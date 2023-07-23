@@ -2661,7 +2661,7 @@ public final class Fn extends Comparators {
      * @param supplier
      * @return
      */
-    public static <A, B, R> Function<A, R> applyIfNotNullOrGet(final java.util.function.Function<A, B> mapperA,
+    public static <A, B, R> Function<A, R> applyIfNotNullOrElseGet(final java.util.function.Function<A, B> mapperA,
             final java.util.function.Function<B, ? extends R> mapperB, final java.util.function.Supplier<R> supplier) {
         N.checkArgNotNull(mapperA);
         N.checkArgNotNull(mapperB);
@@ -2694,7 +2694,7 @@ public final class Fn extends Comparators {
      * @param supplier
      * @return
      */
-    public static <A, B, C, R> Function<A, R> applyIfNotNullOrGet(final java.util.function.Function<A, B> mapperA,
+    public static <A, B, C, R> Function<A, R> applyIfNotNullOrElseGet(final java.util.function.Function<A, B> mapperA,
             final java.util.function.Function<B, C> mapperB, final java.util.function.Function<C, ? extends R> mapperC,
             final java.util.function.Supplier<R> supplier) {
         N.checkArgNotNull(mapperA);
@@ -2737,7 +2737,7 @@ public final class Fn extends Comparators {
      * @param supplier
      * @return
      */
-    public static <A, B, C, D, R> Function<A, R> applyIfNotNullOrGet(final java.util.function.Function<A, B> mapperA,
+    public static <A, B, C, D, R> Function<A, R> applyIfNotNullOrElseGet(final java.util.function.Function<A, B> mapperA,
             final java.util.function.Function<B, C> mapperB, final java.util.function.Function<C, D> mapperC,
             final java.util.function.Function<D, ? extends R> mapperD, final java.util.function.Supplier<R> supplier) {
         N.checkArgNotNull(mapperA);
@@ -2982,6 +2982,7 @@ public final class Fn extends Comparators {
     @SequentialOnly
     @Stateful
     public static <T> Predicate<T> limitThenFilter(final int limit, final java.util.function.Predicate<T> predicate) {
+        N.checkArgNotNegative(limit, "limit");
         N.checkArgNotNull(predicate);
 
         return new Predicate<>() {
@@ -3007,6 +3008,7 @@ public final class Fn extends Comparators {
     @SequentialOnly
     @Stateful
     public static <T, U> BiPredicate<T, U> limitThenFilter(final int limit, final java.util.function.BiPredicate<T, U> predicate) {
+        N.checkArgNotNegative(limit, "limit");
         N.checkArgNotNull(predicate);
 
         return new BiPredicate<>() {
@@ -3032,6 +3034,7 @@ public final class Fn extends Comparators {
     @Stateful
     public static <T> Predicate<T> filterThenLimit(final java.util.function.Predicate<T> predicate, final int limit) {
         N.checkArgNotNull(predicate);
+        N.checkArgNotNegative(limit, "limit");
 
         return new Predicate<>() {
             private final AtomicInteger counter = new AtomicInteger(limit);
@@ -3057,6 +3060,7 @@ public final class Fn extends Comparators {
     @Stateful
     public static <T, U> BiPredicate<T, U> filterThenLimit(final java.util.function.BiPredicate<T, U> predicate, final int limit) {
         N.checkArgNotNull(predicate);
+        N.checkArgNotNegative(limit, "limit");
 
         return new BiPredicate<>() {
             private final AtomicInteger counter = new AtomicInteger(limit);

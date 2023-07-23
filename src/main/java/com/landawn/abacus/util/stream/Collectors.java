@@ -96,6 +96,7 @@ import com.landawn.abacus.util.Tuple.Tuple6;
 import com.landawn.abacus.util.Tuple.Tuple7;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalDouble;
+import com.landawn.abacus.util.function.QuadFunction;
 import com.landawn.abacus.util.function.ToByteFunction;
 import com.landawn.abacus.util.function.ToCharFunction;
 import com.landawn.abacus.util.function.ToFloatFunction;
@@ -2276,11 +2277,11 @@ public abstract class Collectors {
      *
      *
      * @param <T>
-     * @param other
+     * @param defaultForEmpty
      * @return
      */
-    public static <T extends Comparable<? super T>> Collector<T, ?, T> minOrGet(final Supplier<? extends T> other) {
-        return minOrGet(Fn.nullsLast(), other);
+    public static <T extends Comparable<? super T>> Collector<T, ?, T> minOrElse(final T defaultForEmpty) {
+        return minOrElseGet(() -> defaultForEmpty);
     }
 
     /**
@@ -2288,15 +2289,38 @@ public abstract class Collectors {
      *
      * @param <T>
      * @param comparator
-     * @param other
+     * @param defaultForEmpty
      * @return
      */
-    public static <T> Collector<T, ?, T> minOrGet(final Comparator<? super T> comparator, final Supplier<? extends T> other) {
+    public static <T> Collector<T, ?, T> minOrElse(final Comparator<? super T> comparator, final T defaultForEmpty) {
+        return minOrElseGet(comparator, () -> defaultForEmpty);
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param supplierForEmpty
+     * @return
+     */
+    public static <T extends Comparable<? super T>> Collector<T, ?, T> minOrElseGet(final Supplier<? extends T> supplierForEmpty) {
+        return minOrElseGet(Fn.nullsLast(), supplierForEmpty);
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param comparator
+     * @param supplierForEmpty
+     * @return
+     */
+    public static <T> Collector<T, ?, T> minOrElseGet(final Comparator<? super T> comparator, final Supplier<? extends T> supplierForEmpty) {
         N.checkArgNotNull(comparator);
 
         final BinaryOperator<T> op = (a, b) -> comparator.compare(a, b) <= 0 ? a : b;
 
-        return reducingOrGet(op, other);
+        return reducingOrElseGet(op, supplierForEmpty);
     }
 
     /**
@@ -2305,8 +2329,8 @@ public abstract class Collectors {
      * @param <T>
      * @return
      */
-    public static <T extends Comparable<? super T>> Collector<T, ?, T> minOrThrow() {
-        return minOrThrow(Fn.nullsLast());
+    public static <T extends Comparable<? super T>> Collector<T, ?, T> minOrElseThrow() {
+        return minOrElseThrow(Fn.nullsLast());
     }
 
     /**
@@ -2316,8 +2340,8 @@ public abstract class Collectors {
      * @param comparator
      * @return
      */
-    public static <T> Collector<T, ?, T> minOrThrow(final Comparator<? super T> comparator) {
-        return minOrThrow(comparator, noSuchElementExceptionSupplier);
+    public static <T> Collector<T, ?, T> minOrElseThrow(final Comparator<? super T> comparator) {
+        return minOrElseThrow(comparator, noSuchElementExceptionSupplier);
     }
 
     /**
@@ -2328,12 +2352,12 @@ public abstract class Collectors {
      * @param exceptionSupplier
      * @return
      */
-    public static <T> Collector<T, ?, T> minOrThrow(final Comparator<? super T> comparator, final Supplier<? extends RuntimeException> exceptionSupplier) {
+    public static <T> Collector<T, ?, T> minOrElseThrow(final Comparator<? super T> comparator, final Supplier<? extends RuntimeException> exceptionSupplier) {
         N.checkArgNotNull(comparator);
 
         final BinaryOperator<T> op = (a, b) -> comparator.compare(a, b) <= 0 ? a : b;
 
-        return reducingOrThrow(op, exceptionSupplier);
+        return reducingOrElseThrow(op, exceptionSupplier);
     }
 
     private static final Supplier<NoSuchElementException> noSuchElementExceptionSupplier = NoSuchElementException::new;
@@ -2355,12 +2379,13 @@ public abstract class Collectors {
      *
      * @param <T>
      * @param keyMapper
-     * @param other
+     * @param supplierForEmpty
      * @return
      */
     @SuppressWarnings("rawtypes")
-    public static <T> Collector<T, ?, T> minByOrGet(final Function<? super T, ? extends Comparable> keyMapper, final Supplier<? extends T> other) {
-        return minOrGet(Comparators.comparingBy(keyMapper), other);
+    public static <T> Collector<T, ?, T> minByOrElseGet(final Function<? super T, ? extends Comparable> keyMapper,
+            final Supplier<? extends T> supplierForEmpty) {
+        return minOrElseGet(Comparators.comparingBy(keyMapper), supplierForEmpty);
     }
 
     /**
@@ -2371,8 +2396,8 @@ public abstract class Collectors {
      * @return
      */
     @SuppressWarnings("rawtypes")
-    public static <T> Collector<T, ?, T> minByOrThrow(final Function<? super T, ? extends Comparable> keyMapper) {
-        return minOrThrow(Comparators.comparingBy(keyMapper));
+    public static <T> Collector<T, ?, T> minByOrElseThrow(final Function<? super T, ? extends Comparable> keyMapper) {
+        return minOrElseThrow(Comparators.comparingBy(keyMapper));
     }
 
     /**
@@ -2384,9 +2409,9 @@ public abstract class Collectors {
      * @return
      */
     @SuppressWarnings("rawtypes")
-    public static <T> Collector<T, ?, T> minByOrThrow(final Function<? super T, ? extends Comparable> keyMapper,
+    public static <T> Collector<T, ?, T> minByOrElseThrow(final Function<? super T, ? extends Comparable> keyMapper,
             final Supplier<? extends RuntimeException> exceptionSupplier) {
-        return minOrThrow(Comparators.comparingBy(keyMapper), exceptionSupplier);
+        return minOrElseThrow(Comparators.comparingBy(keyMapper), exceptionSupplier);
     }
 
     /**
@@ -2418,11 +2443,11 @@ public abstract class Collectors {
      *
      *
      * @param <T>
-     * @param other
+     * @param defaultForEmpty
      * @return
      */
-    public static <T extends Comparable<? super T>> Collector<T, ?, T> maxOrGet(final Supplier<? extends T> other) {
-        return maxOrGet(Fn.nullsFirst(), other);
+    public static <T extends Comparable<? super T>> Collector<T, ?, T> maxOrElse(final T defaultForEmpty) {
+        return maxOrElseGet(() -> defaultForEmpty);
     }
 
     /**
@@ -2430,15 +2455,38 @@ public abstract class Collectors {
      *
      * @param <T>
      * @param comparator
-     * @param other
+     * @param defaultForEmpty
      * @return
      */
-    public static <T> Collector<T, ?, T> maxOrGet(final Comparator<? super T> comparator, final Supplier<? extends T> other) {
+    public static <T> Collector<T, ?, T> maxOrElse(final Comparator<? super T> comparator, final T defaultForEmpty) {
+        return maxOrElseGet(comparator, () -> defaultForEmpty);
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param supplierForEmpty
+     * @return
+     */
+    public static <T extends Comparable<? super T>> Collector<T, ?, T> maxOrElseGet(final Supplier<? extends T> supplierForEmpty) {
+        return maxOrElseGet(Fn.nullsFirst(), supplierForEmpty);
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param comparator
+     * @param supplierForEmpty
+     * @return
+     */
+    public static <T> Collector<T, ?, T> maxOrElseGet(final Comparator<? super T> comparator, final Supplier<? extends T> supplierForEmpty) {
         N.checkArgNotNull(comparator);
 
         final BinaryOperator<T> op = (a, b) -> comparator.compare(a, b) >= 0 ? a : b;
 
-        return reducingOrGet(op, other);
+        return reducingOrElseGet(op, supplierForEmpty);
     }
 
     /**
@@ -2447,8 +2495,8 @@ public abstract class Collectors {
      * @param <T>
      * @return
      */
-    public static <T extends Comparable<? super T>> Collector<T, ?, T> maxOrThrow() {
-        return maxOrThrow(Fn.nullsFirst());
+    public static <T extends Comparable<? super T>> Collector<T, ?, T> maxOrElseThrow() {
+        return maxOrElseThrow(Fn.nullsFirst());
     }
 
     /**
@@ -2458,8 +2506,8 @@ public abstract class Collectors {
      * @param comparator
      * @return
      */
-    public static <T> Collector<T, ?, T> maxOrThrow(final Comparator<? super T> comparator) {
-        return maxOrThrow(comparator, noSuchElementExceptionSupplier);
+    public static <T> Collector<T, ?, T> maxOrElseThrow(final Comparator<? super T> comparator) {
+        return maxOrElseThrow(comparator, noSuchElementExceptionSupplier);
     }
 
     /**
@@ -2470,12 +2518,12 @@ public abstract class Collectors {
      * @param exceptionSupplier
      * @return
      */
-    public static <T> Collector<T, ?, T> maxOrThrow(final Comparator<? super T> comparator, final Supplier<? extends RuntimeException> exceptionSupplier) {
+    public static <T> Collector<T, ?, T> maxOrElseThrow(final Comparator<? super T> comparator, final Supplier<? extends RuntimeException> exceptionSupplier) {
         N.checkArgNotNull(comparator);
 
         final BinaryOperator<T> op = (a, b) -> comparator.compare(a, b) >= 0 ? a : b;
 
-        return reducingOrThrow(op, exceptionSupplier);
+        return reducingOrElseThrow(op, exceptionSupplier);
     }
 
     /**
@@ -2495,12 +2543,13 @@ public abstract class Collectors {
      *
      * @param <T>
      * @param keyMapper
-     * @param other
+     * @param supplierForEmpty
      * @return
      */
     @SuppressWarnings("rawtypes")
-    public static <T> Collector<T, ?, T> maxByOrGet(final Function<? super T, ? extends Comparable> keyMapper, final Supplier<? extends T> other) {
-        return maxOrGet(Comparators.comparingBy(keyMapper), other);
+    public static <T> Collector<T, ?, T> maxByOrElseGet(final Function<? super T, ? extends Comparable> keyMapper,
+            final Supplier<? extends T> supplierForEmpty) {
+        return maxOrElseGet(Comparators.comparingBy(keyMapper), supplierForEmpty);
     }
 
     /**
@@ -2511,8 +2560,8 @@ public abstract class Collectors {
      * @return
      */
     @SuppressWarnings("rawtypes")
-    public static <T> Collector<T, ?, T> maxByOrThrow(final Function<? super T, ? extends Comparable> keyMapper) {
-        return maxOrThrow(Comparators.comparingBy(keyMapper));
+    public static <T> Collector<T, ?, T> maxByOrElseThrow(final Function<? super T, ? extends Comparable> keyMapper) {
+        return maxOrElseThrow(Comparators.comparingBy(keyMapper));
     }
 
     /**
@@ -2524,9 +2573,9 @@ public abstract class Collectors {
      * @return
      */
     @SuppressWarnings("rawtypes")
-    public static <T> Collector<T, ?, T> maxByOrThrow(final Function<? super T, ? extends Comparable> keyMapper,
+    public static <T> Collector<T, ?, T> maxByOrElseThrow(final Function<? super T, ? extends Comparable> keyMapper,
             final Supplier<? extends RuntimeException> exceptionSupplier) {
-        return maxOrThrow(Comparators.comparingBy(keyMapper), exceptionSupplier);
+        return maxOrElseThrow(Comparators.comparingBy(keyMapper), exceptionSupplier);
     }
 
     /**
@@ -2590,7 +2639,7 @@ public abstract class Collectors {
      *
      * @param <T> the type of the input elements
      * @param <A> the intermediate accumulation type of the downstream collector
-     * @param <D> the result type of the downstream reduction
+     * @param <R> the result type of the downstream reduction
      * @param downstream a {@code Collector} implementing the downstream
      *        reduction
      * @return a {@code Collector} which finds all the minimal elements.
@@ -2599,7 +2648,7 @@ public abstract class Collectors {
      * @see #minAll()
      */
     @SuppressWarnings("rawtypes")
-    public static <T extends Comparable, A, D> Collector<T, ?, D> minAll(Collector<T, A, D> downstream) {
+    public static <T extends Comparable, A, R> Collector<T, ?, R> minAll(Collector<T, A, R> downstream) {
         return minAll(Fn.nullsLast(), downstream);
     }
 
@@ -2614,7 +2663,7 @@ public abstract class Collectors {
      *
      * @param <T> the type of the input elements
      * @param <A> the intermediate accumulation type of the downstream collector
-     * @param <D> the result type of the downstream reduction
+     * @param <R> the result type of the downstream reduction
      * @param comparator a {@code Comparator} to compare the elements
      * @param downstream a {@code Collector} implementing the downstream
      *        reduction
@@ -2623,7 +2672,7 @@ public abstract class Collectors {
      * @see #minAll(Collector)
      * @see #minAll()
      */
-    public static <T, A, D> Collector<T, ?, D> minAll(Comparator<? super T> comparator, Collector<T, A, D> downstream) {
+    public static <T, A, R> Collector<T, ?, R> minAll(Comparator<? super T> comparator, Collector<T, A, R> downstream) {
         return maxAll(Fn.reversedOrder(comparator), downstream);
     }
 
@@ -2631,13 +2680,12 @@ public abstract class Collectors {
      *
      *
      * @param <T>
-     * @param <A>
-     * @param <D>
+     * @param <R>
      * @param downstream
      * @return
      */
     @SuppressWarnings("rawtypes")
-    public static <T extends Comparable, A, D> Collector<T, ?, Optional<Pair<T, D>>> minAlll(Collector<T, A, D> downstream) {
+    public static <T extends Comparable, R> Collector<T, ?, Optional<Pair<T, R>>> minAlll(Collector<T, ?, R> downstream) {
         return minAlll(Fn.nullsLast(), downstream);
     }
 
@@ -2645,30 +2693,28 @@ public abstract class Collectors {
      *
      *
      * @param <T>
-     * @param <A>
-     * @param <D>
+     * @param <R>
      * @param comparator
      * @param downstream
      * @return
      */
-    public static <T, A, D> Collector<T, ?, Optional<Pair<T, D>>> minAlll(final Comparator<? super T> comparator, final Collector<? super T, A, D> downstream) {
-        return minAlll(comparator, downstream, Fn.<Optional<Pair<T, D>>> identity());
+    public static <T, R> Collector<T, ?, Optional<Pair<T, R>>> minAlll(final Comparator<? super T> comparator, final Collector<? super T, ?, R> downstream) {
+        return minAlll(comparator, downstream, Fn.<Optional<Pair<T, R>>> identity());
     }
 
     /**
      *
      *
      * @param <T>
-     * @param <A>
-     * @param <D>
      * @param <R>
+     * @param <RR>
      * @param comparator
      * @param downstream
      * @param finisher
      * @return
      */
-    public static <T, A, D, R> Collector<T, ?, R> minAlll(final Comparator<? super T> comparator, final Collector<? super T, A, D> downstream,
-            final Function<Optional<Pair<T, D>>, R> finisher) {
+    public static <T, R, RR> Collector<T, ?, RR> minAlll(final Comparator<? super T> comparator, final Collector<? super T, ?, R> downstream,
+            final Function<Optional<Pair<T, R>>, RR> finisher) {
         return maxAlll(Fn.reversedOrder(comparator), downstream, finisher);
     }
 
@@ -2787,7 +2833,7 @@ public abstract class Collectors {
      *
      * @param <T> the type of the input elements
      * @param <A> the intermediate accumulation type of the downstream collector
-     * @param <D> the result type of the downstream reduction
+     * @param <R> the result type of the downstream reduction
      * @param downstream a {@code Collector} implementing the downstream
      *        reduction
      * @return a {@code Collector} which finds all the maximal elements.
@@ -2796,7 +2842,7 @@ public abstract class Collectors {
      * @see #maxAll()
      */
     @SuppressWarnings("rawtypes")
-    public static <T extends Comparable, A, D> Collector<T, ?, D> maxAll(Collector<T, A, D> downstream) {
+    public static <T extends Comparable, R> Collector<T, ?, R> maxAll(Collector<T, ?, R> downstream) {
         return maxAll(Fn.nullsFirst(), downstream);
     }
 
@@ -2811,7 +2857,7 @@ public abstract class Collectors {
      *
      * @param <T> the type of the input elements
      * @param <A> the intermediate accumulation type of the downstream collector
-     * @param <D> the result type of the downstream reduction
+     * @param <R> the result type of the downstream reduction
      * @param comparator a {@code Comparator} to compare the elements
      * @param downstream a {@code Collector} implementing the downstream
      *        reduction
@@ -2820,18 +2866,19 @@ public abstract class Collectors {
      * @see #maxAll(Collector)
      * @see #maxAll()
      */
-    public static <T, A, D> Collector<T, ?, D> maxAll(final Comparator<? super T> comparator, final Collector<? super T, A, D> downstream) {
-        final Supplier<A> downstreamSupplier = downstream.supplier();
-        final BiConsumer<A, ? super T> downstreamAccumulator = downstream.accumulator();
-        final BinaryOperator<A> downstreamCombiner = downstream.combiner();
+    public static <T, R> Collector<T, ?, R> maxAll(final Comparator<? super T> comparator, final Collector<? super T, ?, R> downstream) {
+        final Supplier<Object> downstreamSupplier = (Supplier<Object>) downstream.supplier();
+        final BiConsumer<Object, ? super T> downstreamAccumulator = (BiConsumer<Object, ? super T>) downstream.accumulator();
+        final BinaryOperator<Object> downstreamCombiner = (BinaryOperator<Object>) downstream.combiner();
+        final Function<Object, R> downstreamFinisher = (Function<Object, R>) downstream.finisher();
         final MutableBoolean isCollection = MutableBoolean.of(false);
         final MutableBoolean isMap = MutableBoolean.of(false);
 
-        final Supplier<Pair<T, A>> supplier = new Supplier<>() {
+        final Supplier<Pair<T, Object>> supplier = new Supplier<>() {
             @SuppressWarnings("rawtypes")
             @Override
-            public Pair<T, A> get() {
-                final A container = downstreamSupplier.get();
+            public Pair<T, Object> get() {
+                final Object container = downstreamSupplier.get();
 
                 if (container instanceof Collection && ((Collection) container).size() == 0) {
                     try {
@@ -2855,10 +2902,10 @@ public abstract class Collectors {
             }
         };
 
-        final BiConsumer<Pair<T, A>, T> accumulator = new BiConsumer<>() {
+        final BiConsumer<Pair<T, Object>, T> accumulator = new BiConsumer<>() {
             @SuppressWarnings("rawtypes")
             @Override
-            public void accept(Pair<T, A> a, T t) {
+            public void accept(Pair<T, Object> a, T t) {
                 if (a.left == NONE) {
                     a.left = t;
                     downstreamAccumulator.accept(a.right, t);
@@ -2884,7 +2931,7 @@ public abstract class Collectors {
             }
         };
 
-        final BinaryOperator<Pair<T, A>> combiner = (a, b) -> {
+        final BinaryOperator<Pair<T, Object>> combiner = (a, b) -> {
             if (b.left == NONE) {
                 return a;
             } else if (a.left == NONE) {
@@ -2904,7 +2951,7 @@ public abstract class Collectors {
             return a;
         };
 
-        final Function<Pair<T, A>, D> finisher = t -> downstream.finisher().apply(t.right);
+        final Function<Pair<T, Object>, R> finisher = t -> downstreamFinisher.apply(t.right);
 
         return new CollectorImpl<>(supplier, accumulator, combiner, finisher, CH_UNORDERED_NOID);
     }
@@ -2913,13 +2960,12 @@ public abstract class Collectors {
      *
      *
      * @param <T>
-     * @param <A>
-     * @param <D>
+     * @param <R>
      * @param downstream
      * @return
      */
     @SuppressWarnings("rawtypes")
-    public static <T extends Comparable, A, D> Collector<T, ?, Optional<Pair<T, D>>> maxAlll(Collector<T, A, D> downstream) {
+    public static <T extends Comparable, R> Collector<T, ?, Optional<Pair<T, R>>> maxAlll(Collector<T, ?, R> downstream) {
         return maxAlll(Fn.nullsFirst(), downstream);
     }
 
@@ -2927,41 +2973,40 @@ public abstract class Collectors {
      *
      *
      * @param <T>
-     * @param <A>
-     * @param <D>
+     * @param <R>
      * @param comparator
      * @param downstream
      * @return
      */
-    public static <T, A, D> Collector<T, ?, Optional<Pair<T, D>>> maxAlll(final Comparator<? super T> comparator, final Collector<? super T, A, D> downstream) {
-        return maxAlll(comparator, downstream, Fn.<Optional<Pair<T, D>>> identity());
+    public static <T, R> Collector<T, ?, Optional<Pair<T, R>>> maxAlll(final Comparator<? super T> comparator, final Collector<? super T, ?, R> downstream) {
+        return maxAlll(comparator, downstream, Fn.<Optional<Pair<T, R>>> identity());
     }
 
     /**
      *
      *
      * @param <T>
-     * @param <A>
-     * @param <D>
      * @param <R>
+     * @param <RR>
      * @param comparator
      * @param downstream
      * @param finisher
      * @return
      */
-    public static <T, A, D, R> Collector<T, ?, R> maxAlll(final Comparator<? super T> comparator, final Collector<? super T, A, D> downstream,
-            final Function<Optional<Pair<T, D>>, R> finisher) {
-        final Supplier<A> downstreamSupplier = downstream.supplier();
-        final BiConsumer<A, ? super T> downstreamAccumulator = downstream.accumulator();
-        final BinaryOperator<A> downstreamCombiner = downstream.combiner();
+    public static <T, R, RR> Collector<T, ?, RR> maxAlll(final Comparator<? super T> comparator, final Collector<? super T, ?, R> downstream,
+            final Function<Optional<Pair<T, R>>, RR> finisher) {
+        final Supplier<Object> downstreamSupplier = (Supplier<Object>) downstream.supplier();
+        final BiConsumer<Object, ? super T> downstreamAccumulator = (BiConsumer<Object, ? super T>) downstream.accumulator();
+        final BinaryOperator<Object> downstreamCombiner = (BinaryOperator<Object>) downstream.combiner();
+        final Function<Object, R> downstreamFinisher = (Function<Object, R>) downstream.finisher();
         final MutableBoolean isCollection = MutableBoolean.of(false);
         final MutableBoolean isMap = MutableBoolean.of(false);
 
-        final Supplier<Pair<T, A>> supplier = new Supplier<>() {
+        final Supplier<Pair<T, Object>> supplier = new Supplier<>() {
             @SuppressWarnings("rawtypes")
             @Override
-            public Pair<T, A> get() {
-                final A container = downstreamSupplier.get();
+            public Pair<T, Object> get() {
+                final Object container = downstreamSupplier.get();
 
                 if (container instanceof Collection && ((Collection) container).size() == 0) {
                     try {
@@ -2985,10 +3030,10 @@ public abstract class Collectors {
             }
         };
 
-        final BiConsumer<Pair<T, A>, T> accumulator = new BiConsumer<>() {
+        final BiConsumer<Pair<T, Object>, T> accumulator = new BiConsumer<>() {
             @SuppressWarnings("rawtypes")
             @Override
-            public void accept(Pair<T, A> a, T t) {
+            public void accept(Pair<T, Object> a, T t) {
                 if (a.left == NONE) {
                     a.left = t;
                     downstreamAccumulator.accept(a.right, t);
@@ -3014,7 +3059,7 @@ public abstract class Collectors {
             }
         };
 
-        final BinaryOperator<Pair<T, A>> combiner = (a, b) -> {
+        final BinaryOperator<Pair<T, Object>> combiner = (a, b) -> {
             if (b.left == NONE) {
                 return a;
             } else if (a.left == NONE) {
@@ -3033,8 +3078,8 @@ public abstract class Collectors {
             }
         };
 
-        final Function<Pair<T, A>, R> finalFinisher = a -> {
-            final Optional<Pair<T, D>> result = a.left == NONE ? Optional.empty() : Optional.of(Pair.of(a.left, downstream.finisher().apply(a.right)));
+        final Function<Pair<T, Object>, RR> finalFinisher = a -> {
+            final Optional<Pair<T, R>> result = a.left == NONE ? Optional.empty() : Optional.of(Pair.of(a.left, downstreamFinisher.apply(a.right)));
 
             return finisher.apply(result);
         };
@@ -3131,10 +3176,41 @@ public abstract class Collectors {
      *
      *
      * @param <T>
+     * @param supplierForEmpty
      * @return
      */
-    public static <T extends Comparable<? super T>> Collector<T, ?, Pair<T, T>> minMaxOrThrow() {
-        return minMaxOrThrow(Fn.naturalOrder());
+    public static <T extends Comparable<? super T>> Collector<T, ?, Pair<T, T>> minMaxOrElseGet(
+            final Supplier<Pair<? extends T, ? extends T>> supplierForEmpty) {
+        return minMaxOrElseGet(Fn.naturalOrder(), supplierForEmpty);
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param comparator
+     * @param supplierForEmpty
+     * @return
+     */
+    public static <T> Collector<T, ?, Pair<T, T>> minMaxOrElseGet(final Comparator<? super T> comparator,
+            final Supplier<Pair<? extends T, ? extends T>> supplierForEmpty) {
+        return MoreCollectors.combine(Collectors.min(comparator), Collectors.max(comparator), (min, max) -> {
+            if (min.isPresent()) {
+                return Pair.of(min.get(), max.get());
+            } else {
+                return (Pair<T, T>) supplierForEmpty.get();
+            }
+        });
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @return
+     */
+    public static <T extends Comparable<? super T>> Collector<T, ?, Pair<T, T>> minMaxOrElseThrow() {
+        return minMaxOrElseThrow(Fn.naturalOrder());
     }
 
     /**
@@ -3144,8 +3220,8 @@ public abstract class Collectors {
      * @param comparator
      * @return
      */
-    public static <T> Collector<T, ?, Pair<T, T>> minMaxOrThrow(final Comparator<? super T> comparator) {
-        return MoreCollectors.combine(Collectors.minOrThrow(comparator), Collectors.maxOrThrow(comparator), Fn.<T, T> pair());
+    public static <T> Collector<T, ?, Pair<T, T>> minMaxOrElseThrow(final Comparator<? super T> comparator) {
+        return MoreCollectors.combine(Collectors.minOrElseThrow(comparator), Collectors.maxOrElseThrow(comparator), Fn.<T, T> pair());
     }
 
     @SuppressWarnings("unchecked")
@@ -3254,7 +3330,7 @@ public abstract class Collectors {
      * @param mapper
      * @return
      */
-    public static <T> Collector<T, ?, Double> averagingIntOrThrow(final ToIntFunction<? super T> mapper) {
+    public static <T> Collector<T, ?, Double> averagingIntOrElseThrow(final ToIntFunction<? super T> mapper) {
         final BiConsumer<long[], T> accumulator = (a, t) -> {
             a[0] += mapper.applyAsInt(t);
             a[1]++;
@@ -3286,7 +3362,7 @@ public abstract class Collectors {
      * @param mapper
      * @return
      */
-    public static <T> Collector<T, ?, Double> averagingLongOrThrow(final ToLongFunction<? super T> mapper) {
+    public static <T> Collector<T, ?, Double> averagingLongOrElseThrow(final ToLongFunction<? super T> mapper) {
         final BiConsumer<long[], T> accumulator = (a, t) -> {
             a[0] += mapper.applyAsLong(t);
             a[1]++;
@@ -3315,7 +3391,7 @@ public abstract class Collectors {
      * @param mapper
      * @return
      */
-    public static <T> Collector<T, ?, Double> averagingDoubleOrThrow(final ToDoubleFunction<? super T> mapper) {
+    public static <T> Collector<T, ?, Double> averagingDoubleOrElseThrow(final ToDoubleFunction<? super T> mapper) {
         final BiConsumer<KahanSummation, T> accumulator = (a, t) -> a.add(mapper.applyAsDouble(t));
 
         return new CollectorImpl<>(AveragingDouble_Supplier, accumulator, AveragingDouble_Combiner, AveragingDouble_Finisher, CH_UNORDERED_NOID);
@@ -3344,7 +3420,7 @@ public abstract class Collectors {
      * @param mapper
      * @return
      */
-    public static <T> Collector<T, ?, BigDecimal> averagingBigIntegerOrThrow(final Function<? super T, BigInteger> mapper) {
+    public static <T> Collector<T, ?, BigDecimal> averagingBigIntegerOrElseThrow(final Function<? super T, BigInteger> mapper) {
         final BiConsumer<Pair<BigInteger, long[]>, T> accumulator = (a, t) -> {
             a.setLeft(a.left.add(mapper.apply(t)));
             a.right[0] += 1;
@@ -3376,7 +3452,7 @@ public abstract class Collectors {
      * @param mapper
      * @return
      */
-    public static <T> Collector<T, ?, BigDecimal> averagingBigDecimalOrThrow(final Function<? super T, BigDecimal> mapper) {
+    public static <T> Collector<T, ?, BigDecimal> averagingBigDecimalOrElseThrow(final Function<? super T, BigDecimal> mapper) {
         final BiConsumer<Pair<BigDecimal, long[]>, T> accumulator = (a, t) -> {
             a.setLeft(a.left.add(mapper.apply(t)));
             a.right[0] += 1;
@@ -3583,19 +3659,30 @@ public abstract class Collectors {
      *
      * @param <T>
      * @param op
-     * @param other
+     * @param supplierForEmpty
      * @return
      */
     @SuppressWarnings("rawtypes")
-    public static <T> Collector<T, ?, T> reducingOrGet(final BinaryOperator<T> op, final Supplier<? extends T> other) {
+    public static <T> Collector<T, ?, T> reducingOrElseGet(final BinaryOperator<T> op, final Supplier<? extends T> supplierForEmpty) {
         final Supplier<OptHolder<T>> supplier = () -> new OptHolder<>(op);
 
         final BiConsumer<OptHolder<T>, T> accumulator = (BiConsumer) Reducing_Accumulator;
         final BinaryOperator<OptHolder<T>> combiner = (BinaryOperator) Reducing_Combiner;
 
-        final Function<OptHolder<T>, T> finisher = a -> a.present ? a.value : other.get();
+        final Function<OptHolder<T>, T> finisher = a -> a.present ? a.value : supplierForEmpty.get();
 
         return new CollectorImpl<>(supplier, accumulator, combiner, finisher, CH_UNORDERED_NOID);
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param op
+     * @return
+     */
+    public static <T> Collector<T, ?, T> reducingOrElseThrow(final BinaryOperator<T> op) {
+        return reducingOrElseThrow(op, noSuchElementExceptionSupplier);
     }
 
     /**
@@ -3607,7 +3694,7 @@ public abstract class Collectors {
      * @return
      */
     @SuppressWarnings("rawtypes")
-    public static <T> Collector<T, ?, T> reducingOrThrow(final BinaryOperator<T> op, final Supplier<? extends RuntimeException> exceptionSupplier) {
+    public static <T> Collector<T, ?, T> reducingOrElseThrow(final BinaryOperator<T> op, final Supplier<? extends RuntimeException> exceptionSupplier) {
         final Supplier<OptHolder<T>> supplier = () -> new OptHolder<>(op);
 
         final BiConsumer<OptHolder<T>, T> accumulator = (BiConsumer) Reducing_Accumulator;
@@ -3628,34 +3715,23 @@ public abstract class Collectors {
      *
      *
      * @param <T>
-     * @param op
-     * @return
-     */
-    public static <T> Collector<T, ?, T> reducingOrThrow(final BinaryOperator<T> op) {
-        return reducingOrThrow(op, noSuchElementExceptionSupplier);
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param <U>
+     * @param <R>
      * @param identity
      * @param mapper
      * @param op
      * @return
      */
-    public static <T, U> Collector<T, ?, U> reducing(final U identity, final Function<? super T, ? extends U> mapper, final BinaryOperator<U> op) {
-        final BiConsumer<Holder<U>, T> accumulator = (a, t) -> a.setValue(op.apply(a.value(), mapper.apply(t)));
+    public static <T, R> Collector<T, ?, R> reducing(final R identity, final Function<? super T, ? extends R> mapper, final BinaryOperator<R> op) {
+        final BiConsumer<Holder<R>, T> accumulator = (a, t) -> a.setValue(op.apply(a.value(), mapper.apply(t)));
 
-        final BinaryOperator<Holder<U>> combiner = (a, b) -> {
+        final BinaryOperator<Holder<R>> combiner = (a, b) -> {
             a.setValue(op.apply(a.value(), b.value()));
 
             return a;
         };
 
         @SuppressWarnings("rawtypes")
-        final Function<Holder<U>, U> finisher = (Function) Reducing_Finisher_0;
+        final Function<Holder<R>, R> finisher = (Function) Reducing_Finisher_0;
 
         return new CollectorImpl<>(holderSupplier(identity), accumulator, combiner, finisher, CH_UNORDERED_NOID);
     }
@@ -3664,18 +3740,18 @@ public abstract class Collectors {
      *
      *
      * @param <T>
-     * @param <U>
+     * @param <R>
      * @param mapper
      * @param op
      * @return
      */
     @SuppressWarnings("rawtypes")
-    public static <T, U> Collector<T, ?, Optional<U>> reducing(final Function<? super T, ? extends U> mapper, final BinaryOperator<U> op) {
-        final Supplier<MappingOptHolder<T, U>> supplier = () -> new MappingOptHolder<>(mapper, op);
+    public static <T, R> Collector<T, ?, Optional<R>> reducing(final Function<? super T, ? extends R> mapper, final BinaryOperator<R> op) {
+        final Supplier<MappingOptHolder<T, R>> supplier = () -> new MappingOptHolder<>(mapper, op);
 
-        final BiConsumer<MappingOptHolder<T, U>, T> accumulator = (BiConsumer) Reducing_Accumulator_2;
-        final BinaryOperator<MappingOptHolder<T, U>> combiner = (BinaryOperator) Reducing_Combiner_2;
-        final Function<MappingOptHolder<T, U>, Optional<U>> finisher = (Function) Reducing_Finisher_2;
+        final BiConsumer<MappingOptHolder<T, R>, T> accumulator = (BiConsumer) Reducing_Accumulator_2;
+        final BinaryOperator<MappingOptHolder<T, R>> combiner = (BinaryOperator) Reducing_Combiner_2;
+        final Function<MappingOptHolder<T, R>, Optional<R>> finisher = (Function) Reducing_Finisher_2;
 
         return new CollectorImpl<>(supplier, accumulator, combiner, finisher, CH_UNORDERED_NOID);
     }
@@ -3731,20 +3807,20 @@ public abstract class Collectors {
      *
      *
      * @param <T>
-     * @param <U>
+     * @param <R>
      * @param mapper
      * @param op
-     * @param other
+     * @param supplierForEmpty
      * @return
      */
     @SuppressWarnings("rawtypes")
-    public static <T, U> Collector<T, ?, U> reducingOrGet(final Function<? super T, ? extends U> mapper, final BinaryOperator<U> op,
-            final Supplier<? extends U> other) {
-        final Supplier<MappingOptHolder<T, U>> supplier = () -> new MappingOptHolder<>(mapper, op);
+    public static <T, R> Collector<T, ?, R> reducingOrElseGet(final Function<? super T, ? extends R> mapper, final BinaryOperator<R> op,
+            final Supplier<? extends R> supplierForEmpty) {
+        final Supplier<MappingOptHolder<T, R>> supplier = () -> new MappingOptHolder<>(mapper, op);
 
-        final BiConsumer<MappingOptHolder<T, U>, T> accumulator = (BiConsumer) Reducing_Accumulator_2;
-        final BinaryOperator<MappingOptHolder<T, U>> combiner = (BinaryOperator) Reducing_Combiner_2;
-        final Function<MappingOptHolder<T, U>, U> finisher = a -> a.present ? a.value : other.get();
+        final BiConsumer<MappingOptHolder<T, R>, T> accumulator = (BiConsumer) Reducing_Accumulator_2;
+        final BinaryOperator<MappingOptHolder<T, R>> combiner = (BinaryOperator) Reducing_Combiner_2;
+        final Function<MappingOptHolder<T, R>, R> finisher = a -> a.present ? a.value : supplierForEmpty.get();
 
         return new CollectorImpl<>(supplier, accumulator, combiner, finisher, CH_UNORDERED_NOID);
     }
@@ -3753,20 +3829,20 @@ public abstract class Collectors {
      *
      *
      * @param <T>
-     * @param <U>
+     * @param <R>
      * @param mapper
      * @param op
      * @param exceptionSupplier
      * @return
      */
     @SuppressWarnings("rawtypes")
-    public static <T, U> Collector<T, ?, U> reducingOrThrow(final Function<? super T, ? extends U> mapper, final BinaryOperator<U> op,
+    public static <T, R> Collector<T, ?, R> reducingOrElseThrow(final Function<? super T, ? extends R> mapper, final BinaryOperator<R> op,
             final Supplier<? extends RuntimeException> exceptionSupplier) {
-        final Supplier<MappingOptHolder<T, U>> supplier = () -> new MappingOptHolder<>(mapper, op);
+        final Supplier<MappingOptHolder<T, R>> supplier = () -> new MappingOptHolder<>(mapper, op);
 
-        final BiConsumer<MappingOptHolder<T, U>, T> accumulator = (BiConsumer) Reducing_Accumulator_2;
-        final BinaryOperator<MappingOptHolder<T, U>> combiner = (BinaryOperator) Reducing_Combiner_2;
-        final Function<MappingOptHolder<T, U>, U> finisher = a -> {
+        final BiConsumer<MappingOptHolder<T, R>, T> accumulator = (BiConsumer) Reducing_Accumulator_2;
+        final BinaryOperator<MappingOptHolder<T, R>> combiner = (BinaryOperator) Reducing_Combiner_2;
+        final Function<MappingOptHolder<T, R>, R> finisher = a -> {
             if (a.present) {
                 return a.value;
             } else {
@@ -3781,13 +3857,13 @@ public abstract class Collectors {
      *
      *
      * @param <T>
-     * @param <U>
+     * @param <R>
      * @param mapper
      * @param op
      * @return
      */
-    public static <T, U> Collector<T, ?, U> reducingOrThrow(final Function<? super T, ? extends U> mapper, final BinaryOperator<U> op) {
-        return reducingOrThrow(mapper, op, noSuchElementExceptionSupplier);
+    public static <T, R> Collector<T, ?, R> reducingOrElseThrow(final Function<? super T, ? extends R> mapper, final BinaryOperator<R> op) {
+        return reducingOrElseThrow(mapper, op, noSuchElementExceptionSupplier);
     }
 
     /**
@@ -5144,6 +5220,22 @@ public abstract class Collectors {
         }
     }
 
+    /**
+     *
+     * @param <T>
+     * @param <R1>
+     * @param <R2>
+     * @param <R>
+     * @param downstream1
+     * @param downstream2
+     * @param merger
+     * @return
+     */
+    public static <T, R1, R2, R> Collector<T, ?, R> teeing(final Collector<? super T, ?, R1> downstream1, final Collector<? super T, ?, R2> downstream2,
+            final BiFunction<? super R1, ? super R2, R> merger) {
+        return MoreCollectors.combine(downstream1, downstream2, merger);
+    }
+
     public abstract static class MoreCollectors extends Collectors {
         protected MoreCollectors() {
             // for extension.
@@ -5595,315 +5687,127 @@ public abstract class Collectors {
          *
          *
          * @param <T>
-         * @param <A1>
-         * @param <A2>
          * @param <R1>
          * @param <R2>
-         * @param collector1
-         * @param collector2
+         * @param downstream1
+         * @param downstream2
          * @return
          */
-        public static <T, A1, A2, R1, R2> Collector<T, Tuple2<A1, A2>, Tuple2<R1, R2>> combine(final Collector<? super T, A1, R1> collector1,
-                final Collector<? super T, A2, R2> collector2) {
-            final Supplier<A1> supplier1 = collector1.supplier();
-            final Supplier<A2> supplier2 = collector2.supplier();
-            final BiConsumer<A1, ? super T> accumulator1 = collector1.accumulator();
-            final BiConsumer<A2, ? super T> accumulator2 = collector2.accumulator();
-            final BinaryOperator<A1> combiner1 = collector1.combiner();
-            final BinaryOperator<A2> combiner2 = collector2.combiner();
-            final Function<A1, R1> finisher1 = collector1.finisher();
-            final Function<A2, R2> finisher2 = collector2.finisher();
-
-            final Supplier<Tuple2<A1, A2>> supplier = () -> Tuple.of(supplier1.get(), supplier2.get());
-
-            final BiConsumer<Tuple2<A1, A2>, T> accumulator = (acct, e) -> {
-                accumulator1.accept(acct._1, e);
-                accumulator2.accept(acct._2, e);
-            };
-
-            final BinaryOperator<Tuple2<A1, A2>> combiner = (t, u) -> Tuple.of(combiner1.apply(t._1, u._1), combiner2.apply(t._2, u._2));
-
-            List<Characteristics> common = N.intersection(collector1.characteristics(), collector2.characteristics());
-            final Set<Characteristics> characteristics = N.isNullOrEmpty(common) ? CH_NOID : N.newHashSet(common);
-
-            if (characteristics.contains(Characteristics.IDENTITY_FINISH)) {
-                return new CollectorImpl<>(supplier, accumulator, combiner, characteristics);
-            } else {
-                final Function<Tuple2<A1, A2>, Tuple2<R1, R2>> finisher = t -> Tuple.of(finisher1.apply(t._1), finisher2.apply(t._2));
-
-                return new CollectorImpl<>(supplier, accumulator, combiner, finisher, characteristics);
-            }
+        public static <T, R1, R2> Collector<T, ?, Tuple2<R1, R2>> combine(final Collector<? super T, ?, R1> downstream1,
+                final Collector<? super T, ?, R2> downstream2) {
+            return combine(downstream1, downstream2, Tuple::of);
         }
 
         /**
          *
-         *
          * @param <T>
-         * @param <A1>
-         * @param <A2>
-         * @param <R1>
-         * @param <R2>
-         * @param <R>
-         * @param collector1
-         * @param collector2
-         * @param finisher
-         * @return
-         */
-        public static <T, A1, A2, R1, R2, R> Collector<T, Tuple2<A1, A2>, R> combine(final Collector<? super T, A1, R1> collector1,
-                final Collector<? super T, A2, R2> collector2, final BiFunction<? super R1, ? super R2, R> finisher) {
-            final Supplier<A1> supplier1 = collector1.supplier();
-            final Supplier<A2> supplier2 = collector2.supplier();
-            final BiConsumer<A1, ? super T> accumulator1 = collector1.accumulator();
-            final BiConsumer<A2, ? super T> accumulator2 = collector2.accumulator();
-            final BinaryOperator<A1> combiner1 = collector1.combiner();
-            final BinaryOperator<A2> combiner2 = collector2.combiner();
-            final Function<A1, R1> finisher1 = collector1.finisher();
-            final Function<A2, R2> finisher2 = collector2.finisher();
-
-            final Supplier<Tuple2<A1, A2>> supplier = () -> Tuple.of(supplier1.get(), supplier2.get());
-
-            final BiConsumer<Tuple2<A1, A2>, T> accumulator = (acct, e) -> {
-                accumulator1.accept(acct._1, e);
-                accumulator2.accept(acct._2, e);
-            };
-
-            final BinaryOperator<Tuple2<A1, A2>> combiner = (t, u) -> Tuple.of(combiner1.apply(t._1, u._1), combiner2.apply(t._2, u._2));
-
-            final List<Characteristics> common = N.intersection(collector1.characteristics(), collector2.characteristics());
-            common.remove(Characteristics.IDENTITY_FINISH);
-            final Set<Characteristics> characteristics = N.isNullOrEmpty(common) ? CH_NOID : N.newHashSet(common);
-
-            final Function<Tuple2<A1, A2>, R> finalFinisher = t -> finisher.apply(finisher1.apply(t._1), finisher2.apply(t._2));
-
-            return new CollectorImpl<>(supplier, accumulator, combiner, finalFinisher, characteristics);
-        }
-
-        /**
-         *
-         *
-         * @param <T>
-         * @param <A1>
-         * @param <A2>
-         * @param <A3>
          * @param <R1>
          * @param <R2>
          * @param <R3>
-         * @param collector1
-         * @param collector2
-         * @param collector3
+         * @param downstream1
+         * @param downstream2
+         * @param downstream3
          * @return
          */
-        public static <T, A1, A2, A3, R1, R2, R3> Collector<T, Tuple3<A1, A2, A3>, Tuple3<R1, R2, R3>> combine(final Collector<? super T, A1, R1> collector1,
-                final Collector<? super T, A2, R2> collector2, final Collector<? super T, A3, R3> collector3) {
-            final Supplier<A1> supplier1 = collector1.supplier();
-            final Supplier<A2> supplier2 = collector2.supplier();
-            final Supplier<A3> supplier3 = collector3.supplier();
-            final BiConsumer<A1, ? super T> accumulator1 = collector1.accumulator();
-            final BiConsumer<A2, ? super T> accumulator2 = collector2.accumulator();
-            final BiConsumer<A3, ? super T> accumulator3 = collector3.accumulator();
-            final BinaryOperator<A1> combiner1 = collector1.combiner();
-            final BinaryOperator<A2> combiner2 = collector2.combiner();
-            final BinaryOperator<A3> combiner3 = collector3.combiner();
-            final Function<A1, R1> finisher1 = collector1.finisher();
-            final Function<A2, R2> finisher2 = collector2.finisher();
-            final Function<A3, R3> finisher3 = collector3.finisher();
-
-            final Supplier<Tuple3<A1, A2, A3>> supplier = () -> Tuple.of(supplier1.get(), supplier2.get(), supplier3.get());
-
-            final BiConsumer<Tuple3<A1, A2, A3>, T> accumulator = (acct, e) -> {
-                accumulator1.accept(acct._1, e);
-                accumulator2.accept(acct._2, e);
-                accumulator3.accept(acct._3, e);
-            };
-
-            final BinaryOperator<Tuple3<A1, A2, A3>> combiner = (t, u) -> Tuple.of(combiner1.apply(t._1, u._1), combiner2.apply(t._2, u._2),
-                    combiner3.apply(t._3, u._3));
-
-            List<Characteristics> common = N.intersection(collector1.characteristics(), collector2.characteristics());
-
-            if (N.notNullOrEmpty(common)) {
-                common = N.intersection(common, collector3.characteristics());
-            }
-
-            final Set<Characteristics> characteristics = N.isNullOrEmpty(common) ? CH_NOID : N.newHashSet(common);
-
-            if (characteristics.contains(Characteristics.IDENTITY_FINISH)) {
-                return new CollectorImpl<>(supplier, accumulator, combiner, characteristics);
-            } else {
-                final Function<Tuple3<A1, A2, A3>, Tuple3<R1, R2, R3>> finisher = t -> Tuple.of(finisher1.apply(t._1), finisher2.apply(t._2),
-                        finisher3.apply(t._3));
-
-                return new CollectorImpl<>(supplier, accumulator, combiner, finisher, characteristics);
-            }
+        public static <T, R1, R2, R3> Collector<T, ?, Tuple3<R1, R2, R3>> combine(final Collector<? super T, ?, R1> downstream1,
+                final Collector<? super T, ?, R2> downstream2, final Collector<? super T, ?, R3> downstream3) {
+            return combine(downstream1, downstream2, downstream3, Tuple::of);
         }
 
         /**
          *
          *
          * @param <T>
-         * @param <A1>
-         * @param <A2>
-         * @param <A3>
-         * @param <R1>
-         * @param <R2>
-         * @param <R3>
-         * @param <R>
-         * @param collector1
-         * @param collector2
-         * @param collector3
-         * @param finisher
-         * @return
-         */
-        public static <T, A1, A2, A3, R1, R2, R3, R> Collector<T, Tuple3<A1, A2, A3>, R> combine(final Collector<? super T, A1, R1> collector1,
-                final Collector<? super T, A2, R2> collector2, final Collector<? super T, A3, R3> collector3,
-                final TriFunction<? super R1, ? super R2, ? super R3, R> finisher) {
-            final Supplier<A1> supplier1 = collector1.supplier();
-            final Supplier<A2> supplier2 = collector2.supplier();
-            final Supplier<A3> supplier3 = collector3.supplier();
-            final BiConsumer<A1, ? super T> accumulator1 = collector1.accumulator();
-            final BiConsumer<A2, ? super T> accumulator2 = collector2.accumulator();
-            final BiConsumer<A3, ? super T> accumulator3 = collector3.accumulator();
-            final BinaryOperator<A1> combiner1 = collector1.combiner();
-            final BinaryOperator<A2> combiner2 = collector2.combiner();
-            final BinaryOperator<A3> combiner3 = collector3.combiner();
-            final Function<A1, R1> finisher1 = collector1.finisher();
-            final Function<A2, R2> finisher2 = collector2.finisher();
-            final Function<A3, R3> finisher3 = collector3.finisher();
-
-            final Supplier<Tuple3<A1, A2, A3>> supplier = () -> Tuple.of(supplier1.get(), supplier2.get(), supplier3.get());
-
-            final BiConsumer<Tuple3<A1, A2, A3>, T> accumulator = (acct, e) -> {
-                accumulator1.accept(acct._1, e);
-                accumulator2.accept(acct._2, e);
-                accumulator3.accept(acct._3, e);
-            };
-
-            final BinaryOperator<Tuple3<A1, A2, A3>> combiner = (t, u) -> Tuple.of(combiner1.apply(t._1, u._1), combiner2.apply(t._2, u._2),
-                    combiner3.apply(t._3, u._3));
-
-            List<Characteristics> common = N.intersection(collector1.characteristics(), collector2.characteristics());
-
-            if (N.notNullOrEmpty(common)) {
-                common = N.intersection(common, collector3.characteristics());
-            }
-
-            common.remove(Characteristics.IDENTITY_FINISH);
-            final Set<Characteristics> characteristics = N.isNullOrEmpty(common) ? CH_NOID : N.newHashSet(common);
-
-            final Function<Tuple3<A1, A2, A3>, R> finalFinisher = t -> finisher.apply(finisher1.apply(t._1), finisher2.apply(t._2), finisher3.apply(t._3));
-
-            return new CollectorImpl<>(supplier, accumulator, combiner, finalFinisher, characteristics);
-        }
-
-        /**
-         *
-         *
-         * @param <T>
-         * @param <A1>
-         * @param <A2>
-         * @param <A3>
-         * @param <A4>
          * @param <R1>
          * @param <R2>
          * @param <R3>
          * @param <R4>
-         * @param collector1
-         * @param collector2
-         * @param collector3
-         * @param collector4
+         * @param downstream1
+         * @param downstream2
+         * @param downstream3
+         * @param downstream4
          * @return
          */
-        @SuppressWarnings("rawtypes")
-        public static <T, A1, A2, A3, A4, R1, R2, R3, R4> Collector<T, Tuple4<A1, A2, A3, A4>, Tuple4<R1, R2, R3, R4>> combine(
-                final Collector<? super T, A1, R1> collector1, final Collector<? super T, A2, R2> collector2, final Collector<? super T, A3, R3> collector3,
-                final Collector<? super T, A4, R4> collector4) {
-            final List<Collector<? super T, ?, ?>> collectors = (List) Array.asList(collector1, collector2, collector3, collector4);
-
-            final Function<List<?>, Tuple4<A1, A2, A3, A4>> func = Tuple::from;
-
-            return (Collector) collectingAndThen(combine(collectors), func);
+        public static <T, R1, R2, R3, R4> Collector<T, ?, Tuple4<R1, R2, R3, R4>> combine(final Collector<? super T, ?, R1> downstream1,
+                final Collector<? super T, ?, R2> downstream2, final Collector<? super T, ?, R3> downstream3, final Collector<? super T, ?, R4> downstream4) {
+            return combine(downstream1, downstream2, downstream3, downstream4, Tuple::of);
         }
 
         /**
          *
          *
          * @param <T>
-         * @param <A1>
-         * @param <A2>
-         * @param <A3>
-         * @param <A4>
-         * @param <A5>
          * @param <R1>
          * @param <R2>
          * @param <R3>
          * @param <R4>
          * @param <R5>
-         * @param collector1
-         * @param collector2
-         * @param collector3
-         * @param collector4
-         * @param collector5
+         * @param downstream1
+         * @param downstream2
+         * @param downstream3
+         * @param downstream4
+         * @param downstream5
          * @return
          */
         @SuppressWarnings("rawtypes")
-        public static <T, A1, A2, A3, A4, A5, R1, R2, R3, R4, R5> Collector<T, Tuple5<A1, A2, A3, A4, A5>, Tuple5<R1, R2, R3, R4, R5>> combine(
-                final Collector<? super T, A1, R1> collector1, final Collector<? super T, A2, R2> collector2, final Collector<? super T, A3, R3> collector3,
-                final Collector<? super T, A4, R4> collector4, final Collector<? super T, A5, R5> collector5) {
+        public static <T, R1, R2, R3, R4, R5> Collector<T, ?, Tuple5<R1, R2, R3, R4, R5>> combine(final Collector<? super T, ?, R1> downstream1,
+                final Collector<? super T, ?, R2> downstream2, final Collector<? super T, ?, R3> downstream3, final Collector<? super T, ?, R4> downstream4,
+                final Collector<? super T, ?, R5> downstream5) {
+            N.checkArgNotNull(downstream1, "downstream1"); //NOSONAR
+            N.checkArgNotNull(downstream2, "downstream2"); //NOSONAR
+            N.checkArgNotNull(downstream3, "downstream3"); //NOSONAR
+            N.checkArgNotNull(downstream4, "downstream4"); //NOSONAR
+            N.checkArgNotNull(downstream5, "downstream5"); //NOSONAR
 
-            final List<Collector<? super T, ?, ?>> collectors = (List) Array.asList(collector1, collector2, collector3, collector4, collector5);
+            final List<Collector<? super T, ?, ?>> downstreams = (List) Array.asList(downstream1, downstream2, downstream3, downstream4, downstream5);
 
-            final Function<List<?>, Tuple5<A1, A2, A3, A4, A5>> func = Tuple::from;
+            final Function<Object[], Tuple5<R1, R2, R3, R4, R5>> finalMerger = a -> Tuple.of((R1) a[0], (R2) a[1], (R3) a[2], (R4) a[3], (R5) a[4]);
 
-            return (Collector) collectingAndThen(combine(collectors), func);
+            return combine(downstreams, finalMerger);
         }
 
         /**
          *
          *
          * @param <T>
-         * @param <A1>
-         * @param <A2>
-         * @param <A3>
-         * @param <A4>
-         * @param <A5>
-         * @param <A6>
          * @param <R1>
          * @param <R2>
          * @param <R3>
          * @param <R4>
          * @param <R5>
          * @param <R6>
-         * @param collector1
-         * @param collector2
-         * @param collector3
-         * @param collector4
-         * @param collector5
-         * @param collector6
+         * @param downstream1
+         * @param downstream2
+         * @param downstream3
+         * @param downstream4
+         * @param downstream5
+         * @param downstream6
          * @return
          */
         @SuppressWarnings("rawtypes")
-        public static <T, A1, A2, A3, A4, A5, A6, R1, R2, R3, R4, R5, R6> Collector<T, Tuple6<A1, A2, A3, A4, A5, A6>, Tuple6<R1, R2, R3, R4, R5, R6>> combine(
-                final Collector<? super T, A1, R1> collector1, final Collector<? super T, A2, R2> collector2, final Collector<? super T, A3, R3> collector3,
-                final Collector<? super T, A4, R4> collector4, final Collector<? super T, A5, R5> collector5, final Collector<? super T, A6, R6> collector6) {
+        public static <T, R1, R2, R3, R4, R5, R6> Collector<T, ?, Tuple6<R1, R2, R3, R4, R5, R6>> combine(final Collector<? super T, ?, R1> downstream1,
+                final Collector<? super T, ?, R2> downstream2, final Collector<? super T, ?, R3> downstream3, final Collector<? super T, ?, R4> downstream4,
+                final Collector<? super T, ?, R5> downstream5, final Collector<? super T, ?, R6> downstream6) {
+            N.checkArgNotNull(downstream1, "downstream1");
+            N.checkArgNotNull(downstream2, "downstream2");
+            N.checkArgNotNull(downstream3, "downstream3");
+            N.checkArgNotNull(downstream4, "downstream4");
+            N.checkArgNotNull(downstream5, "downstream5");
+            N.checkArgNotNull(downstream6, "downstream6");
 
-            final List<Collector<? super T, ?, ?>> collectors = (List) Array.asList(collector1, collector2, collector3, collector4, collector5, collector6);
+            final List<Collector<? super T, ?, ?>> downstreams = (List) Array.asList(downstream1, downstream2, downstream3, downstream4, downstream5,
+                    downstream6);
 
-            final Function<List<?>, Tuple6<A1, A2, A3, A4, A5, A6>> func = Tuple::from;
+            final Function<Object[], Tuple6<R1, R2, R3, R4, R5, R6>> finalMerger = a -> Tuple.of((R1) a[0], (R2) a[1], (R3) a[2], (R4) a[3], (R5) a[4],
+                    (R6) a[5]);
 
-            return (Collector) collectingAndThen(combine(collectors), func);
+            return combine(downstreams, finalMerger);
         }
 
         /**
          *
          *
          * @param <T>
-         * @param <A1>
-         * @param <A2>
-         * @param <A3>
-         * @param <A4>
-         * @param <A5>
-         * @param <A6>
-         * @param <A7>
          * @param <R1>
          * @param <R2>
          * @param <R3>
@@ -5911,91 +5815,228 @@ public abstract class Collectors {
          * @param <R5>
          * @param <R6>
          * @param <R7>
-         * @param collector1
-         * @param collector2
-         * @param collector3
-         * @param collector4
-         * @param collector5
-         * @param collector6
-         * @param collector7
+         * @param downstream1
+         * @param downstream2
+         * @param downstream3
+         * @param downstream4
+         * @param downstream5
+         * @param downstream6
+         * @param downstream7
          * @return
          */
         @SuppressWarnings("rawtypes")
-        public static <T, A1, A2, A3, A4, A5, A6, A7, R1, R2, R3, R4, R5, R6, R7> Collector<T, Tuple7<A1, A2, A3, A4, A5, A6, A7>, Tuple7<R1, R2, R3, R4, R5, R6, R7>> combine(
-                final Collector<? super T, A1, R1> collector1, final Collector<? super T, A2, R2> collector2, final Collector<? super T, A3, R3> collector3,
-                final Collector<? super T, A4, R4> collector4, final Collector<? super T, A5, R5> collector5, final Collector<? super T, A6, R6> collector6,
-                final Collector<? super T, A7, R7> collector7) {
+        public static <T, R1, R2, R3, R4, R5, R6, R7> Collector<T, ?, Tuple7<R1, R2, R3, R4, R5, R6, R7>> combine(final Collector<? super T, ?, R1> downstream1,
+                final Collector<? super T, ?, R2> downstream2, final Collector<? super T, ?, R3> downstream3, final Collector<? super T, ?, R4> downstream4,
+                final Collector<? super T, ?, R5> downstream5, final Collector<? super T, ?, R6> downstream6, final Collector<? super T, ?, R7> downstream7) {
+            N.checkArgNotNull(downstream1, "downstream1");
+            N.checkArgNotNull(downstream2, "downstream2");
+            N.checkArgNotNull(downstream3, "downstream3");
+            N.checkArgNotNull(downstream4, "downstream4");
+            N.checkArgNotNull(downstream5, "downstream5");
+            N.checkArgNotNull(downstream6, "downstream6");
+            N.checkArgNotNull(downstream7, "downstream7");
 
-            final List<Collector<? super T, ?, ?>> collectors = (List) Array.asList(collector1, collector2, collector3, collector4, collector5, collector6,
-                    collector7);
+            final List<Collector<? super T, ?, ?>> downstreams = (List) Array.asList(downstream1, downstream2, downstream3, downstream4, downstream5,
+                    downstream6, downstream7);
 
-            final Function<List<?>, Tuple7<A1, A2, A3, A4, A5, A6, A7>> func = Tuple::from;
+            final Function<Object[], Tuple7<R1, R2, R3, R4, R5, R6, R7>> finalMerger = a -> Tuple.of((R1) a[0], (R2) a[1], (R3) a[2], (R4) a[3], (R5) a[4],
+                    (R6) a[5], (R7) a[6]);
 
-            return (Collector) collectingAndThen(combine(collectors), func);
+            return combine(downstreams, finalMerger);
+        }
+
+        /**
+         *
+         * @param <T>
+         * @param <R1>
+         * @param <R2>
+         * @param <R>
+         * @param downstream1
+         * @param downstream2
+         * @param merger
+         * @return
+         */
+        @SuppressWarnings("rawtypes")
+        public static <T, R1, R2, R> Collector<T, ?, R> combine(final Collector<? super T, ?, R1> downstream1, final Collector<? super T, ?, R2> downstream2,
+                final BiFunction<? super R1, ? super R2, R> merger) {
+            N.checkArgNotNull(downstream1, "downstream1");
+            N.checkArgNotNull(downstream2, "downstream2");
+            N.checkArgNotNull(merger, "merger"); //NOSONAR
+
+            final Supplier<Object> c1supplier = (Supplier) downstream1.supplier();
+            final Supplier<Object> c2Supplier = (Supplier) downstream2.supplier();
+            final BiConsumer<Object, ? super T> c1Accumulator = (BiConsumer) downstream1.accumulator();
+            final BiConsumer<Object, ? super T> c2Accumulator = (BiConsumer) downstream2.accumulator();
+            final BinaryOperator<Object> c1Combiner = (BinaryOperator) downstream1.combiner();
+            final BinaryOperator<Object> c2Combiner = (BinaryOperator) downstream2.combiner();
+            final Function<Object, R1> c1Finisher = (Function) downstream1.finisher();
+            final Function<Object, R2> c2Finisher = (Function) downstream2.finisher();
+
+            final Supplier<Tuple2<Object, Object>> supplier = () -> Tuple.of(c1supplier.get(), c2Supplier.get());
+
+            final BiConsumer<Tuple2<Object, Object>, T> accumulator = (acct, e) -> {
+                c1Accumulator.accept(acct._1, e);
+                c2Accumulator.accept(acct._2, e);
+            };
+
+            final BinaryOperator<Tuple2<Object, Object>> combiner = (t, u) -> Tuple.of(c1Combiner.apply(t._1, u._1), c2Combiner.apply(t._2, u._2));
+
+            final Function<Tuple2<Object, Object>, R> finisher = t -> merger.apply(c1Finisher.apply(t._1), c2Finisher.apply(t._2));
+
+            final List<Characteristics> common = N.intersection(downstream1.characteristics(), downstream2.characteristics());
+            common.remove(Characteristics.IDENTITY_FINISH);
+            final Set<Characteristics> characteristics = N.isNullOrEmpty(common) ? CH_NOID : N.newHashSet(common);
+
+            return new CollectorImpl<>(supplier, accumulator, combiner, finisher, characteristics);
+        }
+
+        /**
+         *
+         * @param <T>
+         * @param <R1>
+         * @param <R2>
+         * @param <R3>
+         * @param <R>
+         * @param downstream1
+         * @param downstream2
+         * @param downstream3
+         * @param merger
+         * @return
+         */
+        @SuppressWarnings("rawtypes")
+        public static <T, R1, R2, R3, R> Collector<T, ?, R> combine(final Collector<? super T, ?, R1> downstream1,
+                final Collector<? super T, ?, R2> downstream2, final Collector<? super T, ?, R3> downstream3,
+                final TriFunction<? super R1, ? super R2, ? super R3, R> merger) {
+            N.checkArgNotNull(downstream1, "downstream1");
+            N.checkArgNotNull(downstream2, "downstream2");
+            N.checkArgNotNull(downstream3, "downstream3");
+            N.checkArgNotNull(merger, "merger");
+
+            final Supplier<Object> c1supplier = (Supplier) downstream1.supplier();
+            final Supplier<Object> c2Supplier = (Supplier) downstream2.supplier();
+            final Supplier<Object> c3Supplier = (Supplier) downstream3.supplier();
+            final BiConsumer<Object, ? super T> c1Accumulator = (BiConsumer) downstream1.accumulator();
+            final BiConsumer<Object, ? super T> c2Accumulator = (BiConsumer) downstream2.accumulator();
+            final BiConsumer<Object, ? super T> c3Accumulator = (BiConsumer) downstream3.accumulator();
+            final BinaryOperator<Object> c1Combiner = (BinaryOperator) downstream1.combiner();
+            final BinaryOperator<Object> c2Combiner = (BinaryOperator) downstream2.combiner();
+            final BinaryOperator<Object> c3Combiner = (BinaryOperator) downstream3.combiner();
+            final Function<Object, R1> c1Finisher = (Function) downstream1.finisher();
+            final Function<Object, R2> c2Finisher = (Function) downstream2.finisher();
+            final Function<Object, R3> c3Finisher = (Function) downstream3.finisher();
+
+            final Supplier<Tuple3<Object, Object, Object>> supplier = () -> Tuple.of(c1supplier.get(), c2Supplier.get(), c3Supplier.get());
+
+            final BiConsumer<Tuple3<Object, Object, Object>, T> accumulator = (acct, e) -> {
+                c1Accumulator.accept(acct._1, e);
+                c2Accumulator.accept(acct._2, e);
+                c3Accumulator.accept(acct._3, e);
+            };
+
+            final BinaryOperator<Tuple3<Object, Object, Object>> combiner = (t, u) -> Tuple.of(c1Combiner.apply(t._1, u._1), c2Combiner.apply(t._2, u._2),
+                    c3Combiner.apply(t._3, u._3));
+
+            final Function<Tuple3<Object, Object, Object>, R> finisher = t -> merger.apply(c1Finisher.apply(t._1), c2Finisher.apply(t._2),
+                    c3Finisher.apply(t._3));
+
+            final List<Characteristics> common = N.intersection(downstream1.characteristics(), downstream2.characteristics());
+            common.remove(Characteristics.IDENTITY_FINISH);
+            final Set<Characteristics> characteristics = N.isNullOrEmpty(common) ? CH_NOID : N.newHashSet(common);
+
+            return new CollectorImpl<>(supplier, accumulator, combiner, finisher, characteristics);
         }
 
         /**
          *
          *
          * @param <T>
-         * @param collectors
+         * @param <R1>
+         * @param <R2>
+         * @param <R3>
+         * @param <R4>
+         * @param <R>
+         * @param downstream1
+         * @param downstream2
+         * @param downstream3
+         * @param downstream4
          * @return
-         * @see Tuple#from(Collection)
          */
         @SuppressWarnings("rawtypes")
-        public static <T> Collector<T, ?, List<?>> combine(final Collection<? extends Collector<? super T, ?, ?>> collectors) { //NOSONAR
-            N.checkArgument(N.notNullOrEmpty(collectors), "The specified 'collectors' can't be null or empty");
+        public static <T, R1, R2, R3, R4, R> Collector<T, ?, R> combine(final Collector<? super T, ?, R1> downstream1,
+                final Collector<? super T, ?, R2> downstream2, final Collector<? super T, ?, R3> downstream3, final Collector<? super T, ?, R4> downstream4,
+                final QuadFunction<? super R1, ? super R2, ? super R3, ? super R4, R> merger) {
+            N.checkArgNotNull(downstream1, "downstream1");
+            N.checkArgNotNull(downstream2, "downstream2");
+            N.checkArgNotNull(downstream3, "downstream3");
+            N.checkArgNotNull(downstream4, "downstream4");
+            N.checkArgNotNull(merger, "merger");
 
-            final int len = collectors.size();
-            final java.util.stream.Collector<T, Object, Object>[] cs = collectors.toArray(new java.util.stream.Collector[len]);
+            final List<Collector<? super T, ?, ?>> downstreams = (List) Array.asList(downstream1, downstream2, downstream3, downstream4);
+
+            final Function<Object[], R> finalMerger = a -> merger.apply((R1) a[0], (R2) a[1], (R3) a[2], (R4) a[3]);
+
+            return combine(downstreams, finalMerger);
+        }
+
+        /**
+         *
+         * @param <T>
+         * @param <R>
+         * @param downstreams
+         * @param merger
+         * @return
+         */
+        public static <T, R> Collector<T, ?, R> combine(final Collection<? extends Collector<? super T, ?, ?>> downstreams,
+                final Function<Object[], R> merger) { //NOSONAR
+            N.checkArgument(N.notNullOrEmpty(downstreams), "The specified 'collectors' can't be null or empty");
+            N.checkArgNotNull(merger, "merger");
+
+            final int size = downstreams.size();
+
+            final Supplier<Object>[] suppliers = downstreams.stream().map(Collector::supplier).toArray(i -> new Supplier[size]);
+            final BiConsumer<Object, ? super T>[] accumulators = downstreams.stream().map(Collector::accumulator).toArray(i -> new BiConsumer[size]);
+            final BinaryOperator<Object>[] combiners = downstreams.stream().map(Collector::combiner).toArray(i -> new BinaryOperator[size]);
+            final Function<Object, Object>[] finishers = downstreams.stream().map(Collector::finisher).toArray(i -> new Function[size]);
 
             final Supplier<Object[]> supplier = () -> {
-                final Object[] a = new Object[len];
+                final Object[] a = new Object[size];
 
-                for (int i = 0; i < len; i++) {
-                    a[i] = cs[i].supplier().get();
+                for (int i = 0; i < size; i++) {
+                    a[i] = suppliers[i].get();
                 }
 
                 return a;
             };
 
             final BiConsumer<Object[], T> accumulator = (a, e) -> {
-                for (int i = 0; i < len; i++) {
-                    cs[i].accumulator().accept(a[i], e);
+                for (int i = 0; i < size; i++) {
+                    accumulators[i].accept(a[i], e);
                 }
             };
 
             final BinaryOperator<Object[]> combiner = (a, b) -> {
-                for (int i = 0; i < len; i++) {
-                    a[i] = cs[i].combiner().apply(a[i], b[i]);
+                for (int i = 0; i < size; i++) {
+                    a[i] = combiners[i].apply(a[i], b[i]);
                 }
 
                 return a;
             };
 
-            Collection<Characteristics> common = cs[0].characteristics();
+            final Function<Object[], R> finisher = a -> {
+                for (int i = 0; i < size; i++) {
+                    a[i] = finishers[i].apply(a[i]);
+                }
 
-            for (int i = 1; i < len && N.notNullOrEmpty(common); i++) {
-                common = N.intersection(common, cs[i].characteristics());
-            }
+                return merger.apply(a);
+            };
+
+            final Collection<Characteristics> common = N.intersection(downstreams.stream().map(Collector::characteristics).filter(N::notNullOrEmpty).toList());
+
+            common.remove(Characteristics.IDENTITY_FINISH);
 
             final Set<Characteristics> characteristics = N.isNullOrEmpty(common) ? CH_NOID : N.newHashSet(common);
 
-            Function<Object[], List<Object>> finisher = null;
-
-            if (characteristics.contains(Characteristics.IDENTITY_FINISH)) {
-                finisher = N::asList;
-            } else {
-                finisher = a -> {
-                    for (int i = 0; i < len; i++) {
-                        a[i] = cs[i].finisher().apply(a[i]);
-                    }
-
-                    return N.asList(a);
-                };
-            }
-
-            return (Collector) new CollectorImpl<>(supplier, accumulator, combiner, finisher, characteristics);
+            return new CollectorImpl<>(supplier, accumulator, combiner, finisher, characteristics);
         }
 
         /**
