@@ -4172,7 +4172,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     @IntermediateOp
     @TerminalOpTriggered
     public <K> ExceptionalStream<Map.Entry<K, Integer>, E> countBy(final Throwables.Function<? super T, ? extends K, ? extends E> keyMapper) {
-        return groupBy(keyMapper, Collectors.countingInt());
+        return groupBy(keyMapper, Collectors.countingToInt());
     }
 
     /**

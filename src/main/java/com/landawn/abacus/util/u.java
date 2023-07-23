@@ -88,10 +88,10 @@ public class u {//NOSONAR
         }
 
         /**
-         * 
          *
-         * @param value 
-         * @return 
+         *
+         * @param value
+         * @return
          */
         public static Optional<String> of(final String value) {
             N.checkArgNotNull(value);
@@ -114,10 +114,10 @@ public class u {//NOSONAR
         }
 
         /**
-         * 
          *
-         * @param value 
-         * @return 
+         *
+         * @param value
+         * @return
          */
         public static Optional<String> ofNullable(final String value) {
             if (value == null) {
@@ -442,10 +442,10 @@ public class u {//NOSONAR
         }
 
         /**
-         * 
          *
-         * @param element 
-         * @return 
+         *
+         * @param element
+         * @return
          */
         public boolean contains(final T element) {
             return isPresent() && N.equals(this.value, element);
@@ -751,18 +751,18 @@ public class u {//NOSONAR
         }
 
         /**
-         * 
          *
-         * @return 
+         *
+         * @return
          */
         public boolean isPresent() {
             return isPresent;
         }
 
         /**
-         * 
          *
-         * @return 
+         *
+         * @return
          */
         public boolean isEmpty() {
             return !isPresent;
@@ -845,6 +845,42 @@ public class u {//NOSONAR
         }
 
         /**
+         * Map to char.
+         *
+         * @param <E>
+         * @param mapper
+         * @return
+         * @throws E the e
+         */
+        public <E extends Exception> OptionalChar mapToChar(final Throwables.ToCharFunction<Boolean, E> mapper) throws E {
+            N.checkArgNotNull(mapper, "mapper");
+
+            if (isPresent) {
+                return OptionalChar.of(mapper.applyAsChar(value));
+            } else {
+                return OptionalChar.empty();
+            }
+        }
+
+        /**
+         * Map to int.
+         *
+         * @param <E>
+         * @param mapper
+         * @return
+         * @throws E the e
+         */
+        public <E extends Exception> OptionalInt mapToInt(final Throwables.ToIntFunction<Boolean, E> mapper) throws E {
+            N.checkArgNotNull(mapper, "mapper");
+
+            if (isPresent) {
+                return OptionalInt.of(mapper.applyAsInt(value));
+            } else {
+                return OptionalInt.empty();
+            }
+        }
+
+        /**
          * Map to obj.
          *
          * @param <T>
@@ -864,13 +900,13 @@ public class u {//NOSONAR
         }
 
         /**
-         * 
          *
-         * @param <T> 
-         * @param <E> 
-         * @param mapper 
-         * @return 
-         * @throws E 
+         *
+         * @param <T>
+         * @param <E>
+         * @param mapper
+         * @return
+         * @throws E
          */
         public <T, E extends Exception> Optional<T> mapToNonNull(final Throwables.BooleanFunction<T, E> mapper) throws E {
             N.checkArgNotNull(mapper, "mapper");
@@ -1223,18 +1259,18 @@ public class u {//NOSONAR
         }
 
         /**
-         * 
          *
-         * @return 
+         *
+         * @return
          */
         public boolean isPresent() {
             return isPresent;
         }
 
         /**
-         * 
          *
-         * @return 
+         *
+         * @return
          */
         public boolean isEmpty() {
             return !isPresent;
@@ -1317,6 +1353,24 @@ public class u {//NOSONAR
         }
 
         /**
+         * Map to boolean.
+         *
+         * @param <E>
+         * @param mapper
+         * @return
+         * @throws E the e
+         */
+        public <E extends Exception> OptionalBoolean mapToBolean(final Throwables.ToBooleanFunction<Character, E> mapper) throws E {
+            N.checkArgNotNull(mapper, "mapper");
+
+            if (isPresent) {
+                return OptionalBoolean.of(mapper.applyAsBoolean(value));
+            } else {
+                return OptionalBoolean.empty();
+            }
+        }
+
+        /**
          * Map to int.
          *
          * @param <E>
@@ -1354,13 +1408,13 @@ public class u {//NOSONAR
         }
 
         /**
-         * 
          *
-         * @param <T> 
-         * @param <E> 
-         * @param mapper 
-         * @return 
-         * @throws E 
+         *
+         * @param <T>
+         * @param <E>
+         * @param mapper
+         * @return
+         * @throws E
          */
         public <T, E extends Exception> Optional<T> mapToNonNull(final Throwables.CharFunction<T, E> mapper) throws E {
             N.checkArgNotNull(mapper, "mapper");
@@ -1415,9 +1469,9 @@ public class u {//NOSONAR
         }
 
         /**
-         * 
          *
-         * @return 
+         *
+         * @return
          */
         public char orElseZero() {
             return isPresent() ? value : 0;
@@ -1704,18 +1758,18 @@ public class u {//NOSONAR
         }
 
         /**
-         * 
          *
-         * @return 
+         *
+         * @return
          */
         public boolean isPresent() {
             return isPresent;
         }
 
         /**
-         * 
          *
-         * @return 
+         *
+         * @return
          */
         public boolean isEmpty() {
             return !isPresent;
@@ -1835,13 +1889,13 @@ public class u {//NOSONAR
         }
 
         /**
-         * 
          *
-         * @param <T> 
-         * @param <E> 
-         * @param mapper 
-         * @return 
-         * @throws E 
+         *
+         * @param <T>
+         * @param <E>
+         * @param mapper
+         * @return
+         * @throws E
          */
         public <T, E extends Exception> Optional<T> mapToNonNull(final Throwables.ByteFunction<T, E> mapper) throws E {
             N.checkArgNotNull(mapper, "mapper");
@@ -1896,9 +1950,9 @@ public class u {//NOSONAR
         }
 
         /**
-         * 
          *
-         * @return 
+         *
+         * @return
          */
         public byte orElseZero() {
             return isPresent ? value : 0;
@@ -2185,18 +2239,18 @@ public class u {//NOSONAR
         }
 
         /**
-         * 
          *
-         * @return 
+         *
+         * @return
          */
         public boolean isPresent() {
             return isPresent;
         }
 
         /**
-         * 
          *
-         * @return 
+         *
+         * @return
          */
         public boolean isEmpty() {
             return !isPresent;
@@ -2316,13 +2370,13 @@ public class u {//NOSONAR
         }
 
         /**
-         * 
          *
-         * @param <T> 
-         * @param <E> 
-         * @param mapper 
-         * @return 
-         * @throws E 
+         *
+         * @param <T>
+         * @param <E>
+         * @param mapper
+         * @return
+         * @throws E
          */
         public <T, E extends Exception> Optional<T> mapToNonNull(final Throwables.ShortFunction<T, E> mapper) throws E {
             N.checkArgNotNull(mapper, "mapper");
@@ -2377,9 +2431,9 @@ public class u {//NOSONAR
         }
 
         /**
-         * 
          *
-         * @return 
+         *
+         * @return
          */
         public short orElseZero() {
             return isPresent ? value : 0;
@@ -2679,18 +2733,18 @@ public class u {//NOSONAR
         }
 
         /**
-         * 
          *
-         * @return 
+         *
+         * @return
          */
         public boolean isPresent() {
             return isPresent;
         }
 
         /**
-         * 
          *
-         * @return 
+         *
+         * @return
          */
         public boolean isEmpty() {
             return !isPresent;
@@ -2773,6 +2827,42 @@ public class u {//NOSONAR
         }
 
         /**
+         * Map to boolean.
+         *
+         * @param <E>
+         * @param mapper
+         * @return
+         * @throws E the e
+         */
+        public <E extends Exception> OptionalBoolean mapToBolean(final Throwables.ToBooleanFunction<Integer, E> mapper) throws E {
+            N.checkArgNotNull(mapper, "mapper");
+
+            if (isPresent) {
+                return OptionalBoolean.of(mapper.applyAsBoolean(value));
+            } else {
+                return OptionalBoolean.empty();
+            }
+        }
+
+        /**
+         * Map to char.
+         *
+         * @param <E>
+         * @param mapper
+         * @return
+         * @throws E the e
+         */
+        public <E extends Exception> OptionalChar mapToChar(final Throwables.ToCharFunction<Integer, E> mapper) throws E {
+            N.checkArgNotNull(mapper, "mapper");
+
+            if (isPresent) {
+                return OptionalChar.of(mapper.applyAsChar(value));
+            } else {
+                return OptionalChar.empty();
+            }
+        }
+
+        /**
          * Map to long.
          *
          * @param <E>
@@ -2846,13 +2936,13 @@ public class u {//NOSONAR
         }
 
         /**
-         * 
          *
-         * @param <T> 
-         * @param <E> 
-         * @param mapper 
-         * @return 
-         * @throws E 
+         *
+         * @param <T>
+         * @param <E>
+         * @param mapper
+         * @return
+         * @throws E
          */
         public <T, E extends Exception> Optional<T> mapToNonNull(final Throwables.IntFunction<T, E> mapper) throws E {
             N.checkArgNotNull(mapper, "mapper");
@@ -2907,9 +2997,9 @@ public class u {//NOSONAR
         }
 
         /**
-         * 
          *
-         * @return 
+         *
+         * @return
          */
         public int orElseZero() {
             return isPresent ? value : 0;
@@ -3231,18 +3321,18 @@ public class u {//NOSONAR
         }
 
         /**
-         * 
          *
-         * @return 
+         *
+         * @return
          */
         public boolean isPresent() {
             return isPresent;
         }
 
         /**
-         * 
          *
-         * @return 
+         *
+         * @return
          */
         public boolean isEmpty() {
             return !isPresent;
@@ -3380,13 +3470,13 @@ public class u {//NOSONAR
         }
 
         /**
-         * 
          *
-         * @param <T> 
-         * @param <E> 
-         * @param mapper 
-         * @return 
-         * @throws E 
+         *
+         * @param <T>
+         * @param <E>
+         * @param mapper
+         * @return
+         * @throws E
          */
         public <T, E extends Exception> Optional<T> mapToNonNull(final Throwables.LongFunction<T, E> mapper) throws E {
             N.checkArgNotNull(mapper, "mapper");
@@ -3441,9 +3531,9 @@ public class u {//NOSONAR
         }
 
         /**
-         * 
          *
-         * @return 
+         *
+         * @return
          */
         public long orElseZero() {
             return isPresent ? value : 0;
@@ -3737,18 +3827,18 @@ public class u {//NOSONAR
         }
 
         /**
-         * 
          *
-         * @return 
+         *
+         * @return
          */
         public boolean isPresent() {
             return isPresent;
         }
 
         /**
-         * 
          *
-         * @return 
+         *
+         * @return
          */
         public boolean isEmpty() {
             return !isPresent;
@@ -3886,13 +3976,13 @@ public class u {//NOSONAR
         }
 
         /**
-         * 
          *
-         * @param <T> 
-         * @param <E> 
-         * @param mapper 
-         * @return 
-         * @throws E 
+         *
+         * @param <T>
+         * @param <E>
+         * @param mapper
+         * @return
+         * @throws E
          */
         public <T, E extends Exception> Optional<T> mapToNonNull(final Throwables.FloatFunction<T, E> mapper) throws E {
             N.checkArgNotNull(mapper, "mapper");
@@ -3947,9 +4037,9 @@ public class u {//NOSONAR
         }
 
         /**
-         * 
          *
-         * @return 
+         *
+         * @return
          */
         public float orElseZero() {
             return isPresent ? value : 0;
@@ -4234,18 +4324,18 @@ public class u {//NOSONAR
         }
 
         /**
-         * 
          *
-         * @return 
+         *
+         * @return
          */
         public boolean isPresent() {
             return isPresent;
         }
 
         /**
-         * 
          *
-         * @return 
+         *
+         * @return
          */
         public boolean isEmpty() {
             return !isPresent;
@@ -4383,13 +4473,13 @@ public class u {//NOSONAR
         }
 
         /**
-         * 
          *
-         * @param <T> 
-         * @param <E> 
-         * @param mapper 
-         * @return 
-         * @throws E 
+         *
+         * @param <T>
+         * @param <E>
+         * @param mapper
+         * @return
+         * @throws E
          */
         public <T, E extends Exception> Optional<T> mapToNonNull(final Throwables.DoubleFunction<T, E> mapper) throws E {
             N.checkArgNotNull(mapper, "mapper");
@@ -4444,9 +4534,9 @@ public class u {//NOSONAR
         }
 
         /**
-         * 
          *
-         * @return 
+         *
+         * @return
          */
         public double orElseZero() {
             return isPresent ? value : 0;
@@ -4722,10 +4812,10 @@ public class u {//NOSONAR
         }
 
         /**
-         * 
          *
-         * @param value 
-         * @return 
+         *
+         * @param value
+         * @return
          */
         public static Nullable<String> of(final String value) {
             if (value == null) {
@@ -5351,10 +5441,10 @@ public class u {//NOSONAR
         }
 
         /**
-         * 
          *
-         * @param element 
-         * @return 
+         *
+         * @param element
+         * @return
          */
         public boolean contains(final T element) {
             return isPresent() && N.equals(this.value, element);

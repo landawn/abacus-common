@@ -3831,11 +3831,11 @@ public final class IOUtil {
     }
 
     /**
-     * 
      *
-     * @param file 
-     * @return 
-     * @throws UncheckedIOException 
+     *
+     * @param file
+     * @return
+     * @throws UncheckedIOException
      */
     public static FileOutputStream newFileOutputStream(final File file) throws UncheckedIOException {
         try {
@@ -3846,11 +3846,11 @@ public final class IOUtil {
     }
 
     /**
-     * 
      *
-     * @param file 
-     * @return 
-     * @throws UncheckedIOException 
+     *
+     * @param file
+     * @return
+     * @throws UncheckedIOException
      */
     public static FileInputStream newFileInputStream(final File file) throws UncheckedIOException {
         try {
@@ -3861,11 +3861,11 @@ public final class IOUtil {
     }
 
     /**
-     * 
      *
-     * @param name 
-     * @return 
-     * @throws UncheckedIOException 
+     *
+     * @param name
+     * @return
+     * @throws UncheckedIOException
      */
     public static FileOutputStream newFileOutputStream(final String name) throws UncheckedIOException {
         try {
@@ -3876,11 +3876,11 @@ public final class IOUtil {
     }
 
     /**
-     * 
      *
-     * @param file 
-     * @return 
-     * @throws UncheckedIOException 
+     *
+     * @param file
+     * @return
+     * @throws UncheckedIOException
      */
     public static FileReader newFileReader(final File file) throws UncheckedIOException {
         try {
@@ -3891,12 +3891,12 @@ public final class IOUtil {
     }
 
     /**
-     * 
      *
-     * @param file 
-     * @param charset 
-     * @return 
-     * @throws UncheckedIOException 
+     *
+     * @param file
+     * @param charset
+     * @return
+     * @throws UncheckedIOException
      */
     public static FileReader newFileReader(final File file, final Charset charset) throws UncheckedIOException {
         try {
@@ -3907,11 +3907,11 @@ public final class IOUtil {
     }
 
     /**
-     * 
      *
-     * @param file 
-     * @return 
-     * @throws UncheckedIOException 
+     *
+     * @param file
+     * @return
+     * @throws UncheckedIOException
      */
     public static FileWriter newFileWriter(final File file) throws UncheckedIOException {
         try {
@@ -3922,12 +3922,12 @@ public final class IOUtil {
     }
 
     /**
-     * 
      *
-     * @param file 
-     * @param charset 
-     * @return 
-     * @throws UncheckedIOException 
+     *
+     * @param file
+     * @param charset
+     * @return
+     * @throws UncheckedIOException
      */
     public static FileWriter newFileWriter(final File file, final Charset charset) throws UncheckedIOException {
         try {
@@ -4837,10 +4837,10 @@ public final class IOUtil {
     }
 
     /**
-     * 
      *
-     * @param dir 
-     * @return 
+     *
+     * @param dir
+     * @return
      */
     public static boolean mkdirIfNotExists(final File dir) {
         if (!(dir.exists() && dir.isDirectory())) {
@@ -4851,10 +4851,10 @@ public final class IOUtil {
     }
 
     /**
-     * 
      *
-     * @param dir 
-     * @return 
+     *
+     * @param dir
+     * @return
      */
     public static boolean mkdirsIfNotExists(final File dir) {
         if (!(dir.exists() && dir.isDirectory())) {
@@ -5330,6 +5330,8 @@ public final class IOUtil {
      */
     @SuppressWarnings("null")
     static void splitByLine(final File file, final int numOfParts, final File destDir) throws UncheckedIOException {
+        N.checkArgPositive(numOfParts, "numOfParts");
+
         final int suffixLen = String.valueOf(numOfParts).length();
 
         final long lineNumOfPart = estimateLineCount(file, 10000) / numOfParts;

@@ -271,39 +271,57 @@ public abstract class Collectors {
 
     static final Function<Joiner, String> Joiner_Finisher = Joiner::toString;
 
-    static final Function<Object, Long> Counting_Accumulator = t -> 1L;
+    static final Supplier<int[]> SummingInt_Supplier = () -> new int[1];
+    static final Supplier<int[]> SummingInt_Supplier_2 = () -> new int[2];
+    static final Supplier<int[]> SummingInt_Supplier_3 = () -> new int[3];
 
-    static final BinaryOperator<Long> Counting_Combiner = (a, b) -> a.longValue() + b.longValue();
+    static final Supplier<long[]> SummingIntToLong_Supplier = () -> new long[1];
+    static final Supplier<long[]> SummingIntToLong_Supplier_2 = () -> new long[2];
+    static final Supplier<long[]> SummingIntToLong_Supplier_3 = () -> new long[3];
 
-    static final Function<Object, Integer> CountingInt_Accumulator = t -> 1;
-
-    static final BinaryOperator<Integer> CountingInt_Combiner = (a, b) -> a.intValue() + b.intValue();
-
-    static final Supplier<long[]> SummingInt_Supplier = () -> new long[1];
-    static final Supplier<long[]> SummingInt_Supplier_2 = () -> new long[2];
-    static final Supplier<long[]> SummingInt_Supplier_3 = () -> new long[3];
-
-    static final BinaryOperator<long[]> SummingInt_Combiner = (a, b) -> {
+    static final BinaryOperator<int[]> SummingInt_Combiner = (a, b) -> {
         a[0] += b[0];
         return a;
     };
 
-    static final BinaryOperator<long[]> SummingInt_Combiner_2 = (a, b) -> {
+    static final BinaryOperator<int[]> SummingInt_Combiner_2 = (a, b) -> {
         a[0] += b[0];
         a[1] += b[1];
         return a;
     };
 
-    static final BinaryOperator<long[]> SummingInt_Combiner_3 = (a, b) -> {
+    static final BinaryOperator<int[]> SummingInt_Combiner_3 = (a, b) -> {
         a[0] += b[0];
         a[1] += b[1];
         a[2] += b[2];
         return a;
     };
 
-    static final Function<long[], Long> SummingInt_Finisher = a -> a[0];
-    static final Function<long[], Tuple2<Long, Long>> SummingInt_Finisher_2 = a -> Tuple.of(a[0], a[1]);
-    static final Function<long[], Tuple3<Long, Long, Long>> SummingInt_Finisher_3 = a -> Tuple.of(a[0], a[1], a[2]);
+    static final BinaryOperator<long[]> SummingIntToLong_Combiner = (a, b) -> {
+        a[0] += b[0];
+        return a;
+    };
+
+    static final BinaryOperator<long[]> SummingIntToLong_Combiner_2 = (a, b) -> {
+        a[0] += b[0];
+        a[1] += b[1];
+        return a;
+    };
+
+    static final BinaryOperator<long[]> SummingIntToLong_Combiner_3 = (a, b) -> {
+        a[0] += b[0];
+        a[1] += b[1];
+        a[2] += b[2];
+        return a;
+    };
+
+    static final Function<int[], Integer> SummingInt_Finisher = a -> a[0];
+    static final Function<int[], Tuple2<Integer, Integer>> SummingInt_Finisher_2 = a -> Tuple.of(a[0], a[1]);
+    static final Function<int[], Tuple3<Integer, Integer, Integer>> SummingInt_Finisher_3 = a -> Tuple.of(a[0], a[1], a[2]);
+
+    static final Function<long[], Long> SummingIntToLong_Finisher = a -> a[0];
+    static final Function<long[], Tuple2<Long, Long>> SummingIntToLong_Finisher_2 = a -> Tuple.of(a[0], a[1]);
+    static final Function<long[], Tuple3<Long, Long, Long>> SummingIntToLong_Finisher_3 = a -> Tuple.of(a[0], a[1], a[2]);
 
     static final Supplier<long[]> SummingLong_Supplier = () -> new long[1];
     static final Supplier<long[]> SummingLong_Supplier_2 = () -> new long[2];
@@ -1950,6 +1968,7 @@ public abstract class Collectors {
      * @return
      */
     public static <T, A, R, RR> Collector<T, A, RR> collectingAndThen(final Collector<T, A, R> downstream, final Function<R, RR> finisher) {
+        N.checkArgNotNull(downstream);
         N.checkArgNotNull(finisher);
 
         final Function<A, R> downstreamFinisher = downstream.finisher();
@@ -1969,6 +1988,146 @@ public abstract class Collectors {
         }
 
         return new CollectorImpl<>(downstream.supplier(), downstream.accumulator(), downstream.combiner(), thenFinisher, characteristics);
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param <A>
+     * @param <R>
+     * @param collector
+     * @return
+     */
+    @Beta
+    public static <T, A, R> Collector<T, A, Optional<R>> collectingOrEmpty(final Collector<T, A, R> collector) {
+        N.checkArgNotNull(collector);
+
+        final MutableBoolean accumulated = MutableBoolean.of(false);
+        final BiConsumer<A, T> downstreamAccumulator = collector.accumulator();
+        final Function<A, R> downstreamFinisher = collector.finisher();
+
+        final BiConsumer<A, T> newAccumulator = (a, t) -> {
+            downstreamAccumulator.accept(a, t);
+            accumulated.setTrue();
+        };
+
+        final Function<A, Optional<R>> newFinisher = a -> {
+            if (accumulated.isTrue()) {
+                return Optional.of(downstreamFinisher.apply(a));
+            } else {
+                return Optional.empty();
+            }
+        };
+
+        Set<Characteristics> characteristics = collector.characteristics();
+
+        if (characteristics.contains(Characteristics.IDENTITY_FINISH)) {
+            if (characteristics.size() == 1) {
+                characteristics = Collectors.CH_NOID;
+            } else {
+                characteristics = EnumSet.copyOf(characteristics);
+                characteristics.remove(Characteristics.IDENTITY_FINISH);
+                characteristics = Collections.unmodifiableSet(characteristics);
+            }
+        }
+
+        return new CollectorImpl<>(collector.supplier(), newAccumulator, collector.combiner(), newFinisher, characteristics);
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param <A>
+     * @param <R>
+     * @param collector
+     * @param defaultForEmpty
+     * @return
+     */
+    @Beta
+    public static <T, A, R> Collector<T, A, R> collectingOrElseIfEmpty(final Collector<T, A, R> collector, final R defaultForEmpty) {
+        return collectingOrElseGetIfEmpty(collector, () -> defaultForEmpty);
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param <A>
+     * @param <R>
+     * @param collector
+     * @param defaultForEmpty
+     * @return
+     */
+    @Beta
+    public static <T, A, R> Collector<T, A, R> collectingOrElseGetIfEmpty(final Collector<T, A, R> collector, final Supplier<? extends R> defaultForEmpty) {
+        N.checkArgNotNull(collector);
+
+        final MutableBoolean accumulated = MutableBoolean.of(false);
+        final BiConsumer<A, T> downstreamAccumulator = collector.accumulator();
+        final Function<A, R> downstreamFinisher = collector.finisher();
+
+        final BiConsumer<A, T> newAccumulator = (a, t) -> {
+            downstreamAccumulator.accept(a, t);
+            accumulated.setTrue();
+        };
+
+        final Function<A, R> newFinisher = a -> {
+            if (accumulated.isTrue()) {
+                return downstreamFinisher.apply(a);
+            } else {
+                return defaultForEmpty.get();
+            }
+        };
+
+        Set<Characteristics> characteristics = collector.characteristics();
+
+        if (characteristics.contains(Characteristics.IDENTITY_FINISH)) {
+            if (characteristics.size() == 1) {
+                characteristics = Collectors.CH_NOID;
+            } else {
+                characteristics = EnumSet.copyOf(characteristics);
+                characteristics.remove(Characteristics.IDENTITY_FINISH);
+                characteristics = Collections.unmodifiableSet(characteristics);
+            }
+        }
+
+        return new CollectorImpl<>(collector.supplier(), newAccumulator, collector.combiner(), newFinisher, characteristics);
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param <A>
+     * @param <R>
+     * @param collector
+     * @return
+     */
+    @Beta
+    public static <T, A, R> Collector<T, A, R> collectingOrElseThrowIfEmpty(final Collector<T, A, R> collector) {
+        return collectingOrElseGetIfEmpty(collector, () -> {
+            throw noSuchElementExceptionSupplier.get();
+        });
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param <A>
+     * @param <R>
+     * @param collector
+     * @param exceptionSupplier
+     * @return
+     */
+    @Beta
+    public static <T, A, R> Collector<T, A, R> collectingOrElseThrowIfEmpty(final Collector<T, A, R> collector,
+            final Supplier<? extends RuntimeException> exceptionSupplier) {
+        return collectingOrElseGetIfEmpty(collector, () -> {
+            throw exceptionSupplier.get();
+        });
     }
 
     /**
@@ -2075,10 +2234,7 @@ public abstract class Collectors {
      * @return
      */
     public static <T> Collector<T, ?, Long> counting() {
-        final Function<? super T, Long> accumulator = Counting_Accumulator;
-        final BinaryOperator<Long> combiner = Counting_Combiner;
-
-        return reducing(0L, accumulator, combiner);
+        return summingLong(it -> 1L);
     }
 
     /**
@@ -2087,11 +2243,8 @@ public abstract class Collectors {
      * @param <T>
      * @return
      */
-    public static <T> Collector<T, ?, Integer> countingInt() {
-        final Function<? super T, Integer> accumulator = CountingInt_Accumulator;
-        final BinaryOperator<Integer> combiner = CountingInt_Combiner;
-
-        return reducing(0, accumulator, combiner);
+    public static <T> Collector<T, ?, Integer> countingToInt() {
+        return summingInt(it -> 1);
     }
 
     /**
@@ -3007,10 +3160,23 @@ public abstract class Collectors {
      * @param mapper
      * @return
      */
-    public static <T> Collector<T, ?, Long> summingInt(final ToIntFunction<? super T> mapper) {
-        final BiConsumer<long[], T> accumulator = (a, t) -> a[0] += mapper.applyAsInt(t);
+    public static <T> Collector<T, ?, Integer> summingInt(final ToIntFunction<? super T> mapper) {
+        final BiConsumer<int[], T> accumulator = (a, t) -> a[0] += mapper.applyAsInt(t);
 
         return new CollectorImpl<>(SummingInt_Supplier, accumulator, SummingInt_Combiner, SummingInt_Finisher, CH_UNORDERED_NOID);
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param mapper
+     * @return
+     */
+    public static <T> Collector<T, ?, Long> summingIntToLong(final ToIntFunction<? super T> mapper) {
+        final BiConsumer<long[], T> accumulator = (a, t) -> a[0] += mapper.applyAsInt(t);
+
+        return new CollectorImpl<>(SummingIntToLong_Supplier, accumulator, SummingIntToLong_Combiner, SummingIntToLong_Finisher, CH_UNORDERED_NOID);
     }
 
     /**
@@ -4048,8 +4214,8 @@ public abstract class Collectors {
      * @param keyMapper
      * @return
      */
-    public static <T, K> Collector<T, ?, Map<K, Integer>> countingIntBy(Function<? super T, ? extends K> keyMapper) {
-        return countingIntBy(keyMapper, Suppliers.<K, Integer> ofMap());
+    public static <T, K> Collector<T, ?, Map<K, Integer>> countingToIntBy(Function<? super T, ? extends K> keyMapper) {
+        return countingToIntBy(keyMapper, Suppliers.<K, Integer> ofMap());
     }
 
     /**
@@ -4062,9 +4228,9 @@ public abstract class Collectors {
      * @param mapFactory
      * @return
      */
-    public static <T, K, M extends Map<K, Integer>> Collector<T, ?, M> countingIntBy(final Function<? super T, ? extends K> keyMapper,
+    public static <T, K, M extends Map<K, Integer>> Collector<T, ?, M> countingToIntBy(final Function<? super T, ? extends K> keyMapper,
             final Supplier<? extends M> mapFactory) {
-        final Collector<? super T, ?, Integer> downstream = countingInt();
+        final Collector<? super T, ?, Integer> downstream = countingToInt();
 
         return groupingBy(keyMapper, downstream, mapFactory);
     }
@@ -4991,8 +5157,8 @@ public abstract class Collectors {
          * @param mapper2
          * @return
          */
-        public static <T> Collector<T, ?, Tuple2<Long, Long>> summingInt(final ToIntFunction<? super T> mapper1, final ToIntFunction<? super T> mapper2) {
-            final BiConsumer<long[], T> accumulator = (a, t) -> {
+        public static <T> Collector<T, ?, Tuple2<Integer, Integer>> summingInt(final ToIntFunction<? super T> mapper1, final ToIntFunction<? super T> mapper2) {
+            final BiConsumer<int[], T> accumulator = (a, t) -> {
                 a[0] += mapper1.applyAsInt(t);
                 a[1] += mapper2.applyAsInt(t);
             };
@@ -5009,15 +5175,52 @@ public abstract class Collectors {
          * @param mapper3
          * @return
          */
-        public static <T> Collector<T, ?, Tuple3<Long, Long, Long>> summingInt(final ToIntFunction<? super T> mapper1, final ToIntFunction<? super T> mapper2,
-                final ToIntFunction<? super T> mapper3) {
-            final BiConsumer<long[], T> accumulator = (a, t) -> {
+        public static <T> Collector<T, ?, Tuple3<Integer, Integer, Integer>> summingInt(final ToIntFunction<? super T> mapper1,
+                final ToIntFunction<? super T> mapper2, final ToIntFunction<? super T> mapper3) {
+            final BiConsumer<int[], T> accumulator = (a, t) -> {
                 a[0] += mapper1.applyAsInt(t);
                 a[1] += mapper2.applyAsInt(t);
                 a[2] += mapper3.applyAsInt(t);
             };
 
             return new CollectorImpl<>(SummingInt_Supplier_3, accumulator, SummingInt_Combiner_3, SummingInt_Finisher_3, CH_UNORDERED_NOID);
+        }
+
+        /**
+         *
+         *
+         * @param <T>
+         * @param mapper1
+         * @param mapper2
+         * @return
+         */
+        public static <T> Collector<T, ?, Tuple2<Long, Long>> summingIntToLong(final ToIntFunction<? super T> mapper1, final ToIntFunction<? super T> mapper2) {
+            final BiConsumer<long[], T> accumulator = (a, t) -> {
+                a[0] += mapper1.applyAsInt(t);
+                a[1] += mapper2.applyAsInt(t);
+            };
+
+            return new CollectorImpl<>(SummingIntToLong_Supplier_2, accumulator, SummingIntToLong_Combiner_2, SummingIntToLong_Finisher_2, CH_UNORDERED_NOID);
+        }
+
+        /**
+         *
+         *
+         * @param <T>
+         * @param mapper1
+         * @param mapper2
+         * @param mapper3
+         * @return
+         */
+        public static <T> Collector<T, ?, Tuple3<Long, Long, Long>> summingIntToLong(final ToIntFunction<? super T> mapper1,
+                final ToIntFunction<? super T> mapper2, final ToIntFunction<? super T> mapper3) {
+            final BiConsumer<long[], T> accumulator = (a, t) -> {
+                a[0] += mapper1.applyAsInt(t);
+                a[1] += mapper2.applyAsInt(t);
+                a[2] += mapper3.applyAsInt(t);
+            };
+
+            return new CollectorImpl<>(SummingIntToLong_Supplier_3, accumulator, SummingIntToLong_Combiner_3, SummingIntToLong_Finisher_3, CH_UNORDERED_NOID);
         }
 
         /**
