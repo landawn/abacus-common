@@ -1011,7 +1011,7 @@ public abstract class Collectors {
                     } else {
                         final Iterator<T> iter = b.iterator();
 
-                        for (int i = 0; i < n; i++) {
+                        while (iter.hasNext() && a.size() < atMostSize) {
                             a.add(iter.next());
                         }
                     }
