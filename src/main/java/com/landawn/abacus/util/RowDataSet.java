@@ -10715,7 +10715,7 @@ public class RowDataSet implements DataSet, Cloneable {
             ds = new RowDataSet(newColumnNames, newColumnList, _properties);
         }
 
-        ds.frozen();
+        ds.isFrozen();
         return ds;
     }
 
@@ -11243,7 +11243,7 @@ public class RowDataSet implements DataSet, Cloneable {
      * @return true, if successful
      */
     @Override
-    public boolean frozen() {
+    public boolean isFrozen() {
         return _isFrozen;
     }
 

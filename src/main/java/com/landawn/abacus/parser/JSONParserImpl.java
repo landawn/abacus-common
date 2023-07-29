@@ -98,7 +98,7 @@ final class JSONParserImpl extends AbstractJSONParser {
 
     private static final String PROPERTIES = "properties";
 
-    private static final String FROZEN = "frozen";
+    private static final String IS_FROZEN = "isFrozen";
 
     private static final Map<String, Integer> dataSetPropOrder = new HashMap<>();
 
@@ -108,7 +108,7 @@ final class JSONParserImpl extends AbstractJSONParser {
         dataSetPropOrder.put(COLUMN_NAMES, 3);
         dataSetPropOrder.put(COLUMN_TYPES, 4);
         dataSetPropOrder.put(PROPERTIES, 5);
-        dataSetPropOrder.put(FROZEN, 6);
+        dataSetPropOrder.put(IS_FROZEN, 6);
     }
 
     private static final JSONDeserializationConfig jdcForStringElement = JDC.create().setElementType(String.class);
@@ -1404,7 +1404,7 @@ final class JSONParserImpl extends AbstractJSONParser {
             write(bw, ds.properties(), config, false, nextIndentation, serializedObjects);
         }
 
-        if (ds.frozen()) {
+        if (ds.isFrozen()) {
             if (isPrettyFormat) {
                 bw.write(',');
             } else {
@@ -1425,15 +1425,15 @@ final class JSONParserImpl extends AbstractJSONParser {
 
             if (quotePropName) {
                 bw.write(_D_QUOTATION);
-                bw.write(FROZEN);
+                bw.write(IS_FROZEN);
                 bw.write(_D_QUOTATION);
             } else {
-                bw.write(FROZEN);
+                bw.write(IS_FROZEN);
             }
 
             bw.write(_COLON);
 
-            bw.write(ds.frozen());
+            bw.write(ds.isFrozen());
         }
 
         if (columnNames.size() > 0) {
@@ -2751,7 +2751,7 @@ final class JSONParserImpl extends AbstractJSONParser {
         List<String> columnNameList = null;
         List<List<Object>> columnList = null;
         Properties<String, Object> properties = null;
-        boolean frozen = false;
+        boolean isFrozen = false;
 
         List<Type<?>> columnTypeList = null;
 
@@ -2807,7 +2807,7 @@ final class JSONParserImpl extends AbstractJSONParser {
                             //        break;
 
                             case 6:
-                                frozen = jr.readValue(boolType);
+                                isFrozen = jr.readValue(boolType);
                                 break;
 
                             default:
@@ -2863,7 +2863,7 @@ final class JSONParserImpl extends AbstractJSONParser {
                                 //        break;
 
                                 case 6:
-                                    frozen = jr.readValue(boolType);
+                                    isFrozen = jr.readValue(boolType);
                                     break;
 
                                 default:
@@ -2957,7 +2957,7 @@ final class JSONParserImpl extends AbstractJSONParser {
                             // break;
                             //
                             // case 6:
-                            // frozen = N.parseBoolean(jr.getText());
+                            // isFrozen = N.parseBoolean(jr.getText());
                             // break;
                             //
                             // default:
@@ -2981,7 +2981,7 @@ final class JSONParserImpl extends AbstractJSONParser {
 
                     rs = new RowDataSet(columnNameList, columnList, properties);
 
-                    if (frozen) {
+                    if (isFrozen) {
                         rs.freeze();
                     }
 
@@ -3086,13 +3086,13 @@ final class JSONParserImpl extends AbstractJSONParser {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param elementClass 
-     * @param json 
-     * @param config 
-     * @return 
+     *
+     * @param <T>
+     * @param elementClass
+     * @param json
+     * @param config
+     * @return
      */
     @Override
     public <T> ExceptionalStream<T, IOException> stream(final Class<? extends T> elementClass, final String json, final JSONDeserializationConfig config) {
@@ -3122,13 +3122,13 @@ final class JSONParserImpl extends AbstractJSONParser {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param elementClass 
-     * @param file 
-     * @param config 
-     * @return 
+     *
+     * @param <T>
+     * @param elementClass
+     * @param file
+     * @param config
+     * @return
      */
     @Override
     public <T> ExceptionalStream<T, IOException> stream(final Class<? extends T> elementClass, final File file, final JSONDeserializationConfig config) {
@@ -3149,14 +3149,14 @@ final class JSONParserImpl extends AbstractJSONParser {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param elementClass 
-     * @param is 
-     * @param closeInputStreamWhenStreamIsClosed 
-     * @param config 
-     * @return 
+     *
+     * @param <T>
+     * @param elementClass
+     * @param is
+     * @param closeInputStreamWhenStreamIsClosed
+     * @param config
+     * @return
      */
     @Override
     public <T> ExceptionalStream<T, IOException> stream(final Class<? extends T> elementClass, final InputStream is,
@@ -3167,14 +3167,14 @@ final class JSONParserImpl extends AbstractJSONParser {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param elementClass 
-     * @param reader 
-     * @param closeReaderWhenStreamIsClosed 
-     * @param config 
-     * @return 
+     *
+     * @param <T>
+     * @param elementClass
+     * @param reader
+     * @param closeReaderWhenStreamIsClosed
+     * @param config
+     * @return
      */
     @Override
     public <T> ExceptionalStream<T, IOException> stream(final Class<? extends T> elementClass, final Reader reader, final boolean closeReaderWhenStreamIsClosed,

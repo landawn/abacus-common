@@ -29,6 +29,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
+import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.exception.UncheckedException;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.exception.UncheckedInterruptedException;
@@ -199,10 +200,10 @@ public final class ExceptionUtil {
     static final Map<Class<? extends Throwable>, Class<? extends Throwable>> runtimeToCheckedExceptionClassMap = new ConcurrentHashMap<>();
 
     /**
-     * 
      *
-     * @param e 
-     * @return 
+     *
+     * @param e
+     * @return
      */
     public static Exception tryToGetOriginalCheckedException(final Exception e) {
         if (e instanceof RuntimeException && e.getCause() != null && (!(e.getCause() instanceof RuntimeException) && (e.getCause() instanceof Exception))) {
@@ -213,7 +214,7 @@ public final class ExceptionUtil {
 
             final Throwable cause = e.getCause();
 
-            if (runtimeToCheckedExceptionClassMap.containsKey(e.getClass()) && runtimeToCheckedExceptionClassMap.get(e.getClass()).equals(cause.getClass())) {
+            if (cause.getClass().equals(runtimeToCheckedExceptionClassMap.get(e.getClass()))) {
                 return (Exception) cause;
             }
 
@@ -232,91 +233,101 @@ public final class ExceptionUtil {
     }
 
     /**
-     * 
      *
-     * @param throwable 
-     * @param targetExceptionType 
-     * @return 
+     *
+     * @param e
+     * @param targetExceptionType
+     * @return
      */
-    public static boolean hasCause(Throwable throwable, final Class<? extends Throwable> targetExceptionType) {
-        while (throwable != null) {
-            if (targetExceptionType.isAssignableFrom(throwable.getClass())) {
+    public static boolean hasCause(Throwable e, final Class<? extends Throwable> targetExceptionType) {
+        while (e != null) {
+            if (targetExceptionType.isAssignableFrom(e.getClass())) {
                 return true;
             }
 
-            throwable = throwable.getCause();
+            e = e.getCause();
         }
 
         return false;
     }
 
     /**
-     * 
      *
-     * @param throwable 
-     * @param targetExceptionTester 
-     * @return 
+     *
+     * @param e
+     * @param targetExceptionTester
+     * @return
      */
-    public static boolean hasCause(Throwable throwable, final Predicate<? super Throwable> targetExceptionTester) {
-        while (throwable != null) {
-            if (targetExceptionTester.test(throwable)) {
+    public static boolean hasCause(Throwable e, final Predicate<? super Throwable> targetExceptionTester) {
+        while (e != null) {
+            if (targetExceptionTester.test(e)) {
                 return true;
             }
 
-            throwable = throwable.getCause();
+            e = e.getCause();
         }
 
         return false;
     }
 
     /**
-     * 
      *
-     * @param throwable 
-     * @return 
+     *
+     * @param e
+     * @return
      */
-    public static boolean hasSQLCause(Throwable throwable) {
-        while (throwable != null) {
-            if (throwable instanceof SQLException || UncheckedSQLExceptionClassName.equals(throwable.getClass().getSimpleName())) {
+    public static boolean hasSQLCause(Throwable e) {
+        while (e != null) {
+            if (e instanceof SQLException || UncheckedSQLExceptionClassName.equals(e.getClass().getSimpleName())) {
                 return true;
             }
 
-            throwable = throwable.getCause();
+            e = e.getCause();
         }
 
         return false;
     }
 
     /**
-     * 
      *
-     * @param throwable 
-     * @return 
+     *
+     * @param e
+     * @return
      */
-    public static boolean hasIOCause(Throwable throwable) {
-        while (throwable != null) {
-            if (throwable instanceof IOException || UncheckedIOExceptionClassName.equals(throwable.getClass().getSimpleName())) {
+    public static boolean hasIOCause(Throwable e) {
+        while (e != null) {
+            if (e instanceof IOException || UncheckedIOExceptionClassName.equals(e.getClass().getSimpleName())) {
                 return true;
             }
 
-            throwable = throwable.getCause();
+            e = e.getCause();
         }
 
         return false;
     }
 
     /**
-     * 
      *
-     * @param throwable 
-     * @return 
+     * @param e
+     * @return
      */
-    public static List<Throwable> listCause(Throwable throwable) {
+    @Beta
+    public static boolean isNullPointerOrIllegalArgumentException(Throwable e) {
+        return e instanceof NullPointerException || e instanceof IllegalArgumentException;
+    }
+
+    /**
+     *
+     *
+     * @param e
+     * @return
+     */
+    public static List<Throwable> listCause(Throwable e) {
         final List<Throwable> list = new ArrayList<>();
 
-        while (throwable != null && !list.contains(throwable)) {
-            list.add(throwable);
-            throwable = throwable.getCause();
+        while (e != null && !list.contains(e)) {
+            list.add(e);
+            e = e.getCause();
         }
 
         return list;
@@ -325,11 +336,11 @@ public final class ExceptionUtil {
     /**
      * Returns the specified {@code throwable} if there is no cause found in it ({@code throwable.getCause() == null}).
      *
-     * @param throwable
+     * @param e
      * @return
      */
-    public static Throwable firstCause(final Throwable throwable) {
-        Throwable result = throwable;
+    public static Throwable firstCause(final Throwable e) {
+        Throwable result = e;
 
         while (result.getCause() != null) {
             result = result.getCause();
@@ -347,14 +358,14 @@ public final class ExceptionUtil {
      * On JDK1.3 and earlier, the cause exception will not be shown
      * unless the specified throwable alters printStackTrace.</p>
      *
-     * @param throwable the <code>Throwable</code> to be examined
+     * @param e the <code>Throwable</code> to be examined
      * @return
      *  <code>printStackTrace(PrintWriter)</code> method
      */
-    public static String getStackTrace(final Throwable throwable) {
+    public static String getStackTrace(final Throwable e) {
         final StringWriter sw = new StringWriter();
         final PrintWriter pw = new PrintWriter(sw, true);
-        throwable.printStackTrace(pw);
+        e.printStackTrace(pw);
         return sw.getBuffer().toString();
     }
 
@@ -372,21 +383,21 @@ public final class ExceptionUtil {
     //    }
 
     /**
-     * 
      *
-     * @param e 
-     * @return 
+     *
+     * @param e
+     * @return
      */
     public static String getErrorMessage(final Throwable e) {
         return getErrorMessage(e, false);
     }
 
     /**
-     * 
      *
-     * @param e 
-     * @param withExceptionClassName 
-     * @return 
+     *
+     * @param e
+     * @param withExceptionClassName
+     * @return
      */
     public static String getErrorMessage(final Throwable e, final boolean withExceptionClassName) {
         String msg = e.getMessage();

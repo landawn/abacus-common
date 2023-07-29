@@ -4151,7 +4151,7 @@ public interface DataSet {
      *
      * @return true, if successful
      */
-    boolean frozen();
+    boolean isFrozen();
 
     /**
      * Method clear.

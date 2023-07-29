@@ -20,12 +20,10 @@ import java.io.InputStream;
 import java.io.Reader;
 import java.util.Collection;
 import java.util.Map;
-import java.util.Set;
 
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.type.TypeFactory;
 import com.landawn.abacus.util.ExceptionalStream;
-import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.WD;
 
 /**
@@ -71,9 +69,6 @@ abstract class AbstractJSONParser extends AbstractParser<JSONSerializationConfig
             REPLACEMENT_CHARS[i] = String.format("\\u%04x", i);
         }
     }
-
-    protected static final Set<String> ignoredDirtyMarkerPropNames = N.asSet("signedPropNames", "dirtyPropNames", "frozen", "version", "isDirty",
-            "dirtyMarkerImpl");
 
     protected final JSONSerializationConfig defaultJSONSerializationConfig;
 

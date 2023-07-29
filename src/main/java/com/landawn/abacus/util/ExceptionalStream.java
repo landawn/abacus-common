@@ -8362,15 +8362,15 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     /**
      *
      *
-     * @param <E2>
-     * @param action
      * @param threadNum
+     * @param action
+     * @param <E2>
      * @throws E the e
      * @throws E2 the e2
      */
     @Beta
     @TerminalOp
-    public <E2 extends Exception> void forEachInParallel(Throwables.Consumer<? super T, E2> action, final int threadNum) throws E, E2 {
+    public <E2 extends Exception> void forEachInParallel(final int threadNum, Throwables.Consumer<? super T, E2> action) throws E, E2 {
         assertNotClosed();
 
         checkArgNotNull(action, "action");
@@ -8385,16 +8385,16 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     /**
      *
      *
-     * @param <E2>
-     * @param action
      * @param threadNum
+     * @param action
      * @param executor
+     * @param <E2>
      * @throws E the e
      * @throws E2 the e2
      */
     @Beta
     @TerminalOp
-    public <E2 extends Exception> void forEachInParallel(Throwables.Consumer<? super T, E2> action, final int threadNum, final Executor executor) throws E, E2 {
+    public <E2 extends Exception> void forEachInParallel(final int threadNum, Throwables.Consumer<? super T, E2> action, final Executor executor) throws E, E2 {
         assertNotClosed();
 
         checkArgNotNull(action, "action");

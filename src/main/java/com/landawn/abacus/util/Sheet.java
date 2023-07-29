@@ -1700,7 +1700,7 @@ public final class Sheet<R, C, E> implements Cloneable {
      *
      * @return
      */
-    public boolean frozen() {
+    public boolean isFrozen() {
         return _isFrozen;
     }
 
