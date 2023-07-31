@@ -185,8 +185,7 @@ import com.landawn.abacus.util.function.UnaryOperator;
  * @author haiyang li
  *
  */
-
-@SuppressWarnings({ "java:S1192", "java:S1221", "java:S1452", "java:S2445" })
+@SuppressWarnings({ "java:S6539", "java:S1192", "java:S1221", "java:S1452", "java:S2445" })
 public final class Fn extends Comparators {
 
     private static final Object NONE = new Object();

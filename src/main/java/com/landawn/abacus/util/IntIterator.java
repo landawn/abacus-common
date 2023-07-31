@@ -29,6 +29,7 @@ import com.landawn.abacus.util.stream.IntStream;
  * @author Haiyang Li
  * @since 0.8
  */
+@SuppressWarnings({ "java:S6548" })
 public abstract class IntIterator extends ImmutableIterator<Integer> {
 
     public static final IntIterator EMPTY = new IntIterator() {
@@ -44,9 +45,9 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
     };
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public static IntIterator empty() {//NOSONAR
         return EMPTY;
@@ -253,17 +254,17 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public abstract int nextInt();
 
     /**
-     * 
      *
-     * @param n 
-     * @return 
+     *
+     * @param n
+     * @return
      */
     public IntIterator skip(final long n) {
         N.checkArgNotNegative(n, "n");
@@ -308,10 +309,10 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
     }
 
     /**
-     * 
      *
-     * @param count 
-     * @return 
+     *
+     * @param count
+     * @return
      */
     public IntIterator limit(final long count) {
         N.checkArgNotNegative(count, "count");
@@ -343,10 +344,10 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
     }
 
     /**
-     * 
      *
-     * @param predicate 
-     * @return 
+     *
+     * @param predicate
+     * @return
      */
     public IntIterator filter(final IntPredicate predicate) {
         N.checkArgNotNull(predicate, "predicate");
@@ -387,9 +388,9 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public OptionalInt first() {
         if (hasNext()) {
@@ -400,9 +401,9 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public OptionalInt last() {
         if (hasNext()) {
@@ -419,18 +420,18 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public int[] toArray() {
         return toList().trimToSize().array();
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public IntList toList() {
         final IntList list = new IntList();
@@ -443,18 +444,18 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public IntStream stream() {
         return IntStream.of(this);
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Beta
     public ObjIterator<IndexedInt> indexed() {
@@ -462,10 +463,10 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
     }
 
     /**
-     * 
      *
-     * @param startIndex 
-     * @return 
+     *
+     * @param startIndex
+     * @return
      */
     @Beta
     public ObjIterator<IndexedInt> indexed(final long startIndex) {

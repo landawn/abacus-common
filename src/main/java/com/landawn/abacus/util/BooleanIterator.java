@@ -28,6 +28,7 @@ import com.landawn.abacus.util.stream.Stream;
  * @author Haiyang Li
  * @since 0.8
  */
+@SuppressWarnings({ "java:S6548" })
 public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
 
     public static final BooleanIterator EMPTY = new BooleanIterator() {
@@ -43,9 +44,9 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
     };
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public static BooleanIterator empty() {//NOSONAR
         return EMPTY;
@@ -242,9 +243,9 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      * @throws NoSuchElementException if the iteration has no more elements
      * @deprecated use <code>nextBoolean()</code> instead.
      */
@@ -261,10 +262,10 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
     public abstract boolean nextBoolean();
 
     /**
-     * 
      *
-     * @param n 
-     * @return 
+     *
+     * @param n
+     * @return
      */
     public BooleanIterator skip(final long n) {
         N.checkArgNotNegative(n, "n");
@@ -309,10 +310,10 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
     }
 
     /**
-     * 
      *
-     * @param count 
-     * @return 
+     *
+     * @param count
+     * @return
      */
     public BooleanIterator limit(final long count) {
         N.checkArgNotNegative(count, "count");
@@ -344,10 +345,10 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
     }
 
     /**
-     * 
      *
-     * @param predicate 
-     * @return 
+     *
+     * @param predicate
+     * @return
      */
     public BooleanIterator filter(final BooleanPredicate predicate) {
         N.checkArgNotNull(predicate, "predicate");
@@ -388,9 +389,9 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public OptionalBoolean first() {
         if (hasNext()) {
@@ -401,9 +402,9 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public OptionalBoolean last() {
         if (hasNext()) {
@@ -420,18 +421,18 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public boolean[] toArray() {
         return toList().trimToSize().array();
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public BooleanList toList() {
         final BooleanList list = new BooleanList();
@@ -444,18 +445,18 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public Stream<Boolean> stream() {
         return Stream.of(this);
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Beta
     public ObjIterator<IndexedBoolean> indexed() {
@@ -463,10 +464,10 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
     }
 
     /**
-     * 
      *
-     * @param startIndex 
-     * @return 
+     *
+     * @param startIndex
+     * @return
      */
     @Beta
     public ObjIterator<IndexedBoolean> indexed(final long startIndex) {

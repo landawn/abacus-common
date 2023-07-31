@@ -29,6 +29,7 @@ import com.landawn.abacus.util.stream.LongStream;
  * @author Haiyang Li
  * @since 0.8
  */
+@SuppressWarnings({ "java:S6548" })
 public abstract class LongIterator extends ImmutableIterator<Long> {
 
     public static final LongIterator EMPTY = new LongIterator() {
@@ -44,9 +45,9 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
     };
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public static LongIterator empty() {//NOSONAR
         return EMPTY;
@@ -253,17 +254,17 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public abstract long nextLong();
 
     /**
-     * 
      *
-     * @param n 
-     * @return 
+     *
+     * @param n
+     * @return
      */
     public LongIterator skip(final long n) {
         N.checkArgNotNegative(n, "n");
@@ -308,10 +309,10 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
     }
 
     /**
-     * 
      *
-     * @param count 
-     * @return 
+     *
+     * @param count
+     * @return
      */
     public LongIterator limit(final long count) {
         N.checkArgNotNegative(count, "count");
@@ -343,10 +344,10 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
     }
 
     /**
-     * 
      *
-     * @param predicate 
-     * @return 
+     *
+     * @param predicate
+     * @return
      */
     public LongIterator filter(final LongPredicate predicate) {
         N.checkArgNotNull(predicate, "predicate");
@@ -387,9 +388,9 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public OptionalLong first() {
         if (hasNext()) {
@@ -400,9 +401,9 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public OptionalLong last() {
         if (hasNext()) {
@@ -419,18 +420,18 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public long[] toArray() {
         return toList().trimToSize().array();
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public LongList toList() {
         final LongList list = new LongList();
@@ -443,18 +444,18 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public LongStream stream() {
         return LongStream.of(this);
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Beta
     public ObjIterator<IndexedLong> indexed() {
@@ -462,10 +463,10 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
     }
 
     /**
-     * 
      *
-     * @param startIndex 
-     * @return 
+     *
+     * @param startIndex
+     * @return
      */
     @Beta
     public ObjIterator<IndexedLong> indexed(final long startIndex) {

@@ -22,6 +22,7 @@ import com.landawn.abacus.annotation.Beta;
  * @param <T>
  * @since 0.8
  */
+@SuppressWarnings({ "java:S6539" })
 public final class Throwables {
 
     private Throwables() {
@@ -184,9 +185,9 @@ public final class Throwables {
         void run() throws E;
 
         /**
-         * 
          *
-         * @return 
+         *
+         * @return
          */
         @Beta
         default com.landawn.abacus.util.function.Runnable unchecked() {
@@ -216,9 +217,9 @@ public final class Throwables {
         R call() throws E;
 
         /**
-         * 
          *
-         * @return 
+         *
+         * @return
          */
         @Beta
         default com.landawn.abacus.util.function.Callable<R> unchecked() {
@@ -248,9 +249,9 @@ public final class Throwables {
         T get() throws E;
 
         /**
-         * 
          *
-         * @return 
+         *
+         * @return
          */
         @Beta
         default com.landawn.abacus.util.function.Supplier<T> unchecked() {
@@ -409,18 +410,18 @@ public final class Throwables {
         boolean test(T t) throws E;
 
         /**
-         * 
          *
-         * @return 
+         *
+         * @return
          */
         default Predicate<T, E> negate() {
             return t -> !test(t);
         }
 
         /**
-         * 
          *
-         * @return 
+         *
+         * @return
          */
         @Beta
         default com.landawn.abacus.util.function.Predicate<T> unchecked() {
@@ -453,9 +454,9 @@ public final class Throwables {
         boolean test(T t, U u) throws E;
 
         /**
-         * 
          *
-         * @return 
+         *
+         * @return
          */
         @Beta
         default com.landawn.abacus.util.function.BiPredicate<T, U> unchecked() {
@@ -531,9 +532,9 @@ public final class Throwables {
         R apply(T t) throws E;
 
         /**
-         * 
          *
-         * @return 
+         *
+         * @return
          */
         @Beta
         default com.landawn.abacus.util.function.Function<T, R> unchecked() {
@@ -567,9 +568,9 @@ public final class Throwables {
         R apply(T t, U u) throws E;
 
         /**
-         * 
          *
-         * @return 
+         *
+         * @return
          */
         @Beta
         default com.landawn.abacus.util.function.BiFunction<T, U, R> unchecked() {
@@ -645,9 +646,9 @@ public final class Throwables {
         void accept(T t) throws E;
 
         /**
-         * 
          *
-         * @return 
+         *
+         * @return
          */
         @Beta
         default com.landawn.abacus.util.function.Consumer<T> unchecked() {
@@ -679,9 +680,9 @@ public final class Throwables {
         void accept(T t, U u) throws E;
 
         /**
-         * 
          *
-         * @return 
+         *
+         * @return
          */
         @Beta
         default com.landawn.abacus.util.function.BiConsumer<T, U> unchecked() {
@@ -3048,10 +3049,10 @@ public final class Throwables {
         void accept(int i, T t) throws E;
 
         /**
-         * 
          *
-         * @param after 
-         * @return 
+         *
+         * @param after
+         * @return
          */
         default IntObjConsumer<T, E> andThen(final IntObjConsumer<? super T, E> after) {
             N.checkArgNotNull(after);
@@ -3075,10 +3076,10 @@ public final class Throwables {
         void accept(int i, int j, T t) throws E;
 
         /**
-         * 
          *
-         * @param after 
-         * @return 
+         *
+         * @param after
+         * @return
          */
         default BiIntObjConsumer<T, E> andThen(final BiIntObjConsumer<? super T, E> after) {
             N.checkArgNotNull(after);
@@ -3093,20 +3094,20 @@ public final class Throwables {
     public interface BooleanNFunction<R, E extends Throwable> {
 
         /**
-         * 
          *
-         * @param args 
-         * @return 
-         * @throws E 
+         *
+         * @param args
+         * @return
+         * @throws E
          */
         R apply(boolean... args) throws E;
 
         /**
-         * 
          *
-         * @param <V> 
-         * @param after 
-         * @return 
+         *
+         * @param <V>
+         * @param after
+         * @return
          */
         default <V> BooleanNFunction<V, E> andThen(java.util.function.Function<? super R, ? extends V> after) {
             N.checkArgNotNull(after);
@@ -3118,20 +3119,20 @@ public final class Throwables {
     public interface CharNFunction<R, E extends Throwable> {
 
         /**
-         * 
          *
-         * @param args 
-         * @return 
-         * @throws E 
+         *
+         * @param args
+         * @return
+         * @throws E
          */
         R apply(char... args) throws E;
 
         /**
-         * 
          *
-         * @param <V> 
-         * @param after 
-         * @return 
+         *
+         * @param <V>
+         * @param after
+         * @return
          */
         default <V> CharNFunction<V, E> andThen(java.util.function.Function<? super R, ? extends V> after) {
             N.checkArgNotNull(after);
@@ -3143,20 +3144,20 @@ public final class Throwables {
     public interface ByteNFunction<R, E extends Throwable> {
 
         /**
-         * 
          *
-         * @param args 
-         * @return 
-         * @throws E 
+         *
+         * @param args
+         * @return
+         * @throws E
          */
         R apply(byte... args) throws E;
 
         /**
-         * 
          *
-         * @param <V> 
-         * @param after 
-         * @return 
+         *
+         * @param <V>
+         * @param after
+         * @return
          */
         default <V> ByteNFunction<V, E> andThen(java.util.function.Function<? super R, ? extends V> after) {
             N.checkArgNotNull(after);
@@ -3168,20 +3169,20 @@ public final class Throwables {
     public interface ShortNFunction<R, E extends Throwable> {
 
         /**
-         * 
          *
-         * @param args 
-         * @return 
-         * @throws E 
+         *
+         * @param args
+         * @return
+         * @throws E
          */
         R apply(short... args) throws E;
 
         /**
-         * 
          *
-         * @param <V> 
-         * @param after 
-         * @return 
+         *
+         * @param <V>
+         * @param after
+         * @return
          */
         default <V> ShortNFunction<V, E> andThen(java.util.function.Function<? super R, ? extends V> after) {
             N.checkArgNotNull(after);
@@ -3193,20 +3194,20 @@ public final class Throwables {
     public interface IntNFunction<R, E extends Throwable> {
 
         /**
-         * 
          *
-         * @param args 
-         * @return 
-         * @throws E 
+         *
+         * @param args
+         * @return
+         * @throws E
          */
         R apply(int... args) throws E;
 
         /**
-         * 
          *
-         * @param <V> 
-         * @param after 
-         * @return 
+         *
+         * @param <V>
+         * @param after
+         * @return
          */
         default <V> IntNFunction<V, E> andThen(java.util.function.Function<? super R, ? extends V> after) {
             N.checkArgNotNull(after);
@@ -3218,20 +3219,20 @@ public final class Throwables {
     public interface LongNFunction<R, E extends Throwable> {
 
         /**
-         * 
          *
-         * @param args 
-         * @return 
-         * @throws E 
+         *
+         * @param args
+         * @return
+         * @throws E
          */
         R apply(long... args) throws E;
 
         /**
-         * 
          *
-         * @param <V> 
-         * @param after 
-         * @return 
+         *
+         * @param <V>
+         * @param after
+         * @return
          */
         default <V> LongNFunction<V, E> andThen(java.util.function.Function<? super R, ? extends V> after) {
             N.checkArgNotNull(after);
@@ -3243,20 +3244,20 @@ public final class Throwables {
     public interface FloatNFunction<R, E extends Throwable> {
 
         /**
-         * 
          *
-         * @param args 
-         * @return 
-         * @throws E 
+         *
+         * @param args
+         * @return
+         * @throws E
          */
         R apply(float... args) throws E;
 
         /**
-         * 
          *
-         * @param <V> 
-         * @param after 
-         * @return 
+         *
+         * @param <V>
+         * @param after
+         * @return
          */
         default <V> FloatNFunction<V, E> andThen(java.util.function.Function<? super R, ? extends V> after) {
             N.checkArgNotNull(after);
@@ -3268,20 +3269,20 @@ public final class Throwables {
     public interface DoubleNFunction<R, E extends Throwable> {
 
         /**
-         * 
          *
-         * @param args 
-         * @return 
-         * @throws E 
+         *
+         * @param args
+         * @return
+         * @throws E
          */
         R apply(double... args) throws E;
 
         /**
-         * 
          *
-         * @param <V> 
-         * @param after 
-         * @return 
+         *
+         * @param <V>
+         * @param after
+         * @return
          */
         default <V> DoubleNFunction<V, E> andThen(java.util.function.Function<? super R, ? extends V> after) {
             N.checkArgNotNull(after);
@@ -3293,20 +3294,20 @@ public final class Throwables {
     public interface NFunction<T, R, E extends Throwable> {
 
         /**
-         * 
          *
-         * @param args 
-         * @return 
-         * @throws E 
+         *
+         * @param args
+         * @return
+         * @throws E
          */
         R apply(T... args) throws E;
 
         /**
-         * 
          *
-         * @param <V> 
-         * @param after 
-         * @return 
+         *
+         * @param <V>
+         * @param after
+         * @return
          */
         default <V> NFunction<T, V, E> andThen(java.util.function.Function<? super R, ? extends V> after) {
             N.checkArgNotNull(after);
@@ -3323,10 +3324,10 @@ public final class Throwables {
         public interface Runnable<E extends Throwable, E2 extends Throwable> {
 
             /**
-             * 
              *
-             * @throws E 
-             * @throws E2 
+             *
+             * @throws E
+             * @throws E2
              */
             void run() throws E, E2;
         }
@@ -3334,11 +3335,11 @@ public final class Throwables {
         public interface Callable<R, E extends Throwable, E2 extends Throwable> {
 
             /**
-             * 
              *
-             * @return 
-             * @throws E 
-             * @throws E2 
+             *
+             * @return
+             * @throws E
+             * @throws E2
              */
             R call() throws E, E2;
         }
@@ -3346,11 +3347,11 @@ public final class Throwables {
         public interface Supplier<T, E extends Throwable, E2 extends Throwable> {
 
             /**
-             * 
              *
-             * @return 
-             * @throws E 
-             * @throws E2 
+             *
+             * @return
+             * @throws E
+             * @throws E2
              */
             T get() throws E, E2;
         }
@@ -3358,12 +3359,12 @@ public final class Throwables {
         public interface Predicate<T, E extends Throwable, E2 extends Throwable> {
 
             /**
-             * 
              *
-             * @param t 
-             * @return 
-             * @throws E 
-             * @throws E2 
+             *
+             * @param t
+             * @return
+             * @throws E
+             * @throws E2
              */
             boolean test(T t) throws E, E2;
         }
@@ -3371,13 +3372,13 @@ public final class Throwables {
         public interface BiPredicate<T, U, E extends Throwable, E2 extends Throwable> {
 
             /**
-             * 
              *
-             * @param t 
-             * @param u 
-             * @return 
-             * @throws E 
-             * @throws E2 
+             *
+             * @param t
+             * @param u
+             * @return
+             * @throws E
+             * @throws E2
              */
             boolean test(T t, U u) throws E, E2;
         }
@@ -3385,14 +3386,14 @@ public final class Throwables {
         public interface TriPredicate<A, B, C, E extends Throwable, E2 extends Throwable> {
 
             /**
-             * 
              *
-             * @param a 
-             * @param b 
-             * @param c 
-             * @return 
-             * @throws E 
-             * @throws E2 
+             *
+             * @param a
+             * @param b
+             * @param c
+             * @return
+             * @throws E
+             * @throws E2
              */
             boolean test(A a, B b, C c) throws E, E2;
         }
@@ -3400,12 +3401,12 @@ public final class Throwables {
         public interface Function<T, R, E extends Throwable, E2 extends Throwable> {
 
             /**
-             * 
              *
-             * @param t 
-             * @return 
-             * @throws E 
-             * @throws E2 
+             *
+             * @param t
+             * @return
+             * @throws E
+             * @throws E2
              */
             R apply(T t) throws E, E2;
         }
@@ -3413,13 +3414,13 @@ public final class Throwables {
         public interface BiFunction<T, U, R, E extends Throwable, E2 extends Throwable> {
 
             /**
-             * 
              *
-             * @param t 
-             * @param u 
-             * @return 
-             * @throws E 
-             * @throws E2 
+             *
+             * @param t
+             * @param u
+             * @return
+             * @throws E
+             * @throws E2
              */
             R apply(T t, U u) throws E, E2;
         }
@@ -3427,14 +3428,14 @@ public final class Throwables {
         public interface TriFunction<A, B, C, R, E extends Throwable, E2 extends Throwable> {
 
             /**
-             * 
              *
-             * @param a 
-             * @param b 
-             * @param c 
-             * @return 
-             * @throws E 
-             * @throws E2 
+             *
+             * @param a
+             * @param b
+             * @param c
+             * @return
+             * @throws E
+             * @throws E2
              */
             R apply(A a, B b, C c) throws E, E2;
         }
@@ -3442,11 +3443,11 @@ public final class Throwables {
         public interface Consumer<T, E extends Throwable, E2 extends Throwable> {
 
             /**
-             * 
              *
-             * @param t 
-             * @throws E 
-             * @throws E2 
+             *
+             * @param t
+             * @throws E
+             * @throws E2
              */
             void accept(T t) throws E, E2;
         }
@@ -3454,12 +3455,12 @@ public final class Throwables {
         public interface BiConsumer<T, U, E extends Throwable, E2 extends Throwable> {
 
             /**
-             * 
              *
-             * @param t 
-             * @param u 
-             * @throws E 
-             * @throws E2 
+             *
+             * @param t
+             * @param u
+             * @throws E
+             * @throws E2
              */
             void accept(T t, U u) throws E, E2;
         }
@@ -3467,13 +3468,13 @@ public final class Throwables {
         public interface TriConsumer<A, B, C, E extends Throwable, E2 extends Throwable> {
 
             /**
-             * 
              *
-             * @param a 
-             * @param b 
-             * @param c 
-             * @throws E 
-             * @throws E2 
+             *
+             * @param a
+             * @param b
+             * @param c
+             * @throws E
+             * @throws E2
              */
             void accept(A a, B b, C c) throws E, E2;
         }
@@ -3491,11 +3492,11 @@ public final class Throwables {
         public interface Runnable<E extends Throwable, E2 extends Throwable, E3 extends Throwable> {
 
             /**
-             * 
              *
-             * @throws E 
-             * @throws E2 
-             * @throws E3 
+             *
+             * @throws E
+             * @throws E2
+             * @throws E3
              */
             void run() throws E, E2, E3;
         }
@@ -3503,12 +3504,12 @@ public final class Throwables {
         public interface Callable<R, E extends Throwable, E2 extends Throwable, E3 extends Throwable> {
 
             /**
-             * 
              *
-             * @return 
-             * @throws E 
-             * @throws E2 
-             * @throws E3 
+             *
+             * @return
+             * @throws E
+             * @throws E2
+             * @throws E3
              */
             R call() throws E, E2, E3;
         }
@@ -3516,12 +3517,12 @@ public final class Throwables {
         public interface Supplier<T, E extends Throwable, E2 extends Throwable, E3 extends Throwable> {
 
             /**
-             * 
              *
-             * @return 
-             * @throws E 
-             * @throws E2 
-             * @throws E3 
+             *
+             * @return
+             * @throws E
+             * @throws E2
+             * @throws E3
              */
             T get() throws E, E2, E3;
         }
@@ -3529,13 +3530,13 @@ public final class Throwables {
         public interface Predicate<T, E extends Throwable, E2 extends Throwable, E3 extends Throwable> {
 
             /**
-             * 
              *
-             * @param t 
-             * @return 
-             * @throws E 
-             * @throws E2 
-             * @throws E3 
+             *
+             * @param t
+             * @return
+             * @throws E
+             * @throws E2
+             * @throws E3
              */
             boolean test(T t) throws E, E2, E3;
         }
@@ -3543,14 +3544,14 @@ public final class Throwables {
         public interface BiPredicate<T, U, E extends Throwable, E2 extends Throwable, E3 extends Throwable> {
 
             /**
-             * 
              *
-             * @param t 
-             * @param u 
-             * @return 
-             * @throws E 
-             * @throws E2 
-             * @throws E3 
+             *
+             * @param t
+             * @param u
+             * @return
+             * @throws E
+             * @throws E2
+             * @throws E3
              */
             boolean test(T t, U u) throws E, E2, E3;
         }
@@ -3558,15 +3559,15 @@ public final class Throwables {
         public interface TriPredicate<A, B, C, E extends Throwable, E2 extends Throwable, E3 extends Throwable> {
 
             /**
-             * 
              *
-             * @param a 
-             * @param b 
-             * @param c 
-             * @return 
-             * @throws E 
-             * @throws E2 
-             * @throws E3 
+             *
+             * @param a
+             * @param b
+             * @param c
+             * @return
+             * @throws E
+             * @throws E2
+             * @throws E3
              */
             boolean test(A a, B b, C c) throws E, E2, E3;
         }
@@ -3574,13 +3575,13 @@ public final class Throwables {
         public interface Function<T, R, E extends Throwable, E2 extends Throwable, E3 extends Throwable> {
 
             /**
-             * 
              *
-             * @param t 
-             * @return 
-             * @throws E 
-             * @throws E2 
-             * @throws E3 
+             *
+             * @param t
+             * @return
+             * @throws E
+             * @throws E2
+             * @throws E3
              */
             R apply(T t) throws E, E2, E3;
         }
@@ -3588,14 +3589,14 @@ public final class Throwables {
         public interface BiFunction<T, U, R, E extends Throwable, E2 extends Throwable, E3 extends Throwable> {
 
             /**
-             * 
              *
-             * @param t 
-             * @param u 
-             * @return 
-             * @throws E 
-             * @throws E2 
-             * @throws E3 
+             *
+             * @param t
+             * @param u
+             * @return
+             * @throws E
+             * @throws E2
+             * @throws E3
              */
             R apply(T t, U u) throws E, E2, E3;
         }
@@ -3603,15 +3604,15 @@ public final class Throwables {
         public interface TriFunction<A, B, C, R, E extends Throwable, E2 extends Throwable, E3 extends Throwable> {
 
             /**
-             * 
              *
-             * @param a 
-             * @param b 
-             * @param c 
-             * @return 
-             * @throws E 
-             * @throws E2 
-             * @throws E3 
+             *
+             * @param a
+             * @param b
+             * @param c
+             * @return
+             * @throws E
+             * @throws E2
+             * @throws E3
              */
             R apply(A a, B b, C c) throws E, E2, E3;
         }
@@ -3619,12 +3620,12 @@ public final class Throwables {
         public interface Consumer<T, E extends Throwable, E2 extends Throwable, E3 extends Throwable> {
 
             /**
-             * 
              *
-             * @param t 
-             * @throws E 
-             * @throws E2 
-             * @throws E3 
+             *
+             * @param t
+             * @throws E
+             * @throws E2
+             * @throws E3
              */
             void accept(T t) throws E, E2, E3;
         }
@@ -3632,13 +3633,13 @@ public final class Throwables {
         public interface BiConsumer<T, U, E extends Throwable, E2 extends Throwable, E3 extends Throwable> {
 
             /**
-             * 
              *
-             * @param t 
-             * @param u 
-             * @throws E 
-             * @throws E2 
-             * @throws E3 
+             *
+             * @param t
+             * @param u
+             * @throws E
+             * @throws E2
+             * @throws E3
              */
             void accept(T t, U u) throws E, E2, E3;
         }
@@ -3646,14 +3647,14 @@ public final class Throwables {
         public interface TriConsumer<A, B, C, E extends Throwable, E2 extends Throwable, E3 extends Throwable> {
 
             /**
-             * 
              *
-             * @param a 
-             * @param b 
-             * @param c 
-             * @throws E 
-             * @throws E2 
-             * @throws E3 
+             *
+             * @param a
+             * @param b
+             * @param c
+             * @throws E
+             * @throws E2
+             * @throws E3
              */
             void accept(A a, B b, C c) throws E, E2, E3;
         }
@@ -3671,10 +3672,10 @@ public final class Throwables {
         }
 
         /**
-         * 
          *
-         * @return 
-         * @throws E 
+         *
+         * @return
+         * @throws E
          */
         @Override
         public T get() throws E {
@@ -3693,12 +3694,12 @@ public final class Throwables {
         }
 
         /**
-         * 
          *
-         * @param <T> 
-         * @param <E> 
-         * @param supplier 
-         * @return 
+         *
+         * @param <T>
+         * @param <E>
+         * @param supplier
+         * @return
          */
         public static <T, E extends Throwable> LazyInitializer<T, E> of(final Throwables.Supplier<T, E> supplier) {
             N.checkArgNotNull(supplier);

@@ -102,7 +102,7 @@ import com.landawn.abacus.util.stream.Stream;
  * @see com.landawn.abacus.util.Strings
  * @see com.landawn.abacus.util.IOUtil
  */
-@SuppressWarnings("java:S1192")
+@SuppressWarnings({ "java:S1192", "java:S6539" })
 public final class N extends CommonUtil {
 
     private static final int CPU_CORES = Runtime.getRuntime().availableProcessors();
@@ -373,29 +373,11 @@ public final class N extends CommonUtil {
      * @param iter
      * @param valueToFind
      * @return
+     * @throws ArithmeticException if the {@code occurrences} is bigger than {@code Integer.MAX_VALUE}
+     * @see Iterators#occurrencesOf(Iterator, Object)
      */
-    public static long occurrencesOf(final Iterator<?> iter, final Object valueToFind) {
-        if (iter == null) {
-            return 0;
-        }
-
-        long occurrences = 0;
-
-        if (valueToFind == null) {
-            while (iter.hasNext()) {
-                if (iter.next() == null) {
-                    occurrences++;
-                }
-            }
-        } else {
-            while (iter.hasNext()) {
-                if (equals(iter.next(), valueToFind)) {
-                    occurrences++;
-                }
-            }
-        }
-
-        return occurrences;
+    public static int occurrencesOf(final Iterator<?> iter, final Object valueToFind) throws ArithmeticException {
+        return Numbers.toIntExact(Iterators.occurrencesOf(iter, valueToFind));
     }
 
     /**
@@ -477,10 +459,16 @@ public final class N extends CommonUtil {
             return mapSupplier.get();
         }
 
-        final Map<T, Integer> map = mapSupplier.get();
+        final Multiset<T> multiset = new Multiset<>();
 
         for (T e : c) {
-            map.merge(e, 1, (o, n) -> o + n);
+            multiset.add(e, 1);
+        }
+
+        final Map<T, Integer> map = mapSupplier.get();
+
+        for (T e : multiset) {
+            map.put(e, multiset.get(e));
         }
 
         return map;
@@ -511,10 +499,16 @@ public final class N extends CommonUtil {
             return mapSupplier.get();
         }
 
-        final Map<T, Integer> map = mapSupplier.get();
+        final LongMultiset<T> multiset = new LongMultiset<>();
 
         while (iter.hasNext()) {
-            map.merge(iter.next(), 1, (o, n) -> o + n);
+            multiset.add(iter.next(), 1);
+        }
+
+        final Map<T, Integer> map = mapSupplier.get();
+
+        for (T e : multiset) {
+            map.put(e, Numbers.toIntExact(multiset.get(e)));
         }
 
         return map;
@@ -627,6 +621,27 @@ public final class N extends CommonUtil {
     /**
      *
      *
+     * @param c
+     * @param valueToFind
+     * @return
+     */
+    public static boolean contains(final Iterable<?> c, final Object valueToFind) {
+        if (c == null) {
+            return false;
+        }
+
+        for (Object e : c) {
+            if (equals(e, valueToFind)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     *
+     *
      * @param iter
      * @param valueToFind
      * @return
@@ -681,6 +696,31 @@ public final class N extends CommonUtil {
     /**
      *
      *
+     * @param c
+     * @param valuesToFind
+     * @return
+     */
+    public static boolean containsAll(final Iterable<?> c, final Collection<?> valuesToFind) {
+        if (isNullOrEmpty(valuesToFind)) {
+            return true;
+        } else if (c == null) {
+            return false;
+        }
+
+        final Set<?> set = new HashSet<>(valuesToFind);
+
+        for (Object e : c) {
+            if (set.remove(e) && (set.size() == 0)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     *
+     *
      * @param iter
      * @param valuesToFind
      * @return
@@ -730,6 +770,27 @@ public final class N extends CommonUtil {
         }
 
         return !disjoint(c, Array.asList(valuesToFind));
+    }
+
+    /**
+     *
+     *
+     * @param c
+     * @param valuesToFind
+     * @return
+     */
+    public static boolean containsAny(final Iterable<?> c, final Set<?> valuesToFind) {
+        if (c == null || isNullOrEmpty(valuesToFind)) {
+            return false;
+        }
+
+        for (Object e : c) {
+            if (valuesToFind.contains(e)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -823,7 +884,7 @@ public final class N extends CommonUtil {
      * @param toIndex
      * @return
      */
-    public static <T> ObjIterator<T> slice(final Iterator<T> iter, final long fromIndex, final long toIndex) {
+    public static <T> ObjIterator<T> slice(final Iterator<? extends T> iter, final long fromIndex, final long toIndex) {
         if (fromIndex < 0 || fromIndex > toIndex) {
             throw new IndexOutOfBoundsException("Index range [" + fromIndex + ", " + toIndex + "] is out-of-bounds");
         }
@@ -1315,26 +1376,20 @@ public final class N extends CommonUtil {
     }
 
     /**
-     * Returns consecutive sub lists of a collection, each of the same chunkSize (the final list may be smaller).
-     * or an empty List if the specified collection is {@code null} or empty. The order of elements in the original collection is kept
      *
      * @param <T>
      * @param c
-     * @param chunkSize the desired size of each sub list (the last may be smaller).
+     * @param chunkSize
      * @return
      */
-    public static <T> List<List<T>> split(final Iterable<? extends T> c, final int chunkSize) {
+    public static <T> List<List<T>> split(final Collection<? extends T> c, final int chunkSize) {
         checkArgPositive(chunkSize, "chunkSize");
 
-        if (c == null) {
+        if (isNullOrEmpty(c)) {
             return new ArrayList<>();
-        } else if (c instanceof Collection) {
-            final Collection<T> coll = (Collection<T>) c;
-
-            return split(coll, 0, coll.size(), chunkSize);
-        } else {
-            return toList(split(c.iterator(), chunkSize));
         }
+
+        return split(c, 0, c.size(), chunkSize);
     }
 
     /**
@@ -1386,6 +1441,29 @@ public final class N extends CommonUtil {
         }
 
         return res;
+    }
+
+    /**
+     * Returns consecutive sub lists of a collection, each of the same chunkSize (the final list may be smaller).
+     * or an empty List if the specified collection is {@code null} or empty. The order of elements in the original collection is kept
+     *
+     * @param <T>
+     * @param c
+     * @param chunkSize the desired size of each sub list (the last may be smaller).
+     * @return
+     */
+    public static <T> List<List<T>> split(final Iterable<? extends T> c, final int chunkSize) {
+        checkArgPositive(chunkSize, "chunkSize");
+
+        if (c == null) {
+            return new ArrayList<>();
+        } else if (c instanceof Collection) {
+            final Collection<T> coll = (Collection<T>) c;
+
+            return split(coll, 0, coll.size(), chunkSize);
+        } else {
+            return toList(split(c.iterator(), chunkSize));
+        }
     }
 
     /**
@@ -2597,6 +2675,88 @@ public final class N extends CommonUtil {
         }
 
         return ret;
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param c
+     * @return
+     */
+    public static <T> List<T> flatten(final Iterable<? extends Iterable<? extends T>> c) {
+        return flatten(c, Suppliers.ofList());
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param <C>
+     * @param c
+     * @param supplier
+     * @return
+     */
+    @SuppressWarnings("rawtypes")
+    public static <T, C extends Collection<T>> C flatten(final Iterable<? extends Iterable<? extends T>> c, Supplier<? extends C> supplier) {
+        if (isNullOrEmpty(c)) {
+            return supplier.get();
+        }
+
+        final C ret = supplier.get();
+
+        for (Iterable<? extends T> e : c) {
+            if (e == null) {
+                continue; //NOSONAR
+            } else if (e instanceof Collection) {
+                ret.addAll((Collection) e);
+            } else {
+                for (T ee : e) {
+                    ret.add(ee);
+                }
+            }
+        }
+
+        return ret;
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param iters
+     * @return
+     */
+    public static <T> Iterator<T> flatten(final Iterator<? extends Iterator<? extends T>> iters) {
+        if (iters == null) {
+            return ObjIterator.empty();
+        }
+
+        return new ObjIterator<>() {
+            private Iterator<? extends T> cur = null;
+
+            @Override
+            public boolean hasNext() {
+                if (cur == null || !cur.hasNext()) {
+                    while (iters.hasNext()) {
+                        cur = iters.next();
+
+                        if (cur != null && cur.hasNext()) {
+                            break;
+                        }
+                    }
+                }
+
+                return cur != null && cur.hasNext();
+            }
+
+            @Override
+            public T next() {
+                if (!hasNext()) {
+                    throw new NoSuchElementException();
+                }
+
+                return cur.next();
+            }
+        };
     }
 
     /**
@@ -10114,7 +10274,7 @@ public final class N extends CommonUtil {
      * @param endExclusive
      * @return
      */
-    public static <T> List<T> skipRange(final Collection<T> c, final int startInclusive, final int endExclusive) {
+    public static <T> List<T> skipRange(final Collection<? extends T> c, final int startInclusive, final int endExclusive) {
         return skipRange(c, startInclusive, endExclusive, IntFunctions.ofList());
     }
 
@@ -10129,7 +10289,7 @@ public final class N extends CommonUtil {
      * @param supplier
      * @return
      */
-    public static <T, C extends Collection<T>> C skipRange(final Collection<T> c, final int startInclusive, final int endExclusive,
+    public static <T, C extends Collection<T>> C skipRange(final Collection<? extends T> c, final int startInclusive, final int endExclusive,
             final IntFunction<C> supplier) {
         final int size = size(c);
 
@@ -10148,7 +10308,7 @@ public final class N extends CommonUtil {
                 result.addAll(list.subList(endExclusive, size));
             }
         } else {
-            final Iterator<T> iter = c.iterator();
+            final Iterator<? extends T> iter = c.iterator();
 
             for (int i = 0; i < startInclusive; i++) {
                 result.add(iter.next());
@@ -10981,6 +11141,31 @@ public final class N extends CommonUtil {
      * @return
      */
     public static int sum(final int[] a, final int fromIndex, final int toIndex) {
+        return Numbers.toIntExact(sumToLong(a, fromIndex, toIndex));
+    }
+
+    /**
+     *
+     * @param a
+     * @return a long number
+     */
+    @SafeVarargs
+    public static long sumToLong(final int... a) {
+        if (isNullOrEmpty(a)) {
+            return 0;
+        }
+
+        return sumToLong(a, 0, a.length);
+    }
+
+    /**
+     *
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return
+     */
+    public static long sumToLong(final int[] a, final int fromIndex, final int toIndex) {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (isNullOrEmpty(a) || fromIndex == toIndex) {
@@ -11427,39 +11612,6 @@ public final class N extends CommonUtil {
      *
      * @param <T>
      * @param c
-     * @return
-     */
-    public static <T extends Number> int sumInt(final Iterable<? extends T> c) {
-        return sumInt(c, Fn.numToInt());
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param <E>
-     * @param c
-     * @param func
-     * @return
-     * @throws E the e
-     */
-    public static <T, E extends Exception> int sumInt(final Iterable<? extends T> c, final Throwables.ToIntFunction<? super T, E> func) throws E {
-        if (c == null) {
-            return 0;
-        }
-
-        long sum = 0;
-
-        for (T e : c) {
-            sum += func.applyAsInt(e);
-        }
-
-        return Numbers.toIntExact(sum);
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param c
      * @param fromIndex
      * @param toIndex
      * @return
@@ -11512,6 +11664,62 @@ public final class N extends CommonUtil {
         }
 
         return Numbers.toIntExact(sum);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param c
+     * @return
+     */
+    public static <T extends Number> int sumInt(final Iterable<? extends T> c) {
+        return sumInt(c, Fn.numToInt());
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param <E>
+     * @param c
+     * @param func
+     * @return
+     * @throws E the e
+     */
+    public static <T, E extends Exception> int sumInt(final Iterable<? extends T> c, final Throwables.ToIntFunction<? super T, E> func) throws E {
+        return Numbers.toIntExact(sumIntToLong(c, func));
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param c
+     * @return
+     */
+    public static <T extends Number> long sumIntToLong(final Iterable<? extends T> c) {
+        return sumIntToLong(c, Fn.numToInt());
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param <E>
+     * @param c
+     * @param func
+     * @return
+     * @throws E the e
+     */
+    public static <T, E extends Exception> long sumIntToLong(final Iterable<? extends T> c, final Throwables.ToIntFunction<? super T, E> func) throws E {
+        if (c == null) {
+            return 0;
+        }
+
+        long sum = 0;
+
+        for (T e : c) {
+            sum += func.applyAsInt(e);
+        }
+
+        return sum;
     }
 
     /**
@@ -11585,39 +11793,6 @@ public final class N extends CommonUtil {
      *
      * @param <T>
      * @param c
-     * @return
-     */
-    public static <T extends Number> long sumLong(final Iterable<? extends T> c) {
-        return sumLong(c, Fn.numToLong());
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param <E>
-     * @param c
-     * @param func
-     * @return
-     * @throws E the e
-     */
-    public static <T, E extends Exception> long sumLong(final Iterable<? extends T> c, final Throwables.ToLongFunction<? super T, E> func) throws E {
-        if (c == null) {
-            return 0L;
-        }
-
-        long sum = 0;
-
-        for (T e : c) {
-            sum += func.applyAsLong(e);
-        }
-
-        return sum;
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param c
      * @param fromIndex
      * @param toIndex
      * @return
@@ -11667,6 +11842,39 @@ public final class N extends CommonUtil {
                     break;
                 }
             }
+        }
+
+        return sum;
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param c
+     * @return
+     */
+    public static <T extends Number> long sumLong(final Iterable<? extends T> c) {
+        return sumLong(c, Fn.numToLong());
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param <E>
+     * @param c
+     * @param func
+     * @return
+     * @throws E the e
+     */
+    public static <T, E extends Exception> long sumLong(final Iterable<? extends T> c, final Throwables.ToLongFunction<? super T, E> func) throws E {
+        if (c == null) {
+            return 0L;
+        }
+
+        long sum = 0;
+
+        for (T e : c) {
+            sum += func.applyAsLong(e);
         }
 
         return sum;
@@ -11743,39 +11951,6 @@ public final class N extends CommonUtil {
      *
      * @param <T>
      * @param c
-     * @return
-     */
-    public static <T extends Number> double sumDouble(final Iterable<? extends T> c) {
-        return sumDouble(c, Fn.numToDouble());
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param <E>
-     * @param c
-     * @param func
-     * @return
-     * @throws E the e
-     */
-    public static <T, E extends Exception> double sumDouble(final Iterable<? extends T> c, final Throwables.ToDoubleFunction<? super T, E> func) throws E {
-        if (c == null) {
-            return 0D;
-        }
-
-        final KahanSummation summation = new KahanSummation();
-
-        for (T e : c) {
-            summation.add(func.applyAsDouble(e));
-        }
-
-        return summation.sum();
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param c
      * @param fromIndex
      * @param toIndex
      * @return
@@ -11825,6 +12000,40 @@ public final class N extends CommonUtil {
                     break;
                 }
             }
+        }
+
+        return summation.sum();
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param c
+     * @return
+     */
+    public static <T extends Number> double sumDouble(final Iterable<? extends T> c) {
+        return sumDouble(c, Fn.numToDouble());
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param <E>
+     * @param c
+     * @param func
+     * @return
+     * @throws E the e
+     */
+    public static <T, E extends Exception> double sumDouble(final Iterable<? extends T> c, final Throwables.ToDoubleFunction<? super T, E> func) throws E {
+        if (c == null) {
+            return 0D;
+        }
+
+        final Iterator<? extends T> iter = c.iterator();
+        final KahanSummation summation = new KahanSummation();
+
+        while (iter.hasNext()) {
+            summation.add(func.applyAsDouble(iter.next()));
         }
 
         return summation.sum();
@@ -11984,43 +12193,6 @@ public final class N extends CommonUtil {
      *
      * @param <T>
      * @param c
-     * @return
-     */
-    public static <T extends Number> double averageInt(final Iterable<? extends T> c) {
-        return averageInt(c, Fn.numToInt());
-    }
-
-    /**
-     * Returns {@code 0} if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
-     *
-     * @param <T>
-     * @param <E>
-     * @param c
-     * @param func
-     * @return
-     * @throws E the e
-     */
-    public static <T, E extends Exception> double averageInt(final Iterable<? extends T> c, final Throwables.ToIntFunction<? super T, E> func) throws E {
-        if (c == null) {
-            return 0D;
-        }
-
-        long sum = 0;
-        long count = 0;
-
-        for (T e : c) {
-            sum += func.applyAsInt(e);
-            count++;
-        }
-
-        return count == 0 ? 0D : ((double) sum) / count;
-    }
-
-    /**
-     * Returns {@code 0} if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
-     *
-     * @param <T>
-     * @param c
      * @param fromIndex
      * @param toIndex
      * @return
@@ -12074,6 +12246,43 @@ public final class N extends CommonUtil {
         }
 
         return ((double) sum) / (toIndex - fromIndex);
+    }
+
+    /**
+     * Returns {@code 0} if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
+     *
+     * @param <T>
+     * @param c
+     * @return
+     */
+    public static <T extends Number> double averageInt(final Iterable<? extends T> c) {
+        return averageInt(c, Fn.numToInt());
+    }
+
+    /**
+     * Returns {@code 0} if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
+     *
+     * @param <T>
+     * @param <E>
+     * @param c
+     * @param func
+     * @return
+     * @throws E the e
+     */
+    public static <T, E extends Exception> double averageInt(final Iterable<? extends T> c, final Throwables.ToIntFunction<? super T, E> func) throws E {
+        if (c == null) {
+            return 0D;
+        }
+
+        long sum = 0;
+        long count = 0;
+
+        for (T e : c) {
+            sum += func.applyAsInt(e);
+            count++;
+        }
+
+        return count == 0 ? 0D : ((double) sum) / count;
     }
 
     /**
@@ -12146,6 +12355,42 @@ public final class N extends CommonUtil {
      *
      * @param <T>
      * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @return
+     */
+    public static <T extends Number> double averageLong(final Collection<? extends T> c, final int fromIndex, final int toIndex) {
+        return averageLong(c, fromIndex, toIndex, Fn.numToLong());
+    }
+
+    /**
+     * Returns {@code 0} if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
+     *
+     * @param <T>
+     * @param <E>
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @param func
+     * @return
+     * @throws E the e
+     */
+    public static <T, E extends Exception> double averageLong(final Collection<? extends T> c, final int fromIndex, final int toIndex,
+            final Throwables.ToLongFunction<? super T, E> func) throws E {
+        checkFromToIndex(fromIndex, toIndex, size(c));
+
+        if (fromIndex == toIndex) {
+            return 0d;
+        }
+
+        return ((double) sumLong(c, fromIndex, toIndex, func)) / (toIndex - fromIndex);
+    }
+
+    /**
+     * Returns {@code 0} if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
+     *
+     * @param <T>
+     * @param c
      * @return
      */
     public static <T extends Number> double averageLong(final Iterable<? extends T> c) {
@@ -12176,42 +12421,6 @@ public final class N extends CommonUtil {
         }
 
         return count == 0 ? 0D : ((double) sum) / count;
-    }
-
-    /**
-     * Returns {@code 0} if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
-     *
-     * @param <T>
-     * @param c
-     * @param fromIndex
-     * @param toIndex
-     * @return
-     */
-    public static <T extends Number> double averageLong(final Collection<? extends T> c, final int fromIndex, final int toIndex) {
-        return averageLong(c, fromIndex, toIndex, Fn.numToLong());
-    }
-
-    /**
-     * Returns {@code 0} if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
-     *
-     * @param <T>
-     * @param <E>
-     * @param c
-     * @param fromIndex
-     * @param toIndex
-     * @param func
-     * @return
-     * @throws E the e
-     */
-    public static <T, E extends Exception> double averageLong(final Collection<? extends T> c, final int fromIndex, final int toIndex,
-            final Throwables.ToLongFunction<? super T, E> func) throws E {
-        checkFromToIndex(fromIndex, toIndex, size(c));
-
-        if (fromIndex == toIndex) {
-            return 0d;
-        }
-
-        return ((double) sumLong(c, fromIndex, toIndex, func)) / (toIndex - fromIndex);
     }
 
     /**
@@ -12287,37 +12496,6 @@ public final class N extends CommonUtil {
      *
      * @param <T>
      * @param c
-     * @return
-     * @see Iterables#averageDouble(Collection)
-     */
-    public static <T extends Number> double averageDouble(final Iterable<? extends T> c) {
-        return averageDouble(c, Fn.numToDouble());
-    }
-
-    /**
-     * Returns {@code 0} if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
-     *
-     * @param <T>
-     * @param <E>
-     * @param c
-     * @param func
-     * @return
-     * @throws E the e
-     * @see Iterables#averageDouble(Collection, Throwables.ToDoubleFunction)
-     */
-    public static <T, E extends Exception> double averageDouble(final Iterable<? extends T> c, final Throwables.ToDoubleFunction<? super T, E> func) throws E {
-        if (c == null) {
-            return 0d;
-        }
-
-        return Iterables.averageDouble(c, func).orElseZero();
-    }
-
-    /**
-     * Returns {@code 0} if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
-     *
-     * @param <T>
-     * @param c
      * @param fromIndex
      * @param toIndex
      * @return
@@ -12348,6 +12526,37 @@ public final class N extends CommonUtil {
         }
 
         return Iterables.averageDouble(c, fromIndex, toIndex, func).orElseZero();
+    }
+
+    /**
+     * Returns {@code 0} if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
+     *
+     * @param <T>
+     * @param c
+     * @return
+     * @see Iterables#averageDouble(Collection)
+     */
+    public static <T extends Number> double averageDouble(final Iterable<? extends T> c) {
+        return averageDouble(c, Fn.numToDouble());
+    }
+
+    /**
+     * Returns {@code 0} if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
+     *
+     * @param <T>
+     * @param <E>
+     * @param c
+     * @param func
+     * @return
+     * @throws E the e
+     * @see Iterables#averageDouble(Collection, Throwables.ToDoubleFunction)
+     */
+    public static <T, E extends Exception> double averageDouble(final Iterable<? extends T> c, final Throwables.ToDoubleFunction<? super T, E> func) throws E {
+        if (c == null) {
+            return 0d;
+        }
+
+        return Iterables.averageDouble(c, func).orElseZero();
     }
 
     /**
@@ -13043,53 +13252,6 @@ public final class N extends CommonUtil {
      *
      * @param <T>
      * @param c
-     * @return
-     * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
-     * @see Iterables#min(Collection)
-     */
-    public static <T extends Comparable<? super T>> T min(final Iterable<? extends T> c) throws IllegalArgumentException {
-        return (T) min(c, NULL_MAX_COMPARATOR);
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param c
-     * @param cmp
-     * @return
-     * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
-     * @see Iterables#min(Collection, Comparator)
-     */
-    public static <T> T min(final Iterable<? extends T> c, Comparator<? super T> cmp) throws IllegalArgumentException {
-        if (c instanceof Collection) {
-            final Collection<T> coll = (Collection<T>) c;
-            return min(coll, 0, coll.size(), cmp);
-        }
-
-        final Iterator<? extends T> iter = Iterables.checkNotNullOrEmpty(c, "The spcified collection can not be null or empty"); //NOSONAR
-
-        T candidate = iter.next();
-        T e = null;
-
-        while (iter.hasNext()) {
-            e = iter.next();
-
-            if (cmp.compare(e, candidate) < 0) {
-                candidate = e;
-            }
-
-            if (candidate == null && cmp == NULL_MIN_COMPARATOR) {
-                return null;
-            }
-        }
-
-        return candidate;
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param c
      * @param fromIndex
      * @param toIndex
      * @return
@@ -13170,6 +13332,53 @@ public final class N extends CommonUtil {
     /**
      *
      * @param <T>
+     * @param c
+     * @return
+     * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
+     * @see Iterables#min(Collection)
+     */
+    public static <T extends Comparable<? super T>> T min(final Iterable<? extends T> c) throws IllegalArgumentException {
+        return (T) min(c, NULL_MAX_COMPARATOR);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param c
+     * @param cmp
+     * @return
+     * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
+     * @see Iterables#min(Collection, Comparator)
+     */
+    public static <T> T min(final Iterable<? extends T> c, Comparator<? super T> cmp) throws IllegalArgumentException {
+        if (c instanceof Collection) {
+            final Collection<T> coll = (Collection<T>) c;
+            return min(coll, 0, coll.size(), cmp);
+        }
+
+        final Iterator<? extends T> iter = Iterables.iterateNonEmpty(c, "The spcified Collection/Iterable can not be null or empty"); //NOSONAR
+
+        T candidate = iter.next();
+        T e = null;
+
+        while (iter.hasNext()) {
+            e = iter.next();
+
+            if (cmp.compare(e, candidate) < 0) {
+                candidate = e;
+            }
+
+            if (candidate == null && cmp == NULL_MIN_COMPARATOR) {
+                return null;
+            }
+        }
+
+        return candidate;
+    }
+
+    /**
+     *
+     * @param <T>
      * @param a
      * @return
      */
@@ -13218,7 +13427,7 @@ public final class N extends CommonUtil {
      * @param c
      * @return
      */
-    public static <T extends Comparable<? super T>> List<T> minAll(final Iterable<T> c) {
+    public static <T extends Comparable<? super T>> List<T> minAll(final Iterable<? extends T> c) {
         return minAll(c, NULL_MAX_COMPARATOR);
     }
 
@@ -13229,7 +13438,7 @@ public final class N extends CommonUtil {
      * @param cmp
      * @return
      */
-    public static <T> List<T> minAll(final Iterable<T> c, Comparator<? super T> cmp) {
+    public static <T> List<T> minAll(final Iterable<? extends T> c, Comparator<? super T> cmp) {
         if (c == null) {
             return new ArrayList<>();
         }
@@ -13617,6 +13826,7 @@ public final class N extends CommonUtil {
      * @param a
      * @return
      * @throws IllegalArgumentException if {@code a} is null or empty.
+     * @see Iterables#minMax(Comparable[])
      */
     public static <T extends Comparable<? super T>> Pair<T, T> minMax(final T[] a) throws IllegalArgumentException {
         return minMax(a, NULL_MIN_COMPARATOR);
@@ -13629,6 +13839,7 @@ public final class N extends CommonUtil {
      * @param cmp
      * @return
      * @throws IllegalArgumentException if {@code a} is null or empty.
+     * @see Iterables#minMax(Object[], Comparator)
      */
     public static <T> Pair<T, T> minMax(final T[] a, Comparator<? super T> cmp) throws IllegalArgumentException {
         checkArgNotNullOrEmpty(a, "The spcified array can not be null or empty");
@@ -13662,6 +13873,7 @@ public final class N extends CommonUtil {
      * @param c
      * @return
      * @throws IllegalArgumentException if {@code c} is null or empty.
+     * @see Iterables#minMax(Iterable)
      */
     public static <T extends Comparable<? super T>> Pair<T, T> minMax(final Iterable<? extends T> c) throws IllegalArgumentException {
         return minMax(c, NULL_MIN_COMPARATOR);
@@ -13674,6 +13886,7 @@ public final class N extends CommonUtil {
      * @param cmp
      * @return
      * @throws IllegalArgumentException if {@code c} is null or empty.
+     * @see Iterables#minMax(Iterable, Comparator)
      */
     public static <T> Pair<T, T> minMax(final Iterable<? extends T> c, Comparator<? super T> cmp) throws IllegalArgumentException {
         checkArgNotNull(c, "The spcified iterable can not be null or empty");
@@ -14343,7 +14556,7 @@ public final class N extends CommonUtil {
             return max(coll, 0, coll.size(), cmp);
         }
 
-        final Iterator<? extends T> iter = Iterables.checkNotNullOrEmpty(c, "The spcified collection can not be null or empty");
+        final Iterator<? extends T> iter = Iterables.iterateNonEmpty(c, "The spcified Collection/Iterable can not be null or empty");
 
         T candidate = iter.next();
         T e = null;
@@ -17914,7 +18127,7 @@ public final class N extends CommonUtil {
      * @throws E the e
      * @throws E2 the e2
      */
-    public static <T, U, E extends Exception, E2 extends Exception> void forEach(final Iterable<T> c,
+    public static <T, U, E extends Exception, E2 extends Exception> void forEach(final Iterable<? extends T> c,
             final Throwables.Function<? super T, ? extends Collection<U>, E> flatMapper, final Throwables.BiConsumer<? super T, ? super U, E2> action)
             throws E, E2 {
         checkArgNotNull(flatMapper);
@@ -18033,7 +18246,7 @@ public final class N extends CommonUtil {
      * @throws E2 the e2
      * @throws E3 the e3
      */
-    public static <T, T2, T3, E extends Exception, E2 extends Exception, E3 extends Exception> void forEach(final Iterable<T> c,
+    public static <T, T2, T3, E extends Exception, E2 extends Exception, E3 extends Exception> void forEach(final Iterable<? extends T> c,
             final Throwables.Function<? super T, ? extends Collection<T2>, E> flatMapper,
             final Throwables.Function<? super T2, ? extends Collection<T3>, E2> flatMapper2,
             final Throwables.TriConsumer<? super T, ? super T2, ? super T3, E3> action) throws E, E2, E3 {
@@ -18455,7 +18668,7 @@ public final class N extends CommonUtil {
      * @param action
      * @throws E the e
      */
-    public static <T, E extends Exception> void forEachNonNull(final Iterable<T> c, final Throwables.Consumer<? super T, E> action) throws E {
+    public static <T, E extends Exception> void forEachNonNull(final Iterable<? extends T> c, final Throwables.Consumer<? super T, E> action) throws E {
         checkArgNotNull(action);
 
         if (c == null) {
@@ -18520,7 +18733,7 @@ public final class N extends CommonUtil {
      * @throws E the e
      * @throws E2 the e2
      */
-    public static <T, U, E extends Exception, E2 extends Exception> void forEachNonNull(final Iterable<T> c,
+    public static <T, U, E extends Exception, E2 extends Exception> void forEachNonNull(final Iterable<? extends T> c,
             final Throwables.Function<? super T, ? extends Collection<U>, E> flatMapper, final Throwables.BiConsumer<? super T, ? super U, E2> action)
             throws E, E2 {
         checkArgNotNull(flatMapper);
@@ -18656,7 +18869,7 @@ public final class N extends CommonUtil {
      * @throws E2 the e2
      * @throws E3 the e3
      */
-    public static <T, T2, T3, E extends Exception, E2 extends Exception, E3 extends Exception> void forEachNonNull(final Iterable<T> c,
+    public static <T, T2, T3, E extends Exception, E2 extends Exception, E3 extends Exception> void forEachNonNull(final Iterable<? extends T> c,
             final Throwables.Function<? super T, ? extends Collection<T2>, E> flatMapper,
             final Throwables.Function<? super T2, ? extends Collection<T3>, E2> flatMapper2,
             final Throwables.TriConsumer<? super T, ? super T2, ? super T3, E3> action) throws E, E2, E3 {
@@ -21677,53 +21890,6 @@ public final class N extends CommonUtil {
     }
 
     /**
-     *
-     * @param <T>
-     * @param <R>
-     * @param <E>
-     * @param c
-     * @param func
-     * @return
-     * @throws E the e
-     */
-    public static <T, R, E extends Exception> List<R> flatMap(final Iterable<? extends T> c,
-            final Throwables.Function<? super T, ? extends Collection<? extends R>, E> func) throws E {
-        return flatMap(c, func, Factory.<R> ofList());
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param <R>
-     * @param <C>
-     * @param <E>
-     * @param c
-     * @param func
-     * @param supplier
-     * @return
-     * @throws E the e
-     */
-    public static <T, R, C extends Collection<R>, E extends Exception> C flatMap(final Iterable<? extends T> c,
-            final Throwables.Function<? super T, ? extends Collection<? extends R>, E> func, final IntFunction<? extends C> supplier) throws E {
-        checkArgNotNull(func);
-
-        if (c == null) {
-            return supplier.apply(0);
-        }
-
-        final C result = supplier.apply(initSizeForFlatMap(c));
-        Collection<? extends R> mr = null;
-
-        for (T e : c) {
-            if (notNullOrEmpty(mr = func.apply(e))) {
-                result.addAll(mr);
-            }
-        }
-
-        return result;
-    }
-
-    /**
      * Mostly it's designed for one-step operation to complete the operation in one step.
      * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
      *
@@ -21800,6 +21966,53 @@ public final class N extends CommonUtil {
         return result;
     }
 
+    /**
+     *
+     * @param <T>
+     * @param <R>
+     * @param <E>
+     * @param c
+     * @param func
+     * @return
+     * @throws E the e
+     */
+    public static <T, R, E extends Exception> List<R> flatMap(final Iterable<? extends T> c,
+            final Throwables.Function<? super T, ? extends Collection<? extends R>, E> func) throws E {
+        return flatMap(c, func, Factory.<R> ofList());
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param <R>
+     * @param <C>
+     * @param <E>
+     * @param c
+     * @param func
+     * @param supplier
+     * @return
+     * @throws E the e
+     */
+    public static <T, R, C extends Collection<R>, E extends Exception> C flatMap(final Iterable<? extends T> c,
+            final Throwables.Function<? super T, ? extends Collection<? extends R>, E> func, final IntFunction<? extends C> supplier) throws E {
+        checkArgNotNull(func);
+
+        if (c == null) {
+            return supplier.apply(0);
+        }
+
+        final C result = supplier.apply(initSizeForFlatMap(c));
+        Collection<? extends R> mr = null;
+
+        for (T e : c) {
+            if (notNullOrEmpty(mr = func.apply(e))) {
+                result.addAll(mr);
+            }
+        }
+
+        return result;
+    }
+
     //    /**
     //     *
     //     * @param <T>
@@ -21852,7 +22065,7 @@ public final class N extends CommonUtil {
      *
      *
      * @param <T>
-     * @param <T2>
+     * @param <U>
      * @param <R>
      * @param <E>
      * @param <E2>
@@ -21863,9 +22076,9 @@ public final class N extends CommonUtil {
      * @throws E the e
      * @throws E2 the e2
      */
-    public static <T, T2, R, E extends Exception, E2 extends Exception> List<R> flatMap(final T[] a,
-            final Throwables.Function<? super T, ? extends Collection<? extends T2>, E> func,
-            final Throwables.Function<? super T2, ? extends Collection<? extends R>, E2> func2) throws E, E2 {
+    public static <T, U, R, E extends Exception, E2 extends Exception> List<R> flatMap(final T[] a,
+            final Throwables.Function<? super T, ? extends Collection<? extends U>, E> func,
+            final Throwables.Function<? super U, ? extends Collection<? extends R>, E2> func2) throws E, E2 {
 
         return flatMap(a, func, func2, Factory.<R> ofList());
     }
@@ -21875,7 +22088,7 @@ public final class N extends CommonUtil {
      * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
      *
      * @param <T>
-     * @param <T2>
+     * @param <U>
      * @param <R>
      * @param <C>
      * @param <E>
@@ -21888,9 +22101,9 @@ public final class N extends CommonUtil {
      * @throws E the e
      * @throws E2 the e2
      */
-    public static <T, T2, R, C extends Collection<R>, E extends Exception, E2 extends Exception> C flatMap(final T[] a,
-            final Throwables.Function<? super T, ? extends Collection<? extends T2>, E> func,
-            final Throwables.Function<? super T2, ? extends Collection<? extends R>, E2> func2, final IntFunction<? extends C> supplier) throws E, E2 {
+    public static <T, U, R, C extends Collection<R>, E extends Exception, E2 extends Exception> C flatMap(final T[] a,
+            final Throwables.Function<? super T, ? extends Collection<? extends U>, E> func,
+            final Throwables.Function<? super U, ? extends Collection<? extends R>, E2> func2, final IntFunction<? extends C> supplier) throws E, E2 {
         checkArgNotNull(func);
         checkArgNotNull(func2);
 
@@ -21902,10 +22115,10 @@ public final class N extends CommonUtil {
         final C result = supplier.apply(len);
 
         for (T e : a) {
-            final Collection<? extends T2> c1 = func.apply(e);
+            final Collection<? extends U> c1 = func.apply(e);
 
             if (notNullOrEmpty(c1)) {
-                for (T2 e2 : c1) {
+                for (U e2 : c1) {
                     final Collection<? extends R> c2 = func2.apply(e2);
 
                     if (notNullOrEmpty(c2)) {
@@ -21922,7 +22135,7 @@ public final class N extends CommonUtil {
      *
      *
      * @param <T>
-     * @param <T2>
+     * @param <U>
      * @param <R>
      * @param <E>
      * @param <E2>
@@ -21933,9 +22146,9 @@ public final class N extends CommonUtil {
      * @throws E the e
      * @throws E2 the e2
      */
-    public static <T, T2, R, E extends Exception, E2 extends Exception> List<R> flatMap(final Iterable<? extends T> c,
-            final Throwables.Function<? super T, ? extends Collection<? extends T2>, E> func,
-            final Throwables.Function<? super T2, ? extends Collection<? extends R>, E2> func2) throws E, E2 {
+    public static <T, U, R, E extends Exception, E2 extends Exception> List<R> flatMap(final Iterable<? extends T> c,
+            final Throwables.Function<? super T, ? extends Collection<? extends U>, E> func,
+            final Throwables.Function<? super U, ? extends Collection<? extends R>, E2> func2) throws E, E2 {
 
         return flatMap(c, func, func2, Factory.<R> ofList());
     }
@@ -21945,7 +22158,7 @@ public final class N extends CommonUtil {
      * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
      *
      * @param <T>
-     * @param <T2>
+     * @param <U>
      * @param <R>
      * @param <C>
      * @param <E>
@@ -21958,9 +22171,9 @@ public final class N extends CommonUtil {
      * @throws E the e
      * @throws E2 the e2
      */
-    public static <T, T2, R, C extends Collection<R>, E extends Exception, E2 extends Exception> C flatMap(final Iterable<? extends T> c,
-            final Throwables.Function<? super T, ? extends Collection<? extends T2>, E> func,
-            final Throwables.Function<? super T2, ? extends Collection<? extends R>, E2> func2, final IntFunction<? extends C> supplier) throws E, E2 {
+    public static <T, U, R, C extends Collection<R>, E extends Exception, E2 extends Exception> C flatMap(final Iterable<? extends T> c,
+            final Throwables.Function<? super T, ? extends Collection<? extends U>, E> func,
+            final Throwables.Function<? super U, ? extends Collection<? extends R>, E2> func2, final IntFunction<? extends C> supplier) throws E, E2 {
         checkArgNotNull(func);
         checkArgNotNull(func2);
 
@@ -21971,10 +22184,10 @@ public final class N extends CommonUtil {
         final C result = supplier.apply(initSizeForFlatMap(c));
 
         for (T e : c) {
-            final Collection<? extends T2> c1 = func.apply(e);
+            final Collection<? extends U> c1 = func.apply(e);
 
             if (notNullOrEmpty(c1)) {
-                for (T2 e2 : c1) {
+                for (U e2 : c1) {
                     final Collection<? extends R> c2 = func2.apply(e2);
 
                     if (notNullOrEmpty(c2)) {
@@ -22088,53 +22301,6 @@ public final class N extends CommonUtil {
     }
 
     /**
-     *
-     * @param <T>
-     * @param <R>
-     * @param <E>
-     * @param c
-     * @param func
-     * @return
-     * @throws E the e
-     */
-    public static <T, R, E extends Exception> List<R> flatmap(final Iterable<? extends T> c, final Throwables.Function<? super T, ? extends R[], E> func) //NOSONAR
-            throws E {
-        return flatmap(c, func, Factory.<R> ofList());
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param <R>
-     * @param <C>
-     * @param <E>
-     * @param c
-     * @param func
-     * @param supplier
-     * @return
-     * @throws E the e
-     */
-    public static <T, R, C extends Collection<R>, E extends Exception> C flatmap(final Iterable<? extends T> c, //NOSONAR
-            final Throwables.Function<? super T, ? extends R[], E> func, final IntFunction<? extends C> supplier) throws E {
-        checkArgNotNull(func);
-
-        if (c == null) {
-            return supplier.apply(0);
-        }
-
-        final C result = supplier.apply(initSizeForFlatMap(c));
-        R[] mr = null;
-
-        for (T e : c) {
-            if (notNullOrEmpty(mr = func.apply(e))) {
-                result.addAll(Arrays.asList(mr));
-            }
-        }
-
-        return result;
-    }
-
-    /**
      * Mostly it's designed for one-step operation to complete the operation in one step.
      * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
      *
@@ -22205,6 +22371,53 @@ public final class N extends CommonUtil {
                 if (idx >= toIndex) {
                     break;
                 }
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param <R>
+     * @param <E>
+     * @param c
+     * @param func
+     * @return
+     * @throws E the e
+     */
+    public static <T, R, E extends Exception> List<R> flatmap(final Iterable<? extends T> c, final Throwables.Function<? super T, ? extends R[], E> func) //NOSONAR
+            throws E {
+        return flatmap(c, func, Factory.<R> ofList());
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param <R>
+     * @param <C>
+     * @param <E>
+     * @param c
+     * @param func
+     * @param supplier
+     * @return
+     * @throws E the e
+     */
+    public static <T, R, C extends Collection<R>, E extends Exception> C flatmap(final Iterable<? extends T> c, //NOSONAR
+            final Throwables.Function<? super T, ? extends R[], E> func, final IntFunction<? extends C> supplier) throws E {
+        checkArgNotNull(func);
+
+        if (c == null) {
+            return supplier.apply(0);
+        }
+
+        final C result = supplier.apply(initSizeForFlatMap(c));
+        R[] mr = null;
+
+        for (T e : c) {
+            if (notNullOrEmpty(mr = func.apply(e))) {
+                result.addAll(Arrays.asList(mr));
             }
         }
 
@@ -22899,56 +23112,6 @@ public final class N extends CommonUtil {
      * @param <T>
      * @param <E>
      * @param c
-     * @param keyMapper don't change value of the input parameter.
-     * @return
-     * @throws E the e
-     */
-    public static <T, E extends Exception> List<T> distinctBy(final Iterable<? extends T> c, final Throwables.Function<? super T, ?, E> keyMapper) throws E {
-        return distinctBy(c, keyMapper, Suppliers.ofList());
-    }
-
-    /**
-     * Distinct by the value mapped from <code>keyMapper</code>.
-     *
-     * Mostly it's designed for one-step operation to complete the operation in one step.
-     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
-     *
-     * @param <T>
-     * @param <C>
-     * @param <E>
-     * @param c
-     * @param keyMapper don't change value of the input parameter.
-     * @param supplier
-     * @return
-     * @throws E the e
-     */
-    public static <T, C extends Collection<T>, E extends Exception> C distinctBy(final Iterable<? extends T> c,
-            final Throwables.Function<? super T, ?, E> keyMapper, final Supplier<C> supplier) throws E {
-        if (c == null) {
-            return supplier.get();
-        }
-
-        final C result = supplier.get();
-        final Set<Object> set = newHashSet(c instanceof Collection ? ((Collection<T>) c).size() / 2 + 1 : 0);
-
-        for (T e : c) {
-            if (set.add(hashKey(keyMapper.apply(e)))) {
-                result.add(e);
-            }
-        }
-
-        return result;
-    }
-
-    /**
-     * Distinct by the value mapped from <code>keyMapper</code>.
-     *
-     * Mostly it's designed for one-step operation to complete the operation in one step.
-     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
-     *
-     * @param <T>
-     * @param <E>
-     * @param c
      * @param fromIndex
      * @param toIndex
      * @param keyMapper don't change value of the input parameter.
@@ -22991,6 +23154,56 @@ public final class N extends CommonUtil {
                 if (set.add(hashKey(keyMapper.apply(e)))) {
                     result.add(e);
                 }
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Distinct by the value mapped from <code>keyMapper</code>.
+     *
+     * Mostly it's designed for one-step operation to complete the operation in one step.
+     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
+     *
+     * @param <T>
+     * @param <E>
+     * @param c
+     * @param keyMapper don't change value of the input parameter.
+     * @return
+     * @throws E the e
+     */
+    public static <T, E extends Exception> List<T> distinctBy(final Iterable<? extends T> c, final Throwables.Function<? super T, ?, E> keyMapper) throws E {
+        return distinctBy(c, keyMapper, Suppliers.ofList());
+    }
+
+    /**
+     * Distinct by the value mapped from <code>keyMapper</code>.
+     *
+     * Mostly it's designed for one-step operation to complete the operation in one step.
+     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
+     *
+     * @param <T>
+     * @param <C>
+     * @param <E>
+     * @param c
+     * @param keyMapper don't change value of the input parameter.
+     * @param supplier
+     * @return
+     * @throws E the e
+     */
+    public static <T, C extends Collection<T>, E extends Exception> C distinctBy(final Iterable<? extends T> c,
+            final Throwables.Function<? super T, ?, E> keyMapper, final Supplier<C> supplier) throws E {
+        if (c == null) {
+            return supplier.get();
+        }
+
+        final C result = supplier.get();
+        final Set<Object> set = newHashSet(c instanceof Collection ? ((Collection<T>) c).size() / 2 + 1 : 0);
+
+        for (T e : c) {
+            if (set.add(hashKey(keyMapper.apply(e)))) {
+                result.add(e);
             }
         }
 
@@ -26695,7 +26908,7 @@ public final class N extends CommonUtil {
             throw ExceptionUtil.toRuntimeException(e);
         } finally {
             if (hasException) {
-                if (f2.isDone() == false) {
+                if (f2.isDone() == false) { // NOSONAR
                     f2.cancel(false);
                 }
             }
@@ -26922,7 +27135,7 @@ public final class N extends CommonUtil {
             throw ExceptionUtil.toRuntimeException(e);
         } finally {
             if (hasException) {
-                if (f2.isDone() == false) {
+                if (f2.isDone() == false) { // NOSONAR
                     f2.cancel(false);
                 }
             }
@@ -27198,7 +27411,7 @@ public final class N extends CommonUtil {
      * @throws E
      * @throws E2
      */
-    public static <T, E extends Exception, E2 extends Exception> void runByBatch(final Iterable<T> iter, final int batchSize,
+    public static <T, E extends Exception, E2 extends Exception> void runByBatch(final Iterable<? extends T> iter, final int batchSize,
             final Throwables.Consumer<? super T, E> elementConsumer, final Throwables.Runnable<E2> batchAction) throws E, E2 {
         N.checkArgPositive(batchSize, "batchSize");
         N.checkArgNotNull(elementConsumer, "elementConsumer");
@@ -27237,7 +27450,7 @@ public final class N extends CommonUtil {
      * @throws E
      * @throws E2
      */
-    public static <T, E extends Exception, E2 extends Exception> void runByBatch(final Iterator<T> iter, final int batchSize,
+    public static <T, E extends Exception, E2 extends Exception> void runByBatch(final Iterator<? extends T> iter, final int batchSize,
             final Throwables.Consumer<? super T, E> elementConsumer, final Throwables.Runnable<E2> batchAction) throws E, E2 {
         N.checkArgPositive(batchSize, "batchSize");
         N.checkArgNotNull(elementConsumer, "elementConsumer");
@@ -27317,7 +27530,7 @@ public final class N extends CommonUtil {
      * @throws E
      * @throws E2
      */
-    public static <T, R, E extends Exception, E2 extends Exception> List<R> callByBatch(final Iterable<T> iter, final int batchSize,
+    public static <T, R, E extends Exception, E2 extends Exception> List<R> callByBatch(final Iterable<? extends T> iter, final int batchSize,
             final Throwables.Consumer<? super T, E> elementConsumer, final Throwables.Callable<? extends R, E2> batchAction) throws E, E2 {
         N.checkArgPositive(batchSize, "batchSize");
         N.checkArgNotNull(elementConsumer, "elementConsumer");
@@ -27359,7 +27572,7 @@ public final class N extends CommonUtil {
      * @throws E
      * @throws E2
      */
-    public static <T, R, E extends Exception, E2 extends Exception> List<R> callByBatch(final Iterator<T> iter, final int batchSize,
+    public static <T, R, E extends Exception, E2 extends Exception> List<R> callByBatch(final Iterator<? extends T> iter, final int batchSize,
             final Throwables.Consumer<? super T, E> elementConsumer, final Throwables.Callable<? extends R, E2> batchAction) throws E, E2 {
         N.checkArgPositive(batchSize, "batchSize");
         N.checkArgNotNull(elementConsumer, "elementConsumer");

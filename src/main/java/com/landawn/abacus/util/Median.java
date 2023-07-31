@@ -588,7 +588,7 @@ public final class Median {
      * @param c
      * @return
      */
-    public static <T extends Comparable<? super T>> Pair<T, Nullable<T>> of(final Collection<T> c) {
+    public static <T extends Comparable<? super T>> Pair<T, Nullable<T>> of(final Collection<? extends T> c) {
         return of(c, Comparators.naturalOrder());
     }
 
@@ -600,7 +600,7 @@ public final class Median {
      * @return
      */
     @SuppressWarnings("rawtypes")
-    public static <T> Pair<T, Nullable<T>> of(final Collection<T> c, Comparator<? super T> cmp) {
+    public static <T> Pair<T, Nullable<T>> of(final Collection<? extends T> c, Comparator<? super T> cmp) {
         if (N.isNullOrEmpty(c)) {
             throw new IllegalArgumentException("The size of collection can't be null or empty");
         }
@@ -612,7 +612,7 @@ public final class Median {
         if (len == 1) {
             return Pair.of(c.iterator().next(), Nullable.<T> empty());
         } else if (len == 2) {
-            final Iterator<T> iter = c.iterator();
+            final Iterator<? extends T> iter = c.iterator();
             final T first = iter.next();
             final T second = iter.next();
             return N.compare(first, second, cmp) <= 0 ? Pair.of(first, Nullable.of(second)) : Pair.of(second, Nullable.of(first));

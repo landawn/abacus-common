@@ -29,6 +29,7 @@ import com.landawn.abacus.util.stream.ShortStream;
  * @author Haiyang Li
  * @since 0.8
  */
+@SuppressWarnings({ "java:S6548" })
 public abstract class ShortIterator extends ImmutableIterator<Short> {
 
     public static final ShortIterator EMPTY = new ShortIterator() {
@@ -44,9 +45,9 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
     };
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public static ShortIterator empty() {//NOSONAR
         return EMPTY;
@@ -253,17 +254,17 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public abstract short nextShort();
 
     /**
-     * 
      *
-     * @param n 
-     * @return 
+     *
+     * @param n
+     * @return
      */
     public ShortIterator skip(final long n) {
         N.checkArgNotNegative(n, "n");
@@ -308,10 +309,10 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
     }
 
     /**
-     * 
      *
-     * @param count 
-     * @return 
+     *
+     * @param count
+     * @return
      */
     public ShortIterator limit(final long count) {
         N.checkArgNotNegative(count, "count");
@@ -343,10 +344,10 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
     }
 
     /**
-     * 
      *
-     * @param predicate 
-     * @return 
+     *
+     * @param predicate
+     * @return
      */
     public ShortIterator filter(final ShortPredicate predicate) {
         N.checkArgNotNull(predicate, "predicate");
@@ -387,9 +388,9 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public OptionalShort first() {
         if (hasNext()) {
@@ -400,9 +401,9 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public OptionalShort last() {
         if (hasNext()) {
@@ -419,18 +420,18 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public short[] toArray() {
         return toList().trimToSize().array();
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public ShortList toList() {
         final ShortList list = new ShortList();
@@ -443,18 +444,18 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public ShortStream stream() {
         return ShortStream.of(this);
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Beta
     public ObjIterator<IndexedShort> indexed() {
@@ -462,10 +463,10 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
     }
 
     /**
-     * 
      *
-     * @param startIndex 
-     * @return 
+     *
+     * @param startIndex
+     * @return
      */
     @Beta
     public ObjIterator<IndexedShort> indexed(final long startIndex) {

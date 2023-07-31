@@ -81,7 +81,7 @@ import com.landawn.abacus.util.stream.Stream;
  * @author Haiyang Li
  * @since 0.8
  */
-@SuppressWarnings({ "java:S1192", "java:S1854" })
+@SuppressWarnings({ "java:S6539", "java:S1192", "java:S1854" })
 public class RowDataSet implements DataSet, Cloneable {
 
     static final char PROP_NAME_SEPARATOR = '.';
@@ -11221,6 +11221,23 @@ public class RowDataSet implements DataSet, Cloneable {
 
     /**
      *
+     * @param <R>
+     * @param <E>
+     * @param func
+     * @return
+     * @throws E the e
+     */
+    @Override
+    public <R, E extends Exception> Optional<R> applyIfNotEmpty(Throwables.Function<? super DataSet, ? extends R, E> func) throws E {
+        if (size() > 0) {
+            return Optional.ofNullable(func.apply(this));
+        } else {
+            return Optional.empty();
+        }
+    }
+
+    /**
+     *
      * @param <E>
      * @param action
      * @throws E the e
@@ -11228,6 +11245,19 @@ public class RowDataSet implements DataSet, Cloneable {
     @Override
     public <E extends Exception> void accept(Throwables.Consumer<? super DataSet, E> action) throws E {
         action.accept(this);
+    }
+
+    /**
+     *
+     * @param <E>
+     * @param action
+     * @throws E the e
+     */
+    @Override
+    public <E extends Exception> void acceptIfNotEmpty(Throwables.Consumer<? super DataSet, E> action) throws E {
+        if (size() > 0) {
+            action.accept(this);
+        }
     }
 
     /**

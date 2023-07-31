@@ -4136,11 +4136,29 @@ public interface DataSet {
 
     /**
      *
+     * @param <R>
+     * @param <E>
+     * @param func
+     * @return
+     * @throws E the e
+     */
+    <R, E extends Exception> Optional<R> applyIfNotEmpty(Throwables.Function<? super DataSet, ? extends R, E> func) throws E;
+
+    /**
+     *
      * @param <E>
      * @param action
      * @throws E the e
      */
     <E extends Exception> void accept(Throwables.Consumer<? super DataSet, E> action) throws E;
+
+    /**
+     *
+     * @param <E>
+     * @param action
+     * @throws E the e
+     */
+    <E extends Exception> void acceptIfNotEmpty(Throwables.Consumer<? super DataSet, E> action) throws E;
 
     /**
      * Method freeze.

@@ -37,6 +37,7 @@ import com.landawn.abacus.util.stream.Stream;
  * @param <B>
  * @since 1.2.10
  */
+@SuppressWarnings({ "java:S6548" })
 public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
 
     @SuppressWarnings("rawtypes")
@@ -601,10 +602,10 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
     };
 
     /**
-     * 
      *
-     * @param n 
-     * @return 
+     *
+     * @param n
+     * @return
      */
     public BiIterator<A, B> skip(final long n) {
         N.checkArgNotNegative(n, "n");
@@ -678,10 +679,10 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
     }
 
     /**
-     * 
      *
-     * @param count 
-     * @return 
+     *
+     * @param count
+     * @return
      */
     public BiIterator<A, B> limit(final long count) {
         N.checkArgNotNegative(count, "count");
@@ -740,10 +741,10 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
     }
 
     /**
-     * 
      *
-     * @param predicate 
-     * @return 
+     *
+     * @param predicate
+     * @return
      */
     public BiIterator<A, B> filter(final BiPredicate<? super A, ? super B> predicate) {
         N.checkArgNotNull(predicate, "predicate");
@@ -846,9 +847,9 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
     public abstract <R> ObjIterator<R> map(final BiFunction<? super A, ? super B, ? extends R> mapper);
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public Optional<Pair<A, B>> first() {
         if (hasNext()) {
@@ -859,9 +860,9 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public Optional<Pair<A, B>> last() {
         if (hasNext()) {
@@ -889,9 +890,9 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public Pair<A, B>[] toArray() {
         return toArray(new Pair[0]);
@@ -910,9 +911,9 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public List<Pair<A, B>> toList() {
         return toCollection(Suppliers.<Pair<A, B>> ofList());

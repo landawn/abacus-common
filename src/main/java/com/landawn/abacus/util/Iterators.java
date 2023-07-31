@@ -91,6 +91,36 @@ public final class Iterators {
     /**
      *
      * @param iter
+     * @param valueToFind
+     * @return
+     */
+    public static long occurrencesOf(final Iterator<?> iter, final Object valueToFind) {
+        if (iter == null) {
+            return 0;
+        }
+
+        long occurrences = 0;
+
+        if (valueToFind == null) {
+            while (iter.hasNext()) {
+                if (iter.next() == null) {
+                    occurrences++;
+                }
+            }
+        } else {
+            while (iter.hasNext()) {
+                if (N.equals(iter.next(), valueToFind)) {
+                    occurrences++;
+                }
+            }
+        }
+
+        return occurrences;
+    }
+
+    /**
+     *
+     * @param iter
      * @return
      */
     public static long count(final Iterator<?> iter) {
@@ -1437,23 +1467,6 @@ public final class Iterators {
      * @param zipFunction
      * @return
      */
-    public static <A, B, R> ObjIterator<R> zip(final Iterable<A> a, final Iterable<B> b, final BiFunction<? super A, ? super B, ? extends R> zipFunction) {
-        final Iterator<A> iterA = N.iterate(a);
-        final Iterator<B> iterB = N.iterate(b);
-
-        return zip(iterA, iterB, zipFunction);
-    }
-
-    /**
-     *
-     * @param <A>
-     * @param <B>
-     * @param <R>
-     * @param a
-     * @param b
-     * @param zipFunction
-     * @return
-     */
     public static <A, B, R> ObjIterator<R> zip(final Iterator<A> a, final Iterator<B> b, final BiFunction<? super A, ? super B, ? extends R> zipFunction) {
         N.checkArgNotNull(zipFunction);
 
@@ -1477,21 +1490,17 @@ public final class Iterators {
      *
      * @param <A>
      * @param <B>
-     * @param <C>
      * @param <R>
      * @param a
      * @param b
-     * @param c
      * @param zipFunction
      * @return
      */
-    public static <A, B, C, R> ObjIterator<R> zip(final Iterable<A> a, final Iterable<B> b, final Iterable<C> c,
-            final TriFunction<? super A, ? super B, ? super C, ? extends R> zipFunction) {
+    public static <A, B, R> ObjIterator<R> zip(final Iterable<A> a, final Iterable<B> b, final BiFunction<? super A, ? super B, ? extends R> zipFunction) {
         final Iterator<A> iterA = N.iterate(a);
         final Iterator<B> iterB = N.iterate(b);
-        final Iterator<C> iterC = N.iterate(c);
 
-        return zip(iterA, iterB, iterC, zipFunction);
+        return zip(iterA, iterB, zipFunction);
     }
 
     /**
@@ -1531,20 +1540,21 @@ public final class Iterators {
      *
      * @param <A>
      * @param <B>
+     * @param <C>
      * @param <R>
      * @param a
      * @param b
-     * @param valueForNoneA
-     * @param valueForNoneB
+     * @param c
      * @param zipFunction
      * @return
      */
-    public static <A, B, R> ObjIterator<R> zip(final Iterable<A> a, final Iterable<B> b, final A valueForNoneA, final B valueForNoneB,
-            final BiFunction<? super A, ? super B, ? extends R> zipFunction) {
+    public static <A, B, C, R> ObjIterator<R> zip(final Iterable<A> a, final Iterable<B> b, final Iterable<C> c,
+            final TriFunction<? super A, ? super B, ? super C, ? extends R> zipFunction) {
         final Iterator<A> iterA = N.iterate(a);
         final Iterator<B> iterB = N.iterate(b);
+        final Iterator<C> iterC = N.iterate(c);
 
-        return zip(iterA, iterB, valueForNoneA, valueForNoneB, zipFunction);
+        return zip(iterA, iterB, iterC, zipFunction);
     }
 
     /**
@@ -1587,24 +1597,20 @@ public final class Iterators {
      *
      * @param <A>
      * @param <B>
-     * @param <C>
      * @param <R>
      * @param a
      * @param b
-     * @param c
      * @param valueForNoneA
      * @param valueForNoneB
-     * @param valueForNoneC
      * @param zipFunction
      * @return
      */
-    public static <A, B, C, R> ObjIterator<R> zip(final Iterable<A> a, final Iterable<B> b, final Iterable<C> c, final A valueForNoneA, final B valueForNoneB,
-            final C valueForNoneC, final TriFunction<? super A, ? super B, ? super C, ? extends R> zipFunction) {
+    public static <A, B, R> ObjIterator<R> zip(final Iterable<A> a, final Iterable<B> b, final A valueForNoneA, final B valueForNoneB,
+            final BiFunction<? super A, ? super B, ? extends R> zipFunction) {
         final Iterator<A> iterA = N.iterate(a);
         final Iterator<B> iterB = N.iterate(b);
-        final Iterator<C> iterC = N.iterate(c);
 
-        return zip(iterA, iterB, iterC, valueForNoneA, valueForNoneB, valueForNoneC, zipFunction);
+        return zip(iterA, iterB, valueForNoneA, valueForNoneB, zipFunction);
     }
 
     /**
@@ -1645,6 +1651,30 @@ public final class Iterators {
                 }
             }
         };
+    }
+
+    /**
+     *
+     * @param <A>
+     * @param <B>
+     * @param <C>
+     * @param <R>
+     * @param a
+     * @param b
+     * @param c
+     * @param valueForNoneA
+     * @param valueForNoneB
+     * @param valueForNoneC
+     * @param zipFunction
+     * @return
+     */
+    public static <A, B, C, R> ObjIterator<R> zip(final Iterable<A> a, final Iterable<B> b, final Iterable<C> c, final A valueForNoneA, final B valueForNoneB,
+            final C valueForNoneC, final TriFunction<? super A, ? super B, ? super C, ? extends R> zipFunction) {
+        final Iterator<A> iterA = N.iterate(a);
+        final Iterator<B> iterB = N.iterate(b);
+        final Iterator<C> iterC = N.iterate(c);
+
+        return zip(iterA, iterB, iterC, valueForNoneA, valueForNoneB, valueForNoneC, zipFunction);
     }
 
     /**
@@ -2287,7 +2317,7 @@ public final class Iterators {
      * @param mapper
      * @return
      */
-    public static <T, U> ObjIterator<U> flatMap(final Iterator<? extends T> iter, final Function<? super T, ? extends Collection<? extends U>> mapper) {
+    public static <T, U> ObjIterator<U> flatMap(final Iterator<? extends T> iter, final Function<? super T, ? extends Iterable<? extends U>> mapper) {
         N.checkArgNotNull(mapper, "mapper");
 
         if (iter == null) {
@@ -2295,7 +2325,7 @@ public final class Iterators {
         }
 
         return new ObjIterator<>() {
-            private Collection<? extends U> c = null;
+            private Iterable<? extends U> c = null;
             private Iterator<? extends U> cur = null;
 
             @Override
@@ -2303,7 +2333,7 @@ public final class Iterators {
                 if (cur == null || !cur.hasNext()) {
                     while (iter.hasNext()) {
                         c = mapper.apply(iter.next());
-                        cur = c == null || c.size() == 0 ? null : c.iterator();
+                        cur = c == null ? null : c.iterator();
 
                         if (cur != null && cur.hasNext()) {
                             break;

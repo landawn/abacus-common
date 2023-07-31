@@ -37,6 +37,7 @@ import com.landawn.abacus.util.stream.Stream;
  * @param <C>
  * @since 1.2.10
  */
+@SuppressWarnings({ "java:S6548" })
 public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B, C>> {
 
     @SuppressWarnings("rawtypes")

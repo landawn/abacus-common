@@ -110,7 +110,7 @@ import com.landawn.abacus.util.stream.Stream;
 @LazyEvaluation
 @SequentialOnly
 @com.landawn.abacus.annotation.Immutable
-@SuppressWarnings("java:S1192")
+@SuppressWarnings({ "java:S6539", "java:S1192" })
 public class ExceptionalStream<T, E extends Exception> implements Closeable, Immutable {
 
     static final Logger logger = LoggerFactory.getLogger(ExceptionalStream.class);
@@ -5523,7 +5523,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
         try {
             if (elements.hasNext()) {
-                return Optional.of(func.apply(this));
+                return Optional.ofNullable(func.apply(this));
             } else {
                 return Optional.empty();
             }

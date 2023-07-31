@@ -127,7 +127,7 @@ public abstract class Observer<T> implements Immutable {
      * @param c
      * @return
      */
-    public static <T> Observer<T> of(final Collection<T> c) {
+    public static <T> Observer<T> of(final Collection<? extends T> c) {
         return of(N.isNullOrEmpty(c) ? ObjIterator.<T> empty() : c.iterator());
     }
 
@@ -137,7 +137,7 @@ public abstract class Observer<T> implements Immutable {
      * @param iter
      * @return
      */
-    public static <T> Observer<T> of(final Iterator<T> iter) {
+    public static <T> Observer<T> of(final Iterator<? extends T> iter) {
         N.checkArgNotNull(iter, "iterator");
 
         return new IteratorObserver<>(iter);
@@ -577,9 +577,9 @@ public abstract class Observer<T> implements Immutable {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public Observer<T> distinct() {
         dispatcher.append(new Dispatcher<>() {
@@ -1082,7 +1082,7 @@ public abstract class Observer<T> implements Immutable {
     static final class IteratorObserver<T> extends ObserverBase<T> {
 
         /** The iter. */
-        private final Iterator<T> iter;
+        private final Iterator<? extends T> iter;
 
         /**
          * This method is called when information about an Iterator
@@ -1091,7 +1091,7 @@ public abstract class Observer<T> implements Immutable {
          *
          * @param iter
          */
-        IteratorObserver(final Iterator<T> iter) {
+        IteratorObserver(final Iterator<? extends T> iter) {
             this.iter = iter;
         }
 

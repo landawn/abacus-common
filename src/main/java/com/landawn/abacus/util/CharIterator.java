@@ -28,6 +28,7 @@ import com.landawn.abacus.util.stream.CharStream;
  * @author Haiyang Li
  * @since 0.8
  */
+@SuppressWarnings({ "java:S6548" })
 public abstract class CharIterator extends ImmutableIterator<Character> {
 
     public static final CharIterator EMPTY = new CharIterator() {
@@ -43,9 +44,9 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
     };
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public static CharIterator empty() {//NOSONAR
         return EMPTY;
@@ -252,16 +253,16 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public abstract char nextChar();
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public OptionalChar first() {
         if (hasNext()) {
@@ -272,9 +273,9 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public OptionalChar last() {
         if (hasNext()) {
@@ -291,18 +292,18 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public char[] toArray() {
         return toList().trimToSize().array();
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public CharList toList() {
         final CharList list = new CharList();
@@ -315,18 +316,18 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public CharStream stream() {
         return CharStream.of(this);
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Beta
     public ObjIterator<IndexedChar> indexed() {
@@ -334,10 +335,10 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
     }
 
     /**
-     * 
      *
-     * @param startIndex 
-     * @return 
+     *
+     * @param startIndex
+     * @return
      */
     @Beta
     public ObjIterator<IndexedChar> indexed(final long startIndex) {

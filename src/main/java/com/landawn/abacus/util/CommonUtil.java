@@ -123,7 +123,7 @@ import com.landawn.abacus.util.function.ToFloatFunction;
  * @see com.landawn.abacus.util.Strings
  * @see com.landawn.abacus.util.IOUtil
  */
-@SuppressWarnings("java:S1192")
+@SuppressWarnings({ "java:S1192", "java:S6539" })
 class CommonUtil {
     // ... it has to be big enough to make it's safety to add element to
     // ArrayBlockingQueue.
@@ -16322,7 +16322,7 @@ class CommonUtil {
      * @param n
      * @return
      */
-    public static <T> List<T> repeatEach(final Collection<T> c, final int n) {
+    public static <T> List<T> repeatEach(final Collection<? extends T> c, final int n) {
         checkArgNotNegative(n, "n");
 
         if (n == 0 || isNullOrEmpty(c)) {
@@ -16420,7 +16420,7 @@ class CommonUtil {
      * @param size
      * @return
      */
-    public static <T> List<T> repeatAllToSize(final Collection<T> c, final int size) {
+    public static <T> List<T> repeatAllToSize(final Collection<? extends T> c, final int size) {
         checkArgNotNegative(size, "size");
         checkArgument(size == 0 || notNullOrEmpty(c), "Collection can not be empty or null when size > 0");
 
@@ -16434,7 +16434,7 @@ class CommonUtil {
             if (c.size() <= size - result.size()) {
                 result.addAll(c);
             } else {
-                final Iterator<T> iter = c.iterator();
+                final Iterator<? extends T> iter = c.iterator();
 
                 for (int i = 0, len = size - result.size(); i < len; i++) {
                     result.add(iter.next());
@@ -16464,8 +16464,12 @@ class CommonUtil {
      * @see java.util.Collections#copy(List, List)
      */
     public static <T> void copy(final List<? extends T> src, final List<? super T> dest) {
+        if (N.isNullOrEmpty(src)) {
+            return;
+        }
+
         if (src.size() > dest.size()) {
-            throw new IllegalArgumentException("Source does not fit in dest");
+            throw new IndexOutOfBoundsException("Source does not fit in dest");
         }
 
         Collections.copy(dest, src);
@@ -16481,12 +16485,11 @@ class CommonUtil {
      * @param length
      */
     public static <T> void copy(final List<? extends T> src, final int srcPos, final List<? super T> dest, final int destPos, final int length) {
-        if (src.size() < srcPos + length) {
-            throw new IllegalArgumentException("The size of src list less than " + (srcPos + length));
-        }
+        N.checkFromToIndex(srcPos, srcPos + length, size(src));
+        N.checkFromToIndex(destPos, destPos + length, size(dest));
 
-        if (dest.size() < destPos + length) {
-            throw new IllegalArgumentException("The size of dest list less than " + (destPos + length));
+        if (N.isNullOrEmpty(src) && srcPos == 0 && length == 0) {
+            return;
         }
 
         if (src instanceof RandomAccess && dest instanceof RandomAccess) {
@@ -16525,12 +16528,11 @@ class CommonUtil {
      * @param length
      */
     public static void copy(final boolean[] src, final int srcPos, final boolean[] dest, final int destPos, final int length) {
-        if (src.length < srcPos + length) {
-            throw new IllegalArgumentException("The size of src array less than " + (srcPos + length));
-        }
+        N.checkFromToIndex(srcPos, srcPos + length, len(src));
+        N.checkFromToIndex(destPos, destPos + length, len(dest));
 
-        if (dest.length < destPos + length) {
-            throw new IllegalArgumentException("The size of dest array less than " + (destPos + length));
+        if (N.isNullOrEmpty(src) && srcPos == 0 && length == 0) {
+            return;
         }
 
         if (length < MIN_SIZE_FOR_COPY_ALL) {
@@ -16558,12 +16560,11 @@ class CommonUtil {
      * @param length
      */
     public static void copy(final char[] src, final int srcPos, final char[] dest, final int destPos, final int length) {
-        if (src.length < srcPos + length) {
-            throw new IllegalArgumentException("The size of src array less than " + (srcPos + length));
-        }
+        N.checkFromToIndex(srcPos, srcPos + length, len(src));
+        N.checkFromToIndex(destPos, destPos + length, len(dest));
 
-        if (dest.length < destPos + length) {
-            throw new IllegalArgumentException("The size of dest array less than " + (destPos + length));
+        if (N.isNullOrEmpty(src) && srcPos == 0 && length == 0) {
+            return;
         }
 
         if (length < MIN_SIZE_FOR_COPY_ALL) {
@@ -16591,12 +16592,11 @@ class CommonUtil {
      * @param length
      */
     public static void copy(final byte[] src, final int srcPos, final byte[] dest, final int destPos, final int length) {
-        if (src.length < srcPos + length) {
-            throw new IllegalArgumentException("The size of src array less than " + (srcPos + length));
-        }
+        N.checkFromToIndex(srcPos, srcPos + length, len(src));
+        N.checkFromToIndex(destPos, destPos + length, len(dest));
 
-        if (dest.length < destPos + length) {
-            throw new IllegalArgumentException("The size of dest array less than " + (destPos + length));
+        if (N.isNullOrEmpty(src) && srcPos == 0 && length == 0) {
+            return;
         }
 
         if (length < MIN_SIZE_FOR_COPY_ALL) {
@@ -16624,12 +16624,11 @@ class CommonUtil {
      * @param length
      */
     public static void copy(final short[] src, final int srcPos, final short[] dest, final int destPos, final int length) {
-        if (src.length < srcPos + length) {
-            throw new IllegalArgumentException("The size of src array less than " + (srcPos + length));
-        }
+        N.checkFromToIndex(srcPos, srcPos + length, len(src));
+        N.checkFromToIndex(destPos, destPos + length, len(dest));
 
-        if (dest.length < destPos + length) {
-            throw new IllegalArgumentException("The size of dest array less than " + (destPos + length));
+        if (N.isNullOrEmpty(src) && srcPos == 0 && length == 0) {
+            return;
         }
 
         if (length < MIN_SIZE_FOR_COPY_ALL) {
@@ -16657,12 +16656,11 @@ class CommonUtil {
      * @param length
      */
     public static void copy(final int[] src, final int srcPos, final int[] dest, final int destPos, final int length) {
-        if (src.length < srcPos + length) {
-            throw new IllegalArgumentException("The size of src array less than " + (srcPos + length));
-        }
+        N.checkFromToIndex(srcPos, srcPos + length, len(src));
+        N.checkFromToIndex(destPos, destPos + length, len(dest));
 
-        if (dest.length < destPos + length) {
-            throw new IllegalArgumentException("The size of dest array less than " + (destPos + length));
+        if (N.isNullOrEmpty(src) && srcPos == 0 && length == 0) {
+            return;
         }
 
         if (length < MIN_SIZE_FOR_COPY_ALL) {
@@ -16690,12 +16688,11 @@ class CommonUtil {
      * @param length
      */
     public static void copy(final long[] src, final int srcPos, final long[] dest, final int destPos, final int length) {
-        if (src.length < srcPos + length) {
-            throw new IllegalArgumentException("The size of src array less than " + (srcPos + length));
-        }
+        N.checkFromToIndex(srcPos, srcPos + length, len(src));
+        N.checkFromToIndex(destPos, destPos + length, len(dest));
 
-        if (dest.length < destPos + length) {
-            throw new IllegalArgumentException("The size of dest array less than " + (destPos + length));
+        if (N.isNullOrEmpty(src) && srcPos == 0 && length == 0) {
+            return;
         }
 
         if (length < MIN_SIZE_FOR_COPY_ALL) {
@@ -16723,12 +16720,11 @@ class CommonUtil {
      * @param length
      */
     public static void copy(final float[] src, final int srcPos, final float[] dest, final int destPos, final int length) {
-        if (src.length < srcPos + length) {
-            throw new IllegalArgumentException("The size of src array less than " + (srcPos + length));
-        }
+        N.checkFromToIndex(srcPos, srcPos + length, len(src));
+        N.checkFromToIndex(destPos, destPos + length, len(dest));
 
-        if (dest.length < destPos + length) {
-            throw new IllegalArgumentException("The size of dest array less than " + (destPos + length));
+        if (N.isNullOrEmpty(src) && srcPos == 0 && length == 0) {
+            return;
         }
 
         if (length < MIN_SIZE_FOR_COPY_ALL) {
@@ -16756,12 +16752,11 @@ class CommonUtil {
      * @param length
      */
     public static void copy(final double[] src, final int srcPos, final double[] dest, final int destPos, final int length) {
-        if (src.length < srcPos + length) {
-            throw new IllegalArgumentException("The size of src array less than " + (srcPos + length));
-        }
+        N.checkFromToIndex(srcPos, srcPos + length, len(src));
+        N.checkFromToIndex(destPos, destPos + length, len(dest));
 
-        if (dest.length < destPos + length) {
-            throw new IllegalArgumentException("The size of dest array less than " + (destPos + length));
+        if (N.isNullOrEmpty(src) && srcPos == 0 && length == 0) {
+            return;
         }
 
         if (length < MIN_SIZE_FOR_COPY_ALL) {
@@ -16789,12 +16784,11 @@ class CommonUtil {
      * @param length
      */
     public static void copy(final Object[] src, final int srcPos, final Object[] dest, final int destPos, final int length) {
-        if (src.length < srcPos + length) {
-            throw new IllegalArgumentException("The size of src array less than " + (srcPos + length));
-        }
+        N.checkFromToIndex(srcPos, srcPos + length, len(src));
+        N.checkFromToIndex(destPos, destPos + length, len(dest));
 
-        if (dest.length < destPos + length) {
-            throw new IllegalArgumentException("The size of dest array less than " + (destPos + length));
+        if (N.isNullOrEmpty(src) && srcPos == 0 && length == 0) {
+            return;
         }
 
         if (length < MIN_SIZE_FOR_COPY_ALL) {
@@ -16823,13 +16817,8 @@ class CommonUtil {
      * @see System#arraycopy(Object, int, Object, int, int) is called
      */
     public static void copy(final Object src, final int srcPos, final Object dest, final int destPos, final int length) {
-        if (Array.getLength(src) < srcPos + length) {
-            throw new IllegalArgumentException("The size of src array less than " + (srcPos + length));
-        }
-
-        if (Array.getLength(dest) < destPos + length) {
-            throw new IllegalArgumentException("The size of dest array less than " + (destPos + length));
-        }
+        N.checkFromToIndex(srcPos, srcPos + length, Array.getLength(src));
+        N.checkFromToIndex(destPos, destPos + length, Array.getLength(dest));
 
         System.arraycopy(src, srcPos, dest, destPos, length);
     }
@@ -18760,12 +18749,12 @@ class CommonUtil {
      * @param c
      * @return
      */
-    public static <T extends Comparable<? super T>> boolean isSorted(final Collection<T> c) {
+    public static <T extends Comparable<? super T>> boolean isSorted(final Collection<? extends T> c) {
         if (N.size(c) < 2) {
             return true;
         }
 
-        final Iterator<T> iter = c.iterator();
+        final Iterator<? extends T> iter = c.iterator();
         T prev = iter.next();
         T cur = null;
 
@@ -18791,14 +18780,14 @@ class CommonUtil {
      * @param toIndex
      * @return
      */
-    public static <T extends Comparable<? super T>> boolean isSorted(final Collection<T> c, final int fromIndex, final int toIndex) {
+    public static <T extends Comparable<? super T>> boolean isSorted(final Collection<? extends T> c, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, N.size(c));
 
         if (toIndex - fromIndex < 2) {
             return true;
         }
 
-        final Iterator<T> iter = c.iterator();
+        final Iterator<? extends T> iter = c.iterator();
         int cursor = 0;
 
         while (cursor < fromIndex) {
@@ -18832,14 +18821,14 @@ class CommonUtil {
      * @param cmp
      * @return
      */
-    public static <T> boolean isSorted(final Collection<T> c, Comparator<? super T> cmp) {
+    public static <T> boolean isSorted(final Collection<? extends T> c, Comparator<? super T> cmp) {
         if (N.size(c) < 2) {
             return true;
         }
 
         cmp = cmp == null ? NATURAL_ORDER : cmp;
 
-        final Iterator<T> iter = c.iterator();
+        final Iterator<? extends T> iter = c.iterator();
         T prev = iter.next();
         T cur = null;
 
@@ -18866,7 +18855,7 @@ class CommonUtil {
      * @param cmp
      * @return
      */
-    public static <T> boolean isSorted(final Collection<T> c, final int fromIndex, final int toIndex, Comparator<? super T> cmp) {
+    public static <T> boolean isSorted(final Collection<? extends T> c, final int fromIndex, final int toIndex, Comparator<? super T> cmp) {
         N.checkFromToIndex(fromIndex, toIndex, N.size(c));
 
         if (toIndex - fromIndex < 2) {
@@ -18875,7 +18864,7 @@ class CommonUtil {
 
         cmp = cmp == null ? NATURAL_ORDER : cmp;
 
-        final Iterator<T> iter = c.iterator();
+        final Iterator<? extends T> iter = c.iterator();
         int cursor = 0;
 
         while (cursor < fromIndex) {

@@ -45,6 +45,7 @@ import java.util.StringTokenizer;
  * @version $Id: FileSystemUtils.java 1642799 2014-12-02 02:55:39Z sebb $
  * @since 1.1
  */
+@SuppressWarnings({ "java:S6548" })
 final class FileSystemUtil {
 
     /** Singleton instance, used mainly for testing. */

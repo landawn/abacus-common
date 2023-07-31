@@ -1162,14 +1162,14 @@ public final class Joiner implements Closeable {
     /**
      *
      *
-     * @param iter
+     * @param c
      * @return
      */
-    public Joiner appendAll(final Iterable<?> iter) {
-        if (iter != null) {
+    public Joiner appendAll(final Iterable<?> c) {
+        if (c != null) {
             StringBuilder sb = null;
 
-            for (Object e : iter) {
+            for (Object e : c) {
                 if (e != null || !skipNulls) {
                     if (sb == null) {
                         sb = prepareBuilder().append(toString(e));
@@ -1191,18 +1191,18 @@ public final class Joiner implements Closeable {
      *
      * @param <T>
      * @param <E>
-     * @param iter
+     * @param c
      * @param filter will be the only condition to decide if append an element from the specified {@code Iterable} or not. {@code skipNulls()} won't be used here.
      * @return
      * @throws E
      */
-    public <T, E extends Exception> Joiner appendAll(final Iterable<T> iter, final Throwables.Predicate<? super T, E> filter) throws E {
+    public <T, E extends Exception> Joiner appendAll(final Iterable<? extends T> c, final Throwables.Predicate<? super T, E> filter) throws E {
         N.checkArgNotNull(filter, "filter"); //NOSONAR
 
-        if (iter != null) {
+        if (c != null) {
             StringBuilder sb = null;
 
-            for (T e : iter) {
+            for (T e : c) {
                 if (filter.test(e) == false) {
                     continue;
                 }
@@ -1261,7 +1261,7 @@ public final class Joiner implements Closeable {
      * @return
      * @throws E
      */
-    public <T, E extends Exception> Joiner appendAll(final Iterator<T> iter, final Throwables.Predicate<? super T, E> filter) throws E {
+    public <T, E extends Exception> Joiner appendAll(final Iterator<? extends T> iter, final Throwables.Predicate<? super T, E> filter) throws E {
         N.checkArgNotNull(filter, "filter");
 
         if (iter != null) {

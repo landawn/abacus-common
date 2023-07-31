@@ -5334,7 +5334,7 @@ public final class IOUtil {
 
         final int suffixLen = String.valueOf(numOfParts).length();
 
-        final long lineNumOfPart = estimateLineCount(file, 10000) / numOfParts;
+        final long lineNumOfPart = N.max(estimateLineCount(file, 10000) / numOfParts, 1);
 
         int index = file.getName().lastIndexOf('.');
         String prefix = file.getName().substring(0, index);

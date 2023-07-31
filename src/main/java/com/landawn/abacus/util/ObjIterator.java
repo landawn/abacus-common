@@ -38,6 +38,7 @@ import com.landawn.abacus.util.stream.Stream;
  * @param <T>
  * @since 0.9
  */
+@SuppressWarnings({ "java:S6548" })
 public abstract class ObjIterator<T> extends ImmutableIterator<T> {
 
     @SuppressWarnings("rawtypes")

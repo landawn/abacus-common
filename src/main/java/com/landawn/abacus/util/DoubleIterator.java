@@ -29,6 +29,7 @@ import com.landawn.abacus.util.stream.DoubleStream;
  * @author Haiyang Li
  * @since 0.8
  */
+@SuppressWarnings({ "java:S6548" })
 public abstract class DoubleIterator extends ImmutableIterator<Double> {
 
     public static final DoubleIterator EMPTY = new DoubleIterator() {
@@ -44,9 +45,9 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
     };
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public static DoubleIterator empty() {//NOSONAR
         return EMPTY;
@@ -253,17 +254,17 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public abstract double nextDouble();
 
     /**
-     * 
      *
-     * @param n 
-     * @return 
+     *
+     * @param n
+     * @return
      */
     public DoubleIterator skip(final long n) {
         N.checkArgNotNegative(n, "n");
@@ -308,10 +309,10 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
     }
 
     /**
-     * 
      *
-     * @param count 
-     * @return 
+     *
+     * @param count
+     * @return
      */
     public DoubleIterator limit(final long count) {
         N.checkArgNotNegative(count, "count");
@@ -343,10 +344,10 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
     }
 
     /**
-     * 
      *
-     * @param predicate 
-     * @return 
+     *
+     * @param predicate
+     * @return
      */
     public DoubleIterator filter(final DoublePredicate predicate) {
         N.checkArgNotNull(predicate, "predicate");
@@ -387,9 +388,9 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public OptionalDouble first() {
         if (hasNext()) {
@@ -400,9 +401,9 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public OptionalDouble last() {
         if (hasNext()) {
@@ -419,18 +420,18 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public double[] toArray() {
         return toList().trimToSize().array();
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public DoubleList toList() {
         final DoubleList list = new DoubleList();
@@ -443,18 +444,18 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public DoubleStream stream() {
         return DoubleStream.of(this);
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Beta
     public ObjIterator<IndexedDouble> indexed() {
@@ -462,10 +463,10 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
     }
 
     /**
-     * 
      *
-     * @param startIndex 
-     * @return 
+     *
+     * @param startIndex
+     * @return
      */
     @Beta
     public ObjIterator<IndexedDouble> indexed(final long startIndex) {
@@ -491,10 +492,10 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
     }
 
     /**
-     * 
      *
-     * @param action 
-     * @deprecated 
+     *
+     * @param action
+     * @deprecated
      */
     @Override
     @Deprecated
@@ -503,11 +504,11 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
     }
 
     /**
-     * 
      *
-     * @param <E> 
-     * @param action 
-     * @throws E 
+     *
+     * @param <E>
+     * @param action
+     * @throws E
      */
     public <E extends Exception> void foreachRemaining(Throwables.DoubleConsumer<E> action) throws E {//NOSONAR
         N.checkArgNotNull(action);
@@ -518,11 +519,11 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
     }
 
     /**
-     * 
      *
-     * @param <E> 
-     * @param action 
-     * @throws E 
+     *
+     * @param <E>
+     * @param action
+     * @throws E
      */
     public <E extends Exception> void foreachIndexed(Throwables.IndexedDoubleConsumer<E> action) throws E {
         N.checkArgNotNull(action);

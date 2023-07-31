@@ -22,12 +22,12 @@ import com.landawn.abacus.util.Throwables;
  *
  * @author Haiyang Li
  */
-public interface ObjIntConsumer<T> extends Throwables.ObjIntConsumer<T, RuntimeException>, java.util.function.ObjIntConsumer<T> {
+public interface ObjIntConsumer<T> extends Throwables.ObjIntConsumer<T, RuntimeException>, java.util.function.ObjIntConsumer<T> { // NOSONAR
     /**
-     * 
      *
-     * @param t 
-     * @param value 
+     *
+     * @param t
+     * @param value
      */
     //NOSONAR
     @Override

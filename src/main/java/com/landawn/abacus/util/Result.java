@@ -285,27 +285,27 @@ public class Result<T, E extends Throwable> implements Immutable {
     //    }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public Pair<T, E> toPair() {
         return Pair.of(value, exception);
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public Tuple2<T, E> toTuple() {
         return Tuple.of(value, exception);
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public int hashCode() {
@@ -324,7 +324,7 @@ public class Result<T, E extends Throwable> implements Immutable {
             return true;
         }
 
-        if (obj instanceof Result other) {
+        if (obj instanceof Result other) { // NOSONAR
             return N.equals(other.value, value) && N.equals(other.exception, exception);
         }
 
@@ -332,9 +332,9 @@ public class Result<T, E extends Throwable> implements Immutable {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public String toString() {
@@ -348,12 +348,12 @@ public class Result<T, E extends Throwable> implements Immutable {
         }
 
         /**
-         * 
          *
-         * @param <T> 
-         * @param value 
-         * @param exception 
-         * @return 
+         *
+         * @param <T>
+         * @param value
+         * @param exception
+         * @return
          */
         public static <T> Result.R<T> of(final T value, final RuntimeException exception) {
             return new R<>(value, exception);

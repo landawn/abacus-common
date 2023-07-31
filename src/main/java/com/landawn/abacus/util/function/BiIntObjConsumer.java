@@ -22,13 +22,13 @@ import com.landawn.abacus.util.Throwables;
  *
  * @author Haiyang Li
  */
-public interface BiIntObjConsumer<T> extends Throwables.BiIntObjConsumer<T, RuntimeException> {
+public interface BiIntObjConsumer<T> extends Throwables.BiIntObjConsumer<T, RuntimeException> { // NOSONAR
     /**
-     * 
      *
-     * @param i 
-     * @param j 
-     * @param t 
+     *
+     * @param i
+     * @param j
+     * @param t
      */
     //NOSONAR
     @Override

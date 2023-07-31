@@ -44,6 +44,7 @@ import com.landawn.abacus.util.stream.Stream;
  * @param <T>
  * @since 0.8
  */
+@SuppressWarnings({ "java:S6539" })
 public class Builder<T> {
 
     final T val;
@@ -208,10 +209,10 @@ public class Builder<T> {
     }
 
     /**
-     * 
      *
-     * @param val 
-     * @return 
+     *
+     * @param val
+     * @return
      * @throws IllegalArgumentException if the specified {@code val} is {@code null}.
      */
     public static final DataSetBuilder of(final DataSet val) throws IllegalArgumentException {
@@ -305,9 +306,9 @@ public class Builder<T> {
     //    }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public T val() {
         return val;
@@ -363,9 +364,9 @@ public class Builder<T> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public Stream<T> stream() {
         return Stream.of(val);
@@ -2230,12 +2231,12 @@ public class Builder<T> {
         }
 
         /**
-         * 
          *
-         * @param <E> 
-         * @param columnNames 
-         * @param func 
-         * @return 
+         *
+         * @param <E>
+         * @param columnNames
+         * @param func
+         * @return
          * @throws E the e
          */
         public <E extends Exception> DataSetBuilder updateColumns(Collection<String> columnNames, Throwables.Function<?, ?, E> func) throws E {
