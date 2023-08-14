@@ -12596,10 +12596,10 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         return iter::close;
     }
 
-    static <E extends Exception> void close(final Deque<? extends Throwables.Runnable<? extends E>> closeHandlers) {
+    static void close(final Deque<? extends Throwables.Runnable<? extends Exception>> closeHandlers) {
         Exception ex = null;
 
-        for (Throwables.Runnable<? extends E> closeHandler : closeHandlers) {
+        for (Throwables.Runnable<? extends Exception> closeHandler : closeHandlers) {
             try {
                 closeHandler.run();
             } catch (Exception e) {

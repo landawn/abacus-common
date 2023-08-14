@@ -2536,7 +2536,6 @@ public interface DataSet {
     /**
      *
      * @param <T>
-     * @param <E>
      * @param columnNames
      * @param aggregateResultColumnName
      * @param aggregateOnColumnName
@@ -2545,8 +2544,8 @@ public interface DataSet {
      * @see Iterables#rollup(Collection)
      */
     @Beta
-    <T, E extends Exception> Stream<DataSet> rollup(Collection<String> columnNames, String aggregateResultColumnName, String aggregateOnColumnName,
-            Throwables.Function<Stream<T>, ?, E> func);
+    <T> Stream<DataSet> rollup(Collection<String> columnNames, String aggregateResultColumnName, String aggregateOnColumnName,
+            Throwables.Function<Stream<T>, ?, ? extends Exception> func);
 
     /**
      *
@@ -2576,7 +2575,6 @@ public interface DataSet {
     /**
      *
      * @param <T>
-     * @param <E>
      * @param columnNames
      * @param aggregateResultColumnName
      * @param aggregateOnColumnNames
@@ -2586,24 +2584,22 @@ public interface DataSet {
      * @see Iterables#rollup(Collection)
      */
     @Beta
-    <T, E extends Exception> Stream<DataSet> rollup(Collection<String> columnNames, String aggregateResultColumnName, Collection<String> aggregateOnColumnNames,
-            Throwables.Function<? super DisposableObjArray, T, E> rowMapper, Collector<? super T, ?, ?> collector);
+    <T> Stream<DataSet> rollup(Collection<String> columnNames, String aggregateResultColumnName, Collection<String> aggregateOnColumnNames,
+            Throwables.Function<? super DisposableObjArray, T, ? extends Exception> rowMapper, Collector<? super T, ?, ?> collector);
 
     /**
      *
-     * @param <E>
      * @param columnNames
      * @param keyMapper DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
      * @return
      * @see Iterables#rollup(Collection)
      */
     @Beta
-    <E extends Exception> Stream<DataSet> rollup(Collection<String> columnNames, Throwables.Function<? super DisposableObjArray, ?, E> keyMapper);
+    Stream<DataSet> rollup(Collection<String> columnNames, Throwables.Function<? super DisposableObjArray, ?, ? extends Exception> keyMapper);
 
     /**
      *
      * @param <T>
-     * @param <E>
      * @param columnNames
      * @param keyMapper DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
      * @param aggregateResultColumnName
@@ -2613,14 +2609,12 @@ public interface DataSet {
      * @see Iterables#rollup(Collection)
      */
     @Beta
-    <T, E extends Exception> Stream<DataSet> rollup(Collection<String> columnNames, Throwables.Function<? super DisposableObjArray, ?, E> keyMapper,
+    <T> Stream<DataSet> rollup(Collection<String> columnNames, Throwables.Function<? super DisposableObjArray, ?, ? extends Exception> keyMapper,
             String aggregateResultColumnName, String aggregateOnColumnName, Collector<T, ?, ?> collector);
 
     /**
      *
      * @param <T>
-     * @param <E>
-     * @param <E2>
      * @param columnNames
      * @param keyMapper DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
      * @param aggregateResultColumnName
@@ -2630,13 +2624,11 @@ public interface DataSet {
      * @see Iterables#rollup(Collection)
      */
     @Beta
-    <T, E extends Exception, E2 extends Exception> Stream<DataSet> rollup(Collection<String> columnNames,
-            Throwables.Function<? super DisposableObjArray, ?, E> keyMapper, String aggregateResultColumnName, String aggregateOnColumnName,
-            Throwables.Function<Stream<T>, ?, E2> func);
+    <T> Stream<DataSet> rollup(Collection<String> columnNames, Throwables.Function<? super DisposableObjArray, ?, ? extends Exception> keyMapper,
+            String aggregateResultColumnName, String aggregateOnColumnName, Throwables.Function<Stream<T>, ?, ? extends Exception> func);
 
     /**
     *
-    * @param <E>
     * @param columnNames
     * @param keyMapper DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
     * @param aggregateResultColumnName
@@ -2646,12 +2638,11 @@ public interface DataSet {
      * @see Iterables#rollup(Collection)
     */
     @Beta
-    <E extends Exception> Stream<DataSet> rollup(Collection<String> columnNames, Throwables.Function<? super DisposableObjArray, ?, E> keyMapper,
+    Stream<DataSet> rollup(Collection<String> columnNames, Throwables.Function<? super DisposableObjArray, ?, ? extends Exception> keyMapper,
             String aggregateResultColumnName, Collection<String> aggregateOnColumnNames, Class<?> rowClass);
 
     /**
      *
-     * @param <E>
      * @param columnNames
      * @param keyMapper DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
      * @param aggregateResultColumnName
@@ -2661,14 +2652,12 @@ public interface DataSet {
      * @see Iterables#rollup(Collection)
      */
     @Beta
-    <E extends Exception> Stream<DataSet> rollup(Collection<String> columnNames, Throwables.Function<? super DisposableObjArray, ?, E> keyMapper,
+    Stream<DataSet> rollup(Collection<String> columnNames, Throwables.Function<? super DisposableObjArray, ?, ? extends Exception> keyMapper,
             String aggregateResultColumnName, Collection<String> aggregateOnColumnNames, Collector<? super Object[], ?, ?> collector);
 
     /**
      *
      * @param <T>
-     * @param <E>
-     * @param <E2>
      * @param columnNames
      * @param keyMapper DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
      * @param aggregateResultColumnName
@@ -2679,9 +2668,9 @@ public interface DataSet {
      * @see Iterables#rollup(Collection)
      */
     @Beta
-    <T, E extends Exception, E2 extends Exception> Stream<DataSet> rollup(Collection<String> columnNames,
-            Throwables.Function<? super DisposableObjArray, ?, E> keyMapper, String aggregateResultColumnName, Collection<String> aggregateOnColumnNames,
-            Throwables.Function<? super DisposableObjArray, T, E2> rowMapper, Collector<? super T, ?, ?> collector);
+    <T> Stream<DataSet> rollup(Collection<String> columnNames, Throwables.Function<? super DisposableObjArray, ?, ? extends Exception> keyMapper,
+            String aggregateResultColumnName, Collection<String> aggregateOnColumnNames,
+            Throwables.Function<? super DisposableObjArray, T, ? extends Exception> rowMapper, Collector<? super T, ?, ?> collector);
 
     /**
      *
@@ -2708,7 +2697,6 @@ public interface DataSet {
     /**
      *
      * @param <T>
-     * @param <E>
      * @param columnNames
      * @param aggregateResultColumnName
      * @param aggregateOnColumnName
@@ -2717,8 +2705,8 @@ public interface DataSet {
      * @see Iterables#powerSet(java.util.Set)
      */
     @Beta
-    <T, E extends Exception> Stream<DataSet> cube(Collection<String> columnNames, String aggregateResultColumnName, String aggregateOnColumnName,
-            Throwables.Function<Stream<T>, ?, E> func);
+    <T> Stream<DataSet> cube(Collection<String> columnNames, String aggregateResultColumnName, String aggregateOnColumnName,
+            Throwables.Function<Stream<T>, ?, ? extends Exception> func);
 
     /**
     *
@@ -2748,7 +2736,6 @@ public interface DataSet {
     /**
      *
      * @param <T>
-     * @param <E>
      * @param columnNames
      * @param aggregateResultColumnName
      * @param aggregateOnColumnNames
@@ -2758,24 +2745,22 @@ public interface DataSet {
      * @see Iterables#powerSet(java.util.Set)
      */
     @Beta
-    <T, E extends Exception> Stream<DataSet> cube(Collection<String> columnNames, String aggregateResultColumnName, Collection<String> aggregateOnColumnNames,
-            Throwables.Function<? super DisposableObjArray, T, E> rowMapper, Collector<? super T, ?, ?> collector);
+    <T> Stream<DataSet> cube(Collection<String> columnNames, String aggregateResultColumnName, Collection<String> aggregateOnColumnNames,
+            Throwables.Function<? super DisposableObjArray, T, ? extends Exception> rowMapper, Collector<? super T, ?, ?> collector);
 
     /**
      *
-     * @param <E>
      * @param columnNames
      * @param keyMapper DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
      * @return
      * @see Iterables#powerSet(java.util.Set)
      */
     @Beta
-    <E extends Exception> Stream<DataSet> cube(Collection<String> columnNames, Throwables.Function<? super DisposableObjArray, ?, E> keyMapper);
+    Stream<DataSet> cube(Collection<String> columnNames, Throwables.Function<? super DisposableObjArray, ?, ? extends Exception> keyMapper);
 
     /**
      *
      * @param <T>
-     * @param <E>
      * @param columnNames
      * @param keyMapper DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
      * @param aggregateResultColumnName
@@ -2785,14 +2770,12 @@ public interface DataSet {
      * @see Iterables#powerSet(java.util.Set)
      */
     @Beta
-    <T, E extends Exception> Stream<DataSet> cube(Collection<String> columnNames, Throwables.Function<? super DisposableObjArray, ?, E> keyMapper,
+    <T> Stream<DataSet> cube(Collection<String> columnNames, Throwables.Function<? super DisposableObjArray, ?, ? extends Exception> keyMapper,
             String aggregateResultColumnName, String aggregateOnColumnName, Collector<T, ?, ?> collector);
 
     /**
      *
      * @param <T>
-     * @param <E>
-     * @param <E2>
      * @param columnNames
      * @param keyMapper DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
      * @param aggregateResultColumnName
@@ -2802,13 +2785,11 @@ public interface DataSet {
      * @see Iterables#powerSet(java.util.Set)
      */
     @Beta
-    <T, E extends Exception, E2 extends Exception> Stream<DataSet> cube(Collection<String> columnNames,
-            Throwables.Function<? super DisposableObjArray, ?, E> keyMapper, String aggregateResultColumnName, String aggregateOnColumnName,
-            Throwables.Function<Stream<T>, ?, E2> func);
+    <T> Stream<DataSet> cube(Collection<String> columnNames, Throwables.Function<? super DisposableObjArray, ?, ? extends Exception> keyMapper,
+            String aggregateResultColumnName, String aggregateOnColumnName, Throwables.Function<Stream<T>, ?, ? extends Exception> func);
 
     /**
     *
-    * @param <E>
     * @param columnNames
     * @param keyMapper DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
     * @param aggregateResultColumnName
@@ -2818,12 +2799,11 @@ public interface DataSet {
     * @see Iterables#powerSet(java.util.Set)
     */
     @Beta
-    <E extends Exception> Stream<DataSet> cube(Collection<String> columnNames, Throwables.Function<? super DisposableObjArray, ?, E> keyMapper,
+    Stream<DataSet> cube(Collection<String> columnNames, Throwables.Function<? super DisposableObjArray, ?, ? extends Exception> keyMapper,
             String aggregateResultColumnName, Collection<String> aggregateOnColumnNames, Class<?> rowClass);
 
     /**
      *
-     * @param <E>
      * @param columnNames
      * @param keyMapper DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
      * @param aggregateResultColumnName
@@ -2833,14 +2813,12 @@ public interface DataSet {
      * @see Iterables#powerSet(java.util.Set)
      */
     @Beta
-    <E extends Exception> Stream<DataSet> cube(Collection<String> columnNames, Throwables.Function<? super DisposableObjArray, ?, E> keyMapper,
+    Stream<DataSet> cube(Collection<String> columnNames, Throwables.Function<? super DisposableObjArray, ?, ? extends Exception> keyMapper,
             String aggregateResultColumnName, Collection<String> aggregateOnColumnNames, Collector<? super Object[], ?, ?> collector);
 
     /**
      *
      * @param <T>
-     * @param <E>
-     * @param <E2>
      * @param columnNames
      * @param keyMapper DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
      * @param aggregateResultColumnName
@@ -2851,9 +2829,9 @@ public interface DataSet {
      * @see Iterables#powerSet(java.util.Set)
      */
     @Beta
-    <T, E extends Exception, E2 extends Exception> Stream<DataSet> cube(Collection<String> columnNames,
-            Throwables.Function<? super DisposableObjArray, ?, E> keyMapper, String aggregateResultColumnName, Collection<String> aggregateOnColumnNames,
-            Throwables.Function<? super DisposableObjArray, T, E2> rowMapper, Collector<? super T, ?, ?> collector);
+    <T> Stream<DataSet> cube(Collection<String> columnNames, Throwables.Function<? super DisposableObjArray, ?, ? extends Exception> keyMapper,
+            String aggregateResultColumnName, Collection<String> aggregateOnColumnNames,
+            Throwables.Function<? super DisposableObjArray, T, ? extends Exception> rowMapper, Collector<? super T, ?, ?> collector);
 
     /**
      *

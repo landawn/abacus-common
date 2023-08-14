@@ -3798,12 +3798,11 @@ public final class Fn extends Comparators {
     /**
      *
      * @param <T>
-     * @param <E>
      * @param predicate
      * @return
      */
     @Beta
-    public static <T, E extends Exception> Predicate<T> pp(final Throwables.Predicate<T, E> predicate) {
+    public static <T> Predicate<T> pp(final Throwables.Predicate<T, ? extends Exception> predicate) {
         N.checkArgNotNull(predicate);
 
         return value -> {
@@ -3819,13 +3818,12 @@ public final class Fn extends Comparators {
      *
      * @param <A>
      * @param <T>
-     * @param <E>
      * @param a
      * @param biPredicate
      * @return
      */
     @Beta
-    public static <A, T, E extends Exception> Predicate<T> pp(final A a, final Throwables.BiPredicate<A, T, E> biPredicate) {
+    public static <A, T> Predicate<T> pp(final A a, final Throwables.BiPredicate<A, T, ? extends Exception> biPredicate) {
         N.checkArgNotNull(biPredicate);
 
         return t -> {
@@ -3842,14 +3840,13 @@ public final class Fn extends Comparators {
      * @param <A>
      * @param <B>
      * @param <T>
-     * @param <E>
      * @param a
      * @param b
      * @param triPredicate
      * @return
      */
     @Beta
-    public static <A, B, T, E extends Exception> Predicate<T> pp(final A a, final B b, final Throwables.TriPredicate<A, B, T, E> triPredicate) {
+    public static <A, B, T> Predicate<T> pp(final A a, final B b, final Throwables.TriPredicate<A, B, T, ? extends Exception> triPredicate) {
         N.checkArgNotNull(triPredicate);
 
         return t -> {
@@ -3865,12 +3862,11 @@ public final class Fn extends Comparators {
      *
      * @param <T>
      * @param <U>
-     * @param <E>
      * @param biPredicate
      * @return
      */
     @Beta
-    public static <T, U, E extends Exception> BiPredicate<T, U> pp(final Throwables.BiPredicate<T, U, E> biPredicate) {
+    public static <T, U> BiPredicate<T, U> pp(final Throwables.BiPredicate<T, U, ? extends Exception> biPredicate) {
         N.checkArgNotNull(biPredicate);
 
         return (t, u) -> {
@@ -3887,13 +3883,12 @@ public final class Fn extends Comparators {
      * @param <A>
      * @param <T>
      * @param <U>
-     * @param <E>
      * @param a
      * @param triPredicate
      * @return
      */
     @Beta
-    public static <A, T, U, E extends Exception> BiPredicate<T, U> pp(final A a, final Throwables.TriPredicate<A, T, U, E> triPredicate) {
+    public static <A, T, U> BiPredicate<T, U> pp(final A a, final Throwables.TriPredicate<A, T, U, ? extends Exception> triPredicate) {
         N.checkArgNotNull(triPredicate);
 
         return (t, u) -> {
@@ -3910,12 +3905,11 @@ public final class Fn extends Comparators {
      * @param <A>
      * @param <B>
      * @param <C>
-     * @param <E>
      * @param triPredicate
      * @return
      */
     @Beta
-    public static <A, B, C, E extends Exception> TriPredicate<A, B, C> pp(final Throwables.TriPredicate<A, B, C, E> triPredicate) {
+    public static <A, B, C> TriPredicate<A, B, C> pp(final Throwables.TriPredicate<A, B, C, ? extends Exception> triPredicate) {
         N.checkArgNotNull(triPredicate);
 
         return (a, b, c) -> {
@@ -3930,12 +3924,11 @@ public final class Fn extends Comparators {
     /**
      *
      * @param <T>
-     * @param <E>
      * @param consumer
      * @return
      */
     @Beta
-    public static <T, E extends Exception> Consumer<T> cc(final Throwables.Consumer<T, E> consumer) {
+    public static <T> Consumer<T> cc(final Throwables.Consumer<T, ? extends Exception> consumer) {
         N.checkArgNotNull(consumer);
 
         return t -> {
@@ -3951,13 +3944,12 @@ public final class Fn extends Comparators {
      *
      * @param <A>
      * @param <T>
-     * @param <E>
      * @param a
      * @param biConsumer
      * @return
      */
     @Beta
-    public static <A, T, E extends Exception> Consumer<T> cc(final A a, final Throwables.BiConsumer<A, T, E> biConsumer) {
+    public static <A, T> Consumer<T> cc(final A a, final Throwables.BiConsumer<A, T, ? extends Exception> biConsumer) {
         N.checkArgNotNull(biConsumer);
 
         return t -> {
@@ -3974,14 +3966,13 @@ public final class Fn extends Comparators {
      * @param <A>
      * @param <B>
      * @param <T>
-     * @param <E>
      * @param a
      * @param b
      * @param triConsumer
      * @return
      */
     @Beta
-    public static <A, B, T, E extends Exception> Consumer<T> cc(final A a, final B b, final Throwables.TriConsumer<A, B, T, E> triConsumer) {
+    public static <A, B, T> Consumer<T> cc(final A a, final B b, final Throwables.TriConsumer<A, B, T, ? extends Exception> triConsumer) {
         N.checkArgNotNull(triConsumer);
 
         return t -> {
@@ -3997,12 +3988,11 @@ public final class Fn extends Comparators {
      *
      * @param <T>
      * @param <U>
-     * @param <E>
      * @param biConsumer
      * @return
      */
     @Beta
-    public static <T, U, E extends Exception> BiConsumer<T, U> cc(final Throwables.BiConsumer<T, U, E> biConsumer) {
+    public static <T, U> BiConsumer<T, U> cc(final Throwables.BiConsumer<T, U, ? extends Exception> biConsumer) {
         N.checkArgNotNull(biConsumer);
 
         return (t, u) -> {
@@ -4019,13 +4009,12 @@ public final class Fn extends Comparators {
      * @param <A>
      * @param <T>
      * @param <U>
-     * @param <E>
      * @param a
      * @param triConsumer
      * @return
      */
     @Beta
-    public static <A, T, U, E extends Exception> BiConsumer<T, U> cc(final A a, final Throwables.TriConsumer<A, T, U, E> triConsumer) {
+    public static <A, T, U> BiConsumer<T, U> cc(final A a, final Throwables.TriConsumer<A, T, U, ? extends Exception> triConsumer) {
         N.checkArgNotNull(triConsumer);
 
         return (t, u) -> {
@@ -4042,12 +4031,11 @@ public final class Fn extends Comparators {
      * @param <A>
      * @param <B>
      * @param <C>
-     * @param <E>
      * @param triConsumer
      * @return
      */
     @Beta
-    public static <A, B, C, E extends Exception> TriConsumer<A, B, C> cc(final Throwables.TriConsumer<A, B, C, E> triConsumer) {
+    public static <A, B, C> TriConsumer<A, B, C> cc(final Throwables.TriConsumer<A, B, C, ? extends Exception> triConsumer) {
         N.checkArgNotNull(triConsumer);
 
         return (a, b, c) -> {
@@ -4063,12 +4051,11 @@ public final class Fn extends Comparators {
      *
      * @param <T>
      * @param <R>
-     * @param <E>
      * @param function
      * @return
      */
     @Beta
-    public static <T, R, E extends Exception> Function<T, R> ff(final Throwables.Function<T, ? extends R, E> function) {
+    public static <T, R> Function<T, R> ff(final Throwables.Function<T, ? extends R, ? extends Exception> function) {
         N.checkArgNotNull(function);
 
         return t -> {
@@ -4084,13 +4071,12 @@ public final class Fn extends Comparators {
      *
      * @param <T>
      * @param <R>
-     * @param <E>
      * @param function
      * @param defaultOnError
      * @return
      */
     @Beta
-    public static <T, R, E extends Exception> Function<T, R> ff(final Throwables.Function<T, ? extends R, E> function, final R defaultOnError) {
+    public static <T, R> Function<T, R> ff(final Throwables.Function<T, ? extends R, ? extends Exception> function, final R defaultOnError) {
         N.checkArgNotNull(function);
 
         return t -> {
@@ -4107,13 +4093,12 @@ public final class Fn extends Comparators {
      * @param <A>
      * @param <T>
      * @param <R>
-     * @param <E>
      * @param a
      * @param biFunction
      * @return
      */
     @Beta
-    public static <A, T, R, E extends Exception> Function<T, R> ff(final A a, final Throwables.BiFunction<A, T, R, E> biFunction) {
+    public static <A, T, R> Function<T, R> ff(final A a, final Throwables.BiFunction<A, T, R, ? extends Exception> biFunction) {
         N.checkArgNotNull(biFunction);
 
         return t -> {
@@ -4131,14 +4116,13 @@ public final class Fn extends Comparators {
      * @param <B>
      * @param <T>
      * @param <R>
-     * @param <E>
      * @param a
      * @param b
      * @param triFunction
      * @return
      */
     @Beta
-    public static <A, B, T, R, E extends Exception> Function<T, R> ff(final A a, final B b, final Throwables.TriFunction<A, B, T, R, E> triFunction) {
+    public static <A, B, T, R> Function<T, R> ff(final A a, final B b, final Throwables.TriFunction<A, B, T, R, ? extends Exception> triFunction) {
         N.checkArgNotNull(triFunction);
 
         return t -> {
@@ -4155,12 +4139,11 @@ public final class Fn extends Comparators {
      * @param <T>
      * @param <U>
      * @param <R>
-     * @param <E>
      * @param biFunction
      * @return
      */
     @Beta
-    public static <T, U, R, E extends Exception> BiFunction<T, U, R> ff(final Throwables.BiFunction<T, U, R, E> biFunction) {
+    public static <T, U, R> BiFunction<T, U, R> ff(final Throwables.BiFunction<T, U, R, ? extends Exception> biFunction) {
         N.checkArgNotNull(biFunction);
 
         return (t, u) -> {
@@ -4178,13 +4161,12 @@ public final class Fn extends Comparators {
      * @param <T>
      * @param <U>
      * @param <R>
-     * @param <E>
      * @param biFunction
      * @param defaultOnError
      * @return
      */
     @Beta
-    public static <T, U, R, E extends Exception> BiFunction<T, U, R> ff(final Throwables.BiFunction<T, U, R, E> biFunction, final R defaultOnError) {
+    public static <T, U, R> BiFunction<T, U, R> ff(final Throwables.BiFunction<T, U, R, ? extends Exception> biFunction, final R defaultOnError) {
         N.checkArgNotNull(biFunction);
 
         return (t, u) -> {
@@ -4202,13 +4184,12 @@ public final class Fn extends Comparators {
      * @param <T>
      * @param <U>
      * @param <R>
-     * @param <E>
      * @param a
      * @param triFunction
      * @return
      */
     @Beta
-    public static <A, T, U, R, E extends Exception> BiFunction<T, U, R> ff(final A a, final Throwables.TriFunction<A, T, U, R, E> triFunction) {
+    public static <A, T, U, R> BiFunction<T, U, R> ff(final A a, final Throwables.TriFunction<A, T, U, R, ? extends Exception> triFunction) {
         N.checkArgNotNull(triFunction);
 
         return (t, u) -> {
@@ -4226,12 +4207,11 @@ public final class Fn extends Comparators {
      * @param <B>
      * @param <C>
      * @param <R>
-     * @param <E>
      * @param triFunction
      * @return
      */
     @Beta
-    public static <A, B, C, R, E extends Exception> TriFunction<A, B, C, R> ff(final Throwables.TriFunction<A, B, C, R, E> triFunction) {
+    public static <A, B, C, R> TriFunction<A, B, C, R> ff(final Throwables.TriFunction<A, B, C, R, ? extends Exception> triFunction) {
         N.checkArgNotNull(triFunction);
 
         return (a, b, c) -> {
@@ -4249,14 +4229,12 @@ public final class Fn extends Comparators {
      * @param <B>
      * @param <C>
      * @param <R>
-     * @param <E>
      * @param triFunction
      * @param defaultOnError
      * @return
      */
     @Beta
-    public static <A, B, C, R, E extends Exception> TriFunction<A, B, C, R> ff(final Throwables.TriFunction<A, B, C, R, E> triFunction,
-            final R defaultOnError) {
+    public static <A, B, C, R> TriFunction<A, B, C, R> ff(final Throwables.TriFunction<A, B, C, R, ? extends Exception> triFunction, final R defaultOnError) {
         N.checkArgNotNull(triFunction);
 
         return (a, b, c) -> {
@@ -4637,11 +4615,10 @@ public final class Fn extends Comparators {
     /**
      *
      *
-     * @param <E>
      * @param runnbale
      * @return
      */
-    public static <E extends Exception> Runnable rr(final Throwables.Runnable<E> runnbale) {
+    public static Runnable rr(final Throwables.Runnable<? extends Exception> runnbale) {
         return () -> {
             try {
                 runnbale.run();
@@ -4655,11 +4632,10 @@ public final class Fn extends Comparators {
      *
      *
      * @param <R>
-     * @param <E>
      * @param callable
      * @return
      */
-    public static <R, E extends Exception> Callable<R> cc(final Throwables.Callable<R, E> callable) {
+    public static <R> Callable<R> cc(final Throwables.Callable<R, ? extends Exception> callable) {
         return () -> {
             try {
                 return callable.call();
@@ -8227,11 +8203,10 @@ public final class Fn extends Comparators {
          * @param <K> the key type
          * @param <V> the value type
          * @param <T>
-         * @param <E>
          * @param f
          * @return
          */
-        public static <K, V, T, E extends Exception> Function<Map.Entry<K, V>, T> ff(final Throwables.BiFunction<? super K, ? super V, ? extends T, E> f) {
+        public static <K, V, T> Function<Map.Entry<K, V>, T> ff(final Throwables.BiFunction<? super K, ? super V, ? extends T, ? extends Exception> f) {
             N.checkArgNotNull(f, "BiFunction");
 
             return e -> {
@@ -8247,11 +8222,10 @@ public final class Fn extends Comparators {
          *
          * @param <K> the key type
          * @param <V> the value type
-         * @param <E>
          * @param p
          * @return
          */
-        public static <K, V, E extends Exception> Predicate<Map.Entry<K, V>> pp(final Throwables.BiPredicate<? super K, ? super V, E> p) {
+        public static <K, V> Predicate<Map.Entry<K, V>> pp(final Throwables.BiPredicate<? super K, ? super V, ? extends Exception> p) {
             N.checkArgNotNull(p, "BiPredicate");
 
             return e -> {
@@ -8267,11 +8241,10 @@ public final class Fn extends Comparators {
          *
          * @param <K> the key type
          * @param <V> the value type
-         * @param <E>
          * @param c
          * @return
          */
-        public static <K, V, E extends Exception> Consumer<Map.Entry<K, V>> cc(final Throwables.BiConsumer<? super K, ? super V, E> c) {
+        public static <K, V> Consumer<Map.Entry<K, V>> cc(final Throwables.BiConsumer<? super K, ? super V, ? extends Exception> c) {
             N.checkArgNotNull(c, "BiConsumer");
 
             return e -> {
@@ -12015,11 +11988,10 @@ public final class Fn extends Comparators {
          *
          *
          * @param <R>
-         * @param <E>
          * @param callable
          * @return
          */
-        public static <R, E extends Exception> java.util.concurrent.Callable<R> c2jc(final Throwables.Callable<R, E> callable) {
+        public static <R> java.util.concurrent.Callable<R> c2jc(final Throwables.Callable<R, ? extends Exception> callable) {
             N.checkArgNotNull(callable);
 
             if (callable instanceof java.util.concurrent.Callable) {

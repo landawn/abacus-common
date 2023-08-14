@@ -344,14 +344,13 @@ public final class Futures {
      * @param <T1>
      * @param <T2>
      * @param <R>
-     * @param <E>
      * @param cf1
      * @param cf2
      * @param action
      * @return
      */
-    public static <T1, T2, R, E extends Exception> ContinuableFuture<R> combine(final Future<? extends T1> cf1, final Future<? extends T2> cf2,
-            final Throwables.BiFunction<? super T1, ? super T2, ? extends R, E> action) {
+    public static <T1, T2, R> ContinuableFuture<R> combine(final Future<? extends T1> cf1, final Future<? extends T2> cf2,
+            final Throwables.BiFunction<? super T1, ? super T2, ? extends R, ? extends Exception> action) {
         return allOf(Arrays.asList(cf1, cf2)).map(t -> action.apply((T1) t.get(0), (T2) t.get(1)));
     }
 
@@ -361,15 +360,14 @@ public final class Futures {
      * @param <T2>
      * @param <T3>
      * @param <R>
-     * @param <E>
      * @param cf1
      * @param cf2
      * @param cf3
      * @param action
      * @return
      */
-    public static <T1, T2, T3, R, E extends Exception> ContinuableFuture<R> combine(final Future<? extends T1> cf1, final Future<? extends T2> cf2,
-            final Future<? extends T3> cf3, final Throwables.TriFunction<? super T1, ? super T2, ? super T3, ? extends R, E> action) {
+    public static <T1, T2, T3, R> ContinuableFuture<R> combine(final Future<? extends T1> cf1, final Future<? extends T2> cf2, final Future<? extends T3> cf3,
+            final Throwables.TriFunction<? super T1, ? super T2, ? super T3, ? extends R, ? extends Exception> action) {
         return allOf(Arrays.asList(cf1, cf2, cf3)).map(t -> action.apply((T1) t.get(0), (T2) t.get(1), (T3) t.get(2)));
     }
 
@@ -377,18 +375,17 @@ public final class Futures {
      *
      * @param <T>
      * @param <R>
-     * @param <E>
      * @param cfs
      * @param action
      * @return
      */
-    public static <T, R, E extends Exception> ContinuableFuture<R> combine(final Collection<? extends Future<? extends T>> cfs,
-            final Throwables.Function<List<T>, ? extends R, E> action) {
+    public static <T, R> ContinuableFuture<R> combine(final Collection<? extends Future<? extends T>> cfs,
+            final Throwables.Function<List<T>, ? extends R, ? extends Exception> action) {
         final ContinuableFuture<List<T>> f = allOf(cfs);
         return f.map(action);
     }
 
-    //    public static <T, R, E extends Exception> Future<R> combine(final List<? extends Future<? extends T>> cfs, final Try.Function<List<T>, ? extends R, E> action) {
+    //    public static <T, R> Future<R> combine(final List<? extends Future<? extends T>> cfs, final Try.Function<List<T>, ? extends R, ? extends Exception> action) {
     //        final Future<List<T>> future = allOf(cfs);
     //        return future.thenApply(action);
     //    }

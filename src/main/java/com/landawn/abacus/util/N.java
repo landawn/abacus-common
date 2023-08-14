@@ -27365,6 +27365,88 @@ public final class N extends CommonUtil {
      *
      * @param <T>
      * @param <E>
+     * @param a
+     * @param batchSize
+     * @param batchAction
+     * @throws E
+     */
+    public static <T, E extends Exception> void runByBatch(final T[] a, final int batchSize,
+            final Throwables.Consumer<? super List<? extends T>, E> batchAction) throws E {
+        if (N.isNullOrEmpty(a)) {
+            return;
+        }
+
+        runByBatch(Arrays.asList(a), batchSize, batchAction);
+    }
+
+    /**
+    *
+    * @param <T>
+    * @param <E>
+    * @param iter
+    * @param batchSize
+    * @param batchAction
+    * @throws E
+    */
+    public static <T, E extends Exception> void runByBatch(Iterable<? extends T> iter, final int batchSize,
+            final Throwables.Consumer<? super List<? extends T>, E> batchAction) throws E {
+        N.checkArgPositive(batchSize, "batchSize");
+        N.checkArgNotNull(batchAction, "batchAction");
+
+        if (iter == null) {
+            return;
+        }
+
+        if (iter instanceof List) {
+            final List<T> list = (List<T>) iter;
+            final int totalSize = list.size();
+
+            for (int i = 0; i < totalSize; i += batchSize) {
+                batchAction.accept(list.subList(i, N.min(i + batchSize, totalSize)));
+            }
+        } else {
+            runByBatch(iter.iterator(), batchSize, batchAction);
+        }
+    }
+
+    /**
+    *
+    * @param <T>
+    * @param <E>
+    * @param iter
+    * @param batchSize
+    * @param batchAction
+    * @throws E
+    */
+    public static <T, E extends Exception> void runByBatch(final Iterator<? extends T> iter, final int batchSize,
+            final Throwables.Consumer<? super List<? extends T>, E> batchAction) throws E {
+        N.checkArgPositive(batchSize, "batchSize");
+        N.checkArgNotNull(batchAction, "batchAction");
+
+        if (iter == null || iter.hasNext() == false) {
+            return;
+        }
+
+        final T[] a = (T[]) new Object[batchSize];
+        int cnt = 0;
+
+        while (iter.hasNext()) {
+            a[cnt++ % batchSize] = iter.next();
+
+            if (cnt % batchSize == 0) {
+                batchAction.accept(ImmutableList.of(a));
+            }
+        }
+
+        if (cnt % batchSize != 0) {
+            batchAction.accept(ImmutableList.of(N.copyOfRange(a, 0, cnt % batchSize)));
+        }
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param <E>
      * @param <E2>
      * @param a
      * @param batchSize
@@ -27375,28 +27457,11 @@ public final class N extends CommonUtil {
      */
     public static <T, E extends Exception, E2 extends Exception> void runByBatch(final T[] a, final int batchSize,
             final Throwables.Consumer<? super T, E> elementConsumer, final Throwables.Runnable<E2> batchAction) throws E, E2 {
-        N.checkArgPositive(batchSize, "batchSize");
-        N.checkArgNotNull(elementConsumer, "elementConsumer");
-        N.checkArgNotNull(batchAction, "batchAction");
-
         if (N.isNullOrEmpty(a)) {
             return;
         }
 
-        int cnt = 0;
-
-        for (T e : a) {
-            elementConsumer.accept(e);
-            cnt++;
-
-            if (cnt % batchSize == 0) {
-                batchAction.run();
-            }
-        }
-
-        if (cnt % batchSize != 0) {
-            batchAction.run();
-        }
+        runByBatch(Arrays.asList(a), batchSize, elementConsumer, batchAction);
     }
 
     /**
@@ -27413,34 +27478,16 @@ public final class N extends CommonUtil {
      */
     public static <T, E extends Exception, E2 extends Exception> void runByBatch(final Iterable<? extends T> iter, final int batchSize,
             final Throwables.Consumer<? super T, E> elementConsumer, final Throwables.Runnable<E2> batchAction) throws E, E2 {
-        N.checkArgPositive(batchSize, "batchSize");
-        N.checkArgNotNull(elementConsumer, "elementConsumer");
-        N.checkArgNotNull(batchAction, "batchAction");
-
         if (iter == null) {
             return;
         }
 
-        int cnt = 0;
-
-        for (T e : iter) {
-            elementConsumer.accept(e);
-            cnt++;
-
-            if (cnt % batchSize == 0) {
-                batchAction.run();
-            }
-        }
-
-        if (cnt % batchSize != 0) {
-            batchAction.run();
-        }
+        runByBatch(iter.iterator(), batchSize, elementConsumer, batchAction);
     }
 
     /**
      *
      * @param <T>
-     * @param <R>
      * @param <E>
      * @param <E2>
      * @param iter
@@ -27481,6 +27528,97 @@ public final class N extends CommonUtil {
      * @param <T>
      * @param <R>
      * @param <E>
+     * @param a
+     * @param batchSize
+     * @param batchAction
+     * @throws E
+     */
+    public static <T, R, E extends Exception> List<R> callByBatch(final T[] a, final int batchSize,
+            final Throwables.Function<? super List<? extends T>, R, E> batchAction) throws E {
+        if (N.isNullOrEmpty(a)) {
+            return new ArrayList<>(0);
+        }
+
+        return callByBatch(Arrays.asList(a), batchSize, batchAction);
+    }
+
+    /**
+    *
+    * @param <T>
+    * @param <R>
+    * @param <E>
+    * @param iter
+    * @param batchSize
+    * @param batchAction
+    * @throws E
+    */
+    public static <T, R, E extends Exception> List<R> callByBatch(Iterable<? extends T> iter, final int batchSize,
+            final Throwables.Function<? super List<? extends T>, R, E> batchAction) throws E {
+        N.checkArgPositive(batchSize, "batchSize");
+        N.checkArgNotNull(batchAction, "batchAction");
+
+        if (iter == null) {
+            return new ArrayList<>(0);
+        }
+
+        if (iter instanceof List) {
+            final List<T> list = (List<T>) iter;
+            final int totalSize = list.size();
+            final List<R> result = new ArrayList<>(totalSize % batchSize == 0 ? totalSize / batchSize : totalSize / batchSize + 1);
+
+            for (int i = 0; i < totalSize; i += batchSize) {
+                result.add(batchAction.apply(list.subList(i, N.min(i + batchSize, totalSize))));
+            }
+
+            return result;
+        } else {
+            return callByBatch(iter.iterator(), batchSize, batchAction);
+        }
+    }
+
+    /**
+    *
+    * @param <T>
+    * @param <R>
+    * @param <E>
+    * @param iter
+    * @param batchSize
+    * @param batchAction
+    * @throws E
+    */
+    public static <T, R, E extends Exception> List<R> callByBatch(final Iterator<? extends T> iter, final int batchSize,
+            final Throwables.Function<? super List<? extends T>, R, E> batchAction) throws E {
+        N.checkArgPositive(batchSize, "batchSize");
+        N.checkArgNotNull(batchAction, "batchAction");
+
+        if (iter == null || iter.hasNext() == false) {
+            return new ArrayList<>();
+        }
+
+        final T[] a = (T[]) new Object[batchSize];
+        final List<R> result = new ArrayList<>();
+        int cnt = 0;
+
+        while (iter.hasNext()) {
+            a[cnt++ % batchSize] = iter.next();
+
+            if (cnt % batchSize == 0) {
+                result.add(batchAction.apply(ImmutableList.of(a)));
+            }
+        }
+
+        if (cnt % batchSize != 0) {
+            result.add(batchAction.apply(ImmutableList.of(N.copyOfRange(a, 0, cnt % batchSize))));
+        }
+
+        return result;
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param <R>
+     * @param <E>
      * @param <E2>
      * @param a
      * @param batchSize
@@ -27491,31 +27629,11 @@ public final class N extends CommonUtil {
      */
     public static <T, R, E extends Exception, E2 extends Exception> List<R> callByBatch(final T[] a, final int batchSize,
             final Throwables.Consumer<? super T, E> elementConsumer, final Throwables.Callable<? extends R, E2> batchAction) throws E, E2 {
-        N.checkArgPositive(batchSize, "batchSize");
-        N.checkArgNotNull(elementConsumer, "elementConsumer");
-        N.checkArgNotNull(batchAction, "batchAction");
-
         if (N.isNullOrEmpty(a)) {
-            return new ArrayList<>();
+            return new ArrayList<>(0);
         }
 
-        final List<R> result = new ArrayList<>(a.length / batchSize + 1);
-        int cnt = 0;
-
-        for (T e : a) {
-            elementConsumer.accept(e);
-            cnt++;
-
-            if (cnt % batchSize == 0) {
-                result.add(batchAction.call());
-            }
-        }
-
-        if (cnt % batchSize != 0) {
-            result.add(batchAction.call());
-        }
-
-        return result;
+        return callByBatch(Arrays.asList(a), batchSize, elementConsumer, batchAction);
     }
 
     /**
@@ -27532,31 +27650,11 @@ public final class N extends CommonUtil {
      */
     public static <T, R, E extends Exception, E2 extends Exception> List<R> callByBatch(final Iterable<? extends T> iter, final int batchSize,
             final Throwables.Consumer<? super T, E> elementConsumer, final Throwables.Callable<? extends R, E2> batchAction) throws E, E2 {
-        N.checkArgPositive(batchSize, "batchSize");
-        N.checkArgNotNull(elementConsumer, "elementConsumer");
-        N.checkArgNotNull(batchAction, "batchAction");
-
         if (iter == null) {
-            return new ArrayList<>();
+            return new ArrayList<>(0);
         }
 
-        final List<R> result = new ArrayList<>();
-        int cnt = 0;
-
-        for (T e : iter) {
-            elementConsumer.accept(e);
-            cnt++;
-
-            if (cnt % batchSize == 0) {
-                result.add(batchAction.call());
-            }
-        }
-
-        if (cnt % batchSize != 0) {
-            result.add(batchAction.call());
-        }
-
-        return result;
+        return callByBatch(iter.iterator(), batchSize, elementConsumer, batchAction);
     }
 
     /**
@@ -28077,7 +28175,6 @@ public final class N extends CommonUtil {
      *
      * @param <T>
      * @param <R>
-     * @param <E>
      * @param init
      * @param func
      * @return
@@ -28085,8 +28182,7 @@ public final class N extends CommonUtil {
      * @see Try#call(Throwables.Function, Object)
      */
     @Beta
-    public static <T, R, E extends Exception> Nullable<R> tryOrEmptyIfExceptionOccurred(final T init,
-            final Throwables.Function<? super T, ? extends R, E> func) {
+    public static <T, R> Nullable<R> tryOrEmptyIfExceptionOccurred(final T init, final Throwables.Function<? super T, ? extends R, ? extends Exception> func) {
         try {
             return Nullable.of(func.apply(init));
         } catch (Exception e) {
@@ -28118,7 +28214,6 @@ public final class N extends CommonUtil {
      *
      * @param <T>
      * @param <R>
-     * @param <E>
      * @param init
      * @param func
      * @param defaultIfExceptionOccurred
@@ -28127,7 +28222,7 @@ public final class N extends CommonUtil {
      * @see Try#call(Throwables.Function, Object)
      */
     @Beta
-    public static <T, R, E extends Exception> R tryOrDefaultIfExceptionOccurred(final T init, final Throwables.Function<? super T, ? extends R, E> func,
+    public static <T, R> R tryOrDefaultIfExceptionOccurred(final T init, final Throwables.Function<? super T, ? extends R, ? extends Exception> func,
             final R defaultIfExceptionOccurred) {
         try {
             return func.apply(init);
@@ -28161,7 +28256,6 @@ public final class N extends CommonUtil {
      *
      * @param <T>
      * @param <R>
-     * @param <E>
      * @param init
      * @param func
      * @param supplierForDefaultIfExceptionOccurred
@@ -28171,7 +28265,7 @@ public final class N extends CommonUtil {
      * @see Try#call(Throwables.Function, Supplier)
      */
     @Beta
-    public static <T, R, E extends Exception> R tryOrDefaultIfExceptionOccurred(final T init, final Throwables.Function<? super T, ? extends R, E> func,
+    public static <T, R> R tryOrDefaultIfExceptionOccurred(final T init, final Throwables.Function<? super T, ? extends R, ? extends Exception> func,
             final Supplier<R> supplierForDefaultIfExceptionOccurred) {
         try {
             return func.apply(init);
@@ -28629,29 +28723,125 @@ public final class N extends CommonUtil {
         return unwrapped == null ? cls : unwrapped;
     }
 
+    // Boolean utilities
+    //--------------------------------------------------------------------------
+
+    @Beta
+    public static boolean isNullOrFalse(final Boolean bool) {
+        if (bool == null) {
+            return true;
+        }
+
+        return Boolean.FALSE.equals(bool);
+    }
+
+    @Beta
+    public static boolean isNullOrTrue(final Boolean bool) {
+        if (bool == null) {
+            return true;
+        }
+
+        return Boolean.TRUE.equals(bool);
+    }
+
+    //    /**
+    //     * Returns {@code 0} if the specified {@code bool} is {@code null} or {@code false}, otherwise {@code 1} is returned.
+    //     *
+    //     * @param bool
+    //     * @return
+    //     */
+    //    @Beta
+    //    public static int toIntOneZero(final Boolean bool) {
+    //        if (bool == null) {
+    //            return 0;
+    //        }
+    //
+    //        return bool.booleanValue() ? 1 : 0;
+    //    }
+    //
+    //    /**
+    //     * Returns {@code 'N'} if the specified {@code bool} is {@code null} or {@code false}, otherwise {@code 'Y'} is returned.
+    //     *
+    //     *
+    //     * @param bool
+    //     * @return
+    //     */
+    //    @Beta
+    //    public static char toCharYN(final Boolean bool) {
+    //        if (bool == null) {
+    //            return 'N';
+    //        }
+    //
+    //        return bool.booleanValue() ? 'Y' : 'N';
+    //    }
+    //
+    //    /**
+    //     * Returns {@code "no"} if the specified {@code bool} is {@code null} or {@code false}, otherwise {@code "yes"} is returned.
+    //     *
+    //     *
+    //     * @param bool
+    //     * @return
+    //     */
+    //    @Beta
+    //    public static String toStringYesNo(final Boolean bool) {
+    //        if (bool == null) {
+    //            return "no";
+    //        }
+    //
+    //        return bool.booleanValue() ? "yes" : "no";
+    //    }
+
     /**
-     * Inverts the element from {@code fromIndex} to {@code toIndex}: set it to {@code true} if it's {@code false}, or set it to {@code false} if it's {@code true}.
+     * <p>Note: copied from Apache commons Lang under Apache license v2.0 </p>
+     *
+     * <p>Negates the specified boolean.</p>
+     *
+     * <p>If {@code null} is passed in, {@code null} will be returned.</p>
+     *
+     * <p>NOTE: This returns null and will throw a NullPointerException if autoboxed to a boolean. </p>
+     *
+     * <pre>
+     *   BooleanUtils.negate(Boolean.TRUE)  = Boolean.FALSE;
+     *   BooleanUtils.negate(Boolean.FALSE) = Boolean.TRUE;
+     *   BooleanUtils.negate(null)          = null;
+     * </pre>
+     *
+     * @param bool  the Boolean to negate, may be null
+     * @return the negated Boolean, or {@code null} if {@code null} input
+     */
+    @Beta
+    public static Boolean negate(final Boolean bool) {
+        if (bool == null) {
+            return null;
+        }
+
+        return bool.booleanValue() ? Boolean.FALSE : Boolean.TRUE;
+    }
+
+    /**
+     * <p>Negates boolean values in the specified boolean array</p>
+     *
      *
      * @param a
      */
     @Beta
-    public static void invert(final boolean[] a) {
+    public static void negate(final boolean[] a) {
         if (isNullOrEmpty(a)) {
             return;
         }
 
-        invert(a, 0, a.length);
+        negate(a, 0, a.length);
     }
 
     /**
-     * Inverts the element from {@code fromIndex} to {@code toIndex}: set it to {@code true} if it's {@code false}, or set it to {@code false} if it's {@code true}.
+     * <p>Negates boolean values {@code fromIndex} to {@code toIndex} in the specified boolean array</p>
      *
      * @param a
      * @param fromIndex
      * @param toIndex
      */
     @Beta
-    public static void invert(final boolean[] a, final int fromIndex, final int toIndex) {
+    public static void negate(final boolean[] a, final int fromIndex, final int toIndex) {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (fromIndex == toIndex) {

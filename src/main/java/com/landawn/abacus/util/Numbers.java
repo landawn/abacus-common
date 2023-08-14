@@ -1348,13 +1348,16 @@ public final class Numbers {
      * @param value the long value
      * @return
      * @throws ArithmeticException if the {@code argument} overflows an int
+     * @see Math#toIntExact(long)
      */
     public static int toIntExact(long value) {
-        if (value < Integer.MIN_VALUE || value > Integer.MAX_VALUE) {
-            throw new ArithmeticException("integer overflow");
-        }
+        //    if (value < Integer.MIN_VALUE || value > Integer.MAX_VALUE) {
+        //        throw new ArithmeticException("integer overflow");
+        //    }
+        //
+        //    return (int) value;
 
-        return (int) value;
+        return Math.toIntExact(value);
     }
 
     /**
