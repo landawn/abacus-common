@@ -605,6 +605,10 @@ public final class Maps {
             return new HashMap<>();
         }
 
+        if (m instanceof SortedMap) {
+            return new LinkedHashMap<>();
+        }
+
         return N.newMap(m.getClass(), m.size());
     }
 
@@ -2395,7 +2399,7 @@ public final class Maps {
         final List<Map<K, V>> result = new ArrayList<>(maxValueSize);
 
         for (int i = 0; i < maxValueSize; i++) {
-            result.add(newOrderingMap(map));
+            result.add(newTargetMap(map));
         }
 
         K key = null;

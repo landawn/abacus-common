@@ -103,7 +103,7 @@ import com.landawn.abacus.util.stream.Stream;
  * @see com.landawn.abacus.util.IOUtil
  */
 @SuppressWarnings({ "java:S1192", "java:S6539" })
-public final class N extends CommonUtil {
+public final class N extends CommonUtil { // public final class N extends π implements ℕ, ℂ, ℚ, ℝ, ℤ { //  Error while storing the mojo status in Maven
 
     private static final int CPU_CORES = Runtime.getRuntime().availableProcessors();
 

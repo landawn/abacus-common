@@ -754,9 +754,34 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
+     */
+    @SuppressWarnings("rawtypes")
+    public SetMultimap<E, K> inverse() {
+        final SetMultimap<K, E> multimap = this;
+        final SetMultimap<E, K> res = new SetMultimap<>(Maps.newOrderingMap(valueMap), (Supplier) valueSupplier);
+
+        if (N.notNullOrEmpty(multimap)) {
+            for (Map.Entry<K, Set<E>> entry : multimap.entrySet()) {
+                final Set<E> c = entry.getValue();
+
+                if (N.notNullOrEmpty(c)) {
+                    for (E e : c) {
+                        res.put(e, entry.getKey());
+                    }
+                }
+            }
+        }
+
+        return res;
+    }
+
+    /**
+     *
+     *
+     * @return
      */
     @Override
     public SetMultimap<K, E> copy() {
@@ -774,7 +799,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      */
     @SuppressWarnings("deprecation")
     public ImmutableMap<K, ImmutableSet<E>> toImmutableMap() {
-        final Map<K, ImmutableSet<E>> map = Maps.newOrderingMap(valueMap);
+        final Map<K, ImmutableSet<E>> map = Maps.newTargetMap(valueMap);
 
         for (Map.Entry<K, Set<E>> entry : valueMap.entrySet()) {
             map.put(entry.getKey(), ImmutableSet.copyOf(entry.getValue()));

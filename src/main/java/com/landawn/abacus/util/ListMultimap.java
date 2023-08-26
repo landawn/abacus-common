@@ -755,9 +755,34 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
+     */
+    @SuppressWarnings("rawtypes")
+    public ListMultimap<E, K> inverse() {
+        final ListMultimap<K, E> multimap = this;
+        final ListMultimap<E, K> res = new ListMultimap<>(Maps.newOrderingMap(valueMap), (Supplier) valueSupplier);
+
+        if (N.notNullOrEmpty(multimap)) {
+            for (Map.Entry<K, List<E>> entry : multimap.entrySet()) {
+                final List<E> c = entry.getValue();
+
+                if (N.notNullOrEmpty(c)) {
+                    for (E e : c) {
+                        res.put(e, entry.getKey());
+                    }
+                }
+            }
+        }
+
+        return res;
+    }
+
+    /**
+     *
+     *
+     * @return
      */
     @Override
     public ListMultimap<K, E> copy() {
@@ -775,7 +800,7 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      */
     @SuppressWarnings("deprecation")
     public ImmutableMap<K, ImmutableList<E>> toImmutableMap() {
-        final Map<K, ImmutableList<E>> map = Maps.newOrderingMap(valueMap);
+        final Map<K, ImmutableList<E>> map = Maps.newTargetMap(valueMap);
 
         for (Map.Entry<K, List<E>> entry : valueMap.entrySet()) {
             map.put(entry.getKey(), ImmutableList.copyOf(entry.getValue()));

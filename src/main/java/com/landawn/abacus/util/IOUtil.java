@@ -120,30 +120,7 @@ public final class IOUtil {
         stringDecodeMethod = decodeMethod;
     }
 
-    public static final String HOST_NAME;
-
-    static {
-        String hostName = null;
-        final boolean IS_PLATFORM_ANDROID = System.getProperty("java.vendor").toUpperCase().contains("ANDROID") //NOSONAR
-                || System.getProperty("java.vm.vendor").toUpperCase().contains("ANDROID"); //NOSONAR
-
-        // implementation for android support
-        if (IS_PLATFORM_ANDROID) {
-            try {
-                hostName = Executors.newSingleThreadExecutor().submit(() -> InetAddress.getLocalHost().getHostName()).get();
-            } catch (Exception e) {
-                logger.error("Failed to get host name");
-            }
-        } else {
-            try {
-                hostName = InetAddress.getLocalHost().getHostName();
-            } catch (Exception e) {
-                logger.error("Failed to get host name");
-            }
-        }
-
-        HOST_NAME = hostName;
-    }
+    private static String hostName;
 
     public static final int CPU_CORES = Runtime.getRuntime().availableProcessors();
 
@@ -283,6 +260,36 @@ public final class IOUtil {
      */
     private IOUtil() {
         // no instance;
+    }
+
+    public static String getHostName() {
+        String ret = hostName;
+
+        if (ret == null) {
+            // This may be slow on some machine. Move it from static initialization block to method.
+
+            final boolean IS_PLATFORM_ANDROID = System.getProperty("java.vendor").toUpperCase().contains("ANDROID") //NOSONAR
+                    || System.getProperty("java.vm.vendor").toUpperCase().contains("ANDROID"); //NOSONAR
+
+            // implementation for android support
+            if (IS_PLATFORM_ANDROID) {
+                try {
+                    ret = Executors.newSingleThreadExecutor().submit(() -> InetAddress.getLocalHost().getHostName()).get();
+                } catch (Exception e) {
+                    logger.error("Failed to get host name");
+                }
+            } else {
+                try {
+                    ret = InetAddress.getLocalHost().getHostName();
+                } catch (Exception e) {
+                    logger.error("Failed to get host name");
+                }
+            }
+
+            hostName = ret;
+        }
+
+        return ret;
     }
 
     /**

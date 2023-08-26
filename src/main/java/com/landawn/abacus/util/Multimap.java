@@ -963,9 +963,9 @@ public class Multimap<K, E, V extends Collection<E>> {
      * Replace the specified {@code oldValue} (all occurrences) with the specified {@code newValue}.
      * <code>False</code> is returned if no <code>oldValue</code> is found.
      *
-     * @param key 
-     * @param oldValue 
-     * @param newValue 
+     * @param key
+     * @param oldValue
+     * @param newValue
      * @return <code>true</code> if this Multimap is modified by this operation, otherwise <code>false</code>.
      */
     public boolean replaceAll(final K key, final E oldValue, final E newValue) {
@@ -1651,9 +1651,9 @@ public class Multimap<K, E, V extends Collection<E>> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public Multimap<K, E, V> copy() {
         final Multimap<K, E, V> copy = new Multimap<>(mapSupplier, valueSupplier);
@@ -1664,12 +1664,12 @@ public class Multimap<K, E, V extends Collection<E>> {
     }
 
     /**
-     * 
      *
-     * @param <VV> 
-     * @param <M> 
-     * @param multimapSupplier 
-     * @return 
+     *
+     * @param <VV>
+     * @param <M>
+     * @param multimapSupplier
+     * @return
      */
     public <VV extends Collection<K>, M extends Multimap<E, K, VV>> M inverse(final IntFunction<? extends M> multimapSupplier) {
         final Multimap<K, E, V> multimap = this;
@@ -1691,27 +1691,27 @@ public class Multimap<K, E, V extends Collection<E>> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public Set<K> keySet() {
         return valueMap.keySet();
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public Collection<V> values() {
         return valueMap.values();
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public List<E> flatValues() {
         final List<E> result = new ArrayList<>(totalCountOfValues());
@@ -1740,21 +1740,21 @@ public class Multimap<K, E, V extends Collection<E>> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public Set<Map.Entry<K, V>> entrySet() {
         return valueMap.entrySet();
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public Map<K, V> toMap() {
-        final Map<K, V> result = Maps.newOrderingMap(valueMap);
+        final Map<K, V> result = Maps.newTargetMap(valueMap);
 
         result.putAll(valueMap);
 
@@ -1774,9 +1774,9 @@ public class Multimap<K, E, V extends Collection<E>> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public Multiset<K> toMultiset() {
         final Multiset<K> multiset = new Multiset<>(valueMap.getClass());
@@ -1814,18 +1814,18 @@ public class Multimap<K, E, V extends Collection<E>> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public Stream<Map.Entry<K, V>> stream() {
         return Stream.of(valueMap.entrySet());
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public EntryStream<K, V> entryStream() {
         return EntryStream.of(valueMap);
@@ -1839,9 +1839,9 @@ public class Multimap<K, E, V extends Collection<E>> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public int size() {
         return valueMap.size();
@@ -1908,9 +1908,9 @@ public class Multimap<K, E, V extends Collection<E>> {
     /**
      * Accept if not empty.
      *
-     * @param <X> 
-     * @param action 
-     * @return 
+     * @param <X>
+     * @param action
+     * @return
      * @throws X the x
      */
     public <X extends Exception> OrElse acceptIfNotEmpty(Throwables.Consumer<? super Multimap<K, E, V>, X> action) throws X {
@@ -1918,9 +1918,9 @@ public class Multimap<K, E, V extends Collection<E>> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public int hashCode() {
@@ -1939,9 +1939,9 @@ public class Multimap<K, E, V extends Collection<E>> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public String toString() {

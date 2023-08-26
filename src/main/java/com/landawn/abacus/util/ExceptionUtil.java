@@ -36,6 +36,7 @@ import com.landawn.abacus.exception.UncheckedInterruptedException;
 import com.landawn.abacus.exception.UncheckedParseException;
 import com.landawn.abacus.exception.UncheckedReflectiveOperationException;
 import com.landawn.abacus.exception.UncheckedSQLException;
+import com.landawn.abacus.util.u.Optional;
 
 /**
  * Note: This class contains the methods copied from Apache Commons and Google Guava under Apache License v2.
@@ -347,6 +348,43 @@ public final class ExceptionUtil {
         }
 
         return result;
+    }
+
+    /**
+     *
+     * @param <E>
+     * @param e
+     * @param targetExceptionType
+     * @return
+     */
+    public static <E extends Throwable> Optional<E> findCause(Throwable e, final Class<? extends E> targetExceptionType) {
+        while (e != null) {
+            if (targetExceptionType.isAssignableFrom(e.getClass())) {
+                return Optional.of((E) e);
+            }
+
+            e = e.getCause();
+        }
+
+        return Optional.empty();
+    }
+
+    /**
+     * @param <E>
+     * @param e
+     * @param targetExceptionTester
+     * @return
+     */
+    public static <E extends Throwable> Optional<E> findCause(Throwable e, final Predicate<? super Throwable> targetExceptionTester) {
+        while (e != null) {
+            if (targetExceptionTester.test(e)) {
+                return Optional.of((E) e);
+            }
+
+            e = e.getCause();
+        }
+
+        return Optional.empty();
     }
 
     //-----------------------------------------------------------------------
