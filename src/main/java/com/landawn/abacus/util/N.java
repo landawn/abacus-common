@@ -407,7 +407,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T>
      * @param a
      * @return
-     * @see Multiset#from(Collection)
+     * @see Multiset#create(Collection)
      */
     public static <T> Map<T, Integer> occurrencesMap(final T[] a) {
         return occurrencesMap(a, Suppliers.<T, Integer> ofMap());
@@ -419,7 +419,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a
      * @param mapSupplier
      * @return
-     * @see Multiset#from(Collection)
+     * @see Multiset#create(Collection)
      */
     public static <T> Map<T, Integer> occurrencesMap(final T[] a, final Supplier<Map<T, Integer>> mapSupplier) {
         if (isNullOrEmpty(a)) {
@@ -440,7 +440,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T>
      * @param c
      * @return
-     * @see Multiset#from(Collection)
+     * @see Multiset#create(Collection)
      */
     public static <T> Map<T, Integer> occurrencesMap(final Iterable<? extends T> c) {
         return occurrencesMap(c, Suppliers.<T, Integer> ofMap());
@@ -452,7 +452,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param c
      * @param mapSupplier
      * @return
-     * @see Multiset#from(Collection)
+     * @see Multiset#create(Collection)
      */
     public static <T> Map<T, Integer> occurrencesMap(final Iterable<? extends T> c, final Supplier<Map<T, Integer>> mapSupplier) {
         if (c == null) {
@@ -480,7 +480,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T>
      * @param iter
      * @return
-     * @see Multiset#from(Iterator)
+     * @see Multiset#create(Iterator)
      */
     public static <T> Map<T, Integer> occurrencesMap(final Iterator<? extends T> iter) {
         return occurrencesMap(iter, Suppliers.<T, Integer> ofMap());
@@ -492,7 +492,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param iter
      * @param mapSupplier
      * @return
-     * @see Multiset#from(Iterator)
+     * @see Multiset#create(Iterator)
      */
     public static <T> Map<T, Integer> occurrencesMap(final Iterator<? extends T> iter, final Supplier<Map<T, Integer>> mapSupplier) {
         if (iter == null) {
@@ -2975,7 +2975,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return new ArrayList<>();
         }
 
-        final Multiset<Object> bOccurrences = Multiset.from(b);
+        final Multiset<Object> bOccurrences = Multiset.create(b);
 
         final List<T> result = new ArrayList<>(min(9, a.size(), b.size()));
 
@@ -3231,7 +3231,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return new ArrayList<>(a);
         }
 
-        final Multiset<Object> bOccurrences = Multiset.from(b);
+        final Multiset<Object> bOccurrences = Multiset.create(b);
 
         final List<T> result = new ArrayList<>(min(a.size(), max(9, a.size() - b.size())));
 
@@ -3447,7 +3447,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return isNullOrEmpty(a) ? new ArrayList<>() : new ArrayList<>(a);
         }
 
-        final Multiset<T> bOccurrences = Multiset.from(b);
+        final Multiset<T> bOccurrences = Multiset.create(b);
         final List<T> result = new ArrayList<>(max(9, Math.abs(a.size() - b.size())));
 
         for (T e : a) {
@@ -3757,8 +3757,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return false;
         }
 
-        final Multiset<?> multisetA = Multiset.from(subColl);
-        final Multiset<?> multisetB = Multiset.from(coll);
+        final Multiset<?> multisetA = Multiset.create(subColl);
+        final Multiset<?> multisetB = Multiset.create(coll);
 
         for (final Object e : subColl) {
             if (multisetA.occurrencesOf(e) > multisetB.occurrencesOf(e)) {
@@ -3825,8 +3825,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return false;
         }
 
-        final Multiset<?> multisetA = Multiset.from(a);
-        final Multiset<?> multisetB = Multiset.from(b);
+        final Multiset<?> multisetA = Multiset.create(a);
+        final Multiset<?> multisetB = Multiset.create(b);
 
         if (multisetA.size() != multisetB.size()) {
             return false;

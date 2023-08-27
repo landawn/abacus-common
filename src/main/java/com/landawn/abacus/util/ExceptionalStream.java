@@ -4829,7 +4829,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     public ExceptionalStream<T, E> intersection(final Collection<?> c) {
         assertNotClosed();
 
-        final Multiset<?> multiset = Multiset.from(c);
+        final Multiset<?> multiset = Multiset.create(c);
 
         return filter(value -> multiset.getAndRemove(value) > 0);
     }
@@ -4846,7 +4846,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     public <U> ExceptionalStream<T, E> intersection(final Throwables.Function<? super T, ? extends U, E> mapper, final Collection<U> c) {
         assertNotClosed();
 
-        final Multiset<?> multiset = Multiset.from(c);
+        final Multiset<?> multiset = Multiset.create(c);
 
         return filter(value -> multiset.getAndRemove(mapper.apply(value)) > 0);
     }
@@ -4860,7 +4860,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     public ExceptionalStream<T, E> difference(final Collection<?> c) {
         assertNotClosed();
 
-        final Multiset<?> multiset = Multiset.from(c);
+        final Multiset<?> multiset = Multiset.create(c);
 
         return filter(value -> multiset.getAndRemove(value) < 1);
     }
@@ -4877,7 +4877,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     public <U> ExceptionalStream<T, E> difference(final Function<? super T, ? extends U> mapper, final Collection<U> c) {
         assertNotClosed();
 
-        final Multiset<?> multiset = Multiset.from(c);
+        final Multiset<?> multiset = Multiset.create(c);
 
         return filter(value -> multiset.getAndRemove(mapper.apply(value)) < 1);
     }
@@ -4891,7 +4891,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     public ExceptionalStream<T, E> symmetricDifference(final Collection<T> c) {
         assertNotClosed();
 
-        final Multiset<?> multiset = Multiset.from(c);
+        final Multiset<?> multiset = Multiset.create(c);
 
         return filter(value -> multiset.getAndRemove(value) < 1).append(ExceptionalStream.<T, E> of(c).filter(value -> multiset.getAndRemove(value) > 0));
     }

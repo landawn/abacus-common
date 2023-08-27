@@ -147,7 +147,7 @@ public final class Multiset<T> implements Iterable<T> {
      * @param coll
      * @return
      */
-    public static <T> Multiset<T> from(final Collection<? extends T> coll) {
+    public static <T> Multiset<T> create(final Collection<? extends T> coll) {
         return new Multiset<>(coll);
     }
 
@@ -157,7 +157,7 @@ public final class Multiset<T> implements Iterable<T> {
      * @param iter
      * @return
      */
-    public static <T> Multiset<T> from(final Iterator<? extends T> iter) {
+    public static <T> Multiset<T> create(final Iterator<? extends T> iter) {
         final Multiset<T> result = new Multiset<>();
 
         if (iter != null) {
@@ -189,7 +189,7 @@ public final class Multiset<T> implements Iterable<T> {
      * @param m
      * @return
      */
-    public static <T> Multiset<T> from(final Map<? extends T, Integer> m) {
+    public static <T> Multiset<T> create(final Map<? extends T, Integer> m) {
         if (N.isNullOrEmpty(m)) {
             return new Multiset<>();
         }
@@ -211,7 +211,7 @@ public final class Multiset<T> implements Iterable<T> {
      * @return
      */
     @Beta
-    public static <T, V> Multiset<T> from(final Map<? extends T, ? extends V> m, final ToIntFunction<? super V> valueMapper) {
+    public static <T, V> Multiset<T> create(final Map<? extends T, ? extends V> m, final ToIntFunction<? super V> valueMapper) {
         if (N.isNullOrEmpty(m)) {
             return new Multiset<>();
         }

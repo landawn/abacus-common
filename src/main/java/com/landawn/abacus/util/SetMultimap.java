@@ -244,13 +244,14 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
     }
 
     /**
+     * Create a new {@code SetMultimap} with the keys/values from the specified {@code map}.
      *
      * @param <K> the key type
      * @param <E>
      * @param map
      * @return
      */
-    public static <K, E> SetMultimap<K, E> from(final Map<? extends K, ? extends E> map) {
+    public static <K, E> SetMultimap<K, E> create(final Map<? extends K, ? extends E> map) {
         final SetMultimap<K, E> multimap = new SetMultimap<>(Maps.newTargetMap(map), HashSet.class);
 
         if (N.notNullOrEmpty(map)) {
@@ -411,9 +412,9 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      */
     public static <K, E> SetMultimap<K, E> concat(final Map<? extends K, ? extends E> a, final Map<? extends K, ? extends E> b) {
         if (a == null) {
-            return b == null ? N.<K, E> newSetMultimap() : from(b);
+            return b == null ? N.<K, E> newSetMultimap() : create(b);
         } else {
-            final SetMultimap<K, E> res = from(a);
+            final SetMultimap<K, E> res = create(a);
             res.putAll(b);
             return res;
         }
@@ -432,14 +433,14 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
             final Map<? extends K, ? extends E> c) {
         if (a == null) {
             if (b == null) {
-                return c == null ? N.<K, E> newSetMultimap() : from(c);
+                return c == null ? N.<K, E> newSetMultimap() : create(c);
             } else {
-                final SetMultimap<K, E> res = from(b);
+                final SetMultimap<K, E> res = create(b);
                 res.putAll(c);
                 return res;
             }
         } else {
-            final SetMultimap<K, E> res = from(a);
+            final SetMultimap<K, E> res = create(a);
             res.putAll(b);
             res.putAll(c);
             return res;
@@ -459,7 +460,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
         }
 
         final Iterator<? extends Map<? extends K, ? extends E>> iter = c.iterator();
-        final SetMultimap<K, E> res = from(iter.next());
+        final SetMultimap<K, E> res = create(iter.next());
 
         while (iter.hasNext()) {
             res.putAll(iter.next());

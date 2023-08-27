@@ -109,8 +109,8 @@ public interface EntityId {
      * @param nameValues
      * @return
      */
-    static EntityId from(Map<String, Object> nameValues) {
-        return Seid.from(nameValues);
+    static EntityId create(Map<String, Object> nameValues) {
+        return Seid.create(nameValues);
     }
 
     /**
@@ -120,7 +120,7 @@ public interface EntityId {
      * @return
      */
     @SuppressWarnings("deprecation")
-    static EntityId from(String entityName, Map<String, Object> nameValues) {
+    static EntityId create(String entityName, Map<String, Object> nameValues) {
         final Seid seid = Seid.of(entityName);
         seid.set(nameValues);
         return seid;
@@ -131,8 +131,8 @@ public interface EntityId {
      * @param entity
      * @return
      */
-    static EntityId from(Object entity) {
-        return Seid.from(entity);
+    static EntityId create(Object entity) {
+        return Seid.create(entity);
     }
 
     /**
@@ -141,8 +141,8 @@ public interface EntityId {
      * @param idPropNames
      * @return
      */
-    static EntityId from(Object entity, Collection<String> idPropNames) {
-        return Seid.from(entity, idPropNames);
+    static EntityId create(Object entity, Collection<String> idPropNames) {
+        return Seid.create(entity, idPropNames);
     }
 
     /**

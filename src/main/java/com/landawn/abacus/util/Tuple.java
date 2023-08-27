@@ -326,7 +326,7 @@ public abstract class Tuple<TP> implements Immutable {
      * @return
      */
     @Beta
-    public static <K, V> Tuple2<K, V> from(final Map.Entry<K, V> entry) {
+    public static <K, V> Tuple2<K, V> create(final Map.Entry<K, V> entry) {
         return new Tuple2<>(entry.getKey(), entry.getValue());
     }
 
@@ -338,7 +338,7 @@ public abstract class Tuple<TP> implements Immutable {
      * @return 
      */
     @Beta
-    public static <TP extends Tuple<TP>> TP from(final Object[] a) {
+    public static <TP extends Tuple<TP>> TP create(final Object[] a) {
         final int len = a == null ? 0 : a.length;
 
         Tuple<?> result = null;
@@ -399,7 +399,7 @@ public abstract class Tuple<TP> implements Immutable {
      * @return 
      */
     @Beta
-    public static <TP extends Tuple<TP>> TP from(final Collection<?> c) {
+    public static <TP extends Tuple<TP>> TP create(final Collection<?> c) {
         final int len = c == null ? 0 : c.size();
         final Iterator<?> iter = c == null ? null : c.iterator();
 

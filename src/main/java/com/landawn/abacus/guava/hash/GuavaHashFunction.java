@@ -28,18 +28,18 @@ final class GuavaHashFunction implements HashFunction {
         this.gHashFunction = gHashFunction;
     }
 
-    static GuavaHashFunction from(final com.google.common.hash.HashFunction gHashFunction) {
+    static GuavaHashFunction wrap(final com.google.common.hash.HashFunction gHashFunction) {
         return new GuavaHashFunction(gHashFunction);
     }
 
     @Override
     public Hasher newHasher() {
-        return GuavaHasher.from(gHashFunction.newHasher());
+        return GuavaHasher.wrap(gHashFunction.newHasher());
     }
 
     @Override
     public Hasher newHasher(final int expectedInputSize) {
-        return GuavaHasher.from(gHashFunction.newHasher(expectedInputSize));
+        return GuavaHasher.wrap(gHashFunction.newHasher(expectedInputSize));
     }
 
     @Override

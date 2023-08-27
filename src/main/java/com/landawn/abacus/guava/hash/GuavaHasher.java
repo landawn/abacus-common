@@ -30,7 +30,7 @@ final class GuavaHasher implements Hasher {
         this.gHasher = gHasher;
     }
 
-    static GuavaHasher from(final com.google.common.hash.Hasher gHasher) {
+    static GuavaHasher wrap(final com.google.common.hash.Hasher gHasher) {
         return new GuavaHasher(gHasher);
     }
 

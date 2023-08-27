@@ -49,7 +49,7 @@ public class Properties<K, V> implements Map<K, V> {
      * @param map
      * @return
      */
-    public static <K, V> Properties<K, V> from(final Map<? extends K, ? extends V> map) {
+    public static <K, V> Properties<K, V> create(final Map<? extends K, ? extends V> map) {
         return new Properties<>(new ConcurrentHashMap<>(map));
     }
 

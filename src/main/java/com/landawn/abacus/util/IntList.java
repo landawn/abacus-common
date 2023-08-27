@@ -133,26 +133,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
         return of(N.copyOfRange(a, fromIndex, toIndex));
     }
 
-    //    public static IntList from(String... a) {
-    //        return a == null ? new IntList() : from(a, 0, a.length);
-    //    }
-    //
-    //    public static IntList from(String[] a, int startIndex, int endIndex) {
-    //        if (a == null && (startIndex == 0 && endIndex == 0)) {
-    //            return new IntList();
-    //        }
-    //
-    //        N.checkIndex(startIndex, endIndex, a == null ? 0 : a.length);
-    //
-    //        final int[] elementData = new int[endIndex - startIndex];
-    //
-    //        for (int i = startIndex; i < endIndex; i++) {
-    //            elementData[i - startIndex] = N.parseInt(a[i]);
-    //        }
-    //
-    //        return of(elementData);
-    //    }
-
     /**
      *
      * @param c

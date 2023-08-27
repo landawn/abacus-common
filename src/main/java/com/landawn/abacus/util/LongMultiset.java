@@ -147,7 +147,7 @@ public final class LongMultiset<T> implements Iterable<T> {
      * @param coll
      * @return
      */
-    public static <T> LongMultiset<T> from(final Collection<? extends T> coll) {
+    public static <T> LongMultiset<T> create(final Collection<? extends T> coll) {
         return new LongMultiset<>(coll);
     }
 
@@ -157,7 +157,7 @@ public final class LongMultiset<T> implements Iterable<T> {
      * @param iter
      * @return
      */
-    public static <T> LongMultiset<T> from(final Iterator<? extends T> iter) {
+    public static <T> LongMultiset<T> create(final Iterator<? extends T> iter) {
         final LongMultiset<T> result = new LongMultiset<>();
 
         if (iter != null) {
@@ -189,7 +189,7 @@ public final class LongMultiset<T> implements Iterable<T> {
      * @param m
      * @return
      */
-    public static <T> LongMultiset<T> from(final Map<? extends T, Long> m) {
+    public static <T> LongMultiset<T> create(final Map<? extends T, Long> m) {
         if (N.isNullOrEmpty(m)) {
             return new LongMultiset<>();
         }
@@ -211,7 +211,7 @@ public final class LongMultiset<T> implements Iterable<T> {
      * @return
      */
     @Beta
-    public static <T, V> LongMultiset<T> from(final Map<? extends T, ? extends V> m, final ToLongFunction<? super V> valueMapper) {
+    public static <T, V> LongMultiset<T> create(final Map<? extends T, ? extends V> m, final ToLongFunction<? super V> valueMapper) {
         if (N.isNullOrEmpty(m)) {
             return new LongMultiset<>();
         }
@@ -231,7 +231,7 @@ public final class LongMultiset<T> implements Iterable<T> {
      * @param multiset
      * @return
      */
-    public static <T> LongMultiset<T> from(final Multiset<? extends T> multiset) {
+    public static <T> LongMultiset<T> create(final Multiset<? extends T> multiset) {
         if (N.isNullOrEmpty(multiset)) {
             return new LongMultiset<>();
         }

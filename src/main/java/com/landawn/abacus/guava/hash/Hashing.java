@@ -63,7 +63,7 @@ public final class Hashing {
      *     minimumBits} or greater
      */
     public static HashFunction goodFastHash(int minimumBits) {
-        return GuavaHashFunction.from(com.google.common.hash.Hashing.goodFastHash(minimumBits));
+        return GuavaHashFunction.wrap(com.google.common.hash.Hashing.goodFastHash(minimumBits));
     }
 
     /**
@@ -79,7 +79,7 @@ public final class Hashing {
      * @since 31.0
      */
     public static HashFunction murmur3_32(int seed) { //NOSONAR
-        return GuavaHashFunction.from(com.google.common.hash.Hashing.murmur3_32_fixed(seed));
+        return GuavaHashFunction.wrap(com.google.common.hash.Hashing.murmur3_32_fixed(seed));
     }
 
     /**
@@ -109,7 +109,7 @@ public final class Hashing {
      * @return
      */
     public static HashFunction murmur3_128(int seed) { //NOSONAR
-        return GuavaHashFunction.from(com.google.common.hash.Hashing.murmur3_128(seed));
+        return GuavaHashFunction.wrap(com.google.common.hash.Hashing.murmur3_128(seed));
     }
 
     /**
@@ -146,7 +146,7 @@ public final class Hashing {
      * @since 15.0
      */
     public static HashFunction sipHash24(long k0, long k1) {
-        return GuavaHashFunction.from(com.google.common.hash.Hashing.sipHash24(k0, k1));
+        return GuavaHashFunction.wrap(com.google.common.hash.Hashing.sipHash24(k0, k1));
     }
 
     /**
@@ -224,7 +224,7 @@ public final class Hashing {
      * @since 20.0
      */
     public static HashFunction hmacMd5(Key key) {
-        return GuavaHashFunction.from(com.google.common.hash.Hashing.hmacMd5(key));
+        return GuavaHashFunction.wrap(com.google.common.hash.Hashing.hmacMd5(key));
     }
 
     /**
@@ -237,7 +237,7 @@ public final class Hashing {
      * @since 20.0
      */
     public static HashFunction hmacMd5(byte[] key) {
-        return GuavaHashFunction.from(com.google.common.hash.Hashing.hmacMd5(key));
+        return GuavaHashFunction.wrap(com.google.common.hash.Hashing.hmacMd5(key));
     }
 
     /**
@@ -250,7 +250,7 @@ public final class Hashing {
      * @since 20.0
      */
     public static HashFunction hmacSha1(Key key) {
-        return GuavaHashFunction.from(com.google.common.hash.Hashing.hmacSha1(key));
+        return GuavaHashFunction.wrap(com.google.common.hash.Hashing.hmacSha1(key));
     }
 
     /**
@@ -263,7 +263,7 @@ public final class Hashing {
      * @since 20.0
      */
     public static HashFunction hmacSha1(byte[] key) {
-        return GuavaHashFunction.from(com.google.common.hash.Hashing.hmacSha1(key));
+        return GuavaHashFunction.wrap(com.google.common.hash.Hashing.hmacSha1(key));
     }
 
     /**
@@ -276,7 +276,7 @@ public final class Hashing {
      * @since 20.0
      */
     public static HashFunction hmacSha256(Key key) {
-        return GuavaHashFunction.from(com.google.common.hash.Hashing.hmacSha256(key));
+        return GuavaHashFunction.wrap(com.google.common.hash.Hashing.hmacSha256(key));
     }
 
     /**
@@ -289,7 +289,7 @@ public final class Hashing {
      * @since 20.0
      */
     public static HashFunction hmacSha256(byte[] key) {
-        return GuavaHashFunction.from(com.google.common.hash.Hashing.hmacSha256(key));
+        return GuavaHashFunction.wrap(com.google.common.hash.Hashing.hmacSha256(key));
     }
 
     /**
@@ -302,7 +302,7 @@ public final class Hashing {
      * @since 20.0
      */
     public static HashFunction hmacSha512(Key key) {
-        return GuavaHashFunction.from(com.google.common.hash.Hashing.hmacSha512(key));
+        return GuavaHashFunction.wrap(com.google.common.hash.Hashing.hmacSha512(key));
     }
 
     /**
@@ -315,7 +315,7 @@ public final class Hashing {
      * @since 20.0
      */
     public static HashFunction hmacSha512(byte[] key) {
-        return GuavaHashFunction.from(com.google.common.hash.Hashing.hmacSha512(key));
+        return GuavaHashFunction.wrap(com.google.common.hash.Hashing.hmacSha512(key));
     }
 
     /**
@@ -415,7 +415,7 @@ public final class Hashing {
             gHashFunctionList.add(((GuavaHashFunction) iter.next()).gHashFunction);
         }
 
-        return GuavaHashFunction.from(com.google.common.hash.Hashing.concatenating(gHashFunctionList));
+        return GuavaHashFunction.wrap(com.google.common.hash.Hashing.concatenating(gHashFunctionList));
     }
 
     /**
@@ -569,26 +569,26 @@ public final class Hashing {
     }
 
     private static final class Hash_Holder { //NOSONAR
-        static final HashFunction MURMUR3_32_FIXED = GuavaHashFunction.from(com.google.common.hash.Hashing.murmur3_32_fixed());
-        static final HashFunction MURMUR3_128 = GuavaHashFunction.from(com.google.common.hash.Hashing.murmur3_128());
+        static final HashFunction MURMUR3_32_FIXED = GuavaHashFunction.wrap(com.google.common.hash.Hashing.murmur3_32_fixed());
+        static final HashFunction MURMUR3_128 = GuavaHashFunction.wrap(com.google.common.hash.Hashing.murmur3_128());
 
-        static final HashFunction SIP_HASH_24 = GuavaHashFunction.from(com.google.common.hash.Hashing.sipHash24());
-
-        @SuppressWarnings("deprecation")
-        static final HashFunction MD5 = GuavaHashFunction.from(com.google.common.hash.Hashing.md5());
+        static final HashFunction SIP_HASH_24 = GuavaHashFunction.wrap(com.google.common.hash.Hashing.sipHash24());
 
         @SuppressWarnings("deprecation")
-        static final HashFunction SHA_1 = GuavaHashFunction.from(com.google.common.hash.Hashing.sha1());
-        static final HashFunction SHA_256 = GuavaHashFunction.from(com.google.common.hash.Hashing.sha256());
-        static final HashFunction SHA_384 = GuavaHashFunction.from(com.google.common.hash.Hashing.sha384());
-        static final HashFunction SHA_512 = GuavaHashFunction.from(com.google.common.hash.Hashing.sha512());
+        static final HashFunction MD5 = GuavaHashFunction.wrap(com.google.common.hash.Hashing.md5());
 
-        static final HashFunction CRC_32_C = GuavaHashFunction.from(com.google.common.hash.Hashing.crc32c());
-        static final HashFunction CRC_32 = GuavaHashFunction.from(com.google.common.hash.Hashing.crc32());
+        @SuppressWarnings("deprecation")
+        static final HashFunction SHA_1 = GuavaHashFunction.wrap(com.google.common.hash.Hashing.sha1());
+        static final HashFunction SHA_256 = GuavaHashFunction.wrap(com.google.common.hash.Hashing.sha256());
+        static final HashFunction SHA_384 = GuavaHashFunction.wrap(com.google.common.hash.Hashing.sha384());
+        static final HashFunction SHA_512 = GuavaHashFunction.wrap(com.google.common.hash.Hashing.sha512());
 
-        static final HashFunction ADLER_32 = GuavaHashFunction.from(com.google.common.hash.Hashing.adler32());
+        static final HashFunction CRC_32_C = GuavaHashFunction.wrap(com.google.common.hash.Hashing.crc32c());
+        static final HashFunction CRC_32 = GuavaHashFunction.wrap(com.google.common.hash.Hashing.crc32());
 
-        static final HashFunction FARMHASH_FINGERPRINT_64 = GuavaHashFunction.from(com.google.common.hash.Hashing.farmHashFingerprint64());
+        static final HashFunction ADLER_32 = GuavaHashFunction.wrap(com.google.common.hash.Hashing.adler32());
+
+        static final HashFunction FARMHASH_FINGERPRINT_64 = GuavaHashFunction.wrap(com.google.common.hash.Hashing.farmHashFingerprint64());
 
         private Hash_Holder() {
             // singleton for utility class.

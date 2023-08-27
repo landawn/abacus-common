@@ -116,7 +116,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
 
             @Override
             public Pair<K, V> next() {
-                return Pair.from(iter.next());
+                return Pair.create(iter.next());
             }
 
             @Override

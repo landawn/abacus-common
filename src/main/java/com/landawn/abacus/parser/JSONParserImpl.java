@@ -2916,7 +2916,7 @@ final class JSONParserImpl extends AbstractJSONParser {
                         throw new ParseException(token, getErrorMsg(jr, token) + ". Key: " + propName + ",  Value: " + jr.getText());
                     }
 
-                    properties = Properties.from(readMap(null, Map.class, jr, jdcForPropertiesElement, null, false));
+                    properties = Properties.create(readMap(null, Map.class, jr, jdcForPropertiesElement, null, false));
 
                     break;
 

@@ -123,12 +123,12 @@ public final class Enumerations {
      * @param c 
      * @return 
      */
-    public static <T> Enumeration<T> from(final Collection<? extends T> c) {
+    public static <T> Enumeration<T> create(final Collection<? extends T> c) {
         if (N.isNullOrEmpty(c)) {
             return empty();
         }
 
-        return from(c.iterator());
+        return create(c.iterator());
     }
 
     /**
@@ -138,7 +138,7 @@ public final class Enumerations {
      * @param iter 
      * @return 
      */
-    public static <T> Enumeration<T> from(final Iterator<? extends T> iter) {
+    public static <T> Enumeration<T> create(final Iterator<? extends T> iter) {
         return new Enumeration<>() {
             @Override
             public boolean hasMoreElements() {

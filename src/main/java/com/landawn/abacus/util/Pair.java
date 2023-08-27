@@ -38,7 +38,7 @@ public final class Pair<L, R> implements Mutable {
     public R right; //NOSONAR
 
     /**
-     * 
+     *
      */
     public Pair() {
     }
@@ -61,24 +61,25 @@ public final class Pair<L, R> implements Mutable {
     }
 
     /**
+     * Create a new {@code Pair} with the values from the specified {@code entry}.
      *
      * @param <K> the key type
      * @param <V> the value type
      * @param entry
      * @return
      */
-    public static <K, V> Pair<K, V> from(final Map.Entry<K, V> entry) {
+    public static <K, V> Pair<K, V> create(final Map.Entry<K, V> entry) {
         return new Pair<>(entry.getKey(), entry.getValue());
     }
 
     private static final Pair<?, ?>[] EMPTY_ARRAY = new Pair[0];
 
     /**
-     * 
      *
-     * @param <L> 
-     * @param <R> 
-     * @return 
+     *
+     * @param <L>
+     * @param <R>
+     * @return
      */
     @SuppressWarnings("unchecked")
     public static <L, R> Pair<L, R>[] emptyArray() {
@@ -306,18 +307,18 @@ public final class Pair<L, R> implements Mutable {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public Pair<L, R> copy() {
         return new Pair<>(this.left, this.right);
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public Object[] toArray() {
         return new Object[] { left, right };
@@ -420,67 +421,67 @@ public final class Pair<L, R> implements Mutable {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public Stream<Pair<L, R>> stream() {
         return Stream.of(this);
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <E> 
-     * @param func 
-     * @return 
-     * @throws E 
+     *
+     * @param <T>
+     * @param <E>
+     * @param func
+     * @return
+     * @throws E
      */
     public <T, E extends Exception> Stream<T> stream(final Throwables.Function<? super Pair<L, R>, Stream<T>, E> func) throws E {
         return func.apply(this);
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public Optional<Pair<L, R>> toOptional() {
         return Optional.of(this);
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public Tuple2<L, R> toTuple() {
         return Tuple.of(left, right);
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public Map.Entry<L, R> toEntry() {
         return new AbstractMap.SimpleEntry<>(left, right);
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public ImmutableEntry<L, R> toImmutableEntry() {
         return ImmutableEntry.of(left, right);
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public int hashCode() {
@@ -511,9 +512,9 @@ public final class Pair<L, R> implements Mutable {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public String toString() {

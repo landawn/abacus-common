@@ -189,7 +189,7 @@ public class Difference<L, R> {
         } else if (N.isNullOrEmpty(b)) {
             leftOnly.addAll(a);
         } else {
-            final Multiset<T2> bOccurrences = Multiset.from(b);
+            final Multiset<T2> bOccurrences = Multiset.create(b);
 
             for (T1 e : a) {
                 if (bOccurrences.getAndRemove(e) > 0) {

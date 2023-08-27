@@ -53,10 +53,10 @@ public class Seid implements EntityId {
     }
 
     /**
-     * 
      *
-     * @param entityName 
-     * @deprecated 
+     *
+     * @param entityName
+     * @deprecated
      */
     @Deprecated
     @Internal
@@ -69,10 +69,10 @@ public class Seid implements EntityId {
     }
 
     /**
-     * 
      *
-     * @param propName 
-     * @param propValue 
+     *
+     * @param propName
+     * @param propValue
      */
     public Seid(String propName, Object propValue) {
         this(NameUtil.getParentName(propName));
@@ -81,9 +81,9 @@ public class Seid implements EntityId {
     }
 
     /**
-     * 
      *
-     * @param nameValues 
+     *
+     * @param nameValues
      */
     public Seid(Map<String, Object> nameValues) {
         this(NameUtil.getParentName(nameValues.keySet().iterator().next()));
@@ -148,19 +148,8 @@ public class Seid implements EntityId {
      *
      * @param nameValues
      * @return
-     * @deprecated replaced by {@link #from(Map)}
      */
-    @Deprecated
-    public static Seid of(Map<String, Object> nameValues) {
-        return from(nameValues);
-    }
-
-    /**
-     *
-     * @param nameValues
-     * @return
-     */
-    public static Seid from(Map<String, Object> nameValues) {
+    public static Seid create(Map<String, Object> nameValues) {
         return new Seid(nameValues);
     }
 
@@ -169,14 +158,14 @@ public class Seid implements EntityId {
      * @param entity
      * @return
      */
-    public static Seid from(Object entity) {
+    public static Seid create(Object entity) {
         final List<String> idPropNames = Seid.getIdFieldNames(entity.getClass());
 
         if (N.isNullOrEmpty(idPropNames)) {
             throw new IllegalArgumentException("No id property defined in class: " + ClassUtil.getCanonicalClassName(entity.getClass()));
         }
 
-        return from(entity, idPropNames);
+        return create(entity, idPropNames);
     }
 
     /**
@@ -185,7 +174,7 @@ public class Seid implements EntityId {
      * @param idPropNames
      * @return
      */
-    public static Seid from(Object entity, Collection<String> idPropNames) {
+    public static Seid create(Object entity, Collection<String> idPropNames) {
         if (N.isNullOrEmpty(idPropNames)) {
             throw new IllegalArgumentException("Id property names can't be null or empty");
         }
@@ -202,9 +191,9 @@ public class Seid implements EntityId {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public String entityName() {
@@ -227,10 +216,10 @@ public class Seid implements EntityId {
     }
 
     /**
-     * 
      *
-     * @param propName 
-     * @return 
+     *
+     * @param propName
+     * @return
      */
     @Override
     public int getInt(String propName) {
@@ -239,10 +228,10 @@ public class Seid implements EntityId {
     }
 
     /**
-     * 
      *
-     * @param propName 
-     * @return 
+     *
+     * @param propName
+     * @return
      */
     @Override
     public long getLong(String propName) {
@@ -251,12 +240,12 @@ public class Seid implements EntityId {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param propName 
-     * @param targetType 
-     * @return 
+     *
+     * @param <T>
+     * @param propName
+     * @param targetType
+     * @return
      */
     @Override
     @SuppressWarnings("unchecked")
@@ -394,9 +383,9 @@ public class Seid implements EntityId {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public Set<String> keySet() {
@@ -404,9 +393,9 @@ public class Seid implements EntityId {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public Set<Entry<String, Object>> entrySet() {
@@ -414,9 +403,9 @@ public class Seid implements EntityId {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public int size() {
@@ -476,9 +465,9 @@ public class Seid implements EntityId {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public int hashCode() {
@@ -486,9 +475,9 @@ public class Seid implements EntityId {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public String toString() {

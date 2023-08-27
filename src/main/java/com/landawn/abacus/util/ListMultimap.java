@@ -245,13 +245,14 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
     }
 
     /**
+     * Create a new {@code ListMultimap} with the keys/values from the specified {@code map}.
      *
      * @param <K> the key type
      * @param <E>
      * @param map
      * @return
      */
-    public static <K, E> ListMultimap<K, E> from(final Map<? extends K, ? extends E> map) {
+    public static <K, E> ListMultimap<K, E> create(final Map<? extends K, ? extends E> map) {
         final ListMultimap<K, E> multimap = new ListMultimap<>(Maps.newTargetMap(map), ArrayList.class);
 
         if (N.notNullOrEmpty(map)) {
@@ -412,9 +413,9 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      */
     public static <K, E> ListMultimap<K, E> concat(final Map<? extends K, ? extends E> a, final Map<? extends K, ? extends E> b) {
         if (a == null) {
-            return b == null ? N.<K, E> newListMultimap() : from(b);
+            return b == null ? N.<K, E> newListMultimap() : create(b);
         } else {
-            final ListMultimap<K, E> res = from(a);
+            final ListMultimap<K, E> res = create(a);
             res.putAll(b);
             return res;
         }
@@ -433,14 +434,14 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
             final Map<? extends K, ? extends E> c) {
         if (a == null) {
             if (b == null) {
-                return c == null ? N.<K, E> newListMultimap() : from(c);
+                return c == null ? N.<K, E> newListMultimap() : create(c);
             } else {
-                final ListMultimap<K, E> res = from(b);
+                final ListMultimap<K, E> res = create(b);
                 res.putAll(c);
                 return res;
             }
         } else {
-            final ListMultimap<K, E> res = from(a);
+            final ListMultimap<K, E> res = create(a);
             res.putAll(b);
             res.putAll(c);
             return res;
@@ -460,7 +461,7 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
         }
 
         final Iterator<? extends Map<? extends K, ? extends E>> iter = c.iterator();
-        final ListMultimap<K, E> res = from(iter.next());
+        final ListMultimap<K, E> res = create(iter.next());
 
         while (iter.hasNext()) {
             res.putAll(iter.next());
