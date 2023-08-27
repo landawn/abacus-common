@@ -24,7 +24,6 @@ import java.util.function.Function;
 import java.util.function.IntFunction;
 import java.util.function.Supplier;
 
-import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.Internal;
 
 /**
@@ -262,25 +261,25 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
         return multimap;
     }
 
-    /**
-     *
-     * @param <K> the key type
-     * @param <E>
-     * @param map
-     * @return
-     */
-    @Beta
-    public static <K, E> ListMultimap<K, E> flatFrom(final Map<? extends K, ? extends Collection<? extends E>> map) {
-        final ListMultimap<K, E> multimap = new ListMultimap<>(Maps.newTargetMap(map), ArrayList.class);
-
-        if (N.notNullOrEmpty(map)) {
-            for (Map.Entry<? extends K, ? extends Collection<? extends E>> entry : map.entrySet()) {
-                multimap.putAll(entry.getKey(), entry.getValue());
-            }
-        }
-
-        return multimap;
-    }
+    //    /**
+    //     *
+    //     * @param <K> the key type
+    //     * @param <E>
+    //     * @param map
+    //     * @return
+    //     */
+    //    @Beta
+    //    public static <K, E> ListMultimap<K, E> copyOf(final Map<? extends K, ? extends Collection<? extends E>> map) {
+    //        final ListMultimap<K, E> multimap = new ListMultimap<>(Maps.newTargetMap(map), ArrayList.class);
+    //
+    //        if (N.notNullOrEmpty(map)) {
+    //            for (Map.Entry<? extends K, ? extends Collection<? extends E>> entry : map.entrySet()) {
+    //                multimap.putAll(entry.getKey(), entry.getValue());
+    //            }
+    //        }
+    //
+    //        return multimap;
+    //    }
 
     /**
      *
@@ -290,7 +289,7 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      * @param keyMapper
      * @return
      */
-    public static <T, K> ListMultimap<K, T> from(final Collection<? extends T> c, final Function<? super T, ? extends K> keyMapper) {
+    public static <T, K> ListMultimap<K, T> create(final Collection<? extends T> c, final Function<? super T, ? extends K> keyMapper) {
         N.checkArgNotNull(keyMapper);
 
         final ListMultimap<K, T> multimap = N.newListMultimap(N.size(c));
@@ -314,7 +313,7 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      * @param valueExtractor
      * @return
      */
-    public static <T, K, E> ListMultimap<K, E> from(final Collection<? extends T> c, final Function<? super T, ? extends K> keyMapper,
+    public static <T, K, E> ListMultimap<K, E> create(final Collection<? extends T> c, final Function<? super T, ? extends K> keyMapper,
             final Function<? super T, ? extends E> valueExtractor) {
         N.checkArgNotNull(keyMapper);
         N.checkArgNotNull(valueExtractor);
@@ -330,78 +329,78 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
         return multimap;
     }
 
-    /**
-     *
-     * @param <K> the key type
-     * @param <E>
-     * @param map
-     * @return
-     * @see Multimap#invertFrom(Map, Supplier)
-     */
-    public static <K, E> ListMultimap<E, K> invertFrom(final Map<K, E> map) {
-        final ListMultimap<E, K> multimap = new ListMultimap<>(Maps.newOrderingMap(map), ArrayList.class);
-
-        if (N.notNullOrEmpty(map)) {
-            for (Map.Entry<K, E> entry : map.entrySet()) {
-                multimap.put(entry.getValue(), entry.getKey());
-            }
-        }
-
-        return multimap;
-    }
-
-    /**
-     * Flat invert from.
-     *
-     * @param <K> the key type
-     * @param <E>
-     * @param map
-     * @return
-     * @see Multimap#flatInvertFrom(Map, Supplier)
-     */
-    public static <K, E> ListMultimap<E, K> flatInvertFrom(final Map<K, ? extends Collection<? extends E>> map) {
-        final ListMultimap<E, K> multimap = new ListMultimap<>(Maps.newOrderingMap(map), ArrayList.class);
-
-        if (N.notNullOrEmpty(map)) {
-            for (Map.Entry<K, ? extends Collection<? extends E>> entry : map.entrySet()) {
-                final Collection<? extends E> c = entry.getValue();
-
-                if (N.notNullOrEmpty(c)) {
-                    for (E e : c) {
-                        multimap.put(e, entry.getKey());
-                    }
-                }
-            }
-        }
-
-        return multimap;
-    }
-
-    /**
-     *
-     * @param <K> the key type
-     * @param <E>
-     * @param <V> the value type
-     * @param map
-     * @return
-     */
-    public static <K, E, V extends Collection<E>> ListMultimap<E, K> invertFrom(final Multimap<K, E, V> map) {
-        final ListMultimap<E, K> multimap = new ListMultimap<>(Maps.newOrderingMap(map.valueMap), ArrayList.class);
-
-        if (N.notNullOrEmpty(map)) {
-            for (Map.Entry<K, V> entry : map.entrySet()) {
-                final V c = entry.getValue();
-
-                if (N.notNullOrEmpty(c)) {
-                    for (E e : c) {
-                        multimap.put(e, entry.getKey());
-                    }
-                }
-            }
-        }
-
-        return multimap;
-    }
+    //    /**
+    //     *
+    //     * @param <K> the key type
+    //     * @param <E>
+    //     * @param map
+    //     * @return
+    //     * @see Multimap#invertFrom(Map, Supplier)
+    //     */
+    //    public static <K, E> ListMultimap<E, K> invertFrom(final Map<K, E> map) {
+    //        final ListMultimap<E, K> multimap = new ListMultimap<>(Maps.newOrderingMap(map), ArrayList.class);
+    //
+    //        if (N.notNullOrEmpty(map)) {
+    //            for (Map.Entry<K, E> entry : map.entrySet()) {
+    //                multimap.put(entry.getValue(), entry.getKey());
+    //            }
+    //        }
+    //
+    //        return multimap;
+    //    }
+    //
+    //    /**
+    //     * Flat invert from.
+    //     *
+    //     * @param <K> the key type
+    //     * @param <E>
+    //     * @param map
+    //     * @return
+    //     * @see Multimap#flatInvertFrom(Map, Supplier)
+    //     */
+    //    public static <K, E> ListMultimap<E, K> flatInvertFrom(final Map<K, ? extends Collection<? extends E>> map) {
+    //        final ListMultimap<E, K> multimap = new ListMultimap<>(Maps.newOrderingMap(map), ArrayList.class);
+    //
+    //        if (N.notNullOrEmpty(map)) {
+    //            for (Map.Entry<K, ? extends Collection<? extends E>> entry : map.entrySet()) {
+    //                final Collection<? extends E> c = entry.getValue();
+    //
+    //                if (N.notNullOrEmpty(c)) {
+    //                    for (E e : c) {
+    //                        multimap.put(e, entry.getKey());
+    //                    }
+    //                }
+    //            }
+    //        }
+    //
+    //        return multimap;
+    //    }
+    //
+    //    /**
+    //     *
+    //     * @param <K> the key type
+    //     * @param <E>
+    //     * @param <V> the value type
+    //     * @param map
+    //     * @return
+    //     */
+    //    public static <K, E, V extends Collection<E>> ListMultimap<E, K> invertFrom(final Multimap<K, E, V> map) {
+    //        final ListMultimap<E, K> multimap = new ListMultimap<>(Maps.newOrderingMap(map.valueMap), ArrayList.class);
+    //
+    //        if (N.notNullOrEmpty(map)) {
+    //            for (Map.Entry<K, V> entry : map.entrySet()) {
+    //                final V c = entry.getValue();
+    //
+    //                if (N.notNullOrEmpty(c)) {
+    //                    for (E e : c) {
+    //                        multimap.put(e, entry.getKey());
+    //                    }
+    //                }
+    //            }
+    //        }
+    //
+    //        return multimap;
+    //    }
 
     /**
      *

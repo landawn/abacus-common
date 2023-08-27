@@ -29,7 +29,9 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.function.IntFunction;
 import java.util.function.Supplier;
+import java.util.function.ToIntFunction;
 
+import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.Internal;
 import com.landawn.abacus.util.Fn.Suppliers;
 import com.landawn.abacus.util.If.OrElse;
@@ -195,6 +197,30 @@ public final class Multiset<T> implements Iterable<T> {
         final Multiset<T> multiset = new Multiset<>(Maps.newTargetMap(m));
 
         multiset.setAll(m);
+
+        return multiset;
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param <V>
+     * @param m
+     * @param valueMapper
+     * @return
+     */
+    @Beta
+    public static <T, V> Multiset<T> from(final Map<? extends T, ? extends V> m, final ToIntFunction<? super V> valueMapper) {
+        if (N.isNullOrEmpty(m)) {
+            return new Multiset<>();
+        }
+
+        final Multiset<T> multiset = new Multiset<>(Maps.newTargetMap(m));
+
+        for (Map.Entry<? extends T, ? extends V> entry : m.entrySet()) {
+            multiset.set(entry.getKey(), checkOccurrences(valueMapper.applyAsInt(entry.getValue())));
+        }
 
         return multiset;
     }
@@ -1874,9 +1900,11 @@ public final class Multiset<T> implements Iterable<T> {
      *
      * @param occurrences
      */
-    private static void checkOccurrences(final int occurrences) {
+    private static int checkOccurrences(final int occurrences) {
         if (occurrences < 0) {
             throw new IllegalArgumentException("The specified 'occurrences' can not be negative");
         }
+
+        return occurrences;
     }
 }
