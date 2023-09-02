@@ -2910,7 +2910,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @Beta
     @IntermediateOp
-    public <R> ExceptionalStream<R, E> flatMapp(final Throwables.Function<? super T, ? extends Stream<? extends R>, ? extends E> mapper) {
+    public <R> ExceptionalStream<R, E> flattmap(final Throwables.Function<? super T, ? extends Stream<? extends R>, ? extends E> mapper) { //NOSONAR
         assertNotClosed();
 
         final ExceptionalIterator<R, E> iter = new ExceptionalIterator<>() {

@@ -20433,18 +20433,18 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T>
      * @param <E>
      * @param a
-     * @param func
+     * @param mapper
      * @return
      * @throws E the e
      */
-    public static <T, E extends Exception> boolean[] mapToBoolean(final T[] a, final Throwables.ToBooleanFunction<? super T, E> func) throws E {
-        checkArgNotNull(func);
+    public static <T, E extends Exception> boolean[] mapToBoolean(final T[] a, final Throwables.ToBooleanFunction<? super T, E> mapper) throws E {
+        checkArgNotNull(mapper);
 
         if (isNullOrEmpty(a)) {
             return EMPTY_BOOLEAN_ARRAY;
         }
 
-        return mapToBoolean(a, 0, a.length, func);
+        return mapToBoolean(a, 0, a.length, mapper);
     }
 
     /**
@@ -20456,14 +20456,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a
      * @param fromIndex
      * @param toIndex
-     * @param func
+     * @param mapper
      * @return
      * @throws E the e
      */
     public static <T, E extends Exception> boolean[] mapToBoolean(final T[] a, final int fromIndex, final int toIndex,
-            final Throwables.ToBooleanFunction<? super T, E> func) throws E {
+            final Throwables.ToBooleanFunction<? super T, E> mapper) throws E {
         checkFromToIndex(fromIndex, toIndex, len(a));
-        checkArgNotNull(func);
+        checkArgNotNull(mapper);
 
         if (isNullOrEmpty(a) || fromIndex == toIndex) {
             return EMPTY_BOOLEAN_ARRAY;
@@ -20472,7 +20472,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         final boolean[] result = new boolean[toIndex - fromIndex];
 
         for (int i = fromIndex; i < toIndex; i++) {
-            result[i - fromIndex] = func.applyAsBoolean(a[i]);
+            result[i - fromIndex] = mapper.applyAsBoolean(a[i]);
         }
 
         return result;
@@ -20484,19 +20484,19 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T>
      * @param <E>
      * @param c
-     * @param func
+     * @param mapper
      * @return
      * @throws E the e
      */
-    public static <T, E extends Exception> boolean[] mapToBoolean(final Collection<? extends T> c, final Throwables.ToBooleanFunction<? super T, E> func)
+    public static <T, E extends Exception> boolean[] mapToBoolean(final Collection<? extends T> c, final Throwables.ToBooleanFunction<? super T, E> mapper)
             throws E {
-        checkArgNotNull(func);
+        checkArgNotNull(mapper);
 
         if (isNullOrEmpty(c)) {
             return EMPTY_BOOLEAN_ARRAY;
         }
 
-        return mapToBoolean(c, 0, c.size(), func);
+        return mapToBoolean(c, 0, c.size(), mapper);
     }
 
     /**
@@ -20508,14 +20508,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param c
      * @param fromIndex
      * @param toIndex
-     * @param func
+     * @param mapper
      * @return
      * @throws E the e
      */
     public static <T, E extends Exception> boolean[] mapToBoolean(final Collection<? extends T> c, final int fromIndex, final int toIndex,
-            final Throwables.ToBooleanFunction<? super T, E> func) throws E {
+            final Throwables.ToBooleanFunction<? super T, E> mapper) throws E {
         checkFromToIndex(fromIndex, toIndex, size(c));
-        checkArgNotNull(func);
+        checkArgNotNull(mapper);
 
         if ((isNullOrEmpty(c) && fromIndex == 0 && toIndex == 0) || fromIndex == toIndex) {
             return EMPTY_BOOLEAN_ARRAY;
@@ -20527,7 +20527,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             final List<T> list = (List<T>) c;
 
             for (int i = fromIndex; i < toIndex; i++) {
-                result[i - fromIndex] = func.applyAsBoolean(list.get(i));
+                result[i - fromIndex] = mapper.applyAsBoolean(list.get(i));
             }
         } else {
             int idx = 0;
@@ -20537,7 +20537,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
                     continue;
                 }
 
-                result[idx - fromIndex] = func.applyAsBoolean(e);
+                result[idx - fromIndex] = mapper.applyAsBoolean(e);
 
                 if (idx >= toIndex) {
                     break;
@@ -20554,18 +20554,18 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T>
      * @param <E>
      * @param a
-     * @param func
+     * @param mapper
      * @return
      * @throws E the e
      */
-    public static <T, E extends Exception> char[] mapToChar(final T[] a, final Throwables.ToCharFunction<? super T, E> func) throws E {
-        checkArgNotNull(func);
+    public static <T, E extends Exception> char[] mapToChar(final T[] a, final Throwables.ToCharFunction<? super T, E> mapper) throws E {
+        checkArgNotNull(mapper);
 
         if (isNullOrEmpty(a)) {
             return EMPTY_CHAR_ARRAY;
         }
 
-        return mapToChar(a, 0, a.length, func);
+        return mapToChar(a, 0, a.length, mapper);
     }
 
     /**
@@ -20577,14 +20577,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a
      * @param fromIndex
      * @param toIndex
-     * @param func
+     * @param mapper
      * @return
      * @throws E the e
      */
     public static <T, E extends Exception> char[] mapToChar(final T[] a, final int fromIndex, final int toIndex,
-            final Throwables.ToCharFunction<? super T, E> func) throws E {
+            final Throwables.ToCharFunction<? super T, E> mapper) throws E {
         checkFromToIndex(fromIndex, toIndex, len(a));
-        checkArgNotNull(func);
+        checkArgNotNull(mapper);
 
         if (isNullOrEmpty(a) || fromIndex == toIndex) {
             return EMPTY_CHAR_ARRAY;
@@ -20593,7 +20593,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         final char[] result = new char[toIndex - fromIndex];
 
         for (int i = fromIndex; i < toIndex; i++) {
-            result[i - fromIndex] = func.applyAsChar(a[i]);
+            result[i - fromIndex] = mapper.applyAsChar(a[i]);
         }
 
         return result;
@@ -20605,18 +20605,18 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T>
      * @param <E>
      * @param c
-     * @param func
+     * @param mapper
      * @return
      * @throws E the e
      */
-    public static <T, E extends Exception> char[] mapToChar(final Collection<? extends T> c, final Throwables.ToCharFunction<? super T, E> func) throws E {
-        checkArgNotNull(func);
+    public static <T, E extends Exception> char[] mapToChar(final Collection<? extends T> c, final Throwables.ToCharFunction<? super T, E> mapper) throws E {
+        checkArgNotNull(mapper);
 
         if (isNullOrEmpty(c)) {
             return EMPTY_CHAR_ARRAY;
         }
 
-        return mapToChar(c, 0, c.size(), func);
+        return mapToChar(c, 0, c.size(), mapper);
     }
 
     /**
@@ -20628,14 +20628,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param c
      * @param fromIndex
      * @param toIndex
-     * @param func
+     * @param mapper
      * @return
      * @throws E the e
      */
     public static <T, E extends Exception> char[] mapToChar(final Collection<? extends T> c, final int fromIndex, final int toIndex,
-            final Throwables.ToCharFunction<? super T, E> func) throws E {
+            final Throwables.ToCharFunction<? super T, E> mapper) throws E {
         checkFromToIndex(fromIndex, toIndex, size(c));
-        checkArgNotNull(func);
+        checkArgNotNull(mapper);
 
         if ((isNullOrEmpty(c) && fromIndex == 0 && toIndex == 0) || fromIndex == toIndex) {
             return EMPTY_CHAR_ARRAY;
@@ -20647,7 +20647,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             final List<T> list = (List<T>) c;
 
             for (int i = fromIndex; i < toIndex; i++) {
-                result[i - fromIndex] = func.applyAsChar(list.get(i));
+                result[i - fromIndex] = mapper.applyAsChar(list.get(i));
             }
         } else {
             int idx = 0;
@@ -20657,7 +20657,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
                     continue;
                 }
 
-                result[idx - fromIndex] = func.applyAsChar(e);
+                result[idx - fromIndex] = mapper.applyAsChar(e);
 
                 if (idx >= toIndex) {
                     break;
@@ -20674,18 +20674,18 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T>
      * @param <E>
      * @param a
-     * @param func
+     * @param mapper
      * @return
      * @throws E the e
      */
-    public static <T, E extends Exception> byte[] mapToByte(final T[] a, final Throwables.ToByteFunction<? super T, E> func) throws E {
-        checkArgNotNull(func);
+    public static <T, E extends Exception> byte[] mapToByte(final T[] a, final Throwables.ToByteFunction<? super T, E> mapper) throws E {
+        checkArgNotNull(mapper);
 
         if (isNullOrEmpty(a)) {
             return EMPTY_BYTE_ARRAY;
         }
 
-        return mapToByte(a, 0, a.length, func);
+        return mapToByte(a, 0, a.length, mapper);
     }
 
     /**
@@ -20697,14 +20697,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a
      * @param fromIndex
      * @param toIndex
-     * @param func
+     * @param mapper
      * @return
      * @throws E the e
      */
     public static <T, E extends Exception> byte[] mapToByte(final T[] a, final int fromIndex, final int toIndex,
-            final Throwables.ToByteFunction<? super T, E> func) throws E {
+            final Throwables.ToByteFunction<? super T, E> mapper) throws E {
         checkFromToIndex(fromIndex, toIndex, len(a));
-        checkArgNotNull(func);
+        checkArgNotNull(mapper);
 
         if (isNullOrEmpty(a) || fromIndex == toIndex) {
             return EMPTY_BYTE_ARRAY;
@@ -20713,7 +20713,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         final byte[] result = new byte[toIndex - fromIndex];
 
         for (int i = fromIndex; i < toIndex; i++) {
-            result[i - fromIndex] = func.applyAsByte(a[i]);
+            result[i - fromIndex] = mapper.applyAsByte(a[i]);
         }
 
         return result;
@@ -20725,18 +20725,18 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T>
      * @param <E>
      * @param c
-     * @param func
+     * @param mapper
      * @return
      * @throws E the e
      */
-    public static <T, E extends Exception> byte[] mapToByte(final Collection<? extends T> c, final Throwables.ToByteFunction<? super T, E> func) throws E {
-        checkArgNotNull(func);
+    public static <T, E extends Exception> byte[] mapToByte(final Collection<? extends T> c, final Throwables.ToByteFunction<? super T, E> mapper) throws E {
+        checkArgNotNull(mapper);
 
         if (isNullOrEmpty(c)) {
             return EMPTY_BYTE_ARRAY;
         }
 
-        return mapToByte(c, 0, c.size(), func);
+        return mapToByte(c, 0, c.size(), mapper);
     }
 
     /**
@@ -20748,14 +20748,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param c
      * @param fromIndex
      * @param toIndex
-     * @param func
+     * @param mapper
      * @return
      * @throws E the e
      */
     public static <T, E extends Exception> byte[] mapToByte(final Collection<? extends T> c, final int fromIndex, final int toIndex,
-            final Throwables.ToByteFunction<? super T, E> func) throws E {
+            final Throwables.ToByteFunction<? super T, E> mapper) throws E {
         checkFromToIndex(fromIndex, toIndex, size(c));
-        checkArgNotNull(func);
+        checkArgNotNull(mapper);
 
         if ((isNullOrEmpty(c) && fromIndex == 0 && toIndex == 0) || fromIndex == toIndex) {
             return EMPTY_BYTE_ARRAY;
@@ -20767,7 +20767,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             final List<T> list = (List<T>) c;
 
             for (int i = fromIndex; i < toIndex; i++) {
-                result[i - fromIndex] = func.applyAsByte(list.get(i));
+                result[i - fromIndex] = mapper.applyAsByte(list.get(i));
             }
         } else {
             int idx = 0;
@@ -20777,7 +20777,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
                     continue;
                 }
 
-                result[idx - fromIndex] = func.applyAsByte(e);
+                result[idx - fromIndex] = mapper.applyAsByte(e);
 
                 if (idx >= toIndex) {
                     break;
@@ -20794,18 +20794,18 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T>
      * @param <E>
      * @param a
-     * @param func
+     * @param mapper
      * @return
      * @throws E the e
      */
-    public static <T, E extends Exception> short[] mapToShort(final T[] a, final Throwables.ToShortFunction<? super T, E> func) throws E {
-        checkArgNotNull(func);
+    public static <T, E extends Exception> short[] mapToShort(final T[] a, final Throwables.ToShortFunction<? super T, E> mapper) throws E {
+        checkArgNotNull(mapper);
 
         if (isNullOrEmpty(a)) {
             return EMPTY_SHORT_ARRAY;
         }
 
-        return mapToShort(a, 0, a.length, func);
+        return mapToShort(a, 0, a.length, mapper);
     }
 
     /**
@@ -20817,14 +20817,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a
      * @param fromIndex
      * @param toIndex
-     * @param func
+     * @param mapper
      * @return
      * @throws E the e
      */
     public static <T, E extends Exception> short[] mapToShort(final T[] a, final int fromIndex, final int toIndex,
-            final Throwables.ToShortFunction<? super T, E> func) throws E {
+            final Throwables.ToShortFunction<? super T, E> mapper) throws E {
         checkFromToIndex(fromIndex, toIndex, len(a));
-        checkArgNotNull(func);
+        checkArgNotNull(mapper);
 
         if (isNullOrEmpty(a) || fromIndex == toIndex) {
             return EMPTY_SHORT_ARRAY;
@@ -20833,7 +20833,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         final short[] result = new short[toIndex - fromIndex];
 
         for (int i = fromIndex; i < toIndex; i++) {
-            result[i - fromIndex] = func.applyAsShort(a[i]);
+            result[i - fromIndex] = mapper.applyAsShort(a[i]);
         }
 
         return result;
@@ -20845,18 +20845,18 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T>
      * @param <E>
      * @param c
-     * @param func
+     * @param mapper
      * @return
      * @throws E the e
      */
-    public static <T, E extends Exception> short[] mapToShort(final Collection<? extends T> c, final Throwables.ToShortFunction<? super T, E> func) throws E {
-        checkArgNotNull(func);
+    public static <T, E extends Exception> short[] mapToShort(final Collection<? extends T> c, final Throwables.ToShortFunction<? super T, E> mapper) throws E {
+        checkArgNotNull(mapper);
 
         if (isNullOrEmpty(c)) {
             return EMPTY_SHORT_ARRAY;
         }
 
-        return mapToShort(c, 0, c.size(), func);
+        return mapToShort(c, 0, c.size(), mapper);
     }
 
     /**
@@ -20868,14 +20868,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param c
      * @param fromIndex
      * @param toIndex
-     * @param func
+     * @param mapper
      * @return
      * @throws E the e
      */
     public static <T, E extends Exception> short[] mapToShort(final Collection<? extends T> c, final int fromIndex, final int toIndex,
-            final Throwables.ToShortFunction<? super T, E> func) throws E {
+            final Throwables.ToShortFunction<? super T, E> mapper) throws E {
         checkFromToIndex(fromIndex, toIndex, size(c));
-        checkArgNotNull(func);
+        checkArgNotNull(mapper);
 
         if ((isNullOrEmpty(c) && fromIndex == 0 && toIndex == 0) || fromIndex == toIndex) {
             return EMPTY_SHORT_ARRAY;
@@ -20887,7 +20887,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             final List<T> list = (List<T>) c;
 
             for (int i = fromIndex; i < toIndex; i++) {
-                result[i - fromIndex] = func.applyAsShort(list.get(i));
+                result[i - fromIndex] = mapper.applyAsShort(list.get(i));
             }
         } else {
             int idx = 0;
@@ -20897,7 +20897,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
                     continue;
                 }
 
-                result[idx - fromIndex] = func.applyAsShort(e);
+                result[idx - fromIndex] = mapper.applyAsShort(e);
 
                 if (idx >= toIndex) {
                     break;
@@ -20914,18 +20914,18 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T>
      * @param <E>
      * @param a
-     * @param func
+     * @param mapper
      * @return
      * @throws E the e
      */
-    public static <T, E extends Exception> int[] mapToInt(final T[] a, final Throwables.ToIntFunction<? super T, E> func) throws E {
-        checkArgNotNull(func);
+    public static <T, E extends Exception> int[] mapToInt(final T[] a, final Throwables.ToIntFunction<? super T, E> mapper) throws E {
+        checkArgNotNull(mapper);
 
         if (isNullOrEmpty(a)) {
             return EMPTY_INT_ARRAY;
         }
 
-        return mapToInt(a, 0, a.length, func);
+        return mapToInt(a, 0, a.length, mapper);
     }
 
     /**
@@ -20937,14 +20937,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a
      * @param fromIndex
      * @param toIndex
-     * @param func
+     * @param mapper
      * @return
      * @throws E the e
      */
     public static <T, E extends Exception> int[] mapToInt(final T[] a, final int fromIndex, final int toIndex,
-            final Throwables.ToIntFunction<? super T, E> func) throws E {
+            final Throwables.ToIntFunction<? super T, E> mapper) throws E {
         checkFromToIndex(fromIndex, toIndex, len(a));
-        checkArgNotNull(func);
+        checkArgNotNull(mapper);
 
         if (isNullOrEmpty(a) || fromIndex == toIndex) {
             return EMPTY_INT_ARRAY;
@@ -20953,7 +20953,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         final int[] result = new int[toIndex - fromIndex];
 
         for (int i = fromIndex; i < toIndex; i++) {
-            result[i - fromIndex] = func.applyAsInt(a[i]);
+            result[i - fromIndex] = mapper.applyAsInt(a[i]);
         }
 
         return result;
@@ -20965,18 +20965,18 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T>
      * @param <E>
      * @param c
-     * @param func
+     * @param mapper
      * @return
      * @throws E the e
      */
-    public static <T, E extends Exception> int[] mapToInt(final Collection<? extends T> c, final Throwables.ToIntFunction<? super T, E> func) throws E {
-        checkArgNotNull(func);
+    public static <T, E extends Exception> int[] mapToInt(final Collection<? extends T> c, final Throwables.ToIntFunction<? super T, E> mapper) throws E {
+        checkArgNotNull(mapper);
 
         if (isNullOrEmpty(c)) {
             return EMPTY_INT_ARRAY;
         }
 
-        return mapToInt(c, 0, c.size(), func);
+        return mapToInt(c, 0, c.size(), mapper);
     }
 
     /**
@@ -20988,14 +20988,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param c
      * @param fromIndex
      * @param toIndex
-     * @param func
+     * @param mapper
      * @return
      * @throws E the e
      */
     public static <T, E extends Exception> int[] mapToInt(final Collection<? extends T> c, final int fromIndex, final int toIndex,
-            final Throwables.ToIntFunction<? super T, E> func) throws E {
+            final Throwables.ToIntFunction<? super T, E> mapper) throws E {
         checkFromToIndex(fromIndex, toIndex, size(c));
-        checkArgNotNull(func);
+        checkArgNotNull(mapper);
 
         if ((isNullOrEmpty(c) && fromIndex == 0 && toIndex == 0) || fromIndex == toIndex) {
             return EMPTY_INT_ARRAY;
@@ -21007,7 +21007,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             final List<T> list = (List<T>) c;
 
             for (int i = fromIndex; i < toIndex; i++) {
-                result[i - fromIndex] = func.applyAsInt(list.get(i));
+                result[i - fromIndex] = mapper.applyAsInt(list.get(i));
             }
         } else {
             int idx = 0;
@@ -21017,7 +21017,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
                     continue;
                 }
 
-                result[idx - fromIndex] = func.applyAsInt(e);
+                result[idx - fromIndex] = mapper.applyAsInt(e);
 
                 if (idx >= toIndex) {
                     break;
@@ -21082,18 +21082,18 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T>
      * @param <E>
      * @param a
-     * @param func
+     * @param mapper
      * @return
      * @throws E the e
      */
-    public static <T, E extends Exception> long[] mapToLong(final T[] a, final Throwables.ToLongFunction<? super T, E> func) throws E {
-        checkArgNotNull(func);
+    public static <T, E extends Exception> long[] mapToLong(final T[] a, final Throwables.ToLongFunction<? super T, E> mapper) throws E {
+        checkArgNotNull(mapper);
 
         if (isNullOrEmpty(a)) {
             return EMPTY_LONG_ARRAY;
         }
 
-        return mapToLong(a, 0, a.length, func);
+        return mapToLong(a, 0, a.length, mapper);
     }
 
     /**
@@ -21105,14 +21105,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a
      * @param fromIndex
      * @param toIndex
-     * @param func
+     * @param mapper
      * @return
      * @throws E the e
      */
     public static <T, E extends Exception> long[] mapToLong(final T[] a, final int fromIndex, final int toIndex,
-            final Throwables.ToLongFunction<? super T, E> func) throws E {
+            final Throwables.ToLongFunction<? super T, E> mapper) throws E {
         checkFromToIndex(fromIndex, toIndex, len(a));
-        checkArgNotNull(func);
+        checkArgNotNull(mapper);
 
         if (isNullOrEmpty(a) || fromIndex == toIndex) {
             return EMPTY_LONG_ARRAY;
@@ -21121,7 +21121,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         final long[] result = new long[toIndex - fromIndex];
 
         for (int i = fromIndex; i < toIndex; i++) {
-            result[i - fromIndex] = func.applyAsLong(a[i]);
+            result[i - fromIndex] = mapper.applyAsLong(a[i]);
         }
 
         return result;
@@ -21133,18 +21133,18 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T>
      * @param <E>
      * @param c
-     * @param func
+     * @param mapper
      * @return
      * @throws E the e
      */
-    public static <T, E extends Exception> long[] mapToLong(final Collection<? extends T> c, final Throwables.ToLongFunction<? super T, E> func) throws E {
-        checkArgNotNull(func);
+    public static <T, E extends Exception> long[] mapToLong(final Collection<? extends T> c, final Throwables.ToLongFunction<? super T, E> mapper) throws E {
+        checkArgNotNull(mapper);
 
         if (isNullOrEmpty(c)) {
             return EMPTY_LONG_ARRAY;
         }
 
-        return mapToLong(c, 0, c.size(), func);
+        return mapToLong(c, 0, c.size(), mapper);
     }
 
     /**
@@ -21156,14 +21156,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param c
      * @param fromIndex
      * @param toIndex
-     * @param func
+     * @param mapper
      * @return
      * @throws E the e
      */
     public static <T, E extends Exception> long[] mapToLong(final Collection<? extends T> c, final int fromIndex, final int toIndex,
-            final Throwables.ToLongFunction<? super T, E> func) throws E {
+            final Throwables.ToLongFunction<? super T, E> mapper) throws E {
         checkFromToIndex(fromIndex, toIndex, size(c));
-        checkArgNotNull(func);
+        checkArgNotNull(mapper);
 
         if ((isNullOrEmpty(c) && fromIndex == 0 && toIndex == 0) || fromIndex == toIndex) {
             return EMPTY_LONG_ARRAY;
@@ -21175,7 +21175,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             final List<T> list = (List<T>) c;
 
             for (int i = fromIndex; i < toIndex; i++) {
-                result[i - fromIndex] = func.applyAsLong(list.get(i));
+                result[i - fromIndex] = mapper.applyAsLong(list.get(i));
             }
         } else {
             int idx = 0;
@@ -21185,7 +21185,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
                     continue;
                 }
 
-                result[idx - fromIndex] = func.applyAsLong(e);
+                result[idx - fromIndex] = mapper.applyAsLong(e);
 
                 if (idx >= toIndex) {
                     break;
@@ -21250,18 +21250,18 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T>
      * @param <E>
      * @param a
-     * @param func
+     * @param mapper
      * @return
      * @throws E the e
      */
-    public static <T, E extends Exception> float[] mapToFloat(final T[] a, final Throwables.ToFloatFunction<? super T, E> func) throws E {
-        checkArgNotNull(func);
+    public static <T, E extends Exception> float[] mapToFloat(final T[] a, final Throwables.ToFloatFunction<? super T, E> mapper) throws E {
+        checkArgNotNull(mapper);
 
         if (isNullOrEmpty(a)) {
             return EMPTY_FLOAT_ARRAY;
         }
 
-        return mapToFloat(a, 0, a.length, func);
+        return mapToFloat(a, 0, a.length, mapper);
     }
 
     /**
@@ -21273,14 +21273,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a
      * @param fromIndex
      * @param toIndex
-     * @param func
+     * @param mapper
      * @return
      * @throws E the e
      */
     public static <T, E extends Exception> float[] mapToFloat(final T[] a, final int fromIndex, final int toIndex,
-            final Throwables.ToFloatFunction<? super T, E> func) throws E {
+            final Throwables.ToFloatFunction<? super T, E> mapper) throws E {
         checkFromToIndex(fromIndex, toIndex, len(a));
-        checkArgNotNull(func);
+        checkArgNotNull(mapper);
 
         if (isNullOrEmpty(a) || fromIndex == toIndex) {
             return EMPTY_FLOAT_ARRAY;
@@ -21289,7 +21289,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         final float[] result = new float[toIndex - fromIndex];
 
         for (int i = fromIndex; i < toIndex; i++) {
-            result[i - fromIndex] = func.applyAsFloat(a[i]);
+            result[i - fromIndex] = mapper.applyAsFloat(a[i]);
         }
 
         return result;
@@ -21301,18 +21301,18 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T>
      * @param <E>
      * @param c
-     * @param func
+     * @param mapper
      * @return
      * @throws E the e
      */
-    public static <T, E extends Exception> float[] mapToFloat(final Collection<? extends T> c, final Throwables.ToFloatFunction<? super T, E> func) throws E {
-        checkArgNotNull(func);
+    public static <T, E extends Exception> float[] mapToFloat(final Collection<? extends T> c, final Throwables.ToFloatFunction<? super T, E> mapper) throws E {
+        checkArgNotNull(mapper);
 
         if (isNullOrEmpty(c)) {
             return EMPTY_FLOAT_ARRAY;
         }
 
-        return mapToFloat(c, 0, c.size(), func);
+        return mapToFloat(c, 0, c.size(), mapper);
     }
 
     /**
@@ -21324,14 +21324,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param c
      * @param fromIndex
      * @param toIndex
-     * @param func
+     * @param mapper
      * @return
      * @throws E the e
      */
     public static <T, E extends Exception> float[] mapToFloat(final Collection<? extends T> c, final int fromIndex, final int toIndex,
-            final Throwables.ToFloatFunction<? super T, E> func) throws E {
+            final Throwables.ToFloatFunction<? super T, E> mapper) throws E {
         checkFromToIndex(fromIndex, toIndex, size(c));
-        checkArgNotNull(func);
+        checkArgNotNull(mapper);
 
         if ((isNullOrEmpty(c) && fromIndex == 0 && toIndex == 0) || fromIndex == toIndex) {
             return EMPTY_FLOAT_ARRAY;
@@ -21343,7 +21343,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             final List<T> list = (List<T>) c;
 
             for (int i = fromIndex; i < toIndex; i++) {
-                result[i - fromIndex] = func.applyAsFloat(list.get(i));
+                result[i - fromIndex] = mapper.applyAsFloat(list.get(i));
             }
         } else {
             int idx = 0;
@@ -21353,7 +21353,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
                     continue;
                 }
 
-                result[idx - fromIndex] = func.applyAsFloat(e);
+                result[idx - fromIndex] = mapper.applyAsFloat(e);
 
                 if (idx >= toIndex) {
                     break;
@@ -21370,18 +21370,18 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T>
      * @param <E>
      * @param a
-     * @param func
+     * @param mapper
      * @return
      * @throws E the e
      */
-    public static <T, E extends Exception> double[] mapToDouble(final T[] a, final Throwables.ToDoubleFunction<? super T, E> func) throws E {
-        checkArgNotNull(func);
+    public static <T, E extends Exception> double[] mapToDouble(final T[] a, final Throwables.ToDoubleFunction<? super T, E> mapper) throws E {
+        checkArgNotNull(mapper);
 
         if (isNullOrEmpty(a)) {
             return EMPTY_DOUBLE_ARRAY;
         }
 
-        return mapToDouble(a, 0, a.length, func);
+        return mapToDouble(a, 0, a.length, mapper);
     }
 
     /**
@@ -21393,14 +21393,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a
      * @param fromIndex
      * @param toIndex
-     * @param func
+     * @param mapper
      * @return
      * @throws E the e
      */
     public static <T, E extends Exception> double[] mapToDouble(final T[] a, final int fromIndex, final int toIndex,
-            final Throwables.ToDoubleFunction<? super T, E> func) throws E {
+            final Throwables.ToDoubleFunction<? super T, E> mapper) throws E {
         checkFromToIndex(fromIndex, toIndex, len(a));
-        checkArgNotNull(func);
+        checkArgNotNull(mapper);
 
         if (isNullOrEmpty(a) || fromIndex == toIndex) {
             return EMPTY_DOUBLE_ARRAY;
@@ -21409,7 +21409,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         final double[] result = new double[toIndex - fromIndex];
 
         for (int i = fromIndex; i < toIndex; i++) {
-            result[i - fromIndex] = func.applyAsDouble(a[i]);
+            result[i - fromIndex] = mapper.applyAsDouble(a[i]);
         }
 
         return result;
@@ -21421,19 +21421,19 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T>
      * @param <E>
      * @param c
-     * @param func
+     * @param mapper
      * @return
      * @throws E the e
      */
-    public static <T, E extends Exception> double[] mapToDouble(final Collection<? extends T> c, final Throwables.ToDoubleFunction<? super T, E> func)
+    public static <T, E extends Exception> double[] mapToDouble(final Collection<? extends T> c, final Throwables.ToDoubleFunction<? super T, E> mapper)
             throws E {
-        checkArgNotNull(func);
+        checkArgNotNull(mapper);
 
         if (isNullOrEmpty(c)) {
             return EMPTY_DOUBLE_ARRAY;
         }
 
-        return mapToDouble(c, 0, c.size(), func);
+        return mapToDouble(c, 0, c.size(), mapper);
     }
 
     /**
@@ -21445,14 +21445,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param c
      * @param fromIndex
      * @param toIndex
-     * @param func
+     * @param mapper
      * @return
      * @throws E the e
      */
     public static <T, E extends Exception> double[] mapToDouble(final Collection<? extends T> c, final int fromIndex, final int toIndex,
-            final Throwables.ToDoubleFunction<? super T, E> func) throws E {
+            final Throwables.ToDoubleFunction<? super T, E> mapper) throws E {
         checkFromToIndex(fromIndex, toIndex, size(c));
-        checkArgNotNull(func);
+        checkArgNotNull(mapper);
 
         if ((isNullOrEmpty(c) && fromIndex == 0 && toIndex == 0) || fromIndex == toIndex) {
             return EMPTY_DOUBLE_ARRAY;
@@ -21464,7 +21464,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             final List<T> list = (List<T>) c;
 
             for (int i = fromIndex; i < toIndex; i++) {
-                result[i - fromIndex] = func.applyAsDouble(list.get(i));
+                result[i - fromIndex] = mapper.applyAsDouble(list.get(i));
             }
         } else {
             int idx = 0;
@@ -21474,7 +21474,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
                     continue;
                 }
 
-                result[idx - fromIndex] = func.applyAsDouble(e);
+                result[idx - fromIndex] = mapper.applyAsDouble(e);
 
                 if (idx >= toIndex) {
                     break;
@@ -21539,18 +21539,18 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <R>
      * @param <E>
      * @param a
-     * @param func
+     * @param mapper
      * @return
      * @throws E the e
      */
-    public static <T, R, E extends Exception> List<R> map(final T[] a, final Throwables.Function<? super T, ? extends R, E> func) throws E {
-        checkArgNotNull(func);
+    public static <T, R, E extends Exception> List<R> map(final T[] a, final Throwables.Function<? super T, ? extends R, E> mapper) throws E {
+        checkArgNotNull(mapper);
 
         if (isNullOrEmpty(a)) {
             return new ArrayList<>();
         }
 
-        return map(a, 0, a.length, func);
+        return map(a, 0, a.length, mapper);
     }
 
     /**
@@ -21560,20 +21560,20 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <C>
      * @param <E>
      * @param a
-     * @param func
+     * @param mapper
      * @param supplier
      * @return
      * @throws E the e
      */
-    public static <T, R, C extends Collection<R>, E extends Exception> C map(final T[] a, final Throwables.Function<? super T, ? extends R, E> func,
+    public static <T, R, C extends Collection<R>, E extends Exception> C map(final T[] a, final Throwables.Function<? super T, ? extends R, E> mapper,
             final IntFunction<? extends C> supplier) throws E {
-        checkArgNotNull(func);
+        checkArgNotNull(mapper);
 
         if (isNullOrEmpty(a)) {
             return supplier.apply(0);
         }
 
-        return map(a, 0, a.length, func, supplier);
+        return map(a, 0, a.length, mapper, supplier);
     }
 
     /**
@@ -21586,13 +21586,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a
      * @param fromIndex
      * @param toIndex
-     * @param func
+     * @param mapper
      * @return
      * @throws E the e
      */
     public static <T, R, E extends Exception> List<R> map(final T[] a, final int fromIndex, final int toIndex,
-            final Throwables.Function<? super T, ? extends R, E> func) throws E {
-        return map(a, fromIndex, toIndex, func, Factory.ofList());
+            final Throwables.Function<? super T, ? extends R, E> mapper) throws E {
+        return map(a, fromIndex, toIndex, mapper, Factory.ofList());
     }
 
     /**
@@ -21606,15 +21606,15 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a
      * @param fromIndex
      * @param toIndex
-     * @param func
+     * @param mapper
      * @param supplier
      * @return
      * @throws E the e
      */
     public static <T, R, C extends Collection<R>, E extends Exception> C map(final T[] a, final int fromIndex, final int toIndex,
-            final Throwables.Function<? super T, ? extends R, E> func, final IntFunction<? extends C> supplier) throws E {
+            final Throwables.Function<? super T, ? extends R, E> mapper, final IntFunction<? extends C> supplier) throws E {
         checkFromToIndex(fromIndex, toIndex, len(a));
-        checkArgNotNull(func);
+        checkArgNotNull(mapper);
 
         if (isNullOrEmpty(a) || fromIndex == toIndex) {
             return supplier.apply(0);
@@ -21623,7 +21623,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         final C result = supplier.apply(toIndex - fromIndex);
 
         for (int i = fromIndex; i < toIndex; i++) {
-            result.add(func.apply(a[i]));
+            result.add(mapper.apply(a[i]));
         }
 
         return result;
@@ -21635,12 +21635,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <R>
      * @param <E>
      * @param c
-     * @param func
+     * @param mapper
      * @return
      * @throws E the e
      */
-    public static <T, R, E extends Exception> List<R> map(final Iterable<? extends T> c, final Throwables.Function<? super T, ? extends R, E> func) throws E {
-        return map(c, func, Factory.ofList());
+    public static <T, R, E extends Exception> List<R> map(final Iterable<? extends T> c, final Throwables.Function<? super T, ? extends R, E> mapper) throws E {
+        return map(c, mapper, Factory.ofList());
     }
 
     /**
@@ -21650,14 +21650,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <C>
      * @param <E>
      * @param c
-     * @param func
+     * @param mapper
      * @param supplier
      * @return
      * @throws E the e
      */
     public static <T, R, C extends Collection<R>, E extends Exception> C map(final Iterable<? extends T> c,
-            final Throwables.Function<? super T, ? extends R, E> func, final IntFunction<? extends C> supplier) throws E {
-        checkArgNotNull(func);
+            final Throwables.Function<? super T, ? extends R, E> mapper, final IntFunction<? extends C> supplier) throws E {
+        checkArgNotNull(mapper);
 
         if (c == null) {
             return supplier.apply(0);
@@ -21666,7 +21666,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         final C result = supplier.apply(getSizeOrDefault(c, 0));
 
         for (T e : c) {
-            result.add(func.apply(e));
+            result.add(mapper.apply(e));
         }
 
         return result;
@@ -21682,13 +21682,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param c
      * @param fromIndex
      * @param toIndex
-     * @param func
+     * @param mapper
      * @return
      * @throws E the e
      */
     public static <T, R, E extends Exception> List<R> map(final Collection<? extends T> c, final int fromIndex, final int toIndex,
-            final Throwables.Function<? super T, ? extends R, E> func) throws E {
-        return map(c, fromIndex, toIndex, func, Factory.ofList());
+            final Throwables.Function<? super T, ? extends R, E> mapper) throws E {
+        return map(c, fromIndex, toIndex, mapper, Factory.ofList());
     }
 
     /**
@@ -21702,15 +21702,15 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param c
      * @param fromIndex
      * @param toIndex
-     * @param func
+     * @param mapper
      * @param supplier
      * @return
      * @throws E the e
      */
     public static <T, R, C extends Collection<R>, E extends Exception> C map(final Collection<? extends T> c, final int fromIndex, final int toIndex,
-            final Throwables.Function<? super T, ? extends R, E> func, final IntFunction<? extends C> supplier) throws E {
+            final Throwables.Function<? super T, ? extends R, E> mapper, final IntFunction<? extends C> supplier) throws E {
         checkFromToIndex(fromIndex, toIndex, size(c));
-        checkArgNotNull(func);
+        checkArgNotNull(mapper);
 
         if ((isNullOrEmpty(c) && fromIndex == 0 && toIndex == 0) || fromIndex == toIndex) {
             return supplier.apply(0);
@@ -21722,7 +21722,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             final List<T> list = (List<T>) c;
 
             for (int i = fromIndex; i < toIndex; i++) {
-                result.add(func.apply(list.get(i)));
+                result.add(mapper.apply(list.get(i)));
             }
         } else {
             int idx = 0;
@@ -21732,7 +21732,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
                     continue;
                 }
 
-                result.add(func.apply(e));
+                result.add(mapper.apply(e));
 
                 if (idx >= toIndex) {
                     break;
@@ -21752,15 +21752,15 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //     * @return
     //     * @see {@code Iterators.map(Iterator, Function)}
     //     */
-    //    public static <T, R, E extends Exception> List<R> map(final Iterator<? extends T> iter, final Throwables.Function<? super T, ? extends R, E> func)
+    //    public static <T, R, E extends Exception> List<R> map(final Iterator<? extends T> iter, final Throwables.Function<? super T, ? extends R, E> mapper)
     //            throws E {
-    //        return map(iter, 0, Integer.MAX_VALUE, func);
+    //        return map(iter, 0, Integer.MAX_VALUE, mapper);
     //    }
     //
     //    public static <T, R, E extends Exception> List<R> map(final Iterator<? extends T> iter, final int fromIndex, final int toIndex,
-    //            final Throwables.Function<? super T, ? extends R, E> func) throws E {
+    //            final Throwables.Function<? super T, ? extends R, E> mapper) throws E {
     //        checkFromToIndex(fromIndex, toIndex, Integer.MAX_VALUE);
-    //        checkArgNotNull(func);
+    //        checkArgNotNull(mapper);
     //
     //        if (iter == null || fromIndex == toIndex) {
     //            return new ArrayList<>();
@@ -21778,7 +21778,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //                continue;
     //            }
     //
-    //            result.add(func.apply(e));
+    //            result.add(mapper.apply(e));
     //
     //            if (idx >= toIndex) {
     //                break;
@@ -21794,19 +21794,19 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <R>
      * @param <E>
      * @param a
-     * @param func
+     * @param mapper
      * @return
      * @throws E the e
      */
-    public static <T, R, E extends Exception> List<R> flatMap(final T[] a, final Throwables.Function<? super T, ? extends Collection<? extends R>, E> func)
+    public static <T, R, E extends Exception> List<R> flatMap(final T[] a, final Throwables.Function<? super T, ? extends Collection<? extends R>, E> mapper)
             throws E {
-        checkArgNotNull(func);
+        checkArgNotNull(mapper);
 
         if (isNullOrEmpty(a)) {
             return new ArrayList<>();
         }
 
-        return flatMap(a, 0, a.length, func);
+        return flatMap(a, 0, a.length, mapper);
     }
 
     /**
@@ -21816,20 +21816,20 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <C>
      * @param <E>
      * @param a
-     * @param func
+     * @param mapper
      * @param supplier
      * @return
      * @throws E the e
      */
     public static <T, R, C extends Collection<R>, E extends Exception> C flatMap(final T[] a,
-            final Throwables.Function<? super T, ? extends Collection<? extends R>, E> func, final IntFunction<? extends C> supplier) throws E {
-        checkArgNotNull(func);
+            final Throwables.Function<? super T, ? extends Collection<? extends R>, E> mapper, final IntFunction<? extends C> supplier) throws E {
+        checkArgNotNull(mapper);
 
         if (isNullOrEmpty(a)) {
             return supplier.apply(0);
         }
 
-        return flatMap(a, 0, a.length, func, supplier);
+        return flatMap(a, 0, a.length, mapper, supplier);
     }
 
     /**
@@ -21842,13 +21842,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a
      * @param fromIndex
      * @param toIndex
-     * @param func
+     * @param mapper
      * @return
      * @throws E the e
      */
     public static <T, R, E extends Exception> List<R> flatMap(final T[] a, final int fromIndex, final int toIndex,
-            final Throwables.Function<? super T, ? extends Collection<? extends R>, E> func) throws E {
-        return flatMap(a, fromIndex, toIndex, func, Factory.ofList());
+            final Throwables.Function<? super T, ? extends Collection<? extends R>, E> mapper) throws E {
+        return flatMap(a, fromIndex, toIndex, mapper, Factory.ofList());
     }
 
     /**
@@ -21862,15 +21862,15 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a
      * @param fromIndex
      * @param toIndex
-     * @param func
+     * @param mapper
      * @param supplier
      * @return
      * @throws E the e
      */
     public static <T, R, C extends Collection<R>, E extends Exception> C flatMap(final T[] a, final int fromIndex, final int toIndex,
-            final Throwables.Function<? super T, ? extends Collection<? extends R>, E> func, final IntFunction<? extends C> supplier) throws E {
+            final Throwables.Function<? super T, ? extends Collection<? extends R>, E> mapper, final IntFunction<? extends C> supplier) throws E {
         checkFromToIndex(fromIndex, toIndex, len(a));
-        checkArgNotNull(func);
+        checkArgNotNull(mapper);
 
         if (isNullOrEmpty(a) || fromIndex == toIndex) {
             return supplier.apply(0);
@@ -21881,7 +21881,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         Collection<? extends R> mr = null;
 
         for (int i = fromIndex; i < toIndex; i++) {
-            if (notNullOrEmpty(mr = func.apply(a[i]))) {
+            if (notNullOrEmpty(mr = mapper.apply(a[i]))) {
                 result.addAll(mr);
             }
         }
@@ -21899,13 +21899,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param c
      * @param fromIndex
      * @param toIndex
-     * @param func
+     * @param mapper
      * @return
      * @throws E the e
      */
     public static <T, R, E extends Exception> List<R> flatMap(final Collection<? extends T> c, final int fromIndex, final int toIndex,
-            final Throwables.Function<? super T, ? extends Collection<? extends R>, E> func) throws E {
-        return flatMap(c, fromIndex, toIndex, func, Factory.<R> ofList());
+            final Throwables.Function<? super T, ? extends Collection<? extends R>, E> mapper) throws E {
+        return flatMap(c, fromIndex, toIndex, mapper, Factory.<R> ofList());
     }
 
     /**
@@ -21919,15 +21919,15 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param c
      * @param fromIndex
      * @param toIndex
-     * @param func
+     * @param mapper
      * @param supplier
      * @return
      * @throws E the e
      */
     public static <T, R, C extends Collection<R>, E extends Exception> C flatMap(final Collection<? extends T> c, final int fromIndex, final int toIndex,
-            final Throwables.Function<? super T, ? extends Collection<? extends R>, E> func, final IntFunction<? extends C> supplier) throws E {
+            final Throwables.Function<? super T, ? extends Collection<? extends R>, E> mapper, final IntFunction<? extends C> supplier) throws E {
         checkFromToIndex(fromIndex, toIndex, size(c));
-        checkArgNotNull(func);
+        checkArgNotNull(mapper);
 
         if ((isNullOrEmpty(c) && fromIndex == 0 && toIndex == 0) || fromIndex == toIndex) {
             return supplier.apply(0);
@@ -21941,7 +21941,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             final List<T> list = (List<T>) c;
 
             for (int i = fromIndex; i < toIndex; i++) {
-                if (notNullOrEmpty(mr = func.apply(list.get(i)))) {
+                if (notNullOrEmpty(mr = mapper.apply(list.get(i)))) {
                     result.addAll(mr);
                 }
             }
@@ -21953,7 +21953,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
                     continue;
                 }
 
-                if (notNullOrEmpty(mr = func.apply(e))) {
+                if (notNullOrEmpty(mr = mapper.apply(e))) {
                     result.addAll(mr);
                 }
 
@@ -21972,13 +21972,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <R>
      * @param <E>
      * @param c
-     * @param func
+     * @param mapper
      * @return
      * @throws E the e
      */
     public static <T, R, E extends Exception> List<R> flatMap(final Iterable<? extends T> c,
-            final Throwables.Function<? super T, ? extends Collection<? extends R>, E> func) throws E {
-        return flatMap(c, func, Factory.<R> ofList());
+            final Throwables.Function<? super T, ? extends Collection<? extends R>, E> mapper) throws E {
+        return flatMap(c, mapper, Factory.<R> ofList());
     }
 
     /**
@@ -21988,14 +21988,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <C>
      * @param <E>
      * @param c
-     * @param func
+     * @param mapper
      * @param supplier
      * @return
      * @throws E the e
      */
     public static <T, R, C extends Collection<R>, E extends Exception> C flatMap(final Iterable<? extends T> c,
-            final Throwables.Function<? super T, ? extends Collection<? extends R>, E> func, final IntFunction<? extends C> supplier) throws E {
-        checkArgNotNull(func);
+            final Throwables.Function<? super T, ? extends Collection<? extends R>, E> mapper, final IntFunction<? extends C> supplier) throws E {
+        checkArgNotNull(mapper);
 
         if (c == null) {
             return supplier.apply(0);
@@ -22005,7 +22005,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         Collection<? extends R> mr = null;
 
         for (T e : c) {
-            if (notNullOrEmpty(mr = func.apply(e))) {
+            if (notNullOrEmpty(mr = mapper.apply(e))) {
                 result.addAll(mr);
             }
         }
@@ -22023,14 +22023,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //     * @see {@code Iterators.flatMap(Iterator, Function)}
     //     */
     //    public static <T, R, E extends Exception> List<R> flatMap(final Iterator<? extends T> iter,
-    //            final Throwables.Function<? super T, ? extends Collection<? extends R>, E> func) throws E {
-    //        return flatMap(iter, 0, Integer.MAX_VALUE, func);
+    //            final Throwables.Function<? super T, ? extends Collection<? extends R>, E> mapper) throws E {
+    //        return flatMap(iter, 0, Integer.MAX_VALUE, mapper);
     //    }
     //
     //    public static <T, R, E extends Exception> List<R> flatMap(final Iterator<? extends T> iter, final int fromIndex, final int toIndex,
-    //            final Throwables.Function<? super T, ? extends Collection<? extends R>, E> func) throws E {
+    //            final Throwables.Function<? super T, ? extends Collection<? extends R>, E> mapper) throws E {
     //        checkFromToIndex(fromIndex, toIndex, Integer.MAX_VALUE);
-    //        checkArgNotNull(func);
+    //        checkArgNotNull(mapper);
     //
     //        if (iter == null || fromIndex == toIndex) {
     //            return new ArrayList<>();
@@ -22049,7 +22049,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //                continue;
     //            }
     //
-    //            if (notNullOrEmpty(mr = func.apply(e))) {
+    //            if (notNullOrEmpty(mr = mapper.apply(e))) {
     //                result.addAll(mr);
     //            }
     //
@@ -22070,17 +22070,17 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <E>
      * @param <E2>
      * @param a
-     * @param func
-     * @param func2
+     * @param mapper
+     * @param mapper2
      * @return
      * @throws E the e
      * @throws E2 the e2
      */
     public static <T, U, R, E extends Exception, E2 extends Exception> List<R> flatMap(final T[] a,
-            final Throwables.Function<? super T, ? extends Collection<? extends U>, E> func,
-            final Throwables.Function<? super U, ? extends Collection<? extends R>, E2> func2) throws E, E2 {
+            final Throwables.Function<? super T, ? extends Collection<? extends U>, E> mapper,
+            final Throwables.Function<? super U, ? extends Collection<? extends R>, E2> mapper2) throws E, E2 {
 
-        return flatMap(a, func, func2, Factory.<R> ofList());
+        return flatMap(a, mapper, mapper2, Factory.<R> ofList());
     }
 
     /**
@@ -22094,18 +22094,18 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <E>
      * @param <E2>
      * @param a
-     * @param func
-     * @param func2
+     * @param mapper
+     * @param mapper2
      * @param supplier
      * @return
      * @throws E the e
      * @throws E2 the e2
      */
     public static <T, U, R, C extends Collection<R>, E extends Exception, E2 extends Exception> C flatMap(final T[] a,
-            final Throwables.Function<? super T, ? extends Collection<? extends U>, E> func,
-            final Throwables.Function<? super U, ? extends Collection<? extends R>, E2> func2, final IntFunction<? extends C> supplier) throws E, E2 {
-        checkArgNotNull(func);
-        checkArgNotNull(func2);
+            final Throwables.Function<? super T, ? extends Collection<? extends U>, E> mapper,
+            final Throwables.Function<? super U, ? extends Collection<? extends R>, E2> mapper2, final IntFunction<? extends C> supplier) throws E, E2 {
+        checkArgNotNull(mapper);
+        checkArgNotNull(mapper2);
 
         if (isNullOrEmpty(a)) {
             return supplier.apply(0);
@@ -22115,11 +22115,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
         final C result = supplier.apply(len);
 
         for (T e : a) {
-            final Collection<? extends U> c1 = func.apply(e);
+            final Collection<? extends U> c1 = mapper.apply(e);
 
             if (notNullOrEmpty(c1)) {
                 for (U e2 : c1) {
-                    final Collection<? extends R> c2 = func2.apply(e2);
+                    final Collection<? extends R> c2 = mapper2.apply(e2);
 
                     if (notNullOrEmpty(c2)) {
                         result.addAll(c2);
@@ -22140,17 +22140,17 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <E>
      * @param <E2>
      * @param c
-     * @param func
-     * @param func2
+     * @param mapper
+     * @param mapper2
      * @return
      * @throws E the e
      * @throws E2 the e2
      */
     public static <T, U, R, E extends Exception, E2 extends Exception> List<R> flatMap(final Iterable<? extends T> c,
-            final Throwables.Function<? super T, ? extends Collection<? extends U>, E> func,
-            final Throwables.Function<? super U, ? extends Collection<? extends R>, E2> func2) throws E, E2 {
+            final Throwables.Function<? super T, ? extends Collection<? extends U>, E> mapper,
+            final Throwables.Function<? super U, ? extends Collection<? extends R>, E2> mapper2) throws E, E2 {
 
-        return flatMap(c, func, func2, Factory.<R> ofList());
+        return flatMap(c, mapper, mapper2, Factory.<R> ofList());
     }
 
     /**
@@ -22164,18 +22164,18 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <E>
      * @param <E2>
      * @param c
-     * @param func
-     * @param func2
+     * @param mapper
+     * @param mapper2
      * @param supplier
      * @return
      * @throws E the e
      * @throws E2 the e2
      */
     public static <T, U, R, C extends Collection<R>, E extends Exception, E2 extends Exception> C flatMap(final Iterable<? extends T> c,
-            final Throwables.Function<? super T, ? extends Collection<? extends U>, E> func,
-            final Throwables.Function<? super U, ? extends Collection<? extends R>, E2> func2, final IntFunction<? extends C> supplier) throws E, E2 {
-        checkArgNotNull(func);
-        checkArgNotNull(func2);
+            final Throwables.Function<? super T, ? extends Collection<? extends U>, E> mapper,
+            final Throwables.Function<? super U, ? extends Collection<? extends R>, E2> mapper2, final IntFunction<? extends C> supplier) throws E, E2 {
+        checkArgNotNull(mapper);
+        checkArgNotNull(mapper2);
 
         if (c == null) {
             return supplier.apply(0);
@@ -22184,11 +22184,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
         final C result = supplier.apply(initSizeForFlatMap(c));
 
         for (T e : c) {
-            final Collection<? extends U> c1 = func.apply(e);
+            final Collection<? extends U> c1 = mapper.apply(e);
 
             if (notNullOrEmpty(c1)) {
                 for (U e2 : c1) {
-                    final Collection<? extends R> c2 = func2.apply(e2);
+                    final Collection<? extends R> c2 = mapper2.apply(e2);
 
                     if (notNullOrEmpty(c2)) {
                         result.addAll(c2);
@@ -22206,18 +22206,18 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <R>
      * @param <E>
      * @param a
-     * @param func
+     * @param mapper
      * @return
      * @throws E the e
      */
-    public static <T, R, E extends Exception> List<R> flatmap(final T[] a, final Throwables.Function<? super T, ? extends R[], E> func) throws E { //NOSONAR
-        checkArgNotNull(func);
+    public static <T, R, E extends Exception> List<R> flatmap(final T[] a, final Throwables.Function<? super T, ? extends R[], E> mapper) throws E { //NOSONAR
+        checkArgNotNull(mapper);
 
         if (isNullOrEmpty(a)) {
             return new ArrayList<>();
         }
 
-        return flatmap(a, 0, a.length, func);
+        return flatmap(a, 0, a.length, mapper);
     }
 
     /**
@@ -22227,20 +22227,20 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <C>
      * @param <E>
      * @param a
-     * @param func
+     * @param mapper
      * @param supplier
      * @return
      * @throws E the e
      */
-    public static <T, R, C extends Collection<R>, E extends Exception> C flatmap(final T[] a, final Throwables.Function<? super T, ? extends R[], E> func, //NOSONAR
+    public static <T, R, C extends Collection<R>, E extends Exception> C flatmap(final T[] a, final Throwables.Function<? super T, ? extends R[], E> mapper, //NOSONAR
             final IntFunction<? extends C> supplier) throws E {
-        checkArgNotNull(func);
+        checkArgNotNull(mapper);
 
         if (isNullOrEmpty(a)) {
             return supplier.apply(0);
         }
 
-        return flatmap(a, 0, a.length, func, supplier);
+        return flatmap(a, 0, a.length, mapper, supplier);
     }
 
     /**
@@ -22253,13 +22253,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a
      * @param fromIndex
      * @param toIndex
-     * @param func
+     * @param mapper
      * @return
      * @throws E the e
      */
     public static <T, R, E extends Exception> List<R> flatmap(final T[] a, final int fromIndex, final int toIndex, //NOSONAR
-            final Throwables.Function<? super T, ? extends R[], E> func) throws E {
-        return flatmap(a, fromIndex, toIndex, func, Factory.ofList());
+            final Throwables.Function<? super T, ? extends R[], E> mapper) throws E {
+        return flatmap(a, fromIndex, toIndex, mapper, Factory.ofList());
     }
 
     /**
@@ -22273,15 +22273,15 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a
      * @param fromIndex
      * @param toIndex
-     * @param func
+     * @param mapper
      * @param supplier
      * @return
      * @throws E the e
      */
     public static <T, R, C extends Collection<R>, E extends Exception> C flatmap(final T[] a, final int fromIndex, final int toIndex, //NOSONAR
-            final Throwables.Function<? super T, ? extends R[], E> func, final IntFunction<? extends C> supplier) throws E {
+            final Throwables.Function<? super T, ? extends R[], E> mapper, final IntFunction<? extends C> supplier) throws E {
         checkFromToIndex(fromIndex, toIndex, len(a));
-        checkArgNotNull(func);
+        checkArgNotNull(mapper);
 
         if (isNullOrEmpty(a) || fromIndex == toIndex) {
             return supplier.apply(0);
@@ -22292,7 +22292,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         R[] mr = null;
 
         for (int i = fromIndex; i < toIndex; i++) {
-            if (notNullOrEmpty(mr = func.apply(a[i]))) {
+            if (notNullOrEmpty(mr = mapper.apply(a[i]))) {
                 result.addAll(Arrays.asList(mr));
             }
         }
@@ -22310,13 +22310,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param c
      * @param fromIndex
      * @param toIndex
-     * @param func
+     * @param mapper
      * @return
      * @throws E the e
      */
     public static <T, R, E extends Exception> List<R> flatmap(final Collection<? extends T> c, final int fromIndex, final int toIndex, //NOSONAR
-            final Throwables.Function<? super T, ? extends R[], E> func) throws E {
-        return flatmap(c, fromIndex, toIndex, func, Factory.ofList());
+            final Throwables.Function<? super T, ? extends R[], E> mapper) throws E {
+        return flatmap(c, fromIndex, toIndex, mapper, Factory.ofList());
     }
 
     /**
@@ -22330,15 +22330,15 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param c
      * @param fromIndex
      * @param toIndex
-     * @param func
+     * @param mapper
      * @param supplier
      * @return
      * @throws E the e
      */
     public static <T, R, C extends Collection<R>, E extends Exception> C flatmap(final Collection<? extends T> c, final int fromIndex, final int toIndex, //NOSONAR
-            final Throwables.Function<? super T, ? extends R[], E> func, final IntFunction<? extends C> supplier) throws E {
+            final Throwables.Function<? super T, ? extends R[], E> mapper, final IntFunction<? extends C> supplier) throws E {
         checkFromToIndex(fromIndex, toIndex, size(c));
-        checkArgNotNull(func);
+        checkArgNotNull(mapper);
 
         if ((isNullOrEmpty(c) && fromIndex == 0 && toIndex == 0) || fromIndex == toIndex) {
             return supplier.apply(0);
@@ -22352,7 +22352,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             final List<T> list = (List<T>) c;
 
             for (int i = fromIndex; i < toIndex; i++) {
-                if (notNullOrEmpty(mr = func.apply(list.get(i)))) {
+                if (notNullOrEmpty(mr = mapper.apply(list.get(i)))) {
                     result.addAll(Arrays.asList(mr));
                 }
             }
@@ -22364,7 +22364,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
                     continue;
                 }
 
-                if (notNullOrEmpty(mr = func.apply(e))) {
+                if (notNullOrEmpty(mr = mapper.apply(e))) {
                     result.addAll(Arrays.asList(mr));
                 }
 
@@ -22383,13 +22383,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <R>
      * @param <E>
      * @param c
-     * @param func
+     * @param mapper
      * @return
      * @throws E the e
      */
-    public static <T, R, E extends Exception> List<R> flatmap(final Iterable<? extends T> c, final Throwables.Function<? super T, ? extends R[], E> func) //NOSONAR
+    public static <T, R, E extends Exception> List<R> flatmap(final Iterable<? extends T> c, final Throwables.Function<? super T, ? extends R[], E> mapper) //NOSONAR
             throws E {
-        return flatmap(c, func, Factory.<R> ofList());
+        return flatmap(c, mapper, Factory.<R> ofList());
     }
 
     /**
@@ -22399,14 +22399,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <C>
      * @param <E>
      * @param c
-     * @param func
+     * @param mapper
      * @param supplier
      * @return
      * @throws E the e
      */
     public static <T, R, C extends Collection<R>, E extends Exception> C flatmap(final Iterable<? extends T> c, //NOSONAR
-            final Throwables.Function<? super T, ? extends R[], E> func, final IntFunction<? extends C> supplier) throws E {
-        checkArgNotNull(func);
+            final Throwables.Function<? super T, ? extends R[], E> mapper, final IntFunction<? extends C> supplier) throws E {
+        checkArgNotNull(mapper);
 
         if (c == null) {
             return supplier.apply(0);
@@ -22416,7 +22416,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         R[] mr = null;
 
         for (T e : c) {
-            if (notNullOrEmpty(mr = func.apply(e))) {
+            if (notNullOrEmpty(mr = mapper.apply(e))) {
                 result.addAll(Arrays.asList(mr));
             }
         }
@@ -28812,7 +28812,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     @Beta
     public static Boolean negate(final Boolean bool) {
         if (bool == null) {
-            return null;
+            return null; //NOSONAR
         }
 
         return bool.booleanValue() ? Boolean.FALSE : Boolean.TRUE;
@@ -28851,6 +28851,18 @@ public final class N extends CommonUtil { // public final class N extends π imp
         for (int i = fromIndex; i < toIndex; i++) {
             a[i] = !a[i];
         }
+    }
+
+    /**
+     * Add it because {@code Comparator.reversed()} doesn't work well in some scenarios.
+     *
+     * @param <T>
+     * @param cmp
+     * @return
+     * @see Collections#reverseOrder(Comparator)
+     */
+    public static <T> Comparator<T> reverseOrder(final Comparator<T> cmp) {
+        return Collections.reverseOrder(cmp);
     }
 
     /**

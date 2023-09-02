@@ -109,74 +109,6 @@ public abstract class DateUtil {
     @SuppressWarnings("deprecation")
     private static final int POOL_SIZE = InternalUtil.POOL_SIZE;
 
-    /**
-     * A new instance of <code>java.sql.Time</code> returned is based on the
-     * current time in the default time zone with the default locale.
-     *
-     * @return
-     */
-    public static Time currentTime() {
-        return new Time(System.currentTimeMillis());
-    }
-
-    /**
-     * A new instance of <code>java.sql.Date</code> returned is based on the
-     * current time in the default time zone with the default locale.
-     *
-     * @return
-     */
-    public static Date currentDate() {
-        return new Date(System.currentTimeMillis());
-    }
-
-    /**
-     * A new instance of <code>java.sql.Timestamp</code> returned is based on
-     * the current time in the default time zone with the default locale.
-     *
-     * @return
-     */
-    public static Timestamp currentTimestamp() {
-        return new Timestamp(System.currentTimeMillis());
-    }
-
-    /**
-     * A new instance of <code>java.util.Date</code> returned is based on the
-     * current time in the default time zone with the default locale.
-     *
-     * @return
-     */
-    public static java.util.Date currentJUDate() {
-        return new java.util.Date();
-    }
-
-    /**
-     * A new instance of <code>java.util.Calendar</code> returned is based on
-     * the current time in the default time zone with the default locale.
-     *
-     * @return a Calendar.
-     */
-    public static Calendar currentCalendar() {
-        return Calendar.getInstance();
-    }
-
-    /**
-     * Current gregorian calendar.
-     *
-     * @return
-     */
-    public static GregorianCalendar currentGregorianCalendar() {
-        return new GregorianCalendar();
-    }
-
-    /**
-     * Current XML gregorian calendar.
-     *
-     * @return
-     */
-    public static XMLGregorianCalendar currentXMLGregorianCalendar() {
-        return dataTypeFactory.newXMLGregorianCalendar(currentGregorianCalendar());
-    }
-
     private static final Map<String, Queue<DateFormat>> dfPool = new ObjectPool<>(64);
 
     private static final Map<TimeZone, Queue<Calendar>> calendarPool = new ObjectPool<>(64);
@@ -247,6 +179,154 @@ public abstract class DateUtil {
 
     DateUtil() {
         // singleton
+    }
+
+    /**
+     * A new instance of <code>java.sql.Time</code> returned is based on the
+     * current time in the default time zone with the default locale.
+     *
+     * @return
+     */
+    public static Time currentTime() {
+        return new Time(System.currentTimeMillis());
+    }
+
+    /**
+     * A new instance of <code>java.sql.Date</code> returned is based on the
+     * current time in the default time zone with the default locale.
+     *
+     * @return
+     */
+    public static Date currentDate() {
+        return new Date(System.currentTimeMillis());
+    }
+
+    /**
+     * A new instance of <code>java.sql.Timestamp</code> returned is based on
+     * the current time in the default time zone with the default locale.
+     *
+     * @return
+     */
+    public static Timestamp currentTimestamp() {
+        return new Timestamp(System.currentTimeMillis());
+    }
+
+    /**
+     * A new instance of <code>java.util.Date</code> returned is based on the
+     * current time in the default time zone with the default locale.
+     *
+     * @return
+     */
+    public static java.util.Date currentJUDate() {
+        return new java.util.Date();
+    }
+
+    /**
+     * A new instance of <code>java.util.Calendar</code> returned is based on
+     * the current time in the default time zone with the default locale.
+     *
+     * @return a Calendar.
+     */
+    public static Calendar currentCalendar() {
+        return Calendar.getInstance();
+    }
+
+    /**
+     * Current gregorian calendar.
+     *
+     * @return
+     */
+    public static GregorianCalendar currentGregorianCalendar() {
+        return new GregorianCalendar();
+    }
+
+    /**
+     * Current XML gregorian calendar.
+     *
+     * @return
+     */
+    public static XMLGregorianCalendar currentXMLGregorianCalendar() {
+        return dataTypeFactory.newXMLGregorianCalendar(currentGregorianCalendar());
+    }
+
+    /**
+     * Adds or subtracts the specified amount of time with the given time unit to current {@code java.sql.Time}
+     *
+     * @param amount
+     * @param unit
+     * @return
+     * @return a new {@code Time} by Adding or subtracting the specified amount of time to current {@code java.sql.Time}.
+     */
+    @Beta
+    static long currentTimeMillisRolled(final long amount, final TimeUnit unit) {
+        return System.currentTimeMillis() + unit.toMillis(amount);
+    }
+
+    /**
+     * Adds or subtracts the specified amount of time with the given time unit to current {@code java.sql.Time}
+     *
+     * @param amount
+     * @param unit
+     * @return
+     * @return a new {@code Time} by Adding or subtracting the specified amount of time to current {@code java.sql.Time}.
+     */
+    @Beta
+    public static Time currentTimeRolled(final long amount, final TimeUnit unit) {
+        return new Time(currentTimeMillisRolled(amount, unit));
+    }
+
+    /**
+     * Adds or subtracts the specified amount of time with the given time unit to current {@code java.sql.Date}
+     *
+     * @param amount
+     * @param unit
+     * @return a new {@code Date} by Adding or subtracting the specified amount of time to current {@code java.sql.Date}.
+     */
+    @Beta
+    public static Date currentDateRolled(final long amount, final TimeUnit unit) {
+        return new Date(currentTimeMillisRolled(amount, unit));
+    }
+
+    /**
+     * Adds or subtracts the specified amount of time with the given time unit to current {@code java.sql.Timestamp}
+     *
+     *
+     * @param amount
+     * @param unit
+     * @return
+     * @return a new {@code Timestamp} by Adding or subtracting the specified amount of time to current {@code java.sql.Timestamp}.
+     */
+    @Beta
+    public static Timestamp currentTimestampRolled(final long amount, final TimeUnit unit) {
+        return new Timestamp(currentTimeMillisRolled(amount, unit));
+    }
+
+    /**
+     * Adds or subtracts the specified amount of time with the given time unit to current {@code java.util.Date}
+     *
+     *
+     * @param amount
+     * @param unit
+     * @return a new {@code Date} by Adding or subtracting the specified amount of time to current {@code java.util.Date}.
+     */
+    @Beta
+    public static java.util.Date currentJUDateRolled(final long amount, final TimeUnit unit) {
+        return new java.util.Date(currentTimeMillisRolled(amount, unit));
+    }
+
+    /**
+     * Adds or subtracts the specified amount of time with the given time unit to current {@code java.util.Calendar}.
+     *
+     *
+     * @param amount
+     * @param unit
+     * @return a new {@code Calendar} by Adding or subtracting the specified amount of time to current {@code java.util.Calendar}.
+     */
+    @Beta
+    public static Calendar currentCalendarRolled(final long amount, final TimeUnit unit) {
+        final Calendar ret = Calendar.getInstance();
+        ret.setTimeInMillis(currentTimeMillisRolled(amount, unit));
+        return ret;
     }
 
     /**
@@ -3450,12 +3530,21 @@ public abstract class DateUtil {
     /**
      * The Class DateTimeUtil.
      */
+    @Beta
     public static class DateTimeUtil extends DateUtil {
 
-        /**
-         * Instantiates a new date time util.
-         */
         private DateTimeUtil() {
+            // singleton.
+        }
+    }
+
+    /**
+     * The Class Times.
+     */
+    @Beta
+    public static class Times extends DateUtil {
+
+        private Times() {
             // singleton.
         }
     }

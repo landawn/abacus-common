@@ -2447,13 +2447,13 @@ public class Builder<T> {
         /**
          *
          * @param <E>
-         * @param func
+         * @param predicate
          * @param newValue
          * @return
          * @throws E the e
          */
-        public <E extends Exception> DataSetBuilder replaceIf(Throwables.Predicate<?, E> func, Object newValue) throws E {
-            val.replaceIf(func, newValue);
+        public <E extends Exception> DataSetBuilder replaceIf(Throwables.Predicate<?, E> predicate, Object newValue) throws E {
+            val.replaceIf(predicate, newValue);
 
             return this;
         }

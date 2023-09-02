@@ -71,15 +71,21 @@ import com.landawn.abacus.util.Fn.BiPredicates;
  * @version $Revision: 0.8 $
  */
 public final class IOUtil {
-
     private static final Logger logger = LoggerFactory.getLogger(IOUtil.class);
 
-    private static final Splitter pathSplitter = Splitter.with('/').trimResults();
-
     // ...
+    private static final String JAVA_VENDOR_STR = "java.vendor";
+
+    private static final String JAVA_VM_VENDOR_STR = "java.vm.vendor";
+
+    private static final String ANDROID = "ANDROID";
+
     private static final String ZIP = ".zip";
 
     private static final String GZ = ".gz";
+
+    // ...
+    private static final Splitter pathSplitter = Splitter.with('/').trimResults();
 
     /** The file copy buffer size (32 MB). */
     private static final int FILE_COPY_BUFFER_SIZE = (1024 * 1024) * 32;
@@ -156,15 +162,15 @@ public final class IOUtil {
 
     public static final boolean IS_OS_LINUX = OS_NAME.toUpperCase().contains("LINUX");
 
-    public static final boolean IS_PLATFORM_ANDROID = System.getProperty("java.vendor").toUpperCase().contains("ANDROID")
-            || System.getProperty("java.vm.vendor").toUpperCase().contains("ANDROID");
+    public static final boolean IS_PLATFORM_ANDROID = System.getProperty(JAVA_VENDOR_STR).toUpperCase().contains(ANDROID)
+            || System.getProperty(JAVA_VM_VENDOR_STR).toUpperCase().contains(ANDROID);
 
     // ...
     public static final String JAVA_HOME = System.getProperty("java.home");
 
     public static final JavaVersion JAVA_VERSION = JavaVersion.of(System.getProperty("java.version"));
 
-    public static final String JAVA_VENDOR = System.getProperty("java.vendor");
+    public static final String JAVA_VENDOR = System.getProperty(JAVA_VENDOR_STR);
 
     public static final String JAVA_CLASS_PATH = System.getProperty("java.class.path");
 
@@ -190,7 +196,7 @@ public final class IOUtil {
 
     public static final String JAVA_VM_SPECIFICATION_VERSION = System.getProperty("java.vm.specification.version");
 
-    public static final String JAVA_VM_VENDOR = System.getProperty("java.vm.vendor");
+    public static final String JAVA_VM_VENDOR = System.getProperty(JAVA_VM_VENDOR_STR);
 
     public static final String JAVA_VM_VERSION = System.getProperty("java.vm.version");
 
@@ -268,8 +274,8 @@ public final class IOUtil {
         if (ret == null) {
             // This may be slow on some machine. Move it from static initialization block to method.
 
-            final boolean IS_PLATFORM_ANDROID = System.getProperty("java.vendor").toUpperCase().contains("ANDROID") //NOSONAR
-                    || System.getProperty("java.vm.vendor").toUpperCase().contains("ANDROID"); //NOSONAR
+            final boolean IS_PLATFORM_ANDROID = System.getProperty(JAVA_VENDOR_STR).toUpperCase().contains(ANDROID) //NOSONAR
+                    || System.getProperty(JAVA_VM_VENDOR_STR).toUpperCase().contains(ANDROID); //NOSONAR
 
             // implementation for android support
             if (IS_PLATFORM_ANDROID) {

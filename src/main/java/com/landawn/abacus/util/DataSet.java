@@ -3290,129 +3290,129 @@ public interface DataSet {
      *
      * @param <E>
      * @param fromColumnName
-     * @param func
+     * @param mapper
      * @param newColumnName
      * @param copyingColumnName
      * @return
      * @throws E the e
      */
-    <E extends Exception> DataSet map(String fromColumnName, Throwables.Function<?, ?, E> func, String newColumnName, String copyingColumnName) throws E;
+    <E extends Exception> DataSet map(String fromColumnName, Throwables.Function<?, ?, E> mapper, String newColumnName, String copyingColumnName) throws E;
 
     /**
      *
      * @param <E>
      * @param fromColumnName
-     * @param func
+     * @param mapper
      * @param newColumnName
      * @param copyingColumnNames
      * @return
      * @throws E the e
      */
-    <E extends Exception> DataSet map(String fromColumnName, Throwables.Function<?, ?, E> func, String newColumnName, Collection<String> copyingColumnNames)
+    <E extends Exception> DataSet map(String fromColumnName, Throwables.Function<?, ?, E> mapper, String newColumnName, Collection<String> copyingColumnNames)
             throws E;
 
     /**
      *
      * @param <E>
      * @param fromColumnNames
-     * @param func
+     * @param mapper
      * @param newColumnName
      * @param copyingColumnNames
      * @return
      * @throws E the e
      */
-    <E extends Exception> DataSet map(Tuple2<String, String> fromColumnNames, Throwables.BiFunction<?, ?, ?, E> func, String newColumnName,
+    <E extends Exception> DataSet map(Tuple2<String, String> fromColumnNames, Throwables.BiFunction<?, ?, ?, E> mapper, String newColumnName,
             Collection<String> copyingColumnNames) throws E;
 
     /**
      *
      * @param <E>
      * @param fromColumnNames
-     * @param func
+     * @param mapper
      * @param newColumnName
      * @param copyingColumnNames
      * @return
      * @throws E the e
      */
-    <E extends Exception> DataSet map(Tuple3<String, String, String> fromColumnNames, Throwables.TriFunction<?, ?, ?, ?, E> func, String newColumnName,
+    <E extends Exception> DataSet map(Tuple3<String, String, String> fromColumnNames, Throwables.TriFunction<?, ?, ?, ?, E> mapper, String newColumnName,
             Collection<String> copyingColumnNames) throws E;
 
     /**
      *
      * @param <E>
      * @param fromColumnNames
-     * @param func DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
+     * @param mapper DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
      * @param newColumnName
      * @param copyingColumnNames
      * @return
      * @throws E the e
      */
-    <E extends Exception> DataSet map(Collection<String> fromColumnNames, Throwables.Function<DisposableObjArray, ?, E> func, String newColumnName,
+    <E extends Exception> DataSet map(Collection<String> fromColumnNames, Throwables.Function<DisposableObjArray, ?, E> mapper, String newColumnName,
             Collection<String> copyingColumnNames) throws E;
 
     /**
      *
      * @param <E>
      * @param fromColumnName
-     * @param func
+     * @param mapper
      * @param newColumnName
      * @param copyingColumnName
      * @return
      * @throws E the e
      */
-    <E extends Exception> DataSet flatMap(String fromColumnName, Throwables.Function<?, ? extends Collection<?>, E> func, String newColumnName,
+    <E extends Exception> DataSet flatMap(String fromColumnName, Throwables.Function<?, ? extends Collection<?>, E> mapper, String newColumnName,
             String copyingColumnName) throws E;
 
     /**
      *
      * @param <E>
      * @param fromColumnName
-     * @param func
+     * @param mapper
      * @param newColumnName
      * @param copyingColumnNames
      * @return
      * @throws E the e
      */
-    <E extends Exception> DataSet flatMap(String fromColumnName, Throwables.Function<?, ? extends Collection<?>, E> func, String newColumnName,
+    <E extends Exception> DataSet flatMap(String fromColumnName, Throwables.Function<?, ? extends Collection<?>, E> mapper, String newColumnName,
             Collection<String> copyingColumnNames) throws E;
 
     /**
      *
      * @param <E>
      * @param fromColumnNames
-     * @param func
+     * @param mapper
      * @param newColumnName
      * @param copyingColumnNames
      * @return
      * @throws E the e
      */
-    <E extends Exception> DataSet flatMap(Tuple2<String, String> fromColumnNames, Throwables.BiFunction<?, ?, ? extends Collection<?>, E> func,
+    <E extends Exception> DataSet flatMap(Tuple2<String, String> fromColumnNames, Throwables.BiFunction<?, ?, ? extends Collection<?>, E> mapper,
             String newColumnName, Collection<String> copyingColumnNames) throws E;
 
     /**
      *
      * @param <E>
      * @param fromColumnNames
-     * @param func
+     * @param mapper
      * @param newColumnName
      * @param copyingColumnNames
      * @return
      * @throws E the e
      */
-    <E extends Exception> DataSet flatMap(Tuple3<String, String, String> fromColumnNames, Throwables.TriFunction<?, ?, ?, ? extends Collection<?>, E> func,
+    <E extends Exception> DataSet flatMap(Tuple3<String, String, String> fromColumnNames, Throwables.TriFunction<?, ?, ?, ? extends Collection<?>, E> mapper,
             String newColumnName, Collection<String> copyingColumnNames) throws E;
 
     /**
      *
      * @param <E>
      * @param fromColumnNames
-     * @param func DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
+     * @param mapper DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
      * @param newColumnName
      * @param copyingColumnNames
      * @return
      * @throws E the e
      */
-    <E extends Exception> DataSet flatMap(Collection<String> fromColumnNames, Throwables.Function<DisposableObjArray, ? extends Collection<?>, E> func,
+    <E extends Exception> DataSet flatMap(Collection<String> fromColumnNames, Throwables.Function<DisposableObjArray, ? extends Collection<?>, E> mapper,
             String newColumnName, Collection<String> copyingColumnNames) throws E;
 
     /**

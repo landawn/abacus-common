@@ -7581,43 +7581,43 @@ public class RowDataSet implements DataSet, Cloneable {
      *
      * @param <E>
      * @param fromColumnName
-     * @param func
+     * @param mapper
      * @param newColumnName
      * @param copyingColumnName
      * @return
      * @throws E the e
      */
     @Override
-    public <E extends Exception> DataSet map(final String fromColumnName, final Throwables.Function<?, ?, E> func, final String newColumnName,
+    public <E extends Exception> DataSet map(final String fromColumnName, final Throwables.Function<?, ?, E> mapper, final String newColumnName,
             final String copyingColumnName) throws E {
-        return map(fromColumnName, func, newColumnName, Array.asList(copyingColumnName));
+        return map(fromColumnName, mapper, newColumnName, Array.asList(copyingColumnName));
     }
 
     /**
      *
      * @param <E>
      * @param fromColumnName
-     * @param func
+     * @param mapper
      * @param newColumnName
      * @param copyingColumnNames
      * @return
      * @throws E the e
      */
     @Override
-    public <E extends Exception> DataSet map(final String fromColumnName, final Throwables.Function<?, ?, E> func, final String newColumnName,
+    public <E extends Exception> DataSet map(final String fromColumnName, final Throwables.Function<?, ?, E> mapper, final String newColumnName,
             final Collection<String> copyingColumnNames) throws E {
-        N.checkArgNotNull(func, "func");
+        N.checkArgNotNull(mapper, "mapper");
         final int fromColumnIndex = checkColumnName(fromColumnName);
         final int[] copyingColumnIndices = N.isNullOrEmpty(copyingColumnNames) ? N.EMPTY_INT_ARRAY : checkColumnName(copyingColumnNames);
 
-        final Throwables.Function<Object, Object, E> mapper = (Throwables.Function<Object, Object, E>) func;
+        final Throwables.Function<Object, Object, E> mapperToUse = (Throwables.Function<Object, Object, E>) mapper;
         final int size = size();
         final int copyingColumnCount = copyingColumnIndices.length;
 
         final List<Object> mappedColumn = new ArrayList<>(size);
 
         for (Object val : _columnList.get(fromColumnIndex)) {
-            mappedColumn.add(mapper.apply(val));
+            mappedColumn.add(mapperToUse.apply(val));
         }
 
         final List<String> newColumnNameList = new ArrayList<>(copyingColumnCount + 1);
@@ -7641,28 +7641,28 @@ public class RowDataSet implements DataSet, Cloneable {
      *
      * @param <E>
      * @param fromColumnNames
-     * @param func
+     * @param mapper
      * @param newColumnName
      * @param copyingColumnNames
      * @return
      * @throws E the e
      */
     @Override
-    public <E extends Exception> DataSet map(final Tuple2<String, String> fromColumnNames, final Throwables.BiFunction<?, ?, ?, E> func,
+    public <E extends Exception> DataSet map(final Tuple2<String, String> fromColumnNames, final Throwables.BiFunction<?, ?, ?, E> mapper,
             final String newColumnName, final Collection<String> copyingColumnNames) throws E {
-        N.checkArgNotNull(func, "func");
+        N.checkArgNotNull(mapper, "mapper");
         final List<Object> fromColumn1 = _columnList.get(checkColumnName(fromColumnNames._1));
         final List<Object> fromColumn2 = _columnList.get(checkColumnName(fromColumnNames._2));
         final int[] copyingColumnIndices = N.isNullOrEmpty(copyingColumnNames) ? N.EMPTY_INT_ARRAY : checkColumnName(copyingColumnNames);
 
-        final Throwables.BiFunction<Object, Object, Object, E> mapper = (Throwables.BiFunction<Object, Object, Object, E>) func;
+        final Throwables.BiFunction<Object, Object, Object, E> mapperToUse = (Throwables.BiFunction<Object, Object, Object, E>) mapper;
         final int size = size();
         final int copyingColumnCount = copyingColumnIndices.length;
 
         final List<Object> mappedColumn = new ArrayList<>(size);
 
         for (int rowIndex = 0; rowIndex < size; rowIndex++) {
-            mappedColumn.add(mapper.apply(fromColumn1.get(rowIndex), fromColumn2.get(rowIndex)));
+            mappedColumn.add(mapperToUse.apply(fromColumn1.get(rowIndex), fromColumn2.get(rowIndex)));
         }
 
         final List<String> newColumnNameList = new ArrayList<>(copyingColumnCount + 1);
@@ -7686,30 +7686,30 @@ public class RowDataSet implements DataSet, Cloneable {
      *
      * @param <E>
      * @param fromColumnNames
-     * @param func
+     * @param mapper
      * @param newColumnName
      * @param copyingColumnNames
      * @return
      * @throws E the e
      */
     @Override
-    public <E extends Exception> DataSet map(final Tuple3<String, String, String> fromColumnNames, final Throwables.TriFunction<?, ?, ?, ?, E> func,
+    public <E extends Exception> DataSet map(final Tuple3<String, String, String> fromColumnNames, final Throwables.TriFunction<?, ?, ?, ?, E> mapper,
             final String newColumnName, final Collection<String> copyingColumnNames) throws E {
-        N.checkArgNotNull(func, "func");
+        N.checkArgNotNull(mapper, "mapper");
         final List<Object> fromColumn1 = _columnList.get(checkColumnName(fromColumnNames._1));
         final List<Object> fromColumn2 = _columnList.get(checkColumnName(fromColumnNames._2));
         final List<Object> fromColumn3 = _columnList.get(checkColumnName(fromColumnNames._3));
 
         final int[] copyingColumnIndices = N.isNullOrEmpty(copyingColumnNames) ? N.EMPTY_INT_ARRAY : checkColumnName(copyingColumnNames);
 
-        final Throwables.TriFunction<Object, Object, Object, Object, E> mapper = (Throwables.TriFunction<Object, Object, Object, Object, E>) func;
+        final Throwables.TriFunction<Object, Object, Object, Object, E> mapperToUse = (Throwables.TriFunction<Object, Object, Object, Object, E>) mapper;
         final int size = size();
         final int copyingColumnCount = copyingColumnIndices.length;
 
         final List<Object> mappedColumn = new ArrayList<>(size);
 
         for (int rowIndex = 0; rowIndex < size; rowIndex++) {
-            mappedColumn.add(mapper.apply(fromColumn1.get(rowIndex), fromColumn2.get(rowIndex), fromColumn3.get(rowIndex)));
+            mappedColumn.add(mapperToUse.apply(fromColumn1.get(rowIndex), fromColumn2.get(rowIndex), fromColumn3.get(rowIndex)));
         }
 
         final List<String> newColumnNameList = new ArrayList<>(copyingColumnCount + 1);
@@ -7733,20 +7733,20 @@ public class RowDataSet implements DataSet, Cloneable {
      *
      * @param <E>
      * @param fromColumnNames
-     * @param func
+     * @param mapper
      * @param newColumnName
      * @param copyingColumnNames
      * @return
      * @throws E the e
      */
     @Override
-    public <E extends Exception> DataSet map(final Collection<String> fromColumnNames, final Throwables.Function<DisposableObjArray, ?, E> func,
+    public <E extends Exception> DataSet map(final Collection<String> fromColumnNames, final Throwables.Function<DisposableObjArray, ?, E> mapper,
             final String newColumnName, final Collection<String> copyingColumnNames) throws E {
-        N.checkArgNotNull(func, "func");
+        N.checkArgNotNull(mapper, "mapper");
         final int[] fromColumnIndices = checkColumnName(fromColumnNames);
         final int[] copyingColumnIndices = N.isNullOrEmpty(copyingColumnNames) ? N.EMPTY_INT_ARRAY : checkColumnName(copyingColumnNames);
 
-        final Throwables.Function<DisposableObjArray, Object, E> mapper = (Throwables.Function<DisposableObjArray, Object, E>) func;
+        final Throwables.Function<DisposableObjArray, Object, E> mapperToUse = (Throwables.Function<DisposableObjArray, Object, E>) mapper;
         final int size = size();
         final int fromColumnCount = fromColumnIndices.length;
         final int copyingColumnCount = copyingColumnIndices.length;
@@ -7760,7 +7760,7 @@ public class RowDataSet implements DataSet, Cloneable {
                 tmpRow[i] = _columnList.get(fromColumnIndices[i]).get(rowIndex);
             }
 
-            mappedColumn.add(mapper.apply(disposableArray));
+            mappedColumn.add(mapperToUse.apply(disposableArray));
         }
 
         final List<String> newColumnNameList = new ArrayList<>(copyingColumnCount + 1);
@@ -7784,36 +7784,36 @@ public class RowDataSet implements DataSet, Cloneable {
      *
      * @param <E>
      * @param fromColumnName
-     * @param func
+     * @param mapper
      * @param newColumnName
      * @param copyingColumnName
      * @return
      * @throws E the e
      */
     @Override
-    public <E extends Exception> DataSet flatMap(final String fromColumnName, final Throwables.Function<?, ? extends Collection<?>, E> func,
+    public <E extends Exception> DataSet flatMap(final String fromColumnName, final Throwables.Function<?, ? extends Collection<?>, E> mapper,
             final String newColumnName, final String copyingColumnName) throws E {
-        return flatMap(fromColumnName, func, newColumnName, Array.asList(copyingColumnName));
+        return flatMap(fromColumnName, mapper, newColumnName, Array.asList(copyingColumnName));
     }
 
     /**
      *
      * @param <E>
      * @param fromColumnName
-     * @param func
+     * @param mapper
      * @param newColumnName
      * @param copyingColumnNames
      * @return
      * @throws E the e
      */
     @Override
-    public <E extends Exception> DataSet flatMap(final String fromColumnName, final Throwables.Function<?, ? extends Collection<?>, E> func,
+    public <E extends Exception> DataSet flatMap(final String fromColumnName, final Throwables.Function<?, ? extends Collection<?>, E> mapper,
             final String newColumnName, final Collection<String> copyingColumnNames) throws E {
-        N.checkArgNotNull(func, "func");
+        N.checkArgNotNull(mapper, "mapper");
         final int fromColumnIndex = checkColumnName(fromColumnName);
         final int[] copyingColumnIndices = N.isNullOrEmpty(copyingColumnNames) ? N.EMPTY_INT_ARRAY : checkColumnName(copyingColumnNames);
 
-        final Throwables.Function<Object, Collection<Object>, E> mapper = (Throwables.Function<Object, Collection<Object>, E>) func;
+        final Throwables.Function<Object, Collection<Object>, E> mapperToUse = (Throwables.Function<Object, Collection<Object>, E>) mapper;
         final int size = size();
         final int copyingColumnCount = copyingColumnIndices.length;
 
@@ -7829,7 +7829,7 @@ public class RowDataSet implements DataSet, Cloneable {
             Collection<Object> c = null;
 
             for (Object val : _columnList.get(fromColumnIndex)) {
-                c = mapper.apply(val);
+                c = mapperToUse.apply(val);
 
                 if (N.notNullOrEmpty(c)) {
                     mappedColumn.addAll(c);
@@ -7848,7 +7848,7 @@ public class RowDataSet implements DataSet, Cloneable {
             Object val = null;
 
             for (int rowIndex = 0; rowIndex < size; rowIndex++) {
-                c = mapper.apply(fromColumn.get(rowIndex));
+                c = mapperToUse.apply(fromColumn.get(rowIndex));
 
                 if (N.notNullOrEmpty(c)) {
                     mappedColumn.addAll(c);
@@ -7872,7 +7872,7 @@ public class RowDataSet implements DataSet, Cloneable {
      *
      * @param <E>
      * @param fromColumnNames
-     * @param func
+     * @param mapper
      * @param newColumnName
      * @param copyingColumnNames
      * @return
@@ -7880,15 +7880,15 @@ public class RowDataSet implements DataSet, Cloneable {
      */
     @Override
     public <E extends Exception> DataSet flatMap(final Tuple2<String, String> fromColumnNames,
-            final Throwables.BiFunction<?, ?, ? extends Collection<?>, E> func, final String newColumnName, final Collection<String> copyingColumnNames)
+            final Throwables.BiFunction<?, ?, ? extends Collection<?>, E> mapper, final String newColumnName, final Collection<String> copyingColumnNames)
             throws E {
-        N.checkArgNotNull(func, "func");
+        N.checkArgNotNull(mapper, "mapper");
         final List<Object> fromColumn1 = _columnList.get(checkColumnName(fromColumnNames._1));
         final List<Object> fromColumn2 = _columnList.get(checkColumnName(fromColumnNames._2));
 
         final int[] copyingColumnIndices = N.isNullOrEmpty(copyingColumnNames) ? N.EMPTY_INT_ARRAY : checkColumnName(copyingColumnNames);
 
-        final Throwables.BiFunction<Object, Object, Collection<Object>, E> mapper = (Throwables.BiFunction<Object, Object, Collection<Object>, E>) func;
+        final Throwables.BiFunction<Object, Object, Collection<Object>, E> mapperToUse = (Throwables.BiFunction<Object, Object, Collection<Object>, E>) mapper;
         final int size = size();
         final int copyingColumnCount = copyingColumnIndices.length;
 
@@ -7904,7 +7904,7 @@ public class RowDataSet implements DataSet, Cloneable {
             Collection<Object> c = null;
 
             for (int rowIndex = 0; rowIndex < size; rowIndex++) {
-                c = mapper.apply(fromColumn1.get(rowIndex), fromColumn2.get(rowIndex));
+                c = mapperToUse.apply(fromColumn1.get(rowIndex), fromColumn2.get(rowIndex));
 
                 if (N.notNullOrEmpty(c)) {
                     mappedColumn.addAll(c);
@@ -7922,7 +7922,7 @@ public class RowDataSet implements DataSet, Cloneable {
             Object val = null;
 
             for (int rowIndex = 0; rowIndex < size; rowIndex++) {
-                c = mapper.apply(fromColumn1.get(rowIndex), fromColumn2.get(rowIndex));
+                c = mapperToUse.apply(fromColumn1.get(rowIndex), fromColumn2.get(rowIndex));
 
                 if (N.notNullOrEmpty(c)) {
                     mappedColumn.addAll(c);
@@ -7946,7 +7946,7 @@ public class RowDataSet implements DataSet, Cloneable {
      *
      * @param <E>
      * @param fromColumnNames
-     * @param func
+     * @param mapper
      * @param newColumnName
      * @param copyingColumnNames
      * @return
@@ -7954,16 +7954,16 @@ public class RowDataSet implements DataSet, Cloneable {
      */
     @Override
     public <E extends Exception> DataSet flatMap(final Tuple3<String, String, String> fromColumnNames,
-            final Throwables.TriFunction<?, ?, ?, ? extends Collection<?>, E> func, final String newColumnName, final Collection<String> copyingColumnNames)
+            final Throwables.TriFunction<?, ?, ?, ? extends Collection<?>, E> mapper, final String newColumnName, final Collection<String> copyingColumnNames)
             throws E {
-        N.checkArgNotNull(func, "func");
+        N.checkArgNotNull(mapper, "mapper");
         final List<Object> fromColumn1 = _columnList.get(checkColumnName(fromColumnNames._1));
         final List<Object> fromColumn2 = _columnList.get(checkColumnName(fromColumnNames._2));
         final List<Object> fromColumn3 = _columnList.get(checkColumnName(fromColumnNames._3));
 
         final int[] copyingColumnIndices = N.isNullOrEmpty(copyingColumnNames) ? N.EMPTY_INT_ARRAY : checkColumnName(copyingColumnNames);
 
-        final Throwables.TriFunction<Object, Object, Object, Collection<Object>, E> mapper = (Throwables.TriFunction<Object, Object, Object, Collection<Object>, E>) func;
+        final Throwables.TriFunction<Object, Object, Object, Collection<Object>, E> mapperToUse = (Throwables.TriFunction<Object, Object, Object, Collection<Object>, E>) mapper;
         final int size = size();
         final int copyingColumnCount = copyingColumnIndices.length;
 
@@ -7979,7 +7979,7 @@ public class RowDataSet implements DataSet, Cloneable {
             Collection<Object> c = null;
 
             for (int rowIndex = 0; rowIndex < size; rowIndex++) {
-                c = mapper.apply(fromColumn1.get(rowIndex), fromColumn2.get(rowIndex), fromColumn3.get(rowIndex));
+                c = mapperToUse.apply(fromColumn1.get(rowIndex), fromColumn2.get(rowIndex), fromColumn3.get(rowIndex));
 
                 if (N.notNullOrEmpty(c)) {
                     mappedColumn.addAll(c);
@@ -7997,7 +7997,7 @@ public class RowDataSet implements DataSet, Cloneable {
             Object val = null;
 
             for (int rowIndex = 0; rowIndex < size; rowIndex++) {
-                c = mapper.apply(fromColumn1.get(rowIndex), fromColumn2.get(rowIndex), fromColumn3.get(rowIndex));
+                c = mapperToUse.apply(fromColumn1.get(rowIndex), fromColumn2.get(rowIndex), fromColumn3.get(rowIndex));
 
                 if (N.notNullOrEmpty(c)) {
                     mappedColumn.addAll(c);
@@ -8021,7 +8021,7 @@ public class RowDataSet implements DataSet, Cloneable {
      *
      * @param <E>
      * @param fromColumnNames
-     * @param func
+     * @param mapper
      * @param newColumnName
      * @param copyingColumnNames
      * @return
@@ -8029,13 +8029,13 @@ public class RowDataSet implements DataSet, Cloneable {
      */
     @Override
     public <E extends Exception> DataSet flatMap(final Collection<String> fromColumnNames,
-            final Throwables.Function<DisposableObjArray, ? extends Collection<?>, E> func, final String newColumnName,
+            final Throwables.Function<DisposableObjArray, ? extends Collection<?>, E> mapper, final String newColumnName,
             final Collection<String> copyingColumnNames) throws E {
-        N.checkArgNotNull(func, "func");
+        N.checkArgNotNull(mapper, "mapper");
         final int[] fromColumnIndices = checkColumnName(fromColumnNames);
         final int[] copyingColumnIndices = N.isNullOrEmpty(copyingColumnNames) ? N.EMPTY_INT_ARRAY : checkColumnName(copyingColumnNames);
 
-        final Throwables.Function<DisposableObjArray, Collection<Object>, E> mapper = (Throwables.Function<DisposableObjArray, Collection<Object>, E>) func;
+        final Throwables.Function<DisposableObjArray, Collection<Object>, E> mapperToUse = (Throwables.Function<DisposableObjArray, Collection<Object>, E>) mapper;
         final int size = size();
         final int fromColumnCount = fromColumnIndices.length;
         final int copyingColumnCount = copyingColumnIndices.length;
@@ -8059,7 +8059,7 @@ public class RowDataSet implements DataSet, Cloneable {
                     tmpRow[j] = _columnList.get(fromColumnIndices[j]).get(rowIndex);
                 }
 
-                c = mapper.apply(disposableArray);
+                c = mapperToUse.apply(disposableArray);
 
                 if (N.notNullOrEmpty(c)) {
                     mappedColumn.addAll(c);
@@ -8081,7 +8081,7 @@ public class RowDataSet implements DataSet, Cloneable {
                     tmpRow[j] = _columnList.get(fromColumnIndices[j]).get(rowIndex);
                 }
 
-                c = mapper.apply(disposableArray);
+                c = mapperToUse.apply(disposableArray);
 
                 if (N.notNullOrEmpty(c)) {
                     mappedColumn.addAll(c);
