@@ -34,16 +34,28 @@ public @interface Table {
     String value() default "";
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     String name() default "";
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     String alias() default "";
+
+    /**
+     *
+     * @return
+     */
+    String[] columnFields() default {};
+
+    /**
+     *
+     * @return
+     */
+    String[] nonColumnFields() default {};
 }

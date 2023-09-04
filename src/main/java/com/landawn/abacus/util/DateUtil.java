@@ -2980,6 +2980,47 @@ public abstract class DateUtil {
                 && cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR);
     }
 
+    public static boolean isSameMonth(final java.util.Date date1, final java.util.Date date2) {
+        N.checkArgNotNull(date1, "date1");
+        N.checkArgNotNull(date2, "date2");
+
+        final Calendar cal1 = Calendar.getInstance();
+        cal1.setTime(date1);
+
+        final Calendar cal2 = Calendar.getInstance();
+        cal2.setTime(date2);
+
+        return isSameMonth(cal1, cal2);
+    }
+
+    public static boolean isSameMonth(final Calendar cal1, final Calendar cal2) {
+        N.checkArgNotNull(cal1, "cal1");
+        N.checkArgNotNull(cal2, "cal2");
+
+        return cal1.get(Calendar.ERA) == cal2.get(Calendar.ERA) && cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR)
+                && cal1.get(Calendar.MONTH) == cal2.get(Calendar.MONTH);
+    }
+
+    public static boolean isSameYear(final java.util.Date date1, final java.util.Date date2) {
+        N.checkArgNotNull(date1, "date1");
+        N.checkArgNotNull(date2, "date2");
+
+        final Calendar cal1 = Calendar.getInstance();
+        cal1.setTime(date1);
+
+        final Calendar cal2 = Calendar.getInstance();
+        cal2.setTime(date2);
+
+        return isSameYear(cal1, cal2);
+    }
+
+    public static boolean isSameYear(final Calendar cal1, final Calendar cal2) {
+        N.checkArgNotNull(cal1, "cal1");
+        N.checkArgNotNull(cal2, "cal2");
+
+        return cal1.get(Calendar.ERA) == cal2.get(Calendar.ERA) && cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR);
+    }
+
     //-----------------------------------------------------------------------
     /**
      * Copied from Apache Commons Lang under Apache License v2.
@@ -3525,6 +3566,42 @@ public abstract class DateUtil {
          * Ceiling.
          */
         CEILING
+    }
+
+    public static boolean isLastDateOfMonth(final java.util.Date date) {
+        N.checkArgNotNull(date, "date");
+
+        final Calendar cal = Calendar.getInstance();
+        cal.setTime(date);
+
+        return cal.get(Calendar.DAY_OF_MONTH) == cal.getActualMaximum(Calendar.DAY_OF_MONTH);
+    }
+
+    public static boolean isLastDateOfYear(final java.util.Date date) {
+        N.checkArgNotNull(date, "date");
+
+        final Calendar cal = Calendar.getInstance();
+        cal.setTime(date);
+
+        return cal.get(Calendar.DAY_OF_YEAR) == cal.getActualMaximum(Calendar.DAY_OF_YEAR);
+    }
+
+    public static int getLastDateOfMonth(final java.util.Date date) {
+        N.checkArgNotNull(date, "date");
+
+        final Calendar cal = Calendar.getInstance();
+        cal.setTime(date);
+
+        return cal.getActualMaximum(Calendar.DAY_OF_MONTH);
+    }
+
+    public static int getLastDateOfYear(final java.util.Date date) {
+        N.checkArgNotNull(date, "date");
+
+        final Calendar cal = Calendar.getInstance();
+        cal.setTime(date);
+
+        return cal.getActualMaximum(Calendar.DAY_OF_YEAR);
     }
 
     /**
