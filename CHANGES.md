@@ -1,6 +1,10 @@
+### 3.7.3
+
+* Improvements and bug fix.
+
+
 ### 3.7.2
 
-* Rename `from` to `create`.
 * Improvements and bug fix.
 
 

@@ -356,9 +356,13 @@ public abstract class DateUtil {
      * @return
      */
     public static java.util.Date createJUDate(final long timeInMillis) {
-        N.checkArgPositive(timeInMillis, "timeInMillis"); //NOSONAR
+        //    N.checkArgPositive(timeInMillis, "timeInMillis");
+        //
+        //    if (timeInMillis == 0) {
+        //        return null;
+        //    }
 
-        return (timeInMillis == 0) ? null : new java.util.Date(timeInMillis);
+        return new java.util.Date(timeInMillis);
     }
 
     /**
@@ -388,9 +392,13 @@ public abstract class DateUtil {
      * @return
      */
     public static Date createDate(final long timeInMillis) {
-        N.checkArgPositive(timeInMillis, "timeInMillis");
+        //    N.checkArgPositive(timeInMillis, "timeInMillis");
+        //
+        //    if (timeInMillis == 0) {
+        //        return null;
+        //    }
 
-        return (timeInMillis == 0) ? null : new Date(timeInMillis);
+        return new Date(timeInMillis);
     }
 
     /**
@@ -420,9 +428,13 @@ public abstract class DateUtil {
      * @return
      */
     public static Time createTime(final long timeInMillis) {
-        N.checkArgPositive(timeInMillis, "timeInMillis");
+        //    N.checkArgPositive(timeInMillis, "timeInMillis");
+        //
+        //    if (timeInMillis == 0) {
+        //        return null;
+        //    }
 
-        return (timeInMillis == 0) ? null : new Time(timeInMillis);
+        return new Time(timeInMillis);
     }
 
     /**
@@ -452,9 +464,13 @@ public abstract class DateUtil {
      * @return
      */
     public static Timestamp createTimestamp(final long timeInMillis) {
-        N.checkArgPositive(timeInMillis, "timeInMillis");
+        //    N.checkArgPositive(timeInMillis, "timeInMillis");
+        //
+        //    if (timeInMillis == 0) {
+        //        return null;
+        //    }
 
-        return (timeInMillis == 0) ? null : new Timestamp(timeInMillis);
+        return new Timestamp(timeInMillis);
     }
 
     /**
@@ -484,11 +500,11 @@ public abstract class DateUtil {
      * @return
      */
     public static Calendar createCalendar(final long timeInMillis) {
-        N.checkArgPositive(timeInMillis, "timeInMillis");
-
-        if (timeInMillis == 0) {
-            return null;
-        }
+        //    N.checkArgPositive(timeInMillis, "timeInMillis");
+        //
+        //    if (timeInMillis == 0) {
+        //        return null;
+        //    }
 
         final Calendar c = Calendar.getInstance();
 
@@ -505,11 +521,11 @@ public abstract class DateUtil {
      * @return
      */
     public static Calendar createCalendar(final long timeInMillis, final TimeZone tz) {
-        N.checkArgPositive(timeInMillis, "timeInMillis");
-
-        if (timeInMillis == 0) {
-            return null;
-        }
+        //    N.checkArgPositive(timeInMillis, "timeInMillis");
+        //
+        //    if (timeInMillis == 0) {
+        //        return null;
+        //    }
 
         final Calendar c = Calendar.getInstance(tz);
 
@@ -545,11 +561,11 @@ public abstract class DateUtil {
      * @return
      */
     public static GregorianCalendar createGregorianCalendar(final long timeInMillis) {
-        N.checkArgPositive(timeInMillis, "timeInMillis");
-
-        if (timeInMillis == 0) {
-            return null;
-        }
+        //    N.checkArgPositive(timeInMillis, "timeInMillis");
+        //
+        //    if (timeInMillis == 0) {
+        //        return null;
+        //    }
 
         final GregorianCalendar c = new GregorianCalendar();
 
@@ -566,11 +582,11 @@ public abstract class DateUtil {
      * @return
      */
     public static GregorianCalendar createGregorianCalendar(final long timeInMillis, final TimeZone tz) {
-        N.checkArgPositive(timeInMillis, "timeInMillis");
-
-        if (timeInMillis == 0) {
-            return null;
-        }
+        //    N.checkArgPositive(timeInMillis, "timeInMillis");
+        //
+        //    if (timeInMillis == 0) {
+        //        return null;
+        //    }
 
         final GregorianCalendar c = new GregorianCalendar(tz);
 
@@ -606,11 +622,11 @@ public abstract class DateUtil {
      * @return
      */
     public static XMLGregorianCalendar createXMLGregorianCalendar(final long timeInMillis) {
-        N.checkArgPositive(timeInMillis, "timeInMillis");
-
-        if (timeInMillis == 0) {
-            return null;
-        }
+        //    N.checkArgPositive(timeInMillis, "timeInMillis");
+        //
+        //    if (timeInMillis == 0) {
+        //        return null;
+        //    }
 
         return dataTypeFactory.newXMLGregorianCalendar(createGregorianCalendar(timeInMillis));
     }
@@ -921,7 +937,7 @@ public abstract class DateUtil {
 
         long timeInMillis = fastDateParse(date, format, timeZone);
 
-        if (timeInMillis > 0) {
+        if (timeInMillis != 0) {
             return timeInMillis;
         }
 
