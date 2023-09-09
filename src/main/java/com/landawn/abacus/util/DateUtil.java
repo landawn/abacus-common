@@ -47,6 +47,14 @@ import com.landawn.abacus.exception.UncheckedIOException;
  */
 public abstract class DateUtil {
 
+    private static final String DATE_STR = "date";
+    private static final String DATE1_STR = "date1";
+    private static final String DATE2_STR = "date2";
+
+    private static final String CALENDAR_STR = "calendar";
+    private static final String CAL1_STR = "cal1";
+    private static final String CAL2_STR = "cal2";
+
     // ...
     public static final TimeZone UTC_TIME_ZONE = TimeZone.getTimeZone("UTC");
 
@@ -1501,7 +1509,7 @@ public abstract class DateUtil {
      * @since 2.4
      */
     private static <T extends java.util.Date> T set(final T date, final int calendarField, final int amount) {
-        N.checkArgNotNull(date, "date");
+        N.checkArgNotNull(date, DATE_STR);
 
         // getInstance() returns a new object, so this method is thread safe.
         final Calendar c = Calendar.getInstance();
@@ -1528,7 +1536,7 @@ public abstract class DateUtil {
      */
     @Deprecated
     public static <T extends java.util.Date> T roll(final T date, final long amount, final TimeUnit unit) {
-        N.checkArgNotNull(date, "date");
+        N.checkArgNotNull(date, DATE_STR);
 
         return createDate(date.getClass(), date.getTime() + unit.toMillis(amount));
     }
@@ -1549,7 +1557,7 @@ public abstract class DateUtil {
      */
     @Deprecated
     public static <T extends java.util.Date> T roll(final T date, final long amount, final CalendarField unit) {
-        N.checkArgNotNull(date, "date");
+        N.checkArgNotNull(date, DATE_STR);
 
         if (amount > Integer.MAX_VALUE || amount < Integer.MIN_VALUE) {
             throw new IllegalArgumentException("The amount :" + amount + " is too big for unit: " + unit);
@@ -1614,7 +1622,7 @@ public abstract class DateUtil {
      */
     @Deprecated
     public static <T extends Calendar> T roll(final T calendar, final long amount, final TimeUnit unit) {
-        N.checkArgNotNull(calendar, "calendar"); //NOSONAR
+        N.checkArgNotNull(calendar, CALENDAR_STR); //NOSONAR
 
         return createCalendar(calendar, calendar.getTimeInMillis() + unit.toMillis(amount));
     }
@@ -1635,7 +1643,7 @@ public abstract class DateUtil {
      */
     @Deprecated
     public static <T extends Calendar> T roll(final T calendar, final long amount, final CalendarField unit) {
-        N.checkArgNotNull(calendar, "calendar");
+        N.checkArgNotNull(calendar, CALENDAR_STR);
 
         if (amount > Integer.MAX_VALUE || amount < Integer.MIN_VALUE) {
             throw new IllegalArgumentException("The amount :" + amount + " is too big for unit: " + unit);
@@ -1921,7 +1929,7 @@ public abstract class DateUtil {
      * @throws ArithmeticException if the year is over 280 million
      */
     public static <T extends java.util.Date> T round(final T date, final int field) {
-        N.checkArgNotNull(date, "date");
+        N.checkArgNotNull(date, DATE_STR);
 
         final Calendar gval = Calendar.getInstance();
         gval.setTime(date);
@@ -1974,7 +1982,7 @@ public abstract class DateUtil {
      * @throws ArithmeticException if the year is over 280 million
      */
     public static <T extends Calendar> T round(final T calendar, final int field) {
-        N.checkArgNotNull(calendar, "calendar");
+        N.checkArgNotNull(calendar, CALENDAR_STR);
 
         final Calendar rounded = (Calendar) calendar.clone();
         modify(rounded, field, ModifyType.ROUND);
@@ -2019,7 +2027,7 @@ public abstract class DateUtil {
      * @throws ArithmeticException if the year is over 280 million
      */
     public static <T extends java.util.Date> T truncate(final T date, final int field) {
-        N.checkArgNotNull(date, "date");
+        N.checkArgNotNull(date, DATE_STR);
 
         final Calendar gval = Calendar.getInstance();
         gval.setTime(date);
@@ -2059,7 +2067,7 @@ public abstract class DateUtil {
      * @throws ArithmeticException if the year is over 280 million
      */
     public static <T extends Calendar> T truncate(final T calendar, final int field) {
-        N.checkArgNotNull(calendar, "calendar");
+        N.checkArgNotNull(calendar, CALENDAR_STR);
 
         final Calendar truncated = (Calendar) calendar.clone();
         modify(truncated, field, ModifyType.TRUNCATE);
@@ -2104,7 +2112,7 @@ public abstract class DateUtil {
      * @since 2.5
      */
     public static <T extends java.util.Date> T ceiling(final T date, final int field) {
-        N.checkArgNotNull(date, "date");
+        N.checkArgNotNull(date, DATE_STR);
 
         final Calendar gval = Calendar.getInstance();
         gval.setTime(date);
@@ -2145,7 +2153,7 @@ public abstract class DateUtil {
      * @since 2.5
      */
     public static <T extends Calendar> T ceiling(final T calendar, final int field) {
-        N.checkArgNotNull(calendar, "calendar");
+        N.checkArgNotNull(calendar, CALENDAR_STR);
 
         final Calendar ceiled = (Calendar) calendar.clone();
 
@@ -2181,7 +2189,7 @@ public abstract class DateUtil {
      * @param modType type to truncate, round or ceiling
      * @throws ArithmeticException if the year is over 280 million
      */
-    private static void modify(final Calendar val, final int field, final ModifyType modType) {
+    private static void modify(final Calendar val, final int field, final ModifyType modType) { //NOSONAR
         if (val.get(Calendar.YEAR) > 280000000) {
             throw new ArithmeticException("Calendar value too large for accurate calculations");
         }
@@ -2668,7 +2676,7 @@ public abstract class DateUtil {
      * @since 2.4
      */
     private static long getFragment(final java.util.Date date, final int fragment, final TimeUnit unit) {
-        N.checkArgNotNull(date, "date");
+        N.checkArgNotNull(date, DATE_STR);
 
         final Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
@@ -2897,7 +2905,7 @@ public abstract class DateUtil {
      * @since 2.4
      */
     private static long getFragment(final Calendar calendar, final int fragment, final TimeUnit unit) {
-        N.checkArgNotNull(calendar, "calendar");
+        N.checkArgNotNull(calendar, CALENDAR_STR);
 
         long result = 0;
 
@@ -2960,8 +2968,8 @@ public abstract class DateUtil {
      * @since 2.1
      */
     public static boolean isSameDay(final java.util.Date date1, final java.util.Date date2) {
-        N.checkArgNotNull(date1, "date1");
-        N.checkArgNotNull(date2, "date2");
+        N.checkArgNotNull(date1, DATE1_STR);
+        N.checkArgNotNull(date2, DATE2_STR);
 
         final Calendar cal1 = Calendar.getInstance();
         cal1.setTime(date1);
@@ -2989,16 +2997,16 @@ public abstract class DateUtil {
      * @since 2.1
      */
     public static boolean isSameDay(final Calendar cal1, final Calendar cal2) {
-        N.checkArgNotNull(cal1, "cal1");
-        N.checkArgNotNull(cal2, "cal2");
+        N.checkArgNotNull(cal1, CAL1_STR);
+        N.checkArgNotNull(cal2, CAL2_STR);
 
         return cal1.get(Calendar.ERA) == cal2.get(Calendar.ERA) && cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR)
                 && cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR);
     }
 
     public static boolean isSameMonth(final java.util.Date date1, final java.util.Date date2) {
-        N.checkArgNotNull(date1, "date1");
-        N.checkArgNotNull(date2, "date2");
+        N.checkArgNotNull(date1, DATE1_STR);
+        N.checkArgNotNull(date2, DATE2_STR);
 
         final Calendar cal1 = Calendar.getInstance();
         cal1.setTime(date1);
@@ -3010,16 +3018,16 @@ public abstract class DateUtil {
     }
 
     public static boolean isSameMonth(final Calendar cal1, final Calendar cal2) {
-        N.checkArgNotNull(cal1, "cal1");
-        N.checkArgNotNull(cal2, "cal2");
+        N.checkArgNotNull(cal1, CAL1_STR);
+        N.checkArgNotNull(cal2, CAL2_STR);
 
         return cal1.get(Calendar.ERA) == cal2.get(Calendar.ERA) && cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR)
                 && cal1.get(Calendar.MONTH) == cal2.get(Calendar.MONTH);
     }
 
     public static boolean isSameYear(final java.util.Date date1, final java.util.Date date2) {
-        N.checkArgNotNull(date1, "date1");
-        N.checkArgNotNull(date2, "date2");
+        N.checkArgNotNull(date1, DATE1_STR);
+        N.checkArgNotNull(date2, DATE2_STR);
 
         final Calendar cal1 = Calendar.getInstance();
         cal1.setTime(date1);
@@ -3031,8 +3039,8 @@ public abstract class DateUtil {
     }
 
     public static boolean isSameYear(final Calendar cal1, final Calendar cal2) {
-        N.checkArgNotNull(cal1, "cal1");
-        N.checkArgNotNull(cal2, "cal2");
+        N.checkArgNotNull(cal1, CAL1_STR);
+        N.checkArgNotNull(cal2, CAL2_STR);
 
         return cal1.get(Calendar.ERA) == cal2.get(Calendar.ERA) && cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR);
     }
@@ -3053,8 +3061,8 @@ public abstract class DateUtil {
      * @since 2.1
      */
     public static boolean isSameInstant(final java.util.Date date1, final java.util.Date date2) {
-        N.checkArgNotNull(date1, "date1");
-        N.checkArgNotNull(date2, "date2");
+        N.checkArgNotNull(date1, DATE1_STR);
+        N.checkArgNotNull(date2, DATE2_STR);
         return date1.getTime() == date2.getTime();
     }
 
@@ -3073,8 +3081,8 @@ public abstract class DateUtil {
      * @since 2.1
      */
     public static boolean isSameInstant(final Calendar cal1, final Calendar cal2) {
-        N.checkArgNotNull(cal1, "cal1");
-        N.checkArgNotNull(cal2, "cal2");
+        N.checkArgNotNull(cal1, CAL1_STR);
+        N.checkArgNotNull(cal2, CAL2_STR);
 
         return cal1.getTime().getTime() == cal2.getTime().getTime();
     }
@@ -3096,8 +3104,8 @@ public abstract class DateUtil {
      * @since 2.1
      */
     public static boolean isSameLocalTime(final Calendar cal1, final Calendar cal2) {
-        N.checkArgNotNull(cal1, "cal1");
-        N.checkArgNotNull(cal2, "cal2");
+        N.checkArgNotNull(cal1, CAL1_STR);
+        N.checkArgNotNull(cal2, CAL2_STR);
 
         return cal1.get(Calendar.MILLISECOND) == cal2.get(Calendar.MILLISECOND) && cal1.get(Calendar.SECOND) == cal2.get(Calendar.SECOND)
                 && cal1.get(Calendar.MINUTE) == cal2.get(Calendar.MINUTE) && cal1.get(Calendar.HOUR_OF_DAY) == cal2.get(Calendar.HOUR_OF_DAY)
@@ -3585,7 +3593,7 @@ public abstract class DateUtil {
     }
 
     public static boolean isLastDateOfMonth(final java.util.Date date) {
-        N.checkArgNotNull(date, "date");
+        N.checkArgNotNull(date, DATE_STR);
 
         final Calendar cal = Calendar.getInstance();
         cal.setTime(date);
@@ -3594,7 +3602,7 @@ public abstract class DateUtil {
     }
 
     public static boolean isLastDateOfYear(final java.util.Date date) {
-        N.checkArgNotNull(date, "date");
+        N.checkArgNotNull(date, DATE_STR);
 
         final Calendar cal = Calendar.getInstance();
         cal.setTime(date);
@@ -3603,7 +3611,7 @@ public abstract class DateUtil {
     }
 
     public static int getLastDateOfMonth(final java.util.Date date) {
-        N.checkArgNotNull(date, "date");
+        N.checkArgNotNull(date, DATE_STR);
 
         final Calendar cal = Calendar.getInstance();
         cal.setTime(date);
@@ -3612,7 +3620,7 @@ public abstract class DateUtil {
     }
 
     public static int getLastDateOfYear(final java.util.Date date) {
-        N.checkArgNotNull(date, "date");
+        N.checkArgNotNull(date, DATE_STR);
 
         final Calendar cal = Calendar.getInstance();
         cal.setTime(date);

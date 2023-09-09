@@ -4391,19 +4391,18 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     /**
      *
      * @param <R>
-     * @param <A>
      * @param collapsible test the current element with its previous element. The first parameter is the previous element of current element, the second parameter is the current element.
      * @param collector
      * @return
      */
     @IntermediateOp
-    public <R, A> ExceptionalStream<R, E> collapse(final Throwables.BiPredicate<? super T, ? super T, ? extends E> collapsible,
-            final Collector<? super T, A, R> collector) {
+    public <R> ExceptionalStream<R, E> collapse(final Throwables.BiPredicate<? super T, ? super T, ? extends E> collapsible,
+            final Collector<? super T, ?, R> collector) {
         assertNotClosed();
 
-        final Supplier<A> supplier = collector.supplier();
-        final BiConsumer<A, ? super T> accumulator = collector.accumulator();
-        final Function<A, R> finisher = collector.finisher();
+        final Supplier<Object> supplier = (Supplier<Object>) collector.supplier();
+        final BiConsumer<Object, ? super T> accumulator = (BiConsumer<Object, ? super T>) collector.accumulator();
+        final Function<Object, R> finisher = (Function<Object, R>) collector.finisher();
 
         final ExceptionalIterator<T, E> iter = elements;
 
@@ -4418,7 +4417,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
             @Override
             public R next() throws E {
-                final A container = supplier.get();
+                final Object container = supplier.get();
                 accumulator.accept(container, hasNext ? next : (next = iter.next()));
 
                 while ((hasNext = iter.hasNext())) {
@@ -4673,19 +4672,18 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      *
      *
      * @param <R>
-     * @param <A>
      * @param collapsible test the current element with the first element and previous element in the series. The first parameter is the first element of this series, the second parameter is the previous element and the third parameter is the current element.
      * @param collector
      * @return
      */
     @IntermediateOp
-    public <R, A> ExceptionalStream<R, E> collapse(final Throwables.TriPredicate<? super T, ? super T, ? super T, ? extends E> collapsible,
-            final Collector<? super T, A, R> collector) {
+    public <R> ExceptionalStream<R, E> collapse(final Throwables.TriPredicate<? super T, ? super T, ? super T, ? extends E> collapsible,
+            final Collector<? super T, ?, R> collector) {
         assertNotClosed();
 
-        final Supplier<A> supplier = collector.supplier();
-        final BiConsumer<A, ? super T> accumulator = collector.accumulator();
-        final Function<A, R> finisher = collector.finisher();
+        final Supplier<Object> supplier = (Supplier<Object>) collector.supplier();
+        final BiConsumer<Object, ? super T> accumulator = (BiConsumer<Object, ? super T>) collector.accumulator();
+        final Function<Object, R> finisher = (Function<Object, R>) collector.finisher();
 
         final ExceptionalIterator<T, E> iter = elements;
 
@@ -4701,7 +4699,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             @Override
             public R next() throws E {
                 final T first = hasNext ? next : (next = iter.next());
-                final A container = supplier.get();
+                final Object container = supplier.get();
                 accumulator.accept(container, first);
 
                 while ((hasNext = iter.hasNext())) {
@@ -5786,20 +5784,19 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     /**
      *
      * @param <R>
-     * @param <A>
      * @param chunkSize the desired size of each sub sequence (the last may be smaller).
      * @param collector
      * @return
      */
     @IntermediateOp
-    public <R, A> ExceptionalStream<R, E> split(final int chunkSize, final Collector<? super T, A, R> collector) {
+    public <R> ExceptionalStream<R, E> split(final int chunkSize, final Collector<? super T, ?, R> collector) {
         assertNotClosed();
 
         checkArgPositive(chunkSize, "chunkSize");
 
-        final Supplier<A> supplier = collector.supplier();
-        final BiConsumer<A, ? super T> accumulator = collector.accumulator();
-        final Function<A, R> finisher = collector.finisher();
+        final Supplier<Object> supplier = (Supplier<Object>) collector.supplier();
+        final BiConsumer<Object, ? super T> accumulator = (BiConsumer<Object, ? super T>) collector.accumulator();
+        final Function<Object, R> finisher = (Function<Object, R>) collector.finisher();
 
         return newStream(new ExceptionalIterator<R, E>() {
             @Override
@@ -5813,7 +5810,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
-                final A container = supplier.get();
+                final Object container = supplier.get();
                 int cnt = 0;
 
                 while (cnt++ < chunkSize && elements.hasNext()) {
@@ -6203,7 +6200,6 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
     /**
      *
-     * @param <A>
      * @param <R>
      * @param windowSize
      * @param increment
@@ -6211,14 +6207,14 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     @IntermediateOp
-    public <A, R> ExceptionalStream<R, E> sliding(final int windowSize, final int increment, final Collector<? super T, A, R> collector) {
+    public <R> ExceptionalStream<R, E> sliding(final int windowSize, final int increment, final Collector<? super T, ?, R> collector) {
         assertNotClosed();
 
         checkArgument(windowSize > 0 && increment > 0, "windowSize=%s and increment=%s must be bigger than 0", windowSize, increment);
 
-        final Supplier<A> supplier = collector.supplier();
-        final BiConsumer<A, ? super T> accumulator = collector.accumulator();
-        final Function<A, R> finisher = collector.finisher();
+        final Supplier<Object> supplier = (Supplier<Object>) collector.supplier();
+        final BiConsumer<Object, ? super T> accumulator = (BiConsumer<Object, ? super T>) collector.accumulator();
+        final Function<Object, R> finisher = (Function<Object, R>) collector.finisher();
 
         return newStream(new ExceptionalIterator<R, E>() {
             private Deque<T> queue = null;
@@ -6249,7 +6245,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                     queue = new ArrayDeque<>(windowSize - increment);
                 }
 
-                final A container = supplier.get();
+                final Object container = supplier.get();
                 int cnt = 0;
 
                 if (increment < windowSize && queue.size() > 0) {
@@ -10488,26 +10484,28 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     /**
      *
      * @param <R>
-     * @param <A>
      * @param collector
      * @return
      * @throws E the e
      */
     @TerminalOp
-    public <R, A> R collect(final Collector<? super T, A, R> collector) throws E {
+    public <R> R collect(final Collector<? super T, ?, R> collector) throws E {
         assertNotClosed();
 
         checkArgNotNull(collector, "collector");
 
+        final Supplier<Object> supplier = (Supplier<Object>) collector.supplier();
+        final BiConsumer<Object, ? super T> accumulator = (BiConsumer<Object, ? super T>) collector.accumulator();
+        final Function<Object, R> finisher = (Function<Object, R>) collector.finisher();
+
         try {
-            final A container = collector.supplier().get();
-            final BiConsumer<A, ? super T> accumulator = collector.accumulator();
+            final Object container = supplier.get();
 
             while (elements.hasNext()) {
                 accumulator.accept(container, elements.next());
             }
 
-            return collector.finisher().apply(container);
+            return finisher.apply(container);
         } finally {
             close();
         }
@@ -10518,7 +10516,6 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      *
      * @param <R>
      * @param <RR>
-     * @param <A>
      * @param <E2>
      * @param collector
      * @param func
@@ -10527,7 +10524,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @throws E2 the e2
      */
     @TerminalOp
-    public <R, RR, A, E2 extends Exception> RR collectAndThen(final Collector<? super T, A, R> collector,
+    public <R, RR, E2 extends Exception> RR collectAndThen(final Collector<? super T, ?, R> collector,
             final Throwables.Function<? super R, ? extends RR, E2> func) throws E, E2 {
         assertNotClosed();
 
