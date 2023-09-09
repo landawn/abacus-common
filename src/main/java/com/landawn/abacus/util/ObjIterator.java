@@ -50,7 +50,7 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
 
         @Override
         public Object next() {
-            throw new NoSuchElementException();
+            throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
         }
 
         @Override
@@ -86,7 +86,7 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
             @Override
             public T next() {
                 if (done) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 done = true;
@@ -133,7 +133,7 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
             @Override
             public T next() {
                 if (cursor >= toIndex) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 return a[cursor++];
@@ -235,7 +235,7 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
     //                }
     //
     //                if (cur >= len) {
-    //                    throw new NoSuchElementException();
+    //                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
     //                }
     //
     //                return aar[cur++];
@@ -335,7 +335,7 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
             @Override
             public T next() {
                 if (!hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 return supplier.get();
@@ -552,7 +552,7 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
             @Override
             public T next() {
                 if (!hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 return iter.next();
@@ -596,7 +596,7 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
             @Override
             public T next() {
                 if (!hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 cnt--;

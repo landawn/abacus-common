@@ -49,12 +49,12 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
 
         @Override
         public Object next() {
-            throw new NoSuchElementException();
+            throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
         }
 
         @Override
         protected void next(Throwables.BiConsumer action) throws NoSuchElementException {
-            throw new NoSuchElementException();
+            throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
         }
 
         @Override
@@ -198,7 +198,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
             @Override
             public Pair<A, B> next() {
                 if (!hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 output.accept(tmp);
@@ -211,7 +211,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
                 // N.checkArgNotNull(action);
 
                 if (!hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 output.accept(tmp);
@@ -243,7 +243,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
                     @Override
                     public R next() {
                         if (!hasNext()) {
-                            throw new NoSuchElementException();
+                            throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                         }
 
                         output.accept(tmp);
@@ -280,7 +280,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
             @Override
             public Pair<A, B> next() {
                 if (!hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 output.accept(cursor.getAndIncrement(), tmp);
@@ -293,7 +293,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
                 // N.checkArgNotNull(action);
 
                 if (!hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 output.accept(cursor.getAndIncrement(), tmp);
@@ -325,7 +325,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
                     @Override
                     public R next() {
                         if (!hasNext()) {
-                            throw new NoSuchElementException();
+                            throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                         }
 
                         output.accept(cursor.getAndIncrement(), tmp);
@@ -411,7 +411,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
             @Override
             public Pair<A, B> next() {
                 if (!hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 return Pair.of(iterA.next(), iterB.next());
@@ -446,7 +446,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
                     @Override
                     public R next() {
                         if (!hasNext()) {
-                            throw new NoSuchElementException();
+                            throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                         }
 
                         return mapper.apply(iterA.next(), iterB.next());
@@ -479,7 +479,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
             @Override
             public Pair<A, B> next() {
                 if (!hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 return Pair.of(iter1.hasNext() ? iter1.next() : valueForNoneA, iter2.hasNext() ? iter2.next() : valueForNoneB);
@@ -490,7 +490,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
                 // N.checkArgNotNull(action);
 
                 if (!hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 action.accept(iter1.hasNext() ? iter1.next() : valueForNoneA, iter2.hasNext() ? iter2.next() : valueForNoneB);
@@ -518,7 +518,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
                     @Override
                     public R next() {
                         if (!hasNext()) {
-                            throw new NoSuchElementException();
+                            throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                         }
 
                         return mapper.apply(iter1.hasNext() ? iter1.next() : valueForNoneA, iter2.hasNext() ? iter2.next() : valueForNoneB);
@@ -631,7 +631,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
             @Override
             public Pair<A, B> next() {
                 if (!hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 return iter.next();
@@ -704,7 +704,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
             @Override
             public Pair<A, B> next() {
                 if (!hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 cnt--;
@@ -714,7 +714,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
             @Override
             protected <E extends Exception> void next(final Throwables.BiConsumer<? super A, ? super B, E> action) throws NoSuchElementException, E {
                 if (!hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 cnt--;
@@ -776,7 +776,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
             @Override
             public Pair<A, B> next() {
                 if (!hasNext && !hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 hasNext = false;
@@ -787,7 +787,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
             @Override
             protected <E extends Exception> void next(final Throwables.BiConsumer<? super A, ? super B, E> action) throws NoSuchElementException, E {
                 if (!hasNext && !hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 hasNext = false;
@@ -826,7 +826,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
                     @Override
                     public R next() {
                         if (!hasNext && !hasNext()) {
-                            throw new NoSuchElementException();
+                            throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                         }
 
                         hasNext = false;

@@ -40,7 +40,7 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
 
         @Override
         public long nextLong() {
-            throw new NoSuchElementException();
+            throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
         }
     };
 
@@ -88,7 +88,7 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
             @Override
             public long nextLong() {
                 if (cursor >= toIndex) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 return a[cursor++];
@@ -137,7 +137,7 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
     //                }
     //
     //                if (cur >= len) {
-    //                    throw new NoSuchElementException();
+    //                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
     //                }
     //
     //                return aar[cur++];
@@ -234,7 +234,7 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
             @Override
             public long nextLong() {
                 if (!hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 return supplier.getAsLong();
@@ -290,7 +290,7 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
             @Override
             public long nextLong() {
                 if (!hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 return iter.nextLong();
@@ -334,7 +334,7 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
             @Override
             public long nextLong() {
                 if (!hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 cnt--;
@@ -377,7 +377,7 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
             @Override
             public long nextLong() {
                 if (!hasNext && !hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 hasNext = false;

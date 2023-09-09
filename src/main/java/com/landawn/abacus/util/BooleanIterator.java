@@ -39,7 +39,7 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
 
         @Override
         public boolean nextBoolean() {
-            throw new NoSuchElementException();
+            throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
         }
     };
 
@@ -87,7 +87,7 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
             @Override
             public boolean nextBoolean() {
                 if (cursor >= toIndex) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 return a[cursor++];
@@ -137,7 +137,7 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
     //                }
     //
     //                if (cur >= len) {
-    //                    throw new NoSuchElementException();
+    //                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
     //                }
     //
     //                return aar[cur++];
@@ -234,7 +234,7 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
             @Override
             public boolean nextBoolean() {
                 if (!hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 return supplier.getAsBoolean();
@@ -291,7 +291,7 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
             @Override
             public boolean nextBoolean() {
                 if (!hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 return iter.nextBoolean();
@@ -335,7 +335,7 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
             @Override
             public boolean nextBoolean() {
                 if (!hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 cnt--;
@@ -378,7 +378,7 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
             @Override
             public boolean nextBoolean() {
                 if (!hasNext && !hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 hasNext = false;

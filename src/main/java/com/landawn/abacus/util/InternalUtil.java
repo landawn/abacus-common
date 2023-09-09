@@ -28,6 +28,8 @@ import com.landawn.abacus.util.ExceptionalStream.ExceptionalIterator;
 
 @Internal
 public final class InternalUtil {
+    public static final String ERROR_MSG_FOR_NO_SUCH_EX = "Target object/value does not exist or is not found";
+
     /**
      *
      * @deprecated DO NOT call the methods defined in this class. it's for internal use only.

@@ -46,6 +46,7 @@ import java.util.Set;
 import java.util.Spliterator;
 import java.util.Spliterators;
 import java.util.concurrent.Executor;
+import java.util.function.BiConsumer;
 import java.util.function.BinaryOperator;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -102,7 +103,7 @@ import com.landawn.abacus.util.stream.Stream;
  * @see IntStream
  * @see LongStream
  * @see DoubleStream
- * @see Collectors
+ * @see Collectorsa
  * @see com.landawn.abacus.util.Fn.Fnn
  * @see com.landawn.abacus.util.Comparators
  * @see com.landawn.abacus.util.ExceptionUtil
@@ -275,7 +276,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             @Override
             public T next() throws E {
                 if (position >= len) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 return a[position++];
@@ -326,7 +327,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                 @Override
                 public T next() throws E {
                     if (position >= len) {
-                        throw new NoSuchElementException();
+                        throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                     }
 
                     return a[position++];
@@ -1041,7 +1042,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             @Override
             public T next() throws E {
                 if (!hasNextVal && !hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 hasNextVal = false;
@@ -1081,7 +1082,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             @Override
             public T next() throws E {
                 if (!hasNextVal && !hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 hasNextVal = false;
@@ -1127,7 +1128,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             @Override
             public T next() throws E {
                 if (!hasNextVal && !hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 t = cur;
@@ -1216,7 +1217,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             @Override
             public T next() throws E {
                 if (cnt-- <= 0) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 return element;
@@ -1397,7 +1398,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             @Override
             public File next() {
                 if (!hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 if (subFiles[cursor].isDirectory()) {
@@ -1588,7 +1589,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             @Override
             public T next() throws E {
                 if ((iter == null || !iter.hasNext()) && !hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 return iter.next();
@@ -1919,7 +1920,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             @Override
             public T next() throws E {
                 if (!hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 return zipFunction.apply(iterA.hasNext() ? iterA.next() : valueForNoneA, iterB.hasNext() ? iterB.next() : valueForNoneB);
@@ -1961,7 +1962,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             @Override
             public T next() throws E {
                 if (!hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 return zipFunction.apply(iterA.hasNext() ? iterA.next() : valueForNoneA, iterB.hasNext() ? iterB.next() : valueForNoneB,
@@ -2000,7 +2001,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             @Override
             public T next() throws E {
                 if (!hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 return zipFunction.apply(iterA.hasNext() ? iterA.next() : valueForNoneA, iterB.hasNext() ? iterB.next() : valueForNoneB);
@@ -2042,7 +2043,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             @Override
             public T next() throws E {
                 if (!hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 return zipFunction.apply(iterA.hasNext() ? iterA.next() : valueForNoneA, iterB.hasNext() ? iterB.next() : valueForNoneB,
@@ -2124,7 +2125,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                 } else if (cursorB < lenB) {
                     return b[cursorB++];
                 } else {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
             }
         });
@@ -2308,7 +2309,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                 } else if (iterB.hasNext()) {
                     return iterB.next();
                 } else {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
             }
         });
@@ -2346,7 +2347,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             @Override
             public T next() throws E {
                 if (!hasNext && !hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 hasNext = false;
@@ -2409,7 +2410,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             @Override
             public T next() throws E {
                 if (!hasNext && !hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 hasNext = false;
@@ -2459,7 +2460,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             @Override
             public T next() throws E {
                 if (!hasNext && !hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 hasNext = false;
@@ -2800,7 +2801,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             @Override
             public R next() throws E {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 return cur.next();
@@ -2852,7 +2853,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             @Override
             public R next() throws E {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 return cur.next();
@@ -2894,7 +2895,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             @Override
             public R next() throws E {
                 if (idx >= len && !hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 return cur[idx++];
@@ -2945,7 +2946,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             @Override
             public R next() throws E {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 return cur.next();
@@ -3012,7 +3013,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     //            @Override
     //            public R next() throws E {
     //                if ((cur == null || cur.hasNext() == false) && hasNext() == false) {
-    //                    throw new NoSuchElementException();
+    //                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
     //                }
     //
     //                return cur.next();
@@ -3080,7 +3081,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     //            @Override
     //            public R next() throws E {
     //                if ((cur == null || cur.hasNext() == false) && hasNext() == false) {
-    //                    throw new NoSuchElementException();
+    //                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
     //                }
     //
     //                return cur.next();
@@ -3177,7 +3178,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             @Override
             public Boolean next() throws E {
                 if (idx >= len && !hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 return cur[idx++];
@@ -3220,7 +3221,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             @Override
             public Character next() throws E {
                 if (idx >= len && !hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 return cur[idx++];
@@ -3263,7 +3264,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             @Override
             public Byte next() throws E {
                 if (idx >= len && !hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 return cur[idx++];
@@ -3306,7 +3307,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             @Override
             public Short next() throws E {
                 if (idx >= len && !hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 return cur[idx++];
@@ -3349,7 +3350,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             @Override
             public Integer next() throws E {
                 if (idx >= len && !hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 return cur[idx++];
@@ -3392,7 +3393,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             @Override
             public Long next() throws E {
                 if (idx >= len && !hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 return cur[idx++];
@@ -3435,7 +3436,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             @Override
             public Float next() throws E {
                 if (idx >= len && !hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 return cur[idx++];
@@ -3478,7 +3479,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             @Override
             public Double next() throws E {
                 if (idx >= len && !hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 return cur[idx++];
@@ -3676,7 +3677,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             @Override
             public R next() throws E {
                 if (queue.size() == 0 && !hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 return queue.poll();
@@ -3752,7 +3753,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             @Override
             public R next() throws E {
                 if (!hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 if (ignoreNotPaired) {
@@ -3846,7 +3847,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             @Override
             public R next() throws E {
                 if (!hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 if (ignoreNotPaired) {
@@ -4017,7 +4018,6 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      *
      *
      * @param <K> the key type
-     * @param <A>
      * @param <D>
      * @param keyMapper
      * @param downstream
@@ -4025,8 +4025,8 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @IntermediateOp
     @TerminalOpTriggered
-    public <K, A, D> ExceptionalStream<Map.Entry<K, D>, E> groupBy(final Throwables.Function<? super T, ? extends K, ? extends E> keyMapper,
-            final Collector<? super T, A, D> downstream) {
+    public <K, D> ExceptionalStream<Map.Entry<K, D>, E> groupBy(final Throwables.Function<? super T, ? extends K, ? extends E> keyMapper,
+            final Collector<? super T, ?, D> downstream) {
         return groupBy(keyMapper, downstream, Suppliers.<K, D> ofMap());
     }
 
@@ -4034,7 +4034,6 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      *
      *
      * @param <K> the key type
-     * @param <A>
      * @param <D>
      * @param keyMapper
      * @param downstream
@@ -4043,8 +4042,8 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @IntermediateOp
     @TerminalOpTriggered
-    public <K, A, D> ExceptionalStream<Map.Entry<K, D>, E> groupBy(final Throwables.Function<? super T, ? extends K, ? extends E> keyMapper,
-            final Collector<? super T, A, D> downstream, final Supplier<? extends Map<K, D>> mapFactory) {
+    public <K, D> ExceptionalStream<Map.Entry<K, D>, E> groupBy(final Throwables.Function<? super T, ? extends K, ? extends E> keyMapper,
+            final Collector<? super T, ?, D> downstream, final Supplier<? extends Map<K, D>> mapFactory) {
         return groupBy(keyMapper, Fnn.<T, E> identity(), downstream, mapFactory);
     }
 
@@ -4053,7 +4052,6 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <A>
      * @param <D>
      * @param keyMapper
      * @param valueMapper
@@ -4062,8 +4060,8 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @IntermediateOp
     @TerminalOpTriggered
-    public <K, V, A, D> ExceptionalStream<Map.Entry<K, D>, E> groupBy(final Throwables.Function<? super T, ? extends K, ? extends E> keyMapper,
-            final Throwables.Function<? super T, ? extends V, ? extends E> valueMapper, final Collector<? super V, A, D> downstream) {
+    public <K, V, D> ExceptionalStream<Map.Entry<K, D>, E> groupBy(final Throwables.Function<? super T, ? extends K, ? extends E> keyMapper,
+            final Throwables.Function<? super T, ? extends V, ? extends E> valueMapper, final Collector<? super V, ?, D> downstream) {
         return groupBy(keyMapper, valueMapper, downstream, Suppliers.<K, D> ofMap());
     }
 
@@ -4072,7 +4070,6 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <A>
      * @param <D>
      * @param keyMapper
      * @param valueMapper
@@ -4082,8 +4079,8 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @IntermediateOp
     @TerminalOpTriggered
-    public <K, V, A, D> ExceptionalStream<Map.Entry<K, D>, E> groupBy(final Throwables.Function<? super T, ? extends K, ? extends E> keyMapper,
-            final Throwables.Function<? super T, ? extends V, ? extends E> valueMapper, final Collector<? super V, A, D> downstream,
+    public <K, V, D> ExceptionalStream<Map.Entry<K, D>, E> groupBy(final Throwables.Function<? super T, ? extends K, ? extends E> keyMapper,
+            final Throwables.Function<? super T, ? extends V, ? extends E> valueMapper, final Collector<? super V, ?, D> downstream,
             final Supplier<? extends Map<K, D>> mapFactory) {
         assertNotClosed();
 
@@ -4127,7 +4124,6 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     /**
      *
      *
-     * @param <A>
      * @param <D>
      * @param predicate
      * @param downstream
@@ -4136,8 +4132,8 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @IntermediateOp
     @TerminalOpTriggered
-    public <A, D> ExceptionalStream<Map.Entry<Boolean, D>, E> partitionBy(final Throwables.Predicate<? super T, E> predicate,
-            final Collector<? super T, A, D> downstream) {
+    public <D> ExceptionalStream<Map.Entry<Boolean, D>, E> partitionBy(final Throwables.Predicate<? super T, E> predicate,
+            final Collector<? super T, ?, D> downstream) {
         assertNotClosed();
 
         return newStream(new ExceptionalIterator<Entry<Boolean, D>, E>() {
@@ -4181,12 +4177,12 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     @IntermediateOp
-    public ExceptionalStream<Stream<T>, E> collapse(final Throwables.BiPredicate<? super T, ? super T, ? extends E> collapsible) {
+    public ExceptionalStream<List<T>, E> collapse(final Throwables.BiPredicate<? super T, ? super T, ? extends E> collapsible) {
         assertNotClosed();
 
         final ExceptionalIterator<T, E> iter = elements;
 
-        return newStream(new ExceptionalIterator<Stream<T>, E>() {
+        return newStream(new ExceptionalIterator<List<T>, E>() {
             private boolean hasNext = false;
             private T next = null;
 
@@ -4196,7 +4192,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             }
 
             @Override
-            public Stream<T> next() throws E {
+            public List<T> next() throws E {
                 final List<T> c = new ArrayList<>();
                 c.add(hasNext ? next : (next = iter.next()));
 
@@ -4208,7 +4204,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                     }
                 }
 
-                return Stream.of(c);
+                return c;
             }
         }, closeHandlers);
     }
@@ -4405,9 +4401,9 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             final Collector<? super T, A, R> collector) {
         assertNotClosed();
 
-        final java.util.function.Supplier<A> supplier = collector.supplier();
-        final java.util.function.BiConsumer<A, ? super T> accumulator = collector.accumulator();
-        final java.util.function.Function<A, R> finisher = collector.finisher();
+        final Supplier<A> supplier = collector.supplier();
+        final BiConsumer<A, ? super T> accumulator = collector.accumulator();
+        final Function<A, R> finisher = collector.finisher();
 
         final ExceptionalIterator<T, E> iter = elements;
 
@@ -4444,12 +4440,12 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     @IntermediateOp
-    public ExceptionalStream<Stream<T>, E> collapse(final Throwables.TriPredicate<? super T, ? super T, ? super T, ? extends E> collapsible) {
+    public ExceptionalStream<List<T>, E> collapse(final Throwables.TriPredicate<? super T, ? super T, ? super T, ? extends E> collapsible) {
         assertNotClosed();
 
         final ExceptionalIterator<T, E> iter = elements;
 
-        return newStream(new ExceptionalIterator<Stream<T>, E>() {
+        return newStream(new ExceptionalIterator<List<T>, E>() {
             private boolean hasNext = false;
             private T next = null;
 
@@ -4459,7 +4455,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             }
 
             @Override
-            public Stream<T> next() throws E {
+            public List<T> next() throws E {
                 final T first = hasNext ? next : (next = iter.next());
                 final List<T> c = new ArrayList<>();
                 c.add(first);
@@ -4472,7 +4468,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                     }
                 }
 
-                return Stream.of(c);
+                return c;
             }
         }, closeHandlers);
     }
@@ -4687,9 +4683,9 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             final Collector<? super T, A, R> collector) {
         assertNotClosed();
 
-        final java.util.function.Supplier<A> supplier = collector.supplier();
-        final java.util.function.BiConsumer<A, ? super T> accumulator = collector.accumulator();
-        final java.util.function.Function<A, R> finisher = collector.finisher();
+        final Supplier<A> supplier = collector.supplier();
+        final BiConsumer<A, ? super T> accumulator = collector.accumulator();
+        final Function<A, R> finisher = collector.finisher();
 
         final ExceptionalIterator<T, E> iter = elements;
 
@@ -5169,7 +5165,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     //            @Override
     //            public T next() throws E {
     //                if (hasNext() == false) {
-    //                    throw new NoSuchElementException();
+    //                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
     //                }
     //
     //                try {
@@ -5207,7 +5203,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     //            @Override
     //            public T next() throws E {
     //                if (hasNext() == false) {
-    //                    throw new NoSuchElementException();
+    //                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
     //                }
     //
     //                try {
@@ -5249,7 +5245,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     //            @Override
     //            public T next() throws E {
     //                if (hasNext() == false) {
-    //                    throw new NoSuchElementException();
+    //                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
     //                }
     //
     //                try {
@@ -5295,7 +5291,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     //            @Override
     //            public T next() throws E {
     //                if (hasNext() == false) {
-    //                    throw new NoSuchElementException();
+    //                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
     //                }
     //
     //                try {
@@ -5368,7 +5364,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     //            @Override
     //            public T next() throws E {
     //                if (hasNext() == false) {
-    //                    throw new NoSuchElementException();
+    //                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
     //                }
     //
     //                try {
@@ -5441,7 +5437,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     //            @Override
     //            public T next() throws E {
     //                if (hasNext() == false) {
-    //                    throw new NoSuchElementException();
+    //                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
     //                }
     //
     //                try {
@@ -5759,7 +5755,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             @Override
             public C next() throws E {
                 if (!hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 final C result = collectionSupplier.apply(chunkSize);
@@ -5801,9 +5797,9 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
         checkArgPositive(chunkSize, "chunkSize");
 
-        final java.util.function.Supplier<A> supplier = collector.supplier();
-        final java.util.function.BiConsumer<A, ? super T> accumulator = collector.accumulator();
-        final java.util.function.Function<A, R> finisher = collector.finisher();
+        final Supplier<A> supplier = collector.supplier();
+        final BiConsumer<A, ? super T> accumulator = collector.accumulator();
+        final Function<A, R> finisher = collector.finisher();
 
         return newStream(new ExceptionalIterator<R, E>() {
             @Override
@@ -5814,7 +5810,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             @Override
             public R next() throws E {
                 if (!hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 final A container = supplier.get();
@@ -5867,7 +5863,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             @Override
             public ExceptionalStream<T, E> next() throws E {
                 if (!hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 ExceptionalStream<T, E> result = null;
@@ -5941,7 +5937,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             @Override
             public ExceptionalStream<T, E> next() throws E {
                 if (!hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 ExceptionalStream<T, E> result = null;
@@ -5976,7 +5972,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                             @Override
                             public T next() throws E {
                                 if (!hasNext()) {
-                                    throw new NoSuchElementException();
+                                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                                 }
 
                                 if (isFirst) {
@@ -6105,7 +6101,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             @Override
             public C next() throws E {
                 if (!hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 if (queue == null) {
@@ -6220,9 +6216,9 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
         checkArgument(windowSize > 0 && increment > 0, "windowSize=%s and increment=%s must be bigger than 0", windowSize, increment);
 
-        final java.util.function.Supplier<A> supplier = collector.supplier();
-        final java.util.function.BiConsumer<A, ? super T> accumulator = collector.accumulator();
-        final java.util.function.Function<A, R> finisher = collector.finisher();
+        final Supplier<A> supplier = collector.supplier();
+        final BiConsumer<A, ? super T> accumulator = collector.accumulator();
+        final Function<A, R> finisher = collector.finisher();
 
         return newStream(new ExceptionalIterator<R, E>() {
             private Deque<T> queue = null;
@@ -6246,7 +6242,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             @Override
             public R next() throws E {
                 if (!hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 if (increment < windowSize && queue == null) {
@@ -6432,7 +6428,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             @Override
             public T next() throws E {
                 if (cnt >= maxSize) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 cnt++;
@@ -6506,7 +6502,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                 }
 
                 if (cursor >= to) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 return aar[cursor++];
@@ -6686,7 +6682,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             @Override
             public T next() throws E {
                 if (!hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 deque.offerLast(elements.next());
@@ -6728,7 +6724,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                 }
 
                 if (cursor <= 0) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 return aar[--cursor];
@@ -6796,7 +6792,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             @Override
             public T next() throws E {
                 if (!hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 return aar[(start + cnt++) % len];
@@ -6975,7 +6971,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                 }
 
                 if (cursor >= len) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 return aar[cursor++];
@@ -7053,7 +7049,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             @Override
             public T next() throws E {
                 if (!hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 if (len > 0) {
@@ -7129,7 +7125,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             @Override
             public T next() throws E {
                 if (!hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 if (len > 0) {
@@ -7187,6 +7183,22 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
     /**
      *
+     * @param delay
+     * @return
+     */
+    @IntermediateOp
+    public ExceptionalStream<T, E> delay(final Duration delay) {
+        assertNotClosed();
+        checkArgNotNull(delay, "delay");
+
+        final long millis = delay.toMillis();
+        final Throwables.Consumer<T, E> action = it -> N.sleepUninterruptibly(millis);
+
+        return onEach(action);
+    }
+
+    /**
+     *
      *
      * @return
      */
@@ -7218,7 +7230,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             @Override
             public T next() throws E {
                 if (!hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 if (toInsert) {
@@ -7509,7 +7521,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     //            @Override
     //            public T next() throws E {
     //                if (!hasNext()) {
-    //                    throw new NoSuchElementException();
+    //                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
     //                }
     //
     //                ret = next;
@@ -7567,7 +7579,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     //            @Override
     //            public T next() throws E {
     //                if (!hasNext()) {
-    //                    throw new NoSuchElementException();
+    //                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
     //                }
     //
     //                ret = next;
@@ -7625,7 +7637,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     //            @Override
     //            public T next() throws E {
     //                if (!hasNext()) {
-    //                    throw new NoSuchElementException();
+    //                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
     //                }
     //
     //                ret = next;
@@ -7690,7 +7702,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     //            @Override
     //            public T next() throws E {
     //                if (!hasNext()) {
-    //                    throw new NoSuchElementException();
+    //                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
     //                }
     //
     //                ret = next;
@@ -7738,7 +7750,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     //            @Override
     //            public T next() {
     //                if (!hasNext()) {
-    //                    throw new NoSuchElementException();
+    //                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
     //                }
     //
     //                ret = next;
@@ -7791,7 +7803,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     //            @Override
     //            public T next() throws E {
     //                if (!hasNext()) {
-    //                    throw new NoSuchElementException();
+    //                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
     //                }
     //
     //                ret = next;
@@ -7844,7 +7856,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     //            @Override
     //            public T next() throws E {
     //                if (!hasNext()) {
-    //                    throw new NoSuchElementException();
+    //                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
     //                }
     //
     //                ret = next;
@@ -7898,7 +7910,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     //            @Override
     //            public T next() throws E {
     //                if (!hasNext()) {
-    //                    throw new NoSuchElementException();
+    //                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
     //                }
     //
     //                ret = next;
@@ -7959,7 +7971,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     //            @Override
     //            public T next() throws E {
     //                if (!hasNext()) {
-    //                    throw new NoSuchElementException();
+    //                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
     //                }
     //
     //                ret = next;
@@ -7998,7 +8010,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     //            @Override
     //            public T next() {
     //                if (!hasNext()) {
-    //                    throw new NoSuchElementException();
+    //                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
     //                }
     //
     //                ret = next;
@@ -9564,8 +9576,8 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     //     */
     //    @Deprecated
     //    @TerminalOp
-    //    public final <K, A, D, E2 extends Exception> Map<K, D> toMap(final Throwables.Function<? super T, ? extends K, E2> keyMapper,
-    //            final Collector<? super T, A, D> downstream) throws E, E2 {
+    //    public final <K, D, E2 extends Exception> Map<K, D> toMap(final Throwables.Function<? super T, ? extends K, E2> keyMapper,
+    //            final Collector<? super T, ?, D> downstream) throws E, E2 {
     //        return groupTo(keyMapper, downstream);
     //    }
     //
@@ -9580,8 +9592,8 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     //     */
     //    @Deprecated
     //    @TerminalOp
-    //    public final <K, A, D, M extends Map<K, D>, E2 extends Exception> M toMap(final Throwables.Function<? super T, ? extends K, E2> keyMapper,
-    //            final Collector<? super T, A, D> downstream, final Supplier<? extends M> mapFactory) throws E, E2 {
+    //    public final <K, D, M extends Map<K, D>, E2 extends Exception> M toMap(final Throwables.Function<? super T, ? extends K, E2> keyMapper,
+    //            final Collector<? super T, ?, D> downstream, final Supplier<? extends M> mapFactory) throws E, E2 {
     //        return groupTo(keyMapper, downstream, mapFactory);
     //    }
     //
@@ -9596,8 +9608,8 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     //     */
     //    @Deprecated
     //    @TerminalOp
-    //    public final <K, V, A, D, E2 extends Exception, E3 extends Exception> Map<K, D> toMap(final Throwables.Function<? super T, ? extends K, E2> keyMapper,
-    //            final Throwables.Function<? super T, ? extends V, E3> valueMapper, final Collector<? super V, A, D> downstream) throws E, E2, E3 {
+    //    public final <K, V, D, E2 extends Exception, E3 extends Exception> Map<K, D> toMap(final Throwables.Function<? super T, ? extends K, E2> keyMapper,
+    //            final Throwables.Function<? super T, ? extends V, E3> valueMapper, final Collector<? super V, ?, D> downstream) throws E, E2, E3 {
     //        return groupTo(keyMapper, valueMapper, downstream);
     //    }
     //
@@ -9613,9 +9625,9 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     //     */
     //    @Deprecated
     //    @TerminalOp
-    //    public final <K, V, A, D, M extends Map<K, D>, E2 extends Exception, E3 extends Exception> M toMap(
+    //    public final <K, V, D, M extends Map<K, D>, E2 extends Exception, E3 extends Exception> M toMap(
     //            final Throwables.Function<? super T, ? extends K, E2> keyMapper, final Throwables.Function<? super T, ? extends V, E3> valueMapper,
-    //            final Collector<? super V, A, D> downstream, final Supplier<? extends M> mapFactory) throws E, E2, E3 {
+    //            final Collector<? super V, ?, D> downstream, final Supplier<? extends M> mapFactory) throws E, E2, E3 {
     //        return groupTo(keyMapper, valueMapper, downstream, mapFactory);
     //    }
 
@@ -9728,7 +9740,6 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      *
      *
      * @param <K> the key type
-     * @param <A>
      * @param <D>
      * @param <E2>
      * @param keyMapper
@@ -9738,8 +9749,8 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @throws E2
      */
     @TerminalOp
-    public <K, A, D, E2 extends Exception> Map<K, D> groupTo(final Throwables.Function<? super T, ? extends K, E2> keyMapper,
-            final Collector<? super T, A, D> downstream) throws E, E2 {
+    public <K, D, E2 extends Exception> Map<K, D> groupTo(final Throwables.Function<? super T, ? extends K, E2> keyMapper,
+            final Collector<? super T, ?, D> downstream) throws E, E2 {
         return groupTo(keyMapper, downstream, Suppliers.<K, D> ofMap());
     }
 
@@ -9747,7 +9758,6 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      *
      *
      * @param <K> the key type
-     * @param <A>
      * @param <D>
      * @param <M>
      * @param <E2>
@@ -9759,8 +9769,8 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @throws E2
      */
     @TerminalOp
-    public <K, A, D, M extends Map<K, D>, E2 extends Exception> M groupTo(final Throwables.Function<? super T, ? extends K, E2> keyMapper,
-            final Collector<? super T, A, D> downstream, final Supplier<? extends M> mapFactory) throws E, E2 {
+    public <K, D, M extends Map<K, D>, E2 extends Exception> M groupTo(final Throwables.Function<? super T, ? extends K, E2> keyMapper,
+            final Collector<? super T, ?, D> downstream, final Supplier<? extends M> mapFactory) throws E, E2 {
         return groupTo(keyMapper, Fnn.<T, E> identity(), downstream, mapFactory);
     }
 
@@ -9769,7 +9779,6 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <A>
      * @param <D>
      * @param <E2>
      * @param <E3>
@@ -9782,8 +9791,8 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @throws E3
      */
     @TerminalOp
-    public <K, V, A, D, E2 extends Exception, E3 extends Exception> Map<K, D> groupTo(final Throwables.Function<? super T, ? extends K, E2> keyMapper,
-            final Throwables.Function<? super T, ? extends V, E3> valueMapper, final Collector<? super V, A, D> downstream) throws E, E2, E3 {
+    public <K, V, D, E2 extends Exception, E3 extends Exception> Map<K, D> groupTo(final Throwables.Function<? super T, ? extends K, E2> keyMapper,
+            final Throwables.Function<? super T, ? extends V, E3> valueMapper, final Collector<? super V, ?, D> downstream) throws E, E2, E3 {
         return groupTo(keyMapper, valueMapper, downstream, Suppliers.<K, D> ofMap());
     }
 
@@ -9792,7 +9801,6 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <A>
      * @param <D>
      * @param <M>
      * @param <E2>
@@ -9807,9 +9815,9 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @throws E3
      */
     @TerminalOp
-    public <K, V, A, D, M extends Map<K, D>, E2 extends Exception, E3 extends Exception> M groupTo(
-            final Throwables.Function<? super T, ? extends K, E2> keyMapper, final Throwables.Function<? super T, ? extends V, E3> valueMapper,
-            final Collector<? super V, A, D> downstream, final Supplier<? extends M> mapFactory) throws E, E2, E3 {
+    public <K, V, D, M extends Map<K, D>, E2 extends Exception, E3 extends Exception> M groupTo(final Throwables.Function<? super T, ? extends K, E2> keyMapper,
+            final Throwables.Function<? super T, ? extends V, E3> valueMapper, final Collector<? super V, ?, D> downstream,
+            final Supplier<? extends M> mapFactory) throws E, E2, E3 {
         assertNotClosed();
 
         checkArgNotNull(keyMapper, "keyMapper");
@@ -9818,15 +9826,15 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         checkArgNotNull(mapFactory, "mapFactory");
 
         try {
-            final java.util.function.Supplier<A> downstreamSupplier = downstream.supplier();
-            final java.util.function.BiConsumer<A, ? super V> downstreamAccumulator = downstream.accumulator();
-            final java.util.function.Function<A, D> downstreamFinisher = downstream.finisher();
+            final Supplier<Object> downstreamSupplier = (Supplier<Object>) downstream.supplier();
+            final BiConsumer<Object, ? super V> downstreamAccumulator = (BiConsumer<Object, ? super V>) downstream.accumulator();
+            final Function<Object, D> downstreamFinisher = (Function<Object, D>) downstream.finisher();
 
             final M result = mapFactory.get();
-            final Map<K, A> tmp = (Map<K, A>) result;
+            final Map<K, Object> tmp = (Map<K, Object>) result;
             T next = null;
             K key = null;
-            A container = null;
+            Object container = null;
 
             while (elements.hasNext()) {
                 next = elements.next();
@@ -9842,7 +9850,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             }
 
             for (Map.Entry<K, D> entry : result.entrySet()) {
-                entry.setValue(downstreamFinisher.apply((A) entry.getValue()));
+                entry.setValue(downstreamFinisher.apply(entry.getValue()));
             }
 
             return result;
@@ -9871,7 +9879,6 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     /**
      *
      *
-     * @param <A>
      * @param <D>
      * @param <E2>
      * @param predicate
@@ -9882,20 +9889,20 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @see Collectors#partitioningBy(Predicate, Collector)
      */
     @TerminalOp
-    public <A, D, E2 extends Exception> Map<Boolean, D> partitionTo(final Throwables.Predicate<? super T, E2> predicate,
-            final Collector<? super T, A, D> downstream) throws E, E2 {
+    public <D, E2 extends Exception> Map<Boolean, D> partitionTo(final Throwables.Predicate<? super T, E2> predicate,
+            final Collector<? super T, ?, D> downstream) throws E, E2 {
         assertNotClosed();
 
+        final Function<Object, D> downstreamFinisher = (Function<Object, D>) downstream.finisher();
+
         final Throwables.Function<T, Boolean, E2> keyMapper = t -> predicate.test(t);
-
         final Supplier<Map<Boolean, D>> mapFactory = () -> N.<Boolean, D> newHashMap(2);
-
         final Map<Boolean, D> map = groupTo(keyMapper, downstream, mapFactory);
 
         if (!map.containsKey(Boolean.TRUE)) {
-            map.put(Boolean.TRUE, downstream.finisher().apply(downstream.supplier().get()));
+            map.put(Boolean.TRUE, downstreamFinisher.apply(downstream.supplier().get()));
         } else if (!map.containsKey(Boolean.FALSE)) {
-            map.put(Boolean.FALSE, downstream.finisher().apply(downstream.supplier().get()));
+            map.put(Boolean.FALSE, downstreamFinisher.apply(downstream.supplier().get()));
         }
 
         return map;
@@ -10494,7 +10501,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
         try {
             final A container = collector.supplier().get();
-            final java.util.function.BiConsumer<A, ? super T> accumulator = collector.accumulator();
+            final BiConsumer<A, ? super T> accumulator = collector.accumulator();
 
             while (elements.hasNext()) {
                 accumulator.accept(container, elements.next());
@@ -12265,7 +12272,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             @Override
             public T next() throws Exception {
                 if (!hasNext && !hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 hasNext = false;
@@ -12350,7 +12357,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             @Override
             public R next() throws Exception {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 return cur.next();
@@ -12404,7 +12411,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             @Override
             public R next() throws Exception {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 return cur.next();
@@ -12916,7 +12923,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
             @Override
             public Object next() throws Exception {
-                throw new NoSuchElementException();
+                throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
             }
         };
 
@@ -12951,7 +12958,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                 @Override
                 public T next() {
                     if (done) {
-                        throw new NoSuchElementException();
+                        throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                     }
 
                     done = true;
@@ -13002,7 +13009,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                 @Override
                 public T next() {
                     if (cursor >= toIndex) {
-                        throw new NoSuchElementException();
+                        throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                     }
 
                     return a[cursor++];
@@ -13084,7 +13091,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         //                    }
         //
         //                    if (position >= len) {
-        //                        throw new NoSuchElementException();
+        //                        throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
         //                    }
         //
         //                    return a[position++];
@@ -13237,7 +13244,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                 @Override
                 public T next() throws E {
                     if ((cur == null || !cur.hasNext()) && !hasNext()) {
-                        throw new NoSuchElementException();
+                        throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                     }
 
                     return cur.next();

@@ -40,7 +40,7 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
 
         @Override
         public double nextDouble() {
-            throw new NoSuchElementException();
+            throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
         }
     };
 
@@ -88,7 +88,7 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
             @Override
             public double nextDouble() {
                 if (cursor >= toIndex) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 return a[cursor++];
@@ -137,7 +137,7 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
     //                }
     //
     //                if (cur >= len) {
-    //                    throw new NoSuchElementException();
+    //                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
     //                }
     //
     //                return aar[cur++];
@@ -234,7 +234,7 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
             @Override
             public double nextDouble() {
                 if (!hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 return supplier.getAsDouble();
@@ -290,7 +290,7 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
             @Override
             public double nextDouble() {
                 if (!hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 return iter.nextDouble();
@@ -334,7 +334,7 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
             @Override
             public double nextDouble() {
                 if (!hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 cnt--;
@@ -377,7 +377,7 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
             @Override
             public double nextDouble() {
                 if (!hasNext && !hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 hasNext = false;

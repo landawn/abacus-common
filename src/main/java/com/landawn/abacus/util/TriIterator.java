@@ -49,12 +49,12 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
 
         @Override
         public Object next() {
-            throw new NoSuchElementException();
+            throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
         }
 
         @Override
         protected void next(Throwables.TriConsumer action) throws NoSuchElementException {
-            throw new NoSuchElementException();
+            throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
         }
 
         @Override
@@ -118,7 +118,7 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
             @Override
             public Triple<A, B, C> next() {
                 if (!hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 output.accept(tmp);
@@ -132,7 +132,7 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
                 // N.checkArgNotNull(action);
 
                 if (!hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 output.accept(tmp);
@@ -164,7 +164,7 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
                     @Override
                     public R next() {
                         if (!hasNext()) {
-                            throw new NoSuchElementException();
+                            throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                         }
 
                         output.accept(tmp);
@@ -202,7 +202,7 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
             @Override
             public Triple<A, B, C> next() {
                 if (!hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 output.accept(cursor.getAndIncrement(), tmp);
@@ -216,7 +216,7 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
                 // N.checkArgNotNull(action);
 
                 if (!hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 output.accept(cursor.getAndIncrement(), tmp);
@@ -248,7 +248,7 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
                     @Override
                     public R next() {
                         if (!hasNext()) {
-                            throw new NoSuchElementException();
+                            throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                         }
 
                         output.accept(cursor.getAndIncrement(), tmp);
@@ -349,7 +349,7 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
             @Override
             public Triple<A, B, C> next() {
                 if (!hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 return Triple.of(iterA.next(), iterB.next(), iterC.next());
@@ -385,7 +385,7 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
                     @Override
                     public R next() {
                         if (!hasNext()) {
-                            throw new NoSuchElementException();
+                            throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                         }
 
                         return mapper.apply(iterA.next(), iterB.next(), iterC.next());
@@ -423,7 +423,7 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
             @Override
             public Triple<A, B, C> next() {
                 if (!hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 return Triple.of(iter1.hasNext() ? iter1.next() : valueForNoneA, iter2.hasNext() ? iter2.next() : valueForNoneB,
@@ -436,7 +436,7 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
                 // N.checkArgNotNull(action);
 
                 if (!hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 action.accept(iter1.hasNext() ? iter1.next() : valueForNoneA, iter2.hasNext() ? iter2.next() : valueForNoneB,
@@ -466,7 +466,7 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
                     @Override
                     public R next() {
                         if (!hasNext()) {
-                            throw new NoSuchElementException();
+                            throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                         }
 
                         return mapper.apply(iter1.hasNext() ? iter1.next() : valueForNoneA, iter2.hasNext() ? iter2.next() : valueForNoneB,
@@ -583,7 +583,7 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
             @Override
             public Triple<A, B, C> next() {
                 if (!hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 return iter.next();
@@ -657,7 +657,7 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
             @Override
             public Triple<A, B, C> next() {
                 if (!hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 cnt--;
@@ -668,7 +668,7 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
             protected <E extends Exception> void next(final Throwables.TriConsumer<? super A, ? super B, ? super C, E> action)
                     throws NoSuchElementException, E {
                 if (!hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 cnt--;
@@ -730,7 +730,7 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
             @Override
             public Triple<A, B, C> next() {
                 if (!hasNext && !hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 hasNext = false;
@@ -742,7 +742,7 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
             protected <E extends Exception> void next(final Throwables.TriConsumer<? super A, ? super B, ? super C, E> action)
                     throws NoSuchElementException, E {
                 if (!hasNext && !hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 hasNext = false;
@@ -781,7 +781,7 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
                     @Override
                     public R next() {
                         if (!hasNext && !hasNext()) {
-                            throw new NoSuchElementException();
+                            throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                         }
 
                         hasNext = false;

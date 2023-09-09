@@ -10869,7 +10869,7 @@ public class RowDataSet implements DataSet, Cloneable {
     //                ConcurrentModification();
     //
     //                if (cursor >= toRowIndex) {
-    //                    throw new NoSuchElementException();
+    //                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
     //                }
     //
     //                getRow(rowType, null, row, columnIndexes, columnNames, cursor);
@@ -11116,7 +11116,7 @@ public class RowDataSet implements DataSet, Cloneable {
                 checkConcurrentModification();
 
                 if (cursor >= toRowIndex) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 return getRow(rowType, rowClass, beanInfo, columnNames, columnIndexes, columnCount, cursor++, prefixAndFieldNameMap, rowSupplier);
@@ -11972,7 +11972,7 @@ public class RowDataSet implements DataSet, Cloneable {
                     return next;
                 } catch (IndexOutOfBoundsException e) {
                     checkConcurrentModification();
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
             }
 

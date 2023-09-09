@@ -31,7 +31,7 @@ public abstract class ImmutableListIterator<T> extends ObjIterator<T> implements
 
         @Override
         public Object next() {
-            throw new NoSuchElementException();
+            throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
         }
 
         @Override
@@ -41,7 +41,7 @@ public abstract class ImmutableListIterator<T> extends ObjIterator<T> implements
 
         @Override
         public Object previous() {
-            throw new NoSuchElementException();
+            throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
         }
 
         @Override

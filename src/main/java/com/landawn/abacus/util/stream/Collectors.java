@@ -14,6 +14,8 @@
 
 package com.landawn.abacus.util.stream;
 
+import static com.landawn.abacus.util.stream.StreamBase.ERROR_MSG_FOR_NO_SUCH_EX;
+
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayDeque;
@@ -459,7 +461,7 @@ public abstract class Collectors {
 
     static final Function<long[], Double> AveragingInt_Finisher = a -> {
         if (a[1] == 0) {
-            throw new NoSuchElementException();
+            throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
         }
 
         return ((double) a[0]) / a[1];
@@ -475,7 +477,7 @@ public abstract class Collectors {
 
     static final Function<Pair<long[], long[]>, Tuple2<Double, Double>> AveragingInt_Finisher_2 = a -> {
         if (a.right[0] == 0 || a.right[1] == 0) {
-            throw new NoSuchElementException();
+            throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
         }
 
         return Tuple2.of(((double) a.left[0]) / a.right[0], ((double) a.left[1]) / a.right[1]);
@@ -483,7 +485,7 @@ public abstract class Collectors {
 
     static final Function<Pair<long[], long[]>, Tuple3<Double, Double, Double>> AveragingInt_Finisher_3 = a -> {
         if (a.right[0] == 0 || a.right[1] == 0 || a.right[2] == 0) {
-            throw new NoSuchElementException();
+            throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
         }
 
         return Tuple2.of(((double) a.left[0]) / a.right[0], ((double) a.left[1]) / a.right[1], ((double) a.left[2]) / a.right[2]);
@@ -519,7 +521,7 @@ public abstract class Collectors {
 
     static final Function<long[], Double> AveragingLong_Finisher = a -> {
         if (a[1] == 0) {
-            throw new NoSuchElementException();
+            throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
         }
 
         return ((double) a[0]) / a[1];
@@ -535,7 +537,7 @@ public abstract class Collectors {
 
     static final Function<Pair<long[], long[]>, Tuple2<Double, Double>> AveragingLong_Finisher_2 = a -> {
         if (a.right[0] == 0 || a.right[1] == 0) {
-            throw new NoSuchElementException();
+            throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
         }
 
         return Tuple2.of(((double) a.left[0]) / a.right[0], ((double) a.left[1]) / a.right[1]);
@@ -543,7 +545,7 @@ public abstract class Collectors {
 
     static final Function<Pair<long[], long[]>, Tuple3<Double, Double, Double>> AveragingLong_Finisher_3 = a -> {
         if (a.right[0] == 0 || a.right[1] == 0 || a.right[2] == 0) {
-            throw new NoSuchElementException();
+            throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
         }
 
         return Tuple2.of(((double) a.left[0]) / a.right[0], ((double) a.left[1]) / a.right[1], ((double) a.left[2]) / a.right[2]);
@@ -574,7 +576,7 @@ public abstract class Collectors {
 
     static final Function<KahanSummation, Double> AveragingDouble_Finisher = a -> {
         if (a.count() == 0) {
-            throw new NoSuchElementException();
+            throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
         }
 
         return a.average().get();
@@ -584,7 +586,7 @@ public abstract class Collectors {
 
     static final Function<KahanSummation[], Tuple2<Double, Double>> AveragingDouble_Finisher_2 = a -> {
         if (a[0].count() == 0 || a[1].count() == 0) {
-            throw new NoSuchElementException();
+            throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
         }
 
         return Tuple.of(a[0].average().get(), a[1].average().get());
@@ -592,7 +594,7 @@ public abstract class Collectors {
 
     static final Function<KahanSummation[], Tuple3<Double, Double, Double>> AveragingDouble_Finisher_3 = a -> {
         if (a[0].count() == 0 || a[1].count() == 0 || a[2].count() == 0) {
-            throw new NoSuchElementException();
+            throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
         }
 
         return Tuple.of(a[0].average().get(), a[1].average().get(), a[2].average().get());
@@ -632,7 +634,7 @@ public abstract class Collectors {
 
     static final Function<Pair<BigInteger, long[]>, BigDecimal> AveragingBigInteger_Finisher = a -> {
         if (a.right[0] == 0) {
-            throw new NoSuchElementException();
+            throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
         }
 
         return new BigDecimal(a.left).divide(new BigDecimal(a.right[0]));
@@ -643,7 +645,7 @@ public abstract class Collectors {
 
     static final Function<Pair<BigInteger[], long[]>, Tuple2<BigDecimal, BigDecimal>> AveragingBigInteger_Finisher_2 = a -> {
         if (a.right[0] == 0 || a.right[1] == 0) {
-            throw new NoSuchElementException();
+            throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
         }
 
         return Tuple.of(new BigDecimal(a.left[0]).divide(new BigDecimal(a.right[0])), new BigDecimal(a.left[1]).divide(new BigDecimal(a.right[1])));
@@ -651,7 +653,7 @@ public abstract class Collectors {
 
     static final Function<Pair<BigInteger[], long[]>, Tuple3<BigDecimal, BigDecimal, BigDecimal>> AveragingBigInteger_Finisher_3 = a -> {
         if (a.right[0] == 0 || a.right[1] == 0 || a.right[2] == 0) {
-            throw new NoSuchElementException();
+            throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
         }
 
         return Tuple.of(new BigDecimal(a.left[0]).divide(new BigDecimal(a.right[0])), new BigDecimal(a.left[1]).divide(new BigDecimal(a.right[1])),
@@ -692,7 +694,7 @@ public abstract class Collectors {
 
     static final Function<Pair<BigDecimal, long[]>, BigDecimal> AveragingBigDecimal_Finisher = a -> {
         if (a.right[0] == 0) {
-            throw new NoSuchElementException();
+            throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
         }
 
         return a.left.divide(new BigDecimal(a.right[0]));
@@ -703,7 +705,7 @@ public abstract class Collectors {
 
     static final Function<Pair<BigDecimal[], long[]>, Tuple2<BigDecimal, BigDecimal>> AveragingBigDecimal_Finisher_2 = a -> {
         if (a.right[0] == 0 || a.right[1] == 0) {
-            throw new NoSuchElementException();
+            throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
         }
 
         return Tuple.of(a.left[0].divide(new BigDecimal(a.right[0])), a.left[1].divide(new BigDecimal(a.right[1])));
@@ -711,7 +713,7 @@ public abstract class Collectors {
 
     static final Function<Pair<BigDecimal[], long[]>, Tuple3<BigDecimal, BigDecimal, BigDecimal>> AveragingBigDecimal_Finisher_3 = a -> {
         if (a.right[0] == 0 || a.right[1] == 0 || a.right[2] == 0) {
-            throw new NoSuchElementException();
+            throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
         }
 
         return Tuple.of(a.left[0].divide(new BigDecimal(a.right[0])), a.left[1].divide(new BigDecimal(a.right[1])),

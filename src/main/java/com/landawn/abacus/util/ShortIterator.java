@@ -40,7 +40,7 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
 
         @Override
         public short nextShort() {
-            throw new NoSuchElementException();
+            throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
         }
     };
 
@@ -88,7 +88,7 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
             @Override
             public short nextShort() {
                 if (cursor >= toIndex) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 return a[cursor++];
@@ -137,7 +137,7 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
     //                }
     //
     //                if (cur >= len) {
-    //                    throw new NoSuchElementException();
+    //                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
     //                }
     //
     //                return aar[cur++];
@@ -234,7 +234,7 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
             @Override
             public short nextShort() {
                 if (!hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 return supplier.getAsShort();
@@ -290,7 +290,7 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
             @Override
             public short nextShort() {
                 if (!hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 return iter.nextShort();
@@ -334,7 +334,7 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
             @Override
             public short nextShort() {
                 if (!hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 cnt--;
@@ -377,7 +377,7 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
             @Override
             public short nextShort() {
                 if (!hasNext && !hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 hasNext = false;

@@ -39,7 +39,7 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
 
         @Override
         public char nextChar() {
-            throw new NoSuchElementException();
+            throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
         }
     };
 
@@ -87,7 +87,7 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
             @Override
             public char nextChar() {
                 if (cursor >= toIndex) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 return a[cursor++];
@@ -136,7 +136,7 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
     //                }
     //
     //                if (cur >= len) {
-    //                    throw new NoSuchElementException();
+    //                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
     //                }
     //
     //                return aar[cur++];
@@ -233,7 +233,7 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
             @Override
             public char nextChar() {
                 if (!hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 return supplier.getAsChar();

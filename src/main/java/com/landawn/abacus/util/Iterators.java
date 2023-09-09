@@ -191,7 +191,7 @@ public final class Iterators {
             @Override
             public T next() {
                 if (cnt <= 0) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 cnt--;
@@ -227,7 +227,7 @@ public final class Iterators {
             @Override
             public T next() {
                 if (!hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 if (cnt <= 0) {
@@ -268,7 +268,7 @@ public final class Iterators {
             @Override
             public T next() {
                 if (!hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 if (iter == null || !iter.hasNext()) {
@@ -313,7 +313,7 @@ public final class Iterators {
             @Override
             public T next() {
                 if (!hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 if (iter == null) {
@@ -359,7 +359,7 @@ public final class Iterators {
             @Override
             public T next() {
                 if (!hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 if (iter == null || !iter.hasNext()) {
@@ -402,7 +402,7 @@ public final class Iterators {
             @Override
             public boolean nextBoolean() {
                 if ((cur == null || cursor >= cur.length) && !hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 return cur[cursor++];
@@ -439,7 +439,7 @@ public final class Iterators {
             @Override
             public short nextShort() {
                 if ((cur == null || cursor >= cur.length) && !hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 return cur[cursor++];
@@ -476,7 +476,7 @@ public final class Iterators {
             @Override
             public byte nextByte() {
                 if ((cur == null || cursor >= cur.length) && !hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 return cur[cursor++];
@@ -513,7 +513,7 @@ public final class Iterators {
             @Override
             public int nextInt() {
                 if ((cur == null || cursor >= cur.length) && !hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 return cur[cursor++];
@@ -550,7 +550,7 @@ public final class Iterators {
             @Override
             public long nextLong() {
                 if ((cur == null || cursor >= cur.length) && !hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 return cur[cursor++];
@@ -587,7 +587,7 @@ public final class Iterators {
             @Override
             public float nextFloat() {
                 if ((cur == null || cursor >= cur.length) && !hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 return cur[cursor++];
@@ -624,7 +624,7 @@ public final class Iterators {
             @Override
             public double nextDouble() {
                 if ((cur == null || cursor >= cur.length) && !hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 return cur[cursor++];
@@ -659,7 +659,7 @@ public final class Iterators {
             @Override
             public boolean nextBoolean() {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 return cur.nextBoolean();
@@ -694,7 +694,7 @@ public final class Iterators {
             @Override
             public char nextChar() {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 return cur.nextChar();
@@ -729,7 +729,7 @@ public final class Iterators {
             @Override
             public byte nextByte() {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 return cur.nextByte();
@@ -764,7 +764,7 @@ public final class Iterators {
             @Override
             public short nextShort() {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 return cur.nextShort();
@@ -799,7 +799,7 @@ public final class Iterators {
             @Override
             public int nextInt() {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 return cur.nextInt();
@@ -834,7 +834,7 @@ public final class Iterators {
             @Override
             public long nextLong() {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 return cur.nextLong();
@@ -869,7 +869,7 @@ public final class Iterators {
             @Override
             public float nextFloat() {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 return cur.nextFloat();
@@ -904,7 +904,7 @@ public final class Iterators {
             @Override
             public double nextDouble() {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 return cur.nextDouble();
@@ -1023,7 +1023,7 @@ public final class Iterators {
             @Override
             public T next() {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 return cur.next();
@@ -1058,7 +1058,7 @@ public final class Iterators {
             @Override
             public T next() {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 return cur.next();
@@ -1095,7 +1095,7 @@ public final class Iterators {
             @Override
             public Pair<A, B> next() {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 return cur.next();
@@ -1104,7 +1104,7 @@ public final class Iterators {
             @Override
             protected <E extends Exception> void next(Throwables.BiConsumer<? super A, ? super B, E> action) throws NoSuchElementException, E {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 cur.next(action);
@@ -1142,7 +1142,7 @@ public final class Iterators {
                     @Override
                     public R next() {
                         if (!hasNext()) {
-                            throw new NoSuchElementException();
+                            throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                         }
 
                         return mappedIter.next();
@@ -1182,7 +1182,7 @@ public final class Iterators {
             @Override
             public Triple<A, B, C> next() {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 return cur.next();
@@ -1192,7 +1192,7 @@ public final class Iterators {
             protected <E extends Exception> void next(final Throwables.TriConsumer<? super A, ? super B, ? super C, E> action)
                     throws NoSuchElementException, E {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 cur.next(action);
@@ -1230,7 +1230,7 @@ public final class Iterators {
                     @Override
                     public R next() {
                         if (!hasNext()) {
-                            throw new NoSuchElementException();
+                            throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                         }
 
                         return mappedIter.next();
@@ -1794,7 +1794,7 @@ public final class Iterators {
             @Override
             public T next() {
                 if (!hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 return iter.next();
@@ -1838,7 +1838,7 @@ public final class Iterators {
             @Override
             public T next() {
                 if (!hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 cnt--;
@@ -1884,7 +1884,7 @@ public final class Iterators {
             @Override
             public T next() {
                 if (!hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 cnt--;
@@ -1965,7 +1965,7 @@ public final class Iterators {
             @Override
             public T next() {
                 if (!hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 tmp = next;
@@ -2014,7 +2014,7 @@ public final class Iterators {
             @Override
             public T next() {
                 if (!hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 tmp = next;
@@ -2062,7 +2062,7 @@ public final class Iterators {
             @Override
             public T next() {
                 if (!hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 tmp = next;
@@ -2111,7 +2111,7 @@ public final class Iterators {
             @Override
             public T next() {
                 if (!hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 tmp = next;
@@ -2161,7 +2161,7 @@ public final class Iterators {
             @Override
             public T next() {
                 if (!hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 tmp = next;
@@ -2212,7 +2212,7 @@ public final class Iterators {
             @Override
             public T next() {
                 if (!hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 if (next != NONE) {
@@ -2267,7 +2267,7 @@ public final class Iterators {
             @Override
             public T next() {
                 if (!hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 if (next != NONE) {
@@ -2347,7 +2347,7 @@ public final class Iterators {
             @Override
             public U next() {
                 if (!hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 return cur.next();
@@ -2396,7 +2396,7 @@ public final class Iterators {
             @Override
             public U next() {
                 if (!hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 return a[cursor++];

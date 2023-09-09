@@ -1492,7 +1492,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             @Override
             public List<T> next() {
                 if (!hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 final List<T> next = new ArrayList<>(chunkSize);
@@ -1615,7 +1615,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             @Override
             public T next() {
                 if (cursor >= totalSize) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 return func.apply(cursor, cursor = (count-- > biggerCount ? cursor + smallerSize : cursor + biggerSize));
@@ -1680,7 +1680,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             @Override
             public T next() {
                 if (cursor >= totalSize) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 return func.apply(cursor, cursor = (count-- > smallerCount ? cursor + biggerSize : cursor + smallerSize));
@@ -2751,7 +2751,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             @Override
             public T next() {
                 if (!hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 return cur.next();
@@ -26757,7 +26757,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             @Override
             public Void next() {
                 if (hasNext() == false) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 queue.poll();
@@ -26876,7 +26876,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             @Override
             public R next() {
                 if (hasNext() == false) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 next = queue.poll();

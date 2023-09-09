@@ -84,7 +84,7 @@ public final class PermutationIterator {
             @Override
             public List<T> next() {
                 if (!hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 hasNext = 0;
@@ -233,7 +233,7 @@ public final class PermutationIterator {
             @Override
             public List<T> next() {
                 if (!hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 hasNext = 0;

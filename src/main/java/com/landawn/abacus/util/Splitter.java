@@ -139,7 +139,7 @@ public final class Splitter {
                 @Override
                 public String next() {
                     if (!hasNext()) {
-                        throw new NoSuchElementException();
+                        throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                     }
 
                     final String result = next;
@@ -222,7 +222,7 @@ public final class Splitter {
                     @Override
                     public String next() {
                         if (!hasNext()) {
-                            throw new NoSuchElementException();
+                            throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                         }
 
                         final String result = next;
@@ -312,7 +312,7 @@ public final class Splitter {
                 @Override
                 public String next() {
                     if (!hasNext()) {
-                        throw new NoSuchElementException();
+                        throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                     }
 
                     final String result = next;
@@ -1169,7 +1169,7 @@ public final class Splitter {
                 @Override
                 public Map.Entry<String, String> next() {
                     if (!hasNext()) {
-                        throw new NoSuchElementException();
+                        throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                     }
 
                     final Map.Entry<String, String> result = next;

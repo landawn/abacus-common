@@ -23,6 +23,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.function.Supplier;
 
+import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.util.stream.ByteStream;
 import com.landawn.abacus.util.stream.CharStream;
@@ -35,6 +36,8 @@ import com.landawn.abacus.util.stream.Stream;
 
 @SuppressWarnings("java:S1192")
 public class u {//NOSONAR
+
+    private static final String NO_VALUE_PRESENT = "No value present"; // should change it to InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX
 
     private u() {
         // utility class
@@ -525,7 +528,94 @@ public class u {//NOSONAR
             if (isPresent()) {
                 return value;
             } else {
-                throw new NoSuchElementException("No value is present");
+                throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+            }
+        }
+
+        /**
+         * Or else throw.
+         * @param errorMessage
+         *
+         * @return
+         * @throws NoSuchElementException the no such element exception
+         */
+        @Beta
+        public T orElseThrow(final String errorMessage) throws NoSuchElementException {
+            if (isPresent()) {
+                return value;
+            } else {
+                throw new NoSuchElementException(errorMessage);
+            }
+        }
+
+        /**
+         * Or else throw.
+         * @param errorMessage
+         * @param param
+         *
+         * @return
+         * @throws NoSuchElementException the no such element exception
+         */
+        @Beta
+        public T orElseThrow(final String errorMessage, final Object param) throws NoSuchElementException {
+            if (isPresent()) {
+                return value;
+            } else {
+                throw new NoSuchElementException(N.format(errorMessage, param));
+            }
+        }
+
+        /**
+         * Or else throw.
+         * @param errorMessage
+         * @param param1
+         * @param param2
+         *
+         * @return
+         * @throws NoSuchElementException the no such element exception
+         */
+        @Beta
+        public T orElseThrow(final String errorMessage, final Object param1, final Object param2) throws NoSuchElementException {
+            if (isPresent()) {
+                return value;
+            } else {
+                throw new NoSuchElementException(N.format(errorMessage, param1, param2));
+            }
+        }
+
+        /**
+         * Or else throw.
+         * @param errorMessage
+         * @param param1
+         * @param param2
+         * @param param3
+         *
+         * @return
+         * @throws NoSuchElementException the no such element exception
+         */
+        @Beta
+        public T orElseThrow(final String errorMessage, final Object param1, final Object param2, final Object param3) throws NoSuchElementException {
+            if (isPresent()) {
+                return value;
+            } else {
+                throw new NoSuchElementException(N.format(errorMessage, param1, param2, param3));
+            }
+        }
+
+        /**
+         * Or else throw.
+         * @param errorMessage
+         * @param params
+         *
+         * @return
+         * @throws NoSuchElementException the no such element exception
+         */
+        @Beta
+        public T orElseThrow(final String errorMessage, final Object... params) throws NoSuchElementException {
+            if (isPresent()) {
+                return value;
+            } else {
+                throw new NoSuchElementException(N.format(errorMessage, params));
             }
         }
 
@@ -1015,7 +1105,94 @@ public class u {//NOSONAR
             if (isPresent) {
                 return value;
             } else {
-                throw new NoSuchElementException("No value present");
+                throw new NoSuchElementException(NO_VALUE_PRESENT);
+            }
+        }
+
+        /**
+         * Or else throw.
+         * @param errorMessage
+         *
+         * @return
+         * @throws NoSuchElementException the no such element exception
+         */
+        @Beta
+        public boolean orElseThrow(final String errorMessage) throws NoSuchElementException {
+            if (isPresent()) {
+                return value;
+            } else {
+                throw new NoSuchElementException(errorMessage);
+            }
+        }
+
+        /**
+         * Or else throw.
+         * @param errorMessage
+         * @param param
+         *
+         * @return
+         * @throws NoSuchElementException the no such element exception
+         */
+        @Beta
+        public boolean orElseThrow(final String errorMessage, final Object param) throws NoSuchElementException {
+            if (isPresent()) {
+                return value;
+            } else {
+                throw new NoSuchElementException(N.format(errorMessage, param));
+            }
+        }
+
+        /**
+         * Or else throw.
+         * @param errorMessage
+         * @param param1
+         * @param param2
+         *
+         * @return
+         * @throws NoSuchElementException the no such element exception
+         */
+        @Beta
+        public boolean orElseThrow(final String errorMessage, final Object param1, final Object param2) throws NoSuchElementException {
+            if (isPresent()) {
+                return value;
+            } else {
+                throw new NoSuchElementException(N.format(errorMessage, param1, param2));
+            }
+        }
+
+        /**
+         * Or else throw.
+         * @param errorMessage
+         * @param param1
+         * @param param2
+         * @param param3
+         *
+         * @return
+         * @throws NoSuchElementException the no such element exception
+         */
+        @Beta
+        public boolean orElseThrow(final String errorMessage, final Object param1, final Object param2, final Object param3) throws NoSuchElementException {
+            if (isPresent()) {
+                return value;
+            } else {
+                throw new NoSuchElementException(N.format(errorMessage, param1, param2, param3));
+            }
+        }
+
+        /**
+         * Or else throw.
+         * @param errorMessage
+         * @param params
+         *
+         * @return
+         * @throws NoSuchElementException the no such element exception
+         */
+        @Beta
+        public boolean orElseThrow(final String errorMessage, final Object... params) throws NoSuchElementException {
+            if (isPresent()) {
+                return value;
+            } else {
+                throw new NoSuchElementException(N.format(errorMessage, params));
             }
         }
 
@@ -1514,7 +1691,94 @@ public class u {//NOSONAR
             if (isPresent()) {
                 return value;
             } else {
-                throw new NoSuchElementException("No value present");
+                throw new NoSuchElementException(NO_VALUE_PRESENT);
+            }
+        }
+
+        /**
+         * Or else throw.
+         * @param errorMessage
+         *
+         * @return
+         * @throws NoSuchElementException the no such element exception
+         */
+        @Beta
+        public char orElseThrow(final String errorMessage) throws NoSuchElementException {
+            if (isPresent()) {
+                return value;
+            } else {
+                throw new NoSuchElementException(errorMessage);
+            }
+        }
+
+        /**
+         * Or else throw.
+         * @param errorMessage
+         * @param param
+         *
+         * @return
+         * @throws NoSuchElementException the no such element exception
+         */
+        @Beta
+        public char orElseThrow(final String errorMessage, final Object param) throws NoSuchElementException {
+            if (isPresent()) {
+                return value;
+            } else {
+                throw new NoSuchElementException(N.format(errorMessage, param));
+            }
+        }
+
+        /**
+         * Or else throw.
+         * @param errorMessage
+         * @param param1
+         * @param param2
+         *
+         * @return
+         * @throws NoSuchElementException the no such element exception
+         */
+        @Beta
+        public char orElseThrow(final String errorMessage, final Object param1, final Object param2) throws NoSuchElementException {
+            if (isPresent()) {
+                return value;
+            } else {
+                throw new NoSuchElementException(N.format(errorMessage, param1, param2));
+            }
+        }
+
+        /**
+         * Or else throw.
+         * @param errorMessage
+         * @param param1
+         * @param param2
+         * @param param3
+         *
+         * @return
+         * @throws NoSuchElementException the no such element exception
+         */
+        @Beta
+        public char orElseThrow(final String errorMessage, final Object param1, final Object param2, final Object param3) throws NoSuchElementException {
+            if (isPresent()) {
+                return value;
+            } else {
+                throw new NoSuchElementException(N.format(errorMessage, param1, param2, param3));
+            }
+        }
+
+        /**
+         * Or else throw.
+         * @param errorMessage
+         * @param params
+         *
+         * @return
+         * @throws NoSuchElementException the no such element exception
+         */
+        @Beta
+        public char orElseThrow(final String errorMessage, final Object... params) throws NoSuchElementException {
+            if (isPresent()) {
+                return value;
+            } else {
+                throw new NoSuchElementException(N.format(errorMessage, params));
             }
         }
 
@@ -1995,7 +2259,94 @@ public class u {//NOSONAR
             if (isPresent) {
                 return value;
             } else {
-                throw new NoSuchElementException("No value present");
+                throw new NoSuchElementException(NO_VALUE_PRESENT);
+            }
+        }
+
+        /**
+         * Or else throw.
+         * @param errorMessage
+         *
+         * @return
+         * @throws NoSuchElementException the no such element exception
+         */
+        @Beta
+        public byte orElseThrow(final String errorMessage) throws NoSuchElementException {
+            if (isPresent()) {
+                return value;
+            } else {
+                throw new NoSuchElementException(errorMessage);
+            }
+        }
+
+        /**
+         * Or else throw.
+         * @param errorMessage
+         * @param param
+         *
+         * @return
+         * @throws NoSuchElementException the no such element exception
+         */
+        @Beta
+        public byte orElseThrow(final String errorMessage, final Object param) throws NoSuchElementException {
+            if (isPresent()) {
+                return value;
+            } else {
+                throw new NoSuchElementException(N.format(errorMessage, param));
+            }
+        }
+
+        /**
+         * Or else throw.
+         * @param errorMessage
+         * @param param1
+         * @param param2
+         *
+         * @return
+         * @throws NoSuchElementException the no such element exception
+         */
+        @Beta
+        public byte orElseThrow(final String errorMessage, final Object param1, final Object param2) throws NoSuchElementException {
+            if (isPresent()) {
+                return value;
+            } else {
+                throw new NoSuchElementException(N.format(errorMessage, param1, param2));
+            }
+        }
+
+        /**
+         * Or else throw.
+         * @param errorMessage
+         * @param param1
+         * @param param2
+         * @param param3
+         *
+         * @return
+         * @throws NoSuchElementException the no such element exception
+         */
+        @Beta
+        public byte orElseThrow(final String errorMessage, final Object param1, final Object param2, final Object param3) throws NoSuchElementException {
+            if (isPresent()) {
+                return value;
+            } else {
+                throw new NoSuchElementException(N.format(errorMessage, param1, param2, param3));
+            }
+        }
+
+        /**
+         * Or else throw.
+         * @param errorMessage
+         * @param params
+         *
+         * @return
+         * @throws NoSuchElementException the no such element exception
+         */
+        @Beta
+        public byte orElseThrow(final String errorMessage, final Object... params) throws NoSuchElementException {
+            if (isPresent()) {
+                return value;
+            } else {
+                throw new NoSuchElementException(N.format(errorMessage, params));
             }
         }
 
@@ -2476,7 +2827,94 @@ public class u {//NOSONAR
             if (isPresent) {
                 return value;
             } else {
-                throw new NoSuchElementException("No value present");
+                throw new NoSuchElementException(NO_VALUE_PRESENT);
+            }
+        }
+
+        /**
+         * Or else throw.
+         * @param errorMessage
+         *
+         * @return
+         * @throws NoSuchElementException the no such element exception
+         */
+        @Beta
+        public short orElseThrow(final String errorMessage) throws NoSuchElementException {
+            if (isPresent()) {
+                return value;
+            } else {
+                throw new NoSuchElementException(errorMessage);
+            }
+        }
+
+        /**
+         * Or else throw.
+         * @param errorMessage
+         * @param param
+         *
+         * @return
+         * @throws NoSuchElementException the no such element exception
+         */
+        @Beta
+        public short orElseThrow(final String errorMessage, final Object param) throws NoSuchElementException {
+            if (isPresent()) {
+                return value;
+            } else {
+                throw new NoSuchElementException(N.format(errorMessage, param));
+            }
+        }
+
+        /**
+         * Or else throw.
+         * @param errorMessage
+         * @param param1
+         * @param param2
+         *
+         * @return
+         * @throws NoSuchElementException the no such element exception
+         */
+        @Beta
+        public short orElseThrow(final String errorMessage, final Object param1, final Object param2) throws NoSuchElementException {
+            if (isPresent()) {
+                return value;
+            } else {
+                throw new NoSuchElementException(N.format(errorMessage, param1, param2));
+            }
+        }
+
+        /**
+         * Or else throw.
+         * @param errorMessage
+         * @param param1
+         * @param param2
+         * @param param3
+         *
+         * @return
+         * @throws NoSuchElementException the no such element exception
+         */
+        @Beta
+        public short orElseThrow(final String errorMessage, final Object param1, final Object param2, final Object param3) throws NoSuchElementException {
+            if (isPresent()) {
+                return value;
+            } else {
+                throw new NoSuchElementException(N.format(errorMessage, param1, param2, param3));
+            }
+        }
+
+        /**
+         * Or else throw.
+         * @param errorMessage
+         * @param params
+         *
+         * @return
+         * @throws NoSuchElementException the no such element exception
+         */
+        @Beta
+        public short orElseThrow(final String errorMessage, final Object... params) throws NoSuchElementException {
+            if (isPresent()) {
+                return value;
+            } else {
+                throw new NoSuchElementException(N.format(errorMessage, params));
             }
         }
 
@@ -3042,7 +3480,94 @@ public class u {//NOSONAR
             if (isPresent) {
                 return value;
             } else {
-                throw new NoSuchElementException("No value present");
+                throw new NoSuchElementException(NO_VALUE_PRESENT);
+            }
+        }
+
+        /**
+         * Or else throw.
+         * @param errorMessage
+         *
+         * @return
+         * @throws NoSuchElementException the no such element exception
+         */
+        @Beta
+        public int orElseThrow(final String errorMessage) throws NoSuchElementException {
+            if (isPresent()) {
+                return value;
+            } else {
+                throw new NoSuchElementException(errorMessage);
+            }
+        }
+
+        /**
+         * Or else throw.
+         * @param errorMessage
+         * @param param
+         *
+         * @return
+         * @throws NoSuchElementException the no such element exception
+         */
+        @Beta
+        public int orElseThrow(final String errorMessage, final Object param) throws NoSuchElementException {
+            if (isPresent()) {
+                return value;
+            } else {
+                throw new NoSuchElementException(N.format(errorMessage, param));
+            }
+        }
+
+        /**
+         * Or else throw.
+         * @param errorMessage
+         * @param param1
+         * @param param2
+         *
+         * @return
+         * @throws NoSuchElementException the no such element exception
+         */
+        @Beta
+        public int orElseThrow(final String errorMessage, final Object param1, final Object param2) throws NoSuchElementException {
+            if (isPresent()) {
+                return value;
+            } else {
+                throw new NoSuchElementException(N.format(errorMessage, param1, param2));
+            }
+        }
+
+        /**
+         * Or else throw.
+         * @param errorMessage
+         * @param param1
+         * @param param2
+         * @param param3
+         *
+         * @return
+         * @throws NoSuchElementException the no such element exception
+         */
+        @Beta
+        public int orElseThrow(final String errorMessage, final Object param1, final Object param2, final Object param3) throws NoSuchElementException {
+            if (isPresent()) {
+                return value;
+            } else {
+                throw new NoSuchElementException(N.format(errorMessage, param1, param2, param3));
+            }
+        }
+
+        /**
+         * Or else throw.
+         * @param errorMessage
+         * @param params
+         *
+         * @return
+         * @throws NoSuchElementException the no such element exception
+         */
+        @Beta
+        public int orElseThrow(final String errorMessage, final Object... params) throws NoSuchElementException {
+            if (isPresent()) {
+                return value;
+            } else {
+                throw new NoSuchElementException(N.format(errorMessage, params));
             }
         }
 
@@ -3576,7 +4101,94 @@ public class u {//NOSONAR
             if (isPresent) {
                 return value;
             } else {
-                throw new NoSuchElementException("No value present");
+                throw new NoSuchElementException(NO_VALUE_PRESENT);
+            }
+        }
+
+        /**
+         * Or else throw.
+         * @param errorMessage
+         *
+         * @return
+         * @throws NoSuchElementException the no such element exception
+         */
+        @Beta
+        public long orElseThrow(final String errorMessage) throws NoSuchElementException {
+            if (isPresent()) {
+                return value;
+            } else {
+                throw new NoSuchElementException(errorMessage);
+            }
+        }
+
+        /**
+         * Or else throw.
+         * @param errorMessage
+         * @param param
+         *
+         * @return
+         * @throws NoSuchElementException the no such element exception
+         */
+        @Beta
+        public long orElseThrow(final String errorMessage, final Object param) throws NoSuchElementException {
+            if (isPresent()) {
+                return value;
+            } else {
+                throw new NoSuchElementException(N.format(errorMessage, param));
+            }
+        }
+
+        /**
+         * Or else throw.
+         * @param errorMessage
+         * @param param1
+         * @param param2
+         *
+         * @return
+         * @throws NoSuchElementException the no such element exception
+         */
+        @Beta
+        public long orElseThrow(final String errorMessage, final Object param1, final Object param2) throws NoSuchElementException {
+            if (isPresent()) {
+                return value;
+            } else {
+                throw new NoSuchElementException(N.format(errorMessage, param1, param2));
+            }
+        }
+
+        /**
+         * Or else throw.
+         * @param errorMessage
+         * @param param1
+         * @param param2
+         * @param param3
+         *
+         * @return
+         * @throws NoSuchElementException the no such element exception
+         */
+        @Beta
+        public long orElseThrow(final String errorMessage, final Object param1, final Object param2, final Object param3) throws NoSuchElementException {
+            if (isPresent()) {
+                return value;
+            } else {
+                throw new NoSuchElementException(N.format(errorMessage, param1, param2, param3));
+            }
+        }
+
+        /**
+         * Or else throw.
+         * @param errorMessage
+         * @param params
+         *
+         * @return
+         * @throws NoSuchElementException the no such element exception
+         */
+        @Beta
+        public long orElseThrow(final String errorMessage, final Object... params) throws NoSuchElementException {
+            if (isPresent()) {
+                return value;
+            } else {
+                throw new NoSuchElementException(N.format(errorMessage, params));
             }
         }
 
@@ -4082,7 +4694,94 @@ public class u {//NOSONAR
             if (isPresent) {
                 return value;
             } else {
-                throw new NoSuchElementException("No value present");
+                throw new NoSuchElementException(NO_VALUE_PRESENT);
+            }
+        }
+
+        /**
+         * Or else throw.
+         * @param errorMessage
+         *
+         * @return
+         * @throws NoSuchElementException the no such element exception
+         */
+        @Beta
+        public float orElseThrow(final String errorMessage) throws NoSuchElementException {
+            if (isPresent()) {
+                return value;
+            } else {
+                throw new NoSuchElementException(errorMessage);
+            }
+        }
+
+        /**
+         * Or else throw.
+         * @param errorMessage
+         * @param param
+         *
+         * @return
+         * @throws NoSuchElementException the no such element exception
+         */
+        @Beta
+        public float orElseThrow(final String errorMessage, final Object param) throws NoSuchElementException {
+            if (isPresent()) {
+                return value;
+            } else {
+                throw new NoSuchElementException(N.format(errorMessage, param));
+            }
+        }
+
+        /**
+         * Or else throw.
+         * @param errorMessage
+         * @param param1
+         * @param param2
+         *
+         * @return
+         * @throws NoSuchElementException the no such element exception
+         */
+        @Beta
+        public float orElseThrow(final String errorMessage, final Object param1, final Object param2) throws NoSuchElementException {
+            if (isPresent()) {
+                return value;
+            } else {
+                throw new NoSuchElementException(N.format(errorMessage, param1, param2));
+            }
+        }
+
+        /**
+         * Or else throw.
+         * @param errorMessage
+         * @param param1
+         * @param param2
+         * @param param3
+         *
+         * @return
+         * @throws NoSuchElementException the no such element exception
+         */
+        @Beta
+        public float orElseThrow(final String errorMessage, final Object param1, final Object param2, final Object param3) throws NoSuchElementException {
+            if (isPresent()) {
+                return value;
+            } else {
+                throw new NoSuchElementException(N.format(errorMessage, param1, param2, param3));
+            }
+        }
+
+        /**
+         * Or else throw.
+         * @param errorMessage
+         * @param params
+         *
+         * @return
+         * @throws NoSuchElementException the no such element exception
+         */
+        @Beta
+        public float orElseThrow(final String errorMessage, final Object... params) throws NoSuchElementException {
+            if (isPresent()) {
+                return value;
+            } else {
+                throw new NoSuchElementException(N.format(errorMessage, params));
             }
         }
 
@@ -4579,7 +5278,94 @@ public class u {//NOSONAR
             if (isPresent) {
                 return value;
             } else {
-                throw new NoSuchElementException("No value present");
+                throw new NoSuchElementException(NO_VALUE_PRESENT);
+            }
+        }
+
+        /**
+         * Or else throw.
+         * @param errorMessage
+         *
+         * @return
+         * @throws NoSuchElementException the no such element exception
+         */
+        @Beta
+        public double orElseThrow(final String errorMessage) throws NoSuchElementException {
+            if (isPresent()) {
+                return value;
+            } else {
+                throw new NoSuchElementException(errorMessage);
+            }
+        }
+
+        /**
+         * Or else throw.
+         * @param errorMessage
+         * @param param
+         *
+         * @return
+         * @throws NoSuchElementException the no such element exception
+         */
+        @Beta
+        public double orElseThrow(final String errorMessage, final Object param) throws NoSuchElementException {
+            if (isPresent()) {
+                return value;
+            } else {
+                throw new NoSuchElementException(N.format(errorMessage, param));
+            }
+        }
+
+        /**
+         * Or else throw.
+         * @param errorMessage
+         * @param param1
+         * @param param2
+         *
+         * @return
+         * @throws NoSuchElementException the no such element exception
+         */
+        @Beta
+        public double orElseThrow(final String errorMessage, final Object param1, final Object param2) throws NoSuchElementException {
+            if (isPresent()) {
+                return value;
+            } else {
+                throw new NoSuchElementException(N.format(errorMessage, param1, param2));
+            }
+        }
+
+        /**
+         * Or else throw.
+         * @param errorMessage
+         * @param param1
+         * @param param2
+         * @param param3
+         *
+         * @return
+         * @throws NoSuchElementException the no such element exception
+         */
+        @Beta
+        public double orElseThrow(final String errorMessage, final Object param1, final Object param2, final Object param3) throws NoSuchElementException {
+            if (isPresent()) {
+                return value;
+            } else {
+                throw new NoSuchElementException(N.format(errorMessage, param1, param2, param3));
+            }
+        }
+
+        /**
+         * Or else throw.
+         * @param errorMessage
+         * @param params
+         *
+         * @return
+         * @throws NoSuchElementException the no such element exception
+         */
+        @Beta
+        public double orElseThrow(final String errorMessage, final Object... params) throws NoSuchElementException {
+            if (isPresent()) {
+                return value;
+            } else {
+                throw new NoSuchElementException(N.format(errorMessage, params));
             }
         }
 
@@ -5540,7 +6326,94 @@ public class u {//NOSONAR
             if (isPresent()) {
                 return value;
             } else {
-                throw new NoSuchElementException("No value is present");
+                throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+            }
+        }
+
+        /**
+         * Or else throw.
+         * @param errorMessage
+         *
+         * @return
+         * @throws NoSuchElementException the no such element exception
+         */
+        @Beta
+        public T orElseThrow(final String errorMessage) throws NoSuchElementException {
+            if (isPresent()) {
+                return value;
+            } else {
+                throw new NoSuchElementException(errorMessage);
+            }
+        }
+
+        /**
+         * Or else throw.
+         * @param errorMessage
+         * @param param
+         *
+         * @return
+         * @throws NoSuchElementException the no such element exception
+         */
+        @Beta
+        public T orElseThrow(final String errorMessage, final Object param) throws NoSuchElementException {
+            if (isPresent()) {
+                return value;
+            } else {
+                throw new NoSuchElementException(N.format(errorMessage, param));
+            }
+        }
+
+        /**
+         * Or else throw.
+         * @param errorMessage
+         * @param param1
+         * @param param2
+         *
+         * @return
+         * @throws NoSuchElementException the no such element exception
+         */
+        @Beta
+        public T orElseThrow(final String errorMessage, final Object param1, final Object param2) throws NoSuchElementException {
+            if (isPresent()) {
+                return value;
+            } else {
+                throw new NoSuchElementException(N.format(errorMessage, param1, param2));
+            }
+        }
+
+        /**
+         * Or else throw.
+         * @param errorMessage
+         * @param param1
+         * @param param2
+         * @param param3
+         *
+         * @return
+         * @throws NoSuchElementException the no such element exception
+         */
+        @Beta
+        public T orElseThrow(final String errorMessage, final Object param1, final Object param2, final Object param3) throws NoSuchElementException {
+            if (isPresent()) {
+                return value;
+            } else {
+                throw new NoSuchElementException(N.format(errorMessage, param1, param2, param3));
+            }
+        }
+
+        /**
+         * Or else throw.
+         * @param errorMessage
+         * @param params
+         *
+         * @return
+         * @throws NoSuchElementException the no such element exception
+         */
+        @Beta
+        public T orElseThrow(final String errorMessage, final Object... params) throws NoSuchElementException {
+            if (isPresent()) {
+                return value;
+            } else {
+                throw new NoSuchElementException(N.format(errorMessage, params));
             }
         }
 
@@ -5600,7 +6473,7 @@ public class u {//NOSONAR
             if (isNotNull()) {
                 return value;
             } else {
-                throw new NoSuchElementException("No value is present");
+                throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
             }
         }
 

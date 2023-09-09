@@ -37,7 +37,7 @@ public final class Enumerations {
 
         @Override
         public Object nextElement() {
-            throw new NoSuchElementException();
+            throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
         }
     };
 
@@ -74,7 +74,7 @@ public final class Enumerations {
             @Override
             public T nextElement() {
                 if (!hasNext) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 hasNext = false;
@@ -108,7 +108,7 @@ public final class Enumerations {
             @Override
             public T nextElement() {
                 if (cursor >= len) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 return a[cursor++];
@@ -194,7 +194,7 @@ public final class Enumerations {
             @Override
             public T nextElement() {
                 if ((cur == null || !cur.hasMoreElements()) && !hasMoreElements()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 return cur.nextElement();

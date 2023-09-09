@@ -1712,7 +1712,7 @@ public final class Iterables {
                         @Override
                         public E next() {
                             if (!hasNext()) {
-                                throw new NoSuchElementException();
+                                throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                             }
 
                             if (iter1.hasNext()) {
@@ -1833,7 +1833,7 @@ public final class Iterables {
                         @Override
                         public E next() {
                             if (!hasNext()) {
-                                throw new NoSuchElementException();
+                                throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                             }
 
                             tmp = next;
@@ -1932,7 +1932,7 @@ public final class Iterables {
                         @Override
                         public E next() {
                             if (!hasNext()) {
-                                throw new NoSuchElementException();
+                                throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                             }
 
                             tmp = next;
@@ -2037,7 +2037,7 @@ public final class Iterables {
                         @Override
                         public E next() {
                             if (!hasNext()) {
-                                throw new NoSuchElementException();
+                                throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                             }
 
                             tmp = next;
@@ -2474,7 +2474,7 @@ public final class Iterables {
                 @Override
                 public Set<E> next() {
                     if (!hasNext()) {
-                        throw new NoSuchElementException();
+                        throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                     }
 
                     return new SubSet<>(inputSet, position++);
@@ -2605,7 +2605,7 @@ public final class Iterables {
                 public E next() {
                     int index = Integer.numberOfTrailingZeros(remainingSetBits);
                     if (index == 32) {
-                        throw new NoSuchElementException();
+                        throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                     }
                     remainingSetBits &= ~(1 << index);
                     return elements.get(index);

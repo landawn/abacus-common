@@ -1891,7 +1891,7 @@ public final class Sheet<R, C, E> implements Cloneable {
             @Override
             public Sheet.Cell<R, C, E> next() {
                 if (cursor >= toIndex) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 final int rowIndex = (int) (cursor / columnLength);
@@ -1962,7 +1962,7 @@ public final class Sheet<R, C, E> implements Cloneable {
             @Override
             public Sheet.Cell<R, C, E> next() {
                 if (cursor >= toIndex) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 final int rowIndex = (int) (cursor % rowLength);
@@ -2020,7 +2020,7 @@ public final class Sheet<R, C, E> implements Cloneable {
             @Override
             public Stream<Cell<R, C, E>> next() {
                 if (rowIndex >= toRowIndex) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 return Stream.of(new ObjIteratorEx<Cell<R, C, E>>() {
@@ -2036,7 +2036,7 @@ public final class Sheet<R, C, E> implements Cloneable {
                     @Override
                     public Cell<R, C, E> next() {
                         if (columnIndex >= columnLength) {
-                            throw new NoSuchElementException();
+                            throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                         }
 
                         final int curColumnIndex = columnIndex++;
@@ -2107,7 +2107,7 @@ public final class Sheet<R, C, E> implements Cloneable {
             @Override
             public Stream<Cell<R, C, E>> next() {
                 if (columnIndex >= toColumnIndex) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 final int curColumnIndex = columnIndex++;
@@ -2295,7 +2295,7 @@ public final class Sheet<R, C, E> implements Cloneable {
             @Override
             public E next() {
                 if (cursor >= toIndex) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 if (_initialized) {
@@ -2363,7 +2363,7 @@ public final class Sheet<R, C, E> implements Cloneable {
             @Override
             public E next() {
                 if (cursor >= toIndex) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 if (_initialized) {
@@ -2421,7 +2421,7 @@ public final class Sheet<R, C, E> implements Cloneable {
             @Override
             public Stream<E> next() {
                 if (cursor >= toIndex) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 return Stream.of(new ObjIteratorEx<E>() {
@@ -2437,7 +2437,7 @@ public final class Sheet<R, C, E> implements Cloneable {
                     @Override
                     public E next() {
                         if (cursor2 >= toIndex2) {
-                            throw new NoSuchElementException();
+                            throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                         }
 
                         if (_initialized) {
@@ -2509,7 +2509,7 @@ public final class Sheet<R, C, E> implements Cloneable {
             @Override
             public Stream<E> next() {
                 if (cursor >= toIndex) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 if (_initialized) {
@@ -2567,7 +2567,7 @@ public final class Sheet<R, C, E> implements Cloneable {
             @Override
             public Pair<R, Stream<E>> next() {
                 if (cursor >= toIndex) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 final R rowKey = _rowKeyIndexMap.getByValue(cursor);
@@ -2585,7 +2585,7 @@ public final class Sheet<R, C, E> implements Cloneable {
                     @Override
                     public E next() {
                         if (cursor2 >= toIndex2) {
-                            throw new NoSuchElementException();
+                            throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                         }
 
                         if (_initialized) {
@@ -2659,7 +2659,7 @@ public final class Sheet<R, C, E> implements Cloneable {
             @Override
             public Pair<C, Stream<E>> next() {
                 if (cursor >= toIndex) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 final C columnKey = _columnKeyIndexMap.getByValue(cursor);

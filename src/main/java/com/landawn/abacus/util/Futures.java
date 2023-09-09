@@ -765,7 +765,7 @@ public final class Futures {
             @Override
             public Result<T, Exception> next() {
                 if (!hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 while (true) {
