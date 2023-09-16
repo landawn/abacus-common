@@ -319,51 +319,51 @@ public class Seid implements EntityId {
         strValue = null;
     }
 
-    /**
-     *
-     * @param propName
-     * @return
-     * @deprecated for internal use only
-     */
-    @Deprecated
-    @Internal
-    public Object remove(String propName) {
-        if (values.size() == 0) {
-            return null;
-        }
-
-        final String simplePropName = NameUtil.isCanonicalName(entityName, propName) ? NameUtil.getSimpleName(propName) : propName;
-        Object result = null;
-
-        if (values.size() == 1) {
-            if (values.containsKey(simplePropName)) {
-                result = values.values().iterator().next();
-                values = Collections.emptyMap();
-            }
-        } else {
-            result = values.remove(simplePropName);
-        }
-
-        strValue = null;
-
-        return result;
-    }
-
-    /**
-     * Removes the all.
-     *
-     * @param propNames
-     * @deprecated for internal use only
-     */
-    @Deprecated
-    @Internal
-    public void removeAll(Collection<String> propNames) {
-        for (String propName : propNames) {
-            remove(propName);
-        }
-
-        strValue = null;
-    }
+    //    /**
+    //     *
+    //     * @param propName
+    //     * @return
+    //     * @deprecated for internal use only
+    //     */
+    //    @Deprecated
+    //    @Internal
+    //    public Object remove(String propName) {
+    //        if (values.size() == 0) {
+    //            return null;
+    //        }
+    //
+    //        final String simplePropName = NameUtil.isCanonicalName(entityName, propName) ? NameUtil.getSimpleName(propName) : propName;
+    //        Object result = null;
+    //
+    //        if (values.size() == 1) {
+    //            if (values.containsKey(simplePropName)) {
+    //                result = values.values().iterator().next();
+    //                values = Collections.emptyMap();
+    //            }
+    //        } else {
+    //            result = values.remove(simplePropName);
+    //        }
+    //
+    //        strValue = null;
+    //
+    //        return result;
+    //    }
+    //
+    //    /**
+    //     * Removes the all.
+    //     *
+    //     * @param propNames
+    //     * @deprecated for internal use only
+    //     */
+    //    @Deprecated
+    //    @Internal
+    //    public void removeAll(Collection<String> propNames) {
+    //        for (String propName : propNames) {
+    //            remove(propName);
+    //        }
+    //
+    //        strValue = null;
+    //    }
 
     /**
      *
@@ -379,6 +379,7 @@ public class Seid implements EntityId {
         if (NameUtil.isCanonicalName(entityName, propName)) {
             return values.containsKey(NameUtil.getSimpleName(propName));
         }
+
         return values.containsKey(propName);
     }
 

@@ -2627,7 +2627,7 @@ public abstract class Collectors {
      * @return
      */
     public static <T> Collector<T, ?, List<T>> minAll(Comparator<? super T> comparator, int atMostSize) {
-        return maxAll(Fn.reversedOrder(comparator), atMostSize);
+        return maxAll(Fn.reverseOrder(comparator), atMostSize);
     }
 
     /**
@@ -2675,7 +2675,7 @@ public abstract class Collectors {
      * @see #minAll()
      */
     public static <T, A, R> Collector<T, ?, R> minAll(Comparator<? super T> comparator, Collector<T, A, R> downstream) {
-        return maxAll(Fn.reversedOrder(comparator), downstream);
+        return maxAll(Fn.reverseOrder(comparator), downstream);
     }
 
     /**
@@ -2717,7 +2717,7 @@ public abstract class Collectors {
      */
     public static <T, R, RR> Collector<T, ?, RR> minAlll(final Comparator<? super T> comparator, final Collector<? super T, ?, R> downstream,
             final Function<Optional<Pair<T, R>>, RR> finisher) {
-        return maxAlll(Fn.reversedOrder(comparator), downstream, finisher);
+        return maxAlll(Fn.reverseOrder(comparator), downstream, finisher);
     }
 
     /**

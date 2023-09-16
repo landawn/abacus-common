@@ -4604,6 +4604,7 @@ class CommonUtil {
     }
 
     /**
+     * Return a modifiable {@code Map} with specified key/value.
      *
      *
      * @param <K> the key type
@@ -4619,6 +4620,7 @@ class CommonUtil {
     }
 
     /**
+     * Return a modifiable {@code Map} with specified keys/values.
      *
      *
      * @param <K> the key type
@@ -4637,6 +4639,7 @@ class CommonUtil {
     }
 
     /**
+     * Return a modifiable {@code Map} with specified keys/values.
      *
      *
      * @param <K> the key type
@@ -4658,6 +4661,7 @@ class CommonUtil {
     }
 
     /**
+     * Return a modifiable {@code Map} with specified keys/values.
      *
      *
      * @param <K> the key type
@@ -4682,6 +4686,7 @@ class CommonUtil {
     }
 
     /**
+     * Return a modifiable {@code Map} with specified keys/values.
      *
      *
      * @param <K> the key type
@@ -4710,6 +4715,7 @@ class CommonUtil {
     }
 
     /**
+     * Return a modifiable {@code Map} with specified keys/values.
      *
      *
      * @param <K> the key type
@@ -4741,6 +4747,7 @@ class CommonUtil {
     }
 
     /**
+     * Return a modifiable {@code Map} with specified keys/values.
      *
      *
      * @param <K> the key type
@@ -4775,6 +4782,7 @@ class CommonUtil {
     }
 
     /**
+     * Return a modifiable {@code Map} with specified key/value.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -4794,7 +4802,7 @@ class CommonUtil {
     }
 
     /**
-     * As linked hash map.
+     * Return a modifiable {@code LinkedHashMap} with specified keys/values.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -4809,7 +4817,7 @@ class CommonUtil {
     }
 
     /**
-     * As linked hash map.
+     * Return a modifiable {@code LinkedHashMap} with specified keys/values.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -4827,7 +4835,7 @@ class CommonUtil {
     }
 
     /**
-     * As linked hash map.
+     * Return a modifiable {@code LinkedHashMap} with specified keys/values.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -4848,7 +4856,7 @@ class CommonUtil {
     }
 
     /**
-     * As linked hash map.
+     * Return a modifiable {@code LinkedHashMap} with specified keys/values.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -4872,7 +4880,7 @@ class CommonUtil {
     }
 
     /**
-     * As linked hash map.
+     * Return a modifiable {@code LinkedHashMap} with specified keys/values.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -4900,7 +4908,7 @@ class CommonUtil {
     }
 
     /**
-     * As linked hash map.
+     * Return a modifiable {@code LinkedHashMap} with specified keys/values.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -4931,7 +4939,7 @@ class CommonUtil {
     }
 
     /**
-     * As linked hash map.
+     * Return a modifiable {@code LinkedHashMap} with specified keys/values.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -4965,7 +4973,7 @@ class CommonUtil {
     }
 
     /**
-     * As linked hash map.
+     * Return a modifiable {@code LinkedHashMap} with specified keys/values.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -4984,6 +4992,7 @@ class CommonUtil {
     }
 
     /**
+     * Return a modifiable {@code Map} with specified key/value.
      *
      *
      * @param propName
@@ -4998,6 +5007,7 @@ class CommonUtil {
     }
 
     /**
+     * Return a modifiable {@code Map} with specified keys/values.
      *
      *
      * @param propName1
@@ -5015,6 +5025,7 @@ class CommonUtil {
     }
 
     /**
+     * Return a modifiable {@code Map} with specified keys/values.
      *
      *
      * @param propName1
@@ -5036,6 +5047,7 @@ class CommonUtil {
     }
 
     /**
+     * Return a modifiable {@code Map} with specified keys/values.
      *
      *
      * @param propName1
@@ -5060,6 +5072,7 @@ class CommonUtil {
     }
 
     /**
+     * Return a modifiable {@code Map} with specified keys/values.
      *
      *
      * @param propName1
@@ -5087,6 +5100,7 @@ class CommonUtil {
     }
 
     /**
+     * Return a modifiable {@code Map} with specified keys/values.
      *
      * @param a pairs of property name and value or a Java Bean Object what
      *            allows access to properties using getter and setter methods.
@@ -5104,6 +5118,7 @@ class CommonUtil {
     }
 
     /**
+     * Return a modifiable {@code List} with specified element.
      *
      * @param <T>
      * @param e
@@ -5116,6 +5131,7 @@ class CommonUtil {
     }
 
     /**
+     * Return a modifiable {@code List} with specified elements.
      *
      * @param <T>
      * @param e1
@@ -5130,6 +5146,7 @@ class CommonUtil {
     }
 
     /**
+     * Return a modifiable {@code List} with specified elements.
      *
      * @param <T>
      * @param e1
@@ -5146,6 +5163,7 @@ class CommonUtil {
     }
 
     /**
+     * Return a modifiable {@code List} with specified elements.
      *
      * @param <T>
      * @param e1
@@ -5164,6 +5182,7 @@ class CommonUtil {
     }
 
     /**
+     * Return a modifiable {@code List} with specified elements.
      *
      * @param <T>
      * @param e1
@@ -5184,6 +5203,7 @@ class CommonUtil {
     }
 
     /**
+     * Return a modifiable {@code List} with specified elements.
      *
      * @param <T>
      * @param e1
@@ -5206,6 +5226,7 @@ class CommonUtil {
     }
 
     /**
+     * Return a modifiable {@code List} with specified elements.
      *
      * @param <T>
      * @param e1
@@ -5230,6 +5251,7 @@ class CommonUtil {
     }
 
     /**
+     * Return a modifiable {@code List} with specified elements.
      *
      * @param <T>
      * @param e1
@@ -5256,6 +5278,7 @@ class CommonUtil {
     }
 
     /**
+     * Return a modifiable {@code List} with specified elements.
      *
      * @param <T>
      * @param e1
@@ -5284,6 +5307,7 @@ class CommonUtil {
     }
 
     /**
+     * Return a modifiable {@code List} with specified elements. It's not backed by the specified array.
      *
      * @param <T>
      * @param a
@@ -5308,7 +5332,7 @@ class CommonUtil {
     }
 
     /**
-     * As linked list.
+     * Return a modifiable {@code LinkedList} with specified element.
      *
      * @param <T>
      * @param e
@@ -5321,7 +5345,7 @@ class CommonUtil {
     }
 
     /**
-     * As linked list.
+     * Return a modifiable {@code LinkedList} with specified elements.
      *
      * @param <T>
      * @param e1
@@ -5336,7 +5360,7 @@ class CommonUtil {
     }
 
     /**
-     * As linked list.
+     * Return a modifiable {@code LinkedList} with specified elements.
      *
      * @param <T>
      * @param e1
@@ -5353,7 +5377,7 @@ class CommonUtil {
     }
 
     /**
-     * As linked list.
+     * Return a modifiable {@code LinkedList} with specified elements.
      *
      * @param <T>
      * @param e1
@@ -5372,7 +5396,7 @@ class CommonUtil {
     }
 
     /**
-     * As linked list.
+     * Return a modifiable {@code LinkedList} with specified elements.
      *
      * @param <T>
      * @param e1
@@ -5393,7 +5417,7 @@ class CommonUtil {
     }
 
     /**
-     * As linked list.
+     * Return a modifiable {@code LinkedList} with specified elements.
      *
      * @param <T>
      * @param e1
@@ -5416,7 +5440,7 @@ class CommonUtil {
     }
 
     /**
-     * As linked list.
+     * Return a modifiable {@code LinkedList} with specified elements.
      *
      * @param <T>
      * @param e1
@@ -5441,7 +5465,7 @@ class CommonUtil {
     }
 
     /**
-     * As linked list.
+     * Return a modifiable {@code LinkedList} with specified elements. . It's not backed by the specified array.
      *
      * @param <T>
      * @param a
@@ -5462,6 +5486,7 @@ class CommonUtil {
     }
 
     /**
+     * Return a modifiable {@code Set} with specified element.
      *
      * @param <T>
      * @param e
@@ -5474,6 +5499,7 @@ class CommonUtil {
     }
 
     /**
+     * Return a modifiable {@code Set} with specified elements.
      *
      * @param <T>
      * @param e1
@@ -5488,6 +5514,7 @@ class CommonUtil {
     }
 
     /**
+     * Return a modifiable {@code Set} with specified elements.
      *
      * @param <T>
      * @param e1
@@ -5504,6 +5531,7 @@ class CommonUtil {
     }
 
     /**
+     * Return a modifiable {@code Set} with specified elements.
      *
      * @param <T>
      * @param e1
@@ -5522,6 +5550,7 @@ class CommonUtil {
     }
 
     /**
+     * Return a modifiable {@code Set} with specified elements.
      *
      * @param <T>
      * @param e1
@@ -5542,6 +5571,7 @@ class CommonUtil {
     }
 
     /**
+     * Return a modifiable {@code Set} with specified elements.
      *
      * @param <T>
      * @param e1
@@ -5564,6 +5594,7 @@ class CommonUtil {
     }
 
     /**
+     * Return a modifiable {@code Set} with specified elements.
      *
      * @param <T>
      * @param e1
@@ -5588,6 +5619,7 @@ class CommonUtil {
     }
 
     /**
+     * Return a modifiable {@code Set} with specified elements.
      *
      * @param <T>
      * @param e1
@@ -5614,6 +5646,7 @@ class CommonUtil {
     }
 
     /**
+     * Return a modifiable {@code Set} with specified elements.
      *
      * @param <T>
      * @param e1
@@ -5642,6 +5675,7 @@ class CommonUtil {
     }
 
     /**
+     * Return a modifiable {@code Set} with specified elements. It's not backed by the specified array.
      *
      * @param <T>
      * @param a
@@ -5662,7 +5696,7 @@ class CommonUtil {
     }
 
     /**
-     * As linked linked hash set.
+     * Return a modifiable {@code LinkedHashSet} with specified element.
      *
      * @param <T>
      * @param e
@@ -5675,7 +5709,7 @@ class CommonUtil {
     }
 
     /**
-     * As linked linked hash set.
+     * Return a modifiable {@code LinkedHashSet} with specified elements.
      *
      * @param <T>
      * @param e1
@@ -5690,7 +5724,7 @@ class CommonUtil {
     }
 
     /**
-     * As linked linked hash set.
+     * Return a modifiable {@code LinkedHashSet} with specified elements.
      *
      * @param <T>
      * @param e1
@@ -5707,7 +5741,7 @@ class CommonUtil {
     }
 
     /**
-     * As linked linked hash set.
+     * Return a modifiable {@code LinkedHashSet} with specified elements.
      *
      * @param <T>
      * @param e1
@@ -5726,7 +5760,7 @@ class CommonUtil {
     }
 
     /**
-     * As linked linked hash set.
+     * Return a modifiable {@code LinkedHashSet} with specified elements.
      *
      * @param <T>
      * @param e1
@@ -5747,7 +5781,7 @@ class CommonUtil {
     }
 
     /**
-     * As linked linked hash set.
+     * Return a modifiable {@code LinkedHashSet} with specified elements.
      *
      * @param <T>
      * @param e1
@@ -5770,7 +5804,7 @@ class CommonUtil {
     }
 
     /**
-     * As linked linked hash set.
+     * Return a modifiable {@code LinkedHashSet} with specified elements.
      *
      * @param <T>
      * @param e1
@@ -5795,7 +5829,7 @@ class CommonUtil {
     }
 
     /**
-     * As linked hash set.
+     * Return a modifiable {@code LinkedHashSet} with specified elements. It's not backed by the specified array.
      *
      * @param <T>
      * @param a
@@ -5816,7 +5850,7 @@ class CommonUtil {
     }
 
     /**
-     * As sorted set.
+     * Return a modifiable {@code SortedSet} with specified elements. It's not backed by the specified array.
      *
      * @param <T>
      * @param a
@@ -5837,7 +5871,7 @@ class CommonUtil {
     }
 
     /**
-     * As navigable set.
+     * Return a modifiable {@code NavigableSet} with specified elements. It's not backed by the specified array.
      *
      * @param <T>
      * @param a
@@ -5857,6 +5891,7 @@ class CommonUtil {
     }
 
     /**
+     * Return a modifiable {@code Queue} with specified elements. It's not backed by the specified array.
      *
      * @param <T>
      * @param a
@@ -5868,7 +5903,7 @@ class CommonUtil {
     }
 
     /**
-     * As array blocking queue.
+     * Return a modifiable {@code ArrayBlockingQueue} with specified elements. It's not backed by the specified array.
      *
      * @param <T>
      * @param a
@@ -5888,7 +5923,7 @@ class CommonUtil {
     }
 
     /**
-     * As linked blocking queue.
+     * Return a modifiable {@code LinkedBlockingQueue} with specified elements. It's not backed by the specified array.
      *
      * @param <T>
      * @param a
@@ -5908,7 +5943,7 @@ class CommonUtil {
     }
 
     /**
-     * As concurrent linked queue.
+     * Return a modifiable {@code ConcurrentLinkedQueue} with specified elements. It's not backed by the specified array.
      *
      * @param <T>
      * @param a
@@ -5928,7 +5963,7 @@ class CommonUtil {
     }
 
     /**
-     * As delay queue.
+     * Return a modifiable {@code DelayQueue} with specified elements. It's not backed by the specified array.
      *
      * @param <T>
      * @param a
@@ -5948,7 +5983,7 @@ class CommonUtil {
     }
 
     /**
-     * As priority queue.
+     * Return a modifiable {@code PriorityQueue} with specified elements. It's not backed by the specified array.
      *
      * @param <T>
      * @param a
@@ -5968,6 +6003,7 @@ class CommonUtil {
     }
 
     /**
+     * Return a modifiable {@code Deque} with specified elements. It's not backed by the specified array.
      *
      * @param <T>
      * @param a
@@ -5979,7 +6015,7 @@ class CommonUtil {
     }
 
     /**
-     * As array deque.
+     * Return a modifiable {@code ArrayDeque} with specified elements. It's not backed by the specified array.
      *
      * @param <T>
      * @param a
@@ -5999,7 +6035,7 @@ class CommonUtil {
     }
 
     /**
-     * As linked blocking deque.
+     * Return a modifiable {@code LinkedBlockingDeque} with specified elements. It's not backed by the specified array.
      *
      * @param <T>
      * @param a
@@ -6019,7 +6055,7 @@ class CommonUtil {
     }
 
     /**
-     * As concurrent linked deque.
+     * Return a modifiable {@code ConcurrentLinkedDeque} with specified elements. It's not backed by the specified array.
      *
      * @param <T>
      * @param a
@@ -6039,6 +6075,7 @@ class CommonUtil {
     }
 
     /**
+     * Return a modifiable {@code Multiset} with specified elements. It's not backed by the specified array.
      *
      * @param <T>
      * @param a
@@ -16299,6 +16336,7 @@ class CommonUtil {
      * @param value
      * @param n
      * @return
+     * @see Collections#nCopies(int, Object)
      */
     public static <T> List<T> repeat(final T value, final int n) {
         checkArgNotNegative(n, "n");
@@ -16322,7 +16360,7 @@ class CommonUtil {
      * @param n
      * @return
      */
-    public static <T> List<T> repeatEach(final Collection<? extends T> c, final int n) {
+    public static <T> List<T> repeatElements(final Collection<? extends T> c, final int n) {
         checkArgNotNegative(n, "n");
 
         if (n == 0 || isNullOrEmpty(c)) {
@@ -16352,7 +16390,7 @@ class CommonUtil {
      * @param n
      * @return
      */
-    public static <T> List<T> repeatAll(final Collection<T> c, final int n) {
+    public static <T> List<T> repeatCollection(final Collection<T> c, final int n) {
         checkArgNotNegative(n, "n");
 
         if (n == 0 || isNullOrEmpty(c)) {
@@ -16382,7 +16420,7 @@ class CommonUtil {
      * @param size
      * @return
      */
-    public static <T> List<T> repeatEachToSize(final Collection<T> c, final int size) {
+    public static <T> List<T> repeatElementsToSize(final Collection<T> c, final int size) {
         checkArgNotNegative(size, "size");
         checkArgument(size == 0 || notNullOrEmpty(c), "Collection can not be empty or null when size > 0");
 
@@ -16420,7 +16458,7 @@ class CommonUtil {
      * @param size
      * @return
      */
-    public static <T> List<T> repeatAllToSize(final Collection<? extends T> c, final int size) {
+    public static <T> List<T> repeatCollectionToSize(final Collection<? extends T> c, final int size) {
         checkArgNotNegative(size, "size");
         checkArgument(size == 0 || notNullOrEmpty(c), "Collection can not be empty or null when size > 0");
 
@@ -19955,7 +19993,7 @@ class CommonUtil {
      */
     @SuppressWarnings("rawtypes")
     public static void reverseSort(final Object[] a) {
-        sort(a, (Comparator) Fn.reversedOrder());
+        sort(a, (Comparator) Fn.reverseOrder());
     }
 
     /**
@@ -19966,7 +20004,7 @@ class CommonUtil {
      */
     @SuppressWarnings("rawtypes")
     public static void reverseSort(final Object[] a, final int fromIndex, final int toIndex) {
-        sort(a, fromIndex, toIndex, (Comparator) Fn.reversedOrder());
+        sort(a, fromIndex, toIndex, (Comparator) Fn.reverseOrder());
     }
 
     /**
@@ -19975,7 +20013,7 @@ class CommonUtil {
      * @param list
      */
     public static <T extends Comparable<? super T>> void reverseSort(final List<? extends T> list) {
-        sort(list, Fn.<T> reversedOrder());
+        sort(list, Fn.<T> reverseOrder());
     }
 
     /**
@@ -19986,7 +20024,7 @@ class CommonUtil {
      * @param toIndex
      */
     public static <T extends Comparable<? super T>> void reverseSort(final List<? extends T> list, final int fromIndex, final int toIndex) {
-        sort(list, fromIndex, toIndex, Fn.<T> reversedOrder());
+        sort(list, fromIndex, toIndex, Fn.<T> reverseOrder());
     }
 
     /**

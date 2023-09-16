@@ -36,11 +36,15 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
+import java.util.NavigableMap;
+import java.util.NavigableSet;
 import java.util.NoSuchElementException;
 import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.RandomAccess;
 import java.util.Set;
+import java.util.SortedMap;
+import java.util.SortedSet;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -28862,7 +28866,137 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see Collections#reverseOrder(Comparator)
      */
     public static <T> Comparator<T> reverseOrder(final Comparator<T> cmp) {
-        return Collections.reverseOrder(cmp);
+        return Comparators.reverseOrder(cmp);
+    }
+
+    /**
+     * Returns an {@code unmodifiable view} of the specified {@code Collection}. Or an empty {@code Collection} if the specified {@code collection} is null.
+     *
+     * @param <T>
+     * @param c
+     * @return an empty {@code Collection} if the specified {@code c} is null.
+     */
+    public static <T> Collection<T> unmodifiableCollection(Collection<? extends T> c) {
+        if (c == null) {
+            return N.emptyList();
+        }
+
+        return Collections.unmodifiableCollection(c);
+    }
+
+    /**
+     * Returns an {@code unmodifiable view} of the specified {@code List}. Or an empty {@code List} if the specified {@code list} is null.
+     *
+     * @param <T>
+     * @param list
+     * @return
+     * @see Collections.unmodifiableList(List)
+     */
+    public static <T> List<T> unmodifiableList(final List<? extends T> list) {
+        if (list == null) {
+            return N.emptyList();
+        }
+
+        return Collections.unmodifiableList(list);
+    }
+
+    /**
+     * Returns an {@code unmodifiable view} of the specified {@code Set}. Or an empty {@code Set} if the specified {@code set} is null.
+     *
+     * @param <T>
+     * @param s
+     * @return
+     * @see Collections.unmodifiableSet(Set)
+     */
+    public static <T> Set<T> unmodifiableSet(final Set<? extends T> s) {
+        if (s == null) {
+            return N.emptySet();
+        }
+
+        return Collections.unmodifiableSet(s);
+    }
+
+    /**
+     * Returns an {@code unmodifiable view} of the specified {@code SortedSet}. Or an empty {@code SortedSet} if the specified {@code set} is null.
+     *
+     * @param <T>
+     * @param s
+     * @return
+     * @see Collections.unmodifiableSet(SortedSet)
+     */
+    public static <T> SortedSet<T> unmodifiableSortedSet(final SortedSet<T> s) {
+        if (s == null) {
+            return N.emptySortedSet();
+        }
+
+        return Collections.unmodifiableSortedSet(s);
+    }
+
+    /**
+     * Returns an {@code unmodifiable view} of the specified {@code NavigableSet}. Or an empty {@code NavigableSet} if the specified {@code set} is null.
+     *
+     * @param <T>
+     * @param s
+     * @return
+     * @see Collections.unmodifiableNavigableSet(NavigableSet)
+     */
+    public static <T> NavigableSet<T> unmodifiableNavigableSet(final NavigableSet<T> s) {
+        if (s == null) {
+            return N.emptyNavigableSet();
+        }
+
+        return Collections.unmodifiableNavigableSet(s);
+    }
+
+    /**
+     * Returns an {@code unmodifiable view} of the specified {@code Map}. Or an empty {@code Map} if the specified {@code map} is null.
+     *
+     * @param <K>
+     * @param <V>
+     * @param m
+     * @return
+     * @see Collections#unmodifiableMap(Map)
+     */
+    public static <K, V> Map<K, V> unmodifiableMap(Map<? extends K, ? extends V> m) {
+        if (m == null) {
+            return N.emptyMap();
+        }
+
+        return Collections.unmodifiableMap(m);
+    }
+
+    /**
+     * Returns an {@code unmodifiable view} of the specified {@code SortedMap}. Or an empty {@code SortedMap} if the specified {@code map} is null.
+     *
+     * @param <K>
+     * @param <V>
+     * @param m
+     * @return
+     * @see Collections#unmodifiableSortedMap(SortedMap)
+     */
+    public static <K, V> SortedMap<K, V> unmodifiableSortedMap(SortedMap<K, ? extends V> m) {
+        if (m == null) {
+            return N.emptySortedMap();
+        }
+
+        return Collections.unmodifiableSortedMap(m);
+    }
+
+    /**
+     * Returns an {@code unmodifiable view} of the specified {@code NavigableMap}. Or an empty {@code NavigableMap} if the specified {@code map} is null.
+     *
+     * @param <K>
+     * @param <V>
+     * @param m
+     * @return
+     * @see Collections#unmodifiableNavigableMap(NavigableMap)
+     */
+    public static <K, V> NavigableMap<K, V> unmodifiableNavigableMap(NavigableMap<K, ? extends V> m) {
+        if (m == null) {
+            return N.emptyNavigableMap();
+        }
+
+        return Collections.unmodifiableNavigableMap(m);
     }
 
     /**

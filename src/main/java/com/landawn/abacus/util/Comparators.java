@@ -237,7 +237,7 @@ public abstract class Comparators {
      * @return
      */
     @SuppressWarnings("rawtypes")
-    public static <T extends Comparable> Comparator<T> reversedOrder() {
+    public static <T extends Comparable> Comparator<T> reverseOrder() {
         return REVERSED_ORDER;
     }
 
@@ -247,7 +247,7 @@ public abstract class Comparators {
      * @param cmp
      * @return
      */
-    public static <T> Comparator<T> reversedOrder(final Comparator<T> cmp) {
+    public static <T> Comparator<T> reverseOrder(final Comparator<T> cmp) {
         if (cmp == null || cmp == NATURAL_ORDER) {
             return REVERSED_ORDER;
         } else if (cmp == REVERSED_ORDER) {

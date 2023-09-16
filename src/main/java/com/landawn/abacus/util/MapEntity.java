@@ -47,19 +47,19 @@ public final class MapEntity implements Serializable {
     }
 
     /**
-     * 
      *
-     * @param entityName 
+     *
+     * @param entityName
      */
     public MapEntity(String entityName) {
         this.entityName = entityName;
     }
 
     /**
-     * 
      *
-     * @param entityName 
-     * @param props 
+     *
+     * @param entityName
+     * @param props
      */
     public MapEntity(String entityName, Map<String, Object> props) {
         this(entityName);
@@ -87,9 +87,9 @@ public final class MapEntity implements Serializable {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public String entityName() {
         return entityName;
@@ -115,10 +115,10 @@ public final class MapEntity implements Serializable {
      * Node: To follow one of general design rules in {@code Abacus}, if there is a conversion behind when the source value is not assignable to the target type, put the {@code targetType} to last parameter of the method.
      * Otherwise, put the {@code targetTpye} to the first parameter of the method.
      *
-     * @param <T> 
-     * @param propName 
-     * @param targetType 
-     * @return 
+     * @param <T>
+     * @param propName
+     * @param targetType
+     * @return
      */
     @SuppressWarnings("unchecked")
     public <T> T get(String propName, Class<? extends T> targetType) {
@@ -214,27 +214,27 @@ public final class MapEntity implements Serializable {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public Set<Map.Entry<String, Object>> entrySet() {
         return values.entrySet();
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public Map<String, Object> props() {
         return values;
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public int size() {
         return values.size();
@@ -250,18 +250,18 @@ public final class MapEntity implements Serializable {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public MapEntity copy() {
         return new MapEntity(this.entityName, this.values);
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public int hashCode() {
@@ -290,12 +290,34 @@ public final class MapEntity implements Serializable {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public String toString() {
         return values.toString();
+    }
+
+    public static MapEntityBuilder builder(final String entityName) {
+        return new MapEntityBuilder(entityName);
+    }
+
+    public static class MapEntityBuilder {
+        private final MapEntity mapEntity;
+
+        MapEntityBuilder(final String entityName) {
+            mapEntity = new MapEntity(entityName);
+        }
+
+        public MapEntityBuilder put(final String idPropName, final Object idPropVal) {
+            mapEntity.set(idPropName, idPropVal);
+
+            return this;
+        }
+
+        public MapEntity build() {
+            return mapEntity;
+        }
     }
 }

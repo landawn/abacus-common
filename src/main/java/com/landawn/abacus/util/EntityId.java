@@ -178,9 +178,9 @@ public interface EntityId {
      * Node: To follow one of general design rules in {@code Abacus}, if there is a conversion behind when the source value is not assignable to the target type, put the {@code targetType} to last parameter of the method.
      * Otherwise, put the {@code targetTpye} to the first parameter of the method.
      *
-     * @param <T> 
-     * @param propName 
-     * @param targetType 
+     * @param <T>
+     * @param propName
+     * @param targetType
      * @return T
      */
     <T> T get(String propName, Class<? extends T> targetType);
@@ -199,23 +199,63 @@ public interface EntityId {
     Set<String> keySet();
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     Set<Map.Entry<String, Object>> entrySet();
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     int size();
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     boolean isEmpty();
+
+    static EntityIdBuilder builder() {
+        return new EntityIdBuilder();
+    }
+
+    static EntityIdBuilder builder(final String entityName) {
+        return new EntityIdBuilder(entityName);
+    }
+
+    public static class EntityIdBuilder {
+        private Seid entityId = null;
+
+        EntityIdBuilder() {
+        }
+
+        @SuppressWarnings("deprecation")
+        EntityIdBuilder(final String entityName) {
+            entityId = new Seid(entityName);
+        }
+
+        @SuppressWarnings("deprecation")
+        public EntityIdBuilder put(final String idPropName, final Object idPropVal) {
+            if (entityId == null) {
+                entityId = new Seid(idPropName, idPropVal);
+            } else {
+                entityId.set(idPropName, idPropVal);
+            }
+
+            return this;
+        }
+
+        @SuppressWarnings("deprecation")
+        public EntityId build() {
+            if (entityId == null) {
+                entityId = new Seid(Strings.EMPTY_STRING);
+            }
+
+            return entityId;
+        }
+    }
 }
