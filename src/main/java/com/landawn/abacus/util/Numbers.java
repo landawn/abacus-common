@@ -32,6 +32,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.MathContext;
 import java.math.RoundingMode;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -48,7 +49,7 @@ import com.landawn.abacus.util.u.OptionalLong;
 /**
  *  Note: A lot of codes in this classed are copied from Google Guava, Apache Commons Math and Apache Commons Lang under under the Apache License, Version 2.0.
  *  The purpose of copying the code is to re-organize the APIs.
- *
+ * @see DecimalFormat
  */
 @SuppressWarnings("java:S1192")
 public final class Numbers {
@@ -91,6 +92,9 @@ public final class Numbers {
     public static final Double DOUBLE_ONE = 1.0d;
     /** Reusable Double constant for minus one. */
     public static final Double DOUBLE_MINUS_ONE = -1.0d;
+
+    /** Positive zero. */
+    private static final double POSITIVE_ZERO = 0d;
 
     private Numbers() {
         // utility class.
@@ -694,6 +698,90 @@ public final class Numbers {
             return (T) func.apply(value);
         } else {
             return targetType.valueOf(N.stringOf(value));
+        }
+    }
+
+    /**
+     *
+     * @param x
+     * @param decimalFormat
+     * @return
+     * @see DecimalFormat#format(double)
+     */
+    public static String format(final double x, String decimalFormat) {
+        N.checkArgNotNull(decimalFormat, "decimalFormat");
+
+        DecimalFormat df = decimalFormatPool.get(decimalFormat);
+
+        if (df == null) {
+            df = new DecimalFormat(decimalFormat);
+        }
+
+        return df.format(x);
+    }
+
+    /**
+     *
+     * @param x
+     * @param decimalFormat
+     * @return
+     * @see DecimalFormat#format(double)
+     */
+    public static String format(final float x, String decimalFormat) {
+        N.checkArgNotNull(decimalFormat, "decimalFormat");
+
+        DecimalFormat df = decimalFormatPool.get(decimalFormat);
+
+        if (df == null) {
+            df = new DecimalFormat(decimalFormat);
+        }
+
+        return df.format(x);
+    }
+
+    /**
+     *
+     * @param x
+     * @param decimalFormat
+     * @return
+     * @see DecimalFormat#format(double)
+     */
+    public static String format(final Float x, String decimalFormat) {
+        N.checkArgNotNull(decimalFormat, "decimalFormat");
+
+        DecimalFormat df = decimalFormatPool.get(decimalFormat);
+
+        if (df == null) {
+            df = new DecimalFormat(decimalFormat);
+        }
+
+        if (x == null) {
+            return df.format(0f);
+        } else {
+            return df.format(x.doubleValue());
+        }
+    }
+
+    /**
+     *
+     * @param x
+     * @param decimalFormat
+     * @return
+     * @see DecimalFormat#format(double)
+     */
+    public static String format(final Double x, String decimalFormat) {
+        N.checkArgNotNull(decimalFormat, "decimalFormat");
+
+        DecimalFormat df = decimalFormatPool.get(decimalFormat);
+
+        if (df == null) {
+            df = new DecimalFormat(decimalFormat);
+        }
+
+        if (x == null) {
+            return df.format(0d);
+        } else {
+            return df.format(x);
         }
     }
 
@@ -4389,6 +4477,132 @@ public final class Numbers {
             default:
                 throw new AssertionError();
         }
+    }
+
+    /**
+     *
+     * @param x
+     * @param scale
+     * @return
+     * @see #round(double, int)
+     * @see Math#round(double)
+     */
+    public static float round(final float x, final int scale) {
+        return (float) round((double) x, scale);
+    }
+
+    /**
+     *
+     * @param x
+     * @param scale
+     * @return
+     * @see Math#round(double)
+     */
+    public static double round(final double x, final int scale) {
+        N.checkArgNotNegative(scale, "scale");
+
+        if (scale == 0) {
+            return (long) x;
+        } else if (scale <= 6) {
+            long factor = pow(10, scale);
+            return Math.round(x * factor) / (double) factor;
+        } else {
+            return round(x, scale, RoundingMode.HALF_UP);
+        }
+    }
+
+    /**
+     *
+     * @param x
+     * @param scale
+     * @param roundingMode
+     * @return
+     * @see #round(double, int, RoundingMode)
+     * @see BigDecimal#setScale(int, RoundingMode)
+     * @see BigDecimal#doubleValue()
+     */
+    public static float round(final float x, final int scale, final RoundingMode roundingMode) {
+        return (float) (round((double) x, scale, roundingMode));
+    }
+
+    /**
+     *
+     * @param x
+     * @param scale
+     * @param roundingMode
+     * @return
+     * @see BigDecimal#setScale(int, RoundingMode)
+     * @see BigDecimal#doubleValue()
+     */
+    public static double round(final double x, final int scale, final RoundingMode roundingMode) {
+        final BigDecimal bd = BigDecimal.valueOf(x).setScale(scale, roundingMode == null ? RoundingMode.HALF_UP : roundingMode);
+        final double rounded = bd.doubleValue();
+        return rounded == POSITIVE_ZERO ? POSITIVE_ZERO * x : rounded;
+    }
+
+    static final Map<String, DecimalFormat> decimalFormatPool = ImmutableMap.<String, DecimalFormat> builder()
+            .put("#.#", new DecimalFormat("#.#"))
+            .put("#.##", new DecimalFormat("#.##"))
+            .put("#.####", new DecimalFormat("#.####"))
+            .put("#.#####", new DecimalFormat("#.#####"))
+            .put("#.######", new DecimalFormat("#.######"))
+            .put("0.0", new DecimalFormat("0.0"))
+            .put("0.00", new DecimalFormat("0.00"))
+            .put("0.0000", new DecimalFormat("0.0000"))
+            .put("0.00000", new DecimalFormat("0.00000"))
+            .put("0.000000", new DecimalFormat("0.000000"))
+            .build();
+
+    /**
+     *
+     * @param x
+     * @param decimalFormat
+     * @return
+     * @see DecimalFormat#format(double)
+     * @see #toFloat(String)
+     */
+    public static float round(final float x, final String decimalFormat) {
+        return toFloat(format(x, decimalFormat));
+    }
+
+    /**
+     *
+     * @param x
+     * @param decimalFormat
+     * @return
+     * @see DecimalFormat#format(double)
+     * @see #toDouble(String)
+     */
+    public static double round(final double x, final String decimalFormat) {
+        return toDouble(format(x, decimalFormat));
+    }
+
+    /**
+     *
+     * @param x
+     * @param decimalFormat
+     * @return
+     * @see DecimalFormat#format(double)
+     * @see #toFloat(String)
+     */
+    public static float round(final float x, final DecimalFormat decimalFormat) {
+        N.checkArgNotNull(decimalFormat, "decimalFormat");
+
+        return toFloat(decimalFormat.format(x));
+    }
+
+    /**
+     *
+     * @param x
+     * @param decimalFormat
+     * @return
+     * @see DecimalFormat#format(double)
+     * @see #toDouble(String)
+     */
+    public static double round(final double x, final DecimalFormat decimalFormat) {
+        N.checkArgNotNull(decimalFormat, "decimalFormat");
+
+        return toDouble(decimalFormat.format(x));
     }
 
     /**

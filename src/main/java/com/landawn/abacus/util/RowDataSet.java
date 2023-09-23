@@ -8655,17 +8655,19 @@ public class RowDataSet implements DataSet, Cloneable {
      * @param rightColumnNames
      */
     private void initNewColumnList(final List<String> newColumnNameList, final List<List<Object>> newColumnList, final List<String> rightColumnNames) {
+        for (String rightColumnName : rightColumnNames) {
+            if (this.containsColumn(rightColumnName)) {
+                throw new IllegalArgumentException(
+                        "The column in right DataSet: " + rightColumnName + " is already included in this DataSet: " + _columnNameList);
+            }
+        }
+
         for (int i = 0, len = _columnNameList.size(); i < len; i++) {
             newColumnNameList.add(_columnNameList.get(i));
             newColumnList.add(new ArrayList<>());
         }
 
         for (String rightColumnName : rightColumnNames) {
-            if (this.containsColumn(rightColumnName)) {
-                throw new IllegalArgumentException(
-                        "The column in right DataSet: " + rightColumnName + " is already included in this DataSet: " + _columnNameList);
-            }
-
             newColumnNameList.add(rightColumnName);
             newColumnList.add(new ArrayList<>());
         }

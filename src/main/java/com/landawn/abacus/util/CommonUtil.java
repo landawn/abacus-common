@@ -16247,6 +16247,8 @@ class CommonUtil {
      * @param <T>
      * @param list
      * @param val
+     * @see #padLeft(List, int, Object)
+     * @see #padRight(Collection, int, Object)
      */
     public static <T> void fill(final List<? super T> list, final T val) {
         fill(list, 0, list.size(), val);
@@ -16261,6 +16263,8 @@ class CommonUtil {
      * @param fromIndex
      * @param toIndex
      * @param val
+     * @see #padLeft(List, int, Object)
+     * @see #padRight(Collection, int, Object)
      */
     public static <T> void fill(final List<? super T> list, final int fromIndex, final int toIndex, final T val) {
         checkFromToIndex(fromIndex, toIndex, Integer.MAX_VALUE);
@@ -16328,6 +16332,99 @@ class CommonUtil {
      */
     public static <T> List<T> fill(Class<? extends T> beanClass, int count) {
         return TestUtil.fill(beanClass, count);
+    }
+
+    //    /**
+    //     *
+    //     * @param <T>
+    //     * @param c
+    //     * @param valueToAdd
+    //     * @param minSize
+    //     * @return
+    //     */
+    //    @Beta
+    //    public static <T> boolean append(final Collection<T> c, final T valueToAdd, final int minSize) {
+    //        return N.padRight(c, minSize, valueToAdd);
+    //    }
+    //
+    //    /**
+    //     *
+    //     * @param <T>
+    //     * @param list
+    //     * @param valueToAdd
+    //     * @param fromIndex
+    //     * @param minSize
+    //     * @return
+    //     */
+    //    @Beta
+    //    public static <T> boolean append(final List<T> list, final T valueToAdd, final int fromIndex, final int minSize) {
+    //        return N.padLeft(list, minSize, valueToAdd);
+    //    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param list
+     * @param minSize
+     * @param objToAdd
+     * @return
+     * @see #fill(List, Object)
+     * @see #fill(List, int, int, Object)
+     */
+    @SuppressWarnings("rawtypes")
+    public static <T> boolean padLeft(final List<T> list, final int minSize, final T objToAdd) {
+        N.checkArgNotNegative(minSize, "minSize");
+
+        final int size = N.size(list);
+
+        if (size < minSize) {
+            final int elementCountToAdd = minSize - size;
+            final Object[] a = new Object[elementCountToAdd];
+
+            if (objToAdd != null) {
+                N.fill(a, objToAdd);
+            }
+
+            list.addAll(0, (List) Arrays.asList(a));
+
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param c
+     * @param minSize
+     * @param objToAdd
+     * @return
+     * @see #fill(List, Object)
+     * @see #fill(List, int, int, Object)
+     */
+    @SuppressWarnings("rawtypes")
+    public static <T> boolean padRight(final Collection<T> c, final int minSize, final T objToAdd) {
+        N.checkArgNotNegative(minSize, "minSize");
+
+        final int size = N.size(c);
+
+        if (size < minSize) {
+            final int elementCountToAdd = minSize - size;
+            final Object[] a = new Object[elementCountToAdd];
+
+            if (objToAdd != null) {
+                N.fill(a, objToAdd);
+            }
+
+            c.addAll((Collection) Arrays.asList(a));
+
+            return true;
+        }
+
+        return false;
     }
 
     /**

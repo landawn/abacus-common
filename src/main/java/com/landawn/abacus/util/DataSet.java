@@ -38,7 +38,6 @@ import com.landawn.abacus.util.stream.Stream;
 /**
  *
  * @author Haiyang Li
- * @see com.landawn.abacus.util.DataSetUtil
  * @see com.landawn.abacus.util.Build.DataSetBuilder
  * @see com.landawn.abacus.jdbc.JdbcUtil
  * @see com.landawn.abacus.util.CSVUtil
@@ -3778,7 +3777,7 @@ public interface DataSet {
     //    List<DataSet> splitt(Collection<String> columnNames, int chunkSize);
 
     /**
-     * Returns a frozen {@code DataSet}.
+     * Returns a frozen slice view on this {@code DataSet}.
      *
      * @param columnNames
      * @return a copy of this DataSet
@@ -3787,7 +3786,7 @@ public interface DataSet {
     DataSet slice(Collection<String> columnNames);
 
     /**
-     * Returns a frozen {@code DataSet}.
+     * Returns a frozen slice view on this {@code DataSet}.
      *
      * @param fromRowIndex
      * @param toRowIndex
@@ -3797,7 +3796,7 @@ public interface DataSet {
     DataSet slice(int fromRowIndex, int toRowIndex);
 
     /**
-     * Returns a frozen {@code DataSet}.
+     * Returns a frozen slice view on this {@code DataSet}.
      *
      * @param columnNames
      * @param fromRowIndex

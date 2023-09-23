@@ -10334,68 +10334,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
         return result;
     }
 
-    /**
-     *
-     *
-     * @param <T>
-     * @param list
-     * @param minLen
-     * @param objToAdd
-     * @return
-     */
-    @SuppressWarnings("rawtypes")
-    public static <T> boolean padLeft(final List<T> list, final int minLen, final T objToAdd) {
-        N.checkArgNotNegative(minLen, "minLen");
-
-        final int size = N.size(list);
-
-        if (size < minLen) {
-            final int elementCountToAdd = minLen - size;
-            final Object[] a = new Object[elementCountToAdd];
-
-            if (objToAdd != null) {
-                N.fill(a, objToAdd);
-
-                list.addAll(0, (List) Arrays.asList(a));
-            }
-
-            return true;
-        }
-
-        return false;
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param c
-     * @param minLen
-     * @param objToAdd
-     * @return
-     */
-    @SuppressWarnings("rawtypes")
-    public static <T> boolean padRight(final Collection<T> c, final int minLen, final T objToAdd) {
-        N.checkArgNotNegative(minLen, "minLen");
-
-        final int size = N.size(c);
-
-        if (size < minLen) {
-            final int elementCountToAdd = minLen - size;
-            final Object[] a = new Object[elementCountToAdd];
-
-            if (objToAdd != null) {
-                N.fill(a, objToAdd);
-
-                c.addAll((Collection) Arrays.asList(a));
-            }
-
-            return true;
-        }
-
-        return false;
-    }
-
     // Primitive/Object array converters
     // ----------------------------------------------------------------------
 

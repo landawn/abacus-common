@@ -334,6 +334,30 @@ public abstract class Comparators {
     /**
      *
      * @param <T>
+     * @param cmp
+     * @return
+     */
+    public static <T> Comparator<u.Optional<T>> emptiesFirst(final Comparator<? super T> cmp) {
+        N.checkArgNotNull(cmp);
+
+        return Comparators.<u.Optional<T>, T> comparingBy(o -> o.orElse(null), Comparator.nullsFirst(cmp));
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param cmp
+     * @return
+     */
+    public static <T> Comparator<u.Optional<T>> emptiesLast(final Comparator<? super T> cmp) {
+        N.checkArgNotNull(cmp);
+
+        return Comparators.<u.Optional<T>, T> comparingBy(o -> o.orElse(null), Comparator.nullsLast(cmp));
+    }
+
+    /**
+     *
+     * @param <T>
      * @param <U>
      * @param keyMapper
      * @return

@@ -190,6 +190,15 @@ public abstract class DateUtil {
     }
 
     /**
+     *
+     * @return
+     * @see System#currentTimeMillis()
+     */
+    public static long currentTimeMillis() {
+        return System.currentTimeMillis();
+    }
+
+    /**
      * A new instance of <code>java.sql.Time</code> returned is based on the
      * current time in the default time zone with the default locale.
      *
