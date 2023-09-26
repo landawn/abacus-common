@@ -32,6 +32,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.function.ToIntFunction;
 
+import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.util.NoCachingNoUpdating.DisposableObjArray;
 import com.landawn.abacus.util.Tuple.Tuple2;
 import com.landawn.abacus.util.Tuple.Tuple3;
@@ -3605,6 +3606,7 @@ public class Builder<T> {
      *
      * @param <T>
      */
+    @Beta
     public static final class X<T> extends Builder<T> {
 
         /**

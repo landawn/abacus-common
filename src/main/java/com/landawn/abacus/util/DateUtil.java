@@ -22,6 +22,7 @@ import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.Map;
@@ -58,7 +59,7 @@ public abstract class DateUtil {
     // ...
     public static final TimeZone UTC_TIME_ZONE = TimeZone.getTimeZone("UTC");
 
-    static final TimeZone DEFAULT_TIME_ZONE = TimeZone.getDefault();
+    static final TimeZone DEFAULT_TIME_ZONE = Calendar.getInstance().getTimeZone();
 
     /**
      * Date format.
@@ -194,6 +195,7 @@ public abstract class DateUtil {
      * @return
      * @see System#currentTimeMillis()
      */
+    @Beta
     public static long currentTimeMillis() {
         return System.currentTimeMillis();
     }
@@ -1063,6 +1065,51 @@ public abstract class DateUtil {
     //    }
 
     /**
+     * Format current date with format {@code yyyy-MM-dd}
+     *
+     * @param date
+     * @return
+     */
+    @Beta
+    public static String formatLocalDate() {
+        return format(currentDate(), LOCAL_DATE_FORMAT);
+    }
+
+    /**
+     * Format current date with format with specified {@code yyyy-MM-dd HH:mm:ss).
+     *
+     * @param date
+     * @return
+     */
+    @Beta
+    public static String formatLocalDateTime() {
+        return format(currentDate(), LOCAL_DATETIME_FORMAT);
+    }
+
+    /**
+     * Format current date with format with specified {@code yyyy-MM-dd'T'HH:mm:ss'Z').
+     *
+     * @param date
+     * @param format
+     * @return
+     */
+    public static String formatCurrentDateTime() {
+        return format(currentDate(), ISO_8601_DATETIME_FORMAT);
+    }
+
+    /**
+     * Format current date with format with specified {@code yyyy-MM-dd'T'HH:mm:ss.SSS'Z').
+     *
+     * @param date
+     * @param format
+     * @return
+     */
+    public static String formatCurrentTimestamp() {
+        return format(currentTimestamp(), ISO_8601_TIMESTAMP_FORMAT);
+    }
+
+    /**
+     * Format specified {@code date} with format {@code yyyy-MM-dd'T'HH:mm:ss.SSS'Z'} if it's a {@code Timestamp}, otherwise format it with format {@code yyyy-MM-dd'T'HH:mm:ss'Z'}.
      *
      * @param date
      * @return
@@ -1273,6 +1320,44 @@ public abstract class DateUtil {
             format(writer, createJUDate(c.toGregorianCalendar()), format, timeZone);
         }
     }
+
+    static final Map<String, DateTimeFormatter> dtfPool = ImmutableMap.<String, DateTimeFormatter> builder()
+            .put("uuuu-MM-dd", DateTimeFormatter.ISO_LOCAL_DATE)
+            .build();
+
+    //    // https://stackoverflow.com/questions/47698046/datetimeformatter-iso-local-date-vs-datetimeformatter-ofpatternyyyy-mm-dd-in
+    //    /**
+    //     *
+    //     * @param temporal
+    //     * @param pattern
+    //     * @return
+    //     */
+    //    public static String format(final TemporalAccessor temporal, String pattern) {
+    //        DateTimeFormatter dtf = dtfPool.get(pattern);
+    //
+    //        if (dtf == null) {
+    //            dtf = DateTimeFormatter.ofPattern(pattern);
+    //        }
+    //
+    //        return dtf.format(temporal);
+    //    }
+    //
+    //    /**
+    //    *
+    //    * @param temporal
+    //    * @param pattern
+    //    * @param appendable
+    //    * @return
+    //    */
+    //    public static void formatTo(final TemporalAccessor temporal, String pattern, final Appendable appendable) {
+    //        DateTimeFormatter dtf = dtfPool.get(pattern);
+    //
+    //        if (dtf == null) {
+    //            dtf = DateTimeFormatter.ofPattern(pattern);
+    //        }
+    //
+    //        dtf.formatTo(temporal, appendable);
+    //    }
 
     //    /**
     //     *
@@ -3658,4 +3743,15 @@ public abstract class DateUtil {
             // singleton.
         }
     }
+
+    //    /**
+    //     * The Class Dates.
+    //     */
+    //    @Beta
+    //    public static class Dates extends DateUtil {
+    //
+    //        private Dates() {
+    //            // singleton.
+    //        }
+    //    }
 }

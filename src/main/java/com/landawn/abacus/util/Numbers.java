@@ -702,6 +702,20 @@ public final class Numbers {
     }
 
     /**
+     * <pre>
+     * <code>
+     * Numbers.format(val, "0.0"); --> 12.1
+     * Numbers.format(val, "#.#"); --> 12.1
+     * Numbers.format(val, "0.00"); --> 12.10
+     * Numbers.format(val, "#.##"); --> 12.1
+     * Numbers.format(val, "0.000"); --> 12.105
+     * Numbers.format(val, "#.###"); --> 12.105
+     * Numbers.format(val, "0.0000"); --> 12.1050
+     * Numbers.format(val, "#.####"); --> 12.105
+     * Numbers.format(val, "0.00000"); --> 12.10500
+     * Numbers.format(val, "#.#####"); --> 12.105
+     * </code>
+     * </pre>
      *
      * @param x
      * @param decimalFormat
@@ -721,6 +735,20 @@ public final class Numbers {
     }
 
     /**
+     * <pre>
+     * <code>
+     * Numbers.format(val, "0.0"); --> 12.1
+     * Numbers.format(val, "#.#"); --> 12.1
+     * Numbers.format(val, "0.00"); --> 12.10
+     * Numbers.format(val, "#.##"); --> 12.1
+     * Numbers.format(val, "0.000"); --> 12.105
+     * Numbers.format(val, "#.###"); --> 12.105
+     * Numbers.format(val, "0.0000"); --> 12.1050
+     * Numbers.format(val, "#.####"); --> 12.105
+     * Numbers.format(val, "0.00000"); --> 12.10500
+     * Numbers.format(val, "#.#####"); --> 12.105
+     * </code>
+     * </pre>
      *
      * @param x
      * @param decimalFormat
