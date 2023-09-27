@@ -4533,7 +4533,7 @@ public final class Numbers {
             return (long) x;
         } else if (scale <= 6) {
             long factor = pow(10, scale);
-            return Math.round(x * factor) / (double) factor;
+            return Math.round(x * factor) / (double) factor; //NOSONAR
         } else {
             return round(x, scale, RoundingMode.HALF_UP);
         }

@@ -2550,26 +2550,6 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
-     * Distinct and filter by occurrences.
-     *
-     * @param occurrencesFilter
-     * @return
-     * @see #groupBy(Function, Collector)
-     */
-    @IntermediateOp
-    @TerminalOpTriggered
-    public ExceptionalStream<T, E> distinct(final Throwables.BiPredicate<? super T, ? super Long, ? extends E> occurrencesFilter) {
-        assertNotClosed();
-
-        final Supplier<? extends Map<T, Long>> supplier = Suppliers.<T, Long> ofLinkedHashMap();
-
-        final Throwables.Predicate<Map.Entry<T, Long>, ? extends E> predicate = e -> occurrencesFilter.test(e.getKey(), e.getValue());
-
-        return newStream(groupBy(Fnn.identity(), Collectors.counting(), supplier).filter(predicate).map(Fnn.key()).iteratorEx(), sorted, cmp, closeHandlers);
-
-    }
-
-    /**
      * Distinct by the value mapped from <code>keyMapper</code> .
      *
      * @param <K>
@@ -2618,22 +2598,20 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     @TerminalOpTriggered
     @SuppressWarnings("rawtypes")
     public <K> ExceptionalStream<T, E> distinctBy(final Throwables.Function<? super T, K, ? extends E> keyMapper,
-            final Throwables.Predicate<? super Long, ? extends E> occurrencesFilter) {
+            final Throwables.Predicate<? super Map.Entry<Keyed<K, T>, Long>, ? extends E> occurrencesFilter) {
         assertNotClosed();
 
         final Supplier<? extends Map<Keyed<K, T>, Long>> supplier = Suppliers.<Keyed<K, T>, Long> ofLinkedHashMap();
 
         final Throwables.Function<T, Keyed<K, T>, E> keyedMapper = t -> Keyed.of(keyMapper.apply(t), t);
 
-        final Throwables.Predicate<Map.Entry<Keyed<K, T>, Long>, ? extends E> predicate = e -> occurrencesFilter.test(e.getValue());
-
-        return newStream(groupBy(keyedMapper, Collectors.counting(), supplier).filter(predicate)
+        return newStream(groupBy(keyedMapper, Collectors.counting(), supplier).filter(occurrencesFilter)
                 .map((Throwables.Function<Map.Entry<Keyed<K, T>, Long>, T, E>) (Throwables.Function) KK)
                 .iteratorEx(), sorted, cmp, closeHandlers);
     }
 
     /**
-     * Distinct and filter by occurrences.
+     * Distinct and limit by {@code keyMapper}
      *
      * @param <K>
      * @param keyMapper
@@ -2643,20 +2621,11 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @IntermediateOp
     @TerminalOpTriggered
-    @SuppressWarnings("rawtypes")
-    public <K> ExceptionalStream<T, E> distinctBy(final Throwables.Function<? super T, K, ? extends E> keyMapper,
-            final Throwables.BiPredicate<? super Keyed<K, T>, ? super Long, ? extends E> occurrencesFilter) {
-        assertNotClosed();
+    public <K> ExceptionalStream<T, E> distinctLimitBy(final Throwables.Function<? super T, K, ? extends E> keyMapper,
+            final Throwables.BiFunction<? super K, ? super List<T>, Integer, ? extends E> limit) {
 
-        final Supplier<? extends Map<Keyed<K, T>, Long>> supplier = Suppliers.<Keyed<K, T>, Long> ofLinkedHashMap();
-
-        final Throwables.Function<T, Keyed<K, T>, E> keyedMapper = t -> Keyed.of(keyMapper.apply(t), t);
-
-        final Throwables.Predicate<Map.Entry<Keyed<K, T>, Long>, ? extends E> predicate = e -> occurrencesFilter.test(e.getKey(), e.getValue());
-
-        return newStream(groupBy(keyedMapper, Collectors.counting(), supplier).filter(predicate)
-                .map((Throwables.Function<Map.Entry<Keyed<K, T>, Long>, T, E>) (Throwables.Function) KK)
-                .iteratorEx(), sorted, cmp, closeHandlers);
+        return groupBy(keyMapper) //
+                .flatmap(it -> subList(it.getValue(), 0, limit.apply(it.getKey(), it.getValue())));
     }
 
     /**
@@ -12951,6 +12920,10 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
     static <T, E extends Exception> ExceptionalIterator<T, E> iterate(final ExceptionalStream<? extends T, E> s) {
         return s == null ? ExceptionalIterator.EMPTY : (ExceptionalIterator<T, E>) s.iteratorEx();
+    }
+
+    static <T> List<T> subList(final List<T> list, final int fromIndex, final int toIndex) {
+        return list.subList(fromIndex, N.min(list.size(), toIndex));
     }
 
     /**
