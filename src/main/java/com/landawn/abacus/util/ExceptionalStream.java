@@ -2615,7 +2615,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      *
      * @param <K>
      * @param keyMapper
-     * @param occurrencesFilter
+     * @param limit
      * @return
      * @see #groupBy(Function, Collector)
      */
@@ -11581,12 +11581,28 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @Beta
     @IntermediateOp
-    public <TT, EE extends Exception> ExceptionalStream<TT, EE> __(Function<? super ExceptionalStream<T, E>, ExceptionalStream<TT, EE>> transfer) { //NOSONAR
+    public <TT, EE extends Exception> ExceptionalStream<TT, EE> transform(Function<? super ExceptionalStream<T, E>, ExceptionalStream<TT, EE>> transfer) { //NOSONAR
         assertNotClosed();
 
         checkArgNotNull(transfer, "transfer");
 
         return transfer.apply(this);
+    }
+
+    /**
+     *
+     *
+     * @param <TT>
+     * @param <EE>
+     * @param transfer
+     * @return
+     * @deprecated replaced by {@link #transform(Function)}
+     */
+    @Beta
+    @IntermediateOp
+    @Deprecated
+    public <TT, EE extends Exception> ExceptionalStream<TT, EE> __(Function<? super ExceptionalStream<T, E>, ExceptionalStream<TT, EE>> transfer) { //NOSONAR
+        return transform(transfer);
     }
 
     //    /**

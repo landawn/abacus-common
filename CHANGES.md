@@ -1,3 +1,8 @@
+### 3.7.10
+
+* Improvements and bug fix.
+
+
 ### 3.7.9
 
 * Improvements and bug fix.
