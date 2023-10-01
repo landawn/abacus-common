@@ -2837,15 +2837,21 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             }
         };
 
-        final Deque<Throwables.Runnable<? extends E>> newCloseHandlers = new ArrayDeque<>(N.size(closeHandlers) + 1);
+        final Deque<Throwables.Runnable<? extends E>> newCloseHandlers = mergeCloseHandler(iter);
 
-        newCloseHandlers.add(newCloseHandler(iter));
+        return newStream(iter, newCloseHandlers);
+    }
+
+    private Deque<Throwables.Runnable<? extends E>> mergeCloseHandler(final ExceptionalIterator<?, E> iter) {
+        final Deque<Throwables.Runnable<? extends E>> newCloseHandlers = new ArrayDeque<>(N.size(closeHandlers) + 1);
 
         if (N.notNullOrEmpty(closeHandlers)) {
             newCloseHandlers.addAll(closeHandlers);
         }
 
-        return newStream(iter, newCloseHandlers);
+        newCloseHandlers.add(newCloseHandler(iter));
+
+        return newCloseHandlers;
     }
 
     /**
@@ -2982,13 +2988,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             }
         };
 
-        final Deque<Throwables.Runnable<? extends E>> newCloseHandlers = new ArrayDeque<>(N.size(closeHandlers) + 1);
-
-        newCloseHandlers.add(newCloseHandler(iter));
-
-        if (N.notNullOrEmpty(closeHandlers)) {
-            newCloseHandlers.addAll(closeHandlers);
-        }
+        final Deque<Throwables.Runnable<? extends E>> newCloseHandlers = mergeCloseHandler(iter);
 
         return newStream(iter, newCloseHandlers);
     }
@@ -3051,11 +3051,11 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     //
     //        final Deque<Throwables.Runnable<? extends E>> newCloseHandlers = new ArrayDeque<>(N.size(closeHandlers) + 1);
     //
-    //        newCloseHandlers.add(newCloseHandler(iter));
-    //
     //        if (N.notNullOrEmpty(closeHandlers)) {
     //            newCloseHandlers.addAll(closeHandlers);
     //        }
+    //
+    //        newCloseHandlers.add(newCloseHandler(iter));
     //
     //        return newStream(iter, newCloseHandlers);
     //    }
@@ -3119,11 +3119,11 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     //
     //        final Deque<Throwables.Runnable<? extends E>> newCloseHandlers = new ArrayDeque<>(N.size(closeHandlers) + 1);
     //
-    //        newCloseHandlers.add(newCloseHandler(iter));
-    //
     //        if (N.notNullOrEmpty(closeHandlers)) {
     //            newCloseHandlers.addAll(closeHandlers);
     //        }
+    //
+    //        newCloseHandlers.add(newCloseHandler(iter));
     //
     //        return newStream(iter, newCloseHandlers);
     //    }
@@ -10594,7 +10594,510 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         }
     }
 
-    private static final Throwables.Function<Object, String, IOException> TO_LINE_OF_STRING = N::stringOf;
+    /**
+     *
+     * @param file
+     * @return
+     * @see #onEach(com.landawn.abacus.util.Throwables.Consumer)
+     * @see #onEachE(com.landawn.abacus.util.Throwables.Consumer)
+     */
+    @Beta
+    @IntermediateOp
+    public ExceptionalStream<T, E> saveEach(final File file) {
+        return saveEach(N::stringOf, file);
+    }
+
+    /**
+     *
+     * @param toLine
+     * @param file
+     * @return
+     * @see #onEach(com.landawn.abacus.util.Throwables.Consumer)
+     * @see #onEachE(com.landawn.abacus.util.Throwables.Consumer)
+     */
+    @Beta
+    @IntermediateOp
+    public ExceptionalStream<T, E> saveEach(final Throwables.Function<? super T, String, E> toLine, final File file) {
+        assertNotClosed();
+
+        final ExceptionalIterator<T, E> iter = new ExceptionalIterator<>() {
+            private final ExceptionalIterator<T, E> iter = iteratorEx();
+            private Writer writer = null;
+            private BufferedWriter bw = null;
+            private boolean initialized = false;
+
+            @Override
+            public boolean hasNext() throws E {
+                return iter.hasNext();
+            }
+
+            @Override
+            public T next() throws E {
+                final T next = iter.next();
+
+                if (initialized == false) {
+                    init();
+                }
+
+                try {
+                    bw.write(toLine.apply(next));
+                    bw.write(IOUtil.LINE_SEPARATOR);
+                } catch (IOException e) {
+                    throw N.toRuntimeException(e);
+                }
+
+                return next;
+            }
+
+            @Override
+            public void close() throws E {
+                if (writer != null) {
+                    try {
+                        Objectory.recycle(bw);
+                    } finally {
+                        IOUtil.close(writer);
+                    }
+                }
+            }
+
+            private void init() {
+                initialized = true;
+
+                writer = IOUtil.newFileWriter(file);
+                bw = Objectory.createBufferedWriter(writer);
+            }
+        };
+
+        return newStream(iter, sorted, cmp, closeHandlers).onClose(iter::close); //NOSONAR
+    }
+
+    /**
+     *
+     * @param toLine
+     * @param os
+     * @return
+     * @see #onEach(com.landawn.abacus.util.Throwables.Consumer)
+     * @see #onEachE(com.landawn.abacus.util.Throwables.Consumer)
+     */
+    @Beta
+    @IntermediateOp
+    public ExceptionalStream<T, E> saveEach(final Throwables.Function<? super T, String, E> toLine, final OutputStream os) {
+        assertNotClosed();
+
+        final ExceptionalIterator<T, E> iter = new ExceptionalIterator<>() {
+            private final ExceptionalIterator<T, E> iter = iteratorEx();
+            private BufferedWriter bw = null;
+            private boolean initialized = false;
+
+            @Override
+            public boolean hasNext() throws E {
+                return iter.hasNext();
+            }
+
+            @Override
+            public T next() throws E {
+                final T next = iter.next();
+
+                if (initialized == false) {
+                    init();
+                }
+
+                try {
+                    bw.write(toLine.apply(next));
+                    bw.write(IOUtil.LINE_SEPARATOR);
+                } catch (IOException e) {
+                    throw N.toRuntimeException(e);
+                }
+
+                return next;
+            }
+
+            @Override
+            public void close() {
+                Objectory.recycle(bw);
+            }
+
+            private void init() {
+                initialized = true;
+
+                bw = Objectory.createBufferedWriter(os);
+            }
+        };
+
+        return newStream(iter, sorted, cmp, closeHandlers).onClose(iter::close); //NOSONAR
+    }
+
+    /**
+     *
+     * @param toLine
+     * @param writer
+     * @return
+     * @see #onEach(com.landawn.abacus.util.Throwables.Consumer)
+     * @see #onEachE(com.landawn.abacus.util.Throwables.Consumer)
+     */
+    @Beta
+    @IntermediateOp
+    public ExceptionalStream<T, E> saveEach(final Throwables.Function<? super T, String, E> toLine, Writer writer) {
+        assertNotClosed();
+
+        final ExceptionalIterator<T, E> iter = new ExceptionalIterator<>() {
+            private final ExceptionalIterator<T, E> iter = iteratorEx();
+            private Writer bw = null;
+            private boolean isBufferedWriter = false;
+            private boolean initialized = false;
+
+            @Override
+            public boolean hasNext() throws E {
+                return iter.hasNext();
+            }
+
+            @Override
+            public T next() throws E {
+                final T next = iter.next();
+
+                if (initialized == false) {
+                    init();
+                }
+
+                try {
+                    bw.write(toLine.apply(next));
+                    bw.write(IOUtil.LINE_SEPARATOR);
+                } catch (IOException e) {
+                    throw N.toRuntimeException(e);
+                }
+
+                return next;
+            }
+
+            @Override
+            public void close() {
+                if (isBufferedWriter == false && bw != null) {
+                    Objectory.recycle((BufferedWriter) bw);
+                }
+            }
+
+            private void init() {
+                initialized = true;
+
+                isBufferedWriter = writer instanceof BufferedWriter || writer instanceof java.io.BufferedWriter;
+                bw = isBufferedWriter ? writer : Objectory.createBufferedWriter(writer);
+            }
+        };
+
+        return newStream(iter, sorted, cmp, closeHandlers).onClose(iter::close); //NOSONAR
+    }
+
+    /**
+     *
+     * @param writeLine
+     * @param file
+     * @return
+     * @see #onEach(com.landawn.abacus.util.Throwables.Consumer)
+     * @see #onEachE(com.landawn.abacus.util.Throwables.Consumer)
+     */
+    @Beta
+    @IntermediateOp
+    public ExceptionalStream<T, E> saveEach(final Throwables.BiConsumer<? super T, Writer, IOException> writeLine, final File file) {
+        assertNotClosed();
+
+        final ExceptionalIterator<T, E> iter = new ExceptionalIterator<>() {
+            private final ExceptionalIterator<T, E> iter = iteratorEx();
+            private Writer writer = null;
+            private BufferedWriter bw = null;
+            private boolean initialized = false;
+
+            @Override
+            public boolean hasNext() throws E {
+                return iter.hasNext();
+            }
+
+            @Override
+            public T next() throws E {
+                final T next = iter.next();
+
+                if (initialized == false) {
+                    init();
+                }
+
+                try {
+                    writeLine.accept(next, bw);
+                    bw.write(IOUtil.LINE_SEPARATOR);
+                } catch (IOException e) {
+                    throw N.toRuntimeException(e);
+                }
+
+                return next;
+            }
+
+            @Override
+            public void close() {
+                if (writer != null) {
+                    try {
+                        Objectory.recycle(bw);
+                    } finally {
+                        IOUtil.close(writer);
+                    }
+                }
+            }
+
+            private void init() {
+                initialized = true;
+
+                writer = IOUtil.newFileWriter(file);
+                bw = Objectory.createBufferedWriter(writer);
+            }
+        };
+
+        return newStream(iter, sorted, cmp, closeHandlers).onClose(iter::close); //NOSONAR
+    }
+
+    /**
+     *
+     * @param writeLine
+     * @param writer
+     * @return
+     * @see #onEach(com.landawn.abacus.util.Throwables.Consumer)
+     * @see #onEachE(com.landawn.abacus.util.Throwables.Consumer)
+     */
+    @Beta
+    @IntermediateOp
+    public ExceptionalStream<T, E> saveEach(final Throwables.BiConsumer<? super T, Writer, IOException> writeLine, final Writer writer) {
+        assertNotClosed();
+
+        final ExceptionalIterator<T, E> iter = new ExceptionalIterator<>() {
+            private final ExceptionalIterator<T, E> iter = iteratorEx();
+            private Writer bw = null;
+            private boolean isBufferedWriter = false;
+            private boolean initialized = false;
+
+            @Override
+            public boolean hasNext() throws E {
+                return iter.hasNext();
+            }
+
+            @Override
+            public T next() throws E {
+                final T next = iter.next();
+
+                if (initialized == false) {
+                    init();
+                }
+
+                try {
+                    writeLine.accept(next, bw);
+                    bw.write(IOUtil.LINE_SEPARATOR);
+                } catch (IOException e) {
+                    throw N.toRuntimeException(e);
+                }
+
+                return next;
+            }
+
+            @Override
+            public void close() {
+                if (isBufferedWriter == false && bw != null) {
+                    Objectory.recycle((BufferedWriter) bw);
+                }
+            }
+
+            private void init() {
+                initialized = true;
+
+                isBufferedWriter = writer instanceof BufferedWriter || writer instanceof java.io.BufferedWriter;
+                bw = isBufferedWriter ? writer : Objectory.createBufferedWriter(writer);
+            }
+        };
+
+        return newStream(iter, sorted, cmp, closeHandlers).onClose(iter::close); //NOSONAR
+    }
+
+    /**
+     * To support batch call, please use {@code onEach} or {@code onEachE}.
+     *
+     * @param stmt
+     * @param stmtSetter
+     * @return
+     * @see #onEach(com.landawn.abacus.util.Throwables.Consumer)
+     * @see #onEachE(com.landawn.abacus.util.Throwables.Consumer)
+     */
+    @Beta
+    @IntermediateOp
+    public ExceptionalStream<T, E> saveEach(final PreparedStatement stmt,
+            final Throwables.BiConsumer<? super T, ? super PreparedStatement, SQLException> stmtSetter) {
+        assertNotClosed();
+
+        final ExceptionalIterator<T, E> iter = new ExceptionalIterator<>() {
+            private final ExceptionalIterator<T, E> iter = iteratorEx();
+
+            @Override
+            public boolean hasNext() throws E {
+                return iter.hasNext();
+            }
+
+            @Override
+            public T next() throws E {
+                final T next = iter.next();
+
+                try {
+                    stmtSetter.accept(next, stmt);
+                    stmt.execute();
+                } catch (SQLException e) {
+                    throw N.toRuntimeException(e);
+                }
+
+                return next;
+            }
+
+        };
+
+        return newStream(iter, sorted, cmp, closeHandlers).onClose(iter::close); //NOSONAR
+    }
+
+    /**
+     * To support batch call, please use {@code onEach} or {@code onEachE}.
+     *
+     * @param conn
+     * @param insertSQL
+     * @param stmtSetter
+     * @return
+     * @see #onEach(com.landawn.abacus.util.Throwables.Consumer)
+     * @see #onEachE(com.landawn.abacus.util.Throwables.Consumer)
+     */
+    @Beta
+    @IntermediateOp
+    public ExceptionalStream<T, E> saveEach(final Connection conn, final String insertSQL,
+            final Throwables.BiConsumer<? super T, ? super PreparedStatement, SQLException> stmtSetter) {
+        assertNotClosed();
+
+        final ExceptionalIterator<T, E> iter = new ExceptionalIterator<>() {
+            private final ExceptionalIterator<T, E> iter = iteratorEx();
+            private PreparedStatement stmt = null;
+            private boolean initialized = false;
+
+            @Override
+            public boolean hasNext() throws E {
+                return iter.hasNext();
+            }
+
+            @Override
+            public T next() throws E {
+                final T next = iter.next();
+
+                if (initialized == false) {
+                    init();
+                }
+
+                try {
+                    stmtSetter.accept(next, stmt);
+                    stmt.execute();
+                } catch (SQLException e) {
+                    throw N.toRuntimeException(e);
+                }
+
+                return next;
+            }
+
+            @Override
+            public void close() {
+                if (stmt != null) {
+                    DataSourceUtil.closeQuietly(stmt);
+                }
+            }
+
+            private void init() {
+                initialized = true;
+
+                try {
+                    stmt = conn.prepareStatement(insertSQL);
+                } catch (SQLException e) {
+                    throw N.toRuntimeException(e);
+                }
+            }
+        };
+
+        return newStream(iter, sorted, cmp, closeHandlers).onClose(iter::close); //NOSONAR
+    }
+
+    /**
+     * To support batch/parallel call, please use {@code onEach} or {@code onEachE}.
+     *
+     * @param ds
+     * @param insertSQL
+     * @param stmtSetter
+     * @return
+     * @see #onEach(com.landawn.abacus.util.Throwables.Consumer)
+     * @see #onEachE(com.landawn.abacus.util.Throwables.Consumer)
+     * @see #spsOnEach(com.landawn.abacus.util.Throwables.Consumer)
+     * @see #spsOnEachE(com.landawn.abacus.util.Throwables.Consumer)
+     */
+    @Beta
+    @IntermediateOp
+    public ExceptionalStream<T, E> saveEach(final javax.sql.DataSource ds, final String insertSQL,
+            final Throwables.BiConsumer<? super T, ? super PreparedStatement, SQLException> stmtSetter) {
+        assertNotClosed();
+
+        final ExceptionalIterator<T, E> iter = new ExceptionalIterator<>() {
+            private final ExceptionalIterator<T, E> iter = iteratorEx();
+            private Connection conn = null;
+            private PreparedStatement stmt = null;
+            private boolean initialized = false;
+
+            @Override
+            public boolean hasNext() throws E {
+                return iter.hasNext();
+            }
+
+            @Override
+            public T next() throws E {
+                final T next = iter.next();
+
+                if (initialized == false) {
+                    init();
+                }
+
+                try {
+                    stmtSetter.accept(next, stmt);
+                    stmt.execute();
+                } catch (SQLException e) {
+                    throw N.toRuntimeException(e);
+                }
+
+                return next;
+            }
+
+            @Override
+            public void close() {
+                try {
+                    if (stmt != null) {
+                        DataSourceUtil.closeQuietly(stmt);
+                    }
+                } finally {
+                    DataSourceUtil.releaseConnection(conn, ds);
+                }
+            }
+
+            private void init() {
+                initialized = true;
+
+                try {
+                    conn = ds.getConnection();
+                    stmt = conn.prepareStatement(insertSQL);
+                } catch (SQLException e) {
+                    try {
+                        if (stmt != null) {
+                            DataSourceUtil.closeQuietly(stmt);
+                        }
+                    } finally {
+                        DataSourceUtil.releaseConnection(conn, ds);
+                    }
+
+                    throw N.toRuntimeException(e);
+                }
+            }
+        };
+
+        return newStream(iter, sorted, cmp, closeHandlers).onClose(iter::close); //NOSONAR
+    }
 
     /**
      *
@@ -10606,7 +11109,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @TerminalOp
     public long persist(final File file) throws E, IOException {
-        return persist(TO_LINE_OF_STRING, file);
+        return persist(N::stringOf, file);
     }
 
     /**
@@ -10621,16 +11124,10 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @TerminalOp
     public long persist(final String header, final String tail, final File file) throws E, IOException {
-        return persist(TO_LINE_OF_STRING, header, tail, file);
+        return persist(N::stringOf, header, tail, file);
     }
 
     /**
-     * toCSV:
-     * <pre>
-     * final JSONSerializationConfig jsc = JSC.create().setBracketRootValue(false);
-     * final Throwables.Function<? super T, String, IOException> toLine = it -> N.toJSON(it, jsc);
-     * stream.persist(toLine, header, outputFile);
-     * </pre>
      *
      * @param toLine
      * @param file
@@ -10639,12 +11136,11 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @throws IOException
      */
     @TerminalOp
-    public long persist(final Throwables.Function<? super T, String, IOException> toLine, final File file) throws E, IOException {
+    public long persist(Throwables.Function<? super T, String, E> toLine, final File file) throws E, IOException {
         return persist(toLine, null, null, file);
     }
 
     /**
-     *
      *
      * @param toLine
      * @param header
@@ -10655,8 +11151,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @throws IOException
      */
     @TerminalOp
-    public long persist(final Throwables.Function<? super T, String, IOException> toLine, final String header, final String tail, final File file)
-            throws E, IOException {
+    public long persist(Throwables.Function<? super T, String, E> toLine, final String header, final String tail, final File file) throws E, IOException {
         assertNotClosed();
 
         final Writer writer = IOUtil.newFileWriter(file);
@@ -10678,7 +11173,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @throws IOException
      */
     @TerminalOp
-    public long persist(final Throwables.Function<? super T, String, IOException> toLine, final OutputStream os) throws E, IOException {
+    public long persist(Throwables.Function<? super T, String, E> toLine, final OutputStream os) throws E, IOException {
         assertNotClosed();
 
         final BufferedWriter bw = Objectory.createBufferedWriter(os);
@@ -10691,12 +11186,6 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
-     * toCSV:
-     * <pre>
-     * final JSONSerializationConfig jsc = JSC.create().setBracketRootValue(false);
-     * final Throwables.Function<? super T, String, IOException> toLine = it -> N.toJSON(it, jsc);
-     * stream.persist(toLine, header, outputFile);
-     * </pre>
      *
      * @param toLine
      * @param writer
@@ -10705,14 +11194,13 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @throws IOException
      */
     @TerminalOp
-    public long persist(Throwables.Function<? super T, String, IOException> toLine, Writer writer) throws E, IOException {
+    public long persist(Throwables.Function<? super T, String, E> toLine, Writer writer) throws E, IOException {
         assertNotClosed();
 
         return persist(toLine, null, null, writer);
     }
 
     /**
-     *
      *
      * @param toLine
      * @param header
@@ -10723,7 +11211,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @throws IOException
      */
     @TerminalOp
-    public long persist(Throwables.Function<? super T, String, IOException> toLine, String header, String tail, Writer writer) throws E, IOException {
+    public long persist(Throwables.Function<? super T, String, E> toLine, String header, String tail, Writer writer) throws E, IOException {
         assertNotClosed();
 
         try {
@@ -10874,34 +11362,6 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     /**
      *
      *
-     * @param conn
-     * @param insertSQL
-     * @param batchSize
-     * @param batchIntervalInMillis
-     * @param stmtSetter
-     * @return
-     * @throws E
-     * @throws SQLException
-     */
-    @TerminalOp
-    public long persist(final Connection conn, final String insertSQL, final int batchSize, final long batchIntervalInMillis,
-            final Throwables.BiConsumer<? super T, ? super PreparedStatement, SQLException> stmtSetter) throws E, SQLException {
-        assertNotClosed();
-
-        PreparedStatement stmt = null;
-
-        try {
-            stmt = conn.prepareStatement(insertSQL);
-
-            return persist(stmt, batchSize, batchIntervalInMillis, stmtSetter);
-        } finally {
-            IOUtil.closeQuietly(stmt);
-        }
-    }
-
-    /**
-     *
-     *
      * @param stmt
      * @param batchSize
      * @param batchIntervalInMillis
@@ -10927,7 +11387,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                 stmt.addBatch();
 
                 if ((++cnt % batchSize) == 0) {
-                    executeBatch(stmt);
+                    DataSourceUtil.executeBatch(stmt);
 
                     if (batchIntervalInMillis > 0) {
                         N.sleep(batchIntervalInMillis);
@@ -10936,7 +11396,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             }
 
             if ((cnt % batchSize) > 0) {
-                executeBatch(stmt);
+                DataSourceUtil.executeBatch(stmt);
             }
 
             return cnt;
@@ -10945,14 +11405,63 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         }
     }
 
-    private int[] executeBatch(final PreparedStatement stmt) throws SQLException {
+    /**
+     *
+     *
+     * @param conn
+     * @param insertSQL
+     * @param batchSize
+     * @param batchIntervalInMillis
+     * @param stmtSetter
+     * @return
+     * @throws E
+     * @throws SQLException
+     */
+    @TerminalOp
+    public long persist(final Connection conn, final String insertSQL, final int batchSize, final long batchIntervalInMillis,
+            final Throwables.BiConsumer<? super T, ? super PreparedStatement, SQLException> stmtSetter) throws E, SQLException {
+        assertNotClosed();
+
+        PreparedStatement stmt = null;
+
         try {
-            return stmt.executeBatch();
+            stmt = conn.prepareStatement(insertSQL);
+
+            return persist(stmt, batchSize, batchIntervalInMillis, stmtSetter);
+        } finally {
+            DataSourceUtil.closeQuietly(stmt);
+        }
+    }
+
+    /**
+     *
+     * @param ds
+     * @param insertSQL
+     * @param batchSize
+     * @param batchIntervalInMillis
+     * @param stmtSetter
+     * @return
+     * @throws E
+     * @throws SQLException
+     */
+    @TerminalOp
+    public long persist(final javax.sql.DataSource ds, final String insertSQL, final int batchSize, final long batchIntervalInMillis,
+            final Throwables.BiConsumer<? super T, ? super PreparedStatement, SQLException> stmtSetter) throws E, SQLException {
+        assertNotClosed();
+
+        Connection conn = null;
+        PreparedStatement stmt = null;
+
+        try {
+            conn = ds.getConnection();
+            stmt = conn.prepareStatement(insertSQL);
+
+            return persist(stmt, batchSize, batchIntervalInMillis, stmtSetter);
         } finally {
             try {
-                stmt.clearBatch();
-            } catch (SQLException e) {
-                logger.error("Failed to clear batch parameters after executeBatch", e);
+                DataSourceUtil.closeQuietly(stmt);
+            } finally {
+                DataSourceUtil.releaseConnection(conn, ds);
             }
         }
     }
@@ -12408,11 +12917,11 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
         final Deque<Throwables.Runnable<? extends Exception>> newCloseHandlers = new ArrayDeque<>(N.size(closeHandlers) + 1);
 
-        newCloseHandlers.add(newCloseHandler(iter));
-
         if (N.notNullOrEmpty(closeHandlers)) {
             newCloseHandlers.addAll(closeHandlers);
         }
+
+        newCloseHandlers.add(newCloseHandler(iter));
 
         return newStream(iter, newCloseHandlers);
     }
@@ -12565,6 +13074,10 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
         final Deque<Throwables.Runnable<? extends E>> newCloseHandlers = new ArrayDeque<>(N.size(closeHandlers) + 1);
 
+        if (N.notNullOrEmpty(this.closeHandlers)) {
+            newCloseHandlers.addAll(this.closeHandlers);
+        }
+
         newCloseHandlers.add(new Throwables.Runnable<E>() {
             private volatile boolean isClosed = false;
 
@@ -12578,10 +13091,6 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                 closeHandler.run();
             }
         });
-
-        if (N.notNullOrEmpty(this.closeHandlers)) {
-            newCloseHandlers.addAll(this.closeHandlers);
-        }
 
         return newStream(elements, newCloseHandlers);
     }

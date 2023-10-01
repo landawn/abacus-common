@@ -15,6 +15,7 @@
 package com.landawn.abacus.type;
 
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
@@ -38,9 +39,9 @@ public class URLType extends AbstractType<URL> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public Class<URL> clazz() {
@@ -69,7 +70,7 @@ public class URLType extends AbstractType<URL> {
         }
 
         try {
-            return new URL(str);
+            return URI.create(str).toURL();
         } catch (MalformedURLException e) {
             throw ExceptionUtil.toRuntimeException(e);
         }

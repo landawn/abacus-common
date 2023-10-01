@@ -24,6 +24,7 @@ import java.io.Reader;
 import java.io.Writer;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.List;
@@ -118,7 +119,7 @@ public final class HttpClient {
         _asyncExecutor = executor == null ? HttpUtil.DEFAULT_ASYNC_EXECUTOR : new AsyncExecutor(executor);
 
         try {
-            this._netURL = new URL(url);
+            this._netURL = URI.create(url).toURL();
         } catch (MalformedURLException e) {
             throw ExceptionUtil.toRuntimeException(e);
         }
@@ -244,9 +245,9 @@ public final class HttpClient {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public String url() {
         return _url;
@@ -341,9 +342,9 @@ public final class HttpClient {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public ContinuableFuture<String> asyncGet() {
         return asyncGet(String.class);
@@ -510,9 +511,9 @@ public final class HttpClient {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public ContinuableFuture<String> asyncDelete() {
         return asyncDelete(String.class);
@@ -1221,7 +1222,7 @@ public final class HttpClient {
         try {
             synchronized (_netURL) {
                 if (queryParameters != null && (httpMethod.equals(HttpMethod.GET) || httpMethod.equals(HttpMethod.DELETE))) {
-                    connection = (HttpURLConnection) new URL(URLEncodedUtil.encode(_url, queryParameters)).openConnection();
+                    connection = (HttpURLConnection) URI.create(URLEncodedUtil.encode(_url, queryParameters)).toURL().openConnection();
                 } else {
                     connection = (HttpURLConnection) _netURL.openConnection();
                 }

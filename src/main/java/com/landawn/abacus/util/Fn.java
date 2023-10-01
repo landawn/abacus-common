@@ -5889,15 +5889,11 @@ public final class Fn extends Comparators {
                 throw new IllegalArgumentException("Can't register Supplier with built-in class: " + ClassUtil.getCanonicalClassName(targetClass));
             }
 
-            synchronized (collectionSupplierPool) {
-                if (collectionSupplierPool.containsKey(targetClass)) {
-                    return false;
-                }
-
-                collectionSupplierPool.put(targetClass, Fn.from(supplier));
-
-                return true;
+            if (collectionSupplierPool.containsKey(targetClass)) {
+                return false;
             }
+
+            return collectionSupplierPool.put(targetClass, Fn.from(supplier)) == null;
         }
 
         /**
@@ -5917,15 +5913,11 @@ public final class Fn extends Comparators {
                 throw new IllegalArgumentException("Can't register Supplier with built-in class: " + ClassUtil.getCanonicalClassName(targetClass));
             }
 
-            synchronized (mapSupplierPool) {
-                if (mapSupplierPool.containsKey(targetClass)) {
-                    return false;
-                }
-
-                mapSupplierPool.put(targetClass, Fn.from(supplier));
-
-                return true;
+            if (mapSupplierPool.containsKey(targetClass)) {
+                return false;
             }
+
+            return mapSupplierPool.put(targetClass, Fn.from(supplier)) == null;
         }
 
         /**
@@ -6867,15 +6859,11 @@ public final class Fn extends Comparators {
                 throw new IllegalArgumentException("Can't register IntFunction with built-in class: " + ClassUtil.getCanonicalClassName(targetClass));
             }
 
-            synchronized (collectionCreatorPool) {
-                if (collectionCreatorPool.containsKey(targetClass)) {
-                    return false;
-                }
-
-                collectionCreatorPool.put(targetClass, Fn.from(creator));
-
-                return true;
+            if (collectionCreatorPool.containsKey(targetClass)) {
+                return false;
             }
+
+            return collectionCreatorPool.put(targetClass, Fn.from(creator)) == null;
         }
 
         /**
@@ -6895,15 +6883,12 @@ public final class Fn extends Comparators {
                 throw new IllegalArgumentException("Can't register IntFunction with built-in class: " + ClassUtil.getCanonicalClassName(targetClass));
             }
 
-            synchronized (mapCreatorPool) {
-                if (mapCreatorPool.containsKey(targetClass)) {
-                    return false;
-                }
-
-                mapCreatorPool.put(targetClass, Fn.from(creator));
-
-                return true;
+            if (mapCreatorPool.containsKey(targetClass)) {
+                return false;
             }
+
+            return mapCreatorPool.put(targetClass, Fn.from(creator)) == null;
+
         }
 
         /**
