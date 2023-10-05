@@ -25919,7 +25919,19 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
     public static String formatJSON(final String json) {
-        return formatJSON(Object.class, json);
+        return formatJSON(Object.class, json, Utils.jscPrettyFormat);
+    }
+
+    /**
+     *
+     * @param json
+     * @param config
+     * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
+     */
+    public static String formatJSON(final String json, final JSONSerializationConfig config) {
+        return formatJSON(Object.class, json, config);
     }
 
     /**
@@ -25938,12 +25950,44 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param type
      * @param json
+     * @param config
+     * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
+     */
+    public static String formatJSON(final Class<?> type, final String json, final JSONSerializationConfig config) {
+        final JSONSerializationConfig configToUse = config == null ? Utils.jscPrettyFormat
+                : (config.prettyFormat() == false ? config.copy().prettyFormat(true) : config);
+
+        return toJSON(fromJSON(type, json), configToUse);
+    }
+
+    /**
+     *
+     * @param type
+     * @param json
      * @return
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
     public static String formatJSON(final Type<?> type, final String json) {
         return toJSON(fromJSON(type, json), Utils.jscPrettyFormat);
+    }
+
+    /**
+     *
+     * @param type
+     * @param json
+     * @param config
+     * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
+     */
+    public static String formatJSON(final Type<?> type, final String json, final JSONSerializationConfig config) {
+        final JSONSerializationConfig configToUse = config == null ? Utils.jscPrettyFormat
+                : (config.prettyFormat() == false ? config.copy().prettyFormat(true) : config);
+
+        return toJSON(fromJSON(type, json), configToUse);
     }
 
     /**
@@ -26030,17 +26074,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static void toXML(final Writer writer, final Object obj, final XMLSerializationConfig config) {
         Utils.xmlParser.serialize(writer, obj, config);
-    }
-
-    /**
-     *
-     * @param xml
-     * @return
-     * @see com.landawn.abacus.util.TypeReference
-     * @see com.landawn.abacus.util.TypeReference.TypeToken
-     */
-    public static String formatXML(final String xml) {
-        return formatXML(MapEntity.class, xml);
     }
 
     /**
@@ -26294,6 +26327,29 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     * @param xml
+     * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
+     */
+    public static String formatXML(final String xml) {
+        return formatXML(MapEntity.class, xml);
+    }
+
+    /**
+     *
+     * @param xml
+     * @param config
+     * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
+     */
+    public static String formatXML(final String xml, final XMLSerializationConfig config) {
+        return formatXML(MapEntity.class, xml, config);
+    }
+
+    /**
+     *
      * @param type
      * @param xml
      * @return
@@ -26308,12 +26364,44 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param type
      * @param xml
+     * @param config
+     * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
+     */
+    public static String formatXML(final Class<?> type, final String xml, final XMLSerializationConfig config) {
+        final XMLSerializationConfig configToUse = config == null ? Utils.xscPrettyFormat
+                : (config.prettyFormat() == false ? config.copy().prettyFormat(true) : config);
+
+        return toXML(fromXML(type, xml), configToUse);
+    }
+
+    /**
+     *
+     * @param type
+     * @param xml
      * @return
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
     public static String formatXML(final Type<?> type, final String xml) {
         return toXML(fromXML(type, xml), Utils.xscPrettyFormat);
+    }
+
+    /**
+     *
+     * @param type
+     * @param xml
+     * @param config
+     * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
+     */
+    public static String formatXML(final Type<?> type, final String xml, final XMLSerializationConfig config) {
+        final XMLSerializationConfig configToUse = config == null ? Utils.xscPrettyFormat
+                : (config.prettyFormat() == false ? config.copy().prettyFormat(true) : config);
+
+        return toXML(fromXML(type, xml), configToUse);
     }
 
     /**

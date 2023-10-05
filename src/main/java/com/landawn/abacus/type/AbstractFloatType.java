@@ -111,7 +111,7 @@ public abstract class AbstractFloatType extends NumberType<Number> {
         if (x == null) {
             stmt.setNull(columnIndex, Types.FLOAT);
         } else {
-            stmt.setFloat(columnIndex, x.floatValue());
+            stmt.setFloat(columnIndex, Numbers.toFloat(x));
         }
     }
 
@@ -127,7 +127,7 @@ public abstract class AbstractFloatType extends NumberType<Number> {
         if (x == null) {
             stmt.setNull(parameterName, Types.FLOAT);
         } else {
-            stmt.setFloat(parameterName, x.floatValue());
+            stmt.setFloat(parameterName, Numbers.toFloat(x));
         }
     }
 
@@ -142,7 +142,7 @@ public abstract class AbstractFloatType extends NumberType<Number> {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
-            IOUtil.write(writer, x.floatValue());
+            IOUtil.write(writer, Numbers.toFloat(x));
         }
     }
 
@@ -160,7 +160,7 @@ public abstract class AbstractFloatType extends NumberType<Number> {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
-            IOUtil.write(writer, x.floatValue());
+            IOUtil.write(writer, Numbers.toFloat(x));
         }
     }
 }

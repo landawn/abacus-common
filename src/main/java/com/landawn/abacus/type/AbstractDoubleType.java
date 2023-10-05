@@ -111,7 +111,7 @@ public abstract class AbstractDoubleType extends NumberType<Number> {
         if (x == null) {
             stmt.setNull(columnIndex, Types.DOUBLE);
         } else {
-            stmt.setDouble(columnIndex, x.doubleValue());
+            stmt.setDouble(columnIndex, Numbers.toDouble(x));
         }
     }
 
@@ -127,7 +127,7 @@ public abstract class AbstractDoubleType extends NumberType<Number> {
         if (x == null) {
             stmt.setNull(parameterName, Types.DOUBLE);
         } else {
-            stmt.setDouble(parameterName, x.doubleValue());
+            stmt.setDouble(parameterName, Numbers.toDouble(x));
         }
     }
 
@@ -142,7 +142,7 @@ public abstract class AbstractDoubleType extends NumberType<Number> {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
-            IOUtil.write(writer, x.doubleValue());
+            IOUtil.write(writer, Numbers.toDouble(x));
         }
     }
 
@@ -160,7 +160,7 @@ public abstract class AbstractDoubleType extends NumberType<Number> {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
-            writer.write(x.doubleValue());
+            writer.write(Numbers.toDouble(x));
         }
     }
 }

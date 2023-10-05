@@ -1,3 +1,8 @@
+### 3.7.12
+
+* Improvements and bug fix.
+
+
 ### 3.7.11
 
 * Add `Stream.saveEach`.

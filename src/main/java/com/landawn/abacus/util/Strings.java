@@ -5815,6 +5815,75 @@ public abstract class Strings {
      * @return
      */
     @SafeVarargs
+    public static boolean containsAll(final String str, final char... chs) {
+        if (N.isNullOrEmpty(chs)) {
+            return true;
+        } else if (N.isNullOrEmpty(str)) {
+            return false;
+        }
+
+        for (char ch : chs) {
+            if (str.indexOf(ch) < 0) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     *
+     * @param str
+     * @param searchStrs
+     * @return
+     */
+    @SafeVarargs
+    public static boolean containsAll(final String str, final String... searchStrs) {
+        if (N.isNullOrEmpty(searchStrs)) {
+            return true;
+        } else if (N.isNullOrEmpty(str)) {
+            return false;
+        }
+
+        for (String searchStr : searchStrs) {
+            if (!Strings.contains(str, searchStr)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     *
+     * @param str
+     * @param searchStrs
+     * @return
+     */
+    @SafeVarargs
+    public static boolean containsAllIgnoreCase(final String str, final String... searchStrs) {
+        if (N.isNullOrEmpty(searchStrs)) {
+            return true;
+        } else if (N.isNullOrEmpty(str)) {
+            return false;
+        }
+
+        for (String searchStr : searchStrs) {
+            if (!Strings.containsIgnoreCase(str, searchStr)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     *
+     * @param str
+     * @param chs
+     * @return
+     */
+    @SafeVarargs
     public static boolean containsOnly(final String str, final char... chs) {
         if (N.isNullOrEmpty(str) || N.isNullOrEmpty(chs)) {
             return false;
@@ -6529,7 +6598,7 @@ public abstract class Strings {
     }
 
     /**
-     * Returns {@code null} if {@code inclusiveBeginIndex < 0},
+     * Returns {@code null} if {@code str} is n{@code null} or {@code inclusiveBeginIndex < 0},
      * otherwise the {@code substring} with String value: {@code str.substring(inclusiveBeginIndex)} is returned.
      *
      * @param str
@@ -6546,7 +6615,7 @@ public abstract class Strings {
     }
 
     /**
-     * Returns {@code null} if {@code N.isNullOrEmpty(str) || str.indexOf(delimiterOfInclusiveBeginIndex) < 0},
+     * Returns {@code null} if {@code str} is n{@code null} or {@code N.isNullOrEmpty(str) || str.indexOf(delimiterOfInclusiveBeginIndex) < 0},
      * otherwise the {@code substring} with String value: {@code str.substring(str.indexOf(delimiterOfInclusiveBeginIndex))} is returned.
      *
      * @param str
@@ -6563,7 +6632,7 @@ public abstract class Strings {
     }
 
     /**
-     * Returns {@code null} if {@code N.isNullOrEmpty(str) || str.indexOf(delimiterOfInclusiveBeginIndex) < 0},
+     * Returns {@code null} if {@code str} is n{@code null} or str.indexOf(delimiterOfInclusiveBeginIndex) < 0,
      * otherwise the {@code substring} with String value: {@code str.substring(str.indexOf(delimiterOfInclusiveBeginIndex))} is returned.
      *
      * @param str
@@ -6580,7 +6649,7 @@ public abstract class Strings {
     }
 
     /**
-     * Returns {@code null} if {@code inclusiveBeginIndex < 0 ||exclusiveEndIndex <= 0 || inclusiveBeginIndex > exclusiveEndIndex},
+     * Returns {@code null} if {@code str} is n{@code null} or {@code inclusiveBeginIndex < 0 ||exclusiveEndIndex <= 0 || inclusiveBeginIndex > exclusiveEndIndex},
      * otherwise the {@code substring} with String value: {@code str.substring(exclusiveBeginIndex, exclusiveEndIndex)} is returned.
      *
      * @param str
