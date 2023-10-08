@@ -41,6 +41,7 @@ import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalChar;
+import com.landawn.abacus.util.stream.Stream;
 
 /**
  * <p>
@@ -186,7 +187,7 @@ public abstract class Strings {
      * @return
      */
     public static boolean isValidJavaIdentifier(String str) {
-        if (N.isNullOrEmpty(str)) {
+        if (str == null || str.length() == 0) {
             return false;
         }
 
@@ -1482,7 +1483,7 @@ public abstract class Strings {
      * @return
      */
     public static String toLowerCase(final String str) {
-        if (N.isNullOrEmpty(str)) {
+        if (str == null || str.length() == 0) {
             return str;
         }
 
@@ -1514,7 +1515,7 @@ public abstract class Strings {
      * @since 2.5
      */
     public static String toLowerCase(final String str, final Locale locale) {
-        if (N.isNullOrEmpty(str)) {
+        if (str == null || str.length() == 0) {
             return str;
         }
 
@@ -1528,7 +1529,7 @@ public abstract class Strings {
      * @return
      */
     public static String toLowerCaseWithUnderscore(final String str) {
-        if (N.isNullOrEmpty(str)) {
+        if (str == null || str.length() == 0) {
             return str;
         }
 
@@ -1604,7 +1605,7 @@ public abstract class Strings {
      * @return
      */
     public static String toUpperCase(final String str) {
-        if (N.isNullOrEmpty(str)) {
+        if (str == null || str.length() == 0) {
             return str;
         }
 
@@ -1636,7 +1637,7 @@ public abstract class Strings {
      * @since 2.5
      */
     public static String toUpperCase(final String str, final Locale locale) {
-        if (N.isNullOrEmpty(str)) {
+        if (str == null || str.length() == 0) {
             return str;
         }
 
@@ -1650,7 +1651,7 @@ public abstract class Strings {
      * @return
      */
     public static String toUpperCaseWithUnderscore(final String str) {
-        if (N.isNullOrEmpty(str)) {
+        if (str == null || str.length() == 0) {
             return str;
         }
 
@@ -1693,7 +1694,7 @@ public abstract class Strings {
      * @return
      */
     public static String toCamelCase(final String str) {
-        if (N.isNullOrEmpty(str)) {
+        if (str == null || str.length() == 0) {
             return str;
         }
 
@@ -1778,7 +1779,7 @@ public abstract class Strings {
      * @since 3.6
      */
     public static int[] toCodePoints(final CharSequence str) {
-        if (N.isNullOrEmpty(str)) {
+        if (str == null || str.length() == 0) {
             return N.EMPTY_INT_ARRAY;
         }
 
@@ -1840,7 +1841,7 @@ public abstract class Strings {
      */
     @SuppressWarnings("deprecation")
     public static String swapCase(final String str) {
-        if (N.isNullOrEmpty(str)) {
+        if (str == null || str.length() == 0) {
             return str;
         }
 
@@ -1865,7 +1866,7 @@ public abstract class Strings {
      * @return
      */
     public static String capitalize(final String str) {
-        if (N.isNullOrEmpty(str)) {
+        if (str == null || str.length() == 0) {
             return str;
         }
 
@@ -1888,7 +1889,7 @@ public abstract class Strings {
      * @return
      */
     public static String uncapitalize(final String str) {
-        if (N.isNullOrEmpty(str)) {
+        if (str == null || str.length() == 0) {
             return str;
         }
 
@@ -1914,7 +1915,7 @@ public abstract class Strings {
      * @return
      */
     public static String quoteEscaped(final String str) {
-        if (N.isNullOrEmpty(str)) {
+        if (str == null || str.length() == 0) {
             return str;
         }
 
@@ -1949,7 +1950,7 @@ public abstract class Strings {
      * @return
      */
     public static String quoteEscaped(final String str, final char quoteChar) {
-        if (N.isNullOrEmpty(str)) {
+        if (str == null || str.length() == 0) {
             return str;
         }
 
@@ -2055,7 +2056,7 @@ public abstract class Strings {
      * @since 3.0
      */
     public static String normalizeSpace(final String str) {
-        if (N.isNullOrEmpty(str)) {
+        if (str == null || str.length() == 0) {
             return str;
         }
 
@@ -2617,7 +2618,7 @@ public abstract class Strings {
      * @return
      */
     public static String removeAll(final String str, final int fromIndex, final char removeChar) {
-        if (N.isNullOrEmpty(str)) {
+        if (str == null || str.length() == 0) {
             return str;
         }
 
@@ -3207,7 +3208,7 @@ public abstract class Strings {
      * @return
      */
     public static String strip(final String str, final String stripChars) {
-        if (N.isNullOrEmpty(str)) {
+        if (str == null || str.length() == 0) {
             return str;
         }
 
@@ -3469,7 +3470,7 @@ public abstract class Strings {
      * @return String without newline, {@code null} if null String input
      */
     public static String chomp(final String str) {
-        if (N.isNullOrEmpty(str)) {
+        if (str == null || str.length() == 0) {
             return str;
         }
 
@@ -3542,7 +3543,7 @@ public abstract class Strings {
      * @return String without last character, {@code null} if null String input
      */
     public static String chop(final String str) {
-        if (N.isNullOrEmpty(str)) {
+        if (str == null || str.length() == 0) {
             return str;
         }
 
@@ -3707,7 +3708,7 @@ public abstract class Strings {
      * @return
      */
     public static String deleteWhitespace(final String str) {
-        if (N.isNullOrEmpty(str)) {
+        if (str == null || str.length() == 0) {
             return str;
         }
 
@@ -3752,7 +3753,7 @@ public abstract class Strings {
     public static String appendIfMissing(final String str, final String suffix) {
         N.checkArgNotNull(suffix);
 
-        if (N.isNullOrEmpty(str)) {
+        if (str == null || str.length() == 0) {
             return suffix;
         } else if (str.endsWith(suffix)) {
             return str;
@@ -3770,7 +3771,7 @@ public abstract class Strings {
     public static String appendIfMissingIgnoreCase(final String str, final String suffix) {
         N.checkArgNotNull(suffix);
 
-        if (N.isNullOrEmpty(str)) {
+        if (str == null || str.length() == 0) {
             return suffix;
         } else if (Strings.endsWithIgnoreCase(str, suffix)) {
             return str;
@@ -3789,7 +3790,7 @@ public abstract class Strings {
     public static String prependIfMissing(final String str, final String prefix) {
         N.checkArgNotNull(prefix);
 
-        if (N.isNullOrEmpty(str)) {
+        if (str == null || str.length() == 0) {
             return prefix;
         } else if (str.startsWith(prefix)) {
             return str;
@@ -3808,7 +3809,7 @@ public abstract class Strings {
     public static String prependIfMissingIgnoreCase(final String str, final String prefix) {
         N.checkArgNotNull(prefix);
 
-        if (N.isNullOrEmpty(str)) {
+        if (str == null || str.length() == 0) {
             return prefix;
         } else if (Strings.startsWithIgnoreCase(str, prefix)) {
             return str;
@@ -3850,7 +3851,7 @@ public abstract class Strings {
         N.checkArgNotNull(prefix);
         N.checkArgNotNull(suffix);
 
-        if (N.isNullOrEmpty(str)) {
+        if (str == null || str.length() == 0) {
             return prefix + suffix;
         } else if (str.startsWith(prefix)) {
             return (str.length() - prefix.length() >= suffix.length() && str.endsWith(suffix)) ? str : str + suffix;
@@ -3892,7 +3893,7 @@ public abstract class Strings {
         N.checkArgNotNull(prefix);
         N.checkArgNotNull(suffix);
 
-        if (N.isNullOrEmpty(str)) {
+        if (str == null || str.length() == 0) {
             return prefix + suffix;
         } else {
             return concat(prefix, str, suffix);
@@ -3936,7 +3937,7 @@ public abstract class Strings {
         N.checkArgNotNull(prefix);
         N.checkArgNotNull(suffix);
 
-        if (N.isNullOrEmpty(str)) {
+        if (str == null || str.length() == 0) {
             return N.EMPTY_STRING;
         } else if (str.length() - prefix.length() >= suffix.length() && str.startsWith(prefix) && str.endsWith(suffix)) {
             return str.substring(prefix.length(), str.length() - suffix.length());
@@ -4779,7 +4780,7 @@ public abstract class Strings {
      * @return true, if is ascii digtal number
      */
     public static boolean isAsciiDigtalNumber(final String str) {
-        if (N.isNullOrEmpty(str)) {
+        if (str == null || str.length() == 0) {
             return false;
         }
 
@@ -4883,7 +4884,7 @@ public abstract class Strings {
      * @return true, if is ascii digtal integer
      */
     public static boolean isAsciiDigtalInteger(final String str) {
-        if (N.isNullOrEmpty(str)) {
+        if (str == null || str.length() == 0) {
             return false;
         }
 
@@ -4921,7 +4922,7 @@ public abstract class Strings {
      * @return
      */
     public static int indexOf(final String str, final int targetChar) {
-        if (N.isNullOrEmpty(str)) {
+        if (str == null || str.length() == 0) {
             return N.INDEX_NOT_FOUND;
         }
 
@@ -4936,7 +4937,7 @@ public abstract class Strings {
      * @return
      */
     public static int indexOf(final String str, final int fromIndex, final int targetChar) {
-        if (N.isNullOrEmpty(str)) {
+        if (str == null || str.length() == 0) {
             return N.INDEX_NOT_FOUND;
         }
 
@@ -4950,7 +4951,7 @@ public abstract class Strings {
      * @return
      */
     public static int indexOf(final String str, final String substr) {
-        if (N.isNullOrEmpty(str) || N.isNullOrEmpty(substr) || substr.length() > str.length()) {
+        if (str == null || substr == null || substr.length() > str.length()) {
             return N.INDEX_NOT_FOUND;
         }
 
@@ -4965,7 +4966,7 @@ public abstract class Strings {
      * @return
      */
     public static int indexOf(final String str, final int fromIndex, final String substr) {
-        if (N.isNullOrEmpty(str) || N.isNullOrEmpty(substr) || substr.length() > str.length() - fromIndex) {
+        if (str == null || substr == null || substr.length() > str.length() - fromIndex) {
             return N.INDEX_NOT_FOUND;
         }
 
@@ -5046,7 +5047,7 @@ public abstract class Strings {
      */
     @SafeVarargs
     public static int indexOfAny(final String str, final int fromIndex, final String... substrs) {
-        if (N.isNullOrEmpty(str) || N.isNullOrEmpty(substrs)) {
+        if (str == null || N.isNullOrEmpty(substrs)) {
             return N.INDEX_NOT_FOUND;
         }
 
@@ -5089,7 +5090,7 @@ public abstract class Strings {
      */
     @SafeVarargs
     public static int indexOfAnyBut(final String str, final int fromIndex, final char... chs) {
-        if (N.isNullOrEmpty(str)) {
+        if (str == null || str.length() == 0) {
             return N.INDEX_NOT_FOUND;
         }
 
@@ -5144,9 +5145,13 @@ public abstract class Strings {
      * @return
      */
     public static int indexOf(final String str, final int fromIndex, final String substr, final String delimiter) {
-        if (N.isNullOrEmpty(str) || N.isNullOrEmpty(substr)) {
+        if (isEmpty(delimiter)) {
+            return indexOf(str, fromIndex, substr);
+        } else if (str == null || substr == null) {
             return N.INDEX_NOT_FOUND;
         }
+
+        final int len = str.length();
 
         int index = str.indexOf(substr, fromIndex);
 
@@ -5154,16 +5159,21 @@ public abstract class Strings {
             return N.INDEX_NOT_FOUND;
         }
 
-        if (index + substr.length() == str.length()) {
+        if (index == fromIndex && (index + substr.length() == len || (len >= index + substr.length() + delimiter.length()
+                && delimiter.equals(str.substring(index + substr.length(), index + substr.length() + delimiter.length()))))) {
             return index;
-        } else if (str.length() >= index + substr.length() + delimiter.length()) {
-            for (int i = 0, j = index + substr.length(), seperatorLen = delimiter.length(); i < seperatorLen;) {
-                if (delimiter.charAt(i++) != str.charAt(j++)) {
-                    return N.INDEX_NOT_FOUND;
-                }
-            }
+        }
 
-            return index;
+        index = str.indexOf(delimiter + substr + delimiter, fromIndex);
+
+        if (index >= 0) {
+            return index + delimiter.length();
+        } else {
+            index = str.indexOf(delimiter + substr, fromIndex);
+
+            if (index >= 0 && index + delimiter.length() + substr.length() == len) {
+                return index + delimiter.length();
+            }
         }
 
         return N.INDEX_NOT_FOUND;
@@ -5189,7 +5199,7 @@ public abstract class Strings {
      * @return
      */
     public static int indexOfIgnoreCase(final String str, final int fromIndex, final String substr) {
-        if (N.isNullOrEmpty(str) || N.isNullOrEmpty(substr) || substr.length() > str.length() - fromIndex) {
+        if (str == null || substr == null || substr.length() > str.length() - fromIndex) {
             return N.INDEX_NOT_FOUND;
         }
 
@@ -5210,7 +5220,7 @@ public abstract class Strings {
      * @return
      */
     public static int lastIndexOf(final String str, final int targetChar) {
-        if (N.isNullOrEmpty(str)) {
+        if (str == null || str.length() == 0) {
             return N.INDEX_NOT_FOUND;
         }
 
@@ -5256,7 +5266,7 @@ public abstract class Strings {
      *         character does not occur before that point.
      */
     public static int lastIndexOf(final String str, final int fromIndex, final int targetChar) {
-        if (N.isNullOrEmpty(str)) {
+        if (str == null || str.length() == 0 || fromIndex < 0) {
             return N.INDEX_NOT_FOUND;
         }
 
@@ -5271,7 +5281,7 @@ public abstract class Strings {
      * @return
      */
     public static int lastIndexOf(final String str, final String substr) {
-        if (N.isNullOrEmpty(str) || N.isNullOrEmpty(substr) || substr.length() > str.length()) {
+        if (str == null || substr == null || substr.length() > str.length()) {
             return N.INDEX_NOT_FOUND;
         }
 
@@ -5299,7 +5309,7 @@ public abstract class Strings {
      * @return
      */
     public static int lastIndexOf(final String str, final int fromIndex, final String substr) {
-        if (N.isNullOrEmpty(str) || N.isNullOrEmpty(substr) || substr.length() > str.length()) {
+        if (str == null || substr == null || fromIndex < 0 || substr.length() > str.length()) {
             return N.INDEX_NOT_FOUND;
         }
 
@@ -5328,28 +5338,34 @@ public abstract class Strings {
      * @return
      */
     public static int lastIndexOf(final String str, final int fromIndex, final String substr, final String delimiter) {
-        if (N.isNullOrEmpty(str) || N.isNullOrEmpty(substr)) {
+        if (isEmpty(delimiter)) {
+            return lastIndexOf(str, fromIndex, substr);
+        } else if (str == null || substr == null) {
             return N.INDEX_NOT_FOUND;
         }
 
-        // int index = str.lastIndexOf(substr, min(fromIndex, str.length() -
-        // 1)); // Refer to String.lastIndexOf(String, int). the result is same
-        // as below line.
-        int index = str.lastIndexOf(substr, N.min(fromIndex, str.length()));
+        final int len = str.length();
+
+        int index = str.lastIndexOf(delimiter + substr, fromIndex);
+
+        if (index >= 0 && index + delimiter.length() + substr.length() == len) {
+            return index + delimiter.length();
+        }
+
+        index = str.lastIndexOf(delimiter + substr + delimiter, fromIndex);
+
+        if (index >= 0) {
+            return index + delimiter.length();
+        }
+
+        index = str.lastIndexOf(substr, fromIndex);
 
         if (index < 0) {
             return N.INDEX_NOT_FOUND;
         }
 
-        if (index + substr.length() == str.length()) {
-            return index;
-        } else if (str.length() >= index + substr.length() + delimiter.length()) {
-            for (int i = 0, j = index + substr.length(), len = delimiter.length(); i < len;) {
-                if (delimiter.charAt(i++) != str.charAt(j++)) {
-                    return N.INDEX_NOT_FOUND;
-                }
-            }
-
+        if (index == 0 && (index + substr.length() == len || (len >= index + substr.length() + delimiter.length()
+                && delimiter.equals(str.substring(index + substr.length(), index + substr.length() + delimiter.length()))))) {
             return index;
         }
 
@@ -5364,7 +5380,7 @@ public abstract class Strings {
      * @return
      */
     public static int lastIndexOfIgnoreCase(final String str, final String substr) {
-        if (N.isNullOrEmpty(str) || N.isNullOrEmpty(substr) || substr.length() > str.length()) {
+        if (str == null || substr == null || substr.length() > str.length()) {
             return N.INDEX_NOT_FOUND;
         }
 
@@ -5380,7 +5396,7 @@ public abstract class Strings {
      * @return
      */
     public static int lastIndexOfIgnoreCase(final String str, final int fromIndex, final String substr) {
-        if (N.isNullOrEmpty(str) || N.isNullOrEmpty(substr) || substr.length() > str.length()) {
+        if (str == null || substr == null || substr.length() > str.length()) {
             return N.INDEX_NOT_FOUND;
         }
 
@@ -5451,14 +5467,14 @@ public abstract class Strings {
      */
     @SafeVarargs
     public static int lastIndexOfAny(final String str, final String... substrs) {
-        if (N.isNullOrEmpty(str) || N.isNullOrEmpty(substrs)) {
+        if (str == null || N.isNullOrEmpty(substrs)) {
             return N.INDEX_NOT_FOUND;
         }
 
         int idx = 0;
 
         for (String substr : substrs) {
-            if (N.isNullOrEmpty(substr)) {
+            if (substr == null) {
                 continue;
             }
 
@@ -5488,7 +5504,7 @@ public abstract class Strings {
             throw new IllegalArgumentException("ordinal(" + ordinal + ") must be >= 1");
         }
 
-        if (N.isNullOrEmpty(str) || N.isNullOrEmpty(substr) || substr.length() > str.length()) {
+        if (str == null || substr == null || substr.length() > str.length()) {
             return N.INDEX_NOT_FOUND;
         }
 
@@ -5536,35 +5552,24 @@ public abstract class Strings {
      */
     @SafeVarargs
     public static int smallestIndexOfAll(final String str, final int fromIndex, final String... substrs) {
-        if (N.isNullOrEmpty(str) || N.isNullOrEmpty(substrs)) {
+        if (str == null || N.isNullOrEmpty(substrs)) {
             return N.INDEX_NOT_FOUND;
         }
 
-        String srcStr = str;
+        final int len = str.length();
         int result = N.INDEX_NOT_FOUND;
-        int idx = 0;
 
-        for (int i = 0, len = substrs.length; i < len; i++) {
-            if (N.isNullOrEmpty(substrs[i])) {
+        for (String substr : substrs) {
+            if (substr == null || (fromIndex + substr.length() > len)) {
                 continue;
             }
 
-            idx = indexOf(srcStr, fromIndex, substrs[i]);
+            int tmp = str.indexOf(substr, fromIndex);
 
-            if (idx != N.INDEX_NOT_FOUND && (result == N.INDEX_NOT_FOUND || idx < result)) {
-                result = idx;
+            result = tmp >= 0 && (result == N.INDEX_NOT_FOUND || tmp < result) ? tmp : result;
 
-                if (len - i > 1) {
-                    int max = 0;
-
-                    for (int j = i + 1; j < len; j++) {
-                        max = N.max(max, N.len(substrs[j]));
-                    }
-
-                    if (max > 0 && idx + max < srcStr.length() * 0.8) {
-                        srcStr = srcStr.substring(0, idx + max - 1);
-                    }
-                }
+            if (result == fromIndex) {
+                return result;
             }
         }
 
@@ -5581,24 +5586,23 @@ public abstract class Strings {
      */
     @SafeVarargs
     public static int largestIndexOfAll(final String str, final String... substrs) {
-        if (N.isNullOrEmpty(str) || N.isNullOrEmpty(substrs)) {
+        if (str == null || N.isNullOrEmpty(substrs)) {
             return N.INDEX_NOT_FOUND;
         }
 
-        int result = N.INDEX_NOT_FOUND;
-        int tmp = 0;
+        // TODO performance improvement: refer to smallestIndexOfAll
 
-        for (String substr : substrs) {
-            if (N.isNullOrEmpty(substr)) {
+        final int len = str.length();
+        int result = N.INDEX_NOT_FOUND;
+
+        final String[] newSubstrs = Stream.of(substrs).filter(Fn.notNull()).sortedBy(Fn.length()).toArray(String[]::new);
+
+        for (String substr : newSubstrs) {
+            if (result >= 0 && substr.length() + result >= len) {
                 continue;
             }
 
-            tmp = str.lastIndexOf(substr);
-
-            if (tmp != N.INDEX_NOT_FOUND && (result == N.INDEX_NOT_FOUND || tmp > result)) {
-                result = tmp;
-                // TODO performance improvement: refer to smallestIndexOfAll
-            }
+            result = N.max(result, str.lastIndexOf(substr));
         }
 
         return result;
@@ -5646,7 +5650,7 @@ public abstract class Strings {
      */
     @SuppressWarnings("deprecation")
     public static int occurrencesOf(final String str, final char ch) {
-        if (N.isNullOrEmpty(str)) {
+        if (str == null || str.length() == 0) {
             return 0;
         }
 
@@ -5669,7 +5673,7 @@ public abstract class Strings {
      * @see N#occurrencesOf(String, String)
      */
     public static int occurrencesOf(final String str, final String substr) {
-        if (N.isNullOrEmpty(str) || N.isNullOrEmpty(substr)) {
+        if (str == null || substr == null) {
             return 0;
         }
 
@@ -5696,7 +5700,7 @@ public abstract class Strings {
      * @return
      */
     public static boolean contains(final String str, final int targetChar) {
-        if (N.isNullOrEmpty(str)) {
+        if (str == null || str.length() == 0) {
             return false;
         }
 
@@ -5710,7 +5714,7 @@ public abstract class Strings {
      * @return
      */
     public static boolean contains(final String str, final String substr) {
-        if (N.isNullOrEmpty(str) || N.isNullOrEmpty(substr)) {
+        if (str == null || substr == null) {
             return false;
         }
 
@@ -5725,7 +5729,7 @@ public abstract class Strings {
      * @return
      */
     public static boolean contains(final String str, final String substr, final String delimiter) {
-        if (N.isNullOrEmpty(str) || N.isNullOrEmpty(substr)) {
+        if (str == null || substr == null) {
             return false;
         }
 
@@ -5740,7 +5744,7 @@ public abstract class Strings {
      * @return
      */
     public static boolean containsIgnoreCase(final String str, final String substr) {
-        if (N.isNullOrEmpty(str) || N.isNullOrEmpty(substr)) {
+        if (str == null || substr == null) {
             return false;
         }
 
@@ -5818,7 +5822,7 @@ public abstract class Strings {
     public static boolean containsAll(final String str, final char... chs) {
         if (N.isNullOrEmpty(chs)) {
             return true;
-        } else if (N.isNullOrEmpty(str)) {
+        } else if (str == null || str.length() == 0) {
             return false;
         }
 
@@ -5841,7 +5845,7 @@ public abstract class Strings {
     public static boolean containsAll(final String str, final String... searchStrs) {
         if (N.isNullOrEmpty(searchStrs)) {
             return true;
-        } else if (N.isNullOrEmpty(str)) {
+        } else if (str == null || str.length() == 0) {
             return false;
         }
 
@@ -5864,7 +5868,7 @@ public abstract class Strings {
     public static boolean containsAllIgnoreCase(final String str, final String... searchStrs) {
         if (N.isNullOrEmpty(searchStrs)) {
             return true;
-        } else if (N.isNullOrEmpty(str)) {
+        } else if (str == null || str.length() == 0) {
             return false;
         }
 
@@ -5937,7 +5941,7 @@ public abstract class Strings {
      */
     // From org.springframework.util.StringUtils, under Apache License 2.0
     public static boolean containsWhitespace(final String str) {
-        if (N.isNullOrEmpty(str)) {
+        if (str == null || str.length() == 0) {
             return false;
         }
 
@@ -6560,7 +6564,7 @@ public abstract class Strings {
      * @return
      */
     public static int countMatches(final String str, final char ch) {
-        if (N.isNullOrEmpty(str)) {
+        if (str == null || str.length() == 0) {
             return 0;
         }
 
@@ -6582,24 +6586,24 @@ public abstract class Strings {
      * @return
      */
     public static int countMatches(final String str, final String substr) {
-        if (N.isNullOrEmpty(str) || N.isNullOrEmpty(substr)) {
-            return 0;
-        }
+        //    if (str == null || substr == null) {
+        //        return 0;
+        //    }
+        //
+        //    int count = 0;
+        //    int index = 0;
+        //
+        //    while ((index = str.indexOf(substr, index)) != N.INDEX_NOT_FOUND) {
+        //        count++;
+        //        index += substr.length();
+        //    }
 
-        int count = 0;
-        int index = 0;
-
-        while ((index = str.indexOf(substr, index)) != N.INDEX_NOT_FOUND) {
-            count++;
-            index += substr.length();
-        }
-
-        return count;
+        return occurrencesOf(str, substr);
     }
 
     /**
-     * Returns {@code null} if {@code str} is n{@code null} or {@code inclusiveBeginIndex < 0},
-     * otherwise the {@code substring} with String value: {@code str.substring(inclusiveBeginIndex)} is returned.
+     * Returns {@code null} if {@code (str == null || inclusiveBeginIndex < 0 || inclusiveBeginIndex > str.length())},
+     * otherwise returns: {@code str.substring(inclusiveBeginIndex)}.
      *
      * @param str
      * @param inclusiveBeginIndex
@@ -6607,7 +6611,7 @@ public abstract class Strings {
      * @see #substring(String, int, int)
      */
     public static String substring(String str, int inclusiveBeginIndex) {
-        if (str == null || inclusiveBeginIndex < 0) {
+        if (str == null || inclusiveBeginIndex < 0 || inclusiveBeginIndex > str.length()) {
             return null;
         }
 
@@ -6615,8 +6619,8 @@ public abstract class Strings {
     }
 
     /**
-     * Returns {@code null} if {@code str} is n{@code null} or {@code N.isNullOrEmpty(str) || str.indexOf(delimiterOfInclusiveBeginIndex) < 0},
-     * otherwise the {@code substring} with String value: {@code str.substring(str.indexOf(delimiterOfInclusiveBeginIndex))} is returned.
+     * Returns {@code null} if {@code (str == null || str.length() == 0)}, or {@code str.indexOf(delimiterOfInclusiveBeginIndex) < 0},
+     * otherwise returns: {@code str.substring(str.indexOf(delimiterOfInclusiveBeginIndex))}.
      *
      * @param str
      * @param delimiterOfInclusiveBeginIndex {@code inclusiveBeginIndex <- str.indexOf(delimiterOfInclusiveBeginIndex)}
@@ -6632,8 +6636,8 @@ public abstract class Strings {
     }
 
     /**
-     * Returns {@code null} if {@code str} is n{@code null} or str.indexOf(delimiterOfInclusiveBeginIndex) < 0,
-     * otherwise the {@code substring} with String value: {@code str.substring(str.indexOf(delimiterOfInclusiveBeginIndex))} is returned.
+     * Returns {@code null} if {@code (str == null || delimiterOfInclusiveBeginIndex == null)}, or {@code str.indexOf(delimiterOfInclusiveBeginIndex) < 0},
+     * otherwise returns: {@code str.substring(str.indexOf(delimiterOfInclusiveBeginIndex))}.
      *
      * @param str
      * @param delimiterOfInclusiveBeginIndex {@code inclusiveBeginIndex <- str.indexOf(delimiterOfInclusiveBeginIndex)}
@@ -6645,12 +6649,16 @@ public abstract class Strings {
             return null;
         }
 
+        if (delimiterOfInclusiveBeginIndex.length() == 0) {
+            return str;
+        }
+
         return substring(str, str.indexOf(delimiterOfInclusiveBeginIndex));
     }
 
     /**
-     * Returns {@code null} if {@code str} is n{@code null} or {@code inclusiveBeginIndex < 0 ||exclusiveEndIndex <= 0 || inclusiveBeginIndex > exclusiveEndIndex},
-     * otherwise the {@code substring} with String value: {@code str.substring(exclusiveBeginIndex, exclusiveEndIndex)} is returned.
+     * Returns {@code null} if {@code str == null || inclusiveBeginIndex < 0 || exclusiveEndIndex < 0 || inclusiveBeginIndex > exclusiveEndIndex || inclusiveBeginIndex > str.length()},
+     * otherwise returns: {@code str.substring(exclusiveBeginIndex, min(exclusiveEndIndex, str.length()))}.
      *
      * @param str
      * @param inclusiveBeginIndex
@@ -6658,32 +6666,39 @@ public abstract class Strings {
      * @return
      */
     public static String substring(String str, int inclusiveBeginIndex, int exclusiveEndIndex) {
-        if (str == null || inclusiveBeginIndex < 0 || exclusiveEndIndex <= 0 || inclusiveBeginIndex > exclusiveEndIndex) {
+        if (str == null || inclusiveBeginIndex < 0 || exclusiveEndIndex < 0 || inclusiveBeginIndex > exclusiveEndIndex || inclusiveBeginIndex > str.length()) {
             return null;
         }
 
-        return str.substring(inclusiveBeginIndex, exclusiveEndIndex);
+        return str.substring(inclusiveBeginIndex, N.min(exclusiveEndIndex, str.length()));
     }
 
     /**
-     * Returns {@code null} if {@code str == null || str.length() == 0 || inclusiveBeginIndex < 0}.
+     * Returns {@code null} if {@code (str == null || str.length() == 0 || inclusiveBeginIndex < 0 || inclusiveBeginIndex > str.length())}, or {@code str.indexOf(delimiterOfExclusiveEndIndex, inclusiveBeginIndex + 1)}.
      *
      * @param str
      * @param inclusiveBeginIndex
-     * @param delimiterOfExclusiveEndIndex {@code exclusiveEndIndex <- str.indexOf(delimiterOfExclusiveEndIndex, inclusiveBeginIndex + 1) if inclusiveBeginIndex >= 0}, or {@code str.indexOf(delimiterOfExclusiveEndIndex, inclusiveBeginIndex + 1) < 0}
+     * @param delimiterOfExclusiveEndIndex {@code str.indexOf(delimiterOfExclusiveEndIndex, inclusiveBeginIndex + 1)}
      * @return
      * @see #substring(String, int, int)
      */
     public static String substring(String str, int inclusiveBeginIndex, char delimiterOfExclusiveEndIndex) {
-        if (str == null || str.length() == 0 || inclusiveBeginIndex < 0) {
+        if (str == null || str.length() == 0 || inclusiveBeginIndex < 0 || inclusiveBeginIndex > str.length()) {
             return null;
         }
 
-        return substring(str, inclusiveBeginIndex, str.indexOf(delimiterOfExclusiveEndIndex, inclusiveBeginIndex + 1));
+        final int index = str.indexOf(delimiterOfExclusiveEndIndex, inclusiveBeginIndex + 1);
+
+        // inconsistant behavior
+        //    if (index < 0 && str.charAt(inclusiveBeginIndex) == delimiterOfExclusiveEndIndex) {
+        //        return EMPTY_STRING;
+        //    }
+
+        return substring(str, inclusiveBeginIndex, index);
     }
 
     /**
-     * Returns {@code null} if {@code (str == null || inclusiveBeginIndex < 0 || delimiterOfExclusiveEndIndex == null)}, or {@code str.indexOf(delimiterOfExclusiveEndIndex, inclusiveBeginIndex + 1) < 0}.
+     * Returns {@code null} if {@code (str == null || delimiterOfExclusiveEndIndex == null || inclusiveBeginIndex < 0 || inclusiveBeginIndex > str.length())}, or {@code str.indexOf(delimiterOfExclusiveEndIndex, inclusiveBeginIndex + 1) < 0}.
      *
      * @param str
      * @param inclusiveBeginIndex
@@ -6692,15 +6707,15 @@ public abstract class Strings {
      * @see #substring(String, int, int)
      */
     public static String substring(String str, int inclusiveBeginIndex, String delimiterOfExclusiveEndIndex) {
-        if (str == null || inclusiveBeginIndex < 0 || delimiterOfExclusiveEndIndex == null) {
+        if (str == null || delimiterOfExclusiveEndIndex == null || inclusiveBeginIndex < 0 || inclusiveBeginIndex > str.length()) {
             return null;
         }
 
         if (delimiterOfExclusiveEndIndex.length() == 0) {
-            return str.substring(inclusiveBeginIndex, inclusiveBeginIndex);
-        } else {
-            return substring(str, inclusiveBeginIndex, str.indexOf(delimiterOfExclusiveEndIndex, inclusiveBeginIndex + 1));
+            return EMPTY_STRING;
         }
+
+        return substring(str, inclusiveBeginIndex, str.indexOf(delimiterOfExclusiveEndIndex, inclusiveBeginIndex + 1));
     }
 
     /**
@@ -6721,7 +6736,7 @@ public abstract class Strings {
     }
 
     /**
-     * Returns {@code null} if {@code (str == null || str.length() == 0 || exclusiveEndIndex <= 0)}, or {@code str.lastIndexOf(delimiterOfInclusiveBeginIndex, exclusiveEndIndex - 1) < 0}.
+     * Returns {@code null} if {@code (str == null || str.length() == 0 || exclusiveEndIndex < 0)}, or {@code str.lastIndexOf(delimiterOfInclusiveBeginIndex, exclusiveEndIndex - 1) < 0}.
      *
      * @param str
      * @param delimiterOfInclusiveBeginIndex {@code inclusiveBeginIndex <- str.lastIndexOf(delimiterOfInclusiveBeginIndex, exclusiveEndIndex - 1) if exclusiveEndIndex > 0}
@@ -6730,7 +6745,7 @@ public abstract class Strings {
      * @see #substring(String, int, int)
      */
     public static String substring(String str, char delimiterOfInclusiveBeginIndex, int exclusiveEndIndex) {
-        if (str == null || str.length() == 0 || exclusiveEndIndex <= 0) {
+        if (str == null || str.length() == 0 || exclusiveEndIndex < 0) {
             return null;
         }
 
@@ -6738,29 +6753,30 @@ public abstract class Strings {
     }
 
     /**
-     * Returns {@code null} if {@code (str == null || delimiterOfInclusiveBeginIndex == null ||exclusiveEndIndex <= 0)}, or {@code str.lastIndexOf(delimiterOfInclusiveBeginIndex, exclusiveEndIndex - 1) < 0}.
+     * Returns {@code null} if {@code (str == null || delimiterOfInclusiveBeginIndex == null || exclusiveEndIndex < 0)}, or {@code str.lastIndexOf(delimiterOfInclusiveBeginIndex, exclusiveEndIndex - 1) < 0}.
      *
      *
      * @param str
-     * @param delimiterOfInclusiveBeginIndex {@code inclusiveBeginIndex <- str.lastIndexOf(delimiterOfInclusiveBeginIndex, exclusiveEndIndex - 1) if exclusiveEndIndex > 0}
+     * @param delimiterOfInclusiveBeginIndex {@code inclusiveBeginIndex <- str.lastIndexOf(delimiterOfInclusiveBeginIndex, exclusiveEndIndex - exclusiveEndIndex - delimiterOfInclusiveBeginIndex.length()) if exclusiveEndIndex > 0}
      * @param exclusiveEndIndex
      * @return
      * @see #substring(String, int, int)
      */
     public static String substring(String str, String delimiterOfInclusiveBeginIndex, int exclusiveEndIndex) {
-        if (str == null || delimiterOfInclusiveBeginIndex == null || exclusiveEndIndex <= 0) {
+        if (str == null || delimiterOfInclusiveBeginIndex == null || exclusiveEndIndex < 0) {
             return null;
         }
 
         if (delimiterOfInclusiveBeginIndex.length() == 0) {
-            return str.substring(exclusiveEndIndex, exclusiveEndIndex);
-        } else {
-            return substring(str, str.lastIndexOf(delimiterOfInclusiveBeginIndex, exclusiveEndIndex - 1), exclusiveEndIndex);
+            return EMPTY_STRING;
         }
+
+        return substring(str, str.lastIndexOf(delimiterOfInclusiveBeginIndex, exclusiveEndIndex - delimiterOfInclusiveBeginIndex.length()), exclusiveEndIndex);
+
     }
 
     /**
-     * Returns {@code null} if {@code (str == null ||exclusiveEndIndex <= 0)}, or {@code funcOfInclusiveBeginIndex.applyAsInt(exclusiveEndIndex) < 0}.
+     * Returns {@code null} if {@code (str == null || exclusiveEndIndex < 0)}, or {@code funcOfInclusiveBeginIndex.applyAsInt(exclusiveEndIndex) < 0}.
      *
      *
      * @param str
@@ -6770,7 +6786,7 @@ public abstract class Strings {
      * @see #substring(String, int, int)
      */
     public static String substring(String str, IntUnaryOperator funcOfInclusiveBeginIndex, int exclusiveEndIndex) {
-        if (str == null || exclusiveEndIndex <= 0) {
+        if (str == null || exclusiveEndIndex < 0) {
             return null;
         }
 
@@ -6785,7 +6801,7 @@ public abstract class Strings {
      * @return
      */
     public static String substringAfter(String str, char delimiterOfExclusiveBeginIndex) {
-        if (str == null) {
+        if (str == null || str.length() == 0) {
             return null;
         }
 
@@ -6810,6 +6826,10 @@ public abstract class Strings {
             return null;
         }
 
+        if (delimiterOfExclusiveBeginIndex.length() == 0) {
+            return str;
+        }
+
         int index = str.indexOf(delimiterOfExclusiveBeginIndex);
 
         if (index < 0) {
@@ -6820,7 +6840,8 @@ public abstract class Strings {
     }
 
     /**
-     * Returns the substring after first {@code delimiterOfExclusiveBeginIndex} if it exists, otherwise return {@code null} String.
+     * Returns {@code null} if {@code str == null || delimiterOfExclusiveBeginIndex == null || exclusiveEndIndex < 0}, or {@code str.indexOf(delimiterOfExclusiveBeginIndex) < 0 || str.indexOf(delimiterOfExclusiveBeginIndex) + delimiterOfExclusiveBeginIndex.length() > exclusiveEndIndex}
+     * otherwise returns {@code substring(str, index + delimiterOfExclusiveBeginIndex.length(), exclusiveEndIndex)};
      *
      * @param str
      * @param delimiterOfExclusiveBeginIndex
@@ -6828,17 +6849,23 @@ public abstract class Strings {
      * @return
      */
     public static String substringAfter(String str, String delimiterOfExclusiveBeginIndex, int exclusiveEndIndex) {
-        if (str == null || delimiterOfExclusiveBeginIndex == null || exclusiveEndIndex <= 0) {
+        if (str == null || delimiterOfExclusiveBeginIndex == null || exclusiveEndIndex < 0) {
+            return null;
+        }
+
+        if (delimiterOfExclusiveBeginIndex.length() == 0) {
+            return substring(str, 0, exclusiveEndIndex);
+        } else if (exclusiveEndIndex == 0) {
             return null;
         }
 
         int index = str.indexOf(delimiterOfExclusiveBeginIndex);
 
-        if (index < 0 || index + delimiterOfExclusiveBeginIndex.length() >= exclusiveEndIndex) {
+        if (index < 0 || index + delimiterOfExclusiveBeginIndex.length() > exclusiveEndIndex) {
             return null;
         }
 
-        return str.substring(index + delimiterOfExclusiveBeginIndex.length(), exclusiveEndIndex);
+        return substring(str, index + delimiterOfExclusiveBeginIndex.length(), exclusiveEndIndex);
     }
 
     /**
@@ -6849,7 +6876,7 @@ public abstract class Strings {
      * @return
      */
     public static String substringAfterLast(String str, char delimiterOfExclusiveBeginIndex) {
-        if (str == null) {
+        if (str == null || str.length() == 0) {
             return null;
         }
 
@@ -6874,6 +6901,10 @@ public abstract class Strings {
             return null;
         }
 
+        if (delimiterOfExclusiveBeginIndex.length() == 0) {
+            return EMPTY_STRING;
+        }
+
         int index = str.lastIndexOf(delimiterOfExclusiveBeginIndex);
 
         if (index < 0) {
@@ -6892,17 +6923,19 @@ public abstract class Strings {
      * @return
      */
     public static String substringAfterLast(String str, String delimiterOfExclusiveBeginIndex, int exclusiveEndIndex) {
-        if (str == null || delimiterOfExclusiveBeginIndex == null || exclusiveEndIndex <= 0) {
+        if (str == null || delimiterOfExclusiveBeginIndex == null || exclusiveEndIndex < 0) {
             return null;
         }
 
         if (delimiterOfExclusiveBeginIndex.length() == 0) {
-            return str.substring(exclusiveEndIndex, exclusiveEndIndex);
+            return EMPTY_STRING;
+        } else if (exclusiveEndIndex == 0) {
+            return null;
         }
 
-        int index = str.lastIndexOf(delimiterOfExclusiveBeginIndex, exclusiveEndIndex - 1);
+        int index = str.lastIndexOf(delimiterOfExclusiveBeginIndex, exclusiveEndIndex - delimiterOfExclusiveBeginIndex.length());
 
-        if (index < 0 || index + delimiterOfExclusiveBeginIndex.length() >= exclusiveEndIndex) {
+        if (index < 0 || index + delimiterOfExclusiveBeginIndex.length() > exclusiveEndIndex) {
             return null;
         }
 
@@ -6922,8 +6955,10 @@ public abstract class Strings {
             return null;
         }
 
+        int index = -1;
+
         for (char delimiterOfExclusiveBeginIndex : delimitersOfExclusiveBeginIndex) {
-            int index = str.indexOf(delimiterOfExclusiveBeginIndex);
+            index = str.indexOf(delimiterOfExclusiveBeginIndex);
 
             if (index >= 0) {
                 return str.substring(index + 1);
@@ -6946,11 +6981,13 @@ public abstract class Strings {
             return null;
         }
 
-        for (String delimiterOfExclusiveBeginIndex : delimitersOfExclusiveBeginIndex) {
-            int index = str.indexOf(delimiterOfExclusiveBeginIndex);
+        String substr = null;
 
-            if (index >= 0) {
-                return str.substring(index + delimiterOfExclusiveBeginIndex.length());
+        for (String delimiterOfExclusiveBeginIndex : delimitersOfExclusiveBeginIndex) {
+            substr = substringAfter(str, delimiterOfExclusiveBeginIndex);
+
+            if (substr != null) {
+                return substr;
             }
         }
 
@@ -6990,6 +7027,10 @@ public abstract class Strings {
             return null;
         }
 
+        if (delimiterOfExclusiveEndIndex.length() == 0) {
+            return EMPTY_STRING;
+        }
+
         int index = str.indexOf(delimiterOfExclusiveEndIndex);
 
         if (index < 0) {
@@ -7008,12 +7049,14 @@ public abstract class Strings {
      * @return
      */
     public static String substringBefore(String str, int inclusiveBeginIndex, String delimiterOfExclusiveEndIndex) {
-        if (str == null || delimiterOfExclusiveEndIndex == null || inclusiveBeginIndex < 0) {
+        if (str == null || delimiterOfExclusiveEndIndex == null || inclusiveBeginIndex < 0 || inclusiveBeginIndex > str.length()) {
             return null;
         }
 
         if (delimiterOfExclusiveEndIndex.length() == 0) {
-            return str.substring(inclusiveBeginIndex, inclusiveBeginIndex);
+            return EMPTY_STRING;
+        } else if (inclusiveBeginIndex == str.length()) {
+            return null;
         }
 
         int index = str.indexOf(delimiterOfExclusiveEndIndex, inclusiveBeginIndex + 1);
@@ -7033,7 +7076,7 @@ public abstract class Strings {
      * @return
      */
     public static String substringBeforeLast(String str, char delimiterOfExclusiveEndIndex) {
-        if (str == null) {
+        if (str == null || str.length() == 0) {
             return null;
         }
 
@@ -7058,6 +7101,10 @@ public abstract class Strings {
             return null;
         }
 
+        if (delimiterOfExclusiveEndIndex.length() == 0) {
+            return str;
+        }
+
         int index = str.lastIndexOf(delimiterOfExclusiveEndIndex);
 
         if (index < 0) {
@@ -7076,12 +7123,14 @@ public abstract class Strings {
      * @return
      */
     public static String substringBeforeLast(String str, int inclusiveBeginIndex, String delimiterOfExclusiveEndIndex) {
-        if (str == null || delimiterOfExclusiveEndIndex == null || inclusiveBeginIndex < 0) {
+        if (str == null || delimiterOfExclusiveEndIndex == null || inclusiveBeginIndex < 0 || inclusiveBeginIndex > str.length()) {
             return null;
         }
 
         if (delimiterOfExclusiveEndIndex.length() == 0) {
-            return str.substring(inclusiveBeginIndex, inclusiveBeginIndex);
+            return str.substring(inclusiveBeginIndex);
+        } else if (inclusiveBeginIndex == str.length()) {
+            return null;
         }
 
         int index = str.lastIndexOf(delimiterOfExclusiveEndIndex);
@@ -7106,8 +7155,10 @@ public abstract class Strings {
             return null;
         }
 
+        int index = -1;
+
         for (char delimiterOfExclusiveEndIndex : delimitersOfExclusiveEndIndex) {
-            int index = str.indexOf(delimiterOfExclusiveEndIndex);
+            index = str.indexOf(delimiterOfExclusiveEndIndex);
 
             if (index >= 0) {
                 return str.substring(0, index);
@@ -7130,11 +7181,13 @@ public abstract class Strings {
             return null;
         }
 
-        for (String delimiterOfExclusiveEndIndex : delimitersOfExclusiveEndIndex) {
-            int index = str.indexOf(delimiterOfExclusiveEndIndex);
+        String substr = null;
 
-            if (index >= 0) {
-                return str.substring(0, index);
+        for (String delimiterOfExclusiveEndIndex : delimitersOfExclusiveEndIndex) {
+            substr = substringBefore(str, delimiterOfExclusiveEndIndex);
+
+            if (substr != null) {
+                return substr;
             }
         }
 
@@ -7142,8 +7195,8 @@ public abstract class Strings {
     }
 
     /**
-     * Returns {@code null} if {@code exclusiveBeginIndex < 0 ||exclusiveEndIndex <= 0 || exclusiveBeginIndex >= exclusiveEndIndex},
-     * otherwise the {@code substring} with String value: {@code str.substring(exclusiveBeginIndex + 1, exclusiveEndIndex)} is returned.
+     * Returns {@code null} if {@code str == null || exclusiveBeginIndex < 0 || exclusiveEndIndex < 0 || exclusiveBeginIndex >= exclusiveEndIndex || exclusiveBeginIndex >= str.length()},
+     * Otherwise returns: {@code str.substring(exclusiveBeginIndex + 1, min(exclusiveEndIndex, str.length()))}.
      *
      * @param str
      * @param exclusiveBeginIndex
@@ -7151,11 +7204,12 @@ public abstract class Strings {
      * @return
      */
     public static String substringBetween(String str, int exclusiveBeginIndex, int exclusiveEndIndex) {
-        if (str == null || str.length() == 0 || exclusiveBeginIndex < 0 || exclusiveEndIndex <= 0 || exclusiveBeginIndex >= exclusiveEndIndex) {
+        if (str == null || exclusiveBeginIndex < 0 || exclusiveEndIndex < 0 || exclusiveBeginIndex >= exclusiveEndIndex
+                || exclusiveBeginIndex >= str.length()) {
             return null;
         }
 
-        return str.substring(exclusiveBeginIndex + 1, exclusiveEndIndex);
+        return str.substring(exclusiveBeginIndex + 1, N.min(exclusiveEndIndex, str.length()));
     }
 
     /**
@@ -7167,7 +7221,7 @@ public abstract class Strings {
      * @see #substringBetween(String, int, int)
      */
     public static String substringBetween(String str, int exclusiveBeginIndex, char delimiterOfExclusiveEndIndex) {
-        if (str == null || str.length() == 0 || exclusiveBeginIndex < 0) {
+        if (str == null || exclusiveBeginIndex < 0 || exclusiveBeginIndex >= str.length()) {
             return null;
         }
 
@@ -7183,7 +7237,13 @@ public abstract class Strings {
      * @see #substringBetween(String, int, int)
      */
     public static String substringBetween(String str, int exclusiveBeginIndex, String delimiterOfExclusiveEndIndex) {
-        if (str == null || str.length() == 0 || exclusiveBeginIndex < 0 || delimiterOfExclusiveEndIndex == null || delimiterOfExclusiveEndIndex.length() == 0) {
+        if (str == null || delimiterOfExclusiveEndIndex == null || exclusiveBeginIndex < 0 || exclusiveBeginIndex > str.length()) {
+            return null;
+        }
+
+        if (delimiterOfExclusiveEndIndex.length() == 0) {
+            return EMPTY_STRING;
+        } else if (exclusiveBeginIndex == str.length()) {
             return null;
         }
 
@@ -7199,7 +7259,7 @@ public abstract class Strings {
      * @see #substringBetween(String, int, int)
      */
     public static String substringBetween(String str, int exclusiveBeginIndex, IntUnaryOperator funcOfExclusiveEndIndex) {
-        if (str == null || str.length() == 0 || exclusiveBeginIndex < 0) {
+        if (str == null || exclusiveBeginIndex < 0) {
             return null;
         }
 
@@ -7215,7 +7275,7 @@ public abstract class Strings {
      * @see #substringBetween(String, int, int)
      */
     public static String substringBetween(String str, char delimiterOfExclusiveBeginIndex, int exclusiveEndIndex) {
-        if (str == null || str.length() == 0 || exclusiveEndIndex <= 0) {
+        if (str == null || exclusiveEndIndex <= 0) {
             return null;
         }
 
@@ -7231,15 +7291,25 @@ public abstract class Strings {
      * @see #substringBetween(String, int, int)
      */
     public static String substringBetween(String str, String delimiterOfExclusiveBeginIndex, int exclusiveEndIndex) {
-        if (str == null || str.length() == 0 || delimiterOfExclusiveBeginIndex == null || delimiterOfExclusiveBeginIndex.length() == 0
-                || exclusiveEndIndex <= 0) {
+        if (str == null || delimiterOfExclusiveBeginIndex == null || exclusiveEndIndex < 0) {
             return null;
         }
 
-        final int index = str.lastIndexOf(delimiterOfExclusiveBeginIndex, exclusiveEndIndex - 1);
-        final int exclusiveBeginIndex = index >= 0 ? index + delimiterOfExclusiveBeginIndex.length() - 1 : index;
+        if (delimiterOfExclusiveBeginIndex.length() == 0) {
+            return EMPTY_STRING;
+        } else if (exclusiveEndIndex == 0) {
+            return null;
+        }
 
-        return substringBetween(str, exclusiveBeginIndex, exclusiveEndIndex);
+        final int index = str.lastIndexOf(delimiterOfExclusiveBeginIndex, exclusiveEndIndex - delimiterOfExclusiveBeginIndex.length());
+
+        if (index < 0) {
+            return null;
+        }
+
+        final int exclusiveBeginIndex = index + delimiterOfExclusiveBeginIndex.length();
+
+        return str.substring(exclusiveBeginIndex, exclusiveEndIndex);
     }
 
     /**
@@ -7251,7 +7321,7 @@ public abstract class Strings {
      * @see #substringBetween(String, int, int)
      */
     public static String substringBetween(String str, IntUnaryOperator funcOfExclusiveBeginIndex, int exclusiveEndIndex) {
-        if (str == null || str.length() == 0 || exclusiveEndIndex <= 0) {
+        if (str == null || exclusiveEndIndex < 0) {
             return null;
         }
 
@@ -7268,23 +7338,32 @@ public abstract class Strings {
      * @see #substringBetween(String, int, int)
      */
     public static String substringBetween(String str, char delimiterOfExclusiveBeginIndex, char delimiterOfExclusiveEndIndex) {
-        if (str == null || str.length() == 0) {
+        if (str == null || str.length() <= 1) {
             return null;
         }
 
-        final int start = str.indexOf(delimiterOfExclusiveBeginIndex);
+        int startIndex = str.indexOf(delimiterOfExclusiveBeginIndex);
 
-        if (start < 0) {
+        if (startIndex < 0) {
             return null;
         }
 
-        final int end = str.indexOf(delimiterOfExclusiveEndIndex, start + 1);
+        // even delimiterOfExclusiveBeginIndex and delimiterOfExclusiveEndIndex are equal, but should consider them as different chars. see: substringBetween(String str, String tag)
+        //    if (delimiterOfExclusiveBeginIndex == delimiterOfExclusiveEndIndex) {
+        //        return EMPTY_STRING;
+        //    }
 
-        if (end < 0) {
+        startIndex += 1;
+
+        final int endIndex = str.indexOf(delimiterOfExclusiveEndIndex, startIndex);
+
+        if (endIndex < 0) {
             return null;
         }
 
-        return substringBetween(str, start, end);
+        startIndex = str.lastIndexOf(delimiterOfExclusiveBeginIndex, endIndex - 1);
+
+        return str.substring(startIndex + 1, endIndex);
     }
 
     /**
@@ -7323,24 +7402,39 @@ public abstract class Strings {
      * @see #substringBetween(String, int, int)
      */
     public static String substringBetween(String str, int fromIndex, String delimiterOfExclusiveBeginIndex, String delimiterOfExclusiveEndIndex) {
-        if (str == null || str.length() == 0 || delimiterOfExclusiveBeginIndex == null || delimiterOfExclusiveBeginIndex.length() == 0
-                || delimiterOfExclusiveEndIndex == null || delimiterOfExclusiveEndIndex.length() == 0) {
+        if (str == null || delimiterOfExclusiveBeginIndex == null || delimiterOfExclusiveEndIndex == null || fromIndex < 0 || fromIndex > str.length()) {
             return null;
         }
 
-        final int start = fromIndex == 0 ? str.indexOf(delimiterOfExclusiveBeginIndex) : str.indexOf(delimiterOfExclusiveBeginIndex, fromIndex);
+        if (delimiterOfExclusiveBeginIndex.length() == 0 && delimiterOfExclusiveEndIndex.length() == 0) {
+            return EMPTY_STRING;
+        } else if (delimiterOfExclusiveBeginIndex.length() == 0) {
+            final int endIndex = fromIndex == 0 ? str.indexOf(delimiterOfExclusiveEndIndex) : str.indexOf(delimiterOfExclusiveEndIndex, fromIndex);
 
-        if (start < 0) {
+            return endIndex < 0 ? null : EMPTY_STRING;
+        } else if (delimiterOfExclusiveEndIndex.length() == 0) {
+            final int startIndex = fromIndex == 0 ? str.indexOf(delimiterOfExclusiveBeginIndex) : str.indexOf(delimiterOfExclusiveBeginIndex, fromIndex);
+
+            return startIndex < 0 ? null : EMPTY_STRING;
+        }
+
+        int startIndex = fromIndex == 0 ? str.indexOf(delimiterOfExclusiveBeginIndex) : str.indexOf(delimiterOfExclusiveBeginIndex, fromIndex);
+
+        if (startIndex < 0) {
             return null;
         }
 
-        final int end = str.indexOf(delimiterOfExclusiveEndIndex, start + delimiterOfExclusiveBeginIndex.length());
+        startIndex += delimiterOfExclusiveBeginIndex.length();
 
-        if (end < 0) {
+        final int endIndex = str.indexOf(delimiterOfExclusiveEndIndex, startIndex);
+
+        if (endIndex < 0) {
             return null;
         }
 
-        return substringBetween(str, start + delimiterOfExclusiveBeginIndex.length() - 1, end);
+        startIndex = str.lastIndexOf(delimiterOfExclusiveBeginIndex, endIndex - delimiterOfExclusiveBeginIndex.length());
+
+        return str.substring(startIndex + delimiterOfExclusiveBeginIndex.length(), endIndex);
     }
 
     /**
@@ -7370,7 +7464,7 @@ public abstract class Strings {
 
         final List<IntPair> res = new ArrayList<>();
 
-        if (N.isNullOrEmpty(str)) {
+        if (str == null || str.length() == 0) {
             return res;
         }
 
@@ -7431,7 +7525,7 @@ public abstract class Strings {
 
         final List<IntPair> res = new ArrayList<>();
 
-        if (N.isNullOrEmpty(str)) {
+        if (str == null || str.length() == 0) {
             return res;
         }
 
@@ -10545,7 +10639,7 @@ public abstract class Strings {
             overlay = N.EMPTY_STRING;
         }
 
-        if (N.isNullOrEmpty(str)) {
+        if (str == null || str.length() == 0) {
             return overlay;
         }
 
@@ -10617,8 +10711,7 @@ public abstract class Strings {
         }
 
         /**
-         * Returns an empty <code>Optional</code> if {@code inclusiveBeginIndex < 0},
-         * otherwise an {@code Optional} with String value: {@code str.substring(inclusiveBeginIndex)} is returned.
+         * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}
          *
          * @param str
          * @param inclusiveBeginIndex
@@ -10630,11 +10723,10 @@ public abstract class Strings {
         }
 
         /**
-         * Returns an empty <code>Optional</code> if {@code N.isNullOrEmpty(str) || str.indexOf(delimiterOfInclusiveBeginIndex) < 0},
-         * otherwise an {@code Optional} with String value: {@code str.substring(str.indexOf(delimiterOfInclusiveBeginIndex))} is returned.
+         * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}
          *
          * @param str
-         * @param delimiterOfInclusiveBeginIndex {@code inclusiveBeginIndex <- str.indexOf(delimiterOfInclusiveBeginIndex)}
+         * @param delimiterOfInclusiveBeginIndex
          * @return
          * @see Strings#substring(String, char)
          */
@@ -10643,11 +10735,10 @@ public abstract class Strings {
         }
 
         /**
-         * Returns an empty <code>Optional</code> if {@code N.isNullOrEmpty(str) || str.indexOf(delimiterOfInclusiveBeginIndex) < 0},
-         * otherwise an {@code Optional} with String value: {@code str.substring(str.indexOf(delimiterOfInclusiveBeginIndex))} is returned.
+         * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}
          *
          * @param str
-         * @param delimiterOfInclusiveBeginIndex {@code inclusiveBeginIndex <- str.indexOf(delimiterOfInclusiveBeginIndex)}
+         * @param delimiterOfInclusiveBeginIndex
          * @return
          * @see Strings#substring(String, String)
          */
@@ -10656,8 +10747,7 @@ public abstract class Strings {
         }
 
         /**
-         * Returns an empty <code>Optional</code> if {@code inclusiveBeginIndex < 0 ||exclusiveEndIndex <= 0 || inclusiveBeginIndex > exclusiveEndIndex},
-         * otherwise an {@code Optional} with String value: {@code str.substring(exclusiveBeginIndex, exclusiveEndIndex)} is returned.
+         * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}
          *
          * @param str
          * @param inclusiveBeginIndex
@@ -10670,10 +10760,11 @@ public abstract class Strings {
         }
 
         /**
+         * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}
          *
          * @param str
          * @param inclusiveBeginIndex
-         * @param delimiterOfExclusiveEndIndex {@code exclusiveEndIndex <- str.indexOf(delimiterOfExclusiveEndIndex, inclusiveBeginIndex + 1) if inclusiveBeginIndex >= 0}
+         * @param delimiterOfExclusiveEndIndex
          * @return
          * @see Strings#substring(String, int, char)
          */
@@ -10682,10 +10773,11 @@ public abstract class Strings {
         }
 
         /**
+         * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}
          *
          * @param str
          * @param inclusiveBeginIndex
-         * @param delimiterOfExclusiveEndIndex {@code exclusiveEndIndex <- str.indexOf(delimiterOfExclusiveEndIndex, inclusiveBeginIndex + 1) if inclusiveBeginIndex >= 0}
+         * @param delimiterOfExclusiveEndIndex
          * @return
          * @see Strings#substring(String, int, String)
          */
@@ -10694,10 +10786,11 @@ public abstract class Strings {
         }
 
         /**
+         * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}
          *
          * @param str
          * @param inclusiveBeginIndex
-         * @param funcOfExclusiveEndIndex {@code exclusiveEndIndex <- funcOfExclusiveEndIndex.applyAsInt(inclusiveBeginIndex) if inclusiveBeginIndex >= 0}
+         * @param funcOfExclusiveEndIndex
          * @return
          * @see Strings#substring(String, int, IntUnaryOperator)
          */
@@ -10706,9 +10799,10 @@ public abstract class Strings {
         }
 
         /**
+         * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}
          *
          * @param str
-         * @param delimiterOfInclusiveBeginIndex {@code inclusiveBeginIndex <- str.lastIndexOf(delimiterOfInclusiveBeginIndex, exclusiveEndIndex - 1) if exclusiveEndIndex > 0}
+         * @param delimiterOfInclusiveBeginIndex
          * @param exclusiveEndIndex
          * @return
          * @see Strings#substring(String, char, int)
@@ -10718,9 +10812,10 @@ public abstract class Strings {
         }
 
         /**
+         * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}
          *
          * @param str
-         * @param delimiterOfInclusiveBeginIndex {@code inclusiveBeginIndex <- str.lastIndexOf(delimiterOfInclusiveBeginIndex, exclusiveEndIndex - 1) if exclusiveEndIndex > 0}
+         * @param delimiterOfInclusiveBeginIndex
          * @param exclusiveEndIndex
          * @return
          * @see Strings#substring(String, String, int)
@@ -10730,9 +10825,10 @@ public abstract class Strings {
         }
 
         /**
+         * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}
          *
          * @param str
-         * @param funcOfInclusiveBeginIndex {@code inclusiveBeginIndex <- funcOfInclusiveBeginIndex.applyAsInt(exclusiveEndIndex)) if exclusiveEndIndex > 0}
+         * @param funcOfInclusiveBeginIndex
          * @param exclusiveEndIndex
          * @return
          * @see Strings#substring(String, IntUnaryOperator, int)
@@ -10742,8 +10838,7 @@ public abstract class Strings {
         }
 
         /**
-         * Returns {@code defaultStr} if {@code inclusiveBeginIndex < 0},
-         * otherwise an {@code Optional} with String value: {@code str.substring(inclusiveBeginIndex)} is returned.
+         * Returns the substring if it exists, otherwise returns {@code defaultStr}.
          *
          * @param str
          * @param inclusiveBeginIndex
@@ -10759,11 +10854,10 @@ public abstract class Strings {
         }
 
         /**
-         * Returns {@code defaultStr} if {@code N.isNullOrEmpty(str) || str.indexOf(delimiterOfInclusiveBeginIndex) < 0},
-         * otherwise an {@code Optional} with String value: {@code str.substring(str.indexOf(delimiterOfInclusiveBeginIndex))} is returned.
+         * Returns the substring if it exists, otherwise returns {@code defaultStr}.
          *
          * @param str
-         * @param delimiterOfInclusiveBeginIndex {@code inclusiveBeginIndex <- str.indexOf(delimiterOfInclusiveBeginIndex)}
+         * @param delimiterOfInclusiveBeginIndex
          * @param defaultStr
          * @return
          * @see Strings#substring(String, char)
@@ -10776,11 +10870,10 @@ public abstract class Strings {
         }
 
         /**
-         * Returns {@code defaultStr} if {@code N.isNullOrEmpty(str) || str.indexOf(delimiterOfInclusiveBeginIndex) < 0},
-         * otherwise an {@code Optional} with String value: {@code str.substring(str.indexOf(delimiterOfInclusiveBeginIndex))} is returned.
+         * Returns the substring if it exists, otherwise returns {@code defaultStr}.
          *
          * @param str
-         * @param delimiterOfInclusiveBeginIndex {@code inclusiveBeginIndex <- str.indexOf(delimiterOfInclusiveBeginIndex)}
+         * @param delimiterOfInclusiveBeginIndex
          * @param defaultStr
          * @return
          * @see Strings#substring(String, String)
@@ -10793,8 +10886,7 @@ public abstract class Strings {
         }
 
         /**
-         * Returns {@code defaultStr} if {@code inclusiveBeginIndex < 0 ||exclusiveEndIndex <= 0 || inclusiveBeginIndex > exclusiveEndIndex},
-         * otherwise an {@code Optional} with String value: {@code str.substring(exclusiveBeginIndex, exclusiveEndIndex)} is returned.
+         * Returns the substring if it exists, otherwise returns {@code defaultStr}.
          *
          * @param str
          * @param inclusiveBeginIndex
@@ -10811,10 +10903,11 @@ public abstract class Strings {
         }
 
         /**
+         * Returns the substring if it exists, otherwise returns {@code defaultStr}.
          *
          * @param str
          * @param inclusiveBeginIndex
-         * @param delimiterOfExclusiveEndIndex {@code exclusiveEndIndex <- str.indexOf(delimiterOfExclusiveEndIndex, inclusiveBeginIndex + 1) if inclusiveBeginIndex >= 0}
+         * @param delimiterOfExclusiveEndIndex
          * @param defaultStr
          * @return
          * @see Strings#substring(String, int, char)
@@ -10827,10 +10920,11 @@ public abstract class Strings {
         }
 
         /**
+         * Returns the substring if it exists, otherwise returns {@code defaultStr}.
          *
          * @param str
          * @param inclusiveBeginIndex
-         * @param delimiterOfExclusiveEndIndex {@code exclusiveEndIndex <- str.indexOf(delimiterOfExclusiveEndIndex, inclusiveBeginIndex + 1) if inclusiveBeginIndex >= 0}
+         * @param delimiterOfExclusiveEndIndex
          * @param defaultStr
          * @return
          * @see Strings#substring(String, int, String)
@@ -10843,10 +10937,11 @@ public abstract class Strings {
         }
 
         /**
+         * Returns the substring if it exists, otherwise returns {@code defaultStr}.
          *
          * @param str
          * @param inclusiveBeginIndex
-         * @param funcOfExclusiveEndIndex {@code exclusiveEndIndex <- funcOfExclusiveEndIndex.applyAsInt(inclusiveBeginIndex) if inclusiveBeginIndex >= 0}
+         * @param funcOfExclusiveEndIndex
          * @param defaultStr
          * @return
          * @see Strings#substring(String, int, IntUnaryOperator)
@@ -10859,9 +10954,10 @@ public abstract class Strings {
         }
 
         /**
+         * Returns the substring if it exists, otherwise returns {@code defaultStr}.
          *
          * @param str
-         * @param delimiterOfInclusiveBeginIndex {@code inclusiveBeginIndex <- str.lastIndexOf(delimiterOfInclusiveBeginIndex, exclusiveEndIndex - 1) if exclusiveEndIndex > 0}
+         * @param delimiterOfInclusiveBeginIndex
          * @param exclusiveEndIndex
          * @param defaultStr
          * @return
@@ -10875,9 +10971,10 @@ public abstract class Strings {
         }
 
         /**
+         * Returns the substring if it exists, otherwise returns {@code defaultStr}.
          *
          * @param str
-         * @param delimiterOfInclusiveBeginIndex {@code inclusiveBeginIndex <- str.lastIndexOf(delimiterOfInclusiveBeginIndex, exclusiveEndIndex - 1) if exclusiveEndIndex > 0}
+         * @param delimiterOfInclusiveBeginIndex
          * @param exclusiveEndIndex
          * @param defaultStr
          * @return
@@ -10891,9 +10988,10 @@ public abstract class Strings {
         }
 
         /**
+         * Returns the substring if it exists, otherwise returns {@code defaultStr}.
          *
          * @param str
-         * @param funcOfInclusiveBeginIndex {@code inclusiveBeginIndex <- funcOfInclusiveBeginIndex.applyAsInt(exclusiveEndIndex)) if exclusiveEndIndex > 0}
+         * @param funcOfInclusiveBeginIndex
          * @param exclusiveEndIndex
          * @param defaultStr
          * @return
@@ -10907,8 +11005,7 @@ public abstract class Strings {
         }
 
         /**
-         * Returns the input {@code str} if {@code inclusiveBeginIndex < 0},
-         * otherwise an {@code Optional} with String value: {@code str.substring(inclusiveBeginIndex)} is returned.
+         * Returns the substring if it exists, otherwise returns {@code str} itself.
          *
          * @param str
          * @param inclusiveBeginIndex
@@ -10923,11 +11020,10 @@ public abstract class Strings {
         }
 
         /**
-         * Returns the input {@code str} if {@code N.isNullOrEmpty(str) || str.indexOf(delimiterOfInclusiveBeginIndex) < 0},
-         * otherwise an {@code Optional} with String value: {@code str.substring(str.indexOf(delimiterOfInclusiveBeginIndex))} is returned.
+         * Returns the substring if it exists, otherwise returns {@code str} itself.
          *
          * @param str
-         * @param delimiterOfInclusiveBeginIndex {@code inclusiveBeginIndex <- str.indexOf(delimiterOfInclusiveBeginIndex)}
+         * @param delimiterOfInclusiveBeginIndex
          * @return
          * @see Strings#substring(String, char)
          */
@@ -10939,11 +11035,10 @@ public abstract class Strings {
         }
 
         /**
-         * Returns the input {@code str} if {@code N.isNullOrEmpty(str) || str.indexOf(delimiterOfInclusiveBeginIndex) < 0},
-         * otherwise an {@code Optional} with String value: {@code str.substring(str.indexOf(delimiterOfInclusiveBeginIndex))} is returned.
+         * Returns the substring if it exists, otherwise returns {@code str} itself.
          *
          * @param str
-         * @param delimiterOfInclusiveBeginIndex {@code inclusiveBeginIndex <- str.indexOf(delimiterOfInclusiveBeginIndex)}
+         * @param delimiterOfInclusiveBeginIndex
          * @return
          * @see Strings#substring(String, String)
          */
@@ -10955,8 +11050,7 @@ public abstract class Strings {
         }
 
         /**
-         * Returns the input {@code str} if {@code inclusiveBeginIndex < 0 ||exclusiveEndIndex <= 0 || inclusiveBeginIndex > exclusiveEndIndex},
-         * otherwise an {@code Optional} with String value: {@code str.substring(exclusiveBeginIndex, exclusiveEndIndex)} is returned.
+         * Returns the substring if it exists, otherwise returns {@code str} itself.
          *
          * @param str
          * @param inclusiveBeginIndex
@@ -10972,11 +11066,11 @@ public abstract class Strings {
         }
 
         /**
-         *
+         * Returns the substring if it exists, otherwise returns {@code str} itself.
          *
          * @param str
          * @param inclusiveBeginIndex
-         * @param delimiterOfExclusiveEndIndex {@code exclusiveEndIndex <- str.indexOf(delimiterOfExclusiveEndIndex, inclusiveBeginIndex + 1) if inclusiveBeginIndex >= 0}
+         * @param delimiterOfExclusiveEndIndex
          * @return
          * @see Strings#substring(String, int, char)
          */
@@ -10988,11 +11082,11 @@ public abstract class Strings {
         }
 
         /**
-         *
+         * Returns the substring if it exists, otherwise returns {@code str} itself.
          *
          * @param str
          * @param inclusiveBeginIndex
-         * @param delimiterOfExclusiveEndIndex {@code exclusiveEndIndex <- str.indexOf(delimiterOfExclusiveEndIndex, inclusiveBeginIndex + 1) if inclusiveBeginIndex >= 0}
+         * @param delimiterOfExclusiveEndIndex
          * @return
          * @see Strings#substring(String, int, String)
          */
@@ -11004,11 +11098,11 @@ public abstract class Strings {
         }
 
         /**
-         *
+         * Returns the substring if it exists, otherwise returns {@code str} itself.
          *
          * @param str
          * @param inclusiveBeginIndex
-         * @param funcOfExclusiveEndIndex {@code exclusiveEndIndex <- funcOfExclusiveEndIndex.applyAsInt(inclusiveBeginIndex) if inclusiveBeginIndex >= 0}
+         * @param funcOfExclusiveEndIndex
          * @return
          * @see Strings#substring(String, int, IntUnaryOperator)
          */
@@ -11020,10 +11114,10 @@ public abstract class Strings {
         }
 
         /**
-         *
+         * Returns the substring if it exists, otherwise returns {@code str} itself.
          *
          * @param str
-         * @param delimiterOfInclusiveBeginIndex {@code inclusiveBeginIndex <- str.lastIndexOf(delimiterOfInclusiveBeginIndex, exclusiveEndIndex - 1) if exclusiveEndIndex > 0}
+         * @param delimiterOfInclusiveBeginIndex
          * @param exclusiveEndIndex
          * @return
          * @see Strings#substring(String, char, int)
@@ -11036,10 +11130,10 @@ public abstract class Strings {
         }
 
         /**
-         *
+         * Returns the substring if it exists, otherwise returns {@code str} itself.
          *
          * @param str
-         * @param delimiterOfInclusiveBeginIndex {@code inclusiveBeginIndex <- str.lastIndexOf(delimiterOfInclusiveBeginIndex, exclusiveEndIndex - 1) if exclusiveEndIndex > 0}
+         * @param delimiterOfInclusiveBeginIndex
          * @param exclusiveEndIndex
          * @return
          * @see Strings#substring(String, String, int)
@@ -11052,10 +11146,10 @@ public abstract class Strings {
         }
 
         /**
-         *
+         * Returns the substring if it exists, otherwise returns {@code str} itself.
          *
          * @param str
-         * @param funcOfInclusiveBeginIndex {@code inclusiveBeginIndex <- funcOfInclusiveBeginIndex.applyAsInt(exclusiveEndIndex)) if exclusiveEndIndex > 0}
+         * @param funcOfInclusiveBeginIndex
          * @param exclusiveEndIndex
          * @return
          * @see Strings#substring(String, IntUnaryOperator, int)
@@ -11068,7 +11162,7 @@ public abstract class Strings {
         }
 
         /**
-         * Returns the substring after first {@code delimiterOfExclusiveBeginIndex} if it exists, otherwise return {@code null} String.
+         * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}
          *
          * @param str
          * @param delimiterOfExclusiveBeginIndex
@@ -11081,7 +11175,7 @@ public abstract class Strings {
         }
 
         /**
-         * Returns the substring after first {@code delimiterOfExclusiveBeginIndex} if it exists, otherwise return {@code null} String.
+         * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}
          *
          * @param str
          * @param delimiterOfExclusiveBeginIndex
@@ -11094,7 +11188,7 @@ public abstract class Strings {
         }
 
         /**
-         * Returns the substring after first {@code delimiterOfExclusiveBeginIndex} if it exists, otherwise return {@code null} String.
+         * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}
          *
          * @param str
          * @param delimiterOfExclusiveBeginIndex
@@ -11108,7 +11202,7 @@ public abstract class Strings {
         }
 
         /**
-         * Returns the substring after last {@code delimiterOfExclusiveBeginIndex} if it exists, otherwise return {@code null} String.
+         * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}
          *
          * @param str
          * @param delimiterOfExclusiveBeginIndex
@@ -11121,7 +11215,7 @@ public abstract class Strings {
         }
 
         /**
-         * Returns the substring after last {@code delimiterOfExclusiveBeginIndex} if it exists, otherwise return {@code null} String.
+         * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}
          *
          * @param str
          * @param delimiterOfExclusiveBeginIndex
@@ -11134,7 +11228,7 @@ public abstract class Strings {
         }
 
         /**
-         * Returns the substring after last {@code delimiterOfExclusiveBeginIndex} if it exists, otherwise return {@code null} String.
+         * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}
          *
          * @param str
          * @param delimiterOfExclusiveBeginIndex
@@ -11148,7 +11242,7 @@ public abstract class Strings {
         }
 
         /**
-         * Returns the substring after any of {@code delimitersOfExclusiveBeginIndex} if it exists, otherwise return {@code null} String.
+         * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}
          *
          * @param str
          * @param delimitersOfExclusiveBeginIndex
@@ -11161,7 +11255,7 @@ public abstract class Strings {
         }
 
         /**
-         * Returns the substring after any of {@code delimitersOfExclusiveBeginIndex} if it exists, otherwise return {@code null} String.
+         * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}
          *
          * @param str
          * @param delimitersOfExclusiveBeginIndex
@@ -11174,7 +11268,7 @@ public abstract class Strings {
         }
 
         /**
-         * Returns the substring before first {@code delimiterOfExclusiveBeginIndex} if it exists, otherwise return {@code null} String.
+         * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}
          *
          * @param str
          * @param delimiterOfExclusiveEndIndex
@@ -11187,7 +11281,7 @@ public abstract class Strings {
         }
 
         /**
-         * Returns the substring before first {@code delimiterOfExclusiveBeginIndex} if it exists, otherwise return {@code null} String.
+         * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}
          *
          * @param str
          * @param delimiterOfExclusiveEndIndex
@@ -11200,7 +11294,7 @@ public abstract class Strings {
         }
 
         /**
-         * Returns the substring before first {@code delimiterOfExclusiveBeginIndex} if it exists, otherwise return {@code null} String.
+         * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}
          *
          * @param str
          * @param inclusiveBeginIndex
@@ -11214,7 +11308,7 @@ public abstract class Strings {
         }
 
         /**
-         * Returns the substring last first {@code delimiterOfExclusiveBeginIndex} if it exists, otherwise return {@code null} String.
+         * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}
          *
          * @param str
          * @param delimiterOfExclusiveEndIndex
@@ -11227,7 +11321,7 @@ public abstract class Strings {
         }
 
         /**
-         * Returns the substring last first {@code delimiterOfExclusiveBeginIndex} if it exists, otherwise return {@code null} String.
+         * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}
          *
          * @param str
          * @param delimiterOfExclusiveEndIndex
@@ -11240,7 +11334,7 @@ public abstract class Strings {
         }
 
         /**
-         * Returns the substring last first {@code delimiterOfExclusiveBeginIndex} if it exists, otherwise return {@code null} String.
+         * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}
          *
          * @param str
          * @param inclusiveBeginIndex
@@ -11254,7 +11348,7 @@ public abstract class Strings {
         }
 
         /**
-         * Returns the substring before any of {@code delimitersOfExclusiveEndIndex} if it exists, otherwise return {@code null} String.
+         * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}
          *
          * @param str
          * @param delimitersOfExclusiveEndIndex
@@ -11267,7 +11361,7 @@ public abstract class Strings {
         }
 
         /**
-         * Returns the substring before any of {@code delimitersOfExclusiveEndIndex} if it exists, otherwise return {@code null} String.
+         * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}
          *
          * @param str
          * @param delimitersOfExclusiveEndIndex
@@ -11280,7 +11374,7 @@ public abstract class Strings {
         }
 
         /**
-         * Returns the substring after first {@code delimiterOfExclusiveBeginIndex} if it exists, otherwise return {@code defaultStr}.
+         * Returns the substring if it exists, otherwise returns {@code defaultStr}.
          *
          * @param str
          * @param delimiterOfExclusiveBeginIndex
@@ -11296,7 +11390,7 @@ public abstract class Strings {
         }
 
         /**
-         * Returns the substring after last {@code delimiterOfExclusiveBeginIndex} if it exists, otherwise return {@code defaultStr}.
+         * Returns the substring if it exists, otherwise returns {@code defaultStr}.
          *
          * @param str
          * @param delimiterOfExclusiveBeginIndex
@@ -11312,7 +11406,7 @@ public abstract class Strings {
         }
 
         /**
-         * Returns the substring before first {@code delimiterOfExclusiveBeginIndex} if it exists, otherwise return {@code defaultStr}.
+         * Returns the substring if it exists, otherwise returns {@code defaultStr}.
          *
          * @param str
          * @param delimiterOfExclusiveEndIndex
@@ -11328,7 +11422,7 @@ public abstract class Strings {
         }
 
         /**
-         * Returns the substring last first {@code delimiterOfExclusiveBeginIndex} if it exists, otherwise return {@code defaultStr}.
+         * Returns the substring if it exists, otherwise returns {@code defaultStr}.
          *
          * @param str
          * @param delimiterOfExclusiveEndIndex
@@ -11344,7 +11438,7 @@ public abstract class Strings {
         }
 
         /**
-         * Returns the substring after first {@code delimiterOfExclusiveBeginIndex} if it exists, otherwise return the input {@code str}.
+         * Returns the substring if it exists, otherwise returns {@code str} itself.
          *
          * @param str
          * @param delimiterOfExclusiveBeginIndex
@@ -11359,7 +11453,7 @@ public abstract class Strings {
         }
 
         /**
-         * Returns the substring after first {@code delimiterOfExclusiveBeginIndex} if it exists, otherwise return the input {@code str}.
+         * Returns the substring if it exists, otherwise returns {@code str} itself.
          *
          * @param str
          * @param delimiterOfExclusiveBeginIndex
@@ -11374,7 +11468,7 @@ public abstract class Strings {
         }
 
         /**
-         * Returns the substring after first {@code delimiterOfExclusiveBeginIndex} if it exists, otherwise return the input {@code str}.
+         * Returns the substring if it exists, otherwise returns {@code str} itself.
          *
          * @param str
          * @param delimiterOfExclusiveBeginIndex
@@ -11390,7 +11484,7 @@ public abstract class Strings {
         }
 
         /**
-         * Returns the substring after last {@code delimiterOfExclusiveBeginIndex} if it exists, otherwise return the input {@code str}.
+         * Returns the substring if it exists, otherwise returns {@code str} itself.
          *
          * @param str
          * @param delimiterOfExclusiveBeginIndex
@@ -11405,7 +11499,7 @@ public abstract class Strings {
         }
 
         /**
-         * Returns the substring after last {@code delimiterOfExclusiveBeginIndex} if it exists, otherwise return the input {@code str}.
+         * Returns the substring if it exists, otherwise returns {@code str} itself.
          *
          * @param str
          * @param delimiterOfExclusiveBeginIndex
@@ -11420,7 +11514,7 @@ public abstract class Strings {
         }
 
         /**
-         * Returns the substring after last {@code delimiterOfExclusiveBeginIndex} if it exists, otherwise return the input {@code str}.
+         * Returns the substring if it exists, otherwise returns {@code str} itself.
          *
          * @param str
          * @param delimiterOfExclusiveBeginIndex
@@ -11436,7 +11530,7 @@ public abstract class Strings {
         }
 
         /**
-         * Returns the substring before first {@code delimiterOfExclusiveBeginIndex} if it exists, otherwise return the input {@code str}.
+         * Returns the substring if it exists, otherwise returns {@code str} itself.
          *
          * @param str
          * @param delimiterOfExclusiveEndIndex
@@ -11451,7 +11545,7 @@ public abstract class Strings {
         }
 
         /**
-         * Returns the substring before first {@code delimiterOfExclusiveBeginIndex} if it exists, otherwise return the input {@code str}.
+         * Returns the substring if it exists, otherwise returns {@code str} itself.
          *
          * @param str
          * @param delimiterOfExclusiveEndIndex
@@ -11466,7 +11560,7 @@ public abstract class Strings {
         }
 
         /**
-         * Returns the substring before first {@code delimiterOfExclusiveBeginIndex} if it exists, otherwise return the input {@code str}.
+         * Returns the substring if it exists, otherwise returns {@code str} itself.
          *
          * @param str
          * @param inclusiveBeginIndex
@@ -11482,7 +11576,7 @@ public abstract class Strings {
         }
 
         /**
-         * Returns the substring last first {@code delimiterOfExclusiveBeginIndex} if it exists, otherwise return the input {@code str}.
+         * Returns the substring if it exists, otherwise returns {@code str} itself.
          *
          * @param str
          * @param delimiterOfExclusiveEndIndex
@@ -11497,7 +11591,7 @@ public abstract class Strings {
         }
 
         /**
-         * Returns the substring last first {@code delimiterOfExclusiveBeginIndex} if it exists, otherwise return the input {@code str}.
+         * Returns the substring if it exists, otherwise returns {@code str} itself.
          *
          * @param str
          * @param delimiterOfExclusiveEndIndex
@@ -11512,7 +11606,7 @@ public abstract class Strings {
         }
 
         /**
-         * Returns the substring last first {@code delimiterOfExclusiveBeginIndex} if it exists, otherwise return the input {@code str}.
+         * Returns the substring if it exists, otherwise returns {@code str} itself.
          *
          * @param str
          * @param exclusiveEndIndex
@@ -11528,8 +11622,7 @@ public abstract class Strings {
         }
 
         /**
-         * Returns an empty <code>Optional</code> if {@code exclusiveBeginIndex < 0 ||exclusiveEndIndex <= 0 || exclusiveBeginIndex >= exclusiveEndIndex},
-         * otherwise an {@code Optional} with String value: {@code str.substring(exclusiveBeginIndex + 1, exclusiveEndIndex)} is returned.
+         * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}
          *
          * @param str
          * @param exclusiveBeginIndex
@@ -11542,10 +11635,11 @@ public abstract class Strings {
         }
 
         /**
+         * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}
          *
          * @param str
          * @param exclusiveBeginIndex
-         * @param delimiterOfExclusiveEndIndex {@code exclusiveEndIndex <- str.indexOf(delimiterOfExclusiveEndIndex, beginIndex + 1) if exclusiveBeginIndex >= 0}
+         * @param delimiterOfExclusiveEndIndex
          * @return
          * @see Strings#substringBetween(String, int, char)
          */
@@ -11554,10 +11648,11 @@ public abstract class Strings {
         }
 
         /**
+         * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}
          *
          * @param str
          * @param exclusiveBeginIndex
-         * @param delimiterOfExclusiveEndIndex {@code exclusiveEndIndex <- str.indexOf(delimiterOfExclusiveEndIndex, beginIndex + 1) if exclusiveBeginIndex >= 0}
+         * @param delimiterOfExclusiveEndIndex
          * @return
          * @see Strings#substringBetween(String, int, String)
          */
@@ -11566,10 +11661,11 @@ public abstract class Strings {
         }
 
         /**
+         * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}
          *
          * @param str
          * @param exclusiveBeginIndex
-         * @param funcOfExclusiveEndIndex {@code exclusiveEndIndex <- funcOfExclusiveEndIndex.applyAsInt(inclusiveBeginIndex) if inclusiveBeginIndex >= 0}
+         * @param funcOfExclusiveEndIndex
          * @return
          * @see Strings#substringBetween(String, int, IntUnaryOperator)
          */
@@ -11578,9 +11674,10 @@ public abstract class Strings {
         }
 
         /**
+         * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}
          *
          * @param str
-         * @param delimiterOfExclusiveBeginIndex {@code exclusiveBeginIndex <- str.lastIndexOf(delimiterOfExclusiveBeginIndex, exclusiveEndIndex - 1) if exclusiveEndIndex > 0}
+         * @param delimiterOfExclusiveBeginIndex
          * @param exclusiveEndIndex
          * @return
          * @see Strings#substringBetween(String, char, int)
@@ -11590,9 +11687,10 @@ public abstract class Strings {
         }
 
         /**
+         * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}
          *
          * @param str
-         * @param delimiterOfExclusiveBeginIndex {@code exclusiveBeginIndex <- str.lastIndexOf(delimiterOfExclusiveBeginIndex, exclusiveEndIndex - 1) + delimiterOfExclusiveBeginIndex.length() - 1 if exclusiveEndIndex > 0}
+         * @param delimiterOfExclusiveBeginIndex
          * @param exclusiveEndIndex
          * @return
          * @see Strings#substringBetween(String, String, int)
@@ -11602,9 +11700,10 @@ public abstract class Strings {
         }
 
         /**
+         * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}
          *
          * @param str
-         * @param funcOfExclusiveBeginIndex {@code exclusiveBeginIndex <- funcOfExclusiveBeginIndex.applyAsInt(exclusiveEndIndex)) if exclusiveEndIndex > 0}
+         * @param funcOfExclusiveBeginIndex
          * @param exclusiveEndIndex
          * @return
          * @see Strings#substringBetween(String, IntUnaryOperator, int)
@@ -11614,7 +11713,7 @@ public abstract class Strings {
         }
 
         /**
-         *
+         * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}
          *
          * @param str
          * @param delimiterOfExclusiveBeginIndex
@@ -11627,6 +11726,7 @@ public abstract class Strings {
         }
 
         /**
+         * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}
          *
          * @param str
          * @param tag
@@ -11639,6 +11739,7 @@ public abstract class Strings {
         }
 
         /**
+         * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}
          *
          *
          * @param str
@@ -11652,10 +11753,11 @@ public abstract class Strings {
         }
 
         /**
+         * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}
          *
          *
          * @param str
-         * @param fromIndex start index for {@code delimiterOfExclusive}. {@code str.indexOf(delimiterOfExclusiveBeginIndex, fromIndex)}
+         * @param fromIndex
          * @param delimiterOfExclusiveBeginIndex
          * @param delimiterOfExclusiveEndIndex
          * @return
