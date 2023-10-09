@@ -17,8 +17,8 @@ package com.landawn.abacus.parser;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.Objects;
 
-import com.google.common.base.Objects;
 import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
 
@@ -60,7 +60,7 @@ final class ASMUtil {
             TestBeanA bean = new TestBeanA();
 
             setMethodAccess.invoke(bean, setMethodAccessIndex, "Tom");
-            tmp = Objects.equal(fieldAccess.get(bean, fieldAccessIndex), getMethodAccess.invoke(bean, getMethodAccessIndex));
+            tmp = Objects.equals(fieldAccess.get(bean, fieldAccessIndex), getMethodAccess.invoke(bean, getMethodAccessIndex));
 
         } catch (Throwable e) {
             // ignore.
@@ -91,7 +91,7 @@ final class ASMUtil {
     }
 
     /**
-     * 
+     *
      */
     @Data
     public static final class TestBeanA {

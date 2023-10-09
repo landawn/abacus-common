@@ -2923,8 +2923,7 @@ public final class Fn extends Comparators {
         return PARSE_DOUBLE_FUNC;
     }
 
-    private static final Function<String, Number> CREATE_NUMBER_FUNC = t -> N.isNullOrEmpty(t) ? null
-            : Numbers.createNumber(t).orElseThrow(() -> new NumberFormatException("Invalid number: " + t));
+    private static final Function<String, Number> CREATE_NUMBER_FUNC = t -> N.isNullOrEmpty(t) ? null : Numbers.createNumber(t);
 
     /**
      * Creates the number.

@@ -19,6 +19,8 @@ import static com.landawn.abacus.util.WD._BACKSLASH;
 import static com.landawn.abacus.util.WD._QUOTATION_D;
 import static com.landawn.abacus.util.WD._QUOTATION_S;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -76,14 +78,14 @@ public abstract class Strings {
     /**
      * The empty String {@code ""}.
      */
-    public static final String EMPTY_STRING = N.EMPTY_STRING;
+    public static final String EMPTY_STRING = "".intern();
 
     //    /**
     //     * The empty String {@code ""}.
     //     * @deprecated Use {@link #EMPTY_STRING} instead
     //     */
     //    @Deprecated
-    //    public static final String EMPTY = N.EMPTY_STRING;
+    //    public static final String EMPTY = EMPTY_STRING;
 
     /**
      * A String for a space character.
@@ -708,7 +710,7 @@ public abstract class Strings {
      * @return
      */
     public static String nullToEmpty(final String str) {
-        return str == null ? N.EMPTY_STRING : str;
+        return str == null ? EMPTY_STRING : str;
     }
 
     /**
@@ -722,7 +724,7 @@ public abstract class Strings {
         }
 
         for (int i = 0, len = strs.length; i < len; i++) {
-            strs[i] = strs[i] == null ? N.EMPTY_STRING : strs[i];
+            strs[i] = strs[i] == null ? EMPTY_STRING : strs[i];
         }
     }
 
@@ -967,7 +969,7 @@ public abstract class Strings {
             throw new IllegalArgumentException(String.format("Minimum abbreviation width is %d", minAbbrevWidth));
         }
 
-        if (N.notNullOrEmpty(str) && N.EMPTY_STRING.equals(abbrevMarker) && maxWidth > 0) {
+        if (N.notNullOrEmpty(str) && EMPTY_STRING.equals(abbrevMarker) && maxWidth > 0) {
             return Strings.substring(str, 0, maxWidth);
         } else if (N.anyNullOrEmpty(str, abbrevMarker)) {
             return str;
@@ -1094,7 +1096,7 @@ public abstract class Strings {
         N.checkArgNotNegative(size, "size");
 
         if (str == null) {
-            str = N.EMPTY_STRING;
+            str = EMPTY_STRING;
         }
 
         if (str.length() >= size) {
@@ -1134,7 +1136,7 @@ public abstract class Strings {
         // N.checkArgNotNullOrEmpty(padStr, "padStr");
 
         if (str == null) {
-            str = N.EMPTY_STRING;
+            str = EMPTY_STRING;
         }
 
         if (str.length() >= minLength) {
@@ -1172,7 +1174,7 @@ public abstract class Strings {
     @SuppressWarnings("deprecation")
     public static String padStart(String str, final int minLength, final char padChar) {
         if (str == null) {
-            str = N.EMPTY_STRING;
+            str = EMPTY_STRING;
         }
 
         if (str.length() >= minLength) {
@@ -1198,7 +1200,7 @@ public abstract class Strings {
      */
     public static String padStart(String str, final int minLength, final String padStr) {
         if (str == null) {
-            str = N.EMPTY_STRING;
+            str = EMPTY_STRING;
         }
 
         if (str.length() >= minLength) {
@@ -1255,7 +1257,7 @@ public abstract class Strings {
     @SuppressWarnings("deprecation")
     public static String padEnd(String str, final int minLength, final char padChar) {
         if (str == null) {
-            str = N.EMPTY_STRING;
+            str = EMPTY_STRING;
         }
 
         if (str.length() >= minLength) {
@@ -1279,7 +1281,7 @@ public abstract class Strings {
      */
     public static String padEnd(String str, final int minLength, final String padStr) {
         if (str == null) {
-            str = N.EMPTY_STRING;
+            str = EMPTY_STRING;
         }
 
         if (str.length() >= minLength) {
@@ -1328,7 +1330,7 @@ public abstract class Strings {
         N.checkArgNotNegative(n, "n");
 
         if (n == 0) {
-            return N.EMPTY_STRING;
+            return EMPTY_STRING;
         } else if (n == 1) {
             return String.valueOf(ch);
         }
@@ -1374,7 +1376,7 @@ public abstract class Strings {
      * @return
      */
     public static String repeat(final String str, final int repeat) {
-        return repeat(str, repeat, N.EMPTY_STRING);
+        return repeat(str, repeat, EMPTY_STRING);
     }
 
     /**
@@ -1385,7 +1387,7 @@ public abstract class Strings {
      * @return
      */
     public static String repeat(final String str, final int n, final String delimiter) {
-        return repeat(str, n, delimiter, N.EMPTY_STRING, N.EMPTY_STRING);
+        return repeat(str, n, delimiter, EMPTY_STRING, EMPTY_STRING);
     }
 
     /**
@@ -1401,10 +1403,10 @@ public abstract class Strings {
     public static String repeat(String str, final int n, String delimiter, String prefix, String suffix) {
         N.checkArgNotNegative(n, "n");
 
-        str = str == null ? N.EMPTY_STRING : str;
-        delimiter = delimiter == null ? N.EMPTY_STRING : delimiter;
-        prefix = prefix == null ? N.EMPTY_STRING : prefix;
-        suffix = suffix == null ? N.EMPTY_STRING : suffix;
+        str = str == null ? EMPTY_STRING : str;
+        delimiter = delimiter == null ? EMPTY_STRING : delimiter;
+        prefix = prefix == null ? EMPTY_STRING : prefix;
+        suffix = suffix == null ? EMPTY_STRING : suffix;
 
         if (n == 0 || (N.isNullOrEmpty(str) && N.isNullOrEmpty(delimiter))) {
             return prefix + suffix;
@@ -2693,7 +2695,7 @@ public abstract class Strings {
             return str;
         }
 
-        return replace(str, fromIndex, removeStr, N.EMPTY_STRING, -1);
+        return replace(str, fromIndex, removeStr, EMPTY_STRING, -1);
     }
 
     /**
@@ -2710,7 +2712,7 @@ public abstract class Strings {
      * @since 3.2
      */
     public static String removePattern(final String source, final String regex) {
-        return replacePattern(source, regex, N.EMPTY_STRING);
+        return replacePattern(source, regex, EMPTY_STRING);
     }
 
     /**
@@ -3010,7 +3012,7 @@ public abstract class Strings {
      * @since 2.0
      */
     public static String trimToEmpty(final String str) {
-        return N.isNullOrEmpty(str) ? N.EMPTY_STRING : str.trim();
+        return N.isNullOrEmpty(str) ? EMPTY_STRING : str.trim();
     }
 
     /**
@@ -3155,7 +3157,7 @@ public abstract class Strings {
      * @since 2.0
      */
     public static String stripToEmpty(final String str) {
-        return N.isNullOrEmpty(str) ? N.EMPTY_STRING : strip(str, null);
+        return N.isNullOrEmpty(str) ? EMPTY_STRING : strip(str, null);
     }
 
     /**
@@ -3478,7 +3480,7 @@ public abstract class Strings {
             final char ch = str.charAt(0);
 
             if (ch == N.CHAR_CR || ch == N.CHAR_LF) {
-                return N.EMPTY_STRING;
+                return EMPTY_STRING;
             }
 
             return str;
@@ -3550,7 +3552,7 @@ public abstract class Strings {
         final int strLen = str.length();
 
         if (strLen < 2) {
-            return N.EMPTY_STRING;
+            return EMPTY_STRING;
         }
 
         final int lastIdx = strLen - 1;
@@ -3938,7 +3940,7 @@ public abstract class Strings {
         N.checkArgNotNull(suffix);
 
         if (str == null || str.length() == 0) {
-            return N.EMPTY_STRING;
+            return str;
         } else if (str.length() - prefix.length() >= suffix.length() && str.startsWith(prefix) && str.endsWith(suffix)) {
             return str.substring(prefix.length(), str.length() - suffix.length());
         } else {
@@ -6355,7 +6357,7 @@ public abstract class Strings {
      */
     public static String commonPrefix(final String a, final String b) {
         if (N.isNullOrEmpty(a) || N.isNullOrEmpty(b)) {
-            return N.EMPTY_STRING;
+            return EMPTY_STRING;
         }
 
         int maxPrefixLength = Math.min(a.length(), b.length());
@@ -6386,17 +6388,17 @@ public abstract class Strings {
     @SafeVarargs
     public static String commonPrefix(final String... strs) {
         if (N.isNullOrEmpty(strs)) {
-            return N.EMPTY_STRING;
+            return EMPTY_STRING;
         }
 
         if (strs.length == 1) {
-            return N.isNullOrEmpty(strs[0]) ? N.EMPTY_STRING : strs[0];
+            return N.isNullOrEmpty(strs[0]) ? EMPTY_STRING : strs[0];
         }
 
         String commonPrefix = commonPrefix(strs[0], strs[1]);
 
         if (N.isNullOrEmpty(commonPrefix)) {
-            return N.EMPTY_STRING;
+            return EMPTY_STRING;
         }
 
         for (int i = 2, len = strs.length; i < len; i++) {
@@ -6424,7 +6426,7 @@ public abstract class Strings {
      */
     public static String commonSuffix(final String a, final String b) {
         if (N.isNullOrEmpty(a) || N.isNullOrEmpty(b)) {
-            return N.EMPTY_STRING;
+            return EMPTY_STRING;
         }
 
         final int aLength = a.length();
@@ -6457,17 +6459,17 @@ public abstract class Strings {
     @SafeVarargs
     public static String commonSuffix(final String... strs) {
         if (N.isNullOrEmpty(strs)) {
-            return N.EMPTY_STRING;
+            return EMPTY_STRING;
         }
 
         if (strs.length == 1) {
-            return N.isNullOrEmpty(strs[0]) ? N.EMPTY_STRING : strs[0];
+            return N.isNullOrEmpty(strs[0]) ? EMPTY_STRING : strs[0];
         }
 
         String commonSuffix = commonSuffix(strs[0], strs[1]);
 
         if (N.isNullOrEmpty(commonSuffix)) {
-            return N.EMPTY_STRING;
+            return EMPTY_STRING;
         }
 
         for (int i = 2, len = strs.length; i < len; i++) {
@@ -6505,7 +6507,7 @@ public abstract class Strings {
      */
     public static String longestCommonSubstring(final String a, final String b) {
         if (N.isNullOrEmpty(a) || N.isNullOrEmpty(b)) {
-            return N.EMPTY_STRING;
+            return EMPTY_STRING;
         }
 
         final int lenA = N.len(a);
@@ -6551,7 +6553,7 @@ public abstract class Strings {
         }
 
         if (maxLen == 0) {
-            return N.EMPTY_STRING;
+            return EMPTY_STRING;
         }
 
         return a.substring(endIndex - maxLen, endIndex);
@@ -7690,7 +7692,7 @@ public abstract class Strings {
         N.checkArgNotNegative(n, "n");
 
         if (str == null || str.length() == 0 || n == 0) {
-            return N.EMPTY_STRING;
+            return EMPTY_STRING;
         } else if (str.length() <= n) {
             return str;
         } else {
@@ -7711,7 +7713,7 @@ public abstract class Strings {
         N.checkArgNotNegative(n, "n");
 
         if (str == null || str.length() == 0 || n == 0) {
-            return N.EMPTY_STRING;
+            return EMPTY_STRING;
         } else if (str.length() <= n) {
             return str;
         } else {
@@ -7736,7 +7738,7 @@ public abstract class Strings {
      */
     public static String join(final boolean[] a, final char delimiter) {
         if (N.isNullOrEmpty(a)) {
-            return N.EMPTY_STRING;
+            return EMPTY_STRING;
         }
 
         return join(a, 0, a.length, delimiter);
@@ -7750,7 +7752,7 @@ public abstract class Strings {
      */
     public static String join(final boolean[] a, final String delimiter) {
         if (N.isNullOrEmpty(a)) {
-            return N.EMPTY_STRING;
+            return EMPTY_STRING;
         }
 
         return join(a, 0, a.length, delimiter);
@@ -7768,7 +7770,7 @@ public abstract class Strings {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
         if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
-            return N.EMPTY_STRING;
+            return EMPTY_STRING;
         } else if (toIndex - fromIndex == 1) {
             return N.toString(a[fromIndex]);
         }
@@ -7802,7 +7804,7 @@ public abstract class Strings {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
         if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
-            return N.EMPTY_STRING;
+            return EMPTY_STRING;
         } else if (toIndex - fromIndex == 1) {
             return N.toString(a[fromIndex]);
         }
@@ -7846,7 +7848,7 @@ public abstract class Strings {
 
         if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
             if (N.isNullOrEmpty(prefix) && N.isNullOrEmpty(suffix)) {
-                return N.EMPTY_STRING;
+                return EMPTY_STRING;
             } else if (N.isNullOrEmpty(prefix)) {
                 return suffix;
             } else if (N.isNullOrEmpty(suffix)) {
@@ -7906,7 +7908,7 @@ public abstract class Strings {
      */
     public static String join(final char[] a, final char delimiter) {
         if (N.isNullOrEmpty(a)) {
-            return N.EMPTY_STRING;
+            return EMPTY_STRING;
         }
 
         return join(a, 0, a.length, delimiter);
@@ -7920,7 +7922,7 @@ public abstract class Strings {
      */
     public static String join(final char[] a, final String delimiter) {
         if (N.isNullOrEmpty(a)) {
-            return N.EMPTY_STRING;
+            return EMPTY_STRING;
         }
 
         return join(a, 0, a.length, delimiter);
@@ -7938,7 +7940,7 @@ public abstract class Strings {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
         if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
-            return N.EMPTY_STRING;
+            return EMPTY_STRING;
         } else if (toIndex - fromIndex == 1) {
             return N.toString(a[fromIndex]);
         }
@@ -7972,7 +7974,7 @@ public abstract class Strings {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
         if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
-            return N.EMPTY_STRING;
+            return EMPTY_STRING;
         } else if (toIndex - fromIndex == 1) {
             return N.toString(a[fromIndex]);
         }
@@ -8016,7 +8018,7 @@ public abstract class Strings {
 
         if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
             if (N.isNullOrEmpty(prefix) && N.isNullOrEmpty(suffix)) {
-                return N.EMPTY_STRING;
+                return EMPTY_STRING;
             } else if (N.isNullOrEmpty(prefix)) {
                 return suffix;
             } else if (N.isNullOrEmpty(suffix)) {
@@ -8076,7 +8078,7 @@ public abstract class Strings {
      */
     public static String join(final byte[] a, final char delimiter) {
         if (N.isNullOrEmpty(a)) {
-            return N.EMPTY_STRING;
+            return EMPTY_STRING;
         }
 
         return join(a, 0, a.length, delimiter);
@@ -8090,7 +8092,7 @@ public abstract class Strings {
      */
     public static String join(final byte[] a, final String delimiter) {
         if (N.isNullOrEmpty(a)) {
-            return N.EMPTY_STRING;
+            return EMPTY_STRING;
         }
 
         return join(a, 0, a.length, delimiter);
@@ -8108,7 +8110,7 @@ public abstract class Strings {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
         if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
-            return N.EMPTY_STRING;
+            return EMPTY_STRING;
         } else if (toIndex - fromIndex == 1) {
             return N.toString(a[fromIndex]);
         }
@@ -8142,7 +8144,7 @@ public abstract class Strings {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
         if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
-            return N.EMPTY_STRING;
+            return EMPTY_STRING;
         } else if (toIndex - fromIndex == 1) {
             return N.toString(a[fromIndex]);
         }
@@ -8186,7 +8188,7 @@ public abstract class Strings {
 
         if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
             if (N.isNullOrEmpty(prefix) && N.isNullOrEmpty(suffix)) {
-                return N.EMPTY_STRING;
+                return EMPTY_STRING;
             } else if (N.isNullOrEmpty(prefix)) {
                 return suffix;
             } else if (N.isNullOrEmpty(suffix)) {
@@ -8246,7 +8248,7 @@ public abstract class Strings {
      */
     public static String join(final short[] a, final char delimiter) {
         if (N.isNullOrEmpty(a)) {
-            return N.EMPTY_STRING;
+            return EMPTY_STRING;
         }
 
         return join(a, 0, a.length, delimiter);
@@ -8260,7 +8262,7 @@ public abstract class Strings {
      */
     public static String join(final short[] a, final String delimiter) {
         if (N.isNullOrEmpty(a)) {
-            return N.EMPTY_STRING;
+            return EMPTY_STRING;
         }
 
         return join(a, 0, a.length, delimiter);
@@ -8278,7 +8280,7 @@ public abstract class Strings {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
         if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
-            return N.EMPTY_STRING;
+            return EMPTY_STRING;
         } else if (toIndex - fromIndex == 1) {
             return N.toString(a[fromIndex]);
         }
@@ -8312,7 +8314,7 @@ public abstract class Strings {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
         if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
-            return N.EMPTY_STRING;
+            return EMPTY_STRING;
         } else if (toIndex - fromIndex == 1) {
             return N.toString(a[fromIndex]);
         }
@@ -8356,7 +8358,7 @@ public abstract class Strings {
 
         if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
             if (N.isNullOrEmpty(prefix) && N.isNullOrEmpty(suffix)) {
-                return N.EMPTY_STRING;
+                return EMPTY_STRING;
             } else if (N.isNullOrEmpty(prefix)) {
                 return suffix;
             } else if (N.isNullOrEmpty(suffix)) {
@@ -8416,7 +8418,7 @@ public abstract class Strings {
      */
     public static String join(final int[] a, final char delimiter) {
         if (N.isNullOrEmpty(a)) {
-            return N.EMPTY_STRING;
+            return EMPTY_STRING;
         }
 
         return join(a, 0, a.length, delimiter);
@@ -8430,7 +8432,7 @@ public abstract class Strings {
      */
     public static String join(final int[] a, final String delimiter) {
         if (N.isNullOrEmpty(a)) {
-            return N.EMPTY_STRING;
+            return EMPTY_STRING;
         }
 
         return join(a, 0, a.length, delimiter);
@@ -8448,7 +8450,7 @@ public abstract class Strings {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
         if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
-            return N.EMPTY_STRING;
+            return EMPTY_STRING;
         } else if (toIndex - fromIndex == 1) {
             return N.toString(a[fromIndex]);
         }
@@ -8482,7 +8484,7 @@ public abstract class Strings {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
         if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
-            return N.EMPTY_STRING;
+            return EMPTY_STRING;
         } else if (toIndex - fromIndex == 1) {
             return N.toString(a[fromIndex]);
         }
@@ -8526,7 +8528,7 @@ public abstract class Strings {
 
         if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
             if (N.isNullOrEmpty(prefix) && N.isNullOrEmpty(suffix)) {
-                return N.EMPTY_STRING;
+                return EMPTY_STRING;
             } else if (N.isNullOrEmpty(prefix)) {
                 return suffix;
             } else if (N.isNullOrEmpty(suffix)) {
@@ -8586,7 +8588,7 @@ public abstract class Strings {
      */
     public static String join(final long[] a, final char delimiter) {
         if (N.isNullOrEmpty(a)) {
-            return N.EMPTY_STRING;
+            return EMPTY_STRING;
         }
 
         return join(a, 0, a.length, delimiter);
@@ -8600,7 +8602,7 @@ public abstract class Strings {
      */
     public static String join(final long[] a, final String delimiter) {
         if (N.isNullOrEmpty(a)) {
-            return N.EMPTY_STRING;
+            return EMPTY_STRING;
         }
 
         return join(a, 0, a.length, delimiter);
@@ -8618,7 +8620,7 @@ public abstract class Strings {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
         if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
-            return N.EMPTY_STRING;
+            return EMPTY_STRING;
         } else if (toIndex - fromIndex == 1) {
             return N.toString(a[fromIndex]);
         }
@@ -8652,7 +8654,7 @@ public abstract class Strings {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
         if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
-            return N.EMPTY_STRING;
+            return EMPTY_STRING;
         } else if (toIndex - fromIndex == 1) {
             return N.toString(a[fromIndex]);
         }
@@ -8696,7 +8698,7 @@ public abstract class Strings {
 
         if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
             if (N.isNullOrEmpty(prefix) && N.isNullOrEmpty(suffix)) {
-                return N.EMPTY_STRING;
+                return EMPTY_STRING;
             } else if (N.isNullOrEmpty(prefix)) {
                 return suffix;
             } else if (N.isNullOrEmpty(suffix)) {
@@ -8756,7 +8758,7 @@ public abstract class Strings {
      */
     public static String join(final float[] a, final char delimiter) {
         if (N.isNullOrEmpty(a)) {
-            return N.EMPTY_STRING;
+            return EMPTY_STRING;
         }
 
         return join(a, 0, a.length, delimiter);
@@ -8770,7 +8772,7 @@ public abstract class Strings {
      */
     public static String join(final float[] a, final String delimiter) {
         if (N.isNullOrEmpty(a)) {
-            return N.EMPTY_STRING;
+            return EMPTY_STRING;
         }
 
         return join(a, 0, a.length, delimiter);
@@ -8788,7 +8790,7 @@ public abstract class Strings {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
         if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
-            return N.EMPTY_STRING;
+            return EMPTY_STRING;
         } else if (toIndex - fromIndex == 1) {
             return N.toString(a[fromIndex]);
         }
@@ -8822,7 +8824,7 @@ public abstract class Strings {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
         if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
-            return N.EMPTY_STRING;
+            return EMPTY_STRING;
         } else if (toIndex - fromIndex == 1) {
             return N.toString(a[fromIndex]);
         }
@@ -8866,7 +8868,7 @@ public abstract class Strings {
 
         if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
             if (N.isNullOrEmpty(prefix) && N.isNullOrEmpty(suffix)) {
-                return N.EMPTY_STRING;
+                return EMPTY_STRING;
             } else if (N.isNullOrEmpty(prefix)) {
                 return suffix;
             } else if (N.isNullOrEmpty(suffix)) {
@@ -8926,7 +8928,7 @@ public abstract class Strings {
      */
     public static String join(final double[] a, final char delimiter) {
         if (N.isNullOrEmpty(a)) {
-            return N.EMPTY_STRING;
+            return EMPTY_STRING;
         }
 
         return join(a, 0, a.length, delimiter);
@@ -8940,7 +8942,7 @@ public abstract class Strings {
      */
     public static String join(final double[] a, final String delimiter) {
         if (N.isNullOrEmpty(a)) {
-            return N.EMPTY_STRING;
+            return EMPTY_STRING;
         }
 
         return join(a, 0, a.length, delimiter);
@@ -8958,7 +8960,7 @@ public abstract class Strings {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
         if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
-            return N.EMPTY_STRING;
+            return EMPTY_STRING;
         } else if (toIndex - fromIndex == 1) {
             return N.toString(a[fromIndex]);
         }
@@ -8992,7 +8994,7 @@ public abstract class Strings {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
         if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
-            return N.EMPTY_STRING;
+            return EMPTY_STRING;
         } else if (toIndex - fromIndex == 1) {
             return N.toString(a[fromIndex]);
         }
@@ -9036,7 +9038,7 @@ public abstract class Strings {
 
         if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
             if (N.isNullOrEmpty(prefix) && N.isNullOrEmpty(suffix)) {
-                return N.EMPTY_STRING;
+                return EMPTY_STRING;
             } else if (N.isNullOrEmpty(prefix)) {
                 return suffix;
             } else if (N.isNullOrEmpty(suffix)) {
@@ -9096,7 +9098,7 @@ public abstract class Strings {
      */
     public static String join(final Object[] a, final char delimiter) {
         if (N.isNullOrEmpty(a)) {
-            return N.EMPTY_STRING;
+            return EMPTY_STRING;
         }
 
         return join(a, 0, a.length, delimiter);
@@ -9110,7 +9112,7 @@ public abstract class Strings {
      */
     public static String join(final Object[] a, final String delimiter) {
         if (N.isNullOrEmpty(a)) {
-            return N.EMPTY_STRING;
+            return EMPTY_STRING;
         }
 
         return join(a, 0, a.length, delimiter);
@@ -9168,7 +9170,7 @@ public abstract class Strings {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
         if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
-            return N.EMPTY_STRING;
+            return EMPTY_STRING;
         } else if (toIndex - fromIndex == 1) {
             return trim ? N.toString(a[fromIndex]).trim() : N.toString(a[fromIndex]);
         }
@@ -9232,7 +9234,7 @@ public abstract class Strings {
 
         if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
             if (N.isNullOrEmpty(prefix) && N.isNullOrEmpty(suffix)) {
-                return N.EMPTY_STRING;
+                return EMPTY_STRING;
             } else if (N.isNullOrEmpty(prefix)) {
                 return suffix;
             } else if (N.isNullOrEmpty(suffix)) {
@@ -9356,7 +9358,7 @@ public abstract class Strings {
         N.checkFromToIndex(fromIndex, toIndex, N.size(c));
 
         if (N.isNullOrEmpty(c) || fromIndex == toIndex) {
-            return N.EMPTY_STRING;
+            return EMPTY_STRING;
         }
 
         final StringBuilder sb = Objectory.createStringBuilder();
@@ -9425,7 +9427,7 @@ public abstract class Strings {
 
         if (N.isNullOrEmpty(c) || fromIndex == toIndex) {
             if (N.isNullOrEmpty(prefix) && N.isNullOrEmpty(suffix)) {
-                return N.EMPTY_STRING;
+                return EMPTY_STRING;
             } else if (N.isNullOrEmpty(prefix)) {
                 return suffix;
             } else if (N.isNullOrEmpty(suffix)) {
@@ -9516,7 +9518,7 @@ public abstract class Strings {
      */
     public static String join(final Iterator<?> iter, final char delimiter) {
         if (iter == null) {
-            return N.EMPTY_STRING;
+            return EMPTY_STRING;
         }
 
         final StringBuilder sb = Objectory.createStringBuilder();
@@ -9574,7 +9576,7 @@ public abstract class Strings {
      */
     public static String join(final Iterator<?> iter, final String delimiter, final String prefix, final String suffix, final boolean trim) {
         if (iter == null) {
-            return N.EMPTY_STRING;
+            return EMPTY_STRING;
         }
 
         final StringBuilder sb = Objectory.createStringBuilder();
@@ -9635,7 +9637,7 @@ public abstract class Strings {
      */
     public static String joinEntries(final Map<?, ?> m, final char entryDelimiter) {
         if (N.isNullOrEmpty(m)) {
-            return N.EMPTY_STRING;
+            return EMPTY_STRING;
         }
 
         return joinEntries(m, 0, m.size(), entryDelimiter);
@@ -9649,7 +9651,7 @@ public abstract class Strings {
      */
     public static String joinEntries(final Map<?, ?> m, final String entryDelimiter) {
         if (N.isNullOrEmpty(m)) {
-            return N.EMPTY_STRING;
+            return EMPTY_STRING;
         }
 
         return joinEntries(m, 0, m.size(), entryDelimiter);
@@ -9664,7 +9666,7 @@ public abstract class Strings {
      */
     public static String joinEntries(final Map<?, ?> m, final char entryDelimiter, final char keyValueDelimiter) {
         if (N.isNullOrEmpty(m)) {
-            return N.EMPTY_STRING;
+            return EMPTY_STRING;
         }
 
         return joinEntries(m, 0, m.size(), entryDelimiter, keyValueDelimiter);
@@ -9679,7 +9681,7 @@ public abstract class Strings {
      */
     public static String joinEntries(final Map<?, ?> m, final String entryDelimiter, final String keyValueDelimiter) {
         if (N.isNullOrEmpty(m)) {
-            return N.EMPTY_STRING;
+            return EMPTY_STRING;
         }
 
         return joinEntries(m, 0, m.size(), entryDelimiter, keyValueDelimiter);
@@ -9742,7 +9744,7 @@ public abstract class Strings {
 
         if (N.isNullOrEmpty(m)) {
             if (N.isNullOrEmpty(prefix) && N.isNullOrEmpty(suffix)) {
-                return N.EMPTY_STRING;
+                return EMPTY_STRING;
             } else if (N.isNullOrEmpty(prefix)) {
                 return suffix;
             } else if (N.isNullOrEmpty(suffix)) {
@@ -9865,7 +9867,7 @@ public abstract class Strings {
         N.checkFromToIndex(fromIndex, toIndex, N.size(m));
 
         if (N.isNullOrEmpty(m) || fromIndex == toIndex) {
-            return N.EMPTY_STRING;
+            return EMPTY_STRING;
         }
 
         final StringBuilder sb = Objectory.createStringBuilder();
@@ -9927,7 +9929,7 @@ public abstract class Strings {
 
         if (N.isNullOrEmpty(m) || fromIndex == toIndex) {
             if (N.isNullOrEmpty(prefix) && N.isNullOrEmpty(suffix)) {
-                return N.EMPTY_STRING;
+                return EMPTY_STRING;
             } else if (N.isNullOrEmpty(prefix)) {
                 return suffix;
             } else if (N.isNullOrEmpty(suffix)) {
@@ -10145,7 +10147,7 @@ public abstract class Strings {
     @SafeVarargs
     public static String concat(final String... a) {
         if (N.isNullOrEmpty(a)) {
-            return N.EMPTY_STRING;
+            return EMPTY_STRING;
         } else if (a.length == 1) {
             return N.toString(a[0]);
         }
@@ -10295,7 +10297,7 @@ public abstract class Strings {
     //    @SafeVarargs
     //    public static String concat(final Object... a) {
     //        if (N.isNullOrEmpty(a)) {
-    //            return N.EMPTY_STRING;
+    //            return EMPTY_STRING;
     //        } else if (a.getClass().equals(String[].class)) {
     //            return StringUtil.concat((String[]) a);
     //        }
@@ -10321,7 +10323,7 @@ public abstract class Strings {
     //    @Deprecated
     //    public static String concat(final Collection<?> c) {
     //        if (N.isNullOrEmpty(c)) {
-    //            return N.EMPTY_STRING;
+    //            return EMPTY_STRING;
     //        }
     //
     //        final StringBuilder sb = ObjectFactory.createStringBuilder();
@@ -10636,7 +10638,7 @@ public abstract class Strings {
         N.checkFromToIndex(start, end, N.len(str));
 
         if (overlay == null) {
-            overlay = N.EMPTY_STRING;
+            overlay = EMPTY_STRING;
         }
 
         if (str == null || str.length() == 0) {
@@ -11765,6 +11767,153 @@ public abstract class Strings {
          */
         public static Optional<String> substringBetween(String str, int fromIndex, String delimiterOfExclusiveBeginIndex, String delimiterOfExclusiveEndIndex) {
             return Optional.ofNullable(Strings.substringBetween(str, fromIndex, delimiterOfExclusiveBeginIndex, delimiterOfExclusiveEndIndex));
+        }
+
+        /**
+         * Returns an empty {@code OptionalInt} if the specified string is blank or a invalid integer string. Otherwise returns {@code OptionalInt} with value converted the specified String.
+         *
+         * @param str
+         * @return
+         * @see Numbers#createInteger(String)
+         */
+        @Beta
+        public static u.OptionalInt createInteger(final String str) {
+            if (Strings.isBlank(str)) {
+                return u.OptionalInt.empty();
+            }
+
+            try {
+
+                return u.OptionalInt.of(Numbers.createInteger(str));
+            } catch (NumberFormatException e) {
+                return u.OptionalInt.empty();
+            }
+        }
+
+        /**
+         * Returns an empty {@code OptionalLong} if the specified string is blank or a invalid long string. Otherwise returns {@code OptionalLong} with value converted the specified String.
+         *
+         * @param str
+         * @return
+         * @see Numbers#createLong(String)
+         */
+        @Beta
+        public static u.OptionalLong createLong(final String str) {
+            if (Strings.isBlank(str)) {
+                return u.OptionalLong.empty();
+            }
+
+            try {
+
+                return u.OptionalLong.of(Numbers.createLong(str));
+            } catch (NumberFormatException e) {
+                return u.OptionalLong.empty();
+            }
+        }
+
+        /**
+         * Returns an empty {@code OptionalFloat} if the specified string is blank or a invalid float string. Otherwise returns {@code OptionalFloat} with value converted the specified String.
+         *
+         * @param str
+         * @return
+         * @see Numbers#createFloat(String)
+         */
+        @Beta
+        public static u.OptionalFloat createFloat(final String str) {
+            if (Strings.isBlank(str)) {
+                return u.OptionalFloat.empty();
+            }
+
+            try {
+
+                return u.OptionalFloat.of(Numbers.createFloat(str));
+            } catch (NumberFormatException e) {
+                return u.OptionalFloat.empty();
+            }
+        }
+
+        /**
+         * Returns an empty {@code OptionalDouble} if the specified string is blank or a invalid double string. Otherwise returns {@code OptionalDouble} with value converted the specified String.
+         *
+         * @param str
+         * @return
+         * @see Numbers#createDouble(String)
+         */
+        @Beta
+        public static u.OptionalDouble createDouble(final String str) {
+            if (Strings.isBlank(str)) {
+                return u.OptionalDouble.empty();
+            }
+
+            try {
+
+                return u.OptionalDouble.of(Numbers.createDouble(str));
+            } catch (NumberFormatException e) {
+                return u.OptionalDouble.empty();
+            }
+        }
+
+        /**
+         * Returns an empty {@code Optional<BigInteger>} if the specified string is blank or a invalid {@code BigInteger} string. Otherwise returns {@code Optional<BigInteger>} with value converted the specified String.
+         *
+         * @param str
+         * @return
+         * @see Numbers#createBigInteger(String)
+         */
+        @Beta
+        public static u.Optional<BigInteger> createBigInteger(final String str) {
+            if (Strings.isBlank(str)) {
+                return u.Optional.empty();
+            }
+
+            try {
+
+                return u.Optional.of(Numbers.createBigInteger(str));
+            } catch (NumberFormatException e) {
+                return u.Optional.empty();
+            }
+        }
+
+        /**
+         * Returns an empty {@code Optional<BigDecimal>} if the specified string is blank or a invalid {@code BigDecimal} string. Otherwise returns {@code Optional<BigDecimal>} with value converted the specified String.
+         *
+         * @param str
+         * @return
+         * @see Numbers#createBigDecimal(String)
+         */
+        @Beta
+        public static u.Optional<BigDecimal> createBigDecimal(final String str) {
+            if (Strings.isBlank(str)) {
+                return u.Optional.empty();
+            }
+
+            try {
+
+                return u.Optional.of(Numbers.createBigDecimal(str));
+            } catch (NumberFormatException e) {
+                return u.Optional.empty();
+            }
+        }
+
+        /**
+         * Returns an empty {@code Optional<Number>} if the specified string is blank or a invalid number string. Otherwise returns {@code Optional<Number>} with value converted the specified String.
+         *
+         * @param str
+         * @return
+         * @see Numbers#createNumber(String)
+         */
+        @Beta
+        public static u.Optional<Number> createNumber(final String str) {
+            if (Strings.isBlank(str)) {
+                return u.Optional.empty();
+            }
+
+            try {
+
+                return u.Optional.of(Numbers.createNumber(str));
+            } catch (NumberFormatException e) {
+                return u.Optional.empty();
+            }
         }
     }
 }

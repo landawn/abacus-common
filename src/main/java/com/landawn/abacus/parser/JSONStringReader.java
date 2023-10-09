@@ -542,23 +542,19 @@ class JSONStringReader extends AbstractJSONReader {
                 }
 
                 try {
-                    final Optional<Number> op = Numbers.createNumber(str);
+                    final Number num = Numbers.createNumber(str);
 
-                    if (op.isPresent()) {
-                        final Number num = op.get();
+                    if (num instanceof Float) {
+                        final char lastChar = str.charAt(str.length() - 1);
 
-                        if (num instanceof Float) {
-                            final char lastChar = str.charAt(str.length() - 1);
-
-                            if (lastChar == 'f' || lastChar == 'F') {
-                                return (T) num;
-                            } else {
-                                return (T) Double.valueOf(Numbers.toDouble(num));
-                            }
+                        if (lastChar == 'f' || lastChar == 'F') {
+                            return (T) num;
+                        } else {
+                            return (T) Double.valueOf(Numbers.toDouble(num));
                         }
-
-                        return (T) num;
                     }
+
+                    return (T) num;
                 } catch (Exception e) {
                     // ignore;
                 }

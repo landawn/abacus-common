@@ -224,7 +224,7 @@ class CommonUtil {
     public static final int INDEX_NOT_FOUND = -1;
 
     // ...
-    public static final String EMPTY_STRING = "".intern();
+    public static final String EMPTY_STRING = Strings.EMPTY_STRING;
 
     /**
      * An empty immutable {@code boolean} array.

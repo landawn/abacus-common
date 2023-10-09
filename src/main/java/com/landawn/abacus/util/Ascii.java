@@ -14,8 +14,6 @@
 
 package com.landawn.abacus.util;
 
-import com.google.common.base.CharMatcher;
-
 /**
  * Note: It's copied from Google Guava under Apache License 2.0
  *
@@ -26,7 +24,7 @@ import com.google.common.base.CharMatcher;
  * <ul>
  * <!-- TODO(kevinb): how can we make this not produce a warning when building gwt javadoc? -->
  * <li>{@link Charsets#US_ASCII} specifies the {@code Charset} of ASCII characters.
- * <li>{@link CharMatcher#ascii} matches ASCII characters and provides text processing methods which
+ * <li>{@link com.google.common.base.CharMatcher#ascii} matches ASCII characters and provides text processing methods which
  * operate only on the ASCII characters of a string.
  * </ul>
  *
