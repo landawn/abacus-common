@@ -1091,6 +1091,17 @@ public final class Numbers {
             }
         }
 
+        final int len = str.length();
+        final char ch = str.charAt(len - 1);
+
+        if (len > 1 && (ch == 'L' || ch == 'l')) {
+            try {
+                return Long.parseLong(str.substring(0, len - 1));
+            } catch (NumberFormatException e) {
+                throw new NumberFormatException("Cannot parse string: " + str + ". " + e.getMessage());
+            }
+        }
+
         return Long.parseLong(str);
     }
 
@@ -1473,6 +1484,9 @@ public final class Numbers {
      * spaces are not trimmed.
      * </p>
      *
+     * {@code null} is returned if the specified {@code str} is {@code null}.
+     * <br />
+     * <br />
      *
      * @param str a <code>String</code> to convert, may be null
      * @return
@@ -1494,6 +1508,10 @@ public final class Numbers {
      * handles hex (0Xhhhh) and octal (0ddd) notations. N.B. a leading zero
      * means octal; spaces are not trimmed.
      * </p>
+     *
+     * {@code null} is returned if the specified {@code str} is {@code null}.
+     * <br />
+     * <br />
      *
      *
      * @param str a <code>String</code> to convert, may be null
@@ -1521,7 +1539,12 @@ public final class Numbers {
     /**
      * <p>
      * Convert a <code>String</code> to a <code>Float</code>.
+     *
      * </p>
+     *
+     * {@code null} is returned if the specified {@code str} is {@code null}.
+     * <br />
+     * <br />
      *
      *
      * @param str a <code>String</code> to convert, may be null
@@ -1540,7 +1563,12 @@ public final class Numbers {
     /**
      * <p>
      * Convert a <code>String</code> to a <code>Double</code>.
+     *
      * </p>
+     *
+     * {@code null} is returned if the specified {@code str} is {@code null}.
+     * <br />
+     * <br />
      *
      *
      * @param str a <code>String</code> to convert, may be null
@@ -1560,7 +1588,12 @@ public final class Numbers {
      * <p>
      * Convert a <code>String</code> to a <code>BigInteger</code>; since 3.2 it
      * handles hex (0x or #) and octal (0) notations.
+     *
      * </p>
+     *
+     * {@code null} is returned if the specified {@code str} is {@code null}.
+     * <br />
+     * <br />
      *
      * @param str a <code>String</code> to convert, may be null
      * @return
@@ -1571,9 +1604,11 @@ public final class Numbers {
         if (str == null) {
             return null;
         }
-        if (str.isEmpty()) {
-            throw new NumberFormatException("An empty string is not a valid number");
+
+        if (quickCheckForIsCreatable(str) == false) {
+            throw new NumberFormatException(str + " is not a valid BigInteger.");
         }
+
         int pos = 0; // offset within string
         int radix = 10;
         boolean negate = false; // need to negate later?
@@ -1603,7 +1638,12 @@ public final class Numbers {
     /**
      * <p>
      * Convert a <code>String</code> to a <code>BigDecimal</code>.
+     *
      * </p>
+     *
+     * {@code null} is returned if the specified {@code str} is {@code null}.
+     * <br />
+     * <br />
      *
      *
      * @param str a <code>String</code> to convert, may be null
@@ -1617,51 +1657,11 @@ public final class Numbers {
         }
 
         // handle JDK1.3.1 bug where "" throws IndexOutOfBoundsException
-        if (Strings.isBlank(str)) {
-            throw new NumberFormatException("A blank string is not a valid number");
+        if (quickCheckForIsCreatable(str) == false) {
+            throw new NumberFormatException(str + " is not a valid BigDecimal.");
         }
 
         return new BigDecimal(str);
-    }
-
-    static boolean[] alphanumerics = new boolean[128];
-
-    static {
-        alphanumerics['0'] = true;
-        alphanumerics['1'] = true;
-        alphanumerics['2'] = true;
-        alphanumerics['3'] = true;
-        alphanumerics['4'] = true;
-        alphanumerics['5'] = true;
-        alphanumerics['6'] = true;
-        alphanumerics['7'] = true;
-        alphanumerics['8'] = true;
-        alphanumerics['9'] = true;
-
-        alphanumerics['+'] = true;
-        alphanumerics['-'] = true;
-        alphanumerics['.'] = true;
-        alphanumerics['#'] = true;
-
-        alphanumerics['x'] = true;
-        alphanumerics['X'] = true;
-
-        alphanumerics['e'] = true;
-        alphanumerics['E'] = true;
-
-        alphanumerics['a'] = true;
-        alphanumerics['b'] = true;
-        alphanumerics['c'] = true;
-        alphanumerics['d'] = true;
-        alphanumerics['e'] = true;
-        alphanumerics['f'] = true;
-
-        alphanumerics['l'] = true;
-        alphanumerics['L'] = true;
-        alphanumerics['f'] = true;
-        alphanumerics['F'] = true;
-        alphanumerics['d'] = true;
-        alphanumerics['D'] = true;
     }
 
     /**
@@ -1680,6 +1680,7 @@ public final class Numbers {
      * <code>'f','F','d','D','l','L'</code>. If it is found, it starts trying to
      * create successively larger types from the type specified until one is
      * found that can represent the value.
+     *
      * </p>
      *
      * <p>
@@ -1694,6 +1695,10 @@ public final class Numbers {
      * the returned number will be Integer, Long or BigDecimal as appropriate.
      * </p>
      *
+     * {@code null} is returned if the specified {@code str} is {@code null}.
+     * <br />
+     * <br />
+     *
      * @param str a String containing a number, may be null
      * @return
      * @throws NumberFormatException if the value cannot be converted
@@ -1705,8 +1710,8 @@ public final class Numbers {
             return null;
         }
 
-        if (Strings.isBlank(str)) {
-            throw new NumberFormatException("A blank string is not a valid number");
+        if (quickCheckForIsCreatable(str) == false) {
+            throw new NumberFormatException(str + " is not a valid number.");
         }
 
         final int len = str.length();
@@ -1999,6 +2004,58 @@ public final class Numbers {
         return isCreatable(str);
     }
 
+    private static boolean[] alphanumerics = new boolean[128];
+
+    static {
+        alphanumerics['0'] = true;
+        alphanumerics['1'] = true;
+        alphanumerics['2'] = true;
+        alphanumerics['3'] = true;
+        alphanumerics['4'] = true;
+        alphanumerics['5'] = true;
+        alphanumerics['6'] = true;
+        alphanumerics['7'] = true;
+        alphanumerics['8'] = true;
+        alphanumerics['9'] = true;
+
+        alphanumerics['+'] = true;
+        alphanumerics['-'] = true;
+        alphanumerics['.'] = true;
+        alphanumerics['#'] = true;
+
+        alphanumerics['x'] = true;
+        alphanumerics['X'] = true;
+
+        alphanumerics['e'] = true;
+        alphanumerics['E'] = true;
+
+        alphanumerics['a'] = true;
+        alphanumerics['b'] = true;
+        alphanumerics['c'] = true;
+        alphanumerics['d'] = true;
+        alphanumerics['e'] = true;
+        alphanumerics['f'] = true;
+
+        alphanumerics['l'] = true;
+        alphanumerics['L'] = true;
+        alphanumerics['f'] = true;
+        alphanumerics['F'] = true;
+        alphanumerics['d'] = true;
+        alphanumerics['D'] = true;
+    }
+
+    static boolean quickCheckForIsCreatable(final String str) {
+        if (Strings.isEmpty(str)) {
+            return false;
+        }
+
+        final int len = str.length();
+        char ch = 0;
+
+        return ((ch = str.charAt(0)) < 128 && alphanumerics[ch]) && ((ch = str.charAt(len - 1)) < 128 && alphanumerics[ch])
+                && ((ch = str.charAt(len / 2)) < 128 && alphanumerics[ch]);
+    }
+
     /**
      * <p>Checks whether the String a valid Java number.</p>
      *
@@ -2023,18 +2080,12 @@ public final class Numbers {
      * @see #isParsable(String)
      */
     public static boolean isCreatable(final String str) {
-        if (Strings.isEmpty(str)) {
+        if (quickCheckForIsCreatable(str) == false) {
             return false;
         }
 
         final char[] chars = str.toCharArray();
         int len = chars.length;
-        char ch = 0;
-
-        if (!(((ch = chars[0]) < 128 && alphanumerics[ch]) && ((ch = chars[len - 1]) < 128 && alphanumerics[ch])
-                && ((ch = chars[len / 2]) < 128 && alphanumerics[ch]))) {
-            return false;
-        }
 
         boolean hasExp = false;
         boolean hasDecPoint = false;
@@ -2158,11 +2209,19 @@ public final class Numbers {
      * @since 3.4
      */
     public static boolean isParsable(final String str) {
-        if (Strings.isEmpty(str) || (str.charAt(str.length() - 1) == '.')) {
+        if (Strings.isEmpty(str)) {
             return false;
         }
 
-        if (str.charAt(0) == '-') {
+        final int len = str.length();
+
+        if (str.charAt(len - 1) == '.') {
+            return false;
+        }
+
+        char ch = str.charAt(0);
+
+        if (ch == '-' || ch == '+') {
             if (str.length() == 1) {
                 return false;
             }

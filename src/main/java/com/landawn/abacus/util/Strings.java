@@ -215,7 +215,17 @@ public abstract class Strings {
      * @see N#isBlank(CharSequence)
      */
     public static boolean isBlank(final CharSequence cs) {
-        return N.isBlank(cs);
+        if (isEmpty(cs)) {
+            return true;
+        }
+
+        for (int i = 0, len = cs.length(); i < len; i++) {
+            if (!Character.isWhitespace(cs.charAt(i))) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     /**
@@ -237,15 +247,15 @@ public abstract class Strings {
      * @see N#notBlank(CharSequence)
      */
     public static boolean isNotBlank(final CharSequence cs) {
-        return N.notBlank(cs);
+        return !isBlank(cs);
     }
 
     public static boolean isAllEmpty(final CharSequence a, final CharSequence b) {
-        return N.isNullOrEmpty(a) && N.isNullOrEmpty(b);
+        return isEmpty(a) && isEmpty(b);
     }
 
     public static boolean isAllEmpty(final CharSequence a, final CharSequence b, final CharSequence c) {
-        return N.isNullOrEmpty(a) && N.isNullOrEmpty(b) && N.isNullOrEmpty(c);
+        return isEmpty(a) && isEmpty(b) && isEmpty(c);
     }
 
     /**
@@ -303,11 +313,11 @@ public abstract class Strings {
     }
 
     public static boolean isAllBlank(final CharSequence a, final CharSequence b) {
-        return N.isBlank(a) && N.isBlank(b);
+        return isBlank(a) && isBlank(b);
     }
 
     public static boolean isAllBlank(final CharSequence a, final CharSequence b, final CharSequence c) {
-        return N.isBlank(a) && N.isBlank(b) && N.isBlank(c);
+        return isBlank(a) && isBlank(b) && isBlank(c);
     }
 
     /**
@@ -367,11 +377,11 @@ public abstract class Strings {
     }
 
     public static boolean isAnyEmpty(final CharSequence a, final CharSequence b) {
-        return N.isNullOrEmpty(a) || N.isNullOrEmpty(b);
+        return isEmpty(a) || isEmpty(b);
     }
 
     public static boolean isAnyEmpty(final CharSequence a, final CharSequence b, final CharSequence c) {
-        return N.isNullOrEmpty(a) || N.isNullOrEmpty(b) || N.isNullOrEmpty(c);
+        return isEmpty(a) || isEmpty(b) || isEmpty(c);
     }
 
     /**
@@ -430,11 +440,11 @@ public abstract class Strings {
     }
 
     public static boolean isAnyBlank(final CharSequence a, final CharSequence b) {
-        return N.isBlank(a) || N.isBlank(b);
+        return isBlank(a) || isBlank(b);
     }
 
     public static boolean isAnyBlank(final CharSequence a, final CharSequence b, final CharSequence c) {
-        return N.isBlank(a) || N.isBlank(b) || N.isBlank(c);
+        return isBlank(a) || isBlank(b) || isBlank(c);
     }
 
     /**
@@ -969,7 +979,7 @@ public abstract class Strings {
             throw new IllegalArgumentException(String.format("Minimum abbreviation width is %d", minAbbrevWidth));
         }
 
-        if (N.notNullOrEmpty(str) && EMPTY_STRING.equals(abbrevMarker) && maxWidth > 0) {
+        if (isNotEmpty(str) && EMPTY_STRING.equals(abbrevMarker) && maxWidth > 0) {
             return Strings.substring(str, 0, maxWidth);
         } else if (N.anyNullOrEmpty(str, abbrevMarker)) {
             return str;
@@ -1408,7 +1418,7 @@ public abstract class Strings {
         prefix = prefix == null ? EMPTY_STRING : prefix;
         suffix = suffix == null ? EMPTY_STRING : suffix;
 
-        if (n == 0 || (N.isNullOrEmpty(str) && N.isNullOrEmpty(delimiter))) {
+        if (n == 0 || (isEmpty(str) && isEmpty(delimiter))) {
             return prefix + suffix;
         } else if (n == 1) {
             return prefix + str + suffix;
@@ -1589,9 +1599,9 @@ public abstract class Strings {
      * </p>
      *
      * <pre>
-     * N.toUpperCase(null)  = null
-     * N.toUpperCase("")    = ""
-     * N.toUpperCase("aBc") = "ABC"
+     * Strings.toUpperCase(null)  = null
+     * Strings.toUpperCase("")    = ""
+     * Strings.toUpperCase("aBc") = "ABC"
      * </pre>
      *
      * <p>
@@ -1625,9 +1635,9 @@ public abstract class Strings {
      * </p>
      *
      * <pre>
-     * N.toUpperCase(null, Locale.ENGLISH)  = null
-     * N.toUpperCase("", Locale.ENGLISH)    = ""
-     * N.toUpperCase("aBc", Locale.ENGLISH) = "ABC"
+     * Strings.toUpperCase(null, Locale.ENGLISH)  = null
+     * Strings.toUpperCase("", Locale.ENGLISH)    = ""
+     * Strings.toUpperCase("aBc", Locale.ENGLISH) = "ABC"
      * </pre>
      *
      * @param str
@@ -1707,7 +1717,7 @@ public abstract class Strings {
             try {
 
                 for (String substr : substrs) {
-                    if (N.notNullOrEmpty(substr)) {
+                    if (isNotEmpty(substr)) {
                         sb.append(Strings.toLowerCase(substr));
                         if (sb.length() > substr.length()) {
                             sb.setCharAt(sb.length() - substr.length(), Character.toTitleCase(substr.charAt(0)));
@@ -1825,9 +1835,9 @@ public abstract class Strings {
      * </p>
      *
      * <pre>
-     * N.swapCase(null)                 = null
-     * N.swapCase("")                   = ""
-     * N.swapCase("The dog has a BONE") = "tHE DOG HAS A bone"
+     * Strings.swapCase(null)                 = null
+     * Strings.swapCase("")                   = ""
+     * Strings.swapCase("The dog has a BONE") = "tHE DOG HAS A bone"
      * </pre>
      *
      * <p>
@@ -2075,14 +2085,14 @@ public abstract class Strings {
      * </p>
      *
      * <pre>
-     * N.replaceAll(null, *, *)        = null
-     * N.replaceAll("", *, *)          = ""
-     * N.replaceAll("any", null, *)    = "any"
-     * N.replaceAll("any", *, null)    = "any"
-     * N.replaceAll("any", "", *)      = "any"
-     * N.replaceAll("aba", "a", null)  = "b"
-     * N.replaceAll("aba", "a", "")    = "b"
-     * N.replaceAll("aba", "a", "z")   = "zbz"
+     * Strings.replaceAll(null, *, *)        = null
+     * Strings.replaceAll("", *, *)          = ""
+     * Strings.replaceAll("any", null, *)    = "any"
+     * Strings.replaceAll("any", *, null)    = "any"
+     * Strings.replaceAll("any", "", *)      = "any"
+     * Strings.replaceAll("aba", "a", null)  = "b"
+     * Strings.replaceAll("aba", "a", "")    = "b"
+     * Strings.replaceAll("aba", "a", "z")   = "zbz"
      * </pre>
      *
      * @param str text to search and replace in, may be null
@@ -2342,7 +2352,7 @@ public abstract class Strings {
             replacement = "";
         }
 
-        if (N.isNullOrEmpty(str) || N.isNullOrEmpty(target) || max == 0) {
+        if (isEmpty(str) || isEmpty(target) || max == 0) {
             return str;
         }
 
@@ -2422,13 +2432,13 @@ public abstract class Strings {
      * </p>
      *
      * <pre>
-     * N.removeStart(null, *)      = null
-     * N.removeStart("", *)        = ""
-     * N.removeStart(*, null)      = *
-     * N.removeStart("www.domain.com", "www.")   = "domain.com"
-     * N.removeStart("domain.com", "www.")       = "domain.com"
-     * N.removeStart("www.domain.com", "domain") = "www.domain.com"
-     * N.removeStart("abc", "")    = "abc"
+     * Strings.removeStart(null, *)      = null
+     * Strings.removeStart("", *)        = ""
+     * Strings.removeStart(*, null)      = *
+     * Strings.removeStart("www.domain.com", "www.")   = "domain.com"
+     * Strings.removeStart("domain.com", "www.")       = "domain.com"
+     * Strings.removeStart("www.domain.com", "domain") = "www.domain.com"
+     * Strings.removeStart("abc", "")    = "abc"
      * </pre>
      *
      * @param str
@@ -2440,7 +2450,7 @@ public abstract class Strings {
      * @since 2.1
      */
     public static String removeStart(final String str, final String removeStr) {
-        if (N.isNullOrEmpty(str) || N.isNullOrEmpty(removeStr)) {
+        if (isEmpty(str) || isEmpty(removeStr)) {
             return str;
         }
 
@@ -2464,14 +2474,14 @@ public abstract class Strings {
      * </p>
      *
      * <pre>
-     * N.removeStartIgnoreCase(null, *)      = null
-     * N.removeStartIgnoreCase("", *)        = ""
-     * N.removeStartIgnoreCase(*, null)      = *
-     * N.removeStartIgnoreCase("www.domain.com", "www.")   = "domain.com"
-     * N.removeStartIgnoreCase("www.domain.com", "WWW.")   = "domain.com"
-     * N.removeStartIgnoreCase("domain.com", "www.")       = "domain.com"
-     * N.removeStartIgnoreCase("www.domain.com", "domain") = "www.domain.com"
-     * N.removeStartIgnoreCase("abc", "")    = "abc"
+     * Strings.removeStartIgnoreCase(null, *)      = null
+     * Strings.removeStartIgnoreCase("", *)        = ""
+     * Strings.removeStartIgnoreCase(*, null)      = *
+     * Strings.removeStartIgnoreCase("www.domain.com", "www.")   = "domain.com"
+     * Strings.removeStartIgnoreCase("www.domain.com", "WWW.")   = "domain.com"
+     * Strings.removeStartIgnoreCase("domain.com", "www.")       = "domain.com"
+     * Strings.removeStartIgnoreCase("www.domain.com", "domain") = "www.domain.com"
+     * Strings.removeStartIgnoreCase("abc", "")    = "abc"
      * </pre>
      *
      * @param str
@@ -2484,7 +2494,7 @@ public abstract class Strings {
      * @since 2.4
      */
     public static String removeStartIgnoreCase(final String str, final String removeStr) {
-        if (N.isNullOrEmpty(str) || N.isNullOrEmpty(removeStr)) {
+        if (isEmpty(str) || isEmpty(removeStr)) {
             return str;
         }
 
@@ -2508,13 +2518,13 @@ public abstract class Strings {
      * </p>
      *
      * <pre>
-     * N.removeEnd(null, *)      = null
-     * N.removeEnd("", *)        = ""
-     * N.removeEnd(*, null)      = *
-     * N.removeEnd("www.domain.com", ".com.")  = "www.domain.com"
-     * N.removeEnd("www.domain.com", ".com")   = "www.domain"
-     * N.removeEnd("www.domain.com", "domain") = "www.domain.com"
-     * N.removeEnd("abc", "")    = "abc"
+     * Strings.removeEnd(null, *)      = null
+     * Strings.removeEnd("", *)        = ""
+     * Strings.removeEnd(*, null)      = *
+     * Strings.removeEnd("www.domain.com", ".com.")  = "www.domain.com"
+     * Strings.removeEnd("www.domain.com", ".com")   = "www.domain"
+     * Strings.removeEnd("www.domain.com", "domain") = "www.domain.com"
+     * Strings.removeEnd("abc", "")    = "abc"
      * </pre>
      *
      * @param str
@@ -2526,7 +2536,7 @@ public abstract class Strings {
      * @since 2.1
      */
     public static String removeEnd(final String str, final String removeStr) {
-        if (N.isNullOrEmpty(str) || N.isNullOrEmpty(removeStr)) {
+        if (isEmpty(str) || isEmpty(removeStr)) {
             return str;
         }
 
@@ -2550,15 +2560,15 @@ public abstract class Strings {
      * </p>
      *
      * <pre>
-     * N.removeEndIgnoreCase(null, *)      = null
-     * N.removeEndIgnoreCase("", *)        = ""
-     * N.removeEndIgnoreCase(*, null)      = *
-     * N.removeEndIgnoreCase("www.domain.com", ".com.")  = "www.domain.com"
-     * N.removeEndIgnoreCase("www.domain.com", ".com")   = "www.domain"
-     * N.removeEndIgnoreCase("www.domain.com", "domain") = "www.domain.com"
-     * N.removeEndIgnoreCase("abc", "")    = "abc"
-     * N.removeEndIgnoreCase("www.domain.com", ".COM") = "www.domain")
-     * N.removeEndIgnoreCase("www.domain.COM", ".com") = "www.domain")
+     * Strings.removeEndIgnoreCase(null, *)      = null
+     * Strings.removeEndIgnoreCase("", *)        = ""
+     * Strings.removeEndIgnoreCase(*, null)      = *
+     * Strings.removeEndIgnoreCase("www.domain.com", ".com.")  = "www.domain.com"
+     * Strings.removeEndIgnoreCase("www.domain.com", ".com")   = "www.domain"
+     * Strings.removeEndIgnoreCase("www.domain.com", "domain") = "www.domain.com"
+     * Strings.removeEndIgnoreCase("abc", "")    = "abc"
+     * Strings.removeEndIgnoreCase("www.domain.com", ".COM") = "www.domain")
+     * Strings.removeEndIgnoreCase("www.domain.COM", ".com") = "www.domain")
      * </pre>
      *
      * @param str
@@ -2571,7 +2581,7 @@ public abstract class Strings {
      * @since 2.4
      */
     public static String removeEndIgnoreCase(final String str, final String removeStr) {
-        if (N.isNullOrEmpty(str) || N.isNullOrEmpty(removeStr)) {
+        if (isEmpty(str) || isEmpty(removeStr)) {
             return str;
         }
 
@@ -2593,10 +2603,10 @@ public abstract class Strings {
      * </p>
      *
      * <pre>
-     * N.remove(null, *)       = null
-     * N.remove("", *)         = ""
-     * N.remove("queued", 'u') = "qeed"
-     * N.remove("queued", 'z') = "queued"
+     * Strings.remove(null, *)       = null
+     * Strings.remove("", *)         = ""
+     * Strings.remove("queued", 'u') = "qeed"
+     * Strings.remove("queued", 'z') = "queued"
      * </pre>
      *
      * @param str
@@ -2662,12 +2672,12 @@ public abstract class Strings {
      * </p>
      *
      * <pre>
-     * N.remove(null, *)        = null
-     * N.remove("", *)          = ""
-     * N.remove(*, null)        = *
-     * N.remove(*, "")          = *
-     * N.remove("queued", "ue") = "qd"
-     * N.remove("queued", "zz") = "queued"
+     * Strings.removeAll(null, *)        = null
+     * Strings.removeAll("", *)          = ""
+     * Strings.removeAll(*, null)        = *
+     * Strings.removeAll(*, "")          = *
+     * Strings.removeAll("queued", "ue") = "qd"
+     * Strings.removeAll("queued", "zz") = "queued"
      * </pre>
      *
      * @param str
@@ -2691,7 +2701,7 @@ public abstract class Strings {
      * @return
      */
     public static String removeAll(final String str, final int fromIndex, final String removeStr) {
-        if (N.isNullOrEmpty(str) || N.isNullOrEmpty(removeStr)) {
+        if (isEmpty(str) || isEmpty(removeStr)) {
             return str;
         }
 
@@ -2921,7 +2931,7 @@ public abstract class Strings {
      * @return
      */
     public static String trim(final String str) {
-        return N.isNullOrEmpty(str) || (str.charAt(0) != ' ' && str.charAt(str.length() - 1) != ' ') ? str : str.trim();
+        return isEmpty(str) || (str.charAt(0) != ' ' && str.charAt(str.length() - 1) != ' ') ? str : str.trim();
     }
 
     /**
@@ -2952,11 +2962,11 @@ public abstract class Strings {
      * </p>
      *
      * <pre>
-     * N.trimToNull(null)          = null
-     * N.trimToNull("")            = null
-     * N.trimToNull("     ")       = null
-     * N.trimToNull("abc")         = "abc"
-     * N.trimToNull("    abc    ") = "abc"
+     * Strings.trimToNull(null)          = null
+     * Strings.trimToNull("")            = null
+     * Strings.trimToNull("     ")       = null
+     * Strings.trimToNull("abc")         = "abc"
+     * Strings.trimToNull("    abc    ") = "abc"
      * </pre>
      *
      * @param str
@@ -2968,7 +2978,7 @@ public abstract class Strings {
     public static String trimToNull(String str) {
         str = trim(str);
 
-        return N.isNullOrEmpty(str) ? null : str;
+        return isEmpty(str) ? null : str;
     }
 
     /**
@@ -2999,11 +3009,11 @@ public abstract class Strings {
      * </p>
      *
      * <pre>
-     * N.trimToEmpty(null)          = ""
-     * N.trimToEmpty("")            = ""
-     * N.trimToEmpty("     ")       = ""
-     * N.trimToEmpty("abc")         = "abc"
-     * N.trimToEmpty("    abc    ") = "abc"
+     * Strings.trimToEmpty(null)          = ""
+     * Strings.trimToEmpty("")            = ""
+     * Strings.trimToEmpty("     ")       = ""
+     * Strings.trimToEmpty("abc")         = "abc"
+     * Strings.trimToEmpty("    abc    ") = "abc"
      * </pre>
      *
      * @param str
@@ -3012,7 +3022,7 @@ public abstract class Strings {
      * @since 2.0
      */
     public static String trimToEmpty(final String str) {
-        return N.isNullOrEmpty(str) ? EMPTY_STRING : str.trim();
+        return isEmpty(str) ? EMPTY_STRING : str.trim();
     }
 
     /**
@@ -3047,14 +3057,14 @@ public abstract class Strings {
      * </p>
      *
      * <pre>
-     * N.strip(null)     = null
-     * N.strip("")       = ""
-     * N.strip("   ")    = ""
-     * N.strip("abc")    = "abc"
-     * N.strip("  abc")  = "abc"
-     * N.strip("abc  ")  = "abc"
-     * N.strip(" abc ")  = "abc"
-     * N.strip(" ab c ") = "ab c"
+     * Strings.strip(null)     = null
+     * Strings.strip("")       = ""
+     * Strings.strip("   ")    = ""
+     * Strings.strip("abc")    = "abc"
+     * Strings.strip("  abc")  = "abc"
+     * Strings.strip("abc  ")  = "abc"
+     * Strings.strip(" abc ")  = "abc"
+     * Strings.strip(" ab c ") = "ab c"
      * </pre>
      *
      * @param str
@@ -3092,14 +3102,14 @@ public abstract class Strings {
      * </p>
      *
      * <pre>
-     * N.stripToNull(null)     = null
-     * N.stripToNull("")       = null
-     * N.stripToNull("   ")    = null
-     * N.stripToNull("abc")    = "abc"
-     * N.stripToNull("  abc")  = "abc"
-     * N.stripToNull("abc  ")  = "abc"
-     * N.stripToNull(" abc ")  = "abc"
-     * N.stripToNull(" ab c ") = "ab c"
+     * Strings.stripToNull(null)     = null
+     * Strings.stripToNull("")       = null
+     * Strings.stripToNull("   ")    = null
+     * Strings.stripToNull("abc")    = "abc"
+     * Strings.stripToNull("  abc")  = "abc"
+     * Strings.stripToNull("abc  ")  = "abc"
+     * Strings.stripToNull(" abc ")  = "abc"
+     * Strings.stripToNull(" ab c ") = "ab c"
      * </pre>
      *
      * @param str
@@ -3111,7 +3121,7 @@ public abstract class Strings {
     public static String stripToNull(String str) {
         str = strip(str, null);
 
-        return N.isNullOrEmpty(str) ? null : str;
+        return isEmpty(str) ? null : str;
     }
 
     /**
@@ -3141,14 +3151,14 @@ public abstract class Strings {
      * </p>
      *
      * <pre>
-     * N.stripToEmpty(null)     = ""
-     * N.stripToEmpty("")       = ""
-     * N.stripToEmpty("   ")    = ""
-     * N.stripToEmpty("abc")    = "abc"
-     * N.stripToEmpty("  abc")  = "abc"
-     * N.stripToEmpty("abc  ")  = "abc"
-     * N.stripToEmpty(" abc ")  = "abc"
-     * N.stripToEmpty(" ab c ") = "ab c"
+     * Strings.stripToEmpty(null)     = ""
+     * Strings.stripToEmpty("")       = ""
+     * Strings.stripToEmpty("   ")    = ""
+     * Strings.stripToEmpty("abc")    = "abc"
+     * Strings.stripToEmpty("  abc")  = "abc"
+     * Strings.stripToEmpty("abc  ")  = "abc"
+     * Strings.stripToEmpty(" abc ")  = "abc"
+     * Strings.stripToEmpty(" ab c ") = "ab c"
      * </pre>
      *
      * @param str
@@ -3157,7 +3167,7 @@ public abstract class Strings {
      * @since 2.0
      */
     public static String stripToEmpty(final String str) {
-        return N.isNullOrEmpty(str) ? EMPTY_STRING : strip(str, null);
+        return isEmpty(str) ? EMPTY_STRING : strip(str, null);
     }
 
     /**
@@ -3194,13 +3204,13 @@ public abstract class Strings {
      * </p>
      *
      * <pre>
-     * N.strip(null, *)          = null
-     * N.strip("", *)            = ""
-     * N.strip("abc", null)      = "abc"
-     * N.strip("  abc", null)    = "abc"
-     * N.strip("abc  ", null)    = "abc"
-     * N.strip(" abc ", null)    = "abc"
-     * N.strip("  abcyx", "xyz") = "  abc"
+     * Strings.strip(null, *)          = null
+     * Strings.strip("", *)            = ""
+     * Strings.strip("abc", null)      = "abc"
+     * Strings.strip("  abc", null)    = "abc"
+     * Strings.strip("abc  ", null)    = "abc"
+     * Strings.strip(" abc ", null)    = "abc"
+     * Strings.strip("  abcyx", "xyz") = "  abc"
      * </pre>
      *
      * @param str
@@ -3249,14 +3259,14 @@ public abstract class Strings {
      * </p>
      *
      * <pre>
-     * N.stripStart(null, *)          = null
-     * N.stripStart("", *)            = ""
-     * N.stripStart("abc", "")        = "abc"
-     * N.stripStart("abc", null)      = "abc"
-     * N.stripStart("  abc", null)    = "abc"
-     * N.stripStart("abc  ", null)    = "abc  "
-     * N.stripStart(" abc ", null)    = "abc "
-     * N.stripStart("yxabc  ", "xyz") = "abc  "
+     * Strings.stripStart(null, *)          = null
+     * Strings.stripStart("", *)            = ""
+     * Strings.stripStart("abc", "")        = "abc"
+     * Strings.stripStart("abc", null)      = "abc"
+     * Strings.stripStart("  abc", null)    = "abc"
+     * Strings.stripStart("abc  ", null)    = "abc  "
+     * Strings.stripStart(" abc ", null)    = "abc "
+     * Strings.stripStart("yxabc  ", "xyz") = "abc  "
      * </pre>
      *
      * @param str
@@ -3266,7 +3276,7 @@ public abstract class Strings {
      * @return
      */
     public static String stripStart(final String str, final String stripChars) {
-        if (N.isNullOrEmpty(str) || (stripChars != null && stripChars.isEmpty())) {
+        if (isEmpty(str) || (stripChars != null && stripChars.isEmpty())) {
             return str;
         }
 
@@ -3317,15 +3327,15 @@ public abstract class Strings {
      * </p>
      *
      * <pre>
-     * N.stripEnd(null, *)          = null
-     * N.stripEnd("", *)            = ""
-     * N.stripEnd("abc", "")        = "abc"
-     * N.stripEnd("abc", null)      = "abc"
-     * N.stripEnd("  abc", null)    = "  abc"
-     * N.stripEnd("abc  ", null)    = "abc"
-     * N.stripEnd(" abc ", null)    = " abc"
-     * N.stripEnd("  abcyx", "xyz") = "  abc"
-     * N.stripEnd("120.00", ".0")   = "12"
+     * Strings.stripEnd(null, *)          = null
+     * Strings.stripEnd("", *)            = ""
+     * Strings.stripEnd("abc", "")        = "abc"
+     * Strings.stripEnd("abc", null)      = "abc"
+     * Strings.stripEnd("  abc", null)    = "  abc"
+     * Strings.stripEnd("abc  ", null)    = "abc"
+     * Strings.stripEnd(" abc ", null)    = " abc"
+     * Strings.stripEnd("  abcyx", "xyz") = "  abc"
+     * Strings.stripEnd("120.00", ".0")   = "12"
      * </pre>
      *
      * @param str
@@ -3335,7 +3345,7 @@ public abstract class Strings {
      * @return
      */
     public static String stripEnd(final String str, final String stripChars) {
-        if (N.isNullOrEmpty(str) || (stripChars != null && stripChars.isEmpty())) {
+        if (isEmpty(str) || (stripChars != null && stripChars.isEmpty())) {
             return str;
         }
 
@@ -3383,10 +3393,10 @@ public abstract class Strings {
      * </p>
      *
      * <pre>
-     * N.stripAccents(null)                = null
-     * N.stripAccents("")                  = ""
-     * N.stripAccents("control")           = "control"
-     * N.stripAccents("&eacute;clair")     = "eclair"
+     * Strings.stripAccents(null)                = null
+     * Strings.stripAccents("")                  = ""
+     * Strings.stripAccents("control")           = "control"
+     * Strings.stripAccents("&eacute;clair")     = "eclair"
      * </pre>
      *
      * @param str
@@ -3454,17 +3464,17 @@ public abstract class Strings {
      * </p>
      *
      * <pre>
-     * N.chomp(null)          = null
-     * N.chomp("")            = ""
-     * N.chomp("abc \r")      = "abc "
-     * N.chomp("abc\n")       = "abc"
-     * N.chomp("abc\r\n")     = "abc"
-     * N.chomp("abc\r\n\r\n") = "abc\r\n"
-     * N.chomp("abc\n\r")     = "abc\n"
-     * N.chomp("abc\n\rabc")  = "abc\n\rabc"
-     * N.chomp("\r")          = ""
-     * N.chomp("\n")          = ""
-     * N.chomp("\r\n")        = ""
+     * Strings.chomp(null)          = null
+     * Strings.chomp("")            = ""
+     * Strings.chomp("abc \r")      = "abc "
+     * Strings.chomp("abc\n")       = "abc"
+     * Strings.chomp("abc\r\n")     = "abc"
+     * Strings.chomp("abc\r\n\r\n") = "abc\r\n"
+     * Strings.chomp("abc\n\r")     = "abc\n"
+     * Strings.chomp("abc\n\rabc")  = "abc\n\rabc"
+     * Strings.chomp("\r")          = ""
+     * Strings.chomp("\n")          = ""
+     * Strings.chomp("\r\n")        = ""
      * </pre>
      *
      * @param str
@@ -3699,10 +3709,10 @@ public abstract class Strings {
      * </p>
      *
      * <pre>
-     * N.deleteWhitespace(null)         = null
-     * N.deleteWhitespace("")           = ""
-     * N.deleteWhitespace("abc")        = "abc"
-     * N.deleteWhitespace("   ab  c  ") = "abc"
+     * Strings.deleteWhitespace(null)         = null
+     * Strings.deleteWhitespace("")           = ""
+     * Strings.deleteWhitespace("abc")        = "abc"
+     * Strings.deleteWhitespace("   ab  c  ") = "abc"
      * </pre>
      *
      * @param str
@@ -3833,15 +3843,15 @@ public abstract class Strings {
 
     /**
      * <pre>
-     * N.wrapIfMissing(null, "[", "]") -> "[]"
-     * N.wrapIfMissing("", "[", "]") -> "[]"
-     * N.wrapIfMissing("[", "[", "]") -> "[]"
-     * N.wrapIfMissing("]", "[", "]") -> "[]"
-     * N.wrapIfMissing("abc", "[", "]") -> "[abc]"
-     * N.wrapIfMissing("a", "aa", "aa") -> "aaaaa"
-     * N.wrapIfMissing("aa", "aa", "aa") -> "aaaa"
-     * N.wrapIfMissing("aaa", "aa", "aa") -> "aaaaa"
-     * N.wrapIfMissing("aaaa", "aa", "aa") -> "aaaa"
+     * Strings.wrapIfMissing(null, "[", "]") -> "[]"
+     * Strings.wrapIfMissing("", "[", "]") -> "[]"
+     * Strings.wrapIfMissing("[", "[", "]") -> "[]"
+     * Strings.wrapIfMissing("]", "[", "]") -> "[]"
+     * Strings.wrapIfMissing("abc", "[", "]") -> "[abc]"
+     * Strings.wrapIfMissing("a", "aa", "aa") -> "aaaaa"
+     * Strings.wrapIfMissing("aa", "aa", "aa") -> "aaaa"
+     * Strings.wrapIfMissing("aaa", "aa", "aa") -> "aaaaa"
+     * Strings.wrapIfMissing("aaaa", "aa", "aa") -> "aaaa"
      * </pre>
      *
      * @param str
@@ -3876,14 +3886,14 @@ public abstract class Strings {
 
     /**
      * <pre>
-     * N.wrap(null, "[", "]") -> "[]"
-     * N.wrap("", "[", "]") -> "[]"
-     * N.wrap("[", "[", "]") -> "[[]"
-     * N.wrap("]", "[", "]") -> "[]]"
-     * N.wrap("abc", "[", "]") -> "[abc]"
-     * N.wrap("a", "aa", "aa") -> "aaaaa"
-     * N.wrap("aa", "aa", "aa") -> "aaaaaa"
-     * N.wrap("aaa", "aa", "aa") -> "aaaaaaa"
+     * Strings.wrap(null, "[", "]") -> "[]"
+     * Strings.wrap("", "[", "]") -> "[]"
+     * Strings.wrap("[", "[", "]") -> "[[]"
+     * Strings.wrap("]", "[", "]") -> "[]]"
+     * Strings.wrap("abc", "[", "]") -> "[abc]"
+     * Strings.wrap("a", "aa", "aa") -> "aaaaa"
+     * Strings.wrap("aa", "aa", "aa") -> "aaaaaa"
+     * Strings.wrap("aaa", "aa", "aa") -> "aaaaaaa"
      * </pre>
      *
      * @param str
@@ -3919,15 +3929,15 @@ public abstract class Strings {
      * </p>
      *
      * <pre>
-     * N.unwrap(null, "[", "]") -> ""
-     * N.unwrap("", "[", "]") -> ""
-     * N.unwrap("[", "[", "]") -> "["
-     * N.unwrap("]", "[", "]") -> "["
-     * N.unwrap("[abc]", "[", "]") -> "abc"
-     * N.unwrap("aaaaa", "aa", "aa") -> "a"
-     * N.unwrap("aa", "aa", "aa") -> "aa"
-     * N.unwrap("aaa", "aa", "aa") -> "aaa"
-     * N.unwrap("aaaa", "aa", "aa") -> ""
+     * Strings.unwrap(null, "[", "]") -> ""
+     * Strings.unwrap("", "[", "]") -> ""
+     * Strings.unwrap("[", "[", "]") -> "["
+     * Strings.unwrap("]", "[", "]") -> "["
+     * Strings.unwrap("[abc]", "[", "]") -> "abc"
+     * Strings.unwrap("aaaaa", "aa", "aa") -> "a"
+     * Strings.unwrap("aa", "aa", "aa") -> "aa"
+     * Strings.unwrap("aaa", "aa", "aa") -> "aaa"
+     * Strings.unwrap("aaaa", "aa", "aa") -> ""
      * </pre>
      *
      * @param str
@@ -3995,8 +4005,8 @@ public abstract class Strings {
      * @return true, if is all lower case
      */
     public static boolean isAllLowerCase(final CharSequence cs) {
-        if (N.isNullOrEmpty(cs)) {
-            return false;
+        if (isEmpty(cs)) {
+            return true;
         }
 
         final int len = cs.length();
@@ -4017,8 +4027,8 @@ public abstract class Strings {
      * @return true, if is all upper case
      */
     public static boolean isAllUpperCase(final CharSequence cs) {
-        if (N.isNullOrEmpty(cs)) {
-            return false;
+        if (isEmpty(cs)) {
+            return true;
         }
 
         final int len = cs.length();
@@ -4039,7 +4049,7 @@ public abstract class Strings {
      * @return true, if is mixed case
      */
     public static boolean isMixedCase(final CharSequence cs) {
-        if (N.isNullOrEmpty(cs) || cs.length() == 1) {
+        if (isEmpty(cs) || cs.length() == 1) {
             return false;
         }
 
@@ -4050,10 +4060,6 @@ public abstract class Strings {
         char ch = 0;
 
         for (int i = 0; i < len; i++) {
-            if (containsUppercase && containsLowercase) {
-                return true;
-            }
-
             ch = cs.charAt(i);
 
             if (Character.isUpperCase(ch)) {
@@ -4061,9 +4067,13 @@ public abstract class Strings {
             } else if (Character.isLowerCase(ch)) {
                 containsLowercase = true;
             }
+
+            if (containsUppercase && containsLowercase) {
+                return true;
+            }
         }
 
-        return containsUppercase && containsLowercase;
+        return false;
     }
 
     /**
@@ -4277,13 +4287,30 @@ public abstract class Strings {
     }
 
     /**
-     * Checks if is ascii printable.
+     * Checks if the CharSequence contains only ASCII printable characters.
+     *
+     * <p>{@code null} will return {@code false}.
+     * An empty CharSequence (length()=0) will return {@code true}.</p>
+     *
+     * <pre>
+     * Strings.isAsciiPrintable(null)     = false
+     * Strings.isAsciiPrintable("")       = true
+     * Strings.isAsciiPrintable(" ")      = true
+     * Strings.isAsciiPrintable("Ceki")   = true
+     * Strings.isAsciiPrintable("ab2c")   = true
+     * Strings.isAsciiPrintable("!ab-c~") = true
+     * Strings.isAsciiPrintable("\u0020") = true
+     * Strings.isAsciiPrintable("\u0021") = true
+     * Strings.isAsciiPrintable("\u007e") = true
+     * Strings.isAsciiPrintable("\u007f") = false
+     * Strings.isAsciiPrintable("Ceki G\u00fclc\u00fc") = false
+     * </pre>
      *
      * @param cs
      * @return true, if is ascii printable
      */
     public static boolean isAsciiPrintable(final CharSequence cs) {
-        if (N.isNullOrEmpty(cs)) {
+        if (cs == null) {
             return false;
         }
 
@@ -4305,7 +4332,7 @@ public abstract class Strings {
      * @return true, if is ascii alpha
      */
     public static boolean isAsciiAlpha(final CharSequence cs) {
-        if (N.isNullOrEmpty(cs)) {
+        if (isEmpty(cs)) {
             return false;
         }
 
@@ -4327,7 +4354,7 @@ public abstract class Strings {
      * @return true, if is ascii alpha space
      */
     public static boolean isAsciiAlphaSpace(final CharSequence cs) {
-        if (N.isNullOrEmpty(cs)) {
+        if (cs == null) {
             return false;
         }
 
@@ -4352,7 +4379,7 @@ public abstract class Strings {
      * @return true, if is ascii alphanumeric
      */
     public static boolean isAsciiAlphanumeric(final CharSequence cs) {
-        if (N.isNullOrEmpty(cs)) {
+        if (isEmpty(cs)) {
             return false;
         }
 
@@ -4374,7 +4401,7 @@ public abstract class Strings {
      * @return true, if is ascii alphanumeric space
      */
     public static boolean isAsciiAlphanumericSpace(final CharSequence cs) {
-        if (N.isNullOrEmpty(cs)) {
+        if (cs == null) {
             return false;
         }
 
@@ -4399,7 +4426,7 @@ public abstract class Strings {
      * @return true, if is ascii numeric
      */
     public static boolean isAsciiNumeric(final CharSequence cs) {
-        if (N.isNullOrEmpty(cs)) {
+        if (isEmpty(cs)) {
             return false;
         }
 
@@ -4427,12 +4454,12 @@ public abstract class Strings {
      * </p>
      *
      * <pre>
-     * N.isAlpha(null)   = false
-     * N.isAlpha("")     = false
-     * N.isAlpha("  ")   = false
-     * N.isAlpha("abc")  = true
-     * N.isAlpha("ab2c") = false
-     * N.isAlpha("ab-c") = false
+     * Strings.isAlpha(null)   = false
+     * Strings.isAlpha("")     = false
+     * Strings.isAlpha("  ")   = false
+     * Strings.isAlpha("abc")  = true
+     * Strings.isAlpha("ab2c") = false
+     * Strings.isAlpha("ab-c") = false
      * </pre>
      *
      * @param cs
@@ -4443,7 +4470,7 @@ public abstract class Strings {
      * @since 3.0 Changed "" to return false and not true
      */
     public static boolean isAlpha(final CharSequence cs) {
-        if (N.isNullOrEmpty(cs)) {
+        if (isEmpty(cs)) {
             return false;
         }
 
@@ -4469,13 +4496,13 @@ public abstract class Strings {
      * </p>
      *
      * <pre>
-     * N.isAlphaSpace(null)   = false
-     * N.isAlphaSpace("")     = false
-     * N.isAlphaSpace("  ")   = true
-     * N.isAlphaSpace("abc")  = true
-     * N.isAlphaSpace("ab c") = true
-     * N.isAlphaSpace("ab2c") = false
-     * N.isAlphaSpace("ab-c") = false
+     * Strings.isAlphaSpace(null)   = false
+     * Strings.isAlphaSpace("")     = true
+     * Strings.isAlphaSpace("  ")   = true
+     * Strings.isAlphaSpace("abc")  = true
+     * Strings.isAlphaSpace("ab c") = true
+     * Strings.isAlphaSpace("ab2c") = false
+     * Strings.isAlphaSpace("ab-c") = false
      * </pre>
      *
      * @param cs
@@ -4485,7 +4512,7 @@ public abstract class Strings {
      *        isAlphaSpace(CharSequence)
      */
     public static boolean isAlphaSpace(final CharSequence cs) {
-        if (N.isNullOrEmpty(cs)) {
+        if (cs == null) {
             return false;
         }
 
@@ -4514,13 +4541,13 @@ public abstract class Strings {
      * </p>
      *
      * <pre>
-     * N.isAlphanumeric(null)   = false
-     * N.isAlphanumeric("")     = false
-     * N.isAlphanumeric("  ")   = false
-     * N.isAlphanumeric("abc")  = true
-     * N.isAlphanumeric("ab c") = false
-     * N.isAlphanumeric("ab2c") = true
-     * N.isAlphanumeric("ab-c") = false
+     * Strings.isAlphanumeric(null)   = false
+     * Strings.isAlphanumeric("")     = false
+     * Strings.isAlphanumeric("  ")   = false
+     * Strings.isAlphanumeric("abc")  = true
+     * Strings.isAlphanumeric("ab c") = false
+     * Strings.isAlphanumeric("ab2c") = true
+     * Strings.isAlphanumeric("ab-c") = false
      * </pre>
      *
      * @param cs
@@ -4531,7 +4558,7 @@ public abstract class Strings {
      * @since 3.0 Changed "" to return false and not true
      */
     public static boolean isAlphanumeric(final CharSequence cs) {
-        if (N.isNullOrEmpty(cs)) {
+        if (isEmpty(cs)) {
             return false;
         }
 
@@ -4558,13 +4585,13 @@ public abstract class Strings {
      * </p>
      *
      * <pre>
-     * N.isAlphanumericSpace(null)   = false
-     * N.isAlphanumericSpace("")     = false
-     * N.isAlphanumericSpace("  ")   = true
-     * N.isAlphanumericSpace("abc")  = true
-     * N.isAlphanumericSpace("ab c") = true
-     * N.isAlphanumericSpace("ab2c") = true
-     * N.isAlphanumericSpace("ab-c") = false
+     * Strings.isAlphanumericSpace(null)   = false
+     * Strings.isAlphanumericSpace("")     = true
+     * Strings.isAlphanumericSpace("  ")   = true
+     * Strings.isAlphanumericSpace("abc")  = true
+     * Strings.isAlphanumericSpace("ab c") = true
+     * Strings.isAlphanumericSpace("ab2c") = true
+     * Strings.isAlphanumericSpace("ab-c") = false
      * </pre>
      *
      * @param cs
@@ -4575,7 +4602,7 @@ public abstract class Strings {
      *        isAlphanumericSpace(CharSequence)
      */
     public static boolean isAlphanumericSpace(final CharSequence cs) {
-        if (N.isNullOrEmpty(cs)) {
+        if (cs == null) {
             return false;
         }
 
@@ -4613,16 +4640,16 @@ public abstract class Strings {
      * </p>
      *
      * <pre>
-     * N.isNumeric(null)   = false
-     * N.isNumeric("")     = false
-     * N.isNumeric("  ")   = false
-     * N.isNumeric("123")  = true
-     * N.isNumeric("12 3") = false
-     * N.isNumeric("ab2c") = false
-     * N.isNumeric("12-3") = false
-     * N.isNumeric("12.3") = false
-     * N.isNumeric("-123") = false
-     * N.isNumeric("+123") = false
+     * Strings.isNumeric(null)   = false
+     * Strings.isNumeric("")     = false
+     * Strings.isNumeric("  ")   = false
+     * Strings.isNumeric("123")  = true
+     * Strings.isNumeric("12 3") = false
+     * Strings.isNumeric("ab2c") = false
+     * Strings.isNumeric("12-3") = false
+     * Strings.isNumeric("12.3") = false
+     * Strings.isNumeric("-123") = false
+     * Strings.isNumeric("+123") = false
      * </pre>
      *
      * @param cs
@@ -4633,7 +4660,7 @@ public abstract class Strings {
      * @since 3.0 Changed "" to return false and not true
      */
     public static boolean isNumeric(final CharSequence cs) {
-        if (N.isNullOrEmpty(cs)) {
+        if (isEmpty(cs)) {
             return false;
         }
 
@@ -4649,25 +4676,24 @@ public abstract class Strings {
     }
 
     /**
-     * <p>
-     * Checks if the CharSequence contains only Unicode digits or space (
-     * {@code ' '}). A decimal point is not a Unicode digit and returns false.
-     * </p>
+     * Checks if the CharSequence contains only Unicode digits or space
+     * ({@code ' '}).
+     * A decimal point is not a Unicode digit and returns false.
      *
-     * <p>
-     * {@code null} or empty CharSequence (length()=0) will return {@code false}
-     * .
-     * </p>
+     * <p>{@code null} will return {@code false}.
+     * An empty CharSequence (length()=0) will return {@code true}.</p>
      *
      * <pre>
-     * N.isNumericSpace(null)   = false
-     * N.isNumericSpace("")     = false
-     * N.isNumericSpace("  ")   = true
-     * N.isNumericSpace("123")  = true
-     * N.isNumericSpace("12 3") = true
-     * N.isNumericSpace("ab2c") = false
-     * N.isNumericSpace("12-3") = false
-     * N.isNumericSpace("12.3") = false
+     * Strings.isNumericSpace(null)   = false
+     * Strings.isNumericSpace("")     = true
+     * Strings.isNumericSpace("  ")   = true
+     * Strings.isNumericSpace("123")  = true
+     * Strings.isNumericSpace("12 3") = true
+     * Strings.isNumericSpace("\u0967\u0968\u0969")  = true
+     * Strings.isNumericSpace("\u0967\u0968 \u0969")  = true
+     * Strings.isNumericSpace("ab2c") = false
+     * Strings.isNumericSpace("12-3") = false
+     * Strings.isNumericSpace("12.3") = false
      * </pre>
      *
      * @param cs
@@ -4677,7 +4703,7 @@ public abstract class Strings {
      *        isNumericSpace(CharSequence)
      */
     public static boolean isNumericSpace(final CharSequence cs) {
-        if (N.isNullOrEmpty(cs)) {
+        if (cs == null) {
             return false;
         }
 
@@ -4696,22 +4722,20 @@ public abstract class Strings {
     }
 
     /**
-     * <p>
      * Checks if the CharSequence contains only whitespace.
-     * </p>
      *
-     * <p>
-     * {@code null} or empty CharSequence (length()=0) will return {@code false}
-     * .
-     * </p>
+     * <p>Whitespace is defined by {@link Character#isWhitespace(char)}.</p>
+     *
+     * <p>{@code null} will return {@code false}.
+     * An empty CharSequence (length()=0) will return {@code true}.</p>
      *
      * <pre>
-     * N.isWhitespace(null)   = false
-     * N.isWhitespace("")     = false
-     * N.isWhitespace("  ")   = true
-     * N.isWhitespace("abc")  = false
-     * N.isWhitespace("ab2c") = false
-     * N.isWhitespace("ab-c") = false
+     * Strings.isWhitespace(null)   = false
+     * Strings.isWhitespace("")     = true
+     * Strings.isWhitespace("  ")   = true
+     * Strings.isWhitespace("abc")  = false
+     * Strings.isWhitespace("ab2c") = false
+     * Strings.isWhitespace("ab-c") = false
      * </pre>
      *
      * @param cs
@@ -4722,7 +4746,7 @@ public abstract class Strings {
      *        isWhitespace(CharSequence)
      */
     public static boolean isWhitespace(final CharSequence cs) {
-        if (N.isNullOrEmpty(cs)) {
+        if (cs == null) {
             return false;
         }
 
@@ -4996,7 +5020,7 @@ public abstract class Strings {
      */
     @SafeVarargs
     public static int indexOfAny(final String str, final int fromIndex, final char... chs) {
-        if (N.isNullOrEmpty(str) || N.isNullOrEmpty(chs)) {
+        if (isEmpty(str) || N.isNullOrEmpty(chs)) {
             return N.INDEX_NOT_FOUND;
         }
 
@@ -5056,7 +5080,7 @@ public abstract class Strings {
         int idx = 0;
 
         for (int i = 0, len = substrs.length; i < len; i++) {
-            if (N.isNullOrEmpty(substrs[i])) {
+            if (isEmpty(substrs[i])) {
                 continue;
             }
 
@@ -5420,7 +5444,7 @@ public abstract class Strings {
      */
     @SafeVarargs
     public static int lastIndexOfAny(final String str, final char... chs) {
-        if (N.isNullOrEmpty(str) || N.isNullOrEmpty(chs)) {
+        if (isEmpty(str) || N.isNullOrEmpty(chs)) {
             return N.INDEX_NOT_FOUND;
         }
 
@@ -5761,7 +5785,7 @@ public abstract class Strings {
      */
     @SafeVarargs
     public static boolean containsAny(final String str, final char... chs) {
-        if (N.isNullOrEmpty(str) || N.isNullOrEmpty(chs)) {
+        if (isEmpty(str) || N.isNullOrEmpty(chs)) {
             return false;
         }
 
@@ -5776,7 +5800,7 @@ public abstract class Strings {
      */
     @SafeVarargs
     public static boolean containsAny(final String str, final String... searchStrs) {
-        if (N.isNullOrEmpty(str) || N.isNullOrEmpty(searchStrs)) {
+        if (isEmpty(str) || N.isNullOrEmpty(searchStrs)) {
             return false;
         }
 
@@ -5791,7 +5815,7 @@ public abstract class Strings {
      */
     @SafeVarargs
     public static boolean containsAnyIgnoreCase(final String str, final String... searchStrs) {
-        if (N.isNullOrEmpty(str) || N.isNullOrEmpty(searchStrs)) {
+        if (isEmpty(str) || N.isNullOrEmpty(searchStrs)) {
             return false;
         } else if (searchStrs.length == 1) {
             return containsIgnoreCase(str, searchStrs[0]);
@@ -5806,7 +5830,7 @@ public abstract class Strings {
         final String sourceText = str.toLowerCase();
 
         for (String searchStr : searchStrs) {
-            if (N.notNullOrEmpty(searchStr) && indexOf(sourceText, searchStr.toLowerCase()) != N.INDEX_NOT_FOUND) {
+            if (isNotEmpty(searchStr) && indexOf(sourceText, searchStr.toLowerCase()) != N.INDEX_NOT_FOUND) {
                 return true;
             }
         }
@@ -5891,7 +5915,7 @@ public abstract class Strings {
      */
     @SafeVarargs
     public static boolean containsOnly(final String str, final char... chs) {
-        if (N.isNullOrEmpty(str) || N.isNullOrEmpty(chs)) {
+        if (isEmpty(str) || N.isNullOrEmpty(chs)) {
             return false;
         }
 
@@ -5906,7 +5930,7 @@ public abstract class Strings {
      */
     @SafeVarargs
     public static boolean containsNone(final String str, final char... chs) {
-        if (N.isNullOrEmpty(str) || N.isNullOrEmpty(chs)) {
+        if (isEmpty(str) || N.isNullOrEmpty(chs)) {
             return true;
         }
 
@@ -6206,14 +6230,14 @@ public abstract class Strings {
      * </p>
      *
      * <pre>
-     * N.indexOfDifference(null, null) = -1
-     * N.indexOfDifference("", "") = -1
-     * N.indexOfDifference("", "abc") = 0
-     * N.indexOfDifference("abc", "") = 0
-     * N.indexOfDifference("abc", "abc") = -1
-     * N.indexOfDifference("ab", "abxyz") = 2
-     * N.indexOfDifference("abcde", "abxyz") = 2
-     * N.indexOfDifference("abcde", "xyz") = 0
+     * Strings.indexOfDifference(null, null) = -1
+     * Strings.indexOfDifference("", "") = -1
+     * Strings.indexOfDifference("", "abc") = 0
+     * Strings.indexOfDifference("abc", "") = 0
+     * Strings.indexOfDifference("abc", "abc") = -1
+     * Strings.indexOfDifference("ab", "abxyz") = 2
+     * Strings.indexOfDifference("abcde", "abxyz") = 2
+     * Strings.indexOfDifference("abcde", "xyz") = 0
      * </pre>
      *
      * @param a
@@ -6223,11 +6247,11 @@ public abstract class Strings {
      * @return
      */
     public static int indexOfDifference(final String a, final String b) {
-        if (N.equals(a, b) || (N.isNullOrEmpty(a) && N.isNullOrEmpty(b))) {
+        if (N.equals(a, b) || (isEmpty(a) && isEmpty(b))) {
             return N.INDEX_NOT_FOUND;
         }
 
-        if (N.isNullOrEmpty(a) || N.isNullOrEmpty(b)) {
+        if (isEmpty(a) || isEmpty(b)) {
             return 0;
         }
 
@@ -6257,23 +6281,23 @@ public abstract class Strings {
      * </p>
      *
      * <pre>
-     * N.indexOfDifference(null) = -1
-     * N.indexOfDifference(new String[] {}) = -1
-     * N.indexOfDifference(new String[] {"abc"}) = -1
-     * N.indexOfDifference(new String[] {null, null}) = -1
-     * N.indexOfDifference(new String[] {"", ""}) = -1
-     * N.indexOfDifference(new String[] {"", null}) = -1
-     * N.indexOfDifference(new String[] {"abc", null, null}) = 0
-     * N.indexOfDifference(new String[] {null, null, "abc"}) = 0
-     * N.indexOfDifference(new String[] {"", "abc"}) = 0
-     * N.indexOfDifference(new String[] {"abc", ""}) = 0
-     * N.indexOfDifference(new String[] {"abc", "abc"}) = -1
-     * N.indexOfDifference(new String[] {"abc", "a"}) = 1
-     * N.indexOfDifference(new String[] {"ab", "abxyz"}) = 2
-     * N.indexOfDifference(new String[] {"abcde", "abxyz"}) = 2
-     * N.indexOfDifference(new String[] {"abcde", "xyz"}) = 0
-     * N.indexOfDifference(new String[] {"xyz", "abcde"}) = 0
-     * N.indexOfDifference(new String[] {"i am a machine", "i am a robot"}) = 7
+     * Strings.indexOfDifference(null) = -1
+     * Strings.indexOfDifference(new String[] {}) = -1
+     * Strings.indexOfDifference(new String[] {"abc"}) = -1
+     * Strings.indexOfDifference(new String[] {null, null}) = -1
+     * Strings.indexOfDifference(new String[] {"", ""}) = -1
+     * Strings.indexOfDifference(new String[] {"", null}) = -1
+     * Strings.indexOfDifference(new String[] {"abc", null, null}) = 0
+     * Strings.indexOfDifference(new String[] {null, null, "abc"}) = 0
+     * Strings.indexOfDifference(new String[] {"", "abc"}) = 0
+     * Strings.indexOfDifference(new String[] {"abc", ""}) = 0
+     * Strings.indexOfDifference(new String[] {"abc", "abc"}) = -1
+     * Strings.indexOfDifference(new String[] {"abc", "a"}) = 1
+     * Strings.indexOfDifference(new String[] {"ab", "abxyz"}) = 2
+     * Strings.indexOfDifference(new String[] {"abcde", "abxyz"}) = 2
+     * Strings.indexOfDifference(new String[] {"abcde", "xyz"}) = 0
+     * Strings.indexOfDifference(new String[] {"xyz", "abcde"}) = 0
+     * Strings.indexOfDifference(new String[] {"i am a machine", "i am a robot"}) = 7
      * </pre>
      *
      * @param strs
@@ -6356,7 +6380,7 @@ public abstract class Strings {
      * @return
      */
     public static String commonPrefix(final String a, final String b) {
-        if (N.isNullOrEmpty(a) || N.isNullOrEmpty(b)) {
+        if (isEmpty(a) || isEmpty(b)) {
             return EMPTY_STRING;
         }
 
@@ -6392,19 +6416,19 @@ public abstract class Strings {
         }
 
         if (strs.length == 1) {
-            return N.isNullOrEmpty(strs[0]) ? EMPTY_STRING : strs[0];
+            return isEmpty(strs[0]) ? EMPTY_STRING : strs[0];
         }
 
         String commonPrefix = commonPrefix(strs[0], strs[1]);
 
-        if (N.isNullOrEmpty(commonPrefix)) {
+        if (isEmpty(commonPrefix)) {
             return EMPTY_STRING;
         }
 
         for (int i = 2, len = strs.length; i < len; i++) {
             commonPrefix = commonPrefix(commonPrefix, strs[i]);
 
-            if (N.isNullOrEmpty(commonPrefix)) {
+            if (isEmpty(commonPrefix)) {
                 return commonPrefix;
             }
         }
@@ -6425,7 +6449,7 @@ public abstract class Strings {
      * @return
      */
     public static String commonSuffix(final String a, final String b) {
-        if (N.isNullOrEmpty(a) || N.isNullOrEmpty(b)) {
+        if (isEmpty(a) || isEmpty(b)) {
             return EMPTY_STRING;
         }
 
@@ -6463,19 +6487,19 @@ public abstract class Strings {
         }
 
         if (strs.length == 1) {
-            return N.isNullOrEmpty(strs[0]) ? EMPTY_STRING : strs[0];
+            return isEmpty(strs[0]) ? EMPTY_STRING : strs[0];
         }
 
         String commonSuffix = commonSuffix(strs[0], strs[1]);
 
-        if (N.isNullOrEmpty(commonSuffix)) {
+        if (isEmpty(commonSuffix)) {
             return EMPTY_STRING;
         }
 
         for (int i = 2, len = strs.length; i < len; i++) {
             commonSuffix = commonSuffix(commonSuffix, strs[i]);
 
-            if (N.isNullOrEmpty(commonSuffix)) {
+            if (isEmpty(commonSuffix)) {
                 return commonSuffix;
             }
         }
@@ -6506,7 +6530,7 @@ public abstract class Strings {
      * @return an empty String {@code ""} is {@code a} or {@code b} is empty or {@code null}.
      */
     public static String longestCommonSubstring(final String a, final String b) {
-        if (N.isNullOrEmpty(a) || N.isNullOrEmpty(b)) {
+        if (isEmpty(a) || isEmpty(b)) {
             return EMPTY_STRING;
         }
 
@@ -7448,7 +7472,7 @@ public abstract class Strings {
      * @return
      */
     public static List<IntPair> findAllIndicesBetween(final String str, final char prefix, final char postfix) {
-        return N.isNullOrEmpty(str) ? new ArrayList<>() : findAllIndicesBetween(str, 0, str.length(), prefix, postfix);
+        return isEmpty(str) ? new ArrayList<>() : findAllIndicesBetween(str, 0, str.length(), prefix, postfix);
     }
 
     /**
@@ -7509,7 +7533,7 @@ public abstract class Strings {
      * @return
      */
     public static List<IntPair> findAllIndicesBetween(final String str, final String prefix, final String postfix) {
-        return N.isNullOrEmpty(str) ? new ArrayList<>() : findAllIndicesBetween(str, 0, str.length(), prefix, postfix);
+        return isEmpty(str) ? new ArrayList<>() : findAllIndicesBetween(str, 0, str.length(), prefix, postfix);
     }
 
     /**
@@ -7596,7 +7620,7 @@ public abstract class Strings {
      * @return
      */
     public static List<String> findAllSubstringsBetween(final String str, final char prefix, final char postfix) {
-        return N.isNullOrEmpty(str) ? new ArrayList<>() : findAllSubstringsBetween(str, 0, str.length(), prefix, postfix);
+        return isEmpty(str) ? new ArrayList<>() : findAllSubstringsBetween(str, 0, str.length(), prefix, postfix);
     }
 
     /**
@@ -7629,7 +7653,7 @@ public abstract class Strings {
      * @return
      */
     public static List<String> findAllSubstringsBetween(final String str, final String prefix, final String postfix) {
-        return N.isNullOrEmpty(str) ? new ArrayList<>() : findAllSubstringsBetween(str, 0, str.length(), prefix, postfix);
+        return isEmpty(str) ? new ArrayList<>() : findAllSubstringsBetween(str, 0, str.length(), prefix, postfix);
     }
 
     /**
@@ -7812,7 +7836,7 @@ public abstract class Strings {
         final StringBuilder sb = Objectory.createStringBuilder();
 
         try {
-            if (N.isNullOrEmpty(delimiter)) {
+            if (isEmpty(delimiter)) {
                 for (int i = fromIndex; i < toIndex; i++) {
                     sb.append(a[i]);
                 }
@@ -7847,27 +7871,27 @@ public abstract class Strings {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
         if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
-            if (N.isNullOrEmpty(prefix) && N.isNullOrEmpty(suffix)) {
+            if (isEmpty(prefix) && isEmpty(suffix)) {
                 return EMPTY_STRING;
-            } else if (N.isNullOrEmpty(prefix)) {
+            } else if (isEmpty(prefix)) {
                 return suffix;
-            } else if (N.isNullOrEmpty(suffix)) {
+            } else if (isEmpty(suffix)) {
                 return prefix;
             } else {
                 return prefix + suffix;
             }
-        } else if (toIndex - fromIndex == 1 && N.isNullOrEmpty(prefix) && N.isNullOrEmpty(suffix)) {
+        } else if (toIndex - fromIndex == 1 && isEmpty(prefix) && isEmpty(suffix)) {
             return N.toString(a[fromIndex]);
         }
 
         final StringBuilder sb = Objectory.createStringBuilder();
 
         try {
-            if (N.notNullOrEmpty(prefix)) {
+            if (isNotEmpty(prefix)) {
                 sb.append(prefix);
             }
 
-            if (N.isNullOrEmpty(delimiter)) {
+            if (isEmpty(delimiter)) {
                 for (int i = fromIndex; i < toIndex; i++) {
                     sb.append(a[i]);
                 }
@@ -7881,7 +7905,7 @@ public abstract class Strings {
                 }
             }
 
-            if (N.notNullOrEmpty(suffix)) {
+            if (isNotEmpty(suffix)) {
                 sb.append(suffix);
             }
 
@@ -7982,7 +8006,7 @@ public abstract class Strings {
         final StringBuilder sb = Objectory.createStringBuilder();
 
         try {
-            if (N.isNullOrEmpty(delimiter)) {
+            if (isEmpty(delimiter)) {
                 for (int i = fromIndex; i < toIndex; i++) {
                     sb.append(a[i]);
                 }
@@ -8017,27 +8041,27 @@ public abstract class Strings {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
         if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
-            if (N.isNullOrEmpty(prefix) && N.isNullOrEmpty(suffix)) {
+            if (isEmpty(prefix) && isEmpty(suffix)) {
                 return EMPTY_STRING;
-            } else if (N.isNullOrEmpty(prefix)) {
+            } else if (isEmpty(prefix)) {
                 return suffix;
-            } else if (N.isNullOrEmpty(suffix)) {
+            } else if (isEmpty(suffix)) {
                 return prefix;
             } else {
                 return prefix + suffix;
             }
-        } else if (toIndex - fromIndex == 1 && N.isNullOrEmpty(prefix) && N.isNullOrEmpty(suffix)) {
+        } else if (toIndex - fromIndex == 1 && isEmpty(prefix) && isEmpty(suffix)) {
             return N.toString(a[fromIndex]);
         }
 
         final StringBuilder sb = Objectory.createStringBuilder();
 
         try {
-            if (N.notNullOrEmpty(prefix)) {
+            if (isNotEmpty(prefix)) {
                 sb.append(prefix);
             }
 
-            if (N.isNullOrEmpty(delimiter)) {
+            if (isEmpty(delimiter)) {
                 for (int i = fromIndex; i < toIndex; i++) {
                     sb.append(a[i]);
                 }
@@ -8051,7 +8075,7 @@ public abstract class Strings {
                 }
             }
 
-            if (N.notNullOrEmpty(suffix)) {
+            if (isNotEmpty(suffix)) {
                 sb.append(suffix);
             }
 
@@ -8152,7 +8176,7 @@ public abstract class Strings {
         final StringBuilder sb = Objectory.createStringBuilder();
 
         try {
-            if (N.isNullOrEmpty(delimiter)) {
+            if (isEmpty(delimiter)) {
                 for (int i = fromIndex; i < toIndex; i++) {
                     sb.append(a[i]);
                 }
@@ -8187,27 +8211,27 @@ public abstract class Strings {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
         if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
-            if (N.isNullOrEmpty(prefix) && N.isNullOrEmpty(suffix)) {
+            if (isEmpty(prefix) && isEmpty(suffix)) {
                 return EMPTY_STRING;
-            } else if (N.isNullOrEmpty(prefix)) {
+            } else if (isEmpty(prefix)) {
                 return suffix;
-            } else if (N.isNullOrEmpty(suffix)) {
+            } else if (isEmpty(suffix)) {
                 return prefix;
             } else {
                 return prefix + suffix;
             }
-        } else if (toIndex - fromIndex == 1 && N.isNullOrEmpty(prefix) && N.isNullOrEmpty(suffix)) {
+        } else if (toIndex - fromIndex == 1 && isEmpty(prefix) && isEmpty(suffix)) {
             return N.toString(a[fromIndex]);
         }
 
         final StringBuilder sb = Objectory.createStringBuilder();
 
         try {
-            if (N.notNullOrEmpty(prefix)) {
+            if (isNotEmpty(prefix)) {
                 sb.append(prefix);
             }
 
-            if (N.isNullOrEmpty(delimiter)) {
+            if (isEmpty(delimiter)) {
                 for (int i = fromIndex; i < toIndex; i++) {
                     sb.append(a[i]);
                 }
@@ -8221,7 +8245,7 @@ public abstract class Strings {
                 }
             }
 
-            if (N.notNullOrEmpty(suffix)) {
+            if (isNotEmpty(suffix)) {
                 sb.append(suffix);
             }
 
@@ -8322,7 +8346,7 @@ public abstract class Strings {
         final StringBuilder sb = Objectory.createStringBuilder();
 
         try {
-            if (N.isNullOrEmpty(delimiter)) {
+            if (isEmpty(delimiter)) {
                 for (int i = fromIndex; i < toIndex; i++) {
                     sb.append(a[i]);
                 }
@@ -8357,27 +8381,27 @@ public abstract class Strings {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
         if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
-            if (N.isNullOrEmpty(prefix) && N.isNullOrEmpty(suffix)) {
+            if (isEmpty(prefix) && isEmpty(suffix)) {
                 return EMPTY_STRING;
-            } else if (N.isNullOrEmpty(prefix)) {
+            } else if (isEmpty(prefix)) {
                 return suffix;
-            } else if (N.isNullOrEmpty(suffix)) {
+            } else if (isEmpty(suffix)) {
                 return prefix;
             } else {
                 return prefix + suffix;
             }
-        } else if (toIndex - fromIndex == 1 && N.isNullOrEmpty(prefix) && N.isNullOrEmpty(suffix)) {
+        } else if (toIndex - fromIndex == 1 && isEmpty(prefix) && isEmpty(suffix)) {
             return N.toString(a[fromIndex]);
         }
 
         final StringBuilder sb = Objectory.createStringBuilder();
 
         try {
-            if (N.notNullOrEmpty(prefix)) {
+            if (isNotEmpty(prefix)) {
                 sb.append(prefix);
             }
 
-            if (N.isNullOrEmpty(delimiter)) {
+            if (isEmpty(delimiter)) {
                 for (int i = fromIndex; i < toIndex; i++) {
                     sb.append(a[i]);
                 }
@@ -8391,7 +8415,7 @@ public abstract class Strings {
                 }
             }
 
-            if (N.notNullOrEmpty(suffix)) {
+            if (isNotEmpty(suffix)) {
                 sb.append(suffix);
             }
 
@@ -8492,7 +8516,7 @@ public abstract class Strings {
         final StringBuilder sb = Objectory.createStringBuilder();
 
         try {
-            if (N.isNullOrEmpty(delimiter)) {
+            if (isEmpty(delimiter)) {
                 for (int i = fromIndex; i < toIndex; i++) {
                     sb.append(a[i]);
                 }
@@ -8527,27 +8551,27 @@ public abstract class Strings {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
         if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
-            if (N.isNullOrEmpty(prefix) && N.isNullOrEmpty(suffix)) {
+            if (isEmpty(prefix) && isEmpty(suffix)) {
                 return EMPTY_STRING;
-            } else if (N.isNullOrEmpty(prefix)) {
+            } else if (isEmpty(prefix)) {
                 return suffix;
-            } else if (N.isNullOrEmpty(suffix)) {
+            } else if (isEmpty(suffix)) {
                 return prefix;
             } else {
                 return prefix + suffix;
             }
-        } else if (toIndex - fromIndex == 1 && N.isNullOrEmpty(prefix) && N.isNullOrEmpty(suffix)) {
+        } else if (toIndex - fromIndex == 1 && isEmpty(prefix) && isEmpty(suffix)) {
             return N.toString(a[fromIndex]);
         }
 
         final StringBuilder sb = Objectory.createStringBuilder();
 
         try {
-            if (N.notNullOrEmpty(prefix)) {
+            if (isNotEmpty(prefix)) {
                 sb.append(prefix);
             }
 
-            if (N.isNullOrEmpty(delimiter)) {
+            if (isEmpty(delimiter)) {
                 for (int i = fromIndex; i < toIndex; i++) {
                     sb.append(a[i]);
                 }
@@ -8561,7 +8585,7 @@ public abstract class Strings {
                 }
             }
 
-            if (N.notNullOrEmpty(suffix)) {
+            if (isNotEmpty(suffix)) {
                 sb.append(suffix);
             }
 
@@ -8662,7 +8686,7 @@ public abstract class Strings {
         final StringBuilder sb = Objectory.createStringBuilder();
 
         try {
-            if (N.isNullOrEmpty(delimiter)) {
+            if (isEmpty(delimiter)) {
                 for (int i = fromIndex; i < toIndex; i++) {
                     sb.append(a[i]);
                 }
@@ -8697,27 +8721,27 @@ public abstract class Strings {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
         if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
-            if (N.isNullOrEmpty(prefix) && N.isNullOrEmpty(suffix)) {
+            if (isEmpty(prefix) && isEmpty(suffix)) {
                 return EMPTY_STRING;
-            } else if (N.isNullOrEmpty(prefix)) {
+            } else if (isEmpty(prefix)) {
                 return suffix;
-            } else if (N.isNullOrEmpty(suffix)) {
+            } else if (isEmpty(suffix)) {
                 return prefix;
             } else {
                 return prefix + suffix;
             }
-        } else if (toIndex - fromIndex == 1 && N.isNullOrEmpty(prefix) && N.isNullOrEmpty(suffix)) {
+        } else if (toIndex - fromIndex == 1 && isEmpty(prefix) && isEmpty(suffix)) {
             return N.toString(a[fromIndex]);
         }
 
         final StringBuilder sb = Objectory.createStringBuilder();
 
         try {
-            if (N.notNullOrEmpty(prefix)) {
+            if (isNotEmpty(prefix)) {
                 sb.append(prefix);
             }
 
-            if (N.isNullOrEmpty(delimiter)) {
+            if (isEmpty(delimiter)) {
                 for (int i = fromIndex; i < toIndex; i++) {
                     sb.append(a[i]);
                 }
@@ -8731,7 +8755,7 @@ public abstract class Strings {
                 }
             }
 
-            if (N.notNullOrEmpty(suffix)) {
+            if (isNotEmpty(suffix)) {
                 sb.append(suffix);
             }
 
@@ -8832,7 +8856,7 @@ public abstract class Strings {
         final StringBuilder sb = Objectory.createStringBuilder();
 
         try {
-            if (N.isNullOrEmpty(delimiter)) {
+            if (isEmpty(delimiter)) {
                 for (int i = fromIndex; i < toIndex; i++) {
                     sb.append(a[i]);
                 }
@@ -8867,27 +8891,27 @@ public abstract class Strings {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
         if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
-            if (N.isNullOrEmpty(prefix) && N.isNullOrEmpty(suffix)) {
+            if (isEmpty(prefix) && isEmpty(suffix)) {
                 return EMPTY_STRING;
-            } else if (N.isNullOrEmpty(prefix)) {
+            } else if (isEmpty(prefix)) {
                 return suffix;
-            } else if (N.isNullOrEmpty(suffix)) {
+            } else if (isEmpty(suffix)) {
                 return prefix;
             } else {
                 return prefix + suffix;
             }
-        } else if (toIndex - fromIndex == 1 && N.isNullOrEmpty(prefix) && N.isNullOrEmpty(suffix)) {
+        } else if (toIndex - fromIndex == 1 && isEmpty(prefix) && isEmpty(suffix)) {
             return N.toString(a[fromIndex]);
         }
 
         final StringBuilder sb = Objectory.createStringBuilder();
 
         try {
-            if (N.notNullOrEmpty(prefix)) {
+            if (isNotEmpty(prefix)) {
                 sb.append(prefix);
             }
 
-            if (N.isNullOrEmpty(delimiter)) {
+            if (isEmpty(delimiter)) {
                 for (int i = fromIndex; i < toIndex; i++) {
                     sb.append(a[i]);
                 }
@@ -8901,7 +8925,7 @@ public abstract class Strings {
                 }
             }
 
-            if (N.notNullOrEmpty(suffix)) {
+            if (isNotEmpty(suffix)) {
                 sb.append(suffix);
             }
 
@@ -9002,7 +9026,7 @@ public abstract class Strings {
         final StringBuilder sb = Objectory.createStringBuilder();
 
         try {
-            if (N.isNullOrEmpty(delimiter)) {
+            if (isEmpty(delimiter)) {
                 for (int i = fromIndex; i < toIndex; i++) {
                     sb.append(a[i]);
                 }
@@ -9037,27 +9061,27 @@ public abstract class Strings {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
         if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
-            if (N.isNullOrEmpty(prefix) && N.isNullOrEmpty(suffix)) {
+            if (isEmpty(prefix) && isEmpty(suffix)) {
                 return EMPTY_STRING;
-            } else if (N.isNullOrEmpty(prefix)) {
+            } else if (isEmpty(prefix)) {
                 return suffix;
-            } else if (N.isNullOrEmpty(suffix)) {
+            } else if (isEmpty(suffix)) {
                 return prefix;
             } else {
                 return prefix + suffix;
             }
-        } else if (toIndex - fromIndex == 1 && N.isNullOrEmpty(prefix) && N.isNullOrEmpty(suffix)) {
+        } else if (toIndex - fromIndex == 1 && isEmpty(prefix) && isEmpty(suffix)) {
             return N.toString(a[fromIndex]);
         }
 
         final StringBuilder sb = Objectory.createStringBuilder();
 
         try {
-            if (N.notNullOrEmpty(prefix)) {
+            if (isNotEmpty(prefix)) {
                 sb.append(prefix);
             }
 
-            if (N.isNullOrEmpty(delimiter)) {
+            if (isEmpty(delimiter)) {
                 for (int i = fromIndex; i < toIndex; i++) {
                     sb.append(a[i]);
                 }
@@ -9071,7 +9095,7 @@ public abstract class Strings {
                 }
             }
 
-            if (N.notNullOrEmpty(suffix)) {
+            if (isNotEmpty(suffix)) {
                 sb.append(suffix);
             }
 
@@ -9233,27 +9257,27 @@ public abstract class Strings {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
         if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
-            if (N.isNullOrEmpty(prefix) && N.isNullOrEmpty(suffix)) {
+            if (isEmpty(prefix) && isEmpty(suffix)) {
                 return EMPTY_STRING;
-            } else if (N.isNullOrEmpty(prefix)) {
+            } else if (isEmpty(prefix)) {
                 return suffix;
-            } else if (N.isNullOrEmpty(suffix)) {
+            } else if (isEmpty(suffix)) {
                 return prefix;
             } else {
                 return prefix + suffix;
             }
-        } else if (toIndex - fromIndex == 1 && N.isNullOrEmpty(prefix) && N.isNullOrEmpty(suffix)) {
+        } else if (toIndex - fromIndex == 1 && isEmpty(prefix) && isEmpty(suffix)) {
             return trim ? N.toString(a[fromIndex]).trim() : N.toString(a[fromIndex]);
         }
 
         final StringBuilder sb = Objectory.createStringBuilder();
 
         try {
-            if (N.notNullOrEmpty(prefix)) {
+            if (isNotEmpty(prefix)) {
                 sb.append(prefix);
             }
 
-            if (N.isNullOrEmpty(delimiter)) {
+            if (isEmpty(delimiter)) {
                 for (int i = fromIndex; i < toIndex; i++) {
                     sb.append(trim ? N.toString(a[i]).trim() : N.toString(a[i]));
                 }
@@ -9267,7 +9291,7 @@ public abstract class Strings {
                 }
             }
 
-            if (N.notNullOrEmpty(suffix)) {
+            if (isNotEmpty(suffix)) {
                 sb.append(suffix);
             }
 
@@ -9426,11 +9450,11 @@ public abstract class Strings {
         N.checkFromToIndex(fromIndex, toIndex, N.size(c));
 
         if (N.isNullOrEmpty(c) || fromIndex == toIndex) {
-            if (N.isNullOrEmpty(prefix) && N.isNullOrEmpty(suffix)) {
+            if (isEmpty(prefix) && isEmpty(suffix)) {
                 return EMPTY_STRING;
-            } else if (N.isNullOrEmpty(prefix)) {
+            } else if (isEmpty(prefix)) {
                 return suffix;
-            } else if (N.isNullOrEmpty(suffix)) {
+            } else if (isEmpty(suffix)) {
                 return prefix;
             } else {
                 return prefix + suffix;
@@ -9440,14 +9464,14 @@ public abstract class Strings {
         final StringBuilder sb = Objectory.createStringBuilder();
 
         try {
-            if (N.notNullOrEmpty(prefix)) {
+            if (isNotEmpty(prefix)) {
                 sb.append(prefix);
             }
 
             if (c instanceof List && c instanceof RandomAccess) {
                 final List<?> list = (List<?>) c;
 
-                if (N.isNullOrEmpty(delimiter)) {
+                if (isEmpty(delimiter)) {
                     for (int i = fromIndex; i < toIndex; i++) {
                         sb.append(trim ? N.toString(list.get(i)).trim() : N.toString(list.get(i)));
                     }
@@ -9462,7 +9486,7 @@ public abstract class Strings {
                 }
             } else {
                 int i = 0;
-                if (N.isNullOrEmpty(delimiter)) {
+                if (isEmpty(delimiter)) {
                     for (Object e : c) {
                         if (i++ >= fromIndex) {
                             sb.append(trim ? N.toString(e).trim() : N.toString(e));
@@ -9489,7 +9513,7 @@ public abstract class Strings {
                 }
             }
 
-            if (N.notNullOrEmpty(suffix)) {
+            if (isNotEmpty(suffix)) {
                 sb.append(suffix);
             }
 
@@ -9582,11 +9606,11 @@ public abstract class Strings {
         final StringBuilder sb = Objectory.createStringBuilder();
 
         try {
-            if (N.notNullOrEmpty(prefix)) {
+            if (isNotEmpty(prefix)) {
                 sb.append(prefix);
             }
 
-            if (N.isNullOrEmpty(delimiter)) {
+            if (isEmpty(delimiter)) {
                 while (iter.hasNext()) {
                     if (trim) {
                         sb.append(N.toString(iter.next()).trim());
@@ -9610,7 +9634,7 @@ public abstract class Strings {
                 }
             }
 
-            if (N.notNullOrEmpty(suffix)) {
+            if (isNotEmpty(suffix)) {
                 sb.append(suffix);
             }
 
@@ -9743,11 +9767,11 @@ public abstract class Strings {
         N.checkArgNotNull(valueMapper, "valueMapper");
 
         if (N.isNullOrEmpty(m)) {
-            if (N.isNullOrEmpty(prefix) && N.isNullOrEmpty(suffix)) {
+            if (isEmpty(prefix) && isEmpty(suffix)) {
                 return EMPTY_STRING;
-            } else if (N.isNullOrEmpty(prefix)) {
+            } else if (isEmpty(prefix)) {
                 return suffix;
-            } else if (N.isNullOrEmpty(suffix)) {
+            } else if (isEmpty(suffix)) {
                 return prefix;
             } else {
                 return prefix + suffix;
@@ -9757,7 +9781,7 @@ public abstract class Strings {
         final StringBuilder sb = Objectory.createStringBuilder();
 
         try {
-            if (N.notNullOrEmpty(prefix)) {
+            if (isNotEmpty(prefix)) {
                 sb.append(prefix);
             }
 
@@ -9779,7 +9803,7 @@ public abstract class Strings {
                 }
             }
 
-            if (N.notNullOrEmpty(suffix)) {
+            if (isNotEmpty(suffix)) {
                 sb.append(suffix);
             }
 
@@ -9928,11 +9952,11 @@ public abstract class Strings {
         N.checkFromToIndex(fromIndex, toIndex, N.size(m));
 
         if (N.isNullOrEmpty(m) || fromIndex == toIndex) {
-            if (N.isNullOrEmpty(prefix) && N.isNullOrEmpty(suffix)) {
+            if (isEmpty(prefix) && isEmpty(suffix)) {
                 return EMPTY_STRING;
-            } else if (N.isNullOrEmpty(prefix)) {
+            } else if (isEmpty(prefix)) {
                 return suffix;
-            } else if (N.isNullOrEmpty(suffix)) {
+            } else if (isEmpty(suffix)) {
                 return prefix;
             } else {
                 return prefix + suffix;
@@ -9942,7 +9966,7 @@ public abstract class Strings {
         final StringBuilder sb = Objectory.createStringBuilder();
 
         try {
-            if (N.notNullOrEmpty(prefix)) {
+            if (isNotEmpty(prefix)) {
                 sb.append(prefix);
             }
 
@@ -9970,7 +9994,7 @@ public abstract class Strings {
                 }
             }
 
-            if (N.notNullOrEmpty(suffix)) {
+            if (isNotEmpty(suffix)) {
                 sb.append(suffix);
             }
 
@@ -10471,10 +10495,10 @@ public abstract class Strings {
      * </p>
      *
      * <pre>
-     * N.reverseDelimited(null, *)      = null
-     * N.reverseDelimited("", *)        = ""
-     * N.reverseDelimited("a.b.c", 'x') = "a.b.c"
-     * N.reverseDelimited("a.b.c", ".") = "c.b.a"
+     * Strings.reverseDelimited(null, *)      = null
+     * Strings.reverseDelimited("", *)        = ""
+     * Strings.reverseDelimited("a.b.c", 'x') = "a.b.c"
+     * Strings.reverseDelimited("a.b.c", ".") = "c.b.a"
      * </pre>
      *
      * @param str
@@ -11770,7 +11794,7 @@ public abstract class Strings {
         }
 
         /**
-         * Returns an empty {@code OptionalInt} if the specified string is blank or a invalid integer string. Otherwise returns {@code OptionalInt} with value converted the specified String.
+         * Returns an empty {@code OptionalInt} if the specified string is blank or a invalid integer string. Otherwise returns {@code OptionalInt} with value converted from the specified String.
          *
          * @param str
          * @return
@@ -11778,12 +11802,11 @@ public abstract class Strings {
          */
         @Beta
         public static u.OptionalInt createInteger(final String str) {
-            if (Strings.isBlank(str)) {
+            if (Numbers.quickCheckForIsCreatable(str) == false) {
                 return u.OptionalInt.empty();
             }
 
             try {
-
                 return u.OptionalInt.of(Numbers.createInteger(str));
             } catch (NumberFormatException e) {
                 return u.OptionalInt.empty();
@@ -11791,7 +11814,7 @@ public abstract class Strings {
         }
 
         /**
-         * Returns an empty {@code OptionalLong} if the specified string is blank or a invalid long string. Otherwise returns {@code OptionalLong} with value converted the specified String.
+         * Returns an empty {@code OptionalLong} if the specified string is blank or a invalid long string. Otherwise returns {@code OptionalLong} with value converted from the specified String.
          *
          * @param str
          * @return
@@ -11799,12 +11822,11 @@ public abstract class Strings {
          */
         @Beta
         public static u.OptionalLong createLong(final String str) {
-            if (Strings.isBlank(str)) {
+            if (Numbers.quickCheckForIsCreatable(str) == false) {
                 return u.OptionalLong.empty();
             }
 
             try {
-
                 return u.OptionalLong.of(Numbers.createLong(str));
             } catch (NumberFormatException e) {
                 return u.OptionalLong.empty();
@@ -11812,7 +11834,7 @@ public abstract class Strings {
         }
 
         /**
-         * Returns an empty {@code OptionalFloat} if the specified string is blank or a invalid float string. Otherwise returns {@code OptionalFloat} with value converted the specified String.
+         * Returns an empty {@code OptionalFloat} if the specified string is blank or a invalid float string. Otherwise returns {@code OptionalFloat} with value converted from the specified String.
          *
          * @param str
          * @return
@@ -11820,12 +11842,11 @@ public abstract class Strings {
          */
         @Beta
         public static u.OptionalFloat createFloat(final String str) {
-            if (Strings.isBlank(str)) {
+            if (Numbers.quickCheckForIsCreatable(str) == false) {
                 return u.OptionalFloat.empty();
             }
 
             try {
-
                 return u.OptionalFloat.of(Numbers.createFloat(str));
             } catch (NumberFormatException e) {
                 return u.OptionalFloat.empty();
@@ -11833,7 +11854,7 @@ public abstract class Strings {
         }
 
         /**
-         * Returns an empty {@code OptionalDouble} if the specified string is blank or a invalid double string. Otherwise returns {@code OptionalDouble} with value converted the specified String.
+         * Returns an empty {@code OptionalDouble} if the specified string is blank or a invalid double string. Otherwise returns {@code OptionalDouble} with value converted from the specified String.
          *
          * @param str
          * @return
@@ -11841,12 +11862,11 @@ public abstract class Strings {
          */
         @Beta
         public static u.OptionalDouble createDouble(final String str) {
-            if (Strings.isBlank(str)) {
+            if (Numbers.quickCheckForIsCreatable(str) == false) {
                 return u.OptionalDouble.empty();
             }
 
             try {
-
                 return u.OptionalDouble.of(Numbers.createDouble(str));
             } catch (NumberFormatException e) {
                 return u.OptionalDouble.empty();
@@ -11854,7 +11874,7 @@ public abstract class Strings {
         }
 
         /**
-         * Returns an empty {@code Optional<BigInteger>} if the specified string is blank or a invalid {@code BigInteger} string. Otherwise returns {@code Optional<BigInteger>} with value converted the specified String.
+         * Returns an empty {@code Optional<BigInteger>} if the specified string is blank or a invalid {@code BigInteger} string. Otherwise returns {@code Optional<BigInteger>} with value converted from the specified String.
          *
          * @param str
          * @return
@@ -11862,12 +11882,11 @@ public abstract class Strings {
          */
         @Beta
         public static u.Optional<BigInteger> createBigInteger(final String str) {
-            if (Strings.isBlank(str)) {
+            if (Numbers.quickCheckForIsCreatable(str) == false) {
                 return u.Optional.empty();
             }
 
             try {
-
                 return u.Optional.of(Numbers.createBigInteger(str));
             } catch (NumberFormatException e) {
                 return u.Optional.empty();
@@ -11875,7 +11894,7 @@ public abstract class Strings {
         }
 
         /**
-         * Returns an empty {@code Optional<BigDecimal>} if the specified string is blank or a invalid {@code BigDecimal} string. Otherwise returns {@code Optional<BigDecimal>} with value converted the specified String.
+         * Returns an empty {@code Optional<BigDecimal>} if the specified string is blank or a invalid {@code BigDecimal} string. Otherwise returns {@code Optional<BigDecimal>} with value converted from the specified String.
          *
          * @param str
          * @return
@@ -11883,12 +11902,11 @@ public abstract class Strings {
          */
         @Beta
         public static u.Optional<BigDecimal> createBigDecimal(final String str) {
-            if (Strings.isBlank(str)) {
+            if (Numbers.quickCheckForIsCreatable(str) == false) {
                 return u.Optional.empty();
             }
 
             try {
-
                 return u.Optional.of(Numbers.createBigDecimal(str));
             } catch (NumberFormatException e) {
                 return u.Optional.empty();
@@ -11896,7 +11914,7 @@ public abstract class Strings {
         }
 
         /**
-         * Returns an empty {@code Optional<Number>} if the specified string is blank or a invalid number string. Otherwise returns {@code Optional<Number>} with value converted the specified String.
+         * Returns an empty {@code Optional<Number>} if the specified string is blank or a invalid number string. Otherwise returns {@code Optional<Number>} with value converted from the specified String.
          *
          * @param str
          * @return
@@ -11904,12 +11922,11 @@ public abstract class Strings {
          */
         @Beta
         public static u.Optional<Number> createNumber(final String str) {
-            if (Strings.isBlank(str)) {
+            if (Numbers.quickCheckForIsCreatable(str) == false) {
                 return u.Optional.empty();
             }
 
             try {
-
                 return u.Optional.of(Numbers.createNumber(str));
             } catch (NumberFormatException e) {
                 return u.Optional.empty();

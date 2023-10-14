@@ -45,6 +45,39 @@ public final class Futures {
         // singleton.
     }
 
+    // Doesn't work.
+    //    public static <T> CompletableFuture<T> toCompletableFuture(final Future<? extends T> f) {
+    //        N.checkArgNotNull(f, "future");
+    //
+    //        return new CompletableFuture<>() {
+    //            @Override
+    //            public T get() throws InterruptedException, ExecutionException {
+    //                return f.get();
+    //
+    //            }
+    //
+    //            @Override
+    //            public T get(final long timeout, final TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
+    //                return f.get(timeout, unit);
+    //            }
+    //
+    //            @Override
+    //            public boolean isDone() {
+    //                return f.isDone();
+    //            }
+    //
+    //            @Override
+    //            public boolean isCancelled() {
+    //                return f.isCancelled();
+    //            }
+    //
+    //            @Override
+    //            public boolean cancel(boolean mayInterruptIfRunning) {
+    //                return f.cancel(mayInterruptIfRunning);
+    //            }
+    //        };
+    //    }
+
     /**
      *
      * @param <T1>

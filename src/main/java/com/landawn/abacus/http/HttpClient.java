@@ -49,6 +49,7 @@ import com.landawn.abacus.util.ExceptionUtil;
 import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Objectory;
+import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.URLEncodedUtil;
 
 /**
@@ -99,18 +100,22 @@ public final class HttpClient {
 
     protected final AtomicInteger _activeConnectionCounter; //NOSONAR
 
-    protected HttpClient(String url, int maxConnection, long connectionTimeoutInMillis, long readTimeoutInMillis, HttpSettings settings,
+    protected HttpClient(final String url, int maxConnection, long connectionTimeoutInMillis, long readTimeoutInMillis, HttpSettings settings,
             final AtomicInteger sharedActiveConnectionCounter, final Executor executor) {
-        if (N.isNullOrEmpty(url)) {
-            throw new IllegalArgumentException("url can't be null or empty");
-        }
+        this(null, url, maxConnection, connectionTimeoutInMillis, readTimeoutInMillis, settings, sharedActiveConnectionCounter, executor);
+    }
+
+    protected HttpClient(final URL netUrl, final String url, int maxConnection, long connectionTimeoutInMillis, long readTimeoutInMillis, HttpSettings settings,
+            final AtomicInteger sharedActiveConnectionCounter, final Executor executor) {
+        N.checkArgument(netUrl != null || Strings.isNotEmpty(url), "url can not be null or empty");
 
         if ((maxConnection < 0) || (connectionTimeoutInMillis < 0) || (readTimeoutInMillis < 0)) {
             throw new IllegalArgumentException("maxConnection, connectionTimeoutInMillis or readTimeoutInMillis can't be less than 0: " + maxConnection + ", "
                     + connectionTimeoutInMillis + ", " + readTimeoutInMillis);
         }
 
-        this._url = url;
+        this._netURL = netUrl == null ? createNetUrl(url) : netUrl;
+        this._url = Strings.isEmpty(url) ? netUrl.toString() : url;
         this._maxConnection = (maxConnection == 0) ? DEFAULT_MAX_CONNECTION : maxConnection;
         this._connectionTimeoutInMillis = (connectionTimeoutInMillis == 0) ? DEFAULT_CONNECTION_TIMEOUT : connectionTimeoutInMillis;
         this._readTimeoutInMillis = (readTimeoutInMillis == 0) ? DEFAULT_READ_TIMEOUT : readTimeoutInMillis;
@@ -118,13 +123,15 @@ public final class HttpClient {
 
         _asyncExecutor = executor == null ? HttpUtil.DEFAULT_ASYNC_EXECUTOR : new AsyncExecutor(executor);
 
+        this._activeConnectionCounter = sharedActiveConnectionCounter;
+    }
+
+    private static URL createNetUrl(final String url) {
         try {
-            this._netURL = URI.create(url).toURL();
+            return URI.create(N.checkArgNotNull(url, "url")).toURL();
         } catch (MalformedURLException e) {
             throw ExceptionUtil.toRuntimeException(e);
         }
-
-        this._activeConnectionCounter = sharedActiveConnectionCounter;
     }
 
     /**
@@ -242,6 +249,123 @@ public final class HttpClient {
     public static HttpClient create(String url, int maxConnection, long connectionTimeoutInMillis, long readTimeoutInMillis, HttpSettings settings,
             final AtomicInteger sharedActiveConnectionCounter, final Executor executor) {
         return new HttpClient(url, maxConnection, connectionTimeoutInMillis, readTimeoutInMillis, settings, sharedActiveConnectionCounter, executor);
+    }
+
+    /**
+     *
+     * @param url
+     * @return
+     */
+    public static HttpClient create(URL url) {
+        return create(url, DEFAULT_MAX_CONNECTION);
+    }
+
+    /**
+     *
+     * @param url
+     * @param maxConnection
+     * @return
+     */
+    public static HttpClient create(URL url, int maxConnection) {
+        return create(url, maxConnection, DEFAULT_CONNECTION_TIMEOUT, DEFAULT_READ_TIMEOUT);
+    }
+
+    /**
+     *
+     * @param url
+     * @param connectionTimeoutInMillis
+     * @param readTimeoutInMillis
+     * @return
+     */
+    public static HttpClient create(URL url, long connectionTimeoutInMillis, long readTimeoutInMillis) {
+        return create(url, DEFAULT_MAX_CONNECTION, connectionTimeoutInMillis, readTimeoutInMillis);
+    }
+
+    /**
+     *
+     * @param url
+     * @param maxConnection
+     * @param connectionTimeoutInMillis
+     * @param readTimeoutInMillis
+     * @return
+     */
+    public static HttpClient create(URL url, int maxConnection, long connectionTimeoutInMillis, long readTimeoutInMillis) {
+        return create(url, maxConnection, connectionTimeoutInMillis, readTimeoutInMillis, (HttpSettings) null);
+    }
+
+    /**
+     *
+     * @param url
+     * @param maxConnection
+     * @param connectionTimeoutInMillis
+     * @param readTimeoutInMillis
+     * @param settings
+     * @return
+     * @throws UncheckedIOException the unchecked IO exception
+     */
+    public static HttpClient create(URL url, int maxConnection, long connectionTimeoutInMillis, long readTimeoutInMillis, HttpSettings settings)
+            throws UncheckedIOException {
+        return create(url, maxConnection, connectionTimeoutInMillis, readTimeoutInMillis, settings, new AtomicInteger(0));
+    }
+
+    /**
+     *
+     * @param url
+     * @param maxConnection
+     * @param connectionTimeoutInMillis
+     * @param readTimeoutInMillis
+     * @param settings
+     * @param sharedActiveConnectionCounter
+     * @return
+     */
+    public static HttpClient create(URL url, int maxConnection, long connectionTimeoutInMillis, long readTimeoutInMillis, HttpSettings settings,
+            final AtomicInteger sharedActiveConnectionCounter) {
+        return create(url, maxConnection, connectionTimeoutInMillis, readTimeoutInMillis, settings, sharedActiveConnectionCounter, null);
+    }
+
+    /**
+     *
+     * @param url
+     * @param maxConnection
+     * @param connectionTimeoutInMillis
+     * @param readTimeoutInMillis
+     * @param executor
+     * @return
+     */
+    public static HttpClient create(URL url, int maxConnection, long connectionTimeoutInMillis, long readTimeoutInMillis, final Executor executor) {
+        return create(url, maxConnection, connectionTimeoutInMillis, readTimeoutInMillis, null, executor);
+    }
+
+    /**
+     *
+     * @param url
+     * @param maxConnection
+     * @param connectionTimeoutInMillis
+     * @param readTimeoutInMillis
+     * @param settings
+     * @param executor
+     * @return
+     * @throws UncheckedIOException the unchecked IO exception
+     */
+    public static HttpClient create(URL url, int maxConnection, long connectionTimeoutInMillis, long readTimeoutInMillis, HttpSettings settings,
+            final Executor executor) throws UncheckedIOException {
+        return create(url, maxConnection, connectionTimeoutInMillis, readTimeoutInMillis, settings, new AtomicInteger(0), executor);
+    }
+
+    /**
+     *
+     * @param url
+     * @param maxConnection
+     * @param connectionTimeoutInMillis
+     * @param readTimeoutInMillis
+     * @param settings
+     * @param sharedActiveConnectionCounter
+     * @param executor
+     * @return
+     */
+    public static HttpClient create(URL url, int maxConnection, long connectionTimeoutInMillis, long readTimeoutInMillis, HttpSettings settings,
+            final AtomicInteger sharedActiveConnectionCounter, final Executor executor) {
+        return new HttpClient(url, null, maxConnection, connectionTimeoutInMillis, readTimeoutInMillis, settings, sharedActiveConnectionCounter, executor);
     }
 
     /**
