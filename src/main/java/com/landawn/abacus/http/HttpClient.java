@@ -462,7 +462,7 @@ public final class HttpClient {
      * @throws UncheckedIOException the unchecked IO exception
      */
     public <T> T get(final Class<T> resultClass, final Object queryParameters, final HttpSettings settings) throws UncheckedIOException {
-        return execute(resultClass, HttpMethod.GET, queryParameters, settings);
+        return execute(HttpMethod.GET, resultClass, queryParameters, settings);
     }
 
     /**
@@ -543,7 +543,7 @@ public final class HttpClient {
      * @return
      */
     public <T> ContinuableFuture<T> asyncGet(final Class<T> resultClass, final Object queryParameters, final HttpSettings settings) {
-        return asyncExecute(resultClass, HttpMethod.GET, queryParameters, settings);
+        return asyncExecute(HttpMethod.GET, resultClass, queryParameters, settings);
     }
 
     /**
@@ -631,7 +631,7 @@ public final class HttpClient {
      * @throws UncheckedIOException the unchecked IO exception
      */
     public <T> T delete(final Class<T> resultClass, final Object queryParameters, final HttpSettings settings) throws UncheckedIOException {
-        return execute(resultClass, HttpMethod.DELETE, queryParameters, settings);
+        return execute(HttpMethod.DELETE, resultClass, queryParameters, settings);
     }
 
     /**
@@ -712,7 +712,7 @@ public final class HttpClient {
      * @return
      */
     public <T> ContinuableFuture<T> asyncDelete(final Class<T> resultClass, final Object queryParameters, final HttpSettings settings) {
-        return asyncExecute(resultClass, HttpMethod.DELETE, queryParameters, settings);
+        return asyncExecute(HttpMethod.DELETE, resultClass, queryParameters, settings);
     }
 
     /**
@@ -758,7 +758,7 @@ public final class HttpClient {
      * @throws UncheckedIOException the unchecked IO exception
      */
     public <T> T post(final Class<T> resultClass, final Object request, final HttpSettings settings) throws UncheckedIOException {
-        return execute(resultClass, HttpMethod.POST, request, settings);
+        return execute(HttpMethod.POST, resultClass, request, settings);
     }
 
     /**
@@ -800,7 +800,7 @@ public final class HttpClient {
      * @return
      */
     public <T> ContinuableFuture<T> asyncPost(final Class<T> resultClass, final Object request, final HttpSettings settings) {
-        return asyncExecute(resultClass, HttpMethod.POST, request, settings);
+        return asyncExecute(HttpMethod.POST, resultClass, request, settings);
     }
 
     /**
@@ -846,7 +846,7 @@ public final class HttpClient {
      * @throws UncheckedIOException the unchecked IO exception
      */
     public <T> T put(final Class<T> resultClass, final Object request, final HttpSettings settings) throws UncheckedIOException {
-        return execute(resultClass, HttpMethod.PUT, request, settings);
+        return execute(HttpMethod.PUT, resultClass, request, settings);
     }
 
     /**
@@ -888,7 +888,7 @@ public final class HttpClient {
      * @return
      */
     public <T> ContinuableFuture<T> asyncPut(final Class<T> resultClass, final Object request, final HttpSettings settings) {
-        return asyncExecute(resultClass, HttpMethod.PUT, request, settings);
+        return asyncExecute(HttpMethod.PUT, resultClass, request, settings);
     }
 
     // TODO HTTP METHOD PATCH is not supported by HttpURLConnection.
@@ -988,7 +988,7 @@ public final class HttpClient {
      * @throws UncheckedIOException the unchecked IO exception
      */
     public String execute(final HttpMethod httpMethod, final Object request) throws UncheckedIOException {
-        return execute(String.class, httpMethod, request);
+        return execute(httpMethod, String.class, request);
     }
 
     /**
@@ -1000,51 +1000,51 @@ public final class HttpClient {
      * @throws UncheckedIOException the unchecked IO exception
      */
     public String execute(final HttpMethod httpMethod, final Object request, final HttpSettings settings) throws UncheckedIOException {
-        return execute(String.class, httpMethod, request, settings);
+        return execute(httpMethod, String.class, request, settings);
     }
 
     /**
      *
-     * @param <T>
-     * @param resultClass
      * @param httpMethod
+     * @param resultClass
      * @param request
+     * @param <T>
      * @return
      * @throws UncheckedIOException the unchecked IO exception
      */
-    public <T> T execute(final Class<T> resultClass, final HttpMethod httpMethod, final Object request) throws UncheckedIOException {
-        return execute(resultClass, httpMethod, request, _settings);
+    public <T> T execute(final HttpMethod httpMethod, final Class<T> resultClass, final Object request) throws UncheckedIOException {
+        return execute(httpMethod, resultClass, request, _settings);
     }
 
     /**
      *
-     * @param <T>
-     * @param resultClass
      * @param httpMethod
+     * @param resultClass
      * @param request
      * @param settings
+     * @param <T>
      * @return
      * @throws UncheckedIOException the unchecked IO exception
      */
-    public <T> T execute(final Class<T> resultClass, final HttpMethod httpMethod, final Object request, final HttpSettings settings)
+    public <T> T execute(final HttpMethod httpMethod, final Class<T> resultClass, final Object request, final HttpSettings settings)
             throws UncheckedIOException {
         return execute(resultClass, null, null, httpMethod, request, settings);
     }
 
     /**
      *
-     * @param output
      * @param httpMethod
+     * @param output
      * @param request
      * @param settings
      * @throws UncheckedIOException the unchecked IO exception
      */
-    public void execute(final File output, final HttpMethod httpMethod, final Object request, final HttpSettings settings) throws UncheckedIOException {
+    public void execute(final HttpMethod httpMethod, final File output, final Object request, final HttpSettings settings) throws UncheckedIOException {
         OutputStream os = null;
 
         try {
             os = IOUtil.newFileOutputStream(output);
-            execute(os, httpMethod, request, settings);
+            execute(httpMethod, os, request, settings);
         } finally {
             IOUtil.close(os);
         }
@@ -1052,25 +1052,25 @@ public final class HttpClient {
 
     /**
      *
-     * @param output
      * @param httpMethod
+     * @param output
      * @param request
      * @param settings
      * @throws UncheckedIOException the unchecked IO exception
      */
-    public void execute(final OutputStream output, final HttpMethod httpMethod, final Object request, final HttpSettings settings) throws UncheckedIOException {
+    public void execute(final HttpMethod httpMethod, final OutputStream output, final Object request, final HttpSettings settings) throws UncheckedIOException {
         execute(null, output, null, httpMethod, request, settings);
     }
 
     /**
      *
-     * @param output
      * @param httpMethod
+     * @param output
      * @param request
      * @param settings
      * @throws UncheckedIOException the unchecked IO exception
      */
-    public void execute(final Writer output, final HttpMethod httpMethod, final Object request, final HttpSettings settings) throws UncheckedIOException {
+    public void execute(final HttpMethod httpMethod, final Writer output, final Object request, final HttpSettings settings) throws UncheckedIOException {
         execute(null, null, output, httpMethod, request, settings);
     }
 
@@ -1455,7 +1455,7 @@ public final class HttpClient {
      * @return
      */
     public ContinuableFuture<String> asyncExecute(final HttpMethod httpMethod, final Object request) {
-        return asyncExecute(String.class, httpMethod, request);
+        return asyncExecute(httpMethod, String.class, request);
     }
 
     /**
@@ -1466,47 +1466,47 @@ public final class HttpClient {
      * @return
      */
     public ContinuableFuture<String> asyncExecute(final HttpMethod httpMethod, final Object request, final HttpSettings settings) {
-        return asyncExecute(String.class, httpMethod, request, settings);
+        return asyncExecute(httpMethod, String.class, request, settings);
     }
 
     /**
      *
-     * @param <T>
-     * @param resultClass
      * @param httpMethod
+     * @param resultClass
      * @param request
+     * @param <T>
      * @return
      */
-    public <T> ContinuableFuture<T> asyncExecute(final Class<T> resultClass, final HttpMethod httpMethod, final Object request) {
-        return asyncExecute(resultClass, httpMethod, request, _settings);
+    public <T> ContinuableFuture<T> asyncExecute(final HttpMethod httpMethod, final Class<T> resultClass, final Object request) {
+        return asyncExecute(httpMethod, resultClass, request, _settings);
     }
 
     /**
      *
-     * @param <T>
-     * @param resultClass
      * @param httpMethod
+     * @param resultClass
      * @param request
      * @param settings
+     * @param <T>
      * @return
      */
-    public <T> ContinuableFuture<T> asyncExecute(final Class<T> resultClass, final HttpMethod httpMethod, final Object request, final HttpSettings settings) {
-        final Callable<T> cmd = () -> execute(resultClass, httpMethod, request, settings);
+    public <T> ContinuableFuture<T> asyncExecute(final HttpMethod httpMethod, final Class<T> resultClass, final Object request, final HttpSettings settings) {
+        final Callable<T> cmd = () -> execute(httpMethod, resultClass, request, settings);
 
         return _asyncExecutor.execute(cmd);
     }
 
     /**
      *
-     * @param output
      * @param httpMethod
+     * @param output
      * @param request
      * @param settings
      * @return
      */
-    public ContinuableFuture<Void> asyncExecute(final File output, final HttpMethod httpMethod, final Object request, final HttpSettings settings) {
+    public ContinuableFuture<Void> asyncExecute(final HttpMethod httpMethod, final File output, final Object request, final HttpSettings settings) {
         final Callable<Void> cmd = () -> {
-            execute(output, httpMethod, request, settings);
+            execute(httpMethod, output, request, settings);
 
             return null;
         };
@@ -1516,15 +1516,15 @@ public final class HttpClient {
 
     /**
      *
-     * @param output
      * @param httpMethod
+     * @param output
      * @param request
      * @param settings
      * @return
      */
-    public ContinuableFuture<Void> asyncExecute(final OutputStream output, final HttpMethod httpMethod, final Object request, final HttpSettings settings) {
+    public ContinuableFuture<Void> asyncExecute(final HttpMethod httpMethod, final OutputStream output, final Object request, final HttpSettings settings) {
         final Callable<Void> cmd = () -> {
-            execute(output, httpMethod, request, settings);
+            execute(httpMethod, output, request, settings);
 
             return null;
         };
@@ -1534,15 +1534,15 @@ public final class HttpClient {
 
     /**
      *
-     * @param output
      * @param httpMethod
+     * @param output
      * @param request
      * @param settings
      * @return
      */
-    public ContinuableFuture<Void> asyncExecute(final Writer output, final HttpMethod httpMethod, final Object request, final HttpSettings settings) {
+    public ContinuableFuture<Void> asyncExecute(final HttpMethod httpMethod, final Writer output, final Object request, final HttpSettings settings) {
         final Callable<Void> cmd = () -> {
-            execute(output, httpMethod, request, settings);
+            execute(httpMethod, output, request, settings);
 
             return null;
         };

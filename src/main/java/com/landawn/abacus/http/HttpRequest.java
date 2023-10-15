@@ -489,7 +489,7 @@ public final class HttpRequest {
         N.checkArgNotNull(httpMethod, HTTP_METHOD_STR);
 
         try {
-            return httpClient.execute(resultClass, httpMethod, this.request, checkSettings());
+            return httpClient.execute(httpMethod, resultClass, this.request, checkSettings());
         } finally {
             if (closeHttpClientAfterExecution) {
                 httpClient.close();
@@ -509,7 +509,7 @@ public final class HttpRequest {
         N.checkArgNotNull(httpMethod, HTTP_METHOD_STR);
 
         try {
-            httpClient.execute(output, httpMethod, this.request, checkSettings());
+            httpClient.execute(httpMethod, output, this.request, checkSettings());
         } finally {
             if (closeHttpClientAfterExecution) {
                 httpClient.close();
@@ -529,7 +529,7 @@ public final class HttpRequest {
         N.checkArgNotNull(httpMethod, HTTP_METHOD_STR);
 
         try {
-            httpClient.execute(output, httpMethod, this.request, checkSettings());
+            httpClient.execute(httpMethod, output, this.request, checkSettings());
         } finally {
             if (closeHttpClientAfterExecution) {
                 httpClient.close();
@@ -549,7 +549,7 @@ public final class HttpRequest {
         N.checkArgNotNull(httpMethod, HTTP_METHOD_STR);
 
         try {
-            httpClient.execute(output, httpMethod, this.request, checkSettings());
+            httpClient.execute(httpMethod, output, this.request, checkSettings());
         } finally {
             if (closeHttpClientAfterExecution) {
                 httpClient.close();

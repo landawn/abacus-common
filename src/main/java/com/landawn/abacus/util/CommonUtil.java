@@ -18,7 +18,9 @@ package com.landawn.abacus.util;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.io.Reader;
 import java.io.Serializable;
+import java.io.StringReader;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
@@ -6274,48 +6276,100 @@ class CommonUtil {
             return (T) (Integer.valueOf(((Character) obj).charValue())); //NOSONAR
         } else if ((targetType.clazz().equals(char.class) || targetType.clazz().equals(Character.class)) && srcType.clazz().equals(Integer.class)) {
             return (T) (Character.valueOf((char) ((Integer) obj).intValue()));
-        } else if (targetType.clazz().equals(byte[].class) && srcType.clazz().equals(Blob.class)) {
-            final Blob blob = (Blob) obj;
+        } else if (targetType.clazz().equals(byte[].class)) {
+            if (srcType.clazz().equals(Blob.class)) {
+                final Blob blob = (Blob) obj;
 
-            try {
-                return (T) blob.getBytes(1, (int) blob.length());
-            } catch (SQLException e) {
-                throw new UncheckedSQLException(e);
-            } finally {
                 try {
-                    blob.free();
+                    return (T) blob.getBytes(1, (int) blob.length());
                 } catch (SQLException e) {
-                    throw new UncheckedSQLException(e); //NOSONAR
+                    throw new UncheckedSQLException(e);
+                } finally {
+                    try {
+                        blob.free();
+                    } catch (SQLException e) {
+                        throw new UncheckedSQLException(e); //NOSONAR
+                    }
+                }
+            } else if (srcType.clazz().equals(InputStream.class)) {
+                final InputStream is = (InputStream) obj;
+
+                try {
+                    return (T) IOUtil.readAllBytes(is);
+                } finally {
+                    IOUtil.close(is);
                 }
             }
-        } else if (targetType.clazz().equals(char[].class) && srcType.clazz().equals(Clob.class)) {
-            final Clob clob = (Clob) obj;
+        } else if (targetType.clazz().equals(char[].class)) {
+            if (srcType.clazz().equals(Clob.class)) {
+                final Clob clob = (Clob) obj;
 
-            try {
-                return (T) clob.getSubString(1, (int) clob.length()).toCharArray();
-            } catch (SQLException e) {
-                throw new UncheckedSQLException(e);
-            } finally {
                 try {
-                    clob.free();
+                    return (T) clob.getSubString(1, (int) clob.length()).toCharArray();
                 } catch (SQLException e) {
-                    throw new UncheckedSQLException(e); //NOSONAR
+                    throw new UncheckedSQLException(e);
+                } finally {
+                    try {
+                        clob.free();
+                    } catch (SQLException e) {
+                        throw new UncheckedSQLException(e); //NOSONAR
+                    }
+                }
+            } else if (srcType.clazz().equals(Reader.class)) {
+                final Reader reader = (Reader) obj;
+
+                try {
+                    return (T) IOUtil.readAllChars(reader);
+                } finally {
+                    IOUtil.close(reader);
+                }
+            } else if (srcType.clazz().equals(InputStream.class)) {
+                final InputStream is = (InputStream) obj;
+
+                try {
+                    return (T) IOUtil.readAllChars(is);
+                } finally {
+                    IOUtil.close(is);
                 }
             }
-        } else if (targetType.clazz().equals(String.class) && srcType.clazz().equals(Clob.class)) {
-            final Clob clob = (Clob) obj;
+        } else if (targetType.clazz().equals(String.class)) {
+            if (CharSequence.class.isAssignableFrom(srcType.clazz())) {
+                return (T) ((CharSequence) obj).toString();
+            } else if (srcType.clazz().equals(Clob.class)) {
+                final Clob clob = (Clob) obj;
 
-            try {
-                return (T) clob.getSubString(1, (int) clob.length());
-            } catch (SQLException e) {
-                throw new UncheckedSQLException(e);
-            } finally {
                 try {
-                    clob.free();
+                    return (T) clob.getSubString(1, (int) clob.length());
                 } catch (SQLException e) {
-                    throw new UncheckedSQLException(e); //NOSONAR
+                    throw new UncheckedSQLException(e);
+                } finally {
+                    try {
+                        clob.free();
+                    } catch (SQLException e) {
+                        throw new UncheckedSQLException(e); //NOSONAR
+                    }
+                }
+            } else if (srcType.clazz().equals(Reader.class)) {
+                final Reader reader = (Reader) obj;
+
+                try {
+                    return (T) IOUtil.readAllToString(reader);
+                } finally {
+                    IOUtil.close(reader);
+                }
+            } else if (srcType.clazz().equals(InputStream.class)) {
+                final InputStream is = (InputStream) obj;
+
+                try {
+                    return (T) IOUtil.readAllToString(is);
+                } finally {
+                    IOUtil.close(is);
                 }
             }
+        } else if (targetType.clazz().equals(InputStream.class) && srcType.clazz().equals(byte[].class)) {
+            return (T) new ByteArrayInputStream((byte[]) obj);
+        } else if (targetType.clazz().equals(Reader.class) && srcType.clazz().equals(String.class)) {
+            return (T) new StringReader((String) obj);
         }
 
         return targetType.valueOf(obj);

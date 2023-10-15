@@ -6959,6 +6959,20 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
     /**
      *
+     *
+     * @param keyMapper
+     * @return
+     */
+    @IntermediateOp
+    @TerminalOpTriggered
+    public ExceptionalStream<T, E> reverseSortedBy(@SuppressWarnings("rawtypes") final Function<? super T, ? extends Comparable> keyMapper) {
+        final Comparator<? super T> cmp = Comparators.comparingBy(keyMapper).reversed();
+
+        return sorted(cmp);
+    }
+
+    /**
+     *
      * @param op
      * @param sorted
      * @param cmp
@@ -10596,28 +10610,28 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
     /**
      *
-     * @param file
+     * @param output
      * @return
      * @see #onEach(com.landawn.abacus.util.Throwables.Consumer)
      * @see #onEachE(com.landawn.abacus.util.Throwables.Consumer)
      */
     @Beta
     @IntermediateOp
-    public ExceptionalStream<T, E> saveEach(final File file) {
-        return saveEach(N::stringOf, file);
+    public ExceptionalStream<T, E> saveEach(final File output) {
+        return saveEach(output, N::stringOf);
     }
 
     /**
      *
+     * @param output
      * @param toLine
-     * @param file
      * @return
      * @see #onEach(com.landawn.abacus.util.Throwables.Consumer)
      * @see #onEachE(com.landawn.abacus.util.Throwables.Consumer)
      */
     @Beta
     @IntermediateOp
-    public ExceptionalStream<T, E> saveEach(final Throwables.Function<? super T, String, E> toLine, final File file) {
+    public ExceptionalStream<T, E> saveEach(final File output, final Throwables.Function<? super T, String, E> toLine) {
         assertNotClosed();
 
         final ExceptionalIterator<T, E> iter = new ExceptionalIterator<>() {
@@ -10663,7 +10677,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             private void init() {
                 initialized = true;
 
-                writer = IOUtil.newFileWriter(file);
+                writer = IOUtil.newFileWriter(output);
                 bw = Objectory.createBufferedWriter(writer);
             }
         };
@@ -10673,15 +10687,15 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
     /**
      *
+     * @param output
      * @param toLine
-     * @param os
      * @return
      * @see #onEach(com.landawn.abacus.util.Throwables.Consumer)
      * @see #onEachE(com.landawn.abacus.util.Throwables.Consumer)
      */
     @Beta
     @IntermediateOp
-    public ExceptionalStream<T, E> saveEach(final Throwables.Function<? super T, String, E> toLine, final OutputStream os) {
+    public ExceptionalStream<T, E> saveEach(final OutputStream output, final Throwables.Function<? super T, String, E> toLine) {
         assertNotClosed();
 
         final ExceptionalIterator<T, E> iter = new ExceptionalIterator<>() {
@@ -10720,7 +10734,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             private void init() {
                 initialized = true;
 
-                bw = Objectory.createBufferedWriter(os);
+                bw = Objectory.createBufferedWriter(output);
             }
         };
 
@@ -10729,15 +10743,15 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
     /**
      *
+     * @param output
      * @param toLine
-     * @param writer
      * @return
      * @see #onEach(com.landawn.abacus.util.Throwables.Consumer)
      * @see #onEachE(com.landawn.abacus.util.Throwables.Consumer)
      */
     @Beta
     @IntermediateOp
-    public ExceptionalStream<T, E> saveEach(final Throwables.Function<? super T, String, E> toLine, Writer writer) {
+    public ExceptionalStream<T, E> saveEach(Writer output, final Throwables.Function<? super T, String, E> toLine) {
         assertNotClosed();
 
         final ExceptionalIterator<T, E> iter = new ExceptionalIterator<>() {
@@ -10779,8 +10793,8 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             private void init() {
                 initialized = true;
 
-                isBufferedWriter = writer instanceof BufferedWriter || writer instanceof java.io.BufferedWriter;
-                bw = isBufferedWriter ? writer : Objectory.createBufferedWriter(writer);
+                isBufferedWriter = output instanceof BufferedWriter || output instanceof java.io.BufferedWriter;
+                bw = isBufferedWriter ? output : Objectory.createBufferedWriter(output);
             }
         };
 
@@ -10789,15 +10803,15 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
     /**
      *
+     * @param output
      * @param writeLine
-     * @param file
      * @return
      * @see #onEach(com.landawn.abacus.util.Throwables.Consumer)
      * @see #onEachE(com.landawn.abacus.util.Throwables.Consumer)
      */
     @Beta
     @IntermediateOp
-    public ExceptionalStream<T, E> saveEach(final Throwables.BiConsumer<? super T, Writer, IOException> writeLine, final File file) {
+    public ExceptionalStream<T, E> saveEach(final File output, final Throwables.BiConsumer<? super T, Writer, IOException> writeLine) {
         assertNotClosed();
 
         final ExceptionalIterator<T, E> iter = new ExceptionalIterator<>() {
@@ -10843,7 +10857,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             private void init() {
                 initialized = true;
 
-                writer = IOUtil.newFileWriter(file);
+                writer = IOUtil.newFileWriter(output);
                 bw = Objectory.createBufferedWriter(writer);
             }
         };
@@ -10853,15 +10867,15 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
     /**
      *
+     * @param output
      * @param writeLine
-     * @param writer
      * @return
      * @see #onEach(com.landawn.abacus.util.Throwables.Consumer)
      * @see #onEachE(com.landawn.abacus.util.Throwables.Consumer)
      */
     @Beta
     @IntermediateOp
-    public ExceptionalStream<T, E> saveEach(final Throwables.BiConsumer<? super T, Writer, IOException> writeLine, final Writer writer) {
+    public ExceptionalStream<T, E> saveEach(final Writer output, final Throwables.BiConsumer<? super T, Writer, IOException> writeLine) {
         assertNotClosed();
 
         final ExceptionalIterator<T, E> iter = new ExceptionalIterator<>() {
@@ -10903,8 +10917,8 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             private void init() {
                 initialized = true;
 
-                isBufferedWriter = writer instanceof BufferedWriter || writer instanceof java.io.BufferedWriter;
-                bw = isBufferedWriter ? writer : Objectory.createBufferedWriter(writer);
+                isBufferedWriter = output instanceof BufferedWriter || output instanceof java.io.BufferedWriter;
+                bw = isBufferedWriter ? output : Objectory.createBufferedWriter(output);
             }
         };
 
@@ -11102,62 +11116,62 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     /**
      *
      *
-     * @param file
+     * @param output
      * @return
      * @throws E
      * @throws IOException
      */
     @TerminalOp
-    public long persist(final File file) throws E, IOException {
-        return persist(N::stringOf, file);
+    public long persist(final File output) throws E, IOException {
+        return persist(output, N::stringOf);
     }
 
     /**
      *
      *
+     * @param output
      * @param header
      * @param tail
-     * @param file
      * @return
      * @throws E
      * @throws IOException
      */
     @TerminalOp
-    public long persist(final String header, final String tail, final File file) throws E, IOException {
-        return persist(N::stringOf, header, tail, file);
+    public long persist(final File output, final String header, final String tail) throws E, IOException {
+        return persist(output, header, tail, N::stringOf);
     }
 
     /**
      *
+     * @param output
      * @param toLine
-     * @param file
      * @return
      * @throws E
      * @throws IOException
      */
     @TerminalOp
-    public long persist(Throwables.Function<? super T, String, E> toLine, final File file) throws E, IOException {
-        return persist(toLine, null, null, file);
+    public long persist(final File output, Throwables.Function<? super T, String, E> toLine) throws E, IOException {
+        return persist(output, null, null, toLine);
     }
 
     /**
      *
-     * @param toLine
+     * @param output
      * @param header
      * @param tail
-     * @param file
+     * @param toLine
      * @return
      * @throws E
      * @throws IOException
      */
     @TerminalOp
-    public long persist(Throwables.Function<? super T, String, E> toLine, final String header, final String tail, final File file) throws E, IOException {
+    public long persist(final File output, final String header, final String tail, Throwables.Function<? super T, String, E> toLine) throws E, IOException {
         assertNotClosed();
 
-        final Writer writer = IOUtil.newFileWriter(file);
+        final Writer writer = IOUtil.newFileWriter(output);
 
         try {
-            return persist(toLine, header, tail, writer);
+            return persist(writer, header, tail, toLine);
         } finally {
             IOUtil.close(writer);
         }
@@ -11166,20 +11180,20 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     /**
      *
      *
+     * @param output
      * @param toLine
-     * @param os
      * @return
      * @throws E
      * @throws IOException
      */
     @TerminalOp
-    public long persist(Throwables.Function<? super T, String, E> toLine, final OutputStream os) throws E, IOException {
+    public long persist(final OutputStream output, Throwables.Function<? super T, String, E> toLine) throws E, IOException {
         assertNotClosed();
 
-        final BufferedWriter bw = Objectory.createBufferedWriter(os);
+        final BufferedWriter bw = Objectory.createBufferedWriter(output);
 
         try {
-            return persist(toLine, bw);
+            return persist(bw, toLine);
         } finally {
             Objectory.recycle(bw);
         }
@@ -11187,36 +11201,36 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
     /**
      *
+     * @param output
      * @param toLine
-     * @param writer
      * @return
      * @throws E
      * @throws IOException
      */
     @TerminalOp
-    public long persist(Throwables.Function<? super T, String, E> toLine, Writer writer) throws E, IOException {
+    public long persist(Writer output, Throwables.Function<? super T, String, E> toLine) throws E, IOException {
         assertNotClosed();
 
-        return persist(toLine, null, null, writer);
+        return persist(output, null, null, toLine);
     }
 
     /**
      *
-     * @param toLine
+     * @param output
      * @param header
      * @param tail
-     * @param writer
+     * @param toLine
      * @return
      * @throws E
      * @throws IOException
      */
     @TerminalOp
-    public long persist(Throwables.Function<? super T, String, E> toLine, String header, String tail, Writer writer) throws E, IOException {
+    public long persist(Writer output, String header, String tail, Throwables.Function<? super T, String, E> toLine) throws E, IOException {
         assertNotClosed();
 
         try {
-            boolean isBufferedWriter = writer instanceof BufferedWriter || writer instanceof java.io.BufferedWriter;
-            final Writer bw = isBufferedWriter ? writer : Objectory.createBufferedWriter(writer); //NOSONAR
+            boolean isBufferedWriter = output instanceof BufferedWriter || output instanceof java.io.BufferedWriter;
+            final Writer bw = isBufferedWriter ? output : Objectory.createBufferedWriter(output); //NOSONAR
             final ExceptionalIterator<T, E> iter = iteratorEx();
             long cnt = 0;
 
@@ -11253,39 +11267,39 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     /**
      *
      *
+     * @param output
      * @param writeLine
-     * @param file
      * @return
      * @throws E
      * @throws IOException
      */
     @TerminalOp
-    public long persist(final Throwables.BiConsumer<? super T, Writer, IOException> writeLine, final File file) throws E, IOException {
+    public long persist(final File output, final Throwables.BiConsumer<? super T, Writer, IOException> writeLine) throws E, IOException {
         assertNotClosed();
 
-        return persist(writeLine, null, null, file);
+        return persist(output, null, null, writeLine);
     }
 
     /**
      *
      *
-     * @param writeLine
+     * @param output
      * @param header
      * @param tail
-     * @param file
+     * @param writeLine
      * @return
      * @throws E
      * @throws IOException
      */
     @TerminalOp
-    public long persist(final Throwables.BiConsumer<? super T, Writer, IOException> writeLine, final String header, final String tail, final File file)
+    public long persist(final File output, final String header, final String tail, final Throwables.BiConsumer<? super T, Writer, IOException> writeLine)
             throws E, IOException {
         assertNotClosed();
 
-        final Writer writer = IOUtil.newFileWriter(file);
+        final Writer writer = IOUtil.newFileWriter(output);
 
         try {
-            return persist(writeLine, header, tail, writer);
+            return persist(writer, header, tail, writeLine);
         } finally {
             IOUtil.close(writer);
         }
@@ -11294,38 +11308,38 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     /**
      *
      *
+     * @param output
      * @param writeLine
-     * @param writer
      * @return
      * @throws E
      * @throws IOException
      */
     @TerminalOp
-    public long persist(final Throwables.BiConsumer<? super T, Writer, IOException> writeLine, final Writer writer) throws E, IOException {
+    public long persist(final Writer output, final Throwables.BiConsumer<? super T, Writer, IOException> writeLine) throws E, IOException {
         assertNotClosed();
 
-        return persist(writeLine, null, null, writer);
+        return persist(output, null, null, writeLine);
     }
 
     /**
      *
      *
-     * @param writeLine
+     * @param output
      * @param header
      * @param tail
-     * @param writer
+     * @param writeLine
      * @return
      * @throws E
      * @throws IOException
      */
     @TerminalOp
-    public long persist(final Throwables.BiConsumer<? super T, Writer, IOException> writeLine, final String header, final String tail, final Writer writer)
+    public long persist(final Writer output, final String header, final String tail, final Throwables.BiConsumer<? super T, Writer, IOException> writeLine)
             throws E, IOException {
         assertNotClosed();
 
         try {
-            boolean isBufferedWriter = writer instanceof BufferedWriter || writer instanceof java.io.BufferedWriter;
-            final Writer bw = isBufferedWriter ? writer : Objectory.createBufferedWriter(writer); //NOSONAR
+            boolean isBufferedWriter = output instanceof BufferedWriter || output instanceof java.io.BufferedWriter;
+            final Writer bw = isBufferedWriter ? output : Objectory.createBufferedWriter(output); //NOSONAR
             final ExceptionalIterator<T, E> iter = iteratorEx();
             long cnt = 0;
 
@@ -11336,7 +11350,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                 }
 
                 while (iter.hasNext()) {
-                    writeLine.accept(iter.next(), writer);
+                    writeLine.accept(iter.next(), output);
                     bw.write(IOUtil.LINE_SEPARATOR);
                     cnt++;
                 }
@@ -11469,14 +11483,14 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     /**
      * Each line in the output file/Writer is an array of JSON String without root bracket.
      *
-     * @param file
+     * @param output
      * @return
      * @throws E
      * @throws IOException
      */
     @TerminalOp
-    public long persistToCSV(File file) throws E, IOException {
-        final Writer writer = IOUtil.newFileWriter(file);
+    public long persistToCSV(File output) throws E, IOException {
+        final Writer writer = IOUtil.newFileWriter(output);
 
         try {
             return persistToCSV(writer);
@@ -11487,19 +11501,19 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
     /**
      * Each line in the output file/Writer is an array of JSON String without root bracket.
-     *
+     * @param output
      * @param csvHeaders
-     * @param file
+     *
      * @return
      * @throws E
      * @throws IOException
      */
     @TerminalOp
-    public long persistToCSV(Collection<String> csvHeaders, File file) throws E, IOException {
-        final Writer writer = IOUtil.newFileWriter(file);
+    public long persistToCSV(File output, Collection<String> csvHeaders) throws E, IOException {
+        final Writer writer = IOUtil.newFileWriter(output);
 
         try {
-            return persistToCSV(csvHeaders, writer);
+            return persistToCSV(writer, csvHeaders);
         } finally {
             IOUtil.close(writer);
         }
@@ -11508,14 +11522,14 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     /**
      * Each line in the output file/Writer is an array of JSON String without root bracket.
      *
-     * @param os
+     * @param output
      * @return
      * @throws E
      * @throws IOException
      */
     @TerminalOp
-    public long persistToCSV(OutputStream os) throws E, IOException {
-        final BufferedWriter bw = Objectory.createBufferedWriter(os);
+    public long persistToCSV(OutputStream output) throws E, IOException {
+        final BufferedWriter bw = Objectory.createBufferedWriter(output);
 
         try {
             return persistToCSV(bw);
@@ -11526,19 +11540,19 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
     /**
      * Each line in the output file/Writer is an array of JSON String without root bracket.
-     *
+     * @param output
      * @param csvHeaders
-     * @param os
+     *
      * @return
      * @throws E
      * @throws IOException
      */
     @TerminalOp
-    public long persistToCSV(Collection<String> csvHeaders, OutputStream os) throws E, IOException {
-        final BufferedWriter bw = Objectory.createBufferedWriter(os);
+    public long persistToCSV(OutputStream output, Collection<String> csvHeaders) throws E, IOException {
+        final BufferedWriter bw = Objectory.createBufferedWriter(output);
 
         try {
-            return persistToCSV(csvHeaders, bw);
+            return persistToCSV(bw, csvHeaders);
         } finally {
             IOUtil.close(bw);
         }
@@ -11582,18 +11596,18 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     /**
      * Each line in the output file/Writer is an array of JSON String without root bracket.
      *
-     * @param writer
+     * @param output
      * @return
      * @throws E
      * @throws IOException
      */
     @TerminalOp
-    public long persistToCSV(Writer writer) throws E, IOException {
+    public long persistToCSV(Writer output) throws E, IOException {
         assertNotClosed();
 
         try {
-            final boolean isBufferedWriter = writer instanceof BufferedJSONWriter;
-            final BufferedJSONWriter bw = isBufferedWriter ? (BufferedJSONWriter) writer : Objectory.createBufferedJSONWriter(writer);
+            final boolean isBufferedWriter = output instanceof BufferedJSONWriter;
+            final BufferedJSONWriter bw = isBufferedWriter ? (BufferedJSONWriter) output : Objectory.createBufferedJSONWriter(output);
 
             final ExceptionalIterator<T, E> iter = iteratorEx();
             long cnt = 0;
@@ -11704,22 +11718,22 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
     /**
      * Each line in the output file/Writer is an array of JSON String without root bracket.
-     *
+     * @param output
      * @param csvHeaders
-     * @param writer
+     *
      * @return
      * @throws E
      * @throws IOException
      */
     @TerminalOp
-    public long persistToCSV(Collection<String> csvHeaders, Writer writer) throws E, IOException {
+    public long persistToCSV(Writer output, Collection<String> csvHeaders) throws E, IOException {
         checkArgNotNullOrEmpty(csvHeaders, "csvHeaders");
         assertNotClosed();
 
         try {
             List<String> headers = new ArrayList<>(csvHeaders);
-            final boolean isBufferedWriter = writer instanceof BufferedJSONWriter;
-            final BufferedJSONWriter bw = isBufferedWriter ? (BufferedJSONWriter) writer : Objectory.createBufferedJSONWriter(writer);
+            final boolean isBufferedWriter = output instanceof BufferedJSONWriter;
+            final BufferedJSONWriter bw = isBufferedWriter ? (BufferedJSONWriter) output : Objectory.createBufferedJSONWriter(output);
 
             final int headSize = headers.size();
             final ExceptionalIterator<T, E> iter = iteratorEx();
