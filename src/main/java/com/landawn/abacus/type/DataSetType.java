@@ -15,7 +15,7 @@
 package com.landawn.abacus.type;
 
 import com.landawn.abacus.util.DataSet;
-import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.Strings;
 
 /**
  *
@@ -92,6 +92,6 @@ public class DataSetType extends AbstractType<DataSet> {
      */
     @Override
     public DataSet valueOf(String str) {
-        return (N.isNullOrEmpty(str)) ? null : (DataSet) Utils.jsonParser.deserialize(typeClass, str);
+        return (Strings.isEmpty(str)) ? null : (DataSet) Utils.jsonParser.deserialize(typeClass, str);
     }
 }

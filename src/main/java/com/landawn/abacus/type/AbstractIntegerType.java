@@ -27,6 +27,7 @@ import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Numbers;
+import com.landawn.abacus.util.Strings;
 
 /**
  *
@@ -60,7 +61,7 @@ public abstract class AbstractIntegerType extends NumberType<Number> {
      */
     @Override
     public Integer valueOf(String str) {
-        if (N.isNullOrEmpty(str)) {
+        if (Strings.isEmpty(str)) {
             return (Integer) defaultValue();
         }
 

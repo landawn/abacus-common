@@ -19,7 +19,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.Strings;
 
 /**
  *
@@ -51,7 +51,7 @@ public class BytesType extends AbstractType<byte[]> {
      */
     @Override
     public String stringOf(byte[] x) {
-        return (x == null) ? null : N.base64Encode(x);
+        return (x == null) ? null : Strings.base64Encode(x);
     }
 
     /**
@@ -61,7 +61,7 @@ public class BytesType extends AbstractType<byte[]> {
      */
     @Override
     public byte[] valueOf(String st) {
-        return (st == null) ? null : N.base64Decode(st);
+        return (st == null) ? null : Strings.base64Decode(st);
     }
 
     /**

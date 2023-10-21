@@ -75,7 +75,7 @@ public final class If {
      * @return
      */
     public static If isNullOrEmpty(final CharSequence s) {
-        return is(N.isNullOrEmpty(s));
+        return is(Strings.isEmpty(s));
     }
 
     /**
@@ -237,7 +237,7 @@ public final class If {
      */
     // DON'T change 'OrEmptyOrBlank' to 'OrBlank' because of the occurring order in the auto-completed context menu.
     public static If isBlank(final CharSequence s) {
-        return is(N.isBlank(s));
+        return is(Strings.isBlank(s));
     }
 
     /**
@@ -247,7 +247,7 @@ public final class If {
      * @return
      */
     public static If notNullOrEmpty(final CharSequence s) {
-        return is(N.notNullOrEmpty(s));
+        return is(Strings.isNotEmpty(s));
     }
 
     /**
@@ -409,7 +409,7 @@ public final class If {
      */
     // DON'T change 'OrEmptyOrBlank' to 'OrBlank' because of the occurring order in the auto-completed context menu.
     public static If notBlank(final CharSequence s) {
-        return is(N.notBlank(s));
+        return is(Strings.isNotBlank(s));
     }
 
     //    public <E extends Throwable> void thenRun(final Throwables.Runnable<E> cmd) throws E {

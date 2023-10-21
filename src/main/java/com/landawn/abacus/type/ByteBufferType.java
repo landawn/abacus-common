@@ -18,6 +18,7 @@ import java.nio.ByteBuffer;
 
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.Strings;
 
 /**
  *
@@ -63,7 +64,7 @@ public class ByteBufferType extends AbstractType<ByteBuffer> {
      */
     @Override
     public String stringOf(ByteBuffer x) {
-        return x == null ? null : N.base64Encode(byteArrayOf(x));
+        return x == null ? null : Strings.base64Encode(byteArrayOf(x));
     }
 
     /**
@@ -78,7 +79,7 @@ public class ByteBufferType extends AbstractType<ByteBuffer> {
         } else if (str.length() == 0) {
             return valueOf(N.EMPTY_BYTE_ARRAY);
         } else {
-            return valueOf(N.base64Decode(str));
+            return valueOf(Strings.base64Decode(str));
         }
     }
 

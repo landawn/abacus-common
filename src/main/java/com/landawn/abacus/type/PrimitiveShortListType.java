@@ -21,6 +21,7 @@ import com.landawn.abacus.parser.SerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.ShortList;
+import com.landawn.abacus.util.Strings;
 
 /**
  *
@@ -77,7 +78,7 @@ public final class PrimitiveShortListType extends AbstractPrimitiveListType<Shor
      */
     @Override
     public ShortList valueOf(String str) {
-        return N.isNullOrEmpty(str) ? null : ShortList.of(arrayType.valueOf(str));
+        return Strings.isEmpty(str) ? null : ShortList.of(arrayType.valueOf(str));
     }
 
     /**

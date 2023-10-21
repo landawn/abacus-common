@@ -49,7 +49,7 @@ public class Seid implements EntityId {
 
     // for Kryo.
     protected Seid() {
-        entityName = N.EMPTY_STRING;
+        entityName = Strings.EMPTY_STRING;
     }
 
     /**
@@ -65,7 +65,7 @@ public class Seid implements EntityId {
         //        throw new IllegalArgumentException("Entity name can't be null or empty");
         //    }
 
-        this.entityName = entityName == null ? N.EMPTY_STRING : entityName;
+        this.entityName = entityName == null ? Strings.EMPTY_STRING : entityName;
     }
 
     /**

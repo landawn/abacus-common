@@ -17,6 +17,7 @@ import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.MutableFloat;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Numbers;
+import com.landawn.abacus.util.Strings;
 
 /**
  *
@@ -58,7 +59,7 @@ public class MutableFloatType extends MutableType<MutableFloat> {
      */
     @Override
     public MutableFloat valueOf(String str) {
-        return N.isNullOrEmpty(str) ? null : MutableFloat.of(Numbers.toFloat(str));
+        return Strings.isEmpty(str) ? null : MutableFloat.of(Numbers.toFloat(str));
     }
 
     /**

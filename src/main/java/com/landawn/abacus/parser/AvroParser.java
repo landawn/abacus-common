@@ -50,6 +50,7 @@ import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.Maps;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Objectory;
+import com.landawn.abacus.util.Strings;
 
 /**
  * The content is encoded with Base64 if the target output is String or Writer, otherwise the content is NOT encoded with Base64 if the target output is File or OutputStream.
@@ -74,7 +75,7 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
         try {
             serialize(os, obj, config);
 
-            return N.base64Encode(os.toByteArray());
+            return Strings.base64Encode(os.toByteArray());
         } finally {
             Objectory.recycle(os);
         }
@@ -304,7 +305,7 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
      */
     @Override
     public <T> T deserialize(Class<? extends T> targetClass, String st, AvroDeserializationConfig config) {
-        return deserialize(targetClass, new ByteArrayInputStream(N.base64Decode(st)), config);
+        return deserialize(targetClass, new ByteArrayInputStream(Strings.base64Decode(st)), config);
     }
 
     /**

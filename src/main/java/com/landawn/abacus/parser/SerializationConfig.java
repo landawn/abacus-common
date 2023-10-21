@@ -27,7 +27,7 @@ import com.landawn.abacus.util.WD;
  */
 public abstract class SerializationConfig<C extends SerializationConfig<C>> extends ParserConfig<C> {
 
-    protected static final Exclusion defaultExclusion = Exclusion.NULL;
+    protected static final Exclusion defaultExclusion = null;
 
     protected static final DateTimeFormat defaultDateTimeFormat = DateTimeFormat.LONG;
 
@@ -159,27 +159,27 @@ public abstract class SerializationConfig<C extends SerializationConfig<C>> exte
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public C noCharQuotation() {
         return setCharQuotation((char) 0);
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public C noStringQuotation() {
         return setStringQuotation((char) 0);
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public C noQuotation() {
         return setCharQuotation((char) 0).setStringQuotation((char) 0);
@@ -386,9 +386,9 @@ public abstract class SerializationConfig<C extends SerializationConfig<C>> exte
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public int hashCode() {
@@ -439,9 +439,9 @@ public abstract class SerializationConfig<C extends SerializationConfig<C>> exte
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public String toString() {

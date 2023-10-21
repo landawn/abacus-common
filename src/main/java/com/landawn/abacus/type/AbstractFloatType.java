@@ -25,8 +25,8 @@ import java.sql.Types;
 import com.landawn.abacus.parser.SerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.IOUtil;
-import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Numbers;
+import com.landawn.abacus.util.Strings;
 
 /**
  *
@@ -61,7 +61,7 @@ public abstract class AbstractFloatType extends NumberType<Number> {
     @Override
     public Float valueOf(String st) {
         try {
-            return N.isNullOrEmpty(st) ? ((Float) defaultValue()) : Float.valueOf(st);
+            return Strings.isEmpty(st) ? ((Float) defaultValue()) : Float.valueOf(st);
         } catch (NumberFormatException e) {
             if (st.length() > 1) {
                 char ch = st.charAt(st.length() - 1);

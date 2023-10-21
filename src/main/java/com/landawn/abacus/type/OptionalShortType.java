@@ -14,8 +14,8 @@ import java.sql.SQLException;
 import com.landawn.abacus.parser.SerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.IOUtil;
-import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Numbers;
+import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.u.OptionalShort;
 
 /**
@@ -68,7 +68,7 @@ public class OptionalShortType extends AbstractOptionalType<OptionalShort> {
      */
     @Override
     public OptionalShort valueOf(String str) {
-        return N.isNullOrEmpty(str) ? OptionalShort.empty() : OptionalShort.of(Numbers.toShort(str));
+        return Strings.isEmpty(str) ? OptionalShort.empty() : OptionalShort.of(Numbers.toShort(str));
     }
 
     /**

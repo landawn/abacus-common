@@ -29,6 +29,7 @@ import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Numbers;
+import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.TypeAttrParser;
 
 /**
@@ -92,7 +93,7 @@ public abstract class AbstractType<T> implements Type<T> {
                 if (cls != null) {
                     cls = ClassUtil.forClass(ClassUtil.getSimpleClassName(cls));
                     if (cls != null) {
-                        simpleName = ClassUtil.getSimpleClassName(cls) + (index > 0 ? typeName.substring(index) : N.EMPTY_STRING);
+                        simpleName = ClassUtil.getSimpleClassName(cls) + (index > 0 ? typeName.substring(index) : Strings.EMPTY_STRING);
                     }
                 }
             } catch (Exception e) {

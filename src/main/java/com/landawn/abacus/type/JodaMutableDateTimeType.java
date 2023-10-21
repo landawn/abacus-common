@@ -23,6 +23,7 @@ import java.sql.Timestamp;
 import org.joda.time.MutableDateTime;
 
 import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.Strings;
 
 /**
  *
@@ -74,7 +75,7 @@ public class JodaMutableDateTimeType extends AbstractJodaDateTimeType<MutableDat
      */
     @Override
     public MutableDateTime valueOf(String str) {
-        if (N.isNullOrEmpty(str)) {
+        if (Strings.isEmpty(str)) {
             return null;
         }
 

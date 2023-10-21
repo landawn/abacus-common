@@ -26,6 +26,7 @@ import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.ImmutableBiMap;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Objectory;
+import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.Strings.StringUtil;
 
 public class WebUtil {
@@ -52,7 +53,7 @@ public class WebUtil {
 
             if (httpMethod == null && (token.equals("-X") || token.equals("--request")) && httpMethodMap.containsValue(tokens.get(i + 1).toUpperCase())) {
                 httpMethod = HttpMethod.valueOf(tokens.get(++i).toUpperCase());
-            } else if (N.isNullOrEmpty(url) && (StringUtil.startsWithIgnoreCase(token, "https://") || StringUtil.startsWithIgnoreCase(token, "http://"))) {
+            } else if (Strings.isEmpty(url) && (StringUtil.startsWithIgnoreCase(token, "https://") || StringUtil.startsWithIgnoreCase(token, "http://"))) {
                 url = token;
             } else if (StringUtil.equals(token, "--header") || StringUtil.equals(token, "-H")) {
                 String header = tokens.get(++i);
@@ -65,19 +66,19 @@ public class WebUtil {
 
         String requestBody = null;
 
-        if (N.notNullOrEmpty(body)) {
+        if (Strings.isNotEmpty(body)) {
             requestBody = "  String requestBody = \"" + escapeJava(body) + "\";";
         }
 
         StringBuilder sb = new StringBuilder(IOUtil.LINE_SEPARATOR);
 
-        if (N.notNullOrEmpty(requestBody)) {
+        if (Strings.isNotEmpty(requestBody)) {
             sb.append(requestBody).append(IOUtil.LINE_SEPARATOR).append(IOUtil.LINE_SEPARATOR);
         }
 
         sb.append("  HttpRequest.url(\"" + url + "\")");
 
-        if (N.notNullOrEmpty(headers)) {
+        if (Strings.isNotEmpty(headers)) {
             sb.append(headers);
         }
 
@@ -135,7 +136,7 @@ public class WebUtil {
 
             if (httpMethod == null && (token.equals("-X") || token.equals("--request")) && httpMethodMap.containsValue(tokens.get(i + 1).toUpperCase())) {
                 httpMethod = HttpMethod.valueOf(tokens.get(++i).toUpperCase());
-            } else if (N.isNullOrEmpty(url) && (StringUtil.startsWithIgnoreCase(token, "https://") || StringUtil.startsWithIgnoreCase(token, "http://"))) {
+            } else if (Strings.isEmpty(url) && (StringUtil.startsWithIgnoreCase(token, "https://") || StringUtil.startsWithIgnoreCase(token, "http://"))) {
                 url = token;
             } else if (StringUtil.equals(token, "--header") || StringUtil.equals(token, "-H")) {
                 String header = tokens.get(++i);
@@ -152,23 +153,23 @@ public class WebUtil {
 
         String requestBody = null;
 
-        if (N.notNullOrEmpty(body)) {
+        if (Strings.isNotEmpty(body)) {
             requestBody = "  RequestBody requestBody = RequestBody.create(" + mediaType + ", \"" + escapeJava(body) + "\");";
         }
 
         final StringBuilder sb = new StringBuilder(IOUtil.LINE_SEPARATOR);
 
-        if (N.notNullOrEmpty(requestBody)) {
+        if (Strings.isNotEmpty(requestBody)) {
             sb.append(requestBody).append(IOUtil.LINE_SEPARATOR).append(IOUtil.LINE_SEPARATOR);
         }
 
         sb.append("  OkHttpRequest.url(\"" + url + "\")");
 
-        if (N.notNullOrEmpty(headers)) {
+        if (Strings.isNotEmpty(headers)) {
             sb.append(headers);
         }
 
-        if (N.notNullOrEmpty(requestBody)) {
+        if (Strings.isNotEmpty(requestBody)) {
             sb.append(indent).append(".body(requestBody)");
         }
 
@@ -323,10 +324,10 @@ public class WebUtil {
                 }
             }
 
-            if (N.notNullOrEmpty(body)) {
+            if (Strings.isNotEmpty(body)) {
                 String contentType = HttpUtil.readHttpHeadValue(headers.get(HttpHeaders.Names.CONTENT_TYPE));
 
-                if (N.isNullOrEmpty(contentType) && N.notNullOrEmpty(bodyType)) {
+                if (Strings.isEmpty(contentType) && Strings.isNotEmpty(bodyType)) {
                     sb.append(" -H ")
                             .append(quoteChar)
                             .append(HttpHeaders.Names.CONTENT_TYPE)
@@ -353,7 +354,7 @@ public class WebUtil {
      * @param httpHeaders 
      */
     public static void setContentTypeByRequestBodyType(final String requestBodyType, final HttpHeaders httpHeaders) {
-        if (N.notNullOrEmpty(requestBodyType) && httpHeaders.get(HttpHeaders.Names.CONTENT_TYPE) == null) {
+        if (Strings.isNotEmpty(requestBodyType) && httpHeaders.get(HttpHeaders.Names.CONTENT_TYPE) == null) {
             httpHeaders.setContentType(requestBodyType);
         }
     }

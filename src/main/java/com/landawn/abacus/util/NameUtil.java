@@ -135,7 +135,7 @@ public final class NameUtil {
             } else if (parentName.equals(getParentName(name))) {
                 canonicalName = getCachedName(canonicalName);
             } else {
-                canonicalName = N.EMPTY_STRING;
+                canonicalName = Strings.EMPTY_STRING;
             }
 
             canonicalNameMap.put(name, canonicalName);
@@ -181,7 +181,7 @@ public final class NameUtil {
             int indx = name.lastIndexOf(WD._PERIOD);
 
             if (indx < 1) {
-                parentName = N.EMPTY_STRING;
+                parentName = Strings.EMPTY_STRING;
             } else {
                 parentName = NameUtil.getCachedName(name.substring(0, indx));
             }

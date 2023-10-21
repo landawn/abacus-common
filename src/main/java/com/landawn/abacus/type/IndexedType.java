@@ -26,6 +26,7 @@ import com.landawn.abacus.util.Indexed;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Numbers;
 import com.landawn.abacus.util.Objectory;
+import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.WD;
 
 /**
@@ -112,7 +113,7 @@ public class IndexedType<T> extends AbstractType<Indexed<T>> {
     @SuppressWarnings("unchecked")
     @Override
     public Indexed<T> valueOf(String str) {
-        if (N.isNullOrEmpty(str)) {
+        if (Strings.isEmpty(str)) {
             return null;
         }
 

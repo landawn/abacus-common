@@ -22,6 +22,7 @@ import com.landawn.abacus.parser.JSONDeserializationConfig.JDC;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.ListMultimap;
 import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.WD;
 
 /**
@@ -123,7 +124,7 @@ public class ListMultimapType<K, E> extends AbstractType<ListMultimap<K, E>> {
     @SuppressWarnings("unchecked")
     @Override
     public ListMultimap<K, E> valueOf(String st) {
-        if (N.isNullOrEmpty(st)) {
+        if (Strings.isEmpty(st)) {
             return null;
         }
 

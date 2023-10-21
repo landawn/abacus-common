@@ -1016,7 +1016,7 @@ public final class IOUtil {
         try {
             final char[] chs = readChars(file, offset, maxLen, encoding);
 
-            return N.isNullOrEmpty(chs) ? N.EMPTY_STRING : InternalUtil.newString(chs, true);
+            return N.isNullOrEmpty(chs) ? Strings.EMPTY_STRING : InternalUtil.newString(chs, true);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
@@ -1048,7 +1048,7 @@ public final class IOUtil {
         try {
             final char[] chs = readChars(is, offset, maxLen, encoding);
 
-            return N.isNullOrEmpty(chs) ? N.EMPTY_STRING : InternalUtil.newString(chs, true);
+            return N.isNullOrEmpty(chs) ? Strings.EMPTY_STRING : InternalUtil.newString(chs, true);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
@@ -1067,7 +1067,7 @@ public final class IOUtil {
         try {
             final char[] chs = readChars(reader, offset, maxLen);
 
-            return N.isNullOrEmpty(chs) ? N.EMPTY_STRING : InternalUtil.newString(chs, true);
+            return N.isNullOrEmpty(chs) ? Strings.EMPTY_STRING : InternalUtil.newString(chs, true);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
@@ -3759,7 +3759,7 @@ public final class IOUtil {
      * @since 11.0
      */
     public static String simplifyPath(String pathname) {
-        if (N.isNullOrEmpty(pathname)) {
+        if (Strings.isEmpty(pathname)) {
             return ".";
         }
 

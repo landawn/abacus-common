@@ -440,19 +440,19 @@ public final class ExceptionUtil {
     public static String getErrorMessage(final Throwable e, final boolean withExceptionClassName) {
         String msg = e.getMessage();
 
-        if (N.isNullOrEmpty(msg) && e.getCause() != null) {
+        if (Strings.isEmpty(msg) && e.getCause() != null) {
             Throwable cause = e.getCause();
 
             do {
                 msg = cause.getMessage();
 
-                if (N.notNullOrEmpty(msg)) {
+                if (Strings.isNotEmpty(msg)) {
                     break;
                 }
             } while ((cause = e.getCause()) != null);
         }
 
-        if (N.isNullOrEmpty(msg)) {
+        if (Strings.isEmpty(msg)) {
             msg = e.getClass().getCanonicalName();
         }
 

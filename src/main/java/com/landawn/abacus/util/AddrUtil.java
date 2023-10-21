@@ -66,7 +66,7 @@ public final class AddrUtil {
      * @return
      */
     public static List<InetSocketAddress> getAddressList(String servers) {
-        if (N.isNullOrEmpty(servers)) {
+        if (Strings.isEmpty(servers)) {
             throw new IllegalArgumentException("Null or empty host list");
         }
 

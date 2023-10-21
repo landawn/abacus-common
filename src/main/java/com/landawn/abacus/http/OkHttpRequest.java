@@ -40,6 +40,7 @@ import com.landawn.abacus.util.ContinuableFuture;
 import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Objectory;
+import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.URLEncodedUtil;
 
 import okhttp3.CacheControl;
@@ -71,6 +72,8 @@ public final class OkHttpRequest {
     private final Request.Builder builder;
     private RequestBody body;
     private Request request;
+
+    private boolean closeHttpClientAfterExecution = false;
 
     OkHttpRequest(OkHttpClient httpClient) {
         this.httpClient = httpClient;
@@ -161,7 +164,7 @@ public final class OkHttpRequest {
         return create(url,
                 new OkHttpClient.Builder().connectTimeout(connectionTimeoutInMillis, TimeUnit.MILLISECONDS)
                         .readTimeout(readTimeoutInMillis, TimeUnit.MILLISECONDS)
-                        .build());
+                        .build()).closeHttpClientAfterExecution(true);
     }
 
     /**
@@ -176,7 +179,7 @@ public final class OkHttpRequest {
         return create(url,
                 new OkHttpClient.Builder().connectTimeout(connectionTimeoutInMillis, TimeUnit.MILLISECONDS)
                         .readTimeout(readTimeoutInMillis, TimeUnit.MILLISECONDS)
-                        .build());
+                        .build()).closeHttpClientAfterExecution(true);
     }
 
     /**
@@ -191,7 +194,13 @@ public final class OkHttpRequest {
         return create(url,
                 new OkHttpClient.Builder().connectTimeout(connectionTimeoutInMillis, TimeUnit.MILLISECONDS)
                         .readTimeout(readTimeoutInMillis, TimeUnit.MILLISECONDS)
-                        .build());
+                        .build()).closeHttpClientAfterExecution(true);
+    }
+
+    OkHttpRequest closeHttpClientAfterExecution(boolean b) {
+        this.closeHttpClientAfterExecution = b;
+
+        return this;
     }
 
     /**
@@ -244,7 +253,7 @@ public final class OkHttpRequest {
      * @return
      */
     public OkHttpRequest basicAuth(String user, Object password) {
-        builder.header(HttpHeaders.Names.AUTHORIZATION, "Basic " + N.base64Encode((user + ":" + password).getBytes()));
+        builder.header(HttpHeaders.Names.AUTHORIZATION, "Basic " + Strings.base64Encode((user + ":" + password).getBytes()));
         return this;
     }
 
@@ -665,7 +674,11 @@ public final class OkHttpRequest {
         // body = (body == null && HttpMethod.DELETE.equals(httpMethod)) ? Util.EMPTY_REQUEST : body;
         request = builder.method(httpMethod.name(), body).build();
 
-        return httpClient.newCall(request).execute();
+        try {
+            return httpClient.newCall(request).execute();
+        } finally {
+            doAfterExecution();
+        }
     }
 
     /**
@@ -718,6 +731,14 @@ public final class OkHttpRequest {
             } else {
                 throw new IOException(resp.code() + ": " + resp.message());
             }
+        } finally {
+            doAfterExecution();
+        }
+    }
+
+    void doAfterExecution() {
+        if (closeHttpClientAfterExecution) {
+            // Shutdown isn't necessary?
         }
     }
 

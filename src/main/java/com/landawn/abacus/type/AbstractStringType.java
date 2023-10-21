@@ -99,7 +99,7 @@ public abstract class AbstractStringType extends AbstractCharSequenceType<String
      */
     @Override
     public String valueOf(char[] cbuf, int offset, int len) {
-        return cbuf == null ? null : ((cbuf.length == 0 || len == 0) ? N.EMPTY_STRING : String.valueOf(cbuf, offset, len));
+        return cbuf == null ? null : ((cbuf.length == 0 || len == 0) ? Strings.EMPTY_STRING : String.valueOf(cbuf, offset, len));
     }
 
     /**

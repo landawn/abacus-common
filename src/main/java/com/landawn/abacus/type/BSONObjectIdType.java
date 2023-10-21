@@ -16,7 +16,7 @@ package com.landawn.abacus.type;
 
 import org.bson.types.ObjectId;
 
-import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.Strings;
 
 /**
  *
@@ -58,6 +58,6 @@ public class BSONObjectIdType extends AbstractType<ObjectId> {
      */
     @Override
     public ObjectId valueOf(String str) {
-        return N.isNullOrEmpty(str) ? null : new ObjectId(str);
+        return Strings.isEmpty(str) ? null : new ObjectId(str);
     }
 }

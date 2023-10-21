@@ -13,6 +13,7 @@ import com.landawn.abacus.util.Fn;
 import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.Maps;
 import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.Tuple;
 import com.landawn.abacus.util.Tuple.Tuple2;
 import com.landawn.abacus.util.Tuple.Tuple3;
@@ -236,7 +237,7 @@ public class HARUtil {
         final String requestBody = Maps.getByPath(requestEntry, "postData.text");
         final String bodyType = Maps.getByPath(requestEntry, "postData.mimeType");
 
-        if (N.notNullOrEmpty(requestBody)) {
+        if (Strings.isNotEmpty(requestBody)) {
             WebUtil.setContentTypeByRequestBodyType(bodyType, httpHeaders);
         }
 

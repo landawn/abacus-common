@@ -23,7 +23,6 @@ import com.landawn.abacus.parser.SerializationConfig;
 import com.landawn.abacus.util.BufferedJSONWriter;
 import com.landawn.abacus.util.BufferedWriter;
 import com.landawn.abacus.util.CharacterWriter;
-import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Objectory;
 import com.landawn.abacus.util.Range;
 import com.landawn.abacus.util.Range.BoundType;
@@ -149,7 +148,7 @@ public class RangeType<T extends Comparable<? super T>> extends AbstractType<Ran
     public Range<T> valueOf(String str) {
         str = Strings.trim(str);
 
-        if (N.isNullOrEmpty(str)) {
+        if (Strings.isEmpty(str)) {
             return null;
         }
 

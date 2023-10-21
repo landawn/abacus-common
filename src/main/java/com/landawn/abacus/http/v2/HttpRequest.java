@@ -38,6 +38,7 @@ import com.landawn.abacus.http.HttpMethod;
 import com.landawn.abacus.http.HttpUtil;
 import com.landawn.abacus.util.ExceptionUtil;
 import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.URLEncodedUtil;
 
 /**
@@ -57,6 +58,7 @@ public final class HttpRequest {
     private BodyPublisher bodyPublisher;
 
     private boolean requireNewClient = false;
+
     private boolean closeHttpClientAfterExecution = false;
 
     HttpRequest(HttpClient httpClient, final HttpClient.Builder clientBuilder, final java.net.http.HttpRequest.Builder requestBuilder) {
@@ -96,7 +98,7 @@ public final class HttpRequest {
      * @throws IllegalArgumentException if the scheme of {@code url} is not {@code http} or {@code https}.
      */
     public static HttpRequest url(String url, final HttpClient httpClient) {
-        return new HttpRequest(httpClient, null, java.net.http.HttpRequest.newBuilder().uri(URI.create(url))).closeHttpClientAfterExecution(true);
+        return new HttpRequest(httpClient, null, java.net.http.HttpRequest.newBuilder().uri(URI.create(url))).closeHttpClientAfterExecution(false);
     }
 
     /**
@@ -138,7 +140,7 @@ public final class HttpRequest {
      */
     public static HttpRequest url(URL url, final HttpClient httpClient) {
         try {
-            return new HttpRequest(httpClient, null, java.net.http.HttpRequest.newBuilder().uri(url.toURI())).closeHttpClientAfterExecution(true);
+            return new HttpRequest(httpClient, null, java.net.http.HttpRequest.newBuilder().uri(url.toURI())).closeHttpClientAfterExecution(false);
         } catch (URISyntaxException e) {
             throw ExceptionUtil.toRuntimeException(e);
         }
@@ -176,10 +178,10 @@ public final class HttpRequest {
      * @throws IllegalArgumentException if the scheme of {@code url} is not {@code http} or {@code https}.
      */
     public static HttpRequest url(URI url, final HttpClient httpClient) {
-        return new HttpRequest(httpClient, null, java.net.http.HttpRequest.newBuilder().uri(url)).closeHttpClientAfterExecution(true);
+        return new HttpRequest(httpClient, null, java.net.http.HttpRequest.newBuilder().uri(url)).closeHttpClientAfterExecution(false);
     }
 
-    protected HttpRequest closeHttpClientAfterExecution(boolean b) {
+    HttpRequest closeHttpClientAfterExecution(boolean b) {
         this.closeHttpClientAfterExecution = b;
 
         return this;
@@ -261,7 +263,7 @@ public final class HttpRequest {
      * @return
      */
     public HttpRequest basicAuth(final String user, final Object password) {
-        header(HttpHeaders.Names.AUTHORIZATION, "Basic " + N.base64Encode((user + ":" + password).getBytes()));
+        header(HttpHeaders.Names.AUTHORIZATION, "Basic " + Strings.base64Encode((user + ":" + password).getBytes()));
 
         return this;
     }
@@ -588,7 +590,7 @@ public final class HttpRequest {
      * @return
      * @throws UncheckedIOException the unchecked IO exception
      */
-    <T> HttpResponse<T> head(final HttpResponse.BodyHandler<T> responseBodyHandler) throws UncheckedIOException {
+    private <T> HttpResponse<T> head(final HttpResponse.BodyHandler<T> responseBodyHandler) throws UncheckedIOException {
         return execute(HttpMethod.HEAD, responseBodyHandler);
     }
 
@@ -615,14 +617,14 @@ public final class HttpRequest {
     public <T> HttpResponse<T> execute(final HttpMethod httpMethod, final HttpResponse.BodyHandler<T> responseBodyHandler) throws UncheckedIOException {
         N.checkArgNotNull(httpMethod, HTTP_METHOD_STR);
 
+        final HttpClient httpClientToUse = checkHttpClient();
+
         try {
-            return checkHttpClient().send(requestBuilder.method(httpMethod.name(), checkBodyPublisher()).build(), responseBodyHandler);
+            return httpClientToUse.send(requestBuilder.method(httpMethod.name(), checkBodyPublisher()).build(), responseBodyHandler);
         } catch (IOException | InterruptedException e) {
             throw ExceptionUtil.toRuntimeException(e);
         } finally {
-            if (closeHttpClientAfterExecution) {
-                // httpClient.close();
-            }
+            doAfterExecution(httpClientToUse);
         }
     }
 
@@ -639,6 +641,24 @@ public final class HttpRequest {
         final BodyHandler<?> responseBodyHandler = createResponseBodyHandler(resultClass);
 
         return getBody(execute(httpMethod, responseBodyHandler), resultClass);
+    }
+
+    private HttpClient checkHttpClient() {
+        if (httpClient == null || requireNewClient) {
+            if (clientBuilder == null) {
+                return DEFAULT_HTTP_CLIENT;
+            } else {
+                return clientBuilder.build();
+            }
+        } else {
+            return httpClient;
+        }
+    }
+
+    void doAfterExecution(final HttpClient httpClientUsed) {
+        if (closeHttpClientAfterExecution && httpClientUsed != DEFAULT_HTTP_CLIENT) {
+            // Shutdown isn't necessary?
+        }
     }
 
     /**
@@ -884,12 +904,13 @@ public final class HttpRequest {
     public <T> CompletableFuture<HttpResponse<T>> asyncExecute(final HttpMethod httpMethod, final HttpResponse.BodyHandler<T> responseBodyHandler) {
         N.checkArgNotNull(httpMethod, HTTP_METHOD_STR);
 
+        final HttpClient httpClientToUse = checkHttpClient();
+
         try {
-            return checkHttpClient().sendAsync(requestBuilder.method(httpMethod.name(), checkBodyPublisher()).build(), responseBodyHandler);
+            return httpClientToUse.sendAsync(requestBuilder.method(httpMethod.name(), checkBodyPublisher()).build(), responseBodyHandler);
         } finally {
-            if (closeHttpClientAfterExecution) {
-                // httpClient.close();
-            }
+            // This is asynchronous call
+            // doAfterExecution(httpClientToUse);
         }
     }
 
@@ -904,15 +925,15 @@ public final class HttpRequest {
     public <T> CompletableFuture<T> asyncExecute(final HttpMethod httpMethod, final Class<T> resultClass) {
         N.checkArgNotNull(httpMethod, HTTP_METHOD_STR);
 
-        try {
-            final BodyHandler<?> responseBodyHandler = createResponseBodyHandler(resultClass);
+        final HttpClient httpClientToUse = checkHttpClient();
+        final BodyHandler<?> responseBodyHandler = createResponseBodyHandler(resultClass);
 
-            return checkHttpClient().sendAsync(requestBuilder.method(httpMethod.name(), checkBodyPublisher()).build(), responseBodyHandler)
+        try {
+            return httpClientToUse.sendAsync(requestBuilder.method(httpMethod.name(), checkBodyPublisher()).build(), responseBodyHandler)
                     .thenApply(it -> getBody(it, resultClass));
         } finally {
-            if (closeHttpClientAfterExecution) {
-                // httpClient.close();
-            }
+            // This is asynchronous call
+            // doAfterExecution(httpClientToUse);
         }
     }
 
@@ -929,24 +950,13 @@ public final class HttpRequest {
             final PushPromiseHandler<T> pushPromiseHandler) {
         N.checkArgNotNull(httpMethod, HTTP_METHOD_STR);
 
-        try {
-            return checkHttpClient().sendAsync(requestBuilder.method(httpMethod.name(), checkBodyPublisher()).build(), responseBodyHandler, pushPromiseHandler);
-        } finally {
-            if (closeHttpClientAfterExecution) {
-                // httpClient.close();
-            }
-        }
-    }
+        final HttpClient httpClientToUse = checkHttpClient();
 
-    private HttpClient checkHttpClient() {
-        if (httpClient == null || requireNewClient) {
-            if (clientBuilder == null) {
-                return DEFAULT_HTTP_CLIENT;
-            } else {
-                return clientBuilder.build();
-            }
-        } else {
-            return httpClient;
+        try {
+            return httpClientToUse.sendAsync(requestBuilder.method(httpMethod.name(), checkBodyPublisher()).build(), responseBodyHandler, pushPromiseHandler);
+        } finally {
+            // This is asynchronous call
+            // doAfterExecution(httpClientToUse);
         }
     }
 

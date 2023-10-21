@@ -32,6 +32,7 @@ import com.landawn.abacus.parser.JSONSerializationConfig.JSC;
 import com.landawn.abacus.parser.ParserUtil.PropInfo;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.WD;
 import com.landawn.abacus.util.XMLUtil;
 
@@ -106,7 +107,7 @@ abstract class AbstractXMLParser extends AbstractParser<XMLSerializationConfig, 
     protected Object getPropValue(final String propName, final Type<?> propType, final PropInfo propInfo, final Node propNode) {
         String txtValue = XMLUtil.getTextContent(propNode);
 
-        if (N.isNullOrEmpty(txtValue)) {
+        if (Strings.isEmpty(txtValue)) {
             Node attrNode = propNode.getAttributes().getNamedItem(XMLConstants.IS_NULL);
 
             if ((attrNode != null) && Boolean.valueOf(attrNode.getNodeValue())) { //NOSONAR

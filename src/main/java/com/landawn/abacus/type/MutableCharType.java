@@ -16,6 +16,7 @@ import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.MutableChar;
 import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.Strings;
 
 /**
  *
@@ -57,7 +58,7 @@ public class MutableCharType extends MutableType<MutableChar> {
      */
     @Override
     public MutableChar valueOf(String str) {
-        return N.isNullOrEmpty(str) ? null : MutableChar.of(N.parseChar(str));
+        return Strings.isEmpty(str) ? null : MutableChar.of(Strings.parseChar(str));
     }
 
     /**

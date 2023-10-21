@@ -24,6 +24,7 @@ import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Objectory;
+import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.Tuple;
 import com.landawn.abacus.util.Tuple.Tuple1;
 import com.landawn.abacus.util.WD;
@@ -114,7 +115,7 @@ public class Tuple1Type<T1> extends AbstractType<Tuple1<T1>> {
     @SuppressWarnings("unchecked")
     @Override
     public Tuple1<T1> valueOf(String str) {
-        if (N.isNullOrEmpty(str)) {
+        if (Strings.isEmpty(str)) {
             return null;
         }
 

@@ -101,7 +101,7 @@ public final class HttpRequest {
         return new HttpRequest(HttpClient.create(url, 1, connectionTimeoutInMillis, readTimeoutInMillis)).closeHttpClientAfterExecution(true);
     }
 
-    protected HttpRequest closeHttpClientAfterExecution(boolean b) {
+    HttpRequest closeHttpClientAfterExecution(boolean b) {
         this.closeHttpClientAfterExecution = b;
 
         return this;
@@ -369,8 +369,9 @@ public final class HttpRequest {
     /**
      *
      * @return
+     * @throws UncheckedIOException the unchecked IO exception
      */
-    public HttpResponse post() {
+    public HttpResponse post() throws UncheckedIOException {
         return post(HttpResponse.class);
     }
 
@@ -405,25 +406,26 @@ public final class HttpRequest {
         return execute(HttpMethod.PUT, resultClass);
     }
 
-    /**
-     *
-     * @return
-     * @throws UncheckedIOException the unchecked IO exception
-     */
-    public HttpResponse patch() throws UncheckedIOException {
-        return patch(HttpResponse.class);
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param resultClass
-     * @return
-     * @throws UncheckedIOException the unchecked IO exception
-     */
-    public <T> T patch(final Class<T> resultClass) throws UncheckedIOException {
-        return execute(HttpMethod.PATCH, resultClass);
-    }
+    // TODO HTTP METHOD PATCH is not supported by HttpURLConnection.
+    //    /**
+    //     *
+    //     * @return
+    //     * @throws UncheckedIOException the unchecked IO exception
+    //     */
+    //    public HttpResponse patch() throws UncheckedIOException {
+    //        return patch(HttpResponse.class);
+    //    }
+    //
+    //    /**
+    //     *
+    //     * @param <T>
+    //     * @param resultClass
+    //     * @return
+    //     * @throws UncheckedIOException the unchecked IO exception
+    //     */
+    //    public <T> T patch(final Class<T> resultClass) throws UncheckedIOException {
+    //        return execute(HttpMethod.PATCH, resultClass);
+    //    }
 
     /**
      *
@@ -491,9 +493,7 @@ public final class HttpRequest {
         try {
             return httpClient.execute(httpMethod, resultClass, this.request, checkSettings());
         } finally {
-            if (closeHttpClientAfterExecution) {
-                httpClient.close();
-            }
+            doAfterExecution();
         }
     }
 
@@ -511,9 +511,7 @@ public final class HttpRequest {
         try {
             httpClient.execute(httpMethod, output, this.request, checkSettings());
         } finally {
-            if (closeHttpClientAfterExecution) {
-                httpClient.close();
-            }
+            doAfterExecution();
         }
     }
 
@@ -531,9 +529,7 @@ public final class HttpRequest {
         try {
             httpClient.execute(httpMethod, output, this.request, checkSettings());
         } finally {
-            if (closeHttpClientAfterExecution) {
-                httpClient.close();
-            }
+            doAfterExecution();
         }
     }
 
@@ -551,9 +547,13 @@ public final class HttpRequest {
         try {
             httpClient.execute(httpMethod, output, this.request, checkSettings());
         } finally {
-            if (closeHttpClientAfterExecution) {
-                httpClient.close();
-            }
+            doAfterExecution();
+        }
+    }
+
+    void doAfterExecution() {
+        if (closeHttpClientAfterExecution) {
+            httpClient.close();
         }
     }
 
@@ -673,43 +673,44 @@ public final class HttpRequest {
         return asyncExecute(HttpMethod.PUT, resultClass, executor);
     }
 
-    /**
-     *
-     * @return
-     */
-    public ContinuableFuture<HttpResponse> asyncPatch() {
-        return asyncPatch(HttpResponse.class);
-    }
-
-    /**
-     *
-     * @param executor
-     * @return
-     */
-    public ContinuableFuture<HttpResponse> asyncPatch(final Executor executor) {
-        return asyncPatch(HttpResponse.class, executor);
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param resultClass
-     * @return
-     */
-    public <T> ContinuableFuture<T> asyncPatch(final Class<T> resultClass) {
-        return asyncExecute(HttpMethod.PATCH, resultClass);
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param resultClass
-     * @param executor
-     * @return
-     */
-    public <T> ContinuableFuture<T> asyncPatch(final Class<T> resultClass, final Executor executor) {
-        return asyncExecute(HttpMethod.PATCH, resultClass, executor);
-    }
+    // TODO HTTP METHOD PATCH is not supported by HttpURLConnection.
+    //    /**
+    //     *
+    //     * @return
+    //     */
+    //    public ContinuableFuture<HttpResponse> asyncPatch() {
+    //        return asyncPatch(HttpResponse.class);
+    //    }
+    //
+    //    /**
+    //     *
+    //     * @param executor
+    //     * @return
+    //     */
+    //    public ContinuableFuture<HttpResponse> asyncPatch(final Executor executor) {
+    //        return asyncPatch(HttpResponse.class, executor);
+    //    }
+    //
+    //    /**
+    //     *
+    //     * @param <T>
+    //     * @param resultClass
+    //     * @return
+    //     */
+    //    public <T> ContinuableFuture<T> asyncPatch(final Class<T> resultClass) {
+    //        return asyncExecute(HttpMethod.PATCH, resultClass);
+    //    }
+    //
+    //    /**
+    //     *
+    //     * @param <T>
+    //     * @param resultClass
+    //     * @param executor
+    //     * @return
+    //     */
+    //    public <T> ContinuableFuture<T> asyncPatch(final Class<T> resultClass, final Executor executor) {
+    //        return asyncExecute(HttpMethod.PATCH, resultClass, executor);
+    //    }
 
     /**
      *

@@ -25,6 +25,7 @@ import com.landawn.abacus.parser.JSONDeserializationConfig.JDC;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Sheet;
+import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.WD;
 
 // TODO: Auto-generated Javadoc
@@ -172,7 +173,7 @@ public class SheetType<R, C, E> extends AbstractType<Sheet<R, C, E>> {
      */
     @Override
     public Sheet<R, C, E> valueOf(String str) {
-        if (N.isNullOrEmpty(str)) {
+        if (Strings.isEmpty(str)) {
             return null;
         }
 

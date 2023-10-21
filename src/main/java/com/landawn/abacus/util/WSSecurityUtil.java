@@ -125,7 +125,7 @@ public final class WSSecurityUtil {
         N.copy(password, 0, b4, offset, password.length);
 
         byte[] digestBytes = generateDigest(b4);
-        return N.base64Encode(digestBytes);
+        return Strings.base64Encode(digestBytes);
     }
 
     /**

@@ -14,7 +14,7 @@ import java.sql.SQLException;
 import com.landawn.abacus.parser.SerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.IOUtil;
-import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.u.OptionalChar;
 
 /**
@@ -67,7 +67,7 @@ public class OptionalCharType extends AbstractOptionalType<OptionalChar> {
      */
     @Override
     public OptionalChar valueOf(String str) {
-        return N.isNullOrEmpty(str) ? OptionalChar.empty() : OptionalChar.of(N.parseChar(str));
+        return Strings.isEmpty(str) ? OptionalChar.empty() : OptionalChar.of(Strings.parseChar(str));
     }
 
     /**
@@ -83,7 +83,7 @@ public class OptionalCharType extends AbstractOptionalType<OptionalChar> {
 
         return obj == null ? OptionalChar.empty()
                 : OptionalChar.of(obj instanceof Character ? (Character) obj
-                        : (obj instanceof Integer ? (char) ((Integer) obj).intValue() : N.parseChar(obj.toString())));
+                        : (obj instanceof Integer ? (char) ((Integer) obj).intValue() : Strings.parseChar(obj.toString())));
     }
 
     /**
@@ -99,7 +99,7 @@ public class OptionalCharType extends AbstractOptionalType<OptionalChar> {
 
         return obj == null ? OptionalChar.empty()
                 : OptionalChar.of(obj instanceof Character ? (Character) obj
-                        : (obj instanceof Integer ? (char) ((Integer) obj).intValue() : N.parseChar(obj.toString())));
+                        : (obj instanceof Integer ? (char) ((Integer) obj).intValue() : Strings.parseChar(obj.toString())));
     }
 
     /**

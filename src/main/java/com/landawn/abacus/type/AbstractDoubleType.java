@@ -27,6 +27,7 @@ import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Numbers;
+import com.landawn.abacus.util.Strings;
 
 /**
  *
@@ -61,7 +62,7 @@ public abstract class AbstractDoubleType extends NumberType<Number> {
     @Override
     public Double valueOf(String str) {
         try {
-            return N.isNullOrEmpty(str) ? ((Double) defaultValue()) : Double.valueOf(str);
+            return Strings.isEmpty(str) ? ((Double) defaultValue()) : Double.valueOf(str);
         } catch (NumberFormatException e) {
             if (str.length() > 1) {
                 char ch = str.charAt(str.length() - 1);

@@ -201,7 +201,7 @@ public final class URLEncodedUtil {
     public static Map<String, String> decode(final String urlQuery, final Charset charset) {
         final Map<String, String> result = new LinkedHashMap<>();
 
-        if (N.isNullOrEmpty(urlQuery)) {
+        if (Strings.isEmpty(urlQuery)) {
             return result;
         }
 
@@ -255,7 +255,7 @@ public final class URLEncodedUtil {
         final BeanInfo beanInfo = ParserUtil.getBeanInfo(targetClass);
         final Object result = beanInfo.createBeanResult();
 
-        if (N.isNullOrEmpty(urlQuery)) {
+        if (Strings.isEmpty(urlQuery)) {
             return (T) beanInfo.finishBeanResult(result);
         }
 
@@ -318,7 +318,7 @@ public final class URLEncodedUtil {
             propInfo = beanInfo.getPropInfo(key);
             values = parameters.get(key);
 
-            if (N.isNullOrEmpty(values) || (values.length == 1 && N.isNullOrEmpty(values[0]))) {
+            if (N.isNullOrEmpty(values) || (values.length == 1 && Strings.isEmpty(values[0]))) {
                 propValue = propInfo.jsonXmlType.defaultValue();
             } else {
                 if (propInfo.jsonXmlType.clazz().equals(String[].class)) {

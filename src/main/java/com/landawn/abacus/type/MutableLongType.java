@@ -17,6 +17,7 @@ import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.MutableLong;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Numbers;
+import com.landawn.abacus.util.Strings;
 
 /**
  *
@@ -58,7 +59,7 @@ public class MutableLongType extends MutableType<MutableLong> {
      */
     @Override
     public MutableLong valueOf(String str) {
-        return N.isNullOrEmpty(str) ? null : MutableLong.of(Numbers.toLong(str));
+        return Strings.isEmpty(str) ? null : MutableLong.of(Numbers.toLong(str));
     }
 
     /**

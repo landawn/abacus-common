@@ -24,7 +24,7 @@ import java.sql.SQLException;
 
 import com.landawn.abacus.parser.SerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
-import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.Strings;
 
 /**
  *
@@ -66,7 +66,7 @@ public final class BigDecimalType extends NumberType<BigDecimal> {
      */
     @Override
     public BigDecimal valueOf(String str) {
-        return N.isNullOrEmpty(str) ? null : new BigDecimal(str, MathContext.UNLIMITED);
+        return Strings.isEmpty(str) ? null : new BigDecimal(str, MathContext.UNLIMITED);
     }
 
     /**

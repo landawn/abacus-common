@@ -24,6 +24,7 @@ import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Objectory;
+import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.Tuple;
 import com.landawn.abacus.util.Tuple.Tuple8;
 import com.landawn.abacus.util.WD;
@@ -150,7 +151,7 @@ public class Tuple8Type<T1, T2, T3, T4, T5, T6, T7, T8> extends AbstractType<Tup
     @SuppressWarnings({ "unchecked", "deprecation" })
     @Override
     public Tuple8<T1, T2, T3, T4, T5, T6, T7, T8> valueOf(String str) {
-        if (N.isNullOrEmpty(str)) {
+        if (Strings.isEmpty(str)) {
             return null;
         }
 

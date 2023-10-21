@@ -16,7 +16,7 @@ package com.landawn.abacus.type;
 
 import java.util.regex.Pattern;
 
-import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.Strings;
 
 /**
  *
@@ -58,6 +58,6 @@ public class PatternType extends AbstractType<Pattern> {
      */
     @Override
     public Pattern valueOf(String st) {
-        return (N.isNullOrEmpty(st)) ? null : Pattern.compile(st);
+        return (Strings.isEmpty(st)) ? null : Pattern.compile(st);
     }
 }

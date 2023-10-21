@@ -24,6 +24,7 @@ import com.landawn.abacus.parser.ParserUtil.PropInfo;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Numbers;
+import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.WD;
 import com.landawn.abacus.util.u.Nullable;
 import com.landawn.abacus.util.u.Optional;
@@ -537,7 +538,7 @@ class JSONStringReader extends AbstractJSONReader {
             if (type.isObjectType()) {
                 final String str = new String(nextChar > 0 ? N.copyOfRange(cbuf, 0, nextChar) : N.copyOfRange(strValue, startIndexForText, endIndexForText));
 
-                if (N.isNullOrEmpty(str)) {
+                if (Strings.isEmpty(str)) {
                     return (T) str;
                 }
 

@@ -14,8 +14,8 @@ import java.sql.SQLException;
 import com.landawn.abacus.parser.SerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.IOUtil;
-import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Numbers;
+import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.u.OptionalInt;
 
 /**
@@ -68,7 +68,7 @@ public class OptionalIntType extends AbstractOptionalType<OptionalInt> {
      */
     @Override
     public OptionalInt valueOf(String str) {
-        return N.isNullOrEmpty(str) ? OptionalInt.empty() : OptionalInt.of(Numbers.toInt(str));
+        return Strings.isEmpty(str) ? OptionalInt.empty() : OptionalInt.of(Numbers.toInt(str));
     }
 
     /**

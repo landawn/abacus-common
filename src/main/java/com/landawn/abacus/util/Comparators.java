@@ -40,33 +40,45 @@ import com.landawn.abacus.util.function.ToShortFunction;
  * @author haiyangl
  *
  */
-public abstract class Comparators {
+public final class Comparators {
 
     @SuppressWarnings("rawtypes")
-    static final Comparator<? extends Comparable> NULL_FIRST_COMPARATOR = (a, b) -> a == null ? (b == null ? 0 : -1) : (b == null ? 1 : a.compareTo(b));
+    static final Comparator<Comparable> NULL_FIRST_COMPARATOR = (a, b) -> a == null ? (b == null ? 0 : -1) : (b == null ? 1 : a.compareTo(b));
 
     @SuppressWarnings("rawtypes")
-    static final Comparator<? extends Comparable> NULL_LAST_COMPARATOR = (a, b) -> a == null ? (b == null ? 0 : 1) : (b == null ? -1 : a.compareTo(b));
+    static final Comparator<Comparable> NULL_FIRST_REVERSED_ORDER = (a, b) -> a == null ? (b == null ? 0 : -1) : (b == null ? 1 : b.compareTo(a));
+
+    @SuppressWarnings("rawtypes")
+    static final Comparator<Comparable> NULL_LAST_COMPARATOR = (a, b) -> a == null ? (b == null ? 0 : 1) : (b == null ? -1 : a.compareTo(b));
+
+    @SuppressWarnings("rawtypes")
+    static final Comparator<Comparable> NULL_LAST_REVERSED_ORDER = (a, b) -> a == null ? (b == null ? 0 : 1) : (b == null ? -1 : b.compareTo(a));
 
     @SuppressWarnings("rawtypes")
     static final Comparator NATURAL_ORDER = NULL_FIRST_COMPARATOR;
 
+    // It's reversed order of NATURAL_ORDER and null last
     @SuppressWarnings("rawtypes")
-    static final Comparator REVERSED_ORDER = Collections.reverseOrder(NATURAL_ORDER);
-
-    static final Comparator<String> COMPARING_IGNORE_CASE = N::compareIgnoreCase;
-
-    static final Comparator<CharSequence> COMPARING_BY_LENGTH = (a, b) -> (a == null ? 0 : a.length()) - (b == null ? 0 : b.length());
-
-    @SuppressWarnings("rawtypes")
-    static final Comparator<Collection> COMPARING_BY_SIZE = (a, b) -> (a == null ? 0 : a.size()) - (b == null ? 0 : b.size());
-
-    @SuppressWarnings("rawtypes")
-    static final Comparator<Map> COMPARING_BY_MAP_SIZE = (a, b) -> (a == null ? 0 : a.size()) - (b == null ? 0 : b.size());
-
-    Comparators() {
-        // Singleton
+    static final Comparator REVERSED_ORDER;
+    static {
+        //  Collections.reverseOrder(NATURAL_ORDER);
+        // It's reversed order of NATURAL_ORDER and null last
+        final Comparator<? extends Comparable<Object>> reversedOrder = (a, b) -> a == null ? (b == null ? 0 : 1) : (b == null ? -1 : b.compareTo(a));
+        REVERSED_ORDER = reversedOrder;
     }
+
+    static final Comparator<String> COMPARING_IGNORE_CASE = (a, b) -> a == null ? (b == null ? 0 : -1) : (b == null ? 1 : a.compareToIgnoreCase(b));
+
+    static final Comparator<CharSequence> COMPARING_BY_LENGTH = (a, b) -> Integer.compare(a == null ? 0 : a.length(), b == null ? 0 : b.length());
+
+    static final Comparator<Object> COMPARING_BY_ARRAY_LENGTH = (a, b) -> Integer.compare(a == null ? 0 : Array.getLength(a),
+            b == null ? 0 : Array.getLength(b));
+
+    @SuppressWarnings("rawtypes")
+    static final Comparator<Collection> COMPARING_BY_SIZE = (a, b) -> Integer.compare(a == null ? 0 : a.size(), b == null ? 0 : b.size());
+
+    @SuppressWarnings("rawtypes")
+    static final Comparator<Map> COMPARING_BY_MAP_SIZE = (a, b) -> Integer.compare(a == null ? 0 : a.size(), b == null ? 0 : b.size());
 
     public static final Comparator<boolean[]> BOOLEAN_ARRAY_COMPARATOR = (a, b) -> {
         final int lenA = N.len(a);
@@ -78,7 +90,7 @@ public abstract class Comparators {
             }
         }
 
-        return N.compare(lenA, lenB);
+        return NATURAL_ORDER.compare(lenA, lenB);
     };
 
     public static final Comparator<char[]> CHAR_ARRAY_COMPARATOR = (a, b) -> {
@@ -91,7 +103,7 @@ public abstract class Comparators {
             }
         }
 
-        return N.compare(lenA, lenB);
+        return NATURAL_ORDER.compare(lenA, lenB);
     };
 
     public static final Comparator<byte[]> BYTE_ARRAY_COMPARATOR = (a, b) -> {
@@ -104,7 +116,7 @@ public abstract class Comparators {
             }
         }
 
-        return N.compare(lenA, lenB);
+        return NATURAL_ORDER.compare(lenA, lenB);
     };
 
     public static final Comparator<short[]> SHORT_ARRAY_COMPARATOR = (a, b) -> {
@@ -117,7 +129,7 @@ public abstract class Comparators {
             }
         }
 
-        return N.compare(lenA, lenB);
+        return NATURAL_ORDER.compare(lenA, lenB);
     };
 
     public static final Comparator<int[]> INT_ARRAY_COMPARATOR = (a, b) -> {
@@ -130,7 +142,7 @@ public abstract class Comparators {
             }
         }
 
-        return N.compare(lenA, lenB);
+        return NATURAL_ORDER.compare(lenA, lenB);
     };
 
     public static final Comparator<long[]> LONG_ARRAY_COMPARATOR = (a, b) -> {
@@ -143,7 +155,7 @@ public abstract class Comparators {
             }
         }
 
-        return N.compare(lenA, lenB);
+        return NATURAL_ORDER.compare(lenA, lenB);
     };
 
     public static final Comparator<float[]> FLOAT_ARRAY_COMPARATOR = (a, b) -> {
@@ -159,7 +171,7 @@ public abstract class Comparators {
             }
         }
 
-        return N.compare(lenA, lenB);
+        return NATURAL_ORDER.compare(lenA, lenB);
     };
 
     public static final Comparator<double[]> DOUBLE_ARRAY_COMPARATOR = (a, b) -> {
@@ -175,7 +187,7 @@ public abstract class Comparators {
             }
         }
 
-        return N.compare(lenA, lenB);
+        return NATURAL_ORDER.compare(lenA, lenB);
     };
 
     public static final Comparator<Object[]> OBJECT_ARRAY_COMPARATOR = (a, b) -> {
@@ -191,7 +203,7 @@ public abstract class Comparators {
             }
         }
 
-        return N.compare(lenA, lenB);
+        return NATURAL_ORDER.compare(lenA, lenB);
     };
 
     @SuppressWarnings("rawtypes")
@@ -217,14 +229,19 @@ public abstract class Comparators {
             }
         }
 
-        return N.compare(lenA, lenB);
+        return NATURAL_ORDER.compare(lenA, lenB);
     };
 
+    private Comparators() {
+        // Utility class.
+    }
+
     /**
-     * Same as {@code nullsFirst}.
+     * Same as {@code nullsFirst()}.
      *
      * @param <T>
-     * @return {@link #nullsFirst()}
+     * @return
+     * @see #nullsFirst()
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public static <T extends Comparable> Comparator<T> naturalOrder() {
@@ -232,35 +249,11 @@ public abstract class Comparators {
     }
 
     /**
+     * Same as {@code naturalOrder()}.
      *
      * @param <T>
      * @return
-     */
-    @SuppressWarnings("rawtypes")
-    public static <T extends Comparable> Comparator<T> reverseOrder() {
-        return REVERSED_ORDER;
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param cmp
-     * @return
-     */
-    public static <T> Comparator<T> reverseOrder(final Comparator<T> cmp) {
-        if (cmp == null || cmp == NATURAL_ORDER) {
-            return REVERSED_ORDER;
-        } else if (cmp == REVERSED_ORDER) {
-            return NATURAL_ORDER;
-        }
-
-        return Collections.reverseOrder(cmp);
-    }
-
-    /**
-     *
-     * @param <T>
-     * @return
+     * @see #naturalOrder()
      */
     @SuppressWarnings("rawtypes")
     public static <T extends Comparable> Comparator<T> nullsFirst() {
@@ -340,7 +333,9 @@ public abstract class Comparators {
     public static <T> Comparator<u.Optional<T>> emptiesFirst(final Comparator<? super T> cmp) {
         N.checkArgNotNull(cmp);
 
-        return Comparators.<u.Optional<T>, T> comparingBy(o -> o.orElse(null), Comparator.nullsFirst(cmp));
+        // return Comparators.<u.Optional<T>, T> comparingBy(o -> o.orElse(null), Comparator.nullsFirst(cmp));
+
+        return (a, b) -> a.isEmpty() ? (b.isEmpty() ? 0 : -1) : (b.isEmpty() ? 1 : cmp.compare(a.get(), b.get()));
     }
 
     /**
@@ -352,92 +347,25 @@ public abstract class Comparators {
     public static <T> Comparator<u.Optional<T>> emptiesLast(final Comparator<? super T> cmp) {
         N.checkArgNotNull(cmp);
 
-        return Comparators.<u.Optional<T>, T> comparingBy(o -> o.orElse(null), Comparator.nullsLast(cmp));
+        // return Comparators.<u.Optional<T>, T> comparingBy(o -> o.orElse(null), Comparator.nullsLast(cmp));
+
+        return (a, b) -> a.isEmpty() ? (b.isEmpty() ? 0 : 1) : (b.isEmpty() ? -1 : cmp.compare(a.get(), b.get()));
     }
 
     /**
+     * Comparing the key/value extracted by {@code keyMapper} by {@code nullsFirst()} comparator.
      *
      * @param <T>
      * @param <U>
      * @param keyMapper
      * @return
+     * @see #naturalOrder()
+     * @see #nullsFirst()
      */
     public static <T, U extends Comparable<? super U>> Comparator<T> comparingBy(final Function<? super T, ? extends U> keyMapper) {
         N.checkArgNotNull(keyMapper);
 
-        return (a, b) -> N.compare(keyMapper.apply(a), keyMapper.apply(b));
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param <U>
-     * @param keyMapper
-     * @return
-     */
-    @Beta
-    public static <T, U extends Comparable<? super U>> Comparator<T> comparingByIfNotNullOrElseNullsFirst(final Function<? super T, ? extends U> keyMapper) {
-        N.checkArgNotNull(keyMapper);
-
-        return (a, b) -> a == null ? (b == null ? 0 : -1) : (b == null ? 1 : N.compare(keyMapper.apply(a), keyMapper.apply(b)));
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param <U>
-     * @param keyMapper
-     * @return
-     */
-    @Beta
-    public static <T, U extends Comparable<? super U>> Comparator<T> comparingByIfNotNullOrElseNullsLast(final Function<? super T, ? extends U> keyMapper) {
-        N.checkArgNotNull(keyMapper);
-
-        return (a, b) -> a == null ? (b == null ? 0 : 1) : (b == null ? -1 : N.compare(keyMapper.apply(a), keyMapper.apply(b)));
-    }
-
-    /**
-     * Reversed comparing by.
-     *
-     * @param <T>
-     * @param <U>
-     * @param keyMapper
-     * @return
-     */
-    public static <T, U extends Comparable<? super U>> Comparator<T> reversedComparingBy(final Function<? super T, ? extends U> keyMapper) {
-        N.checkArgNotNull(keyMapper);
-
-        return (a, b) -> N.compare(keyMapper.apply(b), keyMapper.apply(a));
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param <U>
-     * @param keyMapper
-     * @return
-     */
-    @Beta
-    public static <T, U extends Comparable<? super U>> Comparator<T> reversedComparingByIfNotNullOrElseNullsFirst(
-            final Function<? super T, ? extends U> keyMapper) {
-        N.checkArgNotNull(keyMapper);
-
-        return (a, b) -> a == null ? (b == null ? 0 : -1) : (b == null ? 1 : N.compare(keyMapper.apply(b), keyMapper.apply(a)));
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param <U>
-     * @param keyMapper
-     * @return
-     */
-    @Beta
-    public static <T, U extends Comparable<? super U>> Comparator<T> reversedComparingByIfNotNullOrElseNullsLast(
-            final Function<? super T, ? extends U> keyMapper) {
-        N.checkArgNotNull(keyMapper);
-
-        return (a, b) -> a == null ? (b == null ? 0 : 1) : (b == null ? -1 : N.compare(keyMapper.apply(b), keyMapper.apply(a)));
+        return (a, b) -> NATURAL_ORDER.compare(keyMapper.apply(a), keyMapper.apply(b));
     }
 
     /**
@@ -453,6 +381,40 @@ public abstract class Comparators {
         N.checkArgNotNull(keyComparator);
 
         return (a, b) -> keyComparator.compare(keyMapper.apply(a), keyMapper.apply(b));
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param <U>
+     * @param keyMapper
+     * @return
+     */
+    @Beta
+    public static <T, U extends Comparable<? super U>> Comparator<T> comparingByIfNotNullOrElseNullsFirst(final Function<? super T, ? extends U> keyMapper) {
+        N.checkArgNotNull(keyMapper);
+
+        @SuppressWarnings("rawtypes")
+        final Comparator<U> cmp = (Comparator) NULL_FIRST_COMPARATOR;
+
+        return (a, b) -> a == null ? (b == null ? 0 : -1) : (b == null ? 1 : cmp.compare(keyMapper.apply(a), keyMapper.apply(b)));
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param <U>
+     * @param keyMapper
+     * @return
+     */
+    @Beta
+    public static <T, U extends Comparable<? super U>> Comparator<T> comparingByIfNotNullOrElseNullsLast(final Function<? super T, ? extends U> keyMapper) {
+        N.checkArgNotNull(keyMapper);
+
+        @SuppressWarnings("rawtypes")
+        final Comparator<U> cmp = (Comparator) NULL_LAST_COMPARATOR;
+
+        return (a, b) -> a == null ? (b == null ? 0 : 1) : (b == null ? -1 : cmp.compare(keyMapper.apply(a), keyMapper.apply(b)));
     }
 
     /**
@@ -570,7 +532,7 @@ public abstract class Comparators {
     public static <T> Comparator<T> comparingIgnoreCase(final Function<? super T, String> keyMapper) {
         N.checkArgNotNull(keyMapper);
 
-        return (a, b) -> N.compareIgnoreCase(keyMapper.apply(a), keyMapper.apply(b));
+        return (a, b) -> COMPARING_IGNORE_CASE.compare(keyMapper.apply(a), keyMapper.apply(b));
     }
 
     /**
@@ -581,18 +543,7 @@ public abstract class Comparators {
      * @return
      */
     public static <K extends Comparable<? super K>, V> Comparator<Map.Entry<K, V>> comparingByKey() {
-        return (a, b) -> N.compare(a.getKey(), b.getKey());
-    }
-
-    /**
-     * Reversed comparing by key.
-     *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @return
-     */
-    public static <K extends Comparable<? super K>, V> Comparator<Map.Entry<K, V>> reversedComparingByKey() {
-        return (a, b) -> N.compare(b.getKey(), a.getKey());
+        return (a, b) -> NATURAL_ORDER.compare(a.getKey(), b.getKey());
     }
 
     /**
@@ -603,18 +554,7 @@ public abstract class Comparators {
      * @return
      */
     public static <K, V extends Comparable<? super V>> Comparator<Map.Entry<K, V>> comparingByValue() {
-        return (a, b) -> N.compare(a.getValue(), b.getValue());
-    }
-
-    /**
-     * Reversed comparing by value.
-     *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @return
-     */
-    public static <K, V extends Comparable<? super V>> Comparator<Map.Entry<K, V>> reversedComparingByValue() {
-        return (a, b) -> N.compare(b.getValue(), a.getValue());
+        return (a, b) -> NATURAL_ORDER.compare(a.getValue(), b.getValue());
     }
 
     /**
@@ -646,36 +586,6 @@ public abstract class Comparators {
     }
 
     /**
-     * Reversed comparing by key.
-     *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param cmp
-     * @return
-     */
-    @Beta
-    public static <K, V> Comparator<Map.Entry<K, V>> reversedComparingByKey(final Comparator<? super K> cmp) {
-        N.checkArgNotNull(cmp);
-
-        return (a, b) -> cmp.compare(b.getKey(), a.getKey());
-    }
-
-    /**
-     * Reversed comparing by value.
-     *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param cmp
-     * @return
-     */
-    @Beta
-    public static <K, V> Comparator<Map.Entry<K, V>> reversedComparingByValue(final Comparator<? super V> cmp) {
-        N.checkArgNotNull(cmp);
-
-        return (a, b) -> cmp.compare(b.getValue(), a.getValue());
-    }
-
-    /**
      * Comparing by length.
      *
      * @param <T>
@@ -684,8 +594,6 @@ public abstract class Comparators {
     public static <T extends CharSequence> Comparator<T> comparingByLength() {
         return (Comparator<T>) COMPARING_BY_LENGTH;
     }
-
-    static final Comparator<Object> COMPARING_BY_ARRAY_LENGTH = (a, b) -> (a == null ? 0 : Array.getLength(a)) - (b == null ? 0 : Array.getLength(b));
 
     /**
      * Comparing by array length.
@@ -768,7 +676,7 @@ public abstract class Comparators {
                 }
             }
 
-            return N.compare(lenA, lenB);
+            return Integer.compare(lenA, lenB);
         };
     }
 
@@ -805,7 +713,34 @@ public abstract class Comparators {
                 }
             }
 
-            return N.compare(sizeA, sizeB);
+            return Integer.compare(sizeA, sizeB);
+        };
+    }
+
+    public static <T, C extends Iterable<T>> Comparator<C> comparingIterable(final Comparator<? super T> cmp) {
+        N.checkArgNotNull(cmp);
+
+        return (a, b) -> {
+            final Iterator<T> iterA = N.iterate(a);
+            final Iterator<T> iterB = N.iterate(b);
+
+            if (N.isNullOrEmpty(iterA)) {
+                return N.isNullOrEmpty(iterB) ? 0 : -1;
+            } else if (N.isNullOrEmpty(iterB)) {
+                return 1;
+            }
+
+            int result = 0;
+
+            while (iterA.hasNext() && iterB.hasNext()) {
+                result = cmp.compare(iterA.next(), iterB.next());
+
+                if (result != 0) {
+                    return result;
+                }
+            }
+
+            return iterA.hasNext() ? 1 : (iterB.hasNext() ? -1 : 0);
         };
     }
 
@@ -842,5 +777,137 @@ public abstract class Comparators {
 
             return iterA.hasNext() ? 1 : (iterB.hasNext() ? -1 : 0);
         };
+    }
+
+    /**
+     *
+     * @param <T>
+     * @return
+     */
+    @SuppressWarnings("rawtypes")
+    public static <T extends Comparable> Comparator<T> reverseOrder() {
+        return REVERSED_ORDER;
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param cmp
+     * @return
+     */
+    public static <T> Comparator<T> reverseOrder(final Comparator<T> cmp) {
+        if (cmp == null || cmp == NATURAL_ORDER) {
+            return REVERSED_ORDER;
+        } else if (cmp == REVERSED_ORDER) {
+            return NATURAL_ORDER;
+        }
+
+        return Collections.reverseOrder(cmp);
+    }
+
+    /**
+     * Reversed comparing by.
+     *
+     * @param <T>
+     * @param <U>
+     * @param keyMapper
+     * @return
+     */
+    public static <T, U extends Comparable<? super U>> Comparator<T> reversedComparingBy(final Function<? super T, ? extends U> keyMapper) {
+        N.checkArgNotNull(keyMapper);
+
+        return (a, b) -> REVERSED_ORDER.compare(keyMapper.apply(a), keyMapper.apply(b));
+    }
+
+    /**
+     * Reversed comparing by key.
+     *
+     * @param <K> the key type
+     * @param <V> the value type
+     * @return
+     */
+    public static <K extends Comparable<? super K>, V> Comparator<Map.Entry<K, V>> reversedComparingByKey() {
+        return (a, b) -> REVERSED_ORDER.compare(a.getKey(), b.getKey());
+    }
+
+    /**
+     * Reversed comparing by value.
+     *
+     * @param <K> the key type
+     * @param <V> the value type
+     * @return
+     */
+    public static <K, V extends Comparable<? super V>> Comparator<Map.Entry<K, V>> reversedComparingByValue() {
+        return (a, b) -> REVERSED_ORDER.compare(a.getValue(), b.getValue());
+    }
+
+    /**
+     * Reversed comparing by key.
+     *
+     * @param <K> the key type
+     * @param <V> the value type
+     * @param cmp
+     * @return
+     */
+    @Beta
+    public static <K, V> Comparator<Map.Entry<K, V>> reversedComparingByKey(final Comparator<? super K> cmp) {
+        N.checkArgNotNull(cmp);
+
+        final Comparator<? super K> reversedOrder = reverseOrder(cmp);
+
+        return (a, b) -> reversedOrder.compare(a.getKey(), b.getKey());
+    }
+
+    /**
+     * Reversed comparing by value.
+     *
+     * @param <K> the key type
+     * @param <V> the value type
+     * @param cmp
+     * @return
+     */
+    @Beta
+    public static <K, V> Comparator<Map.Entry<K, V>> reversedComparingByValue(final Comparator<? super V> cmp) {
+        N.checkArgNotNull(cmp);
+
+        final Comparator<? super V> reversedOrder = reverseOrder(cmp);
+
+        return (a, b) -> reversedOrder.compare(a.getValue(), b.getValue());
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param <U>
+     * @param keyMapper
+     * @return
+     */
+    @Beta
+    public static <T, U extends Comparable<? super U>> Comparator<T> reversedComparingByIfNotNullOrElseNullsFirst(
+            final Function<? super T, ? extends U> keyMapper) {
+        N.checkArgNotNull(keyMapper);
+
+        @SuppressWarnings("rawtypes")
+        final Comparator<U> cmp = (Comparator) NULL_FIRST_REVERSED_ORDER;
+
+        return (a, b) -> a == null ? (b == null ? 0 : -1) : (b == null ? 1 : cmp.compare(keyMapper.apply(a), keyMapper.apply(b)));
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param <U>
+     * @param keyMapper
+     * @return
+     */
+    @Beta
+    public static <T, U extends Comparable<? super U>> Comparator<T> reversedComparingByIfNotNullOrElseNullsLast(
+            final Function<? super T, ? extends U> keyMapper) {
+        N.checkArgNotNull(keyMapper);
+
+        @SuppressWarnings("rawtypes")
+        final Comparator<U> cmp = (Comparator) NULL_LAST_REVERSED_ORDER;
+
+        return (a, b) -> a == null ? (b == null ? 0 : 1) : (b == null ? -1 : cmp.compare(keyMapper.apply(a), keyMapper.apply(b)));
     }
 }

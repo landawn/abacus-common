@@ -15,8 +15,8 @@ import java.util.OptionalLong;
 import com.landawn.abacus.parser.SerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.IOUtil;
-import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Numbers;
+import com.landawn.abacus.util.Strings;
 
 /**
  *
@@ -68,7 +68,7 @@ public class JdkOptionalLongType extends AbstractOptionalType<OptionalLong> {
      */
     @Override
     public OptionalLong valueOf(String str) {
-        return N.isNullOrEmpty(str) ? OptionalLong.empty() : OptionalLong.of(Numbers.toLong(str));
+        return Strings.isEmpty(str) ? OptionalLong.empty() : OptionalLong.of(Numbers.toLong(str));
     }
 
     /**

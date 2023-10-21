@@ -15,6 +15,7 @@ import com.landawn.abacus.parser.SerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.MutableBoolean;
 import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.Strings;
 
 /**
  *
@@ -66,7 +67,7 @@ public class MutableBooleanType extends MutableType<MutableBoolean> {
      */
     @Override
     public MutableBoolean valueOf(String str) {
-        return N.isNullOrEmpty(str) ? null : MutableBoolean.of(N.parseBoolean(str));
+        return Strings.isEmpty(str) ? null : MutableBoolean.of(Strings.parseBoolean(str));
     }
 
     /**

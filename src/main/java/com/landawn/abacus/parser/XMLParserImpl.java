@@ -54,6 +54,7 @@ import com.landawn.abacus.util.MapEntity;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.NamingPolicy;
 import com.landawn.abacus.util.Objectory;
+import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.WD;
 import com.landawn.abacus.util.XMLUtil;
 
@@ -84,7 +85,7 @@ final class XMLParserImpl extends AbstractXMLParser {
     @Override
     public String serialize(final Object obj, final XMLSerializationConfig config) {
         if (obj == null) {
-            return N.EMPTY_STRING;
+            return Strings.EMPTY_STRING;
         }
 
         final BufferedXMLWriter bw = Objectory.createBufferedXMLWriter();
@@ -184,7 +185,7 @@ final class XMLParserImpl extends AbstractXMLParser {
         final XMLSerializationConfig configToUse = check(config);
 
         if (obj == null) {
-            IOUtil.write(bw, N.EMPTY_STRING);
+            IOUtil.write(bw, Strings.EMPTY_STRING);
             return;
         }
 
@@ -286,7 +287,7 @@ final class XMLParserImpl extends AbstractXMLParser {
             }
         }
 
-        final String propIndentation = isPrettyFormat ? ((indentation == null ? N.EMPTY_STRING : indentation) + config.getIndentation()) : null;
+        final String propIndentation = isPrettyFormat ? ((indentation == null ? Strings.EMPTY_STRING : indentation) + config.getIndentation()) : null;
 
         writeProperties(bw, type, obj, config, propIndentation, serializedObjects);
 
@@ -324,16 +325,19 @@ final class XMLParserImpl extends AbstractXMLParser {
         final Class<?> cls = type.clazz();
         final BeanInfo beanInfo = ParserUtil.getBeanInfo(cls);
 
+        final Exclusion exlusion = getExclusion(config, beanInfo);
+
+        final boolean ignoreNullProperty = (exlusion == Exclusion.NULL) || (exlusion == Exclusion.DEFAULT);
+        final boolean ignoreDefaultProperty = (exlusion == Exclusion.DEFAULT);
+
         final Collection<String> ignoredClassPropNames = config.getIgnoredPropNames(cls);
-        final boolean ignoreNullProperty = (config.getExclusion() == Exclusion.NULL) || (config.getExclusion() == Exclusion.DEFAULT);
-        final boolean ignoreDefaultProperty = (config.getExclusion() == Exclusion.DEFAULT);
         final boolean tagByPropertyName = config.tagByPropertyName();
         final boolean ignoreTypeInfo = config.ignoreTypeInfo();
         final boolean isPrettyFormat = config.prettyFormat();
         final NamingPolicy jsonXmlNamingPolicy = config.getPropNamingPolicy() == null ? beanInfo.jsonXmlNamingPolicy : config.getPropNamingPolicy();
         final int nameTagIdx = jsonXmlNamingPolicy.ordinal();
 
-        final String nextIndentation = isPrettyFormat ? ((propIndentation == null ? N.EMPTY_STRING : propIndentation) + config.getIndentation()) : null;
+        final String nextIndentation = isPrettyFormat ? ((propIndentation == null ? Strings.EMPTY_STRING : propIndentation) + config.getIndentation()) : null;
         final PropInfo[] propInfoList = config.skipTransientField() ? beanInfo.nonTransientSeriPropInfos : beanInfo.jsonXmlSerializablePropInfos;
         PropInfo propInfo = null;
         String propName = null;
@@ -439,7 +443,7 @@ final class XMLParserImpl extends AbstractXMLParser {
             bw.write(XMLConstants.CLOSE_ATTR_AND_ELE);
         }
 
-        final String propIndentation = isPrettyFormat ? ((indentation == null ? N.EMPTY_STRING : indentation) + config.getIndentation()) : null;
+        final String propIndentation = isPrettyFormat ? ((indentation == null ? Strings.EMPTY_STRING : indentation) + config.getIndentation()) : null;
         final String nextIndentation = propIndentation + config.getIndentation();
 
         String strKey = null;
@@ -545,7 +549,7 @@ final class XMLParserImpl extends AbstractXMLParser {
             bw.write(XMLConstants.CLOSE_ATTR_AND_ELE);
         }
 
-        final String propIndentation = isPrettyFormat ? ((indentation == null ? N.EMPTY_STRING : indentation) + config.getIndentation()) : null;
+        final String propIndentation = isPrettyFormat ? ((indentation == null ? Strings.EMPTY_STRING : indentation) + config.getIndentation()) : null;
         final String nextIndentation = propIndentation + config.getIndentation();
 
         Object value = null;
@@ -644,7 +648,7 @@ final class XMLParserImpl extends AbstractXMLParser {
             bw.write(XMLConstants.CLOSE_ATTR_AND_ELE);
         }
 
-        final String nextIndentation = isPrettyFormat ? ((indentation == null ? N.EMPTY_STRING : indentation) + config.getIndentation()) : null;
+        final String nextIndentation = isPrettyFormat ? ((indentation == null ? Strings.EMPTY_STRING : indentation) + config.getIndentation()) : null;
         final Object[] a = (Object[]) obj;
         final boolean isSerializableByJSON = isSerializableByJSON(a);
 
@@ -724,7 +728,7 @@ final class XMLParserImpl extends AbstractXMLParser {
             }
         }
 
-        final String nextIndentation = isPrettyFormat ? ((indentation == null ? N.EMPTY_STRING : indentation) + config.getIndentation()) : null;
+        final String nextIndentation = isPrettyFormat ? ((indentation == null ? Strings.EMPTY_STRING : indentation) + config.getIndentation()) : null;
         final boolean isSerializableByJSON = isSerializableByJSON(c);
 
         if (isSerializableByJSON) {
@@ -923,7 +927,7 @@ final class XMLParserImpl extends AbstractXMLParser {
      */
     @Override
     public <T> T deserialize(Class<? extends T> targetClass, String st, final XMLDeserializationConfig config) {
-        if (N.isNullOrEmpty(st)) {
+        if (Strings.isEmpty(st)) {
             return N.defaultValueOf(targetClass);
         }
 
@@ -1052,7 +1056,7 @@ final class XMLParserImpl extends AbstractXMLParser {
         if (N.notNullOrEmpty(nodeClasses)) {
             String nodeName = XMLUtil.getAttribute(node, XMLConstants.NAME);
 
-            if (N.isNullOrEmpty(nodeName)) {
+            if (Strings.isEmpty(nodeName)) {
                 nodeName = node.getNodeName();
             }
 
@@ -1095,7 +1099,7 @@ final class XMLParserImpl extends AbstractXMLParser {
                             nodeName = xmlReader.getAttributeValue(null, XMLConstants.NAME);
                         }
 
-                        if (N.isNullOrEmpty(nodeName)) {
+                        if (Strings.isEmpty(nodeName)) {
                             nodeName = xmlReader.getLocalName();
                         }
 
@@ -1121,7 +1125,7 @@ final class XMLParserImpl extends AbstractXMLParser {
                     if (targetClass == null && N.notNullOrEmpty(nodeClasses)) {
                         String nodeName = XMLUtil.getAttribute(node, XMLConstants.NAME);
 
-                        if (N.isNullOrEmpty(nodeName)) {
+                        if (Strings.isEmpty(nodeName)) {
                             nodeName = node.getNodeName();
                         }
 
@@ -1980,7 +1984,7 @@ final class XMLParserImpl extends AbstractXMLParser {
                     nodeName = isTagByPropertyName ? node.getNodeName() : XMLUtil.getAttribute(node, XMLConstants.NAME);
                 } else {
                     String nameAttr = XMLUtil.getAttribute(node, XMLConstants.NAME);
-                    nodeName = N.notNullOrEmpty(nameAttr) ? nameAttr : node.getNodeName();
+                    nodeName = Strings.isNotEmpty(nameAttr) ? nameAttr : node.getNodeName();
                 }
 
                 targetClass = hasPropTypes && configToUse.hasPropType(nodeName) ? configToUse.getPropType(nodeName).clazz() : null;
@@ -2024,8 +2028,8 @@ final class XMLParserImpl extends AbstractXMLParser {
                     }
 
                     if (!checkedAttr) {
-                        isTagByPropertyName = N.isNullOrEmpty(XMLUtil.getAttribute(propNode, XMLConstants.NAME));
-                        ignoreTypeInfo = N.isNullOrEmpty(XMLUtil.getAttribute(propNode, XMLConstants.TYPE));
+                        isTagByPropertyName = Strings.isEmpty(XMLUtil.getAttribute(propNode, XMLConstants.NAME));
+                        ignoreTypeInfo = Strings.isEmpty(XMLUtil.getAttribute(propNode, XMLConstants.TYPE));
                         checkedAttr = true;
                     }
 
@@ -2105,8 +2109,8 @@ final class XMLParserImpl extends AbstractXMLParser {
                     }
 
                     if (!checkedAttr) {
-                        isTagByPropertyName = N.isNullOrEmpty(XMLUtil.getAttribute(propNode, XMLConstants.NAME));
-                        ignoreTypeInfo = N.isNullOrEmpty(XMLUtil.getAttribute(propNode, XMLConstants.TYPE));
+                        isTagByPropertyName = Strings.isEmpty(XMLUtil.getAttribute(propNode, XMLConstants.NAME));
+                        ignoreTypeInfo = Strings.isEmpty(XMLUtil.getAttribute(propNode, XMLConstants.TYPE));
                         checkedAttr = true;
                     }
 
@@ -2165,8 +2169,8 @@ final class XMLParserImpl extends AbstractXMLParser {
                     }
 
                     if (!checkedAttr) {
-                        isTagByPropertyName = N.isNullOrEmpty(XMLUtil.getAttribute(propNode, XMLConstants.NAME));
-                        ignoreTypeInfo = N.isNullOrEmpty(XMLUtil.getAttribute(propNode, XMLConstants.TYPE));
+                        isTagByPropertyName = Strings.isEmpty(XMLUtil.getAttribute(propNode, XMLConstants.NAME));
+                        ignoreTypeInfo = Strings.isEmpty(XMLUtil.getAttribute(propNode, XMLConstants.TYPE));
                         checkedAttr = true;
                     }
 
@@ -2231,8 +2235,8 @@ final class XMLParserImpl extends AbstractXMLParser {
                         }
 
                         if (!checkedAttr) {
-                            isTagByPropertyName = N.isNullOrEmpty(XMLUtil.getAttribute(eleNode, XMLConstants.NAME));
-                            ignoreTypeInfo = N.isNullOrEmpty(XMLUtil.getAttribute(eleNode, XMLConstants.TYPE));
+                            isTagByPropertyName = Strings.isEmpty(XMLUtil.getAttribute(eleNode, XMLConstants.NAME));
+                            ignoreTypeInfo = Strings.isEmpty(XMLUtil.getAttribute(eleNode, XMLConstants.TYPE));
                             checkedAttr = true;
                         }
 
@@ -2294,8 +2298,8 @@ final class XMLParserImpl extends AbstractXMLParser {
                     }
 
                     if (!checkedAttr) {
-                        isTagByPropertyName = N.isNullOrEmpty(XMLUtil.getAttribute(eleNode, XMLConstants.NAME));
-                        ignoreTypeInfo = N.isNullOrEmpty(XMLUtil.getAttribute(eleNode, XMLConstants.TYPE));
+                        isTagByPropertyName = Strings.isEmpty(XMLUtil.getAttribute(eleNode, XMLConstants.NAME));
+                        ignoreTypeInfo = Strings.isEmpty(XMLUtil.getAttribute(eleNode, XMLConstants.TYPE));
                         checkedAttr = true;
                     }
 

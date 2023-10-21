@@ -1413,7 +1413,7 @@ public final class Iterators {
      */
     @SuppressWarnings("rawtypes")
     public static <T extends Comparable> ObjIterator<T> mergeSorted(final Iterator<? extends T> a, final Iterator<? extends T> b) {
-        return mergeSorted(a, b, Comparators.<T> naturalOrder());
+        return mergeSorted(a, b, N.NATURAL_COMPARATOR);
     }
 
     /**
@@ -1439,7 +1439,7 @@ public final class Iterators {
      */
     @SuppressWarnings("rawtypes")
     public static <T extends Comparable> ObjIterator<T> mergeSorted(final Iterable<? extends T> a, final Iterable<? extends T> b) {
-        return mergeSorted(a, b, Comparators.<T> naturalOrder());
+        return mergeSorted(a, b, N.NATURAL_COMPARATOR);
     }
 
     /**

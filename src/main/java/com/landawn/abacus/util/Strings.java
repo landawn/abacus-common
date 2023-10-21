@@ -21,6 +21,8 @@ import static com.landawn.abacus.util.WD._QUOTATION_S;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -34,6 +36,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
 import java.util.RandomAccess;
+import java.util.UUID;
 import java.util.function.IntUnaryOperator;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
@@ -170,6 +173,26 @@ public abstract class Strings {
     }
 
     /**
+     * Returns the UUID without '-'.
+     *
+     * @return
+     * @see UUID#randomUUID().
+     */
+    public static String guid() {
+        return uuid().replace("-", "");
+    }
+
+    /**
+     * Returns an UUID.
+     *
+     * @return
+     * @see UUID#randomUUID().
+     */
+    public static String uuid() {
+        return UUID.randomUUID().toString();
+    }
+
+    /**
      * Returns the string representation of the {@code char} array or null.
      *
      * @param value the character array.
@@ -197,22 +220,21 @@ public abstract class Strings {
     }
 
     /**
-     * Same as {@code N.isNullOrEmpty(CharSequence)}.
+     * Checks if the specified {@code CharSequence} is null or empty.
      *
      * @param cs
      * @return
-     * @see N#isNullOrEmpty(CharSequence)
      */
     public static boolean isEmpty(final CharSequence cs) {
         return (cs == null) || (cs.length() == 0);
     }
 
     /**
-     * Same as {@code N.isBlank(CharSequence)}.
+     * Checks if the specified {@code CharSequence} is null or blank.
+     *
      *
      * @param cs
      * @return
-     * @see N#isBlank(CharSequence)
      */
     public static boolean isBlank(final CharSequence cs) {
         if (isEmpty(cs)) {
@@ -229,24 +251,40 @@ public abstract class Strings {
     }
 
     /**
-     * Same as {@code N.notNullOrEmpty(CharSequence)}.
      *
      * @param cs
      * @return
-     * @see N#notNullOrEmpty(CharSequence)
      */
     public static boolean isNotEmpty(final CharSequence cs) {
         return (cs != null) && (cs.length() > 0);
     }
 
     /**
-     * Same as {@code N.notBlank(CharSequence)}.
      *
      * @param cs
      * @return
-     * @see N#notBlank(CharSequence)
      */
     public static boolean isNotBlank(final CharSequence cs) {
+        return !isBlank(cs);
+    }
+
+    /**
+     *
+     * @param cs
+     * @return
+     */
+    @Beta
+    public static boolean notEmpty(final CharSequence cs) {
+        return (cs != null) && (cs.length() > 0);
+    }
+
+    /**
+     *
+     * @param cs
+     * @return
+     */
+    @Beta
+    public static boolean notBlank(final CharSequence cs) {
         return !isBlank(cs);
     }
 
@@ -262,20 +300,20 @@ public abstract class Strings {
      * <p>Checks if all of the CharSequences are empty ("") or null.</p>
      *
      * <pre>
-     * StringUtil.isAllEmpty(null)             = true
-     * StringUtil.isAllEmpty(null, "")         = true
-     * StringUtil.isAllEmpty(new String[] {})  = true
-     * StringUtil.isAllEmpty(null, "foo")      = false
-     * StringUtil.isAllEmpty("", "bar")        = false
-     * StringUtil.isAllEmpty("bob", "")        = false
-     * StringUtil.isAllEmpty("  bob  ", null)  = false
-     * StringUtil.isAllEmpty(" ", "bar")       = false
-     * StringUtil.isAllEmpty("foo", "bar")     = false
+     * Strings.isAllEmpty(null)             = true
+     * Strings.isAllEmpty(null, "")         = true
+     * Strings.isAllEmpty(new String[] {})  = true
+     * Strings.isAllEmpty(null, "foo")      = false
+     * Strings.isAllEmpty("", "bar")        = false
+     * Strings.isAllEmpty("bob", "")        = false
+     * Strings.isAllEmpty("  bob  ", null)  = false
+     * Strings.isAllEmpty(" ", "bar")       = false
+     * Strings.isAllEmpty("foo", "bar")     = false
      * </pre>
      *
      * @param css the CharSequences to check, may be null or empty
      * @return {@code true} if all of the CharSequences are empty or null
-     * @see N#allNullOrEmpty(CharSequence...)
+     * @see Strings#allEmpty(CharSequence...)
      * @since 3.6
      */
     public static boolean isAllEmpty(final CharSequence... css) {
@@ -296,7 +334,7 @@ public abstract class Strings {
      *
      * @param css
      * @return
-     * @see N#allNullOrEmpty(Collection)
+     * @see Strings#allEmpty(Collection)
      */
     public static boolean isAllEmpty(final Collection<? extends CharSequence> css) {
         if (N.isNullOrEmpty(css)) {
@@ -326,20 +364,20 @@ public abstract class Strings {
      * <p>Whitespace is defined by {@link Character#isWhitespace(char)}.</p>
      *
      * <pre>
-     * StringUtil.isAllBlank(null)             = true
-     * StringUtil.isAllBlank(null, "foo")      = false
-     * StringUtil.isAllBlank(null, null)       = true
-     * StringUtil.isAllBlank("", "bar")        = false
-     * StringUtil.isAllBlank("bob", "")        = false
-     * StringUtil.isAllBlank("  bob  ", null)  = false
-     * StringUtil.isAllBlank(" ", "bar")       = false
-     * StringUtil.isAllBlank("foo", "bar")     = false
-     * StringUtil.isAllBlank(new String[] {})  = true
+     * Strings.isAllBlank(null)             = true
+     * Strings.isAllBlank(null, "foo")      = false
+     * Strings.isAllBlank(null, null)       = true
+     * Strings.isAllBlank("", "bar")        = false
+     * Strings.isAllBlank("bob", "")        = false
+     * Strings.isAllBlank("  bob  ", null)  = false
+     * Strings.isAllBlank(" ", "bar")       = false
+     * Strings.isAllBlank("foo", "bar")     = false
+     * Strings.isAllBlank(new String[] {})  = true
      * </pre>
      *
      * @param css the CharSequences to check, may be null or empty
      * @return {@code true} if all of the CharSequences are empty or null or whitespace only
-     * @see N#allBlank(CharSequence...)
+     * @see Strings#allBlank(CharSequence...)
      * @since 3.6
      */
     public static boolean isAllBlank(final CharSequence... css) {
@@ -360,7 +398,7 @@ public abstract class Strings {
      *
      * @param css
      * @return
-     * @see N#allBlank(Collection)
+     * @see Strings#allBlank(Collection)
      */
     public static boolean isAllBlank(final Collection<? extends CharSequence> css) {
         if (N.isNullOrEmpty(css)) {
@@ -388,21 +426,21 @@ public abstract class Strings {
      * <p>Checks if any of the CharSequences are empty ("") or null.</p>
      *
      * <pre>
-     * StringUtil.isAnyEmpty((String) null)    = true
-     * StringUtil.isAnyEmpty((String[]) null)  = false
-     * StringUtil.isAnyEmpty(null, "foo")      = true
-     * StringUtil.isAnyEmpty("", "bar")        = true
-     * StringUtil.isAnyEmpty("bob", "")        = true
-     * StringUtil.isAnyEmpty("  bob  ", null)  = true
-     * StringUtil.isAnyEmpty(" ", "bar")       = false
-     * StringUtil.isAnyEmpty("foo", "bar")     = false
-     * StringUtil.isAnyEmpty(new String[]{})   = false
-     * StringUtil.isAnyEmpty(new String[]{""}) = true
+     * Strings.isAnyEmpty((String) null)    = true
+     * Strings.isAnyEmpty((String[]) null)  = false
+     * Strings.isAnyEmpty(null, "foo")      = true
+     * Strings.isAnyEmpty("", "bar")        = true
+     * Strings.isAnyEmpty("bob", "")        = true
+     * Strings.isAnyEmpty("  bob  ", null)  = true
+     * Strings.isAnyEmpty(" ", "bar")       = false
+     * Strings.isAnyEmpty("foo", "bar")     = false
+     * Strings.isAnyEmpty(new String[]{})   = false
+     * Strings.isAnyEmpty(new String[]{""}) = true
      * </pre>
      *
      * @param css the CharSequences to check, may be null or empty
      * @return {@code true} if any of the CharSequences are empty or null
-     * @see N#anyNullOrEmpty(CharSequence...)
+     * @see Strings#anyEmpty(CharSequence...)
      * @since 3.2
      */
     public static boolean isAnyEmpty(final CharSequence... css) {
@@ -423,7 +461,7 @@ public abstract class Strings {
      *
      * @param css
      * @return
-     * @see N#anyNullOrEmpty(CharSequence...)
+     * @see Strings#anyEmpty(CharSequence...)
      */
     public static boolean isAnyEmpty(final Collection<? extends CharSequence> css) {
         if (N.isNullOrEmpty(css)) {
@@ -453,22 +491,22 @@ public abstract class Strings {
      * <p>Whitespace is defined by {@link Character#isWhitespace(char)}.</p>
      *
      * <pre>
-     * StringUtil.isAnyBlank((String) null)    = true
-     * StringUtil.isAnyBlank((String[]) null)  = false
-     * StringUtil.isAnyBlank(null, "foo")      = true
-     * StringUtil.isAnyBlank(null, null)       = true
-     * StringUtil.isAnyBlank("", "bar")        = true
-     * StringUtil.isAnyBlank("bob", "")        = true
-     * StringUtil.isAnyBlank("  bob  ", null)  = true
-     * StringUtil.isAnyBlank(" ", "bar")       = true
-     * StringUtil.isAnyBlank(new String[] {})  = false
-     * StringUtil.isAnyBlank(new String[]{""}) = true
-     * StringUtil.isAnyBlank("foo", "bar")     = false
+     * Strings.isAnyBlank((String) null)    = true
+     * Strings.isAnyBlank((String[]) null)  = false
+     * Strings.isAnyBlank(null, "foo")      = true
+     * Strings.isAnyBlank(null, null)       = true
+     * Strings.isAnyBlank("", "bar")        = true
+     * Strings.isAnyBlank("bob", "")        = true
+     * Strings.isAnyBlank("  bob  ", null)  = true
+     * Strings.isAnyBlank(" ", "bar")       = true
+     * Strings.isAnyBlank(new String[] {})  = false
+     * Strings.isAnyBlank(new String[]{""}) = true
+     * Strings.isAnyBlank("foo", "bar")     = false
      * </pre>
      *
      * @param css the CharSequences to check, may be null or empty
      * @return {@code true} if any of the CharSequences are empty or null or whitespace only
-     * @see N#anyBlank(CharSequence...)
+     * @see Strings#anyBlank(CharSequence...)
      * @since 3.2
      */
     public static boolean isAnyBlank(final CharSequence... css) {
@@ -489,7 +527,7 @@ public abstract class Strings {
      *
      * @param css
      * @return
-     * @see N#anyBlank(Collection)
+     * @see Strings#anyBlank(Collection)
      */
     public static boolean isAnyBlank(final Collection<? extends CharSequence> css) {
         if (N.isNullOrEmpty(css)) {
@@ -537,20 +575,20 @@ public abstract class Strings {
      * or empty then {@code null} is returned.</p>
      *
      * <pre>
-     * StringUtil.firstNonEmpty(null, null, null)   = null
-     * StringUtil.firstNonEmpty(null, null, "")     = null
-     * StringUtil.firstNonEmpty(null, "", " ")      = " "
-     * StringUtil.firstNonEmpty("abc")              = "abc"
-     * StringUtil.firstNonEmpty(null, "xyz")        = "xyz"
-     * StringUtil.firstNonEmpty("", "xyz")          = "xyz"
-     * StringUtil.firstNonEmpty(null, "xyz", "abc") = "xyz"
-     * StringUtil.firstNonEmpty()                   = null
+     * Strings.firstNonEmpty(null, null, null)   = null
+     * Strings.firstNonEmpty(null, null, "")     = null
+     * Strings.firstNonEmpty(null, "", " ")      = " "
+     * Strings.firstNonEmpty("abc")              = "abc"
+     * Strings.firstNonEmpty(null, "xyz")        = "xyz"
+     * Strings.firstNonEmpty("", "xyz")          = "xyz"
+     * Strings.firstNonEmpty(null, "xyz", "abc") = "xyz"
+     * Strings.firstNonEmpty()                   = null
      * </pre>
      *
      * @param <T> the specific kind of CharSequence
      * @param css the values to test, may be {@code null} or empty
      * @return the first value from {@code css} which is not empty, or {@code null} if there is no non-empty value.
-     * @see N#firstNonEmpty(CharSequence...)
+     * @see MoreStringUtil#firstNonEmpty(CharSequence...)
      * @since 3.8
      */
     @SafeVarargs
@@ -573,7 +611,7 @@ public abstract class Strings {
      * @param <T>
      * @param css
      * @return the first value from {@code css} which is not empty, or {@code null} if there is no non-empty value.
-     * @see N#firstNonEmpty(CharSequence...)
+     * @see MoreStringUtil#firstNonEmpty(CharSequence...)
      */
     public static <T extends CharSequence> T firstNonEmpty(final Collection<? extends T> css) {
         if (N.isNullOrEmpty(css)) {
@@ -619,7 +657,7 @@ public abstract class Strings {
      * @param <T>
      * @param css
      * @return the first value from {@code css} which is not empty, or {@code null} if there is no non-blank value.
-     * @see N#firstNonBlank(CharSequence...)
+     * @see MoreStringUtil#firstNonBlank(CharSequence...)
      */
     @SafeVarargs
     public static <T extends CharSequence> T firstNonBlank(final T... css) {
@@ -641,7 +679,7 @@ public abstract class Strings {
      * @param <T>
      * @param css
      * @return the first value from {@code css} which is not empty, or {@code null} if there is no non-blank value.
-     * @see N#firstNonEmpty(CharSequence...)
+     * @see MoreStringUtil#firstNonEmpty(CharSequence...)
      */
     public static <T extends CharSequence> T firstNonBlank(final Collection<? extends T> css) {
         if (N.isNullOrEmpty(css)) {
@@ -664,7 +702,7 @@ public abstract class Strings {
      * @param str
      * @param defaultStr
      * @return
-     * @see N#defaultIfNullOrEmpty(CharSequence, CharSequence)
+     * @see Strings#defaultIfNullOrEmpty(CharSequence, CharSequence)
      */
     public static <T extends CharSequence> T defaultIfEmpty(final T str, final T defaultStr) {
         return isEmpty(str) ? defaultStr : str;
@@ -692,7 +730,7 @@ public abstract class Strings {
      * @param str
      * @param defaultStr
      * @return
-     * @see N#defaultIfBlank(CharSequence, CharSequence)
+     * @see Strings#defaultIfBlank(CharSequence, CharSequence)
      */
     public static <T extends CharSequence> T defaultIfBlank(final T str, final T defaultStr) {
         return isBlank(str) ? defaultStr : str;
@@ -826,19 +864,19 @@ public abstract class Strings {
      * {@code maxWidth}.</p>
      *
      * <pre>
-     * StringUtil.abbreviate(null, 0, 4)                  = null
-     * StringUtil.abbreviate("", 0, 4)                  = ""
-     * StringUtil.abbreviate("abcdefghijklmno", -1, 10) = "abcdefg..."
-     * StringUtil.abbreviate("abcdefghijklmno", 0, 10)  = "abcdefg..."
-     * StringUtil.abbreviate("abcdefghijklmno", 1, 10)  = "abcdefg..."
-     * StringUtil.abbreviate("abcdefghijklmno", 4, 10)  = "abcdefg..."
-     * StringUtil.abbreviate("abcdefghijklmno", 5, 10)  = "...fghi..."
-     * StringUtil.abbreviate("abcdefghijklmno", 6, 10)  = "...ghij..."
-     * StringUtil.abbreviate("abcdefghijklmno", 8, 10)  = "...ijklmno"
-     * StringUtil.abbreviate("abcdefghijklmno", 10, 10) = "...ijklmno"
-     * StringUtil.abbreviate("abcdefghijklmno", 12, 10) = "...ijklmno"
-     * StringUtil.abbreviate("abcdefghij", 0, 3)        = IllegalArgumentException
-     * StringUtil.abbreviate("abcdefghij", 5, 6)        = IllegalArgumentException
+     * Strings.abbreviate(null, 0, 4)                  = null
+     * Strings.abbreviate("", 0, 4)                  = ""
+     * Strings.abbreviate("abcdefghijklmno", -1, 10) = "abcdefg..."
+     * Strings.abbreviate("abcdefghijklmno", 0, 10)  = "abcdefg..."
+     * Strings.abbreviate("abcdefghijklmno", 1, 10)  = "abcdefg..."
+     * Strings.abbreviate("abcdefghijklmno", 4, 10)  = "abcdefg..."
+     * Strings.abbreviate("abcdefghijklmno", 5, 10)  = "...fghi..."
+     * Strings.abbreviate("abcdefghijklmno", 6, 10)  = "...ghij..."
+     * Strings.abbreviate("abcdefghijklmno", 8, 10)  = "...ijklmno"
+     * Strings.abbreviate("abcdefghijklmno", 10, 10) = "...ijklmno"
+     * Strings.abbreviate("abcdefghijklmno", 12, 10) = "...ijklmno"
+     * Strings.abbreviate("abcdefghij", 0, 3)        = IllegalArgumentException
+     * Strings.abbreviate("abcdefghij", 5, 6)        = IllegalArgumentException
      * </pre>
      *
      * @param str the String to check, may be null
@@ -872,13 +910,13 @@ public abstract class Strings {
      * </ul>
      *
      * <pre>
-     * StringUtil.abbreviate(null, 4)        = null
-     * StringUtil.abbreviate("", 4)        = ""
-     * StringUtil.abbreviate("abcdefg", 6) = "abc..."
-     * StringUtil.abbreviate("abcdefg", 7) = "abcdefg"
-     * StringUtil.abbreviate("abcdefg", 8) = "abcdefg"
-     * StringUtil.abbreviate("abcdefg", 4) = "a..."
-     * StringUtil.abbreviate("abcdefg", 3) = IllegalArgumentException
+     * Strings.abbreviate(null, 4)        = null
+     * Strings.abbreviate("", 4)        = ""
+     * Strings.abbreviate("abcdefg", 6) = "abc..."
+     * Strings.abbreviate("abcdefg", 7) = "abcdefg"
+     * Strings.abbreviate("abcdefg", 8) = "abcdefg"
+     * Strings.abbreviate("abcdefg", 4) = "a..."
+     * Strings.abbreviate("abcdefg", 3) = IllegalArgumentException
      * </pre>
      *
      * @param str the String to check, may be null
@@ -908,16 +946,16 @@ public abstract class Strings {
      * </ul>
      *
      * <pre>
-     * StringUtil.abbreviate(null, "...", 4)        = null
-     * StringUtil.abbreviate("", "...", 4)        = ""
-     * StringUtil.abbreviate("abcdefg", null, *)  = "abcdefg"
-     * StringUtil.abbreviate("abcdefg", ".", 5)   = "abcd."
-     * StringUtil.abbreviate("abcdefg", ".", 7)   = "abcdefg"
-     * StringUtil.abbreviate("abcdefg", ".", 8)   = "abcdefg"
-     * StringUtil.abbreviate("abcdefg", "..", 4)  = "ab.."
-     * StringUtil.abbreviate("abcdefg", "..", 3)  = "a.."
-     * StringUtil.abbreviate("abcdefg", "..", 2)  = IllegalArgumentException
-     * StringUtil.abbreviate("abcdefg", "...", 3) = IllegalArgumentException
+     * Strings.abbreviate(null, "...", 4)        = null
+     * Strings.abbreviate("", "...", 4)        = ""
+     * Strings.abbreviate("abcdefg", null, *)  = "abcdefg"
+     * Strings.abbreviate("abcdefg", ".", 5)   = "abcd."
+     * Strings.abbreviate("abcdefg", ".", 7)   = "abcdefg"
+     * Strings.abbreviate("abcdefg", ".", 8)   = "abcdefg"
+     * Strings.abbreviate("abcdefg", "..", 4)  = "ab.."
+     * Strings.abbreviate("abcdefg", "..", 3)  = "a.."
+     * Strings.abbreviate("abcdefg", "..", 2)  = IllegalArgumentException
+     * Strings.abbreviate("abcdefg", "...", 3) = IllegalArgumentException
      * </pre>
      *
      * @param str the String to check, may be null
@@ -944,20 +982,20 @@ public abstract class Strings {
      * <p>In no case will it return a String of length greater than {@code maxWidth}.</p>
      *
      * <pre>
-     * StringUtil.abbreviate(null, "...", 0, 4)                  = null
-     * StringUtil.abbreviate("", "...", 0, 4)                  = ""
-     * StringUtil.abbreviate("abcdefghijklmno", null, *, *)    = "abcdefghijklmno"
-     * StringUtil.abbreviate("abcdefghijklmno", "---", -1, 10) = "abcdefg---"
-     * StringUtil.abbreviate("abcdefghijklmno", ",", 0, 10)    = "abcdefghi,"
-     * StringUtil.abbreviate("abcdefghijklmno", ",", 1, 10)    = "abcdefghi,"
-     * StringUtil.abbreviate("abcdefghijklmno", ",", 2, 10)    = "abcdefghi,"
-     * StringUtil.abbreviate("abcdefghijklmno", "::", 4, 10)   = "::efghij::"
-     * StringUtil.abbreviate("abcdefghijklmno", "...", 6, 10)  = "...ghij..."
-     * StringUtil.abbreviate("abcdefghijklmno", "*", 9, 10)    = "*ghijklmno"
-     * StringUtil.abbreviate("abcdefghijklmno", "'", 10, 10)   = "'ghijklmno"
-     * StringUtil.abbreviate("abcdefghijklmno", "!", 12, 10)   = "!ghijklmno"
-     * StringUtil.abbreviate("abcdefghij", "abra", 0, 4)       = IllegalArgumentException
-     * StringUtil.abbreviate("abcdefghij", "...", 5, 6)        = IllegalArgumentException
+     * Strings.abbreviate(null, "...", 0, 4)                  = null
+     * Strings.abbreviate("", "...", 0, 4)                  = ""
+     * Strings.abbreviate("abcdefghijklmno", null, *, *)    = "abcdefghijklmno"
+     * Strings.abbreviate("abcdefghijklmno", "---", -1, 10) = "abcdefg---"
+     * Strings.abbreviate("abcdefghijklmno", ",", 0, 10)    = "abcdefghi,"
+     * Strings.abbreviate("abcdefghijklmno", ",", 1, 10)    = "abcdefghi,"
+     * Strings.abbreviate("abcdefghijklmno", ",", 2, 10)    = "abcdefghi,"
+     * Strings.abbreviate("abcdefghijklmno", "::", 4, 10)   = "::efghij::"
+     * Strings.abbreviate("abcdefghijklmno", "...", 6, 10)  = "...ghij..."
+     * Strings.abbreviate("abcdefghijklmno", "*", 9, 10)    = "*ghijklmno"
+     * Strings.abbreviate("abcdefghijklmno", "'", 10, 10)   = "'ghijklmno"
+     * Strings.abbreviate("abcdefghijklmno", "!", 12, 10)   = "!ghijklmno"
+     * Strings.abbreviate("abcdefghij", "abra", 0, 4)       = IllegalArgumentException
+     * Strings.abbreviate("abcdefghij", "...", 5, 6)        = IllegalArgumentException
      * </pre>
      *
      * @param str the String to check, may be null
@@ -981,7 +1019,7 @@ public abstract class Strings {
 
         if (isNotEmpty(str) && EMPTY_STRING.equals(abbrevMarker) && maxWidth > 0) {
             return Strings.substring(str, 0, maxWidth);
-        } else if (N.anyNullOrEmpty(str, abbrevMarker)) {
+        } else if (isAnyEmpty(str, abbrevMarker)) {
             return str;
         }
 
@@ -1030,11 +1068,11 @@ public abstract class Strings {
      * </p>
      *
      * <pre>
-     * StringUtil.abbreviateMiddle(null, null, 0)      = null
-     * StringUtil.abbreviateMiddle("abc", null, 0)      = "abc"
-     * StringUtil.abbreviateMiddle("abc", ".", 0)      = "abc"
-     * StringUtil.abbreviateMiddle("abc", ".", 3)      = "abc"
-     * StringUtil.abbreviateMiddle("abcdef", ".", 4)     = "ab.f"
+     * Strings.abbreviateMiddle(null, null, 0)      = null
+     * Strings.abbreviateMiddle("abc", null, 0)      = "abc"
+     * Strings.abbreviateMiddle("abc", ".", 0)      = "abc"
+     * Strings.abbreviateMiddle("abc", ".", 3)      = "abc"
+     * Strings.abbreviateMiddle("abcdef", ".", 4)     = "ab.f"
      * </pre>
      *
      * @param str the String to abbreviate, may be null
@@ -1044,7 +1082,7 @@ public abstract class Strings {
      * @since 2.5
      */
     public static String abbreviateMiddle(final String str, final String middle, final int length) {
-        if (N.anyNullOrEmpty(str, middle) || length >= str.length() || length < middle.length() + 2) {
+        if (isAnyEmpty(str, middle) || length >= str.length() || length < middle.length() + 2) {
             return str;
         }
 
@@ -1066,11 +1104,11 @@ public abstract class Strings {
      * <p>Equivalent to {@code center(str, size, " ")}.</p>
      *
      * <pre>
-     * StringUtil.center(null, 4)     = "    "
-     * StringUtil.center("", 4)     = "    "
-     * StringUtil.center("ab", 4)   = " ab "
-     * StringUtil.center("abcd", 2) = "abcd"
-     * StringUtil.center("a", 4)    = " a  "
+     * Strings.center(null, 4)     = "    "
+     * Strings.center("", 4)     = "    "
+     * Strings.center("ab", 4)   = " ab "
+     * Strings.center("abcd", 2) = "abcd"
+     * Strings.center("a", 4)    = " a  "
      * </pre>
      *
      * @param str the String to center, may be null
@@ -1088,12 +1126,12 @@ public abstract class Strings {
      * <p>If the size is less than the String length, the String is returned.
      *
      * <pre>
-     * StringUtil.center(null, 4, ' ')     = "    "
-     * StringUtil.center("", 4, ' ')     = "    "
-     * StringUtil.center("ab", 4, ' ')   = " ab "
-     * StringUtil.center("abcd", 2, ' ') = "abcd"
-     * StringUtil.center("a", 4, ' ')    = " a  "
-     * StringUtil.center("a", 4, 'y')    = "yayy"
+     * Strings.center(null, 4, ' ')     = "    "
+     * Strings.center("", 4, ' ')     = "    "
+     * Strings.center("ab", 4, ' ')   = " ab "
+     * Strings.center("abcd", 2, ' ') = "abcd"
+     * Strings.center("a", 4, ' ')    = " a  "
+     * Strings.center("a", 4, 'y')    = "yayy"
      * </pre>
      *
      * @param str the String to center, may be null
@@ -1127,13 +1165,13 @@ public abstract class Strings {
      * <p>If the size is less than the String length, the String is returned.
      *
      * <pre>
-     * StringUtil.center(null, 4, " ")     = "    "
-     * StringUtil.center("", 4, " ")     = "    "
-     * StringUtil.center("ab", 4, " ")   = " ab "
-     * StringUtil.center("abcd", 2, " ") = "abcd"
-     * StringUtil.center("a", 4, " ")    = " a  "
-     * StringUtil.center("a", 4, "yz")   = "yzayz"
-     * StringUtil.center("abc", 7, "")   = "  abc  "
+     * Strings.center(null, 4, " ")     = "    "
+     * Strings.center("", 4, " ")     = "    "
+     * Strings.center("ab", 4, " ")   = " ab "
+     * Strings.center("abcd", 2, " ") = "abcd"
+     * Strings.center("a", 4, " ")    = " a  "
+     * Strings.center("a", 4, "yz")   = "yzayz"
+     * Strings.center("abc", 7, "")   = "  abc  "
      * </pre>
      *
      * @param str the String to center, may be null
@@ -1458,6 +1496,80 @@ public abstract class Strings {
     }
 
     /**
+     * Returns the byte array returned by {@code String#getBytes(StandardCharsets.UTF_8)}, or {@code null} if the specified String is {@code null}.
+     *
+     * @param string
+     * @param charset
+     * @return the encoded bytes
+     */
+    public static byte[] getBytes(final String string, final Charset charset) {
+        return string == null ? null : string.getBytes(charset);
+    }
+
+    /**
+     * Returns the char array of the specified CharSequence, or {@code null} if the specified String is {@code null}.
+     *
+     *
+     *
+     * @param source
+     * @return
+     */
+    public static char[] toCharArray(final CharSequence source) {
+        if (source == null) {
+            return null;
+        } else if (source.length() == 0) {
+            return N.EMPTY_CHAR_ARRAY;
+        } else if (source instanceof String) {
+            return ((String) source).toCharArray();
+        }
+
+        final int len = N.len(source);
+
+        final char[] array = new char[len];
+
+        for (int i = 0; i < len; i++) {
+            array[i] = source.charAt(i);
+        }
+
+        return array;
+    }
+
+    /**
+     * <p>Converts a {@code CharSequence} into an array of code points.</p>
+     *
+     * <p>Valid pairs of surrogate code units will be converted into a single supplementary
+     * code point. Isolated surrogate code units (i.e. a high surrogate not followed by a low surrogate or
+     * a low surrogate not preceded by a high surrogate) will be returned as-is.</p>
+     *
+     * <pre>
+     * Strings.toCodePoints(null)   =  null
+     * Strings.toCodePoints("")     =  []  // empty array
+     * </pre>
+     *
+     * @param str the character sequence to convert
+     * @return an array of code points
+     * @since 3.6
+     */
+    public static int[] toCodePoints(final CharSequence str) {
+        if (str == null) {
+            return null;
+        } else if (str.length() == 0) {
+            return N.EMPTY_INT_ARRAY;
+        }
+
+        final String s = str.toString();
+        final int[] result = new int[s.codePointCount(0, s.length())];
+        int index = 0;
+
+        for (int i = 0; i < result.length; i++) {
+            result[i] = s.codePointAt(index);
+            index += Character.charCount(result[i]);
+        }
+
+        return result;
+    }
+
+    /**
      * To lower case.
      *
      * @param ch
@@ -1477,9 +1589,9 @@ public abstract class Strings {
      * </p>
      *
      * <pre>
-     * StringUtil.toLowerCase(null)  = null
-     * StringUtil.toLowerCase("")    = ""
-     * StringUtil.toLowerCase("aBc") = "abc"
+     * Strings.toLowerCase(null)  = null
+     * Strings.toLowerCase("")    = ""
+     * Strings.toLowerCase("aBc") = "abc"
      * </pre>
      *
      * <p>
@@ -1513,9 +1625,9 @@ public abstract class Strings {
      * </p>
      *
      * <pre>
-     * StringUtil.toLowerCase(null, Locale.ENGLISH)  = null
-     * StringUtil.toLowerCase("", Locale.ENGLISH)    = ""
-     * StringUtil.toLowerCase("aBc", Locale.ENGLISH) = "abc"
+     * Strings.toLowerCase(null, Locale.ENGLISH)  = null
+     * Strings.toLowerCase("", Locale.ENGLISH)    = ""
+     * Strings.toLowerCase("aBc", Locale.ENGLISH) = "abc"
      * </pre>
      *
      * @param str
@@ -1750,65 +1862,6 @@ public abstract class Strings {
 
     /**
      *
-     *
-     * @param source
-     * @return
-     */
-    public static char[] toCharArray(final CharSequence source) {
-        final int len = N.len(source);
-
-        if (len == 0) {
-            return N.EMPTY_CHAR_ARRAY;
-        }
-
-        if (source instanceof String) {
-            return ((String) source).toCharArray();
-        }
-
-        final char[] array = new char[len];
-
-        for (int i = 0; i < len; i++) {
-            array[i] = source.charAt(i);
-        }
-
-        return array;
-    }
-
-    /**
-     * <p>Converts a {@code CharSequence} into an array of code points.</p>
-     *
-     * <p>Valid pairs of surrogate code units will be converted into a single supplementary
-     * code point. Isolated surrogate code units (i.e. a high surrogate not followed by a low surrogate or
-     * a low surrogate not preceded by a high surrogate) will be returned as-is.</p>
-     *
-     * <pre>
-     * StringUtil.toCodePoints(null)   =  []  // empty array
-     * StringUtil.toCodePoints("")     =  []  // empty array
-     * </pre>
-     *
-     * @param str the character sequence to convert
-     * @return an empty array is the specified String {@code str} is null or empty.
-     * @since 3.6
-     */
-    public static int[] toCodePoints(final CharSequence str) {
-        if (str == null || str.length() == 0) {
-            return N.EMPTY_INT_ARRAY;
-        }
-
-        final String s = str.toString();
-        final int[] result = new int[s.codePointCount(0, s.length())];
-        int index = 0;
-
-        for (int i = 0; i < result.length; i++) {
-            result[i] = s.codePointAt(index);
-            index += Character.charCount(result[i]);
-        }
-
-        return result;
-    }
-
-    /**
-     *
      * @param ch
      * @return
      */
@@ -2001,8 +2054,8 @@ public abstract class Strings {
      * </p>
      *
      * <pre>
-     *   StringUtil.unicodeEscaped(' ') = "\u0020"
-     *   StringUtil.unicodeEscaped('A') = "\u0041"
+     *   Strings.unicodeEscaped(' ') = "\u0020"
+     *   Strings.unicodeEscaped('A') = "\u0041"
      * </pre>
      *
      * @param ch
@@ -2125,14 +2178,14 @@ public abstract class Strings {
      * <p>A {@code null} reference passed to this method is a no-op.</p>
      *
      * <pre>
-     * StringUtil.replaceOnce(null, *, *)        = null
-     * StringUtil.replaceOnce("", *, *)          = ""
-     * StringUtil.replaceOnce("any", null, *)    = "any"
-     * StringUtil.replaceOnce("any", *, null)    = "any"
-     * StringUtil.replaceOnce("any", "", *)      = "any"
-     * StringUtil.replaceOnce("aba", "a", null)  = "ba"
-     * StringUtil.replaceOnce("aba", "a", "")    = "ba"
-     * StringUtil.replaceOnce("aba", "a", "z")   = "zba"
+     * Strings.replaceOnce(null, *, *)        = null
+     * Strings.replaceOnce("", *, *)          = ""
+     * Strings.replaceOnce("any", null, *)    = "any"
+     * Strings.replaceOnce("any", *, null)    = "any"
+     * Strings.replaceOnce("any", "", *)      = "any"
+     * Strings.replaceOnce("aba", "a", null)  = "ba"
+     * Strings.replaceOnce("aba", "a", "")    = "ba"
+     * Strings.replaceOnce("aba", "a", "z")   = "zba"
      * </pre>
      *
      * @param str
@@ -2164,14 +2217,14 @@ public abstract class Strings {
      * <p>A {@code null} reference passed to this method is a no-op.</p>
      *
      * <pre>
-     * StringUtil.replaceOnce(null, *, *)        = null
-     * StringUtil.replaceOnce("", *, *)          = ""
-     * StringUtil.replaceOnce("any", null, *)    = "any"
-     * StringUtil.replaceOnce("any", *, null)    = "any"
-     * StringUtil.replaceOnce("any", "", *)      = "any"
-     * StringUtil.replaceOnce("aba", "a", null)  = "ba"
-     * StringUtil.replaceOnce("aba", "a", "")    = "ba"
-     * StringUtil.replaceOnce("aba", "a", "z")   = "zba"
+     * Strings.replaceOnce(null, *, *)        = null
+     * Strings.replaceOnce("", *, *)          = ""
+     * Strings.replaceOnce("any", null, *)    = "any"
+     * Strings.replaceOnce("any", *, null)    = "any"
+     * Strings.replaceOnce("any", "", *)      = "any"
+     * Strings.replaceOnce("aba", "a", null)  = "ba"
+     * Strings.replaceOnce("aba", "a", "")    = "ba"
+     * Strings.replaceOnce("aba", "a", "z")   = "zba"
      * </pre>
      *
      * @param str
@@ -2919,11 +2972,11 @@ public abstract class Strings {
      * </p>
      *
      * <pre>
-     * StringUtil.trim(null)          = null
-     * StringUtil.trim("")            = ""
-     * StringUtil.trim("     ")       = ""
-     * StringUtil.trim("abc")         = "abc"
-     * StringUtil.trim("    abc    ") = "abc"
+     * Strings.trim(null)          = null
+     * Strings.trim("")            = ""
+     * Strings.trim("     ")       = ""
+     * Strings.trim("abc")         = "abc"
+     * Strings.trim("    abc    ") = "abc"
      * </pre>
      *
      * @param str
@@ -3537,17 +3590,17 @@ public abstract class Strings {
      * </p>
      *
      * <pre>
-     * StringUtil.chop(null)          = null
-     * StringUtil.chop("")            = ""
-     * StringUtil.chop("abc \r")      = "abc "
-     * StringUtil.chop("abc\n")       = "abc"
-     * StringUtil.chop("abc\r\n")     = "abc"
-     * StringUtil.chop("abc")         = "ab"
-     * StringUtil.chop("abc\nabc")    = "abc\nab"
-     * StringUtil.chop("a")           = ""
-     * StringUtil.chop("\r")          = ""
-     * StringUtil.chop("\n")          = ""
-     * StringUtil.chop("\r\n")        = ""
+     * Strings.chop(null)          = null
+     * Strings.chop("")            = ""
+     * Strings.chop("abc \r")      = "abc "
+     * Strings.chop("abc\n")       = "abc"
+     * Strings.chop("abc\r\n")     = "abc"
+     * Strings.chop("abc")         = "ab"
+     * Strings.chop("abc\nabc")    = "abc\nab"
+     * Strings.chop("a")           = ""
+     * Strings.chop("\r")          = ""
+     * Strings.chop("\n")          = ""
+     * Strings.chop("\r\n")        = ""
      * </pre>
      *
      * @param str
@@ -3605,14 +3658,14 @@ public abstract class Strings {
      * </ul>
      *
      * <pre>
-     * StringUtil.truncate(null, 0)       = null
-     * StringUtil.truncate(null, 2)       = null
-     * StringUtil.truncate("", 4)         = ""
-     * StringUtil.truncate("abcdefg", 4)  = "abcd"
-     * StringUtil.truncate("abcdefg", 6)  = "abcdef"
-     * StringUtil.truncate("abcdefg", 7)  = "abcdefg"
-     * StringUtil.truncate("abcdefg", 8)  = "abcdefg"
-     * StringUtil.truncate("abcdefg", -1) = throws an IllegalArgumentException
+     * Strings.truncate(null, 0)       = null
+     * Strings.truncate(null, 2)       = null
+     * Strings.truncate("", 4)         = ""
+     * Strings.truncate("abcdefg", 4)  = "abcd"
+     * Strings.truncate("abcdefg", 6)  = "abcdef"
+     * Strings.truncate("abcdefg", 7)  = "abcdefg"
+     * Strings.truncate("abcdefg", 8)  = "abcdefg"
+     * Strings.truncate("abcdefg", -1) = throws an IllegalArgumentException
      * </pre>
      *
      * @param str the String to truncate, may be null
@@ -3646,36 +3699,36 @@ public abstract class Strings {
      * </ul>
      *
      * <pre>
-     * StringUtil.truncate(null, 0, 0) = null
-     * StringUtil.truncate(null, 2, 4) = null
-     * StringUtil.truncate("", 0, 10) = ""
-     * StringUtil.truncate("", 2, 10) = ""
-     * StringUtil.truncate("abcdefghij", 0, 3) = "abc"
-     * StringUtil.truncate("abcdefghij", 5, 6) = "fghij"
-     * StringUtil.truncate("raspberry peach", 10, 15) = "peach"
-     * StringUtil.truncate("abcdefghijklmno", 0, 10) = "abcdefghij"
-     * StringUtil.truncate("abcdefghijklmno", -1, 10) = throws an IllegalArgumentException
-     * StringUtil.truncate("abcdefghijklmno", Integer.MIN_VALUE, 10) = throws an IllegalArgumentException
-     * StringUtil.truncate("abcdefghijklmno", Integer.MIN_VALUE, Integer.MAX_VALUE) = throws an IllegalArgumentException
-     * StringUtil.truncate("abcdefghijklmno", 0, Integer.MAX_VALUE) = "abcdefghijklmno"
-     * StringUtil.truncate("abcdefghijklmno", 1, 10) = "bcdefghijk"
-     * StringUtil.truncate("abcdefghijklmno", 2, 10) = "cdefghijkl"
-     * StringUtil.truncate("abcdefghijklmno", 3, 10) = "defghijklm"
-     * StringUtil.truncate("abcdefghijklmno", 4, 10) = "efghijklmn"
-     * StringUtil.truncate("abcdefghijklmno", 5, 10) = "fghijklmno"
-     * StringUtil.truncate("abcdefghijklmno", 5, 5) = "fghij"
-     * StringUtil.truncate("abcdefghijklmno", 5, 3) = "fgh"
-     * StringUtil.truncate("abcdefghijklmno", 10, 3) = "klm"
-     * StringUtil.truncate("abcdefghijklmno", 10, Integer.MAX_VALUE) = "klmno"
-     * StringUtil.truncate("abcdefghijklmno", 13, 1) = "n"
-     * StringUtil.truncate("abcdefghijklmno", 13, Integer.MAX_VALUE) = "no"
-     * StringUtil.truncate("abcdefghijklmno", 14, 1) = "o"
-     * StringUtil.truncate("abcdefghijklmno", 14, Integer.MAX_VALUE) = "o"
-     * StringUtil.truncate("abcdefghijklmno", 15, 1) = ""
-     * StringUtil.truncate("abcdefghijklmno", 15, Integer.MAX_VALUE) = ""
-     * StringUtil.truncate("abcdefghijklmno", Integer.MAX_VALUE, Integer.MAX_VALUE) = ""
-     * StringUtil.truncate("abcdefghij", 3, -1) = throws an IllegalArgumentException
-     * StringUtil.truncate("abcdefghij", -2, 4) = throws an IllegalArgumentException
+     * Strings.truncate(null, 0, 0) = null
+     * Strings.truncate(null, 2, 4) = null
+     * Strings.truncate("", 0, 10) = ""
+     * Strings.truncate("", 2, 10) = ""
+     * Strings.truncate("abcdefghij", 0, 3) = "abc"
+     * Strings.truncate("abcdefghij", 5, 6) = "fghij"
+     * Strings.truncate("raspberry peach", 10, 15) = "peach"
+     * Strings.truncate("abcdefghijklmno", 0, 10) = "abcdefghij"
+     * Strings.truncate("abcdefghijklmno", -1, 10) = throws an IllegalArgumentException
+     * Strings.truncate("abcdefghijklmno", Integer.MIN_VALUE, 10) = throws an IllegalArgumentException
+     * Strings.truncate("abcdefghijklmno", Integer.MIN_VALUE, Integer.MAX_VALUE) = throws an IllegalArgumentException
+     * Strings.truncate("abcdefghijklmno", 0, Integer.MAX_VALUE) = "abcdefghijklmno"
+     * Strings.truncate("abcdefghijklmno", 1, 10) = "bcdefghijk"
+     * Strings.truncate("abcdefghijklmno", 2, 10) = "cdefghijkl"
+     * Strings.truncate("abcdefghijklmno", 3, 10) = "defghijklm"
+     * Strings.truncate("abcdefghijklmno", 4, 10) = "efghijklmn"
+     * Strings.truncate("abcdefghijklmno", 5, 10) = "fghijklmno"
+     * Strings.truncate("abcdefghijklmno", 5, 5) = "fghij"
+     * Strings.truncate("abcdefghijklmno", 5, 3) = "fgh"
+     * Strings.truncate("abcdefghijklmno", 10, 3) = "klm"
+     * Strings.truncate("abcdefghijklmno", 10, Integer.MAX_VALUE) = "klmno"
+     * Strings.truncate("abcdefghijklmno", 13, 1) = "n"
+     * Strings.truncate("abcdefghijklmno", 13, Integer.MAX_VALUE) = "no"
+     * Strings.truncate("abcdefghijklmno", 14, 1) = "o"
+     * Strings.truncate("abcdefghijklmno", 14, Integer.MAX_VALUE) = "o"
+     * Strings.truncate("abcdefghijklmno", 15, 1) = ""
+     * Strings.truncate("abcdefghijklmno", 15, Integer.MAX_VALUE) = ""
+     * Strings.truncate("abcdefghijklmno", Integer.MAX_VALUE, Integer.MAX_VALUE) = ""
+     * Strings.truncate("abcdefghij", 3, -1) = throws an IllegalArgumentException
+     * Strings.truncate("abcdefghij", -2, 4) = throws an IllegalArgumentException
      * </pre>
      *
      * @param str the String to truncate, may be null
@@ -4116,12 +4169,12 @@ public abstract class Strings {
      * </p>
      *
      * <pre>
-     *   StringUtil.isAscii('a')  = true
-     *   StringUtil.isAscii('A')  = true
-     *   StringUtil.isAscii('3')  = true
-     *   StringUtil.isAscii('-')  = true
-     *   StringUtil.isAscii('\n') = true
-     *   StringUtil.isAscii('&copy;') = false
+     *   Strings.isAscii('a')  = true
+     *   Strings.isAscii('A')  = true
+     *   Strings.isAscii('3')  = true
+     *   Strings.isAscii('-')  = true
+     *   Strings.isAscii('\n') = true
+     *   Strings.isAscii('&copy;') = false
      * </pre>
      *
      * @param ch
@@ -4138,12 +4191,12 @@ public abstract class Strings {
      * </p>
      *
      * <pre>
-     *   StringUtil.isAsciiPrintable('a')  = true
-     *   StringUtil.isAsciiPrintable('A')  = true
-     *   StringUtil.isAsciiPrintable('3')  = true
-     *   StringUtil.isAsciiPrintable('-')  = true
-     *   StringUtil.isAsciiPrintable('\n') = false
-     *   StringUtil.isAsciiPrintable('&copy;') = false
+     *   Strings.isAsciiPrintable('a')  = true
+     *   Strings.isAsciiPrintable('A')  = true
+     *   Strings.isAsciiPrintable('3')  = true
+     *   Strings.isAsciiPrintable('-')  = true
+     *   Strings.isAsciiPrintable('\n') = false
+     *   Strings.isAsciiPrintable('&copy;') = false
      * </pre>
      *
      * @param ch
@@ -4160,12 +4213,12 @@ public abstract class Strings {
      * </p>
      *
      * <pre>
-     *   StringUtil.isAsciiControl('a')  = false
-     *   StringUtil.isAsciiControl('A')  = false
-     *   StringUtil.isAsciiControl('3')  = false
-     *   StringUtil.isAsciiControl('-')  = false
-     *   StringUtil.isAsciiControl('\n') = true
-     *   StringUtil.isAsciiControl('&copy;') = false
+     *   Strings.isAsciiControl('a')  = false
+     *   Strings.isAsciiControl('A')  = false
+     *   Strings.isAsciiControl('3')  = false
+     *   Strings.isAsciiControl('-')  = false
+     *   Strings.isAsciiControl('\n') = true
+     *   Strings.isAsciiControl('&copy;') = false
      * </pre>
      *
      * @param ch
@@ -4182,12 +4235,12 @@ public abstract class Strings {
      * </p>
      *
      * <pre>
-     *   StringUtil.isAsciiAlpha('a')  = true
-     *   StringUtil.isAsciiAlpha('A')  = true
-     *   StringUtil.isAsciiAlpha('3')  = false
-     *   StringUtil.isAsciiAlpha('-')  = false
-     *   StringUtil.isAsciiAlpha('\n') = false
-     *   StringUtil.isAsciiAlpha('&copy;') = false
+     *   Strings.isAsciiAlpha('a')  = true
+     *   Strings.isAsciiAlpha('A')  = true
+     *   Strings.isAsciiAlpha('3')  = false
+     *   Strings.isAsciiAlpha('-')  = false
+     *   Strings.isAsciiAlpha('\n') = false
+     *   Strings.isAsciiAlpha('&copy;') = false
      * </pre>
      *
      * @param ch
@@ -4204,12 +4257,12 @@ public abstract class Strings {
      * </p>
      *
      * <pre>
-     *   StringUtil.isAsciiAlphaUpper('a')  = false
-     *   StringUtil.isAsciiAlphaUpper('A')  = true
-     *   StringUtil.isAsciiAlphaUpper('3')  = false
-     *   StringUtil.isAsciiAlphaUpper('-')  = false
-     *   StringUtil.isAsciiAlphaUpper('\n') = false
-     *   StringUtil.isAsciiAlphaUpper('&copy;') = false
+     *   Strings.isAsciiAlphaUpper('a')  = false
+     *   Strings.isAsciiAlphaUpper('A')  = true
+     *   Strings.isAsciiAlphaUpper('3')  = false
+     *   Strings.isAsciiAlphaUpper('-')  = false
+     *   Strings.isAsciiAlphaUpper('\n') = false
+     *   Strings.isAsciiAlphaUpper('&copy;') = false
      * </pre>
      *
      * @param ch
@@ -4226,12 +4279,12 @@ public abstract class Strings {
      * </p>
      *
      * <pre>
-     *   StringUtil.isAsciiAlphaLower('a')  = true
-     *   StringUtil.isAsciiAlphaLower('A')  = false
-     *   StringUtil.isAsciiAlphaLower('3')  = false
-     *   StringUtil.isAsciiAlphaLower('-')  = false
-     *   StringUtil.isAsciiAlphaLower('\n') = false
-     *   StringUtil.isAsciiAlphaLower('&copy;') = false
+     *   Strings.isAsciiAlphaLower('a')  = true
+     *   Strings.isAsciiAlphaLower('A')  = false
+     *   Strings.isAsciiAlphaLower('3')  = false
+     *   Strings.isAsciiAlphaLower('-')  = false
+     *   Strings.isAsciiAlphaLower('\n') = false
+     *   Strings.isAsciiAlphaLower('&copy;') = false
      * </pre>
      *
      * @param ch
@@ -4248,12 +4301,12 @@ public abstract class Strings {
      * </p>
      *
      * <pre>
-     *   StringUtil.isAsciiNumeric('a')  = false
-     *   StringUtil.isAsciiNumeric('A')  = false
-     *   StringUtil.isAsciiNumeric('3')  = true
-     *   StringUtil.isAsciiNumeric('-')  = false
-     *   StringUtil.isAsciiNumeric('\n') = false
-     *   StringUtil.isAsciiNumeric('&copy;') = false
+     *   Strings.isAsciiNumeric('a')  = false
+     *   Strings.isAsciiNumeric('A')  = false
+     *   Strings.isAsciiNumeric('3')  = true
+     *   Strings.isAsciiNumeric('-')  = false
+     *   Strings.isAsciiNumeric('\n') = false
+     *   Strings.isAsciiNumeric('&copy;') = false
      * </pre>
      *
      * @param ch
@@ -4270,12 +4323,12 @@ public abstract class Strings {
      * </p>
      *
      * <pre>
-     *   StringUtil.isAsciiAlphanumeric('a')  = true
-     *   StringUtil.isAsciiAlphanumeric('A')  = true
-     *   StringUtil.isAsciiAlphanumeric('3')  = true
-     *   StringUtil.isAsciiAlphanumeric('-')  = false
-     *   StringUtil.isAsciiAlphanumeric('\n') = false
-     *   StringUtil.isAsciiAlphanumeric('&copy;') = false
+     *   Strings.isAsciiAlphanumeric('a')  = true
+     *   Strings.isAsciiAlphanumeric('A')  = true
+     *   Strings.isAsciiAlphanumeric('3')  = true
+     *   Strings.isAsciiAlphanumeric('-')  = false
+     *   Strings.isAsciiAlphanumeric('\n') = false
+     *   Strings.isAsciiAlphanumeric('&copy;') = false
      * </pre>
      *
      * @param ch
@@ -5668,14 +5721,13 @@ public abstract class Strings {
 
     /**
      *
-     *
      * @param str
      * @param ch
      * @return
-     * @see N#occurrencesOf(String, String)
+     * @see N#occurrencesOf(String, char)
      */
     @SuppressWarnings("deprecation")
-    public static int occurrencesOf(final String str, final char ch) {
+    public static int countMatches(final String str, final char ch) {
         if (str == null || str.length() == 0) {
             return 0;
         }
@@ -5698,7 +5750,7 @@ public abstract class Strings {
      * @return
      * @see N#occurrencesOf(String, String)
      */
-    public static int occurrencesOf(final String str, final String substr) {
+    public static int countMatches(final String str, final String substr) {
         if (str == null || substr == null) {
             return 0;
         }
@@ -6219,6 +6271,17 @@ public abstract class Strings {
     }
 
     /**
+     * Compare ignore case.
+     *
+     * @param a
+     * @param b
+     * @return
+     */
+    public static int compareIgnoreCase(final String a, final String b) {
+        return a == null ? (b == null ? 0 : -1) : (b == null ? 1 : a.compareToIgnoreCase(b));
+    }
+
+    /**
      * <p>
      * Compares two Strings, and returns the index at which the Stringss begin
      * to differ.
@@ -6581,50 +6644,6 @@ public abstract class Strings {
         }
 
         return a.substring(endIndex - maxLen, endIndex);
-    }
-
-    /**
-     *
-     * @param str
-     * @param ch
-     * @return
-     */
-    public static int countMatches(final String str, final char ch) {
-        if (str == null || str.length() == 0) {
-            return 0;
-        }
-
-        int count = 0;
-
-        for (int i = 0, len = str.length(); i < len; i++) {
-            if (str.charAt(i) == ch) {
-                count++;
-            }
-        }
-
-        return count;
-    }
-
-    /**
-     *
-     * @param str
-     * @param substr
-     * @return
-     */
-    public static int countMatches(final String str, final String substr) {
-        //    if (str == null || substr == null) {
-        //        return 0;
-        //    }
-        //
-        //    int count = 0;
-        //    int index = 0;
-        //
-        //    while ((index = str.indexOf(substr, index)) != N.INDEX_NOT_FOUND) {
-        //        count++;
-        //        index += substr.length();
-        //    }
-
-        return occurrencesOf(str, substr);
     }
 
     /**
@@ -10323,7 +10342,7 @@ public abstract class Strings {
     //        if (N.isNullOrEmpty(a)) {
     //            return EMPTY_STRING;
     //        } else if (a.getClass().equals(String[].class)) {
-    //            return StringUtil.concat((String[]) a);
+    //            return Strings.concat((String[]) a);
     //        }
     //
     //        final StringBuilder sb = ObjectFactory.createStringBuilder();
@@ -10569,15 +10588,15 @@ public abstract class Strings {
      * </ul>
      *
      * <pre>
-     * StringUtil.rotate(null, *)        = null
-     * StringUtil.rotate("", *)          = ""
-     * StringUtil.rotate("abcdefg", 0)   = "abcdefg"
-     * StringUtil.rotate("abcdefg", 2)   = "fgabcde"
-     * StringUtil.rotate("abcdefg", -2)  = "cdefgab"
-     * StringUtil.rotate("abcdefg", 7)   = "abcdefg"
-     * StringUtil.rotate("abcdefg", -7)  = "abcdefg"
-     * StringUtil.rotate("abcdefg", 9)   = "fgabcde"
-     * StringUtil.rotate("abcdefg", -9)  = "cdefgab"
+     * Strings.rotate(null, *)        = null
+     * Strings.rotate("", *)          = ""
+     * Strings.rotate("abcdefg", 0)   = "abcdefg"
+     * Strings.rotate("abcdefg", 2)   = "fgabcde"
+     * Strings.rotate("abcdefg", -2)  = "cdefgab"
+     * Strings.rotate("abcdefg", 7)   = "abcdefg"
+     * Strings.rotate("abcdefg", -7)  = "abcdefg"
+     * Strings.rotate("abcdefg", 9)   = "fgabcde"
+     * Strings.rotate("abcdefg", -9)  = "cdefgab"
      * </pre>
      *
      * @param str the String to rotate, may be null
@@ -10644,11 +10663,11 @@ public abstract class Strings {
      * <p>Overlays part of a String with another String.</p>
      *
      * <pre>
-     * StringUtil.overlay(null, "abc", 0, 0)          = "abc"
-     * StringUtil.overlay("", "abc", 0, 0)          = "abc"
-     * StringUtil.overlay("abcdef", null, 2, 4)     = "abef"
-     * StringUtil.overlay("abcdef", "", 2, 4)       = "abef"
-     * StringUtil.overlay("abcdef", "zzzz", 2, 4)   = "abzzzzef"
+     * Strings.overlay(null, "abc", 0, 0)          = "abc"
+     * Strings.overlay("", "abc", 0, 0)          = "abc"
+     * Strings.overlay("abcdef", null, 2, 4)     = "abef"
+     * Strings.overlay("abcdef", "", 2, 4)       = "abef"
+     * Strings.overlay("abcdef", "zzzz", 2, 4)   = "abzzzzef"
      * </pre>
      *
      * @param str the String to do overlaying in, may be null
@@ -10694,6 +10713,442 @@ public abstract class Strings {
         //        }
 
         return str.substring(0, start) + overlay + str.substring(end);
+    }
+
+    /**
+     * Returns a <code>Boolean</code> with a value represented by the specified
+     * string. The <code>Boolean</code> returned represents a true value if the
+     * string argument is not <code>null</code> and is equal, ignoring case, to
+     * the string {@code "true"}.
+     *
+     * @param str
+     *            a string.
+     * @return
+     */
+    public static boolean parseBoolean(final String str) {
+        return Strings.isEmpty(str) ? false : Boolean.parseBoolean(str);
+    }
+
+    /**
+     * Parses the char.
+     *
+     * @param str
+     * @return
+     */
+    public static char parseChar(final String str) {
+        return Strings.isEmpty(str) ? N.CHAR_ZERO : ((str.length() == 1) ? str.charAt(0) : (char) Integer.parseInt(str));
+    }
+
+    /**
+     * Returns the value by calling {@code Byte.valueOf(String)} if {@code str}
+     * is not {@code null}, otherwise, the default value 0 for {@code byte} is
+     * returned.
+     *
+     * @param str
+     * @return
+     * @throws NumberFormatException If the string is not a parsable {@code byte}.
+     * @see Numbers#toByte(String)
+     * @deprecated replaced by {@code Numbers.toByte(String)}
+     */
+    @Deprecated
+    public static byte parseByte(final String str) throws NumberFormatException {
+        return Numbers.toByte(str);
+    }
+
+    /**
+     * Returns the value by calling {@code Short.valueOf(String)} if {@code str}
+     * is not {@code null}, otherwise, the default value 0 for {@code short} is
+     * returned.
+     *
+     * @param str
+     * @return
+     * @throws NumberFormatException If the string is not a parsable {@code short}.
+     * @see Numbers#toShort(String)
+     * @deprecated replaced by {@code Numbers.toShort(String)}
+     */
+    @Deprecated
+    public static short parseShort(final String str) throws NumberFormatException {
+        return Numbers.toShort(str);
+    }
+
+    /**
+     * Returns the value by calling {@code Integer.valueOf(String)} if
+     * {@code str} is not {@code null}, otherwise, the default value 0 for
+     * {@code int} is returned.
+     *
+     * @param str
+     * @return
+     * @throws NumberFormatException If the string is not a parsable {@code int}.
+     * @see Numbers#toInt(String)
+     * @deprecated replaced by {@code Numbers.toInt(String)}
+     */
+    @Deprecated
+    public static int parseInt(final String str) throws NumberFormatException {
+        return Numbers.toInt(str);
+    }
+
+    /**
+     * Returns the value by calling {@code Long.valueOf(String)} if {@code str}
+     * is not {@code null}, otherwise, the default value 0 for {@code long} is
+     * returned.
+     *
+     * @param str
+     * @return
+     * @throws NumberFormatException If the string is not a parsable {@code long}.
+     * @see Numbers#toLong(String)
+     * @deprecated replaced by {@code Numbers.toLong(String)}
+     */
+    @Deprecated
+    public static long parseLong(final String str) throws NumberFormatException {
+        return Numbers.toLong(str);
+    }
+
+    /**
+     * Returns the value by calling {@code Float.valueOf(String)} if {@code str}
+     * is not {@code null}, otherwise, the default value 0f for {@code float} is
+     * returned.
+     *
+     * @param str
+     * @return
+     * @throws NumberFormatException If the string is not a parsable {@code float}.
+     * @see Numbers#toFloat(String)
+     * @deprecated replaced by {@code Numbers.toFloat(String)}
+     */
+    @Deprecated
+    public static float parseFloat(final String str) throws NumberFormatException {
+        return Numbers.toFloat(str);
+    }
+
+    /**
+     * Returns the value by calling {@code Double.valueOf(String)} if {@code str}
+     * is not {@code null}, otherwise, the default value 0d for {@code double} is
+     * returned.
+     *
+     * @param str
+     * @return
+     * @throws NumberFormatException If the string is not a parsable {@code double}.
+     * @see Numbers#toDouble(String)
+     * @deprecated replaced by {@code Numbers.toDouble(String)}
+     */
+    @Deprecated
+    public static double parseDouble(final String str) throws NumberFormatException {
+        return Numbers.toDouble(str);
+    }
+
+    /**
+     * Base 64 encode.
+     *
+     * @param binaryData
+     * @return
+     */
+    public static String base64Encode(final byte[] binaryData) {
+        if (N.isNullOrEmpty(binaryData)) {
+            return Strings.EMPTY_STRING;
+        }
+
+        return Base64.encodeBase64String(binaryData);
+    }
+
+    /**
+     *
+     *
+     * @param str
+     * @return
+     */
+    public static String base64EncodeString(final String str) {
+        if (Strings.isEmpty(str)) {
+            return Strings.EMPTY_STRING;
+        }
+
+        return Base64.encodeBase64String(str.getBytes());
+    }
+
+    /**
+     *
+     *
+     * @param str
+     * @return
+     */
+    public static String base64EncodeUtf8String(final String str) {
+        if (Strings.isEmpty(str)) {
+            return Strings.EMPTY_STRING;
+        }
+
+        return Base64.encodeBase64String(str.getBytes(Charsets.UTF_8));
+    }
+
+    /**
+     * Base 64 encode chunked.
+     *
+     * @param binaryData
+     * @return
+     */
+    public static String base64EncodeChunked(final byte[] binaryData) {
+        if (N.isNullOrEmpty(binaryData)) {
+            return Strings.EMPTY_STRING;
+        }
+
+        return new String(Base64.encodeBase64Chunked(binaryData), Charsets.US_ASCII);
+    }
+
+    /**
+     * Base 64 decode.
+     *
+     * @param base64String
+     * @return
+     */
+    public static byte[] base64Decode(final String base64String) {
+        if (Strings.isEmpty(base64String)) {
+            return N.EMPTY_BYTE_ARRAY;
+        }
+
+        return Base64.decodeBase64(base64String);
+    }
+
+    /**
+     * Base 64 decode to string.
+     *
+     * @param base64String
+     * @return
+     */
+    public static String base64DecodeToString(final String base64String) {
+        if (Strings.isEmpty(base64String)) {
+            return Strings.EMPTY_STRING;
+        }
+
+        return new String(base64Decode(base64String));
+    }
+
+    /**
+     *
+     *
+     * @param base64String
+     * @return
+     */
+    public static String base64DecodeToUtf8String(final String base64String) {
+        if (Strings.isEmpty(base64String)) {
+            return Strings.EMPTY_STRING;
+        }
+
+        return new String(base64Decode(base64String), Charsets.UTF_8);
+    }
+
+    /**
+     * Base 64 url encode.
+     *
+     * @param binaryData
+     * @return
+     */
+    public static String base64UrlEncode(final byte[] binaryData) {
+        if (N.isNullOrEmpty(binaryData)) {
+            return Strings.EMPTY_STRING;
+        }
+
+        return Base64.encodeBase64URLSafeString(binaryData);
+    }
+
+    /**
+     * Base 64 url decode.
+     *
+     * @param base64String
+     * @return
+     */
+    public static byte[] base64UrlDecode(final String base64String) {
+        if (Strings.isEmpty(base64String)) {
+            return N.EMPTY_BYTE_ARRAY;
+        }
+
+        return Base64.decodeBase64URL(base64String);
+    }
+
+    /**
+     * Base 64 url decode to string.
+     *
+     * @param base64String
+     * @return
+     */
+    public static String base64UrlDecodeToString(final String base64String) {
+        if (Strings.isEmpty(base64String)) {
+            return Strings.EMPTY_STRING;
+        }
+
+        return new String(Base64.decodeBase64URL(base64String));
+    }
+
+    /**
+     *
+     *
+     * @param base64String
+     * @return
+     */
+    public static String base64UrlDecodeToUtf8String(final String base64String) {
+        if (Strings.isEmpty(base64String)) {
+            return Strings.EMPTY_STRING;
+        }
+
+        return new String(Base64.decodeBase64URL(base64String), Charsets.UTF_8);
+    }
+
+    /**
+     *
+     * @param parameters
+     * @return
+     */
+    public static String urlEncode(final Object parameters) {
+        if (parameters == null) {
+            return Strings.EMPTY_STRING;
+        }
+
+        return URLEncodedUtil.encode(parameters);
+    }
+
+    /**
+     *
+     * @param parameters
+     * @param charset
+     * @return
+     */
+    public static String urlEncode(final Object parameters, final Charset charset) {
+        if (parameters == null) {
+            return Strings.EMPTY_STRING;
+        }
+
+        return URLEncodedUtil.encode(parameters, charset);
+    }
+
+    /**
+     *
+     * @param urlQuery
+     * @return
+     */
+    public static Map<String, String> urlDecode(final String urlQuery) {
+        if (Strings.isEmpty(urlQuery)) {
+            return N.newLinkedHashMap();
+        }
+
+        return URLEncodedUtil.decode(urlQuery);
+    }
+
+    /**
+     *
+     * @param urlQuery
+     * @param charset
+     * @return
+     */
+    public static Map<String, String> urlDecode(final String urlQuery, final Charset charset) {
+        if (Strings.isEmpty(urlQuery)) {
+            return N.newLinkedHashMap();
+        }
+
+        return URLEncodedUtil.decode(urlQuery, charset);
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param urlQuery
+     * @param targetClass
+     * @return
+     */
+    public static <T> T urlDecode(final String urlQuery, final Class<? extends T> targetClass) {
+        if (Strings.isEmpty(urlQuery)) {
+            return N.newInstance(targetClass);
+        }
+
+        return URLEncodedUtil.decode(urlQuery, targetClass);
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param urlQuery
+     * @param charset
+     * @param targetClass
+     * @return
+     */
+    public static <T> T urlDecode(final String urlQuery, final Charset charset, final Class<? extends T> targetClass) {
+        if (Strings.isEmpty(urlQuery)) {
+            return N.newInstance(targetClass);
+        }
+
+        return URLEncodedUtil.decode(urlQuery, charset, targetClass);
+    }
+
+    /**
+     * Byte used to pad output.
+     */
+    protected static final byte PAD_DEFAULT = '='; // Allow static access to default
+
+    /**
+     * This array is a lookup table that translates Unicode characters drawn from the "Base64 Alphabet" (as specified
+     * in Table 1 of RFC 2045) into their 6-bit positive integer equivalents. Characters that are not in the Base64
+     * alphabet but fall within the bounds of the array are translated to -1.
+     * <p>
+     * Note: '+' and '-' both decode to 62. '/' and '_' both decode to 63. This means decoder seamlessly handles both
+     * URL_SAFE and STANDARD base64. (The encoder, on the other hand, needs to know ahead of time what to emit).
+     * </p>
+     * <p>
+     * Thanks to "commons" project in ws.apache.org for this code.
+     * http://svn.apache.org/repos/asf/webservices/commons/trunk/modules/util/
+     * </p>
+     */
+    private static final byte[] DECODE_TABLE = {
+            //   0   1   2   3   4   5   6   7   8   9   A   B   C   D   E   F
+            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, // 00-0f
+            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, // 10-1f
+            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 62, -1, 62, -1, 63, // 20-2f + - /
+            52, 53, 54, 55, 56, 57, 58, 59, 60, 61, -1, -1, -1, -1, -1, -1, // 30-3f 0-9
+            -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, // 40-4f A-O
+            15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, -1, -1, -1, -1, 63, // 50-5f P-Z _
+            -1, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, // 60-6f a-o
+            41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51 // 70-7a p-z
+    };
+
+    /**
+     * Returns whether or not the {@code octet} is in the base 64 alphabet.
+     *
+     * @param octet
+     *            The value to test
+     * @return {@code true} if the value is defined in the base 64 alphabet, {@code false} otherwise.
+     * @since 1.4
+     */
+    public static boolean isBase64(final byte octet) {
+        return octet == PAD_DEFAULT || (octet >= 0 && octet < DECODE_TABLE.length && DECODE_TABLE[octet] != -1);
+    }
+
+    /**
+     * Tests a given byte array to see if it contains only valid characters within the Base64 alphabet. Currently the
+     * method treats whitespace as valid.
+     *
+     * @param arrayOctet
+     *            byte array to test
+     * @return {@code true} if all bytes are valid characters in the Base64 alphabet or if the byte array is empty;
+     *         {@code false}, otherwise
+     * @since 1.5
+     */
+    public static boolean isBase64(final byte[] arrayOctet) {
+        for (final byte element : arrayOctet) {
+            if (!isBase64(element) && !Character.isWhitespace(element)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Tests a given String to see if it contains only valid characters within the Base64 alphabet. Currently the
+     * method treats whitespace as valid.
+     *
+     * @param base64
+     *            String to test
+     * @return {@code true} if all characters in the String are valid characters in the Base64 alphabet or if
+     *         the String is empty; {@code false}, otherwise
+     *  @since 1.5
+     */
+    public static boolean isBase64(final String base64) {
+        return isBase64(getBytes(base64, StandardCharsets.UTF_8));
     }
 
     /**
@@ -11791,6 +12246,94 @@ public abstract class Strings {
          */
         public static Optional<String> substringBetween(String str, int fromIndex, String delimiterOfExclusiveBeginIndex, String delimiterOfExclusiveEndIndex) {
             return Optional.ofNullable(Strings.substringBetween(str, fromIndex, delimiterOfExclusiveBeginIndex, delimiterOfExclusiveEndIndex));
+        }
+
+        /**
+         *
+         * @param <T>
+         * @param a
+         * @param b
+         * @return
+         */
+        public static <T extends CharSequence> Optional<T> firstNonEmpty(final T a, final T b) {
+            return Strings.isNotEmpty(a) ? Optional.of(a) : (Strings.isNotEmpty(b) ? Optional.of(b) : Optional.<T> empty());
+        }
+
+        /**
+         *
+         * @param <T>
+         * @param a
+         * @param b
+         * @param c
+         * @return
+         */
+        public static <T extends CharSequence> Optional<T> firstNonEmpty(final T a, final T b, final T c) {
+            return Strings.isNotEmpty(a) ? Optional.of(a)
+                    : (Strings.isNotEmpty(b) ? Optional.of(b) : (Strings.isNotEmpty(c) ? Optional.of(c) : Optional.<T> empty()));
+        }
+
+        /**
+         *
+         * @param <T>
+         * @param a
+         * @return
+         */
+        public static <T extends CharSequence> Optional<T> firstNonEmpty(final T... a) {
+            if (N.isNullOrEmpty(a)) {
+                return Optional.empty();
+            }
+
+            for (T e : a) {
+                if (Strings.isNotEmpty(e)) {
+                    return Optional.of(e);
+                }
+            }
+
+            return Optional.empty();
+        }
+
+        /**
+         *
+         * @param <T>
+         * @param a
+         * @param b
+         * @return
+         */
+        public static <T extends CharSequence> Optional<T> firstNonBlank(final T a, final T b) {
+            return Strings.isNotBlank(a) ? Optional.of(a) : (Strings.isNotBlank(b) ? Optional.of(b) : Optional.<T> empty());
+        }
+
+        /**
+         *
+         * @param <T>
+         * @param a
+         * @param b
+         * @param c
+         * @return
+         */
+        public static <T extends CharSequence> Optional<T> firstNonBlank(final T a, final T b, final T c) {
+            return Strings.isNotBlank(a) ? Optional.of(a)
+                    : (Strings.isNotBlank(b) ? Optional.of(b) : (Strings.isNotBlank(c) ? Optional.of(c) : Optional.<T> empty()));
+        }
+
+        /**
+         *
+         * @param <T>
+         * @param a
+         * @return
+         */
+        public static <T extends CharSequence> Optional<T> firstNonBlank(final T... a) {
+            if (N.isNullOrEmpty(a)) {
+                return Optional.empty();
+            }
+
+            for (T e : a) {
+                if (Strings.isNotBlank(e)) {
+                    return Optional.of(e);
+                }
+            }
+
+            return Optional.empty();
         }
 
         /**

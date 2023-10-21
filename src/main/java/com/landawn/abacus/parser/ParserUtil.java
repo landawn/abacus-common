@@ -71,6 +71,7 @@ import com.landawn.abacus.util.Numbers;
 import com.landawn.abacus.util.ObjectPool;
 import com.landawn.abacus.util.Splitter;
 import com.landawn.abacus.util.Strings;
+import com.landawn.abacus.util.Strings.MoreStringUtil;
 import com.landawn.abacus.util.Tuple.Tuple3;
 import com.landawn.abacus.util.WD;
 import com.landawn.abacus.util.u.Optional;
@@ -167,13 +168,13 @@ public final class ParserUtil {
 
     static String getDateFormat(final Field field, final JsonXmlConfig jsonXmlConfig) {
         if (field != null) {
-            if (field.isAnnotationPresent(JsonXmlField.class) && N.notNullOrEmpty(field.getAnnotation(JsonXmlField.class).dateFormat())) {
+            if (field.isAnnotationPresent(JsonXmlField.class) && Strings.isNotEmpty(field.getAnnotation(JsonXmlField.class).dateFormat())) {
                 return field.getAnnotation(JsonXmlField.class).dateFormat();
             }
 
             try {
                 if (field.isAnnotationPresent(com.alibaba.fastjson.annotation.JSONField.class)
-                        && N.notNullOrEmpty(field.getAnnotation(com.alibaba.fastjson.annotation.JSONField.class).format())) {
+                        && Strings.isNotEmpty(field.getAnnotation(com.alibaba.fastjson.annotation.JSONField.class).format())) {
                     return field.getAnnotation(com.alibaba.fastjson.annotation.JSONField.class).format();
                 }
             } catch (Throwable e) {
@@ -182,7 +183,7 @@ public final class ParserUtil {
 
             try {
                 if (field.isAnnotationPresent(com.alibaba.fastjson2.annotation.JSONField.class)
-                        && N.notNullOrEmpty(field.getAnnotation(com.alibaba.fastjson2.annotation.JSONField.class).format())) {
+                        && Strings.isNotEmpty(field.getAnnotation(com.alibaba.fastjson2.annotation.JSONField.class).format())) {
                     return field.getAnnotation(com.alibaba.fastjson2.annotation.JSONField.class).format();
                 }
             } catch (Throwable e) {
@@ -191,7 +192,7 @@ public final class ParserUtil {
 
             try {
                 if (field.isAnnotationPresent(com.fasterxml.jackson.annotation.JsonFormat.class)
-                        && N.notNullOrEmpty(field.getAnnotation(com.fasterxml.jackson.annotation.JsonFormat.class).pattern())) {
+                        && Strings.isNotEmpty(field.getAnnotation(com.fasterxml.jackson.annotation.JsonFormat.class).pattern())) {
                     return field.getAnnotation(com.fasterxml.jackson.annotation.JsonFormat.class).pattern();
                 }
             } catch (Throwable e) {
@@ -199,7 +200,7 @@ public final class ParserUtil {
             }
         }
 
-        if (jsonXmlConfig != null && N.notNullOrEmpty(jsonXmlConfig.dateFormat())) {
+        if (jsonXmlConfig != null && Strings.isNotEmpty(jsonXmlConfig.dateFormat())) {
             return jsonXmlConfig.dateFormat();
         }
 
@@ -208,13 +209,13 @@ public final class ParserUtil {
 
     static String getTimeZone(final Field field, final JsonXmlConfig jsonXmlConfig) {
         if (field != null) {
-            if (field.isAnnotationPresent(JsonXmlField.class) && N.notNullOrEmpty(field.getAnnotation(JsonXmlField.class).timeZone())) {
+            if (field.isAnnotationPresent(JsonXmlField.class) && Strings.isNotEmpty(field.getAnnotation(JsonXmlField.class).timeZone())) {
                 return field.getAnnotation(JsonXmlField.class).timeZone();
             }
 
             try {
                 if (field.isAnnotationPresent(com.fasterxml.jackson.annotation.JsonFormat.class)
-                        && N.notNullOrEmpty(field.getAnnotation(com.fasterxml.jackson.annotation.JsonFormat.class).timezone())) {
+                        && Strings.isNotEmpty(field.getAnnotation(com.fasterxml.jackson.annotation.JsonFormat.class).timezone())) {
                     return field.getAnnotation(com.fasterxml.jackson.annotation.JsonFormat.class).timezone();
                 }
             } catch (Throwable e) {
@@ -222,7 +223,7 @@ public final class ParserUtil {
             }
         }
 
-        if (jsonXmlConfig != null && N.notNullOrEmpty(jsonXmlConfig.timeZone())) {
+        if (jsonXmlConfig != null && Strings.isNotEmpty(jsonXmlConfig.timeZone())) {
             return jsonXmlConfig.timeZone();
         }
 
@@ -230,11 +231,11 @@ public final class ParserUtil {
     }
 
     static String getNumberFormat(final Field field, final JsonXmlConfig jsonXmlConfig) {
-        if ((field != null) && (field.isAnnotationPresent(JsonXmlField.class) && N.notNullOrEmpty(field.getAnnotation(JsonXmlField.class).numberFormat()))) {
+        if ((field != null) && (field.isAnnotationPresent(JsonXmlField.class) && Strings.isNotEmpty(field.getAnnotation(JsonXmlField.class).numberFormat()))) {
             return field.getAnnotation(JsonXmlField.class).numberFormat();
         }
 
-        if (jsonXmlConfig != null && N.notNullOrEmpty(jsonXmlConfig.numberFormat())) {
+        if (jsonXmlConfig != null && Strings.isNotEmpty(jsonXmlConfig.numberFormat())) {
             return jsonXmlConfig.numberFormat();
         }
 
@@ -324,22 +325,22 @@ public final class ParserUtil {
         String jsonXmlFieldName = null;
 
         if (field != null) {
-            if (field.isAnnotationPresent(JsonXmlField.class) && N.notNullOrEmpty(field.getAnnotation(JsonXmlField.class).name())) {
+            if (field.isAnnotationPresent(JsonXmlField.class) && Strings.isNotEmpty(field.getAnnotation(JsonXmlField.class).name())) {
                 jsonXmlFieldName = field.getAnnotation(JsonXmlField.class).name();
             } else {
                 try {
                     if (field.isAnnotationPresent(com.alibaba.fastjson.annotation.JSONField.class)
-                            && N.notNullOrEmpty(field.getAnnotation(com.alibaba.fastjson.annotation.JSONField.class).name())) {
+                            && Strings.isNotEmpty(field.getAnnotation(com.alibaba.fastjson.annotation.JSONField.class).name())) {
                         jsonXmlFieldName = field.getAnnotation(com.alibaba.fastjson.annotation.JSONField.class).name();
                     }
                 } catch (Throwable e) {
                     // ignore
                 }
 
-                if (N.isNullOrEmpty(jsonXmlFieldName)) {
+                if (Strings.isEmpty(jsonXmlFieldName)) {
                     try {
                         if (field.isAnnotationPresent(com.alibaba.fastjson2.annotation.JSONField.class)
-                                && N.notNullOrEmpty(field.getAnnotation(com.alibaba.fastjson2.annotation.JSONField.class).name())) {
+                                && Strings.isNotEmpty(field.getAnnotation(com.alibaba.fastjson2.annotation.JSONField.class).name())) {
                             jsonXmlFieldName = field.getAnnotation(com.alibaba.fastjson2.annotation.JSONField.class).name();
                         }
                     } catch (Throwable e) {
@@ -347,10 +348,10 @@ public final class ParserUtil {
                     }
                 }
 
-                if (N.isNullOrEmpty(jsonXmlFieldName)) {
+                if (Strings.isEmpty(jsonXmlFieldName)) {
                     try {
                         if (field.isAnnotationPresent(com.fasterxml.jackson.annotation.JsonProperty.class)
-                                && N.notNullOrEmpty(field.getAnnotation(com.fasterxml.jackson.annotation.JsonProperty.class).value())) {
+                                && Strings.isNotEmpty(field.getAnnotation(com.fasterxml.jackson.annotation.JsonProperty.class).value())) {
                             jsonXmlFieldName = field.getAnnotation(com.fasterxml.jackson.annotation.JsonProperty.class).value();
                         }
                     } catch (Throwable e) {
@@ -360,7 +361,7 @@ public final class ParserUtil {
             }
         }
 
-        if (N.notNullOrEmpty(jsonXmlFieldName) && !jsonXmlFieldName.equals(Strings.strip(jsonXmlFieldName))) {
+        if (Strings.isNotEmpty(jsonXmlFieldName) && !jsonXmlFieldName.equals(Strings.strip(jsonXmlFieldName))) {
             throw new IllegalArgumentException(
                     "JsonXmlFieldName name: \"" + jsonXmlFieldName + "\" must not start or end with any whitespace for field: " + field);
         }
@@ -368,7 +369,7 @@ public final class ParserUtil {
         final JsonNameTag[] result = new JsonNameTag[NamingPolicy.values().length];
 
         for (NamingPolicy np : NamingPolicy.values()) {
-            result[np.ordinal()] = new JsonNameTag(N.isNullOrEmpty(jsonXmlFieldName) ? convertName(propName, np) : jsonXmlFieldName);
+            result[np.ordinal()] = new JsonNameTag(Strings.isEmpty(jsonXmlFieldName) ? convertName(propName, np) : jsonXmlFieldName);
         }
 
         return result;
@@ -378,22 +379,22 @@ public final class ParserUtil {
         String jsonXmlFieldName = null;
 
         if (field != null) {
-            if (field.isAnnotationPresent(JsonXmlField.class) && N.notNullOrEmpty(field.getAnnotation(JsonXmlField.class).name())) {
+            if (field.isAnnotationPresent(JsonXmlField.class) && Strings.isNotEmpty(field.getAnnotation(JsonXmlField.class).name())) {
                 jsonXmlFieldName = field.getAnnotation(JsonXmlField.class).name();
             } else {
                 try {
                     if (field.isAnnotationPresent(com.alibaba.fastjson.annotation.JSONField.class)
-                            && N.notNullOrEmpty(field.getAnnotation(com.alibaba.fastjson.annotation.JSONField.class).name())) {
+                            && Strings.isNotEmpty(field.getAnnotation(com.alibaba.fastjson.annotation.JSONField.class).name())) {
                         jsonXmlFieldName = field.getAnnotation(com.alibaba.fastjson.annotation.JSONField.class).name();
                     }
                 } catch (Throwable e) {
                     // ignore
                 }
 
-                if (N.isNullOrEmpty(jsonXmlFieldName)) {
+                if (Strings.isEmpty(jsonXmlFieldName)) {
                     try {
                         if (field.isAnnotationPresent(com.alibaba.fastjson2.annotation.JSONField.class)
-                                && N.notNullOrEmpty(field.getAnnotation(com.alibaba.fastjson2.annotation.JSONField.class).name())) {
+                                && Strings.isNotEmpty(field.getAnnotation(com.alibaba.fastjson2.annotation.JSONField.class).name())) {
                             jsonXmlFieldName = field.getAnnotation(com.alibaba.fastjson2.annotation.JSONField.class).name();
                         }
                     } catch (Throwable e) {
@@ -401,10 +402,10 @@ public final class ParserUtil {
                     }
                 }
 
-                if (N.isNullOrEmpty(jsonXmlFieldName)) {
+                if (Strings.isEmpty(jsonXmlFieldName)) {
                     try {
                         if (field.isAnnotationPresent(com.fasterxml.jackson.annotation.JsonProperty.class)
-                                && N.notNullOrEmpty(field.getAnnotation(com.fasterxml.jackson.annotation.JsonProperty.class).value())) {
+                                && Strings.isNotEmpty(field.getAnnotation(com.fasterxml.jackson.annotation.JsonProperty.class).value())) {
                             jsonXmlFieldName = field.getAnnotation(com.fasterxml.jackson.annotation.JsonProperty.class).value();
                         }
                     } catch (Throwable e) {
@@ -414,7 +415,7 @@ public final class ParserUtil {
             }
         }
 
-        if (N.notNullOrEmpty(jsonXmlFieldName) && !jsonXmlFieldName.equals(Strings.strip(jsonXmlFieldName))) {
+        if (Strings.isNotEmpty(jsonXmlFieldName) && !jsonXmlFieldName.equals(Strings.strip(jsonXmlFieldName))) {
             throw new IllegalArgumentException(
                     "JsonXmlFieldName name: \"" + jsonXmlFieldName + "\" must not start or end with any whitespace for field: " + field);
         }
@@ -422,7 +423,7 @@ public final class ParserUtil {
         final XmlNameTag[] result = new XmlNameTag[NamingPolicy.values().length];
 
         for (NamingPolicy np : NamingPolicy.values()) {
-            result[np.ordinal()] = new XmlNameTag(N.isNullOrEmpty(jsonXmlFieldName) ? convertName(propName, np) : jsonXmlFieldName, typeName, isBean);
+            result[np.ordinal()] = new XmlNameTag(Strings.isEmpty(jsonXmlFieldName) ? convertName(propName, np) : jsonXmlFieldName, typeName, isBean);
         }
 
         return result;
@@ -572,6 +573,8 @@ public final class ParserUtil {
 
         final NamingPolicy jsonXmlNamingPolicy;
 
+        final Exclusion jsonXmlSeriExclusion;
+
         final String typeName;
 
         final JsonNameTag[] jsonNameTags;
@@ -663,6 +666,7 @@ public final class ParserUtil {
             final JsonXmlConfig jsonXmlConfig = (JsonXmlConfig) annotations.get(JsonXmlConfig.class);
             this.jsonXmlNamingPolicy = jsonXmlConfig == null || jsonXmlConfig.namingPolicy() == null ? NamingPolicy.LOWER_CAMEL_CASE
                     : jsonXmlConfig.namingPolicy();
+            this.jsonXmlSeriExclusion = jsonXmlConfig == null || jsonXmlConfig.exclusion() == null ? Exclusion.NULL : jsonXmlConfig.exclusion();
 
             jsonNameTags = getJsonNameTags(name);
             xmlNameTags = getXmlNameTags(name, typeName, true);
@@ -810,7 +814,7 @@ public final class ParserUtil {
             if (this.annotations.containsKey(Table.class)) {
                 tmpTableName = ((Table) this.annotations.get(Table.class)).value();
 
-                if (N.isNullOrEmpty(tmpTableName)) {
+                if (Strings.isEmpty(tmpTableName)) {
                     tmpTableName = ((Table) this.annotations.get(Table.class)).name();
                 }
             } else {
@@ -823,11 +827,11 @@ public final class ParserUtil {
                 }
             }
 
-            if (N.notNullOrEmpty(tmpTableName) && !tmpTableName.equals(Strings.strip(tmpTableName))) {
+            if (Strings.isNotEmpty(tmpTableName) && !tmpTableName.equals(Strings.strip(tmpTableName))) {
                 throw new IllegalArgumentException("Table name: \"" + tmpTableName + "\" must not start or end with any whitespace in class: " + cls);
             }
 
-            this.tableName = N.isNullOrEmpty(tmpTableName) ? Optional.<String> empty() : Optional.ofNullable(tmpTableName);
+            this.tableName = Strings.isEmpty(tmpTableName) ? Optional.<String> empty() : Optional.ofNullable(tmpTableName);
 
             this.fieldTypes = new Class[propInfos.length];
             this.defaultFieldValues = new Object[propInfos.length];
@@ -1128,7 +1132,7 @@ public final class ParserUtil {
 
             inputPropName = inputPropName.trim();
 
-            return inputPropName.equalsIgnoreCase(propNameByMethod) || inputPropName.replace(WD.UNDERSCORE, N.EMPTY_STRING).equalsIgnoreCase(propNameByMethod)
+            return inputPropName.equalsIgnoreCase(propNameByMethod) || inputPropName.replace(WD.UNDERSCORE, Strings.EMPTY_STRING).equalsIgnoreCase(propNameByMethod)
                     || inputPropName.equalsIgnoreCase(ClassUtil.getSimpleClassName(cls) + WD._PERIOD + propNameByMethod)
                     || (inputPropName.startsWith(GET) && inputPropName.substring(3).equalsIgnoreCase(propNameByMethod))
                     || (inputPropName.startsWith(SET) && inputPropName.substring(3).equalsIgnoreCase(propNameByMethod))
@@ -1567,10 +1571,10 @@ public final class ParserUtil {
 
             String timeZoneStr = Strings.trim(getTimeZone(field, jsonXmlConfig));
             String dateFormatStr = Strings.trim(getDateFormat(field, jsonXmlConfig));
-            this.dateFormat = N.isNullOrEmpty(dateFormatStr) ? null : dateFormatStr;
-            this.timeZone = N.isNullOrEmpty(timeZoneStr) ? TimeZone.getDefault() : TimeZone.getTimeZone(timeZoneStr);
+            this.dateFormat = Strings.isEmpty(dateFormatStr) ? null : dateFormatStr;
+            this.timeZone = Strings.isEmpty(timeZoneStr) ? TimeZone.getDefault() : TimeZone.getTimeZone(timeZoneStr);
             this.zoneId = timeZone.toZoneId();
-            this.dateTimeFormatter = N.isNullOrEmpty(dateFormat) ? null : DateTimeFormatter.ofPattern(dateFormat).withZone(zoneId);
+            this.dateTimeFormatter = Strings.isEmpty(dateFormat) ? null : DateTimeFormatter.ofPattern(dateFormat).withZone(zoneId);
             this.isJsonRawValue = isJsonRawValue(field);
 
             JodaDateTimeFormatterHolder tmpJodaDTFH = null;
@@ -1585,16 +1589,16 @@ public final class ParserUtil {
 
             this.jodaDTFH = tmpJodaDTFH;
 
-            this.isLongDateFormat = N.notNullOrEmpty(dateFormat) && "long".equalsIgnoreCase(dateFormat);
+            this.isLongDateFormat = Strings.isNotEmpty(dateFormat) && "long".equalsIgnoreCase(dateFormat);
 
             if (isLongDateFormat && (java.time.LocalTime.class.isAssignableFrom(clazz) || java.time.LocalDate.class.isAssignableFrom(clazz))) {
                 throw new UnsupportedOperationException("Date format can't be 'long' for type java.time.LocalTime/LocalDate");
             }
 
             String numberFormatStr = Strings.trim(getNumberFormat(field, jsonXmlConfig));
-            this.numberFormat = N.isNullOrEmpty(numberFormatStr) ? null : new DecimalFormat(numberFormatStr);
+            this.numberFormat = Strings.isEmpty(numberFormatStr) ? null : new DecimalFormat(numberFormatStr);
 
-            this.hasFormat = N.notNullOrEmpty(dateFormat) || numberFormat != null;
+            this.hasFormat = Strings.isNotEmpty(dateFormat) || numberFormat != null;
 
             this.jsonXmlExpose = field != null && field.isAnnotationPresent(JsonXmlField.class) ? field.getAnnotation(JsonXmlField.class).expose()
                     : JsonXmlField.Expose.DEFAULT;
@@ -1622,7 +1626,7 @@ public final class ParserUtil {
 
                 tmpColumnName = ((Column) this.annotations.get(Column.class)).value();
 
-                if (N.isNullOrEmpty(tmpColumnName)) {
+                if (Strings.isEmpty(tmpColumnName)) {
                     tmpColumnName = ((Column) this.annotations.get(Column.class)).name();
                 }
             } else {
@@ -1637,13 +1641,13 @@ public final class ParserUtil {
                 }
             }
 
-            if (N.notNullOrEmpty(tmpColumnName) && !tmpColumnName.equals(Strings.strip(tmpColumnName))) {
+            if (Strings.isNotEmpty(tmpColumnName) && !tmpColumnName.equals(Strings.strip(tmpColumnName))) {
                 throw new IllegalArgumentException("Column name: \"" + tmpColumnName + "\" must not start or end with any whitespace for field: " + field);
             }
 
             this.isMarkedToColumn = tmpIsMarkedToColumn;
 
-            this.columnName = N.isNullOrEmpty(tmpColumnName) ? Optional.<String> empty() : Optional.ofNullable(tmpColumnName);
+            this.columnName = Strings.isEmpty(tmpColumnName) ? Optional.<String> empty() : Optional.ofNullable(tmpColumnName);
 
             this.canSetFieldByGetMethod = ClassUtil.isRegisteredXMLBindingClass(declaringClass) && getMethod != null
                     && (Map.class.isAssignableFrom(getMethod.getReturnType()) || Collection.class.isAssignableFrom(getMethod.getReturnType()));
@@ -2103,7 +2107,7 @@ public final class ParserUtil {
             if (typeAnno != null && (typeAnno.scope() == Scope.ALL || typeAnno.scope() == Scope.PARSER)) {
                 final String typeName = getTypeName(typeAnno, propClass);
 
-                if (N.notNullOrEmpty(typeName)) {
+                if (Strings.isNotEmpty(typeName)) {
                     return typeName;
                 }
             }
@@ -2111,7 +2115,7 @@ public final class ParserUtil {
             final JsonXmlField jsonXmlFieldAnno = getAnnotation(JsonXmlField.class);
 
             if (jsonXmlFieldAnno != null) {
-                if (N.notNullOrEmpty(jsonXmlFieldAnno.type())) {
+                if (Strings.isNotEmpty(jsonXmlFieldAnno.type())) {
                     return jsonXmlFieldAnno.type();
                 } else if (propClass.isEnum()) {
                     return ClassUtil.getCanonicalClassName(propClass) + "(" + (getEnumerated(field, jsonXmlConfig) == EnumBy.ORDINAL) + ")";
@@ -2131,7 +2135,7 @@ public final class ParserUtil {
             final JsonXmlField jsonXmlFieldAnno = getAnnotation(JsonXmlField.class);
 
             if (jsonXmlFieldAnno != null) {
-                if (N.notNullOrEmpty(jsonXmlFieldAnno.type())) {
+                if (Strings.isNotEmpty(jsonXmlFieldAnno.type())) {
                     return jsonXmlFieldAnno.type();
                 } else if (propClass.isEnum()) {
                     return ClassUtil.getCanonicalClassName(propClass) + "(" + (getEnumerated(field, jsonXmlConfig) == EnumBy.ORDINAL) + ")";
@@ -2147,7 +2151,7 @@ public final class ParserUtil {
             if (typeAnno != null && (typeAnno.scope() == Scope.ALL || typeAnno.scope() == Scope.PARSER)) {
                 final String typeName = getTypeName(typeAnno, propClass);
 
-                if (N.notNullOrEmpty(typeName)) {
+                if (Strings.isNotEmpty(typeName)) {
                     return typeName;
                 }
             }
@@ -2171,7 +2175,7 @@ public final class ParserUtil {
             if (typeAnno != null && (typeAnno.scope() == Scope.ALL || typeAnno.scope() == Scope.DB)) {
                 final String typeName = getTypeName(typeAnno, propClass);
 
-                if (N.notNullOrEmpty(typeName)) {
+                if (Strings.isNotEmpty(typeName)) {
                     return typeName;
                 }
             }
@@ -2182,7 +2186,7 @@ public final class ParserUtil {
         private String getTypeName(final com.landawn.abacus.annotation.Type typeAnno, final Class<?> propClass) {
             @SuppressWarnings("deprecation")
 
-            final Optional<String> typeName = N.firstNonEmpty(typeAnno.value(), typeAnno.name());
+            final Optional<String> typeName = MoreStringUtil.firstNonEmpty(typeAnno.value(), typeAnno.name());
 
             if (typeName.isPresent() && !typeName.get().equals(Strings.strip(typeName.get()))) {
                 throw new IllegalArgumentException("Type name: \"" + typeName.get() + "\" must not start or end with any whitespace for field: " + field);
@@ -2254,7 +2258,7 @@ public final class ParserUtil {
         @SuppressWarnings("unused")
         private <T> Type<T> getType(final String annoType, final Field field, final Method getMethod, final Method setMethod, final Class<?> propClass,
                 final Class<?> beanClass) {
-            if (N.isNullOrEmpty(annoType)) {
+            if (Strings.isEmpty(annoType)) {
                 final String parameterizedTypeName = field != null ? ClassUtil.getParameterizedTypeNameByField(field)
                         : ClassUtil.getParameterizedTypeNameByMethod((setMethod == null) ? getMethod : setMethod);
 
@@ -2268,7 +2272,7 @@ public final class ParserUtil {
                     // ignore
                 }
 
-                if ((localType == null || localType.getClass().equals(ObjectType.class)) && N.notNullOrEmpty(ClassUtil.getPackageName(beanClass))) {
+                if ((localType == null || localType.getClass().equals(ObjectType.class)) && Strings.isNotEmpty(ClassUtil.getPackageName(beanClass))) {
                     final String pkgName = ClassUtil.getPackageName(beanClass);
                     final StringBuilder sb = new StringBuilder();
                     int start = 0;

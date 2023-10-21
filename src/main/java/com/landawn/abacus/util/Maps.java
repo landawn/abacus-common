@@ -791,7 +791,7 @@ public final class Maps {
         } else if (val instanceof Boolean) {
             return OptionalBoolean.of((Boolean) val);
         } else {
-            return OptionalBoolean.of(N.parseBoolean(N.toString(val)));
+            return OptionalBoolean.of(Strings.parseBoolean(N.toString(val)));
         }
     }
 
@@ -817,7 +817,7 @@ public final class Maps {
         } else if (val instanceof Boolean) {
             return (Boolean) val;
         } else {
-            return N.parseBoolean(N.toString(val));
+            return Strings.parseBoolean(N.toString(val));
         }
     }
 
@@ -841,7 +841,7 @@ public final class Maps {
         } else if (val instanceof Character) {
             return OptionalChar.of(((Character) val));
         } else {
-            return OptionalChar.of(N.parseChar(N.toString(val)));
+            return OptionalChar.of(Strings.parseChar(N.toString(val)));
         }
     }
 
@@ -867,7 +867,7 @@ public final class Maps {
         } else if (val instanceof Character) {
             return (Character) val;
         } else {
-            return N.parseChar(N.toString(val));
+            return Strings.parseChar(N.toString(val));
         }
     }
 
@@ -2469,7 +2469,7 @@ public final class Maps {
             return;
         }
 
-        if (N.isNullOrEmpty(prefix)) {
+        if (Strings.isEmpty(prefix)) {
             for (Map.Entry<String, Object> entry : map.entrySet()) {
                 if (entry.getValue() instanceof Map) {
                     flatten((Map<String, Object>) entry.getValue(), entry.getKey(), delimiter, output);
@@ -3808,7 +3808,7 @@ public final class Maps {
                 return (Boolean) value;
             }
 
-            return N.parseBoolean(N.toString(value));
+            return Strings.parseBoolean(N.toString(value));
         }
 
         /**
@@ -3826,7 +3826,7 @@ public final class Maps {
                 return (Character) value;
             }
 
-            return N.parseChar(N.toString(value));
+            return Strings.parseChar(N.toString(value));
         }
 
         /**

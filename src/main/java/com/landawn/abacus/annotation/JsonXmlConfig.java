@@ -21,6 +21,7 @@ import java.lang.annotation.Target;
 import java.text.DecimalFormat;
 
 import com.landawn.abacus.annotation.Type.EnumBy;
+import com.landawn.abacus.parser.Exclusion;
 import com.landawn.abacus.util.NamingPolicy;
 
 @Target({ ElementType.TYPE })
@@ -28,31 +29,31 @@ import com.landawn.abacus.util.NamingPolicy;
 public @interface JsonXmlConfig {
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     NamingPolicy namingPolicy() default NamingPolicy.LOWER_CAMEL_CASE;
 
     /**
      * values can be regular expressions.
      *
-     * @return 
+     * @return
      * @see String#matches(String)
      */
     String[] ignoredFields() default {};
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     String dateFormat() default "";
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     String timeZone() default "";
 
@@ -64,9 +65,16 @@ public @interface JsonXmlConfig {
     String numberFormat() default "";
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     EnumBy enumerated() default EnumBy.NAME;
+
+    /**
+     *
+     *
+     * @return
+     */
+    Exclusion exclusion() default Exclusion.NULL;
 }

@@ -6482,7 +6482,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     public ExceptionalStream<T, E> top(int n) {
         assertNotClosed();
 
-        return top(n, Comparators.NATURAL_ORDER);
+        return top(n, (Comparator<T>) Comparators.nullsFirst());
     }
 
     /**
@@ -6952,9 +6952,9 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     @IntermediateOp
     @TerminalOpTriggered
     public ExceptionalStream<T, E> reverseSorted(Comparator<? super T> comparator) {
-        final Comparator<? super T> cmp = comparator == null ? Comparators.REVERSED_ORDER : comparator.reversed(); //NOSONAR
+        final Comparator<? super T> cmpToUse = Comparators.reverseOrder(comparator);
 
-        return sorted(cmp);
+        return sorted(cmpToUse);
     }
 
     /**
@@ -6966,9 +6966,9 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     @IntermediateOp
     @TerminalOpTriggered
     public ExceptionalStream<T, E> reverseSortedBy(@SuppressWarnings("rawtypes") final Function<? super T, ? extends Comparable> keyMapper) {
-        final Comparator<? super T> cmp = Comparators.comparingBy(keyMapper).reversed();
+        final Comparator<? super T> cmpToUse = Comparators.reversedComparingBy(keyMapper);
 
-        return sorted(cmp);
+        return sorted(cmpToUse);
     }
 
     /**
@@ -8467,7 +8467,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                 return Optional.of(elements.next());
             }
 
-            comparator = comparator == null ? Comparators.NATURAL_ORDER : comparator;
+            comparator = comparator == null ? (Comparator<T>) Comparators.nullsLast() : comparator;
             T candidate = elements.next();
             T next = null;
 
@@ -8497,9 +8497,9 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
         checkArgNotNull(keyMapper, "keyMapper");
 
-        try {
-            final Comparator<? super T> comparator = Fn.comparingBy(keyMapper);
+        final Comparator<? super T> comparator = Comparators.comparingByIfNotNullOrElseNullsLast(keyMapper);
 
+        try {
             return min(comparator);
         } finally {
             close();
@@ -8529,7 +8529,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                 return Optional.of(next);
             }
 
-            comparator = comparator == null ? Comparators.NATURAL_ORDER : comparator;
+            comparator = comparator == null ? (Comparator<T>) Comparators.nullsFirst() : comparator;
             T candidate = elements.next();
             T next = null;
 
@@ -8560,9 +8560,9 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
         checkArgNotNull(keyMapper, "keyMapper");
 
-        try {
-            final Comparator<? super T> comparator = Fn.comparingBy(keyMapper);
+        final Comparator<? super T> comparator = Comparators.comparingByIfNotNullOrElseNullsFirst(keyMapper);
 
+        try {
             return max(comparator);
         } finally {
             close();
@@ -9041,7 +9041,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                 return queue.size() < k ? (Optional<T>) Optional.empty() : Optional.of(queue.peek());
             }
 
-            comparator = comparator == null ? Comparators.NATURAL_ORDER : comparator;
+            comparator = comparator == null ? (Comparator<T>) Comparators.nullsFirst() : comparator;
             final Queue<T> queue = new PriorityQueue<>(k, comparator);
             T e = null;
 
@@ -13003,8 +13003,8 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         }, sorted, cmp, (Deque) closeHandlers);
     }
 
-    // #################################################################################################################################
-    // #################################################################################################################################
+    // #######################################9X9#######################################
+    // #######################################9X9#######################################
 
     /**
      *

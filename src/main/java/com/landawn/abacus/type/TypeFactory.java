@@ -57,6 +57,7 @@ import com.landawn.abacus.util.Pair;
 import com.landawn.abacus.util.Range;
 import com.landawn.abacus.util.SetMultimap;
 import com.landawn.abacus.util.Sheet;
+import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.Timed;
 import com.landawn.abacus.util.Triple;
 import com.landawn.abacus.util.Tuple.Tuple1;
@@ -410,7 +411,7 @@ public final class TypeFactory {
     static String getClassName(Class<?> cls) {
         String clsName = ClassUtil.getCanonicalClassName(cls);
 
-        if (N.isNullOrEmpty(clsName)) {
+        if (Strings.isEmpty(clsName)) {
             clsName = cls.getName();
         }
 
@@ -427,7 +428,7 @@ public final class TypeFactory {
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     private static <T> Type<T> getType(Class cls, String typeName) {
-        if (N.isNullOrEmpty(typeName)) {
+        if (Strings.isEmpty(typeName)) {
             typeName = getClassName(cls);
         }
 
@@ -937,7 +938,7 @@ public final class TypeFactory {
 
                         if (!(val.isObjectType() || val.clazz().equals(Object[].class)) && val.clazz().isAssignableFrom(cls)) {
                             try {
-                                if ((val.isGenericType() || N.notNullOrEmpty(typeParameters) || N.notNullOrEmpty(parameters)) && N.notNullOrEmpty(typeName)) {
+                                if ((val.isGenericType() || N.notNullOrEmpty(typeParameters) || N.notNullOrEmpty(parameters)) && Strings.isNotEmpty(typeName)) {
                                     final Constructor<? extends Type> constructor = ClassUtil.getDeclaredConstructor(val.getClass(), String.class);
 
                                     if (constructor != null) {
@@ -966,7 +967,7 @@ public final class TypeFactory {
                     }
 
                     if (type == null) {
-                        type = N.isNullOrEmpty(typeName) ? new ObjectType<>(cls) : new ObjectType<>(typeName, cls);
+                        type = Strings.isEmpty(typeName) ? new ObjectType<>(cls) : new ObjectType<>(typeName, cls);
                     }
                 }
             }

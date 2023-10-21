@@ -21,6 +21,7 @@ import com.landawn.abacus.parser.SerializationConfig;
 import com.landawn.abacus.util.CharList;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.Strings;
 
 /**
  *
@@ -77,7 +78,7 @@ public final class PrimitiveCharListType extends AbstractPrimitiveListType<CharL
      */
     @Override
     public CharList valueOf(String str) {
-        return N.isNullOrEmpty(str) ? null : CharList.of(arrayType.valueOf(str));
+        return Strings.isEmpty(str) ? null : CharList.of(arrayType.valueOf(str));
     }
 
     /**

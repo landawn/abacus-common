@@ -14,7 +14,7 @@
 
 package com.landawn.abacus.type;
 
-import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.Strings;
 
 /**
  *
@@ -71,6 +71,6 @@ public class TypeType extends AbstractType<Type> {
      */
     @Override
     public Type valueOf(String str) {
-        return (N.isNullOrEmpty(str)) ? null : TypeFactory.getType(str);
+        return (Strings.isEmpty(str)) ? null : TypeFactory.getType(str);
     }
 }

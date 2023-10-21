@@ -2257,7 +2257,7 @@ public abstract class Collectors {
      * @return
      */
     public static <T extends Comparable<? super T>> Collector<T, ?, Optional<T>> min() {
-        return min(Fn.nullsLast());
+        return min(Comparators.nullsLast());
     }
 
     /**
@@ -2306,7 +2306,7 @@ public abstract class Collectors {
      * @return
      */
     public static <T extends Comparable<? super T>> Collector<T, ?, T> minOrElseGet(final Supplier<? extends T> supplierForEmpty) {
-        return minOrElseGet(Fn.nullsLast(), supplierForEmpty);
+        return minOrElseGet(Comparators.nullsLast(), supplierForEmpty);
     }
 
     /**
@@ -2332,7 +2332,7 @@ public abstract class Collectors {
      * @return
      */
     public static <T extends Comparable<? super T>> Collector<T, ?, T> minOrElseThrow() {
-        return minOrElseThrow(Fn.nullsLast());
+        return minOrElseThrow(Comparators.nullsLast());
     }
 
     /**
@@ -2373,7 +2373,7 @@ public abstract class Collectors {
      */
     @SuppressWarnings("rawtypes")
     public static <T> Collector<T, ?, Optional<T>> minBy(final Function<? super T, ? extends Comparable> keyMapper) {
-        return min(Comparators.comparingBy(keyMapper));
+        return min(Comparators.comparingByIfNotNullOrElseNullsLast(keyMapper));
     }
 
     /**
@@ -2387,7 +2387,7 @@ public abstract class Collectors {
     @SuppressWarnings("rawtypes")
     public static <T> Collector<T, ?, T> minByOrElseGet(final Function<? super T, ? extends Comparable> keyMapper,
             final Supplier<? extends T> supplierForEmpty) {
-        return minOrElseGet(Comparators.comparingBy(keyMapper), supplierForEmpty);
+        return minOrElseGet(Comparators.comparingByIfNotNullOrElseNullsLast(keyMapper), supplierForEmpty);
     }
 
     /**
@@ -2399,7 +2399,7 @@ public abstract class Collectors {
      */
     @SuppressWarnings("rawtypes")
     public static <T> Collector<T, ?, T> minByOrElseThrow(final Function<? super T, ? extends Comparable> keyMapper) {
-        return minOrElseThrow(Comparators.comparingBy(keyMapper));
+        return minOrElseThrow(Comparators.comparingByIfNotNullOrElseNullsLast(keyMapper));
     }
 
     /**
@@ -2413,7 +2413,7 @@ public abstract class Collectors {
     @SuppressWarnings("rawtypes")
     public static <T> Collector<T, ?, T> minByOrElseThrow(final Function<? super T, ? extends Comparable> keyMapper,
             final Supplier<? extends RuntimeException> exceptionSupplier) {
-        return minOrElseThrow(Comparators.comparingBy(keyMapper), exceptionSupplier);
+        return minOrElseThrow(Comparators.comparingByIfNotNullOrElseNullsLast(keyMapper), exceptionSupplier);
     }
 
     /**
@@ -2423,7 +2423,7 @@ public abstract class Collectors {
      * @return
      */
     public static <T extends Comparable<? super T>> Collector<T, ?, Optional<T>> max() {
-        return max(Fn.nullsFirst());
+        return max(Comparators.nullsFirst());
     }
 
     /**
@@ -2472,7 +2472,7 @@ public abstract class Collectors {
      * @return
      */
     public static <T extends Comparable<? super T>> Collector<T, ?, T> maxOrElseGet(final Supplier<? extends T> supplierForEmpty) {
-        return maxOrElseGet(Fn.nullsFirst(), supplierForEmpty);
+        return maxOrElseGet(Comparators.nullsFirst(), supplierForEmpty);
     }
 
     /**
@@ -2498,7 +2498,7 @@ public abstract class Collectors {
      * @return
      */
     public static <T extends Comparable<? super T>> Collector<T, ?, T> maxOrElseThrow() {
-        return maxOrElseThrow(Fn.nullsFirst());
+        return maxOrElseThrow(Comparators.nullsFirst());
     }
 
     /**
@@ -2537,7 +2537,7 @@ public abstract class Collectors {
      */
     @SuppressWarnings("rawtypes")
     public static <T> Collector<T, ?, Optional<T>> maxBy(final Function<? super T, ? extends Comparable> keyMapper) {
-        return max(Comparators.comparingBy(keyMapper));
+        return max(Comparators.comparingByIfNotNullOrElseNullsFirst(keyMapper));
     }
 
     /**
@@ -2551,7 +2551,7 @@ public abstract class Collectors {
     @SuppressWarnings("rawtypes")
     public static <T> Collector<T, ?, T> maxByOrElseGet(final Function<? super T, ? extends Comparable> keyMapper,
             final Supplier<? extends T> supplierForEmpty) {
-        return maxOrElseGet(Comparators.comparingBy(keyMapper), supplierForEmpty);
+        return maxOrElseGet(Comparators.comparingByIfNotNullOrElseNullsFirst(keyMapper), supplierForEmpty);
     }
 
     /**
@@ -2563,7 +2563,7 @@ public abstract class Collectors {
      */
     @SuppressWarnings("rawtypes")
     public static <T> Collector<T, ?, T> maxByOrElseThrow(final Function<? super T, ? extends Comparable> keyMapper) {
-        return maxOrElseThrow(Comparators.comparingBy(keyMapper));
+        return maxOrElseThrow(Comparators.comparingByIfNotNullOrElseNullsFirst(keyMapper));
     }
 
     /**
@@ -2577,7 +2577,7 @@ public abstract class Collectors {
     @SuppressWarnings("rawtypes")
     public static <T> Collector<T, ?, T> maxByOrElseThrow(final Function<? super T, ? extends Comparable> keyMapper,
             final Supplier<? extends RuntimeException> exceptionSupplier) {
-        return maxOrElseThrow(Comparators.comparingBy(keyMapper), exceptionSupplier);
+        return maxOrElseThrow(Comparators.comparingByIfNotNullOrElseNullsFirst(keyMapper), exceptionSupplier);
     }
 
     /**
@@ -2595,7 +2595,7 @@ public abstract class Collectors {
      * @see #minAll(Collector)
      */
     public static <T extends Comparable<? super T>> Collector<T, ?, List<T>> minAll() {
-        return minAll(Fn.nullsLast());
+        return minAll(Comparators.nullsLast());
     }
 
     /**
@@ -2627,7 +2627,7 @@ public abstract class Collectors {
      * @return
      */
     public static <T> Collector<T, ?, List<T>> minAll(Comparator<? super T> comparator, int atMostSize) {
-        return maxAll(Fn.reverseOrder(comparator), atMostSize);
+        return maxAll(Comparators.reverseOrder(comparator), atMostSize);
     }
 
     /**
@@ -2651,7 +2651,7 @@ public abstract class Collectors {
      */
     @SuppressWarnings("rawtypes")
     public static <T extends Comparable, A, R> Collector<T, ?, R> minAll(Collector<T, A, R> downstream) {
-        return minAll(Fn.nullsLast(), downstream);
+        return minAll(Comparators.nullsLast(), downstream);
     }
 
     /**
@@ -2675,7 +2675,7 @@ public abstract class Collectors {
      * @see #minAll()
      */
     public static <T, A, R> Collector<T, ?, R> minAll(Comparator<? super T> comparator, Collector<T, A, R> downstream) {
-        return maxAll(Fn.reverseOrder(comparator), downstream);
+        return maxAll(Comparators.reverseOrder(comparator), downstream);
     }
 
     /**
@@ -2688,7 +2688,7 @@ public abstract class Collectors {
      */
     @SuppressWarnings("rawtypes")
     public static <T extends Comparable, R> Collector<T, ?, Optional<Pair<T, R>>> minAlll(Collector<T, ?, R> downstream) {
-        return minAlll(Fn.nullsLast(), downstream);
+        return minAlll(Comparators.nullsLast(), downstream);
     }
 
     /**
@@ -2717,7 +2717,7 @@ public abstract class Collectors {
      */
     public static <T, R, RR> Collector<T, ?, RR> minAlll(final Comparator<? super T> comparator, final Collector<? super T, ?, R> downstream,
             final Function<Optional<Pair<T, R>>, RR> finisher) {
-        return maxAlll(Fn.reverseOrder(comparator), downstream, finisher);
+        return maxAlll(Comparators.reverseOrder(comparator), downstream, finisher);
     }
 
     /**
@@ -2735,7 +2735,7 @@ public abstract class Collectors {
      * @see #maxAll(Collector)
      */
     public static <T extends Comparable<? super T>> Collector<T, ?, List<T>> maxAll() {
-        return maxAll(Fn.nullsFirst());
+        return maxAll(Comparators.nullsFirst());
     }
 
     /**
@@ -2845,7 +2845,7 @@ public abstract class Collectors {
      */
     @SuppressWarnings("rawtypes")
     public static <T extends Comparable, R> Collector<T, ?, R> maxAll(Collector<T, ?, R> downstream) {
-        return maxAll(Fn.nullsFirst(), downstream);
+        return maxAll(Comparators.nullsFirst(), downstream);
     }
 
     /**
@@ -2968,7 +2968,7 @@ public abstract class Collectors {
      */
     @SuppressWarnings("rawtypes")
     public static <T extends Comparable, R> Collector<T, ?, Optional<Pair<T, R>>> maxAlll(Collector<T, ?, R> downstream) {
-        return maxAlll(Fn.nullsFirst(), downstream);
+        return maxAlll(Comparators.nullsFirst(), downstream);
     }
 
     /**
@@ -3097,7 +3097,7 @@ public abstract class Collectors {
      */
     @SuppressWarnings("rawtypes")
     public static <T extends Comparable> Collector<T, ?, Optional<Pair<T, T>>> minMax() {
-        return minMax(Fn.naturalOrder());
+        return minMax(Comparators.naturalOrder());
     }
 
     /**
@@ -3183,7 +3183,7 @@ public abstract class Collectors {
      */
     public static <T extends Comparable<? super T>> Collector<T, ?, Pair<T, T>> minMaxOrElseGet(
             final Supplier<Pair<? extends T, ? extends T>> supplierForEmpty) {
-        return minMaxOrElseGet(Fn.naturalOrder(), supplierForEmpty);
+        return minMaxOrElseGet(Comparators.naturalOrder(), supplierForEmpty);
     }
 
     /**
@@ -3212,7 +3212,7 @@ public abstract class Collectors {
      * @return
      */
     public static <T extends Comparable<? super T>> Collector<T, ?, Pair<T, T>> minMaxOrElseThrow() {
-        return minMaxOrElseThrow(Fn.naturalOrder());
+        return minMaxOrElseThrow(Comparators.naturalOrder());
     }
 
     /**

@@ -66,7 +66,7 @@ public final class TestUtil {
             type = propInfo.jsonXmlType;
 
             if (String.class.equals(parameterClass)) {
-                propValue = N.uuid().substring(0, 16);
+                propValue = Strings.uuid().substring(0, 16);
             } else if (boolean.class.equals(parameterClass) || Boolean.class.equals(parameterClass)) {
                 propValue = N.RAND.nextInt() % 2 == 0 ? false : true;
             } else if (char.class.equals(parameterClass) || Character.class.equals(parameterClass)) {

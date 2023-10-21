@@ -15,7 +15,7 @@
 package com.landawn.abacus.type;
 
 import com.landawn.abacus.util.EntityId;
-import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.Strings;
 
 /**
  *
@@ -92,6 +92,6 @@ public class EntityIdType extends AbstractType<EntityId> {
      */
     @Override
     public EntityId valueOf(String str) {
-        return (N.isNullOrEmpty(str)) ? null : (EntityId) Utils.jsonParser.deserialize(typeClass, str);
+        return (Strings.isEmpty(str)) ? null : (EntityId) Utils.jsonParser.deserialize(typeClass, str);
     }
 }

@@ -21,6 +21,7 @@ import com.landawn.abacus.parser.SerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.DoubleList;
 import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.Strings;
 
 /**
  *
@@ -77,7 +78,7 @@ public final class PrimitiveDoubleListType extends AbstractPrimitiveListType<Dou
      */
     @Override
     public DoubleList valueOf(String str) {
-        return N.isNullOrEmpty(str) ? null : DoubleList.of(arrayType.valueOf(str));
+        return Strings.isEmpty(str) ? null : DoubleList.of(arrayType.valueOf(str));
     }
 
     /**

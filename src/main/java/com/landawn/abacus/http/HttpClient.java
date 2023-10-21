@@ -467,87 +467,6 @@ public final class HttpClient {
 
     /**
      *
-     *
-     * @return
-     */
-    public ContinuableFuture<String> asyncGet() {
-        return asyncGet(String.class);
-    }
-
-    /**
-     *
-     * @param settings
-     * @return
-     */
-    public ContinuableFuture<String> asyncGet(final HttpSettings settings) {
-        return asyncGet(String.class, settings);
-    }
-
-    /**
-     *
-     * @param queryParameters
-     * @return
-     */
-    public ContinuableFuture<String> asyncGet(final Object queryParameters) {
-        return asyncGet(String.class, queryParameters);
-    }
-
-    /**
-     *
-     * @param queryParameters
-     * @param settings
-     * @return
-     */
-    public ContinuableFuture<String> asyncGet(final Object queryParameters, final HttpSettings settings) {
-        return asyncGet(String.class, queryParameters, settings);
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param resultClass
-     * @return
-     */
-    public <T> ContinuableFuture<T> asyncGet(final Class<T> resultClass) {
-        return asyncGet(resultClass, null, _settings);
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param resultClass
-     * @param settings
-     * @return
-     */
-    public <T> ContinuableFuture<T> asyncGet(final Class<T> resultClass, final HttpSettings settings) {
-        return asyncGet(resultClass, null, settings);
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param resultClass
-     * @param queryParameters
-     * @return
-     */
-    public <T> ContinuableFuture<T> asyncGet(final Class<T> resultClass, final Object queryParameters) {
-        return asyncGet(resultClass, queryParameters, _settings);
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param resultClass
-     * @param queryParameters
-     * @param settings
-     * @return
-     */
-    public <T> ContinuableFuture<T> asyncGet(final Class<T> resultClass, final Object queryParameters, final HttpSettings settings) {
-        return asyncExecute(HttpMethod.GET, resultClass, queryParameters, settings);
-    }
-
-    /**
-     *
      * @return
      * @throws UncheckedIOException the unchecked IO exception
      */
@@ -636,6 +555,728 @@ public final class HttpClient {
 
     /**
      *
+     * @param request
+     * @return
+     * @throws UncheckedIOException the unchecked IO exception
+     */
+    public String post(final Object request) throws UncheckedIOException {
+        return post(String.class, request);
+    }
+
+    /**
+     *
+     * @param request
+     * @param settings
+     * @return
+     * @throws UncheckedIOException the unchecked IO exception
+     */
+    public String post(final Object request, final HttpSettings settings) throws UncheckedIOException {
+        return post(String.class, request, settings);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param resultClass
+     * @param request
+     * @return
+     * @throws UncheckedIOException the unchecked IO exception
+     */
+    public <T> T post(final Class<T> resultClass, final Object request) throws UncheckedIOException {
+        return post(resultClass, request, _settings);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param resultClass
+     * @param request
+     * @param settings
+     * @return
+     * @throws UncheckedIOException the unchecked IO exception
+     */
+    public <T> T post(final Class<T> resultClass, final Object request, final HttpSettings settings) throws UncheckedIOException {
+        return execute(HttpMethod.POST, resultClass, request, settings);
+    }
+
+    /**
+     *
+     * @param request
+     * @return
+     * @throws UncheckedIOException the unchecked IO exception
+     */
+    public String put(final Object request) throws UncheckedIOException {
+        return put(String.class, request);
+    }
+
+    /**
+     *
+     * @param request
+     * @param settings
+     * @return
+     * @throws UncheckedIOException the unchecked IO exception
+     */
+    public String put(final Object request, final HttpSettings settings) throws UncheckedIOException {
+        return put(String.class, request, settings);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param resultClass
+     * @param request
+     * @return
+     * @throws UncheckedIOException the unchecked IO exception
+     */
+    public <T> T put(final Class<T> resultClass, final Object request) throws UncheckedIOException {
+        return put(resultClass, request, _settings);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param resultClass
+     * @param request
+     * @param settings
+     * @return
+     * @throws UncheckedIOException the unchecked IO exception
+     */
+    public <T> T put(final Class<T> resultClass, final Object request, final HttpSettings settings) throws UncheckedIOException {
+        return execute(HttpMethod.PUT, resultClass, request, settings);
+    }
+
+    // TODO HTTP METHOD PATCH is not supported by HttpURLConnection.
+    //    /**
+    //     *
+    //     * @param request
+    //     * @return
+    //     * @throws UncheckedIOException the unchecked IO exception
+    //     */
+    //    public String patch(final Object request) throws UncheckedIOException {
+    //        return patch(String.class, request);
+    //    }
+    //
+    //    /**
+    //     *
+    //     * @param request
+    //     * @param settings
+    //     * @return
+    //     * @throws UncheckedIOException the unchecked IO exception
+    //     */
+    //    public String patch(final Object request, final HttpSettings settings) throws UncheckedIOException {
+    //        return patch(String.class, request, settings);
+    //    }
+    //
+    //    /**
+    //     *
+    //     * @param <T>
+    //     * @param resultClass
+    //     * @param request
+    //     * @return
+    //     * @throws UncheckedIOException the unchecked IO exception
+    //     */
+    //    public <T> T patch(final Class<T> resultClass, final Object request) throws UncheckedIOException {
+    //        return patch(resultClass, request, _settings);
+    //    }
+    //
+    //    /**
+    //     *
+    //     * @param <T>
+    //     * @param resultClass
+    //     * @param request
+    //     * @param settings
+    //     * @return
+    //     * @throws UncheckedIOException the unchecked IO exception
+    //     */
+    //    public <T> T patch(final Class<T> resultClass, final Object request, final HttpSettings settings) throws UncheckedIOException {
+    //        return execute(resultClass, HttpMethod.PATCH, request, settings);
+    //    }
+    //
+    //    /**
+    //     *
+    //     * @param request
+    //     * @return
+    //     */
+    //    public ContinuableFuture<String> asyncPatch(final Object request) {
+    //        return asyncPatch(String.class, request);
+    //    }
+    //
+    //    /**
+    //     *
+    //     * @param request
+    //     * @param settings
+    //     * @return
+    //     */
+    //    public ContinuableFuture<String> asyncPatch(final Object request, final HttpSettings settings) {
+    //        return asyncPatch(String.class, request, settings);
+    //    }
+    //
+    //    /**
+    //     *
+    //     * @param <T>
+    //     * @param resultClass
+    //     * @param request
+    //     * @return
+    //     */
+    //    public <T> ContinuableFuture<T> asyncPatch(final Class<T> resultClass, final Object request) {
+    //        return asyncPatch(resultClass, request, _settings);
+    //    }
+    //
+    //    /**
+    //     *
+    //     * @param <T>
+    //     * @param resultClass
+    //     * @param request
+    //     * @param settings
+    //     * @return
+    //     */
+    //    public <T> ContinuableFuture<T> asyncPatch(final Class<T> resultClass, final Object request, final HttpSettings settings) {
+    //        return asyncExecute(resultClass, HttpMethod.PATCH, request, settings);
+    //    }
+
+    /**
+     *
+     * @param httpMethod
+     * @param request
+     * @return
+     * @throws UncheckedIOException the unchecked IO exception
+     */
+    public String execute(final HttpMethod httpMethod, final Object request) throws UncheckedIOException {
+        return execute(httpMethod, String.class, request);
+    }
+
+    /**
+     *
+     * @throws UncheckedIOException the unchecked IO exception
+     */
+    public void head() throws UncheckedIOException {
+        head(_settings);
+    }
+
+    /**
+     *
+     * @param settings
+     * @throws UncheckedIOException the unchecked IO exception
+     */
+    public void head(final HttpSettings settings) throws UncheckedIOException {
+        execute(HttpMethod.HEAD, Void.class, null, settings);
+    }
+
+    /**
+     *
+     * @param httpMethod
+     * @param request
+     * @param settings
+     * @return
+     * @throws UncheckedIOException the unchecked IO exception
+     */
+    public String execute(final HttpMethod httpMethod, final Object request, final HttpSettings settings) throws UncheckedIOException {
+        return execute(httpMethod, String.class, request, settings);
+    }
+
+    /**
+     *
+     * @param httpMethod
+     * @param resultClass
+     * @param request
+     * @param <T>
+     * @return
+     * @throws UncheckedIOException the unchecked IO exception
+     */
+    public <T> T execute(final HttpMethod httpMethod, final Class<T> resultClass, final Object request) throws UncheckedIOException {
+        return execute(httpMethod, resultClass, request, _settings);
+    }
+
+    /**
+     *
+     * @param httpMethod
+     * @param resultClass
+     * @param request
+     * @param settings
+     * @param <T>
+     * @return
+     * @throws UncheckedIOException the unchecked IO exception
+     */
+    public <T> T execute(final HttpMethod httpMethod, final Class<T> resultClass, final Object request, final HttpSettings settings)
+            throws UncheckedIOException {
+        return execute(httpMethod, resultClass, null, null, request, settings);
+    }
+
+    /**
+     *
+     * @param httpMethod
+     * @param output
+     * @param request
+     * @param settings
+     * @throws UncheckedIOException the unchecked IO exception
+     */
+    public void execute(final HttpMethod httpMethod, final File output, final Object request, final HttpSettings settings) throws UncheckedIOException {
+        OutputStream os = null;
+
+        try {
+            os = IOUtil.newFileOutputStream(output);
+            execute(httpMethod, os, request, settings);
+        } finally {
+            IOUtil.close(os);
+        }
+    }
+
+    /**
+     *
+     * @param httpMethod
+     * @param output
+     * @param request
+     * @param settings
+     * @throws UncheckedIOException the unchecked IO exception
+     */
+    public void execute(final HttpMethod httpMethod, final OutputStream output, final Object request, final HttpSettings settings) throws UncheckedIOException {
+        execute(httpMethod, null, output, null, request, settings);
+    }
+
+    /**
+     *
+     * @param httpMethod
+     * @param output
+     * @param request
+     * @param settings
+     * @throws UncheckedIOException the unchecked IO exception
+     */
+    public void execute(final HttpMethod httpMethod, final Writer output, final Object request, final HttpSettings settings) throws UncheckedIOException {
+        execute(httpMethod, null, null, output, request, settings);
+    }
+
+    /**
+     *
+     * @param httpMethod
+     * @param resultClass
+     * @param outputStream
+     * @param outputWriter
+     * @param request
+     * @param settings
+     * @param <T>
+     * @return
+     * @throws UncheckedIOException the unchecked IO exception
+     */
+    private <T> T execute(final HttpMethod httpMethod, final Class<T> resultClass, final OutputStream outputStream, final Writer outputWriter,
+            final Object request, final HttpSettings settings) throws UncheckedIOException {
+        final Charset requestCharset = HttpUtil.getRequestCharset(settings == null || settings.headers().isEmpty() ? _settings.headers() : settings.headers());
+        final ContentFormat requestContentFormat = getContentFormat(settings);
+        final boolean doOutput = request != null && !(httpMethod.equals(HttpMethod.GET) || httpMethod.equals(HttpMethod.DELETE));
+
+        final HttpURLConnection connection = openConnection(httpMethod, resultClass, request, doOutput, settings);
+        final long sentRequestAtMillis = System.currentTimeMillis();
+        InputStream is = null;
+        OutputStream os = null;
+
+        try { //NOSONAR
+            if (request != null && (requireBody(httpMethod))) {
+                os = HttpUtil.getOutputStream(connection, requestContentFormat, getContentType(settings), getContentEncoding(settings));
+
+                Type<Object> type = N.typeOf(request.getClass());
+
+                if (request instanceof File) {
+                    try (InputStream fileInputStream = IOUtil.newFileInputStream((File) request)) {
+                        IOUtil.write(os, fileInputStream);
+                    }
+                } else if (type.isInputStream()) {
+                    IOUtil.write(os, (InputStream) request);
+                } else if (type.isReader()) {
+                    final BufferedWriter bw = Objectory.createBufferedWriter(new OutputStreamWriter(os, requestCharset));
+
+                    try {
+                        IOUtil.write(bw, (Reader) request);
+
+                        bw.flush();
+                    } finally {
+                        Objectory.recycle(bw);
+                    }
+                } else {
+                    if (request instanceof String) {
+                        IOUtil.write(os, ((String) request).getBytes(requestCharset));
+                    } else if (request.getClass().equals(byte[].class)) {
+                        IOUtil.write(os, (byte[]) request);
+                    } else {
+                        if (requestContentFormat == ContentFormat.KRYO && HttpUtil.kryoParser != null) {
+                            HttpUtil.kryoParser.serialize(os, request);
+                        } else if (requestContentFormat == ContentFormat.FormUrlEncoded) {
+                            IOUtil.write(os, URLEncodedUtil.encode(request, requestCharset).getBytes(requestCharset));
+                        } else {
+                            final BufferedWriter bw = Objectory.createBufferedWriter(new OutputStreamWriter(os, requestCharset));
+
+                            try {
+                                HttpUtil.getParser(requestContentFormat).serialize(bw, request);
+
+                                bw.flush();
+                            } finally {
+                                Objectory.recycle(bw);
+                            }
+                        }
+                    }
+                }
+
+                HttpUtil.flush(os);
+            }
+
+            final int statusCode = connection.getResponseCode();
+            final Map<String, List<String>> respHeaders = connection.getHeaderFields();
+            final Charset respCharset = HttpUtil.getResponseCharset(respHeaders, requestCharset);
+            final ContentFormat respContentFormat = HttpUtil.getResponseContentFormat(respHeaders, requestContentFormat);
+
+            is = HttpUtil.getInputStream(connection, respContentFormat);
+
+            if (!HttpUtil.isSuccessfulResponseCode(statusCode) && (resultClass == null || !resultClass.equals(HttpResponse.class))) {
+                throw new UncheckedIOException(
+                        new IOException(statusCode + ": " + connection.getResponseMessage() + ". " + IOUtil.readAllToString(is, respCharset)));
+            }
+
+            if (isOneWayRequest(httpMethod, resultClass, settings)) {
+                return null;
+            } else {
+                if (outputStream != null) {
+                    IOUtil.write(outputStream, is, true);
+
+                    return null;
+                } else if (outputWriter != null) {
+                    final BufferedReader br = Objectory.createBufferedReader(new InputStreamReader(is, respCharset));
+
+                    try {
+                        IOUtil.write(outputWriter, br, true);
+                    } finally {
+                        Objectory.recycle(br);
+                    }
+
+                    return null;
+                } else {
+                    if (resultClass != null && resultClass.equals(HttpResponse.class)) {
+                        return (T) new HttpResponse(_url, sentRequestAtMillis, System.currentTimeMillis(), statusCode, connection.getResponseMessage(),
+                                respHeaders, IOUtil.readAllBytes(is), respContentFormat, respCharset);
+                    } else {
+                        if (resultClass == null || resultClass.equals(String.class)) {
+                            return (T) IOUtil.readAllToString(is, respCharset);
+                        } else if (byte[].class.equals(resultClass)) {
+                            return (T) IOUtil.readAllBytes(is);
+                        } else {
+                            if (respContentFormat == ContentFormat.KRYO && HttpUtil.kryoParser != null) {
+                                return HttpUtil.kryoParser.deserialize(resultClass, is);
+                            } else if (respContentFormat == ContentFormat.FormUrlEncoded) {
+                                return URLEncodedUtil.decode(IOUtil.readAllToString(is, respCharset), resultClass);
+                            } else {
+                                final BufferedReader br = Objectory.createBufferedReader(new InputStreamReader(is, respCharset));
+
+                                try {
+                                    return HttpUtil.getParser(respContentFormat).deserialize(resultClass, br);
+                                } finally {
+                                    Objectory.recycle(br);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        } finally {
+            close(os, is, connection);
+        }
+    }
+
+    /**
+     * Checks if is one way request.
+     *
+     * @param httpMethod
+     * @param resultClass
+     * @param settings
+     * @return true, if is one way request
+     */
+    protected boolean isOneWayRequest(final HttpMethod httpMethod, final Class<?> resultClass, final HttpSettings settings) {
+        return HttpMethod.HEAD == httpMethod || Void.class.equals(resultClass) || (settings == null ? _settings.isOneWayRequest() : settings.isOneWayRequest());
+    }
+
+    /**
+     * Gets the content format.
+     *
+     * @param settings
+     * @return
+     */
+    protected ContentFormat getContentFormat(HttpSettings settings) {
+        ContentFormat contentFormat = null;
+
+        if (settings != null) {
+            contentFormat = settings.getContentFormat();
+        }
+
+        if (contentFormat == null || contentFormat == ContentFormat.NONE) {
+            contentFormat = _settings.getContentFormat();
+        }
+
+        return contentFormat;
+    }
+
+    /**
+     * Gets the content type.
+     *
+     * @param settings
+     * @return
+     */
+    protected String getContentType(HttpSettings settings) {
+        String contentType = null;
+
+        if (settings != null) {
+            contentType = settings.getContentType();
+        }
+
+        if (Strings.isEmpty(contentType)) {
+            contentType = _settings.getContentType();
+        }
+
+        return contentType;
+    }
+
+    /**
+     * Gets the content encoding.
+     *
+     * @param settings
+     * @return
+     */
+    protected String getContentEncoding(HttpSettings settings) {
+        String contentEncoding = null;
+
+        if (settings != null) {
+            contentEncoding = settings.getContentEncoding();
+        }
+
+        if (Strings.isEmpty(contentEncoding)) {
+            contentEncoding = _settings.getContentEncoding();
+        }
+
+        return contentEncoding;
+    }
+
+    private boolean requireBody(HttpMethod httpMethod) {
+        return HttpMethod.POST.equals(httpMethod) || HttpMethod.PUT.equals(httpMethod) || HttpMethod.PATCH.equals(httpMethod);
+    }
+
+    /**
+     *
+     * @param httpMethod
+     * @param resultClass
+     * @param doOutput
+     * @param settings
+     * @return
+     * @throws UncheckedIOException the unchecked IO exception
+     */
+    HttpURLConnection openConnection(HttpMethod httpMethod, final Class<?> resultClass, boolean doOutput, HttpSettings settings) throws UncheckedIOException {
+        return openConnection(httpMethod, resultClass, null, doOutput, settings);
+    }
+
+    /**
+     *
+     * @param httpMethod
+     * @param resultClass
+     * @param queryParameters
+     * @param doOutput
+     * @param settings
+     * @return
+     * @throws UncheckedIOException the unchecked IO exception
+     */
+    HttpURLConnection openConnection(HttpMethod httpMethod, final Class<?> resultClass, final Object queryParameters, boolean doOutput, HttpSettings settings)
+            throws UncheckedIOException {
+        HttpURLConnection connection = null;
+
+        if (_activeConnectionCounter.incrementAndGet() > _maxConnection) {
+            _activeConnectionCounter.decrementAndGet();
+            throw new RuntimeException("Can not get connection, exceeded max connection number: " + _maxConnection);
+        }
+
+        try {
+            synchronized (_netURL) {
+                if (queryParameters != null && (httpMethod.equals(HttpMethod.GET) || httpMethod.equals(HttpMethod.DELETE))) {
+                    connection = (HttpURLConnection) URI.create(URLEncodedUtil.encode(_url, queryParameters)).toURL().openConnection();
+                } else {
+                    connection = (HttpURLConnection) _netURL.openConnection();
+                }
+            }
+
+            if (connection instanceof HttpsURLConnection) {
+                SSLSocketFactory ssf = (settings == null ? _settings : settings).getSSLSocketFactory();
+
+                if (ssf != null) {
+                    ((HttpsURLConnection) connection).setSSLSocketFactory(ssf);
+                }
+            }
+
+            int connectionTimeoutInMillis = _connectionTimeoutInMillis > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int) _connectionTimeoutInMillis;
+
+            if (settings != null) {
+                connectionTimeoutInMillis = settings.getConnectionTimeout();
+            }
+
+            if (connectionTimeoutInMillis > 0) {
+                connection.setConnectTimeout(connectionTimeoutInMillis);
+            }
+
+            int readTimeoutInMillis = _readTimeoutInMillis > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int) _readTimeoutInMillis;
+
+            if (settings != null) {
+                readTimeoutInMillis = settings.getReadTimeout();
+            }
+
+            if (readTimeoutInMillis > 0) {
+                connection.setReadTimeout(readTimeoutInMillis);
+            }
+
+            if (settings != null) {
+                connection.setDoInput(settings.doInput());
+                connection.setDoOutput(settings.doOutput());
+            }
+
+            connection.setUseCaches((settings != null && settings.getUseCaches()) || (_settings != null && _settings.getUseCaches()));
+
+            setHttpProperties(connection, settings == null || settings.headers().isEmpty() ? _settings : settings);
+
+            if (isOneWayRequest(httpMethod, resultClass, settings)) {
+                connection.setDoInput(false);
+            } else {
+                connection.setDoOutput(doOutput);
+            }
+
+            connection.setRequestMethod(httpMethod.name());
+
+            return connection;
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    /**
+     * Sets the http properties.
+     *
+     * @param connection
+     * @param settings
+     * @throws UncheckedIOException the unchecked IO exception
+     */
+    void setHttpProperties(HttpURLConnection connection, HttpSettings settings) throws UncheckedIOException {
+        final HttpHeaders headers = settings.headers();
+
+        if (headers != null) {
+            Object headerValue = null;
+
+            for (String headerName : headers.headerNameSet()) {
+                // lazy set content-encoding
+                // because if content-encoding(lz4/snappy/kryo...) is set but no parameter/result write to OutputStream,
+                // error may happen when read the input stream in sever side.
+
+                if (Names.CONTENT_ENCODING.equalsIgnoreCase(headerName)) {
+                    continue;
+                }
+
+                headerValue = headers.get(headerName);
+
+                connection.setRequestProperty(headerName, HttpHeaders.valueOf(headerValue));
+            }
+        }
+    }
+
+    /**
+     *
+     * @param os
+     * @param is
+     * @param connection
+     */
+    void close(OutputStream os, InputStream is, @SuppressWarnings("unused") HttpURLConnection connection) { //NOSONAR
+        try {
+            IOUtil.closeQuietly(os);
+            IOUtil.closeQuietly(is);
+        } finally {
+            _activeConnectionCounter.decrementAndGet();
+        }
+
+        // connection.disconnect();
+    }
+
+    /**
+     *
+     *
+     * @return
+     */
+    public ContinuableFuture<String> asyncGet() {
+        return asyncGet(String.class);
+    }
+
+    /**
+     *
+     * @param settings
+     * @return
+     */
+    public ContinuableFuture<String> asyncGet(final HttpSettings settings) {
+        return asyncGet(String.class, settings);
+    }
+
+    /**
+     *
+     * @param queryParameters
+     * @return
+     */
+    public ContinuableFuture<String> asyncGet(final Object queryParameters) {
+        return asyncGet(String.class, queryParameters);
+    }
+
+    /**
+     *
+     * @param queryParameters
+     * @param settings
+     * @return
+     */
+    public ContinuableFuture<String> asyncGet(final Object queryParameters, final HttpSettings settings) {
+        return asyncGet(String.class, queryParameters, settings);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param resultClass
+     * @return
+     */
+    public <T> ContinuableFuture<T> asyncGet(final Class<T> resultClass) {
+        return asyncGet(resultClass, null, _settings);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param resultClass
+     * @param settings
+     * @return
+     */
+    public <T> ContinuableFuture<T> asyncGet(final Class<T> resultClass, final HttpSettings settings) {
+        return asyncGet(resultClass, null, settings);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param resultClass
+     * @param queryParameters
+     * @return
+     */
+    public <T> ContinuableFuture<T> asyncGet(final Class<T> resultClass, final Object queryParameters) {
+        return asyncGet(resultClass, queryParameters, _settings);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param resultClass
+     * @param queryParameters
+     * @param settings
+     * @return
+     */
+    public <T> ContinuableFuture<T> asyncGet(final Class<T> resultClass, final Object queryParameters, final HttpSettings settings) {
+        return asyncExecute(HttpMethod.GET, resultClass, queryParameters, settings);
+    }
+
+    /**
+     *
      *
      * @return
      */
@@ -719,52 +1360,6 @@ public final class HttpClient {
      *
      * @param request
      * @return
-     * @throws UncheckedIOException the unchecked IO exception
-     */
-    public String post(final Object request) throws UncheckedIOException {
-        return post(String.class, request);
-    }
-
-    /**
-     *
-     * @param request
-     * @param settings
-     * @return
-     * @throws UncheckedIOException the unchecked IO exception
-     */
-    public String post(final Object request, final HttpSettings settings) throws UncheckedIOException {
-        return post(String.class, request, settings);
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param resultClass
-     * @param request
-     * @return
-     * @throws UncheckedIOException the unchecked IO exception
-     */
-    public <T> T post(final Class<T> resultClass, final Object request) throws UncheckedIOException {
-        return post(resultClass, request, _settings);
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param resultClass
-     * @param request
-     * @param settings
-     * @return
-     * @throws UncheckedIOException the unchecked IO exception
-     */
-    public <T> T post(final Class<T> resultClass, final Object request, final HttpSettings settings) throws UncheckedIOException {
-        return execute(HttpMethod.POST, resultClass, request, settings);
-    }
-
-    /**
-     *
-     * @param request
-     * @return
      */
     public ContinuableFuture<String> asyncPost(final Object request) {
         return asyncPost(String.class, request);
@@ -801,52 +1396,6 @@ public final class HttpClient {
      */
     public <T> ContinuableFuture<T> asyncPost(final Class<T> resultClass, final Object request, final HttpSettings settings) {
         return asyncExecute(HttpMethod.POST, resultClass, request, settings);
-    }
-
-    /**
-     *
-     * @param request
-     * @return
-     * @throws UncheckedIOException the unchecked IO exception
-     */
-    public String put(final Object request) throws UncheckedIOException {
-        return put(String.class, request);
-    }
-
-    /**
-     *
-     * @param request
-     * @param settings
-     * @return
-     * @throws UncheckedIOException the unchecked IO exception
-     */
-    public String put(final Object request, final HttpSettings settings) throws UncheckedIOException {
-        return put(String.class, request, settings);
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param resultClass
-     * @param request
-     * @return
-     * @throws UncheckedIOException the unchecked IO exception
-     */
-    public <T> T put(final Class<T> resultClass, final Object request) throws UncheckedIOException {
-        return put(resultClass, request, _settings);
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param resultClass
-     * @param request
-     * @param settings
-     * @return
-     * @throws UncheckedIOException the unchecked IO exception
-     */
-    public <T> T put(final Class<T> resultClass, final Object request, final HttpSettings settings) throws UncheckedIOException {
-        return execute(HttpMethod.PUT, resultClass, request, settings);
     }
 
     /**
@@ -982,470 +1531,20 @@ public final class HttpClient {
 
     /**
      *
-     * @param httpMethod
-     * @param request
+     *
      * @return
-     * @throws UncheckedIOException the unchecked IO exception
      */
-    public String execute(final HttpMethod httpMethod, final Object request) throws UncheckedIOException {
-        return execute(httpMethod, String.class, request);
+    public ContinuableFuture<Void> asyncHead() {
+        return asyncHead(_settings);
     }
 
     /**
-     *
-     * @param httpMethod
-     * @param request
-     * @param settings
-     * @return
-     * @throws UncheckedIOException the unchecked IO exception
-     */
-    public String execute(final HttpMethod httpMethod, final Object request, final HttpSettings settings) throws UncheckedIOException {
-        return execute(httpMethod, String.class, request, settings);
-    }
-
-    /**
-     *
-     * @param httpMethod
-     * @param resultClass
-     * @param request
-     * @param <T>
-     * @return
-     * @throws UncheckedIOException the unchecked IO exception
-     */
-    public <T> T execute(final HttpMethod httpMethod, final Class<T> resultClass, final Object request) throws UncheckedIOException {
-        return execute(httpMethod, resultClass, request, _settings);
-    }
-
-    /**
-     *
-     * @param httpMethod
-     * @param resultClass
-     * @param request
-     * @param settings
-     * @param <T>
-     * @return
-     * @throws UncheckedIOException the unchecked IO exception
-     */
-    public <T> T execute(final HttpMethod httpMethod, final Class<T> resultClass, final Object request, final HttpSettings settings)
-            throws UncheckedIOException {
-        return execute(resultClass, null, null, httpMethod, request, settings);
-    }
-
-    /**
-     *
-     * @param httpMethod
-     * @param output
-     * @param request
-     * @param settings
-     * @throws UncheckedIOException the unchecked IO exception
-     */
-    public void execute(final HttpMethod httpMethod, final File output, final Object request, final HttpSettings settings) throws UncheckedIOException {
-        OutputStream os = null;
-
-        try {
-            os = IOUtil.newFileOutputStream(output);
-            execute(httpMethod, os, request, settings);
-        } finally {
-            IOUtil.close(os);
-        }
-    }
-
-    /**
-     *
-     * @param httpMethod
-     * @param output
-     * @param request
-     * @param settings
-     * @throws UncheckedIOException the unchecked IO exception
-     */
-    public void execute(final HttpMethod httpMethod, final OutputStream output, final Object request, final HttpSettings settings) throws UncheckedIOException {
-        execute(null, output, null, httpMethod, request, settings);
-    }
-
-    /**
-     *
-     * @param httpMethod
-     * @param output
-     * @param request
-     * @param settings
-     * @throws UncheckedIOException the unchecked IO exception
-     */
-    public void execute(final HttpMethod httpMethod, final Writer output, final Object request, final HttpSettings settings) throws UncheckedIOException {
-        execute(null, null, output, httpMethod, request, settings);
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param resultClass
-     * @param outputStream
-     * @param outputWriter
-     * @param httpMethod
-     * @param request
-     * @param settings
-     * @return
-     * @throws UncheckedIOException the unchecked IO exception
-     */
-    private <T> T execute(final Class<T> resultClass, final OutputStream outputStream, final Writer outputWriter, final HttpMethod httpMethod,
-            final Object request, final HttpSettings settings) throws UncheckedIOException {
-        final Charset requestCharset = HttpUtil.getRequestCharset(settings == null || settings.headers().isEmpty() ? _settings.headers() : settings.headers());
-        final ContentFormat requestContentFormat = getContentFormat(settings);
-        final boolean doOutput = request != null && !(httpMethod.equals(HttpMethod.GET) || httpMethod.equals(HttpMethod.DELETE));
-
-        final HttpURLConnection connection = openConnection(httpMethod, request, doOutput, settings);
-        final long sentRequestAtMillis = System.currentTimeMillis();
-        InputStream is = null;
-        OutputStream os = null;
-
-        try { //NOSONAR
-            if (request != null && (requireBody(httpMethod))) {
-                os = HttpUtil.getOutputStream(connection, requestContentFormat, getContentType(settings), getContentEncoding(settings));
-
-                Type<Object> type = N.typeOf(request.getClass());
-
-                if (request instanceof File) {
-                    try (InputStream fileInputStream = IOUtil.newFileInputStream((File) request)) {
-                        IOUtil.write(os, fileInputStream);
-                    }
-                } else if (type.isInputStream()) {
-                    IOUtil.write(os, (InputStream) request);
-                } else if (type.isReader()) {
-                    final BufferedWriter bw = Objectory.createBufferedWriter(new OutputStreamWriter(os, requestCharset));
-
-                    try {
-                        IOUtil.write(bw, (Reader) request);
-
-                        bw.flush();
-                    } finally {
-                        Objectory.recycle(bw);
-                    }
-                } else {
-                    if (request instanceof String) {
-                        IOUtil.write(os, ((String) request).getBytes(requestCharset));
-                    } else if (request.getClass().equals(byte[].class)) {
-                        IOUtil.write(os, (byte[]) request);
-                    } else {
-                        if (requestContentFormat == ContentFormat.KRYO && HttpUtil.kryoParser != null) {
-                            HttpUtil.kryoParser.serialize(os, request);
-                        } else if (requestContentFormat == ContentFormat.FormUrlEncoded) {
-                            IOUtil.write(os, URLEncodedUtil.encode(request, requestCharset).getBytes(requestCharset));
-                        } else {
-                            final BufferedWriter bw = Objectory.createBufferedWriter(new OutputStreamWriter(os, requestCharset));
-
-                            try {
-                                HttpUtil.getParser(requestContentFormat).serialize(bw, request);
-
-                                bw.flush();
-                            } finally {
-                                Objectory.recycle(bw);
-                            }
-                        }
-                    }
-                }
-
-                HttpUtil.flush(os);
-            }
-
-            final int code = connection.getResponseCode();
-            final Map<String, List<String>> respHeaders = connection.getHeaderFields();
-            final Charset respCharset = HttpUtil.getResponseCharset(respHeaders, requestCharset);
-            final ContentFormat respContentFormat = HttpUtil.getResponseContentFormat(respHeaders, requestContentFormat);
-
-            is = HttpUtil.getInputStream(connection, respContentFormat);
-
-            if (!HttpUtil.isSuccessfulResponseCode(code) && (resultClass == null || !resultClass.equals(HttpResponse.class))) {
-                throw new UncheckedIOException(new IOException(code + ": " + connection.getResponseMessage() + ". " + IOUtil.readAllToString(is, respCharset)));
-            }
-
-            if (isOneWayRequest(settings)) {
-                return null;
-            } else {
-                if (outputStream != null) {
-                    IOUtil.write(outputStream, is, true);
-
-                    return null;
-                } else if (outputWriter != null) {
-                    final BufferedReader br = Objectory.createBufferedReader(new InputStreamReader(is, respCharset));
-
-                    try {
-                        IOUtil.write(outputWriter, br, true);
-                    } finally {
-                        Objectory.recycle(br);
-                    }
-
-                    return null;
-                } else {
-                    if (resultClass != null && resultClass.equals(HttpResponse.class)) {
-                        return (T) new HttpResponse(_url, sentRequestAtMillis, System.currentTimeMillis(), code, connection.getResponseMessage(), respHeaders,
-                                IOUtil.readAllBytes(is), respContentFormat, respCharset);
-                    } else {
-                        if (resultClass == null || resultClass.equals(String.class)) {
-                            return (T) IOUtil.readAllToString(is, respCharset);
-                        } else if (byte[].class.equals(resultClass)) {
-                            return (T) IOUtil.readAllBytes(is);
-                        } else {
-                            if (respContentFormat == ContentFormat.KRYO && HttpUtil.kryoParser != null) {
-                                return HttpUtil.kryoParser.deserialize(resultClass, is);
-                            } else if (respContentFormat == ContentFormat.FormUrlEncoded) {
-                                return URLEncodedUtil.decode(IOUtil.readAllToString(is, respCharset), resultClass);
-                            } else {
-                                final BufferedReader br = Objectory.createBufferedReader(new InputStreamReader(is, respCharset));
-
-                                try {
-                                    return HttpUtil.getParser(respContentFormat).deserialize(resultClass, br);
-                                } finally {
-                                    Objectory.recycle(br);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        } finally {
-            close(os, is, connection);
-        }
-    }
-
-    /**
-     * Checks if is one way request.
-     *
-     * @param settings
-     * @return true, if is one way request
-     */
-    protected boolean isOneWayRequest(HttpSettings settings) {
-        return _settings.isOneWayRequest() || ((settings != null) && settings.isOneWayRequest());
-    }
-
-    /**
-     * Gets the content format.
      *
      * @param settings
      * @return
      */
-    protected ContentFormat getContentFormat(HttpSettings settings) {
-        ContentFormat contentFormat = null;
-
-        if (settings != null) {
-            contentFormat = settings.getContentFormat();
-        }
-
-        if (contentFormat == null || contentFormat == ContentFormat.NONE) {
-            contentFormat = _settings.getContentFormat();
-        }
-
-        return contentFormat;
-    }
-
-    /**
-     * Gets the content type.
-     *
-     * @param settings
-     * @return
-     */
-    protected String getContentType(HttpSettings settings) {
-        String contentType = null;
-
-        if (settings != null) {
-            contentType = settings.getContentType();
-        }
-
-        if (N.isNullOrEmpty(contentType)) {
-            contentType = _settings.getContentType();
-        }
-
-        return contentType;
-    }
-
-    /**
-     * Gets the content encoding.
-     *
-     * @param settings
-     * @return
-     */
-    protected String getContentEncoding(HttpSettings settings) {
-        String contentEncoding = null;
-
-        if (settings != null) {
-            contentEncoding = settings.getContentEncoding();
-        }
-
-        if (N.isNullOrEmpty(contentEncoding)) {
-            contentEncoding = _settings.getContentEncoding();
-        }
-
-        return contentEncoding;
-    }
-
-    /**
-     *
-     * @param httpMethod
-     * @return
-     * @throws UncheckedIOException the unchecked IO exception
-     */
-    HttpURLConnection openConnection(HttpMethod httpMethod) throws UncheckedIOException {
-        return openConnection(httpMethod, requireBody(httpMethod));
-    }
-
-    private boolean requireBody(HttpMethod httpMethod) {
-        return HttpMethod.POST.equals(httpMethod) || HttpMethod.PUT.equals(httpMethod) || HttpMethod.PATCH.equals(httpMethod);
-    }
-
-    /**
-     *
-     * @param httpMethod
-     * @param doOutput
-     * @return
-     * @throws UncheckedIOException the unchecked IO exception
-     */
-    HttpURLConnection openConnection(HttpMethod httpMethod, boolean doOutput) throws UncheckedIOException {
-        return openConnection(httpMethod, doOutput, _settings);
-    }
-
-    /**
-     *
-     * @param httpMethod
-     * @param settings
-     * @return
-     * @throws UncheckedIOException the unchecked IO exception
-     */
-    HttpURLConnection openConnection(HttpMethod httpMethod, HttpSettings settings) throws UncheckedIOException {
-        return openConnection(httpMethod, requireBody(httpMethod), settings);
-    }
-
-    /**
-     *
-     * @param httpMethod
-     * @param doOutput
-     * @param settings
-     * @return
-     * @throws UncheckedIOException the unchecked IO exception
-     */
-    HttpURLConnection openConnection(HttpMethod httpMethod, boolean doOutput, HttpSettings settings) throws UncheckedIOException {
-        return openConnection(httpMethod, null, doOutput, settings);
-    }
-
-    /**
-     *
-     * @param httpMethod
-     * @param queryParameters
-     * @param doOutput
-     * @param settings
-     * @return
-     * @throws UncheckedIOException the unchecked IO exception
-     */
-    HttpURLConnection openConnection(HttpMethod httpMethod, final Object queryParameters, boolean doOutput, HttpSettings settings) throws UncheckedIOException {
-        HttpURLConnection connection = null;
-
-        if (_activeConnectionCounter.incrementAndGet() > _maxConnection) {
-            _activeConnectionCounter.decrementAndGet();
-            throw new RuntimeException("Can not get connection, exceeded max connection number: " + _maxConnection);
-        }
-
-        try {
-            synchronized (_netURL) {
-                if (queryParameters != null && (httpMethod.equals(HttpMethod.GET) || httpMethod.equals(HttpMethod.DELETE))) {
-                    connection = (HttpURLConnection) URI.create(URLEncodedUtil.encode(_url, queryParameters)).toURL().openConnection();
-                } else {
-                    connection = (HttpURLConnection) _netURL.openConnection();
-                }
-            }
-
-            if (connection instanceof HttpsURLConnection) {
-                SSLSocketFactory ssf = (settings == null ? _settings : settings).getSSLSocketFactory();
-
-                if (ssf != null) {
-                    ((HttpsURLConnection) connection).setSSLSocketFactory(ssf);
-                }
-            }
-
-            int connectionTimeoutInMillis = _connectionTimeoutInMillis > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int) _connectionTimeoutInMillis;
-
-            if (settings != null) {
-                connectionTimeoutInMillis = settings.getConnectionTimeout();
-            }
-
-            if (connectionTimeoutInMillis > 0) {
-                connection.setConnectTimeout(connectionTimeoutInMillis);
-            }
-
-            int readTimeoutInMillis = _readTimeoutInMillis > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int) _readTimeoutInMillis;
-
-            if (settings != null) {
-                readTimeoutInMillis = settings.getReadTimeout();
-            }
-
-            if (readTimeoutInMillis > 0) {
-                connection.setReadTimeout(readTimeoutInMillis);
-            }
-
-            if (settings != null) {
-                connection.setDoInput(settings.doInput());
-                connection.setDoOutput(settings.doOutput());
-            }
-
-            connection.setUseCaches((settings != null && settings.getUseCaches()) || (_settings != null && _settings.getUseCaches()));
-
-            setHttpProperties(connection, settings == null || settings.headers().isEmpty() ? _settings : settings);
-
-            if (isOneWayRequest(settings)) {
-                connection.setDoInput(false);
-            }
-
-            connection.setDoOutput(doOutput);
-            connection.setRequestMethod(httpMethod.name());
-
-            return connection;
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
-    }
-
-    /**
-     * Sets the http properties.
-     *
-     * @param connection
-     * @param settings
-     * @throws UncheckedIOException the unchecked IO exception
-     */
-    void setHttpProperties(HttpURLConnection connection, HttpSettings settings) throws UncheckedIOException {
-        final HttpHeaders headers = settings.headers();
-
-        if (headers != null) {
-            Object headerValue = null;
-
-            for (String headerName : headers.headerNameSet()) {
-                // lazy set content-encoding
-                // because if content-encoding(lz4/snappy/kryo...) is set but no parameter/result write to OutputStream,
-                // error may happen when read the input stream in sever side.
-
-                if (Names.CONTENT_ENCODING.equalsIgnoreCase(headerName)) {
-                    continue;
-                }
-
-                headerValue = headers.get(headerName);
-
-                connection.setRequestProperty(headerName, HttpHeaders.valueOf(headerValue));
-            }
-        }
-    }
-
-    /**
-     *
-     * @param os
-     * @param is
-     * @param connection
-     */
-    void close(OutputStream os, InputStream is, @SuppressWarnings("unused") HttpURLConnection connection) { //NOSONAR
-        try {
-            IOUtil.closeQuietly(os);
-            IOUtil.closeQuietly(is);
-        } finally {
-            _activeConnectionCounter.decrementAndGet();
-        }
-
-        // connection.disconnect();
+    public ContinuableFuture<Void> asyncHead(final HttpSettings settings) {
+        return asyncExecute(HttpMethod.HEAD, Void.class, null, settings);
     }
 
     /**

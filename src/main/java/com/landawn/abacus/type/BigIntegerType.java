@@ -20,7 +20,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.Strings;
 
 /**
  *
@@ -62,7 +62,7 @@ public final class BigIntegerType extends NumberType<BigInteger> {
      */
     @Override
     public BigInteger valueOf(String st) {
-        return (N.isNullOrEmpty(st)) ? null : new BigInteger(st, 10);
+        return (Strings.isEmpty(st)) ? null : new BigInteger(st, 10);
     }
 
     /**
@@ -76,7 +76,7 @@ public final class BigIntegerType extends NumberType<BigInteger> {
     public BigInteger get(ResultSet rs, int columnIndex) throws SQLException {
         String str = rs.getString(columnIndex);
 
-        return N.isNullOrEmpty(str) ? null : new BigInteger(str);
+        return Strings.isEmpty(str) ? null : new BigInteger(str);
     }
 
     /**
@@ -90,7 +90,7 @@ public final class BigIntegerType extends NumberType<BigInteger> {
     public BigInteger get(ResultSet rs, String columnLabel) throws SQLException {
         String str = rs.getString(columnLabel);
 
-        return N.isNullOrEmpty(str) ? null : new BigInteger(str);
+        return Strings.isEmpty(str) ? null : new BigInteger(str);
     }
 
     /**

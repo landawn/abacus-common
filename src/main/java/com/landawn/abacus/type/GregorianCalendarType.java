@@ -22,6 +22,7 @@ import java.util.GregorianCalendar;
 
 import com.landawn.abacus.util.DateUtil;
 import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.Strings;
 
 /**
  *
@@ -72,7 +73,7 @@ public class GregorianCalendarType extends AbstractCalendarType<GregorianCalenda
      */
     @Override
     public GregorianCalendar valueOf(String str) {
-        return N.isNullOrEmpty(str) ? null : (N.equals(str, SYS_TIME) ? DateUtil.currentGregorianCalendar() : DateUtil.parseGregorianCalendar(str));
+        return Strings.isEmpty(str) ? null : (N.equals(str, SYS_TIME) ? DateUtil.currentGregorianCalendar() : DateUtil.parseGregorianCalendar(str));
     }
 
     /**

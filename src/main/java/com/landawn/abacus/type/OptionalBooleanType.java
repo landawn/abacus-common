@@ -14,6 +14,7 @@ import java.sql.SQLException;
 import com.landawn.abacus.parser.SerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.u.OptionalBoolean;
 
 /**
@@ -66,7 +67,7 @@ public class OptionalBooleanType extends AbstractOptionalType<OptionalBoolean> {
      */
     @Override
     public OptionalBoolean valueOf(String str) {
-        return N.isNullOrEmpty(str) ? OptionalBoolean.empty() : OptionalBoolean.of(N.parseBoolean(str));
+        return Strings.isEmpty(str) ? OptionalBoolean.empty() : OptionalBoolean.of(Strings.parseBoolean(str));
     }
 
     /**

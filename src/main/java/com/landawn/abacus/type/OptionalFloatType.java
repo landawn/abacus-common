@@ -14,8 +14,8 @@ import java.sql.SQLException;
 import com.landawn.abacus.parser.SerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.IOUtil;
-import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Numbers;
+import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.u.OptionalFloat;
 
 /**
@@ -68,7 +68,7 @@ public class OptionalFloatType extends AbstractOptionalType<OptionalFloat> {
      */
     @Override
     public OptionalFloat valueOf(String str) {
-        return N.isNullOrEmpty(str) ? OptionalFloat.empty() : OptionalFloat.of(Numbers.toFloat(str));
+        return Strings.isEmpty(str) ? OptionalFloat.empty() : OptionalFloat.of(Numbers.toFloat(str));
     }
 
     /**

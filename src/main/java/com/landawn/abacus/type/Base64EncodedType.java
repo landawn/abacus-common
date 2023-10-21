@@ -14,7 +14,7 @@
 
 package com.landawn.abacus.type;
 
-import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.Strings;
 
 /**
  *
@@ -47,7 +47,7 @@ public class Base64EncodedType extends AbstractType<byte[]> {
      */
     @Override
     public String stringOf(byte[] x) {
-        return N.base64Encode(x);
+        return Strings.base64Encode(x);
     }
 
     /**
@@ -58,6 +58,6 @@ public class Base64EncodedType extends AbstractType<byte[]> {
      */
     @Override
     public byte[] valueOf(String base64String) {
-        return N.base64Decode(base64String);
+        return Strings.base64Decode(base64String);
     }
 }

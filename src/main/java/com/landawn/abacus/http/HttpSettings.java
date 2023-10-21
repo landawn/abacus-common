@@ -18,7 +18,7 @@ import java.util.Map;
 
 import javax.net.ssl.SSLSocketFactory;
 
-import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.Strings;
 
 /**
  *
@@ -284,10 +284,10 @@ public final class HttpSettings {
     public String getContentType() {
         String contentType = HttpUtil.getContentType(headers);
 
-        if (N.isNullOrEmpty(contentType) && contentFormat != null) {
+        if (Strings.isEmpty(contentType) && contentFormat != null) {
             contentType = HttpUtil.getContentType(contentFormat);
 
-            if (N.notNullOrEmpty(contentType)) {
+            if (Strings.isNotEmpty(contentType)) {
                 header(HttpHeaders.Names.CONTENT_TYPE, contentType);
             }
         }
@@ -315,10 +315,10 @@ public final class HttpSettings {
     public String getContentEncoding() {
         String contentEncoding = HttpUtil.getContentEncoding(headers);
 
-        if (N.isNullOrEmpty(contentEncoding) && contentFormat != null) {
+        if (Strings.isEmpty(contentEncoding) && contentFormat != null) {
             contentEncoding = HttpUtil.getContentEncoding(contentFormat);
 
-            if (N.notNullOrEmpty(contentEncoding)) {
+            if (Strings.isNotEmpty(contentEncoding)) {
                 header(HttpHeaders.Names.CONTENT_ENCODING, contentEncoding);
             }
         }
@@ -333,7 +333,7 @@ public final class HttpSettings {
      * @return
      */
     public HttpSettings basicAuth(String user, Object password) {
-        return header(HttpHeaders.Names.AUTHORIZATION, "Basic " + N.base64Encode((user + ":" + password).getBytes()));
+        return header(HttpHeaders.Names.AUTHORIZATION, "Basic " + Strings.base64Encode((user + ":" + password).getBytes()));
     }
 
     /**

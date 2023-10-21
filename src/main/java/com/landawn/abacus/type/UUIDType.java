@@ -16,7 +16,7 @@ package com.landawn.abacus.type;
 
 import java.util.UUID;
 
-import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.Strings;
 
 /**
  *
@@ -58,6 +58,6 @@ public class UUIDType extends AbstractType<UUID> {
      */
     @Override
     public UUID valueOf(String str) {
-        return N.isNullOrEmpty(str) ? null : java.util.UUID.fromString(str);
+        return Strings.isEmpty(str) ? null : java.util.UUID.fromString(str);
     }
 }

@@ -15,7 +15,7 @@
 package com.landawn.abacus.type;
 
 import com.landawn.abacus.util.Fraction;
-import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.Strings;
 
 /**
  *
@@ -87,6 +87,6 @@ public class FractionType extends AbstractType<Fraction> {
      */
     @Override
     public Fraction valueOf(String str) {
-        return N.isNullOrEmpty(str) ? null : Fraction.of(str);
+        return Strings.isEmpty(str) ? null : Fraction.of(str);
     }
 }

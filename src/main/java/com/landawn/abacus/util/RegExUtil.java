@@ -66,7 +66,7 @@ public final class RegExUtil {
      * @see java.util.regex.Pattern
      */
     public static String removeAll(final String text, final Pattern regex) {
-        return replaceAll(text, regex, N.EMPTY_STRING);
+        return replaceAll(text, regex, Strings.EMPTY_STRING);
     }
 
     /**
@@ -108,7 +108,7 @@ public final class RegExUtil {
      * @see java.util.regex.Pattern#DOTALL
      */
     public static String removeAll(final String text, final String regex) {
-        return replaceAll(text, regex, N.EMPTY_STRING);
+        return replaceAll(text, regex, Strings.EMPTY_STRING);
     }
 
     /**
@@ -144,7 +144,7 @@ public final class RegExUtil {
      * @see java.util.regex.Pattern
      */
     public static String removeFirst(final String text, final Pattern regex) {
-        return replaceFirst(text, regex, N.EMPTY_STRING);
+        return replaceFirst(text, regex, Strings.EMPTY_STRING);
     }
 
     /**
@@ -185,7 +185,7 @@ public final class RegExUtil {
      * @see java.util.regex.Pattern#DOTALL
      */
     public static String removeFirst(final String text, final String regex) {
-        return replaceFirst(text, regex, N.EMPTY_STRING);
+        return replaceFirst(text, regex, Strings.EMPTY_STRING);
     }
 
     /**
@@ -216,7 +216,7 @@ public final class RegExUtil {
      * @see Pattern#DOTALL
      */
     public static String removePattern(final String text, final String regex) {
-        return replacePattern(text, regex, N.EMPTY_STRING);
+        return replacePattern(text, regex, Strings.EMPTY_STRING);
     }
 
     /**

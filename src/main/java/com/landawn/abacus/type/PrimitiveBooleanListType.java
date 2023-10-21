@@ -21,6 +21,7 @@ import com.landawn.abacus.parser.SerializationConfig;
 import com.landawn.abacus.util.BooleanList;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.Strings;
 
 /**
  *
@@ -77,7 +78,7 @@ public final class PrimitiveBooleanListType extends AbstractPrimitiveListType<Bo
      */
     @Override
     public BooleanList valueOf(String str) {
-        return N.isNullOrEmpty(str) ? null : BooleanList.of(arrayType.valueOf(str));
+        return Strings.isEmpty(str) ? null : BooleanList.of(arrayType.valueOf(str));
     }
 
     /**

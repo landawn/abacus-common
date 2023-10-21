@@ -27,6 +27,7 @@ import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.Clazz;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Objectory;
+import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.WD;
 
 /**
@@ -120,7 +121,7 @@ public class MapEntryType<K, V> extends AbstractType<Map.Entry<K, V>> {
     @SuppressWarnings("unchecked")
     @Override
     public Map.Entry<K, V> valueOf(String str) {
-        if (N.isNullOrEmpty(str) || "{}".equals(str)) {
+        if (Strings.isEmpty(str) || "{}".equals(str)) {
             return null;
         }
 

@@ -38,6 +38,7 @@ import java.util.function.Function;
 import com.landawn.abacus.exception.ParseException;
 import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
+import com.landawn.abacus.parser.ParserUtil.BeanInfo;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.type.TypeFactory;
 import com.landawn.abacus.util.BiMap;
@@ -367,5 +368,9 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
         if (!file.exists() && file.createNewFile() == false) {
             throw new IOException("Failed to create new file: " + file.getName());
         }
+    }
+
+    protected static Exclusion getExclusion(final SerializationConfig<?> config, final BeanInfo beanInfo) {
+        return config.getExclusion() == null ? (beanInfo.jsonXmlSeriExclusion == null ? Exclusion.NULL : beanInfo.jsonXmlSeriExclusion) : config.getExclusion();
     }
 }

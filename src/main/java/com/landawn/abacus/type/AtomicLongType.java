@@ -25,7 +25,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import com.landawn.abacus.parser.SerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.IOUtil;
-import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.Strings;
 
 /**
  *
@@ -115,7 +115,7 @@ public class AtomicLongType extends AbstractAtomicType<AtomicLong> {
      */
     @Override
     public AtomicLong valueOf(String str) {
-        return N.isNullOrEmpty(str) ? null : new AtomicLong(Long.parseLong(str));
+        return Strings.isEmpty(str) ? null : new AtomicLong(Long.parseLong(str));
     }
 
     /**

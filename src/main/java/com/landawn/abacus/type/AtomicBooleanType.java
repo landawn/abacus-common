@@ -24,7 +24,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.landawn.abacus.parser.SerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
-import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.Strings;
 
 /**
  *
@@ -66,7 +66,7 @@ public class AtomicBooleanType extends AbstractAtomicType<AtomicBoolean> {
      */
     @Override
     public AtomicBoolean valueOf(String str) {
-        return N.isNullOrEmpty(str) ? null : new AtomicBoolean(Boolean.parseBoolean(str));
+        return Strings.isEmpty(str) ? null : new AtomicBoolean(Boolean.parseBoolean(str));
     }
 
     /**

@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.landawn.abacus.util.ClassUtil;
-import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.WD;
 
 /**
@@ -101,6 +101,6 @@ public class JSONType<T> extends AbstractType<T> {
      */
     @Override
     public T valueOf(String str) {
-        return N.isNullOrEmpty(str) ? null : Utils.jsonParser.deserialize(typeClass, str);
+        return Strings.isEmpty(str) ? null : Utils.jsonParser.deserialize(typeClass, str);
     }
 }

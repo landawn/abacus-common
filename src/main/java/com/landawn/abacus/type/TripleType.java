@@ -24,6 +24,7 @@ import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Objectory;
+import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.Triple;
 import com.landawn.abacus.util.WD;
 
@@ -120,7 +121,7 @@ public class TripleType<L, M, R> extends AbstractType<Triple<L, M, R>> {
     @SuppressWarnings("unchecked")
     @Override
     public Triple<L, M, R> valueOf(String str) {
-        if (N.isNullOrEmpty(str)) {
+        if (Strings.isEmpty(str)) {
             return null;
         }
 

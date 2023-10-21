@@ -28,6 +28,7 @@ import com.landawn.abacus.util.Clazz;
 import com.landawn.abacus.util.ImmutableEntry;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Objectory;
+import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.WD;
 
 /**
@@ -121,7 +122,7 @@ public class ImmutableMapEntryType<K, V> extends AbstractType<AbstractMap.Simple
     @SuppressWarnings("unchecked")
     @Override
     public AbstractMap.SimpleImmutableEntry<K, V> valueOf(String str) {
-        if (N.isNullOrEmpty(str) || "{}".equals(str)) {
+        if (Strings.isEmpty(str) || "{}".equals(str)) {
             return null;
         }
 

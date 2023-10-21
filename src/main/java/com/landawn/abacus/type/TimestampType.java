@@ -22,6 +22,7 @@ import java.sql.Timestamp;
 
 import com.landawn.abacus.util.DateUtil;
 import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.Strings;
 
 /**
  *
@@ -73,7 +74,7 @@ public class TimestampType extends AbstractDateType<Timestamp> {
      */
     @Override
     public Timestamp valueOf(String str) {
-        return N.isNullOrEmpty(str) ? null : (N.equals(str, SYS_TIME) ? DateUtil.currentTimestamp() : DateUtil.parseTimestamp(str));
+        return Strings.isEmpty(str) ? null : (N.equals(str, SYS_TIME) ? DateUtil.currentTimestamp() : DateUtil.parseTimestamp(str));
     }
 
     /**

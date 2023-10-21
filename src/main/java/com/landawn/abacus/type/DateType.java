@@ -22,6 +22,7 @@ import java.sql.SQLException;
 
 import com.landawn.abacus.util.DateUtil;
 import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.Strings;
 
 /**
  *
@@ -73,7 +74,7 @@ public class DateType extends AbstractDateType<Date> {
      */
     @Override
     public Date valueOf(String str) {
-        return N.isNullOrEmpty(str) ? null : (N.equals(str, SYS_TIME) ? DateUtil.currentDate() : DateUtil.parseDate(str));
+        return Strings.isEmpty(str) ? null : (N.equals(str, SYS_TIME) ? DateUtil.currentDate() : DateUtil.parseDate(str));
     }
 
     /**

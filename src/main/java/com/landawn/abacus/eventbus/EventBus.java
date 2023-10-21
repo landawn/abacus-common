@@ -39,6 +39,7 @@ import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.MoreExecutors;
 import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.ThreadMode;
 
 // DO NOT try to move me out of this project. Somebody tried and gave up then. I'm small. I'm stay here.
@@ -130,7 +131,7 @@ public class EventBus {
      * 
      */
     public EventBus() {
-        this(N.guid());
+        this(Strings.guid());
     }
 
     /**
@@ -295,7 +296,7 @@ public class EventBus {
         final List<SubIdentifier> eventSubList = new ArrayList<>(subList.size());
 
         for (SubIdentifier sub : subList) {
-            if (sub.isPossibleLambdaSubscriber && N.isNullOrEmpty(eventId)) {
+            if (sub.isPossibleLambdaSubscriber && Strings.isEmpty(eventId)) {
                 throw new RuntimeException(
                         "General subscriber (type is {@code Subscriber} and parameter type is Object, mostly created by lambda) only can be registered with event id");
             }
@@ -308,10 +309,10 @@ public class EventBus {
             listOfSubEventSubs = null;
         }
 
-        if (N.isNullOrEmpty(eventId)) {
+        if (Strings.isEmpty(eventId)) {
             synchronized (registeredEventIdSubMap) {
                 for (SubIdentifier sub : eventSubList) {
-                    if (N.isNullOrEmpty(sub.eventId)) {
+                    if (Strings.isEmpty(sub.eventId)) {
                         continue;
                     }
 
@@ -524,7 +525,7 @@ public class EventBus {
 
         List<List<SubIdentifier>> listOfSubs = this.listOfSubEventSubs;
 
-        if (N.isNullOrEmpty(eventId)) {
+        if (Strings.isEmpty(eventId)) {
             if (listOfSubs == null) {
                 synchronized (registeredSubMap) {
                     listOfSubs = new ArrayList<>(registeredSubMap.values()); // in case concurrent register/unregister.
@@ -841,7 +842,7 @@ public class EventBus {
             this.instance = null;
             this.method = method;
             this.parameterType = N.isPrimitiveType(method.getParameterTypes()[0]) ? N.wrap(method.getParameterTypes()[0]) : method.getParameterTypes()[0];
-            this.eventId = subscribe == null || N.isNullOrEmpty(subscribe.eventId()) ? null : subscribe.eventId();
+            this.eventId = subscribe == null || Strings.isEmpty(subscribe.eventId()) ? null : subscribe.eventId();
             this.threadMode = subscribe == null ? ThreadMode.DEFAULT : subscribe.threadMode();
             this.strictEventType = subscribe == null ? false : subscribe.strictEventType();
             this.sticky = subscribe == null ? false : subscribe.sticky();
@@ -866,7 +867,7 @@ public class EventBus {
             this.instance = obj;
             this.method = sub.method;
             this.parameterType = sub.parameterType;
-            this.eventId = N.isNullOrEmpty(eventId) ? sub.eventId : eventId;
+            this.eventId = Strings.isEmpty(eventId) ? sub.eventId : eventId;
             this.threadMode = threadMode == null ? sub.threadMode : threadMode;
             this.strictEventType = sub.strictEventType;
             this.sticky = sub.sticky;

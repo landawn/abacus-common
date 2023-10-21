@@ -17,6 +17,7 @@ import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.MutableInt;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Numbers;
+import com.landawn.abacus.util.Strings;
 
 /**
  *
@@ -58,7 +59,7 @@ public class MutableIntType extends MutableType<MutableInt> {
      */
     @Override
     public MutableInt valueOf(String str) {
-        return N.isNullOrEmpty(str) ? null : MutableInt.of(Numbers.toInt(str));
+        return Strings.isEmpty(str) ? null : MutableInt.of(Numbers.toInt(str));
     }
 
     /**

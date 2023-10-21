@@ -21,6 +21,7 @@ import java.util.Calendar;
 
 import com.landawn.abacus.util.DateUtil;
 import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.Strings;
 
 /**
  *
@@ -74,7 +75,7 @@ public class CalendarType extends AbstractCalendarType<Calendar> {
      */
     @Override
     public Calendar valueOf(String str) {
-        return N.isNullOrEmpty(str) ? null : (N.equals(str, SYS_TIME) ? DateUtil.currentCalendar() : DateUtil.parseCalendar(str));
+        return Strings.isEmpty(str) ? null : (N.equals(str, SYS_TIME) ? DateUtil.currentCalendar() : DateUtil.parseCalendar(str));
     }
 
     /**

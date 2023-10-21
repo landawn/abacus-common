@@ -22,6 +22,7 @@ import java.sql.Time;
 import java.time.LocalTime;
 
 import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.Strings;
 
 /**
  *
@@ -63,7 +64,7 @@ public class LocalTimeType extends AbstractType<LocalTime> {
      */
     @Override
     public LocalTime valueOf(String str) {
-        if (N.isNullOrEmpty(str)) {
+        if (Strings.isEmpty(str)) {
             return null;
         }
 

@@ -25,8 +25,8 @@ import com.landawn.abacus.parser.SerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.Duration;
 import com.landawn.abacus.util.IOUtil;
-import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Numbers;
+import com.landawn.abacus.util.Strings;
 
 /**
  *
@@ -68,7 +68,7 @@ public class DurationType extends AbstractType<Duration> {
      */
     @Override
     public Duration valueOf(String str) {
-        return N.isNullOrEmpty(str) ? null : Duration.ofMillis(Numbers.toLong(str));
+        return Strings.isEmpty(str) ? null : Duration.ofMillis(Numbers.toLong(str));
     }
 
     /**

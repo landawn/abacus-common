@@ -23,7 +23,7 @@ import java.sql.SQLException;
 
 import com.landawn.abacus.parser.SerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
-import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.Strings;
 
 /**
  *
@@ -63,7 +63,7 @@ public abstract class AbstractBooleanType extends AbstractPrimaryType<Boolean> {
      */
     @Override
     public Boolean valueOf(String st) {
-        return N.isNullOrEmpty(st) ? defaultValue() : Boolean.valueOf(st);
+        return Strings.isEmpty(st) ? defaultValue() : Boolean.valueOf(st);
     }
 
     /**

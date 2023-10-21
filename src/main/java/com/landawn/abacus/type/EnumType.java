@@ -30,7 +30,6 @@ import com.landawn.abacus.parser.SerializationConfig;
 import com.landawn.abacus.util.BiMap;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.ClassUtil;
-import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Numbers;
 import com.landawn.abacus.util.Strings;
 
@@ -128,7 +127,7 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
     @Override
     public T valueOf(String str) {
         if (jsonValueType == null) {
-            if (N.isNullOrEmpty(str) || (!hasNull && NULL.equals(str))) {
+            if (Strings.isEmpty(str) || (!hasNull && NULL.equals(str))) {
                 return null;
             }
 
@@ -286,13 +285,13 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
         try {
             final Field field = enumConstant.getClass().getField(((Enum<T>) enumConstant).name());
 
-            if (field.isAnnotationPresent(JsonXmlField.class) && N.notNullOrEmpty(field.getAnnotation(JsonXmlField.class).name())) {
+            if (field.isAnnotationPresent(JsonXmlField.class) && Strings.isNotEmpty(field.getAnnotation(JsonXmlField.class).name())) {
                 return field.getAnnotation(JsonXmlField.class).name();
             }
 
             try { //NOSONAR
                 if (field.isAnnotationPresent(com.alibaba.fastjson.annotation.JSONField.class)
-                        && N.notNullOrEmpty(field.getAnnotation(com.alibaba.fastjson.annotation.JSONField.class).name())) {
+                        && Strings.isNotEmpty(field.getAnnotation(com.alibaba.fastjson.annotation.JSONField.class).name())) {
                     return field.getAnnotation(com.alibaba.fastjson.annotation.JSONField.class).name();
                 }
             } catch (Throwable e) {
@@ -301,7 +300,7 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
 
             try { //NOSONAR
                 if (field.isAnnotationPresent(com.alibaba.fastjson2.annotation.JSONField.class)
-                        && N.notNullOrEmpty(field.getAnnotation(com.alibaba.fastjson2.annotation.JSONField.class).name())) {
+                        && Strings.isNotEmpty(field.getAnnotation(com.alibaba.fastjson2.annotation.JSONField.class).name())) {
                     return field.getAnnotation(com.alibaba.fastjson2.annotation.JSONField.class).name();
                 }
             } catch (Throwable e) {
@@ -310,7 +309,7 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
 
             try { //NOSONAR
                 if (field.isAnnotationPresent(com.fasterxml.jackson.annotation.JsonProperty.class)
-                        && N.notNullOrEmpty(field.getAnnotation(com.fasterxml.jackson.annotation.JsonProperty.class).value())) {
+                        && Strings.isNotEmpty(field.getAnnotation(com.fasterxml.jackson.annotation.JsonProperty.class).value())) {
                     return field.getAnnotation(com.fasterxml.jackson.annotation.JsonProperty.class).value();
                 }
             } catch (Throwable e) {

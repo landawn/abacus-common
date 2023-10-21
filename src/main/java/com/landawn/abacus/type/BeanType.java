@@ -14,7 +14,7 @@
 
 package com.landawn.abacus.type;
 
-import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.Strings;
 
 /**
  *
@@ -89,6 +89,6 @@ public final class BeanType<T> extends AbstractType<T> {
      */
     @Override
     public T valueOf(String st) {
-        return (N.isNullOrEmpty(st)) ? null : (T) Utils.jsonParser.deserialize(typeClass, st);
+        return (Strings.isEmpty(st)) ? null : (T) Utils.jsonParser.deserialize(typeClass, st);
     }
 }

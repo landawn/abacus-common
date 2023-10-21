@@ -21,7 +21,7 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 import com.landawn.abacus.util.IOUtil;
-import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.Strings;
 
 import okhttp3.Headers;
 import okhttp3.Interceptor;
@@ -87,9 +87,9 @@ class CurlInterceptor implements Interceptor {
             String contentType = headers.get(HttpHeaders.Names.CONTENT_TYPE);
             bodyType = requestBody.contentType() == null ? null : requestBody.contentType().toString();
 
-            if (N.notNullOrEmpty(bodyType) && bodyType.indexOf("charset") >= 0) {
+            if (Strings.isNotEmpty(bodyType) && bodyType.indexOf("charset") >= 0) {
                 charset = HttpUtil.getCharset(bodyType);
-            } else if (N.notNullOrEmpty(contentType) && contentType.indexOf("charset") >= 0) {
+            } else if (Strings.isNotEmpty(contentType) && contentType.indexOf("charset") >= 0) {
                 charset = HttpUtil.getCharset(contentType);
             }
 

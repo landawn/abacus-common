@@ -14,8 +14,8 @@ import java.sql.SQLException;
 import com.landawn.abacus.parser.SerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.IOUtil;
-import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Numbers;
+import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.u.OptionalByte;
 
 /**
@@ -68,7 +68,7 @@ public class OptionalByteType extends AbstractOptionalType<OptionalByte> {
      */
     @Override
     public OptionalByte valueOf(String str) {
-        return N.isNullOrEmpty(str) ? OptionalByte.empty() : OptionalByte.of(Numbers.toByte(str));
+        return Strings.isEmpty(str) ? OptionalByte.empty() : OptionalByte.of(Numbers.toByte(str));
     }
 
     /**

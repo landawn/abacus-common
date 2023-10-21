@@ -17,6 +17,7 @@ import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.MutableShort;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Numbers;
+import com.landawn.abacus.util.Strings;
 
 /**
  *
@@ -58,7 +59,7 @@ public class MutableShortType extends MutableType<MutableShort> {
      */
     @Override
     public MutableShort valueOf(String str) {
-        return N.isNullOrEmpty(str) ? null : MutableShort.of(Numbers.toShort(str));
+        return Strings.isEmpty(str) ? null : MutableShort.of(Numbers.toShort(str));
     }
 
     /**

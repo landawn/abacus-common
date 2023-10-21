@@ -25,6 +25,7 @@ import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Objectory;
 import com.landawn.abacus.util.Pair;
+import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.WD;
 
 /**
@@ -115,7 +116,7 @@ public class PairType<L, R> extends AbstractType<Pair<L, R>> {
     @SuppressWarnings("unchecked")
     @Override
     public Pair<L, R> valueOf(String str) {
-        if (N.isNullOrEmpty(str)) {
+        if (Strings.isEmpty(str)) {
             return null;
         }
 

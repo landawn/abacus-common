@@ -32,6 +32,7 @@ import com.landawn.abacus.util.DateTimeFormat;
 import com.landawn.abacus.util.DateUtil;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Numbers;
+import com.landawn.abacus.util.Strings;
 
 /**
  *
@@ -79,7 +80,7 @@ public class ZonedDateTimeType extends AbstractType<ZonedDateTime> {
      */
     @Override
     public ZonedDateTime valueOf(String str) {
-        if (N.isNullOrEmpty(str)) {
+        if (Strings.isEmpty(str)) {
             return null;
         }
 

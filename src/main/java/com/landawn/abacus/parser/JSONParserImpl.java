@@ -68,6 +68,7 @@ import com.landawn.abacus.util.Pair;
 import com.landawn.abacus.util.Properties;
 import com.landawn.abacus.util.RowDataSet;
 import com.landawn.abacus.util.Seid;
+import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.Triple;
 import com.landawn.abacus.util.Tuple;
@@ -137,7 +138,7 @@ final class JSONParserImpl extends AbstractJSONParser {
         final JSONDeserializationConfig configToUse = check(config);
         final Type<T> type = N.typeOf(targetClass);
 
-        if ((N.isNullOrEmpty(str) && configToUse.readNullToEmpty()) || (str != null && str.length() == 0)) {
+        if ((Strings.isEmpty(str) && configToUse.readNullToEmpty()) || (str != null && str.length() == 0)) {
             return emptyOrDefault(type);
         } else if (str == null) {
             return type.defaultValue();
@@ -228,7 +229,7 @@ final class JSONParserImpl extends AbstractJSONParser {
     public void readString(final Map<?, ?> outResult, final String str, final JSONDeserializationConfig config) {
         final JSONDeserializationConfig configToUse = check(config);
 
-        if (N.isNullOrEmpty(str)) {
+        if (Strings.isEmpty(str)) {
             return;
         }
 
@@ -355,7 +356,7 @@ final class JSONParserImpl extends AbstractJSONParser {
 
         if (obj == null) {
             try {
-                IOUtil.write(file, N.EMPTY_STRING);
+                IOUtil.write(file, Strings.EMPTY_STRING);
             } catch (IOException e) {
                 throw new UncheckedIOException(e);
             }
@@ -404,7 +405,7 @@ final class JSONParserImpl extends AbstractJSONParser {
 
         if (obj == null) {
             try {
-                IOUtil.write(os, N.EMPTY_STRING);
+                IOUtil.write(os, Strings.EMPTY_STRING);
             } catch (IOException e) {
                 throw new UncheckedIOException(e);
             }
@@ -449,7 +450,7 @@ final class JSONParserImpl extends AbstractJSONParser {
 
         if (obj == null) {
             try {
-                IOUtil.write(writer, N.EMPTY_STRING);
+                IOUtil.write(writer, Strings.EMPTY_STRING);
             } catch (IOException e) {
                 throw new UncheckedIOException(e);
             }
@@ -627,9 +628,12 @@ final class JSONParserImpl extends AbstractJSONParser {
             throw new ParseException("No serializable property is found in class: " + ClassUtil.getCanonicalClassName(cls));
         }
 
+        final Exclusion exlusion = getExclusion(config, beanInfo);
+
+        final boolean ignoreNullProperty = (exlusion == Exclusion.NULL) || (exlusion == Exclusion.DEFAULT);
+        final boolean ignoreDefaultProperty = (exlusion == Exclusion.DEFAULT);
+
         final Collection<String> ignoredClassPropNames = config.getIgnoredPropNames(cls);
-        final boolean ignoreNullProperty = (config.getExclusion() == Exclusion.NULL) || (config.getExclusion() == Exclusion.DEFAULT);
-        final boolean ignoreDefaultProperty = config.getExclusion() == Exclusion.DEFAULT;
         final boolean writeNullToEmpty = config.writeNullToEmpty();
         final boolean quotePropName = config.quotePropName();
         final boolean isPrettyFormat = config.prettyFormat();
@@ -645,7 +649,7 @@ final class JSONParserImpl extends AbstractJSONParser {
             bw.write(_BRACE_L);
         }
 
-        String nextIndentation = isPrettyFormat ? ((indentation == null ? N.EMPTY_STRING : indentation) + config.getIndentation()) : null;
+        String nextIndentation = isPrettyFormat ? ((indentation == null ? Strings.EMPTY_STRING : indentation) + config.getIndentation()) : null;
 
         if (config.wrapRootValue()) {
             if (isPrettyFormat) {
@@ -790,7 +794,7 @@ final class JSONParserImpl extends AbstractJSONParser {
             bw.write(_BRACE_L);
         }
 
-        final String nextIndentation = isPrettyFormat ? ((indentation == null ? N.EMPTY_STRING : indentation) + config.getIndentation()) : null;
+        final String nextIndentation = isPrettyFormat ? ((indentation == null ? Strings.EMPTY_STRING : indentation) + config.getIndentation()) : null;
 
         Object key = null;
         Object value = null;
@@ -887,7 +891,7 @@ final class JSONParserImpl extends AbstractJSONParser {
             bw.write(_BRACKET_L);
         }
 
-        final String nextIndentation = isPrettyFormat ? ((indentation == null ? N.EMPTY_STRING : indentation) + config.getIndentation()) : null;
+        final String nextIndentation = isPrettyFormat ? ((indentation == null ? Strings.EMPTY_STRING : indentation) + config.getIndentation()) : null;
 
         final Object[] a = isPrimitiveArray ? null : (Object[]) obj;
         final int len = isPrimitiveArray ? Array.getLength(obj) : a.length;
@@ -952,7 +956,7 @@ final class JSONParserImpl extends AbstractJSONParser {
             bw.write(_BRACKET_L);
         }
 
-        final String nextIndentation = isPrettyFormat ? ((indentation == null ? N.EMPTY_STRING : indentation) + config.getIndentation()) : null;
+        final String nextIndentation = isPrettyFormat ? ((indentation == null ? Strings.EMPTY_STRING : indentation) + config.getIndentation()) : null;
         int i = 0;
 
         for (Object e : c) {
@@ -1042,7 +1046,7 @@ final class JSONParserImpl extends AbstractJSONParser {
 
         if (!mapEntity.isEmpty()) {
             final String nextIndentation = isPrettyFormat
-                    ? ((indentation == null ? N.EMPTY_STRING : indentation) + config.getIndentation() + config.getIndentation())
+                    ? ((indentation == null ? Strings.EMPTY_STRING : indentation) + config.getIndentation() + config.getIndentation())
                     : null;
             int i = 0;
 
@@ -1154,7 +1158,7 @@ final class JSONParserImpl extends AbstractJSONParser {
 
         if (entityId.size() > 0) {
             final String nextIndentation = isPrettyFormat
-                    ? ((indentation == null ? N.EMPTY_STRING : indentation) + config.getIndentation() + config.getIndentation())
+                    ? ((indentation == null ? Strings.EMPTY_STRING : indentation) + config.getIndentation() + config.getIndentation())
                     : null;
             int i = 0;
 
@@ -1235,7 +1239,7 @@ final class JSONParserImpl extends AbstractJSONParser {
         final boolean quotePropName = config.quotePropName();
         final boolean isPrettyFormat = config.prettyFormat();
 
-        final String nextIndentation = isPrettyFormat ? ((indentation == null ? N.EMPTY_STRING : indentation) + config.getIndentation()) : null;
+        final String nextIndentation = isPrettyFormat ? ((indentation == null ? Strings.EMPTY_STRING : indentation) + config.getIndentation()) : null;
 
         if (config.bracketRootValue() || !isFirstCall) {
             bw.write(_BRACE_L);
@@ -1524,7 +1528,7 @@ final class JSONParserImpl extends AbstractJSONParser {
 
         final Type<T> type = N.typeOf(targetClass);
 
-        if ((N.isNullOrEmpty(str) && configToUse.readNullToEmpty()) || (str != null && str.length() == 0)) {
+        if ((Strings.isEmpty(str) && configToUse.readNullToEmpty()) || (str != null && str.length() == 0)) {
             return emptyOrDefault(type);
         } else if (str == null) {
             return type.defaultValue();
@@ -1560,7 +1564,7 @@ final class JSONParserImpl extends AbstractJSONParser {
         final JSONDeserializationConfig configToUse = check(config);
         final Type<T> type = N.typeOf(targetClass);
 
-        if ((N.isNullOrEmpty(str) && configToUse.readNullToEmpty()) || (str != null && fromIndex == toIndex)) {
+        if ((Strings.isEmpty(str) && configToUse.readNullToEmpty()) || (str != null && fromIndex == toIndex)) {
             return emptyOrDefault(type);
         } else if (str == null) {
             return type.defaultValue();
@@ -1764,7 +1768,7 @@ final class JSONParserImpl extends AbstractJSONParser {
         int firstToken = isFirstCall ? jr.nextToken() : START_BRACE;
 
         if (firstToken == EOR) {
-            if (isFirstCall && N.notNullOrEmpty(jr.getText())) {
+            if (isFirstCall && Strings.isNotEmpty(jr.getText())) {
                 throw new ParseException(firstToken, "Can't parse: " + jr.getText()); //NOSONAR
             }
 
@@ -2601,7 +2605,7 @@ final class JSONParserImpl extends AbstractJSONParser {
         int firstToken = isFirstCall ? jr.nextToken() : START_BRACKET;
 
         if (firstToken == EOR) {
-            if (isFirstCall && N.notNullOrEmpty(jr.getText())) {
+            if (isFirstCall && Strings.isNotEmpty(jr.getText())) {
                 throw new ParseException(firstToken, "Can't parse: " + jr.getText());
             }
 
@@ -2674,7 +2678,7 @@ final class JSONParserImpl extends AbstractJSONParser {
         int firstToken = isFirstCall ? jr.nextToken() : START_BRACKET;
 
         if (firstToken == EOR) {
-            if (isFirstCall && N.notNullOrEmpty(jr.getText())) {
+            if (isFirstCall && Strings.isNotEmpty(jr.getText())) {
                 throw new ParseException(firstToken, "Can't parse: " + jr.getText());
             }
 
@@ -2762,7 +2766,7 @@ final class JSONParserImpl extends AbstractJSONParser {
         int firstToken = isFirstCall ? jr.nextToken() : START_BRACE;
 
         if (firstToken == EOR) {
-            if (isFirstCall && N.notNullOrEmpty(jr.getText())) {
+            if (isFirstCall && Strings.isNotEmpty(jr.getText())) {
                 throw new ParseException(firstToken, "Can't parse: " + jr.getText());
             }
 
@@ -3099,7 +3103,7 @@ final class JSONParserImpl extends AbstractJSONParser {
         final Type<T> eleType = checkStreamSupportedType(elementClass);
         final JSONDeserializationConfig configToUse = check(config);
 
-        if (N.isNullOrEmpty(json) || "[]".equals(json)) {
+        if (Strings.isEmpty(json) || "[]".equals(json)) {
             return ExceptionalStream.<T, IOException> empty();
         }
 

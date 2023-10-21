@@ -3041,7 +3041,11 @@ public class Builder<T> {
          */
         public <T> ComparisonBuilder compare(T left, T right, Comparator<T> comparator) {
             if (result == 0) {
-                result = N.compare(left, right, comparator);
+                if (comparator == null) {
+                    result = Comparators.NATURAL_ORDER.compare(left, right);
+                } else {
+                    result = comparator.compare(left, right);
+                }
             }
 
             return this;

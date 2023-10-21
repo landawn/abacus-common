@@ -389,10 +389,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param str
      * @param ch
      * @return
-     * @see Strings#occurrencesOf(String, char)
+     * @see Strings#countMatches(String, char)
      */
     public static int occurrencesOf(final String str, final char ch) {
-        return Strings.occurrencesOf(str, ch);
+        return Strings.countMatches(str, ch);
     }
 
     /**
@@ -400,10 +400,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param str
      * @param substr
      * @return
-     * @see Strings#occurrencesOf(String, String)
+     * @see Strings#countMatches(String, String)
      */
     public static int occurrencesOf(final String str, final String substr) {
-        return Strings.occurrencesOf(str, substr);
+        return Strings.countMatches(str, substr);
     }
 
     /**
@@ -828,7 +828,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return the immutable collection<? extends t>
      */
     public static <T> ImmutableList<T> slice(final T[] a, final int fromIndex, final int toIndex) {
-        CommonUtil.checkFromToIndex(fromIndex, toIndex, CommonUtil.len(a));
+        CommonUtil.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
         if (CommonUtil.isNullOrEmpty(a)) {
             return ImmutableList.empty();
@@ -1521,7 +1521,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static List<String> split(final CharSequence str, final int chunkSize) {
         checkArgPositive(chunkSize, "chunkSize");
 
-        if (isNullOrEmpty(str)) {
+        if (Strings.isEmpty(str)) {
             return new ArrayList<>();
         }
 
@@ -1539,10 +1539,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      */
     public static List<String> split(final CharSequence str, final int fromIndex, final int toIndex, final int chunkSize) {
-        checkFromToIndex(fromIndex, toIndex, len(str));
+        checkFromToIndex(fromIndex, toIndex, N.len(str));
         checkArgPositive(chunkSize, "chunkSize");
 
-        if (isNullOrEmpty(str)) {
+        if (Strings.isEmpty(str)) {
             return new ArrayList<>();
         }
 
@@ -4606,6 +4606,32 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * A fake method defined to remind user to use {@code replaceAll} when {@code update/updateAll/updateIf} is searched.
+     *
+     * @throws UnsupportedOperationException
+     * @deprecated use {@code replaceAll}
+     * @see #replaceAll(Object[], com.landawn.abacus.util.Throwables.UnaryOperator)
+     * @see #replaceAll(Object[], Object, Object)
+     */
+    @Deprecated
+    public static void updateAllUsingReplaceAllInstead() throws UnsupportedOperationException {
+        throw new UnsupportedOperationException("Fake method. Please use 'replaceAll'");
+    }
+
+    /**
+     * A fake method defined to remind user to use {@code replaceIf} when {@code update/updateAll/updateIf} is searched.
+     *
+     *
+     * @throws UnsupportedOperationException
+     * @deprecated use {@code replaceIf}
+     * @see #replaceIf(Object[], com.landawn.abacus.util.Throwables.Predicate, Object)
+     */
+    @Deprecated
+    public static void updateIfUsingReplaceIfInstead() throws UnsupportedOperationException {
+        throw new UnsupportedOperationException("Fake method. Please use 'replaceIf'");
+    }
+
+    /**
      * <p>
      * Copies the given array and adds the given elementToAdd at the end of the new
      * array.
@@ -5516,12 +5542,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return a new String
      */
     public static String insert(final String str, final int index, final String strToInsert) {
-        checkIndex(index, len(str));
+        checkIndex(index, N.len(str));
 
-        if (isNullOrEmpty(strToInsert)) {
-            return nullToEmpty(str);
-        } else if (isNullOrEmpty(str)) {
-            return nullToEmpty(strToInsert);
+        if (Strings.isEmpty(strToInsert)) {
+            return Strings.nullToEmpty(str);
+        } else if (Strings.isEmpty(str)) {
+            return Strings.nullToEmpty(strToInsert);
         } else if (index == str.length()) {
             return Strings.concat(str + strToInsert);
         }
@@ -9073,14 +9099,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      */
     public static String deleteRange(String str, final int fromIndex, final int toIndex) {
-        final int len = len(str);
+        final int len = N.len(str);
 
         checkFromToIndex(fromIndex, toIndex, len);
 
         if (fromIndex == toIndex || fromIndex >= len) {
-            return str == null ? EMPTY_STRING : str;
+            return str == null ? Strings.EMPTY_STRING : str;
         } else if (toIndex - fromIndex >= len) {
-            return EMPTY_STRING;
+            return Strings.EMPTY_STRING;
         }
 
         return Strings.concat(str.substring(0, fromIndex) + str.subSequence(toIndex, len));
@@ -9492,13 +9518,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     @SuppressWarnings("deprecation")
     public static String replaceRange(final String str, final int fromIndex, final int toIndex, final String replacement) {
-        final int len = len(str);
+        final int len = N.len(str);
 
         checkFromToIndex(fromIndex, toIndex, len);
 
-        if (isNullOrEmpty(str)) {
-            return isNullOrEmpty(replacement) ? str : replacement;
-        } else if (isNullOrEmpty(replacement)) {
+        if (Strings.isEmpty(str)) {
+            return Strings.isEmpty(replacement) ? str : replacement;
+        } else if (Strings.isEmpty(replacement)) {
             return deleteRange(str, fromIndex, toIndex);
         }
 
@@ -9791,7 +9817,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     @SuppressWarnings("deprecation")
     public static String moveRange(final String str, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
-        final int len = len(str);
+        final int len = N.len(str);
         checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len);
 
         if (fromIndex == toIndex || fromIndex == newPositionStartIndex) {
@@ -12682,7 +12708,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      */
     public static <T extends Comparable<? super T>> T min(final T a, final T b) {
-        return (T) min(a, b, NULL_MAX_COMPARATOR);
+        return min(a, b, (Comparator<T>) NULL_MAX_COMPARATOR);
     }
 
     /**
@@ -12694,7 +12720,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      */
     public static <T> T min(final T a, final T b, final Comparator<? super T> cmp) {
-        return (cmp == null ? NULL_MAX_COMPARATOR : cmp).compare(a, b) <= 0 ? a : b;
+        if (cmp == null) {
+            return ((Comparator<T>) NULL_MAX_COMPARATOR).compare(a, b) <= 0 ? a : b;
+        } else {
+            return cmp.compare(a, b) <= 0 ? a : b;
+        }
     }
 
     /**
@@ -12814,7 +12844,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      */
     public static <T extends Comparable<? super T>> T min(final T a, final T b, final T c) {
-        return (T) min(a, b, c, NULL_MAX_COMPARATOR);
+        return min(a, b, c, (Comparator<T>) NULL_MAX_COMPARATOR);
     }
 
     /**
@@ -13140,7 +13170,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
      */
     public static <T extends Comparable<? super T>> T min(final T[] a, final int fromIndex, final int toIndex) throws IllegalArgumentException {
-        return (T) min(a, fromIndex, toIndex, NULL_MAX_COMPARATOR);
+        return min(a, fromIndex, toIndex, (Comparator<T>) NULL_MAX_COMPARATOR);
     }
 
     /**
@@ -13174,7 +13204,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             throw new IllegalArgumentException("The spcified array can not be null or empty");
         }
 
-        cmp = cmp == null ? NULL_MAX_COMPARATOR : cmp;
+        cmp = cmp == null ? (Comparator<T>) NULL_MAX_COMPARATOR : cmp;
 
         T candidate = a[fromIndex];
         for (int i = fromIndex + 1; i < toIndex; i++) {
@@ -13204,7 +13234,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             throws IllegalArgumentException {
         checkArgNotNullOrEmpty(c, "The spcified collection can not be null or empty");
 
-        return (T) min(c, fromIndex, toIndex, NULL_MAX_COMPARATOR);
+        return min(c, fromIndex, toIndex, (Comparator<T>) NULL_MAX_COMPARATOR);
     }
 
     /**
@@ -13226,7 +13256,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             throw new IllegalArgumentException("The size of collection can not be null or empty");
         }
 
-        cmp = cmp == null ? NULL_MAX_COMPARATOR : cmp;
+        cmp = cmp == null ? (Comparator<T>) NULL_MAX_COMPARATOR : cmp;
 
         T candidate = null;
         T e = null;
@@ -13280,7 +13310,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see Iterables#min(Collection)
      */
     public static <T extends Comparable<? super T>> T min(final Iterable<? extends T> c) throws IllegalArgumentException {
-        return (T) min(c, NULL_MAX_COMPARATOR);
+        return min(c, (Comparator<T>) NULL_MAX_COMPARATOR);
     }
 
     /**
@@ -13298,6 +13328,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return min(coll, 0, coll.size(), cmp);
         }
 
+        cmp = cmp == null ? (Comparator<T>) NULL_MAX_COMPARATOR : cmp;
         final Iterator<? extends T> iter = Iterables.iterateNonEmpty(c, "The spcified Collection/Iterable can not be null or empty"); //NOSONAR
 
         T candidate = iter.next();
@@ -13340,7 +13371,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return new ArrayList<>();
         }
 
-        cmp = cmp == null ? NULL_MAX_COMPARATOR : cmp;
+        cmp = cmp == null ? (Comparator<T>) NULL_MAX_COMPARATOR : cmp;
 
         final List<T> result = new ArrayList<>();
         T candicate = a[0];
@@ -13408,7 +13439,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see Iterables#min(Iterator, Comparator)
      */
     public static <T> List<T> minAll(final Iterator<? extends T> iter, Comparator<? super T> cmp) {
-        cmp = cmp == null ? NULL_MAX_COMPARATOR : cmp;
+        cmp = cmp == null ? (Comparator<T>) NULL_MAX_COMPARATOR : cmp;
 
         final List<T> result = new ArrayList<>();
         T candicate = iter.next();
@@ -13771,7 +13802,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see Iterables#minMax(Comparable[])
      */
     public static <T extends Comparable<? super T>> Pair<T, T> minMax(final T[] a) throws IllegalArgumentException {
-        return minMax(a, NULL_MIN_COMPARATOR);
+        return minMax(a, NATURAL_COMPARATOR);
     }
 
     /**
@@ -13790,7 +13821,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return Pair.of(a[0], a[0]);
         }
 
-        cmp = cmp == null ? NULL_MIN_COMPARATOR : cmp;
+        cmp = cmp == null ? (Comparator<T>) NATURAL_COMPARATOR : cmp;
 
         T min = a[0];
         T max = a[0];
@@ -13818,7 +13849,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see Iterables#minMax(Iterable)
      */
     public static <T extends Comparable<? super T>> Pair<T, T> minMax(final Iterable<? extends T> c) throws IllegalArgumentException {
-        return minMax(c, NULL_MIN_COMPARATOR);
+        return minMax(c, NATURAL_COMPARATOR);
     }
 
     /**
@@ -13845,7 +13876,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see Iterables#minMax(Iterator)
      */
     public static <T extends Comparable<? super T>> Pair<T, T> minMax(final Iterator<? extends T> iter) throws IllegalArgumentException {
-        return minMax(iter, NULL_MIN_COMPARATOR);
+        return minMax(iter, NATURAL_COMPARATOR);
     }
 
     /**
@@ -13860,7 +13891,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static <T> Pair<T, T> minMax(final Iterator<? extends T> iter, Comparator<? super T> cmp) throws IllegalArgumentException {
         checkArgument(iter != null && iter.hasNext(), "The spcified iterator can not be null or empty");
 
-        cmp = cmp == null ? NULL_MIN_COMPARATOR : cmp;
+        cmp = cmp == null ? (Comparator<T>) NATURAL_COMPARATOR : cmp;
 
         T next = iter.next();
         T min = next;
@@ -13981,7 +14012,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      */
     public static <T extends Comparable<? super T>> T max(final T a, final T b) {
-        return (T) max(a, b, NULL_MIN_COMPARATOR);
+        return max(a, b, (Comparator<T>) NULL_MIN_COMPARATOR);
     }
 
     /**
@@ -13993,7 +14024,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      */
     public static <T> T max(final T a, final T b, final Comparator<? super T> cmp) {
-        return (cmp == null ? NULL_MIN_COMPARATOR : cmp).compare(a, b) >= 0 ? a : b;
+        if (cmp == null) {
+            return ((Comparator<T>) NULL_MIN_COMPARATOR).compare(a, b) >= 0 ? a : b;
+        } else {
+            return cmp.compare(a, b) >= 0 ? a : b;
+        }
     }
 
     /**
@@ -14099,7 +14134,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      */
     public static <T extends Comparable<? super T>> T max(final T a, final T b, final T c) {
-        return (T) max(a, b, c, NULL_MIN_COMPARATOR);
+        return max(a, b, c, (Comparator<T>) NULL_MIN_COMPARATOR);
     }
 
     /**
@@ -14421,7 +14456,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
      */
     public static <T extends Comparable<? super T>> T max(final T[] a, final int fromIndex, final int toIndex) throws IllegalArgumentException {
-        return (T) max(a, fromIndex, toIndex, NULL_MIN_COMPARATOR);
+        return max(a, fromIndex, toIndex, (Comparator<T>) NULL_MIN_COMPARATOR);
     }
 
     /**
@@ -14455,7 +14490,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             throw new IllegalArgumentException("The spcified array can not be null or empty");
         }
 
-        cmp = cmp == null ? NULL_MIN_COMPARATOR : cmp;
+        cmp = cmp == null ? (Comparator<T>) NULL_MIN_COMPARATOR : cmp;
 
         T candidate = a[fromIndex];
         for (int i = fromIndex + 1; i < toIndex; i++) {
@@ -14480,7 +14515,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see Iterables#max(Collection)
      */
     public static <T extends Comparable<? super T>> T max(final Iterable<? extends T> c) throws IllegalArgumentException {
-        return (T) max(c, NULL_MIN_COMPARATOR);
+        return max(c, (Comparator<T>) NULL_MIN_COMPARATOR);
     }
 
     /**
@@ -14498,6 +14533,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return max(coll, 0, coll.size(), cmp);
         }
 
+        cmp = cmp == null ? (Comparator<T>) NULL_MIN_COMPARATOR : cmp;
         final Iterator<? extends T> iter = Iterables.iterateNonEmpty(c, "The spcified Collection/Iterable can not be null or empty");
 
         T candidate = iter.next();
@@ -14531,7 +14567,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             throws IllegalArgumentException {
         checkArgNotNullOrEmpty(c, "The spcified collection can not be null or empty");
 
-        return (T) max(c, fromIndex, toIndex, NULL_MIN_COMPARATOR);
+        return max(c, fromIndex, toIndex, (Comparator<T>) NULL_MIN_COMPARATOR);
     }
 
     /**
@@ -14553,7 +14589,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             throw new IllegalArgumentException("The size of collection can not be null or empty");
         }
 
-        cmp = cmp == null ? NULL_MIN_COMPARATOR : cmp;
+        cmp = cmp == null ? (Comparator<T>) NULL_MIN_COMPARATOR : cmp;
 
         T candidate = null;
         T e = null;
@@ -14621,7 +14657,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return new ArrayList<>();
         }
 
-        cmp = cmp == null ? NULL_MIN_COMPARATOR : cmp;
+        cmp = cmp == null ? (Comparator<T>) NULL_MIN_COMPARATOR : cmp;
 
         final List<T> result = new ArrayList<>();
         T candicate = a[0];
@@ -14689,7 +14725,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see Iterables#maxAll(Iterator, Comparator)
      */
     public static <T> List<T> maxAll(final Iterator<? extends T> iter, Comparator<? super T> cmp) {
-        cmp = cmp == null ? NULL_MIN_COMPARATOR : cmp;
+        cmp = cmp == null ? (Comparator<T>) NULL_MIN_COMPARATOR : cmp;
 
         final List<T> result = new ArrayList<>();
         T candicate = iter.next();
@@ -15195,7 +15231,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #median(int...)
      */
     public static <T extends Comparable<? super T>> T median(final T a, final T b, final T c) {
-        return (T) median(a, b, c, NATURAL_ORDER);
+        return (T) median(a, b, c, NATURAL_COMPARATOR);
     }
 
     /**
@@ -15210,7 +15246,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #median(int...)
      */
     public static <T> T median(final T a, final T b, final T c, Comparator<? super T> cmp) {
-        cmp = cmp == null ? NATURAL_ORDER : cmp;
+        cmp = cmp == null ? NATURAL_COMPARATOR : cmp;
 
         int ab = cmp.compare(a, b);
         int ac = cmp.compare(a, c);
@@ -15555,7 +15591,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             throw new IllegalArgumentException("The spcified array can not be null or empty");
         }
 
-        return (T) median(a, fromIndex, toIndex, NATURAL_ORDER);
+        return (T) median(a, fromIndex, toIndex, NATURAL_COMPARATOR);
     }
 
     /**
@@ -15591,7 +15627,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         checkFromToIndex(fromIndex, toIndex, a.length);
 
-        cmp = cmp == null ? NATURAL_ORDER : cmp;
+        cmp = cmp == null ? NATURAL_COMPARATOR : cmp;
 
         final int len = toIndex - fromIndex;
 
@@ -15624,7 +15660,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static <T extends Comparable<? super T>> T median(final Collection<? extends T> c, final int fromIndex, final int toIndex)
             throws IllegalArgumentException {
-        return (T) median(c, fromIndex, toIndex, NATURAL_ORDER);
+        return (T) median(c, fromIndex, toIndex, NATURAL_COMPARATOR);
     }
 
     /**
@@ -15661,7 +15697,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         checkFromToIndex(fromIndex, toIndex, c.size());
 
-        cmp = cmp == null ? NATURAL_ORDER : cmp;
+        cmp = cmp == null ? NATURAL_COMPARATOR : cmp;
 
         final int len = toIndex - fromIndex;
 
@@ -16209,7 +16245,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             throw new IllegalArgumentException("The spcified array can not be null or empty");
         }
 
-        return kthLargest(a, fromIndex, toIndex, k, Comparators.<T> naturalOrder());
+        return kthLargest(a, fromIndex, toIndex, k, (Comparator<T>) NULL_MIN_COMPARATOR);
     }
 
     /**
@@ -16247,7 +16283,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
         checkArgument(k > 0 && k <= toIndex - fromIndex, "'k' (%s) is out of range %s", k, toIndex - fromIndex);
 
-        final Comparator<? super T> comparator = cmp == null ? Comparators.NATURAL_ORDER : cmp;
+        final Comparator<? super T> comparator = cmp == null ? NULL_MIN_COMPARATOR : cmp;
         final int len = toIndex - fromIndex;
 
         if (k == 1) {
@@ -16321,7 +16357,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             throw new IllegalArgumentException("The length of collection can not be null or empty");
         }
 
-        return kthLargest(c, fromIndex, toIndex, k, Comparators.<T> naturalOrder());
+        return kthLargest(c, fromIndex, toIndex, k, (Comparator<T>) NULL_MIN_COMPARATOR);
     }
 
     /**
@@ -16359,7 +16395,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         checkFromToIndex(fromIndex, toIndex, c == null ? 0 : c.size());
         checkArgument(k > 0 && k <= toIndex - fromIndex, "'k' (%s) is out of range %s", k, toIndex - fromIndex);
 
-        final Comparator<? super T> comparator = cmp == null ? Comparators.NATURAL_ORDER : cmp;
+        final Comparator<? super T> comparator = cmp == null ? NULL_MIN_COMPARATOR : cmp;
         final int len = toIndex - fromIndex;
 
         if (k == 1) {
@@ -16478,7 +16514,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return copyOfRange(a, fromIndex, toIndex);
         }
 
-        final Comparator<? super Short> comparator = cmp == null ? Comparators.NATURAL_ORDER : cmp;
+        final Comparator<? super Short> comparator = cmp == null ? NULL_MIN_COMPARATOR : cmp;
         final Queue<Short> heap = new PriorityQueue<>(n, comparator);
 
         for (int i = fromIndex; i < toIndex; i++) {
@@ -16554,7 +16590,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return copyOfRange(a, fromIndex, toIndex);
         }
 
-        final Comparator<? super Integer> comparator = cmp == null ? Comparators.NATURAL_ORDER : cmp;
+        final Comparator<? super Integer> comparator = cmp == null ? NULL_MIN_COMPARATOR : cmp;
         final Queue<Integer> heap = new PriorityQueue<>(n, comparator);
 
         for (int i = fromIndex; i < toIndex; i++) {
@@ -16630,7 +16666,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return copyOfRange(a, fromIndex, toIndex);
         }
 
-        final Comparator<? super Long> comparator = cmp == null ? Comparators.NATURAL_ORDER : cmp;
+        final Comparator<? super Long> comparator = cmp == null ? NULL_MIN_COMPARATOR : cmp;
         final Queue<Long> heap = new PriorityQueue<>(n, comparator);
 
         for (int i = fromIndex; i < toIndex; i++) {
@@ -16706,7 +16742,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return copyOfRange(a, fromIndex, toIndex);
         }
 
-        final Comparator<? super Float> comparator = cmp == null ? Comparators.NATURAL_ORDER : cmp;
+        final Comparator<? super Float> comparator = cmp == null ? NULL_MIN_COMPARATOR : cmp;
         final Queue<Float> heap = new PriorityQueue<>(n, comparator);
 
         for (int i = fromIndex; i < toIndex; i++) {
@@ -16782,7 +16818,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return copyOfRange(a, fromIndex, toIndex);
         }
 
-        final Comparator<? super Double> comparator = cmp == null ? Comparators.NATURAL_ORDER : cmp;
+        final Comparator<? super Double> comparator = cmp == null ? NULL_MIN_COMPARATOR : cmp;
         final Queue<Double> heap = new PriorityQueue<>(n, comparator);
 
         for (int i = fromIndex; i < toIndex; i++) {
@@ -16815,7 +16851,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      */
     public static <T extends Comparable<? super T>> List<T> top(final T[] a, final int n) {
-        return top(a, n, NATURAL_ORDER);
+        return top(a, n, NULL_MIN_COMPARATOR);
     }
 
     /**
@@ -16840,7 +16876,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      */
     public static <T extends Comparable<? super T>> List<T> top(final T[] a, final int fromIndex, final int toIndex, final int n) {
-        return top(a, fromIndex, toIndex, n, NATURAL_ORDER);
+        return top(a, fromIndex, toIndex, n, NULL_MIN_COMPARATOR);
     }
 
     /**
@@ -16863,7 +16899,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return toList(a, fromIndex, toIndex);
         }
 
-        final Comparator<? super T> comparator = cmp == null ? Comparators.NATURAL_ORDER : cmp;
+        final Comparator<? super T> comparator = cmp == null ? NULL_MIN_COMPARATOR : cmp;
         final Queue<T> heap = new PriorityQueue<>(n, comparator);
 
         for (int i = fromIndex; i < toIndex; i++) {
@@ -16954,7 +16990,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             }
         }
 
-        final Comparator<? super T> comparator = cmp == null ? Comparators.NATURAL_ORDER : cmp;
+        final Comparator<? super T> comparator = cmp == null ? NULL_MIN_COMPARATOR : cmp;
         final Queue<T> heap = new PriorityQueue<>(n, comparator);
 
         if (c instanceof List && c instanceof RandomAccess) {
@@ -17007,7 +17043,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      */
     public static <T extends Comparable<? super T>> List<T> top(final T[] a, final int n, final boolean keepEncounterOrder) {
-        return top(a, n, NATURAL_ORDER, keepEncounterOrder);
+        return top(a, n, NULL_MIN_COMPARATOR, keepEncounterOrder);
     }
 
     /**
@@ -17035,7 +17071,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static <T extends Comparable<? super T>> List<T> top(final T[] a, final int fromIndex, final int toIndex, final int n,
             final boolean keepEncounterOrder) {
-        return top(a, fromIndex, toIndex, n, NATURAL_ORDER, keepEncounterOrder);
+        return top(a, fromIndex, toIndex, n, NULL_MIN_COMPARATOR, keepEncounterOrder);
     }
 
     /**
@@ -17118,7 +17154,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      */
     public static <T extends Comparable<? super T>> List<T> top(final Collection<? extends T> c, final int n, final boolean keepEncounterOrder) {
-        return top(c, n, NATURAL_ORDER, keepEncounterOrder);
+        return top(c, n, NULL_MIN_COMPARATOR, keepEncounterOrder);
     }
 
     /**
@@ -17147,7 +17183,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static <T extends Comparable<? super T>> List<T> top(final Collection<? extends T> c, final int fromIndex, final int toIndex, final int n,
             final boolean keepEncounterOrder) {
-        return top(c, fromIndex, toIndex, n, NATURAL_ORDER, keepEncounterOrder);
+        return top(c, fromIndex, toIndex, n, NULL_MIN_COMPARATOR, keepEncounterOrder);
     }
 
     /**
@@ -28756,70 +28792,66 @@ public final class N extends CommonUtil { // public final class N extends π imp
     // Boolean utilities
     //--------------------------------------------------------------------------
 
+    //    @Beta
+    //    public static boolean isNullOrFalse(final Boolean bool) {
+    //        if (bool == null) {
+    //            return true;
+    //        }
+    //
+    //        return Boolean.FALSE.equals(bool);
+    //    }
+    //
+    //    @Beta
+    //    public static boolean isNullOrTrue(final Boolean bool) {
+    //        if (bool == null) {
+    //            return true;
+    //        }
+    //
+    //        return Boolean.TRUE.equals(bool);
+    //    }
+
+    /**
+     * Returns {@code true} if the specified {@code boolean} is {@code Boolean.TRUE}, not {@code null} or {@code Boolean.FALSE}.
+     *
+     * @param bool
+     * @return
+     */
     @Beta
-    public static boolean isNullOrFalse(final Boolean bool) {
-        if (bool == null) {
-            return true;
-        }
-
-        return Boolean.FALSE.equals(bool);
-    }
-
-    @Beta
-    public static boolean isNullOrTrue(final Boolean bool) {
-        if (bool == null) {
-            return true;
-        }
-
+    public static boolean isTrue(final Boolean bool) {
         return Boolean.TRUE.equals(bool);
     }
 
-    //    /**
-    //     * Returns {@code 0} if the specified {@code bool} is {@code null} or {@code false}, otherwise {@code 1} is returned.
-    //     *
-    //     * @param bool
-    //     * @return
-    //     */
-    //    @Beta
-    //    public static int toIntOneZero(final Boolean bool) {
-    //        if (bool == null) {
-    //            return 0;
-    //        }
-    //
-    //        return bool.booleanValue() ? 1 : 0;
-    //    }
-    //
-    //    /**
-    //     * Returns {@code 'N'} if the specified {@code bool} is {@code null} or {@code false}, otherwise {@code 'Y'} is returned.
-    //     *
-    //     *
-    //     * @param bool
-    //     * @return
-    //     */
-    //    @Beta
-    //    public static char toCharYN(final Boolean bool) {
-    //        if (bool == null) {
-    //            return 'N';
-    //        }
-    //
-    //        return bool.booleanValue() ? 'Y' : 'N';
-    //    }
-    //
-    //    /**
-    //     * Returns {@code "no"} if the specified {@code bool} is {@code null} or {@code false}, otherwise {@code "yes"} is returned.
-    //     *
-    //     *
-    //     * @param bool
-    //     * @return
-    //     */
-    //    @Beta
-    //    public static String toStringYesNo(final Boolean bool) {
-    //        if (bool == null) {
-    //            return "no";
-    //        }
-    //
-    //        return bool.booleanValue() ? "yes" : "no";
-    //    }
+    /**
+     * Returns {@code true} if the specified {@code boolean} is {@code null} or {@code Boolean.FALSE}.
+     *
+     * @param bool
+     * @return
+     */
+    @Beta
+    public static boolean isNotTrue(final Boolean bool) {
+        return bool == null || Boolean.FALSE.equals(bool);
+    }
+
+    /**
+     * Returns {@code true} if the specified {@code boolean} is {@code Boolean.FALSE}, not {@code null} or {@code Boolean.TRUE}.
+     *
+     * @return
+     */
+    @Beta
+    public static boolean isFalse(final Boolean bool) {
+        return Boolean.FALSE.equals(bool);
+    }
+
+    /**
+     * Returns {@code true} if the specified {@code boolean} is {@code null} or {@code Boolean.TRUE}.
+     *
+     * @param bool
+     * @return
+     */
+    @Beta
+    public static boolean isNotFalse(final Boolean bool) {
+        return bool == null || Boolean.TRUE.equals(bool);
+    }
 
     /**
      * <p>Note: copied from Apache commons Lang under Apache license v2.0 </p>
@@ -28883,6 +28915,52 @@ public final class N extends CommonUtil { // public final class N extends π imp
         }
     }
 
+    //    /**
+    //     * Returns {@code 0} if the specified {@code bool} is {@code null} or {@code false}, otherwise {@code 1} is returned.
+    //     *
+    //     * @param bool
+    //     * @return
+    //     */
+    //    @Beta
+    //    public static int toIntOneZero(final Boolean bool) {
+    //        if (bool == null) {
+    //            return 0;
+    //        }
+    //
+    //        return bool.booleanValue() ? 1 : 0;
+    //    }
+    //
+    //    /**
+    //     * Returns {@code 'N'} if the specified {@code bool} is {@code null} or {@code false}, otherwise {@code 'Y'} is returned.
+    //     *
+    //     *
+    //     * @param bool
+    //     * @return
+    //     */
+    //    @Beta
+    //    public static char toCharYN(final Boolean bool) {
+    //        if (bool == null) {
+    //            return 'N';
+    //        }
+    //
+    //        return bool.booleanValue() ? 'Y' : 'N';
+    //    }
+    //
+    //    /**
+    //     * Returns {@code "no"} if the specified {@code bool} is {@code null} or {@code false}, otherwise {@code "yes"} is returned.
+    //     *
+    //     *
+    //     * @param bool
+    //     * @return
+    //     */
+    //    @Beta
+    //    public static String toStringYesNo(final Boolean bool) {
+    //        if (bool == null) {
+    //            return "no";
+    //        }
+    //
+    //        return bool.booleanValue() ? "yes" : "no";
+    //    }
     /**
      * Add it because {@code Comparator.reversed()} doesn't work well in some scenarios.
      *
@@ -28891,6 +28969,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      * @see Collections#reverseOrder(Comparator)
      */
+    @Beta
     public static <T> Comparator<T> reverseOrder(final Comparator<T> cmp) {
         return Comparators.reverseOrder(cmp);
     }

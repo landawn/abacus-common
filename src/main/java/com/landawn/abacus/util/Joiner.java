@@ -86,8 +86,8 @@ public final class Joiner implements Closeable {
         this.keyValueSeparator = keyValueSeparator.toString();
         this.suffix = suffix.toString();
         this.emptyValue = this.prefix + this.suffix;
-        this.isEmptySeparator = N.isNullOrEmpty(separator);
-        this.isEmptyKeyValueSeparator = N.isNullOrEmpty(keyValueSeparator);
+        this.isEmptySeparator = Strings.isEmpty(separator);
+        this.isEmptyKeyValueSeparator = Strings.isEmpty(keyValueSeparator);
     }
 
     /**
@@ -2010,7 +2010,7 @@ public final class Joiner implements Closeable {
         try {
             appendable.append(buffer);
 
-            if (N.notNullOrEmpty(suffix)) {
+            if (Strings.isNotEmpty(suffix)) {
                 appendable.append(suffix);
             }
         } finally {

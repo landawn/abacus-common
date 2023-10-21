@@ -15,7 +15,7 @@
 package com.landawn.abacus.type;
 
 import com.landawn.abacus.util.MapEntity;
-import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.Strings;
 
 /**
  *
@@ -92,6 +92,6 @@ public class MapEntityType extends AbstractType<MapEntity> {
      */
     @Override
     public MapEntity valueOf(String str) {
-        return N.isNullOrEmpty(str) ? null : (MapEntity) Utils.jsonParser.deserialize(MapEntity.class, str, Utils.jdc);
+        return Strings.isEmpty(str) ? null : (MapEntity) Utils.jsonParser.deserialize(MapEntity.class, str, Utils.jdc);
     }
 }

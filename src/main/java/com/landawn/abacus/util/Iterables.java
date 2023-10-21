@@ -294,7 +294,7 @@ public final class Iterables {
      * @return
      */
     public static <T> Nullable<T> min(final Iterator<? extends T> iter, Comparator<? super T> cmp) {
-        cmp = cmp == null ? N.NULL_MAX_COMPARATOR : cmp;
+        cmp = cmp == null ? (Comparator<T>) N.NULL_MAX_COMPARATOR : cmp;
 
         if (iter == null || !iter.hasNext()) {
             return Nullable.<T> empty();
@@ -326,7 +326,7 @@ public final class Iterables {
      */
     @SuppressWarnings("rawtypes")
     public static <T> Nullable<T> minBy(final T[] a, final Function<? super T, ? extends Comparable> keyMapper) {
-        return min(a, Fn.comparingBy(keyMapper));
+        return min(a, Comparators.comparingByIfNotNullOrElseNullsLast(keyMapper));
     }
 
     /**
@@ -339,7 +339,7 @@ public final class Iterables {
      */
     @SuppressWarnings("rawtypes")
     public static <T> Nullable<T> minBy(final Iterable<? extends T> c, final Function<? super T, ? extends Comparable> keyMapper) {
-        return min(c, Fn.comparingBy(keyMapper));
+        return min(c, Comparators.comparingByIfNotNullOrElseNullsLast(keyMapper));
     }
 
     /**
@@ -352,7 +352,7 @@ public final class Iterables {
      */
     @SuppressWarnings("rawtypes")
     public static <T> Nullable<T> minBy(final Iterator<? extends T> iter, final Function<? super T, ? extends Comparable> keyMapper) {
-        return min(iter, Fn.comparingBy(keyMapper));
+        return min(iter, Comparators.comparingByIfNotNullOrElseNullsLast(keyMapper));
     }
 
     /**
@@ -421,7 +421,7 @@ public final class Iterables {
      * @return
      */
     public static <T> Nullable<T> max(final Iterator<? extends T> iter, Comparator<? super T> cmp) {
-        cmp = cmp == null ? N.NULL_MIN_COMPARATOR : cmp;
+        cmp = cmp == null ? (Comparator<T>) N.NULL_MIN_COMPARATOR : cmp;
 
         if (iter == null || !iter.hasNext()) {
             return Nullable.<T> empty();
@@ -453,7 +453,7 @@ public final class Iterables {
      */
     @SuppressWarnings("rawtypes")
     public static <T> Nullable<T> maxBy(final T[] a, final Function<? super T, ? extends Comparable> keyMapper) {
-        return max(a, Fn.comparingBy(keyMapper));
+        return max(a, Comparators.comparingByIfNotNullOrElseNullsFirst(keyMapper));
     }
 
     /**
@@ -466,7 +466,7 @@ public final class Iterables {
      */
     @SuppressWarnings("rawtypes")
     public static <T> Nullable<T> maxBy(final Iterable<? extends T> c, final Function<? super T, ? extends Comparable> keyMapper) {
-        return max(c, Fn.comparingBy(keyMapper));
+        return max(c, Comparators.comparingByIfNotNullOrElseNullsFirst(keyMapper));
     }
 
     /**
@@ -479,7 +479,7 @@ public final class Iterables {
      */
     @SuppressWarnings("rawtypes")
     public static <T> Nullable<T> maxBy(final Iterator<? extends T> iter, final Function<? super T, ? extends Comparable> keyMapper) {
-        return max(iter, Fn.comparingBy(keyMapper));
+        return max(iter, Comparators.comparingByIfNotNullOrElseNullsFirst(keyMapper));
     }
 
     /**
@@ -607,7 +607,7 @@ public final class Iterables {
      */
     @SuppressWarnings("rawtypes")
     public static <T> Nullable<T> medianBy(final T[] a, final Function<? super T, ? extends Comparable> keyMapper) {
-        return median(a, Fn.comparingBy(keyMapper));
+        return median(a, Comparators.comparingBy(keyMapper));
     }
 
     /**
@@ -620,7 +620,7 @@ public final class Iterables {
      */
     @SuppressWarnings("rawtypes")
     public static <T> Nullable<T> medianBy(final Collection<? extends T> c, final Function<? super T, ? extends Comparable> keyMapper) {
-        return median(c, Fn.comparingBy(keyMapper));
+        return median(c, Comparators.comparingBy(keyMapper));
     }
 
     /**
@@ -2091,7 +2091,7 @@ public final class Iterables {
      * @return
      */
     public static <K extends Comparable<? super K>> NavigableSet<K> subSet(NavigableSet<K> set, Range<K> range) {
-        if (set.comparator() != null && set.comparator() != Comparators.naturalOrder()) {
+        if (set.comparator() != null && set.comparator() != N.NATURAL_COMPARATOR) {
             N.checkArgument(set.comparator().compare(range.lowerEndpoint(), range.upperEndpoint()) <= 0,
                     "set is using a custom comparator which is inconsistent with the natural ordering.");
         }
@@ -2218,7 +2218,7 @@ public final class Iterables {
      *     null elements.
      */
     public static <E extends Comparable<? super E>> Collection<List<E>> orderedPermutations(final Collection<E> elements) {
-        return orderedPermutations(elements, Comparators.naturalOrder());
+        return orderedPermutations(elements, N.NATURAL_COMPARATOR);
     }
 
     /**

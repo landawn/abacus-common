@@ -15,6 +15,7 @@
 package com.landawn.abacus.parser;
 
 import java.util.Locale;
+import java.util.function.Function;
 
 import com.fasterxml.jackson.core.Base64Variants;
 import com.fasterxml.jackson.databind.AnnotationIntrospector;
@@ -66,6 +67,20 @@ public class JacksonMapperConfig extends MapperConfig {
 
     private DeserializationConfig deserializationConfig;
 
+    JacksonMapperConfig() {
+        this(null, null);
+    }
+
+    /**
+     *
+     * @param serializationConfig
+     * @param deserializationConfig
+     */
+    JacksonMapperConfig(final SerializationConfig serializationConfig, final DeserializationConfig deserializationConfig) {
+        this.serializationConfig = serializationConfig;
+        this.deserializationConfig = deserializationConfig;
+    }
+
     /**
      * Gets the serialization config.
      *
@@ -103,6 +118,19 @@ public class JacksonMapperConfig extends MapperConfig {
 
     /**
      *
+     * @param features
+     * @return
+     */
+    public JacksonMapperConfig with(SerializationFeature... features) {
+        initSerializationConfig();
+
+        serializationConfig = serializationConfig.withFeatures(features);
+
+        return this;
+    }
+
+    /**
+     *
      * @param feature
      * @return
      */
@@ -110,6 +138,32 @@ public class JacksonMapperConfig extends MapperConfig {
         initSerializationConfig();
 
         serializationConfig = serializationConfig.without(feature);
+
+        return this;
+    }
+
+    /**
+     *
+     * @param feature
+     * @return
+     */
+    public JacksonMapperConfig without(SerializationFeature... features) {
+        initSerializationConfig();
+
+        serializationConfig = serializationConfig.withoutFeatures(features);
+
+        return this;
+    }
+
+    /**
+     *
+     * @param setter
+     * @return
+     */
+    public JacksonMapperConfig setSerializationConfig(final Function<? super SerializationConfig, ? extends SerializationConfig> setter) {
+        initDeserializationConfig();
+
+        this.serializationConfig = setter.apply(this.serializationConfig);
 
         return this;
     }
@@ -129,6 +183,19 @@ public class JacksonMapperConfig extends MapperConfig {
 
     /**
      *
+     * @param features
+     * @return
+     */
+    public JacksonMapperConfig with(DeserializationFeature... features) {
+        initDeserializationConfig();
+
+        deserializationConfig = deserializationConfig.withFeatures(features);
+
+        return this;
+    }
+
+    /**
+     *
      * @param feature
      * @return
      */
@@ -136,6 +203,32 @@ public class JacksonMapperConfig extends MapperConfig {
         initDeserializationConfig();
 
         deserializationConfig = deserializationConfig.without(feature);
+
+        return this;
+    }
+
+    /**
+     *
+     * @param features
+     * @return
+     */
+    public JacksonMapperConfig without(DeserializationFeature... features) {
+        initDeserializationConfig();
+
+        deserializationConfig = deserializationConfig.withoutFeatures(features);
+
+        return this;
+    }
+
+    /**
+     *
+     * @param setter
+     * @return
+     */
+    public JacksonMapperConfig setDeserializationConfig(final Function<? super DeserializationConfig, ? extends DeserializationConfig> setter) {
+        initDeserializationConfig();
+
+        this.deserializationConfig = setter.apply(this.deserializationConfig);
 
         return this;
     }
@@ -173,6 +266,18 @@ public class JacksonMapperConfig extends MapperConfig {
          */
         public static JacksonMapperConfig create() {
             return new JacksonMapperConfig();
+        }
+
+        public static JacksonMapperConfig create(SerializationConfig serializationConfig) {
+            return new JacksonMapperConfig(serializationConfig, null);
+        }
+
+        public static JacksonMapperConfig create(DeserializationConfig deserializationConfig) {
+            return new JacksonMapperConfig(null, deserializationConfig);
+        }
+
+        public static JacksonMapperConfig create(SerializationConfig serializationConfig, DeserializationConfig deserializationConfig) {
+            return new JacksonMapperConfig(serializationConfig, deserializationConfig);
         }
     }
 }

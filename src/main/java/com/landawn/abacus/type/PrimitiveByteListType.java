@@ -25,6 +25,7 @@ import com.landawn.abacus.parser.SerializationConfig;
 import com.landawn.abacus.util.ByteList;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.Strings;
 
 /**
  *
@@ -81,7 +82,7 @@ public final class PrimitiveByteListType extends AbstractPrimitiveListType<ByteL
      */
     @Override
     public ByteList valueOf(String str) {
-        return N.isNullOrEmpty(str) ? null : ByteList.of(arrayType.valueOf(str));
+        return Strings.isEmpty(str) ? null : ByteList.of(arrayType.valueOf(str));
     }
 
     /**

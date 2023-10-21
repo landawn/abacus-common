@@ -21,6 +21,7 @@ import com.landawn.abacus.parser.JSONDeserializationConfig.JDC;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.LongMultiset;
 import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.WD;
 
 /**
@@ -130,7 +131,7 @@ public class LongMultisetType<E> extends AbstractType<LongMultiset<E>> {
      */
     @Override
     public LongMultiset<E> valueOf(String str) {
-        if (N.isNullOrEmpty(str)) {
+        if (Strings.isEmpty(str)) {
             return null;
         }
 

@@ -65,7 +65,7 @@ public final class Password {
         }
 
         try {
-            return N.base64Encode(msgDigest.digest(x.getBytes()));
+            return Strings.base64Encode(msgDigest.digest(x.getBytes()));
         } finally {
             msgDigest.reset();
         }

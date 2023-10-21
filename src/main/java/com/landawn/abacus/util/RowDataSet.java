@@ -6804,7 +6804,7 @@ public class RowDataSet implements DataSet, Cloneable {
      */
     @Override
     public DataSet topBy(final String columnName, final int n) {
-        return topBy(columnName, n, Comparators.naturalOrder());
+        return topBy(columnName, n, Comparators.nullsFirst());
     }
 
     /**

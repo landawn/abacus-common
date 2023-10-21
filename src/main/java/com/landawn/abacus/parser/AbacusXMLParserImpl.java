@@ -61,6 +61,7 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.NamingPolicy;
 import com.landawn.abacus.util.ObjectPool;
 import com.landawn.abacus.util.Objectory;
+import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.XMLUtil;
 
 /**
@@ -110,7 +111,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
     @Override
     public String serialize(final Object obj, final XMLSerializationConfig config) {
         if (obj == null) {
-            return N.EMPTY_STRING;
+            return Strings.EMPTY_STRING;
         }
 
         final BufferedXMLWriter bw = Objectory.createBufferedXMLWriter();
@@ -211,7 +212,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
         final XMLSerializationConfig configToUse = check(config);
 
         if (obj == null) {
-            IOUtil.write(bw, N.EMPTY_STRING);
+            IOUtil.write(bw, Strings.EMPTY_STRING);
             return;
         }
 
@@ -312,7 +313,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
             }
         }
 
-        final String propIndentation = isPrettyFormat ? ((indentation == null ? N.EMPTY_STRING : indentation) + config.getIndentation()) : null;
+        final String propIndentation = isPrettyFormat ? ((indentation == null ? Strings.EMPTY_STRING : indentation) + config.getIndentation()) : null;
 
         writeProperties(bw, type, obj, config, propIndentation, serializedObjects);
 
@@ -350,14 +351,17 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
         final Class<?> cls = type.clazz();
         final BeanInfo beanInfo = ParserUtil.getBeanInfo(cls);
 
+        final Exclusion exlusion = getExclusion(config, beanInfo);
+
+        final boolean ignoreNullProperty = (exlusion == Exclusion.NULL) || (exlusion == Exclusion.DEFAULT);
+        final boolean ignoreDefaultProperty = (exlusion == Exclusion.DEFAULT);
+
         final Collection<String> ignoredClassPropNames = config.getIgnoredPropNames(cls);
-        final boolean ignoreNullProperty = (config.getExclusion() == Exclusion.NULL) || (config.getExclusion() == Exclusion.DEFAULT);
-        final boolean ignoreDefaultProperty = (config.getExclusion() == Exclusion.DEFAULT);
         final boolean tagByPropertyName = config.tagByPropertyName();
         final boolean ignoreTypeInfo = config.ignoreTypeInfo();
         final boolean isPrettyFormat = config.prettyFormat();
 
-        final String nextIndentation = isPrettyFormat ? ((propIndentation == null ? N.EMPTY_STRING : propIndentation) + config.getIndentation()) : null;
+        final String nextIndentation = isPrettyFormat ? ((propIndentation == null ? Strings.EMPTY_STRING : propIndentation) + config.getIndentation()) : null;
         final PropInfo[] propInfoList = config.skipTransientField() ? beanInfo.nonTransientSeriPropInfos : beanInfo.jsonXmlSerializablePropInfos;
         final NamingPolicy jsonXmlNamingPolicy = config.getPropNamingPolicy() == null ? beanInfo.jsonXmlNamingPolicy : config.getPropNamingPolicy();
         final int nameTagIdx = jsonXmlNamingPolicy.ordinal();
@@ -480,7 +484,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
             bw.write(XMLConstants.CLOSE_ATTR_AND_ELE);
         }
 
-        final String entryIndentation = isPrettyFormat ? ((indentation == null ? N.EMPTY_STRING : indentation) + config.getIndentation()) : null;
+        final String entryIndentation = isPrettyFormat ? ((indentation == null ? Strings.EMPTY_STRING : indentation) + config.getIndentation()) : null;
         final String keyValueIndentation = entryIndentation + config.getIndentation();
         final String nextIndentation = keyValueIndentation + config.getIndentation();
 
@@ -648,7 +652,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
             bw.write(XMLConstants.CLOSE_ATTR_AND_ELE);
         }
 
-        final String eleIndentation = isPrettyFormat ? ((indentation == null ? N.EMPTY_STRING : indentation) + config.getIndentation()) : null;
+        final String eleIndentation = isPrettyFormat ? ((indentation == null ? Strings.EMPTY_STRING : indentation) + config.getIndentation()) : null;
         final String nextIndentation = eleIndentation + config.getIndentation();
         final Object[] a = (Object[]) obj;
         Type<Object> eleType = null;
@@ -754,7 +758,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
             }
         }
 
-        final String eleIndentation = isPrettyFormat ? ((indentation == null ? N.EMPTY_STRING : indentation) + config.getIndentation()) : null;
+        final String eleIndentation = isPrettyFormat ? ((indentation == null ? Strings.EMPTY_STRING : indentation) + config.getIndentation()) : null;
         final String nextIndentation = eleIndentation + config.getIndentation();
 
         Type<Object> eleType = null;
@@ -848,7 +852,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
      */
     @Override
     public <T> T deserialize(Class<? extends T> targetClass, String st, final XMLDeserializationConfig config) {
-        if (N.isNullOrEmpty(st)) {
+        if (Strings.isEmpty(st)) {
             return N.defaultValueOf(targetClass);
         }
 
@@ -1024,7 +1028,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                             nodeName = xmlReader.getAttributeValue(null, XMLConstants.NAME);
                         }
 
-                        if (N.isNullOrEmpty(nodeName)) {
+                        if (Strings.isEmpty(nodeName)) {
                             nodeName = xmlReader.getLocalName();
                         }
 
@@ -1050,7 +1054,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                     if (targetClass == null && N.notNullOrEmpty(nodeClasses)) {
                         String nodeName = XMLUtil.getAttribute(node, XMLConstants.NAME);
 
-                        if (N.isNullOrEmpty(nodeName)) {
+                        if (Strings.isEmpty(nodeName)) {
                             nodeName = node.getNodeName();
                         }
 
@@ -1118,7 +1122,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
             nodeName = isTagByPropertyName || xmlReader.getAttributeCount() == 0 ? xmlReader.getLocalName() : getAttribute(xmlReader, XMLConstants.NAME);
         } else {
             String nameAttr = getAttribute(xmlReader, XMLConstants.NAME);
-            nodeName = N.notNullOrEmpty(nameAttr) ? nameAttr : xmlReader.getLocalName();
+            nodeName = Strings.isNotEmpty(nameAttr) ? nameAttr : xmlReader.getLocalName();
         }
 
         if (hasPropTypes && config.hasPropType(nodeName)) {
@@ -1174,8 +1178,8 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                 }
 
                 if (!checkedAttr) {
-                    isTagByPropertyName = N.isNullOrEmpty(getAttribute(xmlReader, XMLConstants.NAME));
-                    ignoreTypeInfo = N.isNullOrEmpty(getAttribute(xmlReader, XMLConstants.TYPE));
+                    isTagByPropertyName = Strings.isEmpty(getAttribute(xmlReader, XMLConstants.NAME));
+                    ignoreTypeInfo = Strings.isEmpty(getAttribute(xmlReader, XMLConstants.TYPE));
                     checkedAttr = true;
                 }
 
@@ -1309,7 +1313,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                                         || (propName != null && ignoredClassPropNames != null && ignoredClassPropNames.contains(propName))) {
                                     // ignore;
                                 } else {
-                                    propInfo.setPropValue(result, isNullValue ? null : (propValue == null ? propType.valueOf(N.EMPTY_STRING) : propValue));
+                                    propInfo.setPropValue(result, isNullValue ? null : (propValue == null ? propType.valueOf(Strings.EMPTY_STRING) : propValue));
                                 }
 
                                 propName = null;
@@ -1328,7 +1332,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                                         || (propName != null && ignoredClassPropNames != null && ignoredClassPropNames.contains(propName))) {
                                     // ignore;
                                 } else {
-                                    propInfo.setPropValue(result, isNullValue ? null : (propValue == null ? propType.valueOf(N.EMPTY_STRING) : propValue));
+                                    propInfo.setPropValue(result, isNullValue ? null : (propValue == null ? propType.valueOf(Strings.EMPTY_STRING) : propValue));
                                 }
 
                                 propName = null;
@@ -1400,7 +1404,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
 
                             isNullValue = Boolean.parseBoolean(getAttribute(xmlReader, XMLConstants.IS_NULL));
                             typeAttr = getAttribute(xmlReader, XMLConstants.TYPE);
-                            entryKeyType = N.isNullOrEmpty(typeAttr) ? keyType : N.typeOf(typeAttr);
+                            entryKeyType = Strings.isEmpty(typeAttr) ? keyType : N.typeOf(typeAttr);
                             isStringKey = entryKeyType.clazz().equals(String.class);
 
                             switch (event = xmlReader.next()) {
@@ -1444,7 +1448,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                                     break;
 
                                 case XMLStreamConstants.END_ELEMENT: {
-                                    key = isNullValue ? null : (key == null ? entryKeyType.valueOf(N.EMPTY_STRING) : key);
+                                    key = isNullValue ? null : (key == null ? entryKeyType.valueOf(Strings.EMPTY_STRING) : key);
 
                                     break;
                                 }
@@ -1458,7 +1462,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
 
                             isNullValue = Boolean.parseBoolean(getAttribute(xmlReader, XMLConstants.IS_NULL));
                             typeAttr = getAttribute(xmlReader, XMLConstants.TYPE);
-                            entryValueType = N.isNullOrEmpty(typeAttr) ? valueType : N.typeOf(typeAttr);
+                            entryValueType = Strings.isEmpty(typeAttr) ? valueType : N.typeOf(typeAttr);
 
                             if (hasPropTypes && isStringKey) {
                                 Type<?> tmpType = config.getPropType(N.toString(key));
@@ -1508,7 +1512,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                                     break;
 
                                 case XMLStreamConstants.END_ELEMENT: {
-                                    propValue = isNullValue ? null : (propValue == null ? entryValueType.valueOf(N.EMPTY_STRING) : propValue);
+                                    propValue = isNullValue ? null : (propValue == null ? entryValueType.valueOf(Strings.EMPTY_STRING) : propValue);
 
                                     break;
                                 }
@@ -1615,7 +1619,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                                     }
 
                                     case XMLStreamConstants.END_ELEMENT: {
-                                        list.add(isNullValue ? null : eleType.valueOf(N.EMPTY_STRING));
+                                        list.add(isNullValue ? null : eleType.valueOf(Strings.EMPTY_STRING));
 
                                         break;
                                     }
@@ -1766,7 +1770,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                                 }
 
                                 case XMLStreamConstants.END_ELEMENT: {
-                                    result.add(isNullValue ? null : eleType.valueOf(N.EMPTY_STRING));
+                                    result.add(isNullValue ? null : eleType.valueOf(Strings.EMPTY_STRING));
 
                                     break;
                                 }
@@ -1936,8 +1940,8 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                 }
 
                 if (!checkedAttr) {
-                    isTagByPropertyName = N.isNullOrEmpty(XMLUtil.getAttribute(node, XMLConstants.NAME));
-                    ignoreTypeInfo = N.isNullOrEmpty(XMLUtil.getAttribute(node, XMLConstants.TYPE));
+                    isTagByPropertyName = Strings.isEmpty(XMLUtil.getAttribute(node, XMLConstants.NAME));
+                    ignoreTypeInfo = Strings.isEmpty(XMLUtil.getAttribute(node, XMLConstants.TYPE));
                     checkedAttr = true;
                 }
 
@@ -2143,7 +2147,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                 if (XMLUtil.isTextElement(node)) {
                     String st = XMLUtil.getTextContent(node);
 
-                    if (N.isNullOrEmpty(st)) {
+                    if (Strings.isEmpty(st)) {
                         return (T) N.newArray(eleType.clazz(), 0);
                     } else {
                         return (T) N.valueOf(st, typeClass);
@@ -2321,7 +2325,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                 packName = cls.getPackage().getName();
             }
 
-            if (N.isNullOrEmpty(packName)) {
+            if (Strings.isEmpty(packName)) {
                 return null;
             }
 
@@ -2558,8 +2562,8 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                 case ENTITY: {
 
                     if (!checkedPropNameTag) {
-                        isTagByPropertyName = (attrs == null) || (N.isNullOrEmpty(attrs.getValue(XMLConstants.NAME)));
-                        ignoreTypeInfo = (attrs == null) || (N.isNullOrEmpty(attrs.getValue(XMLConstants.TYPE)));
+                        isTagByPropertyName = (attrs == null) || (Strings.isEmpty(attrs.getValue(XMLConstants.NAME)));
+                        ignoreTypeInfo = (attrs == null) || (Strings.isEmpty(attrs.getValue(XMLConstants.TYPE)));
                         checkedPropNameTag = true;
                         checkedTypeInfo = true;
                     }
@@ -2615,7 +2619,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                 case MAP: {
 
                     if (!checkedTypeInfo) {
-                        ignoreTypeInfo = (attrs == null) || (N.isNullOrEmpty(attrs.getValue(XMLConstants.TYPE)));
+                        ignoreTypeInfo = (attrs == null) || (Strings.isEmpty(attrs.getValue(XMLConstants.TYPE)));
                         checkedTypeInfo = true;
                     }
 
@@ -2675,7 +2679,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                 case ARRAY: {
 
                     if (!checkedTypeInfo) {
-                        ignoreTypeInfo = (attrs == null) || (N.isNullOrEmpty(attrs.getValue(XMLConstants.TYPE)));
+                        ignoreTypeInfo = (attrs == null) || (Strings.isEmpty(attrs.getValue(XMLConstants.TYPE)));
                         checkedTypeInfo = true;
                     }
 
@@ -2720,7 +2724,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                 case COLLECTION: {
 
                     if (!checkedTypeInfo) {
-                        ignoreTypeInfo = (attrs == null) || (N.isNullOrEmpty(attrs.getValue(XMLConstants.TYPE)));
+                        ignoreTypeInfo = (attrs == null) || (Strings.isEmpty(attrs.getValue(XMLConstants.TYPE)));
                         checkedTypeInfo = true;
                     }
 

@@ -26,6 +26,7 @@ import com.landawn.abacus.parser.SerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.Strings;
 
 /**
  *
@@ -58,11 +59,11 @@ public abstract class AbstractCharacterType extends AbstractPrimaryType<Characte
         // NullPointerException Here
         // return N.isNullOrEmpty(st) ? defaultValue()
         // : (char) ((st.length() == 1) ? st.charAt(0) : Integer.parseInt(st));
-        if (N.isNullOrEmpty(str)) {
+        if (Strings.isEmpty(str)) {
             return defaultValue();
         }
 
-        return N.parseChar(str);
+        return Strings.parseChar(str);
     }
 
     /**

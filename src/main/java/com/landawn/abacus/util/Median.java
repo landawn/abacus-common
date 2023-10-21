@@ -559,7 +559,7 @@ public final class Median {
         if (len == 1) {
             return Pair.of(a[fromIndex], Nullable.<T> empty());
         } else if (len == 2) {
-            return N.compare(a[fromIndex], a[fromIndex + 1], cmp) <= 0 ? Pair.of(a[fromIndex], Nullable.of(a[fromIndex + 1]))
+            return cmp.compare(a[fromIndex], a[fromIndex + 1]) <= 0 ? Pair.of(a[fromIndex], Nullable.of(a[fromIndex + 1]))
                     : Pair.of(a[fromIndex + 1], Nullable.of(a[fromIndex]));
         } else if (len == 3) {
             return Pair.of(N.median(a, fromIndex, toIndex, cmp), Nullable.<T> empty());
@@ -571,7 +571,7 @@ public final class Median {
                 if (queue.size() < k) {
                     queue.add(a[i]);
                 } else {
-                    if (N.compare(a[i], queue.peek(), cmp) > 0) {
+                    if (cmp.compare(a[i], queue.peek()) > 0) {
                         queue.remove();
                         queue.add(a[i]);
                     }
@@ -615,7 +615,7 @@ public final class Median {
             final Iterator<? extends T> iter = c.iterator();
             final T first = iter.next();
             final T second = iter.next();
-            return N.compare(first, second, cmp) <= 0 ? Pair.of(first, Nullable.of(second)) : Pair.of(second, Nullable.of(first));
+            return cmp.compare(first, second) <= 0 ? Pair.of(first, Nullable.of(second)) : Pair.of(second, Nullable.of(first));
         } else if (len == 3) {
             return Pair.of(N.median(c, cmp), Nullable.<T> empty());
         } else {
@@ -626,7 +626,7 @@ public final class Median {
                 if (queue.size() < k) {
                     queue.add(e);
                 } else {
-                    if (N.compare(e, queue.peek(), cmp) > 0) {
+                    if (cmp.compare(e, queue.peek()) > 0) {
                         queue.remove();
                         queue.add(e);
                     }

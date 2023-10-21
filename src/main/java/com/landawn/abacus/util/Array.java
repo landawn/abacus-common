@@ -92,7 +92,7 @@ public class Array {
      * @throws IllegalArgumentException the illegal argument exception
      */
     public static int getLength(final Object array) throws IllegalArgumentException {
-        return java.lang.reflect.Array.getLength(array);
+        return array == null ? 0 : java.lang.reflect.Array.getLength(array);
     }
 
     /**
@@ -444,9 +444,9 @@ public class Array {
     /**
      * Returns the input array.
      *
-     * @param <T> 
-     * @param a 
-     * @return 
+     * @param <T>
+     * @param a
+     * @return
      */
     @SafeVarargs
     public static <T extends java.util.Date> T[] of(final T... a) {
@@ -456,9 +456,9 @@ public class Array {
     /**
      * Returns the input array.
      *
-     * @param <T> 
-     * @param a 
-     * @return 
+     * @param <T>
+     * @param a
+     * @return
      */
     @SafeVarargs
     public static <T extends java.util.Calendar> T[] of(final T... a) {
@@ -468,9 +468,9 @@ public class Array {
     /**
      * Returns the input array.
      *
-     * @param <T> 
-     * @param a 
-     * @return 
+     * @param <T>
+     * @param a
+     * @return
      */
     @SafeVarargs
     public static <T extends java.time.temporal.Temporal> T[] of(final T... a) {
@@ -1517,11 +1517,11 @@ public class Array {
     }
 
     /**
-     * 
      *
-     * @param element 
-     * @param n 
-     * @return 
+     *
+     * @param element
+     * @param n
+     * @return
      */
     public static String[] repeat(final String element, final int n) {
         final String[] a = new String[n];

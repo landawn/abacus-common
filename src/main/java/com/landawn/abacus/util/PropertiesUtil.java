@@ -459,7 +459,7 @@ public final class PropertiesUtil {
             propSetMethod = ClassUtil.getPropSetMethod(targetClass, propName);
 
             if (XMLUtil.isTextElement(propNode)) {
-                if (N.isNullOrEmpty(typeAttr)) {
+                if (Strings.isEmpty(typeAttr)) {
                     propValue = Configuration.getTextContent(propNode);
                 } else {
                     propValue = N.typeOf(typeAttr).valueOf(Configuration.getTextContent(propNode));
@@ -506,7 +506,7 @@ public final class PropertiesUtil {
                 } else {
                     Class<?> parameterType = propSetMethod.getParameterTypes()[0];
 
-                    if (N.isNullOrEmpty(propValue.toString()) && Properties.class.isAssignableFrom(parameterType)) {
+                    if (Strings.isEmpty(propValue.toString()) && Properties.class.isAssignableFrom(parameterType)) {
                         propValue = N.newInstance(parameterType);
                     }
 
@@ -986,7 +986,7 @@ public final class PropertiesUtil {
 
                 propName = ClassUtil.formalizePropName(childNode.getNodeName());
 
-                if (propNameSet.contains(propName) || N.notNullOrEmpty(XMLUtil.getAttribute(childNode, TYPE))) {
+                if (propNameSet.contains(propName) || Strings.isNotEmpty(XMLUtil.getAttribute(childNode, TYPE))) {
                     continue;
                 }
 
@@ -1028,7 +1028,7 @@ public final class PropertiesUtil {
 
             attr = XMLUtil.getAttribute(childNode, TYPE);
 
-            if (N.notNullOrEmpty(attr)) {
+            if (Strings.isNotEmpty(attr)) {
                 type = N.typeOf(attr);
                 if (type != null) {
                     Class<?> typeClass = type.clazz();
@@ -1122,7 +1122,7 @@ public final class PropertiesUtil {
         String typeName = node.getChildNodes().getLength() > 1 ? Strings.capitalize(propName) : "String";
         String typeAttr = XMLUtil.getAttribute(node, TYPE);
 
-        if (N.notNullOrEmpty(typeAttr)) {
+        if (Strings.isNotEmpty(typeAttr)) {
             if (typeAttr.equals("Properties")) {
                 typeName = "Properties<String, Object>";
             } else {

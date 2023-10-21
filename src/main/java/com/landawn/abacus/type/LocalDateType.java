@@ -22,6 +22,7 @@ import java.sql.SQLException;
 import java.time.LocalDate;
 
 import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.Strings;
 
 /**
  *
@@ -63,7 +64,7 @@ public class LocalDateType extends AbstractType<LocalDate> {
      */
     @Override
     public LocalDate valueOf(String str) {
-        if (N.isNullOrEmpty(str)) {
+        if (Strings.isEmpty(str)) {
             return null;
         }
 

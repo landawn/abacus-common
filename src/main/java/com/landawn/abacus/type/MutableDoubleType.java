@@ -17,6 +17,7 @@ import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.MutableDouble;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Numbers;
+import com.landawn.abacus.util.Strings;
 
 /**
  *
@@ -58,7 +59,7 @@ public class MutableDoubleType extends MutableType<MutableDouble> {
      */
     @Override
     public MutableDouble valueOf(String str) {
-        return N.isNullOrEmpty(str) ? null : MutableDouble.of(Numbers.toDouble(str));
+        return Strings.isEmpty(str) ? null : MutableDouble.of(Numbers.toDouble(str));
     }
 
     /**

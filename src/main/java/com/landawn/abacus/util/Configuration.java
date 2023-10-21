@@ -230,7 +230,7 @@ public abstract class Configuration {
      * @return File
      */
     private static File findFile(String configFileName, boolean isDir, Set<String> foundDir) {
-        if (N.isNullOrEmpty(configFileName)) {
+        if (Strings.isEmpty(configFileName)) {
             throw new RuntimeException("target file name can't be empty or null: " + configFileName);
         }
 
@@ -361,7 +361,7 @@ public abstract class Configuration {
      * @return
      */
     public static File findFileInDir(String configFileName, File dir, boolean isDir) {
-        if (N.isNullOrEmpty(configFileName)) {
+        if (Strings.isEmpty(configFileName)) {
             throw new RuntimeException("target file name can't be empty or null: " + configFileName);
         }
 
@@ -421,7 +421,7 @@ public abstract class Configuration {
             return null;
         }
 
-        if (N.isNullOrEmpty(folderPrefix) || ((absolutePath.length() > folderPrefix.length())
+        if (Strings.isEmpty(folderPrefix) || ((absolutePath.length() > folderPrefix.length())
                 && absolutePath.substring(absolutePath.length() - folderPrefix.length()).equalsIgnoreCase(folderPrefix))) {
             for (File file : files) {
                 if (file.getName().equalsIgnoreCase(configFileName)) {
@@ -579,7 +579,7 @@ public abstract class Configuration {
     public static long readTimeInMillis(String value) {
         value = value == null ? value : value.trim();
 
-        if (N.isNullOrEmpty(value)) {
+        if (Strings.isEmpty(value)) {
             return 0;
         }
 

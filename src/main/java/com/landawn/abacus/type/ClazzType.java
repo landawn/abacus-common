@@ -15,7 +15,7 @@
 package com.landawn.abacus.type;
 
 import com.landawn.abacus.util.ClassUtil;
-import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.Strings;
 
 /**
  *
@@ -72,6 +72,6 @@ public class ClazzType extends AbstractType<Class> {
      */
     @Override
     public Class valueOf(String str) {
-        return N.isNullOrEmpty(str) ? null : ClassUtil.forClass(str);
+        return Strings.isEmpty(str) ? null : ClassUtil.forClass(str);
     }
 }

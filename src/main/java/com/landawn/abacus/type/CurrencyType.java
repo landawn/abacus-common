@@ -16,7 +16,7 @@ package com.landawn.abacus.type;
 
 import java.util.Currency;
 
-import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.Strings;
 
 /**
  *
@@ -68,6 +68,6 @@ public class CurrencyType extends AbstractType<Currency> {
      */
     @Override
     public Currency valueOf(String str) {
-        return N.isNullOrEmpty(str) ? null : Currency.getInstance(str);
+        return Strings.isEmpty(str) ? null : Currency.getInstance(str);
     }
 }

@@ -14,8 +14,8 @@ import java.sql.SQLException;
 import com.landawn.abacus.parser.SerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.IOUtil;
-import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Numbers;
+import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.u.OptionalDouble;
 
 /**
@@ -68,7 +68,7 @@ public class OptionalDoubleType extends AbstractOptionalType<OptionalDouble> {
      */
     @Override
     public OptionalDouble valueOf(String str) {
-        return N.isNullOrEmpty(str) ? OptionalDouble.empty() : OptionalDouble.of(Numbers.toDouble(str));
+        return Strings.isEmpty(str) ? OptionalDouble.empty() : OptionalDouble.of(Numbers.toDouble(str));
     }
 
     /**

@@ -842,7 +842,7 @@ public final class Numbers {
      * @see Byte#decode(String)
      */
     public static byte toByte(final String str, final byte defaultValueForNull) throws NumberFormatException {
-        if (N.isNullOrEmpty(str)) {
+        if (Strings.isEmpty(str)) {
             return defaultValueForNull;
         }
 
@@ -924,7 +924,7 @@ public final class Numbers {
      * @see Short#decode(String)
      */
     public static short toShort(final String str, final short defaultValueForNull) throws NumberFormatException {
-        if (N.isNullOrEmpty(str)) {
+        if (Strings.isEmpty(str)) {
             return defaultValueForNull;
         }
 
@@ -1002,7 +1002,7 @@ public final class Numbers {
      * @see Integer#decode(String)
      */
     public static int toInt(final String str, final int defaultValueForNull) throws NumberFormatException {
-        if (N.isNullOrEmpty(str)) {
+        if (Strings.isEmpty(str)) {
             return defaultValueForNull;
         }
 
@@ -1080,7 +1080,7 @@ public final class Numbers {
      * @see Long#decode(String)
      */
     public static long toLong(final String str, final long defaultValueForNull) throws NumberFormatException {
-        if (N.isNullOrEmpty(str)) {
+        if (Strings.isEmpty(str)) {
             return defaultValueForNull;
         }
 
@@ -1180,7 +1180,7 @@ public final class Numbers {
      * @see Float#parseFloat(String)
      */
     public static float toFloat(final String str, final float defaultValueForNull) throws NumberFormatException {
-        if (N.isNullOrEmpty(str)) {
+        if (Strings.isEmpty(str)) {
             return defaultValueForNull;
         }
 
@@ -1244,7 +1244,7 @@ public final class Numbers {
      * @see Double#parseDouble(String)
      */
     public static double toDouble(final String str, final double defaultValueForNull) throws NumberFormatException {
-        if (N.isNullOrEmpty(str)) {
+        if (Strings.isEmpty(str)) {
             return defaultValueForNull;
         }
 

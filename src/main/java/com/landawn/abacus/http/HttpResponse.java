@@ -36,7 +36,7 @@ public class HttpResponse {
 
     private final long responseReceivedAtMillis;
 
-    private final int status;
+    private final int statusCode;
 
     private final String message;
 
@@ -48,12 +48,12 @@ public class HttpResponse {
 
     private final Charset respCharset;
 
-    HttpResponse(final String requestUrl, final long requestSentAtMillis, final long responseReceivedAtMillis, final int code, final String message,
+    HttpResponse(final String requestUrl, final long requestSentAtMillis, final long responseReceivedAtMillis, final int statusCode, final String message,
             final Map<String, List<String>> headers, final byte[] body, final ContentFormat bodyFormat, final Charset respCharset) {
         this.requestUrl = requestUrl;
         this.requestSentAtMillis = requestSentAtMillis;
         this.responseReceivedAtMillis = responseReceivedAtMillis;
-        this.status = code;
+        this.statusCode = statusCode;
         this.message = message;
         this.headers = headers;
         this.body = body;
@@ -68,7 +68,7 @@ public class HttpResponse {
      * @return true, if is successful
      */
     public boolean isSuccessful() {
-        return HttpUtil.isSuccessfulResponseCode(status);
+        return HttpUtil.isSuccessfulResponseCode(statusCode);
     }
 
     /**
@@ -109,36 +109,36 @@ public class HttpResponse {
     //    }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
-    public int status() {
-        return status;
+    public int statusCode() {
+        return statusCode;
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public String message() {
         return message;
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public Map<String, List<String>> headers() {
         return headers;
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public byte[] body() {
         return body;
@@ -197,16 +197,16 @@ public class HttpResponse {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
         result = prime * result + ((requestUrl == null) ? 0 : requestUrl.hashCode());
-        result = prime * result + status;
+        result = prime * result + statusCode;
         result = prime * result + ((message == null) ? 0 : message.hashCode());
         result = prime * result + ((headers == null) ? 0 : headers.hashCode());
         result = prime * result + ((bodyFormat == null) ? 0 : bodyFormat.hashCode());
@@ -226,20 +226,21 @@ public class HttpResponse {
         }
 
         if (obj instanceof HttpResponse other) {
-            return requestUrl == other.requestUrl && status == other.status && N.equals(message, other.message) && N.equals(headers, other.headers)
-                    && N.equals(bodyFormat, other.bodyFormat) && N.equals(body, other.body);
+            return N.equals(requestUrl, other.requestUrl) && statusCode == other.statusCode && N.equals(message, other.message)
+                    && N.equals(headers, other.headers) && N.equals(bodyFormat, other.bodyFormat) && N.equals(body, other.body);
         }
 
         return false;
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public String toString() {
-        return requestUrl + ". " + status + ": " + message;
+        return "HttpResponse{statusCode=" + statusCode + ", message=" + message + ", url=" + requestUrl + ", elapsedTime="
+                + (responseReceivedAtMillis - requestSentAtMillis) + '}';
     }
 }

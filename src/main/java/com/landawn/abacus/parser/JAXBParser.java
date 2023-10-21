@@ -31,6 +31,7 @@ import com.landawn.abacus.util.BufferedWriter;
 import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Objectory;
+import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.XMLUtil;
 
 import jakarta.xml.bind.JAXBException;
@@ -60,7 +61,7 @@ final class JAXBParser extends AbstractXMLParser {
     @Override
     public String serialize(Object obj, XMLSerializationConfig config) {
         if (obj == null) {
-            return N.EMPTY_STRING;
+            return Strings.EMPTY_STRING;
         }
 
         final BufferedWriter bw = Objectory.createBufferedWriter();
@@ -157,7 +158,7 @@ final class JAXBParser extends AbstractXMLParser {
 
         if (obj == null) {
             try {
-                IOUtil.write(writer, N.EMPTY_STRING);
+                IOUtil.write(writer, Strings.EMPTY_STRING);
             } catch (IOException e) {
                 throw new UncheckedIOException(e);
             }
@@ -188,7 +189,7 @@ final class JAXBParser extends AbstractXMLParser {
      */
     @Override
     public <T> T deserialize(Class<? extends T> targetClass, String st, XMLDeserializationConfig config) {
-        if (N.isNullOrEmpty(st)) {
+        if (Strings.isEmpty(st)) {
             return N.defaultValueOf(targetClass);
         }
 

@@ -251,7 +251,7 @@ public final class DigestUtil {
      * @since 1.7
      */
     public static String md2Base64(final byte[] data) {
-        return N.base64Encode(md2(data));
+        return Strings.base64Encode(md2(data));
     }
 
     /**
@@ -265,7 +265,7 @@ public final class DigestUtil {
      * @since 1.7
      */
     public static String md2Base64(final InputStream data) throws IOException {
-        return N.base64Encode(md2(data));
+        return Strings.base64Encode(md2(data));
     }
 
     /**
@@ -277,7 +277,7 @@ public final class DigestUtil {
      * @since 1.7
      */
     public static String md2Base64(final String data) {
-        return N.base64Encode(md2(data));
+        return Strings.base64Encode(md2(data));
     }
 
     /**
@@ -361,7 +361,7 @@ public final class DigestUtil {
      * @since 1.7
      */
     public static String md5Base64(final byte[] data) {
-        return N.base64Encode(md5(data));
+        return Strings.base64Encode(md5(data));
     }
 
     /**
@@ -375,7 +375,7 @@ public final class DigestUtil {
      * @since 1.7
      */
     public static String md5Base64(final InputStream data) throws IOException {
-        return N.base64Encode(md5(data));
+        return Strings.base64Encode(md5(data));
     }
 
     /**
@@ -387,7 +387,7 @@ public final class DigestUtil {
      * @since 1.7
      */
     public static String md5Base64(final String data) {
-        return N.base64Encode(md5(data));
+        return Strings.base64Encode(md5(data));
     }
 
     /**
@@ -474,7 +474,7 @@ public final class DigestUtil {
      * @since 1.7
      */
     public static String sha1Base64(final byte[] data) {
-        return N.base64Encode(sha1(data));
+        return Strings.base64Encode(sha1(data));
     }
 
     /**
@@ -488,7 +488,7 @@ public final class DigestUtil {
      * @since 1.7
      */
     public static String sha1Base64(final InputStream data) throws IOException {
-        return N.base64Encode(sha1(data));
+        return Strings.base64Encode(sha1(data));
     }
 
     /**
@@ -500,7 +500,7 @@ public final class DigestUtil {
      * @since 1.7
      */
     public static String sha1Base64(final String data) {
-        return N.base64Encode(sha1(data));
+        return Strings.base64Encode(sha1(data));
     }
 
     /**
@@ -606,7 +606,7 @@ public final class DigestUtil {
      * @since 1.7
      */
     public static String sha256Base64(final byte[] data) {
-        return N.base64Encode(sha256(data));
+        return Strings.base64Encode(sha256(data));
     }
 
     /**
@@ -620,7 +620,7 @@ public final class DigestUtil {
      * @since 1.7
      */
     public static String sha256Base64(final InputStream data) throws IOException {
-        return N.base64Encode(sha256(data));
+        return Strings.base64Encode(sha256(data));
     }
 
     /**
@@ -632,7 +632,7 @@ public final class DigestUtil {
      * @since 1.7
      */
     public static String sha256Base64(final String data) {
-        return N.base64Encode(sha256(data));
+        return Strings.base64Encode(sha256(data));
     }
 
     /**
@@ -738,7 +738,7 @@ public final class DigestUtil {
      * @since 1.7
      */
     public static String sha384Base64(final byte[] data) {
-        return N.base64Encode(sha384(data));
+        return Strings.base64Encode(sha384(data));
     }
 
     /**
@@ -752,7 +752,7 @@ public final class DigestUtil {
      * @since 1.7
      */
     public static String sha384Base64(final InputStream data) throws IOException {
-        return N.base64Encode(sha384(data));
+        return Strings.base64Encode(sha384(data));
     }
 
     /**
@@ -764,7 +764,7 @@ public final class DigestUtil {
      * @since 1.7
      */
     public static String sha384Base64(final String data) {
-        return N.base64Encode(sha384(data));
+        return Strings.base64Encode(sha384(data));
     }
 
     /**
@@ -870,7 +870,7 @@ public final class DigestUtil {
      * @since 1.7
      */
     public static String sha512Base64(final byte[] data) {
-        return N.base64Encode(sha512(data));
+        return Strings.base64Encode(sha512(data));
     }
 
     /**
@@ -884,7 +884,7 @@ public final class DigestUtil {
      * @since 1.7
      */
     public static String sha512Base64(final InputStream data) throws IOException {
-        return N.base64Encode(sha512(data));
+        return Strings.base64Encode(sha512(data));
     }
 
     /**
@@ -896,7 +896,7 @@ public final class DigestUtil {
      * @since 1.7
      */
     public static String sha512Base64(final String data) {
-        return N.base64Encode(sha512(data));
+        return Strings.base64Encode(sha512(data));
     }
 
     /**

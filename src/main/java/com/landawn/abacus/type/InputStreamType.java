@@ -33,6 +33,7 @@ import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.Strings;
 
 /**
  * The InputStream must be encoded by base64.
@@ -105,7 +106,7 @@ public class InputStreamType extends AbstractType<InputStream> {
      */
     @Override
     public String stringOf(InputStream x) {
-        return x == null ? null : N.base64Encode(IOUtil.readAllBytes(x));
+        return x == null ? null : Strings.base64Encode(IOUtil.readAllBytes(x));
     }
 
     /**
@@ -120,11 +121,11 @@ public class InputStreamType extends AbstractType<InputStream> {
         }
 
         if (bytesConstructor != null) {
-            return (InputStream) ClassUtil.invokeConstructor(bytesConstructor, N.base64Decode(str)); //NOSONAR
+            return (InputStream) ClassUtil.invokeConstructor(bytesConstructor, Strings.base64Decode(str)); //NOSONAR
         } else if (streamConstructor != null) {
-            return (InputStream) ClassUtil.invokeConstructor(streamConstructor, new ByteArrayInputStream(N.base64Decode(str)));
+            return (InputStream) ClassUtil.invokeConstructor(streamConstructor, new ByteArrayInputStream(Strings.base64Decode(str)));
         } else {
-            return new ByteArrayInputStream(N.base64Decode(str));
+            return new ByteArrayInputStream(Strings.base64Decode(str));
         }
     }
 
@@ -234,7 +235,7 @@ public class InputStreamType extends AbstractType<InputStream> {
         if (t == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
-            writer.write(N.base64Encode(IOUtil.readAllBytes(t)));
+            writer.write(Strings.base64Encode(IOUtil.readAllBytes(t)));
         }
     }
 
@@ -251,10 +252,10 @@ public class InputStreamType extends AbstractType<InputStream> {
             writer.write(NULL_CHAR_ARRAY);
         } else {
             if ((config == null) || (config.getStringQuotation() == 0)) {
-                writer.write(N.base64Encode(IOUtil.readAllBytes(t)));
+                writer.write(Strings.base64Encode(IOUtil.readAllBytes(t)));
             } else {
                 writer.write(config.getStringQuotation());
-                writer.write(N.base64Encode(IOUtil.readAllBytes(t)));
+                writer.write(Strings.base64Encode(IOUtil.readAllBytes(t)));
                 writer.write(config.getStringQuotation());
             }
         }

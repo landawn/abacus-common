@@ -27,7 +27,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Proxy;
-import java.nio.charset.Charset;
 import java.security.SecureRandom;
 import java.sql.Blob;
 import java.sql.Clob;
@@ -64,7 +63,6 @@ import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.UUID;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
@@ -225,9 +223,6 @@ class CommonUtil {
      */
     public static final int INDEX_NOT_FOUND = -1;
 
-    // ...
-    public static final String EMPTY_STRING = Strings.EMPTY_STRING;
-
     /**
      * An empty immutable {@code boolean} array.
      */
@@ -337,6 +332,32 @@ class CommonUtil {
     @SuppressWarnings("rawtypes")
     static final ListIterator EMPTY_LIST_ITERATOR = Collections.emptyListIterator();
 
+    @SuppressWarnings("rawtypes")
+    static final Comparator NULL_MIN_COMPARATOR = Comparators.NULL_FIRST_COMPARATOR;
+
+    @SuppressWarnings("rawtypes")
+    static final Comparator NULL_MAX_COMPARATOR = Comparators.NULL_LAST_COMPARATOR;
+
+    @SuppressWarnings("rawtypes")
+    static final Comparator NATURAL_COMPARATOR = Comparators.NATURAL_ORDER;
+
+    @SuppressWarnings("rawtypes")
+    static final Comparator REVERSED_COMPARATOR = Comparators.REVERSED_ORDER;
+
+    static final Comparator<Character> CHAR_COMPARATOR = Character::compare;
+
+    static final Comparator<Byte> BYTE_COMPARATOR = Byte::compare;
+
+    static final Comparator<Short> SHORT_COMPARATOR = Short::compare;
+
+    static final Comparator<Integer> INT_COMPARATOR = Integer::compare;
+
+    static final Comparator<Long> LONG_COMPARATOR = Long::compare;
+
+    static final Comparator<Float> FLOAT_COMPARATOR = Float::compare;
+
+    static final Comparator<Double> DOUBLE_COMPARATOR = Double::compare;
+
     // ...
     static final Object NULL_MASK = new NullMask();
 
@@ -351,15 +372,6 @@ class CommonUtil {
 
     // ...
     static final Random RAND = new SecureRandom();
-
-    @SuppressWarnings("rawtypes")
-    static final Comparator NULL_MIN_COMPARATOR = Comparators.nullsFirst();
-
-    @SuppressWarnings("rawtypes")
-    static final Comparator NULL_MAX_COMPARATOR = Comparators.nullsLast();
-
-    @SuppressWarnings("rawtypes")
-    static final Comparator NATURAL_ORDER = Comparators.naturalOrder();
 
     // ...
     static final Map<Class<?>, Object> CLASS_EMPTY_ARRAY = new ConcurrentHashMap<>();
@@ -528,19 +540,6 @@ class CommonUtil {
         }
 
         return (Type<T>) type;
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param str
-     * @param targetClass
-     * @return
-     */
-    @SuppressWarnings("unchecked")
-    public static <T> T valueOf(final String str, final Class<? extends T> targetClass) {
-        return (str == null) ? defaultValueOf(targetClass) : (T) typeOf(targetClass).valueOf(str);
     }
 
     /**
@@ -817,33 +816,6 @@ class CommonUtil {
 
     /**
      *
-     *
-     * @param <T>
-     * @param str
-     * @param defaultStr
-     * @return
-     */
-    public static <T extends CharSequence> T defaultIfNullOrEmpty(final T str, final T defaultStr) {
-        return N.isNullOrEmpty(str) ? defaultStr : str;
-    }
-
-    /**
-     * <p>Returns either the passed in CharSequence, or if the CharSequence is
-     * whitespace, empty ("") or {@code null}, the value of {@code defaultStr}.</p>
-     *
-     * <p>Whitespace is defined by {@link Character#isWhitespace(char)}.</p>
-     *
-     * @param <T>
-     * @param str
-     * @param defaultStr
-     * @return
-     */
-    public static <T extends CharSequence> T defaultIfBlank(final T str, final T defaultStr) {
-        return N.isBlank(str) ? defaultStr : str;
-    }
-
-    /**
-     *
      * @param val
      * @return
      */
@@ -941,6 +913,866 @@ class CommonUtil {
      */
     public static String stringOf(final Object obj) {
         return (obj == null) ? null : typeOf(obj.getClass()).stringOf(obj);
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param str
+     * @param targetClass
+     * @return
+     */
+    @SuppressWarnings("unchecked")
+    public static <T> T valueOf(final String str, final Class<? extends T> targetClass) {
+        return (str == null) ? defaultValueOf(targetClass) : (T) typeOf(targetClass).valueOf(str);
+    }
+
+    private static final Map<Class<?>, BiFunction<Object, Class<?>, Object>> converterMap = new ConcurrentHashMap<>();
+
+    /**
+     *
+     * @param srcClass
+     * @param converter
+     * @return {@code true} if there is no {@code converter} registered with specified {@code srcClass} yet before this call.
+     */
+    @SuppressWarnings("rawtypes")
+    public static boolean registerConverter(final Class<?> srcClass, final BiFunction<?, Class<?>, ?> converter) {
+        N.checkArgNotNull(srcClass, "srcClass");
+        N.checkArgNotNull(converter, "converter");
+
+        if (isBuiltinClass(srcClass)) {
+            throw new IllegalArgumentException("Can't register converter with builtin class: " + ClassUtil.getCanonicalClassName(srcClass));
+        }
+
+        synchronized (converterMap) {
+            if (converterMap.containsKey(srcClass)) {
+                return false;
+            }
+
+            converterMap.put(srcClass, (BiFunction) converter);
+
+            return true;
+        }
+    }
+
+    static boolean isBuiltinClass(final Class<?> cls) {
+        final Package pkg = cls.getPackage();
+
+        if (pkg == null) {
+            if (N.isPrimitiveType(cls) || N.isPrimitiveArrayType(cls)) {
+                return true;
+            } else if (cls.isArray()) {
+                Class<?> componentType = cls.getComponentType();
+
+                while (componentType.isArray()) {
+                    componentType = componentType.getComponentType();
+                }
+
+                return N.isPrimitiveType(cls) || N.isPrimitiveArrayType(cls);
+            }
+
+            return false;
+        }
+
+        final String pkgName = pkg.getName();
+
+        return Strings.isNotEmpty(pkgName) && (pkgName.startsWith("java.") || pkgName.startsWith("com.landawn.abaus."));
+    }
+
+    /**
+     * Try to convert the specified {@code obj} to the specified
+     * {@code targetClass}. Default value of {@code targetClass} is returned if
+     * {@code sourceObject} is null. An instance of {@code targetClass} is returned if
+     * convert successfully
+     *
+     * @param <T>
+     * @param obj
+     * @param targetClass
+     * @return
+     */
+    public static <T> T convert(final Object obj, final Class<? extends T> targetClass) {
+        if (obj == null) {
+            return defaultValueOf(targetClass);
+        }
+
+        final Class<?> srcClass = obj.getClass();
+        BiFunction<Object, Class<?>, Object> converterFunc = null;
+
+        if ((converterFunc = converterMap.get(srcClass)) != null) {
+            return (T) converterFunc.apply(obj, targetClass);
+        }
+
+        final Type<T> type = typeOf(targetClass);
+
+        return convert(obj, srcClass, type);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param obj
+     * @param targetType
+     * @return
+     */
+    public static <T> T convert(final Object obj, final Type<? extends T> targetType) {
+        if (obj == null) {
+            return targetType.defaultValue();
+        }
+
+        final Class<?> srcClass = obj.getClass();
+        BiFunction<Object, Class<?>, Object> converterFunc = null;
+
+        if ((converterFunc = converterMap.get(srcClass)) != null) {
+            return (T) converterFunc.apply(obj, targetType.clazz());
+        }
+
+        return convert(obj, srcClass, targetType);
+    }
+
+    @SuppressWarnings({ "rawtypes" })
+    private static <T> T convert(final Object obj, Class<?> srcClass, final Type<? extends T> targetType) {
+        if (targetType.clazz().isAssignableFrom(srcClass)) {
+            return (T) obj;
+        }
+
+        final Type<Object> srcType = typeOf(srcClass);
+
+        if (targetType.isBoolean() && srcType.isNumber()) {
+            return (T) ((Boolean) (((Number) obj).longValue() > 0));
+        }
+
+        if (targetType.isBean()) {
+            if (srcType.isBean()) {
+                return copy(obj, targetType.clazz());
+            } else if (srcType.isMap()) {
+                return Maps.map2Bean((Map<String, Object>) obj, targetType.clazz());
+            }
+        } else if (targetType.isMap()) {
+            if (srcType.isBean() && targetType.getParameterTypes()[0].clazz().isAssignableFrom(String.class)
+                    && Object.class.equals(targetType.getParameterTypes()[1].clazz())) {
+                try {
+                    return (T) Maps.bean2Map(N.<String, Object> newMap((Class<Map>) targetType.clazz()), obj);
+                } catch (Exception e) {
+                    // ignore.
+                }
+            } else if (srcType.isMap() && Object.class.equals(targetType.getParameterTypes()[0].clazz())
+                    && Object.class.equals(targetType.getParameterTypes()[1].clazz())) {
+                final Map result = N.newMap((Class<Map>) targetType.clazz());
+                result.putAll((Map) obj);
+                return (T) result;
+            }
+        }
+
+        if (targetType.isCollection() && (srcType.isCollection() && Object.class.equals(targetType.getParameterTypes()[0].clazz()))) {
+            final Collection result = N.newCollection((Class<Collection>) targetType.clazz());
+            result.addAll((Collection) obj);
+            return (T) result;
+        }
+
+        if (targetType.isNumber() && srcType.isNumber()) {
+            return (T) Numbers.convert((Number) obj, (Type) targetType);
+        } else if ((targetType.clazz().equals(int.class) || targetType.clazz().equals(Integer.class)) && srcType.clazz().equals(Character.class)) {
+            return (T) (Integer.valueOf(((Character) obj).charValue())); //NOSONAR
+        } else if ((targetType.clazz().equals(char.class) || targetType.clazz().equals(Character.class)) && srcType.clazz().equals(Integer.class)) {
+            return (T) (Character.valueOf((char) ((Integer) obj).intValue()));
+        } else if (targetType.clazz().equals(byte[].class)) {
+            if (srcType.clazz().equals(Blob.class)) {
+                final Blob blob = (Blob) obj;
+
+                try {
+                    return (T) blob.getBytes(1, (int) blob.length());
+                } catch (SQLException e) {
+                    throw new UncheckedSQLException(e);
+                } finally {
+                    try {
+                        blob.free();
+                    } catch (SQLException e) {
+                        throw new UncheckedSQLException(e); //NOSONAR
+                    }
+                }
+            } else if (srcType.clazz().equals(InputStream.class)) {
+                final InputStream is = (InputStream) obj;
+
+                try {
+                    return (T) IOUtil.readAllBytes(is);
+                } finally {
+                    IOUtil.close(is);
+                }
+            }
+        } else if (targetType.clazz().equals(char[].class)) {
+            if (srcType.clazz().equals(Clob.class)) {
+                final Clob clob = (Clob) obj;
+
+                try {
+                    return (T) clob.getSubString(1, (int) clob.length()).toCharArray();
+                } catch (SQLException e) {
+                    throw new UncheckedSQLException(e);
+                } finally {
+                    try {
+                        clob.free();
+                    } catch (SQLException e) {
+                        throw new UncheckedSQLException(e); //NOSONAR
+                    }
+                }
+            } else if (srcType.clazz().equals(Reader.class)) {
+                final Reader reader = (Reader) obj;
+
+                try {
+                    return (T) IOUtil.readAllChars(reader);
+                } finally {
+                    IOUtil.close(reader);
+                }
+            } else if (srcType.clazz().equals(InputStream.class)) {
+                final InputStream is = (InputStream) obj;
+
+                try {
+                    return (T) IOUtil.readAllChars(is);
+                } finally {
+                    IOUtil.close(is);
+                }
+            }
+        } else if (targetType.clazz().equals(String.class)) {
+            if (CharSequence.class.isAssignableFrom(srcType.clazz())) {
+                return (T) ((CharSequence) obj).toString();
+            } else if (srcType.clazz().equals(Clob.class)) {
+                final Clob clob = (Clob) obj;
+
+                try {
+                    return (T) clob.getSubString(1, (int) clob.length());
+                } catch (SQLException e) {
+                    throw new UncheckedSQLException(e);
+                } finally {
+                    try {
+                        clob.free();
+                    } catch (SQLException e) {
+                        throw new UncheckedSQLException(e); //NOSONAR
+                    }
+                }
+            } else if (srcType.clazz().equals(Reader.class)) {
+                final Reader reader = (Reader) obj;
+
+                try {
+                    return (T) IOUtil.readAllToString(reader);
+                } finally {
+                    IOUtil.close(reader);
+                }
+            } else if (srcType.clazz().equals(InputStream.class)) {
+                final InputStream is = (InputStream) obj;
+
+                try {
+                    return (T) IOUtil.readAllToString(is);
+                } finally {
+                    IOUtil.close(is);
+                }
+            }
+        } else if (targetType.clazz().equals(InputStream.class) && srcType.clazz().equals(byte[].class)) {
+            return (T) new ByteArrayInputStream((byte[]) obj);
+        } else if (targetType.clazz().equals(Reader.class) && srcType.clazz().equals(String.class)) {
+            return (T) new StringReader((String) obj);
+        }
+
+        if (obj instanceof AutoCloseable closeable) {
+            try {
+                return targetType.valueOf(obj);
+            } finally {
+                IOUtil.closeQuietly(closeable);
+            }
+        } else {
+            return targetType.valueOf(obj);
+        }
+    }
+
+    /**
+     * Checks if is bean.
+     *
+     * @param cls
+     * @return true, if is bean
+     * @see ClassUtil#isBeanClass(Class)
+     * @deprecated replaced by {@code ClassUtil.isBeanClass(Class)}
+     */
+    @Deprecated
+    public static boolean isBeanClass(final Class<?> cls) {
+        return ClassUtil.isBeanClass(cls);
+    }
+
+    private static final Set<Class<?>> notKryoCompatible = newHashSet();
+
+    /**
+     *
+     * @param <T>
+     * @param obj a Java object which must be serializable and deserializable through {@code Kryo} or {@code JSON}.
+     * @return {@code null} if {@code bean} is {@code null}
+     */
+    @SuppressWarnings("unchecked")
+    public static <T> T clone(final T obj) {
+        if (obj == null) {
+            return null;
+        }
+
+        return (T) clone(obj, obj.getClass());
+    }
+
+    /**
+     * Deeply copy by: obj -> serialize -> kryo/Json -> deserialize -> new object.
+     *
+     * @param <T>
+     * @param obj a Java object which must be serializable and deserialiable through {@code Kryo} or {@code JSON}.
+     * @param targetClass
+     * @return a new instance of {@code targetClass} even if {@code bean} is {@code null}.
+     * @throws IllegalArgumentException if {@code targetClass} is {@code null}.
+     */
+    @SuppressWarnings("unchecked")
+    public static <T> T clone(final Object obj, final Class<? extends T> targetClass) throws IllegalArgumentException {
+        N.checkArgNotNull(targetClass, "targetClass");
+
+        if (obj == null) {
+            if (ClassUtil.isBeanClass(targetClass)) {
+                return copy(obj, targetClass);
+            } else {
+                return newInstance(targetClass);
+            }
+        }
+
+        final Class<?> srcCls = obj.getClass();
+        Object copy = null;
+
+        if (Utils.kryoParser != null && targetClass.equals(obj.getClass()) && !notKryoCompatible.contains(srcCls)) {
+            try {
+                copy = Utils.kryoParser.clone(obj);
+            } catch (Exception e) {
+                notKryoCompatible.add(srcCls);
+
+                // ignore.
+            }
+        }
+
+        if (copy == null) {
+            String xml = Utils.abacusXMLParser.serialize(obj, Utils.xscForClone);
+            copy = Utils.abacusXMLParser.deserialize(targetClass, xml);
+        }
+
+        return (T) copy;
+    }
+
+    /**
+     * Returns a new created instance of the same class and set with same
+     * properties retrieved by 'getXXX' method in the specified {@code bean}.
+     *
+     * @param <T>
+     * @param bean a Java Object what allows access to properties using getter
+     *            and setter methods.
+     * @return {@code null} if {@code bean} is {@code null}
+     */
+    @SuppressWarnings("unchecked")
+    public static <T> T copy(final T bean) {
+        if (bean == null) {
+            return null;
+        }
+
+        return copy(bean, (Class<T>) bean.getClass());
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param bean
+     * @param selectPropNames
+     * @return {@code null} if {@code bean} is {@code null}
+     */
+    public static <T> T copy(final T bean, final Collection<String> selectPropNames) {
+        if (bean == null) {
+            return null;
+        }
+
+        return copy(bean, selectPropNames, (Class<T>) bean.getClass());
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param bean
+     * @param targetClass
+     * @return a new instance of {@code targetClass} even if {@code bean} is {@code null}.
+     * @throws IllegalArgumentException if {@code targetClass} is {@code null}.
+     */
+    public static <T> T copy(final Object bean, final Class<? extends T> targetClass) throws IllegalArgumentException {
+        return copy(bean, null, targetClass);
+    }
+
+    /**
+     * Returns a new created instance of the specified {@code cls} and set with
+     * same properties retrieved by 'getXXX' method in the specified
+     * {@code bean}.
+     *
+     * @param <T>
+     * @param bean a Java Object what allows access to properties using getter
+     *            and setter methods.
+     * @param selectPropNames
+     * @param targetClass a Java Object what allows access to properties using getter
+     *            and setter methods.
+     * @return a new instance of {@code targetClass} even if {@code bean} is {@code null}.
+     * @throws IllegalArgumentException if {@code targetClass} is {@code null}.
+     */
+    @SuppressWarnings({ "unchecked" })
+    public static <T> T copy(final Object bean, final Collection<String> selectPropNames, final Class<? extends T> targetClass)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(targetClass, "targetClass");
+
+        if (bean != null) {
+            final Class<?> srcCls = bean.getClass();
+
+            if (selectPropNames == null && Utils.kryoParser != null && targetClass.equals(srcCls) && !notKryoCompatible.contains(srcCls)) {
+                try {
+                    final T copy = (T) Utils.kryoParser.copy(bean);
+
+                    if (copy != null) {
+                        return copy;
+                    }
+                } catch (Exception e) {
+                    notKryoCompatible.add(srcCls);
+
+                    // ignore
+                }
+            }
+        }
+
+        final BeanInfo targetBeanInfo = ParserUtil.getBeanInfo(targetClass);
+        Object result = targetBeanInfo.createBeanResult();
+
+        if (bean != null) {
+            merge(bean, result, selectPropNames, targetBeanInfo);
+        }
+
+        result = targetBeanInfo.finishBeanResult(result);
+
+        return (T) result;
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param bean
+     * @param ignoreUnmatchedProperty
+     * @param ignoredPropNames
+     * @param targetClass
+     * @return a new instance of {@code targetClass} even if {@code bean} is {@code null}.
+     * @throws IllegalArgumentException if {@code targetClass} is {@code null}.
+     */
+    @SuppressWarnings({ "unchecked" })
+    public static <T> T copy(final Object bean, final boolean ignoreUnmatchedProperty, final Set<String> ignoredPropNames, final Class<? extends T> targetClass)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(targetClass, "targetClass");
+
+        if (bean != null) {
+            final Class<?> srcCls = bean.getClass();
+
+            if (ignoredPropNames == null && Utils.kryoParser != null && targetClass.equals(srcCls) && !notKryoCompatible.contains(srcCls)) {
+                try {
+                    final T copy = (T) Utils.kryoParser.copy(bean);
+
+                    if (copy != null) {
+                        return copy;
+                    }
+                } catch (Exception e) {
+                    notKryoCompatible.add(srcCls);
+
+                    // ignore
+                }
+            }
+        }
+
+        final BeanInfo targetBeanInfo = ParserUtil.getBeanInfo(targetClass);
+        Object result = targetBeanInfo.createBeanResult();
+
+        if (bean != null) {
+            merge(bean, result, ignoreUnmatchedProperty, ignoredPropNames, targetBeanInfo);
+        }
+
+        result = targetBeanInfo.finishBeanResult(result);
+
+        return (T) result;
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param sourceBean
+     * @param targetBean
+     * @return {@code targetBean}
+     * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
+     */
+    public static <T> T merge(final Object sourceBean, final T targetBean) throws IllegalArgumentException {
+        return merge(sourceBean, targetBean, (Collection<String>) null);
+    }
+
+    /**
+     * Set all the signed properties(including all primitive type properties) in
+     * the specified {@code sourceBean} to the specified {@code targetBean}.
+     *
+     * @param <T>
+     * @param sourceBean a Java Object what allows access to properties using getter
+     *            and setter methods.
+     * @param targetBean a Java Object what allows access to properties using getter
+     *            and setter methods.
+     * @param selectPropNames
+     * @return {@code targetBean}
+     * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
+     */
+    public static <T> T merge(final Object sourceBean, final T targetBean, final Collection<String> selectPropNames) throws IllegalArgumentException {
+        N.checkArgNotNull(targetBean, "targetBean");
+
+        return merge(sourceBean, targetBean, selectPropNames, ParserUtil.getBeanInfo(targetBean.getClass()));
+    }
+
+    @SuppressWarnings("deprecation")
+    private static <T> T merge(final Object sourceBean, final T targetBean, final Collection<String> selectPropNames, final BeanInfo targetBeanInfo)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(targetBean, "targetBean");
+
+        if (sourceBean == null) {
+            return targetBean;
+        }
+
+        final BeanInfo srcBeanInfo = ParserUtil.getBeanInfo(sourceBean.getClass());
+        final boolean ignoreUnmatchedProperty = selectPropNames == null;
+
+        if (selectPropNames == null) {
+            Object propValue = null;
+
+            for (PropInfo propInfo : srcBeanInfo.propInfoList) {
+                propValue = propInfo.getPropValue(sourceBean);
+
+                if (InternalUtil.notNullOrDefault(propValue)) {
+                    targetBeanInfo.setPropValue(targetBean, propInfo, propValue, ignoreUnmatchedProperty);
+                }
+            }
+        } else {
+            PropInfo propInfo = null;
+            Object propValue = null;
+
+            for (String propName : selectPropNames) {
+                propInfo = srcBeanInfo.getPropInfo(propName);
+                propValue = propInfo.getPropValue(sourceBean);
+
+                targetBeanInfo.setPropValue(targetBean, propInfo, propValue, ignoreUnmatchedProperty);
+            }
+        }
+
+        return targetBean;
+    }
+
+    /**
+     * Set all the signed properties(including all primitive type properties) in
+     * the specified {@code sourceBean} to the specified {@code targetBean}.
+     *
+     * @param <T>
+     * @param sourceBean a Java Object what allows access to properties using getter
+     *            and setter methods.
+     * @param targetBean a Java Object what allows access to properties using getter
+     *            and setter methods.
+     * @param filter
+     * @return {@code targetBean}
+     * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
+     */
+    public static <T> T merge(final Object sourceBean, final T targetBean, final BiPredicate<String, ?> filter) throws IllegalArgumentException {
+        N.checkArgNotNull(targetBean, "targetBean");
+
+        if (sourceBean == null) {
+            return targetBean;
+        }
+
+        final BeanInfo srcBeanInfo = ParserUtil.getBeanInfo(sourceBean.getClass());
+        final BeanInfo targetBeanInfo = ParserUtil.getBeanInfo(targetBean.getClass());
+        final BiPredicate<String, Object> objFilter = (BiPredicate<String, Object>) filter;
+
+        Object propValue = null;
+
+        for (PropInfo propInfo : srcBeanInfo.propInfoList) {
+            propValue = propInfo.getPropValue(sourceBean);
+
+            if (objFilter.test(propInfo.name, propValue)) {
+                targetBeanInfo.setPropValue(targetBean, propInfo, propValue, false);
+            }
+        }
+
+        return targetBean;
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param sourceBean
+     * @param targetBean
+     * @param ignoreUnmatchedProperty
+     * @param ignoredPropNames
+     * @return {@code targetBean}
+     * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
+     */
+    public static <T> T merge(final Object sourceBean, final T targetBean, final boolean ignoreUnmatchedProperty, final Set<String> ignoredPropNames)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(targetBean, "targetBean");
+
+        if (sourceBean == null) {
+            return targetBean;
+        }
+
+        return merge(sourceBean, targetBean, ignoreUnmatchedProperty, ignoredPropNames, ParserUtil.getBeanInfo(targetBean.getClass()));
+    }
+
+    @SuppressWarnings("deprecation")
+    private static <T> T merge(final Object sourceBean, final T targetBean, final boolean ignoreUnmatchedProperty, final Set<String> ignoredPropNames,
+            final BeanInfo targetBeanInfo) throws IllegalArgumentException {
+        N.checkArgNotNull(targetBean, "targetBean");
+
+        if (sourceBean == null) {
+            return targetBean;
+        }
+
+        final BeanInfo srcBeanInfo = ParserUtil.getBeanInfo(sourceBean.getClass());
+
+        Object propValue = null;
+
+        for (PropInfo propInfo : srcBeanInfo.propInfoList) {
+            if (ignoredPropNames == null || !ignoredPropNames.contains(propInfo.name)) {
+                propValue = propInfo.getPropValue(sourceBean);
+
+                if (InternalUtil.notNullOrDefault(propValue)) {
+                    targetBeanInfo.setPropValue(targetBean, propInfo, propValue, ignoreUnmatchedProperty);
+                }
+            }
+        }
+
+        return targetBean;
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param sourceBean
+     * @param targetBean
+     * @param mergeFunc the first parameter is source property value, the second parameter is target property value.
+     * @return {@code targetBean}
+     * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
+     */
+    public static <T> T merge(final Object sourceBean, final T targetBean, final BinaryOperator<?> mergeFunc) throws IllegalArgumentException {
+        return merge(sourceBean, targetBean, (Collection<String>) null, mergeFunc);
+    }
+
+    /**
+     * Set all the signed properties(including all primitive type properties) in
+     * the specified {@code sourceBean} to the specified {@code targetBean}.
+     *
+     * @param <T>
+     * @param sourceBean a Java Object what allows access to properties using getter
+     *            and setter methods.
+     * @param targetBean a Java Object what allows access to properties using getter
+     *            and setter methods.
+     * @param selectPropNames
+     * @param mergeFunc the first parameter is source property value, the second parameter is target property value.
+     * @return {@code targetBean}
+     * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
+     */
+    public static <T> T merge(final Object sourceBean, final T targetBean, final Collection<String> selectPropNames, final BinaryOperator<?> mergeFunc)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(targetBean, "targetBean");
+
+        if (sourceBean == null) {
+            return targetBean;
+        }
+
+        final BeanInfo srcBeanInfo = ParserUtil.getBeanInfo(sourceBean.getClass());
+        final BeanInfo targetBeanInfo = ParserUtil.getBeanInfo(targetBean.getClass());
+        final BinaryOperator<Object> objMergeFunc = (BinaryOperator<Object>) mergeFunc;
+        final boolean ignoreUnmatchedProperty = selectPropNames == null;
+
+        if (selectPropNames == null) {
+            PropInfo targetPropInfo = null;
+            Object propValue = null;
+
+            for (PropInfo propInfo : srcBeanInfo.propInfoList) {
+                targetPropInfo = targetBeanInfo.getPropInfo(propInfo);
+
+                if (targetPropInfo == null) {
+                    //    if (!ignoreUnmatchedProperty) {
+                    //        throw new IllegalArgumentException(
+                    //                "No property found by name: " + propInfo.name + " in target bean class: " + targetBean.getClass());
+                    //    }
+                } else {
+                    propValue = propInfo.getPropValue(sourceBean);
+                    targetPropInfo.setPropValue(targetBean, objMergeFunc.apply(propValue, targetPropInfo.getPropValue(targetBean)));
+                }
+            }
+        } else {
+            PropInfo targetPropInfo = null;
+            PropInfo propInfo = null;
+            Object propValue = null;
+
+            for (String propName : selectPropNames) {
+                propInfo = srcBeanInfo.getPropInfo(propName);
+                targetPropInfo = targetBeanInfo.getPropInfo(propInfo);
+
+                if (targetPropInfo == null) {
+                    if (!ignoreUnmatchedProperty) { //NOSONAR
+                        throw new IllegalArgumentException("No property found by name: " + propName + " in target bean class: " + targetBean.getClass()); //NOSONAR
+                    }
+                } else {
+                    propValue = srcBeanInfo.getPropValue(sourceBean, propName);
+                    targetPropInfo.setPropValue(targetBean, objMergeFunc.apply(propValue, targetPropInfo.getPropValue(targetBean)));
+                }
+            }
+        }
+
+        return targetBean;
+    }
+
+    /**
+     * Set all the signed properties(including all primitive type properties) in
+     * the specified {@code sourceBean} to the specified {@code targetBean}.
+     *
+     * @param <T>
+     * @param sourceBean a Java Object what allows access to properties using getter
+     *            and setter methods.
+     * @param targetBean a Java Object what allows access to properties using getter
+     *            and setter methods.
+     * @param filter
+     * @param mergeFunc the first parameter is source property value, the second parameter is target property value.
+     * @return {@code targetBean}
+     * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
+     */
+    public static <T> T merge(final Object sourceBean, final T targetBean, final BiPredicate<String, ?> filter, final BinaryOperator<?> mergeFunc)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(targetBean, "targetBean");
+
+        if (sourceBean == null) {
+            return targetBean;
+        }
+
+        final BeanInfo srcBeanInfo = ParserUtil.getBeanInfo(sourceBean.getClass());
+        final BeanInfo targetBeanInfo = ParserUtil.getBeanInfo(targetBean.getClass());
+        final BiPredicate<String, Object> objFilter = (BiPredicate<String, Object>) filter;
+        final BinaryOperator<Object> objMergeFunc = (BinaryOperator<Object>) mergeFunc;
+
+        Object propValue = null;
+        PropInfo targetPropInfo = null;
+
+        for (PropInfo propInfo : srcBeanInfo.propInfoList) {
+            propValue = propInfo.getPropValue(sourceBean);
+
+            if (objFilter.test(propInfo.name, propValue)) {
+                targetPropInfo = targetBeanInfo.getPropInfo(propInfo);
+
+                if (targetPropInfo == null) {
+                    throw new IllegalArgumentException("No property found by name: " + propInfo.name + " in target bean class: " + targetBean.getClass());
+                }
+
+                targetPropInfo.setPropValue(targetBean, objMergeFunc.apply(propValue, targetPropInfo.getPropValue(targetBean)));
+            }
+        }
+
+        return targetBean;
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param sourceBean
+     * @param targetBean
+     * @param ignoreUnmatchedProperty
+     * @param ignoredPropNames
+     * @param mergeFunc the first parameter is source property value, the second parameter is target property value.
+     * @return {@code targetBean}
+     * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
+     */
+    public static <T> T merge(final Object sourceBean, final T targetBean, final boolean ignoreUnmatchedProperty, final Set<String> ignoredPropNames,
+            final BinaryOperator<?> mergeFunc) throws IllegalArgumentException {
+        N.checkArgNotNull(targetBean, "targetBean");
+
+        if (sourceBean == null) {
+            return targetBean;
+        }
+
+        final BeanInfo srcBeanInfo = ParserUtil.getBeanInfo(sourceBean.getClass());
+        final BeanInfo targetBeanInfo = ParserUtil.getBeanInfo(targetBean.getClass());
+        final BinaryOperator<Object> objMergeFunc = (BinaryOperator<Object>) mergeFunc;
+
+        PropInfo targetPropInfo = null;
+        Object propValue = null;
+
+        for (PropInfo propInfo : srcBeanInfo.propInfoList) {
+            if (ignoredPropNames == null || !ignoredPropNames.contains(propInfo.name)) {
+                targetPropInfo = targetBeanInfo.getPropInfo(propInfo);
+
+                if (targetPropInfo == null) {
+                    if (!ignoreUnmatchedProperty) {
+                        throw new IllegalArgumentException("No property found by name: " + propInfo.name + " in target bean class: " + targetBean.getClass());
+                    }
+                } else {
+                    propValue = propInfo.getPropValue(sourceBean);
+                    targetPropInfo.setPropValue(targetBean, objMergeFunc.apply(propValue, targetPropInfo.getPropValue(targetBean)));
+                }
+            }
+        }
+
+        return targetBean;
+    }
+
+    /**
+     *
+     * @param bean
+     * @param propNames
+     */
+    @SafeVarargs
+    public static void erase(final Object bean, final String... propNames) {
+        if (bean == null || isNullOrEmpty(propNames)) {
+            return;
+        }
+
+        final BeanInfo beanInfo = ParserUtil.getBeanInfo(bean.getClass());
+
+        for (String propName : propNames) {
+            beanInfo.setPropValue(bean, propName, null);
+        }
+    }
+
+    /**
+     *
+     * @param bean
+     * @param propNames
+     */
+    public static void erase(final Object bean, final Collection<String> propNames) {
+        if (bean == null || isNullOrEmpty(propNames)) {
+            return;
+        }
+
+        final BeanInfo beanInfo = ParserUtil.getBeanInfo(bean.getClass());
+
+        for (String propName : propNames) {
+            beanInfo.setPropValue(bean, propName, null);
+        }
+    }
+
+    /**
+     *
+     * @param bean
+     */
+    public static void eraseAll(final Object bean) {
+        if (bean == null) {
+            return;
+        }
+
+        final Class<?> cls = bean.getClass();
+        final BeanInfo beanInfo = ParserUtil.getBeanInfo(cls);
+
+        for (PropInfo propInfo : beanInfo.propInfoList) {
+            propInfo.setPropValue(bean, null);
+        }
     }
 
     /**
@@ -6129,1264 +6961,6 @@ class CommonUtil {
         return Collections.singletonMap(key, value);
     }
 
-    private static final Map<Class<?>, BiFunction<Object, Class<?>, Object>> converterMap = new ConcurrentHashMap<>();
-
-    /**
-     *
-     * @param srcClass
-     * @param converter
-     * @return {@code true} if there is no {@code converter} registered with specified {@code srcClass} yet before this call.
-     */
-    @SuppressWarnings("rawtypes")
-    public static boolean registerConverter(final Class<?> srcClass, final BiFunction<?, Class<?>, ?> converter) {
-        N.checkArgNotNull(srcClass, "srcClass");
-        N.checkArgNotNull(converter, "converter");
-
-        if (isBuiltinClass(srcClass)) {
-            throw new IllegalArgumentException("Can't register converter with builtin class: " + ClassUtil.getCanonicalClassName(srcClass));
-        }
-
-        synchronized (converterMap) {
-            if (converterMap.containsKey(srcClass)) {
-                return false;
-            }
-
-            converterMap.put(srcClass, (BiFunction) converter);
-
-            return true;
-        }
-    }
-
-    static boolean isBuiltinClass(final Class<?> cls) {
-        final Package pkg = cls.getPackage();
-
-        if (pkg == null) {
-            if (N.isPrimitiveType(cls) || N.isPrimitiveArrayType(cls)) {
-                return true;
-            } else if (cls.isArray()) {
-                Class<?> componentType = cls.getComponentType();
-
-                while (componentType.isArray()) {
-                    componentType = componentType.getComponentType();
-                }
-
-                return N.isPrimitiveType(cls) || N.isPrimitiveArrayType(cls);
-            }
-
-            return false;
-        }
-
-        final String pkgName = pkg.getName();
-
-        return notNullOrEmpty(pkgName) && (pkgName.startsWith("java.") || pkgName.startsWith("com.landawn.abaus."));
-    }
-
-    /**
-     * Try to convert the specified {@code obj} to the specified
-     * {@code targetClass}. Default value of {@code targetClass} is returned if
-     * {@code sourceObject} is null. An instance of {@code targetClass} is returned if
-     * convert successfully
-     *
-     * @param <T>
-     * @param obj
-     * @param targetClass
-     * @return
-     */
-    public static <T> T convert(final Object obj, final Class<? extends T> targetClass) {
-        if (obj == null) {
-            return defaultValueOf(targetClass);
-        }
-
-        final Class<?> srcClass = obj.getClass();
-        BiFunction<Object, Class<?>, Object> converterFunc = null;
-
-        if ((converterFunc = converterMap.get(srcClass)) != null) {
-            return (T) converterFunc.apply(obj, targetClass);
-        }
-
-        final Type<T> type = typeOf(targetClass);
-        return convert(obj, srcClass, type);
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param obj
-     * @param targetType
-     * @return
-     */
-    public static <T> T convert(final Object obj, final Type<? extends T> targetType) {
-        if (obj == null) {
-            return targetType.defaultValue();
-        }
-
-        final Class<?> srcClass = obj.getClass();
-        BiFunction<Object, Class<?>, Object> converterFunc = null;
-
-        if ((converterFunc = converterMap.get(srcClass)) != null) {
-            return (T) converterFunc.apply(obj, targetType.clazz());
-        }
-
-        return convert(obj, srcClass, targetType);
-    }
-
-    @SuppressWarnings({ "rawtypes" })
-    private static <T> T convert(final Object obj, Class<?> srcClass, final Type<? extends T> targetType) {
-        if (targetType.clazz().isAssignableFrom(srcClass)) {
-            return (T) obj;
-        }
-
-        final Type<Object> srcType = typeOf(srcClass);
-
-        if (targetType.isBoolean() && srcType.isNumber()) {
-            return (T) ((Boolean) (((Number) obj).longValue() > 0));
-        }
-
-        if (targetType.isBean()) {
-            if (srcType.isBean()) {
-                return copy(obj, targetType.clazz());
-            } else if (srcType.isMap()) {
-                return Maps.map2Bean((Map<String, Object>) obj, targetType.clazz());
-            }
-        } else if (targetType.isMap()) {
-            if (srcType.isBean() && targetType.getParameterTypes()[0].clazz().isAssignableFrom(String.class)
-                    && Object.class.equals(targetType.getParameterTypes()[1].clazz())) {
-                try {
-                    return (T) Maps.bean2Map(N.<String, Object> newMap((Class<Map>) targetType.clazz()), obj);
-                } catch (Exception e) {
-                    // ignore.
-                }
-            } else if (srcType.isMap() && Object.class.equals(targetType.getParameterTypes()[0].clazz())
-                    && Object.class.equals(targetType.getParameterTypes()[1].clazz())) {
-                final Map result = N.newMap((Class<Map>) targetType.clazz());
-                result.putAll((Map) obj);
-                return (T) result;
-            }
-        }
-
-        if (targetType.isCollection() && (srcType.isCollection() && Object.class.equals(targetType.getParameterTypes()[0].clazz()))) {
-            final Collection result = N.newCollection((Class<Collection>) targetType.clazz());
-            result.addAll((Collection) obj);
-            return (T) result;
-        }
-
-        if (targetType.isNumber() && srcType.isNumber()) {
-            return (T) Numbers.convert((Number) obj, (Type) targetType);
-        } else if ((targetType.clazz().equals(int.class) || targetType.clazz().equals(Integer.class)) && srcType.clazz().equals(Character.class)) {
-            return (T) (Integer.valueOf(((Character) obj).charValue())); //NOSONAR
-        } else if ((targetType.clazz().equals(char.class) || targetType.clazz().equals(Character.class)) && srcType.clazz().equals(Integer.class)) {
-            return (T) (Character.valueOf((char) ((Integer) obj).intValue()));
-        } else if (targetType.clazz().equals(byte[].class)) {
-            if (srcType.clazz().equals(Blob.class)) {
-                final Blob blob = (Blob) obj;
-
-                try {
-                    return (T) blob.getBytes(1, (int) blob.length());
-                } catch (SQLException e) {
-                    throw new UncheckedSQLException(e);
-                } finally {
-                    try {
-                        blob.free();
-                    } catch (SQLException e) {
-                        throw new UncheckedSQLException(e); //NOSONAR
-                    }
-                }
-            } else if (srcType.clazz().equals(InputStream.class)) {
-                final InputStream is = (InputStream) obj;
-
-                try {
-                    return (T) IOUtil.readAllBytes(is);
-                } finally {
-                    IOUtil.close(is);
-                }
-            }
-        } else if (targetType.clazz().equals(char[].class)) {
-            if (srcType.clazz().equals(Clob.class)) {
-                final Clob clob = (Clob) obj;
-
-                try {
-                    return (T) clob.getSubString(1, (int) clob.length()).toCharArray();
-                } catch (SQLException e) {
-                    throw new UncheckedSQLException(e);
-                } finally {
-                    try {
-                        clob.free();
-                    } catch (SQLException e) {
-                        throw new UncheckedSQLException(e); //NOSONAR
-                    }
-                }
-            } else if (srcType.clazz().equals(Reader.class)) {
-                final Reader reader = (Reader) obj;
-
-                try {
-                    return (T) IOUtil.readAllChars(reader);
-                } finally {
-                    IOUtil.close(reader);
-                }
-            } else if (srcType.clazz().equals(InputStream.class)) {
-                final InputStream is = (InputStream) obj;
-
-                try {
-                    return (T) IOUtil.readAllChars(is);
-                } finally {
-                    IOUtil.close(is);
-                }
-            }
-        } else if (targetType.clazz().equals(String.class)) {
-            if (CharSequence.class.isAssignableFrom(srcType.clazz())) {
-                return (T) ((CharSequence) obj).toString();
-            } else if (srcType.clazz().equals(Clob.class)) {
-                final Clob clob = (Clob) obj;
-
-                try {
-                    return (T) clob.getSubString(1, (int) clob.length());
-                } catch (SQLException e) {
-                    throw new UncheckedSQLException(e);
-                } finally {
-                    try {
-                        clob.free();
-                    } catch (SQLException e) {
-                        throw new UncheckedSQLException(e); //NOSONAR
-                    }
-                }
-            } else if (srcType.clazz().equals(Reader.class)) {
-                final Reader reader = (Reader) obj;
-
-                try {
-                    return (T) IOUtil.readAllToString(reader);
-                } finally {
-                    IOUtil.close(reader);
-                }
-            } else if (srcType.clazz().equals(InputStream.class)) {
-                final InputStream is = (InputStream) obj;
-
-                try {
-                    return (T) IOUtil.readAllToString(is);
-                } finally {
-                    IOUtil.close(is);
-                }
-            }
-        } else if (targetType.clazz().equals(InputStream.class) && srcType.clazz().equals(byte[].class)) {
-            return (T) new ByteArrayInputStream((byte[]) obj);
-        } else if (targetType.clazz().equals(Reader.class) && srcType.clazz().equals(String.class)) {
-            return (T) new StringReader((String) obj);
-        }
-
-        return targetType.valueOf(obj);
-    }
-
-    /**
-     * Returns a <code>Boolean</code> with a value represented by the specified
-     * string. The <code>Boolean</code> returned represents a true value if the
-     * string argument is not <code>null</code> and is equal, ignoring case, to
-     * the string {@code "true"}.
-     *
-     * @param str
-     *            a string.
-     * @return
-     */
-    public static boolean parseBoolean(final String str) {
-        return isNullOrEmpty(str) ? false : Boolean.parseBoolean(str);
-    }
-
-    /**
-     * Parses the char.
-     *
-     * @param str
-     * @return
-     */
-    public static char parseChar(final String str) {
-        return isNullOrEmpty(str) ? CHAR_ZERO : ((str.length() == 1) ? str.charAt(0) : (char) Integer.parseInt(str));
-    }
-
-    /**
-     * Returns the value by calling {@code Byte.valueOf(String)} if {@code str}
-     * is not {@code null}, otherwise, the default value 0 for {@code byte} is
-     * returned.
-     *
-     * @param str
-     * @return
-     * @throws NumberFormatException If the string is not a parsable {@code byte}.
-     * @see Numbers#toByte(String)
-     * @deprecated replaced by {@code Numbers.toByte(String)}
-     */
-    @Deprecated
-    public static byte parseByte(final String str) throws NumberFormatException {
-        return Numbers.toByte(str);
-    }
-
-    /**
-     * Returns the value by calling {@code Short.valueOf(String)} if {@code str}
-     * is not {@code null}, otherwise, the default value 0 for {@code short} is
-     * returned.
-     *
-     * @param str
-     * @return
-     * @throws NumberFormatException If the string is not a parsable {@code short}.
-     * @see Numbers#toShort(String)
-     * @deprecated replaced by {@code Numbers.toShort(String)}
-     */
-    @Deprecated
-    public static short parseShort(final String str) throws NumberFormatException {
-        return Numbers.toShort(str);
-    }
-
-    /**
-     * Returns the value by calling {@code Integer.valueOf(String)} if
-     * {@code str} is not {@code null}, otherwise, the default value 0 for
-     * {@code int} is returned.
-     *
-     * @param str
-     * @return
-     * @throws NumberFormatException If the string is not a parsable {@code int}.
-     * @see Numbers#toInt(String)
-     * @deprecated replaced by {@code Numbers.toInt(String)}
-     */
-    @Deprecated
-    public static int parseInt(final String str) throws NumberFormatException {
-        return Numbers.toInt(str);
-    }
-
-    /**
-     * Returns the value by calling {@code Long.valueOf(String)} if {@code str}
-     * is not {@code null}, otherwise, the default value 0 for {@code long} is
-     * returned.
-     *
-     * @param str
-     * @return
-     * @throws NumberFormatException If the string is not a parsable {@code long}.
-     * @see Numbers#toLong(String)
-     * @deprecated replaced by {@code Numbers.toLong(String)}
-     */
-    @Deprecated
-    public static long parseLong(final String str) throws NumberFormatException {
-        return Numbers.toLong(str);
-    }
-
-    /**
-     * Returns the value by calling {@code Float.valueOf(String)} if {@code str}
-     * is not {@code null}, otherwise, the default value 0f for {@code float} is
-     * returned.
-     *
-     * @param str
-     * @return
-     * @throws NumberFormatException If the string is not a parsable {@code float}.
-     * @see Numbers#toFloat(String)
-     * @deprecated replaced by {@code Numbers.toFloat(String)}
-     */
-    @Deprecated
-    public static float parseFloat(final String str) throws NumberFormatException {
-        return Numbers.toFloat(str);
-    }
-
-    /**
-     * Returns the value by calling {@code Double.valueOf(String)} if {@code str}
-     * is not {@code null}, otherwise, the default value 0d for {@code double} is
-     * returned.
-     *
-     * @param str
-     * @return
-     * @throws NumberFormatException If the string is not a parsable {@code double}.
-     * @see Numbers#toDouble(String)
-     * @deprecated replaced by {@code Numbers.toDouble(String)}
-     */
-    @Deprecated
-    public static double parseDouble(final String str) throws NumberFormatException {
-        return Numbers.toDouble(str);
-    }
-
-    //    // Rarely used. ============================================================================
-    //    /**
-    //     * Returns whether or not the <code>octet</code> is in the base 64 alphabet.
-    //     *
-    //     * @param octet
-    //     *            The value to test
-    //     * @return <code>true</code> if the value is defined in the the base 64 alphabet, <code>false</code> otherwise.
-    //     */
-    //    public static boolean isBase64(final byte octet) {
-    //        return Base64.isBase64(octet);
-    //    }
-    //
-    //    /**
-    //     * Tests a given String to see if it contains only valid characters within the Base64 alphabet. Currently the
-    //     * method treats whitespace as valid.
-    //     *
-    //     * @param base64
-    //     *            String to test
-    //     * @return <code>true</code> if all characters in the String are valid characters in the Base64 alphabet or if
-    //     *         the String is empty; <code>false</code>, otherwise
-    //     */
-    //    public static boolean isBase64(final String base64) {
-    //        return Base64.isBase64(base64);
-    //    }
-    //
-    //    /**
-    //     * Tests a given byte array to see if it contains only valid characters within the Base64 alphabet. Currently the
-    //     * method treats whitespace as valid.
-    //     *
-    //     * @param arrayOctet
-    //     *            byte array to test
-    //     * @return <code>true</code> if all bytes are valid characters in the Base64 alphabet or if the byte array is empty;
-    //     *         <code>false</code>, otherwise
-    //     */
-    //    public static boolean isBase64(final byte[] arrayOctet) {
-    //        return Base64.isBase64(arrayOctet);
-    //    }
-    //    // Rarely used. ============================================================================
-
-    /**
-     * Base 64 encode.
-     *
-     * @param binaryData
-     * @return
-     */
-    public static String base64Encode(final byte[] binaryData) {
-        if (isNullOrEmpty(binaryData)) {
-            return EMPTY_STRING;
-        }
-
-        return Base64.encodeBase64String(binaryData);
-    }
-
-    /**
-     *
-     *
-     * @param str
-     * @return
-     */
-    public static String base64EncodeString(final String str) {
-        if (isNullOrEmpty(str)) {
-            return EMPTY_STRING;
-        }
-
-        return Base64.encodeBase64String(str.getBytes());
-    }
-
-    /**
-     *
-     *
-     * @param str
-     * @return
-     */
-    public static String base64EncodeUtf8String(final String str) {
-        if (isNullOrEmpty(str)) {
-            return EMPTY_STRING;
-        }
-
-        return Base64.encodeBase64String(str.getBytes(Charsets.UTF_8));
-    }
-
-    /**
-     * Base 64 encode chunked.
-     *
-     * @param binaryData
-     * @return
-     */
-    public static String base64EncodeChunked(final byte[] binaryData) {
-        if (isNullOrEmpty(binaryData)) {
-            return EMPTY_STRING;
-        }
-
-        return new String(Base64.encodeBase64Chunked(binaryData), Charsets.US_ASCII);
-    }
-
-    /**
-     * Base 64 decode.
-     *
-     * @param base64String
-     * @return
-     */
-    public static byte[] base64Decode(final String base64String) {
-        if (isNullOrEmpty(base64String)) {
-            return EMPTY_BYTE_ARRAY;
-        }
-
-        return Base64.decodeBase64(base64String);
-    }
-
-    /**
-     * Base 64 decode to string.
-     *
-     * @param base64String
-     * @return
-     */
-    public static String base64DecodeToString(final String base64String) {
-        if (isNullOrEmpty(base64String)) {
-            return EMPTY_STRING;
-        }
-
-        return new String(base64Decode(base64String));
-    }
-
-    /**
-     *
-     *
-     * @param base64String
-     * @return
-     */
-    public static String base64DecodeToUtf8String(final String base64String) {
-        if (isNullOrEmpty(base64String)) {
-            return EMPTY_STRING;
-        }
-
-        return new String(base64Decode(base64String), Charsets.UTF_8);
-    }
-
-    /**
-     * Base 64 url encode.
-     *
-     * @param binaryData
-     * @return
-     */
-    public static String base64UrlEncode(final byte[] binaryData) {
-        if (isNullOrEmpty(binaryData)) {
-            return EMPTY_STRING;
-        }
-
-        return Base64.encodeBase64URLSafeString(binaryData);
-    }
-
-    /**
-     * Base 64 url decode.
-     *
-     * @param base64String
-     * @return
-     */
-    public static byte[] base64UrlDecode(final String base64String) {
-        if (isNullOrEmpty(base64String)) {
-            return EMPTY_BYTE_ARRAY;
-        }
-
-        return Base64.decodeBase64URL(base64String);
-    }
-
-    /**
-     * Base 64 url decode to string.
-     *
-     * @param base64String
-     * @return
-     */
-    public static String base64UrlDecodeToString(final String base64String) {
-        if (isNullOrEmpty(base64String)) {
-            return EMPTY_STRING;
-        }
-
-        return new String(Base64.decodeBase64URL(base64String));
-    }
-
-    /**
-     *
-     *
-     * @param base64String
-     * @return
-     */
-    public static String base64UrlDecodeToUtf8String(final String base64String) {
-        if (isNullOrEmpty(base64String)) {
-            return EMPTY_STRING;
-        }
-
-        return new String(Base64.decodeBase64URL(base64String), Charsets.UTF_8);
-    }
-
-    /**
-     *
-     * @param parameters
-     * @return
-     */
-    public static String urlEncode(final Object parameters) {
-        if (parameters == null) {
-            return EMPTY_STRING;
-        }
-
-        return URLEncodedUtil.encode(parameters);
-    }
-
-    /**
-     *
-     * @param parameters
-     * @param charset
-     * @return
-     */
-    public static String urlEncode(final Object parameters, final Charset charset) {
-        if (parameters == null) {
-            return EMPTY_STRING;
-        }
-
-        return URLEncodedUtil.encode(parameters, charset);
-    }
-
-    /**
-     *
-     * @param urlQuery
-     * @return
-     */
-    public static Map<String, String> urlDecode(final String urlQuery) {
-        if (isNullOrEmpty(urlQuery)) {
-            return N.newLinkedHashMap();
-        }
-
-        return URLEncodedUtil.decode(urlQuery);
-    }
-
-    /**
-     *
-     * @param urlQuery
-     * @param charset
-     * @return
-     */
-    public static Map<String, String> urlDecode(final String urlQuery, final Charset charset) {
-        if (isNullOrEmpty(urlQuery)) {
-            return N.newLinkedHashMap();
-        }
-
-        return URLEncodedUtil.decode(urlQuery, charset);
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param urlQuery
-     * @param targetClass
-     * @return
-     */
-    public static <T> T urlDecode(final String urlQuery, final Class<? extends T> targetClass) {
-        if (isNullOrEmpty(urlQuery)) {
-            return newInstance(targetClass);
-        }
-
-        return URLEncodedUtil.decode(urlQuery, targetClass);
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param urlQuery
-     * @param charset
-     * @param targetClass
-     * @return
-     */
-    public static <T> T urlDecode(final String urlQuery, final Charset charset, final Class<? extends T> targetClass) {
-        if (isNullOrEmpty(urlQuery)) {
-            return newInstance(targetClass);
-        }
-
-        return URLEncodedUtil.decode(urlQuery, charset, targetClass);
-    }
-
-    /**
-     * Returns the UUID without '-'.
-     *
-     * @return
-     * @see UUID#randomUUID().
-     */
-    public static String guid() {
-        return uuid().replace("-", "");
-    }
-
-    /**
-     * Returns an UUID.
-     *
-     * @return
-     * @see UUID#randomUUID().
-     */
-    public static String uuid() {
-        return UUID.randomUUID().toString();
-    }
-
-    /**
-     * Checks if is bean.
-     *
-     * @param cls
-     * @return true, if is bean
-     * @see ClassUtil#isBeanClass(Class)
-     * @deprecated replaced by {@code ClassUtil.isBeanClass(Class)}
-     */
-    @Deprecated
-    public static boolean isBeanClass(final Class<?> cls) {
-        return ClassUtil.isBeanClass(cls);
-    }
-
-    private static final Set<Class<?>> notKryoCompatible = newHashSet();
-
-    /**
-     *
-     * @param <T>
-     * @param obj a Java object which must be serializable and deserializable through {@code Kryo} or {@code JSON}.
-     * @return {@code null} if {@code bean} is {@code null}
-     */
-    @SuppressWarnings("unchecked")
-    public static <T> T clone(final T obj) {
-        if (obj == null) {
-            return null;
-        }
-
-        return (T) clone(obj, obj.getClass());
-    }
-
-    /**
-     * Deeply copy by: obj -> serialize -> kryo/Json -> deserialize -> new object.
-     *
-     * @param <T>
-     * @param obj a Java object which must be serializable and deserialiable through {@code Kryo} or {@code JSON}.
-     * @param targetClass
-     * @return a new instance of {@code targetClass} even if {@code bean} is {@code null}.
-     * @throws IllegalArgumentException if {@code targetClass} is {@code null}.
-     */
-    @SuppressWarnings("unchecked")
-    public static <T> T clone(final Object obj, final Class<? extends T> targetClass) throws IllegalArgumentException {
-        N.checkArgNotNull(targetClass, "targetClass");
-
-        if (obj == null) {
-            if (ClassUtil.isBeanClass(targetClass)) {
-                return copy(obj, targetClass);
-            } else {
-                return newInstance(targetClass);
-            }
-        }
-
-        final Class<?> srcCls = obj.getClass();
-        Object copy = null;
-
-        if (Utils.kryoParser != null && targetClass.equals(obj.getClass()) && !notKryoCompatible.contains(srcCls)) {
-            try {
-                copy = Utils.kryoParser.clone(obj);
-            } catch (Exception e) {
-                notKryoCompatible.add(srcCls);
-
-                // ignore.
-            }
-        }
-
-        if (copy == null) {
-            String xml = Utils.abacusXMLParser.serialize(obj, Utils.xscForClone);
-            copy = Utils.abacusXMLParser.deserialize(targetClass, xml);
-        }
-
-        return (T) copy;
-    }
-
-    /**
-     * Returns a new created instance of the same class and set with same
-     * properties retrieved by 'getXXX' method in the specified {@code bean}.
-     *
-     * @param <T>
-     * @param bean a Java Object what allows access to properties using getter
-     *            and setter methods.
-     * @return {@code null} if {@code bean} is {@code null}
-     */
-    @SuppressWarnings("unchecked")
-    public static <T> T copy(final T bean) {
-        if (bean == null) {
-            return null;
-        }
-
-        return copy(bean, (Class<T>) bean.getClass());
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param bean
-     * @param selectPropNames
-     * @return {@code null} if {@code bean} is {@code null}
-     */
-    public static <T> T copy(final T bean, final Collection<String> selectPropNames) {
-        if (bean == null) {
-            return null;
-        }
-
-        return copy(bean, selectPropNames, (Class<T>) bean.getClass());
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param bean
-     * @param targetClass
-     * @return a new instance of {@code targetClass} even if {@code bean} is {@code null}.
-     * @throws IllegalArgumentException if {@code targetClass} is {@code null}.
-     */
-    public static <T> T copy(final Object bean, final Class<? extends T> targetClass) throws IllegalArgumentException {
-        return copy(bean, null, targetClass);
-    }
-
-    /**
-     * Returns a new created instance of the specified {@code cls} and set with
-     * same properties retrieved by 'getXXX' method in the specified
-     * {@code bean}.
-     *
-     * @param <T>
-     * @param bean a Java Object what allows access to properties using getter
-     *            and setter methods.
-     * @param selectPropNames
-     * @param targetClass a Java Object what allows access to properties using getter
-     *            and setter methods.
-     * @return a new instance of {@code targetClass} even if {@code bean} is {@code null}.
-     * @throws IllegalArgumentException if {@code targetClass} is {@code null}.
-     */
-    @SuppressWarnings({ "unchecked" })
-    public static <T> T copy(final Object bean, final Collection<String> selectPropNames, final Class<? extends T> targetClass)
-            throws IllegalArgumentException {
-        N.checkArgNotNull(targetClass, "targetClass");
-
-        if (bean != null) {
-            final Class<?> srcCls = bean.getClass();
-
-            if (selectPropNames == null && Utils.kryoParser != null && targetClass.equals(srcCls) && !notKryoCompatible.contains(srcCls)) {
-                try {
-                    final T copy = (T) Utils.kryoParser.copy(bean);
-
-                    if (copy != null) {
-                        return copy;
-                    }
-                } catch (Exception e) {
-                    notKryoCompatible.add(srcCls);
-
-                    // ignore
-                }
-            }
-        }
-
-        final BeanInfo targetBeanInfo = ParserUtil.getBeanInfo(targetClass);
-        Object result = targetBeanInfo.createBeanResult();
-
-        if (bean != null) {
-            merge(bean, result, selectPropNames, targetBeanInfo);
-        }
-
-        result = targetBeanInfo.finishBeanResult(result);
-
-        return (T) result;
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param bean
-     * @param ignoreUnmatchedProperty
-     * @param ignoredPropNames
-     * @param targetClass
-     * @return a new instance of {@code targetClass} even if {@code bean} is {@code null}.
-     * @throws IllegalArgumentException if {@code targetClass} is {@code null}.
-     */
-    @SuppressWarnings({ "unchecked" })
-    public static <T> T copy(final Object bean, final boolean ignoreUnmatchedProperty, final Set<String> ignoredPropNames, final Class<? extends T> targetClass)
-            throws IllegalArgumentException {
-        N.checkArgNotNull(targetClass, "targetClass");
-
-        if (bean != null) {
-            final Class<?> srcCls = bean.getClass();
-
-            if (ignoredPropNames == null && Utils.kryoParser != null && targetClass.equals(srcCls) && !notKryoCompatible.contains(srcCls)) {
-                try {
-                    final T copy = (T) Utils.kryoParser.copy(bean);
-
-                    if (copy != null) {
-                        return copy;
-                    }
-                } catch (Exception e) {
-                    notKryoCompatible.add(srcCls);
-
-                    // ignore
-                }
-            }
-        }
-
-        final BeanInfo targetBeanInfo = ParserUtil.getBeanInfo(targetClass);
-        Object result = targetBeanInfo.createBeanResult();
-
-        if (bean != null) {
-            merge(bean, result, ignoreUnmatchedProperty, ignoredPropNames, targetBeanInfo);
-        }
-
-        result = targetBeanInfo.finishBeanResult(result);
-
-        return (T) result;
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param sourceBean
-     * @param targetBean
-     * @return {@code targetBean}
-     * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
-     */
-    public static <T> T merge(final Object sourceBean, final T targetBean) throws IllegalArgumentException {
-        return merge(sourceBean, targetBean, (Collection<String>) null);
-    }
-
-    /**
-     * Set all the signed properties(including all primitive type properties) in
-     * the specified {@code sourceBean} to the specified {@code targetBean}.
-     *
-     * @param <T>
-     * @param sourceBean a Java Object what allows access to properties using getter
-     *            and setter methods.
-     * @param targetBean a Java Object what allows access to properties using getter
-     *            and setter methods.
-     * @param selectPropNames
-     * @return {@code targetBean}
-     * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
-     */
-    public static <T> T merge(final Object sourceBean, final T targetBean, final Collection<String> selectPropNames) throws IllegalArgumentException {
-        N.checkArgNotNull(targetBean, "targetBean");
-
-        return merge(sourceBean, targetBean, selectPropNames, ParserUtil.getBeanInfo(targetBean.getClass()));
-    }
-
-    @SuppressWarnings("deprecation")
-    private static <T> T merge(final Object sourceBean, final T targetBean, final Collection<String> selectPropNames, final BeanInfo targetBeanInfo)
-            throws IllegalArgumentException {
-        N.checkArgNotNull(targetBean, "targetBean");
-
-        if (sourceBean == null) {
-            return targetBean;
-        }
-
-        final BeanInfo srcBeanInfo = ParserUtil.getBeanInfo(sourceBean.getClass());
-        final boolean ignoreUnmatchedProperty = selectPropNames == null;
-
-        if (selectPropNames == null) {
-            Object propValue = null;
-
-            for (PropInfo propInfo : srcBeanInfo.propInfoList) {
-                propValue = propInfo.getPropValue(sourceBean);
-
-                if (InternalUtil.notNullOrDefault(propValue)) {
-                    targetBeanInfo.setPropValue(targetBean, propInfo, propValue, ignoreUnmatchedProperty);
-                }
-            }
-        } else {
-            PropInfo propInfo = null;
-            Object propValue = null;
-
-            for (String propName : selectPropNames) {
-                propInfo = srcBeanInfo.getPropInfo(propName);
-                propValue = propInfo.getPropValue(sourceBean);
-
-                targetBeanInfo.setPropValue(targetBean, propInfo, propValue, ignoreUnmatchedProperty);
-            }
-        }
-
-        return targetBean;
-    }
-
-    /**
-     * Set all the signed properties(including all primitive type properties) in
-     * the specified {@code sourceBean} to the specified {@code targetBean}.
-     *
-     * @param <T>
-     * @param sourceBean a Java Object what allows access to properties using getter
-     *            and setter methods.
-     * @param targetBean a Java Object what allows access to properties using getter
-     *            and setter methods.
-     * @param filter
-     * @return {@code targetBean}
-     * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
-     */
-    public static <T> T merge(final Object sourceBean, final T targetBean, final BiPredicate<String, ?> filter) throws IllegalArgumentException {
-        N.checkArgNotNull(targetBean, "targetBean");
-
-        if (sourceBean == null) {
-            return targetBean;
-        }
-
-        final BeanInfo srcBeanInfo = ParserUtil.getBeanInfo(sourceBean.getClass());
-        final BeanInfo targetBeanInfo = ParserUtil.getBeanInfo(targetBean.getClass());
-        final BiPredicate<String, Object> objFilter = (BiPredicate<String, Object>) filter;
-
-        Object propValue = null;
-
-        for (PropInfo propInfo : srcBeanInfo.propInfoList) {
-            propValue = propInfo.getPropValue(sourceBean);
-
-            if (objFilter.test(propInfo.name, propValue)) {
-                targetBeanInfo.setPropValue(targetBean, propInfo, propValue, false);
-            }
-        }
-
-        return targetBean;
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param sourceBean
-     * @param targetBean
-     * @param ignoreUnmatchedProperty
-     * @param ignoredPropNames
-     * @return {@code targetBean}
-     * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
-     */
-    public static <T> T merge(final Object sourceBean, final T targetBean, final boolean ignoreUnmatchedProperty, final Set<String> ignoredPropNames)
-            throws IllegalArgumentException {
-        N.checkArgNotNull(targetBean, "targetBean");
-
-        if (sourceBean == null) {
-            return targetBean;
-        }
-
-        return merge(sourceBean, targetBean, ignoreUnmatchedProperty, ignoredPropNames, ParserUtil.getBeanInfo(targetBean.getClass()));
-    }
-
-    @SuppressWarnings("deprecation")
-    private static <T> T merge(final Object sourceBean, final T targetBean, final boolean ignoreUnmatchedProperty, final Set<String> ignoredPropNames,
-            final BeanInfo targetBeanInfo) throws IllegalArgumentException {
-        N.checkArgNotNull(targetBean, "targetBean");
-
-        if (sourceBean == null) {
-            return targetBean;
-        }
-
-        final BeanInfo srcBeanInfo = ParserUtil.getBeanInfo(sourceBean.getClass());
-
-        Object propValue = null;
-
-        for (PropInfo propInfo : srcBeanInfo.propInfoList) {
-            if (ignoredPropNames == null || !ignoredPropNames.contains(propInfo.name)) {
-                propValue = propInfo.getPropValue(sourceBean);
-
-                if (InternalUtil.notNullOrDefault(propValue)) {
-                    targetBeanInfo.setPropValue(targetBean, propInfo, propValue, ignoreUnmatchedProperty);
-                }
-            }
-        }
-
-        return targetBean;
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param sourceBean
-     * @param targetBean
-     * @param mergeFunc the first parameter is source property value, the second parameter is target property value.
-     * @return {@code targetBean}
-     * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
-     */
-    public static <T> T merge(final Object sourceBean, final T targetBean, final BinaryOperator<?> mergeFunc) throws IllegalArgumentException {
-        return merge(sourceBean, targetBean, (Collection<String>) null, mergeFunc);
-    }
-
-    /**
-     * Set all the signed properties(including all primitive type properties) in
-     * the specified {@code sourceBean} to the specified {@code targetBean}.
-     *
-     * @param <T>
-     * @param sourceBean a Java Object what allows access to properties using getter
-     *            and setter methods.
-     * @param targetBean a Java Object what allows access to properties using getter
-     *            and setter methods.
-     * @param selectPropNames
-     * @param mergeFunc the first parameter is source property value, the second parameter is target property value.
-     * @return {@code targetBean}
-     * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
-     */
-    public static <T> T merge(final Object sourceBean, final T targetBean, final Collection<String> selectPropNames, final BinaryOperator<?> mergeFunc)
-            throws IllegalArgumentException {
-        N.checkArgNotNull(targetBean, "targetBean");
-
-        if (sourceBean == null) {
-            return targetBean;
-        }
-
-        final BeanInfo srcBeanInfo = ParserUtil.getBeanInfo(sourceBean.getClass());
-        final BeanInfo targetBeanInfo = ParserUtil.getBeanInfo(targetBean.getClass());
-        final BinaryOperator<Object> objMergeFunc = (BinaryOperator<Object>) mergeFunc;
-        final boolean ignoreUnmatchedProperty = selectPropNames == null;
-
-        if (selectPropNames == null) {
-            PropInfo targetPropInfo = null;
-            Object propValue = null;
-
-            for (PropInfo propInfo : srcBeanInfo.propInfoList) {
-                targetPropInfo = targetBeanInfo.getPropInfo(propInfo);
-
-                if (targetPropInfo == null) {
-                    //    if (!ignoreUnmatchedProperty) {
-                    //        throw new IllegalArgumentException(
-                    //                "No property found by name: " + propInfo.name + " in target bean class: " + targetBean.getClass());
-                    //    }
-                } else {
-                    propValue = propInfo.getPropValue(sourceBean);
-                    targetPropInfo.setPropValue(targetBean, objMergeFunc.apply(propValue, targetPropInfo.getPropValue(targetBean)));
-                }
-            }
-        } else {
-            PropInfo targetPropInfo = null;
-            PropInfo propInfo = null;
-            Object propValue = null;
-
-            for (String propName : selectPropNames) {
-                propInfo = srcBeanInfo.getPropInfo(propName);
-                targetPropInfo = targetBeanInfo.getPropInfo(propInfo);
-
-                if (targetPropInfo == null) {
-                    if (!ignoreUnmatchedProperty) { //NOSONAR
-                        throw new IllegalArgumentException("No property found by name: " + propName + " in target bean class: " + targetBean.getClass()); //NOSONAR
-                    }
-                } else {
-                    propValue = srcBeanInfo.getPropValue(sourceBean, propName);
-                    targetPropInfo.setPropValue(targetBean, objMergeFunc.apply(propValue, targetPropInfo.getPropValue(targetBean)));
-                }
-            }
-        }
-
-        return targetBean;
-    }
-
-    /**
-     * Set all the signed properties(including all primitive type properties) in
-     * the specified {@code sourceBean} to the specified {@code targetBean}.
-     *
-     * @param <T>
-     * @param sourceBean a Java Object what allows access to properties using getter
-     *            and setter methods.
-     * @param targetBean a Java Object what allows access to properties using getter
-     *            and setter methods.
-     * @param filter
-     * @param mergeFunc the first parameter is source property value, the second parameter is target property value.
-     * @return {@code targetBean}
-     * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
-     */
-    public static <T> T merge(final Object sourceBean, final T targetBean, final BiPredicate<String, ?> filter, final BinaryOperator<?> mergeFunc)
-            throws IllegalArgumentException {
-        N.checkArgNotNull(targetBean, "targetBean");
-
-        if (sourceBean == null) {
-            return targetBean;
-        }
-
-        final BeanInfo srcBeanInfo = ParserUtil.getBeanInfo(sourceBean.getClass());
-        final BeanInfo targetBeanInfo = ParserUtil.getBeanInfo(targetBean.getClass());
-        final BiPredicate<String, Object> objFilter = (BiPredicate<String, Object>) filter;
-        final BinaryOperator<Object> objMergeFunc = (BinaryOperator<Object>) mergeFunc;
-
-        Object propValue = null;
-        PropInfo targetPropInfo = null;
-
-        for (PropInfo propInfo : srcBeanInfo.propInfoList) {
-            propValue = propInfo.getPropValue(sourceBean);
-
-            if (objFilter.test(propInfo.name, propValue)) {
-                targetPropInfo = targetBeanInfo.getPropInfo(propInfo);
-
-                if (targetPropInfo == null) {
-                    throw new IllegalArgumentException("No property found by name: " + propInfo.name + " in target bean class: " + targetBean.getClass());
-                }
-
-                targetPropInfo.setPropValue(targetBean, objMergeFunc.apply(propValue, targetPropInfo.getPropValue(targetBean)));
-            }
-        }
-
-        return targetBean;
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param sourceBean
-     * @param targetBean
-     * @param ignoreUnmatchedProperty
-     * @param ignoredPropNames
-     * @param mergeFunc the first parameter is source property value, the second parameter is target property value.
-     * @return {@code targetBean}
-     * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
-     */
-    public static <T> T merge(final Object sourceBean, final T targetBean, final boolean ignoreUnmatchedProperty, final Set<String> ignoredPropNames,
-            final BinaryOperator<?> mergeFunc) throws IllegalArgumentException {
-        N.checkArgNotNull(targetBean, "targetBean");
-
-        if (sourceBean == null) {
-            return targetBean;
-        }
-
-        final BeanInfo srcBeanInfo = ParserUtil.getBeanInfo(sourceBean.getClass());
-        final BeanInfo targetBeanInfo = ParserUtil.getBeanInfo(targetBean.getClass());
-        final BinaryOperator<Object> objMergeFunc = (BinaryOperator<Object>) mergeFunc;
-
-        PropInfo targetPropInfo = null;
-        Object propValue = null;
-
-        for (PropInfo propInfo : srcBeanInfo.propInfoList) {
-            if (ignoredPropNames == null || !ignoredPropNames.contains(propInfo.name)) {
-                targetPropInfo = targetBeanInfo.getPropInfo(propInfo);
-
-                if (targetPropInfo == null) {
-                    if (!ignoreUnmatchedProperty) {
-                        throw new IllegalArgumentException("No property found by name: " + propInfo.name + " in target bean class: " + targetBean.getClass());
-                    }
-                } else {
-                    propValue = propInfo.getPropValue(sourceBean);
-                    targetPropInfo.setPropValue(targetBean, objMergeFunc.apply(propValue, targetPropInfo.getPropValue(targetBean)));
-                }
-            }
-        }
-
-        return targetBean;
-    }
-
-    /**
-     *
-     * @param bean
-     * @param propNames
-     */
-    @SafeVarargs
-    public static void erase(final Object bean, final String... propNames) {
-        if (bean == null || isNullOrEmpty(propNames)) {
-            return;
-        }
-
-        final BeanInfo beanInfo = ParserUtil.getBeanInfo(bean.getClass());
-
-        for (String propName : propNames) {
-            beanInfo.setPropValue(bean, propName, null);
-        }
-    }
-
-    /**
-     *
-     * @param bean
-     * @param propNames
-     */
-    public static void erase(final Object bean, final Collection<String> propNames) {
-        if (bean == null || isNullOrEmpty(propNames)) {
-            return;
-        }
-
-        final BeanInfo beanInfo = ParserUtil.getBeanInfo(bean.getClass());
-
-        for (String propName : propNames) {
-            beanInfo.setPropValue(bean, propName, null);
-        }
-    }
-
-    /**
-     *
-     * @param bean
-     */
-    public static void eraseAll(final Object bean) {
-        if (bean == null) {
-            return;
-        }
-
-        final Class<?> cls = bean.getClass();
-        final BeanInfo beanInfo = ParserUtil.getBeanInfo(cls);
-
-        for (PropInfo propInfo : beanInfo.propInfoList) {
-            propInfo.setPropValue(bean, null);
-        }
-    }
-
     /**
      * Returns an empty immutable {@code List}.
      *
@@ -7644,134 +7218,6 @@ class CommonUtil {
     }
 
     /**
-     * check if any null or empty.
-     *
-     * @param a
-     * @param b
-     * @return
-     */
-    public static boolean anyNullOrEmpty(final CharSequence a, final CharSequence b) {
-        return a == null || a.length() == 0 || b == null || b.length() == 0;
-    }
-
-    /**
-     * check if any null or empty.
-     *
-     * @param a
-     * @param b
-     * @param c
-     * @return
-     */
-    public static boolean anyNullOrEmpty(final CharSequence a, final CharSequence b, final CharSequence c) {
-        return a == null || a.length() == 0 || b == null || b.length() == 0 || c == null || c.length() == 0;
-    }
-
-    /**
-     * check if any null or empty.
-     *
-     * @param css
-     * @return
-     */
-    @SafeVarargs
-    public static boolean anyNullOrEmpty(final CharSequence... css) {
-        if (isNullOrEmpty(css)) {
-            return false;
-        }
-
-        for (CharSequence cs : css) {
-            if (cs == null || cs.length() == 0) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     * check if any null or empty.
-     *
-     * @param css
-     * @return
-     */
-    public static boolean anyNullOrEmpty(final Collection<? extends CharSequence> css) {
-        if (isNullOrEmpty(css)) {
-            return false;
-        }
-
-        for (CharSequence cs : css) {
-            if (cs == null || cs.length() == 0) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     * Any blank.
-     *
-     * @param a
-     * @param b
-     * @return
-     */
-    public static boolean anyBlank(final CharSequence a, final CharSequence b) {
-        return isBlank(a) || isBlank(b);
-    }
-
-    /**
-     * Any blank.
-     *
-     * @param a
-     * @param b
-     * @param c
-     * @return
-     */
-    public static boolean anyBlank(final CharSequence a, final CharSequence b, final CharSequence c) {
-        return isBlank(a) || isBlank(b) || isBlank(c);
-    }
-
-    /**
-     * Any blank.
-     *
-     * @param css
-     * @return
-     */
-    @SafeVarargs
-    public static boolean anyBlank(final CharSequence... css) {
-        if (isNullOrEmpty(css)) {
-            return false;
-        }
-
-        for (CharSequence cs : css) {
-            if (isBlank(cs)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     * Any blank.
-     *
-     * @param css
-     * @return
-     */
-    public static boolean anyBlank(final Collection<? extends CharSequence> css) {
-        if (isNullOrEmpty(css)) {
-            return false;
-        }
-
-        for (CharSequence cs : css) {
-            if (isBlank(cs)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /**
      *
      * @param <A>
      * @param <B>
@@ -7817,134 +7263,6 @@ class CommonUtil {
      */
     public static boolean anyNullOrEmpty(final Collection<?> a, final Collection<?> b, final Collection<?> c) {
         return a == null || a.size() == 0 || b == null || b.size() == 0 || c == null || c.size() == 0;
-    }
-
-    /**
-     * All null or empty.
-     *
-     * @param cs1
-     * @param cs2
-     * @return
-     */
-    public static boolean allNullOrEmpty(final CharSequence cs1, final CharSequence cs2) {
-        return isNullOrEmpty(cs1) && isNullOrEmpty(cs2);
-    }
-
-    /**
-     * All null or empty.
-     *
-     * @param cs1
-     * @param cs2
-     * @param cs3
-     * @return
-     */
-    public static boolean allNullOrEmpty(final CharSequence cs1, final CharSequence cs2, final CharSequence cs3) {
-        return isNullOrEmpty(cs1) && isNullOrEmpty(cs2) && isNullOrEmpty(cs3);
-    }
-
-    /**
-     * All null or empty.
-     *
-     * @param css
-     * @return
-     */
-    @SafeVarargs
-    public static boolean allNullOrEmpty(final CharSequence... css) {
-        if (isNullOrEmpty(css)) {
-            return true;
-        }
-
-        for (CharSequence cs : css) {
-            if (!isNullOrEmpty(cs)) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    /**
-     * All null or empty.
-     *
-     * @param css
-     * @return
-     */
-    public static boolean allNullOrEmpty(final Collection<? extends CharSequence> css) {
-        if (isNullOrEmpty(css)) {
-            return true;
-        }
-
-        for (CharSequence cs : css) {
-            if (!isNullOrEmpty(cs)) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    /**
-     * Any blank.
-     *
-     * @param a
-     * @param b
-     * @return
-     */
-    public static boolean allBlank(final CharSequence a, final CharSequence b) {
-        return isBlank(a) && isBlank(b);
-    }
-
-    /**
-     * Check if all elements are blank.
-     *
-     * @param a
-     * @param b
-     * @param c
-     * @return
-     */
-    public static boolean allBlank(final CharSequence a, final CharSequence b, final CharSequence c) {
-        return isBlank(a) && isBlank(b) && isBlank(c);
-    }
-
-    /**
-     * Check if all elements are blank.
-     *
-     * @param css
-     * @return
-     */
-    @SafeVarargs
-    public static boolean allBlank(final CharSequence... css) {
-        if (isNullOrEmpty(css)) {
-            return true;
-        }
-
-        for (CharSequence cs : css) {
-            if (!isBlank(cs)) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    /**
-     * Check if all elements are blank.
-     *
-     * @param css
-     * @return
-     */
-    public static boolean allBlank(final Collection<? extends CharSequence> css) {
-        if (isNullOrEmpty(css)) {
-            return true;
-        }
-
-        for (CharSequence cs : css) {
-            if (!isBlank(cs)) {
-                return false;
-            }
-        }
-
-        return true;
     }
 
     /**
@@ -8424,92 +7742,6 @@ class CommonUtil {
         }
 
         return Optional.ofNullable(lastNonNull);
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param a
-     * @param b
-     * @return
-     */
-    public static <T extends CharSequence> Optional<T> firstNonEmpty(final T a, final T b) {
-        return notNullOrEmpty(a) ? Optional.of(a) : (notNullOrEmpty(b) ? Optional.of(b) : Optional.<T> empty());
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param a
-     * @param b
-     * @param c
-     * @return
-     */
-    public static <T extends CharSequence> Optional<T> firstNonEmpty(final T a, final T b, final T c) {
-        return notNullOrEmpty(a) ? Optional.of(a) : (notNullOrEmpty(b) ? Optional.of(b) : (notNullOrEmpty(c) ? Optional.of(c) : Optional.<T> empty()));
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param a
-     * @return
-     */
-    public static <T extends CharSequence> Optional<T> firstNonEmpty(final T... a) {
-        if (isNullOrEmpty(a)) {
-            return Optional.empty();
-        }
-
-        for (T e : a) {
-            if (N.notNullOrEmpty(e)) {
-                return Optional.of(e);
-            }
-        }
-
-        return Optional.empty();
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param a
-     * @param b
-     * @return
-     */
-    public static <T extends CharSequence> Optional<T> firstNonBlank(final T a, final T b) {
-        return notBlank(a) ? Optional.of(a) : (notBlank(b) ? Optional.of(b) : Optional.<T> empty());
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param a
-     * @param b
-     * @param c
-     * @return
-     */
-    public static <T extends CharSequence> Optional<T> firstNonBlank(final T a, final T b, final T c) {
-        return notBlank(a) ? Optional.of(a) : (notBlank(b) ? Optional.of(b) : (notBlank(c) ? Optional.of(c) : Optional.<T> empty()));
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param a
-     * @return
-     */
-    public static <T extends CharSequence> Optional<T> firstNonBlank(final T... a) {
-        if (isNullOrEmpty(a)) {
-            return Optional.empty();
-        }
-
-        for (T e : a) {
-            if (N.notBlank(e)) {
-                return Optional.of(e);
-            }
-        }
-
-        return Optional.empty();
     }
 
     /**
@@ -9061,7 +8293,7 @@ class CommonUtil {
     }
 
     /**
-     * Returns the length/size of the specified {@code Array/Collection/Map/CharSequence}, or {@code 0} if it's empty or {@code null}.
+     * Returns the length of the specified {@code CharSequence}, or {@code 0} if it's empty or {@code null}.
      *
      * @param s
      * @return
@@ -9071,7 +8303,7 @@ class CommonUtil {
     }
 
     /**
-     * Returns the length/size of the specified {@code Array/Collection/Map/CharSequence}, or {@code 0} if it's empty or {@code null}.
+     * Returns the length/size of the specified {@code Array/Collection/Map}, or {@code 0} if it's empty or {@code null}.
      *
      * @param a
      * @return
@@ -9081,7 +8313,7 @@ class CommonUtil {
     }
 
     /**
-     * Returns the length/size of the specified {@code Array/Collection/Map/CharSequence}, or {@code 0} if it's empty or {@code null}.
+     * Returns the length/size of the specified {@code Array/Collection/Map}, or {@code 0} if it's empty or {@code null}.
      *
      * @param a
      * @return
@@ -9091,7 +8323,7 @@ class CommonUtil {
     }
 
     /**
-     * Returns the length/size of the specified {@code Array/Collection/Map/CharSequence}, or {@code 0} if it's empty or {@code null}.
+     * Returns the length/size of the specified {@code Array/Collection/Map}, or {@code 0} if it's empty or {@code null}.
      *
      * @param a
      * @return
@@ -9101,7 +8333,7 @@ class CommonUtil {
     }
 
     /**
-     * Returns the length/size of the specified {@code Array/Collection/Map/CharSequence}, or {@code 0} if it's empty or {@code null}.
+     * Returns the length/size of the specified {@code Array/Collection/Map}, or {@code 0} if it's empty or {@code null}.
      *
      * @param a
      * @return
@@ -9111,7 +8343,7 @@ class CommonUtil {
     }
 
     /**
-     * Returns the length/size of the specified {@code Array/Collection/Map/CharSequence}, or {@code 0} if it's empty or {@code null}.
+     * Returns the length/size of the specified {@code Array/Collection/Map}, or {@code 0} if it's empty or {@code null}.
      *
      * @param a
      * @return
@@ -9121,7 +8353,7 @@ class CommonUtil {
     }
 
     /**
-     * Returns the length/size of the specified {@code Array/Collection/Map/CharSequence}, or {@code 0} if it's empty or {@code null}.
+     * Returns the length/size of the specified {@code Array/Collection/Map}, or {@code 0} if it's empty or {@code null}.
      *
      * @param a
      * @return
@@ -9131,7 +8363,7 @@ class CommonUtil {
     }
 
     /**
-     * Returns the length/size of the specified {@code Array/Collection/Map/CharSequence}, or {@code 0} if it's empty or {@code null}.
+     * Returns the length/size of the specified {@code Array/Collection/Map}, or {@code 0} if it's empty or {@code null}.
      *
      * @param a
      * @return
@@ -9141,7 +8373,7 @@ class CommonUtil {
     }
 
     /**
-     * Returns the length/size of the specified {@code Array/Collection/Map/CharSequence}, or {@code 0} if it's empty or {@code null}.
+     * Returns the length/size of the specified {@code Array/Collection/Map}, or {@code 0} if it's empty or {@code null}.
      *
      * @param a
      * @return
@@ -9151,7 +8383,7 @@ class CommonUtil {
     }
 
     /**
-     * Returns the length/size of the specified {@code Array/Collection/Map/CharSequence}, or {@code 0} if it's empty or {@code null}.
+     * Returns the length/size of the specified {@code Array/Collection/Map}, or {@code 0} if it's empty or {@code null}.
      *
      * @param a
      * @return
@@ -9161,7 +8393,7 @@ class CommonUtil {
     }
 
     /**
-     * Returns the length/size of the specified {@code Array/Collection/Map/CharSequence}, or {@code 0} if it's empty or {@code null}.
+     * Returns the length/size of the specified {@code Array/Collection/Map}, or {@code 0} if it's empty or {@code null}.
      *
      * @param c
      * @return
@@ -9171,7 +8403,7 @@ class CommonUtil {
     }
 
     /**
-     * Returns the length/size of the specified {@code Array/Collection/Map/CharSequence}, or {@code 0} if it's empty or {@code null}.
+     * Returns the length/size of the specified {@code Array/Collection/Map}, or {@code 0} if it's empty or {@code null}.
      *
      * @param m
      * @return
@@ -9181,7 +8413,7 @@ class CommonUtil {
     }
 
     /**
-     * Returns the length/size of the specified {@code Array/Collection/Map/CharSequence}, or {@code 0} if it's empty or {@code null}.
+     * Returns the length/size of the specified {@code Array/Collection/Map}, or {@code 0} if it's empty or {@code null}.
      *
      * @param c
      * @return
@@ -9301,16 +8533,6 @@ class CommonUtil {
      */
     public static <T> ListIterator<T> nullToEmpty(final ListIterator<T> iter) {
         return iter == null ? emptyListIterator() : iter;
-    }
-
-    /**
-     * Null to empty.
-     *
-     * @param str
-     * @return
-     */
-    public static String nullToEmpty(final String str) {
-        return str == null ? EMPTY_STRING : str;
     }
 
     /**
@@ -9561,16 +8783,6 @@ class CommonUtil {
     /**
      * Checks if is null or empty.
      *
-     * @param s
-     * @return true, if is null or empty
-     */
-    public static boolean isNullOrEmpty(final CharSequence s) {
-        return (s == null) || (s.length() == 0);
-    }
-
-    /**
-     * Checks if is null or empty.
-     *
      * @param a
      * @return true, if is null or empty
      */
@@ -9757,51 +8969,6 @@ class CommonUtil {
      */
     public static boolean isNullOrEmpty(final DataSet rs) {
         return (rs == null) || (rs.isEmpty());
-    }
-
-    /**
-     * Note: Copied from Commons-Lang under Apache License v2.
-     * <br />
-     * <p>Checks if a CharSequence is {@code null}, empty ("") or whitespace only.</p>
-     *
-     * <p>Whitespace is defined by {@link Character#isWhitespace(char)}.</p>
-     *
-     * <pre>
-     * StringUtils.isBlank(null)      = true
-     * StringUtils.isBlank("")        = true
-     * StringUtils.isBlank(" ")       = true
-     * StringUtils.isBlank("bob")     = false
-     * StringUtils.isBlank("  bob  ") = false
-     * </pre>
-     *
-     * @param cs  the CharSequence to check, may be null
-     * @return {@code true} if the CharSequence is null, empty or whitespace only
-     * @see #notBlank(CharSequence)
-     * @see #checkArgNotBlank(CharSequence, String)
-     */
-    // DON'T change 'OrEmptyOrBlank' to 'OrBlank' because of the occurring order in the auto-completed context menu.
-    public static boolean isBlank(final CharSequence cs) {
-        if (isNullOrEmpty(cs)) {
-            return true;
-        }
-
-        for (int i = 0, len = cs.length(); i < len; i++) {
-            if (!Character.isWhitespace(cs.charAt(i))) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    /**
-     * Not null or empty.
-     *
-     * @param s
-     * @return
-     */
-    public static boolean notNullOrEmpty(final CharSequence s) {
-        return (s != null) && (s.length() > 0);
     }
 
     /**
@@ -9996,31 +9163,6 @@ class CommonUtil {
     }
 
     /**
-     * Note: Copied from Commons-Lang under Apache License v2.
-     * <br />
-     * <p>Checks if a CharSequence is NOT {@code null}, empty ("") or whitespace only.</p>
-     *
-     * <p>Whitespace is defined by {@link Character#isWhitespace(char)}.</p>
-     *
-     * <pre>
-     * StringUtils.notBlank(null)      = false
-     * StringUtils.notBlank("")        = false
-     * StringUtils.notBlank(" ")       = false
-     * StringUtils.notBlank("bob")     = true
-     * StringUtils.notBlank("  bob  ") = true
-     * </pre>
-     *
-     * @param cs  the CharSequence to check, may be null
-     * @return {@code true} if the CharSequence is not {@code null}, empty ("") or whitespace only.
-     * @see #isBlank(CharSequence)
-     * @see #checkArgNotBlank(CharSequence, String)
-     */
-    // DON'T change 'OrEmptyOrBlank' to 'OrBlank' because of the occurring order in the auto-completed context menu.
-    public static boolean notBlank(final CharSequence cs) {
-        return !isBlank(cs);
-    }
-
-    /**
      *
      * @param index
      * @param length
@@ -10112,7 +9254,7 @@ class CommonUtil {
      * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
      */
     public static <T extends CharSequence> T checkArgNotNullOrEmpty(final T arg, final String argNameOrErrorMsg) {
-        if (isNullOrEmpty(arg)) {
+        if (Strings.isEmpty(arg)) {
             throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
         }
 
@@ -10435,12 +9577,12 @@ class CommonUtil {
      * @param msg name of parameter or error message
      * @return
      * @throws IllegalArgumentException if the specified parameter is {@code null}, empty ("") or whitespace only.
-     * @see #isBlank(CharSequence)
-     * @see #notBlank(CharSequence)
+     * @see Strings#isBlank(CharSequence)
+     * @see Strings#notBlank(CharSequence)
      */
     // DON'T change 'OrEmptyOrBlank' to 'OrBlank' because of the occurring order in the auto-completed context menu.
     public static <T extends CharSequence> T checkArgNotBlank(final T arg, final String msg) {
-        if (isBlank(arg)) {
+        if (Strings.isBlank(arg)) {
             if (isArgNameOnly(msg)) {
                 throw new IllegalArgumentException("'" + msg + "' can not be null or empty or blank");
             } else {
@@ -11860,7 +11002,11 @@ class CommonUtil {
      * @see Comparator
      */
     public static <T> int compare(final T a, final T b, final Comparator<? super T> cmp) {
-        return a == null ? (b == null ? 0 : -1) : (b == null ? 1 : (cmp == null ? NATURAL_ORDER : cmp).compare(a, b));
+        if (cmp == null) {
+            return NATURAL_COMPARATOR.compare(a, b);
+        }
+
+        return cmp.compare(a, b);
     }
 
     /**
@@ -12106,7 +11252,7 @@ class CommonUtil {
             }
         }
 
-        return a.length - b.length;
+        return Integer.compare(a.length, b.length);
     }
 
     /**
@@ -12155,7 +11301,7 @@ class CommonUtil {
             }
         }
 
-        return a.length - b.length;
+        return Integer.compare(a.length, b.length);
     }
 
     /**
@@ -12204,7 +11350,7 @@ class CommonUtil {
             }
         }
 
-        return a.length - b.length;
+        return Integer.compare(a.length, b.length);
     }
 
     /**
@@ -12253,7 +11399,7 @@ class CommonUtil {
             }
         }
 
-        return a.length - b.length;
+        return Integer.compare(a.length, b.length);
     }
 
     /**
@@ -12302,7 +11448,7 @@ class CommonUtil {
             }
         }
 
-        return a.length - b.length;
+        return Integer.compare(a.length, b.length);
     }
 
     /**
@@ -12351,7 +11497,7 @@ class CommonUtil {
             }
         }
 
-        return a.length - b.length;
+        return Integer.compare(a.length, b.length);
     }
 
     /**
@@ -12402,7 +11548,7 @@ class CommonUtil {
             }
         }
 
-        return a.length - b.length;
+        return Integer.compare(a.length, b.length);
     }
 
     /**
@@ -12455,7 +11601,7 @@ class CommonUtil {
             }
         }
 
-        return a.length - b.length;
+        return Integer.compare(a.length, b.length);
     }
 
     /**
@@ -12495,7 +11641,7 @@ class CommonUtil {
      * @return
      */
     public static <T extends Comparable<? super T>> int compare(final T[] a, final T[] b) {
-        final Comparator<T> cmp = NATURAL_ORDER;
+        final Comparator<T> cmp = NATURAL_COMPARATOR;
 
         return compare(a, b, cmp);
     }
@@ -12511,7 +11657,7 @@ class CommonUtil {
      * @return
      */
     public static <T extends Comparable<? super T>> int compare(final T[] a, final int fromIndexA, final T[] b, final int fromIndexB, final int len) {
-        final Comparator<T> cmp = NATURAL_ORDER;
+        final Comparator<T> cmp = NATURAL_COMPARATOR;
 
         return compare(a, fromIndexA, b, fromIndexB, len, cmp);
     }
@@ -12531,7 +11677,7 @@ class CommonUtil {
             return 1;
         }
 
-        cmp = cmp == null ? NATURAL_ORDER : cmp;
+        cmp = cmp == null ? NATURAL_COMPARATOR : cmp;
 
         int value = 0;
 
@@ -12541,7 +11687,7 @@ class CommonUtil {
             }
         }
 
-        return a.length - b.length;
+        return Integer.compare(a.length, b.length);
     }
 
     /**
@@ -12564,8 +11710,7 @@ class CommonUtil {
             return 0;
         }
 
-        cmp = cmp == null ? NATURAL_ORDER : cmp;
-
+        cmp = cmp == null ? NATURAL_COMPARATOR : cmp;
         int value = 0;
 
         for (int i = fromIndexA, j = fromIndexB, k = 0; k < len; i++, j++, k++) {
@@ -12585,7 +11730,7 @@ class CommonUtil {
      * @return
      */
     public static <T extends Comparable<? super T>> int compare(final Collection<T> a, final Collection<T> b) {
-        final Comparator<T> cmp = NATURAL_ORDER;
+        final Comparator<T> cmp = NATURAL_COMPARATOR;
 
         return compare(a, b, cmp);
     }
@@ -12601,7 +11746,7 @@ class CommonUtil {
      * @return
      */
     public static <T> int compare(final Collection<T> a, int fromIndexA, final Collection<T> b, int fromIndexB, final int len) {
-        final Comparator<T> cmp = NATURAL_ORDER;
+        final Comparator<T> cmp = NATURAL_COMPARATOR;
 
         return compare(a, fromIndexA, b, fromIndexB, len, cmp);
     }
@@ -12621,7 +11766,7 @@ class CommonUtil {
             return 1;
         }
 
-        cmp = cmp == null ? NATURAL_ORDER : cmp;
+        cmp = cmp == null ? NATURAL_COMPARATOR : cmp;
 
         final Iterator<T> iterA = a.iterator();
         final Iterator<T> iterB = b.iterator();
@@ -12633,7 +11778,7 @@ class CommonUtil {
             }
         }
 
-        return a.size() - b.size();
+        return Integer.compare(a.size(), b.size());
     }
 
     /**
@@ -12656,7 +11801,7 @@ class CommonUtil {
             return 0;
         }
 
-        cmp = cmp == null ? NATURAL_ORDER : cmp;
+        cmp = cmp == null ? NATURAL_COMPARATOR : cmp;
         final Iterator<T> iterA = a.iterator();
         final Iterator<T> iterB = b.iterator();
 
@@ -17857,7 +17002,7 @@ class CommonUtil {
         }
 
         if (fromIndex == toIndex || fromIndex < toIndex != step > 0) {
-            return EMPTY_STRING;
+            return Strings.EMPTY_STRING;
         }
 
         if (step == 1) {
@@ -18882,7 +18027,7 @@ class CommonUtil {
      * @return
      */
     public static <T> boolean isSorted(final T[] a, Comparator<? super T> cmp) {
-        cmp = cmp == null ? NATURAL_ORDER : cmp;
+        cmp = cmp == null ? NATURAL_COMPARATOR : cmp;
 
         final int len = N.len(a);
 
@@ -18914,7 +18059,7 @@ class CommonUtil {
     public static <T> boolean isSorted(final T[] a, final int fromIndex, final int toIndex, Comparator<? super T> cmp) {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
-        cmp = cmp == null ? NATURAL_ORDER : cmp;
+        cmp = cmp == null ? NATURAL_COMPARATOR : cmp;
 
         if (toIndex - fromIndex < 2) {
             return true;
@@ -19015,7 +18160,7 @@ class CommonUtil {
             return true;
         }
 
-        cmp = cmp == null ? NATURAL_ORDER : cmp;
+        cmp = cmp == null ? NATURAL_COMPARATOR : cmp;
 
         final Iterator<? extends T> iter = c.iterator();
         T prev = iter.next();
@@ -19051,7 +18196,7 @@ class CommonUtil {
             return true;
         }
 
-        cmp = cmp == null ? NATURAL_ORDER : cmp;
+        cmp = cmp == null ? NATURAL_COMPARATOR : cmp;
 
         final Iterator<? extends T> iter = c.iterator();
         int cursor = 0;
@@ -19314,7 +18459,7 @@ class CommonUtil {
      * @param toIndex
      */
     public static void sort(final Object[] a, final int fromIndex, final int toIndex) {
-        sort(a, fromIndex, toIndex, Comparators.NATURAL_ORDER);
+        sort(a, fromIndex, toIndex, NATURAL_COMPARATOR);
     }
 
     /**
@@ -19359,7 +18504,7 @@ class CommonUtil {
             return;
         }
 
-        sort(list, 0, list.size(), Comparators.NATURAL_ORDER);
+        sort(list, 0, list.size(), NATURAL_COMPARATOR);
     }
 
     /**
@@ -19374,7 +18519,7 @@ class CommonUtil {
             return;
         }
 
-        sort(list, fromIndex, toIndex, Comparators.NATURAL_ORDER);
+        sort(list, fromIndex, toIndex, NATURAL_COMPARATOR);
     }
 
     /**
@@ -19814,7 +18959,7 @@ class CommonUtil {
      * @param toIndex
      */
     public static <T extends Comparable<? super T>> void parallelSort(final List<? extends T> list, final int fromIndex, final int toIndex) {
-        parallelSort(list, fromIndex, toIndex, Comparators.NATURAL_ORDER);
+        parallelSort(list, fromIndex, toIndex, NATURAL_COMPARATOR);
     }
 
     /**
@@ -20142,9 +19287,8 @@ class CommonUtil {
      *
      * @param a
      */
-    @SuppressWarnings("rawtypes")
     public static void reverseSort(final Object[] a) {
-        sort(a, (Comparator) Fn.reverseOrder());
+        sort(a, REVERSED_COMPARATOR);
     }
 
     /**
@@ -20153,9 +19297,8 @@ class CommonUtil {
      * @param fromIndex
      * @param toIndex
      */
-    @SuppressWarnings("rawtypes")
     public static void reverseSort(final Object[] a, final int fromIndex, final int toIndex) {
-        sort(a, fromIndex, toIndex, (Comparator) Fn.reverseOrder());
+        sort(a, fromIndex, toIndex, REVERSED_COMPARATOR);
     }
 
     /**
@@ -20164,7 +19307,7 @@ class CommonUtil {
      * @param list
      */
     public static <T extends Comparable<? super T>> void reverseSort(final List<? extends T> list) {
-        sort(list, Fn.<T> reverseOrder());
+        sort(list, REVERSED_COMPARATOR);
     }
 
     /**
@@ -20175,7 +19318,7 @@ class CommonUtil {
      * @param toIndex
      */
     public static <T extends Comparable<? super T>> void reverseSort(final List<? extends T> list, final int fromIndex, final int toIndex) {
-        sort(list, fromIndex, toIndex, Fn.<T> reverseOrder());
+        sort(list, fromIndex, toIndex, REVERSED_COMPARATOR);
     }
 
     /**
@@ -20404,7 +19547,7 @@ class CommonUtil {
      * @param toIndex
      */
     public static void bucketSort(final Object[] a, final int fromIndex, final int toIndex) {
-        bucketSort(a, fromIndex, toIndex, Comparators.NATURAL_ORDER);
+        bucketSort(a, fromIndex, toIndex, NATURAL_COMPARATOR);
     }
 
     /**
@@ -20442,7 +19585,7 @@ class CommonUtil {
             return;
         }
 
-        final Comparator<? super T> comparator = cmp == null ? Comparators.NATURAL_ORDER : cmp;
+        final Comparator<? super T> comparator = cmp == null ? NATURAL_COMPARATOR : cmp;
         final Multiset<T> multiset = new Multiset<>();
 
         for (int i = fromIndex; i < toIndex; i++) {
@@ -20481,7 +19624,7 @@ class CommonUtil {
      * @param toIndex
      */
     public static <T extends Comparable<? super T>> void bucketSort(final List<T> list, final int fromIndex, final int toIndex) {
-        bucketSort(list, fromIndex, toIndex, Comparators.NATURAL_ORDER);
+        bucketSort(list, fromIndex, toIndex, NATURAL_COMPARATOR);
     }
 
     /**
@@ -20520,7 +19663,7 @@ class CommonUtil {
             return;
         }
 
-        final Comparator<? super T> comparator = cmp == null ? Comparators.NATURAL_ORDER : cmp;
+        final Comparator<? super T> comparator = cmp == null ? NATURAL_COMPARATOR : cmp;
         final Multiset<T> multiset = new Multiset<>();
         ListIterator<T> itr = (ListIterator<T>) list.listIterator(fromIndex);
         int i = fromIndex;
@@ -20879,7 +20022,7 @@ class CommonUtil {
             return N.INDEX_NOT_FOUND;
         }
 
-        return Arrays.binarySearch(a, valueToFind, cmp == null ? Comparators.NATURAL_ORDER : cmp);
+        return Arrays.binarySearch(a, valueToFind, cmp == null ? NATURAL_COMPARATOR : cmp);
     }
 
     /**
@@ -20898,7 +20041,7 @@ class CommonUtil {
             return N.INDEX_NOT_FOUND;
         }
 
-        return Arrays.binarySearch(a, fromIndex, toIndex, valueToFind, cmp == null ? Comparators.NATURAL_ORDER : cmp);
+        return Arrays.binarySearch(a, fromIndex, toIndex, valueToFind, cmp == null ? NATURAL_COMPARATOR : cmp);
     }
 
     /**
@@ -20932,7 +20075,7 @@ class CommonUtil {
             return N.INDEX_NOT_FOUND;
         }
 
-        return binarySearch(list, fromIndex, toIndex, valueToFind, Comparators.NATURAL_ORDER);
+        return binarySearch(list, fromIndex, toIndex, valueToFind, NATURAL_COMPARATOR);
     }
 
     /**
@@ -20962,23 +20105,24 @@ class CommonUtil {
      * @return
      * @see Collections#binarySearch(List, Object, Comparator)
      */
-    public static <T> int binarySearch(final List<? extends T> list, final int fromIndex, final int toIndex, final T valueToFind,
-            final Comparator<? super T> cmp) {
+    public static <T> int binarySearch(final List<? extends T> list, final int fromIndex, final int toIndex, final T valueToFind, Comparator<? super T> cmp) {
         if (N.isNullOrEmpty(list)) {
             return N.INDEX_NOT_FOUND;
         }
+
+        cmp = cmp == null ? NATURAL_COMPARATOR : cmp;
 
         @SuppressWarnings("deprecation")
         final T[] a = (T[]) InternalUtil.getInternalArray(list);
 
         if (a != null) {
-            return binarySearch(a, fromIndex, toIndex, valueToFind, cmp == null ? Comparators.NATURAL_ORDER : cmp);
+            return binarySearch(a, fromIndex, toIndex, valueToFind, cmp);
         }
 
         if (list instanceof RandomAccess || list.size() < BINARYSEARCH_THRESHOLD) {
-            return indexedBinarySearch(list, fromIndex, toIndex, valueToFind, cmp == null ? Comparators.NATURAL_ORDER : cmp);
+            return indexedBinarySearch(list, fromIndex, toIndex, valueToFind, cmp);
         } else {
-            return iteratorBinarySearch(list, fromIndex, toIndex, valueToFind, cmp == null ? Comparators.NATURAL_ORDER : cmp);
+            return iteratorBinarySearch(list, fromIndex, toIndex, valueToFind, cmp);
         }
     }
 

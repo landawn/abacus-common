@@ -25,7 +25,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import com.landawn.abacus.parser.SerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.IOUtil;
-import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.Strings;
 
 /**
  *
@@ -67,7 +67,7 @@ public class AtomicIntegerType extends AbstractAtomicType<AtomicInteger> {
      */
     @Override
     public AtomicInteger valueOf(String str) {
-        return N.isNullOrEmpty(str) ? null : new AtomicInteger(Integer.parseInt(str));
+        return Strings.isEmpty(str) ? null : new AtomicInteger(Integer.parseInt(str));
     }
 
     /**

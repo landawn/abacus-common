@@ -132,6 +132,7 @@ import com.landawn.abacus.util.RowDataSet;
 import com.landawn.abacus.util.SetMultimap;
 import com.landawn.abacus.util.Sheet;
 import com.landawn.abacus.util.ShortList;
+import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.Triple;
 import com.landawn.abacus.util.Tuple;
 import com.landawn.abacus.util.Tuple.Tuple1;
@@ -195,7 +196,7 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
         try {
             write(os, obj, config);
 
-            return N.base64Encode(os.toByteArray());
+            return Strings.base64Encode(os.toByteArray());
         } finally {
             Objectory.recycle(os);
         }
@@ -250,7 +251,7 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
         try {
             write(os, obj, config);
 
-            writer.write(N.base64Encode(os.toByteArray()));
+            writer.write(Strings.base64Encode(os.toByteArray()));
 
             writer.flush();
         } catch (IOException e) {
@@ -315,7 +316,7 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
         Input input = createInput();
 
         try {
-            input.setBuffer(N.base64Decode(st));
+            input.setBuffer(Strings.base64Decode(st));
 
             return read(targetClass, input, config);
         } finally {

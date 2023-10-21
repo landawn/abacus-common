@@ -682,7 +682,7 @@ public abstract class DateUtil {
      * @throws IllegalArgumentException             if the date given can't be parsed with specified format.
      */
     public static java.util.Date parseJUDate(final String date, final String format, final TimeZone timeZone) {
-        if (N.isNullOrEmpty(date) || (date.length() == 4 && "null".equalsIgnoreCase(date))) {
+        if (Strings.isEmpty(date) || (date.length() == 4 && "null".equalsIgnoreCase(date))) {
             return null;
         }
 
@@ -720,7 +720,7 @@ public abstract class DateUtil {
      * @return
      */
     public static Date parseDate(final String date, final String format, final TimeZone timeZone) {
-        if (N.isNullOrEmpty(date) || (date.length() == 4 && "null".equalsIgnoreCase(date))) {
+        if (Strings.isEmpty(date) || (date.length() == 4 && "null".equalsIgnoreCase(date))) {
             return null;
         }
 
@@ -758,7 +758,7 @@ public abstract class DateUtil {
      * @return
      */
     public static Time parseTime(final String date, final String format, final TimeZone timeZone) {
-        if (N.isNullOrEmpty(date) || (date.length() == 4 && "null".equalsIgnoreCase(date))) {
+        if (Strings.isEmpty(date) || (date.length() == 4 && "null".equalsIgnoreCase(date))) {
             return null;
         }
 
@@ -796,7 +796,7 @@ public abstract class DateUtil {
      * @return
      */
     public static Timestamp parseTimestamp(final String date, final String format, final TimeZone timeZone) {
-        if (N.isNullOrEmpty(date) || (date.length() == 4 && "null".equalsIgnoreCase(date))) {
+        if (Strings.isEmpty(date) || (date.length() == 4 && "null".equalsIgnoreCase(date))) {
             return null;
         }
 
@@ -837,7 +837,7 @@ public abstract class DateUtil {
      */
     @Beta
     public static Calendar parseCalendar(final String calendar, final String format, final TimeZone timeZone) {
-        if (N.isNullOrEmpty(calendar) || (calendar.length() == 4 && "null".equalsIgnoreCase(calendar))) {
+        if (Strings.isEmpty(calendar) || (calendar.length() == 4 && "null".equalsIgnoreCase(calendar))) {
             return null;
         }
 
@@ -878,7 +878,7 @@ public abstract class DateUtil {
      */
     @Beta
     public static GregorianCalendar parseGregorianCalendar(final String calendar, final String format, final TimeZone timeZone) {
-        if (N.isNullOrEmpty(calendar) || (calendar.length() == 4 && "null".equalsIgnoreCase(calendar))) {
+        if (Strings.isEmpty(calendar) || (calendar.length() == 4 && "null".equalsIgnoreCase(calendar))) {
             return null;
         }
 
@@ -919,7 +919,7 @@ public abstract class DateUtil {
      */
     @Beta
     public static XMLGregorianCalendar parseXMLGregorianCalendar(final String calendar, final String format, final TimeZone timeZone) {
-        if (N.isNullOrEmpty(calendar) || (calendar.length() == 4 && "null".equalsIgnoreCase(calendar))) {
+        if (Strings.isEmpty(calendar) || (calendar.length() == 4 && "null".equalsIgnoreCase(calendar))) {
             return null;
         }
 
@@ -944,7 +944,7 @@ public abstract class DateUtil {
 
         format = checkDateFormat(date, format);
 
-        if (N.isNullOrEmpty(format)) {
+        if (Strings.isEmpty(format)) {
             if (timeZone == null || timeZone.equals(ISO8601Util.TIMEZONE_Z)) {
                 return ISO8601Util.parse(date).getTime();
             } else {
@@ -3286,7 +3286,7 @@ public abstract class DateUtil {
      */
     @SuppressWarnings("fallthrough")
     private static String checkDateFormat(final String str, final String format) {
-        if (N.isNullOrEmpty(format)) {
+        if (Strings.isEmpty(format)) {
             int len = str.length();
 
             switch (len) {

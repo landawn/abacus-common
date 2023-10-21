@@ -17,6 +17,7 @@ import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.MutableByte;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Numbers;
+import com.landawn.abacus.util.Strings;
 
 /**
  *
@@ -58,7 +59,7 @@ public class MutableByteType extends MutableType<MutableByte> {
      */
     @Override
     public MutableByte valueOf(String str) {
-        return N.isNullOrEmpty(str) ? null : MutableByte.of(Numbers.toByte(str));
+        return Strings.isEmpty(str) ? null : MutableByte.of(Numbers.toByte(str));
     }
 
     /**

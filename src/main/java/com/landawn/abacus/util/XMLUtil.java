@@ -777,7 +777,7 @@ public final class XMLUtil {
     public static String getTextContent(Node node, boolean ignoreWhiteChar) {
         String textContent = node.getTextContent();
 
-        if (ignoreWhiteChar && N.notNullOrEmpty(textContent)) {
+        if (ignoreWhiteChar && Strings.isNotEmpty(textContent)) {
             final StringBuilder sb = Objectory.createStringBuilder();
 
             for (char c : textContent.toCharArray()) {

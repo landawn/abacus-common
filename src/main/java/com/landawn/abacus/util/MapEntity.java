@@ -43,7 +43,7 @@ public final class MapEntity implements Serializable {
 
     // For Kryo
     MapEntity() {
-        this(N.EMPTY_STRING);
+        this(Strings.EMPTY_STRING);
     }
 
     /**

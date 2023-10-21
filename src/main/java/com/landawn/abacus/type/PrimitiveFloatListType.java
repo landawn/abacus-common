@@ -21,6 +21,7 @@ import com.landawn.abacus.parser.SerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.FloatList;
 import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.Strings;
 
 /**
  *
@@ -77,7 +78,7 @@ public final class PrimitiveFloatListType extends AbstractPrimitiveListType<Floa
      */
     @Override
     public FloatList valueOf(String str) {
-        return N.isNullOrEmpty(str) ? null : FloatList.of(arrayType.valueOf(str));
+        return Strings.isEmpty(str) ? null : FloatList.of(arrayType.valueOf(str));
     }
 
     /**

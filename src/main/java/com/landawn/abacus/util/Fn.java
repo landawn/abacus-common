@@ -186,7 +186,7 @@ import com.landawn.abacus.util.function.UnaryOperator;
  *
  */
 @SuppressWarnings({ "java:S6539", "java:S1192", "java:S1221", "java:S1452", "java:S2445" })
-public final class Fn extends Comparators {
+public final class Fn {
 
     private static final Object NONE = new Object();
 
@@ -282,7 +282,7 @@ public final class Fn extends Comparators {
 
     private static final Function<String, String> STRIP_TO_NULL = Strings::stripToNull;
 
-    private static final Function<String, String> NULL_TO_EMPTY = t -> t == null ? N.EMPTY_STRING : t;
+    private static final Function<String, String> NULL_TO_EMPTY = t -> t == null ? Strings.EMPTY_STRING : t;
 
     @SuppressWarnings("rawtypes")
     private static final Function<List, List> NULL_TO_EMPTY_LIST = t -> t == null ? N.emptyList() : t;
@@ -336,16 +336,16 @@ public final class Fn extends Comparators {
     @SuppressWarnings("rawtypes")
     private static final Predicate IS_NULL = Objects::isNull;
 
-    private static final Predicate<CharSequence> IS_NULL_OR_EMPTY = N::isNullOrEmpty;
+    private static final Predicate<CharSequence> IS_EMPTY = Strings::isEmpty;
 
-    private static final Predicate<CharSequence> IS_NULL_OR_EMPTY_OR_BLANK = N::isBlank;
+    private static final Predicate<CharSequence> IS_BLANK = Strings::isBlank;
 
     @SuppressWarnings("rawtypes")
     private static final Predicate NOT_NULL = Objects::nonNull;
 
-    private static final Predicate<CharSequence> NOT_NULL_OR_EMPTY = N::notNullOrEmpty;
+    private static final Predicate<CharSequence> IS_NOT_EMPTY = Strings::isNotEmpty;
 
-    private static final Predicate<CharSequence> NOT_NULL_OR_EMPTY_OR_BLANK = N::notBlank;
+    private static final Predicate<CharSequence> IS_NOT_BLANK = Strings::isNotBlank;
 
     private static final Predicate<File> IS_FILE = file -> file != null && file.isFile();
 
@@ -1501,8 +1501,8 @@ public final class Fn extends Comparators {
      * @param <T>
      * @return
      */
-    public static <T extends CharSequence> Predicate<T> isNullOrEmpty() {
-        return (Predicate<T>) IS_NULL_OR_EMPTY;
+    public static <T extends CharSequence> Predicate<T> isEmpty() {
+        return (Predicate<T>) IS_EMPTY;
     }
 
     /**
@@ -1511,8 +1511,8 @@ public final class Fn extends Comparators {
      * @param valueExtractor
      * @return
      */
-    public static <T> Predicate<T> isNullOrEmpty(final java.util.function.Function<T, ? extends CharSequence> valueExtractor) {
-        return t -> N.isNullOrEmpty(valueExtractor.apply(t));
+    public static <T> Predicate<T> isEmpty(final java.util.function.Function<T, ? extends CharSequence> valueExtractor) {
+        return t -> Strings.isEmpty(valueExtractor.apply(t));
     }
 
     /**
@@ -1522,7 +1522,7 @@ public final class Fn extends Comparators {
      * @return
      */
     public static <T extends CharSequence> Predicate<T> isBlank() {
-        return (Predicate<T>) IS_NULL_OR_EMPTY_OR_BLANK;
+        return (Predicate<T>) IS_BLANK;
     }
 
     /**
@@ -1532,7 +1532,7 @@ public final class Fn extends Comparators {
      * @return
      */
     public static <T> Predicate<T> isBlank(final java.util.function.Function<T, ? extends CharSequence> valueExtractor) {
-        return t -> N.isBlank(valueExtractor.apply(t));
+        return t -> Strings.isBlank(valueExtractor.apply(t));
     }
 
     private static final Predicate<Object[]> IS_NULL_OR_EMPTY_A = value -> value == null || value.length == 0;
@@ -1605,8 +1605,8 @@ public final class Fn extends Comparators {
      * @param <T>
      * @return
      */
-    public static <T extends CharSequence> Predicate<T> notNullOrEmpty() {
-        return (Predicate<T>) NOT_NULL_OR_EMPTY;
+    public static <T extends CharSequence> Predicate<T> isNotEmpty() {
+        return (Predicate<T>) IS_NOT_EMPTY;
     }
 
     /**
@@ -1615,8 +1615,8 @@ public final class Fn extends Comparators {
      * @param valueExtractor
      * @return
      */
-    public static <T> Predicate<T> notNullOrEmpty(final java.util.function.Function<T, ? extends CharSequence> valueExtractor) {
-        return t -> N.notNullOrEmpty(valueExtractor.apply(t));
+    public static <T> Predicate<T> isNotEmpty(final java.util.function.Function<T, ? extends CharSequence> valueExtractor) {
+        return t -> Strings.isNotEmpty(valueExtractor.apply(t));
     }
 
     /**
@@ -1625,8 +1625,8 @@ public final class Fn extends Comparators {
      * @param <T>
      * @return
      */
-    public static <T extends CharSequence> Predicate<T> notBlank() {
-        return (Predicate<T>) NOT_NULL_OR_EMPTY_OR_BLANK;
+    public static <T extends CharSequence> Predicate<T> isNotBlank() {
+        return (Predicate<T>) IS_NOT_BLANK;
     }
 
     /**
@@ -1635,8 +1635,8 @@ public final class Fn extends Comparators {
      * @param valueExtractor
      * @return
      */
-    public static <T> Predicate<T> notBlank(final java.util.function.Function<T, ? extends CharSequence> valueExtractor) {
-        return t -> N.notBlank(valueExtractor.apply(t));
+    public static <T> Predicate<T> isNotBlank(final java.util.function.Function<T, ? extends CharSequence> valueExtractor) {
+        return t -> Strings.isNotBlank(valueExtractor.apply(t));
     }
 
     private static final Predicate<Object[]> NOT_NULL_OR_EMPTY_A = value -> value != null && value.length > 0;
@@ -2923,7 +2923,7 @@ public final class Fn extends Comparators {
         return PARSE_DOUBLE_FUNC;
     }
 
-    private static final Function<String, Number> CREATE_NUMBER_FUNC = t -> N.isNullOrEmpty(t) ? null : Numbers.createNumber(t);
+    private static final Function<String, Number> CREATE_NUMBER_FUNC = t -> Strings.isEmpty(t) ? null : Numbers.createNumber(t);
 
     /**
      * Creates the number.
@@ -3152,7 +3152,7 @@ public final class Fn extends Comparators {
     }
 
     /** The Constant RETURN_FIRST. */
-    private static final BinaryOperator<Object> RETURN_FIRST = (t, u) -> t;
+    private static final BinaryOperator<Object> RETURN_FIRST = (a, b) -> a;
 
     /**
      *
@@ -3165,7 +3165,7 @@ public final class Fn extends Comparators {
     }
 
     /** The Constant RETURN_SECOND. */
-    private static final BinaryOperator<Object> RETURN_SECOND = (t, u) -> u;
+    private static final BinaryOperator<Object> RETURN_SECOND = (a, b) -> b;
 
     /**
      *
@@ -3179,7 +3179,7 @@ public final class Fn extends Comparators {
 
     /** The Constant MIN. */
     @SuppressWarnings({ "rawtypes" })
-    private static final BinaryOperator<Comparable> MIN = (t, u) -> N.compare(t, u) <= 0 ? t : u;
+    private static final BinaryOperator<Comparable> MIN = (a, b) -> Comparators.NULL_LAST_COMPARATOR.compare(a, b) <= 0 ? a : b;
 
     /**
      *
@@ -3200,7 +3200,7 @@ public final class Fn extends Comparators {
     public static <T> BinaryOperator<T> min(final Comparator<? super T> comparator) {
         N.checkArgNotNull(comparator);
 
-        return (t, u) -> comparator.compare(t, u) <= 0 ? t : u;
+        return (a, b) -> comparator.compare(a, b) <= 0 ? a : b;
     }
 
     /**
@@ -3213,13 +3213,21 @@ public final class Fn extends Comparators {
     @SuppressWarnings("rawtypes")
     public static <T> BinaryOperator<T> minBy(final java.util.function.Function<? super T, ? extends Comparable> keyMapper) {
         N.checkArgNotNull(keyMapper);
+        final Comparator<? super T> comparator = Comparators.comparingByIfNotNullOrElseNullsLast(keyMapper);
 
-        return (t, u) -> N.compare(keyMapper.apply(t), keyMapper.apply(u)) <= 0 ? t : u;
+        return (a, b) -> comparator.compare(a, b) <= 0 ? a : b;
     }
 
     /** The Constant MIN_BY_KEY. */
     @SuppressWarnings("rawtypes")
-    private static final BinaryOperator<Map.Entry<Comparable, Object>> MIN_BY_KEY = (t, u) -> N.compare(t.getKey(), u.getKey()) <= 0 ? t : u;
+    private static final BinaryOperator<Map.Entry<Comparable, Object>> MIN_BY_KEY = new BinaryOperator<>() {
+        private final Comparator<Comparable> cmp = Comparators.NULL_LAST_COMPARATOR;
+
+        @Override
+        public Entry<Comparable, Object> apply(Entry<Comparable, Object> a, Entry<Comparable, Object> b) {
+            return cmp.compare(a.getKey(), a.getKey()) <= 0 ? a : b;
+        }
+    };
 
     /**
      *
@@ -3235,7 +3243,14 @@ public final class Fn extends Comparators {
 
     /** The Constant MIN_BY_VALUE. */
     @SuppressWarnings("rawtypes")
-    private static final BinaryOperator<Map.Entry<Object, Comparable>> MIN_BY_VALUE = (t, u) -> N.compare(t.getValue(), u.getValue()) <= 0 ? t : u;
+    private static final BinaryOperator<Map.Entry<Object, Comparable>> MIN_BY_VALUE = new BinaryOperator<>() {
+        private final Comparator<Comparable> cmp = Comparators.NULL_LAST_COMPARATOR;
+
+        @Override
+        public Entry<Object, Comparable> apply(Entry<Object, Comparable> a, Entry<Object, Comparable> b) {
+            return cmp.compare(a.getValue(), a.getValue()) <= 0 ? a : b;
+        }
+    };
 
     /**
      *
@@ -3251,7 +3266,7 @@ public final class Fn extends Comparators {
 
     /** The Constant MAX. */
     @SuppressWarnings("rawtypes")
-    private static final BinaryOperator<Comparable> MAX = (t, u) -> N.compare(t, u) >= 0 ? t : u;
+    private static final BinaryOperator<Comparable> MAX = (a, b) -> Comparators.NULL_FIRST_COMPARATOR.compare(a, b) >= 0 ? a : b;
 
     /**
      *
@@ -3272,7 +3287,7 @@ public final class Fn extends Comparators {
     public static <T> BinaryOperator<T> max(final Comparator<? super T> comparator) {
         N.checkArgNotNull(comparator);
 
-        return (t, u) -> comparator.compare(t, u) >= 0 ? t : u;
+        return (a, b) -> comparator.compare(a, b) >= 0 ? a : b;
     }
 
     /**
@@ -3285,13 +3300,21 @@ public final class Fn extends Comparators {
     @SuppressWarnings("rawtypes")
     public static <T> BinaryOperator<T> maxBy(final java.util.function.Function<? super T, ? extends Comparable> keyMapper) {
         N.checkArgNotNull(keyMapper);
+        final Comparator<? super T> comparator = Comparators.comparingByIfNotNullOrElseNullsFirst(keyMapper);
 
-        return (t, u) -> N.compare(keyMapper.apply(t), keyMapper.apply(u)) >= 0 ? t : u;
+        return (a, b) -> comparator.compare(a, b) >= 0 ? a : b;
     }
 
     /** The Constant MAX_BY_KEY. */
     @SuppressWarnings("rawtypes")
-    private static final BinaryOperator<Map.Entry<Comparable, Object>> MAX_BY_KEY = (t, u) -> N.compare(t.getKey(), u.getKey()) >= 0 ? t : u;
+    private static final BinaryOperator<Map.Entry<Comparable, Object>> MAX_BY_KEY = new BinaryOperator<>() {
+        private final Comparator<Comparable> cmp = Comparators.NULL_FIRST_COMPARATOR;
+
+        @Override
+        public Entry<Comparable, Object> apply(Entry<Comparable, Object> a, Entry<Comparable, Object> b) {
+            return cmp.compare(a.getKey(), a.getKey()) >= 0 ? a : b;
+        }
+    };
 
     /**
      *
@@ -3307,7 +3330,14 @@ public final class Fn extends Comparators {
 
     /** The Constant MAX_BY_VALUE. */
     @SuppressWarnings("rawtypes")
-    private static final BinaryOperator<Map.Entry<Object, Comparable>> MAX_BY_VALUE = (t, u) -> N.compare(t.getValue(), u.getValue()) >= 0 ? t : u;
+    private static final BinaryOperator<Map.Entry<Object, Comparable>> MAX_BY_VALUE = new BinaryOperator<>() {
+        private final Comparator<Comparable> cmp = Comparators.NULL_FIRST_COMPARATOR;
+
+        @Override
+        public Entry<Object, Comparable> apply(Entry<Object, Comparable> a, Entry<Object, Comparable> b) {
+            return cmp.compare(a.getValue(), a.getValue()) >= 0 ? a : b;
+        }
+    };
 
     /**
      *
@@ -3341,11 +3371,9 @@ public final class Fn extends Comparators {
     public static <T> Function<T, Integer> compareTo(final T target, final Comparator<? super T> cmp) {
         // N.checkArgNotNull(cmp);
 
-        if (cmp == null) {
-            return t -> NATURAL_ORDER.compare(t, target);
-        } else {
-            return t -> N.compare(t, target, cmp);
-        }
+        final Comparator<? super T> cmpToUse = cmp == null ? (Comparator<? super T>) Comparators.naturalOrder() : cmp;
+
+        return t -> cmpToUse.compare(t, target);
     }
 
     /**
@@ -3371,7 +3399,7 @@ public final class Fn extends Comparators {
             return (BiFunction<T, T, Integer>) COMPARE;
         }
 
-        return (a, b) -> N.compare(a, b, cmp);
+        return (a, b) -> cmp.compare(a, b);
     }
 
     /**
@@ -4767,8 +4795,8 @@ public final class Fn extends Comparators {
         };
     }
 
-    // #################################################################################################################################
-    // #################################################################################################################################
+    // #######################################9X9#######################################
+    // #######################################9X9#######################################
 
     /**
      *
@@ -4893,10 +4921,10 @@ public final class Fn extends Comparators {
     public static final class Suppliers {
 
         /** The Constant UUID. */
-        private static final Supplier<String> UUID = N::uuid;
+        private static final Supplier<String> UUID = Strings::uuid;
 
         /** The Constant GUID. */
-        private static final Supplier<String> GUID = N::guid;
+        private static final Supplier<String> GUID = Strings::guid;
 
         /** The Constant EMPTY_BOOLEAN_ARRAY. */
         private static final Supplier<boolean[]> EMPTY_BOOLEAN_ARRAY = () -> N.EMPTY_BOOLEAN_ARRAY;
@@ -4929,7 +4957,7 @@ public final class Fn extends Comparators {
         private static final Supplier<Object[]> EMPTY_OBJECT_ARRAY = () -> N.EMPTY_OBJECT_ARRAY;
 
         /** The Constant EMPTY_STRING. */
-        private static final Supplier<String> EMPTY_STRING = () -> N.EMPTY_STRING;
+        private static final Supplier<String> EMPTY_STRING = () -> Strings.EMPTY_STRING;
 
         /** The Constant BOOLEAN_LIST. */
         private static final Supplier<BooleanList> BOOLEAN_LIST = BooleanList::new;
@@ -10177,68 +10205,6 @@ public final class Fn extends Comparators {
          * @return
          */
         @Beta
-        public static <T, E extends Exception> Throwables.Predicate<T, E> notNull() {
-            return Fn.NOT_NULL;
-        }
-
-        /**
-         *
-         *
-         * @param <T>
-         * @param <E>
-         * @return
-         */
-        public static <T extends CharSequence, E extends Exception> Throwables.Predicate<T, E> notNullOrEmpty() {
-            return (Throwables.Predicate<T, E>) Fn.NOT_NULL_OR_EMPTY;
-        }
-
-        /**
-         *
-         *
-         * @param <T>
-         * @param <E>
-         * @return
-         */
-        @Beta
-        @SuppressWarnings("rawtypes")
-        public static <T, E extends Exception> Throwables.Predicate<T[], E> notNullOrEmptyA() {
-            return (Throwables.Predicate) Fn.NOT_NULL_OR_EMPTY_A;
-        }
-
-        /**
-         *
-         *
-         * @param <T>
-         * @param <E>
-         * @return
-         */
-        @Beta
-        @SuppressWarnings("rawtypes")
-        public static <T extends Collection, E extends Exception> Throwables.Predicate<T, E> notNullOrEmptyC() {
-            return (Throwables.Predicate<T, E>) Fn.NOT_NULL_OR_EMPTY_C;
-        }
-
-        /**
-         *
-         *
-         * @param <T>
-         * @param <E>
-         * @return
-         */
-        @Beta
-        @SuppressWarnings("rawtypes")
-        public static <T extends Map, E extends Exception> Throwables.Predicate<T, E> notNullOrEmptyM() {
-            return (Throwables.Predicate<T, E>) Fn.NOT_NULL_OR_EMPTY_M;
-        }
-
-        /**
-         *
-         *
-         * @param <T>
-         * @param <E>
-         * @return
-         */
-        @Beta
         public static <T, E extends Exception> Throwables.Predicate<T, E> isNull() {
             return Fn.IS_NULL;
         }
@@ -10250,8 +10216,19 @@ public final class Fn extends Comparators {
          * @param <E>
          * @return
          */
-        public static <T extends CharSequence, E extends Exception> Throwables.Predicate<T, E> isNullOrEmpty() {
-            return (Throwables.Predicate<T, E>) Fn.IS_NULL_OR_EMPTY;
+        public static <T extends CharSequence, E extends Exception> Throwables.Predicate<T, E> isEmpty() {
+            return (Throwables.Predicate<T, E>) Fn.IS_EMPTY;
+        }
+
+        /**
+         *
+         *
+         * @param <T>
+         * @param <E>
+         * @return
+         */
+        public static <T extends CharSequence, E extends Exception> Throwables.Predicate<T, E> isBlank() {
+            return (Throwables.Predicate<T, E>) Fn.IS_BLANK;
         }
 
         /**
@@ -10291,6 +10268,79 @@ public final class Fn extends Comparators {
         @SuppressWarnings("rawtypes")
         public static <T extends Map, E extends Exception> Throwables.Predicate<T, E> isNullOrEmptyM() {
             return (Throwables.Predicate<T, E>) Fn.IS_NULL_OR_EMPTY_M;
+        }
+
+        /**
+         *
+         *
+         * @param <T>
+         * @param <E>
+         * @return
+         */
+        @Beta
+        public static <T, E extends Exception> Throwables.Predicate<T, E> notNull() {
+            return Fn.NOT_NULL;
+        }
+
+        /**
+         *
+         *
+         * @param <T>
+         * @param <E>
+         * @return
+         */
+        public static <T extends CharSequence, E extends Exception> Throwables.Predicate<T, E> isNotEmpty() {
+            return (Throwables.Predicate<T, E>) Fn.IS_NOT_EMPTY;
+        }
+
+        /**
+         *
+         *
+         * @param <T>
+         * @param <E>
+         * @return
+         */
+        public static <T extends CharSequence, E extends Exception> Throwables.Predicate<T, E> isNotBlank() {
+            return (Throwables.Predicate<T, E>) Fn.IS_NOT_BLANK;
+        }
+
+        /**
+         *
+         *
+         * @param <T>
+         * @param <E>
+         * @return
+         */
+        @Beta
+        @SuppressWarnings("rawtypes")
+        public static <T, E extends Exception> Throwables.Predicate<T[], E> notNullOrEmptyA() {
+            return (Throwables.Predicate) Fn.NOT_NULL_OR_EMPTY_A;
+        }
+
+        /**
+         *
+         *
+         * @param <T>
+         * @param <E>
+         * @return
+         */
+        @Beta
+        @SuppressWarnings("rawtypes")
+        public static <T extends Collection, E extends Exception> Throwables.Predicate<T, E> notNullOrEmptyC() {
+            return (Throwables.Predicate<T, E>) Fn.NOT_NULL_OR_EMPTY_C;
+        }
+
+        /**
+         *
+         *
+         * @param <T>
+         * @param <E>
+         * @return
+         */
+        @Beta
+        @SuppressWarnings("rawtypes")
+        public static <T extends Map, E extends Exception> Throwables.Predicate<T, E> notNullOrEmptyM() {
+            return (Throwables.Predicate<T, E>) Fn.NOT_NULL_OR_EMPTY_M;
         }
 
         /**

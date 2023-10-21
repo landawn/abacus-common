@@ -50,7 +50,7 @@ public final class Splitter {
             end--;
         }
 
-        return start >= end ? N.EMPTY_STRING : source.subSequence(start, end).toString();
+        return start >= end ? Strings.EMPTY_STRING : source.subSequence(start, end).toString();
     };
 
     private static final SubStringFunc stripSubStringFunc = (source, start, end) -> {
@@ -62,7 +62,7 @@ public final class Splitter {
             end--;
         }
 
-        return start >= end ? N.EMPTY_STRING : source.subSequence(start, end).toString();
+        return start >= end ? Strings.EMPTY_STRING : source.subSequence(start, end).toString();
     };
 
     private final Strategy strategy;
@@ -160,7 +160,7 @@ public final class Splitter {
     public static Splitter with(final CharSequence delimiter) throws IllegalArgumentException {
         N.checkArgNotNullOrEmpty(delimiter, "delimiter");
 
-        if (N.isNullOrEmpty(delimiter)) {
+        if (Strings.isEmpty(delimiter)) {
             return with(WHITE_SPACE_PATTERN);
         } else if (delimiter.length() == 1) {
             return with(delimiter.charAt(0));
