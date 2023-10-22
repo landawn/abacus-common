@@ -48,7 +48,7 @@ public final class AddrUtil {
     public static List<String> getServerList(String servers) {
         final List<String> serverList = URL_SPLITTER.split(servers);
 
-        if (N.isNullOrEmpty(serverList)) {
+        if (N.isEmpty(serverList)) {
             throw new IllegalArgumentException("Invlid serverUrl: " + servers);
         }
 
@@ -72,7 +72,7 @@ public final class AddrUtil {
 
         String[] hoststuffs = servers.split(URL_SEPERATOR);
 
-        if (N.isNullOrEmpty(hoststuffs)) {
+        if (N.isEmpty(hoststuffs)) {
             throw new IllegalArgumentException("Invlid addresses: " + servers);
         }
 

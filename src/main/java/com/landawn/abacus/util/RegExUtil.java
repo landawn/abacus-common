@@ -38,7 +38,7 @@ public final class RegExUtil {
      *
      * This method is a {@code null} safe equivalent to:
      * <ul>
-     *  <li>{@code pattern.matcher(text).replaceAll(N.EMPTY_STRING)}</li>
+     *  <li>{@code pattern.matcher(text).replaceAll(Strings.EMPTY_STRING)}</li>
      * </ul>
      *
      * <p>A {@code null} reference passed to this method is a no-op.</p>
@@ -74,8 +74,8 @@ public final class RegExUtil {
      *
      * This method is a {@code null} safe equivalent to:
      * <ul>
-     *  <li>{@code text.replaceAll(regex, N.EMPTY_STRING)}</li>
-     *  <li>{@code Pattern.compile(regex).matcher(text).replaceAll(N.EMPTY_STRING)}</li>
+     *  <li>{@code text.replaceAll(regex, Strings.EMPTY_STRING)}</li>
+     *  <li>{@code Pattern.compile(regex).matcher(text).replaceAll(Strings.EMPTY_STRING)}</li>
      * </ul>
      *
      * <p>A {@code null} reference passed to this method is a no-op.</p>
@@ -116,7 +116,7 @@ public final class RegExUtil {
      *
      * This method is a {@code null} safe equivalent to:
      * <ul>
-     *  <li>{@code pattern.matcher(text).replaceFirst(N.EMPTY_STRING)}</li>
+     *  <li>{@code pattern.matcher(text).replaceFirst(Strings.EMPTY_STRING)}</li>
      * </ul>
      *
      * <p>A {@code null} reference passed to this method is a no-op.</p>
@@ -152,8 +152,8 @@ public final class RegExUtil {
      *
      * This method is a {@code null} safe equivalent to:
      * <ul>
-     *  <li>{@code text.replaceFirst(regex, N.EMPTY_STRING)}</li>
-     *  <li>{@code Pattern.compile(regex).matcher(text).replaceFirst(N.EMPTY_STRING)}</li>
+     *  <li>{@code text.replaceFirst(regex, Strings.EMPTY_STRING)}</li>
+     *  <li>{@code Pattern.compile(regex).matcher(text).replaceFirst(Strings.EMPTY_STRING)}</li>
      * </ul>
      *
      * <p>A {@code null} reference passed to this method is a no-op.</p>
@@ -193,8 +193,8 @@ public final class RegExUtil {
      *
      * This call is a {@code null} safe equivalent to:
      * <ul>
-     * <li>{@code text.replaceAll(&quot;(?s)&quot; + regex, N.EMPTY_STRING)}</li>
-     * <li>{@code Pattern.compile(regex, Pattern.DOTALL).matcher(text).replaceAll(N.EMPTY_STRING)}</li>
+     * <li>{@code text.replaceAll(&quot;(?s)&quot; + regex, Strings.EMPTY_STRING)}</li>
+     * <li>{@code Pattern.compile(regex, Pattern.DOTALL).matcher(text).replaceAll(Strings.EMPTY_STRING)}</li>
      * </ul>
      *
      * <p>A {@code null} reference passed to this method is a no-op.</p>

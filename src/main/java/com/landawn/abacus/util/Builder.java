@@ -1347,7 +1347,7 @@ public class Builder<T> {
         public ListBuilder<T, L> addAll(int index, Collection<? extends T> c) {
             N.checkIndex(index, val.size());
 
-            if (N.notNullOrEmpty(c)) {
+            if (N.notEmpty(c)) {
                 val.addAll(index, c);
             }
 
@@ -1401,7 +1401,7 @@ public class Builder<T> {
          * @return
          */
         public CollectionBuilder<T, C> addAll(final Collection<? extends T> c) {
-            if (N.notNullOrEmpty(c)) {
+            if (N.notEmpty(c)) {
                 val.addAll(c);
             }
 
@@ -1415,7 +1415,7 @@ public class Builder<T> {
          * @return
          */
         public CollectionBuilder<T, C> addAll(final T... a) {
-            if (N.notNullOrEmpty(a)) {
+            if (N.notEmpty(a)) {
                 val.addAll(Arrays.asList(a));
             }
 
@@ -1440,7 +1440,7 @@ public class Builder<T> {
          * @return
          */
         public CollectionBuilder<T, C> removeAll(Collection<?> c) {
-            if (N.notNullOrEmpty(c)) {
+            if (N.notEmpty(c)) {
                 val.removeAll(c);
             }
 
@@ -1454,7 +1454,7 @@ public class Builder<T> {
          * @return
          */
         public CollectionBuilder<T, C> removeAll(final T... a) {
-            if (N.notNullOrEmpty(a)) {
+            if (N.notEmpty(a)) {
                 val.removeAll(Arrays.asList(a));
             }
 
@@ -1720,7 +1720,7 @@ public class Builder<T> {
          * @return
          */
         public MapBuilder<K, V, M> putAll(Map<? extends K, ? extends V> m) {
-            if (N.notNullOrEmpty(m)) {
+            if (N.notEmpty(m)) {
                 val.putAll(m);
             }
 
@@ -1779,7 +1779,7 @@ public class Builder<T> {
          * @return
          */
         public MapBuilder<K, V, M> removeAll(Collection<?> keysToRemove) {
-            if (N.notNullOrEmpty(keysToRemove)) {
+            if (N.notEmpty(keysToRemove)) {
                 for (Object k : keysToRemove) {
                     val.remove(k);
                 }

@@ -938,7 +938,7 @@ public final class TypeFactory {
 
                         if (!(val.isObjectType() || val.clazz().equals(Object[].class)) && val.clazz().isAssignableFrom(cls)) {
                             try {
-                                if ((val.isGenericType() || N.notNullOrEmpty(typeParameters) || N.notNullOrEmpty(parameters)) && Strings.isNotEmpty(typeName)) {
+                                if ((val.isGenericType() || N.notEmpty(typeParameters) || N.notEmpty(parameters)) && Strings.isNotEmpty(typeName)) {
                                     final Constructor<? extends Type> constructor = ClassUtil.getDeclaredConstructor(val.getClass(), String.class);
 
                                     if (constructor != null) {
@@ -998,7 +998,7 @@ public final class TypeFactory {
     @SuppressWarnings("unchecked")
     @SafeVarargs
     static <T> List<Type<T>> getType(final Class<? extends T>... clazzes) {
-        if (N.isNullOrEmpty(clazzes)) {
+        if (N.isEmpty(clazzes)) {
             return new ArrayList<>();
         }
 

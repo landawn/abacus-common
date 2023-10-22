@@ -123,7 +123,7 @@ public interface Type<T> {
     static <T> List<Type<T>> ofAll(final Collection<Class<? extends T>> classes) {
         final List<Type<T>> types = new ArrayList<>(N.size(classes));
 
-        if (N.notNullOrEmpty(classes)) {
+        if (N.notEmpty(classes)) {
             for (Class<?> cls : classes) {
                 types.add((Type<T>) of(cls));
             }

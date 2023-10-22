@@ -124,7 +124,7 @@ public class Multimap<K, E, V extends Collection<E>> {
     //            final IntFunction<? extends M> multimapSupplier) {
     //        final M multimap = multimapSupplier.apply(map == null ? 0 : map.size());
     //
-    //        if (N.notNullOrEmpty(map)) {
+    //        if (N.notEmpty(map)) {
     //            multimap.putAll(map);
     //        }
     //
@@ -146,7 +146,7 @@ public class Multimap<K, E, V extends Collection<E>> {
     //            final Function<? super T, ? extends K> keyMapper, final IntFunction<? extends M> multimapSupplier) {
     //        final M multimap = multimapSupplier.apply(c == null ? 0 : c.size());
     //
-    //        if (N.notNullOrEmpty(c)) {
+    //        if (N.notEmpty(c)) {
     //            for (T e : c) {
     //                multimap.put(keyMapper.apply(e), e);
     //            }
@@ -173,7 +173,7 @@ public class Multimap<K, E, V extends Collection<E>> {
     //            final IntFunction<? extends M> multimapSupplier) {
     //        final M multimap = multimapSupplier.apply(c == null ? 0 : c.size());
     //
-    //        if (N.notNullOrEmpty(c)) {
+    //        if (N.notEmpty(c)) {
     //            for (T e : c) {
     //                multimap.put(keyMapper.apply(e), valueExtractor.apply(e));
     //            }
@@ -196,7 +196,7 @@ public class Multimap<K, E, V extends Collection<E>> {
     //            final IntFunction<? extends M> multimapSupplier) {
     //        final M multimap = multimapSupplier.apply(map == null ? 0 : map.size());
     //
-    //        if (N.notNullOrEmpty(map)) {
+    //        if (N.notEmpty(map)) {
     //            for (Map.Entry<? extends K, ? extends Collection<? extends E>> entry : map.entrySet()) {
     //                multimap.putAll(entry.getKey(), entry.getValue());
     //            }
@@ -221,7 +221,7 @@ public class Multimap<K, E, V extends Collection<E>> {
     //            final IntFunction<? extends M> multimapSupplier) {
     //        final M multimap = multimapSupplier.apply(map == null ? 0 : map.size());
     //
-    //        if (N.notNullOrEmpty(map)) {
+    //        if (N.notEmpty(map)) {
     //            for (Map.Entry<K, E> entry : map.entrySet()) {
     //                multimap.put(entry.getValue(), entry.getKey());
     //            }
@@ -247,11 +247,11 @@ public class Multimap<K, E, V extends Collection<E>> {
     //            final IntFunction<? extends M> multimapSupplier) {
     //        final M multimap = multimapSupplier.apply(map == null ? 0 : map.size());
     //
-    //        if (N.notNullOrEmpty(map)) {
+    //        if (N.notEmpty(map)) {
     //            for (Map.Entry<K, ? extends Collection<? extends E>> entry : map.entrySet()) {
     //                final Collection<? extends E> c = entry.getValue();
     //
-    //                if (N.notNullOrEmpty(c)) {
+    //                if (N.notEmpty(c)) {
     //                    for (E e : c) {
     //                        multimap.put(e, entry.getKey());
     //                    }
@@ -277,11 +277,11 @@ public class Multimap<K, E, V extends Collection<E>> {
     //            final IntFunction<? extends M> multimapSupplier) {
     //        final M res = multimapSupplier.apply(multimap == null ? 0 : multimap.size());
     //
-    //        if (N.notNullOrEmpty(multimap)) {
+    //        if (N.notEmpty(multimap)) {
     //            for (Map.Entry<K, V> entry : multimap.entrySet()) {
     //                final V c = entry.getValue();
     //
-    //                if (N.notNullOrEmpty(c)) {
+    //                if (N.notEmpty(c)) {
     //                    for (E e : c) {
     //                        res.put(e, entry.getKey());
     //                    }
@@ -444,7 +444,7 @@ public class Multimap<K, E, V extends Collection<E>> {
      * @return
      */
     public boolean putAll(final K key, final Collection<? extends E> c) {
-        if (N.isNullOrEmpty(c)) {
+        if (N.isEmpty(c)) {
             return false;
         }
 
@@ -468,7 +468,7 @@ public class Multimap<K, E, V extends Collection<E>> {
      * @return
      */
     public boolean putAllIfKeyAbsent(final K key, final Collection<? extends E> c) {
-        if (N.isNullOrEmpty(c)) {
+        if (N.isEmpty(c)) {
             return false;
         }
 
@@ -490,7 +490,7 @@ public class Multimap<K, E, V extends Collection<E>> {
      * @return
      */
     public boolean putAll(final Map<? extends K, ? extends E> m) {
-        if (N.isNullOrEmpty(m)) {
+        if (N.isEmpty(m)) {
             return false;
         }
 
@@ -519,7 +519,7 @@ public class Multimap<K, E, V extends Collection<E>> {
      * @return
      */
     public boolean putAll(final Multimap<? extends K, ? extends E, ? extends Collection<? extends E>> m) {
-        if (N.isNullOrEmpty(m)) {
+        if (N.isEmpty(m)) {
             return false;
         }
 
@@ -528,7 +528,7 @@ public class Multimap<K, E, V extends Collection<E>> {
         V val = null;
 
         for (Map.Entry<? extends K, ? extends Collection<? extends E>> e : m.entrySet()) {
-            if (N.isNullOrEmpty(e.getValue())) {
+            if (N.isEmpty(e.getValue())) {
                 continue;
             }
 
@@ -584,14 +584,14 @@ public class Multimap<K, E, V extends Collection<E>> {
      * @return
      */
     public boolean removeAll(final Object key, final Collection<?> c) {
-        if (N.isNullOrEmpty(c)) {
+        if (N.isEmpty(c)) {
             return false;
         }
 
         boolean result = false;
         final V val = valueMap.get(key);
 
-        if (N.notNullOrEmpty(val)) {
+        if (N.notEmpty(val)) {
             result = val.removeAll(c);
 
             if (val.isEmpty()) {
@@ -614,7 +614,7 @@ public class Multimap<K, E, V extends Collection<E>> {
      * @return
      */
     public boolean removeAll(final Map<?, ? extends Collection<?>> m) {
-        if (N.isNullOrEmpty(m)) {
+        if (N.isEmpty(m)) {
             return false;
         }
 
@@ -626,7 +626,7 @@ public class Multimap<K, E, V extends Collection<E>> {
             key = e.getKey();
             val = valueMap.get(key);
 
-            if (N.notNullOrEmpty(val)) {
+            if (N.notEmpty(val)) {
                 if (!result) {
                     result = val.removeAll(e.getValue());
                 } else {
@@ -649,7 +649,7 @@ public class Multimap<K, E, V extends Collection<E>> {
      * @return
      */
     public boolean removeAll(final Multimap<?, ?, ?> m) {
-        if (N.isNullOrEmpty(m)) {
+        if (N.isEmpty(m)) {
             return false;
         }
 
@@ -661,7 +661,7 @@ public class Multimap<K, E, V extends Collection<E>> {
             key = e.getKey();
             val = valueMap.get(key);
 
-            if (N.notNullOrEmpty(val) && N.notNullOrEmpty(e.getValue())) {
+            if (N.notEmpty(val) && N.notEmpty(e.getValue())) {
                 if (!result) {
                     result = val.removeAll(e.getValue());
                 } else {
@@ -699,7 +699,7 @@ public class Multimap<K, E, V extends Collection<E>> {
             }
         }
 
-        if (N.isNullOrEmpty(removingKeys)) {
+        if (N.isEmpty(removingKeys)) {
             return false;
         }
 
@@ -736,7 +736,7 @@ public class Multimap<K, E, V extends Collection<E>> {
             }
         }
 
-        if (N.isNullOrEmpty(removingKeys)) {
+        if (N.isEmpty(removingKeys)) {
             return false;
         }
 
@@ -773,7 +773,7 @@ public class Multimap<K, E, V extends Collection<E>> {
             }
         }
 
-        if (N.isNullOrEmpty(removingKeys)) {
+        if (N.isEmpty(removingKeys)) {
             return false;
         }
 
@@ -810,7 +810,7 @@ public class Multimap<K, E, V extends Collection<E>> {
             }
         }
 
-        if (N.isNullOrEmpty(removingKeys)) {
+        if (N.isEmpty(removingKeys)) {
             return false;
         }
 
@@ -846,7 +846,7 @@ public class Multimap<K, E, V extends Collection<E>> {
             }
         }
 
-        if (N.isNullOrEmpty(removingKeys)) {
+        if (N.isEmpty(removingKeys)) {
             return false;
         }
 
@@ -878,7 +878,7 @@ public class Multimap<K, E, V extends Collection<E>> {
             }
         }
 
-        if (N.isNullOrEmpty(removingKeys)) {
+        if (N.isEmpty(removingKeys)) {
             return false;
         }
 
@@ -1208,7 +1208,7 @@ public class Multimap<K, E, V extends Collection<E>> {
         for (Map.Entry<K, V> entry : valueMap.entrySet()) {
             newVal = function.apply(entry.getKey(), entry.getValue());
 
-            if (N.isNullOrEmpty(newVal)) {
+            if (N.isEmpty(newVal)) {
                 if (keyToRemove == null) {
                     keyToRemove = new ArrayList<>();
                 }
@@ -1223,7 +1223,7 @@ public class Multimap<K, E, V extends Collection<E>> {
             }
         }
 
-        if (N.notNullOrEmpty(keyToRemove)) {
+        if (N.notEmpty(keyToRemove)) {
             for (K key : keyToRemove) {
                 valueMap.remove(key);
             }
@@ -1277,7 +1277,7 @@ public class Multimap<K, E, V extends Collection<E>> {
     public boolean containsAll(final Object key, final Collection<?> c) {
         final V val = valueMap.get(key);
 
-        return val == null ? false : (N.isNullOrEmpty(c) ? true : val.containsAll(c));
+        return val == null ? false : (N.isEmpty(c) ? true : val.containsAll(c));
     }
 
     /**
@@ -1427,13 +1427,13 @@ public class Multimap<K, E, V extends Collection<E>> {
      * <pre>
      * final V oldValue = get(key);
      *
-     * if (N.notNullOrEmpty(oldValue)) {
+     * if (N.notEmpty(oldValue)) {
      *     return oldValue;
      * }
      *
      * final V newValue = mappingFunction.apply(key);
      *
-     * if (N.notNullOrEmpty(newValue)) {
+     * if (N.notEmpty(newValue)) {
      *     valueMap.put(key, newValue);
      * }
      *
@@ -1451,13 +1451,13 @@ public class Multimap<K, E, V extends Collection<E>> {
 
         final V oldValue = get(key);
 
-        if (N.notNullOrEmpty(oldValue)) {
+        if (N.notEmpty(oldValue)) {
             return oldValue;
         }
 
         final V newValue = mappingFunction.apply(key);
 
-        if (N.notNullOrEmpty(newValue)) {
+        if (N.notEmpty(newValue)) {
             valueMap.put(key, newValue);
         }
 
@@ -1470,13 +1470,13 @@ public class Multimap<K, E, V extends Collection<E>> {
      * <pre>
      * final V oldValue = get(key);
      *
-     * if (N.isNullOrEmpty(oldValue)) {
+     * if (N.isEmpty(oldValue)) {
      *     return oldValue;
      * }
      *
      * final V newValue = remappingFunction.apply(key, oldValue);
      *
-     * if (N.notNullOrEmpty(newValue)) {
+     * if (N.notEmpty(newValue)) {
      *     valueMap.put(key, newValue);
      * } else {
      *     valueMap.remove(key);
@@ -1496,13 +1496,13 @@ public class Multimap<K, E, V extends Collection<E>> {
 
         final V oldValue = get(key);
 
-        if (N.isNullOrEmpty(oldValue)) {
+        if (N.isEmpty(oldValue)) {
             return oldValue;
         }
 
         final V newValue = remappingFunction.apply(key, oldValue);
 
-        if (N.notNullOrEmpty(newValue)) {
+        if (N.notEmpty(newValue)) {
             valueMap.put(key, newValue);
         } else {
             valueMap.remove(key);
@@ -1518,7 +1518,7 @@ public class Multimap<K, E, V extends Collection<E>> {
      * final V oldValue = get(key);
      * final V newValue = remappingFunction.apply(key, oldValue);
      *
-     * if (N.notNullOrEmpty(newValue)) {
+     * if (N.notEmpty(newValue)) {
      *     valueMap.put(key, newValue);
      * } else {
      *     if (oldValue != null) {
@@ -1541,7 +1541,7 @@ public class Multimap<K, E, V extends Collection<E>> {
         final V oldValue = get(key);
         final V newValue = remappingFunction.apply(key, oldValue);
 
-        if (N.notNullOrEmpty(newValue)) {
+        if (N.notEmpty(newValue)) {
             valueMap.put(key, newValue);
         } else {
             if (oldValue != null) {
@@ -1559,7 +1559,7 @@ public class Multimap<K, E, V extends Collection<E>> {
      * final V oldValue = get(key);
      * final V newValue = oldValue == null ? value : remappingFunction.apply(oldValue, value);
      *
-     * if (N.notNullOrEmpty(newValue)) {
+     * if (N.notEmpty(newValue)) {
      *     valueMap.put(key, newValue);
      * } else {
      *     if (oldValue != null) {
@@ -1584,7 +1584,7 @@ public class Multimap<K, E, V extends Collection<E>> {
         final V oldValue = get(key);
         final V newValue = oldValue == null ? value : remappingFunction.apply(oldValue, value);
 
-        if (N.notNullOrEmpty(newValue)) {
+        if (N.notEmpty(newValue)) {
             valueMap.put(key, newValue);
         } else {
             if (oldValue != null) {
@@ -1601,14 +1601,14 @@ public class Multimap<K, E, V extends Collection<E>> {
      * <pre>
      * final V oldValue = get(key);
      *
-     * if (N.isNullOrEmpty(oldValue)) {
+     * if (N.isEmpty(oldValue)) {
      *     put(key, e);
      *     return get(key);
      * }
      *
      * final V newValue = remappingFunction.apply(oldValue, e);
      *
-     * if (N.notNullOrEmpty(newValue)) {
+     * if (N.notEmpty(newValue)) {
      *     valueMap.put(key, newValue);
      * } else {
      *     if (oldValue != null) {
@@ -1632,14 +1632,14 @@ public class Multimap<K, E, V extends Collection<E>> {
 
         final V oldValue = get(key);
 
-        if (N.isNullOrEmpty(oldValue)) {
+        if (N.isEmpty(oldValue)) {
             put(key, e);
             return get(key);
         }
 
         final V newValue = remappingFunction.apply(oldValue, e);
 
-        if (N.notNullOrEmpty(newValue)) {
+        if (N.notEmpty(newValue)) {
             valueMap.put(key, newValue);
         } else {
             if (oldValue != null) {
@@ -1675,11 +1675,11 @@ public class Multimap<K, E, V extends Collection<E>> {
         final Multimap<K, E, V> multimap = this;
         final M res = multimapSupplier.apply(multimap.size());
 
-        if (N.notNullOrEmpty(multimap)) {
+        if (N.notEmpty(multimap)) {
             for (Map.Entry<K, V> entry : multimap.entrySet()) {
                 final V c = entry.getValue();
 
-                if (N.notNullOrEmpty(c)) {
+                if (N.notEmpty(c)) {
                     for (E e : c) {
                         res.put(e, entry.getKey());
                     }

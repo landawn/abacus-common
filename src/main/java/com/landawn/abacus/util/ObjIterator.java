@@ -104,7 +104,7 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      */
     @SafeVarargs
     public static <T> ObjIterator<T> of(final T... a) {
-        return N.isNullOrEmpty(a) ? EMPTY : of(a, 0, a.length);
+        return N.isEmpty(a) ? EMPTY : of(a, 0, a.length);
     }
 
     /**

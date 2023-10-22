@@ -180,13 +180,13 @@ public class Difference<L, R> {
         List<T1> leftOnly = new ArrayList<>();
         List<T2> rightOnly = new ArrayList<>();
 
-        if (N.isNullOrEmpty(a)) {
-            if (N.isNullOrEmpty(b)) {
+        if (N.isEmpty(a)) {
+            if (N.isEmpty(b)) {
                 // Do nothing. All empty.
             } else {
                 rightOnly.addAll(b);
             }
-        } else if (N.isNullOrEmpty(b)) {
+        } else if (N.isEmpty(b)) {
             leftOnly.addAll(a);
         } else {
             final Multiset<T2> bOccurrences = Multiset.create(b);
@@ -224,13 +224,13 @@ public class Difference<L, R> {
         List<Boolean> leftOnly = new ArrayList<>();
         List<Boolean> rightOnly = new ArrayList<>();
 
-        if (N.isNullOrEmpty(a)) {
-            if (N.isNullOrEmpty(b)) {
+        if (N.isEmpty(a)) {
+            if (N.isEmpty(b)) {
                 // Do nothing. All empty.
             } else {
                 rightOnly = b.toList();
             }
-        } else if (N.isNullOrEmpty(b)) {
+        } else if (N.isEmpty(b)) {
             leftOnly = a.toList();
         } else {
             final Multiset<Boolean> bOccurrences = b.toMultiset();
@@ -273,13 +273,13 @@ public class Difference<L, R> {
         List<Character> leftOnly = new ArrayList<>();
         List<Character> rightOnly = new ArrayList<>();
 
-        if (N.isNullOrEmpty(a)) {
-            if (N.isNullOrEmpty(b)) {
+        if (N.isEmpty(a)) {
+            if (N.isEmpty(b)) {
                 // Do nothing. All empty.
             } else {
                 rightOnly = b.toList();
             }
-        } else if (N.isNullOrEmpty(b)) {
+        } else if (N.isEmpty(b)) {
             leftOnly = a.toList();
         } else {
             final Multiset<Character> bOccurrences = b.toMultiset();
@@ -322,13 +322,13 @@ public class Difference<L, R> {
         List<Byte> leftOnly = new ArrayList<>();
         List<Byte> rightOnly = new ArrayList<>();
 
-        if (N.isNullOrEmpty(a)) {
-            if (N.isNullOrEmpty(b)) {
+        if (N.isEmpty(a)) {
+            if (N.isEmpty(b)) {
                 // Do nothing. All empty.
             } else {
                 rightOnly = b.toList();
             }
-        } else if (N.isNullOrEmpty(b)) {
+        } else if (N.isEmpty(b)) {
             leftOnly = a.toList();
         } else {
             final Multiset<Byte> bOccurrences = b.toMultiset();
@@ -371,13 +371,13 @@ public class Difference<L, R> {
         List<Short> leftOnly = new ArrayList<>();
         List<Short> rightOnly = new ArrayList<>();
 
-        if (N.isNullOrEmpty(a)) {
-            if (N.isNullOrEmpty(b)) {
+        if (N.isEmpty(a)) {
+            if (N.isEmpty(b)) {
                 // Do nothing. All empty.
             } else {
                 rightOnly = b.toList();
             }
-        } else if (N.isNullOrEmpty(b)) {
+        } else if (N.isEmpty(b)) {
             leftOnly = a.toList();
         } else {
             final Multiset<Short> bOccurrences = b.toMultiset();
@@ -420,13 +420,13 @@ public class Difference<L, R> {
         List<Integer> leftOnly = new ArrayList<>();
         List<Integer> rightOnly = new ArrayList<>();
 
-        if (N.isNullOrEmpty(a)) {
-            if (N.isNullOrEmpty(b)) {
+        if (N.isEmpty(a)) {
+            if (N.isEmpty(b)) {
                 // Do nothing. All empty.
             } else {
                 rightOnly = b.toList();
             }
-        } else if (N.isNullOrEmpty(b)) {
+        } else if (N.isEmpty(b)) {
             leftOnly = a.toList();
         } else {
             final Multiset<Integer> bOccurrences = b.toMultiset();
@@ -469,13 +469,13 @@ public class Difference<L, R> {
         List<Long> leftOnly = new ArrayList<>();
         List<Long> rightOnly = new ArrayList<>();
 
-        if (N.isNullOrEmpty(a)) {
-            if (N.isNullOrEmpty(b)) {
+        if (N.isEmpty(a)) {
+            if (N.isEmpty(b)) {
                 // Do nothing. All empty.
             } else {
                 rightOnly = b.toList();
             }
-        } else if (N.isNullOrEmpty(b)) {
+        } else if (N.isEmpty(b)) {
             leftOnly = a.toList();
         } else {
             final Multiset<Long> bOccurrences = b.toMultiset();
@@ -518,13 +518,13 @@ public class Difference<L, R> {
         List<Float> leftOnly = new ArrayList<>();
         List<Float> rightOnly = new ArrayList<>();
 
-        if (N.isNullOrEmpty(a)) {
-            if (N.isNullOrEmpty(b)) {
+        if (N.isEmpty(a)) {
+            if (N.isEmpty(b)) {
                 // Do nothing. All empty.
             } else {
                 rightOnly = b.toList();
             }
-        } else if (N.isNullOrEmpty(b)) {
+        } else if (N.isEmpty(b)) {
             leftOnly = a.toList();
         } else {
             final Multiset<Float> bOccurrences = b.toMultiset();
@@ -567,13 +567,13 @@ public class Difference<L, R> {
         List<Double> leftOnly = new ArrayList<>();
         List<Double> rightOnly = new ArrayList<>();
 
-        if (N.isNullOrEmpty(a)) {
-            if (N.isNullOrEmpty(b)) {
+        if (N.isEmpty(a)) {
+            if (N.isEmpty(b)) {
                 // Do nothing. All empty.
             } else {
                 rightOnly = b.toList();
             }
-        } else if (N.isNullOrEmpty(b)) {
+        } else if (N.isEmpty(b)) {
             leftOnly = a.toList();
         } else {
             final Multiset<Double> bOccurrences = b.toMultiset();
@@ -727,13 +727,13 @@ public class Difference<L, R> {
             final Map<K2, V2> rightOnly = new LinkedHashMap<>();
             final Map<CK, Pair<V1, V2>> withDifferentValues = new LinkedHashMap<>();
 
-            if (N.isNullOrEmpty(map1)) {
-                if (N.isNullOrEmpty(map2)) {
+            if (N.isEmpty(map1)) {
+                if (N.isEmpty(map2)) {
                     // Do nothing. All empty.
                 } else {
                     rightOnly.putAll(map2);
                 }
-            } else if (N.isNullOrEmpty(map2)) {
+            } else if (N.isEmpty(map2)) {
                 leftOnly.putAll(map1);
             } else {
                 Object key1 = null;

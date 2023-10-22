@@ -66,7 +66,7 @@ public class ArrayHashSet<E> implements Set<E> {
      * @param coll 
      */
     public ArrayHashSet(final Collection<? extends E> coll) {
-        if (N.isNullOrEmpty(coll)) {
+        if (N.isEmpty(coll)) {
             set = N.newHashSet();
         } else {
             set = N.newHashSet(coll.size());
@@ -97,7 +97,7 @@ public class ArrayHashSet<E> implements Set<E> {
      */
     @Override
     public boolean addAll(Collection<? extends E> c) {
-        if (N.isNullOrEmpty(c)) {
+        if (N.isEmpty(c)) {
             return false;
         }
 
@@ -128,7 +128,7 @@ public class ArrayHashSet<E> implements Set<E> {
      */
     @Override
     public boolean removeAll(Collection<?> c) {
-        if (N.isNullOrEmpty(c)) {
+        if (N.isEmpty(c)) {
             return false;
         }
 
@@ -148,7 +148,7 @@ public class ArrayHashSet<E> implements Set<E> {
      */
     @Override
     public boolean retainAll(Collection<?> c) {
-        if (N.isNullOrEmpty(c)) {
+        if (N.isEmpty(c)) {
             if (set.isEmpty()) {
                 return false;
             } else {
@@ -184,7 +184,7 @@ public class ArrayHashSet<E> implements Set<E> {
      */
     @Override
     public boolean containsAll(Collection<?> c) {
-        if (N.isNullOrEmpty(c)) {
+        if (N.isEmpty(c)) {
             return true;
         }
 

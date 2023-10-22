@@ -258,7 +258,7 @@ final class XMLParserImpl extends AbstractXMLParser {
         final Class<?> cls = type.clazz();
         final BeanInfo beanInfo = ParserUtil.getBeanInfo(cls);
 
-        if (N.isNullOrEmpty(beanInfo.jsonXmlSerializablePropInfos)) {
+        if (N.isEmpty(beanInfo.jsonXmlSerializablePropInfos)) {
             throw new ParseException("No serializable property is found in class: " + ClassUtil.getCanonicalClassName(cls));
         }
 
@@ -1053,7 +1053,7 @@ final class XMLParserImpl extends AbstractXMLParser {
     public <T> T deserialize(Map<String, Class<?>> nodeClasses, Node node, final XMLDeserializationConfig config) {
         Class<? extends T> targetClass = null;
 
-        if (N.notNullOrEmpty(nodeClasses)) {
+        if (N.notEmpty(nodeClasses)) {
             String nodeName = XMLUtil.getAttribute(node, XMLConstants.NAME);
 
             if (Strings.isEmpty(nodeName)) {
@@ -1092,7 +1092,7 @@ final class XMLParserImpl extends AbstractXMLParser {
                         // do nothing.
                     }
 
-                    if (targetClass == null && N.notNullOrEmpty(nodeClasses)) {
+                    if (targetClass == null && N.notEmpty(nodeClasses)) {
                         String nodeName = null;
 
                         if (xmlReader.getAttributeCount() > 0) {
@@ -1122,7 +1122,7 @@ final class XMLParserImpl extends AbstractXMLParser {
                     Document doc = docBuilder.parse(new InputSource(br));
                     Node node = doc.getFirstChild();
 
-                    if (targetClass == null && N.notNullOrEmpty(nodeClasses)) {
+                    if (targetClass == null && N.notEmpty(nodeClasses)) {
                         String nodeName = XMLUtil.getAttribute(node, XMLConstants.NAME);
 
                         if (Strings.isEmpty(nodeName)) {
@@ -1186,7 +1186,7 @@ final class XMLParserImpl extends AbstractXMLParser {
         }
 
         final XMLDeserializationConfig configToUse = check(config);
-        boolean hasPropTypes = N.notNullOrEmpty(configToUse.getPropTypes());
+        boolean hasPropTypes = N.notEmpty(configToUse.getPropTypes());
 
         if (hasPropTypes && xmlReader.getEventType() == XMLStreamConstants.START_ELEMENT && configToUse.hasPropType(xmlReader.getLocalName())) {
             targetClass = configToUse.getPropType(xmlReader.getLocalName()).clazz();
@@ -1972,7 +1972,7 @@ final class XMLParserImpl extends AbstractXMLParser {
 
         final XMLDeserializationConfig configToUse = check(config);
 
-        boolean hasPropTypes = N.notNullOrEmpty(configToUse.getPropTypes());
+        boolean hasPropTypes = N.notEmpty(configToUse.getPropTypes());
         Class<?> targetClass = null;
 
         if (isFirstCall) {

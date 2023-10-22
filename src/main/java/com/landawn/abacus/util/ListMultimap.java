@@ -255,7 +255,7 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
     public static <K, E> ListMultimap<K, E> create(final Map<? extends K, ? extends E> map) {
         final ListMultimap<K, E> multimap = new ListMultimap<>(Maps.newTargetMap(map), ArrayList.class);
 
-        if (N.notNullOrEmpty(map)) {
+        if (N.notEmpty(map)) {
             multimap.putAll(map);
         }
 
@@ -273,7 +273,7 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
     //    public static <K, E> ListMultimap<K, E> copyOf(final Map<? extends K, ? extends Collection<? extends E>> map) {
     //        final ListMultimap<K, E> multimap = new ListMultimap<>(Maps.newTargetMap(map), ArrayList.class);
     //
-    //        if (N.notNullOrEmpty(map)) {
+    //        if (N.notEmpty(map)) {
     //            for (Map.Entry<? extends K, ? extends Collection<? extends E>> entry : map.entrySet()) {
     //                multimap.putAll(entry.getKey(), entry.getValue());
     //            }
@@ -295,7 +295,7 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
 
         final ListMultimap<K, T> multimap = N.newListMultimap(N.size(c));
 
-        if (N.notNullOrEmpty(c)) {
+        if (N.notEmpty(c)) {
             for (T e : c) {
                 multimap.put(keyMapper.apply(e), e);
             }
@@ -321,7 +321,7 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
 
         final ListMultimap<K, E> multimap = N.newListMultimap(N.size(c));
 
-        if (N.notNullOrEmpty(c)) {
+        if (N.notEmpty(c)) {
             for (T e : c) {
                 multimap.put(keyMapper.apply(e), valueExtractor.apply(e));
             }
@@ -341,7 +341,7 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
     //    public static <K, E> ListMultimap<E, K> invertFrom(final Map<K, E> map) {
     //        final ListMultimap<E, K> multimap = new ListMultimap<>(Maps.newOrderingMap(map), ArrayList.class);
     //
-    //        if (N.notNullOrEmpty(map)) {
+    //        if (N.notEmpty(map)) {
     //            for (Map.Entry<K, E> entry : map.entrySet()) {
     //                multimap.put(entry.getValue(), entry.getKey());
     //            }
@@ -362,11 +362,11 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
     //    public static <K, E> ListMultimap<E, K> flatInvertFrom(final Map<K, ? extends Collection<? extends E>> map) {
     //        final ListMultimap<E, K> multimap = new ListMultimap<>(Maps.newOrderingMap(map), ArrayList.class);
     //
-    //        if (N.notNullOrEmpty(map)) {
+    //        if (N.notEmpty(map)) {
     //            for (Map.Entry<K, ? extends Collection<? extends E>> entry : map.entrySet()) {
     //                final Collection<? extends E> c = entry.getValue();
     //
-    //                if (N.notNullOrEmpty(c)) {
+    //                if (N.notEmpty(c)) {
     //                    for (E e : c) {
     //                        multimap.put(e, entry.getKey());
     //                    }
@@ -388,11 +388,11 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
     //    public static <K, E, V extends Collection<E>> ListMultimap<E, K> invertFrom(final Multimap<K, E, V> map) {
     //        final ListMultimap<E, K> multimap = new ListMultimap<>(Maps.newOrderingMap(map.valueMap), ArrayList.class);
     //
-    //        if (N.notNullOrEmpty(map)) {
+    //        if (N.notEmpty(map)) {
     //            for (Map.Entry<K, V> entry : map.entrySet()) {
     //                final V c = entry.getValue();
     //
-    //                if (N.notNullOrEmpty(c)) {
+    //                if (N.notEmpty(c)) {
     //                    for (E e : c) {
     //                        multimap.put(e, entry.getKey());
     //                    }
@@ -456,7 +456,7 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      * @return
      */
     public static <K, E> ListMultimap<K, E> concat(final Collection<? extends Map<? extends K, ? extends E>> c) {
-        if (N.isNullOrEmpty(c)) {
+        if (N.isEmpty(c)) {
             return N.newListMultimap();
         }
 
@@ -764,11 +764,11 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
         final ListMultimap<K, E> multimap = this;
         final ListMultimap<E, K> res = new ListMultimap<>(Maps.newOrderingMap(valueMap), (Supplier) valueSupplier);
 
-        if (N.notNullOrEmpty(multimap)) {
+        if (N.notEmpty(multimap)) {
             for (Map.Entry<K, List<E>> entry : multimap.entrySet()) {
                 final List<E> c = entry.getValue();
 
-                if (N.notNullOrEmpty(c)) {
+                if (N.notEmpty(c)) {
                     for (E e : c) {
                         res.put(e, entry.getKey());
                     }
@@ -841,11 +841,11 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
     //    public ListMultimap<E, K> inversed() {
     //        final ListMultimap<E, K> multimap = new ListMultimap<E, K>(valueMap.getClass(), concreteValueType);
     //
-    //        if (N.notNullOrEmpty(valueMap)) {
+    //        if (N.notEmpty(valueMap)) {
     //            for (Map.Entry<K, ? extends List<? extends E>> entry : valueMap.entrySet()) {
     //                final List<? extends E> c = entry.getValue();
     //
-    //                if (N.notNullOrEmpty(c)) {
+    //                if (N.notEmpty(c)) {
     //                    for (E e : c) {
     //                        multimap.put(e, entry.getKey());
     //                    }

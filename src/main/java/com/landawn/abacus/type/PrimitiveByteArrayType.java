@@ -325,7 +325,7 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
      */
     @Override
     public <E> Collection<E> array2Collection(Collection<E> resultCollection, byte[] x) {
-        if (N.isNullOrEmpty(x)) {
+        if (N.isEmpty(x)) {
             return resultCollection;
         }
 

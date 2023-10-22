@@ -277,7 +277,7 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
      */
     @Override
     public <E2> Collection<E2> array2Collection(Collection<E2> resultCollection, T[] x) {
-        if (N.isNullOrEmpty(x)) {
+        if (N.isEmpty(x)) {
             return resultCollection;
         }
 

@@ -1002,7 +1002,7 @@ public abstract class DateUtil {
     //     * @return
     //     */
     //    public static ZonedDateTime parseZonedDateTime(final String dateTime, String format, TimeZone timeZone) {
-    //        if (N.isNullOrEmpty(dateTime) || (dateTime.length() == 4 && "null".equalsIgnoreCase(dateTime))) {
+    //        if (N.isEmpty(dateTime) || (dateTime.length() == 4 && "null".equalsIgnoreCase(dateTime))) {
     //            return null;
     //        }
     //
@@ -1018,7 +1018,7 @@ public abstract class DateUtil {
     //
     //        format = checkDateFormat(dateTime, format);
     //
-    //        if (N.isNullOrEmpty(format)) {
+    //        if (N.isEmpty(format)) {
     //            if (dateTime.charAt(dateTime.length() - 1) == ']' && dateTime.lastIndexOf('[') > 0) {
     //                ZonedDateTime ret = ZonedDateTime.parse(dateTime);
     //

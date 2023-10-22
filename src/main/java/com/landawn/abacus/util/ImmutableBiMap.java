@@ -199,7 +199,7 @@ public final class ImmutableBiMap<K, V> extends ImmutableMap<K, V> {
      * @return
      */
     public static <K, V> ImmutableBiMap<K, V> copyOf(final BiMap<? extends K, ? extends V> map) {
-        if (N.isNullOrEmpty(map)) {
+        if (N.isEmpty(map)) {
             return empty();
         }
 

@@ -306,7 +306,7 @@ public final class URLEncodedUtil {
         final BeanInfo beanInfo = ParserUtil.getBeanInfo(targetClass);
         final Object result = beanInfo.createBeanResult();
 
-        if (N.isNullOrEmpty(parameters)) {
+        if (N.isEmpty(parameters)) {
             return (T) beanInfo.finishBeanResult(result);
         }
 
@@ -318,7 +318,7 @@ public final class URLEncodedUtil {
             propInfo = beanInfo.getPropInfo(key);
             values = parameters.get(key);
 
-            if (N.isNullOrEmpty(values) || (values.length == 1 && Strings.isEmpty(values[0]))) {
+            if (N.isEmpty(values) || (values.length == 1 && Strings.isEmpty(values[0]))) {
                 propValue = propInfo.jsonXmlType.defaultValue();
             } else {
                 if (propInfo.jsonXmlType.clazz().equals(String[].class)) {

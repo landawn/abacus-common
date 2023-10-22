@@ -215,7 +215,7 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      * @return
      */
     public boolean containsAll(Collection<? extends T> c) {
-        if (N.isNullOrEmpty(c)) {
+        if (N.isEmpty(c)) {
             return true;
         }
 

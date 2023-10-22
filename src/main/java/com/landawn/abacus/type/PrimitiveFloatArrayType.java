@@ -207,7 +207,7 @@ public final class PrimitiveFloatArrayType extends AbstractPrimitiveArrayType<fl
      */
     @Override
     public <E> Collection<E> array2Collection(Collection<E> resultCollection, float[] x) {
-        if (N.isNullOrEmpty(x)) {
+        if (N.isEmpty(x)) {
             return resultCollection;
         }
 

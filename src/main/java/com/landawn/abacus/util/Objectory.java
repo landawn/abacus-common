@@ -194,7 +194,7 @@ public final class Objectory {
         synchronized (objectArrayPool) {
             Queue<Object[]> arrayQueue = objectArrayPool[size];
 
-            if (N.notNullOrEmpty(arrayQueue)) {
+            if (N.notEmpty(arrayQueue)) {
                 objArray = arrayQueue.poll();
             }
 

@@ -81,7 +81,7 @@ public class ArrayHashMap<K, V> implements Map<K, V> {
      * @param m 
      */
     public ArrayHashMap(final Map<? extends K, ? extends V> m) {
-        if (N.isNullOrEmpty(m)) {
+        if (N.isEmpty(m)) {
             map = new HashMap<>();
         } else {
             map = N.newHashMap(m.size());
@@ -117,7 +117,7 @@ public class ArrayHashMap<K, V> implements Map<K, V> {
      */
     @Override
     public void putAll(Map<? extends K, ? extends V> m) {
-        if (N.isNullOrEmpty(m)) {
+        if (N.isEmpty(m)) {
             return;
         }
 

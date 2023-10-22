@@ -88,7 +88,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
      * @return
      */
     public static <K, V> BiIterator<K, V> of(final Map<K, V> map) {
-        if (N.isNullOrEmpty(map)) {
+        if (N.isEmpty(map)) {
             return empty();
         }
 

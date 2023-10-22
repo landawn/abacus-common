@@ -167,7 +167,7 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
      */
     @SafeVarargs
     public static <E> ImmutableList<E> of(final E... a) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return empty();
         } else if (a.length == 1) {
             return new ImmutableList<>(Collections.singletonList(a[0]));
@@ -183,7 +183,7 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
      * @return
      */
     public static <E> ImmutableList<E> copyOf(final Collection<? extends E> c) {
-        if (N.isNullOrEmpty(c)) {
+        if (N.isEmpty(c)) {
             return empty();
         } else if (c.size() == 1) {
             return new ImmutableList<>(Collections.singletonList(N.firstOrNullIfEmpty(c)));
@@ -402,7 +402,7 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
          * @return 
          */
         public Builder<E> add(final E... elements) {
-            if (N.notNullOrEmpty(elements)) {
+            if (N.notEmpty(elements)) {
                 ret.addAll(Arrays.asList(elements));
             }
 
@@ -416,7 +416,7 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
          * @return 
          */
         public Builder<E> addAll(final Collection<? extends E> c) {
-            if (N.notNullOrEmpty(c)) {
+            if (N.notEmpty(c)) {
                 ret.addAll(c);
             }
 

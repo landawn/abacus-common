@@ -128,7 +128,7 @@ public abstract class Observer<T> implements Immutable {
      * @return
      */
     public static <T> Observer<T> of(final Collection<? extends T> c) {
-        return of(N.isNullOrEmpty(c) ? ObjIterator.<T> empty() : c.iterator());
+        return of(N.isEmpty(c) ? ObjIterator.<T> empty() : c.iterator());
     }
 
     /**
@@ -666,7 +666,7 @@ public abstract class Observer<T> implements Immutable {
                 if (downDispatcher != null) {
                     final Collection<? extends R> c = mapper.apply((T) param); // onError if map.apply throws exception?
 
-                    if (N.notNullOrEmpty(c)) {
+                    if (N.notEmpty(c)) {
                         for (R u : c) {
                             downDispatcher.onNext(u);
                         }
@@ -842,7 +842,7 @@ public abstract class Observer<T> implements Immutable {
     void cancelScheduledFutures() {
         final long startTime = System.currentTimeMillis();
 
-        if (N.notNullOrEmpty(scheduledFutures)) {
+        if (N.notEmpty(scheduledFutures)) {
             for (Map.Entry<ScheduledFuture<?>, Long> entry : scheduledFutures.entrySet()) {
                 final long delay = entry.getValue();
 

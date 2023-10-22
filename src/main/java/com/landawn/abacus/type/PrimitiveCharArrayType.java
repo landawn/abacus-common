@@ -271,7 +271,7 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
      */
     @Override
     public <E> Collection<E> array2Collection(Collection<E> resultCollection, char[] x) {
-        if (N.isNullOrEmpty(x)) {
+        if (N.isEmpty(x)) {
             return resultCollection;
         }
 

@@ -1855,7 +1855,7 @@ public final class Fn {
     public static <T> Predicate<T> in(final Collection<?> c) {
         N.checkArgNotNull(c);
 
-        final boolean isNotEmpty = N.notNullOrEmpty(c);
+        final boolean isNotEmpty = N.notEmpty(c);
 
         return value -> isNotEmpty && c.contains(value);
     }
@@ -1869,7 +1869,7 @@ public final class Fn {
     public static <T> Predicate<T> notIn(final Collection<?> c) {
         N.checkArgNotNull(c);
 
-        final boolean isEmpty = N.isNullOrEmpty(c);
+        final boolean isEmpty = N.isEmpty(c);
 
         return value -> isEmpty || !c.contains(value);
     }

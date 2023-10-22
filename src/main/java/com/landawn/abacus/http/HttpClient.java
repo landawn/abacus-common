@@ -1065,7 +1065,8 @@ public final class HttpClient {
      * @return
      * @throws UncheckedIOException the unchecked IO exception
      */
-    HttpURLConnection openConnection(HttpMethod httpMethod, final Class<?> resultClass, boolean doOutput, HttpSettings settings) throws UncheckedIOException {
+    public HttpURLConnection openConnection(HttpMethod httpMethod, final Class<?> resultClass, boolean doOutput, HttpSettings settings)
+            throws UncheckedIOException {
         return openConnection(httpMethod, resultClass, null, doOutput, settings);
     }
 
@@ -1079,8 +1080,8 @@ public final class HttpClient {
      * @return
      * @throws UncheckedIOException the unchecked IO exception
      */
-    HttpURLConnection openConnection(HttpMethod httpMethod, final Class<?> resultClass, final Object queryParameters, boolean doOutput, HttpSettings settings)
-            throws UncheckedIOException {
+    public HttpURLConnection openConnection(HttpMethod httpMethod, final Class<?> resultClass, final Object queryParameters, boolean doOutput,
+            HttpSettings settings) throws UncheckedIOException {
         HttpURLConnection connection = null;
 
         if (_activeConnectionCounter.incrementAndGet() > _maxConnection) {

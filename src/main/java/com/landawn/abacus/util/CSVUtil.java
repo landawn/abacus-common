@@ -607,7 +607,7 @@ public final class CSVUtil {
                 }
             }
 
-            if (N.notNullOrEmpty(selectPropNameSet)) {
+            if (N.notEmpty(selectPropNameSet)) {
                 throw new IllegalArgumentException(selectColumnNames + " are not included in titles: " + N.toString(titles));
             }
 
@@ -790,7 +790,7 @@ public final class CSVUtil {
             final Map<String, ? extends Type> columnTypeMap) throws UncheckedIOException, E {
         N.checkArgument(offset >= 0 && count >= 0, "'offset'=%s and 'count'=%s can't be negative", offset, count);
 
-        if (N.isNullOrEmpty(columnTypeMap)) {
+        if (N.isEmpty(columnTypeMap)) {
             throw new IllegalArgumentException("columnTypeMap can't be null or empty");
         }
 
@@ -1001,7 +1001,7 @@ public final class CSVUtil {
             final List<? extends Type> columnTypeList) throws UncheckedIOException, E {
         N.checkArgument(offset >= 0 && count >= 0, "'offset'=%s and 'count'=%s can't be negative", offset, count);
 
-        if (N.isNullOrEmpty(columnTypeList)) {
+        if (N.isEmpty(columnTypeList)) {
             throw new IllegalArgumentException("columnTypeList can't be null or empty");
         }
 
@@ -1213,7 +1213,7 @@ public final class CSVUtil {
                     }
                 }
 
-                if (N.notNullOrEmpty(selectPropNameSet)) {
+                if (N.notEmpty(selectPropNameSet)) {
                     throw new IllegalArgumentException(selectColumnNames + " are not included in titles: " + N.toString(titles));
                 }
 

@@ -280,7 +280,7 @@ public final class HttpUtil {
         if (value instanceof Collection) {
             final Collection c = (Collection) value;
 
-            if (N.isNullOrEmpty(c)) {
+            if (N.isEmpty(c)) {
                 return Strings.EMPTY_STRING;
             } else if (c.size() == 1) {
                 return N.stringOf(N.firstOrNullIfEmpty(c));
@@ -732,7 +732,7 @@ public final class HttpUtil {
         String contentEncoding = getContentEncoding(respHeaders);
 
         // Content encoding should be specified explicitly
-        //    if (N.isNullOrEmpty(contentEncoding) && requestContentFormat != null) {
+        //    if (N.isEmpty(contentEncoding) && requestContentFormat != null) {
         //        contentEncoding = requestContentFormat.contentEncoding();
         //    }
 

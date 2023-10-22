@@ -339,7 +339,7 @@ public class Array {
     @SafeVarargs
     @NullSafe
     public static <T> List<T> asList(T... a) {
-        return N.isNullOrEmpty(a) ? N.<T> emptyList() : Arrays.asList(a);
+        return N.isEmpty(a) ? N.<T> emptyList() : Arrays.asList(a);
     }
 
     /**
@@ -1601,9 +1601,9 @@ public class Array {
      * @return
      */
     public static boolean[][] concat(final boolean[][] a, final boolean[][] b) {
-        if (N.isNullOrEmpty(a)) {
-            return N.isNullOrEmpty(b) ? new boolean[0][] : N.clone(b);
-        } else if (N.isNullOrEmpty(b)) {
+        if (N.isEmpty(a)) {
+            return N.isEmpty(b) ? new boolean[0][] : N.clone(b);
+        } else if (N.isEmpty(b)) {
             return N.clone(a);
         }
 
@@ -1624,9 +1624,9 @@ public class Array {
      * @return
      */
     public static boolean[][][] concat(final boolean[][][] a, final boolean[][][] b) {
-        if (N.isNullOrEmpty(a)) {
-            return N.isNullOrEmpty(b) ? new boolean[0][][] : N.clone(b);
-        } else if (N.isNullOrEmpty(b)) {
+        if (N.isEmpty(a)) {
+            return N.isEmpty(b) ? new boolean[0][][] : N.clone(b);
+        } else if (N.isEmpty(b)) {
             return N.clone(a);
         }
 
@@ -1647,9 +1647,9 @@ public class Array {
      * @return
      */
     public static char[][] concat(final char[][] a, final char[][] b) {
-        if (N.isNullOrEmpty(a)) {
-            return N.isNullOrEmpty(b) ? new char[0][] : N.clone(b);
-        } else if (N.isNullOrEmpty(b)) {
+        if (N.isEmpty(a)) {
+            return N.isEmpty(b) ? new char[0][] : N.clone(b);
+        } else if (N.isEmpty(b)) {
             return N.clone(a);
         }
 
@@ -1670,9 +1670,9 @@ public class Array {
      * @return
      */
     public static char[][][] concat(final char[][][] a, final char[][][] b) {
-        if (N.isNullOrEmpty(a)) {
-            return N.isNullOrEmpty(b) ? new char[0][][] : N.clone(b);
-        } else if (N.isNullOrEmpty(b)) {
+        if (N.isEmpty(a)) {
+            return N.isEmpty(b) ? new char[0][][] : N.clone(b);
+        } else if (N.isEmpty(b)) {
             return N.clone(a);
         }
 
@@ -1693,9 +1693,9 @@ public class Array {
      * @return
      */
     public static byte[][] concat(final byte[][] a, final byte[][] b) {
-        if (N.isNullOrEmpty(a)) {
-            return N.isNullOrEmpty(b) ? new byte[0][] : N.clone(b);
-        } else if (N.isNullOrEmpty(b)) {
+        if (N.isEmpty(a)) {
+            return N.isEmpty(b) ? new byte[0][] : N.clone(b);
+        } else if (N.isEmpty(b)) {
             return N.clone(a);
         }
 
@@ -1716,9 +1716,9 @@ public class Array {
      * @return
      */
     public static byte[][][] concat(final byte[][][] a, final byte[][][] b) {
-        if (N.isNullOrEmpty(a)) {
-            return N.isNullOrEmpty(b) ? new byte[0][][] : N.clone(b);
-        } else if (N.isNullOrEmpty(b)) {
+        if (N.isEmpty(a)) {
+            return N.isEmpty(b) ? new byte[0][][] : N.clone(b);
+        } else if (N.isEmpty(b)) {
             return N.clone(a);
         }
 
@@ -1739,9 +1739,9 @@ public class Array {
      * @return
      */
     public static short[][] concat(final short[][] a, final short[][] b) {
-        if (N.isNullOrEmpty(a)) {
-            return N.isNullOrEmpty(b) ? new short[0][] : N.clone(b);
-        } else if (N.isNullOrEmpty(b)) {
+        if (N.isEmpty(a)) {
+            return N.isEmpty(b) ? new short[0][] : N.clone(b);
+        } else if (N.isEmpty(b)) {
             return N.clone(a);
         }
 
@@ -1762,9 +1762,9 @@ public class Array {
      * @return
      */
     public static short[][][] concat(final short[][][] a, final short[][][] b) {
-        if (N.isNullOrEmpty(a)) {
-            return N.isNullOrEmpty(b) ? new short[0][][] : N.clone(b);
-        } else if (N.isNullOrEmpty(b)) {
+        if (N.isEmpty(a)) {
+            return N.isEmpty(b) ? new short[0][][] : N.clone(b);
+        } else if (N.isEmpty(b)) {
             return N.clone(a);
         }
 
@@ -1785,9 +1785,9 @@ public class Array {
      * @return
      */
     public static int[][] concat(final int[][] a, final int[][] b) {
-        if (N.isNullOrEmpty(a)) {
-            return N.isNullOrEmpty(b) ? new int[0][] : N.clone(b);
-        } else if (N.isNullOrEmpty(b)) {
+        if (N.isEmpty(a)) {
+            return N.isEmpty(b) ? new int[0][] : N.clone(b);
+        } else if (N.isEmpty(b)) {
             return N.clone(a);
         }
 
@@ -1808,9 +1808,9 @@ public class Array {
      * @return
      */
     public static int[][][] concat(final int[][][] a, final int[][][] b) {
-        if (N.isNullOrEmpty(a)) {
-            return N.isNullOrEmpty(b) ? new int[0][][] : N.clone(b);
-        } else if (N.isNullOrEmpty(b)) {
+        if (N.isEmpty(a)) {
+            return N.isEmpty(b) ? new int[0][][] : N.clone(b);
+        } else if (N.isEmpty(b)) {
             return N.clone(a);
         }
 
@@ -1831,9 +1831,9 @@ public class Array {
      * @return
      */
     public static long[][] concat(final long[][] a, final long[][] b) {
-        if (N.isNullOrEmpty(a)) {
-            return N.isNullOrEmpty(b) ? new long[0][] : N.clone(b);
-        } else if (N.isNullOrEmpty(b)) {
+        if (N.isEmpty(a)) {
+            return N.isEmpty(b) ? new long[0][] : N.clone(b);
+        } else if (N.isEmpty(b)) {
             return N.clone(a);
         }
 
@@ -1854,9 +1854,9 @@ public class Array {
      * @return
      */
     public static long[][][] concat(final long[][][] a, final long[][][] b) {
-        if (N.isNullOrEmpty(a)) {
-            return N.isNullOrEmpty(b) ? new long[0][][] : N.clone(b);
-        } else if (N.isNullOrEmpty(b)) {
+        if (N.isEmpty(a)) {
+            return N.isEmpty(b) ? new long[0][][] : N.clone(b);
+        } else if (N.isEmpty(b)) {
             return N.clone(a);
         }
 
@@ -1877,9 +1877,9 @@ public class Array {
      * @return
      */
     public static float[][] concat(final float[][] a, final float[][] b) {
-        if (N.isNullOrEmpty(a)) {
-            return N.isNullOrEmpty(b) ? new float[0][] : N.clone(b);
-        } else if (N.isNullOrEmpty(b)) {
+        if (N.isEmpty(a)) {
+            return N.isEmpty(b) ? new float[0][] : N.clone(b);
+        } else if (N.isEmpty(b)) {
             return N.clone(a);
         }
 
@@ -1900,9 +1900,9 @@ public class Array {
      * @return
      */
     public static float[][][] concat(final float[][][] a, final float[][][] b) {
-        if (N.isNullOrEmpty(a)) {
-            return N.isNullOrEmpty(b) ? new float[0][][] : N.clone(b);
-        } else if (N.isNullOrEmpty(b)) {
+        if (N.isEmpty(a)) {
+            return N.isEmpty(b) ? new float[0][][] : N.clone(b);
+        } else if (N.isEmpty(b)) {
             return N.clone(a);
         }
 
@@ -1923,9 +1923,9 @@ public class Array {
      * @return
      */
     public static double[][] concat(final double[][] a, final double[][] b) {
-        if (N.isNullOrEmpty(a)) {
-            return N.isNullOrEmpty(b) ? new double[0][] : N.clone(b);
-        } else if (N.isNullOrEmpty(b)) {
+        if (N.isEmpty(a)) {
+            return N.isEmpty(b) ? new double[0][] : N.clone(b);
+        } else if (N.isEmpty(b)) {
             return N.clone(a);
         }
 
@@ -1946,9 +1946,9 @@ public class Array {
      * @return
      */
     public static double[][][] concat(final double[][][] a, final double[][][] b) {
-        if (N.isNullOrEmpty(a)) {
-            return N.isNullOrEmpty(b) ? new double[0][][] : N.clone(b);
-        } else if (N.isNullOrEmpty(b)) {
+        if (N.isEmpty(a)) {
+            return N.isEmpty(b) ? new double[0][][] : N.clone(b);
+        } else if (N.isEmpty(b)) {
             return N.clone(a);
         }
 
@@ -1970,9 +1970,9 @@ public class Array {
      * @return
      */
     public static <T> T[][] concatt(final T[][] a, final T[][] b) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return N.clone(b);
-        } else if (N.isNullOrEmpty(b)) {
+        } else if (N.isEmpty(b)) {
             return N.clone(a);
         }
 
@@ -1994,9 +1994,9 @@ public class Array {
      * @return
      */
     public static <T> T[][][] concatt(final T[][][] a, final T[][][] b) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return N.clone(b);
-        } else if (N.isNullOrEmpty(b)) {
+        } else if (N.isEmpty(b)) {
             return N.clone(a);
         }
 
@@ -3720,7 +3720,7 @@ public class Array {
     //    * @param array
     //    */
     //    static void parallelSort(final char[] array) {
-    //        if (N.isNullOrEmpty(array)) {
+    //        if (N.isEmpty(array)) {
     //            return;
     //        }
     //
@@ -3736,7 +3736,7 @@ public class Array {
     //    static void parallelSort(final char[] a, final int fromIndex, final int toIndex) {
     //        N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
     //
-    //        if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
+    //        if (N.isEmpty(a) || fromIndex == toIndex) {
     //            return;
     //        }
     //
@@ -3861,7 +3861,7 @@ public class Array {
     //    * @param array
     //    */
     //    static void parallelSort(final byte[] array) {
-    //        if (N.isNullOrEmpty(array)) {
+    //        if (N.isEmpty(array)) {
     //            return;
     //        }
     //
@@ -3877,7 +3877,7 @@ public class Array {
     //    static void parallelSort(final byte[] a, final int fromIndex, final int toIndex) {
     //        N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
     //
-    //        if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
+    //        if (N.isEmpty(a) || fromIndex == toIndex) {
     //            return;
     //        }
     //
@@ -4002,7 +4002,7 @@ public class Array {
     //    * @param array
     //    */
     //    static void parallelSort(final short[] array) {
-    //        if (N.isNullOrEmpty(array)) {
+    //        if (N.isEmpty(array)) {
     //            return;
     //        }
     //
@@ -4018,7 +4018,7 @@ public class Array {
     //    static void parallelSort(final short[] a, final int fromIndex, final int toIndex) {
     //        N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
     //
-    //        if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
+    //        if (N.isEmpty(a) || fromIndex == toIndex) {
     //            return;
     //        }
     //
@@ -4143,7 +4143,7 @@ public class Array {
     //    * @param array
     //    */
     //    static void parallelSort(final int[] array) {
-    //        if (N.isNullOrEmpty(array)) {
+    //        if (N.isEmpty(array)) {
     //            return;
     //        }
     //
@@ -4159,7 +4159,7 @@ public class Array {
     //    static void parallelSort(final int[] a, final int fromIndex, final int toIndex) {
     //        N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
     //
-    //        if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
+    //        if (N.isEmpty(a) || fromIndex == toIndex) {
     //            return;
     //        }
     //
@@ -4284,7 +4284,7 @@ public class Array {
     //    * @param array
     //    */
     //    static void parallelSort(final long[] array) {
-    //        if (N.isNullOrEmpty(array)) {
+    //        if (N.isEmpty(array)) {
     //            return;
     //        }
     //
@@ -4300,7 +4300,7 @@ public class Array {
     //    static void parallelSort(final long[] a, final int fromIndex, final int toIndex) {
     //        N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
     //
-    //        if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
+    //        if (N.isEmpty(a) || fromIndex == toIndex) {
     //            return;
     //        }
     //
@@ -4425,7 +4425,7 @@ public class Array {
     //    * @param array
     //    */
     //    static void parallelSort(final float[] array) {
-    //        if (N.isNullOrEmpty(array)) {
+    //        if (N.isEmpty(array)) {
     //            return;
     //        }
     //
@@ -4441,7 +4441,7 @@ public class Array {
     //    static void parallelSort(final float[] a, final int fromIndex, final int toIndex) {
     //        N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
     //
-    //        if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
+    //        if (N.isEmpty(a) || fromIndex == toIndex) {
     //            return;
     //        }
     //
@@ -4585,7 +4585,7 @@ public class Array {
     //    * @param array
     //    */
     //    static void parallelSort(final double[] array) {
-    //        if (N.isNullOrEmpty(array)) {
+    //        if (N.isEmpty(array)) {
     //            return;
     //        }
     //
@@ -4601,7 +4601,7 @@ public class Array {
     //    static void parallelSort(final double[] a, final int fromIndex, final int toIndex) {
     //        N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
     //
-    //        if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
+    //        if (N.isEmpty(a) || fromIndex == toIndex) {
     //            return;
     //        }
     //
@@ -4745,7 +4745,7 @@ public class Array {
     //    * @param a
     //    */
     //    static void parallelSort(final Object[] a) {
-    //        if (N.isNullOrEmpty(a)) {
+    //        if (N.isEmpty(a)) {
     //            return;
     //        }
     //
@@ -4769,7 +4769,7 @@ public class Array {
     //    * @param cmp
     //    */
     //    static <T> void parallelSort(final T[] a, final Comparator<? super T> cmp) {
-    //        if (N.isNullOrEmpty(a)) {
+    //        if (N.isEmpty(a)) {
     //            return;
     //        }
     //
@@ -4787,7 +4787,7 @@ public class Array {
     //    static <T> void parallelSort(final T[] a, final int fromIndex, final int toIndex, Comparator<? super T> cmp) {
     //        N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
     //
-    //        if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
+    //        if (N.isEmpty(a) || fromIndex == toIndex) {
     //            return;
     //        }
     //
@@ -4917,7 +4917,7 @@ public class Array {
     //    * @param c
     //    */
     //    static <T extends Comparable<? super T>> void parallelSort(final List<? extends T> c) {
-    //        if (N.isNullOrEmpty(c)) {
+    //        if (N.isEmpty(c)) {
     //            return;
     //        }
     //
@@ -4942,7 +4942,7 @@ public class Array {
     //    * @param cmp
     //    */
     //    static <T> void parallelSort(final List<? extends T> list, final Comparator<? super T> cmp) {
-    //        if (N.isNullOrEmpty(list)) {
+    //        if (N.isEmpty(list)) {
     //            return;
     //        }
     //
@@ -4959,7 +4959,7 @@ public class Array {
     //    */
     //    @SuppressWarnings("rawtypes")
     //    static <T> void parallelSort(final List<? extends T> c, final int fromIndex, final int toIndex, final Comparator<? super T> cmp) {
-    //        if ((N.isNullOrEmpty(c) && fromIndex == 0 && toIndex == 0) || fromIndex == toIndex) {
+    //        if ((N.isEmpty(c) && fromIndex == 0 && toIndex == 0) || fromIndex == toIndex) {
     //            return;
     //        }
     //

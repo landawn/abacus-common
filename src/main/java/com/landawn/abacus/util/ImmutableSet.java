@@ -164,7 +164,7 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      */
     @SafeVarargs
     public static <E> ImmutableSet<E> of(final E... a) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return empty();
         } else if (a.length == 1) {
             return new ImmutableSet<>(N.asSet(a[0]));
@@ -180,7 +180,7 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      * @return
      */
     public static <E> ImmutableSet<E> copyOf(final Collection<? extends E> set) {
-        if (N.isNullOrEmpty(set)) {
+        if (N.isEmpty(set)) {
             return empty();
         }
 
@@ -251,7 +251,7 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
          * @return 
          */
         public Builder<E> add(final E... elements) {
-            if (N.notNullOrEmpty(elements)) {
+            if (N.notEmpty(elements)) {
                 ret.addAll(Arrays.asList(elements));
             }
 
@@ -265,7 +265,7 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
          * @return 
          */
         public Builder<E> addAll(final Collection<? extends E> c) {
-            if (N.notNullOrEmpty(c)) {
+            if (N.notEmpty(c)) {
                 ret.addAll(c);
             }
 

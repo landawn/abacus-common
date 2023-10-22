@@ -1730,7 +1730,7 @@ class CommonUtil {
      */
     @SafeVarargs
     public static void erase(final Object bean, final String... propNames) {
-        if (bean == null || isNullOrEmpty(propNames)) {
+        if (bean == null || isEmpty(propNames)) {
             return;
         }
 
@@ -1747,7 +1747,7 @@ class CommonUtil {
      * @param propNames
      */
     public static void erase(final Object bean, final Collection<String> propNames) {
-        if (bean == null || isNullOrEmpty(propNames)) {
+        if (bean == null || isEmpty(propNames)) {
             return;
         }
 
@@ -2114,7 +2114,7 @@ class CommonUtil {
      * @return
      */
     public static <T> ArrayList<T> newArrayList(Collection<? extends T> c) { //NOSONAR
-        return isNullOrEmpty(c) ? new ArrayList<>() : new ArrayList<>(c);
+        return isEmpty(c) ? new ArrayList<>() : new ArrayList<>(c);
     }
 
     /**
@@ -2135,7 +2135,7 @@ class CommonUtil {
      * @return
      */
     public static <T> LinkedList<T> newLinkedList(Collection<? extends T> c) { //NOSONAR
-        return isNullOrEmpty(c) ? new LinkedList<>() : new LinkedList<>(c);
+        return isEmpty(c) ? new LinkedList<>() : new LinkedList<>(c);
     }
 
     /**
@@ -2156,7 +2156,7 @@ class CommonUtil {
      * @return
      */
     public static <T> Set<T> newHashSet(int initialCapacity) {
-        return new HashSet<>(N.initHashCapacity(initialCapacity));
+        return new HashSet<>(initHashCapacity(initialCapacity));
     }
 
     /**
@@ -2167,7 +2167,7 @@ class CommonUtil {
      * @return
      */
     public static <T> Set<T> newHashSet(Collection<? extends T> c) {
-        return isNullOrEmpty(c) ? new HashSet<>() : new HashSet<>(c);
+        return isEmpty(c) ? new HashSet<>() : new HashSet<>(c);
     }
 
     /**
@@ -2188,7 +2188,7 @@ class CommonUtil {
      * @return
      */
     public static <T> Set<T> newLinkedHashSet(int initialCapacity) {
-        return new LinkedHashSet<>(N.initHashCapacity(initialCapacity));
+        return new LinkedHashSet<>(initHashCapacity(initialCapacity));
     }
 
     /**
@@ -2199,7 +2199,7 @@ class CommonUtil {
      * @return
      */
     public static <T> Set<T> newLinkedHashSet(Collection<? extends T> c) {
-        return isNullOrEmpty(c) ? new LinkedHashSet<>() : new LinkedHashSet<>(c);
+        return isEmpty(c) ? new LinkedHashSet<>() : new LinkedHashSet<>(c);
     }
 
     /**
@@ -2231,7 +2231,7 @@ class CommonUtil {
      * @return
      */
     public static <T extends Comparable<? super T>> TreeSet<T> newTreeSet(Collection<? extends T> c) { //NOSONAR
-        return isNullOrEmpty(c) ? new TreeSet<>() : new TreeSet<>(c);
+        return isEmpty(c) ? new TreeSet<>() : new TreeSet<>(c);
     }
 
     /**
@@ -2242,7 +2242,7 @@ class CommonUtil {
      * @return
      */
     public static <T> TreeSet<T> newTreeSet(SortedSet<T> c) { //NOSONAR
-        return isNullOrEmpty(c) ? new TreeSet<>() : new TreeSet<>(c);
+        return isEmpty(c) ? new TreeSet<>() : new TreeSet<>(c);
     }
 
     /**
@@ -2422,7 +2422,7 @@ class CommonUtil {
      * @return
      */
     public static <K, V> Map<K, V> newHashMap(int initialCapacity) {
-        return new HashMap<>(N.initHashCapacity(initialCapacity));
+        return new HashMap<>(initHashCapacity(initialCapacity));
     }
 
     /**
@@ -2434,7 +2434,7 @@ class CommonUtil {
      * @return
      */
     public static <K, V> Map<K, V> newHashMap(Map<? extends K, ? extends V> m) {
-        return isNullOrEmpty(m) ? new HashMap<>() : new HashMap<>(m);
+        return isEmpty(m) ? new HashMap<>() : new HashMap<>(m);
     }
 
     /**
@@ -2452,7 +2452,7 @@ class CommonUtil {
             final Throwables.Function<? super V, ? extends K, E> keyMapper) throws E {
         checkArgNotNull(keyMapper);
 
-        if (isNullOrEmpty(c)) {
+        if (isEmpty(c)) {
             return new HashMap<>();
         }
 
@@ -2485,7 +2485,7 @@ class CommonUtil {
      * @return
      */
     public static <K, V> Map<K, V> newLinkedHashMap(int initialCapacity) {
-        return new LinkedHashMap<>(N.initHashCapacity(initialCapacity));
+        return new LinkedHashMap<>(initHashCapacity(initialCapacity));
     }
 
     /**
@@ -2497,7 +2497,7 @@ class CommonUtil {
      * @return
      */
     public static <K, V> Map<K, V> newLinkedHashMap(Map<? extends K, ? extends V> m) {
-        return isNullOrEmpty(m) ? new LinkedHashMap<>() : new LinkedHashMap<>(m);
+        return isEmpty(m) ? new LinkedHashMap<>() : new LinkedHashMap<>(m);
     }
 
     /**
@@ -2515,7 +2515,7 @@ class CommonUtil {
             final Throwables.Function<? super V, ? extends K, E> keyMapper) throws E {
         checkArgNotNull(keyMapper);
 
-        if (isNullOrEmpty(c)) {
+        if (isEmpty(c)) {
             return N.newLinkedHashMap();
         }
 
@@ -2561,7 +2561,7 @@ class CommonUtil {
      * @return
      */
     public static <K extends Comparable<? super K>, V> TreeMap<K, V> newTreeMap(Map<? extends K, ? extends V> m) { //NOSONAR
-        return isNullOrEmpty(m) ? new TreeMap<>() : new TreeMap<>(m);
+        return isEmpty(m) ? new TreeMap<>() : new TreeMap<>(m);
     }
 
     /**
@@ -2573,7 +2573,7 @@ class CommonUtil {
      * @return
      */
     public static <K, V> TreeMap<K, V> newTreeMap(SortedMap<K, ? extends V> m) { //NOSONAR
-        return isNullOrEmpty(m) ? new TreeMap<>() : new TreeMap<>(m);
+        return isEmpty(m) ? new TreeMap<>() : new TreeMap<>(m);
     }
 
     /**
@@ -2596,7 +2596,7 @@ class CommonUtil {
      * @return
      */
     public static <K, V> IdentityHashMap<K, V> newIdentityHashMap(int initialCapacity) { //NOSONAR
-        return new IdentityHashMap<>(N.initHashCapacity(initialCapacity));
+        return new IdentityHashMap<>(initHashCapacity(initialCapacity));
     }
 
     /**
@@ -2608,7 +2608,7 @@ class CommonUtil {
      * @return
      */
     public static <K, V> IdentityHashMap<K, V> newIdentityHashMap(Map<? extends K, ? extends V> m) { //NOSONAR
-        return isNullOrEmpty(m) ? new IdentityHashMap<>() : new IdentityHashMap<>(m);
+        return isEmpty(m) ? new IdentityHashMap<>() : new IdentityHashMap<>(m);
     }
 
     /**
@@ -2631,7 +2631,7 @@ class CommonUtil {
      * @return
      */
     public static <K, V> ConcurrentHashMap<K, V> newConcurrentHashMap(int initialCapacity) { //NOSONAR
-        return new ConcurrentHashMap<>(N.initHashCapacity(initialCapacity));
+        return new ConcurrentHashMap<>(initHashCapacity(initialCapacity));
     }
 
     /**
@@ -2643,7 +2643,7 @@ class CommonUtil {
      * @return
      */
     public static <K, V> ConcurrentHashMap<K, V> newConcurrentHashMap(Map<? extends K, ? extends V> m) { //NOSONAR
-        return isNullOrEmpty(m) ? new ConcurrentHashMap<>() : new ConcurrentHashMap<>(m);
+        return isEmpty(m) ? new ConcurrentHashMap<>() : new ConcurrentHashMap<>(m);
     }
 
     /**
@@ -2755,7 +2755,7 @@ class CommonUtil {
      * @return
      */
     public static <K, E> ListMultimap<K, E> newListMultimap(final Map<? extends K, ? extends E> m) {
-        final ListMultimap<K, E> multiMap = newListMultimap(N.size(m));
+        final ListMultimap<K, E> multiMap = newListMultimap(size(m));
 
         multiMap.putAll(m);
 
@@ -3036,7 +3036,7 @@ class CommonUtil {
      * @return
      */
     public static DataSet newEmptyDataSet(final Collection<String> columnNames) {
-        if (isNullOrEmpty(columnNames)) {
+        if (isEmpty(columnNames)) {
             return newEmptyDataSet();
         }
 
@@ -3092,16 +3092,16 @@ class CommonUtil {
      * @return
      */
     public static DataSet newDataSet(Collection<String> columnNames, Collection<?> rowList) {
-        if (isNullOrEmpty(columnNames) && isNullOrEmpty(rowList)) {
+        if (isEmpty(columnNames) && isEmpty(rowList)) {
             // throw new IllegalArgumentException("Column name list and row list can not be both null or empty");
             return newEmptyDataSet();
-        } else if (isNullOrEmpty(rowList)) {
+        } else if (isEmpty(rowList)) {
             return newEmptyDataSet(columnNames);
         }
 
         int startRowIndex = 0;
 
-        if (isNullOrEmpty(columnNames)) {
+        if (isEmpty(columnNames)) {
             final Object firstNonNullRow = N.firstNonNull(rowList).orElse(null);
 
             if (firstNonNullRow == null) {
@@ -3137,7 +3137,7 @@ class CommonUtil {
                 throw new IllegalArgumentException("Unsupported header type: " + type.name() + " when specified 'columnNames' is null or empty");
             }
 
-            if (isNullOrEmpty(columnNames)) {
+            if (isEmpty(columnNames)) {
                 throw new IllegalArgumentException("Column name list can not be obtained from row list because it's empty or null");
             }
         }
@@ -3224,10 +3224,10 @@ class CommonUtil {
      * @return
      */
     public static DataSet newDataSet(Collection<String> columnNames, final Object[][] rowList) {
-        if (isNullOrEmpty(columnNames) && isNullOrEmpty(rowList)) {
+        if (isEmpty(columnNames) && isEmpty(rowList)) {
             // throw new IllegalArgumentException("Column name list and row list can not be both null or empty");
             return newEmptyDataSet();
-        } else if (isNullOrEmpty(rowList)) {
+        } else if (isEmpty(rowList)) {
             return newEmptyDataSet(columnNames);
         }
 
@@ -3244,7 +3244,7 @@ class CommonUtil {
      * @return
      */
     public static <C extends Collection<?>> DataSet newDataSet(final Map<String, C> map) {
-        if (isNullOrEmpty(map)) {
+        if (isEmpty(map)) {
             return newEmptyDataSet();
         }
 
@@ -3261,7 +3261,7 @@ class CommonUtil {
         for (C v : map.values()) {
             column = new ArrayList<>(maxColumnLen);
 
-            if (notNullOrEmpty(v)) {
+            if (notEmpty(v)) {
                 column.addAll(v);
             }
 
@@ -3312,7 +3312,7 @@ class CommonUtil {
      * @return
      */
     public static DataSet merge(final Collection<? extends DataSet> dss) {
-        if (N.isNullOrEmpty(dss)) {
+        if (N.isEmpty(dss)) {
             return N.newEmptyDataSet();
         } else if (dss.size() == 1) {
             return N.newEmptyDataSet().merge(dss.iterator().next());
@@ -3328,7 +3328,7 @@ class CommonUtil {
                 columnNameSet.addAll(ds.columnNameList());
                 totalSize += ds.size();
 
-                if (N.notNullOrEmpty(ds.properties())) {
+                if (N.notEmpty(ds.properties())) {
                     props.putAll(ds.properties());
                 }
             }
@@ -3371,7 +3371,7 @@ class CommonUtil {
      */
     @SuppressWarnings("unchecked")
     public static Object[] toArray(final Collection<?> c) {
-        if (isNullOrEmpty(c)) {
+        if (isEmpty(c)) {
             return EMPTY_OBJECT_ARRAY;
         }
 
@@ -3389,7 +3389,7 @@ class CommonUtil {
     public static Object[] toArray(final Collection<?> c, final int fromIndex, final int toIndex) {
         checkFromToIndex(fromIndex, toIndex, size(c));
 
-        if (isNullOrEmpty(c)) {
+        if (isEmpty(c)) {
             return EMPTY_OBJECT_ARRAY;
         } else if (fromIndex == 0 || toIndex == c.size()) {
             return c.toArray(new Object[c.size()]);
@@ -3426,7 +3426,7 @@ class CommonUtil {
     public static <A, T extends A> A[] toArray(final Collection<? extends T> c, final A[] a) throws IllegalArgumentException {
         checkArgNotNull(a);
 
-        if (isNullOrEmpty(c)) {
+        if (isEmpty(c)) {
             return a;
         }
 
@@ -3449,7 +3449,7 @@ class CommonUtil {
         checkFromToIndex(fromIndex, toIndex, size(c));
         checkArgNotNull(a);
 
-        if (isNullOrEmpty(c)) {
+        if (isEmpty(c)) {
             return a;
         } else if (fromIndex == 0 || toIndex == c.size()) {
             return c.toArray(a);
@@ -3485,7 +3485,7 @@ class CommonUtil {
     public static <A, T extends A> A[] toArray(final Collection<? extends T> c, final IntFunction<A[]> arraySupplier) {
         checkArgNotNull(arraySupplier);
 
-        if (isNullOrEmpty(c)) {
+        if (isEmpty(c)) {
             return arraySupplier.apply(0);
         }
 
@@ -3506,7 +3506,7 @@ class CommonUtil {
         checkArgNotNull(arraySupplier);
         checkFromToIndex(fromIndex, toIndex, size(c));
 
-        if (isNullOrEmpty(c)) {
+        if (isEmpty(c)) {
             return arraySupplier.apply(0);
         } else if (fromIndex == 0 || toIndex == c.size()) {
             return c.toArray(arraySupplier.apply(c.size()));
@@ -3544,7 +3544,7 @@ class CommonUtil {
     public static <A, T extends A> A[] toArray(final Collection<? extends T> c, final Class<A[]> targetClass) throws IllegalArgumentException {
         checkArgNotNull(targetClass);
 
-        if (isNullOrEmpty(c)) {
+        if (isEmpty(c)) {
             return newArray(targetClass.getComponentType(), 0);
         }
 
@@ -3570,7 +3570,7 @@ class CommonUtil {
 
         final A[] res = newArray(targetClass.getComponentType(), toIndex - fromIndex);
 
-        if (isNullOrEmpty(c)) {
+        if (isEmpty(c)) {
             return res;
         } else if (fromIndex == 0 || toIndex == c.size()) {
             return c.toArray(res);
@@ -4630,7 +4630,7 @@ class CommonUtil {
      * @return
      */
     public static <T> List<T> toList(final T[] a) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return new ArrayList<>();
         }
 
@@ -4947,7 +4947,7 @@ class CommonUtil {
      * @return
      */
     public static <T> Set<T> toSet(final T[] a) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return newHashSet();
         }
 
@@ -5302,7 +5302,7 @@ class CommonUtil {
      * @return
      */
     public static <T, C extends Collection<T>> C toCollection(final T[] a, final IntFunction<? extends C> supplier) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return supplier.apply(0);
         }
 
@@ -5410,7 +5410,7 @@ class CommonUtil {
      */
     @SuppressWarnings("unchecked")
     static <K, V, T extends Map<K, V>> T newMap(final T m, final Object... a) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return m;
         }
 
@@ -5628,7 +5628,7 @@ class CommonUtil {
     @SafeVarargs
     @NullSafe
     public static <K, V> Map<K, V> asMap(final Object... a) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return new HashMap<>();
         }
 
@@ -5818,7 +5818,7 @@ class CommonUtil {
     @Deprecated
     @SafeVarargs
     public static <K, V> Map<K, V> asLinkedHashMap(final Object... a) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return N.newLinkedHashMap();
         }
 
@@ -5944,7 +5944,7 @@ class CommonUtil {
     @Deprecated
     @SafeVarargs
     public static Map<String, Object> asProps(final Object... a) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return N.newLinkedHashMap();
         }
 
@@ -6150,7 +6150,7 @@ class CommonUtil {
     @SafeVarargs
     @NullSafe
     public static <T> List<T> asList(final T... a) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return new ArrayList<>();
         }
 
@@ -6308,7 +6308,7 @@ class CommonUtil {
     @SafeVarargs
     @NullSafe
     public static <T> LinkedList<T> asLinkedList(final T... a) { //NOSONAR
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return new LinkedList<>();
         }
 
@@ -6518,7 +6518,7 @@ class CommonUtil {
     @SafeVarargs
     @NullSafe
     public static <T> Set<T> asSet(final T... a) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return newHashSet();
         }
 
@@ -6672,7 +6672,7 @@ class CommonUtil {
     @SafeVarargs
     @NullSafe
     public static <T> Set<T> asLinkedHashSet(final T... a) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return newLinkedHashSet();
         }
 
@@ -6693,7 +6693,7 @@ class CommonUtil {
     @SafeVarargs
     @NullSafe
     public static <T> SortedSet<T> asSortedSet(final T... a) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return new TreeSet<>();
         }
 
@@ -6713,7 +6713,7 @@ class CommonUtil {
      */
     @SafeVarargs
     public static <T> NavigableSet<T> asNavigableSet(final T... a) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return new TreeSet<>();
         }
 
@@ -6745,7 +6745,7 @@ class CommonUtil {
      */
     @SafeVarargs
     public static <T> ArrayBlockingQueue<T> asArrayBlockingQueue(final T... a) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return new ArrayBlockingQueue<>(0);
         }
 
@@ -6765,7 +6765,7 @@ class CommonUtil {
      */
     @SafeVarargs
     public static <T> LinkedBlockingQueue<T> asLinkedBlockingQueue(final T... a) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return new LinkedBlockingQueue<>();
         }
 
@@ -6785,7 +6785,7 @@ class CommonUtil {
      */
     @SafeVarargs
     public static <T> ConcurrentLinkedQueue<T> asConcurrentLinkedQueue(final T... a) { //NOSONAR
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return new ConcurrentLinkedQueue<>();
         }
 
@@ -6805,7 +6805,7 @@ class CommonUtil {
      */
     @SafeVarargs
     public static <T extends Delayed> DelayQueue<T> asDelayQueue(final T... a) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return new DelayQueue<>();
         }
 
@@ -6825,7 +6825,7 @@ class CommonUtil {
      */
     @SafeVarargs
     public static <T> PriorityQueue<T> asPriorityQueue(final T... a) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return new PriorityQueue<>();
         }
 
@@ -6857,7 +6857,7 @@ class CommonUtil {
      */
     @SafeVarargs
     public static <T> ArrayDeque<T> asArrayDeque(final T... a) { //NOSONAR
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return new ArrayDeque<>();
         }
 
@@ -6877,7 +6877,7 @@ class CommonUtil {
      */
     @SafeVarargs
     public static <T> LinkedBlockingDeque<T> asLinkedBlockingDeque(final T... a) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return new LinkedBlockingDeque<>();
         }
 
@@ -6897,7 +6897,7 @@ class CommonUtil {
      */
     @SafeVarargs
     public static <T> ConcurrentLinkedDeque<T> asConcurrentLinkedDeque(final T... a) { //NOSONAR
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return new ConcurrentLinkedDeque<>();
         }
 
@@ -7085,233 +7085,6 @@ class CommonUtil {
 
     /**
      *
-     * @param <A>
-     * @param <B>
-     * @param a
-     * @param b
-     * @return
-     */
-    public static <A, B> boolean anyNull(final A a, final B b) {
-        return a == null || b == null;
-    }
-
-    /**
-     *
-     * @param <A>
-     * @param <B>
-     * @param <C>
-     * @param a
-     * @param b
-     * @param c
-     * @return
-     */
-    public static <A, B, C> boolean anyNull(final A a, final B b, final C c) {
-        return a == null || b == null || c == null;
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param a
-     * @return
-     */
-    @SafeVarargs
-    public static <T> boolean anyNull(final T... a) {
-        if (isNullOrEmpty(a)) {
-            return false;
-        }
-
-        for (T e : a) {
-            if (e == null) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     *
-     *
-     * @param c
-     * @return
-     */
-    public static boolean anyNull(final Collection<?> c) {
-        if (isNullOrEmpty(c)) {
-            return false;
-        }
-
-        for (Object e : c) {
-            if (e == null) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     *
-     * @param <A>
-     * @param <B>
-     * @param a
-     * @param b
-     * @return
-     */
-    public static <A, B> boolean allNull(final A a, final B b) {
-        return a == null && b == null;
-    }
-
-    /**
-     *
-     * @param <A>
-     * @param <B>
-     * @param <C>
-     * @param a
-     * @param b
-     * @param c
-     * @return
-     */
-    public static <A, B, C> boolean allNull(final A a, final B b, final C c) {
-        return a == null && b == null && c == null;
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param a
-     * @return
-     */
-    @SafeVarargs
-    public static <T> boolean allNull(final T... a) {
-        if (isNullOrEmpty(a)) {
-            return true;
-        }
-
-        for (T e : a) {
-            if (e != null) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    /**
-     *
-     *
-     * @param c
-     * @return
-     */
-    public static boolean allNull(final Collection<?> c) {
-        if (isNullOrEmpty(c)) {
-            return true;
-        }
-
-        for (Object e : c) {
-            if (e != null) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    /**
-     *
-     * @param <A>
-     * @param <B>
-     * @param a
-     * @param b
-     * @return
-     */
-    public static <A, B> boolean anyNullOrEmpty(final A[] a, final B[] b) {
-        return a == null || a.length == 0 || b == null || b.length == 0;
-    }
-
-    /**
-     *
-     * @param <A>
-     * @param <B>
-     * @param <C>
-     * @param a
-     * @param b
-     * @param c
-     * @return
-     */
-    public static <A, B, C> boolean anyNullOrEmpty(final A[] a, final B[] b, final C[] c) {
-        return a == null || a.length == 0 || b == null || b.length == 0 || c == null || c.length == 0;
-    }
-
-    /**
-     *
-     * @param a
-     * @param b
-     * @return
-     */
-    public static boolean anyNullOrEmpty(final Collection<?> a, final Collection<?> b) {
-        return a == null || a.size() == 0 || b == null || b.size() == 0;
-    }
-
-    /**
-     *
-     *
-     * @param a
-     * @param b
-     * @param c
-     * @return
-     */
-    public static boolean anyNullOrEmpty(final Collection<?> a, final Collection<?> b, final Collection<?> c) {
-        return a == null || a.size() == 0 || b == null || b.size() == 0 || c == null || c.size() == 0;
-    }
-
-    /**
-     *
-     * @param <A>
-     * @param <B>
-     * @param a
-     * @param b
-     * @return
-     */
-    public static <A, B> boolean allNullOrEmpty(final A[] a, final B[] b) {
-        return isNullOrEmpty(a) && isNullOrEmpty(b);
-    }
-
-    /**
-     * @param <A>
-     * @param <B>
-     * @param <C>
-     * @param a
-     * @param b
-     * @param c
-     * @return
-     */
-    public static <A, B, C> boolean allNullOrEmpty(final A[] a, final B[] b, final C[] c) {
-        return isNullOrEmpty(a) && isNullOrEmpty(b) && isNullOrEmpty(c);
-    }
-
-    /**
-     *
-     * @param a
-     * @param b
-     * @return
-     */
-    public static boolean allNullOrEmpty(final Collection<?> a, final Collection<?> b) {
-        return isNullOrEmpty(a) && isNullOrEmpty(b);
-    }
-
-    /**
-     * @param a
-     * @param b
-     * @param c
-     * @return
-     */
-    public static boolean allNullOrEmpty(final Collection<?> a, final Collection<?> b, final Collection<?> c) {
-        return isNullOrEmpty(a) && isNullOrEmpty(b) && isNullOrEmpty(c);
-    }
-
-    /**
-     *
      * @param <T>
      * @param c
      * @param index
@@ -7405,7 +7178,7 @@ class CommonUtil {
      * @return
      */
     public static <T> Nullable<T> firstElement(final Iterable<? extends T> c) {
-        if (isNullOrEmpty(c)) {
+        if (isEmpty(c)) {
             return Nullable.empty();
         }
 
@@ -7433,7 +7206,7 @@ class CommonUtil {
      * @return
      */
     public static <T> Nullable<T> lastElement(final Iterable<? extends T> c) {
-        if (isNullOrEmpty(c)) {
+        if (isEmpty(c)) {
             return Nullable.empty();
         }
 
@@ -7484,7 +7257,7 @@ class CommonUtil {
     public static <T> List<T> firstElements(final Collection<? extends T> c, final int n) {
         N.checkArgument(n >= 0, "'n' can't be negative: " + n);
 
-        if (N.isNullOrEmpty(c) || n == 0) {
+        if (N.isEmpty(c) || n == 0) {
             return new ArrayList<>();
         } else if (c.size() <= n) {
             return new ArrayList<>(c);
@@ -7518,7 +7291,7 @@ class CommonUtil {
     public static <T> List<T> lastElements(final Collection<? extends T> c, final int n) {
         N.checkArgument(n >= 0, "'n' can't be negative: " + n);
 
-        if (N.isNullOrEmpty(c) || n == 0) {
+        if (N.isEmpty(c) || n == 0) {
             return new ArrayList<>();
         } else if (c.size() <= n) {
             return new ArrayList<>(c);
@@ -7575,7 +7348,7 @@ class CommonUtil {
      */
     @SafeVarargs
     public static <T> Optional<T> firstNonNull(final T... a) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return Optional.empty();
         }
 
@@ -7596,7 +7369,7 @@ class CommonUtil {
      * @return
      */
     public static <T> Optional<T> firstNonNull(final Iterable<? extends T> c) {
-        if (isNullOrEmpty(c)) {
+        if (isEmpty(c)) {
             return Optional.empty();
         }
 
@@ -7666,7 +7439,7 @@ class CommonUtil {
      */
     @SafeVarargs
     public static <T> Optional<T> lastNonNull(final T... a) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return Optional.empty();
         }
 
@@ -7687,7 +7460,7 @@ class CommonUtil {
      * @return
      */
     public static <T> Optional<T> lastNonNull(final Iterable<? extends T> c) {
-        if (isNullOrEmpty(c)) {
+        if (isEmpty(c)) {
             return Optional.empty();
         }
 
@@ -7876,7 +7649,7 @@ class CommonUtil {
      * @return
      */
     public static <T> T firstOrDefaultIfEmpty(final Iterable<? extends T> c, final T defaultValueForEmpty) {
-        if (isNullOrEmpty(c)) {
+        if (isEmpty(c)) {
             return defaultValueForEmpty;
         }
 
@@ -7957,7 +7730,7 @@ class CommonUtil {
      * @return
      */
     public static <T> T lastOrDefaultIfEmpty(final Iterable<? extends T> c, final T defaultValueForEmpty) {
-        if (isNullOrEmpty(c)) {
+        if (isEmpty(c)) {
             return defaultValueForEmpty;
         }
 
@@ -8008,7 +7781,7 @@ class CommonUtil {
      * @throws E the e
      */
     public static <T, E extends Exception> Nullable<T> findFirst(final T[] a, final Throwables.Predicate<? super T, E> predicate) throws E {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return Nullable.empty();
         }
 
@@ -8031,7 +7804,7 @@ class CommonUtil {
      * @throws E the e
      */
     public static <T, E extends Exception> Nullable<T> findFirst(final Iterable<? extends T> c, Throwables.Predicate<? super T, E> predicate) throws E {
-        if (N.isNullOrEmpty(c)) {
+        if (N.isEmpty(c)) {
             return Nullable.empty();
         }
 
@@ -8081,7 +7854,7 @@ class CommonUtil {
      * @throws E the e
      */
     public static <T, E extends Exception> Nullable<T> findLast(final T[] a, final Throwables.Predicate<? super T, E> predicate) throws E {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return Nullable.empty();
         }
 
@@ -8189,7 +7962,7 @@ class CommonUtil {
      * @throws E the e
      */
     public static <T, E extends Exception> Optional<T> findFirstNonNull(final T[] a, final Throwables.Predicate<? super T, E> predicate) throws E {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return Optional.empty();
         }
 
@@ -8213,7 +7986,7 @@ class CommonUtil {
      * @throws E the e
      */
     public static <T, E extends Exception> Optional<T> findFirstNonNull(final Iterable<? extends T> c, Throwables.Predicate<? super T, E> predicate) throws E {
-        if (N.isNullOrEmpty(c)) {
+        if (N.isEmpty(c)) {
             return Optional.empty();
         }
 
@@ -8265,7 +8038,7 @@ class CommonUtil {
      * @throws E the e
      */
     public static <T, E extends Exception> Optional<T> findLastNonNull(final T[] a, final Throwables.Predicate<? super T, E> predicate) throws E {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return Optional.empty();
         }
 
@@ -8422,6 +8195,17 @@ class CommonUtil {
     @SuppressWarnings("rawtypes")
     public static int size(final PrimitiveList c) {
         return c == null ? 0 : c.size();
+    }
+
+    /**
+     *
+     *
+     * @param str
+     * @return
+     */
+    @Beta
+    public static String nullToEmpty(final String str) {
+        return str == null ? Strings.EMPTY_STRING : str;
     }
 
     /**
@@ -8622,6 +8406,16 @@ class CommonUtil {
      * @return
      */
     public static String[] nullToEmpty(final String[] a) {
+        //    if (a == null) {
+        //        return EMPTY_STRING_ARRAY;
+        //    }
+        //
+        //    for (int i = 0, len = a.length; i < len; i++) {
+        //        a[i] = a[i] == null ? Strings.EMPTY_STRING : a[i];
+        //    }
+        //
+        //    return a;
+
         return a == null ? EMPTY_STRING_ARRAY : a;
     }
 
@@ -8781,12 +8575,22 @@ class CommonUtil {
     //    }
 
     /**
+     * Checks if the specified {@code CharSequence} is null or empty.
+     *
+     * @param cs
+     * @return
+     */
+    public static boolean isEmpty(final CharSequence cs) {
+        return (cs == null) || (cs.length() == 0);
+    }
+
+    /**
      * Checks if is null or empty.
      *
      * @param a
      * @return true, if is null or empty
      */
-    public static boolean isNullOrEmpty(final boolean[] a) {
+    public static boolean isEmpty(final boolean[] a) {
         return (a == null) || (a.length == 0);
     }
 
@@ -8796,7 +8600,7 @@ class CommonUtil {
      * @param a
      * @return true, if is null or empty
      */
-    public static boolean isNullOrEmpty(final char[] a) {
+    public static boolean isEmpty(final char[] a) {
         return (a == null) || (a.length == 0);
     }
 
@@ -8806,7 +8610,7 @@ class CommonUtil {
      * @param a
      * @return true, if is null or empty
      */
-    public static boolean isNullOrEmpty(final byte[] a) {
+    public static boolean isEmpty(final byte[] a) {
         return (a == null) || (a.length == 0);
     }
 
@@ -8816,7 +8620,7 @@ class CommonUtil {
      * @param a
      * @return true, if is null or empty
      */
-    public static boolean isNullOrEmpty(final short[] a) {
+    public static boolean isEmpty(final short[] a) {
         return (a == null) || (a.length == 0);
     }
 
@@ -8826,7 +8630,7 @@ class CommonUtil {
      * @param a
      * @return true, if is null or empty
      */
-    public static boolean isNullOrEmpty(final int[] a) {
+    public static boolean isEmpty(final int[] a) {
         return (a == null) || (a.length == 0);
     }
 
@@ -8836,7 +8640,7 @@ class CommonUtil {
      * @param a
      * @return true, if is null or empty
      */
-    public static boolean isNullOrEmpty(final long[] a) {
+    public static boolean isEmpty(final long[] a) {
         return (a == null) || (a.length == 0);
     }
 
@@ -8846,7 +8650,7 @@ class CommonUtil {
      * @param a
      * @return true, if is null or empty
      */
-    public static boolean isNullOrEmpty(final float[] a) {
+    public static boolean isEmpty(final float[] a) {
         return (a == null) || (a.length == 0);
     }
 
@@ -8856,7 +8660,7 @@ class CommonUtil {
      * @param a
      * @return true, if is null or empty
      */
-    public static boolean isNullOrEmpty(final double[] a) {
+    public static boolean isEmpty(final double[] a) {
         return (a == null) || (a.length == 0);
     }
 
@@ -8866,7 +8670,7 @@ class CommonUtil {
      * @param a
      * @return true, if is null or empty
      */
-    public static boolean isNullOrEmpty(final Object[] a) {
+    public static boolean isEmpty(final Object[] a) {
         return (a == null) || (a.length == 0);
     }
 
@@ -8876,7 +8680,7 @@ class CommonUtil {
      * @param c
      * @return true, if is null or empty
      */
-    public static boolean isNullOrEmpty(final Collection<?> c) {
+    public static boolean isEmpty(final Collection<?> c) {
         return (c == null) || (c.isEmpty());
     }
 
@@ -8887,15 +8691,15 @@ class CommonUtil {
      * @return
      */
     @Beta
-    public static boolean isNullOrEmpty(final Iterable<?> iter) {
+    public static boolean isEmpty(final Iterable<?> iter) {
         if (iter == null) {
             return true;
         }
 
         if (iter instanceof Collection) {
-            return isNullOrEmpty((Collection<?>) iter);
+            return isEmpty((Collection<?>) iter);
         } else {
-            return isNullOrEmpty(iter.iterator());
+            return isEmpty(iter.iterator());
         }
     }
 
@@ -8906,7 +8710,7 @@ class CommonUtil {
      * @return
      */
     @Beta
-    public static boolean isNullOrEmpty(final Iterator<?> iter) {
+    public static boolean isEmpty(final Iterator<?> iter) {
         return iter == null || (iter.hasNext() == false);
     }
 
@@ -8916,7 +8720,7 @@ class CommonUtil {
      * @param m
      * @return true, if is null or empty
      */
-    public static boolean isNullOrEmpty(final Map<?, ?> m) {
+    public static boolean isEmpty(final Map<?, ?> m) {
         return (m == null) || (m.isEmpty());
     }
 
@@ -8927,7 +8731,7 @@ class CommonUtil {
      * @return true, if is null or empty
      */
     @SuppressWarnings("rawtypes")
-    public static boolean isNullOrEmpty(final PrimitiveList list) {
+    public static boolean isEmpty(final PrimitiveList list) {
         return (list == null) || (list.isEmpty());
     }
 
@@ -8937,7 +8741,7 @@ class CommonUtil {
      * @param s
      * @return true, if is null or empty
      */
-    public static boolean isNullOrEmpty(final Multiset<?> s) {
+    public static boolean isEmpty(final Multiset<?> s) {
         return (s == null) || (s.isEmpty());
     }
 
@@ -8947,7 +8751,7 @@ class CommonUtil {
      * @param s
      * @return true, if is null or empty
      */
-    public static boolean isNullOrEmpty(final LongMultiset<?> s) {
+    public static boolean isEmpty(final LongMultiset<?> s) {
         return (s == null) || (s.isEmpty());
     }
 
@@ -8957,7 +8761,7 @@ class CommonUtil {
      * @param m
      * @return true, if is null or empty
      */
-    public static boolean isNullOrEmpty(final Multimap<?, ?, ?> m) {
+    public static boolean isEmpty(final Multimap<?, ?, ?> m) {
         return (m == null) || (m.isEmpty());
     }
 
@@ -8967,17 +8771,47 @@ class CommonUtil {
      * @param rs
      * @return true, if is null or empty
      */
-    public static boolean isNullOrEmpty(final DataSet rs) {
+    public static boolean isEmpty(final DataSet rs) {
         return (rs == null) || (rs.isEmpty());
     }
 
     /**
+     * Checks if the specified {@code CharSequence} is null or blank.
+     *
+     *
+     * @param cs
+     * @return
+     */
+    public static boolean isBlank(final CharSequence cs) {
+        if (isEmpty(cs)) {
+            return true;
+        }
+
+        for (int i = 0, len = cs.length(); i < len; i++) {
+            if (!Character.isWhitespace(cs.charAt(i))) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     *
+     * @param cs
+     * @return
+     */
+    public static boolean notEmpty(final CharSequence cs) {
+        return (cs != null) && (cs.length() > 0);
+    }
+
+    /**
      * Not null or empty.
      *
      * @param a
      * @return
      */
-    public static boolean notNullOrEmpty(final boolean[] a) {
+    public static boolean notEmpty(final boolean[] a) {
         return (a != null) && (a.length > 0);
     }
 
@@ -8987,7 +8821,7 @@ class CommonUtil {
      * @param a
      * @return
      */
-    public static boolean notNullOrEmpty(final char[] a) {
+    public static boolean notEmpty(final char[] a) {
         return (a != null) && (a.length > 0);
     }
 
@@ -8997,7 +8831,7 @@ class CommonUtil {
      * @param a
      * @return
      */
-    public static boolean notNullOrEmpty(final byte[] a) {
+    public static boolean notEmpty(final byte[] a) {
         return (a != null) && (a.length > 0);
     }
 
@@ -9007,7 +8841,7 @@ class CommonUtil {
      * @param a
      * @return
      */
-    public static boolean notNullOrEmpty(final short[] a) {
+    public static boolean notEmpty(final short[] a) {
         return (a != null) && (a.length > 0);
     }
 
@@ -9017,7 +8851,7 @@ class CommonUtil {
      * @param a
      * @return
      */
-    public static boolean notNullOrEmpty(final int[] a) {
+    public static boolean notEmpty(final int[] a) {
         return (a != null) && (a.length > 0);
     }
 
@@ -9027,7 +8861,7 @@ class CommonUtil {
      * @param a
      * @return
      */
-    public static boolean notNullOrEmpty(final long[] a) {
+    public static boolean notEmpty(final long[] a) {
         return (a != null) && (a.length > 0);
     }
 
@@ -9037,7 +8871,7 @@ class CommonUtil {
      * @param a
      * @return
      */
-    public static boolean notNullOrEmpty(final float[] a) {
+    public static boolean notEmpty(final float[] a) {
         return (a != null) && (a.length > 0);
     }
 
@@ -9047,7 +8881,7 @@ class CommonUtil {
      * @param a
      * @return
      */
-    public static boolean notNullOrEmpty(final double[] a) {
+    public static boolean notEmpty(final double[] a) {
         return (a != null) && (a.length > 0);
     }
 
@@ -9057,7 +8891,7 @@ class CommonUtil {
      * @param a
      * @return
      */
-    public static boolean notNullOrEmpty(final Object[] a) {
+    public static boolean notEmpty(final Object[] a) {
         return (a != null) && (a.length > 0);
     }
 
@@ -9067,7 +8901,7 @@ class CommonUtil {
      * @param c
      * @return
      */
-    public static boolean notNullOrEmpty(final Collection<?> c) {
+    public static boolean notEmpty(final Collection<?> c) {
         return (c != null) && (c.size() > 0);
     }
 
@@ -9078,15 +8912,15 @@ class CommonUtil {
      * @return
      */
     @Beta
-    public static boolean notNullOrEmpty(final Iterable<?> iter) {
+    public static boolean notEmpty(final Iterable<?> iter) {
         if (iter == null) {
             return false;
         }
 
         if (iter instanceof Collection) {
-            return notNullOrEmpty((Collection<?>) iter);
+            return notEmpty((Collection<?>) iter);
         } else {
-            return notNullOrEmpty(iter.iterator());
+            return notEmpty(iter.iterator());
         }
     }
 
@@ -9097,7 +8931,7 @@ class CommonUtil {
      * @return
      */
     @Beta
-    public static boolean notNullOrEmpty(final Iterator<?> iter) {
+    public static boolean notEmpty(final Iterator<?> iter) {
         return (iter != null) && (iter.hasNext());
     }
 
@@ -9107,7 +8941,7 @@ class CommonUtil {
      * @param m
      * @return
      */
-    public static boolean notNullOrEmpty(final Map<?, ?> m) {
+    public static boolean notEmpty(final Map<?, ?> m) {
         return (m != null) && (m.size() > 0);
     }
 
@@ -9118,7 +8952,7 @@ class CommonUtil {
      * @return
      */
     @SuppressWarnings("rawtypes")
-    public static boolean notNullOrEmpty(final PrimitiveList list) {
+    public static boolean notEmpty(final PrimitiveList list) {
         return (list != null) && (list.size() > 0);
     }
 
@@ -9128,7 +8962,7 @@ class CommonUtil {
      * @param s
      * @return
      */
-    public static boolean notNullOrEmpty(final Multiset<?> s) {
+    public static boolean notEmpty(final Multiset<?> s) {
         return (s != null) && (s.size() > 0);
     }
 
@@ -9138,7 +8972,7 @@ class CommonUtil {
      * @param s
      * @return
      */
-    public static boolean notNullOrEmpty(final LongMultiset<?> s) {
+    public static boolean notEmpty(final LongMultiset<?> s) {
         return (s != null) && (s.size() > 0);
     }
 
@@ -9148,7 +8982,7 @@ class CommonUtil {
      * @param m
      * @return
      */
-    public static boolean notNullOrEmpty(final Multimap<?, ?, ?> m) {
+    public static boolean notEmpty(final Multimap<?, ?, ?> m) {
         return (m != null) && (m.size() > 0);
     }
 
@@ -9158,8 +8992,499 @@ class CommonUtil {
      * @param rs
      * @return
      */
-    public static boolean notNullOrEmpty(final DataSet rs) {
+    public static boolean notEmpty(final DataSet rs) {
         return (rs != null) && (rs.size() > 0);
+    }
+
+    /**
+     *
+     * @param cs
+     * @return
+     */
+    public static boolean notBlank(final CharSequence cs) {
+        return !isBlank(cs);
+    }
+
+    /**
+     *
+     * @param <A>
+     * @param <B>
+     * @param a
+     * @param b
+     * @return
+     */
+    public static <A, B> boolean anyNull(final A a, final B b) {
+        return a == null || b == null;
+    }
+
+    /**
+     *
+     * @param <A>
+     * @param <B>
+     * @param <C>
+     * @param a
+     * @param b
+     * @param c
+     * @return
+     */
+    public static <A, B, C> boolean anyNull(final A a, final B b, final C c) {
+        return a == null || b == null || c == null;
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param a
+     * @return
+     */
+    @SafeVarargs
+    public static <T> boolean anyNull(final T... a) {
+        if (isEmpty(a)) {
+            return false;
+        }
+
+        for (T e : a) {
+            if (e == null) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     *
+     *
+     * @param c
+     * @return
+     */
+    public static boolean anyNull(final Collection<?> c) {
+        if (isEmpty(c)) {
+            return false;
+        }
+
+        for (Object e : c) {
+            if (e == null) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public static boolean anyEmpty(final CharSequence a, final CharSequence b) {
+        return isEmpty(a) || isEmpty(b);
+    }
+
+    public static boolean anyEmpty(final CharSequence a, final CharSequence b, final CharSequence c) {
+        return isEmpty(a) || isEmpty(b) || isEmpty(c);
+    }
+
+    /**
+     * <p>Checks if any of the CharSequences are empty ("") or null.</p>
+     *
+     * <pre>
+     * Strings.anyEmpty((String) null)    = true
+     * Strings.anyEmpty((String[]) null)  = false
+     * Strings.anyEmpty(null, "foo")      = true
+     * Strings.anyEmpty("", "bar")        = true
+     * Strings.anyEmpty("bob", "")        = true
+     * Strings.anyEmpty("  bob  ", null)  = true
+     * Strings.anyEmpty(" ", "bar")       = false
+     * Strings.anyEmpty("foo", "bar")     = false
+     * Strings.anyEmpty(new String[]{})   = false
+     * Strings.anyEmpty(new String[]{""}) = true
+     * </pre>
+     *
+     * @param css the CharSequences to check, may be null or empty
+     * @return {@code true} if any of the CharSequences are empty or null
+     * @see Strings#anyEmpty(CharSequence...)
+     * @since 3.2
+     */
+    public static boolean anyEmpty(final CharSequence... css) {
+        if (N.isEmpty(css)) {
+            return false;
+        }
+
+        for (final CharSequence cs : css) {
+            if (isEmpty(cs)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     *
+     * @param css
+     * @return
+     * @see Strings#anyEmpty(CharSequence...)
+     */
+    public static boolean anyEmpty(final Collection<? extends CharSequence> css) {
+        if (N.isEmpty(css)) {
+            return false;
+        }
+
+        for (final CharSequence cs : css) {
+            if (isEmpty(cs)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     *
+     * @param <A>
+     * @param <B>
+     * @param a
+     * @param b
+     * @return
+     */
+    public static <A, B> boolean anyEmpty(final A[] a, final B[] b) {
+        return a == null || a.length == 0 || b == null || b.length == 0;
+    }
+
+    /**
+     *
+     * @param <A>
+     * @param <B>
+     * @param <C>
+     * @param a
+     * @param b
+     * @param c
+     * @return
+     */
+    public static <A, B, C> boolean anyEmpty(final A[] a, final B[] b, final C[] c) {
+        return a == null || a.length == 0 || b == null || b.length == 0 || c == null || c.length == 0;
+    }
+
+    /**
+     *
+     * @param a
+     * @param b
+     * @return
+     */
+    public static boolean anyEmpty(final Collection<?> a, final Collection<?> b) {
+        return a == null || a.size() == 0 || b == null || b.size() == 0;
+    }
+
+    /**
+     *
+     *
+     * @param a
+     * @param b
+     * @param c
+     * @return
+     */
+    public static boolean anyEmpty(final Collection<?> a, final Collection<?> b, final Collection<?> c) {
+        return a == null || a.size() == 0 || b == null || b.size() == 0 || c == null || c.size() == 0;
+    }
+
+    public static boolean anyBlank(final CharSequence a, final CharSequence b) {
+        return isBlank(a) || isBlank(b);
+    }
+
+    public static boolean anyBlank(final CharSequence a, final CharSequence b, final CharSequence c) {
+        return isBlank(a) || isBlank(b) || isBlank(c);
+    }
+
+    /**
+     * <p>Checks if any of the CharSequences are empty ("") or null or whitespace only.</p>
+     *
+     * <p>Whitespace is defined by {@link Character#isWhitespace(char)}.</p>
+     *
+     * <pre>
+     * Strings.anyBlank((String) null)    = true
+     * Strings.anyBlank((String[]) null)  = false
+     * Strings.anyBlank(null, "foo")      = true
+     * Strings.anyBlank(null, null)       = true
+     * Strings.anyBlank("", "bar")        = true
+     * Strings.anyBlank("bob", "")        = true
+     * Strings.anyBlank("  bob  ", null)  = true
+     * Strings.anyBlank(" ", "bar")       = true
+     * Strings.anyBlank(new String[] {})  = false
+     * Strings.anyBlank(new String[]{""}) = true
+     * Strings.anyBlank("foo", "bar")     = false
+     * </pre>
+     *
+     * @param css the CharSequences to check, may be null or empty
+     * @return {@code true} if any of the CharSequences are empty or null or whitespace only
+     * @see Strings#anyBlank(CharSequence...)
+     * @since 3.2
+     */
+    public static boolean anyBlank(final CharSequence... css) {
+        if (N.isEmpty(css)) {
+            return false;
+        }
+
+        for (final CharSequence cs : css) {
+            if (isBlank(cs)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     *
+     * @param css
+     * @return
+     * @see Strings#anyBlank(Collection)
+     */
+    public static boolean anyBlank(final Collection<? extends CharSequence> css) {
+        if (N.isEmpty(css)) {
+            return false;
+        }
+
+        for (final CharSequence cs : css) {
+            if (isBlank(cs)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     *
+     * @param <A>
+     * @param <B>
+     * @param a
+     * @param b
+     * @return
+     */
+    public static <A, B> boolean allNull(final A a, final B b) {
+        return a == null && b == null;
+    }
+
+    /**
+     *
+     * @param <A>
+     * @param <B>
+     * @param <C>
+     * @param a
+     * @param b
+     * @param c
+     * @return
+     */
+    public static <A, B, C> boolean allNull(final A a, final B b, final C c) {
+        return a == null && b == null && c == null;
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param a
+     * @return
+     */
+    @SafeVarargs
+    public static <T> boolean allNull(final T... a) {
+        if (isEmpty(a)) {
+            return true;
+        }
+
+        for (T e : a) {
+            if (e != null) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     *
+     *
+     * @param c
+     * @return
+     */
+    public static boolean allNull(final Collection<?> c) {
+        if (isEmpty(c)) {
+            return true;
+        }
+
+        for (Object e : c) {
+            if (e != null) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public static boolean allEmpty(final CharSequence a, final CharSequence b) {
+        return isEmpty(a) && isEmpty(b);
+    }
+
+    public static boolean allEmpty(final CharSequence a, final CharSequence b, final CharSequence c) {
+        return isEmpty(a) && isEmpty(b) && isEmpty(c);
+    }
+
+    /**
+     * <p>Checks if all of the CharSequences are empty ("") or null.</p>
+     *
+     * <pre>
+     * Strings.allEmpty(null)             = true
+     * Strings.allEmpty(null, "")         = true
+     * Strings.allEmpty(new String[] {})  = true
+     * Strings.allEmpty(null, "foo")      = false
+     * Strings.allEmpty("", "bar")        = false
+     * Strings.allEmpty("bob", "")        = false
+     * Strings.allEmpty("  bob  ", null)  = false
+     * Strings.allEmpty(" ", "bar")       = false
+     * Strings.allEmpty("foo", "bar")     = false
+     * </pre>
+     *
+     * @param css the CharSequences to check, may be null or empty
+     * @return {@code true} if all of the CharSequences are empty or null
+     * @see Strings#allEmpty(CharSequence...)
+     * @since 3.6
+     */
+    public static boolean allEmpty(final CharSequence... css) {
+        if (N.isEmpty(css)) {
+            return true;
+        }
+
+        for (final CharSequence cs : css) {
+            if (notEmpty(cs)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     *
+     * @param css
+     * @return
+     * @see Strings#allEmpty(Collection)
+     */
+    public static boolean allEmpty(final Collection<? extends CharSequence> css) {
+        if (N.isEmpty(css)) {
+            return true;
+        }
+
+        for (final CharSequence cs : css) {
+            if (notEmpty(cs)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     *
+     * @param <A>
+     * @param <B>
+     * @param a
+     * @param b
+     * @return
+     */
+    public static <A, B> boolean allEmpty(final A[] a, final B[] b) {
+        return isEmpty(a) && isEmpty(b);
+    }
+
+    /**
+     * @param <A>
+     * @param <B>
+     * @param <C>
+     * @param a
+     * @param b
+     * @param c
+     * @return
+     */
+    public static <A, B, C> boolean allEmpty(final A[] a, final B[] b, final C[] c) {
+        return isEmpty(a) && isEmpty(b) && isEmpty(c);
+    }
+
+    /**
+     *
+     * @param a
+     * @param b
+     * @return
+     */
+    public static boolean allEmpty(final Collection<?> a, final Collection<?> b) {
+        return isEmpty(a) && isEmpty(b);
+    }
+
+    /**
+     * @param a
+     * @param b
+     * @param c
+     * @return
+     */
+    public static boolean allEmpty(final Collection<?> a, final Collection<?> b, final Collection<?> c) {
+        return isEmpty(a) && isEmpty(b) && isEmpty(c);
+    }
+
+    public static boolean allBlank(final CharSequence a, final CharSequence b) {
+        return isBlank(a) && isBlank(b);
+    }
+
+    public static boolean allBlank(final CharSequence a, final CharSequence b, final CharSequence c) {
+        return isBlank(a) && isBlank(b) && isBlank(c);
+    }
+
+    /**
+     * <p>Checks if all of the CharSequences are empty (""), null or whitespace only.</p>
+     *
+     * <p>Whitespace is defined by {@link Character#isWhitespace(char)}.</p>
+     *
+     * <pre>
+     * Strings.allBlank(null)             = true
+     * Strings.allBlank(null, "foo")      = false
+     * Strings.allBlank(null, null)       = true
+     * Strings.allBlank("", "bar")        = false
+     * Strings.allBlank("bob", "")        = false
+     * Strings.allBlank("  bob  ", null)  = false
+     * Strings.allBlank(" ", "bar")       = false
+     * Strings.allBlank("foo", "bar")     = false
+     * Strings.allBlank(new String[] {})  = true
+     * </pre>
+     *
+     * @param css the CharSequences to check, may be null or empty
+     * @return {@code true} if all of the CharSequences are empty or null or whitespace only
+     * @see Strings#allBlank(CharSequence...)
+     * @since 3.6
+     */
+    public static boolean allBlank(final CharSequence... css) {
+        if (N.isEmpty(css)) {
+            return true;
+        }
+
+        for (final CharSequence cs : css) {
+            if (notBlank(cs)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     *
+     * @param css
+     * @return
+     * @see Strings#allBlank(Collection)
+     */
+    public static boolean allBlank(final Collection<? extends CharSequence> css) {
+        if (N.isEmpty(css)) {
+            return true;
+        }
+
+        for (final CharSequence cs : css) {
+            if (notBlank(cs)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     /**
@@ -9270,7 +9595,7 @@ class CommonUtil {
      * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
      */
     public static boolean[] checkArgNotNullOrEmpty(final boolean[] arg, final String argNameOrErrorMsg) {
-        if (isNullOrEmpty(arg)) {
+        if (isEmpty(arg)) {
             throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
         }
 
@@ -9286,7 +9611,7 @@ class CommonUtil {
      * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
      */
     public static char[] checkArgNotNullOrEmpty(final char[] arg, final String argNameOrErrorMsg) {
-        if (isNullOrEmpty(arg)) {
+        if (isEmpty(arg)) {
             throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
         }
 
@@ -9302,7 +9627,7 @@ class CommonUtil {
      * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
      */
     public static byte[] checkArgNotNullOrEmpty(final byte[] arg, final String argNameOrErrorMsg) {
-        if (isNullOrEmpty(arg)) {
+        if (isEmpty(arg)) {
             throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
         }
 
@@ -9318,7 +9643,7 @@ class CommonUtil {
      * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
      */
     public static short[] checkArgNotNullOrEmpty(final short[] arg, final String argNameOrErrorMsg) {
-        if (isNullOrEmpty(arg)) {
+        if (isEmpty(arg)) {
             throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
         }
 
@@ -9334,7 +9659,7 @@ class CommonUtil {
      * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
      */
     public static int[] checkArgNotNullOrEmpty(final int[] arg, final String argNameOrErrorMsg) {
-        if (isNullOrEmpty(arg)) {
+        if (isEmpty(arg)) {
             throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
         }
 
@@ -9350,7 +9675,7 @@ class CommonUtil {
      * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
      */
     public static long[] checkArgNotNullOrEmpty(final long[] arg, final String argNameOrErrorMsg) {
-        if (isNullOrEmpty(arg)) {
+        if (isEmpty(arg)) {
             throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
         }
 
@@ -9366,7 +9691,7 @@ class CommonUtil {
      * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
      */
     public static float[] checkArgNotNullOrEmpty(final float[] arg, final String argNameOrErrorMsg) {
-        if (isNullOrEmpty(arg)) {
+        if (isEmpty(arg)) {
             throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
         }
 
@@ -9382,7 +9707,7 @@ class CommonUtil {
      * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
      */
     public static double[] checkArgNotNullOrEmpty(final double[] arg, final String argNameOrErrorMsg) {
-        if (isNullOrEmpty(arg)) {
+        if (isEmpty(arg)) {
             throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
         }
 
@@ -9399,7 +9724,7 @@ class CommonUtil {
      * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
      */
     public static <T> T[] checkArgNotNullOrEmpty(final T[] arg, final String argNameOrErrorMsg) {
-        if (isNullOrEmpty(arg)) {
+        if (isEmpty(arg)) {
             throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
         }
 
@@ -9416,7 +9741,7 @@ class CommonUtil {
      * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
      */
     public static <T extends Collection<?>> T checkArgNotNullOrEmpty(final T arg, final String argNameOrErrorMsg) {
-        if (isNullOrEmpty(arg)) {
+        if (isEmpty(arg)) {
             throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
         }
 
@@ -9434,7 +9759,7 @@ class CommonUtil {
      */
     @Beta
     public static <T extends Iterable<?>> T checkArgNotNullOrEmpty(final T arg, final String argNameOrErrorMsg) {
-        if (isNullOrEmpty(arg)) {
+        if (isEmpty(arg)) {
             throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
         }
 
@@ -9452,7 +9777,7 @@ class CommonUtil {
      */
     @Beta
     public static <T extends Iterator<?>> T checkArgNotNullOrEmpty(final T arg, final String argNameOrErrorMsg) {
-        if (isNullOrEmpty(arg)) {
+        if (isEmpty(arg)) {
             throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
         }
 
@@ -9469,7 +9794,7 @@ class CommonUtil {
      * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
      */
     public static <T extends Map<?, ?>> T checkArgNotNullOrEmpty(final T arg, final String argNameOrErrorMsg) {
-        if (isNullOrEmpty(arg)) {
+        if (isEmpty(arg)) {
             throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
         }
 
@@ -9486,7 +9811,7 @@ class CommonUtil {
      * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
      */
     public static <T extends PrimitiveList<?, ?, ?>> T checkArgNotNullOrEmpty(final T arg, final String argNameOrErrorMsg) {
-        if (isNullOrEmpty(arg)) {
+        if (isEmpty(arg)) {
             throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
         }
 
@@ -9503,7 +9828,7 @@ class CommonUtil {
      * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
      */
     public static <T> Multiset<T> checkArgNotNullOrEmpty(final Multiset<T> arg, final String argNameOrErrorMsg) {
-        if (isNullOrEmpty(arg)) {
+        if (isEmpty(arg)) {
             throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
         }
 
@@ -9520,7 +9845,7 @@ class CommonUtil {
      * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
      */
     public static <T> LongMultiset<T> checkArgNotNullOrEmpty(final LongMultiset<T> arg, final String argNameOrErrorMsg) {
-        if (isNullOrEmpty(arg)) {
+        if (isEmpty(arg)) {
             throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
         }
 
@@ -9537,7 +9862,7 @@ class CommonUtil {
      * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
      */
     public static <T extends Multimap<?, ?, ?>> T checkArgNotNullOrEmpty(final T arg, final String argNameOrErrorMsg) {
-        if (isNullOrEmpty(arg)) {
+        if (isEmpty(arg)) {
             throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
         }
 
@@ -9554,7 +9879,7 @@ class CommonUtil {
      * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
      */
     public static <T extends DataSet> T checkArgNotNullOrEmpty(final T arg, final String argNameOrErrorMsg) {
-        if (isNullOrEmpty(arg)) {
+        if (isEmpty(arg)) {
             throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
         }
 
@@ -9840,7 +10165,7 @@ class CommonUtil {
      * @throws IllegalArgumentException if {@code null} element found in {@code a}
      */
     public static void checkElementNotNull(final Object[] a) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return;
         }
 
@@ -9859,7 +10184,7 @@ class CommonUtil {
      * @throws IllegalArgumentException if {@code null} element found in {@code a}
      */
     public static void checkElementNotNull(final Object[] a, final String argNameOrErrorMsg) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return;
         }
 
@@ -9881,7 +10206,7 @@ class CommonUtil {
      * @throws IllegalArgumentException if {@code null} element found in {@code c}
      */
     public static void checkElementNotNull(final Collection<?> c) {
-        if (N.isNullOrEmpty(c)) {
+        if (N.isEmpty(c)) {
             return;
         }
 
@@ -9900,7 +10225,7 @@ class CommonUtil {
      * @throws IllegalArgumentException if {@code null} element found in {@code c}
      */
     public static void checkElementNotNull(final Collection<?> c, final String argNameOrErrorMsg) {
-        if (N.isNullOrEmpty(c)) {
+        if (N.isEmpty(c)) {
             return;
         }
 
@@ -9922,7 +10247,7 @@ class CommonUtil {
      * @throws IllegalArgumentException if {@code null} key found in {@code m}
      */
     public static void checkKeyNotNull(final Map<?, ?> m) {
-        if (N.isNullOrEmpty(m)) {
+        if (N.isEmpty(m)) {
             return;
         }
 
@@ -9941,7 +10266,7 @@ class CommonUtil {
      * @throws IllegalArgumentException if {@code null} key found in {@code m}
      */
     public static void checkKeyNotNull(final Map<?, ?> m, final String argNameOrErrorMsg) {
-        if (N.isNullOrEmpty(m)) {
+        if (N.isEmpty(m)) {
             return;
         }
 
@@ -9963,7 +10288,7 @@ class CommonUtil {
      * @throws IllegalArgumentException if {@code null} value found in {@code m}
      */
     public static void checkValueNotNull(final Map<?, ?> m) {
-        if (N.isNullOrEmpty(m)) {
+        if (N.isEmpty(m)) {
             return;
         }
 
@@ -9982,7 +10307,7 @@ class CommonUtil {
      * @throws IllegalArgumentException if {@code null} value found in {@code m}
      */
     public static void checkValueNotNull(final Map<?, ?> m, final String argNameOrErrorMsg) {
-        if (N.isNullOrEmpty(m)) {
+        if (N.isEmpty(m)) {
             return;
         }
 
@@ -10852,7 +11177,7 @@ class CommonUtil {
     static String format(String template, Object... args) {
         template = String.valueOf(template); // null -> "null"
 
-        if (isNullOrEmpty(args)) {
+        if (isEmpty(args)) {
             return template;
         }
 
@@ -11240,9 +11565,9 @@ class CommonUtil {
      * @return
      */
     public static int compare(final boolean[] a, final boolean[] b) {
-        if (isNullOrEmpty(a)) {
-            return isNullOrEmpty(b) ? 0 : -1;
-        } else if (isNullOrEmpty(b)) {
+        if (isEmpty(a)) {
+            return isEmpty(b) ? 0 : -1;
+        } else if (isEmpty(b)) {
             return 1;
         }
 
@@ -11289,9 +11614,9 @@ class CommonUtil {
      * @return
      */
     public static int compare(final char[] a, final char[] b) {
-        if (isNullOrEmpty(a)) {
-            return isNullOrEmpty(b) ? 0 : -1;
-        } else if (isNullOrEmpty(b)) {
+        if (isEmpty(a)) {
+            return isEmpty(b) ? 0 : -1;
+        } else if (isEmpty(b)) {
             return 1;
         }
 
@@ -11338,9 +11663,9 @@ class CommonUtil {
      * @return
      */
     public static int compare(final byte[] a, final byte[] b) {
-        if (isNullOrEmpty(a)) {
-            return isNullOrEmpty(b) ? 0 : -1;
-        } else if (isNullOrEmpty(b)) {
+        if (isEmpty(a)) {
+            return isEmpty(b) ? 0 : -1;
+        } else if (isEmpty(b)) {
             return 1;
         }
 
@@ -11387,9 +11712,9 @@ class CommonUtil {
      * @return
      */
     public static int compare(final short[] a, final short[] b) {
-        if (isNullOrEmpty(a)) {
-            return isNullOrEmpty(b) ? 0 : -1;
-        } else if (isNullOrEmpty(b)) {
+        if (isEmpty(a)) {
+            return isEmpty(b) ? 0 : -1;
+        } else if (isEmpty(b)) {
             return 1;
         }
 
@@ -11436,9 +11761,9 @@ class CommonUtil {
      * @return
      */
     public static int compare(final int[] a, final int[] b) {
-        if (isNullOrEmpty(a)) {
-            return isNullOrEmpty(b) ? 0 : -1;
-        } else if (isNullOrEmpty(b)) {
+        if (isEmpty(a)) {
+            return isEmpty(b) ? 0 : -1;
+        } else if (isEmpty(b)) {
             return 1;
         }
 
@@ -11485,9 +11810,9 @@ class CommonUtil {
      * @return
      */
     public static int compare(final long[] a, final long[] b) {
-        if (isNullOrEmpty(a)) {
-            return isNullOrEmpty(b) ? 0 : -1;
-        } else if (isNullOrEmpty(b)) {
+        if (isEmpty(a)) {
+            return isEmpty(b) ? 0 : -1;
+        } else if (isEmpty(b)) {
             return 1;
         }
 
@@ -11534,9 +11859,9 @@ class CommonUtil {
      * @return
      */
     public static int compare(final float[] a, final float[] b) {
-        if (isNullOrEmpty(a)) {
-            return isNullOrEmpty(b) ? 0 : -1;
-        } else if (isNullOrEmpty(b)) {
+        if (isEmpty(a)) {
+            return isEmpty(b) ? 0 : -1;
+        } else if (isEmpty(b)) {
             return 1;
         }
 
@@ -11587,9 +11912,9 @@ class CommonUtil {
      * @return
      */
     public static int compare(final double[] a, final double[] b) {
-        if (isNullOrEmpty(a)) {
-            return isNullOrEmpty(b) ? 0 : -1;
-        } else if (isNullOrEmpty(b)) {
+        if (isEmpty(a)) {
+            return isEmpty(b) ? 0 : -1;
+        } else if (isEmpty(b)) {
             return 1;
         }
 
@@ -11671,9 +11996,9 @@ class CommonUtil {
      * @return
      */
     public static <T> int compare(final T[] a, final T[] b, Comparator<? super T> cmp) {
-        if (isNullOrEmpty(a)) {
-            return isNullOrEmpty(b) ? 0 : -1;
-        } else if (isNullOrEmpty(b)) {
+        if (isEmpty(a)) {
+            return isEmpty(b) ? 0 : -1;
+        } else if (isEmpty(b)) {
             return 1;
         }
 
@@ -11760,9 +12085,9 @@ class CommonUtil {
      * @return
      */
     public static <T> int compare(final Collection<T> a, final Collection<T> b, Comparator<? super T> cmp) {
-        if (isNullOrEmpty(a)) {
-            return isNullOrEmpty(b) ? 0 : -1;
-        } else if (isNullOrEmpty(b)) {
+        if (isEmpty(a)) {
+            return isEmpty(b) ? 0 : -1;
+        } else if (isEmpty(b)) {
             return 1;
         }
 
@@ -12589,7 +12914,7 @@ class CommonUtil {
         N.checkArgument(ClassUtil.isBeanClass(bean1.getClass()), "{} is not a bean class", bean1.getClass());
         N.checkArgument(ClassUtil.isBeanClass(bean2.getClass()), "{} is not a bean class", bean2.getClass());
 
-        if (N.isNullOrEmpty(propNamesToCompare)) {
+        if (N.isEmpty(propNamesToCompare)) {
             return true;
         }
 
@@ -14012,7 +14337,7 @@ class CommonUtil {
      * @param a
      */
     public static void reverse(final boolean[] a) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return;
         }
 
@@ -14031,7 +14356,7 @@ class CommonUtil {
     public static void reverse(final boolean[] a, int fromIndex, int toIndex) {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
-        if (isNullOrEmpty(a) || a.length == 1) {
+        if (isEmpty(a) || a.length == 1) {
             return;
         }
 
@@ -14052,7 +14377,7 @@ class CommonUtil {
      * @param a
      */
     public static void reverse(final char[] a) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return;
         }
 
@@ -14071,7 +14396,7 @@ class CommonUtil {
     public static void reverse(final char[] a, int fromIndex, int toIndex) {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
-        if (isNullOrEmpty(a) || a.length == 1) {
+        if (isEmpty(a) || a.length == 1) {
             return;
         }
 
@@ -14092,7 +14417,7 @@ class CommonUtil {
      * @param a
      */
     public static void reverse(final byte[] a) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return;
         }
 
@@ -14111,7 +14436,7 @@ class CommonUtil {
     public static void reverse(final byte[] a, int fromIndex, int toIndex) {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
-        if (isNullOrEmpty(a) || a.length == 1) {
+        if (isEmpty(a) || a.length == 1) {
             return;
         }
 
@@ -14132,7 +14457,7 @@ class CommonUtil {
      * @param a
      */
     public static void reverse(final short[] a) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return;
         }
 
@@ -14151,7 +14476,7 @@ class CommonUtil {
     public static void reverse(final short[] a, int fromIndex, int toIndex) {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
-        if (isNullOrEmpty(a) || a.length == 1) {
+        if (isEmpty(a) || a.length == 1) {
             return;
         }
 
@@ -14172,7 +14497,7 @@ class CommonUtil {
      * @param a
      */
     public static void reverse(final int[] a) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return;
         }
 
@@ -14191,7 +14516,7 @@ class CommonUtil {
     public static void reverse(final int[] a, int fromIndex, int toIndex) {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
-        if (isNullOrEmpty(a) || a.length == 1) {
+        if (isEmpty(a) || a.length == 1) {
             return;
         }
 
@@ -14212,7 +14537,7 @@ class CommonUtil {
      * @param a
      */
     public static void reverse(final long[] a) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return;
         }
 
@@ -14231,7 +14556,7 @@ class CommonUtil {
     public static void reverse(final long[] a, int fromIndex, int toIndex) {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
-        if (isNullOrEmpty(a) || a.length == 1) {
+        if (isEmpty(a) || a.length == 1) {
             return;
         }
 
@@ -14252,7 +14577,7 @@ class CommonUtil {
      * @param a
      */
     public static void reverse(final float[] a) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return;
         }
 
@@ -14271,7 +14596,7 @@ class CommonUtil {
     public static void reverse(final float[] a, int fromIndex, int toIndex) {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
-        if (isNullOrEmpty(a) || a.length == 1) {
+        if (isEmpty(a) || a.length == 1) {
             return;
         }
 
@@ -14292,7 +14617,7 @@ class CommonUtil {
      * @param a
      */
     public static void reverse(final double[] a) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return;
         }
 
@@ -14311,7 +14636,7 @@ class CommonUtil {
     public static void reverse(final double[] a, int fromIndex, int toIndex) {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
-        if (isNullOrEmpty(a) || a.length == 1) {
+        if (isEmpty(a) || a.length == 1) {
             return;
         }
 
@@ -14338,7 +14663,7 @@ class CommonUtil {
      * @param a
      */
     public static void reverse(final Object[] a) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return;
         }
 
@@ -14357,7 +14682,7 @@ class CommonUtil {
     public static void reverse(final Object[] a, int fromIndex, int toIndex) {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
-        if (isNullOrEmpty(a) || a.length == 1) {
+        if (isEmpty(a) || a.length == 1) {
             return;
         }
 
@@ -14375,7 +14700,7 @@ class CommonUtil {
      * @param list
      */
     public static void reverse(final List<?> list) {
-        if (isNullOrEmpty(list)) {
+        if (isEmpty(list)) {
             return;
         }
 
@@ -14391,7 +14716,7 @@ class CommonUtil {
     public static void reverse(final List<?> list, int fromIndex, int toIndex) {
         checkFromToIndex(fromIndex, toIndex, size(list));
 
-        if (isNullOrEmpty(list) || list.size() == 1) {
+        if (isEmpty(list) || list.size() == 1) {
             return;
         }
 
@@ -14419,7 +14744,7 @@ class CommonUtil {
      */
     @SuppressWarnings("rawtypes")
     public static void reverse(final Collection<?> c) {
-        if (isNullOrEmpty(c) || c.size() < 2) {
+        if (isEmpty(c) || c.size() < 2) {
             return;
         }
 
@@ -14796,7 +15121,7 @@ class CommonUtil {
      */
     @SuppressWarnings("rawtypes")
     public static void rotate(final Collection<?> c, final int distance) {
-        if (isNullOrEmpty(c) || c.size() < 2) {
+        if (isEmpty(c) || c.size() < 2) {
             return;
         }
 
@@ -14824,7 +15149,7 @@ class CommonUtil {
      * @param rnd
      */
     public static void shuffle(final boolean[] a, final Random rnd) {
-        if (isNullOrEmpty(a) || a.length == 1) {
+        if (isEmpty(a) || a.length == 1) {
             return;
         }
 
@@ -14847,7 +15172,7 @@ class CommonUtil {
      * @param rnd
      */
     public static void shuffle(final char[] a, final Random rnd) {
-        if (isNullOrEmpty(a) || a.length == 1) {
+        if (isEmpty(a) || a.length == 1) {
             return;
         }
 
@@ -14870,7 +15195,7 @@ class CommonUtil {
      * @param rnd
      */
     public static void shuffle(final byte[] a, final Random rnd) {
-        if (isNullOrEmpty(a) || a.length == 1) {
+        if (isEmpty(a) || a.length == 1) {
             return;
         }
 
@@ -14893,7 +15218,7 @@ class CommonUtil {
      * @param rnd
      */
     public static void shuffle(final short[] a, final Random rnd) {
-        if (isNullOrEmpty(a) || a.length == 1) {
+        if (isEmpty(a) || a.length == 1) {
             return;
         }
 
@@ -14916,7 +15241,7 @@ class CommonUtil {
      * @param rnd
      */
     public static void shuffle(final int[] a, final Random rnd) {
-        if (isNullOrEmpty(a) || a.length == 1) {
+        if (isEmpty(a) || a.length == 1) {
             return;
         }
 
@@ -14939,7 +15264,7 @@ class CommonUtil {
      * @param rnd
      */
     public static void shuffle(final long[] a, final Random rnd) {
-        if (isNullOrEmpty(a) || a.length == 1) {
+        if (isEmpty(a) || a.length == 1) {
             return;
         }
 
@@ -14962,7 +15287,7 @@ class CommonUtil {
      * @param rnd
      */
     public static void shuffle(final float[] a, final Random rnd) {
-        if (isNullOrEmpty(a) || a.length == 1) {
+        if (isEmpty(a) || a.length == 1) {
             return;
         }
 
@@ -14985,7 +15310,7 @@ class CommonUtil {
      * @param rnd
      */
     public static void shuffle(final double[] a, final Random rnd) {
-        if (isNullOrEmpty(a) || a.length == 1) {
+        if (isEmpty(a) || a.length == 1) {
             return;
         }
 
@@ -15010,7 +15335,7 @@ class CommonUtil {
      * @param rnd
      */
     public static <T> void shuffle(final T[] a, final Random rnd) {
-        if (isNullOrEmpty(a) || a.length == 1) {
+        if (isEmpty(a) || a.length == 1) {
             return;
         }
 
@@ -15034,7 +15359,7 @@ class CommonUtil {
      * @see java.util.Collections#shuffle(List, Random)
      */
     public static void shuffle(final List<?> list, final Random rnd) {
-        if (isNullOrEmpty(list) || list.size() == 1) {
+        if (isEmpty(list) || list.size() == 1) {
             return;
         }
 
@@ -15047,7 +15372,7 @@ class CommonUtil {
      */
     @SuppressWarnings("rawtypes")
     public static void shuffle(final Collection<?> c) {
-        if (isNullOrEmpty(c) || c.size() < 2) {
+        if (isEmpty(c) || c.size() < 2) {
             return;
         }
 
@@ -15068,7 +15393,7 @@ class CommonUtil {
      */
     @SuppressWarnings("rawtypes")
     public static void shuffle(final Collection<?> c, final Random rnd) {
-        if (isNullOrEmpty(c) || c.size() < 2) {
+        if (isEmpty(c) || c.size() < 2) {
             return;
         }
 
@@ -15659,7 +15984,7 @@ class CommonUtil {
     public static <T> List<T> repeatElements(final Collection<? extends T> c, final int n) {
         checkArgNotNegative(n, "n");
 
-        if (n == 0 || isNullOrEmpty(c)) {
+        if (n == 0 || isEmpty(c)) {
             return new ArrayList<>();
         }
 
@@ -15689,7 +16014,7 @@ class CommonUtil {
     public static <T> List<T> repeatCollection(final Collection<T> c, final int n) {
         checkArgNotNegative(n, "n");
 
-        if (n == 0 || isNullOrEmpty(c)) {
+        if (n == 0 || isEmpty(c)) {
             return new ArrayList<>();
         }
 
@@ -15718,9 +16043,9 @@ class CommonUtil {
      */
     public static <T> List<T> repeatElementsToSize(final Collection<T> c, final int size) {
         checkArgNotNegative(size, "size");
-        checkArgument(size == 0 || notNullOrEmpty(c), "Collection can not be empty or null when size > 0");
+        checkArgument(size == 0 || notEmpty(c), "Collection can not be empty or null when size > 0");
 
-        if (size == 0 || isNullOrEmpty(c)) {
+        if (size == 0 || isEmpty(c)) {
             return new ArrayList<>();
         }
 
@@ -15756,9 +16081,9 @@ class CommonUtil {
      */
     public static <T> List<T> repeatCollectionToSize(final Collection<? extends T> c, final int size) {
         checkArgNotNegative(size, "size");
-        checkArgument(size == 0 || notNullOrEmpty(c), "Collection can not be empty or null when size > 0");
+        checkArgument(size == 0 || notEmpty(c), "Collection can not be empty or null when size > 0");
 
-        if (size == 0 || isNullOrEmpty(c)) {
+        if (size == 0 || isEmpty(c)) {
             return new ArrayList<>();
         }
 
@@ -15798,7 +16123,7 @@ class CommonUtil {
      * @see java.util.Collections#copy(List, List)
      */
     public static <T> void copy(final List<? extends T> src, final List<? super T> dest) {
-        if (N.isNullOrEmpty(src)) {
+        if (N.isEmpty(src)) {
             return;
         }
 
@@ -15822,7 +16147,7 @@ class CommonUtil {
         N.checkFromToIndex(srcPos, srcPos + length, size(src));
         N.checkFromToIndex(destPos, destPos + length, size(dest));
 
-        if (N.isNullOrEmpty(src) && srcPos == 0 && length == 0) {
+        if (N.isEmpty(src) && srcPos == 0 && length == 0) {
             return;
         }
 
@@ -15865,7 +16190,7 @@ class CommonUtil {
         N.checkFromToIndex(srcPos, srcPos + length, len(src));
         N.checkFromToIndex(destPos, destPos + length, len(dest));
 
-        if (N.isNullOrEmpty(src) && srcPos == 0 && length == 0) {
+        if (N.isEmpty(src) && srcPos == 0 && length == 0) {
             return;
         }
 
@@ -15897,7 +16222,7 @@ class CommonUtil {
         N.checkFromToIndex(srcPos, srcPos + length, len(src));
         N.checkFromToIndex(destPos, destPos + length, len(dest));
 
-        if (N.isNullOrEmpty(src) && srcPos == 0 && length == 0) {
+        if (N.isEmpty(src) && srcPos == 0 && length == 0) {
             return;
         }
 
@@ -15929,7 +16254,7 @@ class CommonUtil {
         N.checkFromToIndex(srcPos, srcPos + length, len(src));
         N.checkFromToIndex(destPos, destPos + length, len(dest));
 
-        if (N.isNullOrEmpty(src) && srcPos == 0 && length == 0) {
+        if (N.isEmpty(src) && srcPos == 0 && length == 0) {
             return;
         }
 
@@ -15961,7 +16286,7 @@ class CommonUtil {
         N.checkFromToIndex(srcPos, srcPos + length, len(src));
         N.checkFromToIndex(destPos, destPos + length, len(dest));
 
-        if (N.isNullOrEmpty(src) && srcPos == 0 && length == 0) {
+        if (N.isEmpty(src) && srcPos == 0 && length == 0) {
             return;
         }
 
@@ -15993,7 +16318,7 @@ class CommonUtil {
         N.checkFromToIndex(srcPos, srcPos + length, len(src));
         N.checkFromToIndex(destPos, destPos + length, len(dest));
 
-        if (N.isNullOrEmpty(src) && srcPos == 0 && length == 0) {
+        if (N.isEmpty(src) && srcPos == 0 && length == 0) {
             return;
         }
 
@@ -16025,7 +16350,7 @@ class CommonUtil {
         N.checkFromToIndex(srcPos, srcPos + length, len(src));
         N.checkFromToIndex(destPos, destPos + length, len(dest));
 
-        if (N.isNullOrEmpty(src) && srcPos == 0 && length == 0) {
+        if (N.isEmpty(src) && srcPos == 0 && length == 0) {
             return;
         }
 
@@ -16057,7 +16382,7 @@ class CommonUtil {
         N.checkFromToIndex(srcPos, srcPos + length, len(src));
         N.checkFromToIndex(destPos, destPos + length, len(dest));
 
-        if (N.isNullOrEmpty(src) && srcPos == 0 && length == 0) {
+        if (N.isEmpty(src) && srcPos == 0 && length == 0) {
             return;
         }
 
@@ -16089,7 +16414,7 @@ class CommonUtil {
         N.checkFromToIndex(srcPos, srcPos + length, len(src));
         N.checkFromToIndex(destPos, destPos + length, len(dest));
 
-        if (N.isNullOrEmpty(src) && srcPos == 0 && length == 0) {
+        if (N.isEmpty(src) && srcPos == 0 && length == 0) {
             return;
         }
 
@@ -16121,7 +16446,7 @@ class CommonUtil {
         N.checkFromToIndex(srcPos, srcPos + length, len(src));
         N.checkFromToIndex(destPos, destPos + length, len(dest));
 
-        if (N.isNullOrEmpty(src) && srcPos == 0 && length == 0) {
+        if (N.isEmpty(src) && srcPos == 0 && length == 0) {
             return;
         }
 
@@ -16171,7 +16496,7 @@ class CommonUtil {
 
         final boolean[] copy = new boolean[newLength];
 
-        if (notNullOrEmpty(original)) {
+        if (notEmpty(original)) {
             copy(original, 0, copy, 0, Math.min(original.length, newLength));
         }
 
@@ -16192,7 +16517,7 @@ class CommonUtil {
 
         final char[] copy = new char[newLength];
 
-        if (notNullOrEmpty(original)) {
+        if (notEmpty(original)) {
             copy(original, 0, copy, 0, Math.min(original.length, newLength));
         }
 
@@ -16213,7 +16538,7 @@ class CommonUtil {
 
         final byte[] copy = new byte[newLength];
 
-        if (notNullOrEmpty(original)) {
+        if (notEmpty(original)) {
             copy(original, 0, copy, 0, Math.min(original.length, newLength));
         }
 
@@ -16234,7 +16559,7 @@ class CommonUtil {
 
         final short[] copy = new short[newLength];
 
-        if (notNullOrEmpty(original)) {
+        if (notEmpty(original)) {
             copy(original, 0, copy, 0, Math.min(original.length, newLength));
         }
 
@@ -16255,7 +16580,7 @@ class CommonUtil {
 
         final int[] copy = new int[newLength];
 
-        if (notNullOrEmpty(original)) {
+        if (notEmpty(original)) {
             copy(original, 0, copy, 0, Math.min(original.length, newLength));
         }
 
@@ -16276,7 +16601,7 @@ class CommonUtil {
 
         final long[] copy = new long[newLength];
 
-        if (notNullOrEmpty(original)) {
+        if (notEmpty(original)) {
             copy(original, 0, copy, 0, Math.min(original.length, newLength));
         }
 
@@ -16297,7 +16622,7 @@ class CommonUtil {
 
         final float[] copy = new float[newLength];
 
-        if (notNullOrEmpty(original)) {
+        if (notEmpty(original)) {
             copy(original, 0, copy, 0, Math.min(original.length, newLength));
         }
 
@@ -16318,7 +16643,7 @@ class CommonUtil {
 
         final double[] copy = new double[newLength];
 
-        if (notNullOrEmpty(original)) {
+        if (notEmpty(original)) {
             copy(original, 0, copy, 0, Math.min(original.length, newLength));
         }
 
@@ -16354,7 +16679,7 @@ class CommonUtil {
     public static <T, U> T[] copyOf(final U[] original, final int newLength, final Class<? extends T[]> newType) {
         final T[] copy = Object[].class.equals(newType) ? (T[]) new Object[newLength] : (T[]) newArray(newType.getComponentType(), newLength);
 
-        if (notNullOrEmpty(original)) {
+        if (notEmpty(original)) {
             copy(original, 0, copy, 0, Math.min(original.length, newLength));
         }
 
@@ -17509,7 +17834,7 @@ class CommonUtil {
     //     * @return
     //     */
     //    public static <T> T[] copy(Class<T[]> newType, Object[] a) {
-    //        if (isNullOrEmpty(a)) {
+    //        if (isEmpty(a)) {
     //            return newArray(newType.getComponentType(), 0);
     //        }
     //
@@ -17526,7 +17851,7 @@ class CommonUtil {
     //    public static <T> T[][] copy(Class<T[][]> newType, Object[][] a) {
     //        final Class<T[]> componentType = (Class<T[]>) newType.getComponentType();
     //
-    //        if (isNullOrEmpty(a)) {
+    //        if (isEmpty(a)) {
     //            return newArray(componentType, 0);
     //        }
     //
@@ -17550,7 +17875,7 @@ class CommonUtil {
     //    public static <T> T[][][] copy(Class<T[][][]> newType, Object[][][] a) {
     //        final Class<T[][]> componentType = (Class<T[][]>) newType.getComponentType();
     //
-    //        if (isNullOrEmpty(a)) {
+    //        if (isEmpty(a)) {
     //            return newArray(componentType, 0);
     //        }
     //
@@ -18229,7 +18554,7 @@ class CommonUtil {
      * @param a
      */
     public static void sort(final boolean[] a) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return;
         }
 
@@ -18249,7 +18574,7 @@ class CommonUtil {
      * @param a
      */
     public static void sort(final char[] a) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return;
         }
 
@@ -18265,7 +18590,7 @@ class CommonUtil {
     public static void sort(final char[] a, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
-        if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
+        if (N.isEmpty(a) || fromIndex == toIndex) {
             return;
         }
 
@@ -18277,7 +18602,7 @@ class CommonUtil {
      * @param a
      */
     public static void sort(final byte[] a) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return;
         }
 
@@ -18293,7 +18618,7 @@ class CommonUtil {
     public static void sort(final byte[] a, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
-        if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
+        if (N.isEmpty(a) || fromIndex == toIndex) {
             return;
         }
 
@@ -18305,7 +18630,7 @@ class CommonUtil {
      * @param a
      */
     public static void sort(final short[] a) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return;
         }
 
@@ -18321,7 +18646,7 @@ class CommonUtil {
     public static void sort(final short[] a, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
-        if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
+        if (N.isEmpty(a) || fromIndex == toIndex) {
             return;
         }
 
@@ -18333,7 +18658,7 @@ class CommonUtil {
      * @param a
      */
     public static void sort(final int[] a) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return;
         }
 
@@ -18349,7 +18674,7 @@ class CommonUtil {
     public static void sort(final int[] a, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
-        if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
+        if (N.isEmpty(a) || fromIndex == toIndex) {
             return;
         }
 
@@ -18361,7 +18686,7 @@ class CommonUtil {
      * @param a
      */
     public static void sort(final long[] a) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return;
         }
 
@@ -18377,7 +18702,7 @@ class CommonUtil {
     public static void sort(final long[] a, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
-        if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
+        if (N.isEmpty(a) || fromIndex == toIndex) {
             return;
         }
 
@@ -18389,7 +18714,7 @@ class CommonUtil {
      * @param a
      */
     public static void sort(final float[] a) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return;
         }
 
@@ -18405,7 +18730,7 @@ class CommonUtil {
     public static void sort(final float[] a, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
-        if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
+        if (N.isEmpty(a) || fromIndex == toIndex) {
             return;
         }
 
@@ -18417,7 +18742,7 @@ class CommonUtil {
      * @param a
      */
     public static void sort(final double[] a) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return;
         }
 
@@ -18433,7 +18758,7 @@ class CommonUtil {
     public static void sort(final double[] a, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
-        if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
+        if (N.isEmpty(a) || fromIndex == toIndex) {
             return;
         }
 
@@ -18445,7 +18770,7 @@ class CommonUtil {
      * @param a
      */
     public static void sort(final Object[] a) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return;
         }
 
@@ -18469,7 +18794,7 @@ class CommonUtil {
      * @param cmp
      */
     public static <T> void sort(final T[] a, final Comparator<? super T> cmp) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return;
         }
 
@@ -18487,7 +18812,7 @@ class CommonUtil {
     public static <T> void sort(final T[] a, final int fromIndex, final int toIndex, final Comparator<? super T> cmp) {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
-        if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
+        if (N.isEmpty(a) || fromIndex == toIndex) {
             return;
         }
 
@@ -18500,7 +18825,7 @@ class CommonUtil {
      * @param list
      */
     public static <T extends Comparable<? super T>> void sort(final List<? extends T> list) {
-        if (N.isNullOrEmpty(list)) {
+        if (N.isEmpty(list)) {
             return;
         }
 
@@ -18515,7 +18840,7 @@ class CommonUtil {
      * @param toIndex
      */
     public static <T extends Comparable<? super T>> void sort(final List<? extends T> list, final int fromIndex, final int toIndex) {
-        if (N.isNullOrEmpty(list)) {
+        if (N.isEmpty(list)) {
             return;
         }
 
@@ -18529,7 +18854,7 @@ class CommonUtil {
      * @param cmp
      */
     public static <T> void sort(final List<? extends T> list, final Comparator<? super T> cmp) {
-        if (N.isNullOrEmpty(list)) {
+        if (N.isEmpty(list)) {
             return;
         }
 
@@ -18545,7 +18870,7 @@ class CommonUtil {
      * @param cmp
      */
     public static <T> void sort(final List<? extends T> list, final int fromIndex, final int toIndex, final Comparator<? super T> cmp) {
-        if ((N.isNullOrEmpty(list) && fromIndex == 0 && toIndex == 0) || fromIndex == toIndex) {
+        if ((N.isEmpty(list) && fromIndex == 0 && toIndex == 0) || fromIndex == toIndex) {
             return;
         }
 
@@ -18683,7 +19008,7 @@ class CommonUtil {
      * @param a
      */
     public static void parallelSort(final char[] a) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return;
         }
 
@@ -18699,7 +19024,7 @@ class CommonUtil {
     public static void parallelSort(final char[] a, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
-        if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
+        if (N.isEmpty(a) || fromIndex == toIndex) {
             return;
         }
 
@@ -18711,7 +19036,7 @@ class CommonUtil {
      * @param a
      */
     public static void parallelSort(final byte[] a) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return;
         }
 
@@ -18727,7 +19052,7 @@ class CommonUtil {
     public static void parallelSort(final byte[] a, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
-        if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
+        if (N.isEmpty(a) || fromIndex == toIndex) {
             return;
         }
 
@@ -18739,7 +19064,7 @@ class CommonUtil {
      * @param a
      */
     public static void parallelSort(final short[] a) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return;
         }
 
@@ -18755,7 +19080,7 @@ class CommonUtil {
     public static void parallelSort(final short[] a, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
-        if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
+        if (N.isEmpty(a) || fromIndex == toIndex) {
             return;
         }
 
@@ -18767,7 +19092,7 @@ class CommonUtil {
      * @param a
      */
     public static void parallelSort(final int[] a) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return;
         }
 
@@ -18783,7 +19108,7 @@ class CommonUtil {
     public static void parallelSort(final int[] a, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
-        if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
+        if (N.isEmpty(a) || fromIndex == toIndex) {
             return;
         }
 
@@ -18795,7 +19120,7 @@ class CommonUtil {
      * @param a
      */
     public static void parallelSort(final long[] a) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return;
         }
 
@@ -18811,7 +19136,7 @@ class CommonUtil {
     public static void parallelSort(final long[] a, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
-        if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
+        if (N.isEmpty(a) || fromIndex == toIndex) {
             return;
         }
 
@@ -18823,7 +19148,7 @@ class CommonUtil {
      * @param a
      */
     public static void parallelSort(final float[] a) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return;
         }
 
@@ -18839,7 +19164,7 @@ class CommonUtil {
     public static void parallelSort(final float[] a, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
-        if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
+        if (N.isEmpty(a) || fromIndex == toIndex) {
             return;
         }
 
@@ -18851,7 +19176,7 @@ class CommonUtil {
      * @param a
      */
     public static void parallelSort(final double[] a) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return;
         }
 
@@ -18867,7 +19192,7 @@ class CommonUtil {
     public static void parallelSort(final double[] a, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
-        if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
+        if (N.isEmpty(a) || fromIndex == toIndex) {
             return;
         }
 
@@ -18881,7 +19206,7 @@ class CommonUtil {
      * @param a
      */
     public static <T extends Comparable<? super T>> void parallelSort(T[] a) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return;
         }
 
@@ -18899,7 +19224,7 @@ class CommonUtil {
     public static <T extends Comparable<? super T>> void parallelSort(T[] a, int fromIndex, int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
-        if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
+        if (N.isEmpty(a) || fromIndex == toIndex) {
             return;
         }
 
@@ -18913,7 +19238,7 @@ class CommonUtil {
      * @param cmp
      */
     public static <T> void parallelSort(final T[] a, final Comparator<? super T> cmp) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return;
         }
 
@@ -18931,7 +19256,7 @@ class CommonUtil {
     public static <T> void parallelSort(final T[] a, final int fromIndex, final int toIndex, final Comparator<? super T> cmp) {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
-        if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
+        if (N.isEmpty(a) || fromIndex == toIndex) {
             return;
         }
 
@@ -18944,7 +19269,7 @@ class CommonUtil {
      * @param list
      */
     public static <T extends Comparable<? super T>> void parallelSort(final List<? extends T> list) {
-        if (N.isNullOrEmpty(list)) {
+        if (N.isEmpty(list)) {
             return;
         }
 
@@ -18969,7 +19294,7 @@ class CommonUtil {
      * @param cmp
      */
     public static <T> void parallelSort(final List<? extends T> list, final Comparator<? super T> cmp) {
-        if (N.isNullOrEmpty(list)) {
+        if (N.isEmpty(list)) {
             return;
         }
 
@@ -18985,7 +19310,7 @@ class CommonUtil {
      * @param cmp
      */
     public static <T> void parallelSort(final List<? extends T> list, final int fromIndex, final int toIndex, final Comparator<? super T> cmp) {
-        if ((N.isNullOrEmpty(list) && fromIndex == 0 && toIndex == 0) || fromIndex == toIndex) {
+        if ((N.isEmpty(list) && fromIndex == 0 && toIndex == 0) || fromIndex == toIndex) {
             return;
         }
 
@@ -19128,7 +19453,7 @@ class CommonUtil {
      * @param a
      */
     public static void reverseSort(final boolean[] a) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return;
         }
 
@@ -19350,7 +19675,7 @@ class CommonUtil {
      * @param a
      */
     public static void bucketSort(final int[] a) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return;
         }
 
@@ -19366,7 +19691,7 @@ class CommonUtil {
     public static void bucketSort(final int[] a, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
-        if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
+        if (N.isEmpty(a) || fromIndex == toIndex) {
             return;
         }
 
@@ -19395,7 +19720,7 @@ class CommonUtil {
      * @param a
      */
     public static void bucketSort(final long[] a) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return;
         }
 
@@ -19411,7 +19736,7 @@ class CommonUtil {
     public static void bucketSort(final long[] a, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
-        if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
+        if (N.isEmpty(a) || fromIndex == toIndex) {
             return;
         }
 
@@ -19441,7 +19766,7 @@ class CommonUtil {
      * @param a
      */
     public static void bucketSort(final float[] a) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return;
         }
 
@@ -19457,7 +19782,7 @@ class CommonUtil {
     public static void bucketSort(final float[] a, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
-        if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
+        if (N.isEmpty(a) || fromIndex == toIndex) {
             return;
         }
 
@@ -19486,7 +19811,7 @@ class CommonUtil {
      * @param a
      */
     public static void bucketSort(final double[] a) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return;
         }
 
@@ -19502,7 +19827,7 @@ class CommonUtil {
     public static void bucketSort(final double[] a, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
-        if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
+        if (N.isEmpty(a) || fromIndex == toIndex) {
             return;
         }
 
@@ -19532,7 +19857,7 @@ class CommonUtil {
      * @param a
      */
     public static void bucketSort(final Object[] a) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return;
         }
 
@@ -19557,7 +19882,7 @@ class CommonUtil {
      * @param cmp
      */
     public static <T> void bucketSort(final T[] a, final Comparator<? super T> cmp) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return;
         }
 
@@ -19576,7 +19901,7 @@ class CommonUtil {
     public static <T> void bucketSort(final T[] a, final int fromIndex, final int toIndex, final Comparator<? super T> cmp) {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
-        if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
+        if (N.isEmpty(a) || fromIndex == toIndex) {
             return;
         }
 
@@ -19608,7 +19933,7 @@ class CommonUtil {
      * @param list
      */
     public static <T extends Comparable<? super T>> void bucketSort(final List<T> list) {
-        if (N.isNullOrEmpty(list)) {
+        if (N.isEmpty(list)) {
             return;
         }
 
@@ -19635,7 +19960,7 @@ class CommonUtil {
      * @param cmp
      */
     public static <T> void bucketSort(final List<? extends T> list, final Comparator<? super T> cmp) {
-        if (N.isNullOrEmpty(list)) {
+        if (N.isEmpty(list)) {
             return;
         }
 
@@ -19654,7 +19979,7 @@ class CommonUtil {
     public static <T> void bucketSort(final List<? extends T> list, final int fromIndex, final int toIndex, final Comparator<? super T> cmp) {
         N.checkFromToIndex(fromIndex, toIndex, list == null ? 0 : list.size());
 
-        if ((N.isNullOrEmpty(list) && fromIndex == 0 && toIndex == 0) || fromIndex == toIndex) {
+        if ((N.isEmpty(list) && fromIndex == 0 && toIndex == 0) || fromIndex == toIndex) {
             return;
         }
 
@@ -19698,7 +20023,7 @@ class CommonUtil {
      * @param keyMapper
      */
     public static <T, U extends Comparable<? super U>> void bucketSortBy(final T[] a, final Function<? super T, ? extends U> keyMapper) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return;
         }
 
@@ -19714,7 +20039,7 @@ class CommonUtil {
      * @param keyMapper
      */
     public static <T, U extends Comparable<? super U>> void bucketSortBy(final List<? extends T> list, final Function<? super T, ? extends U> keyMapper) {
-        if (N.isNullOrEmpty(list)) {
+        if (N.isEmpty(list)) {
             return;
         }
 
@@ -19729,7 +20054,7 @@ class CommonUtil {
      * @return
      */
     static int binarySearch(final boolean[] a, final boolean valueToFind) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return N.INDEX_NOT_FOUND;
         }
 
@@ -19760,7 +20085,7 @@ class CommonUtil {
      * @return
      */
     public static int binarySearch(final char[] a, final char valueToFind) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return N.INDEX_NOT_FOUND;
         }
 
@@ -19777,7 +20102,7 @@ class CommonUtil {
      * @return
      */
     public static int binarySearch(final char[] a, final int fromIndex, final int toIndex, final char valueToFind) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return N.INDEX_NOT_FOUND;
         }
 
@@ -19792,7 +20117,7 @@ class CommonUtil {
      * @return
      */
     public static int binarySearch(final byte[] a, final byte valueToFind) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return N.INDEX_NOT_FOUND;
         }
 
@@ -19809,7 +20134,7 @@ class CommonUtil {
      * @return
      */
     public static int binarySearch(final byte[] a, final int fromIndex, final int toIndex, final byte valueToFind) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return N.INDEX_NOT_FOUND;
         }
 
@@ -19824,7 +20149,7 @@ class CommonUtil {
      * @return
      */
     public static int binarySearch(final short[] a, final short valueToFind) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return N.INDEX_NOT_FOUND;
         }
 
@@ -19841,7 +20166,7 @@ class CommonUtil {
      * @return
      */
     public static int binarySearch(final short[] a, final int fromIndex, final int toIndex, final short valueToFind) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return N.INDEX_NOT_FOUND;
         }
 
@@ -19856,7 +20181,7 @@ class CommonUtil {
      * @return
      */
     public static int binarySearch(final int[] a, final int valueToFind) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return N.INDEX_NOT_FOUND;
         }
 
@@ -19873,7 +20198,7 @@ class CommonUtil {
      * @return
      */
     public static int binarySearch(final int[] a, final int fromIndex, final int toIndex, final int valueToFind) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return N.INDEX_NOT_FOUND;
         }
 
@@ -19888,7 +20213,7 @@ class CommonUtil {
      * @return
      */
     public static int binarySearch(final long[] a, final long valueToFind) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return N.INDEX_NOT_FOUND;
         }
 
@@ -19905,7 +20230,7 @@ class CommonUtil {
      * @return
      */
     public static int binarySearch(final long[] a, final int fromIndex, final int toIndex, final long valueToFind) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return N.INDEX_NOT_FOUND;
         }
 
@@ -19920,7 +20245,7 @@ class CommonUtil {
      * @return
      */
     public static int binarySearch(final float[] a, final float valueToFind) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return N.INDEX_NOT_FOUND;
         }
 
@@ -19937,7 +20262,7 @@ class CommonUtil {
      * @return
      */
     public static int binarySearch(final float[] a, final int fromIndex, final int toIndex, final float valueToFind) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return N.INDEX_NOT_FOUND;
         }
 
@@ -19952,7 +20277,7 @@ class CommonUtil {
      * @return
      */
     public static int binarySearch(final double[] a, final double valueToFind) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return N.INDEX_NOT_FOUND;
         }
 
@@ -19969,7 +20294,7 @@ class CommonUtil {
      * @return
      */
     public static int binarySearch(final double[] a, final int fromIndex, final int toIndex, final double valueToFind) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return N.INDEX_NOT_FOUND;
         }
 
@@ -19984,7 +20309,7 @@ class CommonUtil {
      * @return
      */
     public static int binarySearch(final Object[] a, final Object valueToFind) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return N.INDEX_NOT_FOUND;
         }
 
@@ -20001,7 +20326,7 @@ class CommonUtil {
      * @return
      */
     public static int binarySearch(final Object[] a, final int fromIndex, final int toIndex, final Object valueToFind) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return N.INDEX_NOT_FOUND;
         }
 
@@ -20018,7 +20343,7 @@ class CommonUtil {
      * @return
      */
     public static <T> int binarySearch(final T[] a, final T valueToFind, final Comparator<? super T> cmp) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return N.INDEX_NOT_FOUND;
         }
 
@@ -20037,7 +20362,7 @@ class CommonUtil {
      * @return
      */
     public static <T> int binarySearch(final T[] a, final int fromIndex, final int toIndex, final T valueToFind, final Comparator<? super T> cmp) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return N.INDEX_NOT_FOUND;
         }
 
@@ -20053,7 +20378,7 @@ class CommonUtil {
      * @return
      */
     public static <T extends Comparable<? super T>> int binarySearch(final List<? extends T> list, final T valueToFind) {
-        if (N.isNullOrEmpty(list)) {
+        if (N.isEmpty(list)) {
             return N.INDEX_NOT_FOUND;
         }
 
@@ -20071,7 +20396,7 @@ class CommonUtil {
      */
     public static <T extends Comparable<? super T>> int binarySearch(final List<? extends T> list, final int fromIndex, final int toIndex,
             final T valueToFind) {
-        if (N.isNullOrEmpty(list)) {
+        if (N.isEmpty(list)) {
             return N.INDEX_NOT_FOUND;
         }
 
@@ -20087,7 +20412,7 @@ class CommonUtil {
      * @return
      */
     public static <T> int binarySearch(final List<? extends T> list, final T valueToFind, final Comparator<? super T> cmp) {
-        if (N.isNullOrEmpty(list)) {
+        if (N.isEmpty(list)) {
             return N.INDEX_NOT_FOUND;
         }
 
@@ -20106,7 +20431,7 @@ class CommonUtil {
      * @see Collections#binarySearch(List, Object, Comparator)
      */
     public static <T> int binarySearch(final List<? extends T> list, final int fromIndex, final int toIndex, final T valueToFind, Comparator<? super T> cmp) {
-        if (N.isNullOrEmpty(list)) {
+        if (N.isEmpty(list)) {
             return N.INDEX_NOT_FOUND;
         }
 
@@ -20138,7 +20463,7 @@ class CommonUtil {
      */
     public static <T, U extends Comparable<? super U>> int binarySearchBy(final T[] a, final T valueToFind,
             final Function<? super T, ? extends U> valueToFindMapper) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return N.INDEX_NOT_FOUND;
         }
 
@@ -20157,7 +20482,7 @@ class CommonUtil {
      */
     public static <T, U extends Comparable<? super U>> int binarySearchBy(final List<? extends T> list, final T valueToFind,
             final Function<? super T, ? extends U> valueToFindMapper) {
-        if (N.isNullOrEmpty(list)) {
+        if (N.isEmpty(list)) {
             return N.INDEX_NOT_FOUND;
         }
 
@@ -20663,7 +20988,7 @@ class CommonUtil {
      * @return
      */
     public static int indexOfIgnoreCase(final String[] a, final String valueToFind) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return N.INDEX_NOT_FOUND;
         }
 
@@ -20726,7 +21051,7 @@ class CommonUtil {
      * @see java.util.Collections#indexOfSubList(List, List)
      */
     public static int indexOfSubList(final List<?> sourceList, final List<?> subListToFind) {
-        if (isNullOrEmpty(sourceList) || isNullOrEmpty(subListToFind)) {
+        if (isEmpty(sourceList) || isEmpty(subListToFind)) {
             return INDEX_NOT_FOUND;
         }
 
@@ -20776,7 +21101,7 @@ class CommonUtil {
      * @return
      */
     public static int lastIndexOf(final char[] a, final char valueToFind) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return INDEX_NOT_FOUND;
         }
 
@@ -20815,7 +21140,7 @@ class CommonUtil {
      * @return
      */
     public static int lastIndexOf(final byte[] a, final byte valueToFind) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return INDEX_NOT_FOUND;
         }
 
@@ -20855,7 +21180,7 @@ class CommonUtil {
      * @return
      */
     public static int lastIndexOf(final short[] a, final short valueToFind) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return INDEX_NOT_FOUND;
         }
 
@@ -20894,7 +21219,7 @@ class CommonUtil {
      * @return
      */
     public static int lastIndexOf(final int[] a, final int valueToFind) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return INDEX_NOT_FOUND;
         }
 
@@ -20933,7 +21258,7 @@ class CommonUtil {
      * @return
      */
     public static int lastIndexOf(final long[] a, final long valueToFind) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return INDEX_NOT_FOUND;
         }
 
@@ -20972,7 +21297,7 @@ class CommonUtil {
      * @return
      */
     public static int lastIndexOf(final float[] a, final float valueToFind) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return INDEX_NOT_FOUND;
         }
 
@@ -21011,7 +21336,7 @@ class CommonUtil {
      * @return
      */
     public static int lastIndexOf(final double[] a, final double valueToFind) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return INDEX_NOT_FOUND;
         }
 
@@ -21103,7 +21428,7 @@ class CommonUtil {
      * @return
      */
     public static int lastIndexOf(final Object[] a, final Object valueToFind) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return INDEX_NOT_FOUND;
         }
 
@@ -21142,7 +21467,7 @@ class CommonUtil {
      * @return
      */
     public static int lastIndexOf(final Collection<?> c, final Object valueToFind) {
-        if (isNullOrEmpty(c)) {
+        if (isEmpty(c)) {
             return INDEX_NOT_FOUND;
         }
 
@@ -21203,7 +21528,7 @@ class CommonUtil {
      * @return
      */
     public static int lastIndexOfIgnoreCase(final String[] a, final String valueToFind) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return N.INDEX_NOT_FOUND;
         }
 
@@ -21225,7 +21550,7 @@ class CommonUtil {
      * @see java.util.Collections#lastIndexOfSubList(List, List)
      */
     public static int lastIndexOfSubList(final List<?> sourceList, final List<?> subListToFind) {
-        if (isNullOrEmpty(sourceList) || isNullOrEmpty(subListToFind)) {
+        if (isEmpty(sourceList) || isEmpty(subListToFind)) {
             return INDEX_NOT_FOUND;
         }
 
@@ -21243,7 +21568,7 @@ class CommonUtil {
      * @throws E the e
      */
     public static <T, E extends Exception> OptionalInt findFirstIndex(final T[] a, final Throwables.Predicate<? super T, E> predicate) throws E {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return OptionalInt.empty();
         }
 
@@ -21270,7 +21595,7 @@ class CommonUtil {
      */
     public static <T, U, E extends Exception> OptionalInt findFirstIndex(final T[] a, final U valueToFind,
             final Throwables.BiPredicate<? super T, ? super U, E> predicate) throws E {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return OptionalInt.empty();
         }
 
@@ -21295,7 +21620,7 @@ class CommonUtil {
      */
     public static <T, E extends Exception> OptionalInt findFirstIndex(final Collection<? extends T> c, final Throwables.Predicate<? super T, E> predicate)
             throws E {
-        if (N.isNullOrEmpty(c)) {
+        if (N.isEmpty(c)) {
             return OptionalInt.empty();
         }
 
@@ -21326,7 +21651,7 @@ class CommonUtil {
      */
     public static <T, U, E extends Exception> OptionalInt findFirstIndex(final Collection<? extends T> c, final U valueToFind,
             final Throwables.BiPredicate<? super T, ? super U, E> predicate) throws E {
-        if (N.isNullOrEmpty(c)) {
+        if (N.isEmpty(c)) {
             return OptionalInt.empty();
         }
 
@@ -21354,7 +21679,7 @@ class CommonUtil {
      * @throws E the e
      */
     public static <T, E extends Exception> OptionalInt findLastIndex(final T[] a, final Throwables.Predicate<? super T, E> predicate) throws E {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return OptionalInt.empty();
         }
 
@@ -21381,7 +21706,7 @@ class CommonUtil {
      */
     public static <T, U, E extends Exception> OptionalInt findLastIndex(final T[] a, final U valueToFind,
             final Throwables.BiPredicate<? super T, ? super U, E> predicate) throws E {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return OptionalInt.empty();
         }
 
@@ -21406,7 +21731,7 @@ class CommonUtil {
      */
     public static <T, E extends Exception> OptionalInt findLastIndex(final Collection<? extends T> c, final Throwables.Predicate<? super T, E> predicate)
             throws E {
-        if (N.isNullOrEmpty(c)) {
+        if (N.isEmpty(c)) {
             return OptionalInt.empty();
         }
 
@@ -21460,7 +21785,7 @@ class CommonUtil {
      */
     public static <T, U, E extends Exception> OptionalInt findLastIndex(final Collection<? extends T> c, final U valueToFind,
             final Throwables.BiPredicate<? super T, ? super U, E> predicate) throws E {
-        if (N.isNullOrEmpty(c)) {
+        if (N.isEmpty(c)) {
             return OptionalInt.empty();
         }
 

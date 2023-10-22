@@ -208,9 +208,9 @@ public final class Comparators {
 
     @SuppressWarnings("rawtypes")
     public static final Comparator<Collection> COLLECTION_COMPARATOR = (a, b) -> {
-        if (N.isNullOrEmpty(a)) {
-            return N.isNullOrEmpty(b) ? 0 : -1;
-        } else if (N.isNullOrEmpty(b)) {
+        if (N.isEmpty(a)) {
+            return N.isEmpty(b) ? 0 : -1;
+        } else if (N.isEmpty(b)) {
             return 1;
         }
 
@@ -658,9 +658,9 @@ public final class Comparators {
         N.checkArgNotNull(cmp);
 
         return (a, b) -> {
-            if (N.isNullOrEmpty(a)) {
-                return N.isNullOrEmpty(b) ? 0 : -1;
-            } else if (N.isNullOrEmpty(b)) {
+            if (N.isEmpty(a)) {
+                return N.isEmpty(b) ? 0 : -1;
+            } else if (N.isEmpty(b)) {
                 return 1;
             }
 
@@ -692,9 +692,9 @@ public final class Comparators {
         N.checkArgNotNull(cmp);
 
         return (a, b) -> {
-            if (N.isNullOrEmpty(a)) {
-                return N.isNullOrEmpty(b) ? 0 : -1;
-            } else if (N.isNullOrEmpty(b)) {
+            if (N.isEmpty(a)) {
+                return N.isEmpty(b) ? 0 : -1;
+            } else if (N.isEmpty(b)) {
                 return 1;
             }
 
@@ -724,9 +724,9 @@ public final class Comparators {
             final Iterator<T> iterA = N.iterate(a);
             final Iterator<T> iterB = N.iterate(b);
 
-            if (N.isNullOrEmpty(iterA)) {
-                return N.isNullOrEmpty(iterB) ? 0 : -1;
-            } else if (N.isNullOrEmpty(iterB)) {
+            if (N.isEmpty(iterA)) {
+                return N.isEmpty(iterB) ? 0 : -1;
+            } else if (N.isEmpty(iterB)) {
                 return 1;
             }
 
@@ -756,9 +756,9 @@ public final class Comparators {
         N.checkArgNotNull(cmp);
 
         return (a, b) -> {
-            if (N.isNullOrEmpty(a)) {
-                return N.isNullOrEmpty(b) ? 0 : -1;
-            } else if (N.isNullOrEmpty(b)) {
+            if (N.isEmpty(a)) {
+                return N.isEmpty(b) ? 0 : -1;
+            } else if (N.isEmpty(b)) {
                 return 1;
             }
 

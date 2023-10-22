@@ -128,7 +128,7 @@ public final class LongMultiset<T> implements Iterable<T> {
      */
     @SafeVarargs
     public static <T> LongMultiset<T> of(final T... a) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return new LongMultiset<>();
         }
 
@@ -190,7 +190,7 @@ public final class LongMultiset<T> implements Iterable<T> {
      * @return
      */
     public static <T> LongMultiset<T> create(final Map<? extends T, Long> m) {
-        if (N.isNullOrEmpty(m)) {
+        if (N.isEmpty(m)) {
             return new LongMultiset<>();
         }
 
@@ -212,7 +212,7 @@ public final class LongMultiset<T> implements Iterable<T> {
      */
     @Beta
     public static <T, V> LongMultiset<T> create(final Map<? extends T, ? extends V> m, final ToLongFunction<? super V> valueMapper) {
-        if (N.isNullOrEmpty(m)) {
+        if (N.isEmpty(m)) {
             return new LongMultiset<>();
         }
 
@@ -232,7 +232,7 @@ public final class LongMultiset<T> implements Iterable<T> {
      * @return
      */
     public static <T> LongMultiset<T> create(final Multiset<? extends T> multiset) {
-        if (N.isNullOrEmpty(multiset)) {
+        if (N.isEmpty(multiset)) {
             return new LongMultiset<>();
         }
 
@@ -360,7 +360,7 @@ public final class LongMultiset<T> implements Iterable<T> {
     public LongMultiset<T> setAll(final Collection<? extends T> c, final long occurrences) {
         checkOccurrences(occurrences);
 
-        if (N.notNullOrEmpty(c)) {
+        if (N.notEmpty(c)) {
             for (T e : c) {
                 set(e, occurrences);
             }
@@ -377,7 +377,7 @@ public final class LongMultiset<T> implements Iterable<T> {
      * @throws IllegalArgumentException if the occurrences of element is less than 0.
      */
     public LongMultiset<T> setAll(final Map<? extends T, Long> m) throws IllegalArgumentException {
-        if (N.notNullOrEmpty(m)) {
+        if (N.notEmpty(m)) {
             for (Map.Entry<? extends T, Long> entry : m.entrySet()) {
                 checkOccurrences(entry.getValue());
             }
@@ -398,7 +398,7 @@ public final class LongMultiset<T> implements Iterable<T> {
      * @throws IllegalArgumentException if the occurrences of element is less than 0.
      */
     public LongMultiset<T> setAll(final LongMultiset<? extends T> multiset) throws IllegalArgumentException {
-        if (N.notNullOrEmpty(multiset)) {
+        if (N.notEmpty(multiset)) {
             for (Map.Entry<? extends T, MutableLong> entry : multiset.valueMap.entrySet()) {
                 set(entry.getKey(), entry.getValue().value());
             }
@@ -717,7 +717,7 @@ public final class LongMultiset<T> implements Iterable<T> {
      * @throws IllegalArgumentException if the occurrences of element after this operation is bigger than Long.MAX_VALUE.
      */
     public boolean addAll(final Collection<? extends T> c) throws IllegalArgumentException {
-        if (N.isNullOrEmpty(c)) {
+        if (N.isEmpty(c)) {
             return false;
         }
 
@@ -735,7 +735,7 @@ public final class LongMultiset<T> implements Iterable<T> {
     public boolean addAll(final Collection<? extends T> c, final long occurrencesToAdd) throws IllegalArgumentException {
         checkOccurrences(occurrencesToAdd);
 
-        if (N.isNullOrEmpty(c) || occurrencesToAdd == 0) {
+        if (N.isEmpty(c) || occurrencesToAdd == 0) {
             return false;
         }
 
@@ -754,7 +754,7 @@ public final class LongMultiset<T> implements Iterable<T> {
      * @throws IllegalArgumentException if the occurrences of element after this operation is bigger than Long.MAX_VALUE.
      */
     public boolean addAll(final Map<? extends T, Long> m) throws IllegalArgumentException {
-        if (N.isNullOrEmpty(m)) {
+        if (N.isEmpty(m)) {
             return false;
         }
 
@@ -783,7 +783,7 @@ public final class LongMultiset<T> implements Iterable<T> {
      * @throws IllegalArgumentException if the occurrences of element is less than 0.
      */
     public boolean addAll(final LongMultiset<? extends T> multiset) throws IllegalArgumentException {
-        if (N.isNullOrEmpty(multiset)) {
+        if (N.isEmpty(multiset)) {
             return false;
         }
 
@@ -951,7 +951,7 @@ public final class LongMultiset<T> implements Iterable<T> {
             }
         }
 
-        if (N.isNullOrEmpty(removingKeys)) {
+        if (N.isEmpty(removingKeys)) {
             return false;
         }
 
@@ -981,7 +981,7 @@ public final class LongMultiset<T> implements Iterable<T> {
             }
         }
 
-        if (N.isNullOrEmpty(removingKeys)) {
+        if (N.isEmpty(removingKeys)) {
             return false;
         }
 
@@ -997,7 +997,7 @@ public final class LongMultiset<T> implements Iterable<T> {
      * @return
      */
     public boolean removeAllOccurrencesForEach(final Collection<?> c) {
-        if (N.isNullOrEmpty(c)) {
+        if (N.isEmpty(c)) {
             return false;
         }
 
@@ -1033,7 +1033,7 @@ public final class LongMultiset<T> implements Iterable<T> {
             }
         }
 
-        if (N.isNullOrEmpty(removingKeys)) {
+        if (N.isEmpty(removingKeys)) {
             return false;
         }
 
@@ -1065,7 +1065,7 @@ public final class LongMultiset<T> implements Iterable<T> {
             }
         }
 
-        if (N.isNullOrEmpty(removingKeys)) {
+        if (N.isEmpty(removingKeys)) {
             return false;
         }
 
@@ -1096,7 +1096,7 @@ public final class LongMultiset<T> implements Iterable<T> {
     public boolean removeAll(final Collection<?> c, final long occurrencesToRemove) {
         checkOccurrences(occurrencesToRemove);
 
-        if (N.isNullOrEmpty(c) || occurrencesToRemove == 0) {
+        if (N.isEmpty(c) || occurrencesToRemove == 0) {
             return false;
         }
 
@@ -1120,7 +1120,7 @@ public final class LongMultiset<T> implements Iterable<T> {
      * @return
      */
     public boolean removeAll(final Map<?, Long> m) {
-        if (N.isNullOrEmpty(m)) {
+        if (N.isEmpty(m)) {
             return false;
         }
 
@@ -1149,7 +1149,7 @@ public final class LongMultiset<T> implements Iterable<T> {
      * @throws IllegalArgumentException the illegal argument exception
      */
     public boolean removeAll(final LongMultiset<?> multiset) throws IllegalArgumentException {
-        if (N.isNullOrEmpty(multiset)) {
+        if (N.isEmpty(multiset)) {
             return false;
         }
 
@@ -1271,7 +1271,7 @@ public final class LongMultiset<T> implements Iterable<T> {
             }
         }
 
-        if (N.notNullOrEmpty(keyToRemove)) {
+        if (N.notEmpty(keyToRemove)) {
             for (T key : keyToRemove) {
                 valueMap.remove(key);
             }
@@ -1289,7 +1289,7 @@ public final class LongMultiset<T> implements Iterable<T> {
      * @see Collection#retainAll(Collection)
      */
     public boolean retainAll(final Collection<?> c) {
-        if (N.isNullOrEmpty(c)) {
+        if (N.isEmpty(c)) {
             boolean result = size() > 0;
             clear();
             return result;
@@ -1307,7 +1307,7 @@ public final class LongMultiset<T> implements Iterable<T> {
             }
         }
 
-        return N.isNullOrEmpty(others) ? false : removeAll(others, Long.MAX_VALUE);
+        return N.isEmpty(others) ? false : removeAll(others, Long.MAX_VALUE);
     }
 
     /**
@@ -1500,7 +1500,7 @@ public final class LongMultiset<T> implements Iterable<T> {
      * @return
      */
     Map<T, Long> toMapSortedBy(final Comparator<Map.Entry<T, MutableLong>> cmp) {
-        if (N.isNullOrEmpty(valueMap)) {
+        if (N.isEmpty(valueMap)) {
             return new LinkedHashMap<>();
         }
 

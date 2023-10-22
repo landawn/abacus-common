@@ -139,7 +139,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @return
      */
     public static DoubleList from(Collection<Double> c) {
-        if (N.isNullOrEmpty(c)) {
+        if (N.isEmpty(c)) {
             return new DoubleList();
         }
 
@@ -153,7 +153,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @return
      */
     public static DoubleList from(Collection<Double> c, double defaultForNull) {
-        if (N.isNullOrEmpty(c)) {
+        if (N.isEmpty(c)) {
             return new DoubleList();
         }
 
@@ -177,7 +177,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     public static DoubleList from(final Collection<Double> c, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, N.size(c));
 
-        if (N.isNullOrEmpty(c)) {
+        if (N.isEmpty(c)) {
             return new DoubleList();
         }
 
@@ -308,7 +308,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      */
     @Override
     public boolean addAll(DoubleList c) {
-        if (N.isNullOrEmpty(c)) {
+        if (N.isEmpty(c)) {
             return false;
         }
 
@@ -334,7 +334,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     public boolean addAll(int index, DoubleList c) {
         rangeCheckForAdd(index);
 
-        if (N.isNullOrEmpty(c)) {
+        if (N.isEmpty(c)) {
             return false;
         }
 
@@ -377,7 +377,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     public boolean addAll(int index, double[] a) {
         rangeCheckForAdd(index);
 
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return false;
         }
 
@@ -475,7 +475,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      */
     @Override
     public boolean removeAll(DoubleList c) {
-        if (N.isNullOrEmpty(c)) {
+        if (N.isEmpty(c)) {
             return false;
         }
 
@@ -490,7 +490,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      */
     @Override
     public boolean removeAll(double[] a) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return false;
         }
 
@@ -574,7 +574,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      */
     @Override
     public boolean retainAll(DoubleList c) {
-        if (N.isNullOrEmpty(c)) {
+        if (N.isEmpty(c)) {
             boolean result = size() > 0;
             clear();
             return result;
@@ -590,7 +590,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      */
     @Override
     public boolean retainAll(double[] a) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             boolean result = size() > 0;
             clear();
             return result;
@@ -659,7 +659,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     @Override
     @SafeVarargs
     public final void deleteAll(int... indices) {
-        if (N.isNullOrEmpty(indices)) {
+        if (N.isEmpty(indices)) {
             return;
         }
 
@@ -717,7 +717,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     public void replaceRange(final int fromIndex, final int toIndex, final double[] replacement) {
         N.checkFromToIndex(fromIndex, toIndex, size());
 
-        if (N.isNullOrEmpty(replacement)) {
+        if (N.isEmpty(replacement)) {
             deleteRange(fromIndex, toIndex);
             return;
         }
@@ -836,7 +836,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      */
     @Override
     public boolean containsAny(DoubleList c) {
-        if (this.isEmpty() || N.isNullOrEmpty(c)) {
+        if (this.isEmpty() || N.isEmpty(c)) {
             return false;
         }
 
@@ -850,7 +850,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      */
     @Override
     public boolean containsAny(double[] a) {
-        if (this.isEmpty() || N.isNullOrEmpty(a)) {
+        if (this.isEmpty() || N.isEmpty(a)) {
             return false;
         }
 
@@ -864,7 +864,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      */
     @Override
     public boolean containsAll(DoubleList c) {
-        if (N.isNullOrEmpty(c)) {
+        if (N.isEmpty(c)) {
             return true;
         } else if (isEmpty()) {
             return false;
@@ -900,7 +900,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      */
     @Override
     public boolean containsAll(double[] a) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return true;
         } else if (isEmpty()) {
             return false;
@@ -916,7 +916,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      */
     @Override
     public boolean disjoint(final DoubleList c) {
-        if (isEmpty() || N.isNullOrEmpty(c)) {
+        if (isEmpty() || N.isEmpty(c)) {
             return true;
         }
 
@@ -950,7 +950,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      */
     @Override
     public boolean disjoint(final double[] b) {
-        if (isEmpty() || N.isNullOrEmpty(b)) {
+        if (isEmpty() || N.isEmpty(b)) {
             return true;
         }
 
@@ -965,7 +965,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      */
     @Override
     public DoubleList intersection(final DoubleList b) {
-        if (N.isNullOrEmpty(b)) {
+        if (N.isEmpty(b)) {
             return new DoubleList();
         }
 
@@ -989,7 +989,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      */
     @Override
     public DoubleList intersection(final double[] a) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return new DoubleList();
         }
 
@@ -1004,7 +1004,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      */
     @Override
     public DoubleList difference(DoubleList b) {
-        if (N.isNullOrEmpty(b)) {
+        if (N.isEmpty(b)) {
             return of(N.copyOfRange(elementData, 0, size()));
         }
 
@@ -1028,7 +1028,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      */
     @Override
     public DoubleList difference(final double[] a) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return of(N.copyOfRange(elementData, 0, size()));
         }
 
@@ -1043,7 +1043,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      */
     @Override
     public DoubleList symmetricDifference(DoubleList b) {
-        if (N.isNullOrEmpty(b)) {
+        if (N.isEmpty(b)) {
             return this.copy();
         } else if (this.isEmpty()) {
             return b.copy();
@@ -1078,7 +1078,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      */
     @Override
     public DoubleList symmetricDifference(final double[] a) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return of(N.copyOfRange(elementData, 0, size()));
         } else if (this.isEmpty()) {
             return of(N.copyOfRange(a, 0, a.length));
@@ -2345,7 +2345,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
             throw new OutOfMemoryError();
         }
 
-        if (N.isNullOrEmpty(elementData)) {
+        if (N.isEmpty(elementData)) {
             elementData = new double[Math.max(DEFAULT_CAPACITY, minCapacity)];
         } else if (minCapacity - elementData.length > 0) {
             int newCapacity = calNewCapacity(minCapacity, elementData.length);

@@ -210,7 +210,7 @@ public final class Iterators {
     public static <T> ObjIterator<T> repeatEach(final Collection<? extends T> c, final int n) {
         N.checkArgument(n >= 0, "'n' can't be negative: %s", n);
 
-        if (n == 0 || N.isNullOrEmpty(c)) {
+        if (n == 0 || N.isEmpty(c)) {
             return ObjIterator.empty();
         }
 
@@ -252,7 +252,7 @@ public final class Iterators {
     public static <T> ObjIterator<T> repeatAll(final Collection<? extends T> c, final int n) {
         N.checkArgument(n >= 0, "'n' can't be negative: %s", n);
 
-        if (n == 0 || N.isNullOrEmpty(c)) {
+        if (n == 0 || N.isEmpty(c)) {
             return ObjIterator.empty();
         }
 
@@ -291,9 +291,9 @@ public final class Iterators {
      */
     public static <T> ObjIterator<T> repeatEachToSize(final Collection<? extends T> c, final int size) {
         N.checkArgument(size >= 0, "'size' can't be negative: %s", size);
-        N.checkArgument(size == 0 || N.notNullOrEmpty(c), "Collection can't be empty or null when size > 0");
+        N.checkArgument(size == 0 || N.notEmpty(c), "Collection can't be empty or null when size > 0");
 
-        if (N.isNullOrEmpty(c) || size == 0) {
+        if (N.isEmpty(c) || size == 0) {
             return ObjIterator.empty();
         }
 
@@ -341,9 +341,9 @@ public final class Iterators {
      */
     public static <T> ObjIterator<T> repeatAllToSize(final Collection<? extends T> c, final int size) {
         N.checkArgument(size >= 0, "'size' can't be negative: %s", size);
-        N.checkArgument(size == 0 || N.notNullOrEmpty(c), "Collection can't be empty or null when size > 0");
+        N.checkArgument(size == 0 || N.notEmpty(c), "Collection can't be empty or null when size > 0");
 
-        if (N.isNullOrEmpty(c) || size == 0) {
+        if (N.isEmpty(c) || size == 0) {
             return ObjIterator.empty();
         }
 
@@ -380,7 +380,7 @@ public final class Iterators {
      */
     @SafeVarargs
     public static BooleanIterator concat(final boolean[]... a) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return BooleanIterator.EMPTY;
         }
 
@@ -391,7 +391,7 @@ public final class Iterators {
 
             @Override
             public boolean hasNext() {
-                while ((N.isNullOrEmpty(cur) || cursor >= cur.length) && iter.hasNext()) {
+                while ((N.isEmpty(cur) || cursor >= cur.length) && iter.hasNext()) {
                     cur = iter.next();
                     cursor = 0;
                 }
@@ -417,7 +417,7 @@ public final class Iterators {
      */
     @SafeVarargs
     public static ShortIterator concat(final short[]... a) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return ShortIterator.EMPTY;
         }
 
@@ -428,7 +428,7 @@ public final class Iterators {
 
             @Override
             public boolean hasNext() {
-                while ((N.isNullOrEmpty(cur) || cursor >= cur.length) && iter.hasNext()) {
+                while ((N.isEmpty(cur) || cursor >= cur.length) && iter.hasNext()) {
                     cur = iter.next();
                     cursor = 0;
                 }
@@ -454,7 +454,7 @@ public final class Iterators {
      */
     @SafeVarargs
     public static ByteIterator concat(final byte[]... a) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return ByteIterator.EMPTY;
         }
 
@@ -465,7 +465,7 @@ public final class Iterators {
 
             @Override
             public boolean hasNext() {
-                while ((N.isNullOrEmpty(cur) || cursor >= cur.length) && iter.hasNext()) {
+                while ((N.isEmpty(cur) || cursor >= cur.length) && iter.hasNext()) {
                     cur = iter.next();
                     cursor = 0;
                 }
@@ -491,7 +491,7 @@ public final class Iterators {
      */
     @SafeVarargs
     public static IntIterator concat(final int[]... a) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return IntIterator.EMPTY;
         }
 
@@ -502,7 +502,7 @@ public final class Iterators {
 
             @Override
             public boolean hasNext() {
-                while ((N.isNullOrEmpty(cur) || cursor >= cur.length) && iter.hasNext()) {
+                while ((N.isEmpty(cur) || cursor >= cur.length) && iter.hasNext()) {
                     cur = iter.next();
                     cursor = 0;
                 }
@@ -528,7 +528,7 @@ public final class Iterators {
      */
     @SafeVarargs
     public static LongIterator concat(final long[]... a) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return LongIterator.EMPTY;
         }
 
@@ -539,7 +539,7 @@ public final class Iterators {
 
             @Override
             public boolean hasNext() {
-                while ((N.isNullOrEmpty(cur) || cursor >= cur.length) && iter.hasNext()) {
+                while ((N.isEmpty(cur) || cursor >= cur.length) && iter.hasNext()) {
                     cur = iter.next();
                     cursor = 0;
                 }
@@ -565,7 +565,7 @@ public final class Iterators {
      */
     @SafeVarargs
     public static FloatIterator concat(final float[]... a) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return FloatIterator.EMPTY;
         }
 
@@ -576,7 +576,7 @@ public final class Iterators {
 
             @Override
             public boolean hasNext() {
-                while ((N.isNullOrEmpty(cur) || cursor >= cur.length) && iter.hasNext()) {
+                while ((N.isEmpty(cur) || cursor >= cur.length) && iter.hasNext()) {
                     cur = iter.next();
                     cursor = 0;
                 }
@@ -602,7 +602,7 @@ public final class Iterators {
      */
     @SafeVarargs
     public static DoubleIterator concat(final double[]... a) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return DoubleIterator.EMPTY;
         }
 
@@ -613,7 +613,7 @@ public final class Iterators {
 
             @Override
             public boolean hasNext() {
-                while ((N.isNullOrEmpty(cur) || cursor >= cur.length) && iter.hasNext()) {
+                while ((N.isEmpty(cur) || cursor >= cur.length) && iter.hasNext()) {
                     cur = iter.next();
                     cursor = 0;
                 }
@@ -639,7 +639,7 @@ public final class Iterators {
      */
     @SafeVarargs
     public static BooleanIterator concat(final BooleanIterator... a) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return BooleanIterator.EMPTY;
         }
 
@@ -674,7 +674,7 @@ public final class Iterators {
      */
     @SafeVarargs
     public static CharIterator concat(final CharIterator... a) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return CharIterator.EMPTY;
         }
 
@@ -709,7 +709,7 @@ public final class Iterators {
      */
     @SafeVarargs
     public static ByteIterator concat(final ByteIterator... a) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return ByteIterator.EMPTY;
         }
 
@@ -744,7 +744,7 @@ public final class Iterators {
      */
     @SafeVarargs
     public static ShortIterator concat(final ShortIterator... a) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return ShortIterator.EMPTY;
         }
 
@@ -779,7 +779,7 @@ public final class Iterators {
      */
     @SafeVarargs
     public static IntIterator concat(final IntIterator... a) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return IntIterator.EMPTY;
         }
 
@@ -814,7 +814,7 @@ public final class Iterators {
      */
     @SafeVarargs
     public static LongIterator concat(final LongIterator... a) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return LongIterator.EMPTY;
         }
 
@@ -849,7 +849,7 @@ public final class Iterators {
      */
     @SafeVarargs
     public static FloatIterator concat(final FloatIterator... a) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return FloatIterator.EMPTY;
         }
 
@@ -884,7 +884,7 @@ public final class Iterators {
      */
     @SafeVarargs
     public static DoubleIterator concat(final DoubleIterator... a) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return DoubleIterator.EMPTY;
         }
 
@@ -920,14 +920,14 @@ public final class Iterators {
      */
     @SafeVarargs
     public static <T> ObjIterator<T> concat(final T[]... a) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return ObjIterator.empty();
         }
 
         final List<Iterator<? extends T>> list = new ArrayList<>(a.length);
 
         for (T[] e : a) {
-            if (N.notNullOrEmpty(e)) {
+            if (N.notEmpty(e)) {
                 list.add(ObjIterator.of(e));
             }
         }
@@ -943,7 +943,7 @@ public final class Iterators {
      */
     @SafeVarargs
     public static <T> ObjIterator<T> concat(final Iterator<? extends T>... a) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return ObjIterator.empty();
         }
 
@@ -958,7 +958,7 @@ public final class Iterators {
      */
     @SafeVarargs
     public static <T> ObjIterator<T> concat(final Iterable<? extends T>... a) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return ObjIterator.empty();
         }
 
@@ -981,14 +981,14 @@ public final class Iterators {
      */
     @SafeVarargs
     public static <K, V> ObjIterator<Map.Entry<K, V>> concat(final Map<? extends K, ? extends V>... a) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return ObjIterator.empty();
         }
 
         final List<Iterator<Map.Entry<K, V>>> list = new ArrayList<>(a.length);
 
         for (Map<? extends K, ? extends V> e : a) {
-            if (N.notNullOrEmpty(e)) {
+            if (N.notEmpty(e)) {
                 list.add(((Map<K, V>) e).entrySet().iterator());
             }
         }
@@ -1003,7 +1003,7 @@ public final class Iterators {
      * @return
      */
     public static <T> ObjIterator<T> concat(final Collection<? extends Iterator<? extends T>> c) {
-        if (N.isNullOrEmpty(c)) {
+        if (N.isEmpty(c)) {
             return ObjIterator.empty();
         }
 
@@ -1038,7 +1038,7 @@ public final class Iterators {
      * @return
      */
     public static <T> ObjIterator<T> concatIterables(final Collection<? extends Iterable<? extends T>> c) {
-        if (N.isNullOrEmpty(c)) {
+        if (N.isEmpty(c)) {
             return ObjIterator.empty();
         }
 
@@ -1075,7 +1075,7 @@ public final class Iterators {
      */
     @SafeVarargs
     public static <A, B> BiIterator<A, B> concat(final BiIterator<A, B>... a) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return BiIterator.empty();
         }
 
@@ -1162,7 +1162,7 @@ public final class Iterators {
      */
     @SafeVarargs
     public static <A, B, C> TriIterator<A, B, C> concat(final TriIterator<A, B, C>... a) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return TriIterator.empty();
         }
 
@@ -1324,7 +1324,7 @@ public final class Iterators {
             final BiFunction<? super T, ? super T, MergeResult> nextSelector) {
         N.checkArgNotNull(nextSelector);
 
-        if (N.isNullOrEmpty(c)) {
+        if (N.isEmpty(c)) {
             return ObjIterator.<T> empty();
         } else if (c.size() == 1) {
             return ObjIterator.<T> of(c.iterator().next());
@@ -1386,7 +1386,7 @@ public final class Iterators {
             final BiFunction<? super T, ? super T, MergeResult> nextSelector) {
         N.checkArgNotNull(nextSelector);
 
-        if (N.isNullOrEmpty(iterables)) {
+        if (N.isEmpty(iterables)) {
             return ObjIterator.<T> empty();
         } else if (iterables.size() == 1) {
             return ObjIterator.<T> of(iterables.iterator().next());
@@ -2643,7 +2643,7 @@ public final class Iterators {
             final Throwables.Runnable<E2> onComplete) throws E, E2 {
         N.checkArgument(offset >= 0 && count >= 0, "'offset'=%s and 'count'=%s can not be negative", offset, count);
 
-        if (N.isNullOrEmpty(iterators)) {
+        if (N.isEmpty(iterators)) {
             return;
         }
 

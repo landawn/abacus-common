@@ -60,7 +60,7 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
      */
     @SafeVarargs
     public static IntIterator of(final int... a) {
-        return N.isNullOrEmpty(a) ? EMPTY : of(a, 0, a.length);
+        return N.isEmpty(a) ? EMPTY : of(a, 0, a.length);
     }
 
     /**

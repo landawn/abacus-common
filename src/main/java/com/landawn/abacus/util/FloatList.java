@@ -140,7 +140,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * @return
      */
     public static FloatList from(Collection<Float> c) {
-        if (N.isNullOrEmpty(c)) {
+        if (N.isEmpty(c)) {
             return new FloatList();
         }
 
@@ -154,7 +154,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * @return
      */
     public static FloatList from(Collection<Float> c, float defaultForNull) {
-        if (N.isNullOrEmpty(c)) {
+        if (N.isEmpty(c)) {
             return new FloatList();
         }
 
@@ -178,7 +178,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     public static FloatList from(final Collection<Float> c, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, N.size(c));
 
-        if (N.isNullOrEmpty(c)) {
+        if (N.isEmpty(c)) {
             return new FloatList();
         }
 
@@ -309,7 +309,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      */
     @Override
     public boolean addAll(FloatList c) {
-        if (N.isNullOrEmpty(c)) {
+        if (N.isEmpty(c)) {
             return false;
         }
 
@@ -335,7 +335,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     public boolean addAll(int index, FloatList c) {
         rangeCheckForAdd(index);
 
-        if (N.isNullOrEmpty(c)) {
+        if (N.isEmpty(c)) {
             return false;
         }
 
@@ -378,7 +378,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     public boolean addAll(int index, float[] a) {
         rangeCheckForAdd(index);
 
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return false;
         }
 
@@ -476,7 +476,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      */
     @Override
     public boolean removeAll(FloatList c) {
-        if (N.isNullOrEmpty(c)) {
+        if (N.isEmpty(c)) {
             return false;
         }
 
@@ -491,7 +491,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      */
     @Override
     public boolean removeAll(float[] a) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return false;
         }
 
@@ -575,7 +575,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      */
     @Override
     public boolean retainAll(FloatList c) {
-        if (N.isNullOrEmpty(c)) {
+        if (N.isEmpty(c)) {
             boolean result = size() > 0;
             clear();
             return result;
@@ -591,7 +591,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      */
     @Override
     public boolean retainAll(float[] a) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             boolean result = size() > 0;
             clear();
             return result;
@@ -660,7 +660,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     @Override
     @SafeVarargs
     public final void deleteAll(int... indices) {
-        if (N.isNullOrEmpty(indices)) {
+        if (N.isEmpty(indices)) {
             return;
         }
 
@@ -719,7 +719,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     public void replaceRange(final int fromIndex, final int toIndex, final float[] replacement) {
         N.checkFromToIndex(fromIndex, toIndex, size());
 
-        if (N.isNullOrEmpty(replacement)) {
+        if (N.isEmpty(replacement)) {
             deleteRange(fromIndex, toIndex);
             return;
         }
@@ -838,7 +838,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      */
     @Override
     public boolean containsAny(FloatList c) {
-        if (this.isEmpty() || N.isNullOrEmpty(c)) {
+        if (this.isEmpty() || N.isEmpty(c)) {
             return false;
         }
 
@@ -852,7 +852,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      */
     @Override
     public boolean containsAny(float[] a) {
-        if (this.isEmpty() || N.isNullOrEmpty(a)) {
+        if (this.isEmpty() || N.isEmpty(a)) {
             return false;
         }
 
@@ -866,7 +866,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      */
     @Override
     public boolean containsAll(FloatList c) {
-        if (N.isNullOrEmpty(c)) {
+        if (N.isEmpty(c)) {
             return true;
         } else if (isEmpty()) {
             return false;
@@ -902,7 +902,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      */
     @Override
     public boolean containsAll(float[] a) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return true;
         } else if (isEmpty()) {
             return false;
@@ -918,7 +918,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      */
     @Override
     public boolean disjoint(final FloatList c) {
-        if (isEmpty() || N.isNullOrEmpty(c)) {
+        if (isEmpty() || N.isEmpty(c)) {
             return true;
         }
 
@@ -952,7 +952,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      */
     @Override
     public boolean disjoint(final float[] b) {
-        if (isEmpty() || N.isNullOrEmpty(b)) {
+        if (isEmpty() || N.isEmpty(b)) {
             return true;
         }
 
@@ -967,7 +967,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      */
     @Override
     public FloatList intersection(final FloatList b) {
-        if (N.isNullOrEmpty(b)) {
+        if (N.isEmpty(b)) {
             return new FloatList();
         }
 
@@ -991,7 +991,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      */
     @Override
     public FloatList intersection(final float[] a) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return new FloatList();
         }
 
@@ -1006,7 +1006,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      */
     @Override
     public FloatList difference(FloatList b) {
-        if (N.isNullOrEmpty(b)) {
+        if (N.isEmpty(b)) {
             return of(N.copyOfRange(elementData, 0, size()));
         }
 
@@ -1030,7 +1030,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      */
     @Override
     public FloatList difference(final float[] a) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return of(N.copyOfRange(elementData, 0, size()));
         }
 
@@ -1045,7 +1045,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      */
     @Override
     public FloatList symmetricDifference(FloatList b) {
-        if (N.isNullOrEmpty(b)) {
+        if (N.isEmpty(b)) {
             return this.copy();
         } else if (this.isEmpty()) {
             return b.copy();
@@ -1080,7 +1080,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      */
     @Override
     public FloatList symmetricDifference(final float[] a) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return of(N.copyOfRange(elementData, 0, size()));
         } else if (this.isEmpty()) {
             return of(N.copyOfRange(a, 0, a.length));
@@ -2362,7 +2362,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
             throw new OutOfMemoryError();
         }
 
-        if (N.isNullOrEmpty(elementData)) {
+        if (N.isEmpty(elementData)) {
             elementData = new float[Math.max(DEFAULT_CAPACITY, minCapacity)];
         } else if (minCapacity - elementData.length > 0) {
             int newCapacity = calNewCapacity(minCapacity, elementData.length);

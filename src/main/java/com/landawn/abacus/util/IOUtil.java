@@ -423,7 +423,7 @@ public final class IOUtil {
      * @return
      */
     public static byte[] chars2Bytes(final char[] chars, final Charset charset) {
-        if (N.isNullOrEmpty(chars)) {
+        if (N.isEmpty(chars)) {
             return N.EMPTY_BYTE_ARRAY;
         }
 
@@ -471,7 +471,7 @@ public final class IOUtil {
      * @return
      */
     public static char[] bytes2Chars(final byte[] bytes, final Charset charset) {
-        if (N.isNullOrEmpty(bytes)) {
+        if (N.isEmpty(bytes)) {
             return N.EMPTY_CHAR_ARRAY;
         }
 
@@ -1016,7 +1016,7 @@ public final class IOUtil {
         try {
             final char[] chs = readChars(file, offset, maxLen, encoding);
 
-            return N.isNullOrEmpty(chs) ? Strings.EMPTY_STRING : InternalUtil.newString(chs, true);
+            return N.isEmpty(chs) ? Strings.EMPTY_STRING : InternalUtil.newString(chs, true);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
@@ -1048,7 +1048,7 @@ public final class IOUtil {
         try {
             final char[] chs = readChars(is, offset, maxLen, encoding);
 
-            return N.isNullOrEmpty(chs) ? Strings.EMPTY_STRING : InternalUtil.newString(chs, true);
+            return N.isEmpty(chs) ? Strings.EMPTY_STRING : InternalUtil.newString(chs, true);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
@@ -1067,7 +1067,7 @@ public final class IOUtil {
         try {
             final char[] chs = readChars(reader, offset, maxLen);
 
-            return N.isNullOrEmpty(chs) ? Strings.EMPTY_STRING : InternalUtil.newString(chs, true);
+            return N.isEmpty(chs) ? Strings.EMPTY_STRING : InternalUtil.newString(chs, true);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
@@ -1830,7 +1830,7 @@ public final class IOUtil {
      * @throws IOException
      */
     public static void writeLines(final File file, final Object[] lines) throws IOException {
-        if (N.isNullOrEmpty(lines)) {
+        if (N.isEmpty(lines)) {
             return;
         }
 
@@ -1870,7 +1870,7 @@ public final class IOUtil {
      * @throws IOException
      */
     public static void writeLines(final OutputStream os, final Object[] lines) throws IOException {
-        if (N.isNullOrEmpty(lines)) {
+        if (N.isEmpty(lines)) {
             return;
         }
 
@@ -1885,7 +1885,7 @@ public final class IOUtil {
      * @throws IOException
      */
     public static void writeLines(final OutputStream os, final Object[] lines, final boolean flush) throws IOException {
-        if (N.isNullOrEmpty(lines)) {
+        if (N.isEmpty(lines)) {
             return;
         }
 
@@ -1932,7 +1932,7 @@ public final class IOUtil {
      * @throws IOException
      */
     public static void writeLines(final Writer writer, final Object[] lines) throws IOException {
-        if (N.isNullOrEmpty(lines)) {
+        if (N.isEmpty(lines)) {
             return;
         }
 
@@ -1947,7 +1947,7 @@ public final class IOUtil {
      * @throws IOException
      */
     public static void writeLines(final Writer writer, final Object[] lines, final boolean flush) throws IOException {
-        if (N.isNullOrEmpty(lines)) {
+        if (N.isEmpty(lines)) {
             return;
         }
 
@@ -2025,7 +2025,7 @@ public final class IOUtil {
      * @throws IOException
      */
     public static void writeLines(final File file, final Collection<?> lines) throws IOException {
-        if (N.isNullOrEmpty(lines)) {
+        if (N.isEmpty(lines)) {
             return;
         }
 
@@ -2065,7 +2065,7 @@ public final class IOUtil {
      * @throws IOException
      */
     public static void writeLines(final OutputStream os, final Collection<?> lines) throws IOException {
-        if (N.isNullOrEmpty(lines)) {
+        if (N.isEmpty(lines)) {
             return;
         }
 
@@ -2080,7 +2080,7 @@ public final class IOUtil {
      * @throws IOException
      */
     public static void writeLines(final OutputStream os, final Collection<?> lines, final boolean flush) throws IOException {
-        if (N.isNullOrEmpty(lines)) {
+        if (N.isEmpty(lines)) {
             return;
         }
 
@@ -2127,7 +2127,7 @@ public final class IOUtil {
      * @throws IOException
      */
     public static void writeLines(final Writer writer, final Collection<?> lines) throws IOException {
-        if (N.isNullOrEmpty(lines)) {
+        if (N.isEmpty(lines)) {
             return;
         }
 
@@ -2142,7 +2142,7 @@ public final class IOUtil {
      * @throws IOException
      */
     public static void writeLines(final Writer writer, final Collection<?> lines, final boolean flush) throws IOException {
-        if (N.isNullOrEmpty(lines)) {
+        if (N.isEmpty(lines)) {
             return;
         }
 
@@ -2514,7 +2514,7 @@ public final class IOUtil {
      * @throws IOException
      */
     public static void write(final File output, final char[] chars) throws IOException {
-        if (N.isNullOrEmpty(chars)) {
+        if (N.isEmpty(chars)) {
             return;
         }
 
@@ -2529,7 +2529,7 @@ public final class IOUtil {
      * @throws IOException
      */
     public static void write(final File output, final char[] chars, final Charset charset) throws IOException {
-        if (N.isNullOrEmpty(chars)) {
+        if (N.isEmpty(chars)) {
             return;
         }
 
@@ -2576,7 +2576,7 @@ public final class IOUtil {
      * @throws IOException
      */
     public static void write(final OutputStream output, final char[] chars) throws IOException {
-        if (N.isNullOrEmpty(chars)) {
+        if (N.isEmpty(chars)) {
             return;
         }
 
@@ -2591,7 +2591,7 @@ public final class IOUtil {
      * @throws IOException
      */
     public static void write(final OutputStream output, final char[] chars, final Charset charset) throws IOException {
-        if (N.isNullOrEmpty(chars)) {
+        if (N.isEmpty(chars)) {
             return;
         }
 
@@ -2639,7 +2639,7 @@ public final class IOUtil {
      * @throws IOException
      */
     public static void write(final OutputStream output, final char[] chars, final boolean flush) throws IOException {
-        if (N.isNullOrEmpty(chars)) {
+        if (N.isEmpty(chars)) {
             return;
         }
 
@@ -2689,7 +2689,7 @@ public final class IOUtil {
      * @throws IOException
      */
     public static void write(final Writer output, final char[] chars) throws IOException {
-        if (N.isNullOrEmpty(chars)) {
+        if (N.isEmpty(chars)) {
             return;
         }
 
@@ -2720,7 +2720,7 @@ public final class IOUtil {
      * @throws IOException
      */
     public static void write(final Writer output, final char[] chars, final boolean flush) throws IOException {
-        if (N.isNullOrEmpty(chars)) {
+        if (N.isEmpty(chars)) {
             return;
         }
 
@@ -2755,7 +2755,7 @@ public final class IOUtil {
      * @throws IOException
      */
     public static void write(final File output, final byte[] bytes) throws IOException {
-        if (N.isNullOrEmpty(bytes)) {
+        if (N.isEmpty(bytes)) {
             return;
         }
 
@@ -2797,7 +2797,7 @@ public final class IOUtil {
      * @throws IOException
      */
     public static void write(final OutputStream output, final byte[] bytes) throws IOException {
-        if (N.isNullOrEmpty(bytes)) {
+        if (N.isEmpty(bytes)) {
             return;
         }
 
@@ -2828,7 +2828,7 @@ public final class IOUtil {
      * @throws IOException
      */
     public static void write(final OutputStream output, final byte[] bytes, final boolean flush) throws IOException {
-        if (N.isNullOrEmpty(bytes)) {
+        if (N.isEmpty(bytes)) {
             return;
         }
 
@@ -3269,7 +3269,7 @@ public final class IOUtil {
      * @throws IOException
      */
     public static void append(final File output, final byte[] bytes) throws IOException {
-        if (N.isNullOrEmpty(bytes)) {
+        if (N.isEmpty(bytes)) {
             return;
         }
 
@@ -3311,7 +3311,7 @@ public final class IOUtil {
      * @throws IOException
      */
     public static void append(final File output, final char[] chars) throws IOException {
-        if (N.isNullOrEmpty(chars)) {
+        if (N.isEmpty(chars)) {
             return;
         }
 
@@ -3326,7 +3326,7 @@ public final class IOUtil {
      * @throws IOException
      */
     public static void append(final File output, final char[] chars, final Charset charset) throws IOException {
-        if (N.isNullOrEmpty(chars)) {
+        if (N.isEmpty(chars)) {
             return;
         }
 
@@ -4265,7 +4265,7 @@ public final class IOUtil {
      */
     @SafeVarargs
     public static void closeAll(final AutoCloseable... a) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return;
         }
 
@@ -4277,7 +4277,7 @@ public final class IOUtil {
      * @param c
      */
     public static void closeAll(final Collection<? extends AutoCloseable> c) {
-        if (N.isNullOrEmpty(c)) {
+        if (N.isEmpty(c)) {
             return;
         }
 
@@ -4322,7 +4322,7 @@ public final class IOUtil {
      */
     @SafeVarargs
     public static void closeAllQuietly(final AutoCloseable... a) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return;
         }
 
@@ -4335,7 +4335,7 @@ public final class IOUtil {
      * @param c
      */
     public static void closeAllQuietly(final Collection<? extends AutoCloseable> c) {
-        if (N.isNullOrEmpty(c)) {
+        if (N.isEmpty(c)) {
             return;
         }
 
@@ -4462,7 +4462,7 @@ public final class IOUtil {
 
         final File[] subFiles = srcDir.listFiles();
 
-        if (N.isNullOrEmpty(subFiles)) {
+        if (N.isEmpty(subFiles)) {
             return;
         }
 
@@ -4727,7 +4727,7 @@ public final class IOUtil {
         if (file.isDirectory()) {
             final File[] files = file.listFiles();
 
-            if (N.notNullOrEmpty(files)) {
+            if (N.notEmpty(files)) {
                 for (File subFile : files) {
                     if (subFile == null) {
                         continue;
@@ -4777,7 +4777,7 @@ public final class IOUtil {
         if (dir.isDirectory()) {
             final File[] files = dir.listFiles();
 
-            if (N.isNullOrEmpty(files)) {
+            if (N.isEmpty(files)) {
                 return true;
             }
 
@@ -5589,7 +5589,7 @@ public final class IOUtil {
 
         File[] subFiles = parentPath.listFiles();
 
-        if (N.isNullOrEmpty(subFiles)) {
+        if (N.isEmpty(subFiles)) {
             return files;
         }
 
@@ -5645,7 +5645,7 @@ public final class IOUtil {
 
         File[] subFiles = parentPath.listFiles();
 
-        if (N.isNullOrEmpty(subFiles)) {
+        if (N.isEmpty(subFiles)) {
             return files;
         }
 
@@ -5771,7 +5771,7 @@ public final class IOUtil {
      * @since 1.1
      */
     public static File[] toFiles(final URL[] urls) throws UncheckedIOException {
-        if (N.isNullOrEmpty(urls)) {
+        if (N.isEmpty(urls)) {
             return new File[0];
         }
 
@@ -5791,7 +5791,7 @@ public final class IOUtil {
      * @throws UncheckedIOException the unchecked IO exception
      */
     public static List<File> toFiles(final Collection<URL> urls) throws UncheckedIOException {
-        if (N.isNullOrEmpty(urls)) {
+        if (N.isEmpty(urls)) {
             return new ArrayList<>();
         }
 
@@ -5826,7 +5826,7 @@ public final class IOUtil {
      * @throws UncheckedIOException the unchecked IO exception
      */
     public static URL[] toURLs(final File[] files) throws UncheckedIOException {
-        if (N.isNullOrEmpty(files)) {
+        if (N.isEmpty(files)) {
             return new URL[0];
         }
 
@@ -5851,7 +5851,7 @@ public final class IOUtil {
      * @throws UncheckedIOException the unchecked IO exception
      */
     public static List<URL> toURLs(final Collection<File> files) throws UncheckedIOException {
-        if (N.isNullOrEmpty(files)) {
+        if (N.isEmpty(files)) {
             return new ArrayList<>();
         }
 
@@ -6074,7 +6074,7 @@ public final class IOUtil {
     public static <E extends Exception, E2 extends Exception> void parse(final List<File> files, final long lineOffset, final long count,
             final int processThreadNum, final int queueSize, final Throwables.Consumer<String, E> lineParser, final Throwables.Runnable<E2> onComplete)
             throws UncheckedIOException, E, E2 {
-        if (N.isNullOrEmpty(files)) {
+        if (N.isEmpty(files)) {
             return;
         }
 
@@ -6255,7 +6255,7 @@ public final class IOUtil {
     public static <E extends Exception, E2 extends Exception> void parse(final List<File> files, final long lineOffset, final long count,
             final int readThreadNum, final int processThreadNum, final int queueSize, final Throwables.Consumer<String, E> lineParser,
             final Throwables.Runnable<E2> onComplete) throws UncheckedIOException, E, E2 {
-        if (N.isNullOrEmpty(files)) {
+        if (N.isEmpty(files)) {
             return;
         }
 

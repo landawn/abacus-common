@@ -1499,7 +1499,7 @@ public abstract class Collectors {
         };
 
         final BinaryOperator<List<T>> combiner = (a, b) -> {
-            if (N.notNullOrEmpty(a) && N.notNullOrEmpty(b)) {
+            if (N.notEmpty(a) && N.notEmpty(b)) {
                 throw new UnsupportedOperationException("The 'first' and 'last' Collector only can be used in sequential stream");
             }
 
@@ -1533,7 +1533,7 @@ public abstract class Collectors {
         };
 
         final BinaryOperator<Deque<T>> combiner = (a, b) -> {
-            if (N.notNullOrEmpty(a) && N.notNullOrEmpty(b)) {
+            if (N.notEmpty(a) && N.notEmpty(b)) {
                 throw new UnsupportedOperationException("The 'first' and 'last' Collector only can be used in sequential stream");
             }
 
@@ -1808,7 +1808,7 @@ public abstract class Collectors {
         final BiConsumer<A, T> accumulator = (a, t) -> {
             final Collection<? extends U> c = mapper.apply(t);
 
-            if (N.notNullOrEmpty(c)) {
+            if (N.notEmpty(c)) {
                 for (U u : c) {
                     downstreamAccumulator.accept(a, u);
                 }
@@ -1949,7 +1949,7 @@ public abstract class Collectors {
         final BiConsumer<A, T> accumulator = (a, t) -> {
             final Collection<? extends T2> c = flatMapper.apply(t);
 
-            if (N.notNullOrEmpty(c)) {
+            if (N.notEmpty(c)) {
                 for (T2 t2 : c) {
                     downstreamAccumulator.accept(a, mapper.apply(t, t2));
                 }
@@ -4949,7 +4949,7 @@ public abstract class Collectors {
             final K key = keyMapper.apply(element);
             final Collection<? extends V> values = flatValueMapper.apply(element);
 
-            if (N.notNullOrEmpty(values)) {
+            if (N.notEmpty(values)) {
                 for (V value : values) {
                     map.put(key, value);
                 }
@@ -5100,7 +5100,7 @@ public abstract class Collectors {
             final V value = valueMapper.apply(element);
             final Collection<? extends K> keys = flatKeyMapper.apply(element);
 
-            if (N.notNullOrEmpty(keys)) {
+            if (N.notEmpty(keys)) {
                 for (K key : keys) {
                     map.put(key, value);
                 }
@@ -5196,7 +5196,7 @@ public abstract class Collectors {
                 key = e.getKey();
                 value = e.getValue();
 
-                if (N.notNullOrEmpty(value)) {
+                if (N.notEmpty(value)) {
                     V oldValue = m1.get(key);
 
                     if (oldValue == null) {
@@ -5887,7 +5887,7 @@ public abstract class Collectors {
 
             final List<Characteristics> common = N.intersection(downstream1.characteristics(), downstream2.characteristics());
             common.remove(Characteristics.IDENTITY_FINISH);
-            final Set<Characteristics> characteristics = N.isNullOrEmpty(common) ? CH_NOID : N.newHashSet(common);
+            final Set<Characteristics> characteristics = N.isEmpty(common) ? CH_NOID : N.newHashSet(common);
 
             return new CollectorImpl<>(supplier, accumulator, combiner, finisher, characteristics);
         }
@@ -5943,7 +5943,7 @@ public abstract class Collectors {
 
             final List<Characteristics> common = N.intersection(downstream1.characteristics(), downstream2.characteristics());
             common.remove(Characteristics.IDENTITY_FINISH);
-            final Set<Characteristics> characteristics = N.isNullOrEmpty(common) ? CH_NOID : N.newHashSet(common);
+            final Set<Characteristics> characteristics = N.isEmpty(common) ? CH_NOID : N.newHashSet(common);
 
             return new CollectorImpl<>(supplier, accumulator, combiner, finisher, characteristics);
         }
@@ -5990,7 +5990,7 @@ public abstract class Collectors {
          */
         public static <T, R> Collector<T, ?, R> combine(final Collection<? extends Collector<? super T, ?, ?>> downstreams,
                 final Function<Object[], R> merger) { //NOSONAR
-            N.checkArgument(N.notNullOrEmpty(downstreams), "The specified 'collectors' can't be null or empty");
+            N.checkArgument(N.notEmpty(downstreams), "The specified 'collectors' can't be null or empty");
             N.checkArgNotNull(merger, "merger");
 
             final int size = downstreams.size();
@@ -6032,11 +6032,11 @@ public abstract class Collectors {
                 return merger.apply(a);
             };
 
-            final Collection<Characteristics> common = N.intersection(downstreams.stream().map(Collector::characteristics).filter(N::notNullOrEmpty).toList());
+            final Collection<Characteristics> common = N.intersection(downstreams.stream().map(Collector::characteristics).filter(N::notEmpty).toList());
 
             common.remove(Characteristics.IDENTITY_FINISH);
 
-            final Set<Characteristics> characteristics = N.isNullOrEmpty(common) ? CH_NOID : N.newHashSet(common);
+            final Set<Characteristics> characteristics = N.isEmpty(common) ? CH_NOID : N.newHashSet(common);
 
             return new CollectorImpl<>(supplier, accumulator, combiner, finisher, characteristics);
         }

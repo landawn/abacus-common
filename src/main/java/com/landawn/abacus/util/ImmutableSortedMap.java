@@ -242,7 +242,7 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
      * @return
      */
     public static <K, V> ImmutableSortedMap<K, V> copyOf(final SortedMap<? extends K, ? extends V> sortedMap) {
-        if (N.isNullOrEmpty(sortedMap)) {
+        if (N.isEmpty(sortedMap)) {
             return empty();
         }
 

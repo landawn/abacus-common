@@ -494,7 +494,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
                 }
             }
 
-            if (N.notNullOrEmpty(removingObjects)) {
+            if (N.notEmpty(removingObjects)) {
                 for (K key : removingObjects.keySet()) {
                     pool.remove(key);
                 }
@@ -543,7 +543,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
      * @param map
      */
     protected void destroyAll(Map<K, E> map) {
-        if (N.notNullOrEmpty(map)) {
+        if (N.notEmpty(map)) {
             for (Map.Entry<K, E> entry : map.entrySet()) {
                 destroy(entry.getKey(), entry.getValue());
             }

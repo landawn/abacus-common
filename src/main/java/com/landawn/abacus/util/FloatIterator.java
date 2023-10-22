@@ -60,7 +60,7 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
      */
     @SafeVarargs
     public static FloatIterator of(final float... a) {
-        return N.isNullOrEmpty(a) ? EMPTY : of(a, 0, a.length);
+        return N.isEmpty(a) ? EMPTY : of(a, 0, a.length);
     }
 
     /**

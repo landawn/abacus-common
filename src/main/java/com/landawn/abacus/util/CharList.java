@@ -139,7 +139,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @return
      */
     public static CharList from(Collection<Character> c) {
-        if (N.isNullOrEmpty(c)) {
+        if (N.isEmpty(c)) {
             return new CharList();
         }
 
@@ -153,7 +153,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @return
      */
     public static CharList from(Collection<Character> c, char defaultForNull) {
-        if (N.isNullOrEmpty(c)) {
+        if (N.isEmpty(c)) {
             return new CharList();
         }
 
@@ -177,7 +177,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     public static CharList from(final Collection<Character> c, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, N.size(c));
 
-        if (N.isNullOrEmpty(c)) {
+        if (N.isEmpty(c)) {
             return new CharList();
         }
 
@@ -293,7 +293,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @return
      */
     public static CharList random(final char[] candicates, final int len) {
-        if (N.isNullOrEmpty(candicates) || candicates.length >= Integer.MAX_VALUE) {
+        if (N.isEmpty(candicates) || candicates.length >= Integer.MAX_VALUE) {
             throw new IllegalArgumentException();
         } else if (candicates.length == 1) {
             return repeat(candicates[0], len);
@@ -396,7 +396,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      */
     @Override
     public boolean addAll(CharList c) {
-        if (N.isNullOrEmpty(c)) {
+        if (N.isEmpty(c)) {
             return false;
         }
 
@@ -422,7 +422,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     public boolean addAll(int index, CharList c) {
         rangeCheckForAdd(index);
 
-        if (N.isNullOrEmpty(c)) {
+        if (N.isEmpty(c)) {
             return false;
         }
 
@@ -465,7 +465,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     public boolean addAll(int index, char[] a) {
         rangeCheckForAdd(index);
 
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return false;
         }
 
@@ -563,7 +563,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      */
     @Override
     public boolean removeAll(CharList c) {
-        if (N.isNullOrEmpty(c)) {
+        if (N.isEmpty(c)) {
             return false;
         }
 
@@ -578,7 +578,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      */
     @Override
     public boolean removeAll(char[] a) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return false;
         }
 
@@ -662,7 +662,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      */
     @Override
     public boolean retainAll(CharList c) {
-        if (N.isNullOrEmpty(c)) {
+        if (N.isEmpty(c)) {
             boolean result = size() > 0;
             clear();
             return result;
@@ -678,7 +678,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      */
     @Override
     public boolean retainAll(char[] a) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             boolean result = size() > 0;
             clear();
             return result;
@@ -747,7 +747,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     @Override
     @SafeVarargs
     public final void deleteAll(int... indices) {
-        if (N.isNullOrEmpty(indices)) {
+        if (N.isEmpty(indices)) {
             return;
         }
 
@@ -805,7 +805,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     public void replaceRange(final int fromIndex, final int toIndex, final char[] replacement) {
         N.checkFromToIndex(fromIndex, toIndex, size());
 
-        if (N.isNullOrEmpty(replacement)) {
+        if (N.isEmpty(replacement)) {
             deleteRange(fromIndex, toIndex);
             return;
         }
@@ -924,7 +924,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      */
     @Override
     public boolean containsAny(CharList c) {
-        if (this.isEmpty() || N.isNullOrEmpty(c)) {
+        if (this.isEmpty() || N.isEmpty(c)) {
             return false;
         }
 
@@ -938,7 +938,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      */
     @Override
     public boolean containsAny(char[] a) {
-        if (this.isEmpty() || N.isNullOrEmpty(a)) {
+        if (this.isEmpty() || N.isEmpty(a)) {
             return false;
         }
 
@@ -952,7 +952,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      */
     @Override
     public boolean containsAll(CharList c) {
-        if (N.isNullOrEmpty(c)) {
+        if (N.isEmpty(c)) {
             return true;
         } else if (isEmpty()) {
             return false;
@@ -988,7 +988,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      */
     @Override
     public boolean containsAll(char[] a) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return true;
         } else if (isEmpty()) {
             return false;
@@ -1004,7 +1004,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      */
     @Override
     public boolean disjoint(final CharList c) {
-        if (isEmpty() || N.isNullOrEmpty(c)) {
+        if (isEmpty() || N.isEmpty(c)) {
             return true;
         }
 
@@ -1038,7 +1038,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      */
     @Override
     public boolean disjoint(final char[] b) {
-        if (isEmpty() || N.isNullOrEmpty(b)) {
+        if (isEmpty() || N.isEmpty(b)) {
             return true;
         }
 
@@ -1053,7 +1053,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      */
     @Override
     public CharList intersection(final CharList b) {
-        if (N.isNullOrEmpty(b)) {
+        if (N.isEmpty(b)) {
             return new CharList();
         }
 
@@ -1077,7 +1077,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      */
     @Override
     public CharList intersection(final char[] a) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return new CharList();
         }
 
@@ -1092,7 +1092,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      */
     @Override
     public CharList difference(CharList b) {
-        if (N.isNullOrEmpty(b)) {
+        if (N.isEmpty(b)) {
             return of(N.copyOfRange(elementData, 0, size()));
         }
 
@@ -1116,7 +1116,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      */
     @Override
     public CharList difference(final char[] a) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return of(N.copyOfRange(elementData, 0, size()));
         }
 
@@ -1131,7 +1131,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      */
     @Override
     public CharList symmetricDifference(CharList b) {
-        if (N.isNullOrEmpty(b)) {
+        if (N.isEmpty(b)) {
             return this.copy();
         } else if (this.isEmpty()) {
             return b.copy();
@@ -1166,7 +1166,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      */
     @Override
     public CharList symmetricDifference(final char[] a) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return of(N.copyOfRange(elementData, 0, size()));
         } else if (this.isEmpty()) {
             return of(N.copyOfRange(a, 0, a.length));
@@ -2402,7 +2402,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
             throw new OutOfMemoryError();
         }
 
-        if (N.isNullOrEmpty(elementData)) {
+        if (N.isEmpty(elementData)) {
             elementData = new char[Math.max(DEFAULT_CAPACITY, minCapacity)];
         } else if (minCapacity - elementData.length > 0) {
             int newCapacity = calNewCapacity(minCapacity, elementData.length);

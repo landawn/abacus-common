@@ -245,7 +245,7 @@ public final class HttpSettings {
         //        if (!contentFormat.equals(HTTP.getContentFormat(contentType, contentEncoding))) {
         //            final String newContentType = HTTP.getContentType(contentFormat);
         //
-        //            if (N.isNullOrEmpty(newContentType)) {
+        //            if (N.isEmpty(newContentType)) {
         //                headers().remove(HttpHeaders.Names.CONTENT_TYPE);
         //            } else {
         //                header(HttpHeaders.Names.CONTENT_TYPE, newContentType);
@@ -253,7 +253,7 @@ public final class HttpSettings {
         //
         //            final String newContentEncoding = HTTP.getContentEncoding(contentFormat);
         //
-        //            if (N.isNullOrEmpty(newContentEncoding)) {
+        //            if (N.isEmpty(newContentEncoding)) {
         //                headers().remove(HttpHeaders.Names.CONTENT_ENCODING);
         //            } else {
         //                header(HttpHeaders.Names.CONTENT_ENCODING, newContentEncoding);

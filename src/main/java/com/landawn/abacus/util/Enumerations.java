@@ -92,7 +92,7 @@ public final class Enumerations {
      * @return 
      */
     public static <T> Enumeration<T> of(final T... a) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return empty();
         }
 
@@ -124,7 +124,7 @@ public final class Enumerations {
      * @return 
      */
     public static <T> Enumeration<T> create(final Collection<? extends T> c) {
-        if (N.isNullOrEmpty(c)) {
+        if (N.isEmpty(c)) {
             return empty();
         }
 
@@ -160,7 +160,7 @@ public final class Enumerations {
      */
     @SafeVarargs
     public static <T> Enumeration<T> concat(final Enumeration<? extends T>... a) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return empty();
         }
 
@@ -174,7 +174,7 @@ public final class Enumerations {
      * @return
      */
     public static <T> Enumeration<T> concat(final Collection<? extends Enumeration<? extends T>> c) {
-        if (N.isNullOrEmpty(c)) {
+        if (N.isEmpty(c)) {
             return empty();
         }
 

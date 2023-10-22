@@ -160,7 +160,7 @@ public class JacksonMapperConfig extends MapperConfig {
      * @param setter
      * @return
      */
-    public JacksonMapperConfig setSerializationConfig(final Function<? super SerializationConfig, ? extends SerializationConfig> setter) {
+    public JacksonMapperConfig setSerializationConfig(final Function<? super SerializationConfig, SerializationConfig> setter) {
         initDeserializationConfig();
 
         this.serializationConfig = setter.apply(this.serializationConfig);
@@ -225,7 +225,7 @@ public class JacksonMapperConfig extends MapperConfig {
      * @param setter
      * @return
      */
-    public JacksonMapperConfig setDeserializationConfig(final Function<? super DeserializationConfig, ? extends DeserializationConfig> setter) {
+    public JacksonMapperConfig setDeserializationConfig(final Function<? super DeserializationConfig, DeserializationConfig> setter) {
         initDeserializationConfig();
 
         this.deserializationConfig = setter.apply(this.deserializationConfig);

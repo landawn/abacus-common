@@ -184,7 +184,7 @@ public class ContinuableFuture<T> implements Future<T> {
     public boolean cancelAll(boolean mayInterruptIfRunning) {
         boolean res = true;
 
-        if (N.notNullOrEmpty(upFutures)) {
+        if (N.notEmpty(upFutures)) {
             for (ContinuableFuture<?> preFuture : upFutures) {
                 res = res & preFuture.cancelAll(mayInterruptIfRunning); //NOSONAR
             }
@@ -199,7 +199,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * @return true, if is all cancelled
      */
     public boolean isAllCancelled() {
-        if (N.notNullOrEmpty(upFutures)) {
+        if (N.notEmpty(upFutures)) {
             for (ContinuableFuture<?> preFuture : upFutures) {
                 if (preFuture.isAllCancelled()) {
                     return false;

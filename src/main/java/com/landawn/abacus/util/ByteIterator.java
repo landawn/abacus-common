@@ -60,7 +60,7 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
      */
     @SafeVarargs
     public static ByteIterator of(final byte... a) {
-        return N.isNullOrEmpty(a) ? EMPTY : of(a, 0, a.length);
+        return N.isEmpty(a) ? EMPTY : of(a, 0, a.length);
     }
 
     /**

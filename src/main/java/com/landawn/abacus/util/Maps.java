@@ -85,7 +85,7 @@ public final class Maps {
     public static <T, K> Map<K, T> create(Collection<? extends T> c, final Function<? super T, ? extends K> keyMapper) {
         N.checkArgNotNull(keyMapper);
 
-        if (N.isNullOrEmpty(c)) {
+        if (N.isEmpty(c)) {
             return new HashMap<>();
         }
 
@@ -113,7 +113,7 @@ public final class Maps {
         N.checkArgNotNull(keyMapper);
         N.checkArgNotNull(valueExtractor);
 
-        if (N.isNullOrEmpty(c)) {
+        if (N.isEmpty(c)) {
             return new HashMap<>();
         }
 
@@ -144,7 +144,7 @@ public final class Maps {
         N.checkArgNotNull(valueExtractor);
         N.checkArgNotNull(mapSupplier);
 
-        if (N.isNullOrEmpty(c)) {
+        if (N.isEmpty(c)) {
             return mapSupplier.apply(0);
         }
 
@@ -177,7 +177,7 @@ public final class Maps {
         N.checkArgNotNull(mergeFunction);
         N.checkArgNotNull(mapSupplier);
 
-        if (N.isNullOrEmpty(c)) {
+        if (N.isEmpty(c)) {
             return mapSupplier.apply(0);
         }
 
@@ -622,7 +622,7 @@ public final class Maps {
      * @return
      */
     public static <K, V> Map<K, V> zip(final Collection<? extends K> keys, final Collection<? extends V> values) {
-        if (N.isNullOrEmpty(keys) || N.isNullOrEmpty(values)) {
+        if (N.isEmpty(keys) || N.isEmpty(values)) {
             return new HashMap<>();
         }
 
@@ -652,7 +652,7 @@ public final class Maps {
      */
     public static <K, V, M extends Map<K, V>> Map<K, V> zip(final Collection<? extends K> keys, final Collection<? extends V> values,
             final IntFunction<? extends M> mapSupplier) {
-        if (N.isNullOrEmpty(keys) || N.isNullOrEmpty(values)) {
+        if (N.isEmpty(keys) || N.isEmpty(values)) {
             return new HashMap<>();
         }
 
@@ -683,7 +683,7 @@ public final class Maps {
      */
     public static <K, V, M extends Map<K, V>> Map<K, V> zip(final Collection<? extends K> keys, final Collection<? extends V> values,
             final BinaryOperator<V> mergeFunction, final IntFunction<? extends M> mapSupplier) {
-        if (N.isNullOrEmpty(keys) || N.isNullOrEmpty(values)) {
+        if (N.isEmpty(keys) || N.isEmpty(values)) {
             return new HashMap<>();
         }
 
@@ -709,7 +709,7 @@ public final class Maps {
      * @return
      */
     public static <K, V> Nullable<V> get(final Map<K, ? extends V> map, final K key) {
-        if (N.isNullOrEmpty(map)) {
+        if (N.isEmpty(map)) {
             return Nullable.empty();
         }
 
@@ -733,7 +733,7 @@ public final class Maps {
      * @return
      */
     public static <K, V> V getOrDefault(final Map<K, ? extends V> map, final K key, final V defaultValue) {
-        if (N.isNullOrEmpty(map)) {
+        if (N.isEmpty(map)) {
             return defaultValue;
         }
 
@@ -758,7 +758,7 @@ public final class Maps {
      * @return
      */
     public static <K, V> V getOrDefaultIfNull(final Map<K, ? extends V> map, final K key, final V defaultForNull) {
-        if (N.isNullOrEmpty(map)) {
+        if (N.isEmpty(map)) {
             return defaultForNull;
         }
 
@@ -780,7 +780,7 @@ public final class Maps {
      * @return
      */
     public static <K> OptionalBoolean getBoolean(final Map<? super K, ?> map, final K key) {
-        if (N.isNullOrEmpty(map)) {
+        if (N.isEmpty(map)) {
             return OptionalBoolean.empty();
         }
 
@@ -806,7 +806,7 @@ public final class Maps {
      * @return
      */
     public static <K> boolean getBoolean(final Map<? super K, ?> map, final K key, final boolean defaultForNull) {
-        if (N.isNullOrEmpty(map)) {
+        if (N.isEmpty(map)) {
             return defaultForNull;
         }
 
@@ -830,7 +830,7 @@ public final class Maps {
      * @return
      */
     public static <K> OptionalChar getChar(final Map<? super K, ?> map, final K key) {
-        if (N.isNullOrEmpty(map)) {
+        if (N.isEmpty(map)) {
             return OptionalChar.empty();
         }
 
@@ -856,7 +856,7 @@ public final class Maps {
      * @return
      */
     public static <K> char getChar(final Map<? super K, ?> map, final K key, final char defaultForNull) {
-        if (N.isNullOrEmpty(map)) {
+        if (N.isEmpty(map)) {
             return defaultForNull;
         }
 
@@ -880,7 +880,7 @@ public final class Maps {
      * @return
      */
     public static <K> OptionalByte getByte(final Map<? super K, ?> map, final K key) {
-        if (N.isNullOrEmpty(map)) {
+        if (N.isEmpty(map)) {
             return OptionalByte.empty();
         }
 
@@ -906,7 +906,7 @@ public final class Maps {
      * @return
      */
     public static <K> byte getByte(final Map<? super K, ?> map, final K key, final byte defaultForNull) {
-        if (N.isNullOrEmpty(map)) {
+        if (N.isEmpty(map)) {
             return defaultForNull;
         }
 
@@ -930,7 +930,7 @@ public final class Maps {
      * @return
      */
     public static <K> OptionalShort getShort(final Map<? super K, ?> map, final K key) {
-        if (N.isNullOrEmpty(map)) {
+        if (N.isEmpty(map)) {
             return OptionalShort.empty();
         }
 
@@ -956,7 +956,7 @@ public final class Maps {
      * @return
      */
     public static <K> short getShort(final Map<? super K, ?> map, final K key, final short defaultForNull) {
-        if (N.isNullOrEmpty(map)) {
+        if (N.isEmpty(map)) {
             return defaultForNull;
         }
 
@@ -980,7 +980,7 @@ public final class Maps {
      * @return
      */
     public static <K> OptionalInt getInt(final Map<? super K, ?> map, final K key) {
-        if (N.isNullOrEmpty(map)) {
+        if (N.isEmpty(map)) {
             return OptionalInt.empty();
         }
 
@@ -1006,7 +1006,7 @@ public final class Maps {
      * @return
      */
     public static <K> int getInt(final Map<? super K, ?> map, final K key, final int defaultForNull) {
-        if (N.isNullOrEmpty(map)) {
+        if (N.isEmpty(map)) {
             return defaultForNull;
         }
 
@@ -1030,7 +1030,7 @@ public final class Maps {
      * @return
      */
     public static <K> OptionalLong getLong(final Map<? super K, ?> map, final K key) {
-        if (N.isNullOrEmpty(map)) {
+        if (N.isEmpty(map)) {
             return OptionalLong.empty();
         }
 
@@ -1056,7 +1056,7 @@ public final class Maps {
      * @return
      */
     public static <K> long getLong(final Map<? super K, ?> map, final K key, final long defaultForNull) {
-        if (N.isNullOrEmpty(map)) {
+        if (N.isEmpty(map)) {
             return defaultForNull;
         }
 
@@ -1080,7 +1080,7 @@ public final class Maps {
      * @return
      */
     public static <K> OptionalFloat getFloat(final Map<? super K, ?> map, final K key) {
-        if (N.isNullOrEmpty(map)) {
+        if (N.isEmpty(map)) {
             return OptionalFloat.empty();
         }
 
@@ -1104,7 +1104,7 @@ public final class Maps {
      * @return
      */
     public static <K> float getFloat(final Map<? super K, ?> map, final K key, final float defaultForNull) {
-        if (N.isNullOrEmpty(map)) {
+        if (N.isEmpty(map)) {
             return defaultForNull;
         }
 
@@ -1126,7 +1126,7 @@ public final class Maps {
      * @return
      */
     public static <K> OptionalDouble getDouble(final Map<? super K, ?> map, final K key) {
-        if (N.isNullOrEmpty(map)) {
+        if (N.isEmpty(map)) {
             return OptionalDouble.empty();
         }
 
@@ -1150,7 +1150,7 @@ public final class Maps {
      * @return
      */
     public static <K> double getDouble(final Map<? super K, ?> map, final K key, final double defaultForNull) {
-        if (N.isNullOrEmpty(map)) {
+        if (N.isEmpty(map)) {
             return defaultForNull;
         }
 
@@ -1172,7 +1172,7 @@ public final class Maps {
      * @return
      */
     public static <K> Optional<String> getString(final Map<? super K, ?> map, final K key) {
-        if (N.isNullOrEmpty(map)) {
+        if (N.isEmpty(map)) {
             return Optional.empty();
         }
 
@@ -1200,7 +1200,7 @@ public final class Maps {
     public static <K> String getString(final Map<? super K, ?> map, final K key, final String defaultForNull) {
         N.checkArgNotNull(defaultForNull, "defaultForNull");
 
-        if (N.isNullOrEmpty(map)) {
+        if (N.isEmpty(map)) {
             return defaultForNull;
         }
 
@@ -1230,7 +1230,7 @@ public final class Maps {
      * @return
      */
     public static <K, T> Optional<T> get(final Map<? super K, ?> map, final K key, final Class<? extends T> targetType) {
-        if (N.isNullOrEmpty(map)) {
+        if (N.isEmpty(map)) {
             return Optional.empty();
         }
 
@@ -1260,7 +1260,7 @@ public final class Maps {
      * @return
      */
     public static <K, T> Optional<T> get(final Map<? super K, ?> map, final K key, final Type<? extends T> targetType) {
-        if (N.isNullOrEmpty(map)) {
+        if (N.isEmpty(map)) {
             return Optional.empty();
         }
 
@@ -1289,7 +1289,7 @@ public final class Maps {
     public static <K, T> T get(final Map<? super K, ?> map, final K key, final T defaultForNull) {
         N.checkArgNotNull(defaultForNull, "defaultForNull");
 
-        if (N.isNullOrEmpty(map)) {
+        if (N.isEmpty(map)) {
             return defaultForNull;
         }
 
@@ -1316,7 +1316,7 @@ public final class Maps {
      * @return
      */
     public static <K, E, V extends List<E>> List<E> getOrEmptyList(final Map<K, V> map, final K key) {
-        if (N.isNullOrEmpty(map)) {
+        if (N.isEmpty(map)) {
             return N.<E> emptyList();
         }
 
@@ -1341,7 +1341,7 @@ public final class Maps {
      * @return
      */
     public static <K, E, V extends Set<E>> Set<E> getOrEmptySet(final Map<K, V> map, final K key) {
-        if (N.isNullOrEmpty(map)) {
+        if (N.isEmpty(map)) {
             return N.<E> emptySet();
         }
 
@@ -1446,7 +1446,7 @@ public final class Maps {
      * @return
      */
     public static <K, V> List<V> getIfPresentForEach(final Map<K, ? extends V> map, final Collection<?> keys) {
-        if (N.isNullOrEmpty(map) || N.isNullOrEmpty(keys)) {
+        if (N.isEmpty(map) || N.isEmpty(keys)) {
             return new ArrayList<>(0);
         }
 
@@ -1475,9 +1475,9 @@ public final class Maps {
      * @return
      */
     public static <K, V> List<V> getOrDefaultForEach(final Map<K, V> map, final Collection<?> keys, final V defaultValue) {
-        if (N.isNullOrEmpty(keys)) {
+        if (N.isEmpty(keys)) {
             return new ArrayList<>(0);
-        } else if (N.isNullOrEmpty(map)) {
+        } else if (N.isEmpty(map)) {
             return N.repeat(defaultValue, keys.size());
         }
 
@@ -1508,9 +1508,9 @@ public final class Maps {
      * @return
      */
     public static <K, V> List<V> getOrDefaultIfNullForEach(final Map<K, V> map, final Collection<?> keys, final V defaultValue) {
-        if (N.isNullOrEmpty(keys)) {
+        if (N.isEmpty(keys)) {
             return new ArrayList<>(0);
-        } else if (N.isNullOrEmpty(map)) {
+        } else if (N.isEmpty(map)) {
             return N.repeat(defaultValue, keys.size());
         }
 
@@ -1610,7 +1610,7 @@ public final class Maps {
     public static <T> T getByPathOrDefault(final Map<?, ?> map, final String path, final T defaultValue) {
         N.checkArgNotNull(defaultValue, "defaultValue");
 
-        if (N.isNullOrEmpty(map)) {
+        if (N.isEmpty(map)) {
             return defaultValue;
         }
 
@@ -1624,7 +1624,7 @@ public final class Maps {
         for (int i = 0, len = keys.length; i < len; i++) {
             key = keys[i];
 
-            if (N.isNullOrEmpty(intermediateMap)) {
+            if (N.isEmpty(intermediateMap)) {
                 return defaultValue;
             }
 
@@ -1634,7 +1634,7 @@ public final class Maps {
                 intermediateColl = (Collection) intermediateMap.get(key.substring(0, idx));
 
                 for (int j = 0, idxLen = indexes.length; j < idxLen; j++) {
-                    if (N.isNullOrEmpty(intermediateColl) || intermediateColl.size() <= indexes[j]) {
+                    if (N.isEmpty(intermediateColl) || intermediateColl.size() <= indexes[j]) {
                         return defaultValue;
                     } else {
                         if (j == idxLen - 1) {
@@ -1730,7 +1730,7 @@ public final class Maps {
      * @return
      */
     public static boolean contains(final Map<?, ?> map, final Object key, final Object value) {
-        if (N.isNullOrEmpty(map)) {
+        if (N.isEmpty(map)) {
             return false;
         }
 
@@ -1748,7 +1748,7 @@ public final class Maps {
      * @return
      */
     public static <K, V> Map<K, V> intersection(final Map<K, V> map, final Map<? extends K, ? extends V> map2) {
-        if (N.isNullOrEmpty(map) || N.isNullOrEmpty(map2)) {
+        if (N.isEmpty(map) || N.isEmpty(map2)) {
             return new LinkedHashMap<>();
         }
 
@@ -1775,13 +1775,13 @@ public final class Maps {
      * @return
      */
     public static <K, V> Map<K, Pair<V, Nullable<V>>> difference(final Map<K, V> map, final Map<K, V> map2) {
-        if (N.isNullOrEmpty(map)) {
+        if (N.isEmpty(map)) {
             return new LinkedHashMap<>();
         }
 
         final Map<K, Pair<V, Nullable<V>>> result = map instanceof IdentityHashMap ? new IdentityHashMap<>() : new LinkedHashMap<>();
 
-        if (N.isNullOrEmpty(map2)) {
+        if (N.isEmpty(map2)) {
             for (Map.Entry<K, V> entry : map.entrySet()) {
                 result.put(entry.getKey(), Pair.of(entry.getValue(), Nullable.<V> empty()));
             }
@@ -1811,13 +1811,12 @@ public final class Maps {
      * @return
      */
     public static <K, V> Map<K, Pair<Nullable<V>, Nullable<V>>> symmetricDifference(final Map<K, V> map, final Map<K, V> map2) {
-        final boolean isIdentityHashMap = (N.notNullOrEmpty(map) && map instanceof IdentityHashMap)
-                || (N.notNullOrEmpty(map2) && map2 instanceof IdentityHashMap);
+        final boolean isIdentityHashMap = (N.notEmpty(map) && map instanceof IdentityHashMap) || (N.notEmpty(map2) && map2 instanceof IdentityHashMap);
 
         final Map<K, Pair<Nullable<V>, Nullable<V>>> result = isIdentityHashMap ? new IdentityHashMap<>() : new LinkedHashMap<>();
 
-        if (N.notNullOrEmpty(map)) {
-            if (N.isNullOrEmpty(map2)) {
+        if (N.notEmpty(map)) {
+            if (N.isEmpty(map2)) {
                 for (Map.Entry<K, V> entry : map.entrySet()) {
                     result.put(entry.getKey(), Pair.of(Nullable.of(entry.getValue()), Nullable.<V> empty()));
                 }
@@ -1838,8 +1837,8 @@ public final class Maps {
             }
         }
 
-        if (N.notNullOrEmpty(map2)) {
-            if (N.isNullOrEmpty(map)) {
+        if (N.notEmpty(map2)) {
+            if (N.isEmpty(map)) {
                 for (Map.Entry<K, V> entry : map2.entrySet()) {
                     result.put(entry.getKey(), Pair.of(Nullable.<V> empty(), Nullable.of(entry.getValue())));
                 }
@@ -1918,7 +1917,7 @@ public final class Maps {
      * @return
      */
     public static <K, V> boolean remove(final Map<K, V> map, final Object key, final Object value) {
-        if (N.isNullOrEmpty(map)) {
+        if (N.isEmpty(map)) {
             return false;
         }
 
@@ -1940,7 +1939,7 @@ public final class Maps {
      * @return <code>true</code> if any key/value was removed, otherwise <code>false</code>.
      */
     public static boolean removeKeys(final Map<?, ?> map, final Collection<?> keysToRemove) {
-        if (N.isNullOrEmpty(map) || N.isNullOrEmpty(keysToRemove)) {
+        if (N.isEmpty(map) || N.isEmpty(keysToRemove)) {
             return false;
         }
 
@@ -1961,7 +1960,7 @@ public final class Maps {
      * @return <code>true</code> if any key/value was removed, otherwise <code>false</code>.
      */
     public static boolean removeEntries(final Map<?, ?> map, final Map<?, ?> entriesToRemove) {
-        if (N.isNullOrEmpty(map) || N.isNullOrEmpty(entriesToRemove)) {
+        if (N.isEmpty(map) || N.isEmpty(entriesToRemove)) {
             return false;
         }
 
@@ -2000,7 +1999,7 @@ public final class Maps {
             }
         }
 
-        if (N.notNullOrEmpty(keysToRemove)) {
+        if (N.notEmpty(keysToRemove)) {
             for (K key : keysToRemove) {
                 map.remove(key);
             }
@@ -2035,7 +2034,7 @@ public final class Maps {
             }
         }
 
-        if (N.notNullOrEmpty(keysToRemove)) {
+        if (N.notEmpty(keysToRemove)) {
             for (K key : keysToRemove) {
                 map.remove(key);
             }
@@ -2070,7 +2069,7 @@ public final class Maps {
             }
         }
 
-        if (N.notNullOrEmpty(keysToRemove)) {
+        if (N.notEmpty(keysToRemove)) {
             for (K key : keysToRemove) {
                 map.remove(key);
             }
@@ -2092,7 +2091,7 @@ public final class Maps {
      * @return
      */
     public static <K, V> boolean replace(final Map<K, V> map, final K key, final V oldValue, final V newValue) {
-        if (N.isNullOrEmpty(map)) {
+        if (N.isEmpty(map)) {
             return false;
         }
 
@@ -2116,7 +2115,7 @@ public final class Maps {
      * @return
      */
     public static <K, V> V replace(final Map<K, V> map, final K key, final V newValue) {
-        if (N.isNullOrEmpty(map)) {
+        if (N.isEmpty(map)) {
             return null;
         }
 
@@ -2142,7 +2141,7 @@ public final class Maps {
             throws E {
         N.checkArgNotNull(function);
 
-        if (N.isNullOrEmpty(map)) {
+        if (N.isEmpty(map)) {
             return;
         }
 
@@ -2175,7 +2174,7 @@ public final class Maps {
     //    public static <K, V, E extends Exception> void forEach(final Map<K, V> map, final Throwables.Consumer<? super Map.Entry<K, V>, E> action) throws E {
     //        N.checkArgNotNull(action);
     //
-    //        if (N.isNullOrEmpty(map)) {
+    //        if (N.isEmpty(map)) {
     //            return;
     //        }
     //
@@ -2196,7 +2195,7 @@ public final class Maps {
     //    public static <K, V, E extends Exception> void forEach(final Map<K, V> map, final Throwables.BiConsumer<? super K, ? super V, E> action) throws E {
     //        N.checkArgNotNull(action);
     //
-    //        if (N.isNullOrEmpty(map)) {
+    //        if (N.isEmpty(map)) {
     //            return;
     //        }
     //
@@ -2360,7 +2359,7 @@ public final class Maps {
         for (Map.Entry<K, ? extends Collection<? extends V>> entry : map.entrySet()) {
             final Collection<? extends V> c = entry.getValue();
 
-            if (N.notNullOrEmpty(c)) {
+            if (N.notEmpty(c)) {
                 for (V v : c) {
                     List<K> list = result.get(v);
 
@@ -2406,7 +2405,7 @@ public final class Maps {
         Iterator<? extends V> iter = null;
 
         for (Map.Entry<K, ? extends Collection<? extends V>> entry : map.entrySet()) {
-            if (N.isNullOrEmpty(entry.getValue())) {
+            if (N.isEmpty(entry.getValue())) {
                 continue;
             }
 
@@ -2465,7 +2464,7 @@ public final class Maps {
      * @param output
      */
     private static void flatten(Map<String, Object> map, String prefix, String delimiter, Map<String, Object> output) {
-        if (N.isNullOrEmpty(map)) {
+        if (N.isEmpty(map)) {
             return;
         }
 
@@ -2520,7 +2519,7 @@ public final class Maps {
         final M result = mapSupplier.get();
         final Splitter keySplitter = Splitter.with(delimiter);
 
-        if (N.notNullOrEmpty(map)) {
+        if (N.notEmpty(map)) {
             for (Map.Entry<String, Object> entry : map.entrySet()) {
                 if (entry.getKey().indexOf(delimiter) >= 0) {
                     final String[] keys = keySplitter.splitToArray(entry.getKey());
@@ -2818,7 +2817,7 @@ public final class Maps {
      */
     public static <M extends Map<String, Object>> M bean2Map(final Object bean, final Collection<String> selectPropNames, final NamingPolicy keyNamingPolicy,
             final IntFunction<? extends M> mapSupplier) {
-        final M resultMap = mapSupplier.apply(N.isNullOrEmpty(selectPropNames) ? ClassUtil.getPropNameList(bean.getClass()).size() : selectPropNames.size());
+        final M resultMap = mapSupplier.apply(N.isEmpty(selectPropNames) ? ClassUtil.getPropNameList(bean.getClass()).size() : selectPropNames.size());
 
         bean2Map(resultMap, bean, selectPropNames, keyNamingPolicy);
 
@@ -2867,7 +2866,7 @@ public final class Maps {
         final Class<?> beanClass = bean.getClass();
         final BeanInfo beanInfo = ParserUtil.getBeanInfo(beanClass);
 
-        if (N.isNullOrEmpty(selectPropNames)) {
+        if (N.isEmpty(selectPropNames)) {
             bean2Map(resultMap, bean, true, null, keyNamingPolicy);
         } else {
             PropInfo propInfo = null;
@@ -3015,7 +3014,7 @@ public final class Maps {
             final Set<String> ignoredPropNames, NamingPolicy keyNamingPolicy) {
         keyNamingPolicy = keyNamingPolicy == null ? NamingPolicy.LOWER_CAMEL_CASE : keyNamingPolicy;
         final boolean isLowerCamelCaseOrNoChange = NamingPolicy.LOWER_CAMEL_CASE.equals(keyNamingPolicy) || NamingPolicy.NO_CHANGE.equals(keyNamingPolicy);
-        final boolean hasIgnoredPropNames = N.notNullOrEmpty(ignoredPropNames);
+        final boolean hasIgnoredPropNames = N.notEmpty(ignoredPropNames);
         final Class<?> beanClass = bean.getClass();
         final BeanInfo beanInfo = ParserUtil.getBeanInfo(beanClass);
 
@@ -3104,7 +3103,7 @@ public final class Maps {
      */
     public static <M extends Map<String, Object>> M deepBean2Map(final Object bean, final Collection<String> selectPropNames,
             final NamingPolicy keyNamingPolicy, final IntFunction<? extends M> mapSupplier) {
-        final M resultMap = mapSupplier.apply(N.isNullOrEmpty(selectPropNames) ? ClassUtil.getPropNameList(bean.getClass()).size() : selectPropNames.size());
+        final M resultMap = mapSupplier.apply(N.isEmpty(selectPropNames) ? ClassUtil.getPropNameList(bean.getClass()).size() : selectPropNames.size());
 
         deepBean2Map(resultMap, bean, selectPropNames, keyNamingPolicy);
 
@@ -3154,7 +3153,7 @@ public final class Maps {
         final Class<?> beanClass = bean.getClass();
         final BeanInfo beanInfo = ParserUtil.getBeanInfo(beanClass);
 
-        if (N.isNullOrEmpty(selectPropNames)) {
+        if (N.isEmpty(selectPropNames)) {
             deepBean2Map(resultMap, bean, true, null, keyNamingPolicy);
         } else {
             PropInfo propInfo = null;
@@ -3311,7 +3310,7 @@ public final class Maps {
         final boolean isLowerCamelCaseOrNoChange = keyNamingPolicy == null || NamingPolicy.LOWER_CAMEL_CASE.equals(keyNamingPolicy)
                 || NamingPolicy.NO_CHANGE.equals(keyNamingPolicy);
 
-        final boolean hasIgnoredPropNames = N.notNullOrEmpty(ignoredPropNames);
+        final boolean hasIgnoredPropNames = N.notEmpty(ignoredPropNames);
         final Class<?> beanClass = bean.getClass();
         final BeanInfo beanInfo = ParserUtil.getBeanInfo(beanClass);
 
@@ -3408,7 +3407,7 @@ public final class Maps {
      */
     public static <M extends Map<String, Object>> M bean2FlatMap(final Object bean, final Collection<String> selectPropNames,
             final NamingPolicy keyNamingPolicy, final IntFunction<? extends M> mapSupplier) {
-        final M resultMap = mapSupplier.apply(N.isNullOrEmpty(selectPropNames) ? ClassUtil.getPropNameList(bean.getClass()).size() : selectPropNames.size());
+        final M resultMap = mapSupplier.apply(N.isEmpty(selectPropNames) ? ClassUtil.getPropNameList(bean.getClass()).size() : selectPropNames.size());
 
         bean2FlatMap(resultMap, bean, selectPropNames, keyNamingPolicy);
 
@@ -3457,7 +3456,7 @@ public final class Maps {
         final Class<?> beanClass = bean.getClass();
         final BeanInfo beanInfo = ParserUtil.getBeanInfo(beanClass);
 
-        if (N.isNullOrEmpty(selectPropNames)) {
+        if (N.isEmpty(selectPropNames)) {
             bean2FlatMap(resultMap, bean, true, null, keyNamingPolicy);
         } else {
             PropInfo propInfo = null;
@@ -3615,7 +3614,7 @@ public final class Maps {
         final boolean isLowerCamelCaseOrNoChange = keyNamingPolicy == null || NamingPolicy.LOWER_CAMEL_CASE.equals(keyNamingPolicy)
                 || NamingPolicy.NO_CHANGE.equals(keyNamingPolicy);
 
-        final boolean hasIgnoredPropNames = N.notNullOrEmpty(ignoredPropNames);
+        final boolean hasIgnoredPropNames = N.notEmpty(ignoredPropNames);
         final boolean isNullParentPropName = (parentPropName == null);
         final Class<?> beanClass = bean.getClass();
 

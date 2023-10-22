@@ -214,7 +214,7 @@ public final class LineIterator extends ObjIterator<String> implements Closeable
 
     //    @SafeVarargs
     //    public static LineIterator[] of(final Reader... readers) {
-    //        if (N.isNullOrEmpty(readers)) {
+    //        if (N.isEmpty(readers)) {
     //            return new LineIterator[0];
     //        }
     //
@@ -228,7 +228,7 @@ public final class LineIterator extends ObjIterator<String> implements Closeable
     //    }
 
     //    public static List<LineIterator> of(final Collection<? extends Reader> readers) {
-    //        if (N.isNullOrEmpty(readers)) {
+    //        if (N.isEmpty(readers)) {
     //            return new ArrayList<>();
     //        }
     //

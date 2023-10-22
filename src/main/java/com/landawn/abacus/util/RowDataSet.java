@@ -247,7 +247,7 @@ public class RowDataSet implements DataSet, Cloneable {
      */
     @Override
     public int[] getColumnIndexes(final Collection<String> columnNames) {
-        if (N.isNullOrEmpty(columnNames)) {
+        if (N.isEmpty(columnNames)) {
             return N.EMPTY_INT_ARRAY;
         }
 
@@ -474,7 +474,7 @@ public class RowDataSet implements DataSet, Cloneable {
         _columnList.set(columnIndexA, _columnList.get(columnIndexB));
         _columnList.set(columnIndexB, tmpColumnA);
 
-        if (N.notNullOrEmpty(_columnIndexMap)) {
+        if (N.notEmpty(_columnIndexMap)) {
             _columnIndexMap.put(columnNameA, columnIndexB);
             _columnIndexMap.put(columnNameB, columnIndexA);
         }
@@ -970,13 +970,13 @@ public class RowDataSet implements DataSet, Cloneable {
             throw new IllegalArgumentException("Column(" + columnName + ") is already included in this DataSet.");
         }
 
-        if (N.notNullOrEmpty(column) && column.size() != size()) {
+        if (N.notEmpty(column) && column.size() != size()) {
             throw new IllegalArgumentException("The specified column size[" + column.size() + "] must be same as the this DataSet size[" + size() + "]. ");
         }
 
         _columnNameList.add(columnIndex, columnName);
 
-        if (N.isNullOrEmpty(column)) {
+        if (N.isEmpty(column)) {
             _columnList.add(columnIndex, N.repeat(null, size()));
         } else {
             _columnList.add(columnIndex, new ArrayList<>(column));
@@ -1504,7 +1504,7 @@ public class RowDataSet implements DataSet, Cloneable {
 
         final int columnIndex = this.checkColumnName(columnName);
 
-        if (N.isNullOrEmpty(newColumnNames)) {
+        if (N.isEmpty(newColumnNames)) {
             throw new IllegalArgumentException("New column names can't be null or empty.");
         }
 
@@ -1559,7 +1559,7 @@ public class RowDataSet implements DataSet, Cloneable {
 
         final int columnIndex = this.checkColumnName(columnName);
 
-        if (N.isNullOrEmpty(newColumnNames)) {
+        if (N.isEmpty(newColumnNames)) {
             throw new IllegalArgumentException("New column names can't be null or empty.");
         }
 
@@ -2061,7 +2061,7 @@ public class RowDataSet implements DataSet, Cloneable {
     private <T> T getRow(Class<? extends T> rowClass, Collection<String> columnNames, int rowIndex, IntFunction<? extends T> rowSupplier) {
         checkRowNum(rowIndex);
 
-        columnNames = N.isNullOrEmpty(columnNames) ? this._columnNameList : columnNames;
+        columnNames = N.isEmpty(columnNames) ? this._columnNameList : columnNames;
         final int[] columnIndexes = checkColumnName(columnNames);
         final int columnCount = columnIndexes.length;
 
@@ -2733,7 +2733,7 @@ public class RowDataSet implements DataSet, Cloneable {
     private <T> List<T> toList(Class<? extends T> rowClass, Collection<String> columnNames, int fromRowIndex, int toRowIndex,
             final Map<String, String> prefixAndFieldNameMap, IntFunction<? extends T> rowSupplier) {
         checkRowIndex(fromRowIndex, toRowIndex);
-        columnNames = N.isNullOrEmpty(columnNames) ? this._columnNameList : columnNames;
+        columnNames = N.isEmpty(columnNames) ? this._columnNameList : columnNames;
 
         rowClass = rowClass == null ? (Class<T>) rowSupplier.apply(0).getClass() : rowClass;
         final Type<?> rowType = N.typeOf(rowClass);
@@ -3107,7 +3107,7 @@ public class RowDataSet implements DataSet, Cloneable {
         if (idPropNames == null) {
             idPropNamesToUse = beanInfo.idPropNameList;
 
-            if (N.isNullOrEmpty(idPropNamesToUse)) {
+            if (N.isEmpty(idPropNamesToUse)) {
                 throw new IllegalArgumentException("No id property defined in class: " + beanClass);
             }
         }
@@ -3159,9 +3159,9 @@ public class RowDataSet implements DataSet, Cloneable {
         N.checkArgument(this._columnNameList.containsAll(idPropNamesToUse), "Some id properties {} are not found in DataSet: {} for bean {}", idPropNamesToUse,
                 this._columnNameList, ClassUtil.getSimpleClassName(beanClass));
 
-        selectPropNames = N.isNullOrEmpty(selectPropNames) ? this._columnNameList : selectPropNames;
+        selectPropNames = N.isEmpty(selectPropNames) ? this._columnNameList : selectPropNames;
 
-        N.checkArgument(N.isNullOrEmpty(selectPropNames) || selectPropNames == this._columnNameList || this._columnNameList.containsAll(selectPropNames),
+        N.checkArgument(N.isEmpty(selectPropNames) || selectPropNames == this._columnNameList || this._columnNameList.containsAll(selectPropNames),
                 "Some select properties {} are not found in DataSet: {} for bean {}", selectPropNames, this._columnNameList,
                 ClassUtil.getSimpleClassName(beanClass));
 
@@ -3175,20 +3175,20 @@ public class RowDataSet implements DataSet, Cloneable {
         N.checkArgNotNull(beanClass, "beanClass");
         checkRowIndex(fromRowIndex, toRowIndex);
 
-        if (mergeResult && N.isNullOrEmpty(idPropNames)) {
+        if (mergeResult && N.isEmpty(idPropNames)) {
             throw new IllegalArgumentException("\"idPropNames\" can't be null or empty when \"mergeResult\" is true");
         }
 
         final int rowCount = toRowIndex - fromRowIndex;
         final int columnCount = columnNames.size();
-        final int[] idColumnIndexes = N.isNullOrEmpty(idPropNames) ? N.EMPTY_INT_ARRAY : checkColumnName(idPropNames);
+        final int[] idColumnIndexes = N.isEmpty(idPropNames) ? N.EMPTY_INT_ARRAY : checkColumnName(idPropNames);
         final boolean ignoreUnmatchedProperty = columnNames == this._columnNameList;
 
         final Object[] resultEntities = new Object[rowCount];
         final Map<Object, Object> idBeanMap = mergeResult ? N.newLinkedHashMap(N.min(64, rowCount)) : N.emptyMap();
         Object bean = null;
 
-        if (N.isNullOrEmpty(idColumnIndexes)) {
+        if (N.isEmpty(idColumnIndexes)) {
             for (int rowIndex = fromRowIndex, i = 0; rowIndex < toRowIndex; rowIndex++, i++) {
                 resultEntities[i] = rowSupplier == null ? beanInfo.createBeanResult() : rowSupplier.apply(columnCount);
             }
@@ -3338,7 +3338,7 @@ public class RowDataSet implements DataSet, Cloneable {
                     final Class<?> propBeanClass = propBeanType.clazz();
                     final BeanInfo propBeanInfo = ParserUtil.getBeanInfo(propBeanClass);
                     final List<String> propEntityIdPropNames = mergeResult ? propBeanInfo.idPropNameList : null;
-                    final List<String> newPropEntityIdNames = mergeResult && N.isNullOrEmpty(propEntityIdPropNames) ? new ArrayList<>() : propEntityIdPropNames;
+                    final List<String> newPropEntityIdNames = mergeResult && N.isEmpty(propEntityIdPropNames) ? new ArrayList<>() : propEntityIdPropNames;
                     final List<String> newTmpColumnNameList = new ArrayList<>();
                     final List<List<Object>> newTmpColumnList = new ArrayList<>();
 
@@ -3359,7 +3359,7 @@ public class RowDataSet implements DataSet, Cloneable {
 
                             mergedPropNames.add(columnName);
 
-                            if (mergeResult && N.isNullOrEmpty(propEntityIdPropNames) && newColumnName.indexOf(PROP_NAME_SEPARATOR) < 0) {
+                            if (mergeResult && N.isEmpty(propEntityIdPropNames) && newColumnName.indexOf(PROP_NAME_SEPARATOR) < 0) {
                                 newPropEntityIdNames.add(newColumnName);
                             }
                         }
@@ -3367,7 +3367,7 @@ public class RowDataSet implements DataSet, Cloneable {
 
                     final RowDataSet tmp = new RowDataSet(newTmpColumnNameList, newTmpColumnList);
 
-                    final boolean isToMerge = mergeResult && N.notNullOrEmpty(newPropEntityIdNames) && tmp._columnNameList.containsAll(newPropEntityIdNames);
+                    final boolean isToMerge = mergeResult && N.notEmpty(newPropEntityIdNames) && tmp._columnNameList.containsAll(newPropEntityIdNames);
 
                     final List<?> propValueList = tmp.toEntities(propBeanClass, propBeanInfo, isToMerge ? newPropEntityIdNames : null, tmp._columnNameList,
                             fromRowIndex, toRowIndex, prefixAndFieldNameMap, null, isToMerge, true);
@@ -3409,16 +3409,16 @@ public class RowDataSet implements DataSet, Cloneable {
                 }
             }
 
-            if (N.notNullOrEmpty(listPropValuesToDeduplicate)) {
+            if (N.notEmpty(listPropValuesToDeduplicate)) {
                 for (Collection<Object> list : listPropValuesToDeduplicate) {
                     N.removeDuplicates(list);
                 }
             }
 
-            final List<T> result = returnAllList || N.isNullOrEmpty(idBeanMap) ? (List<T>) N.asList(resultEntities)
+            final List<T> result = returnAllList || N.isEmpty(idBeanMap) ? (List<T>) N.asList(resultEntities)
                     : new ArrayList<>((Collection<T>) idBeanMap.values());
 
-            if (rowSupplier == null && N.notNullOrEmpty(result)) {
+            if (rowSupplier == null && N.notEmpty(result)) {
                 for (int i = 0, size = result.size(); i < size; i++) {
                     result.set(i, beanInfo.finishBeanResult(result.get(i)));
                 }
@@ -3426,7 +3426,7 @@ public class RowDataSet implements DataSet, Cloneable {
 
             return result;
         } finally {
-            if (N.len(idColumnIndexes) > 1 && N.notNullOrEmpty(idBeanMap)) {
+            if (N.len(idColumnIndexes) > 1 && N.notEmpty(idBeanMap)) {
                 for (Wrapper<Object[]> e : ((Map<Wrapper<Object[]>, Object>) ((Map) idBeanMap)).keySet()) {
                     Objectory.recycle(e.value());
                 }
@@ -3437,7 +3437,7 @@ public class RowDataSet implements DataSet, Cloneable {
     private PropInfo getPropInfoByPrefix(final BeanInfo beanInfo, final String prefix, final Map<String, String> prefixAndFieldNameMap) {
         PropInfo propInfo = beanInfo.getPropInfo(prefix);
 
-        if (propInfo == null && N.notNullOrEmpty(prefixAndFieldNameMap) && prefixAndFieldNameMap.containsKey(prefix)) {
+        if (propInfo == null && N.notEmpty(prefixAndFieldNameMap) && prefixAndFieldNameMap.containsKey(prefix)) {
             propInfo = beanInfo.getPropInfo(prefixAndFieldNameMap.get(prefix));
         }
 
@@ -3490,7 +3490,7 @@ public class RowDataSet implements DataSet, Cloneable {
      */
     @Override
     public <K, V> Map<K, V> toMap(final String keyColumnName, final String valueColumnName, final int fromRowIndex, final int toRowIndex) {
-        return toMap(keyColumnName, valueColumnName, fromRowIndex, toRowIndex, (IntFunction<Map<K, V>>) CommonUtil::newLinkedHashMap);
+        return toMap(keyColumnName, valueColumnName, fromRowIndex, toRowIndex, (IntFunction<Map<K, V>>) N::newLinkedHashMap);
     }
 
     /**
@@ -3550,7 +3550,7 @@ public class RowDataSet implements DataSet, Cloneable {
     @Override
     public <K, V> Map<K, V> toMap(final Class<? extends V> rowClass, final String keyColumnName, final Collection<String> valueColumnNames,
             final int fromRowIndex, final int toRowIndex) {
-        return toMap(rowClass, keyColumnName, valueColumnNames, fromRowIndex, toRowIndex, (IntFunction<Map<K, V>>) CommonUtil::newLinkedHashMap);
+        return toMap(rowClass, keyColumnName, valueColumnNames, fromRowIndex, toRowIndex, (IntFunction<Map<K, V>>) N::newLinkedHashMap);
     }
 
     /**
@@ -3679,7 +3679,7 @@ public class RowDataSet implements DataSet, Cloneable {
     @Override
     public <K, V> Map<K, V> toMap(String keyColumnName, Collection<String> valueColumnNames, int fromRowIndex, int toRowIndex,
             IntFunction<? extends V> rowSupplier) {
-        return toMap(keyColumnName, valueColumnNames, fromRowIndex, toRowIndex, rowSupplier, (IntFunction<Map<K, V>>) CommonUtil::newLinkedHashMap);
+        return toMap(keyColumnName, valueColumnNames, fromRowIndex, toRowIndex, rowSupplier, (IntFunction<Map<K, V>>) N::newLinkedHashMap);
     }
 
     /**
@@ -4244,7 +4244,7 @@ public class RowDataSet implements DataSet, Cloneable {
     public void toJSON(final Writer output, final Collection<String> columnNames, final int fromRowIndex, final int toRowIndex) throws UncheckedIOException {
         checkRowIndex(fromRowIndex, toRowIndex);
 
-        if (N.isNullOrEmpty(columnNames)) {
+        if (N.isEmpty(columnNames)) {
             try {
                 IOUtil.write(output, "[]");
             } catch (IOException e) {
@@ -4629,7 +4629,7 @@ public class RowDataSet implements DataSet, Cloneable {
             throws UncheckedIOException {
         checkRowIndex(fromRowIndex, toRowIndex);
 
-        if (N.isNullOrEmpty(columnNames)) {
+        if (N.isEmpty(columnNames)) {
             try {
                 IOUtil.write(output, XMLConstants.DATA_SET_ELE_START);
                 IOUtil.write(output, XMLConstants.DATA_SET_ELE_END);
@@ -4933,7 +4933,7 @@ public class RowDataSet implements DataSet, Cloneable {
             final boolean quoted) throws UncheckedIOException {
         checkRowIndex(fromRowIndex, toRowIndex);
 
-        if (N.isNullOrEmpty(columnNames)) {
+        if (N.isEmpty(columnNames)) {
             return;
         }
 
@@ -5676,7 +5676,7 @@ public class RowDataSet implements DataSet, Cloneable {
             String aggregateResultColumnName, String aggregateOnColumnName, final Collector<T, ?, ?> collector) throws E {
         N.checkArgNotNullOrEmpty(columnNames, "columnNames");
 
-        if (N.notNullOrEmpty(columnNames) && columnNames.contains(aggregateResultColumnName)) {
+        if (N.notEmpty(columnNames) && columnNames.contains(aggregateResultColumnName)) {
             throw new IllegalArgumentException("Duplicated Property name: " + aggregateResultColumnName);
         }
 
@@ -5913,7 +5913,7 @@ public class RowDataSet implements DataSet, Cloneable {
             final Throwables.Function<? super DisposableObjArray, T, E2> rowMapper, final Collector<? super T, ?, ?> collector) throws E, E2 {
         N.checkArgNotNullOrEmpty(columnNames, "columnNames");
 
-        if (N.notNullOrEmpty(columnNames) && columnNames.contains(aggregateResultColumnName)) {
+        if (N.notEmpty(columnNames) && columnNames.contains(aggregateResultColumnName)) {
             throw new IllegalArgumentException("Duplicated Property name: " + aggregateResultColumnName);
         }
 
@@ -6065,7 +6065,7 @@ public class RowDataSet implements DataSet, Cloneable {
         return Sheet.rows(rowKeySet, colKeySet, rows);
     }
 
-    private static final com.landawn.abacus.util.function.Predicate<Collection<String>> NOT_EMPTY_FILTER = CommonUtil::notNullOrEmpty;
+    private static final com.landawn.abacus.util.function.Predicate<Collection<String>> NOT_EMPTY_FILTER = N::notEmpty;
 
     /**
      *
@@ -6476,7 +6476,7 @@ public class RowDataSet implements DataSet, Cloneable {
 
     private static final com.landawn.abacus.util.function.Function<Set<String>, Integer> TO_SIZE_FUNC = Set::size;
 
-    private static final com.landawn.abacus.util.function.Consumer<List<Set<String>>> REVERSE_ACTION = CommonUtil::reverse;
+    private static final com.landawn.abacus.util.function.Consumer<List<Set<String>>> REVERSE_ACTION = N::reverse;
 
     /**
      *
@@ -6973,7 +6973,7 @@ public class RowDataSet implements DataSet, Cloneable {
             }
         }
 
-        final Properties<String, Object> newProperties = N.isNullOrEmpty(_properties) ? null : _properties.copy();
+        final Properties<String, Object> newProperties = N.isEmpty(_properties) ? null : _properties.copy();
 
         return new RowDataSet(newColumnNameList, newColumnList, newProperties);
     }
@@ -7020,7 +7020,7 @@ public class RowDataSet implements DataSet, Cloneable {
             newColumnList.add(new ArrayList<>());
         }
 
-        final Properties<String, Object> newProperties = N.isNullOrEmpty(_properties) ? null : _properties.copy();
+        final Properties<String, Object> newProperties = N.isEmpty(_properties) ? null : _properties.copy();
 
         if (size == 0) {
             return new RowDataSet(newColumnNameList, newColumnList, newProperties);
@@ -7083,7 +7083,7 @@ public class RowDataSet implements DataSet, Cloneable {
             newColumnList.add(new ArrayList<>());
         }
 
-        final Properties<String, Object> newProperties = N.isNullOrEmpty(_properties) ? null : _properties.copy();
+        final Properties<String, Object> newProperties = N.isEmpty(_properties) ? null : _properties.copy();
 
         if (size == 0) {
             return new RowDataSet(newColumnNameList, newColumnList, newProperties);
@@ -7259,7 +7259,7 @@ public class RowDataSet implements DataSet, Cloneable {
             newColumnList.add(new ArrayList<>(N.min(max, (size == 0) ? 0 : ((int) (size * 0.8) + 1))));
         }
 
-        final Properties<String, Object> newProperties = N.isNullOrEmpty(_properties) ? null : _properties.copy();
+        final Properties<String, Object> newProperties = N.isEmpty(_properties) ? null : _properties.copy();
 
         if (size == 0 || max == 0) {
             return new RowDataSet(newColumnNameList, newColumnList, newProperties);
@@ -7357,7 +7357,7 @@ public class RowDataSet implements DataSet, Cloneable {
             newColumnList.add(new ArrayList<>(N.min(max, (size == 0) ? 0 : ((int) (size * 0.8) + 1))));
         }
 
-        final Properties<String, Object> newProperties = N.isNullOrEmpty(_properties) ? null : _properties.copy();
+        final Properties<String, Object> newProperties = N.isEmpty(_properties) ? null : _properties.copy();
 
         if (size == 0 || max == 0) {
             return new RowDataSet(newColumnNameList, newColumnList, newProperties);
@@ -7455,7 +7455,7 @@ public class RowDataSet implements DataSet, Cloneable {
             newColumnList.add(new ArrayList<>(N.min(max, (size == 0) ? 0 : ((int) (size * 0.8) + 1))));
         }
 
-        final Properties<String, Object> newProperties = N.isNullOrEmpty(_properties) ? null : _properties.copy();
+        final Properties<String, Object> newProperties = N.isEmpty(_properties) ? null : _properties.copy();
 
         if (size == 0) {
             return new RowDataSet(newColumnNameList, newColumnList, newProperties);
@@ -7548,7 +7548,7 @@ public class RowDataSet implements DataSet, Cloneable {
             newColumnList.add(new ArrayList<>(N.min(max, (size == 0) ? 0 : ((int) (size * 0.8) + 1))));
         }
 
-        final Properties<String, Object> newProperties = N.isNullOrEmpty(_properties) ? null : _properties.copy();
+        final Properties<String, Object> newProperties = N.isEmpty(_properties) ? null : _properties.copy();
 
         if (size == 0) {
             return new RowDataSet(newColumnNameList, newColumnList, newProperties);
@@ -7608,7 +7608,7 @@ public class RowDataSet implements DataSet, Cloneable {
             final Collection<String> copyingColumnNames) throws E {
         N.checkArgNotNull(mapper, "mapper");
         final int fromColumnIndex = checkColumnName(fromColumnName);
-        final int[] copyingColumnIndices = N.isNullOrEmpty(copyingColumnNames) ? N.EMPTY_INT_ARRAY : checkColumnName(copyingColumnNames);
+        final int[] copyingColumnIndices = N.isEmpty(copyingColumnNames) ? N.EMPTY_INT_ARRAY : checkColumnName(copyingColumnNames);
 
         final Throwables.Function<Object, Object, E> mapperToUse = (Throwables.Function<Object, Object, E>) mapper;
         final int size = size();
@@ -7626,7 +7626,7 @@ public class RowDataSet implements DataSet, Cloneable {
         final List<List<Object>> newColumnList = new ArrayList<>(copyingColumnCount + 1);
         newColumnList.add(mappedColumn);
 
-        if (N.notNullOrEmpty(copyingColumnNames)) {
+        if (N.notEmpty(copyingColumnNames)) {
             newColumnNameList.addAll(copyingColumnNames);
 
             for (int columnIndex : copyingColumnIndices) {
@@ -7653,7 +7653,7 @@ public class RowDataSet implements DataSet, Cloneable {
         N.checkArgNotNull(mapper, "mapper");
         final List<Object> fromColumn1 = _columnList.get(checkColumnName(fromColumnNames._1));
         final List<Object> fromColumn2 = _columnList.get(checkColumnName(fromColumnNames._2));
-        final int[] copyingColumnIndices = N.isNullOrEmpty(copyingColumnNames) ? N.EMPTY_INT_ARRAY : checkColumnName(copyingColumnNames);
+        final int[] copyingColumnIndices = N.isEmpty(copyingColumnNames) ? N.EMPTY_INT_ARRAY : checkColumnName(copyingColumnNames);
 
         final Throwables.BiFunction<Object, Object, Object, E> mapperToUse = (Throwables.BiFunction<Object, Object, Object, E>) mapper;
         final int size = size();
@@ -7671,7 +7671,7 @@ public class RowDataSet implements DataSet, Cloneable {
         final List<List<Object>> newColumnList = new ArrayList<>(copyingColumnCount + 1);
         newColumnList.add(mappedColumn);
 
-        if (N.notNullOrEmpty(copyingColumnNames)) {
+        if (N.notEmpty(copyingColumnNames)) {
             newColumnNameList.addAll(copyingColumnNames);
 
             for (int columnIndex : copyingColumnIndices) {
@@ -7700,7 +7700,7 @@ public class RowDataSet implements DataSet, Cloneable {
         final List<Object> fromColumn2 = _columnList.get(checkColumnName(fromColumnNames._2));
         final List<Object> fromColumn3 = _columnList.get(checkColumnName(fromColumnNames._3));
 
-        final int[] copyingColumnIndices = N.isNullOrEmpty(copyingColumnNames) ? N.EMPTY_INT_ARRAY : checkColumnName(copyingColumnNames);
+        final int[] copyingColumnIndices = N.isEmpty(copyingColumnNames) ? N.EMPTY_INT_ARRAY : checkColumnName(copyingColumnNames);
 
         final Throwables.TriFunction<Object, Object, Object, Object, E> mapperToUse = (Throwables.TriFunction<Object, Object, Object, Object, E>) mapper;
         final int size = size();
@@ -7718,7 +7718,7 @@ public class RowDataSet implements DataSet, Cloneable {
         final List<List<Object>> newColumnList = new ArrayList<>(copyingColumnCount + 1);
         newColumnList.add(mappedColumn);
 
-        if (N.notNullOrEmpty(copyingColumnNames)) {
+        if (N.notEmpty(copyingColumnNames)) {
             newColumnNameList.addAll(copyingColumnNames);
 
             for (int columnIndex : copyingColumnIndices) {
@@ -7744,7 +7744,7 @@ public class RowDataSet implements DataSet, Cloneable {
             final String newColumnName, final Collection<String> copyingColumnNames) throws E {
         N.checkArgNotNull(mapper, "mapper");
         final int[] fromColumnIndices = checkColumnName(fromColumnNames);
-        final int[] copyingColumnIndices = N.isNullOrEmpty(copyingColumnNames) ? N.EMPTY_INT_ARRAY : checkColumnName(copyingColumnNames);
+        final int[] copyingColumnIndices = N.isEmpty(copyingColumnNames) ? N.EMPTY_INT_ARRAY : checkColumnName(copyingColumnNames);
 
         final Throwables.Function<DisposableObjArray, Object, E> mapperToUse = (Throwables.Function<DisposableObjArray, Object, E>) mapper;
         final int size = size();
@@ -7769,7 +7769,7 @@ public class RowDataSet implements DataSet, Cloneable {
         final List<List<Object>> newColumnList = new ArrayList<>(copyingColumnCount + 1);
         newColumnList.add(mappedColumn);
 
-        if (N.notNullOrEmpty(copyingColumnNames)) {
+        if (N.notEmpty(copyingColumnNames)) {
             newColumnNameList.addAll(copyingColumnNames);
 
             for (int columnIndex : copyingColumnIndices) {
@@ -7811,7 +7811,7 @@ public class RowDataSet implements DataSet, Cloneable {
             final String newColumnName, final Collection<String> copyingColumnNames) throws E {
         N.checkArgNotNull(mapper, "mapper");
         final int fromColumnIndex = checkColumnName(fromColumnName);
-        final int[] copyingColumnIndices = N.isNullOrEmpty(copyingColumnNames) ? N.EMPTY_INT_ARRAY : checkColumnName(copyingColumnNames);
+        final int[] copyingColumnIndices = N.isEmpty(copyingColumnNames) ? N.EMPTY_INT_ARRAY : checkColumnName(copyingColumnNames);
 
         final Throwables.Function<Object, Collection<Object>, E> mapperToUse = (Throwables.Function<Object, Collection<Object>, E>) mapper;
         final int size = size();
@@ -7825,13 +7825,13 @@ public class RowDataSet implements DataSet, Cloneable {
         final List<List<Object>> newColumnList = new ArrayList<>(copyingColumnCount + 1);
         newColumnList.add(mappedColumn);
 
-        if (N.isNullOrEmpty(copyingColumnNames)) {
+        if (N.isEmpty(copyingColumnNames)) {
             Collection<Object> c = null;
 
             for (Object val : _columnList.get(fromColumnIndex)) {
                 c = mapperToUse.apply(val);
 
-                if (N.notNullOrEmpty(c)) {
+                if (N.notEmpty(c)) {
                     mappedColumn.addAll(c);
                 }
             }
@@ -7850,7 +7850,7 @@ public class RowDataSet implements DataSet, Cloneable {
             for (int rowIndex = 0; rowIndex < size; rowIndex++) {
                 c = mapperToUse.apply(fromColumn.get(rowIndex));
 
-                if (N.notNullOrEmpty(c)) {
+                if (N.notEmpty(c)) {
                     mappedColumn.addAll(c);
 
                     for (int i = 0; i < copyingColumnCount; i++) {
@@ -7886,7 +7886,7 @@ public class RowDataSet implements DataSet, Cloneable {
         final List<Object> fromColumn1 = _columnList.get(checkColumnName(fromColumnNames._1));
         final List<Object> fromColumn2 = _columnList.get(checkColumnName(fromColumnNames._2));
 
-        final int[] copyingColumnIndices = N.isNullOrEmpty(copyingColumnNames) ? N.EMPTY_INT_ARRAY : checkColumnName(copyingColumnNames);
+        final int[] copyingColumnIndices = N.isEmpty(copyingColumnNames) ? N.EMPTY_INT_ARRAY : checkColumnName(copyingColumnNames);
 
         final Throwables.BiFunction<Object, Object, Collection<Object>, E> mapperToUse = (Throwables.BiFunction<Object, Object, Collection<Object>, E>) mapper;
         final int size = size();
@@ -7900,13 +7900,13 @@ public class RowDataSet implements DataSet, Cloneable {
         final List<List<Object>> newColumnList = new ArrayList<>(copyingColumnCount + 1);
         newColumnList.add(mappedColumn);
 
-        if (N.isNullOrEmpty(copyingColumnNames)) {
+        if (N.isEmpty(copyingColumnNames)) {
             Collection<Object> c = null;
 
             for (int rowIndex = 0; rowIndex < size; rowIndex++) {
                 c = mapperToUse.apply(fromColumn1.get(rowIndex), fromColumn2.get(rowIndex));
 
-                if (N.notNullOrEmpty(c)) {
+                if (N.notEmpty(c)) {
                     mappedColumn.addAll(c);
                 }
             }
@@ -7924,7 +7924,7 @@ public class RowDataSet implements DataSet, Cloneable {
             for (int rowIndex = 0; rowIndex < size; rowIndex++) {
                 c = mapperToUse.apply(fromColumn1.get(rowIndex), fromColumn2.get(rowIndex));
 
-                if (N.notNullOrEmpty(c)) {
+                if (N.notEmpty(c)) {
                     mappedColumn.addAll(c);
 
                     for (int i = 0; i < copyingColumnCount; i++) {
@@ -7961,7 +7961,7 @@ public class RowDataSet implements DataSet, Cloneable {
         final List<Object> fromColumn2 = _columnList.get(checkColumnName(fromColumnNames._2));
         final List<Object> fromColumn3 = _columnList.get(checkColumnName(fromColumnNames._3));
 
-        final int[] copyingColumnIndices = N.isNullOrEmpty(copyingColumnNames) ? N.EMPTY_INT_ARRAY : checkColumnName(copyingColumnNames);
+        final int[] copyingColumnIndices = N.isEmpty(copyingColumnNames) ? N.EMPTY_INT_ARRAY : checkColumnName(copyingColumnNames);
 
         final Throwables.TriFunction<Object, Object, Object, Collection<Object>, E> mapperToUse = (Throwables.TriFunction<Object, Object, Object, Collection<Object>, E>) mapper;
         final int size = size();
@@ -7975,13 +7975,13 @@ public class RowDataSet implements DataSet, Cloneable {
         final List<List<Object>> newColumnList = new ArrayList<>(copyingColumnCount + 1);
         newColumnList.add(mappedColumn);
 
-        if (N.isNullOrEmpty(copyingColumnNames)) {
+        if (N.isEmpty(copyingColumnNames)) {
             Collection<Object> c = null;
 
             for (int rowIndex = 0; rowIndex < size; rowIndex++) {
                 c = mapperToUse.apply(fromColumn1.get(rowIndex), fromColumn2.get(rowIndex), fromColumn3.get(rowIndex));
 
-                if (N.notNullOrEmpty(c)) {
+                if (N.notEmpty(c)) {
                     mappedColumn.addAll(c);
                 }
             }
@@ -7999,7 +7999,7 @@ public class RowDataSet implements DataSet, Cloneable {
             for (int rowIndex = 0; rowIndex < size; rowIndex++) {
                 c = mapperToUse.apply(fromColumn1.get(rowIndex), fromColumn2.get(rowIndex), fromColumn3.get(rowIndex));
 
-                if (N.notNullOrEmpty(c)) {
+                if (N.notEmpty(c)) {
                     mappedColumn.addAll(c);
 
                     for (int i = 0; i < copyingColumnCount; i++) {
@@ -8033,7 +8033,7 @@ public class RowDataSet implements DataSet, Cloneable {
             final Collection<String> copyingColumnNames) throws E {
         N.checkArgNotNull(mapper, "mapper");
         final int[] fromColumnIndices = checkColumnName(fromColumnNames);
-        final int[] copyingColumnIndices = N.isNullOrEmpty(copyingColumnNames) ? N.EMPTY_INT_ARRAY : checkColumnName(copyingColumnNames);
+        final int[] copyingColumnIndices = N.isEmpty(copyingColumnNames) ? N.EMPTY_INT_ARRAY : checkColumnName(copyingColumnNames);
 
         final Throwables.Function<DisposableObjArray, Collection<Object>, E> mapperToUse = (Throwables.Function<DisposableObjArray, Collection<Object>, E>) mapper;
         final int size = size();
@@ -8051,7 +8051,7 @@ public class RowDataSet implements DataSet, Cloneable {
         final Object[] tmpRow = new Object[fromColumnCount];
         final DisposableObjArray disposableArray = DisposableObjArray.wrap(tmpRow);
 
-        if (N.isNullOrEmpty(copyingColumnNames)) {
+        if (N.isEmpty(copyingColumnNames)) {
             Collection<Object> c = null;
 
             for (int rowIndex = 0; rowIndex < size; rowIndex++) {
@@ -8061,7 +8061,7 @@ public class RowDataSet implements DataSet, Cloneable {
 
                 c = mapperToUse.apply(disposableArray);
 
-                if (N.notNullOrEmpty(c)) {
+                if (N.notEmpty(c)) {
                     mappedColumn.addAll(c);
                 }
             }
@@ -8083,7 +8083,7 @@ public class RowDataSet implements DataSet, Cloneable {
 
                 c = mapperToUse.apply(disposableArray);
 
-                if (N.notNullOrEmpty(c)) {
+                if (N.notEmpty(c)) {
                     mappedColumn.addAll(c);
 
                     for (int i = 0; i < copyingColumnCount; i++) {
@@ -8169,7 +8169,7 @@ public class RowDataSet implements DataSet, Cloneable {
             }
         }
 
-        final Properties<String, Object> newProperties = copyProperties && N.notNullOrEmpty(_properties) ? _properties.copy() : null;
+        final Properties<String, Object> newProperties = copyProperties && N.notEmpty(_properties) ? _properties.copy() : null;
 
         return new RowDataSet(newColumnNameList, newColumnList, newProperties);
     }
@@ -8390,7 +8390,7 @@ public class RowDataSet implements DataSet, Cloneable {
      */
     private void join(final List<List<Object>> newColumnList, final DataSet right, final boolean isLeftJoin, int leftRowIndex, List<Integer> rightRowIndexList,
             final int[] rightColumnIndexes) {
-        if (N.notNullOrEmpty(rightRowIndexList)) {
+        if (N.notEmpty(rightRowIndexList)) {
             for (int rightRowIndex : rightRowIndexList) {
                 for (int i = 0, leftColumnLength = _columnNameList.size(); i < leftColumnLength; i++) {
                     newColumnList.get(i).add(_columnList.get(i).get(leftRowIndex));
@@ -8521,7 +8521,7 @@ public class RowDataSet implements DataSet, Cloneable {
      */
     private void join(final List<List<Object>> newColumnList, final DataSet right, final boolean isLeftJoin, final Class<?> newColumnClass,
             final int newColumnIndex, int leftRowIndex, List<Integer> rightRowIndexList) {
-        if (N.notNullOrEmpty(rightRowIndexList)) {
+        if (N.notEmpty(rightRowIndexList)) {
             for (int rightRowIndex : rightRowIndexList) {
                 for (int i = 0, leftColumnLength = _columnNameList.size(); i < leftColumnLength; i++) {
                     newColumnList.get(i).add(_columnList.get(i).get(leftRowIndex));
@@ -8544,7 +8544,7 @@ public class RowDataSet implements DataSet, Cloneable {
      * @param onColumnNames
      */
     private void checkJoinOnColumnNames(final Map<String, String> onColumnNames) {
-        if (N.isNullOrEmpty(onColumnNames)) {
+        if (N.isEmpty(onColumnNames)) {
             throw new IllegalArgumentException("The joining column names can't be null or empty");
         }
     }
@@ -8873,7 +8873,7 @@ public class RowDataSet implements DataSet, Cloneable {
     @SuppressWarnings("rawtypes")
     private void join(final List<List<Object>> newColumnList, final DataSet right, final boolean isLeftJoin, final Class<?> newColumnClass,
             final IntFunction<? extends Collection> collSupplier, final int newColumnIndex, int leftRowIndex, List<Integer> rightRowIndexList) {
-        if (N.notNullOrEmpty(rightRowIndexList)) {
+        if (N.notEmpty(rightRowIndexList)) {
             for (int i = 0, leftColumnLength = _columnNameList.size(); i < leftColumnLength; i++) {
                 newColumnList.get(i).add(_columnList.get(i).get(leftRowIndex));
             }
@@ -9021,7 +9021,7 @@ public class RowDataSet implements DataSet, Cloneable {
      */
     private void rightJoin(final List<List<Object>> newColumnList, final DataSet right, int rightRowIndex, final int[] rightColumnIndexes,
             final int[] leftColumnIndexes, List<Integer> leftRowIndexList) {
-        if (N.notNullOrEmpty(leftRowIndexList)) {
+        if (N.notEmpty(leftRowIndexList)) {
             for (int leftRowIndex : leftRowIndexList) {
                 for (int i = 0, leftColumnLength = leftColumnIndexes.length; i < leftColumnLength; i++) {
                     newColumnList.get(i).add(this.get(leftRowIndex, leftColumnIndexes[i]));
@@ -9229,7 +9229,7 @@ public class RowDataSet implements DataSet, Cloneable {
      */
     private void rightJoin(final List<List<Object>> newColumnList, final DataSet right, final Class<?> newColumnClass, final int newColumnIndex,
             int rightRowIndex, List<Integer> leftRowIndexList, final int[] leftColumnIndexes) {
-        if (N.notNullOrEmpty(leftRowIndexList)) {
+        if (N.notEmpty(leftRowIndexList)) {
             for (int leftRowIndex : leftRowIndexList) {
                 for (int i = 0, leftColumnLength = leftColumnIndexes.length; i < leftColumnLength; i++) {
                     newColumnList.get(i).add(this.get(leftRowIndex, leftColumnIndexes[i]));
@@ -9408,7 +9408,7 @@ public class RowDataSet implements DataSet, Cloneable {
     private void rightJoin(final List<List<Object>> newColumnList, final DataSet right, final Class<?> newColumnClass,
             final IntFunction<? extends Collection> collSupplier, final int newColumnIndex, final int[] leftColumnIndexes, List<Integer> leftRowIndexList,
             List<Integer> rightRowIndexList) {
-        if (N.notNullOrEmpty(leftRowIndexList)) {
+        if (N.notEmpty(leftRowIndexList)) {
             for (int leftRowIndex : leftRowIndexList) {
                 for (int i = 0, leftColumnLength = leftColumnIndexes.length; i < leftColumnLength; i++) {
                     newColumnList.get(i).add(this.get(leftRowIndex, leftColumnIndexes[i]));
@@ -9603,7 +9603,7 @@ public class RowDataSet implements DataSet, Cloneable {
      */
     private void fullJoin(final List<List<Object>> newColumnList, final DataSet right, int leftRowIndex, List<Integer> rightRowIndexList,
             final int[] rightColumnIndexes) {
-        if (N.notNullOrEmpty(rightRowIndexList)) {
+        if (N.notEmpty(rightRowIndexList)) {
             for (int rightRowIndex : rightRowIndexList) {
                 for (int i = 0, leftColumnLength = _columnNameList.size(); i < leftColumnLength; i++) {
                     newColumnList.get(i).add(_columnList.get(i).get(leftRowIndex));
@@ -9779,7 +9779,7 @@ public class RowDataSet implements DataSet, Cloneable {
      */
     private void fullJoin(final List<List<Object>> newColumnList, final DataSet right, final Class<?> newColumnClass, final int newColumnIndex,
             int leftRowIndex, List<Integer> rightRowIndexList) {
-        if (N.notNullOrEmpty(rightRowIndexList)) {
+        if (N.notEmpty(rightRowIndexList)) {
             for (int rightRowIndex : rightRowIndexList) {
                 for (int i = 0, leftColumnLength = _columnNameList.size(); i < leftColumnLength; i++) {
                     newColumnList.get(i).add(_columnList.get(i).get(leftRowIndex));
@@ -9962,7 +9962,7 @@ public class RowDataSet implements DataSet, Cloneable {
     @SuppressWarnings("rawtypes")
     private void fullJoin(final List<List<Object>> newColumnList, final DataSet right, final Class<?> newColumnClass,
             final IntFunction<? extends Collection> collSupplier, final int newColumnIndex, int leftRowIndex, List<Integer> rightRowIndexList) {
-        if (N.notNullOrEmpty(rightRowIndexList)) {
+        if (N.notEmpty(rightRowIndexList)) {
             for (int i = 0, leftColumnLength = _columnNameList.size(); i < leftColumnLength; i++) {
                 newColumnList.get(i).add(_columnList.get(i).get(leftRowIndex));
             }
@@ -10021,7 +10021,7 @@ public class RowDataSet implements DataSet, Cloneable {
         final List<String> commonColumnNameList = new ArrayList<>(this._columnNameList);
         commonColumnNameList.retainAll(other.columnNameList());
 
-        if (N.isNullOrEmpty(commonColumnNameList)) {
+        if (N.isEmpty(commonColumnNameList)) {
             throw new IllegalArgumentException("These two DataSets don't have common column names: " + this._columnNameList + ", " + other.columnNameList());
         }
 
@@ -10136,7 +10136,7 @@ public class RowDataSet implements DataSet, Cloneable {
         final List<String> commonColumnNameList = new ArrayList<>(this._columnNameList);
         commonColumnNameList.retainAll(other.columnNameList());
 
-        if (N.isNullOrEmpty(commonColumnNameList)) {
+        if (N.isEmpty(commonColumnNameList)) {
             throw new IllegalArgumentException("These two DataSets don't have common column names: " + this._columnNameList + ", " + other.columnNameList());
         }
 
@@ -10254,7 +10254,7 @@ public class RowDataSet implements DataSet, Cloneable {
         final List<String> commonColumnNameList = new ArrayList<>(this._columnNameList);
         commonColumnNameList.retainAll(other.columnNameList());
 
-        if (N.isNullOrEmpty(commonColumnNameList)) {
+        if (N.isEmpty(commonColumnNameList)) {
             throw new IllegalArgumentException("These two DataSets don't have common column names: " + this._columnNameList + ", " + other.columnNameList());
         }
 
@@ -10417,7 +10417,7 @@ public class RowDataSet implements DataSet, Cloneable {
             }
         }
 
-        if (N.notNullOrEmpty(from.properties())) {
+        if (N.notEmpty(from.properties())) {
             result.properties().putAll(from.properties());
         }
 
@@ -10443,7 +10443,7 @@ public class RowDataSet implements DataSet, Cloneable {
      */
     @Override
     public DataSet merge(final Collection<? extends DataSet> dss) {
-        if (N.isNullOrEmpty(dss)) {
+        if (N.isEmpty(dss)) {
             return N.newEmptyDataSet().merge(this);
         }
 
@@ -10462,7 +10462,7 @@ public class RowDataSet implements DataSet, Cloneable {
     @Override
     public DataSet cartesianProduct(DataSet b) {
         final Collection<String> tmp = N.intersection(this._columnNameList, b.columnNameList());
-        if (N.notNullOrEmpty(tmp)) {
+        if (N.notEmpty(tmp)) {
             throw new IllegalArgumentException(tmp + " are included in both DataSets: " + this._columnNameList + " : " + b.columnNameList());
         }
 
@@ -10673,7 +10673,7 @@ public class RowDataSet implements DataSet, Cloneable {
         N.checkFromToIndex(fromRowIndex, toRowIndex, size());
         DataSet ds = null;
 
-        if (N.isNullOrEmpty(columnNames)) {
+        if (N.isEmpty(columnNames)) {
             ds = N.newEmptyDataSet();
         } else {
             final int[] columnIndexes = checkColumnName(columnNames);
@@ -10716,7 +10716,7 @@ public class RowDataSet implements DataSet, Cloneable {
      */
     @Override
     public PaginatedDataSet paginate(final Collection<String> columnNames, final int pageSize) {
-        return new PaginatedRowDataSet(N.isNullOrEmpty(columnNames) ? _columnNameList : columnNames, pageSize);
+        return new PaginatedRowDataSet(N.isEmpty(columnNames) ? _columnNameList : columnNames, pageSize);
     }
 
     //    @SuppressWarnings("rawtypes")
@@ -11087,9 +11087,9 @@ public class RowDataSet implements DataSet, Cloneable {
             final int toRowIndex, final Map<String, String> prefixAndFieldNameMap, final IntFunction<? extends T> inputRowSupplier) {
         checkRowIndex(fromRowIndex, toRowIndex);
 
-        final Collection<String> columnNames = N.isNullOrEmpty(inputColumnNames) ? this._columnNameList : inputColumnNames;
+        final Collection<String> columnNames = N.isEmpty(inputColumnNames) ? this._columnNameList : inputColumnNames;
 
-        N.checkArgument(N.isNullOrEmpty(columnNames) || columnNames == this._columnNameList || this._columnNameList.containsAll(columnNames),
+        N.checkArgument(N.isEmpty(columnNames) || columnNames == this._columnNameList || this._columnNameList.containsAll(columnNames),
                 "Some select properties {} are not found in DataSet: {}", columnNames, this._columnNameList);
 
         final int[] columnIndexes = checkColumnName(columnNames);
@@ -11431,7 +11431,7 @@ public class RowDataSet implements DataSet, Cloneable {
      */
     @Override
     public <W extends Writer> W println(final W outputWriter, Collection<String> columnNames, int fromRowIndex, int toRowIndex) throws UncheckedIOException {
-        final int[] columnIndexes = N.isNullOrEmpty(columnNames) ? N.EMPTY_INT_ARRAY : checkColumnName(columnNames);
+        final int[] columnIndexes = N.isEmpty(columnNames) ? N.EMPTY_INT_ARRAY : checkColumnName(columnNames);
         checkRowIndex(fromRowIndex, toRowIndex);
         N.checkArgNotNull(outputWriter, "outputWriter");
 
@@ -11643,7 +11643,7 @@ public class RowDataSet implements DataSet, Cloneable {
      * @return
      */
     int[] checkColumnName(final String... columnNames) {
-        if (N.isNullOrEmpty(columnNames)) {
+        if (N.isEmpty(columnNames)) {
             throw new IllegalArgumentException("The specified columnNames is null or empty");
         }
 
@@ -11664,7 +11664,7 @@ public class RowDataSet implements DataSet, Cloneable {
      * @return
      */
     int[] checkColumnName(final Collection<String> columnNames) {
-        if (N.isNullOrEmpty(columnNames)) {
+        if (N.isEmpty(columnNames)) {
             throw new IllegalArgumentException("The specified columnNames is null or empty");
         }
 

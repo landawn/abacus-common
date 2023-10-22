@@ -153,7 +153,7 @@ public final class ParserUtil {
             // ignore
         }
 
-        if (jsonXmlConfig != null && N.notNullOrEmpty(jsonXmlConfig.ignoredFields())) {
+        if (jsonXmlConfig != null && N.notEmpty(jsonXmlConfig.ignoredFields())) {
             String fieldName = field.getName();
 
             for (String ignoreFieldName : jsonXmlConfig.ignoredFields()) {
@@ -433,22 +433,22 @@ public final class ParserUtil {
         String[] alias = null;
 
         if (field != null) {
-            if (field.isAnnotationPresent(JsonXmlField.class) && N.notNullOrEmpty(field.getAnnotation(JsonXmlField.class).alias())) {
+            if (field.isAnnotationPresent(JsonXmlField.class) && N.notEmpty(field.getAnnotation(JsonXmlField.class).alias())) {
                 alias = field.getAnnotation(JsonXmlField.class).alias();
             } else {
                 try {
                     if (field.isAnnotationPresent(com.alibaba.fastjson.annotation.JSONField.class)
-                            && N.notNullOrEmpty(field.getAnnotation(com.alibaba.fastjson.annotation.JSONField.class).alternateNames())) {
+                            && N.notEmpty(field.getAnnotation(com.alibaba.fastjson.annotation.JSONField.class).alternateNames())) {
                         alias = field.getAnnotation(com.alibaba.fastjson.annotation.JSONField.class).alternateNames();
                     }
                 } catch (Throwable e) {
                     // ignore
                 }
 
-                if (N.isNullOrEmpty(alias)) {
+                if (N.isEmpty(alias)) {
                     try {
                         if (field.isAnnotationPresent(com.alibaba.fastjson2.annotation.JSONField.class)
-                                && N.notNullOrEmpty(field.getAnnotation(com.alibaba.fastjson2.annotation.JSONField.class).alternateNames())) {
+                                && N.notEmpty(field.getAnnotation(com.alibaba.fastjson2.annotation.JSONField.class).alternateNames())) {
                             alias = field.getAnnotation(com.alibaba.fastjson2.annotation.JSONField.class).alternateNames();
                         }
                     } catch (Throwable e) {
@@ -456,10 +456,10 @@ public final class ParserUtil {
                     }
                 }
 
-                if (N.isNullOrEmpty(alias)) {
+                if (N.isEmpty(alias)) {
                     try {
                         if (field.isAnnotationPresent(com.fasterxml.jackson.annotation.JsonAlias.class)
-                                && N.notNullOrEmpty(field.getAnnotation(com.fasterxml.jackson.annotation.JsonAlias.class).value())) {
+                                && N.notEmpty(field.getAnnotation(com.fasterxml.jackson.annotation.JsonAlias.class).value())) {
                             alias = field.getAnnotation(com.fasterxml.jackson.annotation.JsonAlias.class).value();
                         }
                     } catch (Throwable e) {
@@ -469,7 +469,7 @@ public final class ParserUtil {
             }
         }
 
-        if (N.notNullOrEmpty(alias) && field != null) {
+        if (N.notEmpty(alias) && field != null) {
             alias = N.removeAllOccurrences(alias, field.getName());
         }
 
@@ -742,7 +742,7 @@ public final class ParserUtil {
 
                 final ImmutableList<String> aliases = propInfo.aliases;
 
-                if (N.notNullOrEmpty(aliases)) {
+                if (N.notEmpty(aliases)) {
                     for (String str : aliases) {
                         if (propInfoMap.containsKey(str)) {
                             throw new IllegalArgumentException("Can't set alias: " + str + " for property/field: " + propInfo.field + " because " + str
@@ -799,7 +799,7 @@ public final class ParserUtil {
 
             final List<PropInfo> tmpIdPropInfoList = N.filter(propInfos, it -> it.isMarkedToId);
 
-            if (N.isNullOrEmpty(tmpIdPropInfoList)) {
+            if (N.isEmpty(tmpIdPropInfoList)) {
                 tmpIdPropInfoList.addAll(N.filter(propInfos, it -> "id".equals(it.name) && idTypeSet.contains(it.clazz)));
             }
 
@@ -1132,7 +1132,8 @@ public final class ParserUtil {
 
             inputPropName = inputPropName.trim();
 
-            return inputPropName.equalsIgnoreCase(propNameByMethod) || inputPropName.replace(WD.UNDERSCORE, Strings.EMPTY_STRING).equalsIgnoreCase(propNameByMethod)
+            return inputPropName.equalsIgnoreCase(propNameByMethod)
+                    || inputPropName.replace(WD.UNDERSCORE, Strings.EMPTY_STRING).equalsIgnoreCase(propNameByMethod)
                     || inputPropName.equalsIgnoreCase(ClassUtil.getSimpleClassName(cls) + WD._PERIOD + propNameByMethod)
                     || (inputPropName.startsWith(GET) && inputPropName.substring(3).equalsIgnoreCase(propNameByMethod))
                     || (inputPropName.startsWith(SET) && inputPropName.substring(3).equalsIgnoreCase(propNameByMethod))
@@ -1184,7 +1185,7 @@ public final class ParserUtil {
                     }
                 }
 
-                propInfoQueue = N.isNullOrEmpty(propInfoQueue) ? N.<PropInfo> emptyList() : ImmutableList.wrap(propInfoQueue);
+                propInfoQueue = N.isEmpty(propInfoQueue) ? N.<PropInfo> emptyList() : ImmutableList.wrap(propInfoQueue);
 
                 propInfoQueueMap.put(propName, propInfoQueue);
             }
@@ -1325,7 +1326,7 @@ public final class ParserUtil {
             classes.add(cls);
 
             for (Class<?> e : classes) {
-                if (N.notNullOrEmpty(e.getAnnotations())) {
+                if (N.notEmpty(e.getAnnotations())) {
                     for (Annotation anno : e.getAnnotations()) {
                         annos.put(anno.annotationType(), anno);
                     }
@@ -1354,7 +1355,7 @@ public final class ParserUtil {
          */
         @Beta
         <T> T newInstance(final Object... args) {
-            if (N.isNullOrEmpty(args)) {
+            if (N.isEmpty(args)) {
                 return newInstance();
             }
 
@@ -2078,19 +2079,19 @@ public final class ParserUtil {
         private Map<Class<? extends Annotation>, Annotation> getAnnotations() {
             final Map<Class<? extends Annotation>, Annotation> annos = new HashMap<>();
 
-            if (field != null && N.notNullOrEmpty(field.getAnnotations())) {
+            if (field != null && N.notEmpty(field.getAnnotations())) {
                 for (Annotation anno : field.getAnnotations()) {
                     annos.put(anno.annotationType(), anno);
                 }
             }
 
-            if (getMethod != null && N.notNullOrEmpty(getMethod.getAnnotations())) {
+            if (getMethod != null && N.notEmpty(getMethod.getAnnotations())) {
                 for (Annotation anno : getMethod.getAnnotations()) {
                     annos.put(anno.annotationType(), anno);
                 }
             }
 
-            if (setMethod != null && N.notNullOrEmpty(setMethod.getAnnotations())) {
+            if (setMethod != null && N.notEmpty(setMethod.getAnnotations())) {
                 for (Annotation anno : setMethod.getAnnotations()) {
                     annos.put(anno.annotationType(), anno);
                 }

@@ -207,7 +207,7 @@ public final class PrimitiveIntArrayType extends AbstractPrimitiveArrayType<int[
      */
     @Override
     public <E> Collection<E> array2Collection(Collection<E> resultCollection, int[] x) {
-        if (N.isNullOrEmpty(x)) {
+        if (N.isEmpty(x)) {
             return resultCollection;
         }
 

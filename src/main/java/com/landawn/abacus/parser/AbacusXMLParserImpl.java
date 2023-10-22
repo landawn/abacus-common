@@ -284,7 +284,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
         final Class<?> cls = type.clazz();
         final BeanInfo beanInfo = ParserUtil.getBeanInfo(cls);
 
-        if (N.isNullOrEmpty(beanInfo.jsonXmlSerializablePropInfos)) {
+        if (N.isEmpty(beanInfo.jsonXmlSerializablePropInfos)) {
             throw new ParseException("No serializable property is found in class: " + ClassUtil.getCanonicalClassName(cls));
         }
 
@@ -1021,7 +1021,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                         // do nothing.
                     }
 
-                    if (targetClass == null && N.notNullOrEmpty(nodeClasses)) {
+                    if (targetClass == null && N.notEmpty(nodeClasses)) {
                         String nodeName = null;
 
                         if (xmlReader.getAttributeCount() > 0) {
@@ -1051,7 +1051,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                     Document doc = docBuilder.parse(new InputSource(br));
                     Node node = doc.getFirstChild();
 
-                    if (targetClass == null && N.notNullOrEmpty(nodeClasses)) {
+                    if (targetClass == null && N.notEmpty(nodeClasses)) {
                         String nodeName = XMLUtil.getAttribute(node, XMLConstants.NAME);
 
                         if (Strings.isEmpty(nodeName)) {
@@ -1115,7 +1115,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
             Type<?> propType, PropInfo propInfo, boolean checkedAttr, boolean isTagByPropertyName, boolean ignoreTypeInfo, boolean isFirstCall)
             throws XMLStreamException {
 
-        final boolean hasPropTypes = N.notNullOrEmpty(config.getPropTypes());
+        final boolean hasPropTypes = N.notEmpty(config.getPropTypes());
         String nodeName = null;
 
         if (checkedAttr) {
@@ -1313,7 +1313,8 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                                         || (propName != null && ignoredClassPropNames != null && ignoredClassPropNames.contains(propName))) {
                                     // ignore;
                                 } else {
-                                    propInfo.setPropValue(result, isNullValue ? null : (propValue == null ? propType.valueOf(Strings.EMPTY_STRING) : propValue));
+                                    propInfo.setPropValue(result,
+                                            isNullValue ? null : (propValue == null ? propType.valueOf(Strings.EMPTY_STRING) : propValue));
                                 }
 
                                 propName = null;
@@ -1332,7 +1333,8 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                                         || (propName != null && ignoredClassPropNames != null && ignoredClassPropNames.contains(propName))) {
                                     // ignore;
                                 } else {
-                                    propInfo.setPropValue(result, isNullValue ? null : (propValue == null ? propType.valueOf(Strings.EMPTY_STRING) : propValue));
+                                    propInfo.setPropValue(result,
+                                            isNullValue ? null : (propValue == null ? propType.valueOf(Strings.EMPTY_STRING) : propValue));
                                 }
 
                                 propName = null;
@@ -1880,7 +1882,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
             return null;
         }
 
-        final boolean hasPropTypes = N.notNullOrEmpty(config.getPropTypes());
+        final boolean hasPropTypes = N.notEmpty(config.getPropTypes());
 
         String nodeName = checkedAttr ? (isTagByPropertyName ? node.getNodeName() : XMLUtil.getAttribute(node, XMLConstants.NAME))
                 : XMLUtil.getAttribute(node, XMLConstants.NAME);
@@ -2775,7 +2777,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                     propInfo = beanInfo.getPropInfo(beanOrPropName);
                     ignoredClassPropNames = config.getIgnoredPropNames(beanClass);
 
-                    if (N.notNullOrEmpty(ignoredClassPropNames) && ignoredClassPropNames.contains(beanOrPropName)) {
+                    if (N.notEmpty(ignoredClassPropNames) && ignoredClassPropNames.contains(beanOrPropName)) {
                         inIgnorePropRefCount = 1;
 
                         break;
@@ -3105,7 +3107,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
         private void setConfig(XMLDeserializationConfig config) {
             this.config = config;
             propTypes = config.getPropTypes();
-            hasPropTypes = N.notNullOrEmpty(propTypes);
+            hasPropTypes = N.notEmpty(propTypes);
             ignoreUnmatchedProperty = config.ignoreUnmatchedProperty();
             mapIgnoredPropNames = config.getIgnoredPropNames(Map.class);
         }

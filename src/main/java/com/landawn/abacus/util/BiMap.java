@@ -696,7 +696,7 @@ public final class BiMap<K, V> implements Map<K, V> {
          * @return
          */
         public Builder<K, V> putAll(final Map<? extends K, ? extends V> m) {
-            if (N.notNullOrEmpty(m)) {
+            if (N.notEmpty(m)) {
                 biMap.putAll(m);
             }
 

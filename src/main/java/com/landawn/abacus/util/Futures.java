@@ -182,7 +182,7 @@ public final class Futures {
     public static <T, FC extends Collection<? extends Future<? extends T>>, R> ContinuableFuture<R> compose(final FC cfs,
             final Throwables.Function<? super FC, R, Exception> zipFunctionForGet,
             final Throwables.Function<? super Tuple3<FC, Long, TimeUnit>, R, Exception> zipFunctionTimeoutGet) {
-        N.checkArgument(N.notNullOrEmpty(cfs), "'cfs' can't be null or empty"); //NOSONAR
+        N.checkArgument(N.notEmpty(cfs), "'cfs' can't be null or empty"); //NOSONAR
         N.checkArgNotNull(zipFunctionForGet);
         N.checkArgNotNull(zipFunctionTimeoutGet);
 
@@ -460,7 +460,7 @@ public final class Futures {
      * @return
      */
     private static <T> ContinuableFuture<List<T>> allOf2(final Collection<? extends Future<? extends T>> cfs) {
-        N.checkArgument(N.notNullOrEmpty(cfs), "'cfs' can't be null or empty");
+        N.checkArgument(N.notEmpty(cfs), "'cfs' can't be null or empty");
 
         return ContinuableFuture.wrap(new Future<List<T>>() {
             @Override
@@ -570,7 +570,7 @@ public final class Futures {
      * @return
      */
     private static <T> ContinuableFuture<T> anyOf2(final Collection<? extends Future<? extends T>> cfs) {
-        N.checkArgument(N.notNullOrEmpty(cfs), "'cfs' can't be null or empty");
+        N.checkArgument(N.notEmpty(cfs), "'cfs' can't be null or empty");
 
         return ContinuableFuture.wrap(new Future<T>() {
             @Override

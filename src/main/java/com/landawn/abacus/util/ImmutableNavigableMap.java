@@ -242,7 +242,7 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * @return
      */
     public static <K, V> ImmutableNavigableMap<K, V> copyOf(final SortedMap<? extends K, ? extends V> sortedMap) {
-        if (N.isNullOrEmpty(sortedMap)) {
+        if (N.isEmpty(sortedMap)) {
             return empty();
         }
 

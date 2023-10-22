@@ -74,7 +74,7 @@ public final class If {
      * @param s
      * @return
      */
-    public static If isNullOrEmpty(final CharSequence s) {
+    public static If isEmpty(final CharSequence s) {
         return is(Strings.isEmpty(s));
     }
 
@@ -84,8 +84,8 @@ public final class If {
      * @param a
      * @return
      */
-    public static If isNullOrEmpty(final boolean[] a) {
-        return is(N.isNullOrEmpty(a));
+    public static If isEmpty(final boolean[] a) {
+        return is(N.isEmpty(a));
     }
 
     /**
@@ -94,8 +94,8 @@ public final class If {
      * @param a
      * @return
      */
-    public static If isNullOrEmpty(final char[] a) {
-        return is(N.isNullOrEmpty(a));
+    public static If isEmpty(final char[] a) {
+        return is(N.isEmpty(a));
     }
 
     /**
@@ -104,8 +104,8 @@ public final class If {
      * @param a
      * @return
      */
-    public static If isNullOrEmpty(final byte[] a) {
-        return is(N.isNullOrEmpty(a));
+    public static If isEmpty(final byte[] a) {
+        return is(N.isEmpty(a));
     }
 
     /**
@@ -114,8 +114,8 @@ public final class If {
      * @param a
      * @return
      */
-    public static If isNullOrEmpty(final short[] a) {
-        return is(N.isNullOrEmpty(a));
+    public static If isEmpty(final short[] a) {
+        return is(N.isEmpty(a));
     }
 
     /**
@@ -124,8 +124,8 @@ public final class If {
      * @param a
      * @return
      */
-    public static If isNullOrEmpty(final int[] a) {
-        return is(N.isNullOrEmpty(a));
+    public static If isEmpty(final int[] a) {
+        return is(N.isEmpty(a));
     }
 
     /**
@@ -134,8 +134,8 @@ public final class If {
      * @param a
      * @return
      */
-    public static If isNullOrEmpty(final long[] a) {
-        return is(N.isNullOrEmpty(a));
+    public static If isEmpty(final long[] a) {
+        return is(N.isEmpty(a));
     }
 
     /**
@@ -144,8 +144,8 @@ public final class If {
      * @param a
      * @return
      */
-    public static If isNullOrEmpty(final float[] a) {
-        return is(N.isNullOrEmpty(a));
+    public static If isEmpty(final float[] a) {
+        return is(N.isEmpty(a));
     }
 
     /**
@@ -154,8 +154,8 @@ public final class If {
      * @param a
      * @return
      */
-    public static If isNullOrEmpty(final double[] a) {
-        return is(N.isNullOrEmpty(a));
+    public static If isEmpty(final double[] a) {
+        return is(N.isEmpty(a));
     }
 
     /**
@@ -164,8 +164,8 @@ public final class If {
      * @param a
      * @return
      */
-    public static If isNullOrEmpty(final Object[] a) {
-        return is(N.isNullOrEmpty(a));
+    public static If isEmpty(final Object[] a) {
+        return is(N.isEmpty(a));
     }
 
     /**
@@ -174,8 +174,8 @@ public final class If {
      * @param c
      * @return
      */
-    public static If isNullOrEmpty(final Collection<?> c) {
-        return is(N.isNullOrEmpty(c));
+    public static If isEmpty(final Collection<?> c) {
+        return is(N.isEmpty(c));
     }
 
     /**
@@ -184,8 +184,8 @@ public final class If {
      * @param m
      * @return
      */
-    public static If isNullOrEmpty(final Map<?, ?> m) {
-        return is(N.isNullOrEmpty(m));
+    public static If isEmpty(final Map<?, ?> m) {
+        return is(N.isEmpty(m));
     }
 
     /**
@@ -195,8 +195,8 @@ public final class If {
      * @return
      */
     @SuppressWarnings("rawtypes")
-    public static If isNullOrEmpty(final PrimitiveList list) {
-        return is(N.isNullOrEmpty(list));
+    public static If isEmpty(final PrimitiveList list) {
+        return is(N.isEmpty(list));
     }
 
     /**
@@ -205,8 +205,8 @@ public final class If {
      * @param s
      * @return
      */
-    public static If isNullOrEmpty(final Multiset<?> s) {
-        return is(N.isNullOrEmpty(s));
+    public static If isEmpty(final Multiset<?> s) {
+        return is(N.isEmpty(s));
     }
 
     /**
@@ -215,8 +215,8 @@ public final class If {
      * @param s
      * @return
      */
-    public static If isNullOrEmpty(final LongMultiset<?> s) {
-        return is(N.isNullOrEmpty(s));
+    public static If isEmpty(final LongMultiset<?> s) {
+        return is(N.isEmpty(s));
     }
 
     /**
@@ -225,8 +225,8 @@ public final class If {
      * @param m
      * @return
      */
-    public static If isNullOrEmpty(final Multimap<?, ?, ?> m) {
-        return is(N.isNullOrEmpty(m));
+    public static If isEmpty(final Multimap<?, ?, ?> m) {
+        return is(N.isEmpty(m));
     }
 
     /**
@@ -246,7 +246,7 @@ public final class If {
      * @param s
      * @return
      */
-    public static If notNullOrEmpty(final CharSequence s) {
+    public static If notEmpty(final CharSequence s) {
         return is(Strings.isNotEmpty(s));
     }
 
@@ -256,8 +256,8 @@ public final class If {
      * @param a
      * @return
      */
-    public static If notNullOrEmpty(final boolean[] a) {
-        return is(N.notNullOrEmpty(a));
+    public static If notEmpty(final boolean[] a) {
+        return is(N.notEmpty(a));
     }
 
     /**
@@ -266,8 +266,8 @@ public final class If {
      * @param a
      * @return
      */
-    public static If notNullOrEmpty(final char[] a) {
-        return is(N.notNullOrEmpty(a));
+    public static If notEmpty(final char[] a) {
+        return is(N.notEmpty(a));
     }
 
     /**
@@ -276,8 +276,8 @@ public final class If {
      * @param a
      * @return
      */
-    public static If notNullOrEmpty(final byte[] a) {
-        return is(N.notNullOrEmpty(a));
+    public static If notEmpty(final byte[] a) {
+        return is(N.notEmpty(a));
     }
 
     /**
@@ -286,8 +286,8 @@ public final class If {
      * @param a
      * @return
      */
-    public static If notNullOrEmpty(final short[] a) {
-        return is(N.notNullOrEmpty(a));
+    public static If notEmpty(final short[] a) {
+        return is(N.notEmpty(a));
     }
 
     /**
@@ -296,8 +296,8 @@ public final class If {
      * @param a
      * @return
      */
-    public static If notNullOrEmpty(final int[] a) {
-        return is(N.notNullOrEmpty(a));
+    public static If notEmpty(final int[] a) {
+        return is(N.notEmpty(a));
     }
 
     /**
@@ -306,8 +306,8 @@ public final class If {
      * @param a
      * @return
      */
-    public static If notNullOrEmpty(final long[] a) {
-        return is(N.notNullOrEmpty(a));
+    public static If notEmpty(final long[] a) {
+        return is(N.notEmpty(a));
     }
 
     /**
@@ -316,8 +316,8 @@ public final class If {
      * @param a
      * @return
      */
-    public static If notNullOrEmpty(final float[] a) {
-        return is(N.notNullOrEmpty(a));
+    public static If notEmpty(final float[] a) {
+        return is(N.notEmpty(a));
     }
 
     /**
@@ -326,8 +326,8 @@ public final class If {
      * @param a
      * @return
      */
-    public static If notNullOrEmpty(final double[] a) {
-        return is(N.notNullOrEmpty(a));
+    public static If notEmpty(final double[] a) {
+        return is(N.notEmpty(a));
     }
 
     /**
@@ -336,8 +336,8 @@ public final class If {
      * @param a
      * @return
      */
-    public static If notNullOrEmpty(final Object[] a) {
-        return is(N.notNullOrEmpty(a));
+    public static If notEmpty(final Object[] a) {
+        return is(N.notEmpty(a));
     }
 
     /**
@@ -346,8 +346,8 @@ public final class If {
      * @param c
      * @return
      */
-    public static If notNullOrEmpty(final Collection<?> c) {
-        return is(N.notNullOrEmpty(c));
+    public static If notEmpty(final Collection<?> c) {
+        return is(N.notEmpty(c));
     }
 
     /**
@@ -356,8 +356,8 @@ public final class If {
      * @param m
      * @return
      */
-    public static If notNullOrEmpty(final Map<?, ?> m) {
-        return is(N.notNullOrEmpty(m));
+    public static If notEmpty(final Map<?, ?> m) {
+        return is(N.notEmpty(m));
     }
 
     /**
@@ -367,8 +367,8 @@ public final class If {
      * @return
      */
     @SuppressWarnings("rawtypes")
-    public static If notNullOrEmpty(final PrimitiveList list) {
-        return is(N.notNullOrEmpty(list));
+    public static If notEmpty(final PrimitiveList list) {
+        return is(N.notEmpty(list));
     }
 
     /**
@@ -377,8 +377,8 @@ public final class If {
      * @param s
      * @return
      */
-    public static If notNullOrEmpty(final Multiset<?> s) {
-        return is(N.notNullOrEmpty(s));
+    public static If notEmpty(final Multiset<?> s) {
+        return is(N.notEmpty(s));
     }
 
     /**
@@ -387,8 +387,8 @@ public final class If {
      * @param s
      * @return
      */
-    public static If notNullOrEmpty(final LongMultiset<?> s) {
-        return is(N.notNullOrEmpty(s));
+    public static If notEmpty(final LongMultiset<?> s) {
+        return is(N.notEmpty(s));
     }
 
     /**
@@ -397,8 +397,8 @@ public final class If {
      * @param m
      * @return
      */
-    public static If notNullOrEmpty(final Multimap<?, ?, ?> m) {
-        return is(N.notNullOrEmpty(m));
+    public static If notEmpty(final Multimap<?, ?, ?> m) {
+        return is(N.notEmpty(m));
     }
 
     /**
@@ -632,69 +632,69 @@ public final class If {
     //            return index >= 0 ? TRUE : FALSE;
     //        }
     //
-    //        public static IF isNullOrEmpty(final CharSequence s) {
-    //            return is(N.isNullOrEmpty(s));
+    //        public static IF isEmpty(final CharSequence s) {
+    //            return is(N.isEmpty(s));
     //        }
     //
-    //        public static IF isNullOrEmpty(final boolean[] a) {
-    //            return is(N.isNullOrEmpty(a));
+    //        public static IF isEmpty(final boolean[] a) {
+    //            return is(N.isEmpty(a));
     //        }
     //
-    //        public static IF isNullOrEmpty(final char[] a) {
-    //            return is(N.isNullOrEmpty(a));
+    //        public static IF isEmpty(final char[] a) {
+    //            return is(N.isEmpty(a));
     //        }
     //
-    //        public static IF isNullOrEmpty(final byte[] a) {
-    //            return is(N.isNullOrEmpty(a));
+    //        public static IF isEmpty(final byte[] a) {
+    //            return is(N.isEmpty(a));
     //        }
     //
-    //        public static IF isNullOrEmpty(final short[] a) {
-    //            return is(N.isNullOrEmpty(a));
+    //        public static IF isEmpty(final short[] a) {
+    //            return is(N.isEmpty(a));
     //        }
     //
-    //        public static IF isNullOrEmpty(final int[] a) {
-    //            return is(N.isNullOrEmpty(a));
+    //        public static IF isEmpty(final int[] a) {
+    //            return is(N.isEmpty(a));
     //        }
     //
-    //        public static IF isNullOrEmpty(final long[] a) {
-    //            return is(N.isNullOrEmpty(a));
+    //        public static IF isEmpty(final long[] a) {
+    //            return is(N.isEmpty(a));
     //        }
     //
-    //        public static IF isNullOrEmpty(final float[] a) {
-    //            return is(N.isNullOrEmpty(a));
+    //        public static IF isEmpty(final float[] a) {
+    //            return is(N.isEmpty(a));
     //        }
     //
-    //        public static IF isNullOrEmpty(final double[] a) {
-    //            return is(N.isNullOrEmpty(a));
+    //        public static IF isEmpty(final double[] a) {
+    //            return is(N.isEmpty(a));
     //        }
     //
-    //        public static IF isNullOrEmpty(final Object[] a) {
-    //            return is(N.isNullOrEmpty(a));
+    //        public static IF isEmpty(final Object[] a) {
+    //            return is(N.isEmpty(a));
     //        }
     //
-    //        public static IF isNullOrEmpty(final Collection<?> c) {
-    //            return is(N.isNullOrEmpty(c));
+    //        public static IF isEmpty(final Collection<?> c) {
+    //            return is(N.isEmpty(c));
     //        }
     //
-    //        public static IF isNullOrEmpty(final Map<?, ?> m) {
-    //            return is(N.isNullOrEmpty(m));
+    //        public static IF isEmpty(final Map<?, ?> m) {
+    //            return is(N.isEmpty(m));
     //        }
     //
     //        @SuppressWarnings("rawtypes")
-    //        public static IF isNullOrEmpty(final PrimitiveList list) {
-    //            return is(N.isNullOrEmpty(list));
+    //        public static IF isEmpty(final PrimitiveList list) {
+    //            return is(N.isEmpty(list));
     //        }
     //
-    //        public static IF isNullOrEmpty(final Multiset<?> s) {
-    //            return is(N.isNullOrEmpty(s));
+    //        public static IF isEmpty(final Multiset<?> s) {
+    //            return is(N.isEmpty(s));
     //        }
     //
-    //        public static IF isNullOrEmpty(final LongMultiset<?> s) {
-    //            return is(N.isNullOrEmpty(s));
+    //        public static IF isEmpty(final LongMultiset<?> s) {
+    //            return is(N.isEmpty(s));
     //        }
     //
-    //        public static IF isNullOrEmpty(final Multimap<?, ?, ?> m) {
-    //            return is(N.isNullOrEmpty(m));
+    //        public static IF isEmpty(final Multimap<?, ?, ?> m) {
+    //            return is(N.isEmpty(m));
     //        }
     //
     //        // DON'T change 'OrEmptyOrBlank' to 'OrBlank' because of the occurring order in the auto-completed context menu.
@@ -702,69 +702,69 @@ public final class If {
     //            return is(N.isBlank(s));
     //        }
     //
-    //        public static IF notNullOrEmpty(final CharSequence s) {
-    //            return is(N.notNullOrEmpty(s));
+    //        public static IF notEmpty(final CharSequence s) {
+    //            return is(N.notEmpty(s));
     //        }
     //
-    //        public static IF notNullOrEmpty(final boolean[] a) {
-    //            return is(N.notNullOrEmpty(a));
+    //        public static IF notEmpty(final boolean[] a) {
+    //            return is(N.notEmpty(a));
     //        }
     //
-    //        public static IF notNullOrEmpty(final char[] a) {
-    //            return is(N.notNullOrEmpty(a));
+    //        public static IF notEmpty(final char[] a) {
+    //            return is(N.notEmpty(a));
     //        }
     //
-    //        public static IF notNullOrEmpty(final byte[] a) {
-    //            return is(N.notNullOrEmpty(a));
+    //        public static IF notEmpty(final byte[] a) {
+    //            return is(N.notEmpty(a));
     //        }
     //
-    //        public static IF notNullOrEmpty(final short[] a) {
-    //            return is(N.notNullOrEmpty(a));
+    //        public static IF notEmpty(final short[] a) {
+    //            return is(N.notEmpty(a));
     //        }
     //
-    //        public static IF notNullOrEmpty(final int[] a) {
-    //            return is(N.notNullOrEmpty(a));
+    //        public static IF notEmpty(final int[] a) {
+    //            return is(N.notEmpty(a));
     //        }
     //
-    //        public static IF notNullOrEmpty(final long[] a) {
-    //            return is(N.notNullOrEmpty(a));
+    //        public static IF notEmpty(final long[] a) {
+    //            return is(N.notEmpty(a));
     //        }
     //
-    //        public static IF notNullOrEmpty(final float[] a) {
-    //            return is(N.notNullOrEmpty(a));
+    //        public static IF notEmpty(final float[] a) {
+    //            return is(N.notEmpty(a));
     //        }
     //
-    //        public static IF notNullOrEmpty(final double[] a) {
-    //            return is(N.notNullOrEmpty(a));
+    //        public static IF notEmpty(final double[] a) {
+    //            return is(N.notEmpty(a));
     //        }
     //
-    //        public static IF notNullOrEmpty(final Object[] a) {
-    //            return is(N.notNullOrEmpty(a));
+    //        public static IF notEmpty(final Object[] a) {
+    //            return is(N.notEmpty(a));
     //        }
     //
-    //        public static IF notNullOrEmpty(final Collection<?> c) {
-    //            return is(N.notNullOrEmpty(c));
+    //        public static IF notEmpty(final Collection<?> c) {
+    //            return is(N.notEmpty(c));
     //        }
     //
-    //        public static IF notNullOrEmpty(final Map<?, ?> m) {
-    //            return is(N.notNullOrEmpty(m));
+    //        public static IF notEmpty(final Map<?, ?> m) {
+    //            return is(N.notEmpty(m));
     //        }
     //
     //        @SuppressWarnings("rawtypes")
-    //        public static IF notNullOrEmpty(final PrimitiveList list) {
-    //            return is(N.notNullOrEmpty(list));
+    //        public static IF notEmpty(final PrimitiveList list) {
+    //            return is(N.notEmpty(list));
     //        }
     //
-    //        public static IF notNullOrEmpty(final Multiset<?> s) {
-    //            return is(N.notNullOrEmpty(s));
+    //        public static IF notEmpty(final Multiset<?> s) {
+    //            return is(N.notEmpty(s));
     //        }
     //
-    //        public static IF notNullOrEmpty(final LongMultiset<?> s) {
-    //            return is(N.notNullOrEmpty(s));
+    //        public static IF notEmpty(final LongMultiset<?> s) {
+    //            return is(N.notEmpty(s));
     //        }
     //
-    //        public static IF notNullOrEmpty(final Multimap<?, ?, ?> m) {
-    //            return is(N.notNullOrEmpty(m));
+    //        public static IF notEmpty(final Multimap<?, ?, ?> m) {
+    //            return is(N.notEmpty(m));
     //        }
     //
     //        // DON'T change 'OrEmptyOrBlank' to 'OrBlank' because of the occurring order in the auto-completed context menu.

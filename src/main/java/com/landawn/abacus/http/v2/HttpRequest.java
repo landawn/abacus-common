@@ -320,7 +320,7 @@ public final class HttpRequest {
      * @return
      */
     public HttpRequest headers(Map<String, ?> headers) {
-        if (N.notNullOrEmpty(headers)) {
+        if (N.notEmpty(headers)) {
             for (Map.Entry<String, ?> entry : headers.entrySet()) {
                 header(entry.getKey(), entry.getValue());
             }

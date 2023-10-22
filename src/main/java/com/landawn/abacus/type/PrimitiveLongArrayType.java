@@ -208,7 +208,7 @@ public final class PrimitiveLongArrayType extends AbstractPrimitiveArrayType<lon
      */
     @Override
     public <E> Collection<E> array2Collection(Collection<E> resultCollection, long[] x) {
-        if (N.isNullOrEmpty(x)) {
+        if (N.isEmpty(x)) {
             return resultCollection;
         }
 

@@ -319,7 +319,7 @@ public final class OkHttpRequest {
      * @see Request.Builder#header(String, String)
      */
     public OkHttpRequest headers(final Map<String, ?> headers) {
-        if (N.notNullOrEmpty(headers)) {
+        if (N.notEmpty(headers)) {
             for (Map.Entry<String, ?> entry : headers.entrySet()) {
                 builder.header(entry.getKey(), HttpHeaders.valueOf(entry.getValue()));
             }
@@ -412,7 +412,7 @@ public final class OkHttpRequest {
      * @see {@code FormBody.Builder}
      */
     public OkHttpRequest formBody(final Map<?, ?> formBodyByMap) {
-        if (N.isNullOrEmpty(formBodyByMap)) {
+        if (N.isEmpty(formBodyByMap)) {
             this.body = Util.EMPTY_REQUEST;
             return this;
         }

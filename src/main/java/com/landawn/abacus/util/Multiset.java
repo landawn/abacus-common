@@ -128,7 +128,7 @@ public final class Multiset<T> implements Iterable<T> {
      */
     @SafeVarargs
     public static <T> Multiset<T> of(final T... a) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return new Multiset<>();
         }
 
@@ -190,7 +190,7 @@ public final class Multiset<T> implements Iterable<T> {
      * @return
      */
     public static <T> Multiset<T> create(final Map<? extends T, Integer> m) {
-        if (N.isNullOrEmpty(m)) {
+        if (N.isEmpty(m)) {
             return new Multiset<>();
         }
 
@@ -212,7 +212,7 @@ public final class Multiset<T> implements Iterable<T> {
      */
     @Beta
     public static <T, V> Multiset<T> create(final Map<? extends T, ? extends V> m, final ToIntFunction<? super V> valueMapper) {
-        if (N.isNullOrEmpty(m)) {
+        if (N.isEmpty(m)) {
             return new Multiset<>();
         }
 
@@ -340,7 +340,7 @@ public final class Multiset<T> implements Iterable<T> {
     public Multiset<T> setAll(final Collection<? extends T> c, final int occurrences) {
         checkOccurrences(occurrences);
 
-        if (N.notNullOrEmpty(c)) {
+        if (N.notEmpty(c)) {
             for (T e : c) {
                 set(e, occurrences);
             }
@@ -357,7 +357,7 @@ public final class Multiset<T> implements Iterable<T> {
      * @throws IllegalArgumentException if the occurrences of element is less than 0.
      */
     public Multiset<T> setAll(final Map<? extends T, Integer> m) throws IllegalArgumentException {
-        if (N.notNullOrEmpty(m)) {
+        if (N.notEmpty(m)) {
             for (Map.Entry<? extends T, Integer> entry : m.entrySet()) {
                 checkOccurrences(entry.getValue());
             }
@@ -378,7 +378,7 @@ public final class Multiset<T> implements Iterable<T> {
      * @throws IllegalArgumentException if the occurrences of element is less than 0.
      */
     public Multiset<T> setAll(final Multiset<? extends T> multiset) throws IllegalArgumentException {
-        if (N.notNullOrEmpty(multiset)) {
+        if (N.notEmpty(multiset)) {
             for (Map.Entry<? extends T, MutableInt> entry : multiset.valueMap.entrySet()) {
                 set(entry.getKey(), entry.getValue().value());
             }
@@ -697,7 +697,7 @@ public final class Multiset<T> implements Iterable<T> {
      * @throws IllegalArgumentException if the occurrences of element after this operation is bigger than Integer.MAX_VALUE.
      */
     public boolean addAll(final Collection<? extends T> c) throws IllegalArgumentException {
-        if (N.isNullOrEmpty(c)) {
+        if (N.isEmpty(c)) {
             return false;
         }
 
@@ -715,7 +715,7 @@ public final class Multiset<T> implements Iterable<T> {
     public boolean addAll(final Collection<? extends T> c, final int occurrencesToAdd) throws IllegalArgumentException {
         checkOccurrences(occurrencesToAdd);
 
-        if (N.isNullOrEmpty(c) || occurrencesToAdd == 0) {
+        if (N.isEmpty(c) || occurrencesToAdd == 0) {
             return false;
         }
 
@@ -734,7 +734,7 @@ public final class Multiset<T> implements Iterable<T> {
      * @throws IllegalArgumentException if the occurrences of element after this operation is bigger than Integer.MAX_VALUE.
      */
     public boolean addAll(final Map<? extends T, Integer> m) throws IllegalArgumentException {
-        if (N.isNullOrEmpty(m)) {
+        if (N.isEmpty(m)) {
             return false;
         }
 
@@ -763,7 +763,7 @@ public final class Multiset<T> implements Iterable<T> {
      * @throws IllegalArgumentException if the occurrences of element is less than 0.
      */
     public boolean addAll(final Multiset<? extends T> multiset) throws IllegalArgumentException {
-        if (N.isNullOrEmpty(multiset)) {
+        if (N.isEmpty(multiset)) {
             return false;
         }
 
@@ -931,7 +931,7 @@ public final class Multiset<T> implements Iterable<T> {
             }
         }
 
-        if (N.isNullOrEmpty(removingKeys)) {
+        if (N.isEmpty(removingKeys)) {
             return false;
         }
 
@@ -961,7 +961,7 @@ public final class Multiset<T> implements Iterable<T> {
             }
         }
 
-        if (N.isNullOrEmpty(removingKeys)) {
+        if (N.isEmpty(removingKeys)) {
             return false;
         }
 
@@ -977,7 +977,7 @@ public final class Multiset<T> implements Iterable<T> {
      * @return
      */
     public boolean removeAllOccurrencesForEach(final Collection<?> c) {
-        if (N.isNullOrEmpty(c)) {
+        if (N.isEmpty(c)) {
             return false;
         }
 
@@ -1014,7 +1014,7 @@ public final class Multiset<T> implements Iterable<T> {
             }
         }
 
-        if (N.isNullOrEmpty(removingKeys)) {
+        if (N.isEmpty(removingKeys)) {
             return false;
         }
 
@@ -1047,7 +1047,7 @@ public final class Multiset<T> implements Iterable<T> {
             }
         }
 
-        if (N.isNullOrEmpty(removingKeys)) {
+        if (N.isEmpty(removingKeys)) {
             return false;
         }
 
@@ -1078,7 +1078,7 @@ public final class Multiset<T> implements Iterable<T> {
     public boolean removeAll(final Collection<?> c, final int occurrencesToRemove) {
         checkOccurrences(occurrencesToRemove);
 
-        if (N.isNullOrEmpty(c) || occurrencesToRemove == 0) {
+        if (N.isEmpty(c) || occurrencesToRemove == 0) {
             return false;
         }
 
@@ -1102,7 +1102,7 @@ public final class Multiset<T> implements Iterable<T> {
      * @return
      */
     public boolean removeAll(final Map<?, Integer> m) {
-        if (N.isNullOrEmpty(m)) {
+        if (N.isEmpty(m)) {
             return false;
         }
 
@@ -1131,7 +1131,7 @@ public final class Multiset<T> implements Iterable<T> {
      * @throws IllegalArgumentException the illegal argument exception
      */
     public boolean removeAll(final Multiset<?> multiset) throws IllegalArgumentException {
-        if (N.isNullOrEmpty(multiset)) {
+        if (N.isEmpty(multiset)) {
             return false;
         }
 
@@ -1253,7 +1253,7 @@ public final class Multiset<T> implements Iterable<T> {
             }
         }
 
-        if (N.notNullOrEmpty(keyToRemove)) {
+        if (N.notEmpty(keyToRemove)) {
             for (T key : keyToRemove) {
                 valueMap.remove(key);
             }
@@ -1271,7 +1271,7 @@ public final class Multiset<T> implements Iterable<T> {
      * @see Collection#retainAll(Collection)
      */
     public boolean retainAll(final Collection<?> c) {
-        if (N.isNullOrEmpty(c)) {
+        if (N.isEmpty(c)) {
             boolean result = size() > 0;
             clear();
             return result;
@@ -1289,7 +1289,7 @@ public final class Multiset<T> implements Iterable<T> {
             }
         }
 
-        return N.isNullOrEmpty(others) ? false : removeAll(others, Integer.MAX_VALUE);
+        return N.isEmpty(others) ? false : removeAll(others, Integer.MAX_VALUE);
     }
 
     /**
@@ -1482,7 +1482,7 @@ public final class Multiset<T> implements Iterable<T> {
      * @return
      */
     Map<T, Integer> toMapSortedBy(final Comparator<Map.Entry<T, MutableInt>> cmp) {
-        if (N.isNullOrEmpty(valueMap)) {
+        if (N.isEmpty(valueMap)) {
             return new LinkedHashMap<>();
         }
 

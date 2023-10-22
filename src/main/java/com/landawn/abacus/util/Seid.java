@@ -61,7 +61,7 @@ public class Seid implements EntityId {
     @Deprecated
     @Internal
     public Seid(String entityName) {
-        //    if (N.isNullOrEmpty(entityName)) {
+        //    if (N.isEmpty(entityName)) {
         //        throw new IllegalArgumentException("Entity name can't be null or empty");
         //    }
 
@@ -161,7 +161,7 @@ public class Seid implements EntityId {
     public static Seid create(Object entity) {
         final List<String> idPropNames = Seid.getIdFieldNames(entity.getClass());
 
-        if (N.isNullOrEmpty(idPropNames)) {
+        if (N.isEmpty(idPropNames)) {
             throw new IllegalArgumentException("No id property defined in class: " + ClassUtil.getCanonicalClassName(entity.getClass()));
         }
 
@@ -175,7 +175,7 @@ public class Seid implements EntityId {
      * @return
      */
     public static Seid create(Object entity, Collection<String> idPropNames) {
-        if (N.isNullOrEmpty(idPropNames)) {
+        if (N.isEmpty(idPropNames)) {
             throw new IllegalArgumentException("Id property names can't be null or empty");
         }
 
@@ -294,7 +294,7 @@ public class Seid implements EntityId {
     @Deprecated
     @Internal
     public void set(Map<String, Object> nameValues) {
-        if (N.isNullOrEmpty(nameValues)) {
+        if (N.isEmpty(nameValues)) {
             return;
         }
         if (nameValues.size() == 1) {
@@ -568,6 +568,6 @@ public class Seid implements EntityId {
     static List<String> getIdFieldNames(final Class<?> targetClass) {
         final ImmutableList<String> idPropNames = ParserUtil.getBeanInfo(targetClass).idPropNameList;
 
-        return N.isNullOrEmpty(idPropNames) ? N.emptyList() : idPropNames;
+        return N.isEmpty(idPropNames) ? N.emptyList() : idPropNames;
     }
 }

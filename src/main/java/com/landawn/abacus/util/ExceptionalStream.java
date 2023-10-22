@@ -259,7 +259,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @see Stream.of(T[]).checked(SomeCheckedException.class)...
      */
     public static <T, E extends Exception> ExceptionalStream<T, E> of(final T... a) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return empty();
         }
 
@@ -306,7 +306,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     public static <T, E extends Exception> ExceptionalStream<T, E> of(final Collection<? extends T> c) {
-        if (N.isNullOrEmpty(c)) {
+        if (N.isEmpty(c)) {
             return empty();
         }
 
@@ -395,7 +395,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     public static <K, V, E extends Exception> ExceptionalStream<Map.Entry<K, V>, E> of(final Map<K, V> m) {
-        if (N.isNullOrEmpty(m)) {
+        if (N.isEmpty(m)) {
             return empty();
         }
 
@@ -515,7 +515,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     public static <E extends Exception> ExceptionalStream<Boolean, E> of(final boolean[] a) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return empty();
         }
 
@@ -558,7 +558,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     public static <E extends Exception> ExceptionalStream<Character, E> of(final char[] a) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return empty();
         }
 
@@ -601,7 +601,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     public static <E extends Exception> ExceptionalStream<Byte, E> of(final byte[] a) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return empty();
         }
 
@@ -644,7 +644,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     public static <E extends Exception> ExceptionalStream<Short, E> of(final short[] a) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return empty();
         }
 
@@ -686,7 +686,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     public static <E extends Exception> ExceptionalStream<Integer, E> of(final int[] a) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return empty();
         }
 
@@ -728,7 +728,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     public static <E extends Exception> ExceptionalStream<Long, E> of(final long[] a) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return empty();
         }
 
@@ -771,7 +771,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     public static <E extends Exception> ExceptionalStream<Float, E> of(final float[] a) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return empty();
         }
 
@@ -813,7 +813,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     public static <E extends Exception> ExceptionalStream<Double, E> of(final double[] a) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return empty();
         }
 
@@ -881,7 +881,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     public static <K, E extends Exception> ExceptionalStream<K, E> ofKeys(final Map<K, ?> map) {
-        if (N.isNullOrEmpty(map)) {
+        if (N.isEmpty(map)) {
             return empty();
         }
 
@@ -899,7 +899,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     public static <K, V, E extends Exception> ExceptionalStream<K, E> ofKeys(final Map<K, V> map, final Throwables.Predicate<? super V, E> valueFilter) {
-        if (N.isNullOrEmpty(map)) {
+        if (N.isEmpty(map)) {
             return empty();
         }
 
@@ -918,7 +918,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     public static <K, V, E extends Exception> ExceptionalStream<K, E> ofKeys(final Map<K, V> map,
             final Throwables.BiPredicate<? super K, ? super V, E> filter) {
-        if (N.isNullOrEmpty(map)) {
+        if (N.isEmpty(map)) {
             return empty();
         }
 
@@ -934,7 +934,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     public static <V, E extends Exception> ExceptionalStream<V, E> ofValues(final Map<?, V> map) {
-        if (N.isNullOrEmpty(map)) {
+        if (N.isEmpty(map)) {
             return empty();
         }
 
@@ -952,7 +952,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     public static <K, V, E extends Exception> ExceptionalStream<V, E> ofValues(final Map<K, V> map, final Throwables.Predicate<? super K, E> keyFilter) {
-        if (N.isNullOrEmpty(map)) {
+        if (N.isEmpty(map)) {
             return empty();
         }
 
@@ -971,7 +971,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     public static <K, V, E extends Exception> ExceptionalStream<V, E> ofValues(final Map<K, V> map,
             final Throwables.BiPredicate<? super K, ? super V, E> filter) {
-        if (N.isNullOrEmpty(map)) {
+        if (N.isEmpty(map)) {
             return empty();
         }
 
@@ -1386,7 +1386,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                     while (paths.size() > 0) {
                         subFiles = paths.poll().listFiles();
 
-                        if (N.notNullOrEmpty(subFiles)) {
+                        if (N.notEmpty(subFiles)) {
                             break;
                         }
                     }
@@ -1498,7 +1498,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @SafeVarargs
     public static <T, E extends Exception> ExceptionalStream<T, E> concat(final T[]... a) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return empty();
         }
 
@@ -1515,7 +1515,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @SafeVarargs
     public static <T, E extends Exception> ExceptionalStream<T, E> concat(final Iterable<? extends T>... a) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return empty();
         }
 
@@ -1532,7 +1532,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @SafeVarargs
     public static <T, E extends Exception> ExceptionalStream<T, E> concat(final Iterator<? extends T>... a) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return empty();
         }
 
@@ -1548,7 +1548,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @SafeVarargs
     public static <T, E extends Exception> ExceptionalStream<T, E> concat(final ExceptionalStream<? extends T, E>... a) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return empty();
         }
 
@@ -1563,7 +1563,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     public static <T, E extends Exception> ExceptionalStream<T, E> concat(final Collection<? extends ExceptionalStream<? extends T, E>> c) {
-        if (N.isNullOrEmpty(c)) {
+        if (N.isEmpty(c)) {
             return empty();
         }
 
@@ -2054,7 +2054,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
     private static <E extends Exception> Deque<Throwables.Runnable<? extends E>> mergeCloseHandlers(
             Collection<? extends ExceptionalStream<?, E>> closeHandlersList) {
-        if (N.isNullOrEmpty(closeHandlersList)) {
+        if (N.isEmpty(closeHandlersList)) {
             return null;
         }
 
@@ -2093,9 +2093,9 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     public static <T, E extends Exception> ExceptionalStream<T, E> merge(final T[] a, final T[] b,
             final Throwables.BiFunction<? super T, ? super T, MergeResult, E> nextSelector) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return of(b);
-        } else if (N.isNullOrEmpty(b)) {
+        } else if (N.isEmpty(b)) {
             return of(a);
         }
 
@@ -2845,7 +2845,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     private Deque<Throwables.Runnable<? extends E>> mergeCloseHandler(final ExceptionalIterator<?, E> iter) {
         final Deque<Throwables.Runnable<? extends E>> newCloseHandlers = new ArrayDeque<>(N.size(closeHandlers) + 1);
 
-        if (N.notNullOrEmpty(closeHandlers)) {
+        if (N.notEmpty(closeHandlers)) {
             newCloseHandlers.addAll(closeHandlers);
         }
 
@@ -2872,7 +2872,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             public boolean hasNext() throws E {
                 while ((cur == null || !cur.hasNext()) && elements.hasNext()) {
                     c = mapper.apply(elements.next());
-                    cur = N.isNullOrEmpty(c) ? null : c.iterator();
+                    cur = N.isEmpty(c) ? null : c.iterator();
                 }
 
                 return cur != null && cur.hasNext();
@@ -3051,7 +3051,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     //
     //        final Deque<Throwables.Runnable<? extends E>> newCloseHandlers = new ArrayDeque<>(N.size(closeHandlers) + 1);
     //
-    //        if (N.notNullOrEmpty(closeHandlers)) {
+    //        if (N.notEmpty(closeHandlers)) {
     //            newCloseHandlers.addAll(closeHandlers);
     //        }
     //
@@ -3119,7 +3119,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     //
     //        final Deque<Throwables.Runnable<? extends E>> newCloseHandlers = new ArrayDeque<>(N.size(closeHandlers) + 1);
     //
-    //        if (N.notNullOrEmpty(closeHandlers)) {
+    //        if (N.notEmpty(closeHandlers)) {
     //            newCloseHandlers.addAll(closeHandlers);
     //        }
     //
@@ -5037,7 +5037,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     public ExceptionalStream<T, E> appendIfEmpty(final Collection<? extends T> c) {
         assertNotClosed();
 
-        if (N.isNullOrEmpty(c)) {
+        if (N.isEmpty(c)) {
             return newStream(elements, closeHandlers);
         }
 
@@ -5333,7 +5333,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     //
     //            @Override
     //            public void close() {
-    //                if ((s != null && N.notNullOrEmpty(s.closeHandlers)) || N.notNullOrEmpty(ExceptionalStream.this.closeHandlers)) {
+    //                if ((s != null && N.notEmpty(s.closeHandlers)) || N.notEmpty(ExceptionalStream.this.closeHandlers)) {
     //                    try {
     //                        if (s != null) {
     //                            s.close();
@@ -5406,7 +5406,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     //
     //            @Override
     //            public void close() {
-    //                if ((s != null && N.notNullOrEmpty(s.closeHandlers)) || N.notNullOrEmpty(ExceptionalStream.this.closeHandlers)) {
+    //                if ((s != null && N.notEmpty(s.closeHandlers)) || N.notEmpty(ExceptionalStream.this.closeHandlers)) {
     //                    try {
     //                        if (s != null) {
     //                            s.close();
@@ -5479,7 +5479,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     //
     //            @Override
     //            public void close() {
-    //                if ((s != null && N.notNullOrEmpty(s.closeHandlers)) || N.notNullOrEmpty(ExceptionalStream.this.closeHandlers)) {
+    //                if ((s != null && N.notEmpty(s.closeHandlers)) || N.notEmpty(ExceptionalStream.this.closeHandlers)) {
     //                    try {
     //                        if (s != null) {
     //                            s.close();
@@ -6186,7 +6186,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                 if (increment >= windowSize) {
                     elements.advance(n > Long.MAX_VALUE / increment ? Long.MAX_VALUE : n * increment);
                 } else {
-                    if (N.isNullOrEmpty(queue)) {
+                    if (N.isEmpty(queue)) {
                         final long m = ((n - 1) > Long.MAX_VALUE / increment ? Long.MAX_VALUE : (n - 1) * increment);
                         elements.advance(m);
                     } else {
@@ -6328,7 +6328,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                 if (increment >= windowSize) {
                     elements.advance(n > Long.MAX_VALUE / increment ? Long.MAX_VALUE : n * increment);
                 } else {
-                    if (N.isNullOrEmpty(queue)) {
+                    if (N.isEmpty(queue)) {
                         final long m = ((n - 1) > Long.MAX_VALUE / increment ? Long.MAX_VALUE : (n - 1) * increment);
                         elements.advance(m);
                     } else {
@@ -8215,7 +8215,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                 next = elements.next();
                 c = flatMapper.apply(next);
 
-                if (N.notNullOrEmpty(c)) {
+                if (N.notEmpty(c)) {
                     for (U u : c) {
                         action.accept(next, u);
                     }
@@ -8261,11 +8261,11 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                 next = elements.next();
                 c2 = flatMapper.apply(next);
 
-                if (N.notNullOrEmpty(c2)) {
+                if (N.notEmpty(c2)) {
                     for (T2 t2 : c2) {
                         c3 = flatMapper2.apply(t2);
 
-                        if (N.notNullOrEmpty(c3)) {
+                        if (N.notEmpty(c3)) {
                             for (T3 t3 : c3) {
                                 action.accept(next, t2, t3);
                             }
@@ -8871,7 +8871,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         assertNotClosed();
 
         try {
-            if (N.isNullOrEmpty(a)) {
+            if (N.isEmpty(a)) {
                 return true;
             } else if (a.length == 1 || (a.length == 2 && N.equals(a[0], a[1]))) {
                 return anyMatch(Fnn.<T, E> pp(Fn.<T> equal(a[0])));
@@ -8905,7 +8905,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         assertNotClosed();
 
         try {
-            if (N.isNullOrEmpty(c)) {
+            if (N.isEmpty(c)) {
                 return true;
             } else if (c.size() == 1) {
                 final T val = c instanceof List ? ((List<T>) c).get(0) : c.iterator().next();
@@ -8934,7 +8934,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         assertNotClosed();
 
         try {
-            if (N.isNullOrEmpty(a)) {
+            if (N.isEmpty(a)) {
                 return false;
             } else if (a.length == 1 || (a.length == 2 && N.equals(a[0], a[1]))) {
                 return anyMatch(Fnn.<T, E> pp(Fn.<T> equal(a[0])));
@@ -8970,7 +8970,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         assertNotClosed();
 
         try {
-            if (N.isNullOrEmpty(c)) {
+            if (N.isEmpty(c)) {
                 return false;
             } else if (c.size() == 1) {
                 final T val = c instanceof List ? ((List<T>) c).get(0) : c.iterator().next();
@@ -9078,7 +9078,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         try {
             final Object[] a = sorted(comparator).toArray();
 
-            if (N.isNullOrEmpty(a)) {
+            if (N.isEmpty(a)) {
                 return Optional.empty();
             }
 
@@ -11938,7 +11938,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     public Stream<T> unchecked() {
         assertNotClosed();
 
-        if (N.isNullOrEmpty(this.closeHandlers)) {
+        if (N.isEmpty(this.closeHandlers)) {
             return Stream.of(newObjIteratorEx(elements));
         } else {
             return Stream.of(newObjIteratorEx(elements)).onClose(() -> {
@@ -12897,7 +12897,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                         if (s == null) {
                             cur = null;
                         } else {
-                            if (N.notNullOrEmpty(s.closeHandlers)) {
+                            if (N.notEmpty(s.closeHandlers)) {
                                 closeHandle = s.closeHandlers;
                             }
 
@@ -12931,7 +12931,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
         final Deque<Throwables.Runnable<? extends Exception>> newCloseHandlers = new ArrayDeque<>(N.size(closeHandlers) + 1);
 
-        if (N.notNullOrEmpty(closeHandlers)) {
+        if (N.notEmpty(closeHandlers)) {
             newCloseHandlers.addAll(closeHandlers);
         }
 
@@ -12960,7 +12960,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             public boolean hasNext() throws Exception {
                 while ((cur == null || !cur.hasNext()) && elements.hasNext()) {
                     c = mapper.apply(elements.next());
-                    cur = N.isNullOrEmpty(c) ? null : c.iterator();
+                    cur = N.isEmpty(c) ? null : c.iterator();
                 }
 
                 return cur != null && cur.hasNext();
@@ -13088,7 +13088,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
         final Deque<Throwables.Runnable<? extends E>> newCloseHandlers = new ArrayDeque<>(N.size(closeHandlers) + 1);
 
-        if (N.notNullOrEmpty(this.closeHandlers)) {
+        if (N.notEmpty(this.closeHandlers)) {
             newCloseHandlers.addAll(this.closeHandlers);
         }
 
@@ -13120,7 +13120,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         }
 
         if (isEmptyCloseHandlers(closeHandlers)) {
-            if (N.notNullOrEmpty(closeHandlers)) {
+            if (N.notEmpty(closeHandlers)) {
                 closeHandlers.clear();
             }
 
@@ -13139,13 +13139,13 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
         close(closeHandlers);
 
-        if (N.notNullOrEmpty(closeHandlers)) {
+        if (N.notEmpty(closeHandlers)) {
             closeHandlers.clear();
         }
     }
 
     static boolean isEmptyCloseHandlers(final Collection<? extends Throwables.Runnable<?>> closeHandlers) {
-        return N.isNullOrEmpty(closeHandlers) || (closeHandlers.size() == 1 && N.firstOrNullIfEmpty(closeHandlers) == EMPTY_CLOSE_HANDLER);
+        return N.isEmpty(closeHandlers) || (closeHandlers.size() == 1 && N.firstOrNullIfEmpty(closeHandlers) == EMPTY_CLOSE_HANDLER);
     }
 
     @SuppressWarnings("rawtypes")
@@ -13540,7 +13540,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
          */
         @SafeVarargs
         public static <T, E extends Exception> ExceptionalIterator<T, E> of(final T... a) {
-            return N.isNullOrEmpty(a) ? EMPTY : of(a, 0, a.length);
+            return N.isEmpty(a) ? EMPTY : of(a, 0, a.length);
         }
 
         /**
@@ -13786,7 +13786,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
          * @return
          */
         public static <T, E extends Exception> ExceptionalIterator<T, E> concat(final Collection<? extends ExceptionalIterator<? extends T, ? extends E>> c) {
-            if (N.isNullOrEmpty(c)) {
+            if (N.isEmpty(c)) {
                 return ExceptionalIterator.empty();
             }
 

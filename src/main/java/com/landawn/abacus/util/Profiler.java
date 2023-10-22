@@ -237,7 +237,7 @@ public final class Profiler {
         if ((threadNum <= 0) || (loopNum <= 0) || (threadDelay < 0) || (loopDelay < 0)) {
             throw new IllegalArgumentException("threadNum=" + threadNum + ", loopNum=" + loopNum + ", threadDelay=" + threadDelay + ", loopDelay=" + loopDelay); //NOSONAR
         }
-        if (N.notNullOrEmpty(args) && (args.size() > 1) && (args.size() != threadNum)) {
+        if (N.notEmpty(args) && (args.size() > 1) && (args.size() != threadNum)) {
             throw new IllegalArgumentException(
                     "The input args must be null or size = 1 or size = threadNum. It's the input parameter for the every loop in each thread ");
         }
@@ -302,7 +302,7 @@ public final class Profiler {
         final long startTimeInMillis = System.currentTimeMillis();
         final long startTimeInNano = System.nanoTime();
         for (int threadIndex = 0; threadIndex < (suspended ? 1 : threadNum); threadIndex++) {
-            final Object arg = (N.isNullOrEmpty(args)) ? null : ((args.size() == 1) ? args.get(0) : args.get(threadIndex));
+            final Object arg = (N.isEmpty(args)) ? null : ((args.size() == 1) ? args.get(0) : args.get(threadIndex));
             threadCounter.incrementAndGet();
             asyncExecutor.execute(() -> {
                 try {

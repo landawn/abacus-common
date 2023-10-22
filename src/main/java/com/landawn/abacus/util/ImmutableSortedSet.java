@@ -163,7 +163,7 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
      * @return
      */
     public static <E> ImmutableSortedSet<E> copyOf(final SortedSet<? extends E> sortedSet) {
-        if (N.isNullOrEmpty(sortedSet)) {
+        if (N.isEmpty(sortedSet)) {
             return empty();
         }
 

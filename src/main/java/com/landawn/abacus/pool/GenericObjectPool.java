@@ -514,7 +514,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
                 }
             }
 
-            if (N.notNullOrEmpty(removingObjects)) {
+            if (N.notEmpty(removingObjects)) {
                 pool.removeAll(removingObjects);
 
                 destroyAll(removingObjects);
@@ -560,7 +560,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
      * @param c
      */
     protected void destroyAll(Collection<E> c) {
-        if (N.notNullOrEmpty(c)) {
+        if (N.notEmpty(c)) {
             for (E e : c) {
                 destroy(e);
             }

@@ -413,7 +413,7 @@ public abstract class AbstractType<T> implements Type<T> {
      */
     @Override
     public boolean isGenericType() {
-        return N.notNullOrEmpty(getParameterTypes());
+        return N.notEmpty(getParameterTypes());
     }
 
     /**
@@ -837,7 +837,7 @@ public abstract class AbstractType<T> implements Type<T> {
             throw new IllegalArgumentException("'offset' and 'len' can't be negative");
         }
 
-        if (len == 0 || (N.isNullOrEmpty(cbuf) && offset == 0)) {
+        if (len == 0 || (N.isEmpty(cbuf) && offset == 0)) {
             return 0;
         }
 
@@ -897,7 +897,7 @@ public abstract class AbstractType<T> implements Type<T> {
             throw new IllegalArgumentException("'offset' and 'len' can't be negative");
         }
 
-        if (len == 0 || (N.isNullOrEmpty(cbuf) && offset == 0)) {
+        if (len == 0 || (N.isEmpty(cbuf) && offset == 0)) {
             return 0;
         }
 

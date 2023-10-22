@@ -113,7 +113,7 @@ public final class Reflection<T> {
      */
     @SafeVarargs
     public final Reflection<T> _new(Object... args) { //NOSONAR
-        if (N.isNullOrEmpty(args)) {
+        if (N.isEmpty(args)) {
             return _new();
         }
 
@@ -358,7 +358,7 @@ public final class Reflection<T> {
      * @return
      */
     private Class<?>[] getTypes(Object... values) {
-        if (N.isNullOrEmpty(values)) {
+        if (N.isEmpty(values)) {
             return EMPTY_CLASSES;
         }
 

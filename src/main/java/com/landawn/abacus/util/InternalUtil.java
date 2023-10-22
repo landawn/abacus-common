@@ -109,7 +109,7 @@ public final class InternalUtil {
     @Beta
     @SafeVarargs
     static <T> List<T> createList(final T... a) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return new ArrayList<>();
         }
 

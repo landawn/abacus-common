@@ -264,29 +264,29 @@ public abstract class Strings {
      * @param cs
      * @return
      */
+    @Beta
     public static boolean isNotBlank(final CharSequence cs) {
         return !isBlank(cs);
     }
 
-    /**
-     *
-     * @param cs
-     * @return
-     */
-    @Beta
-    public static boolean notEmpty(final CharSequence cs) {
-        return (cs != null) && (cs.length() > 0);
-    }
-
-    /**
-     *
-     * @param cs
-     * @return
-     */
-    @Beta
-    public static boolean notBlank(final CharSequence cs) {
-        return !isBlank(cs);
-    }
+    //    /**
+    //     *
+    //     * @param cs
+    //     * @return
+    //     */
+    //    public static boolean notBlank(final CharSequence cs) {
+    //        return !isBlank(cs);
+    //    }
+    //
+    //    /**
+    //     *
+    //     * @param cs
+    //     * @return
+    //     */
+    //    @Beta
+    //    public static boolean notEmpty(final CharSequence cs) {
+    //        return (cs != null) && (cs.length() > 0);
+    //    }
 
     public static boolean isAllEmpty(final CharSequence a, final CharSequence b) {
         return isEmpty(a) && isEmpty(b);
@@ -317,7 +317,7 @@ public abstract class Strings {
      * @since 3.6
      */
     public static boolean isAllEmpty(final CharSequence... css) {
-        if (N.isNullOrEmpty(css)) {
+        if (N.isEmpty(css)) {
             return true;
         }
 
@@ -337,7 +337,7 @@ public abstract class Strings {
      * @see Strings#allEmpty(Collection)
      */
     public static boolean isAllEmpty(final Collection<? extends CharSequence> css) {
-        if (N.isNullOrEmpty(css)) {
+        if (N.isEmpty(css)) {
             return true;
         }
 
@@ -381,7 +381,7 @@ public abstract class Strings {
      * @since 3.6
      */
     public static boolean isAllBlank(final CharSequence... css) {
-        if (N.isNullOrEmpty(css)) {
+        if (N.isEmpty(css)) {
             return true;
         }
 
@@ -401,7 +401,7 @@ public abstract class Strings {
      * @see Strings#allBlank(Collection)
      */
     public static boolean isAllBlank(final Collection<? extends CharSequence> css) {
-        if (N.isNullOrEmpty(css)) {
+        if (N.isEmpty(css)) {
             return true;
         }
 
@@ -444,7 +444,7 @@ public abstract class Strings {
      * @since 3.2
      */
     public static boolean isAnyEmpty(final CharSequence... css) {
-        if (N.isNullOrEmpty(css)) {
+        if (N.isEmpty(css)) {
             return false;
         }
 
@@ -464,7 +464,7 @@ public abstract class Strings {
      * @see Strings#anyEmpty(CharSequence...)
      */
     public static boolean isAnyEmpty(final Collection<? extends CharSequence> css) {
-        if (N.isNullOrEmpty(css)) {
+        if (N.isEmpty(css)) {
             return false;
         }
 
@@ -510,7 +510,7 @@ public abstract class Strings {
      * @since 3.2
      */
     public static boolean isAnyBlank(final CharSequence... css) {
-        if (N.isNullOrEmpty(css)) {
+        if (N.isEmpty(css)) {
             return false;
         }
 
@@ -530,7 +530,7 @@ public abstract class Strings {
      * @see Strings#anyBlank(Collection)
      */
     public static boolean isAnyBlank(final Collection<? extends CharSequence> css) {
-        if (N.isNullOrEmpty(css)) {
+        if (N.isEmpty(css)) {
             return false;
         }
 
@@ -593,7 +593,7 @@ public abstract class Strings {
      */
     @SafeVarargs
     public static <T extends CharSequence> T firstNonEmpty(final T... css) {
-        if (N.isNullOrEmpty(css)) {
+        if (N.isEmpty(css)) {
             return null;
         }
 
@@ -614,7 +614,7 @@ public abstract class Strings {
      * @see MoreStringUtil#firstNonEmpty(CharSequence...)
      */
     public static <T extends CharSequence> T firstNonEmpty(final Collection<? extends T> css) {
-        if (N.isNullOrEmpty(css)) {
+        if (N.isEmpty(css)) {
             return null;
         }
 
@@ -661,7 +661,7 @@ public abstract class Strings {
      */
     @SafeVarargs
     public static <T extends CharSequence> T firstNonBlank(final T... css) {
-        if (N.isNullOrEmpty(css)) {
+        if (N.isEmpty(css)) {
             return null;
         }
 
@@ -682,7 +682,7 @@ public abstract class Strings {
      * @see MoreStringUtil#firstNonEmpty(CharSequence...)
      */
     public static <T extends CharSequence> T firstNonBlank(final Collection<? extends T> css) {
-        if (N.isNullOrEmpty(css)) {
+        if (N.isEmpty(css)) {
             return null;
         }
 
@@ -767,7 +767,7 @@ public abstract class Strings {
      * @param strs
      */
     public static void nullToEmpty(final String[] strs) {
-        if (N.isNullOrEmpty(strs)) {
+        if (N.isEmpty(strs)) {
             return;
         }
 
@@ -792,7 +792,7 @@ public abstract class Strings {
      * @param strs
      */
     public static void emptyToNull(final String[] strs) {
-        if (N.isNullOrEmpty(strs)) {
+        if (N.isEmpty(strs)) {
             return;
         }
 
@@ -817,7 +817,7 @@ public abstract class Strings {
      * @param strs
      */
     public static void blankToEmpty(final String[] strs) {
-        if (N.isNullOrEmpty(strs)) {
+        if (N.isEmpty(strs)) {
             return;
         }
 
@@ -842,7 +842,7 @@ public abstract class Strings {
      * @param strs
      */
     public static void blankToNull(final String[] strs) {
-        if (N.isNullOrEmpty(strs)) {
+        if (N.isEmpty(strs)) {
             return;
         }
 
@@ -2993,7 +2993,7 @@ public abstract class Strings {
      * @param strs
      */
     public static void trim(final String[] strs) {
-        if (N.isNullOrEmpty(strs)) {
+        if (N.isEmpty(strs)) {
             return;
         }
 
@@ -3040,7 +3040,7 @@ public abstract class Strings {
      * @param strs
      */
     public static void trimToNull(final String[] strs) {
-        if (N.isNullOrEmpty(strs)) {
+        if (N.isEmpty(strs)) {
             return;
         }
 
@@ -3084,7 +3084,7 @@ public abstract class Strings {
      * @param strs
      */
     public static void trimToEmpty(final String[] strs) {
-        if (N.isNullOrEmpty(strs)) {
+        if (N.isEmpty(strs)) {
             return;
         }
 
@@ -3134,7 +3134,7 @@ public abstract class Strings {
      * @param strs
      */
     public static void strip(final String[] strs) {
-        if (N.isNullOrEmpty(strs)) {
+        if (N.isEmpty(strs)) {
             return;
         }
 
@@ -3183,7 +3183,7 @@ public abstract class Strings {
      * @param strs
      */
     public static void stripToNull(final String[] strs) {
-        if (N.isNullOrEmpty(strs)) {
+        if (N.isEmpty(strs)) {
             return;
         }
 
@@ -3229,7 +3229,7 @@ public abstract class Strings {
      * @param strs
      */
     public static void stripToEmpty(final String[] strs) {
-        if (N.isNullOrEmpty(strs)) {
+        if (N.isEmpty(strs)) {
             return;
         }
 
@@ -3287,7 +3287,7 @@ public abstract class Strings {
      * @param stripChars
      */
     public static void strip(final String[] strs, final String stripChars) {
-        if (N.isNullOrEmpty(strs)) {
+        if (N.isEmpty(strs)) {
             return;
         }
 
@@ -3355,7 +3355,7 @@ public abstract class Strings {
      * @param stripChars
      */
     public static void stripStart(final String[] strs, final String stripChars) {
-        if (N.isNullOrEmpty(strs)) {
+        if (N.isEmpty(strs)) {
             return;
         }
 
@@ -3424,7 +3424,7 @@ public abstract class Strings {
      * @param stripChars
      */
     public static void stripEnd(final String[] strs, final String stripChars) {
-        if (N.isNullOrEmpty(strs)) {
+        if (N.isEmpty(strs)) {
             return;
         }
 
@@ -3494,7 +3494,7 @@ public abstract class Strings {
      * @param strs
      */
     public static void stripAccents(final String[] strs) {
-        if (N.isNullOrEmpty(strs)) {
+        if (N.isEmpty(strs)) {
             return;
         }
 
@@ -3569,7 +3569,7 @@ public abstract class Strings {
      * @param strs
      */
     public static void chomp(final String[] strs) {
-        if (N.isNullOrEmpty(strs)) {
+        if (N.isEmpty(strs)) {
             return;
         }
 
@@ -3633,7 +3633,7 @@ public abstract class Strings {
      * @param strs
      */
     public static void chop(final String[] strs) {
-        if (N.isNullOrEmpty(strs)) {
+        if (N.isEmpty(strs)) {
             return;
         }
 
@@ -3799,7 +3799,7 @@ public abstract class Strings {
      * @param strs
      */
     public static void deleteWhitespace(final String[] strs) {
-        if (N.isNullOrEmpty(strs)) {
+        if (N.isEmpty(strs)) {
             return;
         }
 
@@ -5073,7 +5073,7 @@ public abstract class Strings {
      */
     @SafeVarargs
     public static int indexOfAny(final String str, final int fromIndex, final char... chs) {
-        if (isEmpty(str) || N.isNullOrEmpty(chs)) {
+        if (isEmpty(str) || N.isEmpty(chs)) {
             return N.INDEX_NOT_FOUND;
         }
 
@@ -5126,7 +5126,7 @@ public abstract class Strings {
      */
     @SafeVarargs
     public static int indexOfAny(final String str, final int fromIndex, final String... substrs) {
-        if (str == null || N.isNullOrEmpty(substrs)) {
+        if (str == null || N.isEmpty(substrs)) {
             return N.INDEX_NOT_FOUND;
         }
 
@@ -5173,7 +5173,7 @@ public abstract class Strings {
             return N.INDEX_NOT_FOUND;
         }
 
-        if (N.isNullOrEmpty(chs)) {
+        if (N.isEmpty(chs)) {
             return 0;
         }
 
@@ -5497,7 +5497,7 @@ public abstract class Strings {
      */
     @SafeVarargs
     public static int lastIndexOfAny(final String str, final char... chs) {
-        if (isEmpty(str) || N.isNullOrEmpty(chs)) {
+        if (isEmpty(str) || N.isEmpty(chs)) {
             return N.INDEX_NOT_FOUND;
         }
 
@@ -5546,7 +5546,7 @@ public abstract class Strings {
      */
     @SafeVarargs
     public static int lastIndexOfAny(final String str, final String... substrs) {
-        if (str == null || N.isNullOrEmpty(substrs)) {
+        if (str == null || N.isEmpty(substrs)) {
             return N.INDEX_NOT_FOUND;
         }
 
@@ -5631,7 +5631,7 @@ public abstract class Strings {
      */
     @SafeVarargs
     public static int smallestIndexOfAll(final String str, final int fromIndex, final String... substrs) {
-        if (str == null || N.isNullOrEmpty(substrs)) {
+        if (str == null || N.isEmpty(substrs)) {
             return N.INDEX_NOT_FOUND;
         }
 
@@ -5665,7 +5665,7 @@ public abstract class Strings {
      */
     @SafeVarargs
     public static int largestIndexOfAll(final String str, final String... substrs) {
-        if (str == null || N.isNullOrEmpty(substrs)) {
+        if (str == null || N.isEmpty(substrs)) {
             return N.INDEX_NOT_FOUND;
         }
 
@@ -5837,7 +5837,7 @@ public abstract class Strings {
      */
     @SafeVarargs
     public static boolean containsAny(final String str, final char... chs) {
-        if (isEmpty(str) || N.isNullOrEmpty(chs)) {
+        if (isEmpty(str) || N.isEmpty(chs)) {
             return false;
         }
 
@@ -5852,7 +5852,7 @@ public abstract class Strings {
      */
     @SafeVarargs
     public static boolean containsAny(final String str, final String... searchStrs) {
-        if (isEmpty(str) || N.isNullOrEmpty(searchStrs)) {
+        if (isEmpty(str) || N.isEmpty(searchStrs)) {
             return false;
         }
 
@@ -5867,7 +5867,7 @@ public abstract class Strings {
      */
     @SafeVarargs
     public static boolean containsAnyIgnoreCase(final String str, final String... searchStrs) {
-        if (isEmpty(str) || N.isNullOrEmpty(searchStrs)) {
+        if (isEmpty(str) || N.isEmpty(searchStrs)) {
             return false;
         } else if (searchStrs.length == 1) {
             return containsIgnoreCase(str, searchStrs[0]);
@@ -5898,7 +5898,7 @@ public abstract class Strings {
      */
     @SafeVarargs
     public static boolean containsAll(final String str, final char... chs) {
-        if (N.isNullOrEmpty(chs)) {
+        if (N.isEmpty(chs)) {
             return true;
         } else if (str == null || str.length() == 0) {
             return false;
@@ -5921,7 +5921,7 @@ public abstract class Strings {
      */
     @SafeVarargs
     public static boolean containsAll(final String str, final String... searchStrs) {
-        if (N.isNullOrEmpty(searchStrs)) {
+        if (N.isEmpty(searchStrs)) {
             return true;
         } else if (str == null || str.length() == 0) {
             return false;
@@ -5944,7 +5944,7 @@ public abstract class Strings {
      */
     @SafeVarargs
     public static boolean containsAllIgnoreCase(final String str, final String... searchStrs) {
-        if (N.isNullOrEmpty(searchStrs)) {
+        if (N.isEmpty(searchStrs)) {
             return true;
         } else if (str == null || str.length() == 0) {
             return false;
@@ -5967,7 +5967,7 @@ public abstract class Strings {
      */
     @SafeVarargs
     public static boolean containsOnly(final String str, final char... chs) {
-        if (isEmpty(str) || N.isNullOrEmpty(chs)) {
+        if (isEmpty(str) || N.isEmpty(chs)) {
             return false;
         }
 
@@ -5982,7 +5982,7 @@ public abstract class Strings {
      */
     @SafeVarargs
     public static boolean containsNone(final String str, final char... chs) {
-        if (isEmpty(str) || N.isNullOrEmpty(chs)) {
+        if (isEmpty(str) || N.isEmpty(chs)) {
             return true;
         }
 
@@ -6077,7 +6077,7 @@ public abstract class Strings {
      */
     @SafeVarargs
     public static boolean startsWithAny(final String str, final String... substrs) {
-        if (str == null || N.isNullOrEmpty(substrs)) {
+        if (str == null || N.isEmpty(substrs)) {
             return false;
         }
 
@@ -6100,7 +6100,7 @@ public abstract class Strings {
      */
     @SafeVarargs
     public static boolean startsWithAnyIgnoreCase(final String str, final String... substrs) {
-        if (str == null || N.isNullOrEmpty(substrs)) {
+        if (str == null || N.isEmpty(substrs)) {
             return false;
         }
 
@@ -6144,7 +6144,7 @@ public abstract class Strings {
      */
     @SafeVarargs
     public static boolean endsWithAny(final String str, final String... substrs) {
-        if (str == null || N.isNullOrEmpty(substrs)) {
+        if (str == null || N.isEmpty(substrs)) {
             return false;
         }
 
@@ -6165,7 +6165,7 @@ public abstract class Strings {
      * @return
      */
     public static boolean endsWithAnyIgnoreCase(final String str, final String... substrs) {
-        if (str == null || N.isNullOrEmpty(substrs)) {
+        if (str == null || N.isEmpty(substrs)) {
             return false;
         }
 
@@ -6225,7 +6225,7 @@ public abstract class Strings {
      */
     @SafeVarargs
     public static boolean equalsAny(final String str, final String... searchStrings) {
-        if (N.isNullOrEmpty(searchStrings)) {
+        if (N.isEmpty(searchStrings)) {
             return false;
         }
 
@@ -6247,7 +6247,7 @@ public abstract class Strings {
      */
     @SafeVarargs
     public static boolean equalsAnyIgnoreCase(final String str, final String... searchStrs) {
-        if (N.isNullOrEmpty(searchStrs)) {
+        if (N.isEmpty(searchStrs)) {
             return false;
         } else if (searchStrs.length == 1) {
             return equalsIgnoreCase(str, searchStrs[0]);
@@ -6370,7 +6370,7 @@ public abstract class Strings {
      */
     @SafeVarargs
     public static int indexOfDifference(final String... strs) {
-        if (N.isNullOrEmpty(strs) || strs.length == 1) {
+        if (N.isEmpty(strs) || strs.length == 1) {
             return N.INDEX_NOT_FOUND;
         }
 
@@ -6474,7 +6474,7 @@ public abstract class Strings {
      */
     @SafeVarargs
     public static String commonPrefix(final String... strs) {
-        if (N.isNullOrEmpty(strs)) {
+        if (N.isEmpty(strs)) {
             return EMPTY_STRING;
         }
 
@@ -6545,7 +6545,7 @@ public abstract class Strings {
      */
     @SafeVarargs
     public static String commonSuffix(final String... strs) {
-        if (N.isNullOrEmpty(strs)) {
+        if (N.isEmpty(strs)) {
             return EMPTY_STRING;
         }
 
@@ -6996,7 +6996,7 @@ public abstract class Strings {
      * @see #substringAfter(String, String)
      */
     public static String substringAfterAny(String str, char... delimitersOfExclusiveBeginIndex) {
-        if (str == null || N.isNullOrEmpty(delimitersOfExclusiveBeginIndex)) {
+        if (str == null || N.isEmpty(delimitersOfExclusiveBeginIndex)) {
             return null;
         }
 
@@ -7022,7 +7022,7 @@ public abstract class Strings {
      * @see #substringAfter(String, String)
      */
     public static String substringAfterAny(String str, String... delimitersOfExclusiveBeginIndex) {
-        if (str == null || N.isNullOrEmpty(delimitersOfExclusiveBeginIndex)) {
+        if (str == null || N.isEmpty(delimitersOfExclusiveBeginIndex)) {
             return null;
         }
 
@@ -7196,7 +7196,7 @@ public abstract class Strings {
      * @see #substringBefore(String, String)
      */
     public static String substringBeforeAny(String str, char... delimitersOfExclusiveEndIndex) {
-        if (str == null || N.isNullOrEmpty(delimitersOfExclusiveEndIndex)) {
+        if (str == null || N.isEmpty(delimitersOfExclusiveEndIndex)) {
             return null;
         }
 
@@ -7222,7 +7222,7 @@ public abstract class Strings {
      * @see #substringBefore(String, String)
      */
     public static String substringBeforeAny(String str, String... delimitersOfExclusiveEndIndex) {
-        if (str == null || N.isNullOrEmpty(delimitersOfExclusiveEndIndex)) {
+        if (str == null || N.isEmpty(delimitersOfExclusiveEndIndex)) {
             return null;
         }
 
@@ -7261,7 +7261,7 @@ public abstract class Strings {
      *
      * @param str
      * @param exclusiveBeginIndex
-     * @param delimiterOfExclusiveEndIndex {@code exclusiveEndIndex <- str.indexOf(delimiterOfExclusiveEndIndex, beginIndex + 1) if exclusiveBeginIndex >= 0}
+     * @param delimiterOfExclusiveEndIndex
      * @return
      * @see #substringBetween(String, int, int)
      */
@@ -7277,18 +7277,12 @@ public abstract class Strings {
      *
      * @param str
      * @param exclusiveBeginIndex
-     * @param delimiterOfExclusiveEndIndex {@code exclusiveEndIndex <- str.indexOf(delimiterOfExclusiveEndIndex, beginIndex + 1) if exclusiveBeginIndex >= 0}
+     * @param delimiterOfExclusiveEndIndex
      * @return
      * @see #substringBetween(String, int, int)
      */
     public static String substringBetween(String str, int exclusiveBeginIndex, String delimiterOfExclusiveEndIndex) {
-        if (str == null || delimiterOfExclusiveEndIndex == null || exclusiveBeginIndex < 0 || exclusiveBeginIndex > str.length()) {
-            return null;
-        }
-
-        if (delimiterOfExclusiveEndIndex.length() == 0) {
-            return EMPTY_STRING;
-        } else if (exclusiveBeginIndex == str.length()) {
+        if (str == null || delimiterOfExclusiveEndIndex == null || exclusiveBeginIndex < 0 || exclusiveBeginIndex >= str.length()) {
             return null;
         }
 
@@ -7304,7 +7298,7 @@ public abstract class Strings {
      * @see #substringBetween(String, int, int)
      */
     public static String substringBetween(String str, int exclusiveBeginIndex, IntUnaryOperator funcOfExclusiveEndIndex) {
-        if (str == null || exclusiveBeginIndex < 0) {
+        if (str == null || exclusiveBeginIndex < 0 || exclusiveBeginIndex >= str.length()) {
             return null;
         }
 
@@ -7314,7 +7308,7 @@ public abstract class Strings {
     /**
      *
      * @param str
-     * @param delimiterOfExclusiveBeginIndex {@code exclusiveBeginIndex <- str.lastIndexOf(delimiterOfExclusiveBeginIndex, exclusiveEndIndex - 1) if exclusiveEndIndex > 0}
+     * @param delimiterOfExclusiveBeginIndex
      * @param exclusiveEndIndex
      * @return
      * @see #substringBetween(String, int, int)
@@ -7324,13 +7318,13 @@ public abstract class Strings {
             return null;
         }
 
-        return substringBetween(str, str.lastIndexOf(delimiterOfExclusiveBeginIndex, exclusiveEndIndex - 1), exclusiveEndIndex);
+        return substringBetween(str, str.indexOf(delimiterOfExclusiveBeginIndex), exclusiveEndIndex);
     }
 
     /**
      *
      * @param str
-     * @param delimiterOfExclusiveBeginIndex {@code exclusiveBeginIndex <- str.lastIndexOf(delimiterOfExclusiveBeginIndex, exclusiveEndIndex - 1) + delimiterOfExclusiveBeginIndex.length() - 1 if exclusiveEndIndex > 0}
+     * @param delimiterOfExclusiveBeginIndex
      * @param exclusiveEndIndex
      * @return
      * @see #substringBetween(String, int, int)
@@ -7340,19 +7334,17 @@ public abstract class Strings {
             return null;
         }
 
-        if (delimiterOfExclusiveBeginIndex.length() == 0) {
-            return EMPTY_STRING;
-        } else if (exclusiveEndIndex == 0) {
-            return null;
-        }
-
-        final int index = str.lastIndexOf(delimiterOfExclusiveBeginIndex, exclusiveEndIndex - delimiterOfExclusiveBeginIndex.length());
+        final int index = str.indexOf(delimiterOfExclusiveBeginIndex);
 
         if (index < 0) {
             return null;
         }
 
         final int exclusiveBeginIndex = index + delimiterOfExclusiveBeginIndex.length();
+
+        if (exclusiveBeginIndex > exclusiveEndIndex) {
+            return null;
+        }
 
         return str.substring(exclusiveBeginIndex, exclusiveEndIndex);
     }
@@ -7406,9 +7398,7 @@ public abstract class Strings {
             return null;
         }
 
-        startIndex = str.lastIndexOf(delimiterOfExclusiveBeginIndex, endIndex - 1);
-
-        return str.substring(startIndex + 1, endIndex);
+        return str.substring(startIndex, endIndex);
     }
 
     /**
@@ -7451,18 +7441,6 @@ public abstract class Strings {
             return null;
         }
 
-        if (delimiterOfExclusiveBeginIndex.length() == 0 && delimiterOfExclusiveEndIndex.length() == 0) {
-            return EMPTY_STRING;
-        } else if (delimiterOfExclusiveBeginIndex.length() == 0) {
-            final int endIndex = fromIndex == 0 ? str.indexOf(delimiterOfExclusiveEndIndex) : str.indexOf(delimiterOfExclusiveEndIndex, fromIndex);
-
-            return endIndex < 0 ? null : EMPTY_STRING;
-        } else if (delimiterOfExclusiveEndIndex.length() == 0) {
-            final int startIndex = fromIndex == 0 ? str.indexOf(delimiterOfExclusiveBeginIndex) : str.indexOf(delimiterOfExclusiveBeginIndex, fromIndex);
-
-            return startIndex < 0 ? null : EMPTY_STRING;
-        }
-
         int startIndex = fromIndex == 0 ? str.indexOf(delimiterOfExclusiveBeginIndex) : str.indexOf(delimiterOfExclusiveBeginIndex, fromIndex);
 
         if (startIndex < 0) {
@@ -7477,9 +7455,7 @@ public abstract class Strings {
             return null;
         }
 
-        startIndex = str.lastIndexOf(delimiterOfExclusiveBeginIndex, endIndex - delimiterOfExclusiveBeginIndex.length());
-
-        return str.substring(startIndex + delimiterOfExclusiveBeginIndex.length(), endIndex);
+        return str.substring(startIndex, endIndex);
     }
 
     /**
@@ -7780,7 +7756,7 @@ public abstract class Strings {
      * @return
      */
     public static String join(final boolean[] a, final char delimiter) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return EMPTY_STRING;
         }
 
@@ -7794,7 +7770,7 @@ public abstract class Strings {
      * @return
      */
     public static String join(final boolean[] a, final String delimiter) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return EMPTY_STRING;
         }
 
@@ -7812,7 +7788,7 @@ public abstract class Strings {
     public static String join(final boolean[] a, final int fromIndex, final int toIndex, final char delimiter) {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
-        if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
+        if (N.isEmpty(a) || fromIndex == toIndex) {
             return EMPTY_STRING;
         } else if (toIndex - fromIndex == 1) {
             return N.toString(a[fromIndex]);
@@ -7846,7 +7822,7 @@ public abstract class Strings {
     public static String join(final boolean[] a, final int fromIndex, final int toIndex, final String delimiter) {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
-        if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
+        if (N.isEmpty(a) || fromIndex == toIndex) {
             return EMPTY_STRING;
         } else if (toIndex - fromIndex == 1) {
             return N.toString(a[fromIndex]);
@@ -7889,7 +7865,7 @@ public abstract class Strings {
     public static String join(final boolean[] a, final int fromIndex, final int toIndex, final String delimiter, final String prefix, final String suffix) {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
-        if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
+        if (N.isEmpty(a) || fromIndex == toIndex) {
             if (isEmpty(prefix) && isEmpty(suffix)) {
                 return EMPTY_STRING;
             } else if (isEmpty(prefix)) {
@@ -7950,7 +7926,7 @@ public abstract class Strings {
      * @return
      */
     public static String join(final char[] a, final char delimiter) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return EMPTY_STRING;
         }
 
@@ -7964,7 +7940,7 @@ public abstract class Strings {
      * @return
      */
     public static String join(final char[] a, final String delimiter) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return EMPTY_STRING;
         }
 
@@ -7982,7 +7958,7 @@ public abstract class Strings {
     public static String join(final char[] a, final int fromIndex, final int toIndex, final char delimiter) {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
-        if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
+        if (N.isEmpty(a) || fromIndex == toIndex) {
             return EMPTY_STRING;
         } else if (toIndex - fromIndex == 1) {
             return N.toString(a[fromIndex]);
@@ -8016,7 +7992,7 @@ public abstract class Strings {
     public static String join(final char[] a, final int fromIndex, final int toIndex, final String delimiter) {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
-        if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
+        if (N.isEmpty(a) || fromIndex == toIndex) {
             return EMPTY_STRING;
         } else if (toIndex - fromIndex == 1) {
             return N.toString(a[fromIndex]);
@@ -8059,7 +8035,7 @@ public abstract class Strings {
     public static String join(final char[] a, final int fromIndex, final int toIndex, final String delimiter, final String prefix, final String suffix) {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
-        if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
+        if (N.isEmpty(a) || fromIndex == toIndex) {
             if (isEmpty(prefix) && isEmpty(suffix)) {
                 return EMPTY_STRING;
             } else if (isEmpty(prefix)) {
@@ -8120,7 +8096,7 @@ public abstract class Strings {
      * @return
      */
     public static String join(final byte[] a, final char delimiter) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return EMPTY_STRING;
         }
 
@@ -8134,7 +8110,7 @@ public abstract class Strings {
      * @return
      */
     public static String join(final byte[] a, final String delimiter) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return EMPTY_STRING;
         }
 
@@ -8152,7 +8128,7 @@ public abstract class Strings {
     public static String join(final byte[] a, final int fromIndex, final int toIndex, final char delimiter) {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
-        if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
+        if (N.isEmpty(a) || fromIndex == toIndex) {
             return EMPTY_STRING;
         } else if (toIndex - fromIndex == 1) {
             return N.toString(a[fromIndex]);
@@ -8186,7 +8162,7 @@ public abstract class Strings {
     public static String join(final byte[] a, final int fromIndex, final int toIndex, final String delimiter) {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
-        if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
+        if (N.isEmpty(a) || fromIndex == toIndex) {
             return EMPTY_STRING;
         } else if (toIndex - fromIndex == 1) {
             return N.toString(a[fromIndex]);
@@ -8229,7 +8205,7 @@ public abstract class Strings {
     public static String join(final byte[] a, final int fromIndex, final int toIndex, final String delimiter, final String prefix, final String suffix) {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
-        if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
+        if (N.isEmpty(a) || fromIndex == toIndex) {
             if (isEmpty(prefix) && isEmpty(suffix)) {
                 return EMPTY_STRING;
             } else if (isEmpty(prefix)) {
@@ -8290,7 +8266,7 @@ public abstract class Strings {
      * @return
      */
     public static String join(final short[] a, final char delimiter) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return EMPTY_STRING;
         }
 
@@ -8304,7 +8280,7 @@ public abstract class Strings {
      * @return
      */
     public static String join(final short[] a, final String delimiter) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return EMPTY_STRING;
         }
 
@@ -8322,7 +8298,7 @@ public abstract class Strings {
     public static String join(final short[] a, final int fromIndex, final int toIndex, final char delimiter) {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
-        if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
+        if (N.isEmpty(a) || fromIndex == toIndex) {
             return EMPTY_STRING;
         } else if (toIndex - fromIndex == 1) {
             return N.toString(a[fromIndex]);
@@ -8356,7 +8332,7 @@ public abstract class Strings {
     public static String join(final short[] a, final int fromIndex, final int toIndex, final String delimiter) {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
-        if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
+        if (N.isEmpty(a) || fromIndex == toIndex) {
             return EMPTY_STRING;
         } else if (toIndex - fromIndex == 1) {
             return N.toString(a[fromIndex]);
@@ -8399,7 +8375,7 @@ public abstract class Strings {
     public static String join(final short[] a, final int fromIndex, final int toIndex, final String delimiter, final String prefix, final String suffix) {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
-        if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
+        if (N.isEmpty(a) || fromIndex == toIndex) {
             if (isEmpty(prefix) && isEmpty(suffix)) {
                 return EMPTY_STRING;
             } else if (isEmpty(prefix)) {
@@ -8460,7 +8436,7 @@ public abstract class Strings {
      * @return
      */
     public static String join(final int[] a, final char delimiter) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return EMPTY_STRING;
         }
 
@@ -8474,7 +8450,7 @@ public abstract class Strings {
      * @return
      */
     public static String join(final int[] a, final String delimiter) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return EMPTY_STRING;
         }
 
@@ -8492,7 +8468,7 @@ public abstract class Strings {
     public static String join(final int[] a, final int fromIndex, final int toIndex, final char delimiter) {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
-        if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
+        if (N.isEmpty(a) || fromIndex == toIndex) {
             return EMPTY_STRING;
         } else if (toIndex - fromIndex == 1) {
             return N.toString(a[fromIndex]);
@@ -8526,7 +8502,7 @@ public abstract class Strings {
     public static String join(final int[] a, final int fromIndex, final int toIndex, final String delimiter) {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
-        if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
+        if (N.isEmpty(a) || fromIndex == toIndex) {
             return EMPTY_STRING;
         } else if (toIndex - fromIndex == 1) {
             return N.toString(a[fromIndex]);
@@ -8569,7 +8545,7 @@ public abstract class Strings {
     public static String join(final int[] a, final int fromIndex, final int toIndex, final String delimiter, final String prefix, final String suffix) {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
-        if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
+        if (N.isEmpty(a) || fromIndex == toIndex) {
             if (isEmpty(prefix) && isEmpty(suffix)) {
                 return EMPTY_STRING;
             } else if (isEmpty(prefix)) {
@@ -8630,7 +8606,7 @@ public abstract class Strings {
      * @return
      */
     public static String join(final long[] a, final char delimiter) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return EMPTY_STRING;
         }
 
@@ -8644,7 +8620,7 @@ public abstract class Strings {
      * @return
      */
     public static String join(final long[] a, final String delimiter) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return EMPTY_STRING;
         }
 
@@ -8662,7 +8638,7 @@ public abstract class Strings {
     public static String join(final long[] a, final int fromIndex, final int toIndex, final char delimiter) {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
-        if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
+        if (N.isEmpty(a) || fromIndex == toIndex) {
             return EMPTY_STRING;
         } else if (toIndex - fromIndex == 1) {
             return N.toString(a[fromIndex]);
@@ -8696,7 +8672,7 @@ public abstract class Strings {
     public static String join(final long[] a, final int fromIndex, final int toIndex, final String delimiter) {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
-        if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
+        if (N.isEmpty(a) || fromIndex == toIndex) {
             return EMPTY_STRING;
         } else if (toIndex - fromIndex == 1) {
             return N.toString(a[fromIndex]);
@@ -8739,7 +8715,7 @@ public abstract class Strings {
     public static String join(final long[] a, final int fromIndex, final int toIndex, final String delimiter, final String prefix, final String suffix) {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
-        if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
+        if (N.isEmpty(a) || fromIndex == toIndex) {
             if (isEmpty(prefix) && isEmpty(suffix)) {
                 return EMPTY_STRING;
             } else if (isEmpty(prefix)) {
@@ -8800,7 +8776,7 @@ public abstract class Strings {
      * @return
      */
     public static String join(final float[] a, final char delimiter) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return EMPTY_STRING;
         }
 
@@ -8814,7 +8790,7 @@ public abstract class Strings {
      * @return
      */
     public static String join(final float[] a, final String delimiter) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return EMPTY_STRING;
         }
 
@@ -8832,7 +8808,7 @@ public abstract class Strings {
     public static String join(final float[] a, final int fromIndex, final int toIndex, final char delimiter) {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
-        if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
+        if (N.isEmpty(a) || fromIndex == toIndex) {
             return EMPTY_STRING;
         } else if (toIndex - fromIndex == 1) {
             return N.toString(a[fromIndex]);
@@ -8866,7 +8842,7 @@ public abstract class Strings {
     public static String join(final float[] a, final int fromIndex, final int toIndex, final String delimiter) {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
-        if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
+        if (N.isEmpty(a) || fromIndex == toIndex) {
             return EMPTY_STRING;
         } else if (toIndex - fromIndex == 1) {
             return N.toString(a[fromIndex]);
@@ -8909,7 +8885,7 @@ public abstract class Strings {
     public static String join(final float[] a, final int fromIndex, final int toIndex, final String delimiter, final String prefix, final String suffix) {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
-        if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
+        if (N.isEmpty(a) || fromIndex == toIndex) {
             if (isEmpty(prefix) && isEmpty(suffix)) {
                 return EMPTY_STRING;
             } else if (isEmpty(prefix)) {
@@ -8970,7 +8946,7 @@ public abstract class Strings {
      * @return
      */
     public static String join(final double[] a, final char delimiter) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return EMPTY_STRING;
         }
 
@@ -8984,7 +8960,7 @@ public abstract class Strings {
      * @return
      */
     public static String join(final double[] a, final String delimiter) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return EMPTY_STRING;
         }
 
@@ -9002,7 +8978,7 @@ public abstract class Strings {
     public static String join(final double[] a, final int fromIndex, final int toIndex, final char delimiter) {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
-        if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
+        if (N.isEmpty(a) || fromIndex == toIndex) {
             return EMPTY_STRING;
         } else if (toIndex - fromIndex == 1) {
             return N.toString(a[fromIndex]);
@@ -9036,7 +9012,7 @@ public abstract class Strings {
     public static String join(final double[] a, final int fromIndex, final int toIndex, final String delimiter) {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
-        if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
+        if (N.isEmpty(a) || fromIndex == toIndex) {
             return EMPTY_STRING;
         } else if (toIndex - fromIndex == 1) {
             return N.toString(a[fromIndex]);
@@ -9079,7 +9055,7 @@ public abstract class Strings {
     public static String join(final double[] a, final int fromIndex, final int toIndex, final String delimiter, final String prefix, final String suffix) {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
-        if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
+        if (N.isEmpty(a) || fromIndex == toIndex) {
             if (isEmpty(prefix) && isEmpty(suffix)) {
                 return EMPTY_STRING;
             } else if (isEmpty(prefix)) {
@@ -9140,7 +9116,7 @@ public abstract class Strings {
      * @return
      */
     public static String join(final Object[] a, final char delimiter) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return EMPTY_STRING;
         }
 
@@ -9154,7 +9130,7 @@ public abstract class Strings {
      * @return
      */
     public static String join(final Object[] a, final String delimiter) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return EMPTY_STRING;
         }
 
@@ -9212,7 +9188,7 @@ public abstract class Strings {
     public static String join(final Object[] a, final int fromIndex, final int toIndex, final char delimiter, final boolean trim) {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
-        if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
+        if (N.isEmpty(a) || fromIndex == toIndex) {
             return EMPTY_STRING;
         } else if (toIndex - fromIndex == 1) {
             return trim ? N.toString(a[fromIndex]).trim() : N.toString(a[fromIndex]);
@@ -9275,7 +9251,7 @@ public abstract class Strings {
             final boolean trim) {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
-        if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
+        if (N.isEmpty(a) || fromIndex == toIndex) {
             if (isEmpty(prefix) && isEmpty(suffix)) {
                 return EMPTY_STRING;
             } else if (isEmpty(prefix)) {
@@ -9400,7 +9376,7 @@ public abstract class Strings {
     public static String join(final Collection<?> c, final int fromIndex, final int toIndex, final char delimiter, final boolean trim) {
         N.checkFromToIndex(fromIndex, toIndex, N.size(c));
 
-        if (N.isNullOrEmpty(c) || fromIndex == toIndex) {
+        if (N.isEmpty(c) || fromIndex == toIndex) {
             return EMPTY_STRING;
         }
 
@@ -9468,7 +9444,7 @@ public abstract class Strings {
             final boolean trim) {
         N.checkFromToIndex(fromIndex, toIndex, N.size(c));
 
-        if (N.isNullOrEmpty(c) || fromIndex == toIndex) {
+        if (N.isEmpty(c) || fromIndex == toIndex) {
             if (isEmpty(prefix) && isEmpty(suffix)) {
                 return EMPTY_STRING;
             } else if (isEmpty(prefix)) {
@@ -9679,7 +9655,7 @@ public abstract class Strings {
      * @return
      */
     public static String joinEntries(final Map<?, ?> m, final char entryDelimiter) {
-        if (N.isNullOrEmpty(m)) {
+        if (N.isEmpty(m)) {
             return EMPTY_STRING;
         }
 
@@ -9693,7 +9669,7 @@ public abstract class Strings {
      * @return
      */
     public static String joinEntries(final Map<?, ?> m, final String entryDelimiter) {
-        if (N.isNullOrEmpty(m)) {
+        if (N.isEmpty(m)) {
             return EMPTY_STRING;
         }
 
@@ -9708,7 +9684,7 @@ public abstract class Strings {
      * @return
      */
     public static String joinEntries(final Map<?, ?> m, final char entryDelimiter, final char keyValueDelimiter) {
-        if (N.isNullOrEmpty(m)) {
+        if (N.isEmpty(m)) {
             return EMPTY_STRING;
         }
 
@@ -9723,7 +9699,7 @@ public abstract class Strings {
      * @return
      */
     public static String joinEntries(final Map<?, ?> m, final String entryDelimiter, final String keyValueDelimiter) {
-        if (N.isNullOrEmpty(m)) {
+        if (N.isEmpty(m)) {
             return EMPTY_STRING;
         }
 
@@ -9785,7 +9761,7 @@ public abstract class Strings {
         N.checkArgNotNull(keyMapper, "keyMapper");
         N.checkArgNotNull(valueMapper, "valueMapper");
 
-        if (N.isNullOrEmpty(m)) {
+        if (N.isEmpty(m)) {
             if (isEmpty(prefix) && isEmpty(suffix)) {
                 return EMPTY_STRING;
             } else if (isEmpty(prefix)) {
@@ -9909,7 +9885,7 @@ public abstract class Strings {
             final boolean trim) {
         N.checkFromToIndex(fromIndex, toIndex, N.size(m));
 
-        if (N.isNullOrEmpty(m) || fromIndex == toIndex) {
+        if (N.isEmpty(m) || fromIndex == toIndex) {
             return EMPTY_STRING;
         }
 
@@ -9970,7 +9946,7 @@ public abstract class Strings {
             final String prefix, final String suffix, final boolean trim) {
         N.checkFromToIndex(fromIndex, toIndex, N.size(m));
 
-        if (N.isNullOrEmpty(m) || fromIndex == toIndex) {
+        if (N.isEmpty(m) || fromIndex == toIndex) {
             if (isEmpty(prefix) && isEmpty(suffix)) {
                 return EMPTY_STRING;
             } else if (isEmpty(prefix)) {
@@ -10189,7 +10165,7 @@ public abstract class Strings {
      */
     @SafeVarargs
     public static String concat(final String... a) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return EMPTY_STRING;
         } else if (a.length == 1) {
             return N.toString(a[0]);
@@ -10339,7 +10315,7 @@ public abstract class Strings {
     //    @Deprecated
     //    @SafeVarargs
     //    public static String concat(final Object... a) {
-    //        if (N.isNullOrEmpty(a)) {
+    //        if (N.isEmpty(a)) {
     //            return EMPTY_STRING;
     //        } else if (a.getClass().equals(String[].class)) {
     //            return Strings.concat((String[]) a);
@@ -10365,7 +10341,7 @@ public abstract class Strings {
     //     */
     //    @Deprecated
     //    public static String concat(final Collection<?> c) {
-    //        if (N.isNullOrEmpty(c)) {
+    //        if (N.isEmpty(c)) {
     //            return EMPTY_STRING;
     //        }
     //
@@ -10842,7 +10818,7 @@ public abstract class Strings {
      * @return
      */
     public static String base64Encode(final byte[] binaryData) {
-        if (N.isNullOrEmpty(binaryData)) {
+        if (N.isEmpty(binaryData)) {
             return Strings.EMPTY_STRING;
         }
 
@@ -10884,7 +10860,7 @@ public abstract class Strings {
      * @return
      */
     public static String base64EncodeChunked(final byte[] binaryData) {
-        if (N.isNullOrEmpty(binaryData)) {
+        if (N.isEmpty(binaryData)) {
             return Strings.EMPTY_STRING;
         }
 
@@ -10940,7 +10916,7 @@ public abstract class Strings {
      * @return
      */
     public static String base64UrlEncode(final byte[] binaryData) {
-        if (N.isNullOrEmpty(binaryData)) {
+        if (N.isEmpty(binaryData)) {
             return Strings.EMPTY_STRING;
         }
 
@@ -12279,7 +12255,7 @@ public abstract class Strings {
          * @return
          */
         public static <T extends CharSequence> Optional<T> firstNonEmpty(final T... a) {
-            if (N.isNullOrEmpty(a)) {
+            if (N.isEmpty(a)) {
                 return Optional.empty();
             }
 
@@ -12323,7 +12299,7 @@ public abstract class Strings {
          * @return
          */
         public static <T extends CharSequence> Optional<T> firstNonBlank(final T... a) {
-            if (N.isNullOrEmpty(a)) {
+            if (N.isEmpty(a)) {
                 return Optional.empty();
             }
 

@@ -289,7 +289,7 @@ public class EventBus {
         final Class<?> cls = subscriber.getClass();
         final List<SubIdentifier> subList = getClassSubList(cls);
 
-        if (N.isNullOrEmpty(subList)) {
+        if (N.isEmpty(subList)) {
             throw new RuntimeException("No subscriber method found in class: " + ClassUtil.getCanonicalClassName(cls));
         }
 
@@ -480,7 +480,7 @@ public class EventBus {
             listOfSubEventSubs = null;
         }
 
-        if (N.notNullOrEmpty(subEvents)) {
+        if (N.notEmpty(subEvents)) {
             synchronized (registeredEventIdSubMap) {
                 final List<String> keyToRemove = new ArrayList<>();
 
@@ -494,7 +494,7 @@ public class EventBus {
                     listOfEventIdSubMap.remove(entry.getKey());
                 }
 
-                if (N.notNullOrEmpty(keyToRemove)) {
+                if (N.notEmpty(keyToRemove)) {
                     for (String key : keyToRemove) {
                         registeredEventIdSubMap.remove(key);
                     }
@@ -651,7 +651,7 @@ public class EventBus {
                 }
             }
 
-            if (N.notNullOrEmpty(keyToRemove)) {
+            if (N.notEmpty(keyToRemove)) {
                 synchronized (stickyEventMap) {
                     for (Object event : keyToRemove) {
                         stickyEventMap.remove(event);

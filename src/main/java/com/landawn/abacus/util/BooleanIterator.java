@@ -59,7 +59,7 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
      */
     @SafeVarargs
     public static BooleanIterator of(final boolean... a) {
-        return N.isNullOrEmpty(a) ? EMPTY : of(a, 0, a.length);
+        return N.isEmpty(a) ? EMPTY : of(a, 0, a.length);
     }
 
     /**

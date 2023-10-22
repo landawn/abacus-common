@@ -309,7 +309,7 @@ public class WebUtil {
             sb.append(IOUtil.LINE_SEPARATOR);
             sb.append("curl -X ").append(httpMethod).append(" ").append(quoteChar).append(url).append(quoteChar);
 
-            if (N.notNullOrEmpty(headers)) {
+            if (N.notEmpty(headers)) {
                 String headerValue = null;
 
                 for (Map.Entry<String, ?> e : headers.entrySet()) {

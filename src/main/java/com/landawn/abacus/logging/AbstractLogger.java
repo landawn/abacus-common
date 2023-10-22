@@ -921,7 +921,7 @@ public abstract class AbstractLogger implements Logger {
     static String format(String template, Object... args) {
         template = String.valueOf(template); // null -> "null"
 
-        if (N.isNullOrEmpty(args)) {
+        if (N.isEmpty(args)) {
             return template;
         }
 

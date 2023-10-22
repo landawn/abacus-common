@@ -167,7 +167,7 @@ final class JSONParserImpl extends AbstractJSONParser {
     public void readString(Object[] outResult, String str, final JSONDeserializationConfig config) {
         final JSONDeserializationConfig configToUse = check(config);
 
-        //    if (N.isNullOrEmpty(str)) { // TODO ?
+        //    if (N.isEmpty(str)) { // TODO ?
         //        return;
         //    }
 
@@ -198,7 +198,7 @@ final class JSONParserImpl extends AbstractJSONParser {
     public void readString(final Collection<?> outResult, final String str, final JSONDeserializationConfig config) {
         final JSONDeserializationConfig configToUse = check(config);
 
-        //    if (N.isNullOrEmpty(str)) { // TODO ?
+        //    if (N.isEmpty(str)) { // TODO ?
         //        return;
         //    }
 
@@ -624,7 +624,7 @@ final class JSONParserImpl extends AbstractJSONParser {
         final Class<?> cls = type.clazz();
         final BeanInfo beanInfo = ParserUtil.getBeanInfo(cls);
 
-        if (N.isNullOrEmpty(beanInfo.jsonXmlSerializablePropInfos)) {
+        if (N.isEmpty(beanInfo.jsonXmlSerializablePropInfos)) {
             throw new ParseException("No serializable property is found in class: " + ClassUtil.getCanonicalClassName(cls));
         }
 
@@ -1376,7 +1376,7 @@ final class JSONParserImpl extends AbstractJSONParser {
 
         Objectory.recycle(types);
 
-        if (N.notNullOrEmpty(ds.properties())) {
+        if (N.notEmpty(ds.properties())) {
             if (isPrettyFormat) {
                 bw.write(',');
             } else {
@@ -1751,7 +1751,7 @@ final class JSONParserImpl extends AbstractJSONParser {
     @SuppressWarnings("unused")
     protected <T> T readBean(final Type<? extends T> type, final Class<? extends T> targetClass, final JSONReader jr, final JSONDeserializationConfig config,
             final boolean isFirstCall) throws IOException {
-        final boolean hasPropTypes = N.notNullOrEmpty(config.getPropTypes());
+        final boolean hasPropTypes = N.notEmpty(config.getPropTypes());
         final boolean ignoreUnmatchedProperty = config.ignoreUnmatchedProperty();
         final boolean ignoreNullOrEmpty = config.ignoreNullOrEmpty();
         final boolean readNullToEmpty = config.readNullToEmpty();
@@ -2084,7 +2084,7 @@ final class JSONParserImpl extends AbstractJSONParser {
             valueType = config.getMapValueType();
         }
 
-        final boolean hasPropTypes = N.notNullOrEmpty(config.getPropTypes());
+        final boolean hasPropTypes = N.notEmpty(config.getPropTypes());
         final Collection<String> ignoredClassPropNames = config.getIgnoredPropNames(Map.class);
         final boolean ignoreNullOrEmpty = config.ignoreNullOrEmpty();
         final boolean readNullToEmpty = config.readNullToEmpty();
@@ -2107,7 +2107,7 @@ final class JSONParserImpl extends AbstractJSONParser {
         int firstToken = isFirstCall ? jr.nextToken() : START_BRACE;
 
         if (firstToken == EOR) {
-            //    if (isFirstCall && N.notNullOrEmpty(jr.getText())) {
+            //    if (isFirstCall && N.notEmpty(jr.getText())) {
             //        throw new ParseException("Can't parse: " + jr.getText());
             //    }
             //
@@ -2291,7 +2291,7 @@ final class JSONParserImpl extends AbstractJSONParser {
         int firstToken = isFirstCall ? jr.nextToken() : START_BRACKET;
 
         if (firstToken == EOR) {
-            //    if (isFirstCall && N.notNullOrEmpty(jr.getText())) {
+            //    if (isFirstCall && N.notEmpty(jr.getText())) {
             //        throw new ParseException("Can't parse: " + jr.getText());
             //    }
             //
@@ -2502,7 +2502,7 @@ final class JSONParserImpl extends AbstractJSONParser {
         int firstToken = isFirstCall ? jr.nextToken() : START_BRACKET;
 
         if (firstToken == EOR) {
-            //    if (isFirstCall && N.notNullOrEmpty(jr.getText())) {
+            //    if (isFirstCall && N.notEmpty(jr.getText())) {
             //        throw new ParseException("Can't parse: " + jr.getText());
             //    }
             //
@@ -2798,7 +2798,7 @@ final class JSONParserImpl extends AbstractJSONParser {
                             //
                             //    case 2:
                             //        String str = jr.readValue(strType);
-                            //        if (N.isNullOrEmpty(str)) {
+                            //        if (N.isEmpty(str)) {
                             //            beanClass = Map.class;
                             //        } else {
                             //            try {
@@ -2854,7 +2854,7 @@ final class JSONParserImpl extends AbstractJSONParser {
                                 //
                                 //    case 2:
                                 //        String str = jr.readValue(strType);
-                                //        if (N.isNullOrEmpty(str)) {
+                                //        if (N.isEmpty(str)) {
                                 //            beanClass = Map.class;
                                 //        } else {
                                 //            try {
@@ -2948,7 +2948,7 @@ final class JSONParserImpl extends AbstractJSONParser {
                             //
                             // case 2:
                             // String str = jr.getText();
-                            // if (N.isNullOrEmpty(str)) {
+                            // if (N.isEmpty(str)) {
                             // beanClass = Map.class;
                             // } else {
                             // try {
@@ -3333,15 +3333,14 @@ final class JSONParserImpl extends AbstractJSONParser {
     private static final Map<Class<?>, Function<Map<Object, Object>, ?>> map2TargetTypeConverterMap = new HashMap<>();
 
     static {
-        map2TargetTypeConverterMap.put(Map.Entry.class, t -> N.isNullOrEmpty(t) ? null : t.entrySet().iterator().next());
+        map2TargetTypeConverterMap.put(Map.Entry.class, t -> N.isEmpty(t) ? null : t.entrySet().iterator().next());
 
-        map2TargetTypeConverterMap.put(AbstractMap.SimpleEntry.class,
-                t -> N.isNullOrEmpty(t) ? null : new AbstractMap.SimpleEntry<>(t.entrySet().iterator().next()));
+        map2TargetTypeConverterMap.put(AbstractMap.SimpleEntry.class, t -> N.isEmpty(t) ? null : new AbstractMap.SimpleEntry<>(t.entrySet().iterator().next()));
 
         map2TargetTypeConverterMap.put(AbstractMap.SimpleImmutableEntry.class,
-                t -> N.isNullOrEmpty(t) ? null : new AbstractMap.SimpleImmutableEntry<>(t.entrySet().iterator().next()));
+                t -> N.isEmpty(t) ? null : new AbstractMap.SimpleImmutableEntry<>(t.entrySet().iterator().next()));
 
-        map2TargetTypeConverterMap.put(ImmutableEntry.class, t -> N.isNullOrEmpty(t) ? null : ImmutableEntry.copyOf(t.entrySet().iterator().next()));
+        map2TargetTypeConverterMap.put(ImmutableEntry.class, t -> N.isEmpty(t) ? null : ImmutableEntry.copyOf(t.entrySet().iterator().next()));
     }
 
     private static final Map<Class<?>, BiFunction<List<?>, Type<?>, Object>> list2PairTripleConverterMap = new HashMap<>();

@@ -154,7 +154,7 @@ public final class EmailUtil {
 
             multipart.addBodyPart(messageBodyPart);
 
-            if (!N.isNullOrEmpty(attachedFiles)) {
+            if (!N.isEmpty(attachedFiles)) {
                 for (String fileName : attachedFiles) {
                     messageBodyPart = new MimeBodyPart();
 

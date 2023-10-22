@@ -139,7 +139,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * @return
      */
     public static IntList from(Collection<Integer> c) {
-        if (N.isNullOrEmpty(c)) {
+        if (N.isEmpty(c)) {
             return new IntList();
         }
 
@@ -153,7 +153,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * @return
      */
     public static IntList from(Collection<Integer> c, int defaultForNull) {
-        if (N.isNullOrEmpty(c)) {
+        if (N.isEmpty(c)) {
             return new IntList();
         }
 
@@ -177,7 +177,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     public static IntList from(final Collection<Integer> c, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, N.size(c));
 
-        if (N.isNullOrEmpty(c)) {
+        if (N.isEmpty(c)) {
             return new IntList();
         }
 
@@ -380,7 +380,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      */
     @Override
     public boolean addAll(IntList c) {
-        if (N.isNullOrEmpty(c)) {
+        if (N.isEmpty(c)) {
             return false;
         }
 
@@ -406,7 +406,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     public boolean addAll(int index, IntList c) {
         rangeCheckForAdd(index);
 
-        if (N.isNullOrEmpty(c)) {
+        if (N.isEmpty(c)) {
             return false;
         }
 
@@ -449,7 +449,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     public boolean addAll(int index, int[] a) {
         rangeCheckForAdd(index);
 
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return false;
         }
 
@@ -547,7 +547,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      */
     @Override
     public boolean removeAll(IntList c) {
-        if (N.isNullOrEmpty(c)) {
+        if (N.isEmpty(c)) {
             return false;
         }
 
@@ -562,7 +562,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      */
     @Override
     public boolean removeAll(int[] a) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return false;
         }
 
@@ -646,7 +646,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      */
     @Override
     public boolean retainAll(IntList c) {
-        if (N.isNullOrEmpty(c)) {
+        if (N.isEmpty(c)) {
             boolean result = size() > 0;
             clear();
             return result;
@@ -662,7 +662,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      */
     @Override
     public boolean retainAll(int[] a) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             boolean result = size() > 0;
             clear();
             return result;
@@ -731,7 +731,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     @Override
     @SafeVarargs
     public final void deleteAll(int... indices) {
-        if (N.isNullOrEmpty(indices)) {
+        if (N.isEmpty(indices)) {
             return;
         }
 
@@ -789,7 +789,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     public void replaceRange(final int fromIndex, final int toIndex, final int[] replacement) {
         N.checkFromToIndex(fromIndex, toIndex, size());
 
-        if (N.isNullOrEmpty(replacement)) {
+        if (N.isEmpty(replacement)) {
             deleteRange(fromIndex, toIndex);
             return;
         }
@@ -908,7 +908,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      */
     @Override
     public boolean containsAny(IntList c) {
-        if (this.isEmpty() || N.isNullOrEmpty(c)) {
+        if (this.isEmpty() || N.isEmpty(c)) {
             return false;
         }
 
@@ -922,7 +922,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      */
     @Override
     public boolean containsAny(int[] a) {
-        if (this.isEmpty() || N.isNullOrEmpty(a)) {
+        if (this.isEmpty() || N.isEmpty(a)) {
             return false;
         }
 
@@ -936,7 +936,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      */
     @Override
     public boolean containsAll(IntList c) {
-        if (N.isNullOrEmpty(c)) {
+        if (N.isEmpty(c)) {
             return true;
         } else if (isEmpty()) {
             return false;
@@ -972,7 +972,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      */
     @Override
     public boolean containsAll(int[] a) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return true;
         } else if (isEmpty()) {
             return false;
@@ -988,7 +988,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      */
     @Override
     public boolean disjoint(final IntList c) {
-        if (isEmpty() || N.isNullOrEmpty(c)) {
+        if (isEmpty() || N.isEmpty(c)) {
             return true;
         }
 
@@ -1022,7 +1022,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      */
     @Override
     public boolean disjoint(final int[] b) {
-        if (isEmpty() || N.isNullOrEmpty(b)) {
+        if (isEmpty() || N.isEmpty(b)) {
             return true;
         }
 
@@ -1051,7 +1051,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      */
     @Override
     public IntList intersection(final IntList b) {
-        if (N.isNullOrEmpty(b)) {
+        if (N.isEmpty(b)) {
             return new IntList();
         }
 
@@ -1075,7 +1075,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      */
     @Override
     public IntList intersection(final int[] a) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return new IntList();
         }
 
@@ -1100,7 +1100,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      */
     @Override
     public IntList difference(final IntList b) {
-        if (N.isNullOrEmpty(b)) {
+        if (N.isEmpty(b)) {
             return of(N.copyOfRange(elementData, 0, size()));
         }
 
@@ -1124,7 +1124,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      */
     @Override
     public IntList difference(final int[] a) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return of(N.copyOfRange(elementData, 0, size()));
         }
 
@@ -1144,7 +1144,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      */
     @Override
     public IntList symmetricDifference(final IntList b) {
-        if (N.isNullOrEmpty(b)) {
+        if (N.isEmpty(b)) {
             return this.copy();
         } else if (this.isEmpty()) {
             return b.copy();
@@ -1179,7 +1179,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      */
     @Override
     public IntList symmetricDifference(final int[] a) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return of(N.copyOfRange(elementData, 0, size()));
         } else if (this.isEmpty()) {
             return of(N.copyOfRange(a, 0, a.length));
@@ -2491,7 +2491,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
             throw new OutOfMemoryError();
         }
 
-        if (N.isNullOrEmpty(elementData)) {
+        if (N.isEmpty(elementData)) {
             elementData = new int[Math.max(DEFAULT_CAPACITY, minCapacity)];
         } else if (minCapacity - elementData.length > 0) {
             int newCapacity = calNewCapacity(minCapacity, elementData.length);

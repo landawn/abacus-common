@@ -254,7 +254,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
     public static <K, E> SetMultimap<K, E> create(final Map<? extends K, ? extends E> map) {
         final SetMultimap<K, E> multimap = new SetMultimap<>(Maps.newTargetMap(map), HashSet.class);
 
-        if (N.notNullOrEmpty(map)) {
+        if (N.notEmpty(map)) {
             multimap.putAll(map);
         }
 
@@ -272,7 +272,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
     //    public static <K, E> SetMultimap<K, E> copyOf(final Map<? extends K, ? extends Collection<? extends E>> map) {
     //        final SetMultimap<K, E> multimap = new SetMultimap<>(Maps.newTargetMap(map), HashSet.class);
     //
-    //        if (N.notNullOrEmpty(map)) {
+    //        if (N.notEmpty(map)) {
     //            for (Map.Entry<? extends K, ? extends Collection<? extends E>> entry : map.entrySet()) {
     //                multimap.putAll(entry.getKey(), entry.getValue());
     //            }
@@ -294,7 +294,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
 
         final SetMultimap<K, T> multimap = N.newSetMultimap(N.size(c));
 
-        if (N.notNullOrEmpty(c)) {
+        if (N.notEmpty(c)) {
             for (T e : c) {
                 multimap.put(keyMapper.apply(e), e);
             }
@@ -320,7 +320,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
 
         final SetMultimap<K, E> multimap = N.newSetMultimap(N.size(c));
 
-        if (N.notNullOrEmpty(c)) {
+        if (N.notEmpty(c)) {
             for (T e : c) {
                 multimap.put(keyMapper.apply(e), valueExtractor.apply(e));
             }
@@ -340,7 +340,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
     //    public static <K, E> SetMultimap<E, K> invertFrom(final Map<K, E> map) {
     //        final SetMultimap<E, K> multimap = new SetMultimap<>(Maps.newOrderingMap(map), HashSet.class);
     //
-    //        if (N.notNullOrEmpty(map)) {
+    //        if (N.notEmpty(map)) {
     //            for (Map.Entry<K, E> entry : map.entrySet()) {
     //                multimap.put(entry.getValue(), entry.getKey());
     //            }
@@ -361,11 +361,11 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
     //    public static <K, E> SetMultimap<E, K> flatInvertFrom(final Map<K, ? extends Collection<? extends E>> map) {
     //        final SetMultimap<E, K> multimap = new SetMultimap<>(Maps.newOrderingMap(map), HashSet.class);
     //
-    //        if (N.notNullOrEmpty(map)) {
+    //        if (N.notEmpty(map)) {
     //            for (Map.Entry<K, ? extends Collection<? extends E>> entry : map.entrySet()) {
     //                final Collection<? extends E> c = entry.getValue();
     //
-    //                if (N.notNullOrEmpty(c)) {
+    //                if (N.notEmpty(c)) {
     //                    for (E e : c) {
     //                        multimap.put(e, entry.getKey());
     //                    }
@@ -387,11 +387,11 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
     //    public static <K, E, V extends Collection<E>> SetMultimap<E, K> invertFrom(final Multimap<K, E, V> map) {
     //        final SetMultimap<E, K> multimap = new SetMultimap<>(Maps.newOrderingMap(map.valueMap), HashSet.class);
     //
-    //        if (N.notNullOrEmpty(map)) {
+    //        if (N.notEmpty(map)) {
     //            for (Map.Entry<K, V> entry : map.entrySet()) {
     //                final V c = entry.getValue();
     //
-    //                if (N.notNullOrEmpty(c)) {
+    //                if (N.notEmpty(c)) {
     //                    for (E e : c) {
     //                        multimap.put(e, entry.getKey());
     //                    }
@@ -455,7 +455,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * @return
      */
     public static <K, E> SetMultimap<K, E> concat(final Collection<? extends Map<? extends K, ? extends E>> c) {
-        if (N.isNullOrEmpty(c)) {
+        if (N.isEmpty(c)) {
             return N.newSetMultimap();
         }
 
@@ -763,11 +763,11 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
         final SetMultimap<K, E> multimap = this;
         final SetMultimap<E, K> res = new SetMultimap<>(Maps.newOrderingMap(valueMap), (Supplier) valueSupplier);
 
-        if (N.notNullOrEmpty(multimap)) {
+        if (N.notEmpty(multimap)) {
             for (Map.Entry<K, Set<E>> entry : multimap.entrySet()) {
                 final Set<E> c = entry.getValue();
 
-                if (N.notNullOrEmpty(c)) {
+                if (N.notEmpty(c)) {
                     for (E e : c) {
                         res.put(e, entry.getKey());
                     }
@@ -840,11 +840,11 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
     //    public SetMultimap<E, K> inversed() {
     //        final SetMultimap<E, K> multimap = new SetMultimap<E, K>(valueMap.getClass(), concreteValueType);
     //
-    //        if (N.notNullOrEmpty(valueMap)) {
+    //        if (N.notEmpty(valueMap)) {
     //            for (Map.Entry<K, ? extends Set<? extends E>> entry : valueMap.entrySet()) {
     //                final Set<? extends E> c = entry.getValue();
     //
-    //                if (N.notNullOrEmpty(c)) {
+    //                if (N.notEmpty(c)) {
     //                    for (E e : c) {
     //                        multimap.put(e, entry.getKey());
     //                    }

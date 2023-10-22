@@ -236,7 +236,7 @@ public final class Iterables {
      * @return
      */
     public static <T extends Comparable<? super T>> Nullable<T> min(final T[] a) {
-        return N.isNullOrEmpty(a) ? Nullable.<T> empty() : Nullable.of(N.min(a));
+        return N.isEmpty(a) ? Nullable.<T> empty() : Nullable.of(N.min(a));
     }
 
     /**
@@ -248,7 +248,7 @@ public final class Iterables {
      * @return
      */
     public static <T> Nullable<T> min(final T[] a, final Comparator<? super T> cmp) {
-        return N.isNullOrEmpty(a) ? Nullable.<T> empty() : Nullable.of(N.min(a, cmp));
+        return N.isEmpty(a) ? Nullable.<T> empty() : Nullable.of(N.min(a, cmp));
     }
 
     /**
@@ -363,7 +363,7 @@ public final class Iterables {
      * @return
      */
     public static <T extends Comparable<? super T>> Nullable<T> max(final T[] a) {
-        return N.isNullOrEmpty(a) ? Nullable.<T> empty() : Nullable.of(N.max(a));
+        return N.isEmpty(a) ? Nullable.<T> empty() : Nullable.of(N.max(a));
     }
 
     /**
@@ -375,7 +375,7 @@ public final class Iterables {
      * @return
      */
     public static <T> Nullable<T> max(final T[] a, final Comparator<? super T> cmp) {
-        return N.isNullOrEmpty(a) ? Nullable.<T> empty() : Nullable.of(N.max(a, cmp));
+        return N.isEmpty(a) ? Nullable.<T> empty() : Nullable.of(N.max(a, cmp));
     }
 
     /**
@@ -489,7 +489,7 @@ public final class Iterables {
      * @return
      */
     public static <T extends Comparable<? super T>> Optional<Pair<T, T>> minMax(final T[] a) {
-        return N.isNullOrEmpty(a) ? Optional.<Pair<T, T>> empty() : Optional.of(N.minMax(a));
+        return N.isEmpty(a) ? Optional.<Pair<T, T>> empty() : Optional.of(N.minMax(a));
     }
 
     /**
@@ -500,7 +500,7 @@ public final class Iterables {
      * @return
      */
     public static <T> Optional<Pair<T, T>> minMax(final T[] a, Comparator<? super T> cmp) {
-        return N.isNullOrEmpty(a) ? Optional.<Pair<T, T>> empty() : Optional.of(N.minMax(a, cmp));
+        return N.isEmpty(a) ? Optional.<Pair<T, T>> empty() : Optional.of(N.minMax(a, cmp));
     }
 
     /**
@@ -559,7 +559,7 @@ public final class Iterables {
      * @return
      */
     public static <T extends Comparable<? super T>> Nullable<T> median(final T[] a) {
-        return N.isNullOrEmpty(a) ? Nullable.<T> empty() : Nullable.of(N.median(a));
+        return N.isEmpty(a) ? Nullable.<T> empty() : Nullable.of(N.median(a));
     }
 
     /**
@@ -570,7 +570,7 @@ public final class Iterables {
      * @return
      */
     public static <T extends Comparable<? super T>> Nullable<T> median(final Collection<? extends T> c) {
-        return N.isNullOrEmpty(c) ? Nullable.<T> empty() : Nullable.of(N.median(c));
+        return N.isEmpty(c) ? Nullable.<T> empty() : Nullable.of(N.median(c));
     }
 
     /**
@@ -582,7 +582,7 @@ public final class Iterables {
      * @return
      */
     public static <T> Nullable<T> median(final T[] a, final Comparator<? super T> cmp) {
-        return N.isNullOrEmpty(a) ? Nullable.<T> empty() : Nullable.of(N.median(a, cmp));
+        return N.isEmpty(a) ? Nullable.<T> empty() : Nullable.of(N.median(a, cmp));
     }
 
     /**
@@ -594,7 +594,7 @@ public final class Iterables {
      * @return
      */
     public static <T> Nullable<T> median(final Collection<? extends T> c, final Comparator<? super T> cmp) {
-        return N.isNullOrEmpty(c) ? Nullable.<T> empty() : Nullable.of(N.median(c, cmp));
+        return N.isEmpty(c) ? Nullable.<T> empty() : Nullable.of(N.median(c, cmp));
     }
 
     /**
@@ -632,7 +632,7 @@ public final class Iterables {
      * @return
      */
     public static <T extends Comparable<? super T>> Nullable<T> kthLargest(final Collection<? extends T> c, final int k) {
-        return N.isNullOrEmpty(c) || c.size() < k ? Nullable.<T> empty() : Nullable.of(N.kthLargest(c, k));
+        return N.isEmpty(c) || c.size() < k ? Nullable.<T> empty() : Nullable.of(N.kthLargest(c, k));
     }
 
     /**
@@ -644,7 +644,7 @@ public final class Iterables {
      * @return
      */
     public static <T extends Comparable<? super T>> Nullable<T> kthLargest(final T[] a, final int k) {
-        return N.isNullOrEmpty(a) || a.length < k ? Nullable.<T> empty() : Nullable.of(N.kthLargest(a, k));
+        return N.isEmpty(a) || a.length < k ? Nullable.<T> empty() : Nullable.of(N.kthLargest(a, k));
     }
 
     /**
@@ -657,7 +657,7 @@ public final class Iterables {
      * @return
      */
     public static <T> Nullable<T> kthLargest(final Collection<? extends T> c, final int k, final Comparator<? super T> cmp) {
-        return N.isNullOrEmpty(c) || c.size() < k ? Nullable.<T> empty() : Nullable.of(N.kthLargest(c, k, cmp));
+        return N.isEmpty(c) || c.size() < k ? Nullable.<T> empty() : Nullable.of(N.kthLargest(c, k, cmp));
     }
 
     /**
@@ -670,7 +670,7 @@ public final class Iterables {
      * @return
      */
     public static <T> Nullable<T> kthLargest(final T[] a, final int k, final Comparator<? super T> cmp) {
-        return N.isNullOrEmpty(a) || a.length < k ? Nullable.<T> empty() : Nullable.of(N.kthLargest(a, k, cmp));
+        return N.isEmpty(a) || a.length < k ? Nullable.<T> empty() : Nullable.of(N.kthLargest(a, k, cmp));
     }
 
     /**
@@ -892,7 +892,7 @@ public final class Iterables {
      * @throws E the e
      */
     public static <T, E extends Exception> OptionalDouble averageInt(final T[] a, final Throwables.ToIntFunction<? super T, E> func) throws E {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return OptionalDouble.empty();
         }
 
@@ -1025,7 +1025,7 @@ public final class Iterables {
      * @throws E the e
      */
     public static <T, E extends Exception> OptionalDouble averageLong(final T[] a, final Throwables.ToLongFunction<? super T, E> func) throws E {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return OptionalDouble.empty();
         }
 
@@ -1158,7 +1158,7 @@ public final class Iterables {
      * @throws E the e
      */
     public static <T, E extends Exception> OptionalDouble averageDouble(final T[] a, final Throwables.ToDoubleFunction<? super T, E> func) throws E {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return OptionalDouble.empty();
         }
 
@@ -1407,7 +1407,7 @@ public final class Iterables {
      */
     public static <T, E extends Exception, E2 extends Exception> OptionalInt findFirstOrLastIndex(final T[] a,
             final Throwables.Predicate<? super T, E> predicateForFirst, final Throwables.Predicate<? super T, E2> predicateForLast) throws E, E2 {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return OptionalInt.empty();
         }
 
@@ -1431,7 +1431,7 @@ public final class Iterables {
      */
     public static <T, E extends Exception, E2 extends Exception> OptionalInt findFirstOrLastIndex(final Collection<? extends T> c,
             final Throwables.Predicate<? super T, E> predicateForFirst, final Throwables.Predicate<? super T, E2> predicateForLast) throws E, E2 {
-        if (N.isNullOrEmpty(c)) {
+        if (N.isEmpty(c)) {
             return OptionalInt.empty();
         }
 
@@ -1470,7 +1470,7 @@ public final class Iterables {
      */
     public static <T, E extends Exception, E2 extends Exception> Pair<OptionalInt, OptionalInt> findFirstAndLastIndex(final T[] a,
             final Throwables.Predicate<? super T, E> predicateForFirst, final Throwables.Predicate<? super T, E2> predicateForLast) throws E, E2 {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return Pair.of(OptionalInt.empty(), OptionalInt.empty());
         }
 
@@ -1507,7 +1507,7 @@ public final class Iterables {
      */
     public static <T, E extends Exception, E2 extends Exception> Pair<OptionalInt, OptionalInt> findFirstAndLastIndex(final Collection<? extends T> c,
             final Throwables.Predicate<? super T, E> predicateForFirst, final Throwables.Predicate<? super T, E2> predicateForLast) throws E, E2 {
-        if (N.isNullOrEmpty(c)) {
+        if (N.isEmpty(c)) {
             return Pair.of(OptionalInt.empty(), OptionalInt.empty());
         }
 
@@ -1529,7 +1529,7 @@ public final class Iterables {
      */
     public static <T, E extends Exception, E2 extends Exception> Nullable<T> findFirstOrLast(final T[] a,
             final Throwables.Predicate<? super T, E> predicateForFirst, final Throwables.Predicate<? super T, E2> predicateForLast) throws E, E2 {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return Nullable.<T> empty();
         }
 
@@ -1553,7 +1553,7 @@ public final class Iterables {
      */
     public static <T, E extends Exception, E2 extends Exception> Nullable<T> findFirstOrLast(final Collection<? extends T> c,
             final Throwables.Predicate<? super T, E> predicateForFirst, final Throwables.Predicate<? super T, E2> predicateForLast) throws E, E2 {
-        if (N.isNullOrEmpty(c)) {
+        if (N.isEmpty(c)) {
             return Nullable.<T> empty();
         }
 
@@ -1592,7 +1592,7 @@ public final class Iterables {
      */
     public static <T, E extends Exception, E2 extends Exception> Pair<Nullable<T>, Nullable<T>> findFirstAndLast(final T[] a,
             final Throwables.Predicate<? super T, E> predicateForFirst, final Throwables.Predicate<? super T, E2> predicateForLast) throws E, E2 {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return Pair.of(Nullable.<T> empty(), Nullable.<T> empty());
         }
 
@@ -1629,7 +1629,7 @@ public final class Iterables {
      */
     public static <T, E extends Exception, E2 extends Exception> Pair<Nullable<T>, Nullable<T>> findFirstAndLast(final Collection<? extends T> c,
             final Throwables.Predicate<? super T, E> predicateForFirst, final Throwables.Predicate<? super T, E2> predicateForLast) throws E, E2 {
-        if (N.isNullOrEmpty(c)) {
+        if (N.isEmpty(c)) {
             return Pair.of(Nullable.<T> empty(), Nullable.<T> empty());
         }
 
@@ -2147,7 +2147,7 @@ public final class Iterables {
         final List<List<T>> res = new ArrayList<>();
         res.add(new ArrayList<>());
 
-        if (N.notNullOrEmpty(c)) {
+        if (N.notEmpty(c)) {
             for (T e : c) {
                 final List<T> prev = res.get(res.size() - 1);
                 List<T> cur = new ArrayList<>(prev.size() + 1);

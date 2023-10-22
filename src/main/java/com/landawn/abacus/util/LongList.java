@@ -140,7 +140,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * @return
      */
     public static LongList from(Collection<Long> c) {
-        if (N.isNullOrEmpty(c)) {
+        if (N.isEmpty(c)) {
             return new LongList();
         }
 
@@ -154,7 +154,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * @return
      */
     public static LongList from(Collection<Long> c, long defaultForNull) {
-        if (N.isNullOrEmpty(c)) {
+        if (N.isEmpty(c)) {
             return new LongList();
         }
 
@@ -178,7 +178,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
     public static LongList from(final Collection<Long> c, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, N.size(c));
 
-        if (N.isNullOrEmpty(c)) {
+        if (N.isEmpty(c)) {
             return new LongList();
         }
 
@@ -351,7 +351,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      */
     @Override
     public boolean addAll(LongList c) {
-        if (N.isNullOrEmpty(c)) {
+        if (N.isEmpty(c)) {
             return false;
         }
 
@@ -377,7 +377,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
     public boolean addAll(int index, LongList c) {
         rangeCheckForAdd(index);
 
-        if (N.isNullOrEmpty(c)) {
+        if (N.isEmpty(c)) {
             return false;
         }
 
@@ -420,7 +420,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
     public boolean addAll(int index, long[] a) {
         rangeCheckForAdd(index);
 
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return false;
         }
 
@@ -518,7 +518,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      */
     @Override
     public boolean removeAll(LongList c) {
-        if (N.isNullOrEmpty(c)) {
+        if (N.isEmpty(c)) {
             return false;
         }
 
@@ -533,7 +533,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      */
     @Override
     public boolean removeAll(long[] a) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return false;
         }
 
@@ -617,7 +617,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      */
     @Override
     public boolean retainAll(LongList c) {
-        if (N.isNullOrEmpty(c)) {
+        if (N.isEmpty(c)) {
             boolean result = size() > 0;
             clear();
             return result;
@@ -633,7 +633,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      */
     @Override
     public boolean retainAll(long[] a) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             boolean result = size() > 0;
             clear();
             return result;
@@ -702,7 +702,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
     @Override
     @SafeVarargs
     public final void deleteAll(int... indices) {
-        if (N.isNullOrEmpty(indices)) {
+        if (N.isEmpty(indices)) {
             return;
         }
 
@@ -760,7 +760,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
     public void replaceRange(final int fromIndex, final int toIndex, final long[] replacement) {
         N.checkFromToIndex(fromIndex, toIndex, size());
 
-        if (N.isNullOrEmpty(replacement)) {
+        if (N.isEmpty(replacement)) {
             deleteRange(fromIndex, toIndex);
             return;
         }
@@ -879,7 +879,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      */
     @Override
     public boolean containsAny(LongList c) {
-        if (this.isEmpty() || N.isNullOrEmpty(c)) {
+        if (this.isEmpty() || N.isEmpty(c)) {
             return false;
         }
 
@@ -893,7 +893,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      */
     @Override
     public boolean containsAny(long[] a) {
-        if (this.isEmpty() || N.isNullOrEmpty(a)) {
+        if (this.isEmpty() || N.isEmpty(a)) {
             return false;
         }
 
@@ -907,7 +907,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      */
     @Override
     public boolean containsAll(LongList c) {
-        if (N.isNullOrEmpty(c)) {
+        if (N.isEmpty(c)) {
             return true;
         } else if (isEmpty()) {
             return false;
@@ -943,7 +943,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      */
     @Override
     public boolean containsAll(long[] a) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return true;
         } else if (isEmpty()) {
             return false;
@@ -959,7 +959,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      */
     @Override
     public boolean disjoint(final LongList c) {
-        if (isEmpty() || N.isNullOrEmpty(c)) {
+        if (isEmpty() || N.isEmpty(c)) {
             return true;
         }
 
@@ -993,7 +993,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      */
     @Override
     public boolean disjoint(final long[] b) {
-        if (isEmpty() || N.isNullOrEmpty(b)) {
+        if (isEmpty() || N.isEmpty(b)) {
             return true;
         }
 
@@ -1008,7 +1008,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      */
     @Override
     public LongList intersection(final LongList b) {
-        if (N.isNullOrEmpty(b)) {
+        if (N.isEmpty(b)) {
             return new LongList();
         }
 
@@ -1032,7 +1032,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      */
     @Override
     public LongList intersection(final long[] a) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return new LongList();
         }
 
@@ -1047,7 +1047,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      */
     @Override
     public LongList difference(LongList b) {
-        if (N.isNullOrEmpty(b)) {
+        if (N.isEmpty(b)) {
             return of(N.copyOfRange(elementData, 0, size()));
         }
 
@@ -1071,7 +1071,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      */
     @Override
     public LongList difference(final long[] a) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return of(N.copyOfRange(elementData, 0, size()));
         }
 
@@ -1086,7 +1086,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      */
     @Override
     public LongList symmetricDifference(LongList b) {
-        if (N.isNullOrEmpty(b)) {
+        if (N.isEmpty(b)) {
             return this.copy();
         } else if (this.isEmpty()) {
             return b.copy();
@@ -1121,7 +1121,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      */
     @Override
     public LongList symmetricDifference(final long[] a) {
-        if (N.isNullOrEmpty(a)) {
+        if (N.isEmpty(a)) {
             return of(N.copyOfRange(elementData, 0, size()));
         } else if (this.isEmpty()) {
             return of(N.copyOfRange(a, 0, a.length));
@@ -2418,7 +2418,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
             throw new OutOfMemoryError();
         }
 
-        if (N.isNullOrEmpty(elementData)) {
+        if (N.isEmpty(elementData)) {
             elementData = new long[Math.max(DEFAULT_CAPACITY, minCapacity)];
         } else if (minCapacity - elementData.length > 0) {
             int newCapacity = calNewCapacity(minCapacity, elementData.length);

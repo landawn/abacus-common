@@ -67,7 +67,7 @@ public final class Median {
      * @see #of(int[])
      */
     public static Pair<Character, OptionalChar> of(final char[] a, final int fromIndex, final int toIndex) {
-        if (N.isNullOrEmpty(a) || toIndex - fromIndex < 1) {
+        if (N.isEmpty(a) || toIndex - fromIndex < 1) {
             throw new IllegalArgumentException("The length of array can't be null or empty"); //NOSONAR
         }
 
@@ -128,7 +128,7 @@ public final class Median {
      * @see #of(int[])
      */
     public static Pair<Byte, OptionalByte> of(final byte[] a, final int fromIndex, final int toIndex) {
-        if (N.isNullOrEmpty(a) || toIndex - fromIndex < 1) {
+        if (N.isEmpty(a) || toIndex - fromIndex < 1) {
             throw new IllegalArgumentException("The length of array can't be null or empty");
         }
 
@@ -189,7 +189,7 @@ public final class Median {
      * @see #of(int[])
      */
     public static Pair<Short, OptionalShort> of(final short[] a, final int fromIndex, final int toIndex) {
-        if (N.isNullOrEmpty(a) || toIndex - fromIndex < 1) {
+        if (N.isEmpty(a) || toIndex - fromIndex < 1) {
             throw new IllegalArgumentException("The length of array can't be null or empty");
         }
 
@@ -268,7 +268,7 @@ public final class Median {
      * @throws IllegalArgumentException if specified array is empty or length is zero.
      */
     public static Pair<Integer, OptionalInt> of(final int[] a, final int fromIndex, final int toIndex) {
-        if (N.isNullOrEmpty(a) || toIndex - fromIndex < 1) {
+        if (N.isEmpty(a) || toIndex - fromIndex < 1) {
             throw new IllegalArgumentException("The length of array can't be null or empty");
         }
 
@@ -329,7 +329,7 @@ public final class Median {
      * @see #of(int[])
      */
     public static Pair<Long, OptionalLong> of(final long[] a, final int fromIndex, final int toIndex) {
-        if (N.isNullOrEmpty(a) || toIndex - fromIndex < 1) {
+        if (N.isEmpty(a) || toIndex - fromIndex < 1) {
             throw new IllegalArgumentException("The length of array can't be null or empty");
         }
 
@@ -390,7 +390,7 @@ public final class Median {
      * @see #of(int[])
      */
     public static Pair<Float, OptionalFloat> of(final float[] a, final int fromIndex, final int toIndex) {
-        if (N.isNullOrEmpty(a) || toIndex - fromIndex < 1) {
+        if (N.isEmpty(a) || toIndex - fromIndex < 1) {
             throw new IllegalArgumentException("The length of array can't be null or empty");
         }
 
@@ -451,7 +451,7 @@ public final class Median {
      * @see #of(int[])
      */
     public static Pair<Double, OptionalDouble> of(final double[] a, final int fromIndex, final int toIndex) {
-        if (N.isNullOrEmpty(a) || toIndex - fromIndex < 1) {
+        if (N.isEmpty(a) || toIndex - fromIndex < 1) {
             throw new IllegalArgumentException("The length of array can't be null or empty");
         }
 
@@ -547,7 +547,7 @@ public final class Median {
      */
     @SuppressWarnings("rawtypes")
     public static <T> Pair<T, Nullable<T>> of(final T[] a, final int fromIndex, final int toIndex, Comparator<? super T> cmp) {
-        if (N.isNullOrEmpty(a) || toIndex - fromIndex < 1) {
+        if (N.isEmpty(a) || toIndex - fromIndex < 1) {
             throw new IllegalArgumentException("The length of array can't be null or empty");
         }
 
@@ -601,7 +601,7 @@ public final class Median {
      */
     @SuppressWarnings("rawtypes")
     public static <T> Pair<T, Nullable<T>> of(final Collection<? extends T> c, Comparator<? super T> cmp) {
-        if (N.isNullOrEmpty(c)) {
+        if (N.isEmpty(c)) {
             throw new IllegalArgumentException("The size of collection can't be null or empty");
         }
 

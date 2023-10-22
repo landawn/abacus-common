@@ -83,7 +83,7 @@ public class IdentityHashSet<T> extends AbstractSet<T> {
      */
     @Override
     public boolean containsAll(Collection<?> c) {
-        if (N.isNullOrEmpty(c)) {
+        if (N.isEmpty(c)) {
             return true;
         }
 
@@ -100,7 +100,7 @@ public class IdentityHashSet<T> extends AbstractSet<T> {
     public boolean addAll(Collection<? extends T> c) {
         boolean modified = false;
 
-        if (N.notNullOrEmpty(c)) {
+        if (N.notEmpty(c)) {
             for (T e : c) {
                 if (add(e)) {
                     modified = true;
@@ -121,7 +121,7 @@ public class IdentityHashSet<T> extends AbstractSet<T> {
     public boolean removeAll(Collection<?> c) {
         boolean modified = false;
 
-        if (N.notNullOrEmpty(c)) {
+        if (N.notEmpty(c)) {
             for (Object e : c) {
                 if (remove(e)) {
                     modified = true;
@@ -139,7 +139,7 @@ public class IdentityHashSet<T> extends AbstractSet<T> {
      */
     @Override
     public boolean retainAll(Collection<?> c) {
-        if (N.isNullOrEmpty(c)) {
+        if (N.isEmpty(c)) {
             if (map.size() > 0) {
                 map.clear();
                 return true;

@@ -145,7 +145,7 @@ public class AsyncExecutor {
     @Deprecated
     @SafeVarargs
     public final List<ContinuableFuture<Void>> execute(final Throwables.Runnable<? extends Exception>... commands) {
-        if (N.isNullOrEmpty(commands)) {
+        if (N.isEmpty(commands)) {
             return new ArrayList<>();
         }
 
@@ -164,7 +164,7 @@ public class AsyncExecutor {
      * @return
      */
     public List<ContinuableFuture<Void>> execute(final List<? extends Throwables.Runnable<? extends Exception>> commands) {
-        if (N.isNullOrEmpty(commands)) {
+        if (N.isEmpty(commands)) {
             return new ArrayList<>();
         }
 
@@ -214,7 +214,7 @@ public class AsyncExecutor {
     @Deprecated
     @SafeVarargs
     public final <R> List<ContinuableFuture<R>> execute(final Callable<R>... commands) {
-        if (N.isNullOrEmpty(commands)) {
+        if (N.isEmpty(commands)) {
             return new ArrayList<>();
         }
 
@@ -234,7 +234,7 @@ public class AsyncExecutor {
      * @return
      */
     public <R> List<ContinuableFuture<R>> execute(final Collection<? extends Callable<R>> commands) {
-        if (N.isNullOrEmpty(commands)) {
+        if (N.isEmpty(commands)) {
             return new ArrayList<>();
         }
 

@@ -191,12 +191,12 @@ public class SheetType<R, C, E> extends AbstractType<Sheet<R, C, E>> {
             sheet = ClassUtil.invokeConstructor(ClassUtil.getDeclaredConstructor(typeClass, Collection.class, Collection.class), rowKeySet, columnKeySet);
         }
 
-        if (N.notNullOrEmpty(rowList)) {
+        if (N.notEmpty(rowList)) {
             int i = 0;
             for (R rowKey : rowKeySet) {
                 sheet.setRow(rowKey, rowList.get(i++));
             }
-        } else if (N.notNullOrEmpty(columnList)) {
+        } else if (N.notEmpty(columnList)) {
             int i = 0;
             for (C columnKey : columnKeySet) {
                 sheet.setColumn(columnKey, columnList.get(i++));

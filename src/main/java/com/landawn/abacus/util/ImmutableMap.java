@@ -206,7 +206,7 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      * @return
      */
     public static <K, V> ImmutableMap<K, V> copyOf(final Map<? extends K, ? extends V> map) {
-        if (N.isNullOrEmpty(map)) {
+        if (N.isEmpty(map)) {
             return empty();
         }
 
@@ -561,7 +561,7 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
          * @return 
          */
         public Builder<K, V> putAll(final Map<? extends K, ? extends V> m) {
-            if (N.notNullOrEmpty(m)) {
+            if (N.notEmpty(m)) {
                 map.putAll(m);
             }
 

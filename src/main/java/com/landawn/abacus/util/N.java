@@ -141,7 +141,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      */
     public static int occurrencesOf(final boolean[] a, final boolean valueToFind) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return 0;
         }
 
@@ -163,7 +163,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      */
     public static int occurrencesOf(final char[] a, final char valueToFind) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return 0;
         }
 
@@ -185,7 +185,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      */
     public static int occurrencesOf(final byte[] a, final byte valueToFind) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return 0;
         }
 
@@ -207,7 +207,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      */
     public static int occurrencesOf(final short[] a, final short valueToFind) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return 0;
         }
 
@@ -229,7 +229,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      */
     public static int occurrencesOf(final int[] a, final int valueToFind) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return 0;
         }
 
@@ -251,7 +251,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      */
     public static int occurrencesOf(final long[] a, final long valueToFind) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return 0;
         }
 
@@ -273,7 +273,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      */
     public static int occurrencesOf(final float[] a, final float valueToFind) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return 0;
         }
 
@@ -295,7 +295,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      */
     public static int occurrencesOf(final double[] a, final double valueToFind) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return 0;
         }
 
@@ -317,7 +317,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      */
     public static int occurrencesOf(final Object[] a, final Object valueToFind) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return 0;
         }
 
@@ -426,7 +426,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see Multiset#create(Collection)
      */
     public static <T> Map<T, Integer> occurrencesMap(final T[] a, final Supplier<Map<T, Integer>> mapSupplier) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return mapSupplier.get();
         }
 
@@ -615,7 +615,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      */
     public static boolean contains(final Collection<?> c, final Object valueToFind) {
-        if (isNullOrEmpty(c)) {
+        if (isEmpty(c)) {
             return false;
         }
 
@@ -671,9 +671,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      */
     public static boolean containsAll(final Collection<?> c, final Collection<?> valuesToFind) {
-        if (isNullOrEmpty(valuesToFind)) {
+        if (isEmpty(valuesToFind)) {
             return true;
-        } else if (isNullOrEmpty(c)) {
+        } else if (isEmpty(c)) {
             return false;
         }
 
@@ -688,9 +688,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     @SafeVarargs
     public static boolean containsAll(final Collection<?> c, final Object... valuesToFind) {
-        if (isNullOrEmpty(valuesToFind)) {
+        if (isEmpty(valuesToFind)) {
             return true;
-        } else if (isNullOrEmpty(c)) {
+        } else if (isEmpty(c)) {
             return false;
         }
 
@@ -705,7 +705,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      */
     public static boolean containsAll(final Iterable<?> c, final Collection<?> valuesToFind) {
-        if (isNullOrEmpty(valuesToFind)) {
+        if (isEmpty(valuesToFind)) {
             return true;
         } else if (c == null) {
             return false;
@@ -730,7 +730,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      */
     public static boolean containsAll(final Iterator<?> iter, final Collection<?> valuesToFind) {
-        if (isNullOrEmpty(valuesToFind)) {
+        if (isEmpty(valuesToFind)) {
             return true;
         } else if (iter == null) {
             return false;
@@ -754,7 +754,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      */
     public static boolean containsAny(final Collection<?> c, final Collection<?> valuesToFind) {
-        if (isNullOrEmpty(c) || isNullOrEmpty(valuesToFind)) {
+        if (isEmpty(c) || isEmpty(valuesToFind)) {
             return false;
         }
 
@@ -769,7 +769,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     @SafeVarargs
     public static boolean containsAny(final Collection<?> c, final Object... valuesToFind) {
-        if (isNullOrEmpty(c) || isNullOrEmpty(valuesToFind)) {
+        if (isEmpty(c) || isEmpty(valuesToFind)) {
             return false;
         }
 
@@ -784,7 +784,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      */
     public static boolean containsAny(final Iterable<?> c, final Set<?> valuesToFind) {
-        if (c == null || isNullOrEmpty(valuesToFind)) {
+        if (c == null || isEmpty(valuesToFind)) {
             return false;
         }
 
@@ -805,7 +805,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      */
     public static boolean containsAny(final Iterator<?> iter, final Set<?> valuesToFind) {
-        if (iter == null || isNullOrEmpty(valuesToFind)) {
+        if (iter == null || isEmpty(valuesToFind)) {
             return false;
         }
 
@@ -828,9 +828,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return the immutable collection<? extends t>
      */
     public static <T> ImmutableList<T> slice(final T[] a, final int fromIndex, final int toIndex) {
-        CommonUtil.checkFromToIndex(fromIndex, toIndex, N.len(a));
+        checkFromToIndex(fromIndex, toIndex, len(a));
 
-        if (CommonUtil.isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return ImmutableList.empty();
         }
 
@@ -848,9 +848,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     @SuppressWarnings("deprecation")
     public static <T> ImmutableList<T> slice(final List<? extends T> c, final int fromIndex, final int toIndex) {
-        CommonUtil.checkFromToIndex(fromIndex, toIndex, CommonUtil.size(c));
+        checkFromToIndex(fromIndex, toIndex, size(c));
 
-        if (CommonUtil.isNullOrEmpty(c)) {
+        if (isEmpty(c)) {
             return ImmutableList.empty();
         }
 
@@ -867,9 +867,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return the immutable collection<? extends t>
      */
     public static <T> ImmutableCollection<T> slice(final Collection<? extends T> c, final int fromIndex, final int toIndex) {
-        CommonUtil.checkFromToIndex(fromIndex, toIndex, CommonUtil.size(c));
+        checkFromToIndex(fromIndex, toIndex, size(c));
 
-        if (CommonUtil.isNullOrEmpty(c)) {
+        if (isEmpty(c)) {
             return ImmutableList.empty();
         }
 
@@ -911,7 +911,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static List<boolean[]> split(final boolean[] a, final int chunkSize) {
         checkArgPositive(chunkSize, "chunkSize"); //NOSONAR
 
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return new ArrayList<>();
         }
 
@@ -939,7 +939,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgPositive(chunkSize, "chunkSize");
 
-        if (isNullOrEmpty(a) || fromIndex == toIndex) {
+        if (isEmpty(a) || fromIndex == toIndex) {
             return new ArrayList<>();
         }
 
@@ -964,7 +964,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static List<char[]> split(final char[] a, final int chunkSize) {
         checkArgPositive(chunkSize, "chunkSize");
 
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return new ArrayList<>();
         }
 
@@ -992,7 +992,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgPositive(chunkSize, "chunkSize");
 
-        if (isNullOrEmpty(a) || fromIndex == toIndex) {
+        if (isEmpty(a) || fromIndex == toIndex) {
             return new ArrayList<>();
         }
 
@@ -1017,7 +1017,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static List<byte[]> split(final byte[] a, final int chunkSize) {
         checkArgPositive(chunkSize, "chunkSize");
 
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return new ArrayList<>();
         }
 
@@ -1045,7 +1045,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgPositive(chunkSize, "chunkSize");
 
-        if (isNullOrEmpty(a) || fromIndex == toIndex) {
+        if (isEmpty(a) || fromIndex == toIndex) {
             return new ArrayList<>();
         }
 
@@ -1070,7 +1070,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static List<short[]> split(final short[] a, final int chunkSize) {
         checkArgPositive(chunkSize, "chunkSize");
 
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return new ArrayList<>();
         }
 
@@ -1098,7 +1098,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgPositive(chunkSize, "chunkSize");
 
-        if (isNullOrEmpty(a) || fromIndex == toIndex) {
+        if (isEmpty(a) || fromIndex == toIndex) {
             return new ArrayList<>();
         }
 
@@ -1123,7 +1123,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static List<int[]> split(final int[] a, final int chunkSize) {
         checkArgPositive(chunkSize, "chunkSize");
 
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return new ArrayList<>();
         }
 
@@ -1151,7 +1151,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgPositive(chunkSize, "chunkSize");
 
-        if (isNullOrEmpty(a) || fromIndex == toIndex) {
+        if (isEmpty(a) || fromIndex == toIndex) {
             return new ArrayList<>();
         }
 
@@ -1176,7 +1176,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static List<long[]> split(final long[] a, final int chunkSize) {
         checkArgPositive(chunkSize, "chunkSize");
 
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return new ArrayList<>();
         }
 
@@ -1204,7 +1204,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgPositive(chunkSize, "chunkSize");
 
-        if (isNullOrEmpty(a) || fromIndex == toIndex) {
+        if (isEmpty(a) || fromIndex == toIndex) {
             return new ArrayList<>();
         }
 
@@ -1229,7 +1229,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static List<float[]> split(final float[] a, final int chunkSize) {
         checkArgPositive(chunkSize, "chunkSize");
 
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return new ArrayList<>();
         }
 
@@ -1257,7 +1257,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgPositive(chunkSize, "chunkSize");
 
-        if (isNullOrEmpty(a) || fromIndex == toIndex) {
+        if (isEmpty(a) || fromIndex == toIndex) {
             return new ArrayList<>();
         }
 
@@ -1282,7 +1282,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static List<double[]> split(final double[] a, final int chunkSize) {
         checkArgPositive(chunkSize, "chunkSize");
 
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return new ArrayList<>();
         }
 
@@ -1310,7 +1310,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgPositive(chunkSize, "chunkSize");
 
-        if (isNullOrEmpty(a) || fromIndex == toIndex) {
+        if (isEmpty(a) || fromIndex == toIndex) {
             return new ArrayList<>();
         }
 
@@ -1336,7 +1336,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static <T> List<T[]> split(final T[] a, final int chunkSize) {
         checkArgPositive(chunkSize, "chunkSize");
 
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return new ArrayList<>();
         }
 
@@ -1365,7 +1365,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgPositive(chunkSize, "chunkSize");
 
-        if (isNullOrEmpty(a) || fromIndex == toIndex) {
+        if (isEmpty(a) || fromIndex == toIndex) {
             return new ArrayList<>();
         }
 
@@ -1389,7 +1389,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static <T> List<List<T>> split(final Collection<? extends T> c, final int chunkSize) {
         checkArgPositive(chunkSize, "chunkSize");
 
-        if (isNullOrEmpty(c)) {
+        if (isEmpty(c)) {
             return new ArrayList<>();
         }
 
@@ -1411,7 +1411,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         checkFromToIndex(fromIndex, toIndex, size(c));
         checkArgPositive(chunkSize, "chunkSize");
 
-        if (isNullOrEmpty(c) || fromIndex == toIndex) {
+        if (isEmpty(c) || fromIndex == toIndex) {
             return new ArrayList<>();
         }
 
@@ -1539,7 +1539,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      */
     public static List<String> split(final CharSequence str, final int fromIndex, final int toIndex, final int chunkSize) {
-        checkFromToIndex(fromIndex, toIndex, N.len(str));
+        checkFromToIndex(fromIndex, toIndex, len(str));
         checkArgPositive(chunkSize, "chunkSize");
 
         if (Strings.isEmpty(str)) {
@@ -1718,10 +1718,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      */
     public static boolean[] concat(final boolean[] a, final boolean[] b) {
-        if (isNullOrEmpty(a)) {
-            return isNullOrEmpty(b) ? EMPTY_BOOLEAN_ARRAY : b.clone();
-        } else if (isNullOrEmpty(b)) {
-            return isNullOrEmpty(a) ? EMPTY_BOOLEAN_ARRAY : a.clone();
+        if (isEmpty(a)) {
+            return isEmpty(b) ? EMPTY_BOOLEAN_ARRAY : b.clone();
+        } else if (isEmpty(b)) {
+            return isEmpty(a) ? EMPTY_BOOLEAN_ARRAY : a.clone();
         }
 
         final boolean[] c = new boolean[a.length + b.length];
@@ -1739,16 +1739,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     @SafeVarargs
     public static boolean[] concat(final boolean[]... aa) {
-        if (isNullOrEmpty(aa)) {
+        if (isEmpty(aa)) {
             return EMPTY_BOOLEAN_ARRAY;
         } else if (aa.length == 1) {
-            return isNullOrEmpty(aa[0]) ? EMPTY_BOOLEAN_ARRAY : aa[0].clone();
+            return isEmpty(aa[0]) ? EMPTY_BOOLEAN_ARRAY : aa[0].clone();
         }
 
         int len = 0;
 
         for (boolean[] a : aa) {
-            if (isNullOrEmpty(a)) {
+            if (isEmpty(a)) {
                 continue;
             }
 
@@ -1759,7 +1759,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         int fromIndex = 0;
 
         for (boolean[] a : aa) {
-            if (isNullOrEmpty(a)) {
+            if (isEmpty(a)) {
                 continue;
             }
 
@@ -1778,10 +1778,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      */
     public static char[] concat(final char[] a, final char[] b) {
-        if (isNullOrEmpty(a)) {
-            return isNullOrEmpty(b) ? EMPTY_CHAR_ARRAY : b.clone();
-        } else if (isNullOrEmpty(b)) {
-            return isNullOrEmpty(a) ? EMPTY_CHAR_ARRAY : a.clone();
+        if (isEmpty(a)) {
+            return isEmpty(b) ? EMPTY_CHAR_ARRAY : b.clone();
+        } else if (isEmpty(b)) {
+            return isEmpty(a) ? EMPTY_CHAR_ARRAY : a.clone();
         }
 
         final char[] c = new char[a.length + b.length];
@@ -1799,16 +1799,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     @SafeVarargs
     public static char[] concat(final char[]... aa) {
-        if (isNullOrEmpty(aa)) {
+        if (isEmpty(aa)) {
             return EMPTY_CHAR_ARRAY;
         } else if (aa.length == 1) {
-            return isNullOrEmpty(aa[0]) ? EMPTY_CHAR_ARRAY : aa[0].clone();
+            return isEmpty(aa[0]) ? EMPTY_CHAR_ARRAY : aa[0].clone();
         }
 
         int len = 0;
 
         for (char[] a : aa) {
-            if (isNullOrEmpty(a)) {
+            if (isEmpty(a)) {
                 continue;
             }
 
@@ -1819,7 +1819,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         int fromIndex = 0;
 
         for (char[] a : aa) {
-            if (isNullOrEmpty(a)) {
+            if (isEmpty(a)) {
                 continue;
             }
 
@@ -1838,10 +1838,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      */
     public static byte[] concat(final byte[] a, final byte[] b) {
-        if (isNullOrEmpty(a)) {
-            return isNullOrEmpty(b) ? EMPTY_BYTE_ARRAY : b.clone();
-        } else if (isNullOrEmpty(b)) {
-            return isNullOrEmpty(a) ? EMPTY_BYTE_ARRAY : a.clone();
+        if (isEmpty(a)) {
+            return isEmpty(b) ? EMPTY_BYTE_ARRAY : b.clone();
+        } else if (isEmpty(b)) {
+            return isEmpty(a) ? EMPTY_BYTE_ARRAY : a.clone();
         }
 
         final byte[] c = new byte[a.length + b.length];
@@ -1859,16 +1859,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     @SafeVarargs
     public static byte[] concat(final byte[]... aa) {
-        if (isNullOrEmpty(aa)) {
+        if (isEmpty(aa)) {
             return EMPTY_BYTE_ARRAY;
         } else if (aa.length == 1) {
-            return isNullOrEmpty(aa[0]) ? EMPTY_BYTE_ARRAY : aa[0].clone();
+            return isEmpty(aa[0]) ? EMPTY_BYTE_ARRAY : aa[0].clone();
         }
 
         int len = 0;
 
         for (byte[] a : aa) {
-            if (isNullOrEmpty(a)) {
+            if (isEmpty(a)) {
                 continue;
             }
 
@@ -1879,7 +1879,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         int fromIndex = 0;
 
         for (byte[] a : aa) {
-            if (isNullOrEmpty(a)) {
+            if (isEmpty(a)) {
                 continue;
             }
 
@@ -1898,10 +1898,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      */
     public static short[] concat(final short[] a, final short[] b) {
-        if (isNullOrEmpty(a)) {
-            return isNullOrEmpty(b) ? EMPTY_SHORT_ARRAY : b.clone();
-        } else if (isNullOrEmpty(b)) {
-            return isNullOrEmpty(a) ? EMPTY_SHORT_ARRAY : a.clone();
+        if (isEmpty(a)) {
+            return isEmpty(b) ? EMPTY_SHORT_ARRAY : b.clone();
+        } else if (isEmpty(b)) {
+            return isEmpty(a) ? EMPTY_SHORT_ARRAY : a.clone();
         }
 
         final short[] c = new short[a.length + b.length];
@@ -1919,16 +1919,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     @SafeVarargs
     public static short[] concat(final short[]... aa) {
-        if (isNullOrEmpty(aa)) {
+        if (isEmpty(aa)) {
             return EMPTY_SHORT_ARRAY;
         } else if (aa.length == 1) {
-            return isNullOrEmpty(aa[0]) ? EMPTY_SHORT_ARRAY : aa[0].clone();
+            return isEmpty(aa[0]) ? EMPTY_SHORT_ARRAY : aa[0].clone();
         }
 
         int len = 0;
 
         for (short[] a : aa) {
-            if (isNullOrEmpty(a)) {
+            if (isEmpty(a)) {
                 continue;
             }
 
@@ -1939,7 +1939,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         int fromIndex = 0;
 
         for (short[] a : aa) {
-            if (isNullOrEmpty(a)) {
+            if (isEmpty(a)) {
                 continue;
             }
 
@@ -1958,10 +1958,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      */
     public static int[] concat(final int[] a, final int[] b) {
-        if (isNullOrEmpty(a)) {
-            return isNullOrEmpty(b) ? EMPTY_INT_ARRAY : b.clone();
-        } else if (isNullOrEmpty(b)) {
-            return isNullOrEmpty(a) ? EMPTY_INT_ARRAY : a.clone();
+        if (isEmpty(a)) {
+            return isEmpty(b) ? EMPTY_INT_ARRAY : b.clone();
+        } else if (isEmpty(b)) {
+            return isEmpty(a) ? EMPTY_INT_ARRAY : a.clone();
         }
 
         final int[] c = new int[a.length + b.length];
@@ -1979,16 +1979,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     @SafeVarargs
     public static int[] concat(final int[]... aa) {
-        if (isNullOrEmpty(aa)) {
+        if (isEmpty(aa)) {
             return EMPTY_INT_ARRAY;
         } else if (aa.length == 1) {
-            return isNullOrEmpty(aa[0]) ? EMPTY_INT_ARRAY : aa[0].clone();
+            return isEmpty(aa[0]) ? EMPTY_INT_ARRAY : aa[0].clone();
         }
 
         int len = 0;
 
         for (int[] a : aa) {
-            if (isNullOrEmpty(a)) {
+            if (isEmpty(a)) {
                 continue;
             }
 
@@ -1999,7 +1999,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         int fromIndex = 0;
 
         for (int[] a : aa) {
-            if (isNullOrEmpty(a)) {
+            if (isEmpty(a)) {
                 continue;
             }
 
@@ -2018,10 +2018,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      */
     public static long[] concat(final long[] a, final long[] b) {
-        if (isNullOrEmpty(a)) {
-            return isNullOrEmpty(b) ? EMPTY_LONG_ARRAY : b.clone();
-        } else if (isNullOrEmpty(b)) {
-            return isNullOrEmpty(a) ? EMPTY_LONG_ARRAY : a.clone();
+        if (isEmpty(a)) {
+            return isEmpty(b) ? EMPTY_LONG_ARRAY : b.clone();
+        } else if (isEmpty(b)) {
+            return isEmpty(a) ? EMPTY_LONG_ARRAY : a.clone();
         }
 
         final long[] c = new long[a.length + b.length];
@@ -2039,16 +2039,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     @SafeVarargs
     public static long[] concat(final long[]... aa) {
-        if (isNullOrEmpty(aa)) {
+        if (isEmpty(aa)) {
             return EMPTY_LONG_ARRAY;
         } else if (aa.length == 1) {
-            return isNullOrEmpty(aa[0]) ? EMPTY_LONG_ARRAY : aa[0].clone();
+            return isEmpty(aa[0]) ? EMPTY_LONG_ARRAY : aa[0].clone();
         }
 
         int len = 0;
 
         for (long[] a : aa) {
-            if (isNullOrEmpty(a)) {
+            if (isEmpty(a)) {
                 continue;
             }
 
@@ -2059,7 +2059,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         int fromIndex = 0;
 
         for (long[] a : aa) {
-            if (isNullOrEmpty(a)) {
+            if (isEmpty(a)) {
                 continue;
             }
 
@@ -2078,10 +2078,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      */
     public static float[] concat(final float[] a, final float[] b) {
-        if (isNullOrEmpty(a)) {
-            return isNullOrEmpty(b) ? EMPTY_FLOAT_ARRAY : b.clone();
-        } else if (isNullOrEmpty(b)) {
-            return isNullOrEmpty(a) ? EMPTY_FLOAT_ARRAY : a.clone();
+        if (isEmpty(a)) {
+            return isEmpty(b) ? EMPTY_FLOAT_ARRAY : b.clone();
+        } else if (isEmpty(b)) {
+            return isEmpty(a) ? EMPTY_FLOAT_ARRAY : a.clone();
         }
 
         final float[] c = new float[a.length + b.length];
@@ -2099,16 +2099,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     @SafeVarargs
     public static float[] concat(final float[]... aa) {
-        if (isNullOrEmpty(aa)) {
+        if (isEmpty(aa)) {
             return EMPTY_FLOAT_ARRAY;
         } else if (aa.length == 1) {
-            return isNullOrEmpty(aa[0]) ? EMPTY_FLOAT_ARRAY : aa[0].clone();
+            return isEmpty(aa[0]) ? EMPTY_FLOAT_ARRAY : aa[0].clone();
         }
 
         int len = 0;
 
         for (float[] a : aa) {
-            if (isNullOrEmpty(a)) {
+            if (isEmpty(a)) {
                 continue;
             }
 
@@ -2119,7 +2119,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         int fromIndex = 0;
 
         for (float[] a : aa) {
-            if (isNullOrEmpty(a)) {
+            if (isEmpty(a)) {
                 continue;
             }
 
@@ -2138,10 +2138,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      */
     public static double[] concat(final double[] a, final double[] b) {
-        if (isNullOrEmpty(a)) {
-            return isNullOrEmpty(b) ? EMPTY_DOUBLE_ARRAY : b.clone();
-        } else if (isNullOrEmpty(b)) {
-            return isNullOrEmpty(a) ? EMPTY_DOUBLE_ARRAY : a.clone();
+        if (isEmpty(a)) {
+            return isEmpty(b) ? EMPTY_DOUBLE_ARRAY : b.clone();
+        } else if (isEmpty(b)) {
+            return isEmpty(a) ? EMPTY_DOUBLE_ARRAY : a.clone();
         }
 
         final double[] c = new double[a.length + b.length];
@@ -2159,16 +2159,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     @SafeVarargs
     public static double[] concat(final double[]... aa) {
-        if (isNullOrEmpty(aa)) {
+        if (isEmpty(aa)) {
             return EMPTY_DOUBLE_ARRAY;
         } else if (aa.length == 1) {
-            return isNullOrEmpty(aa[0]) ? EMPTY_DOUBLE_ARRAY : aa[0].clone();
+            return isEmpty(aa[0]) ? EMPTY_DOUBLE_ARRAY : aa[0].clone();
         }
 
         int len = 0;
 
         for (double[] a : aa) {
-            if (isNullOrEmpty(a)) {
+            if (isEmpty(a)) {
                 continue;
             }
 
@@ -2179,7 +2179,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         int fromIndex = 0;
 
         for (double[] a : aa) {
-            if (isNullOrEmpty(a)) {
+            if (isEmpty(a)) {
                 continue;
             }
 
@@ -2200,9 +2200,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     @SuppressWarnings("unchecked")
     public static <T> T[] concat(final T[] a, final T[] b) {
-        if (isNullOrEmpty(a)) {
-            return isNullOrEmpty(b) ? a : b.clone();
-        } else if (isNullOrEmpty(b)) {
+        if (isEmpty(a)) {
+            return isEmpty(b) ? a : b.clone();
+        } else if (isEmpty(b)) {
             return a.clone();
         }
 
@@ -2236,7 +2236,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         int len = 0;
 
         for (T[] a : aa) {
-            if (isNullOrEmpty(a)) {
+            if (isEmpty(a)) {
                 continue;
             }
 
@@ -2247,7 +2247,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         int fromIndex = 0;
 
         for (T[] a : aa) {
-            if (isNullOrEmpty(a)) {
+            if (isEmpty(a)) {
                 continue;
             }
 
@@ -2278,7 +2278,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     @SafeVarargs
     public static <T> List<T> concat(final Iterable<? extends T>... a) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return new ArrayList<>();
         }
 
@@ -2304,7 +2304,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      */
     public static <T, C extends Collection<T>> C concat(final Collection<? extends Iterable<? extends T>> c, final IntFunction<? extends C> supplier) {
-        if (isNullOrEmpty(c)) {
+        if (isEmpty(c)) {
             return supplier.apply(0);
         }
 
@@ -2361,7 +2361,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return an empty {@code boolean[]} if {@code a} is null.
      */
     public static boolean[] flatten(final boolean[][] a) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return EMPTY_BOOLEAN_ARRAY;
         }
 
@@ -2375,7 +2375,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         int from = 0;
 
         for (int i = 0, n = a.length; i < n; i++) {
-            if (notNullOrEmpty(a[i])) {
+            if (notEmpty(a[i])) {
                 copy(a[i], 0, ret, from, a[i].length);
                 from += a[i].length;
             }
@@ -2390,7 +2390,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return an empty {@code char[]} if {@code a} is null.
      */
     public static char[] flatten(final char[][] a) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return EMPTY_CHAR_ARRAY;
         }
 
@@ -2404,7 +2404,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         int from = 0;
 
         for (int i = 0, n = a.length; i < n; i++) {
-            if (notNullOrEmpty(a[i])) {
+            if (notEmpty(a[i])) {
                 copy(a[i], 0, ret, from, a[i].length);
                 from += a[i].length;
             }
@@ -2419,7 +2419,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return an empty {@code byte[]} if {@code a} is null.
      */
     public static byte[] flatten(final byte[][] a) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return EMPTY_BYTE_ARRAY;
         }
 
@@ -2433,7 +2433,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         int from = 0;
 
         for (int i = 0, n = a.length; i < n; i++) {
-            if (notNullOrEmpty(a[i])) {
+            if (notEmpty(a[i])) {
                 copy(a[i], 0, ret, from, a[i].length);
                 from += a[i].length;
             }
@@ -2448,7 +2448,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return an empty {@code short[]} if {@code a} is null.
      */
     public static short[] flatten(final short[][] a) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return EMPTY_SHORT_ARRAY;
         }
 
@@ -2462,7 +2462,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         int from = 0;
 
         for (int i = 0, n = a.length; i < n; i++) {
-            if (notNullOrEmpty(a[i])) {
+            if (notEmpty(a[i])) {
                 copy(a[i], 0, ret, from, a[i].length);
                 from += a[i].length;
             }
@@ -2477,7 +2477,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return an empty {@code int[]} if {@code a} is null.
      */
     public static int[] flatten(final int[][] a) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return EMPTY_INT_ARRAY;
         }
 
@@ -2491,7 +2491,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         int from = 0;
 
         for (int i = 0, n = a.length; i < n; i++) {
-            if (notNullOrEmpty(a[i])) {
+            if (notEmpty(a[i])) {
                 copy(a[i], 0, ret, from, a[i].length);
                 from += a[i].length;
             }
@@ -2506,7 +2506,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return an empty {@code long[]} if {@code a} is null.
      */
     public static long[] flatten(final long[][] a) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return EMPTY_LONG_ARRAY;
         }
 
@@ -2520,7 +2520,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         int from = 0;
 
         for (int i = 0, n = a.length; i < n; i++) {
-            if (notNullOrEmpty(a[i])) {
+            if (notEmpty(a[i])) {
                 copy(a[i], 0, ret, from, a[i].length);
                 from += a[i].length;
             }
@@ -2535,7 +2535,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return an empty {@code float[]} if {@code a} is null.
      */
     public static float[] flatten(final float[][] a) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return EMPTY_FLOAT_ARRAY;
         }
 
@@ -2549,7 +2549,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         int from = 0;
 
         for (int i = 0, n = a.length; i < n; i++) {
-            if (notNullOrEmpty(a[i])) {
+            if (notEmpty(a[i])) {
                 copy(a[i], 0, ret, from, a[i].length);
                 from += a[i].length;
             }
@@ -2564,7 +2564,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return an empty {@code double[]} if {@code a} is null.
      */
     public static double[] flatten(final double[][] a) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return EMPTY_DOUBLE_ARRAY;
         }
 
@@ -2578,7 +2578,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         int from = 0;
 
         for (int i = 0, n = a.length; i < n; i++) {
-            if (notNullOrEmpty(a[i])) {
+            if (notEmpty(a[i])) {
                 copy(a[i], 0, ret, from, a[i].length);
                 from += a[i].length;
             }
@@ -2610,7 +2610,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return an empty {@code T[]} if {@code a} is null.
      */
     public static <T> T[] flatten(final T[][] a, final Class<T> componentType) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return newArray(componentType, 0);
         }
 
@@ -2624,7 +2624,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         int from = 0;
 
         for (int i = 0, n = a.length; i < n; i++) {
-            if (notNullOrEmpty(a[i])) {
+            if (notEmpty(a[i])) {
                 copy(a[i], 0, ret, from, a[i].length);
                 from += a[i].length;
             }
@@ -2654,7 +2654,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     @SuppressWarnings("rawtypes")
     public static <T, C extends Collection<T>> C flatten(final Collection<? extends Iterable<? extends T>> c, IntFunction<? extends C> supplier) {
-        if (isNullOrEmpty(c)) {
+        if (isEmpty(c)) {
             return supplier.apply(0);
         }
 
@@ -2702,7 +2702,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     @SuppressWarnings("rawtypes")
     public static <T, C extends Collection<T>> C flatten(final Iterable<? extends Iterable<? extends T>> c, Supplier<? extends C> supplier) {
-        if (isNullOrEmpty(c)) {
+        if (isEmpty(c)) {
             return supplier.get();
         }
 
@@ -2816,8 +2816,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see IntList#intersection(IntList)
      */
     public static boolean[] intersection(final boolean[] a, final boolean[] b) {
-        if (isNullOrEmpty(a) || isNullOrEmpty(b)) {
-            return isNullOrEmpty(a) ? a : EMPTY_BOOLEAN_ARRAY;
+        if (isEmpty(a) || isEmpty(b)) {
+            return isEmpty(a) ? a : EMPTY_BOOLEAN_ARRAY;
         }
 
         return BooleanList.of(a).intersection(BooleanList.of(b)).trimToSize().array();
@@ -2831,7 +2831,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see IntList#intersection(IntList)
      */
     public static char[] intersection(final char[] a, final char[] b) {
-        if (isNullOrEmpty(a) || isNullOrEmpty(b)) {
+        if (isEmpty(a) || isEmpty(b)) {
             return EMPTY_CHAR_ARRAY;
         }
 
@@ -2846,7 +2846,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see IntList#intersection(IntList)
      */
     public static byte[] intersection(final byte[] a, final byte[] b) {
-        if (isNullOrEmpty(a) || isNullOrEmpty(b)) {
+        if (isEmpty(a) || isEmpty(b)) {
             return EMPTY_BYTE_ARRAY;
         }
 
@@ -2861,7 +2861,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see IntList#intersection(IntList)
      */
     public static short[] intersection(final short[] a, final short[] b) {
-        if (isNullOrEmpty(a) || isNullOrEmpty(b)) {
+        if (isEmpty(a) || isEmpty(b)) {
             return EMPTY_SHORT_ARRAY;
         }
 
@@ -2887,7 +2887,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see IntList#intersection(IntList)
      */
     public static int[] intersection(final int[] a, final int[] b) {
-        if (isNullOrEmpty(a) || isNullOrEmpty(b)) {
+        if (isEmpty(a) || isEmpty(b)) {
             return EMPTY_INT_ARRAY;
         }
 
@@ -2902,7 +2902,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see IntList#intersection(IntList)
      */
     public static long[] intersection(final long[] a, final long[] b) {
-        if (isNullOrEmpty(a) || isNullOrEmpty(b)) {
+        if (isEmpty(a) || isEmpty(b)) {
             return EMPTY_LONG_ARRAY;
         }
 
@@ -2917,7 +2917,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see IntList#intersection(IntList)
      */
     public static float[] intersection(final float[] a, final float[] b) {
-        if (isNullOrEmpty(a) || isNullOrEmpty(b)) {
+        if (isEmpty(a) || isEmpty(b)) {
             return EMPTY_FLOAT_ARRAY;
         }
 
@@ -2932,7 +2932,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see IntList#intersection(IntList)
      */
     public static double[] intersection(final double[] a, final double[] b) {
-        if (isNullOrEmpty(a) || isNullOrEmpty(b)) {
+        if (isEmpty(a) || isEmpty(b)) {
             return EMPTY_DOUBLE_ARRAY;
         }
 
@@ -2948,7 +2948,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see IntList#intersection(IntList)
      */
     public static <T> List<T> intersection(final T[] a, final Object[] b) {
-        if (isNullOrEmpty(a) || isNullOrEmpty(b)) {
+        if (isEmpty(a) || isEmpty(b)) {
             return new ArrayList<>();
         }
 
@@ -2975,7 +2975,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see Collection#retainAll(Collection)
      */
     public static <T> List<T> intersection(final Collection<? extends T> a, final Collection<?> b) {
-        if (isNullOrEmpty(a) || isNullOrEmpty(b)) {
+        if (isEmpty(a) || isEmpty(b)) {
             return new ArrayList<>();
         }
 
@@ -3001,14 +3001,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see Collection#retainAll(Collection)
      */
     public static <T> List<T> intersection(final Collection<? extends Collection<? extends T>> c) {
-        if (isNullOrEmpty(c)) {
+        if (isEmpty(c)) {
             return new ArrayList<>();
         } else if (c.size() == 1) {
             return newArrayList(c.iterator().next());
         }
 
         for (Collection<? extends T> e : c) {
-            if (isNullOrEmpty(e)) {
+            if (isEmpty(e)) {
                 return new ArrayList<>();
             }
         }
@@ -3036,9 +3036,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see IntList#difference(IntList)
      */
     public static boolean[] difference(final boolean[] a, final boolean[] b) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return EMPTY_BOOLEAN_ARRAY;
-        } else if (isNullOrEmpty(b)) {
+        } else if (isEmpty(b)) {
             return a.clone();
         }
 
@@ -3054,9 +3054,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see IntList#difference(IntList)
      */
     public static char[] difference(final char[] a, final char[] b) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return EMPTY_CHAR_ARRAY;
-        } else if (isNullOrEmpty(b)) {
+        } else if (isEmpty(b)) {
             return a.clone();
         }
 
@@ -3072,9 +3072,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see IntList#difference(IntList)
      */
     public static byte[] difference(final byte[] a, final byte[] b) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return EMPTY_BYTE_ARRAY;
-        } else if (isNullOrEmpty(b)) {
+        } else if (isEmpty(b)) {
             return a.clone();
         }
 
@@ -3090,9 +3090,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see IntList#difference(IntList)
      */
     public static short[] difference(final short[] a, final short[] b) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return EMPTY_SHORT_ARRAY;
-        } else if (isNullOrEmpty(b)) {
+        } else if (isEmpty(b)) {
             return a.clone();
         }
 
@@ -3118,9 +3118,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see IntList#difference(IntList)
      */
     public static int[] difference(final int[] a, final int[] b) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return EMPTY_INT_ARRAY;
-        } else if (isNullOrEmpty(b)) {
+        } else if (isEmpty(b)) {
             return a.clone();
         }
 
@@ -3136,9 +3136,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see IntList#difference(IntList)
      */
     public static long[] difference(final long[] a, final long[] b) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return EMPTY_LONG_ARRAY;
-        } else if (isNullOrEmpty(b)) {
+        } else if (isEmpty(b)) {
             return a.clone();
         }
 
@@ -3154,9 +3154,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see IntList#difference(IntList)
      */
     public static float[] difference(final float[] a, final float[] b) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return EMPTY_FLOAT_ARRAY;
-        } else if (isNullOrEmpty(b)) {
+        } else if (isEmpty(b)) {
             return a.clone();
         }
 
@@ -3172,9 +3172,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see IntList#difference(IntList)
      */
     public static double[] difference(final double[] a, final double[] b) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return EMPTY_DOUBLE_ARRAY;
-        } else if (isNullOrEmpty(b)) {
+        } else if (isEmpty(b)) {
             return a.clone();
         }
 
@@ -3196,9 +3196,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see Difference#of(Collection, Collection)
      */
     public static <T> List<T> difference(final T[] a, final Object[] b) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return new ArrayList<>();
-        } else if (isNullOrEmpty(b)) {
+        } else if (isEmpty(b)) {
             return asList(a);
         }
 
@@ -3229,9 +3229,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see Difference#of(Collection, Collection)
      */
     public static <T> List<T> difference(final Collection<? extends T> a, final Collection<?> b) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return new ArrayList<>();
-        } else if (isNullOrEmpty(b)) {
+        } else if (isEmpty(b)) {
             return new ArrayList<>(a);
         }
 
@@ -3256,9 +3256,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see IntList#symmetricDifference(IntList)
      */
     public static boolean[] symmetricDifference(final boolean[] a, final boolean[] b) {
-        if (isNullOrEmpty(a)) {
-            return isNullOrEmpty(b) ? EMPTY_BOOLEAN_ARRAY : b.clone();
-        } else if (isNullOrEmpty(b)) {
+        if (isEmpty(a)) {
+            return isEmpty(b) ? EMPTY_BOOLEAN_ARRAY : b.clone();
+        } else if (isEmpty(b)) {
             return a.clone();
         }
 
@@ -3273,9 +3273,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see IntList#symmetricDifference(IntList)
      */
     public static char[] symmetricDifference(final char[] a, final char[] b) {
-        if (isNullOrEmpty(a)) {
-            return isNullOrEmpty(b) ? EMPTY_CHAR_ARRAY : b.clone();
-        } else if (isNullOrEmpty(b)) {
+        if (isEmpty(a)) {
+            return isEmpty(b) ? EMPTY_CHAR_ARRAY : b.clone();
+        } else if (isEmpty(b)) {
             return a.clone();
         }
 
@@ -3290,9 +3290,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see IntList#symmetricDifference(IntList)
      */
     public static byte[] symmetricDifference(final byte[] a, final byte[] b) {
-        if (isNullOrEmpty(a)) {
-            return isNullOrEmpty(b) ? EMPTY_BYTE_ARRAY : b.clone();
-        } else if (isNullOrEmpty(b)) {
+        if (isEmpty(a)) {
+            return isEmpty(b) ? EMPTY_BYTE_ARRAY : b.clone();
+        } else if (isEmpty(b)) {
             return a.clone();
         }
 
@@ -3307,9 +3307,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see IntList#symmetricDifference(IntList)
      */
     public static short[] symmetricDifference(final short[] a, final short[] b) {
-        if (isNullOrEmpty(a)) {
-            return isNullOrEmpty(b) ? EMPTY_SHORT_ARRAY : b.clone();
-        } else if (isNullOrEmpty(b)) {
+        if (isEmpty(a)) {
+            return isEmpty(b) ? EMPTY_SHORT_ARRAY : b.clone();
+        } else if (isEmpty(b)) {
             return a.clone();
         }
 
@@ -3330,9 +3330,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see CommonUtil#difference(int[], int[])
      */
     public static int[] symmetricDifference(final int[] a, final int[] b) {
-        if (isNullOrEmpty(a)) {
-            return isNullOrEmpty(b) ? EMPTY_INT_ARRAY : b.clone();
-        } else if (isNullOrEmpty(b)) {
+        if (isEmpty(a)) {
+            return isEmpty(b) ? EMPTY_INT_ARRAY : b.clone();
+        } else if (isEmpty(b)) {
             return a.clone();
         }
 
@@ -3347,9 +3347,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see IntList#symmetricDifference(IntList)
      */
     public static long[] symmetricDifference(final long[] a, final long[] b) {
-        if (isNullOrEmpty(a)) {
-            return isNullOrEmpty(b) ? EMPTY_LONG_ARRAY : b.clone();
-        } else if (isNullOrEmpty(b)) {
+        if (isEmpty(a)) {
+            return isEmpty(b) ? EMPTY_LONG_ARRAY : b.clone();
+        } else if (isEmpty(b)) {
             return a.clone();
         }
 
@@ -3364,9 +3364,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see IntList#symmetricDifference(IntList)
      */
     public static float[] symmetricDifference(final float[] a, final float[] b) {
-        if (isNullOrEmpty(a)) {
-            return isNullOrEmpty(b) ? EMPTY_FLOAT_ARRAY : b.clone();
-        } else if (isNullOrEmpty(b)) {
+        if (isEmpty(a)) {
+            return isEmpty(b) ? EMPTY_FLOAT_ARRAY : b.clone();
+        } else if (isEmpty(b)) {
             return a.clone();
         }
 
@@ -3381,9 +3381,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see IntList#symmetricDifference(IntList)
      */
     public static double[] symmetricDifference(final double[] a, final double[] b) {
-        if (isNullOrEmpty(a)) {
-            return isNullOrEmpty(b) ? EMPTY_DOUBLE_ARRAY : b.clone();
-        } else if (isNullOrEmpty(b)) {
+        if (isEmpty(a)) {
+            return isEmpty(b) ? EMPTY_DOUBLE_ARRAY : b.clone();
+        } else if (isEmpty(b)) {
             return a.clone();
         }
 
@@ -3403,9 +3403,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see Difference#of(Collection, Collection)
      */
     public static <T> List<T> symmetricDifference(final T[] a, final T[] b) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return asList(b);
-        } else if (isNullOrEmpty(b)) {
+        } else if (isEmpty(b)) {
             return asList(a);
         }
 
@@ -3445,10 +3445,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see Difference#of(Collection, Collection)
      */
     public static <T> List<T> symmetricDifference(final Collection<? extends T> a, final Collection<? extends T> b) {
-        if (isNullOrEmpty(a)) {
-            return isNullOrEmpty(b) ? new ArrayList<>() : new ArrayList<>(b);
-        } else if (isNullOrEmpty(b)) {
-            return isNullOrEmpty(a) ? new ArrayList<>() : new ArrayList<>(a);
+        if (isEmpty(a)) {
+            return isEmpty(b) ? new ArrayList<>() : new ArrayList<>(b);
+        } else if (isEmpty(b)) {
+            return isEmpty(a) ? new ArrayList<>() : new ArrayList<>(a);
         }
 
         final Multiset<T> bOccurrences = Multiset.create(b);
@@ -3487,9 +3487,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     @SuppressWarnings("rawtypes")
     public static <T> Set<T> differentSet(final Collection<? extends T> a, final Collection<?> b) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return newHashSet();
-        } else if (isNullOrEmpty(b)) {
+        } else if (isEmpty(b)) {
             return newHashSet(a);
         }
 
@@ -3513,10 +3513,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see Difference#of(Collection, Collection)
      */
     public static <T> Set<T> symmetricDifferentSet(final Collection<? extends T> a, final Collection<? extends T> b) {
-        if (isNullOrEmpty(a)) {
-            return isNullOrEmpty(b) ? newHashSet() : newHashSet(b);
-        } else if (isNullOrEmpty(b)) {
-            return isNullOrEmpty(a) ? newHashSet() : newHashSet(a);
+        if (isEmpty(a)) {
+            return isEmpty(b) ? newHashSet() : newHashSet(b);
+        } else if (isEmpty(b)) {
+            return isEmpty(a) ? newHashSet() : newHashSet(a);
         }
 
         final Set<T> commonSet = commonSet(a, b);
@@ -3547,7 +3547,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see Collection#retainAll(Collection)
      */
     public static <T> Set<T> commonSet(final Collection<? extends T> a, final Collection<?> b) {
-        if (isNullOrEmpty(a) || isNullOrEmpty(b)) {
+        if (isEmpty(a) || isEmpty(b)) {
             return newHashSet();
         }
 
@@ -3563,7 +3563,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see Collection#retainAll(Collection)
      */
     public static <T> Set<T> commonSet(final Collection<? extends Collection<? extends T>> c) {
-        if (isNullOrEmpty(c)) {
+        if (isEmpty(c)) {
             return newHashSet();
         } else if (c.size() == 1) {
             return newHashSet(c.iterator().next());
@@ -3572,7 +3572,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         Collection<? extends T> smallest = null;
 
         for (final Collection<? extends T> e : c) {
-            if (isNullOrEmpty(e)) {
+            if (isEmpty(e)) {
                 return newHashSet();
             }
 
@@ -3634,7 +3634,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see Difference#of(Collection, Collection)
      */
     public static <T> List<T> exclude(final Collection<? extends T> c, final Object objToExclude) {
-        if (isNullOrEmpty(c)) {
+        if (isEmpty(c)) {
             return new ArrayList<>();
         }
 
@@ -3662,7 +3662,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see Difference#of(Collection, Collection)
      */
     public static <T> Set<T> excludeToSet(final Collection<? extends T> c, final Object objToExclude) {
-        if (isNullOrEmpty(c)) {
+        if (isEmpty(c)) {
             return new HashSet<>();
         }
 
@@ -3686,9 +3686,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see Difference#of(Collection, Collection)
      */
     public static <T> List<T> excludeAll(final Collection<? extends T> c, final Collection<?> objsToExclude) {
-        if (isNullOrEmpty(c)) {
+        if (isEmpty(c)) {
             return new ArrayList<>();
-        } else if (isNullOrEmpty(objsToExclude)) {
+        } else if (isEmpty(objsToExclude)) {
             return new ArrayList<>(c);
         } else if (objsToExclude.size() == 1) {
             return exclude(c, firstOrNullIfEmpty(objsToExclude));
@@ -3719,9 +3719,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see Difference#of(Collection, Collection)
      */
     public static <T> Set<T> excludeAllToSet(final Collection<? extends T> c, final Collection<?> objsToExclude) {
-        if (isNullOrEmpty(c)) {
+        if (isEmpty(c)) {
             return new HashSet<>();
-        } else if (isNullOrEmpty(objsToExclude)) {
+        } else if (isEmpty(objsToExclude)) {
             return new HashSet<>(c);
         } else if (objsToExclude.size() == 1) {
             return excludeToSet(c, firstOrNullIfEmpty(objsToExclude));
@@ -3755,9 +3755,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
         checkArgNotNull(subColl, "a");
         checkArgNotNull(coll, "b");
 
-        if (isNullOrEmpty(coll)) {
+        if (isEmpty(coll)) {
             return true;
-        } else if (isNullOrEmpty(subColl)) {
+        } else if (isEmpty(subColl)) {
             return false;
         }
 
@@ -3853,7 +3853,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      */
     public static int replaceAll(final boolean[] a, final boolean oldVal, final boolean newVal) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return 0;
         }
 
@@ -3878,7 +3878,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      */
     public static int replaceAll(final char[] a, final char oldVal, final char newVal) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return 0;
         }
 
@@ -3903,7 +3903,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      */
     public static int replaceAll(final byte[] a, final byte oldVal, final byte newVal) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return 0;
         }
 
@@ -3928,7 +3928,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      */
     public static int replaceAll(final short[] a, final short oldVal, final short newVal) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return 0;
         }
 
@@ -3953,7 +3953,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      */
     public static int replaceAll(final int[] a, final int oldVal, final int newVal) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return 0;
         }
 
@@ -3978,7 +3978,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      */
     public static int replaceAll(final long[] a, final long oldVal, final long newVal) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return 0;
         }
 
@@ -4003,7 +4003,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      */
     public static int replaceAll(final float[] a, final float oldVal, final float newVal) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return 0;
         }
 
@@ -4028,7 +4028,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      */
     public static int replaceAll(final double[] a, final double oldVal, final double newVal) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return 0;
         }
 
@@ -4054,7 +4054,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      */
     public static <T> int replaceAll(final T[] a, final Object oldVal, final T newVal) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return 0;
         }
 
@@ -4090,7 +4090,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      */
     public static <T> int replaceAll(final List<T> list, final Object oldVal, final T newVal) {
-        if (isNullOrEmpty(list)) {
+        if (isEmpty(list)) {
             return 0;
         }
 
@@ -4150,7 +4150,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws E
      */
     public static <E extends Exception> void replaceAll(final boolean[] a, final Throwables.BooleanUnaryOperator<E> operator) throws E {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return;
         }
 
@@ -4168,7 +4168,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws E
      */
     public static <E extends Exception> void replaceAll(final char[] a, final Throwables.CharUnaryOperator<E> operator) throws E {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return;
         }
 
@@ -4186,7 +4186,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws E
      */
     public static <E extends Exception> void replaceAll(final byte[] a, final Throwables.ByteUnaryOperator<E> operator) throws E {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return;
         }
 
@@ -4204,7 +4204,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws E
      */
     public static <E extends Exception> void replaceAll(final short[] a, final Throwables.ShortUnaryOperator<E> operator) throws E {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return;
         }
 
@@ -4222,7 +4222,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws E
      */
     public static <E extends Exception> void replaceAll(final int[] a, final Throwables.IntUnaryOperator<E> operator) throws E {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return;
         }
 
@@ -4240,7 +4240,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws E
      */
     public static <E extends Exception> void replaceAll(final long[] a, final Throwables.LongUnaryOperator<E> operator) throws E {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return;
         }
 
@@ -4258,7 +4258,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws E
      */
     public static <E extends Exception> void replaceAll(final float[] a, final Throwables.FloatUnaryOperator<E> operator) throws E {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return;
         }
 
@@ -4276,7 +4276,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws E
      */
     public static <E extends Exception> void replaceAll(final double[] a, final Throwables.DoubleUnaryOperator<E> operator) throws E {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return;
         }
 
@@ -4295,7 +4295,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws E
      */
     public static <T, E extends Exception> void replaceAll(final T[] a, final Throwables.UnaryOperator<T, E> operator) throws E {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return;
         }
 
@@ -4314,7 +4314,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws E
      */
     public static <T, E extends Exception> void replaceAll(final List<T> list, final Throwables.UnaryOperator<T, E> operator) throws E {
-        if (isNullOrEmpty(list)) {
+        if (isEmpty(list)) {
             return;
         }
 
@@ -4344,7 +4344,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws E
      */
     public static <E extends Exception> int replaceIf(final boolean[] a, final Throwables.BooleanPredicate<E> predicate, final boolean newValue) throws E {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return 0;
         }
 
@@ -4371,7 +4371,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws E
      */
     public static <E extends Exception> int replaceIf(final char[] a, final Throwables.CharPredicate<E> predicate, final char newValue) throws E {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return 0;
         }
 
@@ -4398,7 +4398,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws E
      */
     public static <E extends Exception> int replaceIf(final byte[] a, final Throwables.BytePredicate<E> predicate, final byte newValue) throws E {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return 0;
         }
 
@@ -4425,7 +4425,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws E
      */
     public static <E extends Exception> int replaceIf(final short[] a, final Throwables.ShortPredicate<E> predicate, final short newValue) throws E {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return 0;
         }
 
@@ -4452,7 +4452,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws E
      */
     public static <E extends Exception> int replaceIf(final int[] a, final Throwables.IntPredicate<E> predicate, final int newValue) throws E {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return 0;
         }
 
@@ -4479,7 +4479,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws E
      */
     public static <E extends Exception> int replaceIf(final long[] a, final Throwables.LongPredicate<E> predicate, final long newValue) throws E {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return 0;
         }
 
@@ -4506,7 +4506,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws E
      */
     public static <E extends Exception> int replaceIf(final float[] a, final Throwables.FloatPredicate<E> predicate, final float newValue) throws E {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return 0;
         }
 
@@ -4533,7 +4533,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws E
      */
     public static <E extends Exception> int replaceIf(final double[] a, final Throwables.DoublePredicate<E> predicate, final double newValue) throws E {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return 0;
         }
 
@@ -4561,7 +4561,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws E
      */
     public static <T, E extends Exception> int replaceIf(final T[] a, final Throwables.Predicate<? super T, E> predicate, final T newValue) throws E {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return 0;
         }
 
@@ -4589,7 +4589,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws E
      */
     public static <T, E extends Exception> int replaceIf(final List<T> c, final Throwables.Predicate<? super T, E> predicate, final T newValue) throws E {
-        if (isNullOrEmpty(c)) {
+        if (isEmpty(c)) {
             return 0;
         }
 
@@ -4641,7 +4641,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return A new array containing the existing elementToAdds plus the new elementToAdd
      */
     public static boolean[] add(final boolean[] a, final boolean elementToAdd) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return Array.of(elementToAdd);
         }
 
@@ -4663,7 +4663,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return A new array containing the existing elementToAdds plus the new elementToAdd
      */
     public static char[] add(final char[] a, final char elementToAdd) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return Array.of(elementToAdd);
         }
 
@@ -4685,7 +4685,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return A new array containing the existing elementToAdds plus the new elementToAdd
      */
     public static byte[] add(final byte[] a, final byte elementToAdd) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return Array.of(elementToAdd);
         }
 
@@ -4707,7 +4707,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return A new array containing the existing elementToAdds plus the new elementToAdd
      */
     public static short[] add(final short[] a, final short elementToAdd) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return Array.of(elementToAdd);
         }
 
@@ -4729,7 +4729,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return A new array containing the existing elementToAdds plus the new elementToAdd
      */
     public static int[] add(final int[] a, final int elementToAdd) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return Array.of(elementToAdd);
         }
 
@@ -4751,7 +4751,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return A new array containing the existing elementToAdds plus the new elementToAdd
      */
     public static long[] add(final long[] a, final long elementToAdd) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return Array.of(elementToAdd);
         }
 
@@ -4773,7 +4773,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return A new array containing the existing elementToAdds plus the new elementToAdd
      */
     public static float[] add(final float[] a, final float elementToAdd) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return Array.of(elementToAdd);
         }
 
@@ -4795,7 +4795,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return A new array containing the existing elementToAdds plus the new elementToAdd
      */
     public static double[] add(final double[] a, final double elementToAdd) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return Array.of(elementToAdd);
         }
 
@@ -4817,7 +4817,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return A new array containing the existing elementToAdds plus the new elementToAdd
      */
     public static String[] add(final String[] a, final String elementToAdd) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return asArray(elementToAdd);
         }
 
@@ -4868,8 +4868,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     @SafeVarargs
     public static boolean[] addAll(final boolean[] a, final boolean... elementsToAdd) {
-        if (isNullOrEmpty(a)) {
-            return isNullOrEmpty(elementsToAdd) ? EMPTY_BOOLEAN_ARRAY : elementsToAdd.clone();
+        if (isEmpty(a)) {
+            return isEmpty(elementsToAdd) ? EMPTY_BOOLEAN_ARRAY : elementsToAdd.clone();
         }
 
         final boolean[] newArray = new boolean[a.length + elementsToAdd.length];
@@ -4893,8 +4893,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     @SafeVarargs
     public static char[] addAll(final char[] a, final char... elementsToAdd) {
-        if (isNullOrEmpty(a)) {
-            return isNullOrEmpty(elementsToAdd) ? EMPTY_CHAR_ARRAY : elementsToAdd.clone();
+        if (isEmpty(a)) {
+            return isEmpty(elementsToAdd) ? EMPTY_CHAR_ARRAY : elementsToAdd.clone();
         }
 
         final char[] newArray = new char[a.length + elementsToAdd.length];
@@ -4918,8 +4918,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     @SafeVarargs
     public static byte[] addAll(final byte[] a, final byte... elementsToAdd) {
-        if (isNullOrEmpty(a)) {
-            return isNullOrEmpty(elementsToAdd) ? EMPTY_BYTE_ARRAY : elementsToAdd.clone();
+        if (isEmpty(a)) {
+            return isEmpty(elementsToAdd) ? EMPTY_BYTE_ARRAY : elementsToAdd.clone();
         }
 
         final byte[] newArray = new byte[a.length + elementsToAdd.length];
@@ -4943,8 +4943,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     @SafeVarargs
     public static short[] addAll(final short[] a, final short... elementsToAdd) {
-        if (isNullOrEmpty(a)) {
-            return isNullOrEmpty(elementsToAdd) ? EMPTY_SHORT_ARRAY : elementsToAdd.clone();
+        if (isEmpty(a)) {
+            return isEmpty(elementsToAdd) ? EMPTY_SHORT_ARRAY : elementsToAdd.clone();
         }
 
         final short[] newArray = new short[a.length + elementsToAdd.length];
@@ -4968,8 +4968,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     @SafeVarargs
     public static int[] addAll(final int[] a, final int... elementsToAdd) {
-        if (isNullOrEmpty(a)) {
-            return isNullOrEmpty(elementsToAdd) ? EMPTY_INT_ARRAY : elementsToAdd.clone();
+        if (isEmpty(a)) {
+            return isEmpty(elementsToAdd) ? EMPTY_INT_ARRAY : elementsToAdd.clone();
         }
 
         final int[] newArray = new int[a.length + elementsToAdd.length];
@@ -4993,8 +4993,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     @SafeVarargs
     public static long[] addAll(final long[] a, final long... elementsToAdd) {
-        if (isNullOrEmpty(a)) {
-            return isNullOrEmpty(elementsToAdd) ? EMPTY_LONG_ARRAY : elementsToAdd.clone();
+        if (isEmpty(a)) {
+            return isEmpty(elementsToAdd) ? EMPTY_LONG_ARRAY : elementsToAdd.clone();
         }
 
         final long[] newArray = new long[a.length + elementsToAdd.length];
@@ -5018,8 +5018,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     @SafeVarargs
     public static float[] addAll(final float[] a, final float... elementsToAdd) {
-        if (isNullOrEmpty(a)) {
-            return isNullOrEmpty(elementsToAdd) ? EMPTY_FLOAT_ARRAY : elementsToAdd.clone();
+        if (isEmpty(a)) {
+            return isEmpty(elementsToAdd) ? EMPTY_FLOAT_ARRAY : elementsToAdd.clone();
         }
 
         final float[] newArray = new float[a.length + elementsToAdd.length];
@@ -5043,8 +5043,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     @SafeVarargs
     public static double[] addAll(final double[] a, final double... elementsToAdd) {
-        if (isNullOrEmpty(a)) {
-            return isNullOrEmpty(elementsToAdd) ? EMPTY_DOUBLE_ARRAY : elementsToAdd.clone();
+        if (isEmpty(a)) {
+            return isEmpty(elementsToAdd) ? EMPTY_DOUBLE_ARRAY : elementsToAdd.clone();
         }
 
         final double[] newArray = new double[a.length + elementsToAdd.length];
@@ -5068,8 +5068,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     @SafeVarargs
     public static String[] addAll(final String[] a, final String... elementsToAdd) {
-        if (isNullOrEmpty(a)) {
-            return isNullOrEmpty(elementsToAdd) ? EMPTY_STRING_ARRAY : elementsToAdd.clone();
+        if (isEmpty(a)) {
+            return isEmpty(elementsToAdd) ? EMPTY_STRING_ARRAY : elementsToAdd.clone();
         }
 
         final String[] newArray = new String[a.length + elementsToAdd.length];
@@ -5095,8 +5095,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static <T> T[] addAll(final T[] a, final T... elementsToAdd) throws IllegalArgumentException {
         checkArgNotNull(a, "a");
 
-        if (isNullOrEmpty(a)) {
-            return isNullOrEmpty(elementsToAdd) ? a.clone() : elementsToAdd.clone();
+        if (isEmpty(a)) {
+            return isEmpty(elementsToAdd) ? a.clone() : elementsToAdd.clone();
         }
 
         final T[] newArray = (T[]) Array.newInstance(a.getClass().getComponentType(), a.length + elementsToAdd.length);
@@ -5119,7 +5119,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static <T> boolean addAll(final Collection<T> c, final T... elementsToAdd) throws IllegalArgumentException {
         checkArgNotNull(c, "c");
 
-        if (isNullOrEmpty(elementsToAdd)) {
+        if (isEmpty(elementsToAdd)) {
             return false;
         }
 
@@ -5169,7 +5169,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return A new array containing the existing elementToInserts and the new elementToInsert
      */
     public static boolean[] insert(final boolean[] a, final int index, final boolean elementToInsert) {
-        if (isNullOrEmpty(a) && index == 0) {
+        if (isEmpty(a) && index == 0) {
             return Array.of(elementToInsert);
         }
 
@@ -5207,7 +5207,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return A new array containing the existing elementToInserts and the new elementToInsert
      */
     public static char[] insert(final char[] a, final int index, final char elementToInsert) {
-        if (isNullOrEmpty(a) && index == 0) {
+        if (isEmpty(a) && index == 0) {
             return Array.of(elementToInsert);
         }
 
@@ -5245,7 +5245,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return A new array containing the existing elementToInserts and the new elementToInsert
      */
     public static byte[] insert(final byte[] a, final int index, final byte elementToInsert) {
-        if (isNullOrEmpty(a) && index == 0) {
+        if (isEmpty(a) && index == 0) {
             return Array.of(elementToInsert);
         }
 
@@ -5283,7 +5283,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return A new array containing the existing elementToInserts and the new elementToInsert
      */
     public static short[] insert(final short[] a, final int index, final short elementToInsert) {
-        if (isNullOrEmpty(a) && index == 0) {
+        if (isEmpty(a) && index == 0) {
             return Array.of(elementToInsert);
         }
 
@@ -5321,7 +5321,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return A new array containing the existing elementToInserts and the new elementToInsert
      */
     public static int[] insert(final int[] a, final int index, final int elementToInsert) {
-        if (isNullOrEmpty(a) && index == 0) {
+        if (isEmpty(a) && index == 0) {
             return Array.of(elementToInsert);
         }
 
@@ -5359,7 +5359,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return A new array containing the existing elementToInserts and the new elementToInsert
      */
     public static long[] insert(final long[] a, final int index, final long elementToInsert) {
-        if (isNullOrEmpty(a) && index == 0) {
+        if (isEmpty(a) && index == 0) {
             return Array.of(elementToInsert);
         }
 
@@ -5397,7 +5397,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return A new array containing the existing elementToInserts and the new elementToInsert
      */
     public static float[] insert(final float[] a, final int index, final float elementToInsert) {
-        if (isNullOrEmpty(a) && index == 0) {
+        if (isEmpty(a) && index == 0) {
             return Array.of(elementToInsert);
         }
 
@@ -5435,7 +5435,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return A new array containing the existing elementToInserts and the new elementToInsert
      */
     public static double[] insert(final double[] a, final int index, final double elementToInsert) {
-        if (isNullOrEmpty(a) && index == 0) {
+        if (isEmpty(a) && index == 0) {
             return Array.of(elementToInsert);
         }
 
@@ -5462,7 +5462,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      */
     public static String[] insert(final String[] a, final int index, final String elementToInsert) {
-        if (isNullOrEmpty(a) && index == 0) {
+        if (isEmpty(a) && index == 0) {
             return asArray(elementToInsert);
         }
 
@@ -5542,7 +5542,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return a new String
      */
     public static String insert(final String str, final int index, final String strToInsert) {
-        checkIndex(index, N.len(str));
+        checkIndex(index, len(str));
 
         if (Strings.isEmpty(strToInsert)) {
             return Strings.nullToEmpty(str);
@@ -5572,7 +5572,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     @SafeVarargs
     public static boolean[] insertAll(final boolean[] a, final int index, final boolean... elementsToInsert) {
-        if (isNullOrEmpty(a) && index == 0) {
+        if (isEmpty(a) && index == 0) {
             return elementsToInsert.clone();
         }
 
@@ -5608,7 +5608,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     @SafeVarargs
     public static char[] insertAll(final char[] a, final int index, final char... elementsToInsert) {
-        if (isNullOrEmpty(a) && index == 0) {
+        if (isEmpty(a) && index == 0) {
             return elementsToInsert.clone();
         }
 
@@ -5644,7 +5644,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     @SafeVarargs
     public static byte[] insertAll(final byte[] a, final int index, final byte... elementsToInsert) {
-        if (isNullOrEmpty(a) && index == 0) {
+        if (isEmpty(a) && index == 0) {
             return elementsToInsert.clone();
         }
 
@@ -5680,7 +5680,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     @SafeVarargs
     public static short[] insertAll(final short[] a, final int index, final short... elementsToInsert) {
-        if (isNullOrEmpty(a) && index == 0) {
+        if (isEmpty(a) && index == 0) {
             return elementsToInsert.clone();
         }
 
@@ -5716,7 +5716,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     @SafeVarargs
     public static int[] insertAll(final int[] a, final int index, final int... elementsToInsert) {
-        if (isNullOrEmpty(a) && index == 0) {
+        if (isEmpty(a) && index == 0) {
             return elementsToInsert.clone();
         }
 
@@ -5752,7 +5752,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     @SafeVarargs
     public static long[] insertAll(final long[] a, final int index, final long... elementsToInsert) {
-        if (isNullOrEmpty(a) && index == 0) {
+        if (isEmpty(a) && index == 0) {
             return elementsToInsert.clone();
         }
 
@@ -5788,7 +5788,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     @SafeVarargs
     public static float[] insertAll(final float[] a, final int index, final float... elementsToInsert) {
-        if (isNullOrEmpty(a) && index == 0) {
+        if (isEmpty(a) && index == 0) {
             return elementsToInsert.clone();
         }
 
@@ -5824,7 +5824,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     @SafeVarargs
     public static double[] insertAll(final double[] a, final int index, final double... elementsToInsert) {
-        if (isNullOrEmpty(a) && index == 0) {
+        if (isEmpty(a) && index == 0) {
             return elementsToInsert.clone();
         }
 
@@ -5852,7 +5852,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     @SafeVarargs
     public static String[] insertAll(final String[] a, final int index, final String... elementsToInsert) {
-        if (isNullOrEmpty(a) && index == 0) {
+        if (isEmpty(a) && index == 0) {
             return elementsToInsert.clone();
         }
 
@@ -5917,11 +5917,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static <T> boolean insertAll(final List<T> list, final int index, final T... elementsToInsert) throws IllegalArgumentException {
         checkArgNotNull(list, "list");
 
-        if (isNullOrEmpty(elementsToInsert)) {
+        if (isEmpty(elementsToInsert)) {
             return false;
         }
 
-        list.addAll(index, N.asList(elementsToInsert));
+        list.addAll(index, asList(elementsToInsert));
 
         return true;
     }
@@ -6279,7 +6279,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     @SafeVarargs
     public static boolean[] deleteAll(final boolean[] a, int... indices) {
-        if (isNullOrEmpty(indices)) {
+        if (isEmpty(indices)) {
             return a == null ? EMPTY_BOOLEAN_ARRAY : a.clone();
         } else if (indices.length == 1) {
             return delete(a, indices[0]);
@@ -6349,7 +6349,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     @SafeVarargs
     public static char[] deleteAll(final char[] a, int... indices) {
-        if (isNullOrEmpty(indices)) {
+        if (isEmpty(indices)) {
             return a == null ? EMPTY_CHAR_ARRAY : a.clone();
         } else if (indices.length == 1) {
             return delete(a, indices[0]);
@@ -6419,7 +6419,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     @SafeVarargs
     public static byte[] deleteAll(final byte[] a, int... indices) {
-        if (isNullOrEmpty(indices)) {
+        if (isEmpty(indices)) {
             return a == null ? EMPTY_BYTE_ARRAY : a.clone();
         } else if (indices.length == 1) {
             return delete(a, indices[0]);
@@ -6489,7 +6489,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     @SafeVarargs
     public static short[] deleteAll(final short[] a, int... indices) {
-        if (isNullOrEmpty(indices)) {
+        if (isEmpty(indices)) {
             return a == null ? EMPTY_SHORT_ARRAY : a.clone();
         } else if (indices.length == 1) {
             return delete(a, indices[0]);
@@ -6561,7 +6561,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     @SafeVarargs
     public static int[] deleteAll(final int[] a, int... indices) {
-        if (isNullOrEmpty(indices)) {
+        if (isEmpty(indices)) {
             return a == null ? EMPTY_INT_ARRAY : a.clone();
         } else if (indices.length == 1) {
             return delete(a, indices[0]);
@@ -6633,7 +6633,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     @SafeVarargs
     public static long[] deleteAll(final long[] a, int... indices) {
-        if (isNullOrEmpty(indices)) {
+        if (isEmpty(indices)) {
             return a == null ? EMPTY_LONG_ARRAY : a.clone();
         } else if (indices.length == 1) {
             return delete(a, indices[0]);
@@ -6703,7 +6703,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     @SafeVarargs
     public static float[] deleteAll(final float[] a, int... indices) {
-        if (isNullOrEmpty(indices)) {
+        if (isEmpty(indices)) {
             return a == null ? EMPTY_FLOAT_ARRAY : a.clone();
         } else if (indices.length == 1) {
             return delete(a, indices[0]);
@@ -6773,7 +6773,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     @SafeVarargs
     public static double[] deleteAll(final double[] a, int... indices) {
-        if (isNullOrEmpty(indices)) {
+        if (isEmpty(indices)) {
             return a == null ? EMPTY_DOUBLE_ARRAY : a.clone();
         } else if (indices.length == 1) {
             return delete(a, indices[0]);
@@ -6825,7 +6825,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     @SafeVarargs
     public static String[] deleteAll(final String[] a, int... indices) throws IllegalArgumentException {
-        if (isNullOrEmpty(indices)) {
+        if (isEmpty(indices)) {
             return a == null ? EMPTY_STRING_ARRAY : a.clone();
         } else if (indices.length == 1) {
             return delete(a, indices[0]);
@@ -6865,7 +6865,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static <T> T[] deleteAll(final T[] a, int... indices) throws IllegalArgumentException {
         checkArgNotNull(a, "a");
 
-        if (isNullOrEmpty(indices)) {
+        if (isEmpty(indices)) {
             return a.clone();
         } else if (indices.length == 1) {
             return delete(a, indices[0]);
@@ -6931,7 +6931,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static boolean deleteAll(final List<?> list, int... indices) {
         checkArgNotNull(list);
 
-        if (isNullOrEmpty(indices)) {
+        if (isEmpty(indices)) {
             return false;
         } else if (indices.length == 1) {
             list.remove(indices[0]);
@@ -6991,7 +6991,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *         occurrence of the specified elementToRemove.
      */
     public static boolean[] remove(final boolean[] a, final boolean elementToRemove) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return EMPTY_BOOLEAN_ARRAY;
         }
 
@@ -7020,7 +7020,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *         occurrence of the specified elementToRemove.
      */
     public static char[] remove(final char[] a, final char elementToRemove) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return EMPTY_CHAR_ARRAY;
         }
 
@@ -7049,7 +7049,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *         occurrence of the specified elementToRemove.
      */
     public static byte[] remove(final byte[] a, final byte elementToRemove) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return EMPTY_BYTE_ARRAY;
         }
 
@@ -7078,7 +7078,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *         occurrence of the specified elementToRemove.
      */
     public static short[] remove(final short[] a, final short elementToRemove) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return EMPTY_SHORT_ARRAY;
         }
 
@@ -7107,7 +7107,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *         occurrence of the specified elementToRemove.
      */
     public static int[] remove(final int[] a, final int elementToRemove) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return EMPTY_INT_ARRAY;
         }
 
@@ -7136,7 +7136,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *         occurrence of the specified elementToRemove.
      */
     public static long[] remove(final long[] a, final long elementToRemove) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return EMPTY_LONG_ARRAY;
         }
 
@@ -7165,7 +7165,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *         occurrence of the specified elementToRemove.
      */
     public static float[] remove(final float[] a, final float elementToRemove) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return EMPTY_FLOAT_ARRAY;
         }
 
@@ -7194,7 +7194,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *         occurrence of the specified elementToRemove.
      */
     public static double[] remove(final double[] a, final double elementToRemove) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return EMPTY_DOUBLE_ARRAY;
         }
 
@@ -7211,7 +7211,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      */
     public static String[] remove(final String[] a, final String elementToRemove) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return EMPTY_STRING_ARRAY;
         }
 
@@ -7242,7 +7242,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException if the specified {@code Array} is <code>null</code>.
      */
     public static <T> T[] remove(final T[] a, final T elementToRemove) throws IllegalArgumentException {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return a;
         }
 
@@ -7264,7 +7264,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return <tt>true</tt> if this collection changed as a result of the call
      */
     public static <T> boolean remove(final Collection<T> c, final T elementToRemove) {
-        if (isNullOrEmpty(c)) {
+        if (isEmpty(c)) {
             return false;
         }
 
@@ -7282,9 +7282,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     @SafeVarargs
     public static boolean[] removeAll(final boolean[] a, final boolean... elementsToRemove) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return EMPTY_BOOLEAN_ARRAY;
-        } else if (isNullOrEmpty(elementsToRemove)) {
+        } else if (isEmpty(elementsToRemove)) {
             return a.clone();
         } else if (elementsToRemove.length == 1) {
             return removeAllOccurrences(a, elementsToRemove[0]);
@@ -7306,9 +7306,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     @SafeVarargs
     public static char[] removeAll(final char[] a, final char... elementsToRemove) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return EMPTY_CHAR_ARRAY;
-        } else if (isNullOrEmpty(elementsToRemove)) {
+        } else if (isEmpty(elementsToRemove)) {
             return a.clone();
         } else if (elementsToRemove.length == 1) {
             return removeAllOccurrences(a, elementsToRemove[0]);
@@ -7330,9 +7330,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     @SafeVarargs
     public static byte[] removeAll(final byte[] a, final byte... elementsToRemove) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return EMPTY_BYTE_ARRAY;
-        } else if (isNullOrEmpty(elementsToRemove)) {
+        } else if (isEmpty(elementsToRemove)) {
             return a.clone();
         } else if (elementsToRemove.length == 1) {
             return removeAllOccurrences(a, elementsToRemove[0]);
@@ -7354,9 +7354,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     @SafeVarargs
     public static short[] removeAll(final short[] a, final short... elementsToRemove) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return EMPTY_SHORT_ARRAY;
-        } else if (isNullOrEmpty(elementsToRemove)) {
+        } else if (isEmpty(elementsToRemove)) {
             return a.clone();
         } else if (elementsToRemove.length == 1) {
             return removeAllOccurrences(a, elementsToRemove[0]);
@@ -7378,9 +7378,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     @SafeVarargs
     public static int[] removeAll(final int[] a, final int... elementsToRemove) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return EMPTY_INT_ARRAY;
-        } else if (isNullOrEmpty(elementsToRemove)) {
+        } else if (isEmpty(elementsToRemove)) {
             return a.clone();
         } else if (elementsToRemove.length == 1) {
             return removeAllOccurrences(a, elementsToRemove[0]);
@@ -7402,9 +7402,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     @SafeVarargs
     public static long[] removeAll(final long[] a, final long... elementsToRemove) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return EMPTY_LONG_ARRAY;
-        } else if (isNullOrEmpty(elementsToRemove)) {
+        } else if (isEmpty(elementsToRemove)) {
             return a.clone();
         } else if (elementsToRemove.length == 1) {
             return removeAllOccurrences(a, elementsToRemove[0]);
@@ -7426,9 +7426,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     @SafeVarargs
     public static float[] removeAll(final float[] a, final float... elementsToRemove) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return EMPTY_FLOAT_ARRAY;
-        } else if (isNullOrEmpty(elementsToRemove)) {
+        } else if (isEmpty(elementsToRemove)) {
             return a.clone();
         } else if (elementsToRemove.length == 1) {
             return removeAllOccurrences(a, elementsToRemove[0]);
@@ -7450,9 +7450,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     @SafeVarargs
     public static double[] removeAll(final double[] a, final double... elementsToRemove) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return EMPTY_DOUBLE_ARRAY;
-        } else if (isNullOrEmpty(elementsToRemove)) {
+        } else if (isEmpty(elementsToRemove)) {
             return a.clone();
         } else if (elementsToRemove.length == 1) {
             return removeAllOccurrences(a, elementsToRemove[0]);
@@ -7474,9 +7474,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     @SafeVarargs
     public static String[] removeAll(final String[] a, final String... elementsToRemove) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return EMPTY_STRING_ARRAY;
-        } else if (isNullOrEmpty(elementsToRemove)) {
+        } else if (isEmpty(elementsToRemove)) {
             return a.clone();
         } else if (elementsToRemove.length == 1) {
             return removeAllOccurrences(a, elementsToRemove[0]);
@@ -7506,9 +7506,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     @SafeVarargs
     public static <T> T[] removeAll(final T[] a, final T... elementsToRemove) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return a;
-        } else if (isNullOrEmpty(elementsToRemove)) {
+        } else if (isEmpty(elementsToRemove)) {
             return a.clone();
         } else if (elementsToRemove.length == 1) {
             return removeAllOccurrences(a, elementsToRemove[0]);
@@ -7537,7 +7537,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     @SafeVarargs
     public static <T> boolean removeAll(final Collection<T> c, final T... elementsToRemove) {
-        if (isNullOrEmpty(c) || isNullOrEmpty(elementsToRemove)) {
+        if (isEmpty(c) || isEmpty(elementsToRemove)) {
             return false;
         } else {
             return removeAll(c, asSet(elementsToRemove));
@@ -7554,7 +7554,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see N#differentSet(Collection, Collection)
      */
     public static <T> boolean removeAll(final Collection<T> c, final Collection<?> elementsToRemove) {
-        if (isNullOrEmpty(c) || isNullOrEmpty(elementsToRemove)) {
+        if (isEmpty(c) || isEmpty(elementsToRemove)) {
             return false;
         }
 
@@ -7584,7 +7584,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      */
     public static <T> boolean removeAll(final Collection<T> c, final Iterator<?> elementsToRemove) {
-        if (isNullOrEmpty(c) || elementsToRemove == null) {
+        if (isEmpty(c) || elementsToRemove == null) {
             return false;
         }
 
@@ -7614,7 +7614,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *         occurrences of the specified elementToRemove.
      */
     public static boolean[] removeAllOccurrences(final boolean[] a, final boolean elementToRemove) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return EMPTY_BOOLEAN_ARRAY;
         }
 
@@ -7644,7 +7644,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *         occurrences of the specified elementToRemove.
      */
     public static char[] removeAllOccurrences(final char[] a, final char elementToRemove) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return EMPTY_CHAR_ARRAY;
         }
 
@@ -7674,7 +7674,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *         occurrences of the specified elementToRemove.
      */
     public static byte[] removeAllOccurrences(final byte[] a, final byte elementToRemove) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return EMPTY_BYTE_ARRAY;
         }
 
@@ -7704,7 +7704,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *         occurrences of the specified elementToRemove.
      */
     public static short[] removeAllOccurrences(final short[] a, final short elementToRemove) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return EMPTY_SHORT_ARRAY;
         }
 
@@ -7734,7 +7734,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *         occurrences of the specified elementToRemove.
      */
     public static int[] removeAllOccurrences(final int[] a, final int elementToRemove) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return EMPTY_INT_ARRAY;
         }
 
@@ -7764,7 +7764,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *         occurrences of the specified elementToRemove.
      */
     public static long[] removeAllOccurrences(final long[] a, final long elementToRemove) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return EMPTY_LONG_ARRAY;
         }
 
@@ -7794,7 +7794,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *         occurrences of the specified elementToRemove.
      */
     public static float[] removeAllOccurrences(final float[] a, final float elementToRemove) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return EMPTY_FLOAT_ARRAY;
         }
 
@@ -7824,7 +7824,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *         occurrences of the specified elementToRemove.
      */
     public static double[] removeAllOccurrences(final double[] a, final double elementToRemove) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return EMPTY_DOUBLE_ARRAY;
         }
 
@@ -7850,7 +7850,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      */
     public static String[] removeAllOccurrences(final String[] a, final String elementToRemove) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return EMPTY_STRING_ARRAY;
         }
 
@@ -7881,7 +7881,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *         occurrences of the specified elementToRemove.
      */
     public static <T> T[] removeAllOccurrences(final T[] a, final T elementToRemove) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return a;
         }
 
@@ -7908,7 +7908,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      */
     public static <T> boolean removeAllOccurrences(final Collection<T> c, final T elementToRemove) {
-        if (isNullOrEmpty(c)) {
+        if (isEmpty(c)) {
             return false;
         }
 
@@ -7922,7 +7922,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      */
     public static boolean[] removeDuplicates(final boolean[] a) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return EMPTY_BOOLEAN_ARRAY;
         }
 
@@ -7940,7 +7940,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static boolean[] removeDuplicates(final boolean[] a, final int fromIndex, final int toIndex) {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
-        if (isNullOrEmpty(a) && fromIndex == 0 && toIndex == 0) {
+        if (isEmpty(a) && fromIndex == 0 && toIndex == 0) {
             return EMPTY_BOOLEAN_ARRAY;
         } else if (toIndex - fromIndex <= 1) {
             return copyOfRange(a, fromIndex, toIndex);
@@ -7967,7 +7967,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      */
     public static char[] removeDuplicates(final char[] a) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return EMPTY_CHAR_ARRAY;
         }
 
@@ -7982,7 +7982,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      */
     public static char[] removeDuplicates(final char[] a, final boolean isSorted) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return EMPTY_CHAR_ARRAY;
         }
 
@@ -8001,7 +8001,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static char[] removeDuplicates(final char[] a, final int fromIndex, final int toIndex, final boolean isSorted) {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
-        if (isNullOrEmpty(a) && fromIndex == 0 && toIndex == 0) {
+        if (isEmpty(a) && fromIndex == 0 && toIndex == 0) {
             return EMPTY_CHAR_ARRAY;
         } else if (toIndex - fromIndex <= 1) {
             return copyOfRange(a, fromIndex, toIndex);
@@ -8049,7 +8049,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      */
     public static byte[] removeDuplicates(final byte[] a) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return EMPTY_BYTE_ARRAY;
         }
 
@@ -8064,7 +8064,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      */
     public static byte[] removeDuplicates(final byte[] a, final boolean isSorted) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return EMPTY_BYTE_ARRAY;
         }
 
@@ -8083,7 +8083,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static byte[] removeDuplicates(final byte[] a, final int fromIndex, final int toIndex, final boolean isSorted) {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
-        if (isNullOrEmpty(a) && fromIndex == 0 && toIndex == 0) {
+        if (isEmpty(a) && fromIndex == 0 && toIndex == 0) {
             return EMPTY_BYTE_ARRAY;
         } else if (toIndex - fromIndex <= 1) {
             return copyOfRange(a, fromIndex, toIndex);
@@ -8131,7 +8131,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      */
     public static short[] removeDuplicates(final short[] a) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return EMPTY_SHORT_ARRAY;
         }
 
@@ -8146,7 +8146,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      */
     public static short[] removeDuplicates(final short[] a, final boolean isSorted) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return EMPTY_SHORT_ARRAY;
         }
 
@@ -8165,7 +8165,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static short[] removeDuplicates(final short[] a, final int fromIndex, final int toIndex, final boolean isSorted) {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
-        if (isNullOrEmpty(a) && fromIndex == 0 && toIndex == 0) {
+        if (isEmpty(a) && fromIndex == 0 && toIndex == 0) {
             return EMPTY_SHORT_ARRAY;
         } else if (toIndex - fromIndex <= 1) {
             return copyOfRange(a, fromIndex, toIndex);
@@ -8213,7 +8213,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      */
     public static int[] removeDuplicates(final int[] a) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return EMPTY_INT_ARRAY;
         }
 
@@ -8228,7 +8228,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      */
     public static int[] removeDuplicates(final int[] a, final boolean isSorted) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return EMPTY_INT_ARRAY;
         }
 
@@ -8247,7 +8247,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static int[] removeDuplicates(final int[] a, final int fromIndex, final int toIndex, final boolean isSorted) {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
-        if (isNullOrEmpty(a) && fromIndex == 0 && toIndex == 0) {
+        if (isEmpty(a) && fromIndex == 0 && toIndex == 0) {
             return EMPTY_INT_ARRAY;
         } else if (toIndex - fromIndex <= 1) {
             return copyOfRange(a, fromIndex, toIndex);
@@ -8295,7 +8295,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      */
     public static long[] removeDuplicates(final long[] a) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return EMPTY_LONG_ARRAY;
         }
 
@@ -8310,7 +8310,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      */
     public static long[] removeDuplicates(final long[] a, final boolean isSorted) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return EMPTY_LONG_ARRAY;
         }
 
@@ -8329,7 +8329,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static long[] removeDuplicates(final long[] a, final int fromIndex, final int toIndex, final boolean isSorted) {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
-        if (isNullOrEmpty(a) && fromIndex == 0 && toIndex == 0) {
+        if (isEmpty(a) && fromIndex == 0 && toIndex == 0) {
             return EMPTY_LONG_ARRAY;
         } else if (toIndex - fromIndex <= 1) {
             return copyOfRange(a, fromIndex, toIndex);
@@ -8377,7 +8377,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      */
     public static float[] removeDuplicates(final float[] a) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return EMPTY_FLOAT_ARRAY;
         }
 
@@ -8392,7 +8392,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      */
     public static float[] removeDuplicates(final float[] a, final boolean isSorted) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return EMPTY_FLOAT_ARRAY;
         }
 
@@ -8411,7 +8411,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static float[] removeDuplicates(final float[] a, final int fromIndex, final int toIndex, final boolean isSorted) {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
-        if (isNullOrEmpty(a) && fromIndex == 0 && toIndex == 0) {
+        if (isEmpty(a) && fromIndex == 0 && toIndex == 0) {
             return EMPTY_FLOAT_ARRAY;
         } else if (toIndex - fromIndex <= 1) {
             return copyOfRange(a, fromIndex, toIndex);
@@ -8460,7 +8460,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      */
     public static double[] removeDuplicates(final double[] a) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return EMPTY_DOUBLE_ARRAY;
         }
 
@@ -8475,7 +8475,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      */
     public static double[] removeDuplicates(final double[] a, final boolean isSorted) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return EMPTY_DOUBLE_ARRAY;
         }
 
@@ -8494,7 +8494,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static double[] removeDuplicates(final double[] a, final int fromIndex, final int toIndex, final boolean isSorted) {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
-        if (isNullOrEmpty(a) && fromIndex == 0 && toIndex == 0) {
+        if (isEmpty(a) && fromIndex == 0 && toIndex == 0) {
             return EMPTY_DOUBLE_ARRAY;
         } else if (toIndex - fromIndex <= 1) {
             return copyOfRange(a, fromIndex, toIndex);
@@ -8542,7 +8542,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      */
     public static String[] removeDuplicates(final String[] a) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return EMPTY_STRING_ARRAY;
         }
 
@@ -8557,7 +8557,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      */
     public static String[] removeDuplicates(final String[] a, final boolean isSorted) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return EMPTY_STRING_ARRAY;
         }
 
@@ -8576,7 +8576,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static String[] removeDuplicates(final String[] a, final int fromIndex, final int toIndex, final boolean isSorted) {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
-        if (isNullOrEmpty(a) && fromIndex == 0 && toIndex == 0) {
+        if (isEmpty(a) && fromIndex == 0 && toIndex == 0) {
             return EMPTY_STRING_ARRAY;
         } else if (toIndex - fromIndex <= 1) {
             return copyOfRange(a, fromIndex, toIndex);
@@ -8632,7 +8632,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws NullPointerException if the specified array <code>a</code> is null.
      */
     public static <T> T[] removeDuplicates(final T[] a) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return a;
         }
 
@@ -8648,7 +8648,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      */
     public static <T> T[] removeDuplicates(final T[] a, final boolean isSorted) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return a;
         }
 
@@ -8668,7 +8668,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static <T> T[] removeDuplicates(final T[] a, final int fromIndex, final int toIndex, final boolean isSorted) {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
-        if (isNullOrEmpty(a) && fromIndex == 0 && toIndex == 0) {
+        if (isEmpty(a) && fromIndex == 0 && toIndex == 0) {
             return a;
         } else if (toIndex - fromIndex <= 1) {
             return copyOfRange(a, fromIndex, toIndex);
@@ -8712,7 +8712,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     @SuppressWarnings("rawtypes")
     public static boolean removeDuplicates(final Collection<?> c, final boolean isSorted) {
-        if (isNullOrEmpty(c) || c.size() == 1 || c instanceof Set) {
+        if (isEmpty(c) || c.size() == 1 || c instanceof Set) {
             return false;
         } else if (c.size() == 2) {
             final Iterator<?> iter = c.iterator();
@@ -9099,7 +9099,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      */
     public static String deleteRange(String str, final int fromIndex, final int toIndex) {
-        final int len = N.len(str);
+        final int len = len(str);
 
         checkFromToIndex(fromIndex, toIndex, len);
 
@@ -9126,9 +9126,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         checkFromToIndex(fromIndex, toIndex, len);
 
-        if (isNullOrEmpty(a)) {
-            return isNullOrEmpty(replacement) ? EMPTY_BOOLEAN_ARRAY : replacement.clone();
-        } else if (isNullOrEmpty(replacement)) {
+        if (isEmpty(a)) {
+            return isEmpty(replacement) ? EMPTY_BOOLEAN_ARRAY : replacement.clone();
+        } else if (isEmpty(replacement)) {
             return deleteRange(a, fromIndex, toIndex);
         }
 
@@ -9161,9 +9161,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         checkFromToIndex(fromIndex, toIndex, len);
 
-        if (isNullOrEmpty(a)) {
-            return isNullOrEmpty(replacement) ? EMPTY_CHAR_ARRAY : replacement.clone();
-        } else if (isNullOrEmpty(replacement)) {
+        if (isEmpty(a)) {
+            return isEmpty(replacement) ? EMPTY_CHAR_ARRAY : replacement.clone();
+        } else if (isEmpty(replacement)) {
             return deleteRange(a, fromIndex, toIndex);
         }
 
@@ -9196,9 +9196,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         checkFromToIndex(fromIndex, toIndex, len);
 
-        if (isNullOrEmpty(a)) {
-            return isNullOrEmpty(replacement) ? EMPTY_BYTE_ARRAY : replacement.clone();
-        } else if (isNullOrEmpty(replacement)) {
+        if (isEmpty(a)) {
+            return isEmpty(replacement) ? EMPTY_BYTE_ARRAY : replacement.clone();
+        } else if (isEmpty(replacement)) {
             return deleteRange(a, fromIndex, toIndex);
         }
 
@@ -9231,9 +9231,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         checkFromToIndex(fromIndex, toIndex, len);
 
-        if (isNullOrEmpty(a)) {
-            return isNullOrEmpty(replacement) ? EMPTY_SHORT_ARRAY : replacement.clone();
-        } else if (isNullOrEmpty(replacement)) {
+        if (isEmpty(a)) {
+            return isEmpty(replacement) ? EMPTY_SHORT_ARRAY : replacement.clone();
+        } else if (isEmpty(replacement)) {
             return deleteRange(a, fromIndex, toIndex);
         }
 
@@ -9266,9 +9266,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         checkFromToIndex(fromIndex, toIndex, len);
 
-        if (isNullOrEmpty(a)) {
-            return isNullOrEmpty(replacement) ? EMPTY_INT_ARRAY : replacement.clone();
-        } else if (isNullOrEmpty(replacement)) {
+        if (isEmpty(a)) {
+            return isEmpty(replacement) ? EMPTY_INT_ARRAY : replacement.clone();
+        } else if (isEmpty(replacement)) {
             return deleteRange(a, fromIndex, toIndex);
         }
 
@@ -9301,9 +9301,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         checkFromToIndex(fromIndex, toIndex, len);
 
-        if (isNullOrEmpty(a)) {
-            return isNullOrEmpty(replacement) ? EMPTY_LONG_ARRAY : replacement.clone();
-        } else if (isNullOrEmpty(replacement)) {
+        if (isEmpty(a)) {
+            return isEmpty(replacement) ? EMPTY_LONG_ARRAY : replacement.clone();
+        } else if (isEmpty(replacement)) {
             return deleteRange(a, fromIndex, toIndex);
         }
 
@@ -9336,9 +9336,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         checkFromToIndex(fromIndex, toIndex, len);
 
-        if (isNullOrEmpty(a)) {
-            return isNullOrEmpty(replacement) ? EMPTY_FLOAT_ARRAY : replacement.clone();
-        } else if (isNullOrEmpty(replacement)) {
+        if (isEmpty(a)) {
+            return isEmpty(replacement) ? EMPTY_FLOAT_ARRAY : replacement.clone();
+        } else if (isEmpty(replacement)) {
             return deleteRange(a, fromIndex, toIndex);
         }
 
@@ -9371,9 +9371,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         checkFromToIndex(fromIndex, toIndex, len);
 
-        if (isNullOrEmpty(a)) {
-            return isNullOrEmpty(replacement) ? EMPTY_DOUBLE_ARRAY : replacement.clone();
-        } else if (isNullOrEmpty(replacement)) {
+        if (isEmpty(a)) {
+            return isEmpty(replacement) ? EMPTY_DOUBLE_ARRAY : replacement.clone();
+        } else if (isEmpty(replacement)) {
             return deleteRange(a, fromIndex, toIndex);
         }
 
@@ -9406,9 +9406,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         checkFromToIndex(fromIndex, toIndex, len);
 
-        if (isNullOrEmpty(a)) {
-            return isNullOrEmpty(replacement) ? EMPTY_STRING_ARRAY : replacement.clone();
-        } else if (isNullOrEmpty(replacement)) {
+        if (isEmpty(a)) {
+            return isEmpty(replacement) ? EMPTY_STRING_ARRAY : replacement.clone();
+        } else if (isEmpty(replacement)) {
             return deleteRange(a, fromIndex, toIndex);
         }
 
@@ -9445,9 +9445,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         checkFromToIndex(fromIndex, toIndex, len);
 
-        if (isNullOrEmpty(a)) {
-            return isNullOrEmpty(replacement) ? a : replacement.clone();
-        } else if (isNullOrEmpty(replacement)) {
+        if (isEmpty(a)) {
+            return isEmpty(replacement) ? a : replacement.clone();
+        } else if (isEmpty(replacement)) {
             return deleteRange(a, fromIndex, toIndex);
         }
 
@@ -9484,7 +9484,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         checkFromToIndex(fromIndex, toIndex, size);
 
-        if (isNullOrEmpty(replacement)) {
+        if (isEmpty(replacement)) {
             if (fromIndex == toIndex) {
                 return false;
             }
@@ -9500,7 +9500,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         c.addAll(replacement);
 
-        if (notNullOrEmpty(endList)) {
+        if (notEmpty(endList)) {
             c.addAll(endList);
         }
 
@@ -9518,7 +9518,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     @SuppressWarnings("deprecation")
     public static String replaceRange(final String str, final int fromIndex, final int toIndex, final String replacement) {
-        final int len = N.len(str);
+        final int len = len(str);
 
         checkFromToIndex(fromIndex, toIndex, len);
 
@@ -9817,7 +9817,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     @SuppressWarnings("deprecation")
     public static String moveRange(final String str, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
-        final int len = N.len(str);
+        final int len = len(str);
         checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len);
 
         if (fromIndex == toIndex || fromIndex == newPositionStartIndex) {
@@ -9851,7 +9851,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //    public static boolean[] copyThenMoveRange(final boolean[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
     //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a));
     //
-    //        final boolean[] copy = isNullOrEmpty(a) ? a : a.clone();
+    //        final boolean[] copy = isEmpty(a) ? a : a.clone();
     //
     //        moveRange(copy, fromIndex, toIndex, newPositionStartIndex);
     //
@@ -9870,7 +9870,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //    public static char[] copyThenMoveRange(final char[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
     //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a));
     //
-    //        final char[] copy = isNullOrEmpty(a) ? a : a.clone();
+    //        final char[] copy = isEmpty(a) ? a : a.clone();
     //
     //        moveRange(copy, fromIndex, toIndex, newPositionStartIndex);
     //
@@ -9889,7 +9889,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //    public static byte[] copyThenMoveRange(final byte[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
     //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a));
     //
-    //        final byte[] copy = isNullOrEmpty(a) ? a : a.clone();
+    //        final byte[] copy = isEmpty(a) ? a : a.clone();
     //
     //        moveRange(copy, fromIndex, toIndex, newPositionStartIndex);
     //
@@ -9908,7 +9908,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //    public static short[] copyThenMoveRange(final short[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
     //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a));
     //
-    //        final short[] copy = isNullOrEmpty(a) ? a : a.clone();
+    //        final short[] copy = isEmpty(a) ? a : a.clone();
     //
     //        moveRange(copy, fromIndex, toIndex, newPositionStartIndex);
     //
@@ -9927,7 +9927,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //    public static int[] copyThenMoveRange(final int[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
     //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a));
     //
-    //        final int[] copy = isNullOrEmpty(a) ? a : a.clone();
+    //        final int[] copy = isEmpty(a) ? a : a.clone();
     //
     //        moveRange(copy, fromIndex, toIndex, newPositionStartIndex);
     //
@@ -9946,7 +9946,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //    public static long[] copyThenMoveRange(final long[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
     //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a));
     //
-    //        final long[] copy = isNullOrEmpty(a) ? a : a.clone();
+    //        final long[] copy = isEmpty(a) ? a : a.clone();
     //
     //        moveRange(copy, fromIndex, toIndex, newPositionStartIndex);
     //
@@ -9965,7 +9965,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //    public static double[] copyThenMoveRange(final double[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
     //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a));
     //
-    //        final double[] copy = isNullOrEmpty(a) ? a : a.clone();
+    //        final double[] copy = isEmpty(a) ? a : a.clone();
     //
     //        moveRange(copy, fromIndex, toIndex, newPositionStartIndex);
     //
@@ -9984,7 +9984,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //    public static <T> T[] copyThenMoveRange(final T[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
     //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a));
     //
-    //        final T[] copy = isNullOrEmpty(a) ? a : a.clone();
+    //        final T[] copy = isEmpty(a) ? a : a.clone();
     //
     //        moveRange(copy, fromIndex, toIndex, newPositionStartIndex);
     //
@@ -10003,7 +10003,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //    public static boolean[] copyThenMoveRange(final boolean[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
     //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a));
     //
-    //        final boolean[] copy = isNullOrEmpty(a) ? a : a.clone();
+    //        final boolean[] copy = isEmpty(a) ? a : a.clone();
     //
     //        moveRange(copy, fromIndex, toIndex, newPositionStartIndex);
     //
@@ -10022,7 +10022,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //    public static char[] copyThenMoveRange(final char[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
     //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a));
     //
-    //        final char[] copy = isNullOrEmpty(a) ? a : a.clone();
+    //        final char[] copy = isEmpty(a) ? a : a.clone();
     //
     //        moveRange(copy, fromIndex, toIndex, newPositionStartIndex);
     //
@@ -10041,7 +10041,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //    public static byte[] copyThenMoveRange(final byte[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
     //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a));
     //
-    //        final byte[] copy = isNullOrEmpty(a) ? a : a.clone();
+    //        final byte[] copy = isEmpty(a) ? a : a.clone();
     //
     //        moveRange(copy, fromIndex, toIndex, newPositionStartIndex);
     //
@@ -10060,7 +10060,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //    public static short[] copyThenMoveRange(final short[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
     //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a));
     //
-    //        final short[] copy = isNullOrEmpty(a) ? a : a.clone();
+    //        final short[] copy = isEmpty(a) ? a : a.clone();
     //
     //        moveRange(copy, fromIndex, toIndex, newPositionStartIndex);
     //
@@ -10079,7 +10079,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //    public static int[] copyThenMoveRange(final int[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
     //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a));
     //
-    //        final int[] copy = isNullOrEmpty(a) ? a : a.clone();
+    //        final int[] copy = isEmpty(a) ? a : a.clone();
     //
     //        moveRange(copy, fromIndex, toIndex, newPositionStartIndex);
     //
@@ -10098,7 +10098,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //    public static long[] copyThenMoveRange(final long[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
     //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a));
     //
-    //        final long[] copy = isNullOrEmpty(a) ? a : a.clone();
+    //        final long[] copy = isEmpty(a) ? a : a.clone();
     //
     //        moveRange(copy, fromIndex, toIndex, newPositionStartIndex);
     //
@@ -10117,7 +10117,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //    public static double[] copyThenMoveRange(final double[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
     //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a));
     //
-    //        final double[] copy = isNullOrEmpty(a) ? a : a.clone();
+    //        final double[] copy = isEmpty(a) ? a : a.clone();
     //
     //        moveRange(copy, fromIndex, toIndex, newPositionStartIndex);
     //
@@ -10136,7 +10136,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //    public static <T> T[] copyThenMoveRange(final T[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
     //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a));
     //
-    //        final T[] copy = isNullOrEmpty(a) ? a : a.clone();
+    //        final T[] copy = isEmpty(a) ? a : a.clone();
     //
     //        moveRange(copy, fromIndex, toIndex, newPositionStartIndex);
     //
@@ -10155,7 +10155,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //    public static boolean[] copyThenMoveRange(final boolean[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
     //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a));
     //
-    //        final boolean[] copy = isNullOrEmpty(a) ? a : a.clone();
+    //        final boolean[] copy = isEmpty(a) ? a : a.clone();
     //
     //        moveRange(copy, fromIndex, toIndex, newPositionStartIndex);
     //
@@ -10174,7 +10174,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //    public static char[] copyThenMoveRange(final char[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
     //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a));
     //
-    //        final char[] copy = isNullOrEmpty(a) ? a : a.clone();
+    //        final char[] copy = isEmpty(a) ? a : a.clone();
     //
     //        moveRange(copy, fromIndex, toIndex, newPositionStartIndex);
     //
@@ -10193,7 +10193,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //    public static byte[] copyThenMoveRange(final byte[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
     //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a));
     //
-    //        final byte[] copy = isNullOrEmpty(a) ? a : a.clone();
+    //        final byte[] copy = isEmpty(a) ? a : a.clone();
     //
     //        moveRange(copy, fromIndex, toIndex, newPositionStartIndex);
     //
@@ -10212,7 +10212,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //    public static short[] copyThenMoveRange(final short[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
     //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a));
     //
-    //        final short[] copy = isNullOrEmpty(a) ? a : a.clone();
+    //        final short[] copy = isEmpty(a) ? a : a.clone();
     //
     //        moveRange(copy, fromIndex, toIndex, newPositionStartIndex);
     //
@@ -10231,7 +10231,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //    public static int[] copyThenMoveRange(final int[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
     //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a));
     //
-    //        final int[] copy = isNullOrEmpty(a) ? a : a.clone();
+    //        final int[] copy = isEmpty(a) ? a : a.clone();
     //
     //        moveRange(copy, fromIndex, toIndex, newPositionStartIndex);
     //
@@ -10250,7 +10250,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //    public static long[] copyThenMoveRange(final long[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
     //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a));
     //
-    //        final long[] copy = isNullOrEmpty(a) ? a : a.clone();
+    //        final long[] copy = isEmpty(a) ? a : a.clone();
     //
     //        moveRange(copy, fromIndex, toIndex, newPositionStartIndex);
     //
@@ -10269,7 +10269,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //    public static double[] copyThenMoveRange(final double[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
     //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a));
     //
-    //        final double[] copy = isNullOrEmpty(a) ? a : a.clone();
+    //        final double[] copy = isEmpty(a) ? a : a.clone();
     //
     //        moveRange(copy, fromIndex, toIndex, newPositionStartIndex);
     //
@@ -10288,7 +10288,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //    public static <T> T[] copyThenMoveRange(final T[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
     //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a));
     //
-    //        final T[] copy = isNullOrEmpty(a) ? a : a.clone();
+    //        final T[] copy = isEmpty(a) ? a : a.clone();
     //
     //        moveRange(copy, fromIndex, toIndex, newPositionStartIndex);
     //
@@ -10381,7 +10381,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      */
     public static boolean hasDuplicates(final char[] a, final boolean isSorted) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return false;
         }
 
@@ -10400,7 +10400,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     static boolean hasDuplicates(final char[] a, final int fromIndex, final int toIndex, final boolean isSorted) {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
-        if (isNullOrEmpty(a) || toIndex - fromIndex < 2) {
+        if (isEmpty(a) || toIndex - fromIndex < 2) {
             return false;
         } else if (toIndex - fromIndex == 2) {
             return a[fromIndex] == a[fromIndex + 1];
@@ -10447,7 +10447,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      */
     public static boolean hasDuplicates(final byte[] a, final boolean isSorted) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return false;
         }
 
@@ -10466,7 +10466,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     static boolean hasDuplicates(final byte[] a, final int fromIndex, final int toIndex, final boolean isSorted) {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
-        if (isNullOrEmpty(a) || toIndex - fromIndex < 2) {
+        if (isEmpty(a) || toIndex - fromIndex < 2) {
             return false;
         } else if (toIndex - fromIndex == 2) {
             return a[fromIndex] == a[fromIndex + 1];
@@ -10513,7 +10513,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      */
     public static boolean hasDuplicates(final short[] a, final boolean isSorted) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return false;
         }
 
@@ -10532,7 +10532,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     static boolean hasDuplicates(final short[] a, final int fromIndex, final int toIndex, final boolean isSorted) {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
-        if (isNullOrEmpty(a) || toIndex - fromIndex < 2) {
+        if (isEmpty(a) || toIndex - fromIndex < 2) {
             return false;
         } else if (toIndex - fromIndex == 2) {
             return a[fromIndex] == a[fromIndex + 1];
@@ -10579,7 +10579,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      */
     public static boolean hasDuplicates(final int[] a, final boolean isSorted) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return false;
         }
 
@@ -10598,7 +10598,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     static boolean hasDuplicates(final int[] a, final int fromIndex, final int toIndex, final boolean isSorted) {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
-        if (isNullOrEmpty(a) || toIndex - fromIndex < 2) {
+        if (isEmpty(a) || toIndex - fromIndex < 2) {
             return false;
         } else if (toIndex - fromIndex == 2) {
             return a[fromIndex] == a[fromIndex + 1];
@@ -10645,7 +10645,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      */
     public static boolean hasDuplicates(final long[] a, final boolean isSorted) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return false;
         }
 
@@ -10664,7 +10664,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     static boolean hasDuplicates(final long[] a, final int fromIndex, final int toIndex, final boolean isSorted) {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
-        if (isNullOrEmpty(a) || toIndex - fromIndex < 2) {
+        if (isEmpty(a) || toIndex - fromIndex < 2) {
             return false;
         } else if (toIndex - fromIndex == 2) {
             return a[fromIndex] == a[fromIndex + 1];
@@ -10711,7 +10711,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      */
     public static boolean hasDuplicates(final float[] a, final boolean isSorted) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return false;
         }
 
@@ -10730,7 +10730,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     static boolean hasDuplicates(final float[] a, final int fromIndex, final int toIndex, final boolean isSorted) {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
-        if (isNullOrEmpty(a) || toIndex - fromIndex < 2) {
+        if (isEmpty(a) || toIndex - fromIndex < 2) {
             return false;
         } else if (toIndex - fromIndex == 2) {
             return equals(a[fromIndex], a[fromIndex + 1]);
@@ -10777,7 +10777,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      */
     public static boolean hasDuplicates(final double[] a, final boolean isSorted) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return false;
         }
 
@@ -10796,7 +10796,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     static boolean hasDuplicates(final double[] a, final int fromIndex, final int toIndex, final boolean isSorted) {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
-        if (isNullOrEmpty(a) || toIndex - fromIndex < 2) {
+        if (isEmpty(a) || toIndex - fromIndex < 2) {
             return false;
         } else if (toIndex - fromIndex == 2) {
             return equals(a[fromIndex], a[fromIndex + 1]);
@@ -10845,7 +10845,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      */
     public static <T> boolean hasDuplicates(final T[] a, final boolean isSorted) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return false;
         }
 
@@ -10865,7 +10865,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     static <T> boolean hasDuplicates(final T[] a, final int fromIndex, final int toIndex, final boolean isSorted) {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
-        if (isNullOrEmpty(a) || toIndex - fromIndex < 2) {
+        if (isEmpty(a) || toIndex - fromIndex < 2) {
             return false;
         } else if (toIndex - fromIndex == 2) {
             return equals(a[fromIndex], a[fromIndex + 1]);
@@ -10912,7 +10912,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      */
     public static boolean hasDuplicates(final Collection<?> c, final boolean isSorted) {
-        if (isNullOrEmpty(c) || c.size() == 1) {
+        if (isEmpty(c) || c.size() == 1) {
             return false;
         }
 
@@ -10953,9 +10953,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      */
     public static <T> boolean retainAll(final Collection<T> c, final Collection<? extends T> objsToKeep) {
-        if (isNullOrEmpty(c)) {
+        if (isEmpty(c)) {
             return false;
-        } else if (isNullOrEmpty(objsToKeep)) {
+        } else if (isEmpty(objsToKeep)) {
             c.clear();
             return true;
         }
@@ -10983,7 +10983,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     @SafeVarargs
     public static int sum(final char... a) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return 0;
         }
 
@@ -11000,7 +11000,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static int sum(final char[] a, final int fromIndex, final int toIndex) {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
-        if (isNullOrEmpty(a) || fromIndex == toIndex) {
+        if (isEmpty(a) || fromIndex == toIndex) {
             return 0;
         }
 
@@ -11020,7 +11020,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     @SafeVarargs
     public static int sum(final byte... a) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return 0;
         }
 
@@ -11037,7 +11037,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static int sum(final byte[] a, final int fromIndex, final int toIndex) {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
-        if (isNullOrEmpty(a) || fromIndex == toIndex) {
+        if (isEmpty(a) || fromIndex == toIndex) {
             return 0;
         }
 
@@ -11057,7 +11057,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     @SafeVarargs
     public static int sum(final short... a) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return 0;
         }
 
@@ -11074,7 +11074,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static int sum(final short[] a, final int fromIndex, final int toIndex) {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
-        if (isNullOrEmpty(a) || fromIndex == toIndex) {
+        if (isEmpty(a) || fromIndex == toIndex) {
             return 0;
         }
 
@@ -11094,7 +11094,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     @SafeVarargs
     public static int sum(final int... a) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return 0;
         }
 
@@ -11119,7 +11119,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     @SafeVarargs
     public static long sumToLong(final int... a) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return 0;
         }
 
@@ -11136,7 +11136,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static long sumToLong(final int[] a, final int fromIndex, final int toIndex) {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
-        if (isNullOrEmpty(a) || fromIndex == toIndex) {
+        if (isEmpty(a) || fromIndex == toIndex) {
             return 0;
         }
 
@@ -11156,7 +11156,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     @SafeVarargs
     public static long sum(final long... a) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return 0L;
         }
 
@@ -11173,7 +11173,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static long sum(final long[] a, final int fromIndex, final int toIndex) {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
-        if (isNullOrEmpty(a) || fromIndex == toIndex) {
+        if (isEmpty(a) || fromIndex == toIndex) {
             return 0;
         }
 
@@ -11193,7 +11193,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     @SafeVarargs
     public static float sum(final float... a) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return 0f;
         }
 
@@ -11210,7 +11210,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static float sum(final float[] a, final int fromIndex, final int toIndex) {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
-        if (isNullOrEmpty(a) || fromIndex == toIndex) {
+        if (isEmpty(a) || fromIndex == toIndex) {
             return 0f;
         }
 
@@ -11230,7 +11230,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     @SafeVarargs
     public static double sum(final double... a) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return 0d;
         }
 
@@ -11247,7 +11247,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static double sum(final double[] a, final int fromIndex, final int toIndex) {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
-        if (isNullOrEmpty(a) || fromIndex == toIndex) {
+        if (isEmpty(a) || fromIndex == toIndex) {
             return 0d;
         }
 
@@ -11268,7 +11268,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     @SafeVarargs
     public static double average(final char... a) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return 0d;
         }
 
@@ -11286,7 +11286,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static double average(final char[] a, final int fromIndex, final int toIndex) {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
-        if (isNullOrEmpty(a) || fromIndex == toIndex) {
+        if (isEmpty(a) || fromIndex == toIndex) {
             return 0d;
         }
 
@@ -11301,7 +11301,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     @SafeVarargs
     public static double average(final byte... a) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return 0d;
         }
 
@@ -11319,7 +11319,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static double average(final byte[] a, final int fromIndex, final int toIndex) {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
-        if (isNullOrEmpty(a) || fromIndex == toIndex) {
+        if (isEmpty(a) || fromIndex == toIndex) {
             return 0d;
         }
 
@@ -11334,7 +11334,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     @SafeVarargs
     public static double average(final short... a) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return 0d;
         }
 
@@ -11352,7 +11352,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static double average(final short[] a, final int fromIndex, final int toIndex) {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
-        if (isNullOrEmpty(a) || fromIndex == toIndex) {
+        if (isEmpty(a) || fromIndex == toIndex) {
             return 0d;
         }
 
@@ -11367,7 +11367,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     @SafeVarargs
     public static double average(final int... a) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return 0d;
         }
 
@@ -11385,7 +11385,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static double average(final int[] a, final int fromIndex, final int toIndex) {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
-        if (isNullOrEmpty(a) || fromIndex == toIndex) {
+        if (isEmpty(a) || fromIndex == toIndex) {
             return 0d;
         }
 
@@ -11406,7 +11406,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     @SafeVarargs
     public static double average(final long... a) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return 0d;
         }
 
@@ -11424,7 +11424,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static double average(final long[] a, final int fromIndex, final int toIndex) {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
-        if (isNullOrEmpty(a) || fromIndex == toIndex) {
+        if (isEmpty(a) || fromIndex == toIndex) {
             return 0d;
         }
 
@@ -11439,7 +11439,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     @SafeVarargs
     public static double average(final float... a) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return 0d;
         }
 
@@ -11457,7 +11457,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static double average(final float[] a, final int fromIndex, final int toIndex) {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
-        if (isNullOrEmpty(a) || fromIndex == toIndex) {
+        if (isEmpty(a) || fromIndex == toIndex) {
             return 0d;
         }
 
@@ -11478,7 +11478,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     @SafeVarargs
     public static double average(final double... a) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return 0d;
         }
 
@@ -11496,7 +11496,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static double average(final double[] a, final int fromIndex, final int toIndex) {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
-        if (isNullOrEmpty(a) || fromIndex == toIndex) {
+        if (isEmpty(a) || fromIndex == toIndex) {
             return 0d;
         }
 
@@ -11541,7 +11541,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws E the e
      */
     public static <T, E extends Exception> int sumInt(final T[] a, final Throwables.ToIntFunction<? super T, E> func) throws E {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return 0;
         }
 
@@ -11722,7 +11722,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws E the e
      */
     public static <T, E extends Exception> long sumLong(final T[] a, final Throwables.ToLongFunction<? super T, E> func) throws E {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return 0L;
         }
 
@@ -11880,7 +11880,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws E the e
      */
     public static <T, E extends Exception> double sumDouble(final T[] a, final Throwables.ToDoubleFunction<? super T, E> func) throws E {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return 0D;
         }
 
@@ -12120,7 +12120,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws E the e
      */
     public static <T, E extends Exception> double averageInt(final T[] a, final Throwables.ToIntFunction<? super T, E> func) throws E {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return 0d;
         }
 
@@ -12288,7 +12288,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws E the e
      */
     public static <T, E extends Exception> double averageLong(final T[] a, final Throwables.ToLongFunction<? super T, E> func) throws E {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return 0d;
         }
 
@@ -12428,7 +12428,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see Iterables#averageDouble(Object[], Throwables.ToDoubleFunction)
      */
     public static <T, E extends Exception> double averageDouble(final T[] a, final Throwables.ToDoubleFunction<? super T, E> func) throws E {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return 0d;
         }
 
@@ -12873,7 +12873,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static char min(final char... a) throws IllegalArgumentException {
         checkArgNotNullOrEmpty(a, "The spcified array can not be null or empty"); //NOSONAR
 
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             throw new IllegalArgumentException("The spcified array can not be null or empty");
         }
 
@@ -12889,7 +12889,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
      */
     public static char min(final char[] a, final int fromIndex, final int toIndex) throws IllegalArgumentException {
-        if (isNullOrEmpty(a) || toIndex - fromIndex < 1) {
+        if (isEmpty(a) || toIndex - fromIndex < 1) {
             throw new IllegalArgumentException("The spcified array can not be null or empty");
         }
 
@@ -12928,7 +12928,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
      */
     public static byte min(final byte[] a, final int fromIndex, final int toIndex) throws IllegalArgumentException {
-        if (isNullOrEmpty(a) || toIndex - fromIndex < 1) {
+        if (isEmpty(a) || toIndex - fromIndex < 1) {
             throw new IllegalArgumentException("The spcified array can not be null or empty");
         }
 
@@ -12967,7 +12967,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
      */
     public static short min(final short[] a, final int fromIndex, final int toIndex) throws IllegalArgumentException {
-        if (isNullOrEmpty(a) || toIndex - fromIndex < 1) {
+        if (isEmpty(a) || toIndex - fromIndex < 1) {
             throw new IllegalArgumentException("The spcified array can not be null or empty");
         }
 
@@ -13006,7 +13006,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
      */
     public static int min(final int[] a, final int fromIndex, final int toIndex) throws IllegalArgumentException {
-        if (isNullOrEmpty(a) || toIndex - fromIndex < 1) {
+        if (isEmpty(a) || toIndex - fromIndex < 1) {
             throw new IllegalArgumentException("The spcified array can not be null or empty");
         }
 
@@ -13045,7 +13045,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
      */
     public static long min(final long[] a, final int fromIndex, final int toIndex) throws IllegalArgumentException {
-        if (isNullOrEmpty(a) || toIndex - fromIndex < 1) {
+        if (isEmpty(a) || toIndex - fromIndex < 1) {
             throw new IllegalArgumentException("The spcified array can not be null or empty");
         }
 
@@ -13086,7 +13086,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
      */
     public static float min(final float[] a, final int fromIndex, final int toIndex) throws IllegalArgumentException {
-        if (isNullOrEmpty(a) || toIndex - fromIndex < 1) {
+        if (isEmpty(a) || toIndex - fromIndex < 1) {
             throw new IllegalArgumentException("The spcified array can not be null or empty");
         }
 
@@ -13129,7 +13129,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
      */
     public static double min(final double[] a, final int fromIndex, final int toIndex) throws IllegalArgumentException {
-        if (isNullOrEmpty(a) || toIndex - fromIndex < 1) {
+        if (isEmpty(a) || toIndex - fromIndex < 1) {
             throw new IllegalArgumentException("The spcified array can not be null or empty");
         }
 
@@ -13200,7 +13200,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
      */
     public static <T> T min(final T[] a, final int fromIndex, final int toIndex, Comparator<? super T> cmp) throws IllegalArgumentException {
-        if (isNullOrEmpty(a) || toIndex - fromIndex < 1) {
+        if (isEmpty(a) || toIndex - fromIndex < 1) {
             throw new IllegalArgumentException("The spcified array can not be null or empty");
         }
 
@@ -13252,7 +13252,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             throws IllegalArgumentException {
         checkFromToIndex(fromIndex, toIndex, size(c));
 
-        if (isNullOrEmpty(c) || toIndex - fromIndex < 1 || fromIndex >= c.size()) {
+        if (isEmpty(c) || toIndex - fromIndex < 1 || fromIndex >= c.size()) {
             throw new IllegalArgumentException("The size of collection can not be null or empty");
         }
 
@@ -13367,7 +13367,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      */
     public static <T> List<T> minAll(final T[] a, Comparator<? super T> cmp) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return new ArrayList<>();
         }
 
@@ -13478,7 +13478,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     @Beta
     public static <T, R extends Comparable<? super R>, E extends Exception> R minOrDefaultIfEmpty(final T[] a,
             final Throwables.Function<? super T, ? extends R, E> valueExtractor, final R defaultValue) throws E {
-        if (N.isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return defaultValue;
         }
 
@@ -13560,7 +13560,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     @Beta
     public static <T, E extends Exception> int minIntOrDefaultIfEmpty(final T[] a, final Throwables.ToIntFunction<? super T, E> valueExtractor,
             final int defaultValue) throws E {
-        if (N.isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return defaultValue;
         }
 
@@ -13642,7 +13642,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     @Beta
     public static <T, E extends Exception> long minLongOrDefaultIfEmpty(final T[] a, final Throwables.ToLongFunction<? super T, E> valueExtractor,
             final long defaultValue) throws E {
-        if (N.isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return defaultValue;
         }
 
@@ -13724,7 +13724,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     @Beta
     public static <T, E extends Exception> double minDoubleOrDefaultIfEmpty(final T[] a, final Throwables.ToDoubleFunction<? super T, E> valueExtractor,
             final double defaultValue) throws E {
-        if (N.isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return defaultValue;
         }
 
@@ -13734,7 +13734,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         for (int i = 1, len = a.length; i < len; i++) {
             next = valueExtractor.applyAsDouble(a[i]);
 
-            if (N.compare(next, candicate) < 0) {
+            if (compare(next, candicate) < 0) {
                 candicate = next;
             }
         }
@@ -13785,7 +13785,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         while (iter.hasNext()) {
             next = valueExtractor.applyAsDouble(iter.next());
 
-            if (N.compare(next, candicate) < 0) {
+            if (compare(next, candicate) < 0) {
                 candicate = next;
             }
         }
@@ -14175,7 +14175,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
      */
     public static char max(final char[] a, final int fromIndex, final int toIndex) throws IllegalArgumentException {
-        if (isNullOrEmpty(a) || toIndex - fromIndex < 1) {
+        if (isEmpty(a) || toIndex - fromIndex < 1) {
             throw new IllegalArgumentException("The spcified array can not be null or empty");
         }
 
@@ -14214,7 +14214,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
      */
     public static byte max(final byte[] a, final int fromIndex, final int toIndex) throws IllegalArgumentException {
-        if (isNullOrEmpty(a) || toIndex - fromIndex < 1) {
+        if (isEmpty(a) || toIndex - fromIndex < 1) {
             throw new IllegalArgumentException("The spcified array can not be null or empty");
         }
 
@@ -14253,7 +14253,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
      */
     public static short max(final short[] a, final int fromIndex, final int toIndex) throws IllegalArgumentException {
-        if (isNullOrEmpty(a) || toIndex - fromIndex < 1) {
+        if (isEmpty(a) || toIndex - fromIndex < 1) {
             throw new IllegalArgumentException("The spcified array can not be null or empty");
         }
 
@@ -14292,7 +14292,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
      */
     public static int max(final int[] a, final int fromIndex, final int toIndex) throws IllegalArgumentException {
-        if (isNullOrEmpty(a) || toIndex - fromIndex < 1) {
+        if (isEmpty(a) || toIndex - fromIndex < 1) {
             throw new IllegalArgumentException("The spcified array can not be null or empty");
         }
 
@@ -14331,7 +14331,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
      */
     public static long max(final long[] a, final int fromIndex, final int toIndex) throws IllegalArgumentException {
-        if (isNullOrEmpty(a) || toIndex - fromIndex < 1) {
+        if (isEmpty(a) || toIndex - fromIndex < 1) {
             throw new IllegalArgumentException("The spcified array can not be null or empty");
         }
 
@@ -14372,7 +14372,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
      */
     public static float max(final float[] a, final int fromIndex, final int toIndex) throws IllegalArgumentException {
-        if (isNullOrEmpty(a) || toIndex - fromIndex < 1) {
+        if (isEmpty(a) || toIndex - fromIndex < 1) {
             throw new IllegalArgumentException("The spcified array can not be null or empty");
         }
 
@@ -14415,7 +14415,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
      */
     public static double max(final double[] a, final int fromIndex, final int toIndex) throws IllegalArgumentException {
-        if (isNullOrEmpty(a) || toIndex - fromIndex < 1) {
+        if (isEmpty(a) || toIndex - fromIndex < 1) {
             throw new IllegalArgumentException("The spcified array can not be null or empty");
         }
 
@@ -14486,7 +14486,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
      */
     public static <T> T max(final T[] a, final int fromIndex, final int toIndex, Comparator<? super T> cmp) throws IllegalArgumentException {
-        if (isNullOrEmpty(a) || toIndex - fromIndex < 1) {
+        if (isEmpty(a) || toIndex - fromIndex < 1) {
             throw new IllegalArgumentException("The spcified array can not be null or empty");
         }
 
@@ -14585,7 +14585,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             throws IllegalArgumentException {
         checkFromToIndex(fromIndex, toIndex, size(c));
 
-        if (isNullOrEmpty(c) || toIndex - fromIndex < 1 || fromIndex >= c.size()) {
+        if (isEmpty(c) || toIndex - fromIndex < 1 || fromIndex >= c.size()) {
             throw new IllegalArgumentException("The size of collection can not be null or empty");
         }
 
@@ -14653,7 +14653,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      */
     public static <T> List<T> maxAll(final T[] a, Comparator<? super T> cmp) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return new ArrayList<>();
         }
 
@@ -14764,7 +14764,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     @Beta
     public static <T, R extends Comparable<? super R>, E extends Exception> R maxOrDefaultIfEmpty(final T[] a,
             final Throwables.Function<? super T, ? extends R, E> valueExtractor, final R defaultValue) throws E {
-        if (N.isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return defaultValue;
         }
 
@@ -14846,7 +14846,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     @Beta
     public static <T, E extends Exception> int maxIntOrDefaultIfEmpty(final T[] a, final Throwables.ToIntFunction<? super T, E> valueExtractor,
             final int defaultValue) throws E {
-        if (N.isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return defaultValue;
         }
 
@@ -14928,7 +14928,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     @Beta
     public static <T, E extends Exception> long maxLongOrDefaultIfEmpty(final T[] a, final Throwables.ToLongFunction<? super T, E> valueExtractor,
             final long defaultValue) throws E {
-        if (N.isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return defaultValue;
         }
 
@@ -15010,7 +15010,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     @Beta
     public static <T, E extends Exception> double maxDoubleOrDefaultIfEmpty(final T[] a, final Throwables.ToDoubleFunction<? super T, E> valueExtractor,
             final double defaultValue) throws E {
-        if (N.isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return defaultValue;
         }
 
@@ -15020,7 +15020,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         for (int i = 1, len = a.length; i < len; i++) {
             next = valueExtractor.applyAsDouble(a[i]);
 
-            if (N.compare(next, candicate) > 0) {
+            if (compare(next, candicate) > 0) {
                 candicate = next;
             }
         }
@@ -15071,7 +15071,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         while (iter.hasNext()) {
             next = valueExtractor.applyAsDouble(iter.next());
 
-            if (N.compare(next, candicate) > 0) {
+            if (compare(next, candicate) > 0) {
                 candicate = next;
             }
         }
@@ -15285,7 +15285,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
      */
     public static char median(final char[] a, final int fromIndex, final int toIndex) throws IllegalArgumentException {
-        if (isNullOrEmpty(a) || toIndex - fromIndex < 1) {
+        if (isEmpty(a) || toIndex - fromIndex < 1) {
             throw new IllegalArgumentException("The spcified array can not be null or empty");
         }
 
@@ -15328,7 +15328,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
      */
     public static byte median(final byte[] a, final int fromIndex, final int toIndex) throws IllegalArgumentException {
-        if (isNullOrEmpty(a) || toIndex - fromIndex < 1) {
+        if (isEmpty(a) || toIndex - fromIndex < 1) {
             throw new IllegalArgumentException("The spcified array can not be null or empty");
         }
 
@@ -15371,7 +15371,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
      */
     public static short median(final short[] a, final int fromIndex, final int toIndex) throws IllegalArgumentException {
-        if (isNullOrEmpty(a) || toIndex - fromIndex < 1) {
+        if (isEmpty(a) || toIndex - fromIndex < 1) {
             throw new IllegalArgumentException("The spcified array can not be null or empty");
         }
 
@@ -15414,7 +15414,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
      */
     public static int median(final int[] a, final int fromIndex, final int toIndex) throws IllegalArgumentException {
-        if (isNullOrEmpty(a) || toIndex - fromIndex < 1) {
+        if (isEmpty(a) || toIndex - fromIndex < 1) {
             throw new IllegalArgumentException("The spcified array can not be null or empty");
         }
 
@@ -15457,7 +15457,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
      */
     public static long median(final long[] a, final int fromIndex, final int toIndex) throws IllegalArgumentException {
-        if (isNullOrEmpty(a) || toIndex - fromIndex < 1) {
+        if (isEmpty(a) || toIndex - fromIndex < 1) {
             throw new IllegalArgumentException("The spcified array can not be null or empty");
         }
 
@@ -15500,7 +15500,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
      */
     public static float median(final float[] a, final int fromIndex, final int toIndex) throws IllegalArgumentException {
-        if (isNullOrEmpty(a) || toIndex - fromIndex < 1) {
+        if (isEmpty(a) || toIndex - fromIndex < 1) {
             throw new IllegalArgumentException("The spcified array can not be null or empty");
         }
 
@@ -15543,7 +15543,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
      */
     public static double median(final double[] a, final int fromIndex, final int toIndex) throws IllegalArgumentException {
-        if (isNullOrEmpty(a) || toIndex - fromIndex < 1) {
+        if (isEmpty(a) || toIndex - fromIndex < 1) {
             throw new IllegalArgumentException("The spcified array can not be null or empty");
         }
 
@@ -15587,7 +15587,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
      */
     public static <T extends Comparable<? super T>> T median(final T[] a, final int fromIndex, final int toIndex) throws IllegalArgumentException {
-        if (isNullOrEmpty(a) || toIndex - fromIndex < 1) {
+        if (isEmpty(a) || toIndex - fromIndex < 1) {
             throw new IllegalArgumentException("The spcified array can not be null or empty");
         }
 
@@ -15621,7 +15621,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
      */
     public static <T> T median(final T[] a, final int fromIndex, final int toIndex, Comparator<? super T> cmp) throws IllegalArgumentException {
-        if (isNullOrEmpty(a) || toIndex - fromIndex < 1) {
+        if (isEmpty(a) || toIndex - fromIndex < 1) {
             throw new IllegalArgumentException("The spcified array can not be null or empty");
         }
 
@@ -15691,7 +15691,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static <T> T median(final Collection<? extends T> c, final int fromIndex, final int toIndex, Comparator<? super T> cmp)
             throws IllegalArgumentException {
-        if (isNullOrEmpty(c) || toIndex - fromIndex < 1) {
+        if (isEmpty(c) || toIndex - fromIndex < 1) {
             throw new IllegalArgumentException("The length of collection can not be null or empty"); //NOSONAR
         }
 
@@ -15727,7 +15727,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or its length/size is less than {@code k}, or {@code toIndex - fromIndex < k}.
      */
     public static char kthLargest(final char[] a, final int fromIndex, final int toIndex, int k) throws IllegalArgumentException {
-        if (isNullOrEmpty(a) || toIndex - fromIndex < 1) {
+        if (isEmpty(a) || toIndex - fromIndex < 1) {
             throw new IllegalArgumentException("The spcified array can not be null or empty");
         }
 
@@ -15800,7 +15800,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or its length/size is less than {@code k}, or {@code toIndex - fromIndex < k}.
      */
     public static byte kthLargest(final byte[] a, final int fromIndex, final int toIndex, int k) throws IllegalArgumentException {
-        if (isNullOrEmpty(a) || toIndex - fromIndex < 1) {
+        if (isEmpty(a) || toIndex - fromIndex < 1) {
             throw new IllegalArgumentException("The spcified array can not be null or empty");
         }
 
@@ -15873,7 +15873,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or its length/size is less than {@code k}, or {@code toIndex - fromIndex < k}.
      */
     public static short kthLargest(final short[] a, final int fromIndex, final int toIndex, int k) throws IllegalArgumentException {
-        if (isNullOrEmpty(a) || toIndex - fromIndex < 1) {
+        if (isEmpty(a) || toIndex - fromIndex < 1) {
             throw new IllegalArgumentException("The spcified array can not be null or empty");
         }
 
@@ -15946,7 +15946,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or its length/size is less than {@code k}, or {@code toIndex - fromIndex < k}.
      */
     public static int kthLargest(final int[] a, final int fromIndex, final int toIndex, int k) throws IllegalArgumentException {
-        if (isNullOrEmpty(a) || toIndex - fromIndex < 1) {
+        if (isEmpty(a) || toIndex - fromIndex < 1) {
             throw new IllegalArgumentException("The spcified array can not be null or empty");
         }
 
@@ -16019,7 +16019,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or its length/size is less than {@code k}, or {@code toIndex - fromIndex < k}.
      */
     public static long kthLargest(final long[] a, final int fromIndex, final int toIndex, int k) throws IllegalArgumentException {
-        if (isNullOrEmpty(a) || toIndex - fromIndex < 1) {
+        if (isEmpty(a) || toIndex - fromIndex < 1) {
             throw new IllegalArgumentException("The spcified array can not be null or empty");
         }
 
@@ -16092,7 +16092,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or its length/size is less than {@code k}, or {@code toIndex - fromIndex < k}.
      */
     public static float kthLargest(final float[] a, final int fromIndex, final int toIndex, int k) throws IllegalArgumentException {
-        if (isNullOrEmpty(a) || toIndex - fromIndex < 1) {
+        if (isEmpty(a) || toIndex - fromIndex < 1) {
             throw new IllegalArgumentException("The spcified array can not be null or empty");
         }
 
@@ -16165,7 +16165,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or its length/size is less than {@code k}, or {@code toIndex - fromIndex < k}.
      */
     public static double kthLargest(final double[] a, final int fromIndex, final int toIndex, int k) throws IllegalArgumentException {
-        if (isNullOrEmpty(a) || toIndex - fromIndex < 1) {
+        if (isEmpty(a) || toIndex - fromIndex < 1) {
             throw new IllegalArgumentException("The spcified array can not be null or empty");
         }
 
@@ -16241,7 +16241,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static <T extends Comparable<? super T>> T kthLargest(final T[] a, final int fromIndex, final int toIndex, final int k)
             throws IllegalArgumentException {
-        if (isNullOrEmpty(a) || toIndex - fromIndex < 1) {
+        if (isEmpty(a) || toIndex - fromIndex < 1) {
             throw new IllegalArgumentException("The spcified array can not be null or empty");
         }
 
@@ -16276,7 +16276,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static <T> T kthLargest(final T[] a, final int fromIndex, final int toIndex, int k, final Comparator<? super T> cmp)
             throws IllegalArgumentException {
-        if (isNullOrEmpty(a) || toIndex - fromIndex < 1) {
+        if (isEmpty(a) || toIndex - fromIndex < 1) {
             throw new IllegalArgumentException("The spcified array can not be null or empty");
         }
 
@@ -16353,7 +16353,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static <T extends Comparable<? super T>> T kthLargest(final Collection<? extends T> c, final int fromIndex, final int toIndex, final int k)
             throws IllegalArgumentException {
-        if (isNullOrEmpty(c) || toIndex - fromIndex < 1) {
+        if (isEmpty(c) || toIndex - fromIndex < 1) {
             throw new IllegalArgumentException("The length of collection can not be null or empty");
         }
 
@@ -16388,7 +16388,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static <T> T kthLargest(final Collection<? extends T> c, final int fromIndex, final int toIndex, int k, final Comparator<? super T> cmp)
             throws IllegalArgumentException {
-        if (isNullOrEmpty(c) || toIndex - fromIndex < 1) {
+        if (isEmpty(c) || toIndex - fromIndex < 1) {
             throw new IllegalArgumentException("The length of collection can not be null or empty");
         }
 
@@ -17603,7 +17603,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static <T, E extends Exception> void forEach(final T[] a, final Throwables.Consumer<? super T, E> action) throws E {
         checkArgNotNull(action);
 
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return;
         }
 
@@ -17627,7 +17627,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), fromIndex < toIndex ? toIndex : fromIndex, len(a));
         checkArgNotNull(action);
 
-        if (isNullOrEmpty(a) || fromIndex == toIndex) {
+        if (isEmpty(a) || fromIndex == toIndex) {
             return;
         }
 
@@ -17702,7 +17702,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), fromIndex < toIndex ? toIndex : fromIndex, size(c));
         checkArgNotNull(action);
 
-        if ((isNullOrEmpty(c) && fromIndex == 0 && toIndex == 0) || fromIndex == toIndex) {
+        if ((isEmpty(c) && fromIndex == 0 && toIndex == 0) || fromIndex == toIndex) {
             return;
         }
 
@@ -17795,7 +17795,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static <K, V, E extends Exception> void forEach(final Map<K, V> map, final Throwables.Consumer<? super Map.Entry<K, V>, E> action) throws E {
         checkArgNotNull(action);
 
-        if (isNullOrEmpty(map)) {
+        if (isEmpty(map)) {
             return;
         }
 
@@ -17814,7 +17814,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static <K, V, E extends Exception> void forEach(final Map<K, V> map, final Throwables.BiConsumer<? super K, ? super V, E> action) throws E {
         checkArgNotNull(action);
 
-        if (isNullOrEmpty(map)) {
+        if (isEmpty(map)) {
             return;
         }
 
@@ -17834,7 +17834,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static <T, E extends Exception> void forEachIndexed(final T[] a, final Throwables.IndexedConsumer<? super T, E> action) throws E {
         checkArgNotNull(action);
 
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return;
         }
 
@@ -17856,7 +17856,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), fromIndex < toIndex ? toIndex : fromIndex, len(a));
         checkArgNotNull(action);
 
-        if (isNullOrEmpty(a) || fromIndex == toIndex) {
+        if (isEmpty(a) || fromIndex == toIndex) {
             return;
         }
 
@@ -17936,7 +17936,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), fromIndex < toIndex ? toIndex : fromIndex, size(c));
         checkArgNotNull(action);
 
-        if ((isNullOrEmpty(c) && fromIndex == 0 && toIndex == 0) || fromIndex == toIndex) {
+        if ((isEmpty(c) && fromIndex == 0 && toIndex == 0) || fromIndex == toIndex) {
             return;
         }
 
@@ -18029,7 +18029,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             throws E {
         checkArgNotNull(action);
 
-        if (isNullOrEmpty(map)) {
+        if (isEmpty(map)) {
             return;
         }
 
@@ -18049,7 +18049,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             throws E {
         checkArgNotNull(action);
 
-        if (isNullOrEmpty(map)) {
+        if (isEmpty(map)) {
             return;
         }
 
@@ -18078,14 +18078,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
         checkArgNotNull(flatMapper);
         checkArgNotNull(action);
 
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return;
         }
 
         for (T t : a) {
             final Collection<U> c2 = flatMapper.apply(t);
 
-            if (notNullOrEmpty(c2)) {
+            if (notEmpty(c2)) {
                 for (U u : c2) {
                     action.accept(t, u);
                 }
@@ -18118,7 +18118,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         for (T t : c) {
             final Collection<U> c2 = flatMapper.apply(t);
 
-            if (notNullOrEmpty(c2)) {
+            if (notEmpty(c2)) {
                 for (U u : c2) {
                     action.accept(t, u);
                 }
@@ -18155,7 +18155,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
             final Collection<U> c2 = flatMapper.apply(t);
 
-            if (notNullOrEmpty(c2)) {
+            if (notEmpty(c2)) {
                 for (U u : c2) {
                     action.accept(t, u);
                 }
@@ -18187,18 +18187,18 @@ public final class N extends CommonUtil { // public final class N extends π imp
         checkArgNotNull(flatMapper2);
         checkArgNotNull(action);
 
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return;
         }
 
         for (T t : a) {
             final Collection<T2> c2 = flatMapper.apply(t);
 
-            if (notNullOrEmpty(c2)) {
+            if (notEmpty(c2)) {
                 for (T2 t2 : c2) {
                     final Collection<T3> c3 = flatMapper2.apply(t2);
 
-                    if (notNullOrEmpty(c3)) {
+                    if (notEmpty(c3)) {
                         for (T3 t3 : c3) {
                             action.accept(t, t2, t3);
                         }
@@ -18239,11 +18239,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
         for (T t : c) {
             final Collection<T2> c2 = flatMapper.apply(t);
 
-            if (notNullOrEmpty(c2)) {
+            if (notEmpty(c2)) {
                 for (T2 t2 : c2) {
                     final Collection<T3> c3 = flatMapper2.apply(t2);
 
-                    if (notNullOrEmpty(c3)) {
+                    if (notEmpty(c3)) {
                         for (T3 t3 : c3) {
                             action.accept(t, t2, t3);
                         }
@@ -18288,11 +18288,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
             final Collection<T2> c2 = flatMapper.apply(t);
 
-            if (notNullOrEmpty(c2)) {
+            if (notEmpty(c2)) {
                 for (T2 t2 : c2) {
                     final Collection<T3> c3 = flatMapper2.apply(t2);
 
-                    if (notNullOrEmpty(c3)) {
+                    if (notEmpty(c3)) {
                         for (T3 t3 : c3) {
                             action.accept(t, t2, t3);
                         }
@@ -18315,7 +18315,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static <A, B, E extends Exception> void forEach(final A[] a, final B[] b, final Throwables.BiConsumer<? super A, ? super B, E> action) throws E {
         checkArgNotNull(action);
 
-        if (isNullOrEmpty(a) || isNullOrEmpty(b)) {
+        if (isEmpty(a) || isEmpty(b)) {
             return;
         }
 
@@ -18387,7 +18387,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             final Throwables.TriConsumer<? super A, ? super B, ? super C, E> action) throws E {
         checkArgNotNull(action);
 
-        if (isNullOrEmpty(a) || isNullOrEmpty(b) || isNullOrEmpty(c)) {
+        if (isEmpty(a) || isEmpty(b) || isEmpty(c)) {
             return;
         }
 
@@ -18626,7 +18626,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static <T, E extends Exception> void forEachNonNull(final T[] a, final Throwables.Consumer<? super T, E> action) throws E {
         checkArgNotNull(action);
 
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return;
         }
 
@@ -18679,7 +18679,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         checkArgNotNull(flatMapper);
         checkArgNotNull(action);
 
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return;
         }
 
@@ -18687,7 +18687,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             if (e != null) {
                 final Collection<U> c2 = flatMapper.apply(e);
 
-                if (notNullOrEmpty(c2)) {
+                if (notEmpty(c2)) {
                     for (U u : c2) {
                         if (u != null) {
                             action.accept(e, u);
@@ -18725,7 +18725,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             if (e != null) {
                 final Collection<U> c2 = flatMapper.apply(e);
 
-                if (notNullOrEmpty(c2)) {
+                if (notEmpty(c2)) {
                     for (U u : c2) {
                         if (u != null) {
                             action.accept(e, u);
@@ -18767,7 +18767,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             if (e != null) {
                 final Collection<U> c2 = flatMapper.apply(e);
 
-                if (notNullOrEmpty(c2)) {
+                if (notEmpty(c2)) {
                     for (U u : c2) {
                         if (u != null) {
                             action.accept(e, u);
@@ -18803,7 +18803,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         checkArgNotNull(flatMapper2);
         checkArgNotNull(action);
 
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return;
         }
 
@@ -18811,12 +18811,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
             if (e != null) {
                 final Collection<T2> c2 = flatMapper.apply(e);
 
-                if (notNullOrEmpty(c2)) {
+                if (notEmpty(c2)) {
                     for (T2 t2 : c2) {
                         if (t2 != null) {
                             final Collection<T3> c3 = flatMapper2.apply(t2);
 
-                            if (notNullOrEmpty(c3)) {
+                            if (notEmpty(c3)) {
                                 for (T3 t3 : c3) {
                                     if (t3 != null) {
                                         action.accept(e, t2, t3);
@@ -18863,12 +18863,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
             if (e != null) {
                 final Collection<T2> c2 = flatMapper.apply(e);
 
-                if (notNullOrEmpty(c2)) {
+                if (notEmpty(c2)) {
                     for (T2 t2 : c2) {
                         if (t2 != null) {
                             final Collection<T3> c3 = flatMapper2.apply(t2);
 
-                            if (notNullOrEmpty(c3)) {
+                            if (notEmpty(c3)) {
                                 for (T3 t3 : c3) {
                                     if (t3 != null) {
                                         action.accept(e, t2, t3);
@@ -18919,12 +18919,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
             if (e != null) {
                 final Collection<T2> c2 = flatMapper.apply(e);
 
-                if (notNullOrEmpty(c2)) {
+                if (notEmpty(c2)) {
                     for (T2 t2 : c2) {
                         if (t2 != null) {
                             final Collection<T3> c3 = flatMapper2.apply(t2);
 
-                            if (notNullOrEmpty(c3)) {
+                            if (notEmpty(c3)) {
                                 for (T3 t3 : c3) {
                                     if (t3 != null) {
                                         action.accept(e, t2, t3);
@@ -18967,7 +18967,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         final int windowSize = 2;
         checkArgument(windowSize > 0 && increment > 0, "windowSize=%s and increment=%s must be bigger than 0", windowSize, increment); //NOSONAR
 
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return;
         }
 
@@ -19102,7 +19102,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         final int windowSize = 3;
         checkArgument(windowSize > 0 && increment > 0, "windowSize=%s and increment=%s must be bigger than 0", windowSize, increment);
 
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return;
         }
 
@@ -19223,7 +19223,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static <E extends Exception> boolean[] filter(final boolean[] a, final Throwables.BooleanPredicate<E> filter) throws E {
         checkArgNotNull(filter, "filter"); //NOSONAR
 
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return EMPTY_BOOLEAN_ARRAY;
         }
 
@@ -19242,7 +19242,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static <E extends Exception> boolean[] filter(final boolean[] a, final Throwables.BooleanPredicate<E> filter, final int max) throws E {
         checkArgNotNull(filter, "filter");
 
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return EMPTY_BOOLEAN_ARRAY;
         }
 
@@ -19282,7 +19282,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgNotNull(filter, "filter");
 
-        if (isNullOrEmpty(a) || fromIndex == toIndex) {
+        if (isEmpty(a) || fromIndex == toIndex) {
             return EMPTY_BOOLEAN_ARRAY;
         }
 
@@ -19315,7 +19315,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static <E extends Exception> char[] filter(final char[] a, final Throwables.CharPredicate<E> filter) throws E {
         checkArgNotNull(filter, "filter");
 
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return EMPTY_CHAR_ARRAY;
         }
 
@@ -19334,7 +19334,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static <E extends Exception> char[] filter(final char[] a, final Throwables.CharPredicate<E> filter, final int max) throws E {
         checkArgNotNull(filter, "filter");
 
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return EMPTY_CHAR_ARRAY;
         }
 
@@ -19374,7 +19374,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgNotNull(filter, "filter");
 
-        if (isNullOrEmpty(a) || fromIndex == toIndex) {
+        if (isEmpty(a) || fromIndex == toIndex) {
             return EMPTY_CHAR_ARRAY;
         }
 
@@ -19407,7 +19407,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static <E extends Exception> byte[] filter(final byte[] a, final Throwables.BytePredicate<E> filter) throws E {
         checkArgNotNull(filter, "filter");
 
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return EMPTY_BYTE_ARRAY;
         }
 
@@ -19426,7 +19426,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static <E extends Exception> byte[] filter(final byte[] a, final Throwables.BytePredicate<E> filter, final int max) throws E {
         checkArgNotNull(filter, "filter");
 
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return EMPTY_BYTE_ARRAY;
         }
 
@@ -19466,7 +19466,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgNotNull(filter, "filter");
 
-        if (isNullOrEmpty(a) || fromIndex == toIndex) {
+        if (isEmpty(a) || fromIndex == toIndex) {
             return EMPTY_BYTE_ARRAY;
         }
 
@@ -19499,7 +19499,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static <E extends Exception> short[] filter(final short[] a, final Throwables.ShortPredicate<E> filter) throws E {
         checkArgNotNull(filter, "filter");
 
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return EMPTY_SHORT_ARRAY;
         }
 
@@ -19518,7 +19518,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static <E extends Exception> short[] filter(final short[] a, final Throwables.ShortPredicate<E> filter, final int max) throws E {
         checkArgNotNull(filter, "filter");
 
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return EMPTY_SHORT_ARRAY;
         }
 
@@ -19558,7 +19558,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgNotNull(filter, "filter");
 
-        if (isNullOrEmpty(a) || fromIndex == toIndex) {
+        if (isEmpty(a) || fromIndex == toIndex) {
             return EMPTY_SHORT_ARRAY;
         }
 
@@ -19591,7 +19591,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static <E extends Exception> int[] filter(final int[] a, final Throwables.IntPredicate<E> filter) throws E {
         checkArgNotNull(filter, "filter");
 
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return EMPTY_INT_ARRAY;
         }
 
@@ -19610,7 +19610,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static <E extends Exception> int[] filter(final int[] a, final Throwables.IntPredicate<E> filter, final int max) throws E {
         checkArgNotNull(filter, "filter");
 
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return EMPTY_INT_ARRAY;
         }
 
@@ -19649,7 +19649,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgNotNull(filter, "filter");
 
-        if (isNullOrEmpty(a) || fromIndex == toIndex) {
+        if (isEmpty(a) || fromIndex == toIndex) {
             return EMPTY_INT_ARRAY;
         }
 
@@ -19682,7 +19682,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static <E extends Exception> long[] filter(final long[] a, final Throwables.LongPredicate<E> filter) throws E {
         checkArgNotNull(filter, "filter");
 
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return EMPTY_LONG_ARRAY;
         }
 
@@ -19701,7 +19701,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static <E extends Exception> long[] filter(final long[] a, final Throwables.LongPredicate<E> filter, final int max) throws E {
         checkArgNotNull(filter, "filter");
 
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return EMPTY_LONG_ARRAY;
         }
 
@@ -19741,7 +19741,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgNotNull(filter, "filter");
 
-        if (isNullOrEmpty(a) || fromIndex == toIndex) {
+        if (isEmpty(a) || fromIndex == toIndex) {
             return EMPTY_LONG_ARRAY;
         }
 
@@ -19774,7 +19774,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static <E extends Exception> float[] filter(final float[] a, final Throwables.FloatPredicate<E> filter) throws E {
         checkArgNotNull(filter, "filter");
 
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return EMPTY_FLOAT_ARRAY;
         }
 
@@ -19793,7 +19793,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static <E extends Exception> float[] filter(final float[] a, final Throwables.FloatPredicate<E> filter, final int max) throws E {
         checkArgNotNull(filter, "filter");
 
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return EMPTY_FLOAT_ARRAY;
         }
 
@@ -19833,7 +19833,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgNotNull(filter, "filter");
 
-        if (isNullOrEmpty(a) || fromIndex == toIndex) {
+        if (isEmpty(a) || fromIndex == toIndex) {
             return EMPTY_FLOAT_ARRAY;
         }
 
@@ -19866,7 +19866,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static <E extends Exception> double[] filter(final double[] a, final Throwables.DoublePredicate<E> filter) throws E {
         checkArgNotNull(filter, "filter");
 
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return EMPTY_DOUBLE_ARRAY;
         }
 
@@ -19885,7 +19885,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static <E extends Exception> double[] filter(final double[] a, final Throwables.DoublePredicate<E> filter, final int max) throws E {
         checkArgNotNull(filter, "filter");
 
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return EMPTY_DOUBLE_ARRAY;
         }
 
@@ -19925,7 +19925,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgNotNull(filter, "filter");
 
-        if (isNullOrEmpty(a) || fromIndex == toIndex) {
+        if (isEmpty(a) || fromIndex == toIndex) {
             return EMPTY_DOUBLE_ARRAY;
         }
 
@@ -19959,7 +19959,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static <T, E extends Exception> List<T> filter(final T[] a, final Throwables.Predicate<? super T, E> filter) throws E {
         checkArgNotNull(filter, "filter");
 
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return new ArrayList<>();
         }
 
@@ -19981,7 +19981,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             final IntFunction<R> supplier) throws E {
         checkArgNotNull(filter, "filter");
 
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return supplier.apply(0);
         }
 
@@ -20001,7 +20001,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static <T, E extends Exception> List<T> filter(final T[] a, final Throwables.Predicate<? super T, E> filter, final int max) throws E {
         checkArgNotNull(filter, "filter");
 
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return new ArrayList<>();
         }
 
@@ -20024,7 +20024,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             final IntFunction<R> supplier) throws E {
         checkArgNotNull(filter, "filter");
 
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return supplier.apply(0);
         }
 
@@ -20105,7 +20105,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgNotNull(filter, "filter");
 
-        if (isNullOrEmpty(a) || fromIndex == toIndex) {
+        if (isEmpty(a) || fromIndex == toIndex) {
             return supplier.apply(0);
         }
 
@@ -20271,13 +20271,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
         checkFromToIndex(fromIndex, toIndex, size(c));
         checkArgNotNull(filter, "filter");
 
-        if ((isNullOrEmpty(c) && fromIndex == 0 && toIndex == 0) || fromIndex == toIndex) {
+        if ((isEmpty(c) && fromIndex == 0 && toIndex == 0) || fromIndex == toIndex) {
             return supplier.apply(0);
         }
 
         final R result = supplier.apply(min(9, max, (toIndex - fromIndex)));
 
-        if ((isNullOrEmpty(c) && fromIndex == 0 && toIndex == 0) || (fromIndex == toIndex && fromIndex < c.size())) {
+        if ((isEmpty(c) && fromIndex == 0 && toIndex == 0) || (fromIndex == toIndex && fromIndex < c.size())) {
             return result;
         }
 
@@ -20418,7 +20418,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static <T, E extends Exception> boolean[] mapToBoolean(final T[] a, final Throwables.ToBooleanFunction<? super T, E> mapper) throws E {
         checkArgNotNull(mapper);
 
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return EMPTY_BOOLEAN_ARRAY;
         }
 
@@ -20443,7 +20443,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgNotNull(mapper);
 
-        if (isNullOrEmpty(a) || fromIndex == toIndex) {
+        if (isEmpty(a) || fromIndex == toIndex) {
             return EMPTY_BOOLEAN_ARRAY;
         }
 
@@ -20470,7 +20470,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             throws E {
         checkArgNotNull(mapper);
 
-        if (isNullOrEmpty(c)) {
+        if (isEmpty(c)) {
             return EMPTY_BOOLEAN_ARRAY;
         }
 
@@ -20495,7 +20495,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         checkFromToIndex(fromIndex, toIndex, size(c));
         checkArgNotNull(mapper);
 
-        if ((isNullOrEmpty(c) && fromIndex == 0 && toIndex == 0) || fromIndex == toIndex) {
+        if ((isEmpty(c) && fromIndex == 0 && toIndex == 0) || fromIndex == toIndex) {
             return EMPTY_BOOLEAN_ARRAY;
         }
 
@@ -20539,7 +20539,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static <T, E extends Exception> char[] mapToChar(final T[] a, final Throwables.ToCharFunction<? super T, E> mapper) throws E {
         checkArgNotNull(mapper);
 
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return EMPTY_CHAR_ARRAY;
         }
 
@@ -20564,7 +20564,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgNotNull(mapper);
 
-        if (isNullOrEmpty(a) || fromIndex == toIndex) {
+        if (isEmpty(a) || fromIndex == toIndex) {
             return EMPTY_CHAR_ARRAY;
         }
 
@@ -20590,7 +20590,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static <T, E extends Exception> char[] mapToChar(final Collection<? extends T> c, final Throwables.ToCharFunction<? super T, E> mapper) throws E {
         checkArgNotNull(mapper);
 
-        if (isNullOrEmpty(c)) {
+        if (isEmpty(c)) {
             return EMPTY_CHAR_ARRAY;
         }
 
@@ -20615,7 +20615,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         checkFromToIndex(fromIndex, toIndex, size(c));
         checkArgNotNull(mapper);
 
-        if ((isNullOrEmpty(c) && fromIndex == 0 && toIndex == 0) || fromIndex == toIndex) {
+        if ((isEmpty(c) && fromIndex == 0 && toIndex == 0) || fromIndex == toIndex) {
             return EMPTY_CHAR_ARRAY;
         }
 
@@ -20659,7 +20659,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static <T, E extends Exception> byte[] mapToByte(final T[] a, final Throwables.ToByteFunction<? super T, E> mapper) throws E {
         checkArgNotNull(mapper);
 
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return EMPTY_BYTE_ARRAY;
         }
 
@@ -20684,7 +20684,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgNotNull(mapper);
 
-        if (isNullOrEmpty(a) || fromIndex == toIndex) {
+        if (isEmpty(a) || fromIndex == toIndex) {
             return EMPTY_BYTE_ARRAY;
         }
 
@@ -20710,7 +20710,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static <T, E extends Exception> byte[] mapToByte(final Collection<? extends T> c, final Throwables.ToByteFunction<? super T, E> mapper) throws E {
         checkArgNotNull(mapper);
 
-        if (isNullOrEmpty(c)) {
+        if (isEmpty(c)) {
             return EMPTY_BYTE_ARRAY;
         }
 
@@ -20735,7 +20735,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         checkFromToIndex(fromIndex, toIndex, size(c));
         checkArgNotNull(mapper);
 
-        if ((isNullOrEmpty(c) && fromIndex == 0 && toIndex == 0) || fromIndex == toIndex) {
+        if ((isEmpty(c) && fromIndex == 0 && toIndex == 0) || fromIndex == toIndex) {
             return EMPTY_BYTE_ARRAY;
         }
 
@@ -20779,7 +20779,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static <T, E extends Exception> short[] mapToShort(final T[] a, final Throwables.ToShortFunction<? super T, E> mapper) throws E {
         checkArgNotNull(mapper);
 
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return EMPTY_SHORT_ARRAY;
         }
 
@@ -20804,7 +20804,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgNotNull(mapper);
 
-        if (isNullOrEmpty(a) || fromIndex == toIndex) {
+        if (isEmpty(a) || fromIndex == toIndex) {
             return EMPTY_SHORT_ARRAY;
         }
 
@@ -20830,7 +20830,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static <T, E extends Exception> short[] mapToShort(final Collection<? extends T> c, final Throwables.ToShortFunction<? super T, E> mapper) throws E {
         checkArgNotNull(mapper);
 
-        if (isNullOrEmpty(c)) {
+        if (isEmpty(c)) {
             return EMPTY_SHORT_ARRAY;
         }
 
@@ -20855,7 +20855,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         checkFromToIndex(fromIndex, toIndex, size(c));
         checkArgNotNull(mapper);
 
-        if ((isNullOrEmpty(c) && fromIndex == 0 && toIndex == 0) || fromIndex == toIndex) {
+        if ((isEmpty(c) && fromIndex == 0 && toIndex == 0) || fromIndex == toIndex) {
             return EMPTY_SHORT_ARRAY;
         }
 
@@ -20899,7 +20899,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static <T, E extends Exception> int[] mapToInt(final T[] a, final Throwables.ToIntFunction<? super T, E> mapper) throws E {
         checkArgNotNull(mapper);
 
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return EMPTY_INT_ARRAY;
         }
 
@@ -20924,7 +20924,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgNotNull(mapper);
 
-        if (isNullOrEmpty(a) || fromIndex == toIndex) {
+        if (isEmpty(a) || fromIndex == toIndex) {
             return EMPTY_INT_ARRAY;
         }
 
@@ -20950,7 +20950,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static <T, E extends Exception> int[] mapToInt(final Collection<? extends T> c, final Throwables.ToIntFunction<? super T, E> mapper) throws E {
         checkArgNotNull(mapper);
 
-        if (isNullOrEmpty(c)) {
+        if (isEmpty(c)) {
             return EMPTY_INT_ARRAY;
         }
 
@@ -20975,7 +20975,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         checkFromToIndex(fromIndex, toIndex, size(c));
         checkArgNotNull(mapper);
 
-        if ((isNullOrEmpty(c) && fromIndex == 0 && toIndex == 0) || fromIndex == toIndex) {
+        if ((isEmpty(c) && fromIndex == 0 && toIndex == 0) || fromIndex == toIndex) {
             return EMPTY_INT_ARRAY;
         }
 
@@ -21020,7 +21020,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return EMPTY_INT_ARRAY;
         }
 
-        final int len = N.len(a);
+        final int len = len(a);
         final int[] result = new int[len];
 
         for (int i = 0; i < len; i++) {
@@ -21044,7 +21044,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return EMPTY_INT_ARRAY;
         }
 
-        final int len = N.len(a);
+        final int len = len(a);
         final int[] result = new int[len];
 
         for (int i = 0; i < len; i++) {
@@ -21067,7 +21067,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static <T, E extends Exception> long[] mapToLong(final T[] a, final Throwables.ToLongFunction<? super T, E> mapper) throws E {
         checkArgNotNull(mapper);
 
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return EMPTY_LONG_ARRAY;
         }
 
@@ -21092,7 +21092,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgNotNull(mapper);
 
-        if (isNullOrEmpty(a) || fromIndex == toIndex) {
+        if (isEmpty(a) || fromIndex == toIndex) {
             return EMPTY_LONG_ARRAY;
         }
 
@@ -21118,7 +21118,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static <T, E extends Exception> long[] mapToLong(final Collection<? extends T> c, final Throwables.ToLongFunction<? super T, E> mapper) throws E {
         checkArgNotNull(mapper);
 
-        if (isNullOrEmpty(c)) {
+        if (isEmpty(c)) {
             return EMPTY_LONG_ARRAY;
         }
 
@@ -21143,7 +21143,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         checkFromToIndex(fromIndex, toIndex, size(c));
         checkArgNotNull(mapper);
 
-        if ((isNullOrEmpty(c) && fromIndex == 0 && toIndex == 0) || fromIndex == toIndex) {
+        if ((isEmpty(c) && fromIndex == 0 && toIndex == 0) || fromIndex == toIndex) {
             return EMPTY_LONG_ARRAY;
         }
 
@@ -21188,7 +21188,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return EMPTY_LONG_ARRAY;
         }
 
-        final int len = N.len(a);
+        final int len = len(a);
         final long[] result = new long[len];
 
         for (int i = 0; i < len; i++) {
@@ -21212,7 +21212,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return EMPTY_LONG_ARRAY;
         }
 
-        final int len = N.len(a);
+        final int len = len(a);
         final long[] result = new long[len];
 
         for (int i = 0; i < len; i++) {
@@ -21235,7 +21235,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static <T, E extends Exception> float[] mapToFloat(final T[] a, final Throwables.ToFloatFunction<? super T, E> mapper) throws E {
         checkArgNotNull(mapper);
 
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return EMPTY_FLOAT_ARRAY;
         }
 
@@ -21260,7 +21260,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgNotNull(mapper);
 
-        if (isNullOrEmpty(a) || fromIndex == toIndex) {
+        if (isEmpty(a) || fromIndex == toIndex) {
             return EMPTY_FLOAT_ARRAY;
         }
 
@@ -21286,7 +21286,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static <T, E extends Exception> float[] mapToFloat(final Collection<? extends T> c, final Throwables.ToFloatFunction<? super T, E> mapper) throws E {
         checkArgNotNull(mapper);
 
-        if (isNullOrEmpty(c)) {
+        if (isEmpty(c)) {
             return EMPTY_FLOAT_ARRAY;
         }
 
@@ -21311,7 +21311,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         checkFromToIndex(fromIndex, toIndex, size(c));
         checkArgNotNull(mapper);
 
-        if ((isNullOrEmpty(c) && fromIndex == 0 && toIndex == 0) || fromIndex == toIndex) {
+        if ((isEmpty(c) && fromIndex == 0 && toIndex == 0) || fromIndex == toIndex) {
             return EMPTY_FLOAT_ARRAY;
         }
 
@@ -21355,7 +21355,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static <T, E extends Exception> double[] mapToDouble(final T[] a, final Throwables.ToDoubleFunction<? super T, E> mapper) throws E {
         checkArgNotNull(mapper);
 
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return EMPTY_DOUBLE_ARRAY;
         }
 
@@ -21380,7 +21380,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgNotNull(mapper);
 
-        if (isNullOrEmpty(a) || fromIndex == toIndex) {
+        if (isEmpty(a) || fromIndex == toIndex) {
             return EMPTY_DOUBLE_ARRAY;
         }
 
@@ -21407,7 +21407,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             throws E {
         checkArgNotNull(mapper);
 
-        if (isNullOrEmpty(c)) {
+        if (isEmpty(c)) {
             return EMPTY_DOUBLE_ARRAY;
         }
 
@@ -21432,7 +21432,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         checkFromToIndex(fromIndex, toIndex, size(c));
         checkArgNotNull(mapper);
 
-        if ((isNullOrEmpty(c) && fromIndex == 0 && toIndex == 0) || fromIndex == toIndex) {
+        if ((isEmpty(c) && fromIndex == 0 && toIndex == 0) || fromIndex == toIndex) {
             return EMPTY_DOUBLE_ARRAY;
         }
 
@@ -21477,7 +21477,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return EMPTY_DOUBLE_ARRAY;
         }
 
-        final int len = N.len(a);
+        final int len = len(a);
         final double[] result = new double[len];
 
         for (int i = 0; i < len; i++) {
@@ -21501,7 +21501,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return EMPTY_DOUBLE_ARRAY;
         }
 
-        final int len = N.len(a);
+        final int len = len(a);
         final double[] result = new double[len];
 
         for (int i = 0; i < len; i++) {
@@ -21524,7 +21524,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static <T, R, E extends Exception> List<R> map(final T[] a, final Throwables.Function<? super T, ? extends R, E> mapper) throws E {
         checkArgNotNull(mapper);
 
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return new ArrayList<>();
         }
 
@@ -21547,7 +21547,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             final IntFunction<? extends C> supplier) throws E {
         checkArgNotNull(mapper);
 
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return supplier.apply(0);
         }
 
@@ -21594,7 +21594,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgNotNull(mapper);
 
-        if (isNullOrEmpty(a) || fromIndex == toIndex) {
+        if (isEmpty(a) || fromIndex == toIndex) {
             return supplier.apply(0);
         }
 
@@ -21690,7 +21690,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         checkFromToIndex(fromIndex, toIndex, size(c));
         checkArgNotNull(mapper);
 
-        if ((isNullOrEmpty(c) && fromIndex == 0 && toIndex == 0) || fromIndex == toIndex) {
+        if ((isEmpty(c) && fromIndex == 0 && toIndex == 0) || fromIndex == toIndex) {
             return supplier.apply(0);
         }
 
@@ -21780,7 +21780,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             throws E {
         checkArgNotNull(mapper);
 
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return new ArrayList<>();
         }
 
@@ -21803,7 +21803,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             final Throwables.Function<? super T, ? extends Collection<? extends R>, E> mapper, final IntFunction<? extends C> supplier) throws E {
         checkArgNotNull(mapper);
 
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return supplier.apply(0);
         }
 
@@ -21850,7 +21850,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgNotNull(mapper);
 
-        if (isNullOrEmpty(a) || fromIndex == toIndex) {
+        if (isEmpty(a) || fromIndex == toIndex) {
             return supplier.apply(0);
         }
 
@@ -21859,7 +21859,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         Collection<? extends R> mr = null;
 
         for (int i = fromIndex; i < toIndex; i++) {
-            if (notNullOrEmpty(mr = mapper.apply(a[i]))) {
+            if (notEmpty(mr = mapper.apply(a[i]))) {
                 result.addAll(mr);
             }
         }
@@ -21907,7 +21907,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         checkFromToIndex(fromIndex, toIndex, size(c));
         checkArgNotNull(mapper);
 
-        if ((isNullOrEmpty(c) && fromIndex == 0 && toIndex == 0) || fromIndex == toIndex) {
+        if ((isEmpty(c) && fromIndex == 0 && toIndex == 0) || fromIndex == toIndex) {
             return supplier.apply(0);
         }
 
@@ -21919,7 +21919,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             final List<T> list = (List<T>) c;
 
             for (int i = fromIndex; i < toIndex; i++) {
-                if (notNullOrEmpty(mr = mapper.apply(list.get(i)))) {
+                if (notEmpty(mr = mapper.apply(list.get(i)))) {
                     result.addAll(mr);
                 }
             }
@@ -21931,7 +21931,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
                     continue;
                 }
 
-                if (notNullOrEmpty(mr = mapper.apply(e))) {
+                if (notEmpty(mr = mapper.apply(e))) {
                     result.addAll(mr);
                 }
 
@@ -21983,7 +21983,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         Collection<? extends R> mr = null;
 
         for (T e : c) {
-            if (notNullOrEmpty(mr = mapper.apply(e))) {
+            if (notEmpty(mr = mapper.apply(e))) {
                 result.addAll(mr);
             }
         }
@@ -22027,7 +22027,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //                continue;
     //            }
     //
-    //            if (notNullOrEmpty(mr = mapper.apply(e))) {
+    //            if (notEmpty(mr = mapper.apply(e))) {
     //                result.addAll(mr);
     //            }
     //
@@ -22085,7 +22085,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         checkArgNotNull(mapper);
         checkArgNotNull(mapper2);
 
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return supplier.apply(0);
         }
 
@@ -22095,11 +22095,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
         for (T e : a) {
             final Collection<? extends U> c1 = mapper.apply(e);
 
-            if (notNullOrEmpty(c1)) {
+            if (notEmpty(c1)) {
                 for (U e2 : c1) {
                     final Collection<? extends R> c2 = mapper2.apply(e2);
 
-                    if (notNullOrEmpty(c2)) {
+                    if (notEmpty(c2)) {
                         result.addAll(c2);
                     }
                 }
@@ -22164,11 +22164,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
         for (T e : c) {
             final Collection<? extends U> c1 = mapper.apply(e);
 
-            if (notNullOrEmpty(c1)) {
+            if (notEmpty(c1)) {
                 for (U e2 : c1) {
                     final Collection<? extends R> c2 = mapper2.apply(e2);
 
-                    if (notNullOrEmpty(c2)) {
+                    if (notEmpty(c2)) {
                         result.addAll(c2);
                     }
                 }
@@ -22191,7 +22191,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static <T, R, E extends Exception> List<R> flatmap(final T[] a, final Throwables.Function<? super T, ? extends R[], E> mapper) throws E { //NOSONAR
         checkArgNotNull(mapper);
 
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return new ArrayList<>();
         }
 
@@ -22214,7 +22214,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             final IntFunction<? extends C> supplier) throws E {
         checkArgNotNull(mapper);
 
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return supplier.apply(0);
         }
 
@@ -22261,7 +22261,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgNotNull(mapper);
 
-        if (isNullOrEmpty(a) || fromIndex == toIndex) {
+        if (isEmpty(a) || fromIndex == toIndex) {
             return supplier.apply(0);
         }
 
@@ -22270,7 +22270,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         R[] mr = null;
 
         for (int i = fromIndex; i < toIndex; i++) {
-            if (notNullOrEmpty(mr = mapper.apply(a[i]))) {
+            if (notEmpty(mr = mapper.apply(a[i]))) {
                 result.addAll(Arrays.asList(mr));
             }
         }
@@ -22318,7 +22318,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         checkFromToIndex(fromIndex, toIndex, size(c));
         checkArgNotNull(mapper);
 
-        if ((isNullOrEmpty(c) && fromIndex == 0 && toIndex == 0) || fromIndex == toIndex) {
+        if ((isEmpty(c) && fromIndex == 0 && toIndex == 0) || fromIndex == toIndex) {
             return supplier.apply(0);
         }
 
@@ -22330,7 +22330,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             final List<T> list = (List<T>) c;
 
             for (int i = fromIndex; i < toIndex; i++) {
-                if (notNullOrEmpty(mr = mapper.apply(list.get(i)))) {
+                if (notEmpty(mr = mapper.apply(list.get(i)))) {
                     result.addAll(Arrays.asList(mr));
                 }
             }
@@ -22342,7 +22342,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
                     continue;
                 }
 
-                if (notNullOrEmpty(mr = mapper.apply(e))) {
+                if (notEmpty(mr = mapper.apply(e))) {
                     result.addAll(Arrays.asList(mr));
                 }
 
@@ -22394,7 +22394,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         R[] mr = null;
 
         for (T e : c) {
-            if (notNullOrEmpty(mr = mapper.apply(e))) {
+            if (notEmpty(mr = mapper.apply(e))) {
                 result.addAll(Arrays.asList(mr));
             }
         }
@@ -22416,7 +22416,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         final List<T> result = new ArrayList<>(min(9, len(a)));
 
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return result;
         }
 
@@ -22475,7 +22475,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         final List<T> result = new ArrayList<>(min(9, len(a)));
 
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return result;
         }
 
@@ -22534,7 +22534,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         final List<T> result = new ArrayList<>(min(9, len(a)));
 
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return result;
         }
 
@@ -22603,7 +22603,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         final List<T> result = new ArrayList<>(min(9, len(a)));
 
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return result;
         }
 
@@ -22875,7 +22875,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      */
     public static <T> List<T> distinct(final T[] a) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return new ArrayList<>();
         }
 
@@ -22895,7 +22895,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static <T> List<T> distinct(final T[] a, final int fromIndex, final int toIndex) {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
-        if (isNullOrEmpty(a) || fromIndex == toIndex) {
+        if (isEmpty(a) || fromIndex == toIndex) {
             return new ArrayList<>();
         }
 
@@ -22953,7 +22953,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static <T> List<T> distinct(final Collection<? extends T> c, final int fromIndex, final int toIndex) {
         checkFromToIndex(fromIndex, toIndex, size(c));
 
-        if ((isNullOrEmpty(c) && fromIndex == 0 && toIndex == 0) || fromIndex == toIndex) {
+        if ((isEmpty(c) && fromIndex == 0 && toIndex == 0) || fromIndex == toIndex) {
             return new ArrayList<>();
         }
 
@@ -23005,7 +23005,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws E the e
      */
     public static <T, E extends Exception> List<T> distinctBy(final T[] a, final Throwables.Function<? super T, ?, E> keyMapper) throws E {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return new ArrayList<>();
         }
 
@@ -23031,7 +23031,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             final Throwables.Function<? super T, ?, E> keyMapper) throws E {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
-        if (isNullOrEmpty(a) || fromIndex == toIndex) {
+        if (isEmpty(a) || fromIndex == toIndex) {
             return new ArrayList<>();
         }
 
@@ -23065,7 +23065,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static <T, C extends Collection<T>, E extends Exception> C distinctBy(final T[] a, final Throwables.Function<? super T, ?, E> keyMapper,
             final Supplier<C> supplier) throws E {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return supplier.get();
         }
 
@@ -23100,7 +23100,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             final Throwables.Function<? super T, ?, E> keyMapper) throws E {
         checkFromToIndex(fromIndex, toIndex, size(c));
 
-        if ((isNullOrEmpty(c) && fromIndex == 0 && toIndex == 0) || fromIndex == toIndex) {
+        if ((isEmpty(c) && fromIndex == 0 && toIndex == 0) || fromIndex == toIndex) {
             return new ArrayList<>();
         }
 
@@ -23200,7 +23200,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static <T, E extends Exception> boolean allMatch(final T[] a, final Throwables.Predicate<? super T, E> filter) throws E {
         checkArgNotNull(filter, "filter");
 
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return true;
         }
 
@@ -23275,7 +23275,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static <T, E extends Exception> boolean anyMatch(final T[] a, final Throwables.Predicate<? super T, E> filter) throws E {
         checkArgNotNull(filter, "filter");
 
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return false;
         }
 
@@ -23350,7 +23350,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static <T, E extends Exception> boolean noneMatch(final T[] a, final Throwables.Predicate<? super T, E> filter) throws E {
         checkArgNotNull(filter, "filter");
 
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return true;
         }
 
@@ -23431,7 +23431,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         checkArgument(atLeast <= atMost, "'atLeast' must be <= 'atMost'"); //NOSONAR
         checkArgNotNull(filter, "filter");
 
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return atLeast == 0;
         }
 
@@ -23518,7 +23518,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      */
     public static boolean allTrue(final boolean[] a) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return true;
         }
 
@@ -23538,7 +23538,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      */
     public static boolean allFalse(final boolean[] a) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return true;
         }
 
@@ -23558,7 +23558,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      */
     public static boolean anyTrue(final boolean[] a) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return false;
         }
 
@@ -23578,7 +23578,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      */
     public static boolean anyFalse(final boolean[] a) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return false;
         }
 
@@ -23604,7 +23604,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static <E extends Exception> int count(final boolean[] a, final Throwables.BooleanPredicate<E> filter) throws E {
         checkArgNotNull(filter, "filter");
 
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return 0;
         }
 
@@ -23628,7 +23628,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgNotNull(filter, "filter");
 
-        if (isNullOrEmpty(a) || fromIndex == toIndex) {
+        if (isEmpty(a) || fromIndex == toIndex) {
             return 0;
         }
 
@@ -23656,7 +23656,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static <E extends Exception> int count(final char[] a, final Throwables.CharPredicate<E> filter) throws E {
         checkArgNotNull(filter, "filter");
 
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return 0;
         }
 
@@ -23679,7 +23679,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgNotNull(filter, "filter");
 
-        if (isNullOrEmpty(a) || fromIndex == toIndex) {
+        if (isEmpty(a) || fromIndex == toIndex) {
             return 0;
         }
 
@@ -23707,7 +23707,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static <E extends Exception> int count(final byte[] a, final Throwables.BytePredicate<E> filter) throws E {
         checkArgNotNull(filter, "filter");
 
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return 0;
         }
 
@@ -23730,7 +23730,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgNotNull(filter, "filter");
 
-        if (isNullOrEmpty(a) || fromIndex == toIndex) {
+        if (isEmpty(a) || fromIndex == toIndex) {
             return 0;
         }
 
@@ -23758,7 +23758,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static <E extends Exception> int count(final short[] a, final Throwables.ShortPredicate<E> filter) throws E {
         checkArgNotNull(filter, "filter");
 
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return 0;
         }
 
@@ -23781,7 +23781,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgNotNull(filter, "filter");
 
-        if (isNullOrEmpty(a) || fromIndex == toIndex) {
+        if (isEmpty(a) || fromIndex == toIndex) {
             return 0;
         }
 
@@ -23809,7 +23809,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static <E extends Exception> int count(final int[] a, final Throwables.IntPredicate<E> filter) throws E {
         checkArgNotNull(filter, "filter");
 
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return 0;
         }
 
@@ -23832,7 +23832,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgNotNull(filter, "filter");
 
-        if (isNullOrEmpty(a) || fromIndex == toIndex) {
+        if (isEmpty(a) || fromIndex == toIndex) {
             return 0;
         }
 
@@ -23860,7 +23860,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static <E extends Exception> int count(final long[] a, final Throwables.LongPredicate<E> filter) throws E {
         checkArgNotNull(filter, "filter");
 
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return 0;
         }
 
@@ -23883,7 +23883,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgNotNull(filter, "filter");
 
-        if (isNullOrEmpty(a) || fromIndex == toIndex) {
+        if (isEmpty(a) || fromIndex == toIndex) {
             return 0;
         }
 
@@ -23911,7 +23911,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static <E extends Exception> int count(final float[] a, final Throwables.FloatPredicate<E> filter) throws E {
         checkArgNotNull(filter, "filter");
 
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return 0;
         }
 
@@ -23934,7 +23934,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgNotNull(filter, "filter");
 
-        if (isNullOrEmpty(a) || fromIndex == toIndex) {
+        if (isEmpty(a) || fromIndex == toIndex) {
             return 0;
         }
 
@@ -23962,7 +23962,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static <E extends Exception> int count(final double[] a, final Throwables.DoublePredicate<E> filter) throws E {
         checkArgNotNull(filter, "filter");
 
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return 0;
         }
 
@@ -23986,7 +23986,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgNotNull(filter, "filter");
 
-        if (isNullOrEmpty(a) || fromIndex == toIndex) {
+        if (isEmpty(a) || fromIndex == toIndex) {
             return 0;
         }
 
@@ -24015,7 +24015,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static <T, E extends Exception> int count(final T[] a, final Throwables.Predicate<? super T, E> filter) throws E {
         checkArgNotNull(filter, "filter");
 
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return 0;
         }
 
@@ -24040,7 +24040,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgNotNull(filter, "filter");
 
-        if (isNullOrEmpty(a) || fromIndex == toIndex) {
+        if (isEmpty(a) || fromIndex == toIndex) {
             return 0;
         }
 
@@ -24102,7 +24102,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         checkFromToIndex(fromIndex, toIndex, size(c));
         checkArgNotNull(filter, "filter");
 
-        if ((isNullOrEmpty(c) && fromIndex == 0 && toIndex == 0) || (fromIndex == toIndex && fromIndex < c.size())) {
+        if ((isEmpty(c) && fromIndex == 0 && toIndex == 0) || (fromIndex == toIndex && fromIndex < c.size())) {
             return 0;
         }
 
@@ -24200,9 +24200,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static <T, E extends Exception> List<T> merge(final T[] a, final T[] b,
             final Throwables.BiFunction<? super T, ? super T, MergeResult, E> nextSelector) throws E {
-        if (isNullOrEmpty(a)) {
-            return isNullOrEmpty(b) ? new ArrayList<>() : asList(b);
-        } else if (isNullOrEmpty(b)) {
+        if (isEmpty(a)) {
+            return isEmpty(b) ? new ArrayList<>() : asList(b);
+        } else if (isEmpty(b)) {
             return asList(a);
         }
 
@@ -24431,7 +24431,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             final Throwables.BiFunction<? super A, ? super B, ? extends R, E> zipFunction) throws E {
         checkArgNotNull(zipFunction);
 
-        if (isNullOrEmpty(a) || isNullOrEmpty(b)) {
+        if (isEmpty(a) || isEmpty(b)) {
             return new ArrayList<>();
         }
 
@@ -24495,7 +24495,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             final Throwables.TriFunction<? super A, ? super B, ? super C, ? extends R, E> zipFunction) throws E {
         checkArgNotNull(zipFunction);
 
-        if (isNullOrEmpty(a) || isNullOrEmpty(b) || isNullOrEmpty(c)) {
+        if (isEmpty(a) || isEmpty(b) || isEmpty(c)) {
             return new ArrayList<>();
         }
 
@@ -25445,7 +25445,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      */
     public static boolean disjoint(final Object[] a, final Object[] b) {
-        if (isNullOrEmpty(a) || isNullOrEmpty(b)) {
+        if (isEmpty(a) || isEmpty(b)) {
             return true;
         }
 
@@ -25461,7 +25461,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see Collections#disjoint(Collection, Collection)
      */
     public static boolean disjoint(final Collection<?> c1, final Collection<?> c2) {
-        if (isNullOrEmpty(c1) || isNullOrEmpty(c2)) {
+        if (isEmpty(c1) || isEmpty(c2)) {
             return true;
         }
 
@@ -26583,7 +26583,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see Futures
      */
     public static List<ContinuableFuture<Void>> asyncExecute(final List<? extends Throwables.Runnable<? extends Exception>> commands, final Executor executor) {
-        if (N.isNullOrEmpty(commands)) {
+        if (isEmpty(commands)) {
             return new ArrayList<>();
         }
 
@@ -26652,7 +26652,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see Futures
      */
     public static <R> List<ContinuableFuture<R>> asyncExecute(final Collection<? extends Callable<R>> commands, final Executor executor) {
-        if (N.isNullOrEmpty(commands)) {
+        if (isEmpty(commands)) {
             return new ArrayList<>();
         }
 
@@ -26750,14 +26750,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static ObjIterator<Void> asynRun(final Collection<? extends Throwables.Runnable<? extends Exception>> commands, final Executor executor) {
         checkArgNotNull(executor, "executor");
 
-        if (isNullOrEmpty(commands)) {
+        if (isEmpty(commands)) {
             return ObjIterator.empty();
         }
 
         final int cmdCount = commands.size();
         final List<FutureTask<Object>> futures = new LinkedList<>();
         final ArrayBlockingQueue<Object> queue = new ArrayBlockingQueue<>(cmdCount);
-        final Object none = N.NULL_MASK;
+        final Object none = NULL_MASK;
 
         for (Throwables.Runnable<? extends Exception> cmd : commands) {
             final FutureTask<Object> futureTask = new FutureTask<>(() -> {
@@ -26795,7 +26795,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
                                 //        iter.next().cancel(false);
                                 //    }
 
-                                throw N.toRuntimeException(e);
+                                throw toRuntimeException(e);
                             }
 
                             iter.remove();
@@ -26814,7 +26814,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
                         break;
                     }
 
-                    N.sleepUninterruptibly(1);
+                    sleepUninterruptibly(1);
                 }
 
                 return queue.size() > 0;
@@ -26863,14 +26863,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static <R> ObjIterator<R> asynCall(final Collection<? extends Callable<? extends R>> commands, final Executor executor) {
         checkArgNotNull(executor, "executor");
 
-        if (isNullOrEmpty(commands)) {
+        if (isEmpty(commands)) {
             return ObjIterator.empty();
         }
 
         final int cmdCount = commands.size();
         final List<FutureTask<R>> futures = new LinkedList<>();
         final ArrayBlockingQueue<R> queue = new ArrayBlockingQueue<>(cmdCount);
-        final R none = (R) N.NULL_MASK;
+        final R none = (R) NULL_MASK;
 
         for (Callable<? extends R> cmd : commands) {
             final FutureTask<R> futureTask = new FutureTask<>(() -> {
@@ -26914,7 +26914,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
                                 //        iter.next().cancel(false);
                                 //    }
 
-                                throw N.toRuntimeException(e);
+                                throw toRuntimeException(e);
                             }
 
                             iter.remove();
@@ -26933,7 +26933,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
                         break;
                     }
 
-                    N.sleepUninterruptibly(1);
+                    sleepUninterruptibly(1);
                 }
 
                 return queue.size() > 0;
@@ -27137,9 +27137,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param executor
      */
     public static void runInParallel(final Collection<? extends Throwables.Runnable<? extends Exception>> commands, final Executor executor) {
-        N.checkArgNotNull(executor, "executor");
+        checkArgNotNull(executor, "executor");
 
-        if (N.isNullOrEmpty(commands)) {
+        if (isEmpty(commands)) {
             return;
         }
 
@@ -27384,9 +27384,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      */
     public static <R> List<R> callInParallel(final Collection<? extends Callable<? extends R>> commands, final Executor executor) {
-        N.checkArgNotNull(executor, "executor");
+        checkArgNotNull(executor, "executor");
 
-        if (N.isNullOrEmpty(commands)) {
+        if (isEmpty(commands)) {
             return new ArrayList<>(0);
         }
 
@@ -27438,7 +27438,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static <T, E extends Exception> void runByBatch(final T[] a, final int batchSize,
             final Throwables.Consumer<? super List<? extends T>, E> batchAction) throws E {
-        if (N.isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return;
         }
 
@@ -27456,8 +27456,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
     */
     public static <T, E extends Exception> void runByBatch(Iterable<? extends T> iter, final int batchSize,
             final Throwables.Consumer<? super List<? extends T>, E> batchAction) throws E {
-        N.checkArgPositive(batchSize, "batchSize");
-        N.checkArgNotNull(batchAction, "batchAction");
+        checkArgPositive(batchSize, "batchSize");
+        checkArgNotNull(batchAction, "batchAction");
 
         if (iter == null) {
             return;
@@ -27468,7 +27468,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             final int totalSize = list.size();
 
             for (int i = 0; i < totalSize; i += batchSize) {
-                batchAction.accept(list.subList(i, N.min(i + batchSize, totalSize)));
+                batchAction.accept(list.subList(i, min(i + batchSize, totalSize)));
             }
         } else {
             runByBatch(iter.iterator(), batchSize, batchAction);
@@ -27486,8 +27486,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
     */
     public static <T, E extends Exception> void runByBatch(final Iterator<? extends T> iter, final int batchSize,
             final Throwables.Consumer<? super List<? extends T>, E> batchAction) throws E {
-        N.checkArgPositive(batchSize, "batchSize");
-        N.checkArgNotNull(batchAction, "batchAction");
+        checkArgPositive(batchSize, "batchSize");
+        checkArgNotNull(batchAction, "batchAction");
 
         if (iter == null || iter.hasNext() == false) {
             return;
@@ -27505,7 +27505,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         }
 
         if (cnt % batchSize != 0) {
-            batchAction.accept(ImmutableList.of(N.copyOfRange(a, 0, cnt % batchSize)));
+            batchAction.accept(ImmutableList.of(copyOfRange(a, 0, cnt % batchSize)));
         }
     }
 
@@ -27523,7 +27523,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static <T, E extends Exception, E2 extends Exception> void runByBatch(final T[] a, final int batchSize,
             final Throwables.Consumer<? super T, E> elementConsumer, final Throwables.Runnable<E2> batchAction) throws E, E2 {
-        if (N.isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return;
         }
 
@@ -27565,9 +27565,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static <T, E extends Exception, E2 extends Exception> void runByBatch(final Iterator<? extends T> iter, final int batchSize,
             final Throwables.Consumer<? super T, E> elementConsumer, final Throwables.Runnable<E2> batchAction) throws E, E2 {
-        N.checkArgPositive(batchSize, "batchSize");
-        N.checkArgNotNull(elementConsumer, "elementConsumer");
-        N.checkArgNotNull(batchAction, "batchAction");
+        checkArgPositive(batchSize, "batchSize");
+        checkArgNotNull(elementConsumer, "elementConsumer");
+        checkArgNotNull(batchAction, "batchAction");
 
         if (iter == null || iter.hasNext() == false) {
             return;
@@ -27601,7 +27601,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static <T, R, E extends Exception> List<R> callByBatch(final T[] a, final int batchSize,
             final Throwables.Function<? super List<? extends T>, R, E> batchAction) throws E {
-        if (N.isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return new ArrayList<>(0);
         }
 
@@ -27620,8 +27620,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
     */
     public static <T, R, E extends Exception> List<R> callByBatch(Iterable<? extends T> iter, final int batchSize,
             final Throwables.Function<? super List<? extends T>, R, E> batchAction) throws E {
-        N.checkArgPositive(batchSize, "batchSize");
-        N.checkArgNotNull(batchAction, "batchAction");
+        checkArgPositive(batchSize, "batchSize");
+        checkArgNotNull(batchAction, "batchAction");
 
         if (iter == null) {
             return new ArrayList<>(0);
@@ -27633,7 +27633,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             final List<R> result = new ArrayList<>(totalSize % batchSize == 0 ? totalSize / batchSize : totalSize / batchSize + 1);
 
             for (int i = 0; i < totalSize; i += batchSize) {
-                result.add(batchAction.apply(list.subList(i, N.min(i + batchSize, totalSize))));
+                result.add(batchAction.apply(list.subList(i, min(i + batchSize, totalSize))));
             }
 
             return result;
@@ -27654,8 +27654,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
     */
     public static <T, R, E extends Exception> List<R> callByBatch(final Iterator<? extends T> iter, final int batchSize,
             final Throwables.Function<? super List<? extends T>, R, E> batchAction) throws E {
-        N.checkArgPositive(batchSize, "batchSize");
-        N.checkArgNotNull(batchAction, "batchAction");
+        checkArgPositive(batchSize, "batchSize");
+        checkArgNotNull(batchAction, "batchAction");
 
         if (iter == null || iter.hasNext() == false) {
             return new ArrayList<>();
@@ -27674,7 +27674,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         }
 
         if (cnt % batchSize != 0) {
-            result.add(batchAction.apply(ImmutableList.of(N.copyOfRange(a, 0, cnt % batchSize))));
+            result.add(batchAction.apply(ImmutableList.of(copyOfRange(a, 0, cnt % batchSize))));
         }
 
         return result;
@@ -27695,7 +27695,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static <T, R, E extends Exception, E2 extends Exception> List<R> callByBatch(final T[] a, final int batchSize,
             final Throwables.Consumer<? super T, E> elementConsumer, final Throwables.Callable<? extends R, E2> batchAction) throws E, E2 {
-        if (N.isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return new ArrayList<>(0);
         }
 
@@ -27738,9 +27738,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static <T, R, E extends Exception, E2 extends Exception> List<R> callByBatch(final Iterator<? extends T> iter, final int batchSize,
             final Throwables.Consumer<? super T, E> elementConsumer, final Throwables.Callable<? extends R, E2> batchAction) throws E, E2 {
-        N.checkArgPositive(batchSize, "batchSize");
-        N.checkArgNotNull(elementConsumer, "elementConsumer");
-        N.checkArgNotNull(batchAction, "batchAction");
+        checkArgPositive(batchSize, "batchSize");
+        checkArgNotNull(elementConsumer, "elementConsumer");
+        checkArgNotNull(batchAction, "batchAction");
 
         if (iter == null || iter.hasNext() == false) {
             return new ArrayList<>();
@@ -28888,7 +28888,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     @Beta
     public static void negate(final boolean[] a) {
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return;
         }
 
@@ -28983,7 +28983,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static <T> Collection<T> unmodifiableCollection(Collection<? extends T> c) {
         if (c == null) {
-            return N.emptyList();
+            return emptyList();
         }
 
         return Collections.unmodifiableCollection(c);
@@ -28999,7 +28999,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static <T> List<T> unmodifiableList(final List<? extends T> list) {
         if (list == null) {
-            return N.emptyList();
+            return emptyList();
         }
 
         return Collections.unmodifiableList(list);
@@ -29015,7 +29015,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static <T> Set<T> unmodifiableSet(final Set<? extends T> s) {
         if (s == null) {
-            return N.emptySet();
+            return emptySet();
         }
 
         return Collections.unmodifiableSet(s);
@@ -29031,7 +29031,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static <T> SortedSet<T> unmodifiableSortedSet(final SortedSet<T> s) {
         if (s == null) {
-            return N.emptySortedSet();
+            return emptySortedSet();
         }
 
         return Collections.unmodifiableSortedSet(s);
@@ -29047,7 +29047,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static <T> NavigableSet<T> unmodifiableNavigableSet(final NavigableSet<T> s) {
         if (s == null) {
-            return N.emptyNavigableSet();
+            return emptyNavigableSet();
         }
 
         return Collections.unmodifiableNavigableSet(s);
@@ -29064,7 +29064,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static <K, V> Map<K, V> unmodifiableMap(Map<? extends K, ? extends V> m) {
         if (m == null) {
-            return N.emptyMap();
+            return emptyMap();
         }
 
         return Collections.unmodifiableMap(m);
@@ -29081,7 +29081,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static <K, V> SortedMap<K, V> unmodifiableSortedMap(SortedMap<K, ? extends V> m) {
         if (m == null) {
-            return N.emptySortedMap();
+            return emptySortedMap();
         }
 
         return Collections.unmodifiableSortedMap(m);
@@ -29098,7 +29098,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static <K, V> NavigableMap<K, V> unmodifiableNavigableMap(NavigableMap<K, ? extends V> m) {
         if (m == null) {
-            return N.emptyNavigableMap();
+            return emptyNavigableMap();
         }
 
         return Collections.unmodifiableNavigableMap(m);
@@ -29117,7 +29117,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static <T, E extends Exception> void applyToEach(final T[] a, final Throwables.Function<? super T, ? extends T, E> converter) throws E {
         checkArgNotNull(converter);
 
-        if (isNullOrEmpty(a)) {
+        if (isEmpty(a)) {
             return;
         }
 
@@ -29139,7 +29139,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static <T, E extends Exception> void applyToEach(final List<T> c, final Throwables.Function<? super T, ? extends T, E> converter) throws E {
         checkArgNotNull(converter);
 
-        if (isNullOrEmpty(c)) {
+        if (isEmpty(c)) {
             return;
         }
 

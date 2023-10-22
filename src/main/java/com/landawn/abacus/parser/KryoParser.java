@@ -788,49 +788,49 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
                 kryo.register(cls);
             }
 
-            if (N.notNullOrEmpty(ParserFactory._kryoClassSet)) {
+            if (N.notEmpty(ParserFactory._kryoClassSet)) {
                 for (Class<?> cls : ParserFactory._kryoClassSet) {
                     kryo.register(cls);
                 }
             }
 
-            if (N.notNullOrEmpty(ParserFactory._kryoClassIdMap)) {
+            if (N.notEmpty(ParserFactory._kryoClassIdMap)) {
                 for (Class<?> cls : ParserFactory._kryoClassIdMap.keySet()) {
                     kryo.register(cls, ParserFactory._kryoClassIdMap.get(cls));
                 }
             }
 
-            if (N.notNullOrEmpty(ParserFactory._kryoClassSerializerMap)) {
+            if (N.notEmpty(ParserFactory._kryoClassSerializerMap)) {
                 for (Class<?> cls : ParserFactory._kryoClassSerializerMap.keySet()) {
                     kryo.register(cls, ParserFactory._kryoClassSerializerMap.get(cls));
                 }
             }
 
-            if (N.notNullOrEmpty(ParserFactory._kryoClassSerializerIdMap)) {
+            if (N.notEmpty(ParserFactory._kryoClassSerializerIdMap)) {
                 for (Map.Entry<Class<?>, Tuple2<Serializer<?>, Integer>> entry : ParserFactory._kryoClassSerializerIdMap.entrySet()) {
                     kryo.register(entry.getKey(), entry.getValue()._1, entry.getValue()._2);
                 }
             }
 
-            if (N.notNullOrEmpty(kryoClassSet)) {
+            if (N.notEmpty(kryoClassSet)) {
                 for (Class<?> cls : kryoClassSet) {
                     kryo.register(cls);
                 }
             }
 
-            if (N.notNullOrEmpty(kryoClassIdMap)) {
+            if (N.notEmpty(kryoClassIdMap)) {
                 for (Class<?> cls : kryoClassIdMap.keySet()) { //NOSONAR
                     kryo.register(cls, kryoClassIdMap.get(cls));
                 }
             }
 
-            if (N.notNullOrEmpty(kryoClassSerializerMap)) {
+            if (N.notEmpty(kryoClassSerializerMap)) {
                 for (Class<?> cls : kryoClassSerializerMap.keySet()) { //NOSONAR
                     kryo.register(cls, kryoClassSerializerMap.get(cls));
                 }
             }
 
-            if (N.notNullOrEmpty(kryoClassSerializerIdMap)) {
+            if (N.notEmpty(kryoClassSerializerIdMap)) {
                 for (Map.Entry<Class<?>, Tuple2<Serializer<?>, Integer>> entry : kryoClassSerializerIdMap.entrySet()) {
                     kryo.register(entry.getKey(), entry.getValue()._1, entry.getValue()._2);
                 }

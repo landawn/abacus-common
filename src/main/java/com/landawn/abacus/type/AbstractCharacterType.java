@@ -57,7 +57,7 @@ public abstract class AbstractCharacterType extends AbstractPrimaryType<Characte
     @Override
     public Character valueOf(String str) {
         // NullPointerException Here
-        // return N.isNullOrEmpty(st) ? defaultValue()
+        // return N.isEmpty(st) ? defaultValue()
         // : (char) ((st.length() == 1) ? st.charAt(0) : Integer.parseInt(st));
         if (Strings.isEmpty(str)) {
             return defaultValue();
@@ -78,7 +78,7 @@ public abstract class AbstractCharacterType extends AbstractPrimaryType<Characte
         // NullPointerException Here
         // return ((cbuf == null) || (len == 0)) ? defaultValue()
         // : ((len == 1) ? cbuf[offset] : (char) N.parseInt(cbuf, offset, len));
-        if (N.isNullOrEmpty(cbuf)) {
+        if (N.isEmpty(cbuf)) {
             return defaultValue();
         }
 

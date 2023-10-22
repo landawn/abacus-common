@@ -161,7 +161,7 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      * @return
      */
     public static <E> ImmutableNavigableSet<E> copyOf(final SortedSet<? extends E> sortedSet) {
-        if (N.isNullOrEmpty(sortedSet)) {
+        if (N.isEmpty(sortedSet)) {
             return empty();
         }
 

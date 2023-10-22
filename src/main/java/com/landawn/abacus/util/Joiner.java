@@ -472,7 +472,7 @@ public final class Joiner implements Closeable {
      * @return
      */
     public Joiner appendAll(final boolean[] a) {
-        if (N.notNullOrEmpty(a)) {
+        if (N.notEmpty(a)) {
             return appendAll(a, 0, a.length);
         }
 
@@ -489,7 +489,7 @@ public final class Joiner implements Closeable {
     public Joiner appendAll(final boolean[] a, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
-        if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
+        if (N.isEmpty(a) || fromIndex == toIndex) {
             return this;
         }
 
@@ -516,7 +516,7 @@ public final class Joiner implements Closeable {
      * @return
      */
     public Joiner appendAll(final char[] a) {
-        if (N.notNullOrEmpty(a)) {
+        if (N.notEmpty(a)) {
             return appendAll(a, 0, a.length);
         }
 
@@ -533,7 +533,7 @@ public final class Joiner implements Closeable {
     public Joiner appendAll(final char[] a, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
-        if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
+        if (N.isEmpty(a) || fromIndex == toIndex) {
             return this;
         }
 
@@ -560,7 +560,7 @@ public final class Joiner implements Closeable {
      * @return
      */
     public Joiner appendAll(final byte[] a) {
-        if (N.notNullOrEmpty(a)) {
+        if (N.notEmpty(a)) {
             return appendAll(a, 0, a.length);
         }
 
@@ -577,7 +577,7 @@ public final class Joiner implements Closeable {
     public Joiner appendAll(final byte[] a, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
-        if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
+        if (N.isEmpty(a) || fromIndex == toIndex) {
             return this;
         }
 
@@ -604,7 +604,7 @@ public final class Joiner implements Closeable {
      * @return
      */
     public Joiner appendAll(final short[] a) {
-        if (N.notNullOrEmpty(a)) {
+        if (N.notEmpty(a)) {
             return appendAll(a, 0, a.length);
         }
 
@@ -621,7 +621,7 @@ public final class Joiner implements Closeable {
     public Joiner appendAll(final short[] a, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
-        if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
+        if (N.isEmpty(a) || fromIndex == toIndex) {
             return this;
         }
 
@@ -648,7 +648,7 @@ public final class Joiner implements Closeable {
      * @return
      */
     public Joiner appendAll(final int[] a) {
-        if (N.notNullOrEmpty(a)) {
+        if (N.notEmpty(a)) {
             return appendAll(a, 0, a.length);
         }
 
@@ -665,7 +665,7 @@ public final class Joiner implements Closeable {
     public Joiner appendAll(final int[] a, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
-        if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
+        if (N.isEmpty(a) || fromIndex == toIndex) {
             return this;
         }
 
@@ -692,7 +692,7 @@ public final class Joiner implements Closeable {
      * @return
      */
     public Joiner appendAll(final long[] a) {
-        if (N.notNullOrEmpty(a)) {
+        if (N.notEmpty(a)) {
             return appendAll(a, 0, a.length);
         }
 
@@ -709,7 +709,7 @@ public final class Joiner implements Closeable {
     public Joiner appendAll(final long[] a, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
-        if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
+        if (N.isEmpty(a) || fromIndex == toIndex) {
             return this;
         }
 
@@ -736,7 +736,7 @@ public final class Joiner implements Closeable {
      * @return
      */
     public Joiner appendAll(final float[] a) {
-        if (N.notNullOrEmpty(a)) {
+        if (N.notEmpty(a)) {
             return appendAll(a, 0, a.length);
         }
 
@@ -753,7 +753,7 @@ public final class Joiner implements Closeable {
     public Joiner appendAll(final float[] a, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
-        if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
+        if (N.isEmpty(a) || fromIndex == toIndex) {
             return this;
         }
 
@@ -780,7 +780,7 @@ public final class Joiner implements Closeable {
      * @return
      */
     public Joiner appendAll(final double[] a) {
-        if (N.notNullOrEmpty(a)) {
+        if (N.notEmpty(a)) {
             return appendAll(a, 0, a.length);
         }
 
@@ -797,7 +797,7 @@ public final class Joiner implements Closeable {
     public Joiner appendAll(final double[] a, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
-        if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
+        if (N.isEmpty(a) || fromIndex == toIndex) {
             return this;
         }
 
@@ -824,7 +824,7 @@ public final class Joiner implements Closeable {
      * @return
      */
     public Joiner appendAll(final Object[] a) {
-        if (N.notNullOrEmpty(a)) {
+        if (N.notEmpty(a)) {
             return appendAll(a, 0, a.length);
         }
 
@@ -841,7 +841,7 @@ public final class Joiner implements Closeable {
     public Joiner appendAll(final Object[] a, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
-        if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
+        if (N.isEmpty(a) || fromIndex == toIndex) {
             return this;
         }
 
@@ -870,7 +870,7 @@ public final class Joiner implements Closeable {
      * @return
      */
     public Joiner appendAll(final BooleanList c) {
-        if (N.notNullOrEmpty(c)) {
+        if (N.notEmpty(c)) {
             return appendAll(c.array(), 0, c.size());
         }
 
@@ -887,7 +887,7 @@ public final class Joiner implements Closeable {
     public Joiner appendAll(final BooleanList c, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, c == null ? 0 : c.size());
 
-        if (N.isNullOrEmpty(c) || fromIndex == toIndex) {
+        if (N.isEmpty(c) || fromIndex == toIndex) {
             return this;
         }
 
@@ -900,7 +900,7 @@ public final class Joiner implements Closeable {
      * @return
      */
     public Joiner appendAll(final CharList c) {
-        if (N.notNullOrEmpty(c)) {
+        if (N.notEmpty(c)) {
             return appendAll(c.array(), 0, c.size());
         }
 
@@ -917,7 +917,7 @@ public final class Joiner implements Closeable {
     public Joiner appendAll(final CharList c, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, c == null ? 0 : c.size());
 
-        if (N.isNullOrEmpty(c) || fromIndex == toIndex) {
+        if (N.isEmpty(c) || fromIndex == toIndex) {
             return this;
         }
 
@@ -930,7 +930,7 @@ public final class Joiner implements Closeable {
      * @return
      */
     public Joiner appendAll(final ByteList c) {
-        if (N.notNullOrEmpty(c)) {
+        if (N.notEmpty(c)) {
             return appendAll(c.array(), 0, c.size());
         }
 
@@ -947,7 +947,7 @@ public final class Joiner implements Closeable {
     public Joiner appendAll(final ByteList c, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, c == null ? 0 : c.size());
 
-        if (N.isNullOrEmpty(c) || fromIndex == toIndex) {
+        if (N.isEmpty(c) || fromIndex == toIndex) {
             return this;
         }
 
@@ -960,7 +960,7 @@ public final class Joiner implements Closeable {
      * @return
      */
     public Joiner appendAll(final ShortList c) {
-        if (N.notNullOrEmpty(c)) {
+        if (N.notEmpty(c)) {
             return appendAll(c.array(), 0, c.size());
         }
 
@@ -977,7 +977,7 @@ public final class Joiner implements Closeable {
     public Joiner appendAll(final ShortList c, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, c == null ? 0 : c.size());
 
-        if (N.isNullOrEmpty(c) || fromIndex == toIndex) {
+        if (N.isEmpty(c) || fromIndex == toIndex) {
             return this;
         }
 
@@ -990,7 +990,7 @@ public final class Joiner implements Closeable {
      * @return
      */
     public Joiner appendAll(final IntList c) {
-        if (N.notNullOrEmpty(c)) {
+        if (N.notEmpty(c)) {
             return appendAll(c.array(), 0, c.size());
         }
 
@@ -1007,7 +1007,7 @@ public final class Joiner implements Closeable {
     public Joiner appendAll(final IntList c, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, c == null ? 0 : c.size());
 
-        if (N.isNullOrEmpty(c) || fromIndex == toIndex) {
+        if (N.isEmpty(c) || fromIndex == toIndex) {
             return this;
         }
 
@@ -1020,7 +1020,7 @@ public final class Joiner implements Closeable {
      * @return
      */
     public Joiner appendAll(final LongList c) {
-        if (N.notNullOrEmpty(c)) {
+        if (N.notEmpty(c)) {
             return appendAll(c.array(), 0, c.size());
         }
 
@@ -1037,7 +1037,7 @@ public final class Joiner implements Closeable {
     public Joiner appendAll(final LongList c, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, c == null ? 0 : c.size());
 
-        if (N.isNullOrEmpty(c) || fromIndex == toIndex) {
+        if (N.isEmpty(c) || fromIndex == toIndex) {
             return this;
         }
 
@@ -1050,7 +1050,7 @@ public final class Joiner implements Closeable {
      * @return
      */
     public Joiner appendAll(final FloatList c) {
-        if (N.notNullOrEmpty(c)) {
+        if (N.notEmpty(c)) {
             return appendAll(c.array(), 0, c.size());
         }
 
@@ -1067,7 +1067,7 @@ public final class Joiner implements Closeable {
     public Joiner appendAll(final FloatList c, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, c == null ? 0 : c.size());
 
-        if (N.isNullOrEmpty(c) || fromIndex == toIndex) {
+        if (N.isEmpty(c) || fromIndex == toIndex) {
             return this;
         }
 
@@ -1080,7 +1080,7 @@ public final class Joiner implements Closeable {
      * @return
      */
     public Joiner appendAll(final DoubleList c) {
-        if (N.notNullOrEmpty(c)) {
+        if (N.notEmpty(c)) {
             return appendAll(c.array(), 0, c.size());
         }
 
@@ -1097,7 +1097,7 @@ public final class Joiner implements Closeable {
     public Joiner appendAll(final DoubleList c, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, c == null ? 0 : c.size());
 
-        if (N.isNullOrEmpty(c) || fromIndex == toIndex) {
+        if (N.isEmpty(c) || fromIndex == toIndex) {
             return this;
         }
 
@@ -1110,7 +1110,7 @@ public final class Joiner implements Closeable {
      * @return
      */
     public Joiner appendAll(final Collection<?> c) {
-        if (N.notNullOrEmpty(c)) {
+        if (N.notEmpty(c)) {
             return appendAll(c, 0, c.size());
         }
 
@@ -1127,7 +1127,7 @@ public final class Joiner implements Closeable {
     public Joiner appendAll(final Collection<?> c, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, c == null ? 0 : c.size());
 
-        if (N.isNullOrEmpty(c) || (fromIndex == toIndex && fromIndex < c.size())) {
+        if (N.isEmpty(c) || (fromIndex == toIndex && fromIndex < c.size())) {
             return this;
         }
 
@@ -1519,7 +1519,7 @@ public final class Joiner implements Closeable {
      * @return
      */
     public Joiner appendEntries(final Map<?, ?> m) {
-        if (N.notNullOrEmpty(m)) {
+        if (N.notEmpty(m)) {
             return appendEntries(m, 0, m.size());
         }
 
@@ -1536,7 +1536,7 @@ public final class Joiner implements Closeable {
     public Joiner appendEntries(final Map<?, ?> m, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, m == null ? 0 : m.size());
 
-        if ((N.isNullOrEmpty(m) && fromIndex == 0 && toIndex == 0) || (fromIndex == toIndex && fromIndex < m.size())) {
+        if ((N.isEmpty(m) && fromIndex == 0 && toIndex == 0) || (fromIndex == toIndex && fromIndex < m.size())) {
             return this;
         }
 
@@ -1720,7 +1720,7 @@ public final class Joiner implements Closeable {
             return this;
         }
 
-        if (N.isNullOrEmpty(selectPropNames)) {
+        if (N.isEmpty(selectPropNames)) {
             return appendEntries(bean, true, null);
         }
 
@@ -1771,7 +1771,7 @@ public final class Joiner implements Closeable {
 
         N.checkArgument(ClassUtil.isBeanClass(cls), "'bean' must be bean class with getter/setter methods");
 
-        final boolean hasIgnoredPropNames = N.notNullOrEmpty(ignoredPropNames);
+        final boolean hasIgnoredPropNames = N.notEmpty(ignoredPropNames);
         final BeanInfo beanInfo = ParserUtil.getBeanInfo(cls);
         StringBuilder sb = null;
         Object propValue = null;
