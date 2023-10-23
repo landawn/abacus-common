@@ -1535,7 +1535,7 @@ public final class Fn {
         return t -> Strings.isBlank(valueExtractor.apply(t));
     }
 
-    private static final Predicate<Object[]> IS_NULL_OR_EMPTY_A = value -> value == null || value.length == 0;
+    private static final Predicate<Object[]> IS_EMPTY_A = value -> value == null || value.length == 0;
 
     /**
      *
@@ -1545,12 +1545,12 @@ public final class Fn {
      */
     @Beta
     @SuppressWarnings("rawtypes")
-    public static <T> Predicate<T[]> isNullOrEmptyA() {
-        return (Predicate) IS_NULL_OR_EMPTY_A;
+    public static <T> Predicate<T[]> isEmptyA() {
+        return (Predicate) IS_EMPTY_A;
     }
 
     @SuppressWarnings("rawtypes")
-    private static final Predicate<Collection> IS_NULL_OR_EMPTY_C = value -> value == null || value.size() == 0;
+    private static final Predicate<Collection> IS_EMPTY_C = value -> value == null || value.size() == 0;
 
     /**
      *
@@ -1560,12 +1560,12 @@ public final class Fn {
      */
     @Beta
     @SuppressWarnings("rawtypes")
-    public static <T extends Collection> Predicate<T> isNullOrEmptyC() {
-        return (Predicate<T>) IS_NULL_OR_EMPTY_C;
+    public static <T extends Collection> Predicate<T> isEmptyC() {
+        return (Predicate<T>) IS_EMPTY_C;
     }
 
     @SuppressWarnings("rawtypes")
-    private static final Predicate<Map> IS_NULL_OR_EMPTY_M = value -> value == null || value.size() == 0;
+    private static final Predicate<Map> IS_EMPTY_M = value -> value == null || value.size() == 0;
 
     /**
      *
@@ -1575,8 +1575,8 @@ public final class Fn {
      */
     @Beta
     @SuppressWarnings("rawtypes")
-    public static <T extends Map> Predicate<T> isNullOrEmptyM() {
-        return (Predicate<T>) IS_NULL_OR_EMPTY_M;
+    public static <T extends Map> Predicate<T> isEmptyM() {
+        return (Predicate<T>) IS_EMPTY_M;
     }
 
     /**
@@ -1605,7 +1605,7 @@ public final class Fn {
      * @param <T>
      * @return
      */
-    public static <T extends CharSequence> Predicate<T> isNotEmpty() {
+    public static <T extends CharSequence> Predicate<T> notEmpty() {
         return (Predicate<T>) IS_NOT_EMPTY;
     }
 
@@ -1615,7 +1615,7 @@ public final class Fn {
      * @param valueExtractor
      * @return
      */
-    public static <T> Predicate<T> isNotEmpty(final java.util.function.Function<T, ? extends CharSequence> valueExtractor) {
+    public static <T> Predicate<T> notEmpty(final java.util.function.Function<T, ? extends CharSequence> valueExtractor) {
         return t -> Strings.isNotEmpty(valueExtractor.apply(t));
     }
 
@@ -1625,7 +1625,7 @@ public final class Fn {
      * @param <T>
      * @return
      */
-    public static <T extends CharSequence> Predicate<T> isNotBlank() {
+    public static <T extends CharSequence> Predicate<T> notBlank() {
         return (Predicate<T>) IS_NOT_BLANK;
     }
 
@@ -1635,11 +1635,11 @@ public final class Fn {
      * @param valueExtractor
      * @return
      */
-    public static <T> Predicate<T> isNotBlank(final java.util.function.Function<T, ? extends CharSequence> valueExtractor) {
+    public static <T> Predicate<T> notBlank(final java.util.function.Function<T, ? extends CharSequence> valueExtractor) {
         return t -> Strings.isNotBlank(valueExtractor.apply(t));
     }
 
-    private static final Predicate<Object[]> NOT_NULL_OR_EMPTY_A = value -> value != null && value.length > 0;
+    private static final Predicate<Object[]> NOT_EMPTY_A = value -> value != null && value.length > 0;
 
     /**
      *
@@ -1649,12 +1649,12 @@ public final class Fn {
      */
     @Beta
     @SuppressWarnings("rawtypes")
-    public static <T> Predicate<T[]> notNullOrEmptyA() {
-        return (Predicate) NOT_NULL_OR_EMPTY_A;
+    public static <T> Predicate<T[]> notEmptyA() {
+        return (Predicate) NOT_EMPTY_A;
     }
 
     @SuppressWarnings("rawtypes")
-    private static final Predicate<Collection> NOT_NULL_OR_EMPTY_C = value -> value != null && value.size() > 0;
+    private static final Predicate<Collection> NOT_EMPTY_C = value -> value != null && value.size() > 0;
 
     /**
      *
@@ -1664,12 +1664,12 @@ public final class Fn {
      */
     @Beta
     @SuppressWarnings("rawtypes")
-    public static <T extends Collection> Predicate<T> notNullOrEmptyC() {
-        return (Predicate<T>) NOT_NULL_OR_EMPTY_C;
+    public static <T extends Collection> Predicate<T> notEmptyC() {
+        return (Predicate<T>) NOT_EMPTY_C;
     }
 
     @SuppressWarnings("rawtypes")
-    private static final Predicate<Map> NOT_NULL_OR_EMPTY_M = value -> value != null && value.size() > 0;
+    private static final Predicate<Map> NOT_EMPTY_M = value -> value != null && value.size() > 0;
 
     /**
      *
@@ -1679,8 +1679,8 @@ public final class Fn {
      */
     @Beta
     @SuppressWarnings("rawtypes")
-    public static <T extends Map> Predicate<T> notNullOrEmptyM() {
-        return (Predicate<T>) NOT_NULL_OR_EMPTY_M;
+    public static <T extends Map> Predicate<T> notEmptyM() {
+        return (Predicate<T>) NOT_EMPTY_M;
     }
 
     /**
@@ -2140,7 +2140,7 @@ public final class Fn {
      * @throws IllegalArgumentException if the specified {@code c} is null or empty.
      */
     public static <T> Predicate<T> and(final Collection<? extends java.util.function.Predicate<? super T>> c) throws IllegalArgumentException {
-        N.checkArgNotNullOrEmpty(c, "c");
+        N.checkArgNotEmpty(c, "c");
 
         return t -> {
             for (java.util.function.Predicate<? super T> p : c) {
@@ -2196,7 +2196,7 @@ public final class Fn {
      * @throws IllegalArgumentException if the specified {@code c} is null or empty.
      */
     public static <T, U> BiPredicate<T, U> and(final List<? extends java.util.function.BiPredicate<? super T, ? super U>> c) throws IllegalArgumentException {
-        N.checkArgNotNullOrEmpty(c, "c");
+        N.checkArgNotEmpty(c, "c");
 
         return (t, u) -> {
             for (java.util.function.BiPredicate<? super T, ? super U> p : c) {
@@ -2277,7 +2277,7 @@ public final class Fn {
      * @throws IllegalArgumentException if the specified {@code c} is null or empty.
      */
     public static <T> Predicate<T> or(final Collection<? extends java.util.function.Predicate<? super T>> c) throws IllegalArgumentException {
-        N.checkArgNotNullOrEmpty(c, "c");
+        N.checkArgNotEmpty(c, "c");
 
         return t -> {
             for (java.util.function.Predicate<? super T> p : c) {
@@ -2333,7 +2333,7 @@ public final class Fn {
      * @throws IllegalArgumentException if the specified {@code c} is null or empty.
      */
     public static <T, U> BiPredicate<T, U> or(final List<? extends java.util.function.BiPredicate<? super T, ? super U>> c) throws IllegalArgumentException {
-        N.checkArgNotNullOrEmpty(c, "c");
+        N.checkArgNotEmpty(c, "c");
 
         return (t, u) -> {
             for (java.util.function.BiPredicate<? super T, ? super U> p : c) {
@@ -10240,8 +10240,8 @@ public final class Fn {
          */
         @Beta
         @SuppressWarnings("rawtypes")
-        public static <T, E extends Exception> Throwables.Predicate<T[], E> isNullOrEmptyA() {
-            return (Throwables.Predicate) Fn.IS_NULL_OR_EMPTY_A;
+        public static <T, E extends Exception> Throwables.Predicate<T[], E> isEmptyA() {
+            return (Throwables.Predicate) Fn.IS_EMPTY_A;
         }
 
         /**
@@ -10253,8 +10253,8 @@ public final class Fn {
          */
         @Beta
         @SuppressWarnings("rawtypes")
-        public static <T extends Collection, E extends Exception> Throwables.Predicate<T, E> isNullOrEmptyC() {
-            return (Throwables.Predicate<T, E>) Fn.IS_NULL_OR_EMPTY_C;
+        public static <T extends Collection, E extends Exception> Throwables.Predicate<T, E> isEmptyC() {
+            return (Throwables.Predicate<T, E>) Fn.IS_EMPTY_C;
         }
 
         /**
@@ -10266,8 +10266,8 @@ public final class Fn {
          */
         @Beta
         @SuppressWarnings("rawtypes")
-        public static <T extends Map, E extends Exception> Throwables.Predicate<T, E> isNullOrEmptyM() {
-            return (Throwables.Predicate<T, E>) Fn.IS_NULL_OR_EMPTY_M;
+        public static <T extends Map, E extends Exception> Throwables.Predicate<T, E> isEmptyM() {
+            return (Throwables.Predicate<T, E>) Fn.IS_EMPTY_M;
         }
 
         /**
@@ -10289,7 +10289,7 @@ public final class Fn {
          * @param <E>
          * @return
          */
-        public static <T extends CharSequence, E extends Exception> Throwables.Predicate<T, E> isNotEmpty() {
+        public static <T extends CharSequence, E extends Exception> Throwables.Predicate<T, E> notEmpty() {
             return (Throwables.Predicate<T, E>) Fn.IS_NOT_EMPTY;
         }
 
@@ -10300,7 +10300,7 @@ public final class Fn {
          * @param <E>
          * @return
          */
-        public static <T extends CharSequence, E extends Exception> Throwables.Predicate<T, E> isNotBlank() {
+        public static <T extends CharSequence, E extends Exception> Throwables.Predicate<T, E> notBlank() {
             return (Throwables.Predicate<T, E>) Fn.IS_NOT_BLANK;
         }
 
@@ -10313,8 +10313,8 @@ public final class Fn {
          */
         @Beta
         @SuppressWarnings("rawtypes")
-        public static <T, E extends Exception> Throwables.Predicate<T[], E> notNullOrEmptyA() {
-            return (Throwables.Predicate) Fn.NOT_NULL_OR_EMPTY_A;
+        public static <T, E extends Exception> Throwables.Predicate<T[], E> notEmptyA() {
+            return (Throwables.Predicate) Fn.NOT_EMPTY_A;
         }
 
         /**
@@ -10326,8 +10326,8 @@ public final class Fn {
          */
         @Beta
         @SuppressWarnings("rawtypes")
-        public static <T extends Collection, E extends Exception> Throwables.Predicate<T, E> notNullOrEmptyC() {
-            return (Throwables.Predicate<T, E>) Fn.NOT_NULL_OR_EMPTY_C;
+        public static <T extends Collection, E extends Exception> Throwables.Predicate<T, E> notEmptyC() {
+            return (Throwables.Predicate<T, E>) Fn.NOT_EMPTY_C;
         }
 
         /**
@@ -10339,8 +10339,8 @@ public final class Fn {
          */
         @Beta
         @SuppressWarnings("rawtypes")
-        public static <T extends Map, E extends Exception> Throwables.Predicate<T, E> notNullOrEmptyM() {
-            return (Throwables.Predicate<T, E>) Fn.NOT_NULL_OR_EMPTY_M;
+        public static <T extends Map, E extends Exception> Throwables.Predicate<T, E> notEmptyM() {
+            return (Throwables.Predicate<T, E>) Fn.NOT_EMPTY_M;
         }
 
         /**

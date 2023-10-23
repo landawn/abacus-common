@@ -3715,32 +3715,32 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @IntermediateOp
     public <R> ExceptionalStream<R, E> slidingMap(Throwables.BiFunction<? super T, ? super T, R, ? extends E> mapper) {
-        return slidingMap(mapper, 1);
+        return slidingMap(1, mapper);
     }
 
     /**
      *
-     * @param <R>
-     * @param mapper
      * @param increment
+     * @param mapper
+     * @param <R>
      * @return
      */
     @IntermediateOp
-    public <R> ExceptionalStream<R, E> slidingMap(Throwables.BiFunction<? super T, ? super T, R, ? extends E> mapper, int increment) {
-        return slidingMap(mapper, increment, false);
+    public <R> ExceptionalStream<R, E> slidingMap(int increment, Throwables.BiFunction<? super T, ? super T, R, ? extends E> mapper) {
+        return slidingMap(increment, false, mapper);
     }
 
     /**
      *
-     * @param <R>
-     * @param mapper
      * @param increment
      * @param ignoreNotPaired
+     * @param mapper
+     * @param <R>
      * @return
      */
     @IntermediateOp
-    public <R> ExceptionalStream<R, E> slidingMap(final Throwables.BiFunction<? super T, ? super T, R, ? extends E> mapper, final int increment,
-            final boolean ignoreNotPaired) {
+    public <R> ExceptionalStream<R, E> slidingMap(final int increment, final boolean ignoreNotPaired,
+            final Throwables.BiFunction<? super T, ? super T, R, ? extends E> mapper) {
         assertNotClosed();
 
         checkArgPositive(increment, "increment");
@@ -3801,32 +3801,32 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @IntermediateOp
     public <R> ExceptionalStream<R, E> slidingMap(Throwables.TriFunction<? super T, ? super T, ? super T, R, ? extends E> mapper) {
-        return slidingMap(mapper, 1);
+        return slidingMap(1, mapper);
     }
 
     /**
      *
-     * @param <R>
-     * @param mapper
      * @param increment
+     * @param mapper
+     * @param <R>
      * @return
      */
     @IntermediateOp
-    public <R> ExceptionalStream<R, E> slidingMap(Throwables.TriFunction<? super T, ? super T, ? super T, R, ? extends E> mapper, int increment) {
-        return slidingMap(mapper, increment, false);
+    public <R> ExceptionalStream<R, E> slidingMap(int increment, Throwables.TriFunction<? super T, ? super T, ? super T, R, ? extends E> mapper) {
+        return slidingMap(increment, false, mapper);
     }
 
     /**
      *
-     * @param <R>
-     * @param mapper
      * @param increment
      * @param ignoreNotPaired
+     * @param mapper
+     * @param <R>
      * @return
      */
     @IntermediateOp
-    public <R> ExceptionalStream<R, E> slidingMap(final Throwables.TriFunction<? super T, ? super T, ? super T, R, ? extends E> mapper, final int increment,
-            final boolean ignoreNotPaired) {
+    public <R> ExceptionalStream<R, E> slidingMap(final int increment, final boolean ignoreNotPaired,
+            final Throwables.TriFunction<? super T, ? super T, ? super T, R, ? extends E> mapper) {
         assertNotClosed();
 
         checkArgPositive(increment, "increment");
@@ -8288,20 +8288,20 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @TerminalOp
     public <E2 extends Exception> void forEachPair(final Throwables.BiConsumer<? super T, ? super T, E2> action) throws E, E2 {
-        forEachPair(action, 1);
+        forEachPair(1, action);
     }
 
     /**
      * For each pair.
+     * @param increment
+     * @param action
      *
      * @param <E2>
-     * @param action
-     * @param increment
      * @throws E the e
      * @throws E2 the e2
      */
     @TerminalOp
-    public <E2 extends Exception> void forEachPair(final Throwables.BiConsumer<? super T, ? super T, E2> action, final int increment) throws E, E2 {
+    public <E2 extends Exception> void forEachPair(final int increment, final Throwables.BiConsumer<? super T, ? super T, E2> action) throws E, E2 {
         assertNotClosed();
 
         final int windowSize = 2;
@@ -8347,20 +8347,20 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @TerminalOp
     public <E2 extends Exception> void forEachTriple(final Throwables.TriConsumer<? super T, ? super T, ? super T, E2> action) throws E, E2 {
-        forEachTriple(action, 1);
+        forEachTriple(1, action);
     }
 
     /**
      * For each triple.
+     * @param increment
+     * @param action
      *
      * @param <E2>
-     * @param action
-     * @param increment
      * @throws E the e
      * @throws E2 the e2
      */
     @TerminalOp
-    public <E2 extends Exception> void forEachTriple(final Throwables.TriConsumer<? super T, ? super T, ? super T, E2> action, final int increment)
+    public <E2 extends Exception> void forEachTriple(final int increment, final Throwables.TriConsumer<? super T, ? super T, ? super T, E2> action)
             throws E, E2 {
         assertNotClosed();
 
@@ -11727,7 +11727,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @TerminalOp
     public long persistToCSV(Writer output, Collection<String> csvHeaders) throws E, IOException {
-        checkArgNotNullOrEmpty(csvHeaders, "csvHeaders");
+        checkArgNotEmpty(csvHeaders, "csvHeaders");
         assertNotClosed();
 
         try {
@@ -13281,10 +13281,10 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     @SuppressWarnings("rawtypes")
-    <ARG extends Collection> ARG checkArgNotNullOrEmpty(final ARG obj, final String errorMessage) {
+    <ARG extends Collection> ARG checkArgNotEmpty(final ARG obj, final String errorMessage) {
         if (obj == null || obj.size() == 0) {
             try {
-                N.checkArgNotNullOrEmpty(obj, errorMessage);
+                N.checkArgNotEmpty(obj, errorMessage);
             } finally {
                 try {
                     close();

@@ -193,7 +193,7 @@ public class WebUtil {
     }
 
     private static List<String> parseCurl(final String curl) {
-        N.checkArgNotNullOrEmpty(curl, "curl");
+        N.checkArgNotEmpty(curl, "curl");
         String str = curl.trim();
         N.checkArgument(StringUtil.startsWithIgnoreCase(str, "curl"), "Input curl script doesn't start with 'curl'");
 

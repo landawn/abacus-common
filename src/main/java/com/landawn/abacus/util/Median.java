@@ -51,7 +51,7 @@ public final class Median {
      */
     @SafeVarargs
     public static Pair<Character, OptionalChar> of(final char... a) throws IllegalArgumentException {
-        N.checkArgNotNullOrEmpty(a, "The spcified array 'a' can't be null or empty"); //NOSONAR
+        N.checkArgNotEmpty(a, "The spcified array 'a' can't be null or empty"); //NOSONAR
 
         return of(a, 0, a.length);
     }
@@ -112,7 +112,7 @@ public final class Median {
      */
     @SafeVarargs
     public static Pair<Byte, OptionalByte> of(final byte... a) throws IllegalArgumentException {
-        N.checkArgNotNullOrEmpty(a, "The spcified array 'a' can't be null or empty");
+        N.checkArgNotEmpty(a, "The spcified array 'a' can't be null or empty");
 
         return of(a, 0, a.length);
     }
@@ -173,7 +173,7 @@ public final class Median {
      */
     @SafeVarargs
     public static Pair<Short, OptionalShort> of(final short... a) throws IllegalArgumentException {
-        N.checkArgNotNullOrEmpty(a, "The spcified array 'a' can't be null or empty");
+        N.checkArgNotEmpty(a, "The spcified array 'a' can't be null or empty");
 
         return of(a, 0, a.length);
     }
@@ -252,7 +252,7 @@ public final class Median {
      */
     @SafeVarargs
     public static Pair<Integer, OptionalInt> of(final int... a) throws IllegalArgumentException {
-        N.checkArgNotNullOrEmpty(a, "The spcified array 'a' can't be null or empty");
+        N.checkArgNotEmpty(a, "The spcified array 'a' can't be null or empty");
 
         return of(a, 0, a.length);
     }
@@ -313,7 +313,7 @@ public final class Median {
      */
     @SafeVarargs
     public static Pair<Long, OptionalLong> of(final long... a) throws IllegalArgumentException {
-        N.checkArgNotNullOrEmpty(a, "The spcified array 'a' can't be null or empty");
+        N.checkArgNotEmpty(a, "The spcified array 'a' can't be null or empty");
 
         return of(a, 0, a.length);
     }
@@ -374,7 +374,7 @@ public final class Median {
      */
     @SafeVarargs
     public static Pair<Float, OptionalFloat> of(final float... a) throws IllegalArgumentException {
-        N.checkArgNotNullOrEmpty(a, "The spcified array 'a' can't be null or empty");
+        N.checkArgNotEmpty(a, "The spcified array 'a' can't be null or empty");
 
         return of(a, 0, a.length);
     }
@@ -435,7 +435,7 @@ public final class Median {
      */
     @SafeVarargs
     public static Pair<Double, OptionalDouble> of(final double... a) throws IllegalArgumentException {
-        N.checkArgNotNullOrEmpty(a, "The spcified array 'a' can't be null or empty");
+        N.checkArgNotEmpty(a, "The spcified array 'a' can't be null or empty");
 
         return of(a, 0, a.length);
     }
@@ -496,7 +496,7 @@ public final class Median {
      * @see #of(int[])
      */
     public static <T extends Comparable<? super T>> Pair<T, Nullable<T>> of(final T[] a) throws IllegalArgumentException {
-        N.checkArgNotNullOrEmpty(a, "The spcified array 'a' can't be null or empty");
+        N.checkArgNotEmpty(a, "The spcified array 'a' can't be null or empty");
 
         return of(a, 0, a.length);
     }
@@ -528,7 +528,7 @@ public final class Median {
      * @see #of(int[])
      */
     public static <T> Pair<T, Nullable<T>> of(final T[] a, Comparator<? super T> cmp) throws IllegalArgumentException {
-        N.checkArgNotNullOrEmpty(a, "The spcified array 'a' can't be null or empty");
+        N.checkArgNotEmpty(a, "The spcified array 'a' can't be null or empty");
 
         return of(a, 0, a.length, cmp);
     }

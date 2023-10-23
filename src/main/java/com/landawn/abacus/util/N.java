@@ -12871,7 +12871,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     @SafeVarargs
     public static char min(final char... a) throws IllegalArgumentException {
-        checkArgNotNullOrEmpty(a, "The spcified array can not be null or empty"); //NOSONAR
+        checkArgNotEmpty(a, "The spcified array can not be null or empty"); //NOSONAR
 
         if (isEmpty(a)) {
             throw new IllegalArgumentException("The spcified array can not be null or empty");
@@ -12914,7 +12914,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     @SafeVarargs
     public static byte min(final byte... a) throws IllegalArgumentException {
-        checkArgNotNullOrEmpty(a, "The spcified array can not be null or empty");
+        checkArgNotEmpty(a, "The spcified array can not be null or empty");
 
         return min(a, 0, a.length);
     }
@@ -12953,7 +12953,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     @SafeVarargs
     public static short min(final short... a) throws IllegalArgumentException {
-        checkArgNotNullOrEmpty(a, "The spcified array can not be null or empty");
+        checkArgNotEmpty(a, "The spcified array can not be null or empty");
 
         return min(a, 0, a.length);
     }
@@ -12992,7 +12992,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     @SafeVarargs
     public static int min(final int... a) throws IllegalArgumentException {
-        checkArgNotNullOrEmpty(a, "The spcified array can not be null or empty");
+        checkArgNotEmpty(a, "The spcified array can not be null or empty");
 
         return min(a, 0, a.length);
     }
@@ -13031,7 +13031,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     @SafeVarargs
     public static long min(final long... a) throws IllegalArgumentException {
-        checkArgNotNullOrEmpty(a, "The spcified array can not be null or empty");
+        checkArgNotEmpty(a, "The spcified array can not be null or empty");
 
         return min(a, 0, a.length);
     }
@@ -13072,7 +13072,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     @SafeVarargs
     public static float min(final float... a) throws IllegalArgumentException {
-        checkArgNotNullOrEmpty(a, "The spcified array can not be null or empty");
+        checkArgNotEmpty(a, "The spcified array can not be null or empty");
 
         return min(a, 0, a.length);
     }
@@ -13115,7 +13115,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     @SafeVarargs
     public static double min(final double... a) throws IllegalArgumentException {
-        checkArgNotNullOrEmpty(a, "The spcified array can not be null or empty");
+        checkArgNotEmpty(a, "The spcified array can not be null or empty");
 
         return min(a, 0, a.length);
     }
@@ -13155,7 +13155,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see Iterables#min(Comparable[])
      */
     public static <T extends Comparable<? super T>> T min(final T[] a) throws IllegalArgumentException {
-        checkArgNotNullOrEmpty(a, "The spcified array can not be null or empty");
+        checkArgNotEmpty(a, "The spcified array can not be null or empty");
 
         return min(a, 0, a.length);
     }
@@ -13184,7 +13184,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see Iterables#min(Object[], Comparator)
      */
     public static <T> T min(final T[] a, final Comparator<? super T> cmp) throws IllegalArgumentException {
-        checkArgNotNullOrEmpty(a, "The spcified array can not be null or empty");
+        checkArgNotEmpty(a, "The spcified array can not be null or empty");
 
         return min(a, 0, a.length, cmp);
     }
@@ -13232,7 +13232,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static <T extends Comparable<? super T>> T min(final Collection<? extends T> c, final int fromIndex, final int toIndex)
             throws IllegalArgumentException {
-        checkArgNotNullOrEmpty(c, "The spcified collection can not be null or empty");
+        checkArgNotEmpty(c, "The spcified collection can not be null or empty");
 
         return min(c, fromIndex, toIndex, (Comparator<T>) NULL_MAX_COMPARATOR);
     }
@@ -13815,7 +13815,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see Iterables#minMax(Object[], Comparator)
      */
     public static <T> Pair<T, T> minMax(final T[] a, Comparator<? super T> cmp) throws IllegalArgumentException {
-        checkArgNotNullOrEmpty(a, "The spcified array can not be null or empty");
+        checkArgNotEmpty(a, "The spcified array can not be null or empty");
 
         if (a.length == 1) {
             return Pair.of(a[0], a[0]);
@@ -14161,7 +14161,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     @SafeVarargs
     public static char max(final char... a) throws IllegalArgumentException {
-        checkArgNotNullOrEmpty(a, "The spcified array can not be null or empty");
+        checkArgNotEmpty(a, "The spcified array can not be null or empty");
 
         return max(a, 0, a.length);
     }
@@ -14200,7 +14200,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     @SafeVarargs
     public static byte max(final byte... a) throws IllegalArgumentException {
-        checkArgNotNullOrEmpty(a, "The spcified array can not be null or empty");
+        checkArgNotEmpty(a, "The spcified array can not be null or empty");
 
         return max(a, 0, a.length);
     }
@@ -14239,7 +14239,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     @SafeVarargs
     public static short max(final short... a) throws IllegalArgumentException {
-        checkArgNotNullOrEmpty(a, "The spcified array can not be null or empty");
+        checkArgNotEmpty(a, "The spcified array can not be null or empty");
 
         return max(a, 0, a.length);
     }
@@ -14278,7 +14278,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     @SafeVarargs
     public static int max(final int... a) throws IllegalArgumentException {
-        checkArgNotNullOrEmpty(a, "The spcified array can not be null or empty");
+        checkArgNotEmpty(a, "The spcified array can not be null or empty");
 
         return max(a, 0, a.length);
     }
@@ -14317,7 +14317,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     @SafeVarargs
     public static long max(final long... a) throws IllegalArgumentException {
-        checkArgNotNullOrEmpty(a, "The spcified array can not be null or empty");
+        checkArgNotEmpty(a, "The spcified array can not be null or empty");
 
         return max(a, 0, a.length);
     }
@@ -14358,7 +14358,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     @SafeVarargs
     public static float max(final float... a) throws IllegalArgumentException {
-        checkArgNotNullOrEmpty(a, "The spcified array can not be null or empty");
+        checkArgNotEmpty(a, "The spcified array can not be null or empty");
 
         return max(a, 0, a.length);
     }
@@ -14401,7 +14401,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     @SafeVarargs
     public static double max(final double... a) throws IllegalArgumentException {
-        checkArgNotNullOrEmpty(a, "The spcified array can not be null or empty");
+        checkArgNotEmpty(a, "The spcified array can not be null or empty");
 
         return max(a, 0, a.length);
     }
@@ -14441,7 +14441,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see Iterables#max(Comparable[])
      */
     public static <T extends Comparable<? super T>> T max(final T[] a) throws IllegalArgumentException {
-        checkArgNotNullOrEmpty(a, "The spcified array can not be null or empty");
+        checkArgNotEmpty(a, "The spcified array can not be null or empty");
 
         return max(a, 0, a.length);
     }
@@ -14470,7 +14470,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see Iterables#max(Object[], Comparator)
      */
     public static <T> T max(final T[] a, final Comparator<? super T> cmp) throws IllegalArgumentException {
-        checkArgNotNullOrEmpty(a, "The spcified array can not be null or empty");
+        checkArgNotEmpty(a, "The spcified array can not be null or empty");
 
         return max(a, 0, a.length, cmp);
     }
@@ -14565,7 +14565,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static <T extends Comparable<? super T>> T max(final Collection<? extends T> c, final int fromIndex, final int toIndex)
             throws IllegalArgumentException {
-        checkArgNotNullOrEmpty(c, "The spcified collection can not be null or empty");
+        checkArgNotEmpty(c, "The spcified collection can not be null or empty");
 
         return max(c, fromIndex, toIndex, (Comparator<T>) NULL_MIN_COMPARATOR);
     }
@@ -15271,7 +15271,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     @SafeVarargs
     public static char median(final char... a) throws IllegalArgumentException {
-        checkArgNotNullOrEmpty(a, "The spcified array can not be null or empty");
+        checkArgNotEmpty(a, "The spcified array can not be null or empty");
 
         return median(a, 0, a.length);
     }
@@ -15314,7 +15314,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     @SafeVarargs
     public static byte median(final byte... a) throws IllegalArgumentException {
-        checkArgNotNullOrEmpty(a, "The spcified array can not be null or empty");
+        checkArgNotEmpty(a, "The spcified array can not be null or empty");
 
         return median(a, 0, a.length);
     }
@@ -15357,7 +15357,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     @SafeVarargs
     public static short median(final short... a) throws IllegalArgumentException {
-        checkArgNotNullOrEmpty(a, "The spcified array can not be null or empty");
+        checkArgNotEmpty(a, "The spcified array can not be null or empty");
 
         return median(a, 0, a.length);
     }
@@ -15400,7 +15400,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     @SafeVarargs
     public static int median(final int... a) throws IllegalArgumentException {
-        checkArgNotNullOrEmpty(a, "The spcified array can not be null or empty");
+        checkArgNotEmpty(a, "The spcified array can not be null or empty");
 
         return median(a, 0, a.length);
     }
@@ -15443,7 +15443,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     @SafeVarargs
     public static long median(final long... a) throws IllegalArgumentException {
-        checkArgNotNullOrEmpty(a, "The spcified array can not be null or empty");
+        checkArgNotEmpty(a, "The spcified array can not be null or empty");
 
         return median(a, 0, a.length);
     }
@@ -15486,7 +15486,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     @SafeVarargs
     public static float median(final float... a) throws IllegalArgumentException {
-        checkArgNotNullOrEmpty(a, "The spcified array can not be null or empty");
+        checkArgNotEmpty(a, "The spcified array can not be null or empty");
 
         return median(a, 0, a.length);
     }
@@ -15529,7 +15529,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     @SafeVarargs
     public static double median(final double... a) throws IllegalArgumentException {
-        checkArgNotNullOrEmpty(a, "The spcified array can not be null or empty");
+        checkArgNotEmpty(a, "The spcified array can not be null or empty");
 
         return median(a, 0, a.length);
     }
@@ -15572,7 +15572,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #median(int...)
      */
     public static <T extends Comparable<? super T>> T median(final T[] a) throws IllegalArgumentException {
-        checkArgNotNullOrEmpty(a, "The spcified array can not be null or empty");
+        checkArgNotEmpty(a, "The spcified array can not be null or empty");
 
         return median(a, 0, a.length);
     }
@@ -15605,7 +15605,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #median(int...)
      */
     public static <T> T median(final T[] a, Comparator<? super T> cmp) throws IllegalArgumentException {
-        checkArgNotNullOrEmpty(a, "The spcified array can not be null or empty");
+        checkArgNotEmpty(a, "The spcified array can not be null or empty");
 
         return median(a, 0, a.length, cmp);
     }
@@ -15644,7 +15644,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #median(int...)
      */
     public static <T extends Comparable<? super T>> T median(final Collection<? extends T> c) throws IllegalArgumentException {
-        checkArgNotNullOrEmpty(c, "The spcified collection can not be null or empty");
+        checkArgNotEmpty(c, "The spcified collection can not be null or empty");
 
         return median(c, 0, c.size());
     }
@@ -15674,7 +15674,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #median(int...)
      */
     public static <T> T median(final Collection<? extends T> c, Comparator<? super T> cmp) throws IllegalArgumentException {
-        checkArgNotNullOrEmpty(c, "The spcified collection can not be null or empty");
+        checkArgNotEmpty(c, "The spcified collection can not be null or empty");
 
         return median(c, 0, c.size(), cmp);
     }
@@ -15712,7 +15712,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or its length/size is less than {@code k}, or {@code toIndex - fromIndex < k}.
      */
     public static char kthLargest(final char[] a, final int k) throws IllegalArgumentException {
-        checkArgNotNullOrEmpty(a, "The spcified array can not be null or empty");
+        checkArgNotEmpty(a, "The spcified array can not be null or empty");
 
         return kthLargest(a, 0, a.length, k);
     }
@@ -15785,7 +15785,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or its length/size is less than {@code k}, or {@code toIndex - fromIndex < k}.
      */
     public static byte kthLargest(final byte[] a, final int k) throws IllegalArgumentException {
-        checkArgNotNullOrEmpty(a, "The spcified array can not be null or empty");
+        checkArgNotEmpty(a, "The spcified array can not be null or empty");
 
         return kthLargest(a, 0, a.length, k);
     }
@@ -15858,7 +15858,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or its length/size is less than {@code k}, or {@code toIndex - fromIndex < k}.
      */
     public static short kthLargest(final short[] a, final int k) throws IllegalArgumentException {
-        checkArgNotNullOrEmpty(a, "The spcified array can not be null or empty");
+        checkArgNotEmpty(a, "The spcified array can not be null or empty");
 
         return kthLargest(a, 0, a.length, k);
     }
@@ -15931,7 +15931,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or its length/size is less than {@code k}, or {@code toIndex - fromIndex < k}.
      */
     public static int kthLargest(final int[] a, final int k) throws IllegalArgumentException {
-        checkArgNotNullOrEmpty(a, "The spcified array can not be null or empty");
+        checkArgNotEmpty(a, "The spcified array can not be null or empty");
 
         return kthLargest(a, 0, a.length, k);
     }
@@ -16004,7 +16004,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or its length/size is less than {@code k}, or {@code toIndex - fromIndex < k}.
      */
     public static long kthLargest(final long[] a, final int k) throws IllegalArgumentException {
-        checkArgNotNullOrEmpty(a, "The spcified array can not be null or empty");
+        checkArgNotEmpty(a, "The spcified array can not be null or empty");
 
         return kthLargest(a, 0, a.length, k);
     }
@@ -16077,7 +16077,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or its length/size is less than {@code k}, or {@code toIndex - fromIndex < k}.
      */
     public static float kthLargest(final float[] a, final int k) throws IllegalArgumentException {
-        checkArgNotNullOrEmpty(a, "The spcified array can not be null or empty");
+        checkArgNotEmpty(a, "The spcified array can not be null or empty");
 
         return kthLargest(a, 0, a.length, k);
     }
@@ -16150,7 +16150,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or its length/size is less than {@code k}, or {@code toIndex - fromIndex < k}.
      */
     public static double kthLargest(final double[] a, final int k) throws IllegalArgumentException {
-        checkArgNotNullOrEmpty(a, "The spcified array can not be null or empty");
+        checkArgNotEmpty(a, "The spcified array can not be null or empty");
 
         return kthLargest(a, 0, a.length, k);
     }
@@ -16224,7 +16224,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or its length/size is less than {@code k}, or {@code toIndex - fromIndex < k}.
      */
     public static <T extends Comparable<? super T>> T kthLargest(final T[] a, final int k) throws IllegalArgumentException {
-        checkArgNotNullOrEmpty(a, "The spcified array can not be null or empty");
+        checkArgNotEmpty(a, "The spcified array can not be null or empty");
 
         return kthLargest(a, 0, a.length, k);
     }
@@ -16258,7 +16258,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or its length/size is less than {@code k}, or {@code toIndex - fromIndex < k}.
      */
     public static <T> T kthLargest(final T[] a, final int k, final Comparator<? super T> cmp) throws IllegalArgumentException {
-        checkArgNotNullOrEmpty(a, "The spcified array can not be null or empty");
+        checkArgNotEmpty(a, "The spcified array can not be null or empty");
 
         return kthLargest(a, 0, a.length, k, cmp);
     }
@@ -16336,7 +16336,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or its length/size is less than {@code k}, or {@code toIndex - fromIndex < k}.
      */
     public static <T extends Comparable<? super T>> T kthLargest(final Collection<? extends T> c, final int k) throws IllegalArgumentException {
-        checkArgNotNullOrEmpty(c, "The spcified collection can not be null or empty");
+        checkArgNotEmpty(c, "The spcified collection can not be null or empty");
 
         return kthLargest(c, 0, c.size(), k);
     }
@@ -16370,7 +16370,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or its length/size is less than {@code k}, or {@code toIndex - fromIndex < k}.
      */
     public static <T> T kthLargest(final Collection<? extends T> c, final int k, final Comparator<? super T> cmp) throws IllegalArgumentException {
-        checkArgNotNullOrEmpty(c, "The spcified collection can not be null or empty");
+        checkArgNotEmpty(c, "The spcified collection can not be null or empty");
 
         return kthLargest(c, 0, c.size(), k, cmp);
     }
@@ -17298,7 +17298,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException if the specified <code>sortedArray</code> is {@code null} or empty.
      */
     public static Map<Percentage, Character> percentiles(final char[] sortedArray) throws IllegalArgumentException {
-        checkArgNotNullOrEmpty(sortedArray, "The spcified 'sortedArray' can not be null or empty"); //NOSONAR
+        checkArgNotEmpty(sortedArray, "The spcified 'sortedArray' can not be null or empty"); //NOSONAR
 
         final int len = sortedArray.length;
         final Map<Percentage, Character> m = newLinkedHashMap(Percentage.values().length);
@@ -17318,7 +17318,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException if the specified <code>sortedArray</code> is {@code null} or empty.
      */
     public static Map<Percentage, Byte> percentiles(final byte[] sortedArray) throws IllegalArgumentException {
-        checkArgNotNullOrEmpty(sortedArray, "The spcified 'sortedArray' can not be null or empty");
+        checkArgNotEmpty(sortedArray, "The spcified 'sortedArray' can not be null or empty");
 
         final int len = sortedArray.length;
         final Map<Percentage, Byte> m = newLinkedHashMap(Percentage.values().length);
@@ -17338,7 +17338,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException if the specified <code>sortedArray</code> is {@code null} or empty.
      */
     public static Map<Percentage, Short> percentiles(final short[] sortedArray) throws IllegalArgumentException {
-        checkArgNotNullOrEmpty(sortedArray, "The spcified 'sortedArray' can not be null or empty");
+        checkArgNotEmpty(sortedArray, "The spcified 'sortedArray' can not be null or empty");
 
         final int len = sortedArray.length;
         final Map<Percentage, Short> m = newLinkedHashMap(Percentage.values().length);
@@ -17358,7 +17358,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException if the specified <code>sortedArray</code> is {@code null} or empty.
      */
     public static Map<Percentage, Integer> percentiles(final int[] sortedArray) throws IllegalArgumentException {
-        checkArgNotNullOrEmpty(sortedArray, "The spcified 'sortedArray' can not be null or empty");
+        checkArgNotEmpty(sortedArray, "The spcified 'sortedArray' can not be null or empty");
 
         final int len = sortedArray.length;
         final Map<Percentage, Integer> m = newLinkedHashMap(Percentage.values().length);
@@ -17378,7 +17378,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException if the specified <code>sortedArray</code> is {@code null} or empty.
      */
     public static Map<Percentage, Long> percentiles(final long[] sortedArray) throws IllegalArgumentException {
-        checkArgNotNullOrEmpty(sortedArray, "The spcified 'sortedArray' can not be null or empty");
+        checkArgNotEmpty(sortedArray, "The spcified 'sortedArray' can not be null or empty");
 
         final int len = sortedArray.length;
         final Map<Percentage, Long> m = newLinkedHashMap(Percentage.values().length);
@@ -17398,7 +17398,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException if the specified <code>sortedArray</code> is {@code null} or empty.
      */
     public static Map<Percentage, Float> percentiles(final float[] sortedArray) throws IllegalArgumentException {
-        checkArgNotNullOrEmpty(sortedArray, "The spcified 'sortedArray' can not be null or empty");
+        checkArgNotEmpty(sortedArray, "The spcified 'sortedArray' can not be null or empty");
 
         final int len = sortedArray.length;
         final Map<Percentage, Float> m = newLinkedHashMap(Percentage.values().length);
@@ -17418,7 +17418,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException if the specified <code>sortedArray</code> is {@code null} or empty.
      */
     public static Map<Percentage, Double> percentiles(final double[] sortedArray) throws IllegalArgumentException {
-        checkArgNotNullOrEmpty(sortedArray, "The spcified 'sortedArray' can not be null or empty");
+        checkArgNotEmpty(sortedArray, "The spcified 'sortedArray' can not be null or empty");
 
         final int len = sortedArray.length;
         final Map<Percentage, Double> m = newLinkedHashMap(Percentage.values().length);
@@ -17439,7 +17439,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException if the specified <code>sortedArray</code> is {@code null} or empty.
      */
     public static <T> Map<Percentage, T> percentiles(final T[] sortedArray) throws IllegalArgumentException {
-        checkArgNotNullOrEmpty(sortedArray, "The spcified 'sortedArray' can not be null or empty");
+        checkArgNotEmpty(sortedArray, "The spcified 'sortedArray' can not be null or empty");
 
         final int len = sortedArray.length;
         final Map<Percentage, T> m = newLinkedHashMap(Percentage.values().length);
@@ -17460,7 +17460,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException if the specified <code>sortedList</code> is {@code null} or empty.
      */
     public static <T> Map<Percentage, T> percentiles(final List<T> sortedList) throws IllegalArgumentException {
-        checkArgNotNullOrEmpty(sortedList, "The spcified 'sortedList' can not be null or empty");
+        checkArgNotEmpty(sortedList, "The spcified 'sortedList' can not be null or empty");
 
         final int size = sortedList.size();
         final Map<Percentage, T> m = newLinkedHashMap(Percentage.values().length);
@@ -18948,7 +18948,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws E the e
      */
     public static <T, E extends Exception> void forEachPair(final T[] a, final Throwables.BiConsumer<? super T, ? super T, E> action) throws E {
-        forEachPair(a, action, 1);
+        forEachPair(a, 1, action);
     }
 
     /**
@@ -18957,11 +18957,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T>
      * @param <E>
      * @param a
-     * @param action
      * @param increment
+     * @param action
      * @throws E the e
      */
-    public static <T, E extends Exception> void forEachPair(final T[] a, final Throwables.BiConsumer<? super T, ? super T, E> action, final int increment)
+    public static <T, E extends Exception> void forEachPair(final T[] a, final int increment, final Throwables.BiConsumer<? super T, ? super T, E> action)
             throws E {
         checkArgNotNull(action);
         final int windowSize = 2;
@@ -18972,7 +18972,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         }
 
         final Iterator<? extends T> iter = ObjIterator.of(a);
-        forEachPair(iter, action, increment);
+        forEachPair(iter, increment, action);
     }
 
     /**
@@ -18986,7 +18986,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static <T, E extends Exception> void forEachPair(final Iterable<? extends T> c, final Throwables.BiConsumer<? super T, ? super T, E> action)
             throws E {
-        forEachPair(c, action, 1);
+        forEachPair(c, 1, action);
     }
 
     /**
@@ -18995,12 +18995,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T>
      * @param <E>
      * @param c
-     * @param action
      * @param increment
+     * @param action
      * @throws E the e
      */
-    public static <T, E extends Exception> void forEachPair(final Iterable<? extends T> c, final Throwables.BiConsumer<? super T, ? super T, E> action,
-            final int increment) throws E {
+    public static <T, E extends Exception> void forEachPair(final Iterable<? extends T> c, final int increment,
+            final Throwables.BiConsumer<? super T, ? super T, E> action) throws E {
         checkArgNotNull(action);
         final int windowSize = 2;
         checkArgument(windowSize > 0 && increment > 0, "windowSize=%s and increment=%s must be bigger than 0", windowSize, increment);
@@ -19010,7 +19010,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         }
 
         final Iterator<? extends T> iter = c.iterator();
-        forEachPair(iter, action, increment);
+        forEachPair(iter, increment, action);
     }
 
     /**
@@ -19024,7 +19024,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static <T, E extends Exception> void forEachPair(final Iterator<? extends T> iter, final Throwables.BiConsumer<? super T, ? super T, E> action)
             throws E {
-        forEachPair(iter, action, 1);
+        forEachPair(iter, 1, action);
     }
 
     /**
@@ -19033,12 +19033,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T>
      * @param <E>
      * @param iter
-     * @param action
      * @param increment
+     * @param action
      * @throws E the e
      */
-    public static <T, E extends Exception> void forEachPair(final Iterator<? extends T> iter, final Throwables.BiConsumer<? super T, ? super T, E> action,
-            final int increment) throws E {
+    public static <T, E extends Exception> void forEachPair(final Iterator<? extends T> iter, final int increment,
+            final Throwables.BiConsumer<? super T, ? super T, E> action) throws E {
         checkArgNotNull(action);
         final int windowSize = 2;
         checkArgument(windowSize > 0 && increment > 0, "windowSize=%s and increment=%s must be bigger than 0", windowSize, increment);
@@ -19083,7 +19083,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws E the e
      */
     public static <T, E extends Exception> void forEachTriple(final T[] a, final Throwables.TriConsumer<? super T, ? super T, ? super T, E> action) throws E {
-        forEachTriple(a, action, 1);
+        forEachTriple(a, 1, action);
     }
 
     /**
@@ -19092,12 +19092,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T>
      * @param <E>
      * @param a
-     * @param action
      * @param increment
+     * @param action
      * @throws E the e
      */
-    public static <T, E extends Exception> void forEachTriple(final T[] a, final Throwables.TriConsumer<? super T, ? super T, ? super T, E> action,
-            final int increment) throws E {
+    public static <T, E extends Exception> void forEachTriple(final T[] a, final int increment,
+            final Throwables.TriConsumer<? super T, ? super T, ? super T, E> action) throws E {
         checkArgNotNull(action);
         final int windowSize = 3;
         checkArgument(windowSize > 0 && increment > 0, "windowSize=%s and increment=%s must be bigger than 0", windowSize, increment);
@@ -19107,7 +19107,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         }
 
         final Iterator<? extends T> iter = ObjIterator.of(a);
-        forEachTriple(iter, action, increment);
+        forEachTriple(iter, increment, action);
     }
 
     /**
@@ -19121,7 +19121,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static <T, E extends Exception> void forEachTriple(final Iterable<? extends T> c,
             final Throwables.TriConsumer<? super T, ? super T, ? super T, E> action) throws E {
-        forEachTriple(c, action, 1);
+        forEachTriple(c, 1, action);
     }
 
     /**
@@ -19130,12 +19130,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T>
      * @param <E>
      * @param c
-     * @param action
      * @param increment
+     * @param action
      * @throws E the e
      */
-    public static <T, E extends Exception> void forEachTriple(final Iterable<? extends T> c,
-            final Throwables.TriConsumer<? super T, ? super T, ? super T, E> action, final int increment) throws E {
+    public static <T, E extends Exception> void forEachTriple(final Iterable<? extends T> c, final int increment,
+            final Throwables.TriConsumer<? super T, ? super T, ? super T, E> action) throws E {
         checkArgNotNull(action);
         final int windowSize = 3;
         checkArgument(windowSize > 0 && increment > 0, "windowSize=%s and increment=%s must be bigger than 0", windowSize, increment);
@@ -19145,7 +19145,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         }
 
         final Iterator<? extends T> iter = c.iterator();
-        forEachTriple(iter, action, increment);
+        forEachTriple(iter, increment, action);
     }
 
     /**
@@ -19159,7 +19159,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static <T, E extends Exception> void forEachTriple(final Iterator<? extends T> iter,
             final Throwables.TriConsumer<? super T, ? super T, ? super T, E> action) throws E {
-        forEachTriple(iter, action, 1);
+        forEachTriple(iter, 1, action);
     }
 
     /**
@@ -19168,12 +19168,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T>
      * @param <E>
      * @param iter
-     * @param action
      * @param increment
+     * @param action
      * @throws E the e
      */
-    public static <T, E extends Exception> void forEachTriple(final Iterator<? extends T> iter,
-            final Throwables.TriConsumer<? super T, ? super T, ? super T, E> action, final int increment) throws E {
+    public static <T, E extends Exception> void forEachTriple(final Iterator<? extends T> iter, final int increment,
+            final Throwables.TriConsumer<? super T, ? super T, ? super T, E> action) throws E {
         checkArgNotNull(action);
         final int windowSize = 3;
         checkArgument(windowSize > 0 && increment > 0, "windowSize=%s and increment=%s must be bigger than 0", windowSize, increment);
@@ -19234,12 +19234,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param <E>
      * @param a
-     * @param filter
      * @param max
+     * @param filter
      * @return
      * @throws E the e
      */
-    public static <E extends Exception> boolean[] filter(final boolean[] a, final Throwables.BooleanPredicate<E> filter, final int max) throws E {
+    public static <E extends Exception> boolean[] filter(final boolean[] a, final int max, final Throwables.BooleanPredicate<E> filter) throws E {
         checkArgNotNull(filter, "filter");
 
         if (isEmpty(a)) {

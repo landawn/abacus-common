@@ -71,7 +71,7 @@ import com.landawn.abacus.util.Numbers;
 import com.landawn.abacus.util.ObjectPool;
 import com.landawn.abacus.util.Splitter;
 import com.landawn.abacus.util.Strings;
-import com.landawn.abacus.util.Strings.MoreStringUtil;
+import com.landawn.abacus.util.Strings.StrUtil;
 import com.landawn.abacus.util.Tuple.Tuple3;
 import com.landawn.abacus.util.WD;
 import com.landawn.abacus.util.u.Optional;
@@ -676,13 +676,13 @@ public final class ParserUtil {
 
             if (cls.isAnnotationPresent(Id.class)) {
                 String[] values = cls.getAnnotation(Id.class).value();
-                N.checkArgNotNullOrEmpty(values, "values for annotation @Id on Type/Class can't be null or empty");
+                N.checkArgNotEmpty(values, "values for annotation @Id on Type/Class can't be null or empty");
                 idPropNames.addAll(Arrays.asList(values));
             }
 
             if (cls.isAnnotationPresent(ReadOnlyId.class)) {
                 String[] values = cls.getAnnotation(ReadOnlyId.class).value();
-                N.checkArgNotNullOrEmpty(values, "values for annotation @ReadOnlyId on Type/Class can't be null or empty");
+                N.checkArgNotEmpty(values, "values for annotation @ReadOnlyId on Type/Class can't be null or empty");
                 idPropNames.addAll(Arrays.asList(values));
                 readOnlyIdPropNames.addAll(Arrays.asList(values));
             }
@@ -2187,7 +2187,7 @@ public final class ParserUtil {
         private String getTypeName(final com.landawn.abacus.annotation.Type typeAnno, final Class<?> propClass) {
             @SuppressWarnings("deprecation")
 
-            final Optional<String> typeName = MoreStringUtil.firstNonEmpty(typeAnno.value(), typeAnno.name());
+            final Optional<String> typeName = StrUtil.firstNonEmpty(typeAnno.value(), typeAnno.name());
 
             if (typeName.isPresent() && !typeName.get().equals(Strings.strip(typeName.get()))) {
                 throw new IllegalArgumentException("Type name: \"" + typeName.get() + "\" must not start or end with any whitespace for field: " + field);

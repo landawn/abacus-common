@@ -158,7 +158,7 @@ public final class Splitter {
      * @throws IllegalArgumentException if the specified {@code delimiter} is null or empty.
      */
     public static Splitter with(final CharSequence delimiter) throws IllegalArgumentException {
-        N.checkArgNotNullOrEmpty(delimiter, "delimiter");
+        N.checkArgNotEmpty(delimiter, "delimiter");
 
         if (Strings.isEmpty(delimiter)) {
             return with(WHITE_SPACE_PATTERN);
@@ -331,7 +331,7 @@ public final class Splitter {
      * @throws IllegalArgumentException if the specified {@code delimiter} is null or empty, or empty string may be matched by it.
      */
     public static Splitter pattern(CharSequence delimiterRegex) throws IllegalArgumentException {
-        N.checkArgNotNullOrEmpty(delimiterRegex, "delimiterRegex");
+        N.checkArgNotEmpty(delimiterRegex, "delimiterRegex");
 
         return with(Pattern.compile(delimiterRegex.toString()));
     }
@@ -684,7 +684,7 @@ public final class Splitter {
      * @return
      */
     public String[] splitToArray(final String[] output, final CharSequence source) {
-        N.checkArgNotNullOrEmpty(output, "output");
+        N.checkArgNotEmpty(output, "output");
 
         final ObjIterator<String> iter = iterate(source);
 

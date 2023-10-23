@@ -5481,8 +5481,8 @@ public class RowDataSet implements DataSet, Cloneable {
      */
     @Override
     public DataSet groupBy(Collection<String> columnNames, String aggregateResultColumnName, Collection<String> aggregateOnColumnNames, Class<?> rowClass) {
-        N.checkArgNotNullOrEmpty(columnNames, "columnNames");
-        N.checkArgNotNullOrEmpty(aggregateOnColumnNames, "aggregateOnColumnNames");
+        N.checkArgNotEmpty(columnNames, "columnNames");
+        N.checkArgNotEmpty(aggregateOnColumnNames, "aggregateOnColumnNames");
 
         if (columnNames.size() == 1) {
             return groupBy(columnNames.iterator().next(), aggregateResultColumnName, aggregateOnColumnNames, rowClass);
@@ -5595,7 +5595,7 @@ public class RowDataSet implements DataSet, Cloneable {
     @Override
     public <E extends Exception> DataSet groupBy(final Collection<String> columnNames, final Throwables.Function<? super DisposableObjArray, ?, E> keyMapper)
             throws E {
-        N.checkArgNotNullOrEmpty(columnNames, "columnNames");
+        N.checkArgNotEmpty(columnNames, "columnNames");
 
         final boolean isNullOrIdentityKeyMapper = keyMapper == null || keyMapper == Fn.identity();
 
@@ -5674,7 +5674,7 @@ public class RowDataSet implements DataSet, Cloneable {
     @Override
     public <T, E extends Exception> DataSet groupBy(Collection<String> columnNames, final Throwables.Function<? super DisposableObjArray, ?, E> keyMapper,
             String aggregateResultColumnName, String aggregateOnColumnName, final Collector<T, ?, ?> collector) throws E {
-        N.checkArgNotNullOrEmpty(columnNames, "columnNames");
+        N.checkArgNotEmpty(columnNames, "columnNames");
 
         if (N.notEmpty(columnNames) && columnNames.contains(aggregateResultColumnName)) {
             throw new IllegalArgumentException("Duplicated Property name: " + aggregateResultColumnName);
@@ -5804,8 +5804,8 @@ public class RowDataSet implements DataSet, Cloneable {
     @Override
     public <E extends Exception> DataSet groupBy(Collection<String> columnNames, Throwables.Function<? super DisposableObjArray, ?, E> keyMapper,
             String aggregateResultColumnName, Collection<String> aggregateOnColumnNames, Class<?> rowClass) throws E {
-        N.checkArgNotNullOrEmpty(columnNames, "columnNames");
-        N.checkArgNotNullOrEmpty(aggregateOnColumnNames, "aggregateOnColumnNames");
+        N.checkArgNotEmpty(columnNames, "columnNames");
+        N.checkArgNotEmpty(aggregateOnColumnNames, "aggregateOnColumnNames");
 
         final boolean isNullOrIdentityKeyMapper = keyMapper == null || keyMapper == Fn.identity();
 
@@ -5911,7 +5911,7 @@ public class RowDataSet implements DataSet, Cloneable {
     public <T, E extends Exception, E2 extends Exception> DataSet groupBy(Collection<String> columnNames,
             Throwables.Function<? super DisposableObjArray, ?, E> keyMapper, String aggregateResultColumnName, Collection<String> aggregateOnColumnNames,
             final Throwables.Function<? super DisposableObjArray, T, E2> rowMapper, final Collector<? super T, ?, ?> collector) throws E, E2 {
-        N.checkArgNotNullOrEmpty(columnNames, "columnNames");
+        N.checkArgNotEmpty(columnNames, "columnNames");
 
         if (N.notEmpty(columnNames) && columnNames.contains(aggregateResultColumnName)) {
             throw new IllegalArgumentException("Duplicated Property name: " + aggregateResultColumnName);

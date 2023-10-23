@@ -588,7 +588,7 @@ public abstract class Strings {
      * @param <T> the specific kind of CharSequence
      * @param css the values to test, may be {@code null} or empty
      * @return the first value from {@code css} which is not empty, or {@code null} if there is no non-empty value.
-     * @see MoreStringUtil#firstNonEmpty(CharSequence...)
+     * @see StrUtil#firstNonEmpty(CharSequence...)
      * @since 3.8
      */
     @SafeVarargs
@@ -611,7 +611,7 @@ public abstract class Strings {
      * @param <T>
      * @param css
      * @return the first value from {@code css} which is not empty, or {@code null} if there is no non-empty value.
-     * @see MoreStringUtil#firstNonEmpty(CharSequence...)
+     * @see StrUtil#firstNonEmpty(CharSequence...)
      */
     public static <T extends CharSequence> T firstNonEmpty(final Collection<? extends T> css) {
         if (N.isEmpty(css)) {
@@ -657,7 +657,7 @@ public abstract class Strings {
      * @param <T>
      * @param css
      * @return the first value from {@code css} which is not empty, or {@code null} if there is no non-blank value.
-     * @see MoreStringUtil#firstNonBlank(CharSequence...)
+     * @see StrUtil#firstNonBlank(CharSequence...)
      */
     @SafeVarargs
     public static <T extends CharSequence> T firstNonBlank(final T... css) {
@@ -679,7 +679,7 @@ public abstract class Strings {
      * @param <T>
      * @param css
      * @return the first value from {@code css} which is not empty, or {@code null} if there is no non-blank value.
-     * @see MoreStringUtil#firstNonEmpty(CharSequence...)
+     * @see StrUtil#firstNonEmpty(CharSequence...)
      */
     public static <T extends CharSequence> T firstNonBlank(final Collection<? extends T> css) {
         if (N.isEmpty(css)) {
@@ -696,13 +696,13 @@ public abstract class Strings {
     }
 
     /**
-     * Same as {@code N.defaultIfNullOrEmpty(CharSequence, CharSequence)}.
+     * Same as {@code N.defaultIfEmpty(CharSequence, CharSequence)}.
      *
      * @param <T>
      * @param str
      * @param defaultStr
      * @return
-     * @see Strings#defaultIfNullOrEmpty(CharSequence, CharSequence)
+     * @see Strings#defaultIfEmpty(CharSequence, CharSequence)
      */
     public static <T extends CharSequence> T defaultIfEmpty(final T str, final T defaultStr) {
         return isEmpty(str) ? defaultStr : str;
@@ -752,6 +752,7 @@ public abstract class Strings {
     }
 
     /**
+     * Converts the specified String to an empty String {@code ""} if it's {@code null}, otherwise just returns itself.
      *
      *
      * @param str
@@ -762,6 +763,7 @@ public abstract class Strings {
     }
 
     /**
+     * Converts each {@code null} String element in the specified String array to an empty String {@code ""}.
      *
      *
      * @param strs
@@ -1181,7 +1183,7 @@ public abstract class Strings {
      */
     public static String center(String str, final int minLength, String padStr) {
         N.checkArgNotNegative(minLength, "minLength");
-        // N.checkArgNotNullOrEmpty(padStr, "padStr");
+        // N.checkArgNotEmpty(padStr, "padStr");
 
         if (str == null) {
             str = EMPTY_STRING;
@@ -1497,6 +1499,16 @@ public abstract class Strings {
 
     /**
      * Returns the byte array returned by {@code String#getBytes(StandardCharsets.UTF_8)}, or {@code null} if the specified String is {@code null}.
+     *
+     * @param string
+     * @return
+     */
+    public static byte[] getBytes(final String string) {
+        return string == null ? null : string.getBytes(StandardCharsets.UTF_8);
+    }
+
+    /**
+     * Returns the byte array returned by {@code String#getBytes(Charset)}, or {@code null} if the specified String is {@code null}.
      *
      * @param string
      * @param charset
@@ -2153,8 +2165,7 @@ public abstract class Strings {
      * @param replacement the String to replace it with, may be null
      * @return
      *         String input
-     * @see #replaceAll(String text, String searchString, String replacement,
-     *      int max)
+     * @see #replaceAll(String text, String searchString, String replacement, int max)
      */
     public static String replaceAll(final String str, final String target, final String replacement) {
         return replaceAll(str, 0, target, replacement);
@@ -7459,37 +7470,111 @@ public abstract class Strings {
     }
 
     /**
-     * <code>findAllIndicesBetween("3[a2[c]]2[a]", '[', ']') = [[2, 7], [10, 11]]</code>.
+     * <code>substringsBetween("3[a2[c]]2[a]", '[', ']') = [a2[c], a]</code>.
      *
      * @param str
-     * @param prefix
-     * @param postfix
+     * @param delimiterOfExclusiveBeginIndex
+     * @param delimiterOfExclusiveEndIndex
      * @return
      */
-    public static List<IntPair> findAllIndicesBetween(final String str, final char prefix, final char postfix) {
-        return isEmpty(str) ? new ArrayList<>() : findAllIndicesBetween(str, 0, str.length(), prefix, postfix);
+    public static List<String> substringsBetween(final String str, final char delimiterOfExclusiveBeginIndex, final char delimiterOfExclusiveEndIndex) {
+        return isEmpty(str) ? new ArrayList<>() : substringsBetween(str, 0, str.length(), delimiterOfExclusiveBeginIndex, delimiterOfExclusiveEndIndex);
     }
 
     /**
-     * <code>findAllIndicesBetween("3[a2[c]]2[a]", '[', ']') = [[2, 7], [10, 11]]</code>.
+     * <code>substringsBetween("3[a2[c]]2[a]", '[', ']') = [a2[c], a]</code>.
      *
      * @param str
      * @param fromIndex
      * @param toIndex
-     * @param prefix
-     * @param postfix
+     * @param delimiterOfExclusiveBeginIndex
+     * @param delimiterOfExclusiveEndIndex
      * @return
      */
-    public static List<IntPair> findAllIndicesBetween(final String str, final int fromIndex, final int toIndex, final char prefix, final char postfix) {
-        N.checkFromToIndex(fromIndex, toIndex, N.len(str));
+    public static List<String> substringsBetween(final String str, final int fromIndex, final int toIndex, final char delimiterOfExclusiveBeginIndex,
+            final char delimiterOfExclusiveEndIndex) {
+        final List<int[]> substringIndices = substringIndicesBetween(str, fromIndex, toIndex, delimiterOfExclusiveBeginIndex, delimiterOfExclusiveEndIndex);
+        final List<String> res = new ArrayList<>(substringIndices.size());
 
-        final List<IntPair> res = new ArrayList<>();
-
-        if (str == null || str.length() == 0) {
-            return res;
+        for (int[] e : substringIndices) {
+            res.add(str.substring(e[0], e[1]));
         }
 
-        int idx = str.indexOf(prefix, fromIndex);
+        return res;
+    }
+
+    /**
+     * <code>substringsBetween("3[a2[c]]2[a]", '[', ']') = [a2[c], a]</code>.
+     *
+     * @param str
+     * @param delimiterOfExclusiveBeginIndex
+     * @param delimiterOfExclusiveEndIndex
+     * @return
+     */
+    public static List<String> substringsBetween(final String str, final String delimiterOfExclusiveBeginIndex, final String delimiterOfExclusiveEndIndex) {
+        return isEmpty(str) ? new ArrayList<>() : substringsBetween(str, 0, str.length(), delimiterOfExclusiveBeginIndex, delimiterOfExclusiveEndIndex);
+    }
+
+    /**
+     * <code>substringsBetween("3[a2[c]]2[a]", '[', ']') = [a2[c], a]</code>.
+     *
+     * @param str
+     * @param fromIndex
+     * @param toIndex
+     * @param delimiterOfExclusiveBeginIndex
+     * @param delimiterOfExclusiveEndIndex
+     * @return
+     */
+    public static List<String> substringsBetween(final String str, final int fromIndex, final int toIndex, final String delimiterOfExclusiveBeginIndex,
+            final String delimiterOfExclusiveEndIndex) {
+        final List<int[]> substringIndices = substringIndicesBetween(str, fromIndex, toIndex, delimiterOfExclusiveBeginIndex, delimiterOfExclusiveEndIndex);
+
+        final List<String> res = new ArrayList<>(substringIndices.size());
+
+        for (int[] e : substringIndices) {
+            res.add(str.substring(e[0], e[1]));
+        }
+
+        return res;
+    }
+
+    /**
+     * <code>substringIndicesBetween("3[a2[c]]2[a]", '[', ']') = [[2, 7], [10, 11]]</code>.
+     *
+     * @param str
+     * @param delimiterOfExclusiveBeginIndex
+     * @param delimiterOfExclusiveEndIndex
+     * @return
+     */
+    public static List<int[]> substringIndicesBetween(final String str, final char delimiterOfExclusiveBeginIndex, final char delimiterOfExclusiveEndIndex) {
+        if (str == null || str.length() == 0) {
+            return new ArrayList<>(0);
+        }
+
+        return substringIndicesBetween(str, 0, str.length(), delimiterOfExclusiveBeginIndex, delimiterOfExclusiveEndIndex);
+    }
+
+    /**
+     * <code>substringIndicesBetween("3[a2[c]]2[a]", '[', ']') = [[2, 7], [10, 11]]</code>.
+     *
+     * @param str
+     * @param fromIndex
+     * @param toIndex
+     * @param delimiterOfExclusiveBeginIndex
+     * @param delimiterOfExclusiveEndIndex
+     * @return
+     */
+    public static List<int[]> substringIndicesBetween(final String str, final int fromIndex, final int toIndex, final char delimiterOfExclusiveBeginIndex,
+            final char delimiterOfExclusiveEndIndex) {
+        N.checkFromToIndex(fromIndex, toIndex, N.len(str));
+
+        if (str == null || str.length() == 0) {
+            return new ArrayList<>(0);
+        }
+
+        final List<int[]> res = new ArrayList<>();
+
+        int idx = str.indexOf(delimiterOfExclusiveBeginIndex, fromIndex);
 
         if (idx < 0) {
             return res;
@@ -7501,18 +7586,18 @@ public abstract class Strings {
         for (int i = idx; i < toIndex; i++) {
             ch = str.charAt(i);
 
-            if (ch == prefix) {
+            if (ch == delimiterOfExclusiveBeginIndex) {
                 queue.push(i + 1);
-            } else if (ch == postfix && queue.size() > 0) {
+            } else if (ch == delimiterOfExclusiveEndIndex && queue.size() > 0) {
                 final int startIndex = queue.pop();
 
-                if (res.size() > 0 && startIndex < res.get(res.size() - 1)._1) {
-                    while (res.size() > 0 && startIndex < res.get(res.size() - 1)._1) {
+                if (res.size() > 0 && startIndex < res.get(res.size() - 1)[0]) {
+                    while (res.size() > 0 && startIndex < res.get(res.size() - 1)[0]) {
                         res.remove(res.size() - 1);//NOSONAR
                     }
                 }
 
-                res.add(IntPair.of(startIndex, i));
+                res.add(new int[] { startIndex, i });
             }
         }
 
@@ -7520,69 +7605,75 @@ public abstract class Strings {
     }
 
     /**
-     * <code>findAllIndicesBetween("3[a2[c]]2[a]", '[', ']') = [[2, 7], [10, 11]]</code>.
+     * <code>substringIndicesBetween("3[a2[c]]2[a]", '[', ']') = [[2, 7], [10, 11]]</code>.
      *
      * @param str
-     * @param prefix
-     * @param postfix
+     * @param delimiterOfExclusiveBeginIndex
+     * @param delimiterOfExclusiveEndIndex
      * @return
      */
-    public static List<IntPair> findAllIndicesBetween(final String str, final String prefix, final String postfix) {
-        return isEmpty(str) ? new ArrayList<>() : findAllIndicesBetween(str, 0, str.length(), prefix, postfix);
+    public static List<int[]> substringIndicesBetween(final String str, final String delimiterOfExclusiveBeginIndex,
+            final String delimiterOfExclusiveEndIndex) {
+        if (str == null || isEmpty(delimiterOfExclusiveBeginIndex) || isEmpty(delimiterOfExclusiveEndIndex)) {
+            return new ArrayList<>(0);
+        }
+
+        return substringIndicesBetween(str, 0, str.length(), delimiterOfExclusiveBeginIndex, delimiterOfExclusiveEndIndex);
     }
 
     /**
-     * <code>findAllIndicesBetween("3[a2[c]]2[a]", '[', ']') = [[2, 7], [10, 11]]</code>.
+     * <code>substringIndicesBetween("3[a2[c]]2[a]", '[', ']') = [[2, 7], [10, 11]]</code>.
      *
      * @param str
      * @param fromIndex
      * @param toIndex
-     * @param prefix
-     * @param postfix
+     * @param delimiterOfExclusiveBeginIndex
+     * @param delimiterOfExclusiveEndIndex
      * @return
      */
-    public static List<IntPair> findAllIndicesBetween(final String str, final int fromIndex, final int toIndex, final String prefix, final String postfix) {
+    public static List<int[]> substringIndicesBetween(final String str, final int fromIndex, final int toIndex, final String delimiterOfExclusiveBeginIndex,
+            final String delimiterOfExclusiveEndIndex) {
         N.checkFromToIndex(fromIndex, toIndex, N.len(str));
 
-        final List<IntPair> res = new ArrayList<>();
-
-        if (str == null || str.length() == 0) {
-            return res;
+        if (str == null || isEmpty(delimiterOfExclusiveBeginIndex) || isEmpty(delimiterOfExclusiveEndIndex)) {
+            return new ArrayList<>(0);
         }
 
-        int idx = str.indexOf(prefix, fromIndex);
+        final List<int[]> res = new ArrayList<>();
+
+        int idx = str.indexOf(delimiterOfExclusiveBeginIndex, fromIndex);
 
         if (idx < 0) {
             return res;
         }
 
         final Deque<Integer> queue = new LinkedList<>();
-        queue.add(idx + prefix.length());
+        queue.add(idx + delimiterOfExclusiveBeginIndex.length());
         int next = -1;
 
-        for (int i = idx + prefix.length(), len = toIndex; i < len;) {
+        for (int i = idx + delimiterOfExclusiveBeginIndex.length(), len = toIndex; i < len;) {
             if (queue.size() == 0) {
-                idx = next >= i ? next : str.indexOf(prefix, i);
+                idx = next >= i ? next : str.indexOf(delimiterOfExclusiveBeginIndex, i);
 
                 if (idx < 0) {
                     break;
                 } else {
-                    queue.add(idx + prefix.length());
-                    i = idx + prefix.length();
+                    queue.add(idx + delimiterOfExclusiveBeginIndex.length());
+                    i = idx + delimiterOfExclusiveBeginIndex.length();
                 }
             }
 
-            idx = str.indexOf(postfix, i);
+            idx = str.indexOf(delimiterOfExclusiveEndIndex, i);
 
             if (idx < 0) {
                 break;
             } else {
                 final int endIndex = idx;
-                idx = res.size() > 0 ? Math.max(res.get(res.size() - 1)._2 + postfix.length(), queue.peekLast()) : queue.peekLast();
+                idx = res.size() > 0 ? Math.max(res.get(res.size() - 1)[1] + delimiterOfExclusiveEndIndex.length(), queue.peekLast()) : queue.peekLast();
 
-                while ((idx = str.indexOf(prefix, idx)) >= 0 && idx < endIndex) {
-                    queue.push(idx + prefix.length());
-                    idx = idx + prefix.length();
+                while ((idx = str.indexOf(delimiterOfExclusiveBeginIndex, idx)) >= 0 && idx < endIndex) {
+                    queue.push(idx + delimiterOfExclusiveBeginIndex.length());
+                    idx = idx + delimiterOfExclusiveBeginIndex.length();
                 }
 
                 if (idx > 0) {
@@ -7591,82 +7682,16 @@ public abstract class Strings {
 
                 final int startIndex = queue.pop();
 
-                if (res.size() > 0 && startIndex < res.get(res.size() - 1)._1) {
-                    while (res.size() > 0 && startIndex < res.get(res.size() - 1)._1) {
+                if (res.size() > 0 && startIndex < res.get(res.size() - 1)[0]) {
+                    while (res.size() > 0 && startIndex < res.get(res.size() - 1)[0]) {
                         res.remove(res.size() - 1);
                     }
                 }
 
-                res.add(IntPair.of(startIndex, endIndex));
+                res.add(new int[] { startIndex, endIndex });
 
-                i = endIndex + postfix.length();
+                i = endIndex + delimiterOfExclusiveEndIndex.length();
             }
-        }
-
-        return res;
-    }
-
-    /**
-     * <code>findAllSubstringsBetween("3[a2[c]]2[a]", '[', ']') = [a2[c], a]</code>.
-     *
-     * @param str
-     * @param prefix
-     * @param postfix
-     * @return
-     */
-    public static List<String> findAllSubstringsBetween(final String str, final char prefix, final char postfix) {
-        return isEmpty(str) ? new ArrayList<>() : findAllSubstringsBetween(str, 0, str.length(), prefix, postfix);
-    }
-
-    /**
-     * <code>findAllSubstringsBetween("3[a2[c]]2[a]", '[', ']') = [a2[c], a]</code>.
-     *
-     * @param str
-     * @param fromIndex
-     * @param toIndex
-     * @param prefix
-     * @param postfix
-     * @return
-     */
-    public static List<String> findAllSubstringsBetween(final String str, final int fromIndex, final int toIndex, final char prefix, final char postfix) {
-        final List<IntPair> points = findAllIndicesBetween(str, fromIndex, toIndex, prefix, postfix);
-        final List<String> res = new ArrayList<>(points.size());
-
-        for (IntPair p : points) {
-            res.add(str.substring(p._1, p._2));
-        }
-
-        return res;
-    }
-
-    /**
-     * <code>findAllSubstringsBetween("3[a2[c]]2[a]", '[', ']') = [a2[c], a]</code>.
-     *
-     * @param str
-     * @param prefix
-     * @param postfix
-     * @return
-     */
-    public static List<String> findAllSubstringsBetween(final String str, final String prefix, final String postfix) {
-        return isEmpty(str) ? new ArrayList<>() : findAllSubstringsBetween(str, 0, str.length(), prefix, postfix);
-    }
-
-    /**
-     * <code>findAllSubstringsBetween("3[a2[c]]2[a]", '[', ']') = [a2[c], a]</code>.
-     *
-     * @param str
-     * @param fromIndex
-     * @param toIndex
-     * @param prefix
-     * @param postfix
-     * @return
-     */
-    public static List<String> findAllSubstringsBetween(final String str, final int fromIndex, final int toIndex, final String prefix, final String postfix) {
-        final List<IntPair> points = findAllIndicesBetween(str, fromIndex, toIndex, prefix, postfix);
-        final List<String> res = new ArrayList<>(points.size());
-
-        for (IntPair p : points) {
-            res.add(str.substring(p._1, p._2));
         }
 
         return res;
@@ -11162,8 +11187,8 @@ public abstract class Strings {
         }
     }
 
-    public static final class MoreStringUtil {
-        private MoreStringUtil() {
+    public static final class StrUtil {
+        private StrUtil() {
             // Utility class.
         }
 

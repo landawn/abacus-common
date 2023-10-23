@@ -18,7 +18,7 @@ public class Maven {
         final String targetVersion = StreamEx.lines(new File("./pom.xml"))
                 .filter(line -> line.indexOf("<version>") > 0 && line.indexOf("</version>") > 0)
                 .first()
-                .map(line -> Strings.findAllSubstringsBetween(line, "<version>", "</version>").get(0))
+                .map(line -> Strings.substringsBetween(line, "<version>", "</version>").get(0))
                 .get();
 
         final String commonMavenPath = "./maven/";

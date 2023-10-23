@@ -815,6 +815,64 @@ class CommonUtil {
     }
 
     /**
+     * Same as {@code Strings.defaultIfEmpty(CharSequence, CharSequence)}.
+     *
+     * @param <T>
+     * @param str
+     * @param defaultStr
+     * @return
+     * @see Strings#defaultIfEmpty(CharSequence, CharSequence)
+     */
+    public static <T extends CharSequence> T defaultIfEmpty(final T str, final T defaultStr) {
+        return isEmpty(str) ? defaultStr : str;
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param str
+     * @param getterForDefaultStr
+     * @return
+     * @see Strings#defaultIfEmpty(CharSequence, Supplier)
+     */
+    public static <T extends CharSequence> T defaultIfEmpty(final T str, final Supplier<? extends T> getterForDefaultStr) {
+        if (isEmpty(str)) {
+            return getterForDefaultStr.get();
+        }
+
+        return str;
+    }
+
+    /**
+     * Same as {@code Strings.defaultIfBlank(CharSequence, CharSequence)}.
+     *
+     * @param <T>
+     * @param str
+     * @param defaultStr
+     * @return
+     * @see Strings#defaultIfBlank(CharSequence, CharSequence)
+     */
+    public static <T extends CharSequence> T defaultIfBlank(final T str, final T defaultStr) {
+        return isBlank(str) ? defaultStr : str;
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param str
+     * @param getterForDefaultStr
+     * @return
+     * @see Strings#defaultIfBlank(CharSequence, Supplier)
+     */
+    public static <T extends CharSequence> T defaultIfBlank(final T str, final Supplier<? extends T> getterForDefaultStr) {
+        if (isBlank(str)) {
+            return getterForDefaultStr.get();
+        }
+
+        return str;
+    }
+
+    /**
      *
      * @param val
      * @return
@@ -7567,6 +7625,94 @@ class CommonUtil {
 
     /**
      *
+     * @param <T>
+     * @param a
+     * @param b
+     * @return
+     */
+    public static <T extends CharSequence> Optional<T> firstNonEmpty(final T a, final T b) {
+        return Strings.isNotEmpty(a) ? Optional.of(a) : (Strings.isNotEmpty(b) ? Optional.of(b) : Optional.<T> empty());
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param a
+     * @param b
+     * @param c
+     * @return
+     */
+    public static <T extends CharSequence> Optional<T> firstNonEmpty(final T a, final T b, final T c) {
+        return Strings.isNotEmpty(a) ? Optional.of(a)
+                : (Strings.isNotEmpty(b) ? Optional.of(b) : (Strings.isNotEmpty(c) ? Optional.of(c) : Optional.<T> empty()));
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param a
+     * @return
+     */
+    public static <T extends CharSequence> Optional<T> firstNonEmpty(final T... a) {
+        if (N.isEmpty(a)) {
+            return Optional.empty();
+        }
+
+        for (T e : a) {
+            if (Strings.isNotEmpty(e)) {
+                return Optional.of(e);
+            }
+        }
+
+        return Optional.empty();
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param a
+     * @param b
+     * @return
+     */
+    public static <T extends CharSequence> Optional<T> firstNonBlank(final T a, final T b) {
+        return Strings.isNotBlank(a) ? Optional.of(a) : (Strings.isNotBlank(b) ? Optional.of(b) : Optional.<T> empty());
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param a
+     * @param b
+     * @param c
+     * @return
+     */
+    public static <T extends CharSequence> Optional<T> firstNonBlank(final T a, final T b, final T c) {
+        return Strings.isNotBlank(a) ? Optional.of(a)
+                : (Strings.isNotBlank(b) ? Optional.of(b) : (Strings.isNotBlank(c) ? Optional.of(c) : Optional.<T> empty()));
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param a
+     * @return
+     */
+    public static <T extends CharSequence> Optional<T> firstNonBlank(final T... a) {
+        if (N.isEmpty(a)) {
+            return Optional.empty();
+        }
+
+        for (T e : a) {
+            if (Strings.isNotBlank(e)) {
+                return Optional.of(e);
+            }
+        }
+
+        return Optional.empty();
+    }
+
+    /**
+     *
      * @param <K> the key type
      * @param <V> the value type
      * @param map
@@ -8417,6 +8563,24 @@ class CommonUtil {
         //    return a;
 
         return a == null ? EMPTY_STRING_ARRAY : a;
+    }
+
+    /**
+     * Converts the specified String array to an empty {@code String[0]} if it's {@code null} and each {@code null} element String to empty String {@code ""}.
+     *
+     * @param a
+     * @return
+     */
+    public static String[] nullToEmptyForEach(final String[] a) {
+        if (a == null) {
+            return EMPTY_STRING_ARRAY;
+        }
+
+        for (int i = 0, len = a.length; i < len; i++) {
+            a[i] = a[i] == null ? Strings.EMPTY_STRING : a[i];
+        }
+
+        return a;
     }
 
     /**
@@ -9578,7 +9742,7 @@ class CommonUtil {
      * @return
      * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
      */
-    public static <T extends CharSequence> T checkArgNotNullOrEmpty(final T arg, final String argNameOrErrorMsg) {
+    public static <T extends CharSequence> T checkArgNotEmpty(final T arg, final String argNameOrErrorMsg) {
         if (Strings.isEmpty(arg)) {
             throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
         }
@@ -9594,7 +9758,7 @@ class CommonUtil {
      * @return
      * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
      */
-    public static boolean[] checkArgNotNullOrEmpty(final boolean[] arg, final String argNameOrErrorMsg) {
+    public static boolean[] checkArgNotEmpty(final boolean[] arg, final String argNameOrErrorMsg) {
         if (isEmpty(arg)) {
             throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
         }
@@ -9610,7 +9774,7 @@ class CommonUtil {
      * @return
      * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
      */
-    public static char[] checkArgNotNullOrEmpty(final char[] arg, final String argNameOrErrorMsg) {
+    public static char[] checkArgNotEmpty(final char[] arg, final String argNameOrErrorMsg) {
         if (isEmpty(arg)) {
             throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
         }
@@ -9626,7 +9790,7 @@ class CommonUtil {
      * @return
      * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
      */
-    public static byte[] checkArgNotNullOrEmpty(final byte[] arg, final String argNameOrErrorMsg) {
+    public static byte[] checkArgNotEmpty(final byte[] arg, final String argNameOrErrorMsg) {
         if (isEmpty(arg)) {
             throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
         }
@@ -9642,7 +9806,7 @@ class CommonUtil {
      * @return
      * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
      */
-    public static short[] checkArgNotNullOrEmpty(final short[] arg, final String argNameOrErrorMsg) {
+    public static short[] checkArgNotEmpty(final short[] arg, final String argNameOrErrorMsg) {
         if (isEmpty(arg)) {
             throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
         }
@@ -9658,7 +9822,7 @@ class CommonUtil {
      * @return
      * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
      */
-    public static int[] checkArgNotNullOrEmpty(final int[] arg, final String argNameOrErrorMsg) {
+    public static int[] checkArgNotEmpty(final int[] arg, final String argNameOrErrorMsg) {
         if (isEmpty(arg)) {
             throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
         }
@@ -9674,7 +9838,7 @@ class CommonUtil {
      * @return
      * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
      */
-    public static long[] checkArgNotNullOrEmpty(final long[] arg, final String argNameOrErrorMsg) {
+    public static long[] checkArgNotEmpty(final long[] arg, final String argNameOrErrorMsg) {
         if (isEmpty(arg)) {
             throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
         }
@@ -9690,7 +9854,7 @@ class CommonUtil {
      * @return
      * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
      */
-    public static float[] checkArgNotNullOrEmpty(final float[] arg, final String argNameOrErrorMsg) {
+    public static float[] checkArgNotEmpty(final float[] arg, final String argNameOrErrorMsg) {
         if (isEmpty(arg)) {
             throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
         }
@@ -9706,24 +9870,7 @@ class CommonUtil {
      * @return
      * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
      */
-    public static double[] checkArgNotNullOrEmpty(final double[] arg, final String argNameOrErrorMsg) {
-        if (isEmpty(arg)) {
-            throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
-        }
-
-        return arg;
-    }
-
-    /**
-     * Checks if the specified {@code arg} is {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
-     *
-     * @param <T>
-     * @param arg
-     * @param argNameOrErrorMsg
-     * @return
-     * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
-     */
-    public static <T> T[] checkArgNotNullOrEmpty(final T[] arg, final String argNameOrErrorMsg) {
+    public static double[] checkArgNotEmpty(final double[] arg, final String argNameOrErrorMsg) {
         if (isEmpty(arg)) {
             throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
         }
@@ -9740,7 +9887,7 @@ class CommonUtil {
      * @return
      * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
      */
-    public static <T extends Collection<?>> T checkArgNotNullOrEmpty(final T arg, final String argNameOrErrorMsg) {
+    public static <T> T[] checkArgNotEmpty(final T[] arg, final String argNameOrErrorMsg) {
         if (isEmpty(arg)) {
             throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
         }
@@ -9757,8 +9904,7 @@ class CommonUtil {
      * @return
      * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
      */
-    @Beta
-    public static <T extends Iterable<?>> T checkArgNotNullOrEmpty(final T arg, final String argNameOrErrorMsg) {
+    public static <T extends Collection<?>> T checkArgNotEmpty(final T arg, final String argNameOrErrorMsg) {
         if (isEmpty(arg)) {
             throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
         }
@@ -9776,7 +9922,7 @@ class CommonUtil {
      * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
      */
     @Beta
-    public static <T extends Iterator<?>> T checkArgNotNullOrEmpty(final T arg, final String argNameOrErrorMsg) {
+    public static <T extends Iterable<?>> T checkArgNotEmpty(final T arg, final String argNameOrErrorMsg) {
         if (isEmpty(arg)) {
             throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
         }
@@ -9793,7 +9939,8 @@ class CommonUtil {
      * @return
      * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
      */
-    public static <T extends Map<?, ?>> T checkArgNotNullOrEmpty(final T arg, final String argNameOrErrorMsg) {
+    @Beta
+    public static <T extends Iterator<?>> T checkArgNotEmpty(final T arg, final String argNameOrErrorMsg) {
         if (isEmpty(arg)) {
             throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
         }
@@ -9810,7 +9957,7 @@ class CommonUtil {
      * @return
      * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
      */
-    public static <T extends PrimitiveList<?, ?, ?>> T checkArgNotNullOrEmpty(final T arg, final String argNameOrErrorMsg) {
+    public static <T extends Map<?, ?>> T checkArgNotEmpty(final T arg, final String argNameOrErrorMsg) {
         if (isEmpty(arg)) {
             throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
         }
@@ -9827,7 +9974,7 @@ class CommonUtil {
      * @return
      * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
      */
-    public static <T> Multiset<T> checkArgNotNullOrEmpty(final Multiset<T> arg, final String argNameOrErrorMsg) {
+    public static <T extends PrimitiveList<?, ?, ?>> T checkArgNotEmpty(final T arg, final String argNameOrErrorMsg) {
         if (isEmpty(arg)) {
             throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
         }
@@ -9844,7 +9991,7 @@ class CommonUtil {
      * @return
      * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
      */
-    public static <T> LongMultiset<T> checkArgNotNullOrEmpty(final LongMultiset<T> arg, final String argNameOrErrorMsg) {
+    public static <T> Multiset<T> checkArgNotEmpty(final Multiset<T> arg, final String argNameOrErrorMsg) {
         if (isEmpty(arg)) {
             throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
         }
@@ -9861,7 +10008,7 @@ class CommonUtil {
      * @return
      * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
      */
-    public static <T extends Multimap<?, ?, ?>> T checkArgNotNullOrEmpty(final T arg, final String argNameOrErrorMsg) {
+    public static <T> LongMultiset<T> checkArgNotEmpty(final LongMultiset<T> arg, final String argNameOrErrorMsg) {
         if (isEmpty(arg)) {
             throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
         }
@@ -9878,7 +10025,24 @@ class CommonUtil {
      * @return
      * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
      */
-    public static <T extends DataSet> T checkArgNotNullOrEmpty(final T arg, final String argNameOrErrorMsg) {
+    public static <T extends Multimap<?, ?, ?>> T checkArgNotEmpty(final T arg, final String argNameOrErrorMsg) {
+        if (isEmpty(arg)) {
+            throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
+        }
+
+        return arg;
+    }
+
+    /**
+     * Checks if the specified {@code arg} is {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
+     *
+     * @param <T>
+     * @param arg
+     * @param argNameOrErrorMsg
+     * @return
+     * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
+     */
+    public static <T extends DataSet> T checkArgNotEmpty(final T arg, final String argNameOrErrorMsg) {
         if (isEmpty(arg)) {
             throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
         }
