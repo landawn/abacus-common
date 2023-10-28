@@ -21,7 +21,7 @@ import java.io.Reader;
 import java.util.Collection;
 import java.util.Map;
 
-import com.landawn.abacus.util.ExceptionalStream;
+import com.landawn.abacus.util.CheckedStream;
 
 /**
  *
@@ -124,7 +124,7 @@ public interface JSONParser extends Parser<JSONSerializationConfig, JSONDeserial
      * @param source
      * @return
      */
-    <T> ExceptionalStream<T, IOException> stream(Class<? extends T> elementClass, String source);
+    <T> CheckedStream<T, IOException> stream(Class<? extends T> elementClass, String source);
 
     /**
      *
@@ -134,7 +134,7 @@ public interface JSONParser extends Parser<JSONSerializationConfig, JSONDeserial
      * @param config
      * @return
      */
-    <T> ExceptionalStream<T, IOException> stream(Class<? extends T> elementClass, String source, JSONDeserializationConfig config);
+    <T> CheckedStream<T, IOException> stream(Class<? extends T> elementClass, String source, JSONDeserializationConfig config);
 
     /**
      *
@@ -143,7 +143,7 @@ public interface JSONParser extends Parser<JSONSerializationConfig, JSONDeserial
      * @param source
      * @return
      */
-    <T> ExceptionalStream<T, IOException> stream(Class<? extends T> elementClass, File source);
+    <T> CheckedStream<T, IOException> stream(Class<? extends T> elementClass, File source);
 
     /**
      *
@@ -153,7 +153,7 @@ public interface JSONParser extends Parser<JSONSerializationConfig, JSONDeserial
      * @param config
      * @return
      */
-    <T> ExceptionalStream<T, IOException> stream(Class<? extends T> elementClass, File source, JSONDeserializationConfig config);
+    <T> CheckedStream<T, IOException> stream(Class<? extends T> elementClass, File source, JSONDeserializationConfig config);
 
     /**
      *
@@ -163,7 +163,7 @@ public interface JSONParser extends Parser<JSONSerializationConfig, JSONDeserial
      * @param closeInputStreamWhenStreamIsClosed
      * @return
      */
-    <T> ExceptionalStream<T, IOException> stream(Class<? extends T> elementClass, InputStream source, boolean closeInputStreamWhenStreamIsClosed);
+    <T> CheckedStream<T, IOException> stream(Class<? extends T> elementClass, InputStream source, boolean closeInputStreamWhenStreamIsClosed);
 
     /**
      *
@@ -174,7 +174,7 @@ public interface JSONParser extends Parser<JSONSerializationConfig, JSONDeserial
      * @param config
      * @return
      */
-    <T> ExceptionalStream<T, IOException> stream(Class<? extends T> elementClass, InputStream source, boolean closeInputStreamWhenStreamIsClosed,
+    <T> CheckedStream<T, IOException> stream(Class<? extends T> elementClass, InputStream source, boolean closeInputStreamWhenStreamIsClosed,
             JSONDeserializationConfig config);
 
     /**
@@ -185,7 +185,7 @@ public interface JSONParser extends Parser<JSONSerializationConfig, JSONDeserial
      * @param closeReaderWhenStreamIsClosed
      * @return
      */
-    <T> ExceptionalStream<T, IOException> stream(Class<? extends T> elementClass, Reader source, boolean closeReaderWhenStreamIsClosed);
+    <T> CheckedStream<T, IOException> stream(Class<? extends T> elementClass, Reader source, boolean closeReaderWhenStreamIsClosed);
 
     /**
      *
@@ -196,6 +196,6 @@ public interface JSONParser extends Parser<JSONSerializationConfig, JSONDeserial
      * @param config
      * @return
      */
-    <T> ExceptionalStream<T, IOException> stream(Class<? extends T> elementClass, Reader source, boolean closeReaderWhenStreamIsClosed,
+    <T> CheckedStream<T, IOException> stream(Class<? extends T> elementClass, Reader source, boolean closeReaderWhenStreamIsClosed,
             JSONDeserializationConfig config);
 }

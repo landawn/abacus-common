@@ -124,7 +124,7 @@ import com.landawn.abacus.util.function.ToFloatFunction;
  * @see com.landawn.abacus.util.IOUtil
  */
 @SuppressWarnings({ "java:S1192", "java:S6539" })
-class CommonUtil {
+sealed class CommonUtil permits N {
     // ... it has to be big enough to make it's safety to add element to
     // ArrayBlockingQueue.
     @SuppressWarnings("deprecation")
@@ -8348,6 +8348,7 @@ class CommonUtil {
      *
      * @param str
      * @return
+     * @see Strings#nullToEmpty(String)
      */
     @Beta
     public static String nullToEmpty(final String str) {
@@ -8550,6 +8551,8 @@ class CommonUtil {
      *
      * @param a
      * @return
+     * @see Strings#nullToEmpty(String)
+     * @see Strings#nullToEmpty(String[])
      */
     public static String[] nullToEmpty(final String[] a) {
         //    if (a == null) {
@@ -8570,8 +8573,11 @@ class CommonUtil {
      *
      * @param a
      * @return
+     * @see Strings#nullToEmpty(String)
+     * @see Strings#nullToEmpty(String[])
      */
-    public static String[] nullToEmptyForEach(final String[] a) {
+    @Beta
+    public static String[] nullToEmptyForEach(final String[] a) { // nullToEmptyForAll is better?
         if (a == null) {
             return EMPTY_STRING_ARRAY;
         }
@@ -8582,6 +8588,26 @@ class CommonUtil {
 
         return a;
     }
+
+    //    /**
+    //     * Converts the specified String array to an empty {@code String[0]} if it's {@code null} and each {@code null} element String to empty String {@code ""}.
+    //     *
+    //     * @param a
+    //     * @return
+    //     * @see Strings#nullToEmpty(String)
+    //     * @see Strings#nullToEmpty(String[])
+    //     */
+    //    static String[] nullToEmptyForAll(final String[] a) { // nullToEmptyForAll is better?
+    //        if (a == null) {
+    //            return EMPTY_STRING_ARRAY;
+    //        }
+    //
+    //        for (int i = 0, len = a.length; i < len; i++) {
+    //            a[i] = a[i] == null ? Strings.EMPTY_STRING : a[i];
+    //        }
+    //
+    //        return a;
+    //    }
 
     /**
      * Null to empty.

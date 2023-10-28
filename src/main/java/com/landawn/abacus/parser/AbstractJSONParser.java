@@ -23,7 +23,7 @@ import java.util.Map;
 
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.type.TypeFactory;
-import com.landawn.abacus.util.ExceptionalStream;
+import com.landawn.abacus.util.CheckedStream;
 import com.landawn.abacus.util.WD;
 
 /**
@@ -217,7 +217,7 @@ abstract class AbstractJSONParser extends AbstractParser<JSONSerializationConfig
      * @return
      */
     @Override
-    public <T> ExceptionalStream<T, IOException> stream(Class<? extends T> elementClass, String json) {
+    public <T> CheckedStream<T, IOException> stream(Class<? extends T> elementClass, String json) {
         return stream(elementClass, json, null);
     }
 
@@ -230,7 +230,7 @@ abstract class AbstractJSONParser extends AbstractParser<JSONSerializationConfig
      * @return
      */
     @Override
-    public <T> ExceptionalStream<T, IOException> stream(Class<? extends T> elementClass, File file) {
+    public <T> CheckedStream<T, IOException> stream(Class<? extends T> elementClass, File file) {
         return stream(elementClass, file, null);
     }
 
@@ -244,7 +244,7 @@ abstract class AbstractJSONParser extends AbstractParser<JSONSerializationConfig
      * @return
      */
     @Override
-    public <T> ExceptionalStream<T, IOException> stream(Class<? extends T> elementClass, InputStream is, boolean closeInputStreamWhenStreamIsClosed) {
+    public <T> CheckedStream<T, IOException> stream(Class<? extends T> elementClass, InputStream is, boolean closeInputStreamWhenStreamIsClosed) {
         return stream(elementClass, is, closeInputStreamWhenStreamIsClosed, null);
     }
 
@@ -258,7 +258,7 @@ abstract class AbstractJSONParser extends AbstractParser<JSONSerializationConfig
      * @return
      */
     @Override
-    public <T> ExceptionalStream<T, IOException> stream(Class<? extends T> elementClass, Reader reader, boolean closeReaderWhenStreamIsClosed) {
+    public <T> CheckedStream<T, IOException> stream(Class<? extends T> elementClass, Reader reader, boolean closeReaderWhenStreamIsClosed) {
         return stream(elementClass, reader, closeReaderWhenStreamIsClosed, null);
     }
 

@@ -110,7 +110,7 @@ import com.landawn.abacus.util.function.TriFunction;
  * @see {@code java.util.stream.Collectors}
  *
  */
-public abstract class Collectors {
+public abstract sealed class Collectors permits Collectors.MoreCollectors {
     static final Object NONE = new Object(); //NOSONAR
 
     /**
@@ -5238,7 +5238,7 @@ public abstract class Collectors {
         return MoreCollectors.combine(downstream1, downstream2, merger);
     }
 
-    public abstract static class MoreCollectors extends Collectors {
+    public static final class MoreCollectors extends Collectors {
         protected MoreCollectors() {
             // for extension.
         }

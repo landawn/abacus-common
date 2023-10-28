@@ -17636,7 +17636,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
                 action.accept(a[i]);
             }
         } else {
-            for (int i = min(a.length - 1, toIndex); i > toIndex; i--) {
+            for (int i = min(a.length - 1, fromIndex); i > toIndex; i--) {
                 action.accept(a[i]);
             }
         }
@@ -17721,7 +17721,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
                 }
             }
         } else {
-
             if (fromIndex <= toIndex) {
                 final Iterator<? extends T> iter = c.iterator();
                 int idx = 0;
@@ -17865,7 +17864,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
                 action.accept(i, a[i]);
             }
         } else {
-            for (int i = min(a.length - 1, toIndex); i > toIndex; i--) {
+            for (int i = min(a.length - 1, fromIndex); i > toIndex; i--) {
                 action.accept(i, a[i]);
             }
         }
@@ -18073,7 +18072,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws E2 the e2
      */
     public static <T, U, E extends Exception, E2 extends Exception> void forEach(final T[] a,
-            final Throwables.Function<? super T, ? extends Collection<U>, E> flatMapper, final Throwables.BiConsumer<? super T, ? super U, E2> action)
+            final Throwables.Function<? super T, ? extends Iterable<U>, E> flatMapper, final Throwables.BiConsumer<? super T, ? super U, E2> action)
             throws E, E2 {
         checkArgNotNull(flatMapper);
         checkArgNotNull(action);
@@ -18083,9 +18082,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
         }
 
         for (T t : a) {
-            final Collection<U> c2 = flatMapper.apply(t);
+            final Iterable<U> c2 = flatMapper.apply(t);
 
-            if (notEmpty(c2)) {
+            if (c2 != null) {
                 for (U u : c2) {
                     action.accept(t, u);
                 }
@@ -18106,7 +18105,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws E2 the e2
      */
     public static <T, U, E extends Exception, E2 extends Exception> void forEach(final Iterable<? extends T> c,
-            final Throwables.Function<? super T, ? extends Collection<U>, E> flatMapper, final Throwables.BiConsumer<? super T, ? super U, E2> action)
+            final Throwables.Function<? super T, ? extends Iterable<U>, E> flatMapper, final Throwables.BiConsumer<? super T, ? super U, E2> action)
             throws E, E2 {
         checkArgNotNull(flatMapper);
         checkArgNotNull(action);
@@ -18116,9 +18115,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
         }
 
         for (T t : c) {
-            final Collection<U> c2 = flatMapper.apply(t);
+            final Iterable<U> c2 = flatMapper.apply(t);
 
-            if (notEmpty(c2)) {
+            if (c2 != null) {
                 for (U u : c2) {
                     action.accept(t, u);
                 }
@@ -18139,7 +18138,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws E2 the e2
      */
     public static <T, U, E extends Exception, E2 extends Exception> void forEach(final Iterator<? extends T> iter,
-            final Throwables.Function<? super T, ? extends Collection<U>, E> flatMapper, final Throwables.BiConsumer<? super T, ? super U, E2> action)
+            final Throwables.Function<? super T, ? extends Iterable<U>, E> flatMapper, final Throwables.BiConsumer<? super T, ? super U, E2> action)
             throws E, E2 {
         checkArgNotNull(flatMapper);
         checkArgNotNull(action);
@@ -18153,9 +18152,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
         while (iter.hasNext()) {
             t = iter.next();
 
-            final Collection<U> c2 = flatMapper.apply(t);
+            final Iterable<U> c2 = flatMapper.apply(t);
 
-            if (notEmpty(c2)) {
+            if (c2 != null) {
                 for (U u : c2) {
                     action.accept(t, u);
                 }
@@ -18180,8 +18179,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws E3 the e3
      */
     public static <T, T2, T3, E extends Exception, E2 extends Exception, E3 extends Exception> void forEach(final T[] a,
-            final Throwables.Function<? super T, ? extends Collection<T2>, E> flatMapper,
-            final Throwables.Function<? super T2, ? extends Collection<T3>, E2> flatMapper2,
+            final Throwables.Function<? super T, ? extends Iterable<T2>, E> flatMapper,
+            final Throwables.Function<? super T2, ? extends Iterable<T3>, E2> flatMapper2,
             final Throwables.TriConsumer<? super T, ? super T2, ? super T3, E3> action) throws E, E2, E3 {
         checkArgNotNull(flatMapper);
         checkArgNotNull(flatMapper2);
@@ -18192,13 +18191,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
         }
 
         for (T t : a) {
-            final Collection<T2> c2 = flatMapper.apply(t);
+            final Iterable<T2> c2 = flatMapper.apply(t);
 
-            if (notEmpty(c2)) {
+            if (c2 != null) {
                 for (T2 t2 : c2) {
-                    final Collection<T3> c3 = flatMapper2.apply(t2);
+                    final Iterable<T3> c3 = flatMapper2.apply(t2);
 
-                    if (notEmpty(c3)) {
+                    if (c3 != null) {
                         for (T3 t3 : c3) {
                             action.accept(t, t2, t3);
                         }
@@ -18225,8 +18224,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws E3 the e3
      */
     public static <T, T2, T3, E extends Exception, E2 extends Exception, E3 extends Exception> void forEach(final Iterable<? extends T> c,
-            final Throwables.Function<? super T, ? extends Collection<T2>, E> flatMapper,
-            final Throwables.Function<? super T2, ? extends Collection<T3>, E2> flatMapper2,
+            final Throwables.Function<? super T, ? extends Iterable<T2>, E> flatMapper,
+            final Throwables.Function<? super T2, ? extends Iterable<T3>, E2> flatMapper2,
             final Throwables.TriConsumer<? super T, ? super T2, ? super T3, E3> action) throws E, E2, E3 {
         checkArgNotNull(flatMapper);
         checkArgNotNull(flatMapper2);
@@ -18237,13 +18236,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
         }
 
         for (T t : c) {
-            final Collection<T2> c2 = flatMapper.apply(t);
+            final Iterable<T2> c2 = flatMapper.apply(t);
 
-            if (notEmpty(c2)) {
+            if (c2 != null) {
                 for (T2 t2 : c2) {
-                    final Collection<T3> c3 = flatMapper2.apply(t2);
+                    final Iterable<T3> c3 = flatMapper2.apply(t2);
 
-                    if (notEmpty(c3)) {
+                    if (c3 != null) {
                         for (T3 t3 : c3) {
                             action.accept(t, t2, t3);
                         }
@@ -18270,8 +18269,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws E3 the e3
      */
     public static <T, T2, T3, E extends Exception, E2 extends Exception, E3 extends Exception> void forEach(final Iterator<? extends T> iter,
-            final Throwables.Function<? super T, ? extends Collection<T2>, E> flatMapper,
-            final Throwables.Function<? super T2, ? extends Collection<T3>, E2> flatMapper2,
+            final Throwables.Function<? super T, ? extends Iterable<T2>, E> flatMapper,
+            final Throwables.Function<? super T2, ? extends Iterable<T3>, E2> flatMapper2,
             final Throwables.TriConsumer<? super T, ? super T2, ? super T3, E3> action) throws E, E2, E3 {
         checkArgNotNull(flatMapper);
         checkArgNotNull(flatMapper2);
@@ -18286,13 +18285,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
         while (iter.hasNext()) {
             t = iter.next();
 
-            final Collection<T2> c2 = flatMapper.apply(t);
+            final Iterable<T2> c2 = flatMapper.apply(t);
 
-            if (notEmpty(c2)) {
+            if (c2 != null) {
                 for (T2 t2 : c2) {
-                    final Collection<T3> c3 = flatMapper2.apply(t2);
+                    final Iterable<T3> c3 = flatMapper2.apply(t2);
 
-                    if (notEmpty(c3)) {
+                    if (c3 != null) {
                         for (T3 t3 : c3) {
                             action.accept(t, t2, t3);
                         }
@@ -18674,7 +18673,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws E2 the e2
      */
     public static <T, U, E extends Exception, E2 extends Exception> void forEachNonNull(final T[] a,
-            final Throwables.Function<? super T, ? extends Collection<U>, E> flatMapper, final Throwables.BiConsumer<? super T, ? super U, E2> action)
+            final Throwables.Function<? super T, ? extends Iterable<U>, E> flatMapper, final Throwables.BiConsumer<? super T, ? super U, E2> action)
             throws E, E2 {
         checkArgNotNull(flatMapper);
         checkArgNotNull(action);
@@ -18685,9 +18684,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         for (T e : a) {
             if (e != null) {
-                final Collection<U> c2 = flatMapper.apply(e);
+                final Iterable<U> c2 = flatMapper.apply(e);
 
-                if (notEmpty(c2)) {
+                if (c2 != null) {
                     for (U u : c2) {
                         if (u != null) {
                             action.accept(e, u);
@@ -18712,7 +18711,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws E2 the e2
      */
     public static <T, U, E extends Exception, E2 extends Exception> void forEachNonNull(final Iterable<? extends T> c,
-            final Throwables.Function<? super T, ? extends Collection<U>, E> flatMapper, final Throwables.BiConsumer<? super T, ? super U, E2> action)
+            final Throwables.Function<? super T, ? extends Iterable<U>, E> flatMapper, final Throwables.BiConsumer<? super T, ? super U, E2> action)
             throws E, E2 {
         checkArgNotNull(flatMapper);
         checkArgNotNull(action);
@@ -18723,9 +18722,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         for (T e : c) {
             if (e != null) {
-                final Collection<U> c2 = flatMapper.apply(e);
+                final Iterable<U> c2 = flatMapper.apply(e);
 
-                if (notEmpty(c2)) {
+                if (c2 != null) {
                     for (U u : c2) {
                         if (u != null) {
                             action.accept(e, u);
@@ -18750,7 +18749,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws E2 the e2
      */
     public static <T, U, E extends Exception, E2 extends Exception> void forEachNonNull(final Iterator<? extends T> iter,
-            final Throwables.Function<? super T, ? extends Collection<U>, E> flatMapper, final Throwables.BiConsumer<? super T, ? super U, E2> action)
+            final Throwables.Function<? super T, ? extends Iterable<U>, E> flatMapper, final Throwables.BiConsumer<? super T, ? super U, E2> action)
             throws E, E2 {
         checkArgNotNull(flatMapper);
         checkArgNotNull(action);
@@ -18765,9 +18764,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
             e = iter.next();
 
             if (e != null) {
-                final Collection<U> c2 = flatMapper.apply(e);
+                final Iterable<U> c2 = flatMapper.apply(e);
 
-                if (notEmpty(c2)) {
+                if (c2 != null) {
                     for (U u : c2) {
                         if (u != null) {
                             action.accept(e, u);
@@ -18796,8 +18795,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws E3 the e3
      */
     public static <T, T2, T3, E extends Exception, E2 extends Exception, E3 extends Exception> void forEachNonNull(final T[] a,
-            final Throwables.Function<? super T, ? extends Collection<T2>, E> flatMapper,
-            final Throwables.Function<? super T2, ? extends Collection<T3>, E2> flatMapper2,
+            final Throwables.Function<? super T, ? extends Iterable<T2>, E> flatMapper,
+            final Throwables.Function<? super T2, ? extends Iterable<T3>, E2> flatMapper2,
             final Throwables.TriConsumer<? super T, ? super T2, ? super T3, E3> action) throws E, E2, E3 {
         checkArgNotNull(flatMapper);
         checkArgNotNull(flatMapper2);
@@ -18809,14 +18808,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         for (T e : a) {
             if (e != null) {
-                final Collection<T2> c2 = flatMapper.apply(e);
+                final Iterable<T2> c2 = flatMapper.apply(e);
 
-                if (notEmpty(c2)) {
+                if (c2 != null) {
                     for (T2 t2 : c2) {
                         if (t2 != null) {
-                            final Collection<T3> c3 = flatMapper2.apply(t2);
+                            final Iterable<T3> c3 = flatMapper2.apply(t2);
 
-                            if (notEmpty(c3)) {
+                            if (c3 != null) {
                                 for (T3 t3 : c3) {
                                     if (t3 != null) {
                                         action.accept(e, t2, t3);
@@ -18848,8 +18847,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws E3 the e3
      */
     public static <T, T2, T3, E extends Exception, E2 extends Exception, E3 extends Exception> void forEachNonNull(final Iterable<? extends T> c,
-            final Throwables.Function<? super T, ? extends Collection<T2>, E> flatMapper,
-            final Throwables.Function<? super T2, ? extends Collection<T3>, E2> flatMapper2,
+            final Throwables.Function<? super T, ? extends Iterable<T2>, E> flatMapper,
+            final Throwables.Function<? super T2, ? extends Iterable<T3>, E2> flatMapper2,
             final Throwables.TriConsumer<? super T, ? super T2, ? super T3, E3> action) throws E, E2, E3 {
         checkArgNotNull(flatMapper);
         checkArgNotNull(flatMapper2);
@@ -18861,14 +18860,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         for (T e : c) {
             if (e != null) {
-                final Collection<T2> c2 = flatMapper.apply(e);
+                final Iterable<T2> c2 = flatMapper.apply(e);
 
-                if (notEmpty(c2)) {
+                if (c2 != null) {
                     for (T2 t2 : c2) {
                         if (t2 != null) {
-                            final Collection<T3> c3 = flatMapper2.apply(t2);
+                            final Iterable<T3> c3 = flatMapper2.apply(t2);
 
-                            if (notEmpty(c3)) {
+                            if (c3 != null) {
                                 for (T3 t3 : c3) {
                                     if (t3 != null) {
                                         action.accept(e, t2, t3);
@@ -18900,8 +18899,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws E3 the e3
      */
     public static <T, T2, T3, E extends Exception, E2 extends Exception, E3 extends Exception> void forEachNonNull(final Iterator<? extends T> iter,
-            final Throwables.Function<? super T, ? extends Collection<T2>, E> flatMapper,
-            final Throwables.Function<? super T2, ? extends Collection<T3>, E2> flatMapper2,
+            final Throwables.Function<? super T, ? extends Iterable<T2>, E> flatMapper,
+            final Throwables.Function<? super T2, ? extends Iterable<T3>, E2> flatMapper2,
             final Throwables.TriConsumer<? super T, ? super T2, ? super T3, E3> action) throws E, E2, E3 {
         checkArgNotNull(flatMapper);
         checkArgNotNull(flatMapper2);
@@ -18917,14 +18916,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
             e = iter.next();
 
             if (e != null) {
-                final Collection<T2> c2 = flatMapper.apply(e);
+                final Iterable<T2> c2 = flatMapper.apply(e);
 
-                if (notEmpty(c2)) {
+                if (c2 != null) {
                     for (T2 t2 : c2) {
                         if (t2 != null) {
-                            final Collection<T3> c3 = flatMapper2.apply(t2);
+                            final Iterable<T3> c3 = flatMapper2.apply(t2);
 
-                            if (notEmpty(c3)) {
+                            if (c3 != null) {
                                 for (T3 t3 : c3) {
                                     if (t3 != null) {
                                         action.accept(e, t2, t3);
@@ -25855,7 +25854,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param source
      * @return
      */
-    public static <T> ExceptionalStream<T, IOException> streamJSON(Class<? extends T> elementClass, String source) {
+    public static <T> CheckedStream<T, IOException> streamJSON(Class<? extends T> elementClass, String source) {
         return Utils.jsonParser.stream(elementClass, source);
     }
 
@@ -25867,7 +25866,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param config
      * @return
      */
-    public static <T> ExceptionalStream<T, IOException> streamJSON(Class<? extends T> elementClass, String source, JSONDeserializationConfig config) {
+    public static <T> CheckedStream<T, IOException> streamJSON(Class<? extends T> elementClass, String source, JSONDeserializationConfig config) {
         return Utils.jsonParser.stream(elementClass, source, config);
     }
 
@@ -25878,7 +25877,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param source
      * @return
      */
-    public static <T> ExceptionalStream<T, IOException> streamJSON(Class<? extends T> elementClass, File source) {
+    public static <T> CheckedStream<T, IOException> streamJSON(Class<? extends T> elementClass, File source) {
         return Utils.jsonParser.stream(elementClass, source);
     }
 
@@ -25890,8 +25889,19 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param config
      * @return
      */
-    public static <T> ExceptionalStream<T, IOException> streamJSON(Class<? extends T> elementClass, File source, JSONDeserializationConfig config) {
+    public static <T> CheckedStream<T, IOException> streamJSON(Class<? extends T> elementClass, File source, JSONDeserializationConfig config) {
         return Utils.jsonParser.stream(elementClass, source, config);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
+     * @param source
+     * @return
+     */
+    public static <T> CheckedStream<T, IOException> streamJSON(Class<? extends T> elementClass, InputStream source) {
+        return streamJSON(elementClass, source, false);
     }
 
     /**
@@ -25902,7 +25912,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param closeInputStreamWhenStreamIsClosed
      * @return
      */
-    public static <T> ExceptionalStream<T, IOException> streamJSON(Class<? extends T> elementClass, InputStream source,
+    public static <T> CheckedStream<T, IOException> streamJSON(Class<? extends T> elementClass, InputStream source,
             boolean closeInputStreamWhenStreamIsClosed) {
         return Utils.jsonParser.stream(elementClass, source, closeInputStreamWhenStreamIsClosed);
     }
@@ -25916,9 +25926,20 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param config
      * @return
      */
-    public static <T> ExceptionalStream<T, IOException> streamJSON(Class<? extends T> elementClass, InputStream source,
-            boolean closeInputStreamWhenStreamIsClosed, JSONDeserializationConfig config) {
+    public static <T> CheckedStream<T, IOException> streamJSON(Class<? extends T> elementClass, InputStream source, boolean closeInputStreamWhenStreamIsClosed,
+            JSONDeserializationConfig config) {
         return Utils.jsonParser.stream(elementClass, source, closeInputStreamWhenStreamIsClosed, config);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
+     * @param source
+     * @return
+     */
+    public static <T> CheckedStream<T, IOException> streamJSON(Class<? extends T> elementClass, Reader source) {
+        return streamJSON(elementClass, source, false);
     }
 
     /**
@@ -25929,7 +25950,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param closeReaderWhenStreamIsClosed
      * @return
      */
-    public static <T> ExceptionalStream<T, IOException> streamJSON(Class<? extends T> elementClass, Reader source, boolean closeReaderWhenStreamIsClosed) {
+    public static <T> CheckedStream<T, IOException> streamJSON(Class<? extends T> elementClass, Reader source, boolean closeReaderWhenStreamIsClosed) {
         return Utils.jsonParser.stream(elementClass, source, closeReaderWhenStreamIsClosed);
     }
 
@@ -25942,7 +25963,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param config
      * @return
      */
-    public static <T> ExceptionalStream<T, IOException> streamJSON(Class<? extends T> elementClass, Reader source, boolean closeReaderWhenStreamIsClosed,
+    public static <T> CheckedStream<T, IOException> streamJSON(Class<? extends T> elementClass, Reader source, boolean closeReaderWhenStreamIsClosed,
             JSONDeserializationConfig config) {
         return Utils.jsonParser.stream(elementClass, source, closeReaderWhenStreamIsClosed, config);
     }

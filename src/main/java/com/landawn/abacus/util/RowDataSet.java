@@ -4340,7 +4340,7 @@ public class RowDataSet implements DataSet, Cloneable {
      */
     @Override
     public String toXML(final String rowElementName) {
-        return toXML(rowElementName, 0, size());
+        return toXML(0, size(), rowElementName);
     }
 
     /**
@@ -4351,19 +4351,19 @@ public class RowDataSet implements DataSet, Cloneable {
      */
     @Override
     public String toXML(final int fromRowIndex, final int toRowIndex) {
-        return toXML(ROW, fromRowIndex, toRowIndex);
+        return toXML(fromRowIndex, toRowIndex, ROW);
     }
 
     /**
      *
-     * @param rowElementName
      * @param fromRowIndex
      * @param toRowIndex
+     * @param rowElementName
      * @return
      */
     @Override
-    public String toXML(final String rowElementName, final int fromRowIndex, final int toRowIndex) {
-        return toXML(rowElementName, this._columnNameList, fromRowIndex, toRowIndex);
+    public String toXML(final int fromRowIndex, final int toRowIndex, final String rowElementName) {
+        return toXML(this._columnNameList, fromRowIndex, toRowIndex, rowElementName);
     }
 
     /**
@@ -4375,23 +4375,23 @@ public class RowDataSet implements DataSet, Cloneable {
      */
     @Override
     public String toXML(final Collection<String> columnNames, final int fromRowIndex, final int toRowIndex) {
-        return toXML(ROW, columnNames, fromRowIndex, toRowIndex);
+        return toXML(columnNames, fromRowIndex, toRowIndex, ROW);
     }
 
     /**
      *
-     * @param rowElementName
      * @param columnNames
      * @param fromRowIndex
      * @param toRowIndex
+     * @param rowElementName
      * @return
      */
     @Override
-    public String toXML(final String rowElementName, final Collection<String> columnNames, final int fromRowIndex, final int toRowIndex) {
+    public String toXML(final Collection<String> columnNames, final int fromRowIndex, final int toRowIndex, final String rowElementName) {
         final BufferedXMLWriter writer = Objectory.createBufferedXMLWriter();
 
         try {
-            toXML(writer, rowElementName, columnNames, fromRowIndex, toRowIndex);
+            toXML(writer, columnNames, fromRowIndex, toRowIndex, rowElementName);
 
             return writer.toString();
         } finally {
@@ -4415,7 +4415,7 @@ public class RowDataSet implements DataSet, Cloneable {
      */
     @Override
     public void toXML(final File output, final String rowElementName) {
-        toXML(output, rowElementName, 0, size());
+        toXML(output, 0, size(), rowElementName);
     }
 
     /**
@@ -4426,19 +4426,19 @@ public class RowDataSet implements DataSet, Cloneable {
      */
     @Override
     public void toXML(final File output, final int fromRowIndex, final int toRowIndex) {
-        toXML(output, ROW, fromRowIndex, toRowIndex);
+        toXML(output, fromRowIndex, toRowIndex, ROW);
     }
 
     /**
      *
      * @param output
-     * @param rowElementName
      * @param fromRowIndex
      * @param toRowIndex
+     * @param rowElementName
      */
     @Override
-    public void toXML(final File output, final String rowElementName, final int fromRowIndex, final int toRowIndex) {
-        toXML(output, rowElementName, this._columnNameList, fromRowIndex, toRowIndex);
+    public void toXML(final File output, final int fromRowIndex, final int toRowIndex, final String rowElementName) {
+        toXML(output, this._columnNameList, fromRowIndex, toRowIndex, rowElementName);
     }
 
     /**
@@ -4450,20 +4450,20 @@ public class RowDataSet implements DataSet, Cloneable {
      */
     @Override
     public void toXML(final File output, final Collection<String> columnNames, final int fromRowIndex, final int toRowIndex) {
-        toXML(output, ROW, columnNames, fromRowIndex, toRowIndex);
+        toXML(output, columnNames, fromRowIndex, toRowIndex, ROW);
     }
 
     /**
      *
      * @param output
-     * @param rowElementName
      * @param columnNames
      * @param fromRowIndex
      * @param toRowIndex
+     * @param rowElementName
      * @throws UncheckedIOException the unchecked IO exception
      */
     @Override
-    public void toXML(final File output, final String rowElementName, final Collection<String> columnNames, final int fromRowIndex, final int toRowIndex)
+    public void toXML(final File output, final Collection<String> columnNames, final int fromRowIndex, final int toRowIndex, final String rowElementName)
             throws UncheckedIOException {
         OutputStream os = null;
 
@@ -4472,7 +4472,7 @@ public class RowDataSet implements DataSet, Cloneable {
 
             os = IOUtil.newFileOutputStream(output);
 
-            toXML(os, rowElementName, columnNames, fromRowIndex, toRowIndex);
+            toXML(os, columnNames, fromRowIndex, toRowIndex, rowElementName);
 
             os.flush();
         } catch (IOException e) {
@@ -4498,7 +4498,7 @@ public class RowDataSet implements DataSet, Cloneable {
      */
     @Override
     public void toXML(final OutputStream output, final String rowElementName) {
-        toXML(output, rowElementName, 0, size());
+        toXML(output, 0, size(), rowElementName);
     }
 
     /**
@@ -4509,19 +4509,19 @@ public class RowDataSet implements DataSet, Cloneable {
      */
     @Override
     public void toXML(final OutputStream output, final int fromRowIndex, final int toRowIndex) {
-        toXML(output, ROW, fromRowIndex, toRowIndex);
+        toXML(output, fromRowIndex, toRowIndex, ROW);
     }
 
     /**
      *
      * @param output
-     * @param rowElementName
      * @param fromRowIndex
      * @param toRowIndex
+     * @param rowElementName
      */
     @Override
-    public void toXML(final OutputStream output, final String rowElementName, final int fromRowIndex, final int toRowIndex) {
-        toXML(output, rowElementName, this._columnNameList, fromRowIndex, toRowIndex);
+    public void toXML(final OutputStream output, final int fromRowIndex, final int toRowIndex, final String rowElementName) {
+        toXML(output, this._columnNameList, fromRowIndex, toRowIndex, rowElementName);
     }
 
     /**
@@ -4533,25 +4533,25 @@ public class RowDataSet implements DataSet, Cloneable {
      */
     @Override
     public void toXML(final OutputStream output, final Collection<String> columnNames, final int fromRowIndex, final int toRowIndex) {
-        toXML(output, ROW, columnNames, fromRowIndex, toRowIndex);
+        toXML(output, columnNames, fromRowIndex, toRowIndex, ROW);
     }
 
     /**
      *
      * @param output
-     * @param rowElementName
      * @param columnNames
      * @param fromRowIndex
      * @param toRowIndex
+     * @param rowElementName
      * @throws UncheckedIOException the unchecked IO exception
      */
     @Override
-    public void toXML(final OutputStream output, final String rowElementName, final Collection<String> columnNames, final int fromRowIndex,
-            final int toRowIndex) throws UncheckedIOException {
+    public void toXML(final OutputStream output, final Collection<String> columnNames, final int fromRowIndex, final int toRowIndex,
+            final String rowElementName) throws UncheckedIOException {
         final BufferedXMLWriter writer = Objectory.createBufferedXMLWriter(output);
 
         try {
-            toXML(writer, rowElementName, columnNames, fromRowIndex, toRowIndex);
+            toXML(writer, columnNames, fromRowIndex, toRowIndex, rowElementName);
 
             writer.flush();
         } catch (IOException e) {
@@ -4577,7 +4577,7 @@ public class RowDataSet implements DataSet, Cloneable {
      */
     @Override
     public void toXML(final Writer output, final String rowElementName) {
-        toXML(output, rowElementName, 0, size());
+        toXML(output, 0, size(), rowElementName);
     }
 
     /**
@@ -4588,19 +4588,19 @@ public class RowDataSet implements DataSet, Cloneable {
      */
     @Override
     public void toXML(final Writer output, final int fromRowIndex, final int toRowIndex) {
-        toXML(output, ROW, fromRowIndex, toRowIndex);
+        toXML(output, fromRowIndex, toRowIndex, ROW);
     }
 
     /**
      *
      * @param output
-     * @param rowElementName
      * @param fromRowIndex
      * @param toRowIndex
+     * @param rowElementName
      */
     @Override
-    public void toXML(final Writer output, final String rowElementName, final int fromRowIndex, final int toRowIndex) {
-        toXML(output, rowElementName, this._columnNameList, fromRowIndex, toRowIndex);
+    public void toXML(final Writer output, final int fromRowIndex, final int toRowIndex, final String rowElementName) {
+        toXML(output, this._columnNameList, fromRowIndex, toRowIndex, rowElementName);
     }
 
     /**
@@ -4612,20 +4612,20 @@ public class RowDataSet implements DataSet, Cloneable {
      */
     @Override
     public void toXML(final Writer output, final Collection<String> columnNames, final int fromRowIndex, final int toRowIndex) {
-        toXML(output, ROW, columnNames, fromRowIndex, toRowIndex);
+        toXML(output, columnNames, fromRowIndex, toRowIndex, ROW);
     }
 
     /**
      *
      * @param output
-     * @param rowElementName
      * @param columnNames
      * @param fromRowIndex
      * @param toRowIndex
+     * @param rowElementName
      * @throws UncheckedIOException the unchecked IO exception
      */
     @Override
-    public void toXML(final Writer output, final String rowElementName, final Collection<String> columnNames, final int fromRowIndex, final int toRowIndex)
+    public void toXML(final Writer output, final Collection<String> columnNames, final int fromRowIndex, final int toRowIndex, final String rowElementName)
             throws UncheckedIOException {
         checkRowIndex(fromRowIndex, toRowIndex);
 

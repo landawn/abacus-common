@@ -54,7 +54,7 @@ import com.landawn.abacus.util.BufferedJSONWriter;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.DataSet;
 import com.landawn.abacus.util.EntityId;
-import com.landawn.abacus.util.ExceptionalStream;
+import com.landawn.abacus.util.CheckedStream;
 import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.IdentityHashSet;
 import com.landawn.abacus.util.ImmutableEntry;
@@ -3099,16 +3099,16 @@ final class JSONParserImpl extends AbstractJSONParser {
      * @return
      */
     @Override
-    public <T> ExceptionalStream<T, IOException> stream(final Class<? extends T> elementClass, final String json, final JSONDeserializationConfig config) {
+    public <T> CheckedStream<T, IOException> stream(final Class<? extends T> elementClass, final String json, final JSONDeserializationConfig config) {
         final Type<T> eleType = checkStreamSupportedType(elementClass);
         final JSONDeserializationConfig configToUse = check(config);
 
         if (Strings.isEmpty(json) || "[]".equals(json)) {
-            return ExceptionalStream.<T, IOException> empty();
+            return CheckedStream.<T, IOException> empty();
         }
 
         final char[] cbuf = Objectory.createCharArrayBuffer();
-        ExceptionalStream<T, IOException> result = null;
+        CheckedStream<T, IOException> result = null;
 
         try {
             final JSONReader jr = JSONStringReader.parse(json, cbuf);
@@ -3135,8 +3135,8 @@ final class JSONParserImpl extends AbstractJSONParser {
      * @return
      */
     @Override
-    public <T> ExceptionalStream<T, IOException> stream(final Class<? extends T> elementClass, final File file, final JSONDeserializationConfig config) {
-        ExceptionalStream<T, IOException> result = null;
+    public <T> CheckedStream<T, IOException> stream(final Class<? extends T> elementClass, final File file, final JSONDeserializationConfig config) {
+        CheckedStream<T, IOException> result = null;
         InputStream is = null;
 
         try {
@@ -3163,7 +3163,7 @@ final class JSONParserImpl extends AbstractJSONParser {
      * @return
      */
     @Override
-    public <T> ExceptionalStream<T, IOException> stream(final Class<? extends T> elementClass, final InputStream is,
+    public <T> CheckedStream<T, IOException> stream(final Class<? extends T> elementClass, final InputStream is,
             final boolean closeInputStreamWhenStreamIsClosed, final JSONDeserializationConfig config) {
         final Reader reader = new InputStreamReader(is);
 
@@ -3181,10 +3181,10 @@ final class JSONParserImpl extends AbstractJSONParser {
      * @return
      */
     @Override
-    public <T> ExceptionalStream<T, IOException> stream(final Class<? extends T> elementClass, final Reader reader, final boolean closeReaderWhenStreamIsClosed,
+    public <T> CheckedStream<T, IOException> stream(final Class<? extends T> elementClass, final Reader reader, final boolean closeReaderWhenStreamIsClosed,
             final JSONDeserializationConfig config) {
         N.checkArgNotNull(reader, "reader");
-        ExceptionalStream<T, IOException> result = null;
+        CheckedStream<T, IOException> result = null;
         final char[] rbuf = Objectory.createCharArrayBuffer();
         final char[] cbuf = Objectory.createCharArrayBuffer();
 
@@ -3240,12 +3240,12 @@ final class JSONParserImpl extends AbstractJSONParser {
         return eleType;
     }
 
-    private <T> ExceptionalStream<T, IOException> stream(final Type<? extends T> eleType, final Class<? extends T> elementClass, final Object source,
+    private <T> CheckedStream<T, IOException> stream(final Type<? extends T> eleType, final Class<? extends T> elementClass, final Object source,
             final JSONReader jr, final JSONDeserializationConfig configToUse) throws IOException {
         final int firstToken = jr.nextToken();
 
         if (firstToken == EOR) {
-            return ExceptionalStream.<T, IOException> empty();
+            return CheckedStream.<T, IOException> empty();
         } else if (firstToken != START_BRACKET) {
             throw new UnsupportedOperationException("Only Collection/Array JSON are supported by stream Methods");
         }
@@ -3289,7 +3289,7 @@ final class JSONParserImpl extends AbstractJSONParser {
             }
         };
 
-        return ExceptionalStream.<T, IOException> iterate(hasNext, next);
+        return CheckedStream.<T, IOException> iterate(hasNext, next);
     }
 
     <T> T emptyOrDefault(final Type<? extends T> type) {

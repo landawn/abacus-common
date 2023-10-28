@@ -24,7 +24,7 @@ import java.util.List;
 
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.Internal;
-import com.landawn.abacus.util.ExceptionalStream.ExceptionalIterator;
+import com.landawn.abacus.util.CheckedStream.CheckedIterator;
 
 @Internal
 public final class InternalUtil {
@@ -250,8 +250,8 @@ public final class InternalUtil {
      * @return
      */
     @Beta
-    public static <T, E extends Exception> ExceptionalStream<T, E> newStream(final ExceptionalIterator<T, E> iter) {
-        return ExceptionalStream.newStream(iter);
+    public static <T, E extends Exception> CheckedStream<T, E> newStream(final CheckedIterator<T, E> iter) {
+        return CheckedStream.newStream(iter);
     }
 
     private InternalUtil() {

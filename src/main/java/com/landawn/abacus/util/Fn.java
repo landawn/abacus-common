@@ -973,6 +973,30 @@ public final class Fn {
         return TO_UPPER_CASE_WITH_UNDERSCORE;
     }
 
+    @SuppressWarnings("rawtypes")
+    private static final Function TO_JSON = N::toJSON;
+
+    /**
+     *
+     * @param <T>
+     * @return
+     */
+    public static <T> Function<T, String> toJson() {
+        return TO_JSON;
+    }
+
+    @SuppressWarnings("rawtypes")
+    private static final Function TO_XML = N::toXML;
+
+    /**
+     *
+     * @param <T>
+     * @return
+     */
+    public static <T> Function<T, String> toXml() {
+        return TO_XML;
+    }
+
     /**
      *
      * @param <T>

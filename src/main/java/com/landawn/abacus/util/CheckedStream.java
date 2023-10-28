@@ -112,9 +112,9 @@ import com.landawn.abacus.util.stream.Stream;
 @SequentialOnly
 @com.landawn.abacus.annotation.Immutable
 @SuppressWarnings({ "java:S6539", "java:S1192" })
-public class ExceptionalStream<T, E extends Exception> implements Closeable, Immutable {
+public final class CheckedStream<T, E extends Exception> implements Closeable, Immutable {
 
-    static final Logger logger = LoggerFactory.getLogger(ExceptionalStream.class);
+    static final Logger logger = LoggerFactory.getLogger(CheckedStream.class);
 
     static final Object NONE = N.NULL_MASK;
 
@@ -158,7 +158,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
     static final Throwables.Function<Map.Entry<Keyed<Object, Object>, Object>, Object, Exception> KK = t -> t.getKey().val();
 
-    private final ExceptionalIterator<T, E> elements;
+    private final CheckedIterator<T, E> elements;
 
     private final boolean sorted;
 
@@ -168,15 +168,15 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
     private boolean isClosed = false;
 
-    ExceptionalStream(final ExceptionalIterator<T, E> iter) {
+    CheckedStream(final CheckedIterator<T, E> iter) {
         this(iter, false, null, null);
     }
 
-    ExceptionalStream(final ExceptionalIterator<T, E> iter, final Deque<Throwables.Runnable<? extends E>> closeHandlers) {
+    CheckedStream(final CheckedIterator<T, E> iter, final Deque<Throwables.Runnable<? extends E>> closeHandlers) {
         this(iter, false, null, closeHandlers);
     }
 
-    ExceptionalStream(final ExceptionalIterator<T, E> iter, final boolean sorted, final Comparator<? super T> comparator,
+    CheckedStream(final CheckedIterator<T, E> iter, final boolean sorted, final Comparator<? super T> comparator,
             final Deque<Throwables.Runnable<? extends E>> closeHandlers) {
         this.elements = iter;
         this.sorted = sorted;
@@ -190,8 +190,8 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @param <E>
      * @return
      */
-    public static <T, E extends Exception> ExceptionalStream<T, E> empty() {
-        return new ExceptionalStream<>(ExceptionalIterator.EMPTY);
+    public static <T, E extends Exception> CheckedStream<T, E> empty() {
+        return new CheckedStream<>(CheckedIterator.EMPTY);
     }
 
     /**
@@ -201,7 +201,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @param e
      * @return
      */
-    public static <T, E extends Exception> ExceptionalStream<T, E> just(final T e) {
+    public static <T, E extends Exception> CheckedStream<T, E> just(final T e) {
         return of(e);
     }
 
@@ -213,7 +213,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @param exceptionType
      * @return
      */
-    public static <T, E extends Exception> ExceptionalStream<T, E> just(final T e, @SuppressWarnings("unused") final Class<E> exceptionType) { //NOSONAR
+    public static <T, E extends Exception> CheckedStream<T, E> just(final T e, @SuppressWarnings("unused") final Class<E> exceptionType) { //NOSONAR
         return of(e);
     }
 
@@ -225,7 +225,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @param e
      * @return
      */
-    public static <T, E extends Exception> ExceptionalStream<T, E> ofNullable(final T e) {
+    public static <T, E extends Exception> CheckedStream<T, E> ofNullable(final T e) {
         if (e == null) {
             return empty();
         }
@@ -242,7 +242,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @param exceptionType
      * @return
      */
-    public static <T, E extends Exception> ExceptionalStream<T, E> ofNullable(final T e, @SuppressWarnings("unused") final Class<E> exceptionType) { //NOSONAR
+    public static <T, E extends Exception> CheckedStream<T, E> ofNullable(final T e, @SuppressWarnings("unused") final Class<E> exceptionType) { //NOSONAR
         if (e == null) {
             return empty();
         }
@@ -258,14 +258,14 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      * @see Stream.of(T[]).checked(SomeCheckedException.class)...
      */
-    public static <T, E extends Exception> ExceptionalStream<T, E> of(final T... a) {
+    public static <T, E extends Exception> CheckedStream<T, E> of(final T... a) {
         if (N.isEmpty(a)) {
             return empty();
         }
 
         final int len = N.len(a);
 
-        return newStream(new ExceptionalIterator<T, E>() {
+        return newStream(new CheckedIterator<T, E>() {
             private int position = 0;
 
             @Override
@@ -305,7 +305,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @param c
      * @return
      */
-    public static <T, E extends Exception> ExceptionalStream<T, E> of(final Collection<? extends T> c) {
+    public static <T, E extends Exception> CheckedStream<T, E> of(final Collection<? extends T> c) {
         if (N.isEmpty(c)) {
             return empty();
         }
@@ -316,7 +316,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         if (a != null) {
             final int len = c.size();
 
-            return newStream(new ExceptionalIterator<T, E>() {
+            return newStream(new CheckedIterator<T, E>() {
                 private int position = 0;
 
                 @Override
@@ -359,12 +359,12 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @param iter
      * @return
      */
-    public static <T, E extends Exception> ExceptionalStream<T, E> of(final Iterator<? extends T> iter) {
+    public static <T, E extends Exception> CheckedStream<T, E> of(final Iterator<? extends T> iter) {
         if (iter == null) {
             return empty();
         }
 
-        return newStream(ExceptionalIterator.<T, E> of(iter));
+        return newStream(CheckedIterator.<T, E> of(iter));
     }
 
     /**
@@ -374,7 +374,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @param iterable
      * @return
      */
-    public static <T, E extends Exception> ExceptionalStream<T, E> of(final Iterable<? extends T> iterable) {
+    public static <T, E extends Exception> CheckedStream<T, E> of(final Iterable<? extends T> iterable) {
         if (iterable == null) {
             return empty();
         }
@@ -394,7 +394,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @param m
      * @return
      */
-    public static <K, V, E extends Exception> ExceptionalStream<Map.Entry<K, V>, E> of(final Map<K, V> m) {
+    public static <K, V, E extends Exception> CheckedStream<Map.Entry<K, V>, E> of(final Map<K, V> m) {
         if (N.isEmpty(m)) {
             return empty();
         }
@@ -409,7 +409,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @param stream
      * @return
      */
-    public static <T, E extends Exception> ExceptionalStream<T, E> of(final Stream<? extends T> stream) {
+    public static <T, E extends Exception> CheckedStream<T, E> of(final Stream<? extends T> stream) {
         return checked(stream, false);
     }
 
@@ -420,12 +420,12 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @param stream
      * @return
      */
-    public static <T, E extends Exception> ExceptionalStream<T, E> of(final java.util.stream.Stream<? extends T> stream) {
+    public static <T, E extends Exception> CheckedStream<T, E> of(final java.util.stream.Stream<? extends T> stream) {
         if (stream == null) {
             return empty();
         }
 
-        return ExceptionalStream.<T, E> of(stream.iterator()).onClose(stream::close);
+        return CheckedStream.<T, E> of(stream.iterator()).onClose(stream::close);
     }
 
     /**
@@ -436,8 +436,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @param exceptionType
      * @return
      */
-    public static <T, E extends Exception> ExceptionalStream<T, E> of(final Collection<? extends T> c,
-            @SuppressWarnings("unused") final Class<E> exceptionType) { //NOSONAR
+    public static <T, E extends Exception> CheckedStream<T, E> of(final Collection<? extends T> c, @SuppressWarnings("unused") final Class<E> exceptionType) { //NOSONAR
         return of(c);
     }
 
@@ -449,8 +448,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @param exceptionType
      * @return
      */
-    public static <T, E extends Exception> ExceptionalStream<T, E> of(final Iterator<? extends T> iter,
-            @SuppressWarnings("unused") final Class<E> exceptionType) { //NOSONAR
+    public static <T, E extends Exception> CheckedStream<T, E> of(final Iterator<? extends T> iter, @SuppressWarnings("unused") final Class<E> exceptionType) { //NOSONAR
         return of(iter);
     }
 
@@ -462,7 +460,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @param exceptionType
      * @return
      */
-    public static <T, E extends Exception> ExceptionalStream<T, E> of(final Iterable<? extends T> iterable,
+    public static <T, E extends Exception> CheckedStream<T, E> of(final Iterable<? extends T> iterable,
             @SuppressWarnings("unused") final Class<E> exceptionType) { //NOSONAR
         return of(iterable);
     }
@@ -476,7 +474,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @param exceptionType
      * @return
      */
-    public static <K, V, E extends Exception> ExceptionalStream<Map.Entry<K, V>, E> of(final Map<K, V> m,
+    public static <K, V, E extends Exception> CheckedStream<Map.Entry<K, V>, E> of(final Map<K, V> m,
             @SuppressWarnings("unused") final Class<E> exceptionType) { //NOSONAR
         return of(m);
     }
@@ -489,8 +487,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @param exceptionType
      * @return
      */
-    public static <T, E extends Exception> ExceptionalStream<T, E> of(final Stream<? extends T> stream,
-            @SuppressWarnings("unused") final Class<E> exceptionType) { //NOSONAR
+    public static <T, E extends Exception> CheckedStream<T, E> of(final Stream<? extends T> stream, @SuppressWarnings("unused") final Class<E> exceptionType) { //NOSONAR
         return of(stream);
     }
 
@@ -502,7 +499,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @param exceptionType
      * @return
      */
-    public static <T, E extends Exception> ExceptionalStream<T, E> of(final java.util.stream.Stream<? extends T> stream,
+    public static <T, E extends Exception> CheckedStream<T, E> of(final java.util.stream.Stream<? extends T> stream,
             @SuppressWarnings("unused") final Class<E> exceptionType) { //NOSONAR
         return of(stream);
     }
@@ -514,14 +511,14 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @param a
      * @return
      */
-    public static <E extends Exception> ExceptionalStream<Boolean, E> of(final boolean[] a) {
+    public static <E extends Exception> CheckedStream<Boolean, E> of(final boolean[] a) {
         if (N.isEmpty(a)) {
             return empty();
         }
 
         final int len = N.len(a);
 
-        return newStream(new ExceptionalIterator<Boolean, E>() {
+        return newStream(new CheckedIterator<Boolean, E>() {
             private int position = 0;
 
             @Override
@@ -557,14 +554,14 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @param a
      * @return
      */
-    public static <E extends Exception> ExceptionalStream<Character, E> of(final char[] a) {
+    public static <E extends Exception> CheckedStream<Character, E> of(final char[] a) {
         if (N.isEmpty(a)) {
             return empty();
         }
 
         final int len = N.len(a);
 
-        return newStream(new ExceptionalIterator<Character, E>() {
+        return newStream(new CheckedIterator<Character, E>() {
             private int position = 0;
 
             @Override
@@ -600,14 +597,14 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @param a
      * @return
      */
-    public static <E extends Exception> ExceptionalStream<Byte, E> of(final byte[] a) {
+    public static <E extends Exception> CheckedStream<Byte, E> of(final byte[] a) {
         if (N.isEmpty(a)) {
             return empty();
         }
 
         final int len = N.len(a);
 
-        return newStream(new ExceptionalIterator<Byte, E>() {
+        return newStream(new CheckedIterator<Byte, E>() {
             private int position = 0;
 
             @Override
@@ -643,14 +640,14 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @param a
      * @return
      */
-    public static <E extends Exception> ExceptionalStream<Short, E> of(final short[] a) {
+    public static <E extends Exception> CheckedStream<Short, E> of(final short[] a) {
         if (N.isEmpty(a)) {
             return empty();
         }
 
         final int len = N.len(a);
 
-        return newStream(new ExceptionalIterator<Short, E>() {
+        return newStream(new CheckedIterator<Short, E>() {
             private int position = 0;
 
             @Override
@@ -685,14 +682,14 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @param a
      * @return
      */
-    public static <E extends Exception> ExceptionalStream<Integer, E> of(final int[] a) {
+    public static <E extends Exception> CheckedStream<Integer, E> of(final int[] a) {
         if (N.isEmpty(a)) {
             return empty();
         }
 
         final int len = N.len(a);
 
-        return newStream(new ExceptionalIterator<Integer, E>() {
+        return newStream(new CheckedIterator<Integer, E>() {
             private int position = 0;
 
             @Override
@@ -727,14 +724,14 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @param a
      * @return
      */
-    public static <E extends Exception> ExceptionalStream<Long, E> of(final long[] a) {
+    public static <E extends Exception> CheckedStream<Long, E> of(final long[] a) {
         if (N.isEmpty(a)) {
             return empty();
         }
 
         final int len = N.len(a);
 
-        return newStream(new ExceptionalIterator<Long, E>() {
+        return newStream(new CheckedIterator<Long, E>() {
             private int position = 0;
 
             @Override
@@ -770,14 +767,14 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @param a
      * @return
      */
-    public static <E extends Exception> ExceptionalStream<Float, E> of(final float[] a) {
+    public static <E extends Exception> CheckedStream<Float, E> of(final float[] a) {
         if (N.isEmpty(a)) {
             return empty();
         }
 
         final int len = N.len(a);
 
-        return newStream(new ExceptionalIterator<Float, E>() {
+        return newStream(new CheckedIterator<Float, E>() {
             private int position = 0;
 
             @Override
@@ -812,14 +809,14 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @param a
      * @return
      */
-    public static <E extends Exception> ExceptionalStream<Double, E> of(final double[] a) {
+    public static <E extends Exception> CheckedStream<Double, E> of(final double[] a) {
         if (N.isEmpty(a)) {
             return empty();
         }
 
         final int len = N.len(a);
 
-        return newStream(new ExceptionalIterator<Double, E>() {
+        return newStream(new CheckedIterator<Double, E>() {
             private int position = 0;
 
             @Override
@@ -856,8 +853,8 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @param op
      * @return
      */
-    public static <T, E extends Exception> ExceptionalStream<T, E> of(final Optional<T> op) {
-        return op == null || !op.isPresent() ? ExceptionalStream.<T, E> empty() : ExceptionalStream.<T, E> of(op.get()); //NOSONAR
+    public static <T, E extends Exception> CheckedStream<T, E> of(final Optional<T> op) {
+        return op == null || !op.isPresent() ? CheckedStream.<T, E> empty() : CheckedStream.<T, E> of(op.get()); //NOSONAR
     }
 
     /**
@@ -868,8 +865,8 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @param op
      * @return
      */
-    public static <T, E extends Exception> ExceptionalStream<T, E> of(final java.util.Optional<T> op) {
-        return op == null || !op.isPresent() ? ExceptionalStream.<T, E> empty() : ExceptionalStream.<T, E> of(op.get()); //NOSONAR
+    public static <T, E extends Exception> CheckedStream<T, E> of(final java.util.Optional<T> op) {
+        return op == null || !op.isPresent() ? CheckedStream.<T, E> empty() : CheckedStream.<T, E> of(op.get()); //NOSONAR
     }
 
     /**
@@ -880,7 +877,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @param map
      * @return
      */
-    public static <K, E extends Exception> ExceptionalStream<K, E> ofKeys(final Map<K, ?> map) {
+    public static <K, E extends Exception> CheckedStream<K, E> ofKeys(final Map<K, ?> map) {
         if (N.isEmpty(map)) {
             return empty();
         }
@@ -898,12 +895,12 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @param valueFilter
      * @return
      */
-    public static <K, V, E extends Exception> ExceptionalStream<K, E> ofKeys(final Map<K, V> map, final Throwables.Predicate<? super V, E> valueFilter) {
+    public static <K, V, E extends Exception> CheckedStream<K, E> ofKeys(final Map<K, V> map, final Throwables.Predicate<? super V, E> valueFilter) {
         if (N.isEmpty(map)) {
             return empty();
         }
 
-        return ExceptionalStream.<K, V, E> of(map).filter(Fnn.<K, V, E> testByValue(valueFilter)).map(Fnn.<K, V, E> key());
+        return CheckedStream.<K, V, E> of(map).filter(Fnn.<K, V, E> testByValue(valueFilter)).map(Fnn.<K, V, E> key());
     }
 
     /**
@@ -916,13 +913,12 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @param filter
      * @return
      */
-    public static <K, V, E extends Exception> ExceptionalStream<K, E> ofKeys(final Map<K, V> map,
-            final Throwables.BiPredicate<? super K, ? super V, E> filter) {
+    public static <K, V, E extends Exception> CheckedStream<K, E> ofKeys(final Map<K, V> map, final Throwables.BiPredicate<? super K, ? super V, E> filter) {
         if (N.isEmpty(map)) {
             return empty();
         }
 
-        return ExceptionalStream.<K, V, E> of(map).filter(Fn.Entries.ep(filter)).map(Fnn.<K, V, E> key());
+        return CheckedStream.<K, V, E> of(map).filter(Fn.Entries.ep(filter)).map(Fnn.<K, V, E> key());
     }
 
     /**
@@ -933,7 +929,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @param map
      * @return
      */
-    public static <V, E extends Exception> ExceptionalStream<V, E> ofValues(final Map<?, V> map) {
+    public static <V, E extends Exception> CheckedStream<V, E> ofValues(final Map<?, V> map) {
         if (N.isEmpty(map)) {
             return empty();
         }
@@ -951,12 +947,12 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @param keyFilter
      * @return
      */
-    public static <K, V, E extends Exception> ExceptionalStream<V, E> ofValues(final Map<K, V> map, final Throwables.Predicate<? super K, E> keyFilter) {
+    public static <K, V, E extends Exception> CheckedStream<V, E> ofValues(final Map<K, V> map, final Throwables.Predicate<? super K, E> keyFilter) {
         if (N.isEmpty(map)) {
             return empty();
         }
 
-        return ExceptionalStream.<K, V, E> of(map).filter(Fnn.<K, V, E> testByKey(keyFilter)).map(Fnn.<K, V, E> value());
+        return CheckedStream.<K, V, E> of(map).filter(Fnn.<K, V, E> testByKey(keyFilter)).map(Fnn.<K, V, E> value());
     }
 
     /**
@@ -969,29 +965,28 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @param filter
      * @return
      */
-    public static <K, V, E extends Exception> ExceptionalStream<V, E> ofValues(final Map<K, V> map,
-            final Throwables.BiPredicate<? super K, ? super V, E> filter) {
+    public static <K, V, E extends Exception> CheckedStream<V, E> ofValues(final Map<K, V> map, final Throwables.BiPredicate<? super K, ? super V, E> filter) {
         if (N.isEmpty(map)) {
             return empty();
         }
 
-        return ExceptionalStream.<K, V, E> of(map).filter(Fn.Entries.ep(filter)).map(Fnn.<K, V, E> value());
+        return CheckedStream.<K, V, E> of(map).filter(Fn.Entries.ep(filter)).map(Fnn.<K, V, E> value());
     }
 
     //    /**
     //     * Lazy evaluation.
     //     * <br />
     //     *
-    //     * This is equal to: {@code ExceptionalStream.just(supplier).flatmap(it -> it.get())}.
+    //     * This is equal to: {@code CheckedStream.just(supplier).flatmap(it -> it.get())}.
     //     *
     //     * @param supplier
     //     * @return
     //     */
     //    @Beta
-    //    public static <T, E extends Exception> ExceptionalStream<T, E> from(final Throwables.Supplier<? extends Collection<? extends T>, ? extends E> supplier) {
+    //    public static <T, E extends Exception> CheckedStream<T, E> from(final Throwables.Supplier<? extends Collection<? extends T>, ? extends E> supplier) {
     //        N.checkArgNotNull(supplier, "supplier");
     //
-    //        return ExceptionalStream.<Throwables.Supplier<? extends Collection<? extends T>, ? extends E>, E> just(supplier)
+    //        return CheckedStream.<Throwables.Supplier<? extends Collection<? extends T>, ? extends E>, E> just(supplier)
     //                .flatmap(Throwables.Supplier::get);
     //    }
 
@@ -999,18 +994,18 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * Lazy evaluation.
      * <br />
      *
-     * This is equal to: {@code ExceptionalStream.just(supplier).flatMap(it -> it.get())}.
+     * This is equal to: {@code CheckedStream.just(supplier).flatMap(it -> it.get())}.
      *
      * @param <T>
      * @param <E>
      * @param supplier
      * @return
      */
-    public static <T, E extends Exception> ExceptionalStream<T, E> defer(
-            final Throwables.Supplier<? extends ExceptionalStream<? extends T, ? extends E>, ? extends E> supplier) {
+    public static <T, E extends Exception> CheckedStream<T, E> defer(
+            final Throwables.Supplier<? extends CheckedStream<? extends T, ? extends E>, ? extends E> supplier) {
         N.checkArgNotNull(supplier, "supplier");
 
-        return ExceptionalStream.<Throwables.Supplier<? extends ExceptionalStream<? extends T, ? extends E>, ? extends E>, E> just(supplier)
+        return CheckedStream.<Throwables.Supplier<? extends CheckedStream<? extends T, ? extends E>, ? extends E>, E> just(supplier)
                 .flatMap(Throwables.Supplier::get);
     }
 
@@ -1022,12 +1017,12 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @param next
      * @return
      */
-    public static <T, E extends Exception> ExceptionalStream<T, E> iterate(final Throwables.BooleanSupplier<? extends E> hasNext,
+    public static <T, E extends Exception> CheckedStream<T, E> iterate(final Throwables.BooleanSupplier<? extends E> hasNext,
             final Throwables.Supplier<? extends T, E> next) {
         N.checkArgNotNull(hasNext, "hasNext");
         N.checkArgNotNull(next, "next");
 
-        return newStream(new ExceptionalIterator<T, E>() {
+        return newStream(new CheckedIterator<T, E>() {
             private boolean hasNextVal = false;
 
             @Override
@@ -1060,12 +1055,12 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @param f
      * @return
      */
-    public static <T, E extends Exception> ExceptionalStream<T, E> iterate(final T init, final Throwables.BooleanSupplier<? extends E> hasNext,
+    public static <T, E extends Exception> CheckedStream<T, E> iterate(final T init, final Throwables.BooleanSupplier<? extends E> hasNext,
             final Throwables.UnaryOperator<T, ? extends E> f) {
         N.checkArgNotNull(hasNext, "hasNext");
         N.checkArgNotNull(f, "f");
 
-        return newStream(new ExceptionalIterator<T, E>() {
+        return newStream(new CheckedIterator<T, E>() {
             private final T none = (T) NONE;
             private T t = none;
             private boolean hasNextVal = false;
@@ -1100,12 +1095,12 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @param f
      * @return
      */
-    public static <T, E extends Exception> ExceptionalStream<T, E> iterate(final T init, final Throwables.Predicate<? super T, ? extends E> hasNext,
+    public static <T, E extends Exception> CheckedStream<T, E> iterate(final T init, final Throwables.Predicate<? super T, ? extends E> hasNext,
             final Throwables.UnaryOperator<T, ? extends E> f) {
         N.checkArgNotNull(hasNext, "hasNext");
         N.checkArgNotNull(f, "f");
 
-        return newStream(new ExceptionalIterator<T, E>() {
+        return newStream(new CheckedIterator<T, E>() {
             private final T none = (T) NONE;
             private T t = none;
             private T cur = none;
@@ -1147,10 +1142,10 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @param f
      * @return
      */
-    public static <T, E extends Exception> ExceptionalStream<T, E> iterate(final T init, final Throwables.UnaryOperator<T, ? extends E> f) {
+    public static <T, E extends Exception> CheckedStream<T, E> iterate(final T init, final Throwables.UnaryOperator<T, ? extends E> f) {
         N.checkArgNotNull(f, "f");
 
-        return newStream(new ExceptionalIterator<T, E>() {
+        return newStream(new CheckedIterator<T, E>() {
             private final T none = (T) NONE;
             private T t = none;
 
@@ -1174,10 +1169,10 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @param supplier
      * @return
      */
-    public static <T, E extends Exception> ExceptionalStream<T, E> generate(final Throwables.Supplier<T, E> supplier) {
+    public static <T, E extends Exception> CheckedStream<T, E> generate(final Throwables.Supplier<T, E> supplier) {
         N.checkArgNotNull(supplier, "supplier");
 
-        return newStream(new ExceptionalIterator<T, E>() {
+        return newStream(new CheckedIterator<T, E>() {
             @Override
             public boolean hasNext() throws E {
                 return true;
@@ -1199,14 +1194,14 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @param n
      * @return
      */
-    public static <T, E extends Exception> ExceptionalStream<T, E> repeat(final T element, final long n) {
+    public static <T, E extends Exception> CheckedStream<T, E> repeat(final T element, final long n) {
         N.checkArgNotNegative(n, "n");
 
         if (n == 0) {
             return empty();
         }
 
-        return newStream(new ExceptionalIterator<T, E>() {
+        return newStream(new CheckedIterator<T, E>() {
             private long cnt = n;
 
             @Override
@@ -1233,7 +1228,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @param endExclusive
      * @return
      */
-    public static <E extends Exception> ExceptionalStream<Integer, E> range(final int startInclusive, final int endExclusive) {
+    public static <E extends Exception> CheckedStream<Integer, E> range(final int startInclusive, final int endExclusive) {
         return IntStream.range(startInclusive, endExclusive).boxed().<E> checked();
     }
 
@@ -1246,7 +1241,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @param by
      * @return
      */
-    public static <E extends Exception> ExceptionalStream<Integer, E> range(final int startInclusive, final int endExclusive, final int by) {
+    public static <E extends Exception> CheckedStream<Integer, E> range(final int startInclusive, final int endExclusive, final int by) {
         return IntStream.range(startInclusive, endExclusive, by).boxed().<E> checked();
     }
 
@@ -1258,7 +1253,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @param endExclusive
      * @return
      */
-    public static <E extends Exception> ExceptionalStream<Integer, E> rangeClosed(final int startInclusive, final int endExclusive) {
+    public static <E extends Exception> CheckedStream<Integer, E> rangeClosed(final int startInclusive, final int endExclusive) {
         return IntStream.rangeClosed(startInclusive, endExclusive).boxed().<E> checked();
     }
 
@@ -1271,7 +1266,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @param by
      * @return
      */
-    public static <E extends Exception> ExceptionalStream<Integer, E> rangeClosed(final int startInclusive, final int endExclusive, final int by) {
+    public static <E extends Exception> CheckedStream<Integer, E> rangeClosed(final int startInclusive, final int endExclusive, final int by) {
         return IntStream.rangeClosed(startInclusive, endExclusive, by).boxed().<E> checked();
     }
 
@@ -1283,7 +1278,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @param delimiter
      * @return
      */
-    public static <E extends Exception> ExceptionalStream<String, E> split(final CharSequence str, final CharSequence delimiter) {
+    public static <E extends Exception> CheckedStream<String, E> split(final CharSequence str, final CharSequence delimiter) {
         return of(Splitter.with(delimiter).iterate(str));
     }
 
@@ -1292,7 +1287,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @param file
      * @return
      */
-    public static ExceptionalStream<String, IOException> lines(final File file) {
+    public static CheckedStream<String, IOException> lines(final File file) {
         return lines(file, Charsets.UTF_8);
     }
 
@@ -1302,10 +1297,10 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @param charset
      * @return
      */
-    public static ExceptionalStream<String, IOException> lines(final File file, final Charset charset) {
+    public static CheckedStream<String, IOException> lines(final File file, final Charset charset) {
         N.checkArgNotNull(file, "file");
 
-        final ExceptionalIterator<String, IOException> iter = createLazyLineIterator(file, null, charset, null, true);
+        final CheckedIterator<String, IOException> iter = createLazyLineIterator(file, null, charset, null, true);
 
         return newStream(iter).onClose(newCloseHandler(iter)); //NOSONAR
     }
@@ -1315,7 +1310,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @param path
      * @return
      */
-    public static ExceptionalStream<String, IOException> lines(final Path path) {
+    public static CheckedStream<String, IOException> lines(final Path path) {
         return lines(path, Charsets.UTF_8);
     }
 
@@ -1325,10 +1320,10 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @param charset
      * @return
      */
-    public static ExceptionalStream<String, IOException> lines(final Path path, final Charset charset) {
+    public static CheckedStream<String, IOException> lines(final Path path, final Charset charset) {
         N.checkArgNotNull(path, "path");
 
-        final ExceptionalIterator<String, IOException> iter = createLazyLineIterator(null, path, charset, null, true);
+        final CheckedIterator<String, IOException> iter = createLazyLineIterator(null, path, charset, null, true);
 
         return newStream(iter).onClose(newCloseHandler(iter));
     }
@@ -1338,7 +1333,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @param reader
      * @return
      */
-    public static ExceptionalStream<String, IOException> lines(final Reader reader) {
+    public static CheckedStream<String, IOException> lines(final Reader reader) {
         N.checkArgNotNull(reader, "reader");
 
         return newStream(createLazyLineIterator(null, null, Charsets.UTF_8, reader, false));
@@ -1350,7 +1345,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @param parentPath
      * @return
      */
-    public static ExceptionalStream<File, IOException> listFiles(final File parentPath) {
+    public static CheckedStream<File, IOException> listFiles(final File parentPath) {
         if (!parentPath.exists()) {
             return empty();
         }
@@ -1365,14 +1360,14 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @param recursively
      * @return
      */
-    public static ExceptionalStream<File, IOException> listFiles(final File parentPath, final boolean recursively) {
+    public static CheckedStream<File, IOException> listFiles(final File parentPath, final boolean recursively) {
         if (!parentPath.exists()) {
             return empty();
         } else if (!recursively) {
             return of(parentPath.listFiles());
         }
 
-        final ExceptionalIterator<File, IOException> iter = new ExceptionalIterator<>() {
+        final CheckedIterator<File, IOException> iter = new CheckedIterator<>() {
             private final Queue<File> paths = N.asLinkedList(parentPath);
             private File[] subFiles = null;
             private int cursor = 0;
@@ -1422,15 +1417,15 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @param closeReader
      * @return
      */
-    private static ExceptionalIterator<String, IOException> createLazyLineIterator(final File file, final Path path, final Charset charset, final Reader reader,
+    private static CheckedIterator<String, IOException> createLazyLineIterator(final File file, final Path path, final Charset charset, final Reader reader,
             final boolean closeReader) {
-        return ExceptionalIterator.defer(new Throwables.Supplier<ExceptionalIterator<String, IOException>, IOException>() {
-            private ExceptionalIterator<String, IOException> lazyIter = null;
+        return CheckedIterator.defer(new Throwables.Supplier<CheckedIterator<String, IOException>, IOException>() {
+            private CheckedIterator<String, IOException> lazyIter = null;
 
             @Override
-            public synchronized ExceptionalIterator<String, IOException> get() {
+            public synchronized CheckedIterator<String, IOException> get() {
                 if (lazyIter == null) {
-                    lazyIter = new ExceptionalIterator<>() {
+                    lazyIter = new CheckedIterator<>() {
                         private BufferedReader bufferedReader;
 
                         { //NOSONAR
@@ -1497,7 +1492,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     @SafeVarargs
-    public static <T, E extends Exception> ExceptionalStream<T, E> concat(final T[]... a) {
+    public static <T, E extends Exception> CheckedStream<T, E> concat(final T[]... a) {
         if (N.isEmpty(a)) {
             return empty();
         }
@@ -1514,7 +1509,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     @SafeVarargs
-    public static <T, E extends Exception> ExceptionalStream<T, E> concat(final Iterable<? extends T>... a) {
+    public static <T, E extends Exception> CheckedStream<T, E> concat(final Iterable<? extends T>... a) {
         if (N.isEmpty(a)) {
             return empty();
         }
@@ -1531,7 +1526,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     @SafeVarargs
-    public static <T, E extends Exception> ExceptionalStream<T, E> concat(final Iterator<? extends T>... a) {
+    public static <T, E extends Exception> CheckedStream<T, E> concat(final Iterator<? extends T>... a) {
         if (N.isEmpty(a)) {
             return empty();
         }
@@ -1547,7 +1542,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     @SafeVarargs
-    public static <T, E extends Exception> ExceptionalStream<T, E> concat(final ExceptionalStream<? extends T, E>... a) {
+    public static <T, E extends Exception> CheckedStream<T, E> concat(final CheckedStream<? extends T, E>... a) {
         if (N.isEmpty(a)) {
             return empty();
         }
@@ -1562,15 +1557,15 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @param c
      * @return
      */
-    public static <T, E extends Exception> ExceptionalStream<T, E> concat(final Collection<? extends ExceptionalStream<? extends T, E>> c) {
+    public static <T, E extends Exception> CheckedStream<T, E> concat(final Collection<? extends CheckedStream<? extends T, E>> c) {
         if (N.isEmpty(c)) {
             return empty();
         }
 
-        return newStream(new ExceptionalIterator<T, E>() {
-            private final Iterator<? extends ExceptionalStream<? extends T, E>> iterators = c.iterator();
-            private ExceptionalStream<? extends T, E> cur;
-            private ExceptionalIterator<? extends T, E> iter;
+        return newStream(new CheckedIterator<T, E>() {
+            private final Iterator<? extends CheckedStream<? extends T, E>> iterators = c.iterator();
+            private CheckedStream<? extends T, E> cur;
+            private CheckedIterator<? extends T, E> iter;
 
             @Override
             public boolean hasNext() throws E {
@@ -1610,7 +1605,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @param zipFunction
      * @return
      */
-    public static <A, B, T, E extends Exception> ExceptionalStream<T, E> zip(final A[] a, final B[] b,
+    public static <A, B, T, E extends Exception> CheckedStream<T, E> zip(final A[] a, final B[] b,
             final Throwables.BiFunction<? super A, ? super B, ? extends T, ? extends E> zipFunction) {
         return zip(ObjIterator.of(a), ObjIterator.of(b), zipFunction);
     }
@@ -1630,7 +1625,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @param zipFunction
      * @return
      */
-    public static <A, B, C, T, E extends Exception> ExceptionalStream<T, E> zip(final A[] a, final B[] b, final C[] c,
+    public static <A, B, C, T, E extends Exception> CheckedStream<T, E> zip(final A[] a, final B[] b, final C[] c,
             final Throwables.TriFunction<? super A, ? super B, ? super C, ? extends T, ? extends E> zipFunction) {
         return zip(ObjIterator.of(a), ObjIterator.of(b), ObjIterator.of(c), zipFunction);
     }
@@ -1648,7 +1643,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @param zipFunction
      * @return
      */
-    public static <A, B, T, E extends Exception> ExceptionalStream<T, E> zip(final Iterable<? extends A> a, final Iterable<? extends B> b,
+    public static <A, B, T, E extends Exception> CheckedStream<T, E> zip(final Iterable<? extends A> a, final Iterable<? extends B> b,
             final Throwables.BiFunction<? super A, ? super B, ? extends T, ? extends E> zipFunction) {
         return zip(N.iterate(a), N.iterate(b), zipFunction);
     }
@@ -1668,7 +1663,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @param zipFunction
      * @return
      */
-    public static <A, B, C, T, E extends Exception> ExceptionalStream<T, E> zip(final Iterable<? extends A> a, final Iterable<? extends B> b,
+    public static <A, B, C, T, E extends Exception> CheckedStream<T, E> zip(final Iterable<? extends A> a, final Iterable<? extends B> b,
             final Iterable<? extends C> c, final Throwables.TriFunction<? super A, ? super B, ? super C, ? extends T, ? extends E> zipFunction) {
         return zip(N.iterate(a), N.iterate(b), N.iterate(c), zipFunction);
     }
@@ -1686,9 +1681,9 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @param zipFunction
      * @return
      */
-    public static <A, B, T, E extends Exception> ExceptionalStream<T, E> zip(final Iterator<? extends A> a, final Iterator<? extends B> b,
+    public static <A, B, T, E extends Exception> CheckedStream<T, E> zip(final Iterator<? extends A> a, final Iterator<? extends B> b,
             final Throwables.BiFunction<? super A, ? super B, ? extends T, ? extends E> zipFunction) {
-        return newStream(new ExceptionalIterator<T, E>() {
+        return newStream(new CheckedIterator<T, E>() {
             private final Iterator<? extends A> iterA = a == null ? ObjIterator.<A> empty() : a;
             private final Iterator<? extends B> iterB = b == null ? ObjIterator.<B> empty() : b;
 
@@ -1719,9 +1714,9 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @param zipFunction
      * @return
      */
-    public static <A, B, C, T, E extends Exception> ExceptionalStream<T, E> zip(final Iterator<? extends A> a, final Iterator<? extends B> b,
+    public static <A, B, C, T, E extends Exception> CheckedStream<T, E> zip(final Iterator<? extends A> a, final Iterator<? extends B> b,
             final Iterator<? extends C> c, final Throwables.TriFunction<? super A, ? super B, ? super C, ? extends T, ? extends E> zipFunction) {
-        return newStream(new ExceptionalIterator<T, E>() {
+        return newStream(new CheckedIterator<T, E>() {
             private final Iterator<? extends A> iterA = a == null ? ObjIterator.<A> empty() : a;
             private final Iterator<? extends B> iterB = b == null ? ObjIterator.<B> empty() : b;
             private final Iterator<? extends C> iterC = c == null ? ObjIterator.<C> empty() : c;
@@ -1751,11 +1746,11 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @param zipFunction
      * @return
      */
-    public static <A, B, T, E extends Exception> ExceptionalStream<T, E> zip(final ExceptionalStream<? extends A, E> a,
-            final ExceptionalStream<? extends B, E> b, final Throwables.BiFunction<? super A, ? super B, ? extends T, ? extends E> zipFunction) {
-        return newStream(new ExceptionalIterator<T, E>() {
-            private final ExceptionalIterator<? extends A, E> iterA = iterate(a);
-            private final ExceptionalIterator<? extends B, E> iterB = iterate(b);
+    public static <A, B, T, E extends Exception> CheckedStream<T, E> zip(final CheckedStream<? extends A, E> a, final CheckedStream<? extends B, E> b,
+            final Throwables.BiFunction<? super A, ? super B, ? extends T, ? extends E> zipFunction) {
+        return newStream(new CheckedIterator<T, E>() {
+            private final CheckedIterator<? extends A, E> iterA = iterate(a);
+            private final CheckedIterator<? extends B, E> iterB = iterate(b);
 
             @Override
             public boolean hasNext() throws E {
@@ -1784,13 +1779,12 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @param zipFunction
      * @return
      */
-    public static <A, B, C, T, E extends Exception> ExceptionalStream<T, E> zip(final ExceptionalStream<? extends A, E> a,
-            final ExceptionalStream<? extends B, E> b, final ExceptionalStream<? extends C, E> c,
-            final Throwables.TriFunction<? super A, ? super B, ? super C, ? extends T, ? extends E> zipFunction) {
-        return newStream(new ExceptionalIterator<T, E>() {
-            private final ExceptionalIterator<? extends A, E> iterA = iterate(a);
-            private final ExceptionalIterator<? extends B, E> iterB = iterate(b);
-            private final ExceptionalIterator<? extends C, E> iterC = iterate(c);
+    public static <A, B, C, T, E extends Exception> CheckedStream<T, E> zip(final CheckedStream<? extends A, E> a, final CheckedStream<? extends B, E> b,
+            final CheckedStream<? extends C, E> c, final Throwables.TriFunction<? super A, ? super B, ? super C, ? extends T, ? extends E> zipFunction) {
+        return newStream(new CheckedIterator<T, E>() {
+            private final CheckedIterator<? extends A, E> iterA = iterate(a);
+            private final CheckedIterator<? extends B, E> iterB = iterate(b);
+            private final CheckedIterator<? extends C, E> iterC = iterate(c);
 
             @Override
             public boolean hasNext() throws E {
@@ -1819,7 +1813,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @param zipFunction
      * @return
      */
-    public static <A, B, T, E extends Exception> ExceptionalStream<T, E> zip(final A[] a, final B[] b, final A valueForNoneA, final B valueForNoneB,
+    public static <A, B, T, E extends Exception> CheckedStream<T, E> zip(final A[] a, final B[] b, final A valueForNoneA, final B valueForNoneB,
             final Throwables.BiFunction<? super A, ? super B, ? extends T, ? extends E> zipFunction) {
         return zip(ObjIterator.of(a), ObjIterator.of(b), valueForNoneA, valueForNoneB, zipFunction);
     }
@@ -1842,8 +1836,8 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @param zipFunction
      * @return
      */
-    public static <A, B, C, T, E extends Exception> ExceptionalStream<T, E> zip(final A[] a, final B[] b, final C[] c, final A valueForNoneA,
-            final B valueForNoneB, final C valueForNoneC, final Throwables.TriFunction<? super A, ? super B, ? super C, ? extends T, ? extends E> zipFunction) {
+    public static <A, B, C, T, E extends Exception> CheckedStream<T, E> zip(final A[] a, final B[] b, final C[] c, final A valueForNoneA, final B valueForNoneB,
+            final C valueForNoneC, final Throwables.TriFunction<? super A, ? super B, ? super C, ? extends T, ? extends E> zipFunction) {
         return zip(ObjIterator.of(a), ObjIterator.of(b), ObjIterator.of(c), valueForNoneA, valueForNoneB, valueForNoneC, zipFunction);
     }
 
@@ -1862,8 +1856,8 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @param zipFunction
      * @return
      */
-    public static <A, B, T, E extends Exception> ExceptionalStream<T, E> zip(final Iterable<? extends A> a, final Iterable<? extends B> b,
-            final A valueForNoneA, final B valueForNoneB, final Throwables.BiFunction<? super A, ? super B, ? extends T, ? extends E> zipFunction) {
+    public static <A, B, T, E extends Exception> CheckedStream<T, E> zip(final Iterable<? extends A> a, final Iterable<? extends B> b, final A valueForNoneA,
+            final B valueForNoneB, final Throwables.BiFunction<? super A, ? super B, ? extends T, ? extends E> zipFunction) {
         return zip(N.iterate(a), N.iterate(b), valueForNoneA, valueForNoneB, zipFunction);
     }
 
@@ -1885,7 +1879,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @param zipFunction
      * @return
      */
-    public static <A, B, C, T, E extends Exception> ExceptionalStream<T, E> zip(final Iterable<? extends A> a, final Iterable<? extends B> b,
+    public static <A, B, C, T, E extends Exception> CheckedStream<T, E> zip(final Iterable<? extends A> a, final Iterable<? extends B> b,
             final Iterable<? extends C> c, final A valueForNoneA, final B valueForNoneB, final C valueForNoneC,
             final Throwables.TriFunction<? super A, ? super B, ? super C, ? extends T, ? extends E> zipFunction) {
         return zip(N.iterate(a), N.iterate(b), N.iterate(c), valueForNoneA, valueForNoneB, valueForNoneC, zipFunction);
@@ -1906,9 +1900,9 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @param zipFunction
      * @return
      */
-    public static <A, B, T, E extends Exception> ExceptionalStream<T, E> zip(final Iterator<? extends A> a, final Iterator<? extends B> b,
-            final A valueForNoneA, final B valueForNoneB, final Throwables.BiFunction<? super A, ? super B, ? extends T, ? extends E> zipFunction) {
-        return newStream(new ExceptionalIterator<T, E>() {
+    public static <A, B, T, E extends Exception> CheckedStream<T, E> zip(final Iterator<? extends A> a, final Iterator<? extends B> b, final A valueForNoneA,
+            final B valueForNoneB, final Throwables.BiFunction<? super A, ? super B, ? extends T, ? extends E> zipFunction) {
+        return newStream(new CheckedIterator<T, E>() {
             private final Iterator<? extends A> iterA = a == null ? ObjIterator.<A> empty() : a;
             private final Iterator<? extends B> iterB = b == null ? ObjIterator.<B> empty() : b;
 
@@ -1946,10 +1940,10 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @param zipFunction
      * @return
      */
-    public static <A, B, C, T, E extends Exception> ExceptionalStream<T, E> zip(final Iterator<? extends A> a, final Iterator<? extends B> b,
+    public static <A, B, C, T, E extends Exception> CheckedStream<T, E> zip(final Iterator<? extends A> a, final Iterator<? extends B> b,
             final Iterator<? extends C> c, final A valueForNoneA, final B valueForNoneB, final C valueForNoneC,
             final Throwables.TriFunction<? super A, ? super B, ? super C, ? extends T, ? extends E> zipFunction) {
-        return newStream(new ExceptionalIterator<T, E>() {
+        return newStream(new CheckedIterator<T, E>() {
             private final Iterator<? extends A> iterA = a == null ? ObjIterator.<A> empty() : a;
             private final Iterator<? extends B> iterB = b == null ? ObjIterator.<B> empty() : b;
             private final Iterator<? extends C> iterC = c == null ? ObjIterator.<C> empty() : c;
@@ -1986,12 +1980,11 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @param zipFunction
      * @return
      */
-    public static <A, B, T, E extends Exception> ExceptionalStream<T, E> zip(final ExceptionalStream<? extends A, E> a,
-            final ExceptionalStream<? extends B, E> b, final A valueForNoneA, final B valueForNoneB,
-            final Throwables.BiFunction<? super A, ? super B, ? extends T, ? extends E> zipFunction) {
-        return newStream(new ExceptionalIterator<T, E>() {
-            private final ExceptionalIterator<? extends A, E> iterA = iterate(a);
-            private final ExceptionalIterator<? extends B, E> iterB = iterate(b);
+    public static <A, B, T, E extends Exception> CheckedStream<T, E> zip(final CheckedStream<? extends A, E> a, final CheckedStream<? extends B, E> b,
+            final A valueForNoneA, final B valueForNoneB, final Throwables.BiFunction<? super A, ? super B, ? extends T, ? extends E> zipFunction) {
+        return newStream(new CheckedIterator<T, E>() {
+            private final CheckedIterator<? extends A, E> iterA = iterate(a);
+            private final CheckedIterator<? extends B, E> iterB = iterate(b);
 
             @Override
             public boolean hasNext() throws E {
@@ -2027,13 +2020,13 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @param zipFunction
      * @return
      */
-    public static <A, B, C, T, E extends Exception> ExceptionalStream<T, E> zip(final ExceptionalStream<? extends A, E> a,
-            final ExceptionalStream<? extends B, E> b, final ExceptionalStream<? extends C, E> c, final A valueForNoneA, final B valueForNoneB,
-            final C valueForNoneC, final Throwables.TriFunction<? super A, ? super B, ? super C, ? extends T, ? extends E> zipFunction) {
-        return newStream(new ExceptionalIterator<T, E>() {
-            private final ExceptionalIterator<? extends A, E> iterA = iterate(a);
-            private final ExceptionalIterator<? extends B, E> iterB = iterate(b);
-            private final ExceptionalIterator<? extends C, E> iterC = iterate(c);
+    public static <A, B, C, T, E extends Exception> CheckedStream<T, E> zip(final CheckedStream<? extends A, E> a, final CheckedStream<? extends B, E> b,
+            final CheckedStream<? extends C, E> c, final A valueForNoneA, final B valueForNoneB, final C valueForNoneC,
+            final Throwables.TriFunction<? super A, ? super B, ? super C, ? extends T, ? extends E> zipFunction) {
+        return newStream(new CheckedIterator<T, E>() {
+            private final CheckedIterator<? extends A, E> iterA = iterate(a);
+            private final CheckedIterator<? extends B, E> iterB = iterate(b);
+            private final CheckedIterator<? extends C, E> iterC = iterate(c);
 
             @Override
             public boolean hasNext() throws E {
@@ -2053,14 +2046,14 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     private static <E extends Exception> Deque<Throwables.Runnable<? extends E>> mergeCloseHandlers(
-            Collection<? extends ExceptionalStream<?, E>> closeHandlersList) {
+            Collection<? extends CheckedStream<?, E>> closeHandlersList) {
         if (N.isEmpty(closeHandlersList)) {
             return null;
         }
 
         int count = 0;
 
-        for (ExceptionalStream<?, E> s : closeHandlersList) {
+        for (CheckedStream<?, E> s : closeHandlersList) {
             count += N.size(s.closeHandlers);
         }
 
@@ -2070,7 +2063,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
         final Deque<Throwables.Runnable<? extends E>> newCloseHandlers = new ArrayDeque<>(count);
 
-        for (ExceptionalStream<?, E> s : closeHandlersList) {
+        for (CheckedStream<?, E> s : closeHandlersList) {
             if (s.isClosed || isEmptyCloseHandlers(s.closeHandlers)) {
                 continue;
             }
@@ -2091,7 +2084,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
      * @return
      */
-    public static <T, E extends Exception> ExceptionalStream<T, E> merge(final T[] a, final T[] b,
+    public static <T, E extends Exception> CheckedStream<T, E> merge(final T[] a, final T[] b,
             final Throwables.BiFunction<? super T, ? super T, MergeResult, E> nextSelector) {
         if (N.isEmpty(a)) {
             return of(b);
@@ -2099,7 +2092,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             return of(a);
         }
 
-        return newStream(new ExceptionalIterator<T, E>() {
+        return newStream(new CheckedIterator<T, E>() {
             private final int lenA = a.length;
             private final int lenB = b.length;
             private int cursorA = 0;
@@ -2142,9 +2135,9 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
      * @return
      */
-    public static <T, E extends Exception> ExceptionalStream<T, E> merge(final T[] a, final T[] b, final T[] c,
+    public static <T, E extends Exception> CheckedStream<T, E> merge(final T[] a, final T[] b, final T[] c,
             final Throwables.BiFunction<? super T, ? super T, MergeResult, E> nextSelector) {
-        return merge(merge(a, b, nextSelector).iteratorEx(), ExceptionalIterator.<T, E> of(N.iterate(c)), nextSelector);
+        return merge(merge(a, b, nextSelector).iteratorEx(), CheckedIterator.<T, E> of(N.iterate(c)), nextSelector);
     }
 
     /**
@@ -2157,7 +2150,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
      * @return
      */
-    public static <T, E extends Exception> ExceptionalStream<T, E> merge(final Iterable<? extends T> a, final Iterable<? extends T> b,
+    public static <T, E extends Exception> CheckedStream<T, E> merge(final Iterable<? extends T> a, final Iterable<? extends T> b,
             final Throwables.BiFunction<? super T, ? super T, MergeResult, E> nextSelector) {
         return merge(N.iterate(a), N.iterate(b), nextSelector);
     }
@@ -2173,7 +2166,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
      * @return
      */
-    public static <T, E extends Exception> ExceptionalStream<T, E> merge(final Iterable<? extends T> a, final Iterable<? extends T> b,
+    public static <T, E extends Exception> CheckedStream<T, E> merge(final Iterable<? extends T> a, final Iterable<? extends T> b,
             final Iterable<? extends T> c, final Throwables.BiFunction<? super T, ? super T, MergeResult, E> nextSelector) {
         return merge(N.iterate(a), N.iterate(b), N.iterate(c), nextSelector);
     }
@@ -2188,9 +2181,9 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
      * @return
      */
-    public static <T, E extends Exception> ExceptionalStream<T, E> merge(final Iterator<? extends T> a, final Iterator<? extends T> b,
+    public static <T, E extends Exception> CheckedStream<T, E> merge(final Iterator<? extends T> a, final Iterator<? extends T> b,
             final Throwables.BiFunction<? super T, ? super T, MergeResult, E> nextSelector) {
-        return merge(ExceptionalIterator.<T, E> of(a), ExceptionalIterator.<T, E> of(b), nextSelector);
+        return merge(CheckedIterator.<T, E> of(a), CheckedIterator.<T, E> of(b), nextSelector);
     }
 
     /**
@@ -2204,9 +2197,9 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
      * @return
      */
-    public static <T, E extends Exception> ExceptionalStream<T, E> merge(final Iterator<? extends T> a, final Iterator<? extends T> b,
+    public static <T, E extends Exception> CheckedStream<T, E> merge(final Iterator<? extends T> a, final Iterator<? extends T> b,
             final Iterator<? extends T> c, final Throwables.BiFunction<? super T, ? super T, MergeResult, E> nextSelector) {
-        return merge(merge(a, b, nextSelector).iteratorEx(), ExceptionalIterator.<T, E> of(c), nextSelector);
+        return merge(merge(a, b, nextSelector).iteratorEx(), CheckedIterator.<T, E> of(c), nextSelector);
     }
 
     /**
@@ -2219,7 +2212,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
      * @return
      */
-    public static <T, E extends Exception> ExceptionalStream<T, E> merge(final ExceptionalStream<? extends T, E> a, final ExceptionalStream<? extends T, E> b,
+    public static <T, E extends Exception> CheckedStream<T, E> merge(final CheckedStream<? extends T, E> a, final CheckedStream<? extends T, E> b,
             final Throwables.BiFunction<? super T, ? super T, MergeResult, E> nextSelector) {
         return merge(iterate(a), iterate(b), nextSelector).onClose(() -> {
             try {
@@ -2245,16 +2238,16 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @param nextSelector
      * @return
      */
-    public static <T, E extends Exception> ExceptionalStream<T, E> merge(final ExceptionalStream<? extends T, E> a, final ExceptionalStream<? extends T, E> b,
-            final ExceptionalStream<? extends T, E> c, final Throwables.BiFunction<? super T, ? super T, MergeResult, E> nextSelector) {
+    public static <T, E extends Exception> CheckedStream<T, E> merge(final CheckedStream<? extends T, E> a, final CheckedStream<? extends T, E> b,
+            final CheckedStream<? extends T, E> c, final Throwables.BiFunction<? super T, ? super T, MergeResult, E> nextSelector) {
         return merge(merge(a, b, nextSelector), c, nextSelector);
     }
 
-    static <T, E extends Exception> ExceptionalStream<T, E> merge(final ExceptionalIterator<? extends T, E> a, final ExceptionalIterator<? extends T, E> b,
+    static <T, E extends Exception> CheckedStream<T, E> merge(final CheckedIterator<? extends T, E> a, final CheckedIterator<? extends T, E> b,
             final Throwables.BiFunction<? super T, ? super T, MergeResult, E> nextSelector) {
-        return newStream(new ExceptionalIterator<T, E>() {
-            private final ExceptionalIterator<T, E> iterA = a == null ? ExceptionalIterator.EMPTY : (ExceptionalIterator<T, E>) a;
-            private final ExceptionalIterator<T, E> iterB = b == null ? ExceptionalIterator.EMPTY : (ExceptionalIterator<T, E>) b;
+        return newStream(new CheckedIterator<T, E>() {
+            private final CheckedIterator<T, E> iterA = a == null ? CheckedIterator.EMPTY : (CheckedIterator<T, E>) a;
+            private final CheckedIterator<T, E> iterB = b == null ? CheckedIterator.EMPTY : (CheckedIterator<T, E>) b;
 
             private T nextA = null;
             private T nextB = null;
@@ -2321,10 +2314,10 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     @IntermediateOp
-    public ExceptionalStream<T, E> filter(final Throwables.Predicate<? super T, ? extends E> predicate) {
+    public CheckedStream<T, E> filter(final Throwables.Predicate<? super T, ? extends E> predicate) {
         assertNotClosed();
 
-        return newStream(new ExceptionalIterator<T, E>() {
+        return newStream(new CheckedIterator<T, E>() {
             private boolean hasNext = false;
             private T next = null;
 
@@ -2364,7 +2357,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     @IntermediateOp
-    public ExceptionalStream<T, E> filter(final Throwables.Predicate<? super T, ? extends E> predicate,
+    public CheckedStream<T, E> filter(final Throwables.Predicate<? super T, ? extends E> predicate,
             final Throwables.Consumer<? super T, ? extends E> actionOnDroppedItem) {
         assertNotClosed();
 
@@ -2384,10 +2377,10 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     @IntermediateOp
-    public ExceptionalStream<T, E> takeWhile(final Throwables.Predicate<? super T, ? extends E> predicate) {
+    public CheckedStream<T, E> takeWhile(final Throwables.Predicate<? super T, ? extends E> predicate) {
         assertNotClosed();
 
-        return newStream(new ExceptionalIterator<T, E>() {
+        return newStream(new CheckedIterator<T, E>() {
             private boolean hasMore = true;
             private boolean hasNext = false;
             private T next = null;
@@ -2426,10 +2419,10 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     @IntermediateOp
-    public ExceptionalStream<T, E> dropWhile(final Throwables.Predicate<? super T, ? extends E> predicate) {
+    public CheckedStream<T, E> dropWhile(final Throwables.Predicate<? super T, ? extends E> predicate) {
         assertNotClosed();
 
-        return newStream(new ExceptionalIterator<T, E>() {
+        return newStream(new CheckedIterator<T, E>() {
             private boolean hasNext = false;
             private T next = null;
             private boolean dropped = false;
@@ -2478,7 +2471,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     @IntermediateOp
-    public ExceptionalStream<T, E> dropWhile(final Throwables.Predicate<? super T, ? extends E> predicate,
+    public CheckedStream<T, E> dropWhile(final Throwables.Predicate<? super T, ? extends E> predicate,
             final Throwables.Consumer<? super T, ? extends E> actionOnDroppedItem) {
         assertNotClosed();
 
@@ -2499,7 +2492,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @Beta
     @IntermediateOp
-    public ExceptionalStream<T, E> skipUntil(final Throwables.Predicate<? super T, ? extends E> predicate) {
+    public CheckedStream<T, E> skipUntil(final Throwables.Predicate<? super T, ? extends E> predicate) {
         return dropWhile(Fnn.not(predicate));
     }
 
@@ -2509,7 +2502,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     @IntermediateOp
-    public ExceptionalStream<T, E> distinct() {
+    public CheckedStream<T, E> distinct() {
         assertNotClosed();
 
         final Set<Object> set = N.newHashSet();
@@ -2526,7 +2519,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @IntermediateOp
     @TerminalOpTriggered
-    public ExceptionalStream<T, E> distinct(final Throwables.BinaryOperator<T, ? extends E> mergeFunction) {
+    public CheckedStream<T, E> distinct(final Throwables.BinaryOperator<T, ? extends E> mergeFunction) {
         return distinctBy(Fnn.identity(), mergeFunction);
     }
 
@@ -2539,7 +2532,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @IntermediateOp
     @TerminalOpTriggered
-    public ExceptionalStream<T, E> distinct(final Throwables.Predicate<? super Long, ? extends E> occurrencesFilter) {
+    public CheckedStream<T, E> distinct(final Throwables.Predicate<? super Long, ? extends E> occurrencesFilter) {
         assertNotClosed();
 
         final Supplier<? extends Map<T, Long>> supplier = Suppliers.<T, Long> ofLinkedHashMap();
@@ -2557,7 +2550,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     @IntermediateOp
-    public <K> ExceptionalStream<T, E> distinctBy(final Throwables.Function<? super T, K, ? extends E> keyMapper) {
+    public <K> CheckedStream<T, E> distinctBy(final Throwables.Function<? super T, K, ? extends E> keyMapper) {
         assertNotClosed();
 
         final Set<Object> set = N.newHashSet();
@@ -2576,7 +2569,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @IntermediateOp
     @TerminalOpTriggered
-    public <K> ExceptionalStream<T, E> distinctBy(final Throwables.Function<? super T, K, ? extends E> keyMapper,
+    public <K> CheckedStream<T, E> distinctBy(final Throwables.Function<? super T, K, ? extends E> keyMapper,
             final Throwables.BinaryOperator<T, ? extends E> mergeFunction) {
         assertNotClosed();
 
@@ -2597,7 +2590,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     @IntermediateOp
     @TerminalOpTriggered
     @SuppressWarnings("rawtypes")
-    public <K> ExceptionalStream<T, E> distinctBy(final Throwables.Function<? super T, K, ? extends E> keyMapper,
+    public <K> CheckedStream<T, E> distinctBy(final Throwables.Function<? super T, K, ? extends E> keyMapper,
             final Throwables.Predicate<? super Map.Entry<Keyed<K, T>, Long>, ? extends E> occurrencesFilter) {
         assertNotClosed();
 
@@ -2621,7 +2614,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @IntermediateOp
     @TerminalOpTriggered
-    public <K> ExceptionalStream<T, E> distinctLimitBy(final Throwables.Function<? super T, K, ? extends E> keyMapper,
+    public <K> CheckedStream<T, E> distinctLimitBy(final Throwables.Function<? super T, K, ? extends E> keyMapper,
             final Throwables.BiFunction<? super K, ? super List<T>, Integer, ? extends E> limit) {
 
         return groupBy(keyMapper) //
@@ -2635,10 +2628,10 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     @IntermediateOp
-    public <R> ExceptionalStream<R, E> map(final Throwables.Function<? super T, ? extends R, ? extends E> mapper) {
+    public <R> CheckedStream<R, E> map(final Throwables.Function<? super T, ? extends R, ? extends E> mapper) {
         assertNotClosed();
 
-        return newStream(new ExceptionalIterator<R, E>() {
+        return newStream(new CheckedIterator<R, E>() {
             @Override
             public boolean hasNext() throws E {
                 return elements.hasNext();
@@ -2658,10 +2651,10 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     @IntermediateOp
-    public ExceptionalStream<T, E> mapFirst(final Throwables.Function<? super T, ? extends T, ? extends E> mapperForFirst) {
+    public CheckedStream<T, E> mapFirst(final Throwables.Function<? super T, ? extends T, ? extends E> mapperForFirst) {
         assertNotClosed();
 
-        return newStream(new ExceptionalIterator<T, E>() {
+        return newStream(new CheckedIterator<T, E>() {
             private boolean isFirst = true;
 
             @Override
@@ -2690,11 +2683,11 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     @IntermediateOp
-    public <R> ExceptionalStream<R, E> mapFirstOrElse(final Throwables.Function<? super T, ? extends R, E> mapperForFirst,
+    public <R> CheckedStream<R, E> mapFirstOrElse(final Throwables.Function<? super T, ? extends R, E> mapperForFirst,
             final Throwables.Function<? super T, ? extends R, E> mapperForElse) {
         assertNotClosed();
 
-        return newStream(new ExceptionalIterator<R, E>() {
+        return newStream(new CheckedIterator<R, E>() {
             private boolean isFirst = true;
 
             @Override
@@ -2721,10 +2714,10 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     @IntermediateOp
-    public ExceptionalStream<T, E> mapLast(final Throwables.Function<? super T, ? extends T, ? extends E> mapperForLast) {
+    public CheckedStream<T, E> mapLast(final Throwables.Function<? super T, ? extends T, ? extends E> mapperForLast) {
         assertNotClosed();
 
-        return newStream(new ExceptionalIterator<T, E>() {
+        return newStream(new CheckedIterator<T, E>() {
             private boolean hasNext = false;
             private T next = null;
 
@@ -2755,11 +2748,11 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     @IntermediateOp
-    public <R> ExceptionalStream<R, E> mapLastOrElse(final Throwables.Function<? super T, ? extends R, E> mapperForLast,
+    public <R> CheckedStream<R, E> mapLastOrElse(final Throwables.Function<? super T, ? extends R, E> mapperForLast,
             final Throwables.Function<? super T, ? extends R, E> mapperForElse) {
         assertNotClosed();
 
-        return newStream(new ExceptionalIterator<R, E>() {
+        return newStream(new CheckedIterator<R, E>() {
             private T next = null;
 
             @Override
@@ -2787,13 +2780,12 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     @IntermediateOp
-    public <R> ExceptionalStream<R, E> flatMap(
-            final Throwables.Function<? super T, ? extends ExceptionalStream<? extends R, ? extends E>, ? extends E> mapper) {
+    public <R> CheckedStream<R, E> flatMap(final Throwables.Function<? super T, ? extends CheckedStream<? extends R, ? extends E>, ? extends E> mapper) {
         assertNotClosed();
 
-        final ExceptionalIterator<R, E> iter = new ExceptionalIterator<>() {
-            private ExceptionalStream<? extends R, ? extends E> s = null;
-            private ExceptionalIterator<? extends R, ? extends E> cur = null;
+        final CheckedIterator<R, E> iter = new CheckedIterator<>() {
+            private CheckedStream<? extends R, ? extends E> s = null;
+            private CheckedIterator<? extends R, ? extends E> cur = null;
 
             @Override
             public boolean hasNext() throws E {
@@ -2842,7 +2834,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         return newStream(iter, newCloseHandlers);
     }
 
-    private Deque<Throwables.Runnable<? extends E>> mergeCloseHandler(final ExceptionalIterator<?, E> iter) {
+    private Deque<Throwables.Runnable<? extends E>> mergeCloseHandler(final CheckedIterator<?, E> iter) {
         final Deque<Throwables.Runnable<? extends E>> newCloseHandlers = new ArrayDeque<>(N.size(closeHandlers) + 1);
 
         if (N.notEmpty(closeHandlers)) {
@@ -2861,10 +2853,10 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     @IntermediateOp
-    public <R> ExceptionalStream<R, E> flatmap(final Throwables.Function<? super T, ? extends Collection<? extends R>, ? extends E> mapper) { //NOSONAR
+    public <R> CheckedStream<R, E> flatmap(final Throwables.Function<? super T, ? extends Collection<? extends R>, ? extends E> mapper) { //NOSONAR
         assertNotClosed();
 
-        return newStream(new ExceptionalIterator<R, E>() {
+        return newStream(new CheckedIterator<R, E>() {
             private Collection<? extends R> c = null;
             private Iterator<? extends R> cur = null;
 
@@ -2896,10 +2888,10 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     @IntermediateOp
-    public <R> ExceptionalStream<R, E> flattMap(final Throwables.Function<? super T, R[], ? extends E> mapper) {
+    public <R> CheckedStream<R, E> flattMap(final Throwables.Function<? super T, R[], ? extends E> mapper) {
         assertNotClosed();
 
-        return newStream(new ExceptionalIterator<R, E>() {
+        return newStream(new CheckedIterator<R, E>() {
             private R[] cur = null;
             private int len = 0;
             private int idx = 0;
@@ -2939,10 +2931,10 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @Beta
     @IntermediateOp
-    public <R> ExceptionalStream<R, E> flattmap(final Throwables.Function<? super T, ? extends Stream<? extends R>, ? extends E> mapper) { //NOSONAR
+    public <R> CheckedStream<R, E> flattmap(final Throwables.Function<? super T, ? extends Stream<? extends R>, ? extends E> mapper) { //NOSONAR
         assertNotClosed();
 
-        final ExceptionalIterator<R, E> iter = new ExceptionalIterator<>() {
+        final CheckedIterator<R, E> iter = new CheckedIterator<>() {
             private Stream<? extends R> s = null;
             private Iterator<? extends R> cur = null;
 
@@ -3001,9 +2993,9 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     //     */
     //    @Beta
     //    @IntermediateOp
-    //    public <R> ExceptionalStream<R, E> flatMapByStream(final Throwables.Function<? super T, ? extends Stream<? extends R>, ? extends E> mapper) {
+    //    public <R> CheckedStream<R, E> flatMapByStream(final Throwables.Function<? super T, ? extends Stream<? extends R>, ? extends E> mapper) {
     //        assertNotClosed();
-    //        final ExceptionalIterator<R, E> iter = new ExceptionalIterator<R, E>() {
+    //        final CheckedIterator<R, E> iter = new CheckedIterator<R, E>() {
     //            private Stream<? extends R> s = null;
     //            private Iterator<? extends R> cur = null;
     //
@@ -3068,10 +3060,10 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     //     */
     //    @Beta
     //    @IntermediateOp
-    //    public <R> ExceptionalStream<R, E> flatMapByStreamJdk(
+    //    public <R> CheckedStream<R, E> flatMapByStreamJdk(
     //            final Throwables.Function<? super T, ? extends java.util.stream.Stream<? extends R>, ? extends E> mapper) {
     //        assertNotClosed();
-    //        final ExceptionalIterator<R, E> iter = new ExceptionalIterator<R, E>() {
+    //        final CheckedIterator<R, E> iter = new CheckedIterator<R, E>() {
     //            private java.util.stream.Stream<? extends R> s = null;
     //            private Iterator<? extends R> cur = null;
     //
@@ -3141,7 +3133,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @Beta
     @IntermediateOp
-    public <R> ExceptionalStream<R, E> flatMapIfNotNull(final Throwables.Function<? super T, ? extends Collection<? extends R>, ? extends E> mapper) {
+    public <R> CheckedStream<R, E> flatMapIfNotNull(final Throwables.Function<? super T, ? extends Collection<? extends R>, ? extends E> mapper) {
         return skipNulls().flatmap(mapper);
     }
 
@@ -3160,7 +3152,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @Beta
     @IntermediateOp
-    public <U, R> ExceptionalStream<R, E> flatMapIfNotNull(final Throwables.Function<? super T, ? extends Collection<? extends U>, ? extends E> mapper,
+    public <U, R> CheckedStream<R, E> flatMapIfNotNull(final Throwables.Function<? super T, ? extends Collection<? extends U>, ? extends E> mapper,
             final Throwables.Function<? super U, ? extends Collection<? extends R>, ? extends E> mapper2) {
         return skipNulls().flatmap(mapper).skipNulls().flatmap(mapper2);
     }
@@ -3173,10 +3165,10 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @Beta
     @IntermediateOp
-    public ExceptionalStream<Boolean, E> flatMapToBoolean(final Throwables.Function<? super T, boolean[], ? extends E> mapper) {
+    public CheckedStream<Boolean, E> flatMapToBoolean(final Throwables.Function<? super T, boolean[], ? extends E> mapper) {
         assertNotClosed();
 
-        return newStream(new ExceptionalIterator<Boolean, E>() {
+        return newStream(new CheckedIterator<Boolean, E>() {
             private boolean[] cur = null;
             private int len = 0;
             private int idx = 0;
@@ -3216,10 +3208,10 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @Beta
     @IntermediateOp
-    public ExceptionalStream<Character, E> flatMapToChar(final Throwables.Function<? super T, char[], ? extends E> mapper) {
+    public CheckedStream<Character, E> flatMapToChar(final Throwables.Function<? super T, char[], ? extends E> mapper) {
         assertNotClosed();
 
-        return newStream(new ExceptionalIterator<Character, E>() {
+        return newStream(new CheckedIterator<Character, E>() {
             private char[] cur = null;
             private int len = 0;
             private int idx = 0;
@@ -3259,10 +3251,10 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @Beta
     @IntermediateOp
-    public ExceptionalStream<Byte, E> flatMapToByte(final Throwables.Function<? super T, byte[], ? extends E> mapper) {
+    public CheckedStream<Byte, E> flatMapToByte(final Throwables.Function<? super T, byte[], ? extends E> mapper) {
         assertNotClosed();
 
-        return newStream(new ExceptionalIterator<Byte, E>() {
+        return newStream(new CheckedIterator<Byte, E>() {
             private byte[] cur = null;
             private int len = 0;
             private int idx = 0;
@@ -3302,10 +3294,10 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @Beta
     @IntermediateOp
-    public ExceptionalStream<Short, E> flatMapToShort(final Throwables.Function<? super T, short[], ? extends E> mapper) {
+    public CheckedStream<Short, E> flatMapToShort(final Throwables.Function<? super T, short[], ? extends E> mapper) {
         assertNotClosed();
 
-        return newStream(new ExceptionalIterator<Short, E>() {
+        return newStream(new CheckedIterator<Short, E>() {
             private short[] cur = null;
             private int len = 0;
             private int idx = 0;
@@ -3345,10 +3337,10 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @Beta
     @IntermediateOp
-    public ExceptionalStream<Integer, E> flatMapToInteger(final Throwables.Function<? super T, int[], ? extends E> mapper) {
+    public CheckedStream<Integer, E> flatMapToInteger(final Throwables.Function<? super T, int[], ? extends E> mapper) {
         assertNotClosed();
 
-        return newStream(new ExceptionalIterator<Integer, E>() {
+        return newStream(new CheckedIterator<Integer, E>() {
             private int[] cur = null;
             private int len = 0;
             private int idx = 0;
@@ -3388,10 +3380,10 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @Beta
     @IntermediateOp
-    public ExceptionalStream<Long, E> flatMapToLong(final Throwables.Function<? super T, long[], ? extends E> mapper) {
+    public CheckedStream<Long, E> flatMapToLong(final Throwables.Function<? super T, long[], ? extends E> mapper) {
         assertNotClosed();
 
-        return newStream(new ExceptionalIterator<Long, E>() {
+        return newStream(new CheckedIterator<Long, E>() {
             private long[] cur = null;
             private int len = 0;
             private int idx = 0;
@@ -3431,10 +3423,10 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @Beta
     @IntermediateOp
-    public ExceptionalStream<Float, E> flatMapToFloat(final Throwables.Function<? super T, float[], ? extends E> mapper) {
+    public CheckedStream<Float, E> flatMapToFloat(final Throwables.Function<? super T, float[], ? extends E> mapper) {
         assertNotClosed();
 
-        return newStream(new ExceptionalIterator<Float, E>() {
+        return newStream(new CheckedIterator<Float, E>() {
             private float[] cur = null;
             private int len = 0;
             private int idx = 0;
@@ -3474,10 +3466,10 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @Beta
     @IntermediateOp
-    public ExceptionalStream<Double, E> flatMapToDouble(final Throwables.Function<? super T, double[], ? extends E> mapper) {
+    public CheckedStream<Double, E> flatMapToDouble(final Throwables.Function<? super T, double[], ? extends E> mapper) {
         assertNotClosed();
 
-        return newStream(new ExceptionalIterator<Double, E>() {
+        return newStream(new CheckedIterator<Double, E>() {
             private double[] cur = null;
             private int len = 0;
             private int idx = 0;
@@ -3515,11 +3507,11 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     //     * @return
     //     */
     //    @IntermediateOp
-    //    public ExceptionalStream<Integer, E> flatmapToInt(final Throwables.Function<? super T, ? extends int[], ? extends E> mapper) {
-    //        final Throwables.Function<T, ExceptionalStream<Integer, E>, E> mapper2 = new Throwables.Function<T, ExceptionalStream<Integer, E>, E>() {
+    //    public CheckedStream<Integer, E> flatmapToInt(final Throwables.Function<? super T, ? extends int[], ? extends E> mapper) {
+    //        final Throwables.Function<T, CheckedStream<Integer, E>, E> mapper2 = new Throwables.Function<T, CheckedStream<Integer, E>, E>() {
     //            @Override
-    //            public ExceptionalStream<Integer, E> apply(T t) throws E {
-    //                return ExceptionalStream.of(mapper.apply(t));
+    //            public CheckedStream<Integer, E> apply(T t) throws E {
+    //                return CheckedStream.of(mapper.apply(t));
     //            }
     //        };
     //
@@ -3532,11 +3524,11 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     //     * @return
     //     */
     //    @IntermediateOp
-    //    public ExceptionalStream<Long, E> flatmapToLong(final Throwables.Function<? super T, ? extends long[], ? extends E> mapper) {
-    //        final Throwables.Function<T, ExceptionalStream<Long, E>, E> mapper2 = new Throwables.Function<T, ExceptionalStream<Long, E>, E>() {
+    //    public CheckedStream<Long, E> flatmapToLong(final Throwables.Function<? super T, ? extends long[], ? extends E> mapper) {
+    //        final Throwables.Function<T, CheckedStream<Long, E>, E> mapper2 = new Throwables.Function<T, CheckedStream<Long, E>, E>() {
     //            @Override
-    //            public ExceptionalStream<Long, E> apply(T t) throws E {
-    //                return ExceptionalStream.of(mapper.apply(t));
+    //            public CheckedStream<Long, E> apply(T t) throws E {
+    //                return CheckedStream.of(mapper.apply(t));
     //            }
     //        };
     //
@@ -3549,11 +3541,11 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     //     * @return
     //     */
     //    @IntermediateOp
-    //    public ExceptionalStream<Double, E> flatmapToDouble(final Throwables.Function<? super T, ? extends double[], ? extends E> mapper) {
-    //        final Throwables.Function<T, ExceptionalStream<Double, E>, E> mapper2 = new Throwables.Function<T, ExceptionalStream<Double, E>, E>() {
+    //    public CheckedStream<Double, E> flatmapToDouble(final Throwables.Function<? super T, ? extends double[], ? extends E> mapper) {
+    //        final Throwables.Function<T, CheckedStream<Double, E>, E> mapper2 = new Throwables.Function<T, CheckedStream<Double, E>, E>() {
     //            @Override
-    //            public ExceptionalStream<Double, E> apply(T t) throws E {
-    //                return ExceptionalStream.of(mapper.apply(t));
+    //            public CheckedStream<Double, E> apply(T t) throws E {
+    //                return CheckedStream.of(mapper.apply(t));
     //            }
     //        };
     //
@@ -3570,7 +3562,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     @SuppressWarnings("rawtypes")
     @Beta
     @IntermediateOp
-    public <R> ExceptionalStream<R, E> mapPartial(final Throwables.Function<? super T, Optional<? extends R>, E> mapper) {
+    public <R> CheckedStream<R, E> mapPartial(final Throwables.Function<? super T, Optional<? extends R>, E> mapper) {
         return map(mapper).filter((Throwables.Predicate) IS_PRESENT_IT).map(GET_AS_IT);
     }
 
@@ -3583,7 +3575,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     @SuppressWarnings("rawtypes")
     @Beta
     @IntermediateOp
-    public ExceptionalStream<Integer, E> mapPartialToInt(final Throwables.Function<? super T, OptionalInt, E> mapper) {
+    public CheckedStream<Integer, E> mapPartialToInt(final Throwables.Function<? super T, OptionalInt, E> mapper) {
         return map(mapper).filter((Throwables.Predicate) IS_PRESENT_INT).map(GET_AS_INT);
     }
 
@@ -3596,7 +3588,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     @SuppressWarnings("rawtypes")
     @Beta
     @IntermediateOp
-    public ExceptionalStream<Long, E> mapPartialToLong(final Throwables.Function<? super T, OptionalLong, E> mapper) {
+    public CheckedStream<Long, E> mapPartialToLong(final Throwables.Function<? super T, OptionalLong, E> mapper) {
         return map(mapper).filter((Throwables.Predicate) IS_PRESENT_LONG).map(GET_AS_LONG);
     }
 
@@ -3609,7 +3601,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     @SuppressWarnings("rawtypes")
     @Beta
     @IntermediateOp
-    public ExceptionalStream<Double, E> mapPartialToDouble(final Throwables.Function<? super T, OptionalDouble, E> mapper) {
+    public CheckedStream<Double, E> mapPartialToDouble(final Throwables.Function<? super T, OptionalDouble, E> mapper) {
         return map(mapper).filter((Throwables.Predicate) IS_PRESENT_DOUBLE).map(GET_AS_DOUBLE);
     }
 
@@ -3623,7 +3615,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     @SuppressWarnings("rawtypes")
     @Beta
     @IntermediateOp
-    public <R> ExceptionalStream<R, E> mapPartialJdk(final Throwables.Function<? super T, java.util.Optional<? extends R>, E> mapper) {
+    public <R> CheckedStream<R, E> mapPartialJdk(final Throwables.Function<? super T, java.util.Optional<? extends R>, E> mapper) {
         return map(mapper).filter((Throwables.Predicate) IS_PRESENT_IT_JDK).map(GET_AS_IT_JDK);
     }
 
@@ -3636,7 +3628,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     @SuppressWarnings("rawtypes")
     @Beta
     @IntermediateOp
-    public ExceptionalStream<Integer, E> mapPartialToIntJdk(final Throwables.Function<? super T, java.util.OptionalInt, E> mapper) {
+    public CheckedStream<Integer, E> mapPartialToIntJdk(final Throwables.Function<? super T, java.util.OptionalInt, E> mapper) {
         return map(mapper).filter((Throwables.Predicate) IS_PRESENT_INT_JDK).map(GET_AS_INT_JDK);
     }
 
@@ -3649,7 +3641,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     @SuppressWarnings("rawtypes")
     @Beta
     @IntermediateOp
-    public ExceptionalStream<Long, E> mapPartialToLongJdk(final Throwables.Function<? super T, java.util.OptionalLong, E> mapper) {
+    public CheckedStream<Long, E> mapPartialToLongJdk(final Throwables.Function<? super T, java.util.OptionalLong, E> mapper) {
         return map(mapper).filter((Throwables.Predicate) IS_PRESENT_LONG_JDK).map(GET_AS_LONG_JDK);
     }
 
@@ -3662,7 +3654,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     @SuppressWarnings("rawtypes")
     @Beta
     @IntermediateOp
-    public ExceptionalStream<Double, E> mapPartialToDoubleJdk(final Throwables.Function<? super T, java.util.OptionalDouble, E> mapper) {
+    public CheckedStream<Double, E> mapPartialToDoubleJdk(final Throwables.Function<? super T, java.util.OptionalDouble, E> mapper) {
         return map(mapper).filter((Throwables.Predicate) IS_PRESENT_DOUBLE_JDK).map(GET_AS_DOUBLE_JDK);
     }
 
@@ -3673,14 +3665,14 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @param mapper
      * @return
      */
-    public <R> ExceptionalStream<R, E> mapMulti(final Throwables.BiConsumer<? super T, ? super Consumer<R>, ? extends E> mapper) {
+    public <R> CheckedStream<R, E> mapMulti(final Throwables.BiConsumer<? super T, ? super Consumer<R>, ? extends E> mapper) {
         final Deque<R> queue = new ArrayDeque<>();
 
         final Consumer<R> consumer = queue::offer;
 
-        final ExceptionalIterator<T, E> iter = iteratorEx();
+        final CheckedIterator<T, E> iter = iteratorEx();
 
-        return newStream(new ExceptionalIterator<R, E>() {
+        return newStream(new CheckedIterator<R, E>() {
             @Override
             public boolean hasNext() throws E {
                 if (queue.size() == 0) {
@@ -3714,7 +3706,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     @IntermediateOp
-    public <R> ExceptionalStream<R, E> slidingMap(Throwables.BiFunction<? super T, ? super T, R, ? extends E> mapper) {
+    public <R> CheckedStream<R, E> slidingMap(Throwables.BiFunction<? super T, ? super T, R, ? extends E> mapper) {
         return slidingMap(1, mapper);
     }
 
@@ -3726,7 +3718,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     @IntermediateOp
-    public <R> ExceptionalStream<R, E> slidingMap(int increment, Throwables.BiFunction<? super T, ? super T, R, ? extends E> mapper) {
+    public <R> CheckedStream<R, E> slidingMap(int increment, Throwables.BiFunction<? super T, ? super T, R, ? extends E> mapper) {
         return slidingMap(increment, false, mapper);
     }
 
@@ -3739,7 +3731,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     @IntermediateOp
-    public <R> ExceptionalStream<R, E> slidingMap(final int increment, final boolean ignoreNotPaired,
+    public <R> CheckedStream<R, E> slidingMap(final int increment, final boolean ignoreNotPaired,
             final Throwables.BiFunction<? super T, ? super T, R, ? extends E> mapper) {
         assertNotClosed();
 
@@ -3747,7 +3739,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
         final int windowSize = 2;
 
-        return newStream(new ExceptionalIterator<R, E>() {
+        return newStream(new CheckedIterator<R, E>() {
             @SuppressWarnings("unchecked")
             private final T none = (T) NONE;
             private T prev = none;
@@ -3800,7 +3792,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     @IntermediateOp
-    public <R> ExceptionalStream<R, E> slidingMap(Throwables.TriFunction<? super T, ? super T, ? super T, R, ? extends E> mapper) {
+    public <R> CheckedStream<R, E> slidingMap(Throwables.TriFunction<? super T, ? super T, ? super T, R, ? extends E> mapper) {
         return slidingMap(1, mapper);
     }
 
@@ -3812,7 +3804,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     @IntermediateOp
-    public <R> ExceptionalStream<R, E> slidingMap(int increment, Throwables.TriFunction<? super T, ? super T, ? super T, R, ? extends E> mapper) {
+    public <R> CheckedStream<R, E> slidingMap(int increment, Throwables.TriFunction<? super T, ? super T, ? super T, R, ? extends E> mapper) {
         return slidingMap(increment, false, mapper);
     }
 
@@ -3825,7 +3817,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     @IntermediateOp
-    public <R> ExceptionalStream<R, E> slidingMap(final int increment, final boolean ignoreNotPaired,
+    public <R> CheckedStream<R, E> slidingMap(final int increment, final boolean ignoreNotPaired,
             final Throwables.TriFunction<? super T, ? super T, ? super T, R, ? extends E> mapper) {
         assertNotClosed();
 
@@ -3833,7 +3825,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
         final int windowSize = 3;
 
-        return newStream(new ExceptionalIterator<R, E>() {
+        return newStream(new CheckedIterator<R, E>() {
             @SuppressWarnings("unchecked")
             private final T none = (T) NONE;
             private T prev = none;
@@ -3903,7 +3895,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @IntermediateOp
     @TerminalOpTriggered
-    public <K> ExceptionalStream<Map.Entry<K, List<T>>, E> groupBy(final Throwables.Function<? super T, ? extends K, ? extends E> keyMapper) {
+    public <K> CheckedStream<Map.Entry<K, List<T>>, E> groupBy(final Throwables.Function<? super T, ? extends K, ? extends E> keyMapper) {
         return groupBy(keyMapper, Suppliers.<K, List<T>> ofMap());
     }
 
@@ -3916,7 +3908,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @IntermediateOp
     @TerminalOpTriggered
-    public <K> ExceptionalStream<Map.Entry<K, List<T>>, E> groupBy(final Throwables.Function<? super T, ? extends K, ? extends E> keyMapper,
+    public <K> CheckedStream<Map.Entry<K, List<T>>, E> groupBy(final Throwables.Function<? super T, ? extends K, ? extends E> keyMapper,
             final Supplier<? extends Map<K, List<T>>> mapFactory) {
         return groupBy(keyMapper, Fnn.<T, E> identity(), mapFactory);
     }
@@ -3932,7 +3924,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @IntermediateOp
     @TerminalOpTriggered
-    public <K, V> ExceptionalStream<Map.Entry<K, List<V>>, E> groupBy(Throwables.Function<? super T, ? extends K, ? extends E> keyMapper,
+    public <K, V> CheckedStream<Map.Entry<K, List<V>>, E> groupBy(Throwables.Function<? super T, ? extends K, ? extends E> keyMapper,
             Throwables.Function<? super T, ? extends V, ? extends E> valueMapper) {
         return groupBy(keyMapper, valueMapper, Suppliers.<K, List<V>> ofMap());
     }
@@ -3949,11 +3941,11 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @IntermediateOp
     @TerminalOpTriggered
-    public <K, V> ExceptionalStream<Map.Entry<K, List<V>>, E> groupBy(final Throwables.Function<? super T, ? extends K, ? extends E> keyMapper,
+    public <K, V> CheckedStream<Map.Entry<K, List<V>>, E> groupBy(final Throwables.Function<? super T, ? extends K, ? extends E> keyMapper,
             final Throwables.Function<? super T, ? extends V, ? extends E> valueMapper, final Supplier<? extends Map<K, List<V>>> mapFactory) {
         assertNotClosed();
 
-        return newStream(new ExceptionalIterator<Map.Entry<K, List<V>>, E>() {
+        return newStream(new CheckedIterator<Map.Entry<K, List<V>>, E>() {
             private Iterator<Map.Entry<K, List<V>>> iter = null;
 
             @Override
@@ -3970,7 +3962,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
             private void init() throws E {
                 if (iter == null) {
-                    iter = ExceptionalStream.this.groupTo(keyMapper, valueMapper, mapFactory).entrySet().iterator();
+                    iter = CheckedStream.this.groupTo(keyMapper, valueMapper, mapFactory).entrySet().iterator();
                 }
             }
         }, closeHandlers);
@@ -3988,7 +3980,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @IntermediateOp
     @TerminalOpTriggered
-    public <K, V> ExceptionalStream<Map.Entry<K, V>, E> groupBy(final Throwables.Function<? super T, ? extends K, ? extends E> keyMapper,
+    public <K, V> CheckedStream<Map.Entry<K, V>, E> groupBy(final Throwables.Function<? super T, ? extends K, ? extends E> keyMapper,
             final Throwables.Function<? super T, ? extends V, ? extends E> valueMapper, Throwables.BinaryOperator<V, ? extends E> mergeFunction) {
         return groupBy(keyMapper, valueMapper, mergeFunction, Suppliers.<K, V> ofMap());
     }
@@ -4008,12 +4000,12 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @IntermediateOp
     @TerminalOpTriggered
-    public <K, V> ExceptionalStream<Map.Entry<K, V>, E> groupBy(final Throwables.Function<? super T, ? extends K, ? extends E> keyMapper,
+    public <K, V> CheckedStream<Map.Entry<K, V>, E> groupBy(final Throwables.Function<? super T, ? extends K, ? extends E> keyMapper,
             final Throwables.Function<? super T, ? extends V, ? extends E> valueMapper, final Throwables.BinaryOperator<V, ? extends E> mergeFunction,
             final Supplier<? extends Map<K, V>> mapFactory) {
         assertNotClosed();
 
-        return newStream(new ExceptionalIterator<Map.Entry<K, V>, E>() {
+        return newStream(new CheckedIterator<Map.Entry<K, V>, E>() {
             private Iterator<Map.Entry<K, V>> iter = null;
 
             @Override
@@ -4030,7 +4022,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
             private void init() throws E {
                 if (iter == null) {
-                    iter = ExceptionalStream.this.toMap(keyMapper, valueMapper, mergeFunction, mapFactory).entrySet().iterator();
+                    iter = CheckedStream.this.toMap(keyMapper, valueMapper, mergeFunction, mapFactory).entrySet().iterator();
                 }
             }
         }, closeHandlers);
@@ -4047,7 +4039,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @IntermediateOp
     @TerminalOpTriggered
-    public <K, D> ExceptionalStream<Map.Entry<K, D>, E> groupBy(final Throwables.Function<? super T, ? extends K, ? extends E> keyMapper,
+    public <K, D> CheckedStream<Map.Entry<K, D>, E> groupBy(final Throwables.Function<? super T, ? extends K, ? extends E> keyMapper,
             final Collector<? super T, ?, D> downstream) {
         return groupBy(keyMapper, downstream, Suppliers.<K, D> ofMap());
     }
@@ -4064,7 +4056,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @IntermediateOp
     @TerminalOpTriggered
-    public <K, D> ExceptionalStream<Map.Entry<K, D>, E> groupBy(final Throwables.Function<? super T, ? extends K, ? extends E> keyMapper,
+    public <K, D> CheckedStream<Map.Entry<K, D>, E> groupBy(final Throwables.Function<? super T, ? extends K, ? extends E> keyMapper,
             final Collector<? super T, ?, D> downstream, final Supplier<? extends Map<K, D>> mapFactory) {
         return groupBy(keyMapper, Fnn.<T, E> identity(), downstream, mapFactory);
     }
@@ -4082,7 +4074,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @IntermediateOp
     @TerminalOpTriggered
-    public <K, V, D> ExceptionalStream<Map.Entry<K, D>, E> groupBy(final Throwables.Function<? super T, ? extends K, ? extends E> keyMapper,
+    public <K, V, D> CheckedStream<Map.Entry<K, D>, E> groupBy(final Throwables.Function<? super T, ? extends K, ? extends E> keyMapper,
             final Throwables.Function<? super T, ? extends V, ? extends E> valueMapper, final Collector<? super V, ?, D> downstream) {
         return groupBy(keyMapper, valueMapper, downstream, Suppliers.<K, D> ofMap());
     }
@@ -4101,12 +4093,12 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @IntermediateOp
     @TerminalOpTriggered
-    public <K, V, D> ExceptionalStream<Map.Entry<K, D>, E> groupBy(final Throwables.Function<? super T, ? extends K, ? extends E> keyMapper,
+    public <K, V, D> CheckedStream<Map.Entry<K, D>, E> groupBy(final Throwables.Function<? super T, ? extends K, ? extends E> keyMapper,
             final Throwables.Function<? super T, ? extends V, ? extends E> valueMapper, final Collector<? super V, ?, D> downstream,
             final Supplier<? extends Map<K, D>> mapFactory) {
         assertNotClosed();
 
-        return newStream(new ExceptionalIterator<Map.Entry<K, D>, E>() {
+        return newStream(new CheckedIterator<Map.Entry<K, D>, E>() {
             private Iterator<Map.Entry<K, D>> iter = null;
 
             @Override
@@ -4123,7 +4115,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
             private void init() throws E {
                 if (iter == null) {
-                    iter = ExceptionalStream.this.groupTo(keyMapper, valueMapper, downstream, mapFactory).entrySet().iterator();
+                    iter = CheckedStream.this.groupTo(keyMapper, valueMapper, downstream, mapFactory).entrySet().iterator();
                 }
             }
         }, closeHandlers);
@@ -4137,7 +4129,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @IntermediateOp
     @TerminalOpTriggered
-    public ExceptionalStream<Map.Entry<Boolean, List<T>>, E> partitionBy(final Throwables.Predicate<? super T, E> predicate) {
+    public CheckedStream<Map.Entry<Boolean, List<T>>, E> partitionBy(final Throwables.Predicate<? super T, E> predicate) {
         assertNotClosed();
 
         return partitionBy(predicate, Collectors.<T> toList());
@@ -4154,11 +4146,11 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @IntermediateOp
     @TerminalOpTriggered
-    public <D> ExceptionalStream<Map.Entry<Boolean, D>, E> partitionBy(final Throwables.Predicate<? super T, E> predicate,
+    public <D> CheckedStream<Map.Entry<Boolean, D>, E> partitionBy(final Throwables.Predicate<? super T, E> predicate,
             final Collector<? super T, ?, D> downstream) {
         assertNotClosed();
 
-        return newStream(new ExceptionalIterator<Entry<Boolean, D>, E>() {
+        return newStream(new CheckedIterator<Entry<Boolean, D>, E>() {
             private Iterator<Entry<Boolean, D>> iter = null;
 
             @Override
@@ -4175,7 +4167,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
             private void init() throws E {
                 if (iter == null) {
-                    iter = ExceptionalStream.this.partitionTo(predicate, downstream).entrySet().iterator();
+                    iter = CheckedStream.this.partitionTo(predicate, downstream).entrySet().iterator();
                 }
             }
         }, closeHandlers);
@@ -4189,7 +4181,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @IntermediateOp
     @TerminalOpTriggered
-    public <K> ExceptionalStream<Map.Entry<K, Integer>, E> countBy(final Throwables.Function<? super T, ? extends K, ? extends E> keyMapper) {
+    public <K> CheckedStream<Map.Entry<K, Integer>, E> countBy(final Throwables.Function<? super T, ? extends K, ? extends E> keyMapper) {
         return groupBy(keyMapper, Collectors.countingToInt());
     }
 
@@ -4199,12 +4191,12 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     @IntermediateOp
-    public ExceptionalStream<List<T>, E> collapse(final Throwables.BiPredicate<? super T, ? super T, ? extends E> collapsible) {
+    public CheckedStream<List<T>, E> collapse(final Throwables.BiPredicate<? super T, ? super T, ? extends E> collapsible) {
         assertNotClosed();
 
-        final ExceptionalIterator<T, E> iter = elements;
+        final CheckedIterator<T, E> iter = elements;
 
-        return newStream(new ExceptionalIterator<List<T>, E>() {
+        return newStream(new CheckedIterator<List<T>, E>() {
             private boolean hasNext = false;
             private T next = null;
 
@@ -4239,13 +4231,13 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     @IntermediateOp
-    public <C extends Collection<T>> ExceptionalStream<C, E> collapse(final Throwables.BiPredicate<? super T, ? super T, ? extends E> collapsible,
+    public <C extends Collection<T>> CheckedStream<C, E> collapse(final Throwables.BiPredicate<? super T, ? super T, ? extends E> collapsible,
             final Supplier<? extends C> supplier) {
         assertNotClosed();
 
-        final ExceptionalIterator<T, E> iter = elements;
+        final CheckedIterator<T, E> iter = elements;
 
-        return newStream(new ExceptionalIterator<C, E>() {
+        return newStream(new CheckedIterator<C, E>() {
             private boolean hasNext = false;
             private T next = null;
 
@@ -4279,11 +4271,11 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * <p>Example:
      * <pre>
      * <code>
-     * ExceptionalStream.of(new Integer[0]).collapse((p, c) -> p < c, (r, c) -> r + c) => []
-     * ExceptionalStream.of(1).collapse((p, c) -> p < c, (r, c) -> r + c) => [1]
-     * ExceptionalStream.of(1, 2).collapse((p, c) -> p < c, (r, c) -> r + c) => [3]
-     * ExceptionalStream.of(1, 2, 3).collapse((p, c) -> p < c, (r, c) -> r + c) => [6]
-     * ExceptionalStream.of(1, 2, 3, 3, 2, 1).collapse((p, c) -> p < c, (r, c) -> r + c) => [6, 3, 2, 1]
+     * CheckedStream.of(new Integer[0]).collapse((p, c) -> p < c, (r, c) -> r + c) => []
+     * CheckedStream.of(1).collapse((p, c) -> p < c, (r, c) -> r + c) => [1]
+     * CheckedStream.of(1, 2).collapse((p, c) -> p < c, (r, c) -> r + c) => [3]
+     * CheckedStream.of(1, 2, 3).collapse((p, c) -> p < c, (r, c) -> r + c) => [6]
+     * CheckedStream.of(1, 2, 3, 3, 2, 1).collapse((p, c) -> p < c, (r, c) -> r + c) => [6, 3, 2, 1]
      * </code>
      * </pre>
      *
@@ -4295,13 +4287,13 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     @IntermediateOp
-    public ExceptionalStream<T, E> collapse(final Throwables.BiPredicate<? super T, ? super T, ? extends E> collapsible,
+    public CheckedStream<T, E> collapse(final Throwables.BiPredicate<? super T, ? super T, ? extends E> collapsible,
             final Throwables.BiFunction<? super T, ? super T, T, ? extends E> mergeFunction) {
         assertNotClosed();
 
-        final ExceptionalIterator<T, E> iter = elements;
+        final CheckedIterator<T, E> iter = elements;
 
-        return newStream(new ExceptionalIterator<T, E>() {
+        return newStream(new CheckedIterator<T, E>() {
             private boolean hasNext = false;
             private T next = null;
 
@@ -4336,13 +4328,13 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     @IntermediateOp
-    public <U> ExceptionalStream<U, E> collapse(final Throwables.BiPredicate<? super T, ? super T, ? extends E> collapsible, final U init,
+    public <U> CheckedStream<U, E> collapse(final Throwables.BiPredicate<? super T, ? super T, ? extends E> collapsible, final U init,
             final Throwables.BiFunction<U, ? super T, U, ? extends E> op) {
         assertNotClosed();
 
-        final ExceptionalIterator<T, E> iter = elements;
+        final CheckedIterator<T, E> iter = elements;
 
-        return newStream(new ExceptionalIterator<U, E>() {
+        return newStream(new CheckedIterator<U, E>() {
             private boolean hasNext = false;
             private T next = null;
 
@@ -4377,13 +4369,13 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     @IntermediateOp
-    public <R> ExceptionalStream<R, E> collapse(final Throwables.BiPredicate<? super T, ? super T, ? extends E> collapsible,
+    public <R> CheckedStream<R, E> collapse(final Throwables.BiPredicate<? super T, ? super T, ? extends E> collapsible,
             final Throwables.Supplier<R, E> supplier, final Throwables.BiConsumer<? super R, ? super T, ? extends E> accumulator) {
         assertNotClosed();
 
-        final ExceptionalIterator<T, E> iter = elements;
+        final CheckedIterator<T, E> iter = elements;
 
-        return newStream(new ExceptionalIterator<R, E>() {
+        return newStream(new CheckedIterator<R, E>() {
             private boolean hasNext = false;
             private T next = null;
 
@@ -4418,7 +4410,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     @IntermediateOp
-    public <R> ExceptionalStream<R, E> collapse(final Throwables.BiPredicate<? super T, ? super T, ? extends E> collapsible,
+    public <R> CheckedStream<R, E> collapse(final Throwables.BiPredicate<? super T, ? super T, ? extends E> collapsible,
             final Collector<? super T, ?, R> collector) {
         assertNotClosed();
 
@@ -4426,9 +4418,9 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         final BiConsumer<Object, ? super T> accumulator = (BiConsumer<Object, ? super T>) collector.accumulator();
         final Function<Object, R> finisher = (Function<Object, R>) collector.finisher();
 
-        final ExceptionalIterator<T, E> iter = elements;
+        final CheckedIterator<T, E> iter = elements;
 
-        return newStream(new ExceptionalIterator<R, E>() {
+        return newStream(new CheckedIterator<R, E>() {
             private boolean hasNext = false;
             private T next = null;
 
@@ -4461,12 +4453,12 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     @IntermediateOp
-    public ExceptionalStream<List<T>, E> collapse(final Throwables.TriPredicate<? super T, ? super T, ? super T, ? extends E> collapsible) {
+    public CheckedStream<List<T>, E> collapse(final Throwables.TriPredicate<? super T, ? super T, ? super T, ? extends E> collapsible) {
         assertNotClosed();
 
-        final ExceptionalIterator<T, E> iter = elements;
+        final CheckedIterator<T, E> iter = elements;
 
-        return newStream(new ExceptionalIterator<List<T>, E>() {
+        return newStream(new CheckedIterator<List<T>, E>() {
             private boolean hasNext = false;
             private T next = null;
 
@@ -4502,13 +4494,13 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     @IntermediateOp
-    public <C extends Collection<T>> ExceptionalStream<C, E> collapse(final Throwables.TriPredicate<? super T, ? super T, ? super T, ? extends E> collapsible,
+    public <C extends Collection<T>> CheckedStream<C, E> collapse(final Throwables.TriPredicate<? super T, ? super T, ? super T, ? extends E> collapsible,
             final Supplier<? extends C> supplier) {
         assertNotClosed();
 
-        final ExceptionalIterator<T, E> iter = elements;
+        final CheckedIterator<T, E> iter = elements;
 
-        return newStream(new ExceptionalIterator<C, E>() {
+        return newStream(new CheckedIterator<C, E>() {
             private boolean hasNext = false;
             private T next = null;
 
@@ -4559,13 +4551,13 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     @IntermediateOp
-    public ExceptionalStream<T, E> collapse(final Throwables.TriPredicate<? super T, ? super T, ? super T, ? extends E> collapsible,
+    public CheckedStream<T, E> collapse(final Throwables.TriPredicate<? super T, ? super T, ? super T, ? extends E> collapsible,
             final Throwables.BiFunction<? super T, ? super T, T, ? extends E> mergeFunction) {
         assertNotClosed();
 
-        final ExceptionalIterator<T, E> iter = elements;
+        final CheckedIterator<T, E> iter = elements;
 
-        return newStream(new ExceptionalIterator<T, E>() {
+        return newStream(new CheckedIterator<T, E>() {
             private boolean hasNext = false;
             private T next = null;
 
@@ -4601,13 +4593,13 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     @IntermediateOp
-    public <U> ExceptionalStream<U, E> collapse(final Throwables.TriPredicate<? super T, ? super T, ? super T, ? extends E> collapsible, final U init,
+    public <U> CheckedStream<U, E> collapse(final Throwables.TriPredicate<? super T, ? super T, ? super T, ? extends E> collapsible, final U init,
             final Throwables.BiFunction<U, ? super T, U, ? extends E> op) {
         assertNotClosed();
 
-        final ExceptionalIterator<T, E> iter = elements;
+        final CheckedIterator<T, E> iter = elements;
 
-        return newStream(new ExceptionalIterator<U, E>() {
+        return newStream(new CheckedIterator<U, E>() {
             private boolean hasNext = false;
             private T next = null;
 
@@ -4643,13 +4635,13 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     @IntermediateOp
-    public <R> ExceptionalStream<R, E> collapse(final Throwables.TriPredicate<? super T, ? super T, ? super T, ? extends E> collapsible,
+    public <R> CheckedStream<R, E> collapse(final Throwables.TriPredicate<? super T, ? super T, ? super T, ? extends E> collapsible,
             final Throwables.Supplier<R, E> supplier, final Throwables.BiConsumer<? super R, ? super T, ? extends E> accumulator) {
         assertNotClosed();
 
-        final ExceptionalIterator<T, E> iter = elements;
+        final CheckedIterator<T, E> iter = elements;
 
-        return newStream(new ExceptionalIterator<R, E>() {
+        return newStream(new CheckedIterator<R, E>() {
             private boolean hasNext = false;
             private T next = null;
 
@@ -4684,11 +4676,11 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * <p>Example:
      * <pre>
      * <code>
-     * ExceptionalStream.of(new Integer[0]).collapse((f, p, c) -> f < c, Collectors.summingInt(Fn.unboxI())) => []
-     * ExceptionalStream.of(1).collapse((f, p, c) -> f < c, Collectors.summingInt(Fn.unboxI())) => [1]
-     * ExceptionalStream.of(1, 2).collapse((f, p, c) -> f < c, Collectors.summingInt(Fn.unboxI())) => [3]
-     * ExceptionalStream.of(1, 2, 3).collapse((f, p, c) -> f < c, Collectors.summingInt(Fn.unboxI())) => [6]
-     * ExceptionalStream.of(1, 2, 3, 3, 2, 1).collapse((f, p, c) -> f < c, Collectors.summingInt(Fn.unboxI())) => [11, 1]
+     * CheckedStream.of(new Integer[0]).collapse((f, p, c) -> f < c, Collectors.summingInt(Fn.unboxI())) => []
+     * CheckedStream.of(1).collapse((f, p, c) -> f < c, Collectors.summingInt(Fn.unboxI())) => [1]
+     * CheckedStream.of(1, 2).collapse((f, p, c) -> f < c, Collectors.summingInt(Fn.unboxI())) => [3]
+     * CheckedStream.of(1, 2, 3).collapse((f, p, c) -> f < c, Collectors.summingInt(Fn.unboxI())) => [6]
+     * CheckedStream.of(1, 2, 3, 3, 2, 1).collapse((f, p, c) -> f < c, Collectors.summingInt(Fn.unboxI())) => [11, 1]
      * </code>
      * </pre>
      *
@@ -4699,7 +4691,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     @IntermediateOp
-    public <R> ExceptionalStream<R, E> collapse(final Throwables.TriPredicate<? super T, ? super T, ? super T, ? extends E> collapsible,
+    public <R> CheckedStream<R, E> collapse(final Throwables.TriPredicate<? super T, ? super T, ? super T, ? extends E> collapsible,
             final Collector<? super T, ?, R> collector) {
         assertNotClosed();
 
@@ -4707,9 +4699,9 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         final BiConsumer<Object, ? super T> accumulator = (BiConsumer<Object, ? super T>) collector.accumulator();
         final Function<Object, R> finisher = (Function<Object, R>) collector.finisher();
 
-        final ExceptionalIterator<T, E> iter = elements;
+        final CheckedIterator<T, E> iter = elements;
 
-        return newStream(new ExceptionalIterator<R, E>() {
+        return newStream(new CheckedIterator<R, E>() {
             private boolean hasNext = false;
             private T next = null;
 
@@ -4743,12 +4735,12 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     @IntermediateOp
-    public ExceptionalStream<T, E> scan(final Throwables.BiFunction<? super T, ? super T, T, ? extends E> accumulator) {
+    public CheckedStream<T, E> scan(final Throwables.BiFunction<? super T, ? super T, T, ? extends E> accumulator) {
         assertNotClosed();
 
-        final ExceptionalIterator<T, E> iter = elements;
+        final CheckedIterator<T, E> iter = elements;
 
-        return newStream(new ExceptionalIterator<T, E>() {
+        return newStream(new CheckedIterator<T, E>() {
             private T res = null;
             private boolean isFirst = true;
 
@@ -4777,12 +4769,12 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     @IntermediateOp
-    public <U> ExceptionalStream<U, E> scan(final U init, final Throwables.BiFunction<U, ? super T, U, ? extends E> accumulator) {
+    public <U> CheckedStream<U, E> scan(final U init, final Throwables.BiFunction<U, ? super T, U, ? extends E> accumulator) {
         assertNotClosed();
 
-        final ExceptionalIterator<T, E> iter = elements;
+        final CheckedIterator<T, E> iter = elements;
 
-        return newStream(new ExceptionalIterator<U, E>() {
+        return newStream(new CheckedIterator<U, E>() {
             private U res = init;
 
             @Override
@@ -4806,16 +4798,16 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     @IntermediateOp
-    public <U> ExceptionalStream<U, E> scan(final U init, final Throwables.BiFunction<U, ? super T, U, ? extends E> accumulator, final boolean initIncluded) {
+    public <U> CheckedStream<U, E> scan(final U init, final Throwables.BiFunction<U, ? super T, U, ? extends E> accumulator, final boolean initIncluded) {
         assertNotClosed();
 
         if (!initIncluded) {
             return scan(init, accumulator);
         }
 
-        final ExceptionalIterator<T, E> iter = elements;
+        final CheckedIterator<T, E> iter = elements;
 
-        return newStream(new ExceptionalIterator<U, E>() {
+        return newStream(new CheckedIterator<U, E>() {
             private boolean isFirst = true;
             private U res = init;
 
@@ -4842,7 +4834,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      * @see N#intersection(Collection, Collection)
      */
-    public ExceptionalStream<T, E> intersection(final Collection<?> c) {
+    public CheckedStream<T, E> intersection(final Collection<?> c) {
         assertNotClosed();
 
         final Multiset<?> multiset = Multiset.create(c);
@@ -4859,7 +4851,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      * @see N#intersection(Collection, Collection)
      */
-    public <U> ExceptionalStream<T, E> intersection(final Throwables.Function<? super T, ? extends U, E> mapper, final Collection<U> c) {
+    public <U> CheckedStream<T, E> intersection(final Throwables.Function<? super T, ? extends U, E> mapper, final Collection<U> c) {
         assertNotClosed();
 
         final Multiset<?> multiset = Multiset.create(c);
@@ -4873,7 +4865,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      * @see N#difference(Collection, Collection)
      */
-    public ExceptionalStream<T, E> difference(final Collection<?> c) {
+    public CheckedStream<T, E> difference(final Collection<?> c) {
         assertNotClosed();
 
         final Multiset<?> multiset = Multiset.create(c);
@@ -4890,7 +4882,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      * @see N#difference(Collection, Collection)
      */
-    public <U> ExceptionalStream<T, E> difference(final Function<? super T, ? extends U> mapper, final Collection<U> c) {
+    public <U> CheckedStream<T, E> difference(final Function<? super T, ? extends U> mapper, final Collection<U> c) {
         assertNotClosed();
 
         final Multiset<?> multiset = Multiset.create(c);
@@ -4904,12 +4896,12 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      * @see N#symmetricDifference(Collection, Collection)
      */
-    public ExceptionalStream<T, E> symmetricDifference(final Collection<T> c) {
+    public CheckedStream<T, E> symmetricDifference(final Collection<T> c) {
         assertNotClosed();
 
         final Multiset<?> multiset = Multiset.create(c);
 
-        return filter(value -> multiset.getAndRemove(value) < 1).append(ExceptionalStream.<T, E> of(c).filter(value -> multiset.getAndRemove(value) > 0));
+        return filter(value -> multiset.getAndRemove(value) < 1).append(CheckedStream.<T, E> of(c).filter(value -> multiset.getAndRemove(value) > 0));
     }
 
     /**
@@ -4919,7 +4911,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @see #appendIfEmpty(Object...)
      */
     @IntermediateOp
-    public final ExceptionalStream<T, E> defaultIfEmpty(final T defaultValue) {
+    public CheckedStream<T, E> defaultIfEmpty(final T defaultValue) {
         return appendIfEmpty(defaultValue);
     }
 
@@ -4930,7 +4922,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     //     * @see #appendIfEmpty(Object...)
     //     */
     //    @IntermediateOp
-    //    public final ExceptionalStream<T, E> defaultIfEmpty(final Collection<? extends T> defaultValues) {
+    //    public final CheckedStream<T, E> defaultIfEmpty(final Collection<? extends T> defaultValues) {
     //        return appendIfEmpty(defaultValues);
     //    }
 
@@ -4941,7 +4933,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @see #appendIfEmpty(Throwables.Supplier)
      */
     @IntermediateOp
-    public final ExceptionalStream<T, E> defaultIfEmpty(final Throwables.Supplier<? extends ExceptionalStream<T, E>, ? extends E> supplier) {
+    public CheckedStream<T, E> defaultIfEmpty(final Throwables.Supplier<? extends CheckedStream<T, E>, ? extends E> supplier) {
         return appendIfEmpty(supplier);
     }
 
@@ -4953,8 +4945,8 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @IntermediateOp
     @SafeVarargs
-    public final ExceptionalStream<T, E> prepend(final T... a) {
-        return prepend(ExceptionalStream.of(a));
+    public final CheckedStream<T, E> prepend(final T... a) {
+        return prepend(CheckedStream.of(a));
     }
 
     /**
@@ -4964,8 +4956,8 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     @IntermediateOp
-    public ExceptionalStream<T, E> prepend(final Collection<? extends T> c) {
-        return prepend(ExceptionalStream.of(c));
+    public CheckedStream<T, E> prepend(final Collection<? extends T> c) {
+        return prepend(CheckedStream.of(c));
     }
 
     /**
@@ -4974,7 +4966,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     @IntermediateOp
-    public ExceptionalStream<T, E> prepend(final ExceptionalStream<T, E> s) {
+    public CheckedStream<T, E> prepend(final CheckedStream<T, E> s) {
         assertNotClosed();
 
         return concat(s, this);
@@ -4988,8 +4980,8 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @IntermediateOp
     @SafeVarargs
-    public final ExceptionalStream<T, E> append(final T... a) {
-        return append(ExceptionalStream.of(a));
+    public final CheckedStream<T, E> append(final T... a) {
+        return append(CheckedStream.of(a));
     }
 
     /**
@@ -4999,8 +4991,8 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     @IntermediateOp
-    public ExceptionalStream<T, E> append(final Collection<? extends T> c) {
-        return append(ExceptionalStream.of(c));
+    public CheckedStream<T, E> append(final Collection<? extends T> c) {
+        return append(CheckedStream.of(c));
     }
 
     /**
@@ -5009,7 +5001,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     @IntermediateOp
-    public ExceptionalStream<T, E> append(final ExceptionalStream<T, E> s) {
+    public CheckedStream<T, E> append(final CheckedStream<T, E> s) {
         assertNotClosed();
 
         return concat(this, s);
@@ -5023,7 +5015,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @IntermediateOp
     @SafeVarargs
-    public final ExceptionalStream<T, E> appendIfEmpty(final T... a) {
+    public final CheckedStream<T, E> appendIfEmpty(final T... a) {
         return appendIfEmpty(Arrays.asList(a));
     }
 
@@ -5034,15 +5026,15 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     @IntermediateOp
-    public ExceptionalStream<T, E> appendIfEmpty(final Collection<? extends T> c) {
+    public CheckedStream<T, E> appendIfEmpty(final Collection<? extends T> c) {
         assertNotClosed();
 
         if (N.isEmpty(c)) {
             return newStream(elements, closeHandlers);
         }
 
-        return newStream(new ExceptionalIterator<T, E>() {
-            private ExceptionalIterator<T, E> iter;
+        return newStream(new CheckedIterator<T, E>() {
+            private CheckedIterator<T, E> iter;
 
             @Override
             public boolean hasNext() throws E {
@@ -5085,7 +5077,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                     if (elements.hasNext()) {
                         iter = elements;
                     } else {
-                        iter = ExceptionalIterator.of(c.iterator());
+                        iter = CheckedIterator.of(c.iterator());
                     }
                 }
             }
@@ -5099,13 +5091,13 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     @IntermediateOp
-    public ExceptionalStream<T, E> appendIfEmpty(final Throwables.Supplier<? extends ExceptionalStream<T, E>, ? extends E> supplier) {
+    public CheckedStream<T, E> appendIfEmpty(final Throwables.Supplier<? extends CheckedStream<T, E>, ? extends E> supplier) {
         assertNotClosed();
 
-        final Holder<ExceptionalStream<T, E>> holder = new Holder<>();
+        final Holder<CheckedStream<T, E>> holder = new Holder<>();
 
-        return newStream(new ExceptionalIterator<T, E>() {
-            private ExceptionalIterator<T, E> iter;
+        return newStream(new CheckedIterator<T, E>() {
+            private CheckedIterator<T, E> iter;
 
             @Override
             public boolean hasNext() throws E {
@@ -5148,7 +5140,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                     if (elements.hasNext()) {
                         iter = elements;
                     } else {
-                        final ExceptionalStream<T, E> s = supplier.get();
+                        final CheckedStream<T, E> s = supplier.get();
                         holder.setValue(s);
                         iter = iterate(s);
                     }
@@ -5167,10 +5159,10 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     //
     //    @Beta
     //    @IntermediateOp
-    //    public ExceptionalStream<T, E> appendOnError(final T fallbackValue) {
+    //    public CheckedStream<T, E> appendOnError(final T fallbackValue) {
     //        assertNotClosed();
     //
-    //        return newStream(new ExceptionalIterator<T, E>() {
+    //        return newStream(new CheckedIterator<T, E>() {
     //            private boolean fallbackValueAvaiable = true;
     //
     //            @Override
@@ -5200,11 +5192,11 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     //
     //    @Beta
     //    @IntermediateOp
-    //    public <XE extends Exception> ExceptionalStream<T, E> appendOnError(final Class<XE> type, final T fallbackValue) {
+    //    public <XE extends Exception> CheckedStream<T, E> appendOnError(final Class<XE> type, final T fallbackValue) {
     //        assertNotClosed();
     //        this.checkArgNotNull(type, "type");
     //
-    //        return newStream(new ExceptionalIterator<T, E>() {
+    //        return newStream(new CheckedIterator<T, E>() {
     //            private boolean fallbackValueAvaiable = true;
     //
     //            @Override
@@ -5242,11 +5234,11 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     //
     //    @Beta
     //    @IntermediateOp
-    //    public ExceptionalStream<T, E> appendOnError(final Predicate<? super Exception> predicate, final T fallbackValue) {
+    //    public CheckedStream<T, E> appendOnError(final Predicate<? super Exception> predicate, final T fallbackValue) {
     //        assertNotClosed();
     //        this.checkArgNotNull(predicate, "predicate");
     //
-    //        return newStream(new ExceptionalIterator<T, E>() {
+    //        return newStream(new CheckedIterator<T, E>() {
     //            private boolean fallbackValueAvaiable = true;
     //
     //            @Override
@@ -5284,14 +5276,14 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     //
     //    @Beta
     //    @IntermediateOp
-    //    public ExceptionalStream<T, E> appendOnError(final Supplier<ExceptionalStream<T, E>> fallbackStreamSupplier) {
+    //    public CheckedStream<T, E> appendOnError(final Supplier<CheckedStream<T, E>> fallbackStreamSupplier) {
     //        assertNotClosed();
     //        this.checkArgNotNull(fallbackStreamSupplier, "fallbackStreamSupplier");
     //
-    //        final ExceptionalIterator<T, E> iter = new ExceptionalIterator<T, E>() {
+    //        final CheckedIterator<T, E> iter = new CheckedIterator<T, E>() {
     //            private boolean fallbackValueAvaiable = true;
-    //            private ExceptionalIterator<T, E> iter = ExceptionalStream.this.elements;
-    //            private ExceptionalStream<T, E> s = null;
+    //            private CheckedIterator<T, E> iter = CheckedStream.this.elements;
+    //            private CheckedStream<T, E> s = null;
     //
     //            @Override
     //            public boolean hasNext() throws E {
@@ -5333,18 +5325,18 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     //
     //            @Override
     //            public void close() {
-    //                if ((s != null && N.notEmpty(s.closeHandlers)) || N.notEmpty(ExceptionalStream.this.closeHandlers)) {
+    //                if ((s != null && N.notEmpty(s.closeHandlers)) || N.notEmpty(CheckedStream.this.closeHandlers)) {
     //                    try {
     //                        if (s != null) {
     //                            s.close();
     //                        }
     //                    } finally {
-    //                        ExceptionalStream.this.close();
+    //                        CheckedStream.this.close();
     //                    }
     //                }
     //            }
     //
-    //            private void useFallbackStream(final Supplier<ExceptionalStream<T, E>> fallbackStream) {
+    //            private void useFallbackStream(final Supplier<CheckedStream<T, E>> fallbackStream) {
     //                fallbackValueAvaiable = false;
     //                s = fallbackStream.get();
     //                iter = s.elements;
@@ -5356,15 +5348,15 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     //
     //    @Beta
     //    @IntermediateOp
-    //    public <XE extends Exception> ExceptionalStream<T, E> appendOnError(final Class<XE> type, final Supplier<ExceptionalStream<T, E>> fallbackStreamSupplier) {
+    //    public <XE extends Exception> CheckedStream<T, E> appendOnError(final Class<XE> type, final Supplier<CheckedStream<T, E>> fallbackStreamSupplier) {
     //        assertNotClosed();
     //        this.checkArgNotNull(type, "type");
     //        this.checkArgNotNull(fallbackStreamSupplier, "fallbackStreamSupplier");
     //
-    //        final ExceptionalIterator<T, E> iter = new ExceptionalIterator<T, E>() {
+    //        final CheckedIterator<T, E> iter = new CheckedIterator<T, E>() {
     //            private boolean fallbackValueAvaiable = true;
-    //            private ExceptionalIterator<T, E> iter = ExceptionalStream.this.elements;
-    //            private ExceptionalStream<T, E> s = null;
+    //            private CheckedIterator<T, E> iter = CheckedStream.this.elements;
+    //            private CheckedStream<T, E> s = null;
     //
     //            @Override
     //            public boolean hasNext() throws E {
@@ -5406,18 +5398,18 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     //
     //            @Override
     //            public void close() {
-    //                if ((s != null && N.notEmpty(s.closeHandlers)) || N.notEmpty(ExceptionalStream.this.closeHandlers)) {
+    //                if ((s != null && N.notEmpty(s.closeHandlers)) || N.notEmpty(CheckedStream.this.closeHandlers)) {
     //                    try {
     //                        if (s != null) {
     //                            s.close();
     //                        }
     //                    } finally {
-    //                        ExceptionalStream.this.close();
+    //                        CheckedStream.this.close();
     //                    }
     //                }
     //            }
     //
-    //            private void useFallbackStream(final Supplier<ExceptionalStream<T, E>> fallbackStream) {
+    //            private void useFallbackStream(final Supplier<CheckedStream<T, E>> fallbackStream) {
     //                fallbackValueAvaiable = false;
     //                s = fallbackStream.get();
     //                iter = s.elements;
@@ -5429,15 +5421,15 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     //
     //    @Beta
     //    @IntermediateOp
-    //    public ExceptionalStream<T, E> appendOnError(final Predicate<? super Exception> predicate, final Supplier<ExceptionalStream<T, E>> fallbackStreamSupplier) {
+    //    public CheckedStream<T, E> appendOnError(final Predicate<? super Exception> predicate, final Supplier<CheckedStream<T, E>> fallbackStreamSupplier) {
     //        assertNotClosed();
     //        this.checkArgNotNull(predicate, "predicate");
     //        this.checkArgNotNull(fallbackStreamSupplier, "fallbackStreamSupplier");
     //
-    //        final ExceptionalIterator<T, E> iter = new ExceptionalIterator<T, E>() {
+    //        final CheckedIterator<T, E> iter = new CheckedIterator<T, E>() {
     //            private boolean fallbackValueAvaiable = true;
-    //            private ExceptionalIterator<T, E> iter = ExceptionalStream.this.elements;
-    //            private ExceptionalStream<T, E> s = null;
+    //            private CheckedIterator<T, E> iter = CheckedStream.this.elements;
+    //            private CheckedStream<T, E> s = null;
     //
     //            @Override
     //            public boolean hasNext() throws E {
@@ -5479,18 +5471,18 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     //
     //            @Override
     //            public void close() {
-    //                if ((s != null && N.notEmpty(s.closeHandlers)) || N.notEmpty(ExceptionalStream.this.closeHandlers)) {
+    //                if ((s != null && N.notEmpty(s.closeHandlers)) || N.notEmpty(CheckedStream.this.closeHandlers)) {
     //                    try {
     //                        if (s != null) {
     //                            s.close();
     //                        }
     //                    } finally {
-    //                        ExceptionalStream.this.close();
+    //                        CheckedStream.this.close();
     //                    }
     //                }
     //            }
     //
-    //            private void useFallbackStream(final Supplier<ExceptionalStream<T, E>> fallbackStream) {
+    //            private void useFallbackStream(final Supplier<CheckedStream<T, E>> fallbackStream) {
     //                fallbackValueAvaiable = false;
     //                s = fallbackStream.get();
     //                iter = s.elements;
@@ -5507,17 +5499,17 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     @IntermediateOp
-    public ExceptionalStream<T, E> throwIfEmpty(final Supplier<? extends E> exceptionSupplier) {
+    public CheckedStream<T, E> throwIfEmpty(final Supplier<? extends E> exceptionSupplier) {
         this.checkArgNotNull(exceptionSupplier, "exceptionSupplier");
 
-        final Throwables.Supplier<ExceptionalStream<T, E>, E> tmp = () -> {
+        final Throwables.Supplier<CheckedStream<T, E>, E> tmp = () -> {
             throw exceptionSupplier.get();
         };
 
         return this.appendIfEmpty(tmp);
     }
 
-    void close(Holder<? extends ExceptionalStream<T, E>> holder) {
+    void close(Holder<? extends CheckedStream<T, E>> holder) {
         if (holder.value() != null) {
             holder.value().close();
         }
@@ -5534,7 +5526,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @throws E2
      */
     @TerminalOp
-    public <R, E2 extends Exception> Optional<R> applyIfNotEmpty(final Throwables.Function<? super ExceptionalStream<T, E>, R, E2> func) throws E, E2 {
+    public <R, E2 extends Exception> Optional<R> applyIfNotEmpty(final Throwables.Function<? super CheckedStream<T, E>, R, E2> func) throws E, E2 {
         assertNotClosed();
 
         try {
@@ -5558,7 +5550,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @throws E2
      */
     @TerminalOp
-    public <E2 extends Exception> OrElse acceptIfNotEmpty(Throwables.Consumer<? super ExceptionalStream<T, E>, E2> action) throws E, E2 {
+    public <E2 extends Exception> OrElse acceptIfNotEmpty(Throwables.Consumer<? super CheckedStream<T, E>, E2> action) throws E, E2 {
         assertNotClosed();
 
         try {
@@ -5580,10 +5572,10 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     @IntermediateOp
-    public ExceptionalStream<T, E> onEach(final Throwables.Consumer<? super T, ? extends E> action) {
+    public CheckedStream<T, E> onEach(final Throwables.Consumer<? super T, ? extends E> action) {
         assertNotClosed();
 
-        return newStream(new ExceptionalIterator<T, E>() {
+        return newStream(new CheckedIterator<T, E>() {
             @Override
             public boolean hasNext() throws E {
                 return elements.hasNext();
@@ -5604,7 +5596,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     @IntermediateOp
-    public ExceptionalStream<T, E> peek(final Throwables.Consumer<? super T, ? extends E> action) {
+    public CheckedStream<T, E> peek(final Throwables.Consumer<? super T, ? extends E> action) {
         return onEach(action);
     }
 
@@ -5615,10 +5607,10 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     @IntermediateOp
-    public ExceptionalStream<T, E> peekFirst(final Throwables.Consumer<? super T, ? extends E> action) {
+    public CheckedStream<T, E> peekFirst(final Throwables.Consumer<? super T, ? extends E> action) {
         assertNotClosed();
 
-        return newStream(new ExceptionalIterator<T, E>() {
+        return newStream(new CheckedIterator<T, E>() {
             private boolean isFirst = true;
 
             @Override
@@ -5647,10 +5639,10 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     @IntermediateOp
-    public ExceptionalStream<T, E> peekLast(final Throwables.Consumer<? super T, ? extends E> action) {
+    public CheckedStream<T, E> peekLast(final Throwables.Consumer<? super T, ? extends E> action) {
         assertNotClosed();
 
-        return newStream(new ExceptionalIterator<T, E>() {
+        return newStream(new CheckedIterator<T, E>() {
             private boolean hasNext = false;
             private T next = null;
 
@@ -5679,7 +5671,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     @IntermediateOp
-    public ExceptionalStream<T, E> peekIf(final Throwables.Predicate<? super T, E> predicate, final Throwables.Consumer<? super T, E> action) {
+    public CheckedStream<T, E> peekIf(final Throwables.Predicate<? super T, E> predicate, final Throwables.Consumer<? super T, E> action) {
         assertNotClosed();
 
         checkArgNotNull(predicate, "predicate");
@@ -5700,7 +5692,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @Beta
     @IntermediateOp
-    public ExceptionalStream<T, E> peekIf(final Throwables.BiPredicate<? super T, ? super Long, E> predicate, final Consumer<? super T> action) {
+    public CheckedStream<T, E> peekIf(final Throwables.BiPredicate<? super T, ? super Long, E> predicate, final Consumer<? super T> action) {
         assertNotClosed();
 
         checkArgNotNull(predicate, "predicate");
@@ -5721,38 +5713,38 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     @IntermediateOp
-    public ExceptionalStream<Stream<T>, E> split(final int chunkSize) {
+    public CheckedStream<Stream<T>, E> split(final int chunkSize) {
         assertNotClosed();
 
         return splitToList(chunkSize).map(Stream::of);
     }
 
     /**
-     * Returns ExceptionalStream of {@code List<T>} with consecutive sub sequences of the elements, each of the same size (the final sequence may be smaller).
+     * Returns CheckedStream of {@code List<T>} with consecutive sub sequences of the elements, each of the same size (the final sequence may be smaller).
      *
      *
      * @param chunkSize the desired size of each sub sequence (the last may be smaller).
      * @return
      */
     @IntermediateOp
-    public ExceptionalStream<List<T>, E> splitToList(final int chunkSize) {
+    public CheckedStream<List<T>, E> splitToList(final int chunkSize) {
         return split(chunkSize, Factory.<T> ofList());
     }
 
     /**
-     * Returns ExceptionalStream of {@code Set<T>} with consecutive sub sequences of the elements, each of the same size (the final sequence may be smaller).
+     * Returns CheckedStream of {@code Set<T>} with consecutive sub sequences of the elements, each of the same size (the final sequence may be smaller).
      *
      *
      * @param chunkSize the desired size of each sub sequence (the last may be smaller).
      * @return
      */
     @IntermediateOp
-    public ExceptionalStream<Set<T>, E> splitToSet(final int chunkSize) {
+    public CheckedStream<Set<T>, E> splitToSet(final int chunkSize) {
         return split(chunkSize, Factory.<T> ofSet());
     }
 
     /**
-     * Returns ExceptionalStream of {@code C} with consecutive sub sequences of the elements, each of the same size (the final sequence may be smaller).
+     * Returns CheckedStream of {@code C} with consecutive sub sequences of the elements, each of the same size (the final sequence may be smaller).
      *
      *
      * @param <C>
@@ -5761,12 +5753,12 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     @IntermediateOp
-    public <C extends Collection<T>> ExceptionalStream<C, E> split(final int chunkSize, final IntFunction<? extends C> collectionSupplier) {
+    public <C extends Collection<T>> CheckedStream<C, E> split(final int chunkSize, final IntFunction<? extends C> collectionSupplier) {
         assertNotClosed();
 
         checkArgPositive(chunkSize, "chunkSize");
 
-        return newStream(new ExceptionalIterator<C, E>() {
+        return newStream(new CheckedIterator<C, E>() {
             @Override
             public boolean hasNext() throws E {
                 return elements.hasNext();
@@ -5811,7 +5803,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     @IntermediateOp
-    public <R> ExceptionalStream<R, E> split(final int chunkSize, final Collector<? super T, ?, R> collector) {
+    public <R> CheckedStream<R, E> split(final int chunkSize, final Collector<? super T, ?, R> collector) {
         assertNotClosed();
 
         checkArgPositive(chunkSize, "chunkSize");
@@ -5820,7 +5812,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         final BiConsumer<Object, ? super T> accumulator = (BiConsumer<Object, ? super T>) collector.accumulator();
         final Function<Object, R> finisher = (Function<Object, R>) collector.finisher();
 
-        return newStream(new ExceptionalIterator<R, E>() {
+        return newStream(new CheckedIterator<R, E>() {
             @Override
             public boolean hasNext() throws E {
                 return elements.hasNext();
@@ -5864,14 +5856,14 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     @IntermediateOp
-    public ExceptionalStream<ExceptionalStream<T, E>, E> splitAt(final int where) {
+    public CheckedStream<CheckedStream<T, E>, E> splitAt(final int where) {
         assertNotClosed();
 
         checkArgNotNegative(where, "where");
 
-        final ExceptionalIterator<T, E> iter = elements;
+        final CheckedIterator<T, E> iter = elements;
 
-        return newStream(new ExceptionalIterator<ExceptionalStream<T, E>, E>() {
+        return newStream(new CheckedIterator<CheckedStream<T, E>, E>() {
             private int cursor = 0;
 
             @Override
@@ -5880,12 +5872,12 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             }
 
             @Override
-            public ExceptionalStream<T, E> next() throws E {
+            public CheckedStream<T, E> next() throws E {
                 if (!hasNext()) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
-                ExceptionalStream<T, E> result = null;
+                CheckedStream<T, E> result = null;
 
                 if (cursor == 0) {
                     final List<T> list = new ArrayList<>();
@@ -5895,9 +5887,9 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                         list.add(iter.next());
                     }
 
-                    result = new ExceptionalStream<>(ExceptionalIterator.of(list.iterator()), sorted, cmp, null);
+                    result = new CheckedStream<>(CheckedIterator.of(list.iterator()), sorted, cmp, null);
                 } else {
-                    result = new ExceptionalStream<>(iter, sorted, cmp, null);
+                    result = new CheckedStream<>(iter, sorted, cmp, null);
                 }
 
                 cursor++;
@@ -5938,12 +5930,12 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     @IntermediateOp
-    public ExceptionalStream<ExceptionalStream<T, E>, E> splitAt(final Throwables.Predicate<? super T, ? extends E> where) {
+    public CheckedStream<CheckedStream<T, E>, E> splitAt(final Throwables.Predicate<? super T, ? extends E> where) {
         assertNotClosed();
 
-        final ExceptionalIterator<T, E> iter = elements;
+        final CheckedIterator<T, E> iter = elements;
 
-        return newStream(new ExceptionalIterator<ExceptionalStream<T, E>, E>() {
+        return newStream(new CheckedIterator<CheckedStream<T, E>, E>() {
             private int cursor = 0;
             private T next = null;
             private boolean hasNext = false;
@@ -5954,12 +5946,12 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             }
 
             @Override
-            public ExceptionalStream<T, E> next() throws E {
+            public CheckedStream<T, E> next() throws E {
                 if (!hasNext()) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
-                ExceptionalStream<T, E> result = null;
+                CheckedStream<T, E> result = null;
 
                 if (cursor == 0) {
                     final List<T> list = new ArrayList<>();
@@ -5975,12 +5967,12 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                         }
                     }
 
-                    result = new ExceptionalStream<>(ExceptionalIterator.of(list.iterator()), sorted, cmp, null);
+                    result = new CheckedStream<>(CheckedIterator.of(list.iterator()), sorted, cmp, null);
                 } else {
-                    ExceptionalIterator<T, E> iterEx = iter;
+                    CheckedIterator<T, E> iterEx = iter;
 
                     if (hasNext) {
-                        iterEx = new ExceptionalIterator<>() {
+                        iterEx = new CheckedIterator<>() {
                             private boolean isFirst = true;
 
                             @Override
@@ -6004,7 +5996,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                         };
                     }
 
-                    result = new ExceptionalStream<>(iterEx, sorted, cmp, null);
+                    result = new CheckedStream<>(iterEx, sorted, cmp, null);
                 }
 
                 cursor++;
@@ -6053,7 +6045,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     @IntermediateOp
-    public ExceptionalStream<Stream<T>, E> sliding(final int windowSize, final int increment) {
+    public CheckedStream<Stream<T>, E> sliding(final int windowSize, final int increment) {
         assertNotClosed();
 
         return slidingToList(windowSize, increment).map(Stream::of);
@@ -6067,7 +6059,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     @IntermediateOp
-    public ExceptionalStream<List<T>, E> slidingToList(final int windowSize, final int increment) {
+    public CheckedStream<List<T>, E> slidingToList(final int windowSize, final int increment) {
         return sliding(windowSize, increment, Factory.<T> ofList());
     }
 
@@ -6079,7 +6071,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     @IntermediateOp
-    public ExceptionalStream<Set<T>, E> slidingToSet(final int windowSize, final int increment) {
+    public CheckedStream<Set<T>, E> slidingToSet(final int windowSize, final int increment) {
         return sliding(windowSize, increment, Factory.<T> ofSet());
     }
 
@@ -6092,13 +6084,12 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     @IntermediateOp
-    public <C extends Collection<T>> ExceptionalStream<C, E> sliding(final int windowSize, final int increment,
-            final IntFunction<? extends C> collectionSupplier) {
+    public <C extends Collection<T>> CheckedStream<C, E> sliding(final int windowSize, final int increment, final IntFunction<? extends C> collectionSupplier) {
         assertNotClosed();
 
         checkArgument(windowSize > 0 && increment > 0, "windowSize=%s and increment=%s must be bigger than 0", windowSize, increment);
 
-        return newStream(new ExceptionalIterator<C, E>() {
+        return newStream(new CheckedIterator<C, E>() {
             private Deque<T> queue = null;
             private boolean toSkip = false;
 
@@ -6229,7 +6220,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     @IntermediateOp
-    public <R> ExceptionalStream<R, E> sliding(final int windowSize, final int increment, final Collector<? super T, ?, R> collector) {
+    public <R> CheckedStream<R, E> sliding(final int windowSize, final int increment, final Collector<? super T, ?, R> collector) {
         assertNotClosed();
 
         checkArgument(windowSize > 0 && increment > 0, "windowSize=%s and increment=%s must be bigger than 0", windowSize, increment);
@@ -6238,7 +6229,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         final BiConsumer<Object, ? super T> accumulator = (BiConsumer<Object, ? super T>) collector.accumulator();
         final Function<Object, R> finisher = (Function<Object, R>) collector.finisher();
 
-        return newStream(new ExceptionalIterator<R, E>() {
+        return newStream(new CheckedIterator<R, E>() {
             private Deque<T> queue = null;
             private boolean toSkip = false;
 
@@ -6368,7 +6359,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     @IntermediateOp
-    public ExceptionalStream<T, E> skip(final long n) {
+    public CheckedStream<T, E> skip(final long n) {
         assertNotClosed();
 
         checkArgNotNegative(n, "n");
@@ -6377,7 +6368,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             return newStream(elements, sorted, cmp, closeHandlers);
         }
 
-        return newStream(new ExceptionalIterator<T, E>() {
+        return newStream(new CheckedIterator<T, E>() {
             private boolean skipped = false;
 
             @Override
@@ -6410,7 +6401,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @Deprecated
     @IntermediateOp
-    public ExceptionalStream<T, E> skipNull() {
+    public CheckedStream<T, E> skipNull() {
         return skipNulls();
     }
 
@@ -6420,7 +6411,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     @IntermediateOp
-    public ExceptionalStream<T, E> skipNulls() {
+    public CheckedStream<T, E> skipNulls() {
         return filter(Fnn.notNull());
     }
 
@@ -6430,12 +6421,12 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     @IntermediateOp
-    public ExceptionalStream<T, E> limit(final long maxSize) {
+    public CheckedStream<T, E> limit(final long maxSize) {
         assertNotClosed();
 
         checkArgNotNegative(maxSize, "maxSize");
 
-        return newStream(new ExceptionalIterator<T, E>() {
+        return newStream(new CheckedIterator<T, E>() {
             private long cnt = 0;
 
             @Override
@@ -6464,7 +6455,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     //     * @deprecated
     //     */
     //    @Deprecated
-    //    public ExceptionalStream<T, E> slice(final long from, final long to) {
+    //    public CheckedStream<T, E> slice(final long from, final long to) {
     //        checkArgNotNegative(from, "from");
     //        checkArgNotNegative(to, "to");
     //        checkArgument(to >= from, "'to' can't be less than `from`");
@@ -6479,7 +6470,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     @IntermediateOp
-    public ExceptionalStream<T, E> top(int n) {
+    public CheckedStream<T, E> top(int n) {
         assertNotClosed();
 
         return top(n, (Comparator<T>) Comparators.nullsFirst());
@@ -6493,12 +6484,12 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     @IntermediateOp
-    public ExceptionalStream<T, E> top(final int n, final Comparator<? super T> comparator) {
+    public CheckedStream<T, E> top(final int n, final Comparator<? super T> comparator) {
         assertNotClosed();
 
         checkArgPositive(n, "n");
 
-        return newStream(new ExceptionalIterator<T, E>() {
+        return newStream(new CheckedIterator<T, E>() {
             private boolean initialized = false;
             private T[] aar = null;
             private int cursor = 0;
@@ -6612,7 +6603,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @Beta
     @IntermediateOp
-    public ExceptionalStream<T, E> last(final int n) {
+    public CheckedStream<T, E> last(final int n) {
         assertNotClosed();
 
         checkArgNotNegative(n, "n");
@@ -6621,7 +6612,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             return limit(0);
         }
 
-        return newStream(new ExceptionalIterator<T, E>() {
+        return newStream(new CheckedIterator<T, E>() {
             private Iterator<T> iter;
             private boolean initialized = false;
 
@@ -6658,7 +6649,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                             deque.offerLast(elements.next());
                         }
                     } finally {
-                        ExceptionalStream.this.close();
+                        CheckedStream.this.close();
                     }
 
                     iter = deque.iterator();
@@ -6674,14 +6665,14 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     @IntermediateOp
-    public ExceptionalStream<T, E> skipLast(final int n) {
+    public CheckedStream<T, E> skipLast(final int n) {
         assertNotClosed();
 
         if (n <= 0) {
             return newStream(elements, sorted, cmp, closeHandlers);
         }
 
-        return newStream(new ExceptionalIterator<T, E>() {
+        return newStream(new CheckedIterator<T, E>() {
             private Deque<T> deque = null;
 
             @Override
@@ -6718,10 +6709,10 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @IntermediateOp
     @TerminalOpTriggered
-    public ExceptionalStream<T, E> reversed() {
+    public CheckedStream<T, E> reversed() {
         assertNotClosed();
 
-        return newStream(new ExceptionalIterator<T, E>() {
+        return newStream(new CheckedIterator<T, E>() {
             private boolean initialized = false;
             private T[] aar;
             private int cursor;
@@ -6769,7 +6760,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             private void init() throws E {
                 if (!initialized) {
                     initialized = true;
-                    aar = (T[]) ExceptionalStream.this.toArrayForIntermediateOp();
+                    aar = (T[]) CheckedStream.this.toArrayForIntermediateOp();
                     cursor = aar.length;
                 }
             }
@@ -6784,14 +6775,14 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @IntermediateOp
     @TerminalOpTriggered
-    public ExceptionalStream<T, E> rotated(final int distance) {
+    public CheckedStream<T, E> rotated(final int distance) {
         assertNotClosed();
 
         if (distance == 0) {
             return newStream(elements, closeHandlers);
         }
 
-        return newStream(new ExceptionalIterator<T, E>() {
+        return newStream(new CheckedIterator<T, E>() {
             private boolean initialized = false;
             private T[] aar;
             private int len;
@@ -6837,7 +6828,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             private void init() throws E {
                 if (!initialized) {
                     initialized = true;
-                    aar = (T[]) ExceptionalStream.this.toArrayForIntermediateOp();
+                    aar = (T[]) CheckedStream.this.toArrayForIntermediateOp();
                     len = aar.length;
 
                     if (len > 0) {
@@ -6861,7 +6852,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @IntermediateOp
     @TerminalOpTriggered
-    public ExceptionalStream<T, E> shuffled() {
+    public CheckedStream<T, E> shuffled() {
         return shuffled(RAND);
     }
 
@@ -6873,7 +6864,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @IntermediateOp
     @TerminalOpTriggered
-    public ExceptionalStream<T, E> shuffled(final Random rnd) {
+    public CheckedStream<T, E> shuffled(final Random rnd) {
         assertNotClosed();
 
         return lazyLoad(a -> {
@@ -6889,7 +6880,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @IntermediateOp
     @TerminalOpTriggered
-    public ExceptionalStream<T, E> sorted() {
+    public CheckedStream<T, E> sorted() {
         return sorted(Comparators.NATURAL_ORDER);
     }
 
@@ -6900,7 +6891,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @IntermediateOp
     @TerminalOpTriggered
-    public ExceptionalStream<T, E> sorted(final Comparator<? super T> comparator) {
+    public CheckedStream<T, E> sorted(final Comparator<? super T> comparator) {
         assertNotClosed();
 
         final Comparator<? super T> cmp = comparator == null ? Comparators.NATURAL_ORDER : comparator; //NOSONAR
@@ -6924,7 +6915,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     @IntermediateOp
     @TerminalOpTriggered
     @SuppressWarnings("rawtypes")
-    public ExceptionalStream<T, E> sortedBy(final Function<? super T, ? extends Comparable> keyMapper) {
+    public CheckedStream<T, E> sortedBy(final Function<? super T, ? extends Comparable> keyMapper) {
         assertNotClosed();
 
         final Comparator<? super T> comparator = (o1, o2) -> N.compare(keyMapper.apply(o1), keyMapper.apply(o2));
@@ -6939,7 +6930,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @IntermediateOp
     @TerminalOpTriggered
-    public ExceptionalStream<T, E> reverseSorted() {
+    public CheckedStream<T, E> reverseSorted() {
         return sorted(Comparators.REVERSED_ORDER);
     }
 
@@ -6951,7 +6942,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @IntermediateOp
     @TerminalOpTriggered
-    public ExceptionalStream<T, E> reverseSorted(Comparator<? super T> comparator) {
+    public CheckedStream<T, E> reverseSorted(Comparator<? super T> comparator) {
         final Comparator<? super T> cmpToUse = Comparators.reverseOrder(comparator);
 
         return sorted(cmpToUse);
@@ -6965,7 +6956,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @IntermediateOp
     @TerminalOpTriggered
-    public ExceptionalStream<T, E> reverseSortedBy(@SuppressWarnings("rawtypes") final Function<? super T, ? extends Comparable> keyMapper) {
+    public CheckedStream<T, E> reverseSortedBy(@SuppressWarnings("rawtypes") final Function<? super T, ? extends Comparable> keyMapper) {
         final Comparator<? super T> cmpToUse = Comparators.reversedComparingBy(keyMapper);
 
         return sorted(cmpToUse);
@@ -6978,10 +6969,10 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @param cmp
      * @return
      */
-    private ExceptionalStream<T, E> lazyLoad(final Function<Object[], Object[]> op, final boolean sorted, final Comparator<? super T> cmp) {
+    private CheckedStream<T, E> lazyLoad(final Function<Object[], Object[]> op, final boolean sorted, final Comparator<? super T> cmp) {
         assertNotClosed();
 
-        return newStream(new ExceptionalIterator<T, E>() {
+        return newStream(new CheckedIterator<T, E>() {
             private boolean initialized = false;
             private T[] aar;
             private int cursor = 0;
@@ -7032,7 +7023,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             private void init() throws E {
                 if (!initialized) {
                     initialized = true;
-                    aar = (T[]) op.apply(ExceptionalStream.this.toArrayForIntermediateOp());
+                    aar = (T[]) op.apply(CheckedStream.this.toArrayForIntermediateOp());
                     len = aar.length;
                 }
             }
@@ -7046,11 +7037,11 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @SequentialOnly
     @IntermediateOp
-    public ExceptionalStream<T, E> cycled() {
+    public CheckedStream<T, E> cycled() {
         assertNotClosed();
 
-        return newStream(new ExceptionalIterator<T, E>() {
-            private ExceptionalIterator<T, E> iter = null;
+        return newStream(new CheckedIterator<T, E>() {
+            private CheckedIterator<T, E> iter = null;
             private List<T> list = null;
             private T[] a = null;
             private int len = 0;
@@ -7101,7 +7092,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             private void init() {
                 if (!initialized) {
                     initialized = true;
-                    iter = ExceptionalStream.this.iteratorEx();
+                    iter = CheckedStream.this.iteratorEx();
                     list = new ArrayList<>();
                 }
             }
@@ -7116,11 +7107,11 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @SequentialOnly
     @IntermediateOp
-    public ExceptionalStream<T, E> cycled(long rounds) {
+    public CheckedStream<T, E> cycled(long rounds) {
         assertNotClosed();
 
-        return newStream(new ExceptionalIterator<T, E>() {
-            private ExceptionalIterator<T, E> iter = null;
+        return newStream(new CheckedIterator<T, E>() {
+            private CheckedIterator<T, E> iter = null;
             private List<T> list = null;
             private T[] a = null;
             private int len = 0;
@@ -7178,7 +7169,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             private void init() {
                 if (!initialized) {
                     initialized = true;
-                    iter = ExceptionalStream.this.iteratorEx();
+                    iter = CheckedStream.this.iteratorEx();
                     list = new ArrayList<>();
                 }
             }
@@ -7192,7 +7183,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     @IntermediateOp
-    public ExceptionalStream<T, E> rateLimited(double permitsPerSecond) {
+    public CheckedStream<T, E> rateLimited(double permitsPerSecond) {
         return rateLimited(RateLimiter.create(permitsPerSecond));
     }
 
@@ -7204,7 +7195,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @see RateLimiter#create(double)
      */
     @IntermediateOp
-    public ExceptionalStream<T, E> rateLimited(final RateLimiter rateLimiter) {
+    public CheckedStream<T, E> rateLimited(final RateLimiter rateLimiter) {
         assertNotClosed();
         checkArgNotNull(rateLimiter, "rateLimiter");
 
@@ -7219,7 +7210,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     @IntermediateOp
-    public ExceptionalStream<T, E> delay(final Duration delay) {
+    public CheckedStream<T, E> delay(final Duration delay) {
         assertNotClosed();
         checkArgNotNull(delay, "delay");
 
@@ -7236,7 +7227,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @Beta
     @IntermediateOp
-    public ExceptionalStream<Timed<T>, E> timed() {
+    public CheckedStream<Timed<T>, E> timed() {
         return map(Timed::of);
     }
 
@@ -7247,11 +7238,11 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     @IntermediateOp
-    public ExceptionalStream<T, E> intersperse(final T delimiter) {
+    public CheckedStream<T, E> intersperse(final T delimiter) {
         assertNotClosed();
 
-        return newStream(new ExceptionalIterator<T, E>() {
-            private final ExceptionalIterator<T, E> iter = iteratorEx();
+        return newStream(new CheckedIterator<T, E>() {
+            private final CheckedIterator<T, E> iter = iteratorEx();
             private boolean toInsert = false;
 
             @Override
@@ -7285,7 +7276,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @Beta
     @IntermediateOp
-    public ExceptionalStream<T, E> step(final long step) {
+    public CheckedStream<T, E> step(final long step) {
         assertNotClosed();
 
         checkArgPositive(step, "step");
@@ -7295,9 +7286,9 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         }
 
         final long skip = step - 1;
-        final ExceptionalIterator<T, E> iter = this.iteratorEx();
+        final CheckedIterator<T, E> iter = this.iteratorEx();
 
-        final ExceptionalIterator<T, E> iterator = new ExceptionalIterator<>() {
+        final CheckedIterator<T, E> iterator = new CheckedIterator<>() {
             @Override
             public boolean hasNext() throws E {
                 return iter.hasNext();
@@ -7321,7 +7312,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @Beta
     @IntermediateOp
-    public ExceptionalStream<Indexed<T>, E> indexed() {
+    public CheckedStream<Indexed<T>, E> indexed() {
         assertNotClosed();
 
         return map(new Throwables.Function<T, Indexed<T>, E>() {
@@ -7341,10 +7332,10 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     @IntermediateOp
-    public ExceptionalStream<T, E> mergeWith(final Collection<? extends T> b, final Throwables.BiFunction<? super T, ? super T, MergeResult, E> nextSelector) {
+    public CheckedStream<T, E> mergeWith(final Collection<? extends T> b, final Throwables.BiFunction<? super T, ? super T, MergeResult, E> nextSelector) {
         assertNotClosed();
 
-        return mergeWith(ExceptionalStream.of(b), nextSelector);
+        return mergeWith(CheckedStream.of(b), nextSelector);
     }
 
     /**
@@ -7354,11 +7345,11 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     @IntermediateOp
-    public ExceptionalStream<T, E> mergeWith(final ExceptionalStream<? extends T, E> b,
+    public CheckedStream<T, E> mergeWith(final CheckedStream<? extends T, E> b,
             final Throwables.BiFunction<? super T, ? super T, MergeResult, E> nextSelector) {
         assertNotClosed();
 
-        return ExceptionalStream.merge(this, b, nextSelector);
+        return CheckedStream.merge(this, b, nextSelector);
     }
 
     /**
@@ -7370,11 +7361,11 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     @IntermediateOp
-    public <T2, R> ExceptionalStream<R, E> zipWith(final Collection<T2> b,
+    public <T2, R> CheckedStream<R, E> zipWith(final Collection<T2> b,
             final Throwables.BiFunction<? super T, ? super T2, ? extends R, ? extends E> zipFunction) {
         assertNotClosed();
 
-        return zip(this, ExceptionalStream.of(b), zipFunction);
+        return zip(this, CheckedStream.of(b), zipFunction);
     }
 
     /**
@@ -7388,11 +7379,11 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     @IntermediateOp
-    public <T2, R> ExceptionalStream<R, E> zipWith(final Collection<T2> b, final T valueForNoneA, final T2 valueForNoneB,
+    public <T2, R> CheckedStream<R, E> zipWith(final Collection<T2> b, final T valueForNoneA, final T2 valueForNoneB,
             final Throwables.BiFunction<? super T, ? super T2, ? extends R, ? extends E> zipFunction) {
         assertNotClosed();
 
-        return zip(this, ExceptionalStream.of(b), valueForNoneA, valueForNoneB, zipFunction);
+        return zip(this, CheckedStream.of(b), valueForNoneA, valueForNoneB, zipFunction);
     }
 
     /**
@@ -7406,11 +7397,11 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     @IntermediateOp
-    public <T2, T3, R> ExceptionalStream<R, E> zipWith(final Collection<T2> b, final Collection<T3> c,
+    public <T2, T3, R> CheckedStream<R, E> zipWith(final Collection<T2> b, final Collection<T3> c,
             final Throwables.TriFunction<? super T, ? super T2, ? super T3, ? extends R, ? extends E> zipFunction) {
         assertNotClosed();
 
-        return zip(this, ExceptionalStream.of(b), ExceptionalStream.of(c), zipFunction);
+        return zip(this, CheckedStream.of(b), CheckedStream.of(c), zipFunction);
     }
 
     /**
@@ -7427,11 +7418,11 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     @IntermediateOp
-    public <T2, T3, R> ExceptionalStream<R, E> zipWith(final Collection<T2> b, final Collection<T3> c, final T valueForNoneA, final T2 valueForNoneB,
+    public <T2, T3, R> CheckedStream<R, E> zipWith(final Collection<T2> b, final Collection<T3> c, final T valueForNoneA, final T2 valueForNoneB,
             final T3 valueForNoneC, final Throwables.TriFunction<? super T, ? super T2, ? super T3, ? extends R, ? extends E> zipFunction) {
         assertNotClosed();
 
-        return zip(this, ExceptionalStream.of(b), ExceptionalStream.of(c), valueForNoneA, valueForNoneB, valueForNoneC, zipFunction);
+        return zip(this, CheckedStream.of(b), CheckedStream.of(c), valueForNoneA, valueForNoneB, valueForNoneC, zipFunction);
     }
 
     /**
@@ -7443,7 +7434,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     @IntermediateOp
-    public <T2, R> ExceptionalStream<R, E> zipWith(final ExceptionalStream<T2, E> b,
+    public <T2, R> CheckedStream<R, E> zipWith(final CheckedStream<T2, E> b,
             final Throwables.BiFunction<? super T, ? super T2, ? extends R, ? extends E> zipFunction) {
         assertNotClosed();
 
@@ -7461,7 +7452,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     @IntermediateOp
-    public <T2, R> ExceptionalStream<R, E> zipWith(final ExceptionalStream<T2, E> b, final T valueForNoneA, final T2 valueForNoneB,
+    public <T2, R> CheckedStream<R, E> zipWith(final CheckedStream<T2, E> b, final T valueForNoneA, final T2 valueForNoneB,
             final Throwables.BiFunction<? super T, ? super T2, ? extends R, ? extends E> zipFunction) {
         assertNotClosed();
 
@@ -7479,7 +7470,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     @IntermediateOp
-    public <T2, T3, R> ExceptionalStream<R, E> zipWith(final ExceptionalStream<T2, E> b, final ExceptionalStream<T3, E> c,
+    public <T2, T3, R> CheckedStream<R, E> zipWith(final CheckedStream<T2, E> b, final CheckedStream<T3, E> c,
             final Throwables.TriFunction<? super T, ? super T2, ? super T3, ? extends R, ? extends E> zipFunction) {
         assertNotClosed();
 
@@ -7500,9 +7491,8 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     @IntermediateOp
-    public <T2, T3, R> ExceptionalStream<R, E> zipWith(final ExceptionalStream<T2, E> b, final ExceptionalStream<T3, E> c, final T valueForNoneA,
-            final T2 valueForNoneB, final T3 valueForNoneC,
-            final Throwables.TriFunction<? super T, ? super T2, ? super T3, ? extends R, ? extends E> zipFunction) {
+    public <T2, T3, R> CheckedStream<R, E> zipWith(final CheckedStream<T2, E> b, final CheckedStream<T3, E> c, final T valueForNoneA, final T2 valueForNoneB,
+            final T3 valueForNoneC, final Throwables.TriFunction<? super T, ? super T2, ? super T3, ? extends R, ? extends E> zipFunction) {
         assertNotClosed();
 
         return zip(this, b, c, valueForNoneA, valueForNoneB, valueForNoneC, zipFunction);
@@ -7520,11 +7510,11 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     //     */
     //    @Beta
     //    @IntermediateOp
-    //    public ExceptionalStream<T, E> onErrorContinue(final Throwables.Consumer<? super Throwable, ? extends E> errorConsumer) {
+    //    public CheckedStream<T, E> onErrorContinue(final Throwables.Consumer<? super Throwable, ? extends E> errorConsumer) {
     //        assertNotClosed();
     //
-    //        return newStream(new ExceptionalIterator<T, E>() {
-    //            private final ExceptionalIterator<T, E> iter = iteratorEx();
+    //        return newStream(new CheckedIterator<T, E>() {
+    //            private final CheckedIterator<T, E> iter = iteratorEx();
     //            private final T none = (T) NONE;
     //            private T next = none;
     //            private T ret = null;
@@ -7573,12 +7563,12 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     //     */
     //    @Beta
     //    @IntermediateOp
-    //    public ExceptionalStream<T, E> onErrorContinue(final Class<? extends Throwable> type,
+    //    public CheckedStream<T, E> onErrorContinue(final Class<? extends Throwable> type,
     //            final Throwables.Consumer<? super Throwable, ? extends E> errorConsumer) {
     //        assertNotClosed();
     //
-    //        return newStream(new ExceptionalIterator<T, E>() {
-    //            private final ExceptionalIterator<T, E> iter = iteratorEx();
+    //        return newStream(new CheckedIterator<T, E>() {
+    //            private final CheckedIterator<T, E> iter = iteratorEx();
     //            private final T none = (T) NONE;
     //            private T next = none;
     //            private T ret = null;
@@ -7631,12 +7621,12 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     //     */
     //    @Beta
     //    @IntermediateOp
-    //    public ExceptionalStream<T, E> onErrorContinue(final Throwables.Predicate<? super Throwable, ? extends E> errorPredicate,
+    //    public CheckedStream<T, E> onErrorContinue(final Throwables.Predicate<? super Throwable, ? extends E> errorPredicate,
     //            final Throwables.Consumer<? super Throwable, ? extends E> errorConsumer) {
     //        assertNotClosed();
     //
-    //        return newStream(new ExceptionalIterator<T, E>() {
-    //            private final ExceptionalIterator<T, E> iter = iteratorEx();
+    //        return newStream(new CheckedIterator<T, E>() {
+    //            private final CheckedIterator<T, E> iter = iteratorEx();
     //            private final T none = (T) NONE;
     //            private T next = none;
     //            private T ret = null;
@@ -7690,14 +7680,14 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     //     */
     //    @Beta
     //    @IntermediateOp
-    //    public ExceptionalStream<T, E> onErrorContinue(final Throwables.Predicate<? super Throwable, ? extends E> errorPredicate,
+    //    public CheckedStream<T, E> onErrorContinue(final Throwables.Predicate<? super Throwable, ? extends E> errorPredicate,
     //            final Throwables.Consumer<? super Throwable, ? extends E> errorConsumer, final int maxErrorCountToStop) {
     //        assertNotClosed();
     //        checkArgNotNegative(maxErrorCountToStop, "maxErrorCountToStop");
     //
-    //        return newStream(new ExceptionalIterator<T, E>() {
+    //        return newStream(new CheckedIterator<T, E>() {
     //            private final AtomicInteger errorCounter = new AtomicInteger(maxErrorCountToStop);
-    //            private final ExceptionalIterator<T, E> iter = iteratorEx();
+    //            private final CheckedIterator<T, E> iter = iteratorEx();
     //            private final T none = (T) NONE;
     //            private T next = none;
     //            private T ret = null;
@@ -7753,11 +7743,11 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     //     */
     //    @Beta
     //    @IntermediateOp
-    //    public ExceptionalStream<T, E> onErrorReturn(final T fallbackValue) {
+    //    public CheckedStream<T, E> onErrorReturn(final T fallbackValue) {
     //        assertNotClosed();
     //
-    //        return newStream(new ExceptionalIterator<T, E>() {
-    //            private final ExceptionalIterator<T, E> iter = iteratorEx();
+    //        return newStream(new CheckedIterator<T, E>() {
+    //            private final CheckedIterator<T, E> iter = iteratorEx();
     //            private final T none = (T) NONE;
     //            private T next = none;
     //            private T ret = null;
@@ -7802,11 +7792,11 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     //     */
     //    @Beta
     //    @IntermediateOp
-    //    public ExceptionalStream<T, E> onErrorReturn(final Class<? extends Throwable> type, final T fallbackValue) {
+    //    public CheckedStream<T, E> onErrorReturn(final Class<? extends Throwable> type, final T fallbackValue) {
     //        assertNotClosed();
     //
-    //        return newStream(new ExceptionalIterator<T, E>() {
-    //            private final ExceptionalIterator<T, E> iter = iteratorEx();
+    //        return newStream(new CheckedIterator<T, E>() {
+    //            private final CheckedIterator<T, E> iter = iteratorEx();
     //            private final T none = (T) NONE;
     //            private T next = none;
     //            private T ret = null;
@@ -7855,11 +7845,11 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     //     */
     //    @Beta
     //    @IntermediateOp
-    //    public ExceptionalStream<T, E> onErrorReturn(final Throwables.Predicate<? super Throwable, ? extends E> predicate, final T fallbackValue) {
+    //    public CheckedStream<T, E> onErrorReturn(final Throwables.Predicate<? super Throwable, ? extends E> predicate, final T fallbackValue) {
     //        assertNotClosed();
     //
-    //        return newStream(new ExceptionalIterator<T, E>() {
-    //            private final ExceptionalIterator<T, E> iter = iteratorEx();
+    //        return newStream(new CheckedIterator<T, E>() {
+    //            private final CheckedIterator<T, E> iter = iteratorEx();
     //            private final T none = (T) NONE;
     //            private T next = none;
     //            private T ret = null;
@@ -7908,12 +7898,12 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     //     */
     //    @Beta
     //    @IntermediateOp
-    //    public ExceptionalStream<T, E> onErrorReturn(final Throwables.Predicate<? super Throwable, ? extends E> predicate,
+    //    public CheckedStream<T, E> onErrorReturn(final Throwables.Predicate<? super Throwable, ? extends E> predicate,
     //            final Throwables.Supplier<? extends T, ? extends E> supplierForFallbackValue) {
     //        assertNotClosed();
     //
-    //        return newStream(new ExceptionalIterator<T, E>() {
-    //            private final ExceptionalIterator<T, E> iter = iteratorEx();
+    //        return newStream(new CheckedIterator<T, E>() {
+    //            private final CheckedIterator<T, E> iter = iteratorEx();
     //            private final T none = (T) NONE;
     //            private T next = none;
     //            private T ret = null;
@@ -7963,14 +7953,14 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     //     */
     //    @Beta
     //    @IntermediateOp
-    //    public ExceptionalStream<T, E> onErrorReturn(final Throwables.Predicate<? super Throwable, ? extends E> predicate,
+    //    public CheckedStream<T, E> onErrorReturn(final Throwables.Predicate<? super Throwable, ? extends E> predicate,
     //            final Throwables.Function<? super Throwable, ? extends T, ? extends E> mapperForFallbackValue, final int maxErrorCountToStop) {
     //        assertNotClosed();
     //        checkArgNotNegative(maxErrorCountToStop, "maxErrorCountToStop");
     //
-    //        return newStream(new ExceptionalIterator<T, E>() {
+    //        return newStream(new CheckedIterator<T, E>() {
     //            private final AtomicInteger errorCounter = new AtomicInteger(maxErrorCountToStop);
-    //            private final ExceptionalIterator<T, E> iter = iteratorEx();
+    //            private final CheckedIterator<T, E> iter = iteratorEx();
     //            private final T none = (T) NONE;
     //            private T next = none;
     //            private T ret = null;
@@ -8015,11 +8005,11 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     //
     //    @Beta
     //    @IntermediateOp
-    //    public ExceptionalStream<T, E> onErrorStop() {
+    //    public CheckedStream<T, E> onErrorStop() {
     //        assertNotClosed();
     //
-    //        return newStream(new ExceptionalIterator<T, E>() {
-    //            private final ExceptionalIterator<T, E> iter = iteratorEx();
+    //        return newStream(new CheckedIterator<T, E>() {
+    //            private final CheckedIterator<T, E> iter = iteratorEx();
     //            private final T none = (T) NONE;
     //            private T next = none;
     //            private T ret = null;
@@ -8200,14 +8190,14 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @throws E3 the e3
      */
     @TerminalOp
-    public <U, E2 extends Exception, E3 extends Exception> void forEach(final Throwables.Function<? super T, ? extends Collection<? extends U>, E2> flatMapper,
+    public <U, E2 extends Exception, E3 extends Exception> void forEach(final Throwables.Function<? super T, ? extends Iterable<? extends U>, E2> flatMapper,
             final Throwables.BiConsumer<? super T, ? super U, E3> action) throws E, E2, E3 {
         assertNotClosed();
 
         checkArgNotNull(flatMapper, "flatMapper");
         checkArgNotNull(action, "action");
 
-        Collection<? extends U> c = null;
+        Iterable<? extends U> c = null;
         T next = null;
 
         try {
@@ -8215,7 +8205,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                 next = elements.next();
                 c = flatMapper.apply(next);
 
-                if (N.notEmpty(c)) {
+                if (c != null) {
                     for (U u : c) {
                         action.accept(next, u);
                     }
@@ -8243,8 +8233,8 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @TerminalOp
     public <T2, T3, E2 extends Exception, E3 extends Exception, E4 extends Exception> void forEach(
-            final Throwables.Function<? super T, ? extends Collection<T2>, E2> flatMapper,
-            final Throwables.Function<? super T2, ? extends Collection<T3>, E3> flatMapper2,
+            final Throwables.Function<? super T, ? extends Iterable<T2>, E2> flatMapper,
+            final Throwables.Function<? super T2, ? extends Iterable<T3>, E3> flatMapper2,
             final Throwables.TriConsumer<? super T, ? super T2, ? super T3, E4> action) throws E, E2, E3, E4 {
         assertNotClosed();
 
@@ -8252,8 +8242,8 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         checkArgNotNull(flatMapper2, "flatMapper2");
         checkArgNotNull(action, "action");
 
-        Collection<T2> c2 = null;
-        Collection<T3> c3 = null;
+        Iterable<T2> c2 = null;
+        Iterable<T3> c3 = null;
         T next = null;
 
         try {
@@ -8261,11 +8251,11 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                 next = elements.next();
                 c2 = flatMapper.apply(next);
 
-                if (N.notEmpty(c2)) {
+                if (c2 != null) {
                     for (T2 t2 : c2) {
                         c3 = flatMapper2.apply(t2);
 
-                        if (N.notEmpty(c3)) {
+                        if (c3 != null) {
                             for (T3 t3 : c3) {
                                 action.accept(next, t2, t3);
                             }
@@ -9197,7 +9187,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     // It won't work for findFirst/only/anyMatch...
-    //    public <R> Pair<Long, R> countAnd(final Throwables.Function<? super ExceptionalStream<T, E>, R, E> terminalAction) throws E {
+    //    public <R> Pair<Long, R> countAnd(final Throwables.Function<? super CheckedStream<T, E>, R, E> terminalAction) throws E {
     //        checkArgNotNull(terminalAction, "terminalAction");
     //
     //        final MutableLong count = MutableLong.of(0);
@@ -10617,7 +10607,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @Beta
     @IntermediateOp
-    public ExceptionalStream<T, E> saveEach(final File output) {
+    public CheckedStream<T, E> saveEach(final File output) {
         return saveEach(output, N::stringOf);
     }
 
@@ -10631,11 +10621,11 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @Beta
     @IntermediateOp
-    public ExceptionalStream<T, E> saveEach(final File output, final Throwables.Function<? super T, String, E> toLine) {
+    public CheckedStream<T, E> saveEach(final File output, final Throwables.Function<? super T, String, E> toLine) {
         assertNotClosed();
 
-        final ExceptionalIterator<T, E> iter = new ExceptionalIterator<>() {
-            private final ExceptionalIterator<T, E> iter = iteratorEx();
+        final CheckedIterator<T, E> iter = new CheckedIterator<>() {
+            private final CheckedIterator<T, E> iter = iteratorEx();
             private Writer writer = null;
             private BufferedWriter bw = null;
             private boolean initialized = false;
@@ -10695,11 +10685,11 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @Beta
     @IntermediateOp
-    public ExceptionalStream<T, E> saveEach(final OutputStream output, final Throwables.Function<? super T, String, E> toLine) {
+    public CheckedStream<T, E> saveEach(final OutputStream output, final Throwables.Function<? super T, String, E> toLine) {
         assertNotClosed();
 
-        final ExceptionalIterator<T, E> iter = new ExceptionalIterator<>() {
-            private final ExceptionalIterator<T, E> iter = iteratorEx();
+        final CheckedIterator<T, E> iter = new CheckedIterator<>() {
+            private final CheckedIterator<T, E> iter = iteratorEx();
             private BufferedWriter bw = null;
             private boolean initialized = false;
 
@@ -10751,11 +10741,11 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @Beta
     @IntermediateOp
-    public ExceptionalStream<T, E> saveEach(Writer output, final Throwables.Function<? super T, String, E> toLine) {
+    public CheckedStream<T, E> saveEach(Writer output, final Throwables.Function<? super T, String, E> toLine) {
         assertNotClosed();
 
-        final ExceptionalIterator<T, E> iter = new ExceptionalIterator<>() {
-            private final ExceptionalIterator<T, E> iter = iteratorEx();
+        final CheckedIterator<T, E> iter = new CheckedIterator<>() {
+            private final CheckedIterator<T, E> iter = iteratorEx();
             private Writer bw = null;
             private boolean isBufferedWriter = false;
             private boolean initialized = false;
@@ -10811,11 +10801,11 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @Beta
     @IntermediateOp
-    public ExceptionalStream<T, E> saveEach(final File output, final Throwables.BiConsumer<? super T, Writer, IOException> writeLine) {
+    public CheckedStream<T, E> saveEach(final File output, final Throwables.BiConsumer<? super T, Writer, IOException> writeLine) {
         assertNotClosed();
 
-        final ExceptionalIterator<T, E> iter = new ExceptionalIterator<>() {
-            private final ExceptionalIterator<T, E> iter = iteratorEx();
+        final CheckedIterator<T, E> iter = new CheckedIterator<>() {
+            private final CheckedIterator<T, E> iter = iteratorEx();
             private Writer writer = null;
             private BufferedWriter bw = null;
             private boolean initialized = false;
@@ -10875,11 +10865,11 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @Beta
     @IntermediateOp
-    public ExceptionalStream<T, E> saveEach(final Writer output, final Throwables.BiConsumer<? super T, Writer, IOException> writeLine) {
+    public CheckedStream<T, E> saveEach(final Writer output, final Throwables.BiConsumer<? super T, Writer, IOException> writeLine) {
         assertNotClosed();
 
-        final ExceptionalIterator<T, E> iter = new ExceptionalIterator<>() {
-            private final ExceptionalIterator<T, E> iter = iteratorEx();
+        final CheckedIterator<T, E> iter = new CheckedIterator<>() {
+            private final CheckedIterator<T, E> iter = iteratorEx();
             private Writer bw = null;
             private boolean isBufferedWriter = false;
             private boolean initialized = false;
@@ -10936,12 +10926,12 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @Beta
     @IntermediateOp
-    public ExceptionalStream<T, E> saveEach(final PreparedStatement stmt,
+    public CheckedStream<T, E> saveEach(final PreparedStatement stmt,
             final Throwables.BiConsumer<? super T, ? super PreparedStatement, SQLException> stmtSetter) {
         assertNotClosed();
 
-        final ExceptionalIterator<T, E> iter = new ExceptionalIterator<>() {
-            private final ExceptionalIterator<T, E> iter = iteratorEx();
+        final CheckedIterator<T, E> iter = new CheckedIterator<>() {
+            private final CheckedIterator<T, E> iter = iteratorEx();
 
             @Override
             public boolean hasNext() throws E {
@@ -10979,12 +10969,12 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @Beta
     @IntermediateOp
-    public ExceptionalStream<T, E> saveEach(final Connection conn, final String insertSQL,
+    public CheckedStream<T, E> saveEach(final Connection conn, final String insertSQL,
             final Throwables.BiConsumer<? super T, ? super PreparedStatement, SQLException> stmtSetter) {
         assertNotClosed();
 
-        final ExceptionalIterator<T, E> iter = new ExceptionalIterator<>() {
-            private final ExceptionalIterator<T, E> iter = iteratorEx();
+        final CheckedIterator<T, E> iter = new CheckedIterator<>() {
+            private final CheckedIterator<T, E> iter = iteratorEx();
             private PreparedStatement stmt = null;
             private boolean initialized = false;
 
@@ -11046,12 +11036,12 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @Beta
     @IntermediateOp
-    public ExceptionalStream<T, E> saveEach(final javax.sql.DataSource ds, final String insertSQL,
+    public CheckedStream<T, E> saveEach(final javax.sql.DataSource ds, final String insertSQL,
             final Throwables.BiConsumer<? super T, ? super PreparedStatement, SQLException> stmtSetter) {
         assertNotClosed();
 
-        final ExceptionalIterator<T, E> iter = new ExceptionalIterator<>() {
-            private final ExceptionalIterator<T, E> iter = iteratorEx();
+        final CheckedIterator<T, E> iter = new CheckedIterator<>() {
+            private final CheckedIterator<T, E> iter = iteratorEx();
             private Connection conn = null;
             private PreparedStatement stmt = null;
             private boolean initialized = false;
@@ -11202,6 +11192,29 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     /**
      *
      * @param output
+     * @param header
+     * @param tail
+     * @param toLine
+     * @return
+     * @throws E
+     * @throws IOException
+     */
+    @TerminalOp
+    public long persist(OutputStream output, String header, String tail, Throwables.Function<? super T, String, E> toLine) throws E, IOException {
+        assertNotClosed();
+
+        final BufferedWriter bw = Objectory.createBufferedWriter(output);
+
+        try {
+            return persist(bw, header, tail, toLine);
+        } finally {
+            Objectory.recycle(bw);
+        }
+    }
+
+    /**
+     *
+     * @param output
      * @param toLine
      * @return
      * @throws E
@@ -11231,7 +11244,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         try {
             boolean isBufferedWriter = output instanceof BufferedWriter || output instanceof java.io.BufferedWriter;
             final Writer bw = isBufferedWriter ? output : Objectory.createBufferedWriter(output); //NOSONAR
-            final ExceptionalIterator<T, E> iter = iteratorEx();
+            final CheckedIterator<T, E> iter = iteratorEx();
             long cnt = 0;
 
             try {
@@ -11340,7 +11353,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         try {
             boolean isBufferedWriter = output instanceof BufferedWriter || output instanceof java.io.BufferedWriter;
             final Writer bw = isBufferedWriter ? output : Objectory.createBufferedWriter(output); //NOSONAR
-            final ExceptionalIterator<T, E> iter = iteratorEx();
+            final CheckedIterator<T, E> iter = iteratorEx();
             long cnt = 0;
 
             try {
@@ -11393,7 +11406,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                 batchSize, batchIntervalInMillis);
 
         try {
-            final ExceptionalIterator<T, E> iter = iteratorEx();
+            final CheckedIterator<T, E> iter = iteratorEx();
             long cnt = 0;
             while (iter.hasNext()) {
                 stmtSetter.accept(iter.next(), stmt);
@@ -11609,7 +11622,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             final boolean isBufferedWriter = output instanceof BufferedJSONWriter;
             final BufferedJSONWriter bw = isBufferedWriter ? (BufferedJSONWriter) output : Objectory.createBufferedJSONWriter(output);
 
-            final ExceptionalIterator<T, E> iter = iteratorEx();
+            final CheckedIterator<T, E> iter = iteratorEx();
             long cnt = 0;
             T next = null;
             Class<?> cls = null;
@@ -11736,7 +11749,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             final BufferedJSONWriter bw = isBufferedWriter ? (BufferedJSONWriter) output : Objectory.createBufferedJSONWriter(output);
 
             final int headSize = headers.size();
-            final ExceptionalIterator<T, E> iter = iteratorEx();
+            final CheckedIterator<T, E> iter = iteratorEx();
             long cnt = 0;
             T next = null;
             Class<?> cls = null;
@@ -11943,7 +11956,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         } else {
             return Stream.of(newObjIteratorEx(elements)).onClose(() -> {
                 try {
-                    ExceptionalStream.this.close();
+                    CheckedStream.this.close();
                 } catch (Exception e) {
                     throw ExceptionUtil.toRuntimeException(e);
                 }
@@ -11967,7 +11980,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         } else {
             return StreamSupport.stream(spliterator, false).onClose(() -> {
                 try {
-                    ExceptionalStream.this.close();
+                    CheckedStream.this.close();
                 } catch (Exception e) {
                     throw ExceptionUtil.toRuntimeException(e);
                 }
@@ -11975,7 +11988,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         }
     }
 
-    //    public <E2 extends Exception> ExceptionalStream<T, E2> __(final Class<E2> targetExceptionType) {
+    //    public <E2 extends Exception> CheckedStream<T, E2> __(final Class<E2> targetExceptionType) {
     //        checkArgNotNull(targetExceptionType, "targetExceptionType");
     //
     //        final Constructor<E2> msgCauseConstructor = ClassUtil.getDeclaredConstructor(targetExceptionType, String.class, Throwable.class);
@@ -12012,8 +12025,8 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     //            });
     //        }
     //
-    //        return newStream(new ExceptionalIterator<T, E2>() {
-    //            private ExceptionalIterator<T, E> iter = null;
+    //        return newStream(new CheckedIterator<T, E2>() {
+    //            private CheckedIterator<T, E> iter = null;
     //            private boolean initialized = false;
     //
     //            @Override
@@ -12074,7 +12087,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     //                if (initialized == false) {
     //                    initialized = true;
     //
-    //                    iter = ExceptionalStream.this.elements;
+    //                    iter = CheckedStream.this.elements;
     //
     //                }
     //            }
@@ -12088,10 +12101,10 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @Beta
     @IntermediateOp
-    public ExceptionalStream<T, Exception> cast() {
+    public CheckedStream<T, Exception> cast() {
         assertNotClosed();
 
-        return (ExceptionalStream<T, Exception>) this;
+        return (CheckedStream<T, Exception>) this;
     }
 
     /**
@@ -12104,7 +12117,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @Beta
     @IntermediateOp
-    public <TT, EE extends Exception> ExceptionalStream<TT, EE> transform(Function<? super ExceptionalStream<T, E>, ExceptionalStream<TT, EE>> transfer) { //NOSONAR
+    public <TT, EE extends Exception> CheckedStream<TT, EE> transform(Function<? super CheckedStream<T, E>, CheckedStream<TT, EE>> transfer) { //NOSONAR
         assertNotClosed();
 
         checkArgNotNull(transfer, "transfer");
@@ -12124,7 +12137,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     @Beta
     @IntermediateOp
     @Deprecated
-    public <TT, EE extends Exception> ExceptionalStream<TT, EE> __(Function<? super ExceptionalStream<T, E>, ExceptionalStream<TT, EE>> transfer) { //NOSONAR
+    public <TT, EE extends Exception> CheckedStream<TT, EE> __(Function<? super CheckedStream<T, E>, CheckedStream<TT, EE>> transfer) { //NOSONAR
         return transform(transfer);
     }
 
@@ -12138,7 +12151,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     //     */
     //    @TerminalOp
     //    @Beta
-    //    public <U, R> R __(final Function<? super ExceptionalStream<T, E>, U> terminalOp, final Throwables.Function<U, ? extends R, E> mapper) throws E {
+    //    public <U, R> R __(final Function<? super CheckedStream<T, E>, U> terminalOp, final Throwables.Function<U, ? extends R, E> mapper) throws E {
     //        return mapper.apply(terminalOp.apply(this));
     //    }
     //
@@ -12151,7 +12164,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     //     */
     //    @TerminalOp
     //    @Beta
-    //    public <R> R __(final Function<? super ExceptionalStream<T, E>, R> terminalOp, final Throwables.Consumer<R, E> action) throws E {
+    //    public <R> R __(final Function<? super CheckedStream<T, E>, R> terminalOp, final Throwables.Consumer<R, E> action) throws E {
     //        final R result = terminalOp.apply(this);
     //        action.accept(result);
     //        return result;
@@ -12173,7 +12186,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @Beta
     @IntermediateOp
-    public <R> ExceptionalStream<R, E> sps(final Function<? super Stream<T>, ? extends Stream<? extends R>> ops) {
+    public <R> CheckedStream<R, E> sps(final Function<? super Stream<T>, ? extends Stream<? extends R>> ops) {
         assertNotClosed();
 
         return checked(((Stream<R>) ops.apply(this.unchecked().parallel())), true);
@@ -12196,7 +12209,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @Beta
     @IntermediateOp
-    public <R> ExceptionalStream<R, E> sps(final int maxThreadNum, final Function<? super Stream<T>, ? extends Stream<? extends R>> ops) {
+    public <R> CheckedStream<R, E> sps(final int maxThreadNum, final Function<? super Stream<T>, ? extends Stream<? extends R>> ops) {
         assertNotClosed();
 
         return checked(((Stream<R>) ops.apply(this.unchecked().parallel(maxThreadNum))), true);
@@ -12212,7 +12225,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     //     */
     //    @Beta
     //    @IntermediateOp
-    //    public <R> ExceptionalStream<R, E> sps(final int maxThreadNum, final boolean withVirtualThread,
+    //    public <R> CheckedStream<R, E> sps(final int maxThreadNum, final boolean withVirtualThread,
     //            final Function<? super Stream<T>, ? extends Stream<? extends R>> ops) {
     //        assertNotClosed();
     //
@@ -12229,7 +12242,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     //     */
     //    @Beta
     //    @IntermediateOp
-    //    public <R> ExceptionalStream<R, E> sps(final int maxThreadNum, final int executorNumForVirtualThread,
+    //    public <R> CheckedStream<R, E> sps(final int maxThreadNum, final int executorNumForVirtualThread,
     //            final Function<? super Stream<T>, ? extends Stream<? extends R>> ops) {
     //        assertNotClosed();
     //
@@ -12251,7 +12264,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @Beta
     @IntermediateOp
-    public ExceptionalStream<T, E> spsFilter(final Throwables.Predicate<? super T, E> predicate) {
+    public CheckedStream<T, E> spsFilter(final Throwables.Predicate<? super T, E> predicate) {
         final Function<Stream<T>, Stream<T>> ops = s -> s.filter(Fn.pp(predicate));
 
         return sps(ops);
@@ -12273,7 +12286,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @Beta
     @IntermediateOp
-    public <R> ExceptionalStream<R, E> spsMap(final Throwables.Function<? super T, ? extends R, E> mapper) {
+    public <R> CheckedStream<R, E> spsMap(final Throwables.Function<? super T, ? extends R, E> mapper) {
         final Function<Stream<T>, Stream<R>> ops = s -> s.map(Fn.ff(mapper));
 
         return sps(ops);
@@ -12295,7 +12308,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @Beta
     @IntermediateOp
-    public <R> ExceptionalStream<R, E> spsFlatMap(final Throwables.Function<? super T, ? extends Stream<? extends R>, E> mapper) {
+    public <R> CheckedStream<R, E> spsFlatMap(final Throwables.Function<? super T, ? extends Stream<? extends R>, E> mapper) {
         final Function<Stream<T>, Stream<R>> ops = s -> s.flatMap(Fn.ff(mapper));
 
         return sps(ops);
@@ -12317,7 +12330,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @Beta
     @IntermediateOp
-    public <R> ExceptionalStream<R, E> spsFlatmap(final Throwables.Function<? super T, ? extends Collection<? extends R>, E> mapper) { //NOSONAR
+    public <R> CheckedStream<R, E> spsFlatmap(final Throwables.Function<? super T, ? extends Collection<? extends R>, E> mapper) { //NOSONAR
         final Function<Stream<T>, Stream<R>> ops = s -> s.flatmap(Fn.ff(mapper));
 
         return sps(ops);
@@ -12338,7 +12351,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @Beta
     @IntermediateOp
-    public ExceptionalStream<T, E> spsOnEach(final Throwables.Consumer<? super T, E> action) {
+    public CheckedStream<T, E> spsOnEach(final Throwables.Consumer<? super T, E> action) {
         final Function<Stream<T>, Stream<T>> ops = s -> s.onEach(Fn.cc(action));
 
         return sps(ops);
@@ -12359,7 +12372,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @Beta
     @IntermediateOp
-    public ExceptionalStream<T, E> spsFilter(final int maxThreadNum, final Throwables.Predicate<? super T, E> predicate) {
+    public CheckedStream<T, E> spsFilter(final int maxThreadNum, final Throwables.Predicate<? super T, E> predicate) {
         final Function<Stream<T>, Stream<T>> ops = s -> s.filter(Fn.pp(predicate));
 
         return sps(maxThreadNum, ops);
@@ -12381,7 +12394,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @Beta
     @IntermediateOp
-    public <R> ExceptionalStream<R, E> spsMap(final int maxThreadNum, final Throwables.Function<? super T, ? extends R, E> mapper) {
+    public <R> CheckedStream<R, E> spsMap(final int maxThreadNum, final Throwables.Function<? super T, ? extends R, E> mapper) {
         final Function<Stream<T>, Stream<R>> ops = s -> s.map(Fn.ff(mapper));
 
         return sps(maxThreadNum, ops);
@@ -12403,7 +12416,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @Beta
     @IntermediateOp
-    public <R> ExceptionalStream<R, E> spsFlatMap(final int maxThreadNum, final Throwables.Function<? super T, ? extends Stream<? extends R>, E> mapper) { //NOSONAR
+    public <R> CheckedStream<R, E> spsFlatMap(final int maxThreadNum, final Throwables.Function<? super T, ? extends Stream<? extends R>, E> mapper) { //NOSONAR
         final Function<Stream<T>, Stream<R>> ops = s -> s.flatMap(Fn.ff(mapper));
 
         return sps(maxThreadNum, ops);
@@ -12425,7 +12438,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @Beta
     @IntermediateOp
-    public <R> ExceptionalStream<R, E> spsFlatmap(final int maxThreadNum, final Throwables.Function<? super T, ? extends Collection<? extends R>, E> mapper) { //NOSONAR
+    public <R> CheckedStream<R, E> spsFlatmap(final int maxThreadNum, final Throwables.Function<? super T, ? extends Collection<? extends R>, E> mapper) { //NOSONAR
         final Function<Stream<T>, Stream<R>> ops = s -> s.flatmap(Fn.ff(mapper));
 
         return sps(maxThreadNum, ops);
@@ -12446,7 +12459,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @Beta
     @IntermediateOp
-    public ExceptionalStream<T, E> spsOnEach(final int maxThreadNum, final Throwables.Consumer<? super T, E> action) {
+    public CheckedStream<T, E> spsOnEach(final int maxThreadNum, final Throwables.Consumer<? super T, E> action) {
         final Function<Stream<T>, Stream<T>> ops = s -> s.onEach(Fn.cc(action));
 
         return sps(maxThreadNum, ops);
@@ -12467,7 +12480,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @Beta
     @IntermediateOp
-    public ExceptionalStream<T, Exception> spsFilterE(final Throwables.Predicate<? super T, ? extends Exception> predicate) {
+    public CheckedStream<T, Exception> spsFilterE(final Throwables.Predicate<? super T, ? extends Exception> predicate) {
         return checked(unchecked().spsFilterE(predicate), true);
     }
 
@@ -12486,7 +12499,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @Beta
     @IntermediateOp
-    public <U> ExceptionalStream<U, Exception> spsMapE(final Throwables.Function<? super T, ? extends U, ? extends Exception> mapper) {
+    public <U> CheckedStream<U, Exception> spsMapE(final Throwables.Function<? super T, ? extends U, ? extends Exception> mapper) {
         return checked(unchecked().<U> spsMapE(mapper), true);
     }
 
@@ -12506,7 +12519,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @Beta
     @IntermediateOp
-    public <R> ExceptionalStream<R, Exception> spsFlatMapE(final Throwables.Function<? super T, ? extends Stream<? extends R>, ? extends Exception> mapper) {
+    public <R> CheckedStream<R, Exception> spsFlatMapE(final Throwables.Function<? super T, ? extends Stream<? extends R>, ? extends Exception> mapper) {
         return checked(unchecked().<R> spsFlatMapE(mapper), true);
     }
 
@@ -12526,7 +12539,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @Beta
     @IntermediateOp
-    public <R> ExceptionalStream<R, Exception> spsFlatmapE( //NOSONAR
+    public <R> CheckedStream<R, Exception> spsFlatmapE( //NOSONAR
             final Throwables.Function<? super T, ? extends Collection<? extends R>, ? extends Exception> mapper) {
         return checked(unchecked().<R> spsFlatmapE(mapper), true);
     }
@@ -12546,7 +12559,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @Beta
     @IntermediateOp
-    public ExceptionalStream<T, Exception> spsOnEachE(final Throwables.Consumer<? super T, ? extends Exception> action) {
+    public CheckedStream<T, Exception> spsOnEachE(final Throwables.Consumer<? super T, ? extends Exception> action) {
         return checked(unchecked().spsOnEachE(action), true);
     }
 
@@ -12566,7 +12579,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @Beta
     @IntermediateOp
-    public ExceptionalStream<T, Exception> spsFilterE(final int maxThreadNum, final Throwables.Predicate<? super T, ? extends Exception> predicate) {
+    public CheckedStream<T, Exception> spsFilterE(final int maxThreadNum, final Throwables.Predicate<? super T, ? extends Exception> predicate) {
         return checked(unchecked().spsFilterE(maxThreadNum, predicate), true);
     }
 
@@ -12586,7 +12599,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @Beta
     @IntermediateOp
-    public <U> ExceptionalStream<U, Exception> spsMapE(final int maxThreadNum, final Throwables.Function<? super T, ? extends U, ? extends Exception> mapper) {
+    public <U> CheckedStream<U, Exception> spsMapE(final int maxThreadNum, final Throwables.Function<? super T, ? extends U, ? extends Exception> mapper) {
         return checked(unchecked().<U> spsMapE(maxThreadNum, mapper), true);
     }
 
@@ -12607,7 +12620,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @Beta
     @IntermediateOp
-    public <R> ExceptionalStream<R, Exception> spsFlatMapE(final int maxThreadNum, //NOSONAR
+    public <R> CheckedStream<R, Exception> spsFlatMapE(final int maxThreadNum, //NOSONAR
             final Throwables.Function<? super T, ? extends Stream<? extends R>, ? extends Exception> mapper) {
         return checked(unchecked().<R> spsFlatMapE(maxThreadNum, mapper), true);
     }
@@ -12629,7 +12642,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @Beta
     @IntermediateOp
-    public <R> ExceptionalStream<R, Exception> spsFlatmapE(final int maxThreadNum, //NOSONAR
+    public <R> CheckedStream<R, Exception> spsFlatmapE(final int maxThreadNum, //NOSONAR
             final Throwables.Function<? super T, ? extends Collection<? extends R>, ? extends Exception> mapper) {
         return checked(unchecked().<R> spsFlatmapE(maxThreadNum, mapper), true);
     }
@@ -12650,19 +12663,19 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @Beta
     @IntermediateOp
-    public ExceptionalStream<T, Exception> spsOnEachE(final int maxThreadNum, final Throwables.Consumer<? super T, ? extends Exception> action) {
+    public CheckedStream<T, Exception> spsOnEachE(final int maxThreadNum, final Throwables.Consumer<? super T, ? extends Exception> action) {
         return checked(unchecked().spsOnEachE(maxThreadNum, action), true);
     }
 
-    static <T, E extends Exception> ExceptionalStream<T, E> checked(final Stream<? extends T> stream, final boolean isForSps) {
+    static <T, E extends Exception> CheckedStream<T, E> checked(final Stream<? extends T> stream, final boolean isForSps) {
         if (stream == null) {
             return empty();
         }
 
-        ExceptionalIterator<T, E> iter = null;
+        CheckedIterator<T, E> iter = null;
 
         if (isForSps) {
-            iter = new ExceptionalIterator<>() {
+            iter = new CheckedIterator<>() {
                 private Stream<? extends T> s = stream;
                 private Iterator<? extends T> iter = null;
                 private boolean isInitialized = false;
@@ -12736,7 +12749,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                 }
             };
         } else {
-            iter = new ExceptionalIterator<>() {
+            iter = new CheckedIterator<>() {
                 private Stream<? extends T> s = stream;
                 private Iterator<? extends T> iter = null;
                 private boolean isInitialized = false;
@@ -12791,7 +12804,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             };
         }
 
-        final ExceptionalIterator<T, E> tmp = iter;
+        final CheckedIterator<T, E> tmp = iter;
 
         return newStream(tmp).onClose(newCloseHandler(tmp));
     }
@@ -12804,10 +12817,10 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     @SuppressWarnings("rawtypes")
     @Beta
     @IntermediateOp
-    public ExceptionalStream<T, Exception> filterE(final Throwables.Predicate<? super T, ? extends Exception> predicate) {
+    public CheckedStream<T, Exception> filterE(final Throwables.Predicate<? super T, ? extends Exception> predicate) {
         assertNotClosed();
 
-        return newStream(new ExceptionalIterator<T, Exception>() {
+        return newStream(new CheckedIterator<T, Exception>() {
             private boolean hasNext = false;
             private T next = null;
 
@@ -12849,10 +12862,10 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     @SuppressWarnings("rawtypes")
     @Beta
     @IntermediateOp
-    public <U> ExceptionalStream<U, Exception> mapE(final Throwables.Function<? super T, ? extends U, ? extends Exception> mapper) {
+    public <U> CheckedStream<U, Exception> mapE(final Throwables.Function<? super T, ? extends U, ? extends Exception> mapper) {
         assertNotClosed();
 
-        return newStream(new ExceptionalIterator<U, Exception>() {
+        return newStream(new CheckedIterator<U, Exception>() {
             @Override
             public boolean hasNext() throws Exception {
                 return elements.hasNext();
@@ -12873,13 +12886,13 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @Beta
     @IntermediateOp
-    public <R> ExceptionalStream<R, Exception> flatMapE(
-            final Throwables.Function<? super T, ? extends ExceptionalStream<? extends R, ? extends Exception>, ? extends Exception> mapper) {
+    public <R> CheckedStream<R, Exception> flatMapE(
+            final Throwables.Function<? super T, ? extends CheckedStream<? extends R, ? extends Exception>, ? extends Exception> mapper) {
         assertNotClosed();
 
-        final ExceptionalIterator<R, Exception> iter = new ExceptionalIterator<>() {
-            private ExceptionalIterator<? extends R, ? extends Exception> cur = null;
-            private ExceptionalStream<? extends R, ? extends Exception> s = null;
+        final CheckedIterator<R, Exception> iter = new CheckedIterator<>() {
+            private CheckedIterator<? extends R, ? extends Exception> cur = null;
+            private CheckedStream<? extends R, ? extends Exception> s = null;
             private Deque<? extends Throwables.Runnable<? extends Exception>> closeHandle = null;
 
             @Override
@@ -12889,7 +12902,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                         if (closeHandle != null) {
                             final Deque<? extends Throwables.Runnable<? extends Exception>> tmp = closeHandle;
                             closeHandle = null;
-                            ExceptionalStream.close(tmp);
+                            CheckedStream.close(tmp);
                         }
 
                         s = mapper.apply(elements.next());
@@ -12924,7 +12937,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             @Override
             public void close() throws Exception {
                 if (closeHandle != null) {
-                    ExceptionalStream.close(closeHandle);
+                    CheckedStream.close(closeHandle);
                 }
             }
         };
@@ -12949,10 +12962,10 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     @SuppressWarnings("rawtypes")
     @Beta
     @IntermediateOp
-    public <R> ExceptionalStream<R, Exception> flatmapE(final Throwables.Function<? super T, ? extends Collection<? extends R>, ? extends Exception> mapper) { //NOSONAR
+    public <R> CheckedStream<R, Exception> flatmapE(final Throwables.Function<? super T, ? extends Collection<? extends R>, ? extends Exception> mapper) { //NOSONAR
         assertNotClosed();
 
-        return newStream(new ExceptionalIterator<R, Exception>() {
+        return newStream(new CheckedIterator<R, Exception>() {
             private Iterator<? extends R> cur = null;
             private Collection<? extends R> c = null;
 
@@ -12985,10 +12998,10 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     @SuppressWarnings("rawtypes")
     @Beta
     @IntermediateOp
-    public ExceptionalStream<T, Exception> onEachE(final Throwables.Consumer<? super T, ? extends Exception> action) {
+    public CheckedStream<T, Exception> onEachE(final Throwables.Consumer<? super T, ? extends Exception> action) {
         assertNotClosed();
 
-        return newStream(new ExceptionalIterator<T, Exception>() {
+        return newStream(new CheckedIterator<T, Exception>() {
             @Override
             public boolean hasNext() throws Exception {
                 return elements.hasNext();
@@ -13014,12 +13027,12 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @Beta
     @TerminalOp
-    public ContinuableFuture<Void> asyncRun(final Throwables.Consumer<? super ExceptionalStream<T, E>, ? extends Exception> terminalAction) {
+    public ContinuableFuture<Void> asyncRun(final Throwables.Consumer<? super CheckedStream<T, E>, ? extends Exception> terminalAction) {
         assertNotClosed();
 
         checkArgNotNull(terminalAction, "terminalAction");
 
-        return ContinuableFuture.run(() -> terminalAction.accept(ExceptionalStream.this));
+        return ContinuableFuture.run(() -> terminalAction.accept(CheckedStream.this));
     }
 
     /**
@@ -13030,14 +13043,14 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @Beta
     @TerminalOp
-    public ContinuableFuture<Void> asyncRun(final Throwables.Consumer<? super ExceptionalStream<T, E>, ? extends Exception> terminalAction,
+    public ContinuableFuture<Void> asyncRun(final Throwables.Consumer<? super CheckedStream<T, E>, ? extends Exception> terminalAction,
             final Executor executor) {
         assertNotClosed();
 
         checkArgNotNull(terminalAction, "terminalAction");
         checkArgNotNull(executor, "executor");
 
-        return ContinuableFuture.run(() -> terminalAction.accept(ExceptionalStream.this), executor);
+        return ContinuableFuture.run(() -> terminalAction.accept(CheckedStream.this), executor);
     }
 
     /**
@@ -13048,12 +13061,12 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @Beta
     @TerminalOp
-    public <R> ContinuableFuture<R> asyncCall(final Throwables.Function<? super ExceptionalStream<T, E>, R, ? extends Exception> terminalAction) {
+    public <R> ContinuableFuture<R> asyncCall(final Throwables.Function<? super CheckedStream<T, E>, R, ? extends Exception> terminalAction) {
         assertNotClosed();
 
         checkArgNotNull(terminalAction, "terminalAction");
 
-        return ContinuableFuture.call(() -> terminalAction.apply(ExceptionalStream.this));
+        return ContinuableFuture.call(() -> terminalAction.apply(CheckedStream.this));
     }
 
     /**
@@ -13065,14 +13078,14 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @Beta
     @TerminalOp
-    public <R> ContinuableFuture<R> asyncCall(final Throwables.Function<? super ExceptionalStream<T, E>, R, ? extends Exception> terminalAction,
+    public <R> ContinuableFuture<R> asyncCall(final Throwables.Function<? super CheckedStream<T, E>, R, ? extends Exception> terminalAction,
             final Executor executor) {
         assertNotClosed();
 
         checkArgNotNull(terminalAction, "terminalAction");
         checkArgNotNull(executor, "executor");
 
-        return ContinuableFuture.call(() -> terminalAction.apply(ExceptionalStream.this), executor);
+        return ContinuableFuture.call(() -> terminalAction.apply(CheckedStream.this), executor);
     }
 
     /**
@@ -13081,7 +13094,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     @IntermediateOp
-    public ExceptionalStream<T, E> onClose(final Throwables.Runnable<? extends E> closeHandler) {
+    public CheckedStream<T, E> onClose(final Throwables.Runnable<? extends E> closeHandler) {
         assertNotClosed();
 
         checkArgNotNull(closeHandler, "closeHandler");
@@ -13135,7 +13148,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
         isClosed = true;
 
-        logger.debug("Closing ExceptionalStream");
+        logger.debug("Closing CheckedStream");
 
         close(closeHandlers);
 
@@ -13153,7 +13166,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         // do nothing.
     };
 
-    private static <E extends Exception, T> Throwables.Runnable<E> newCloseHandler(final ExceptionalIterator<T, E> iter) {
+    private static <E extends Exception, T> Throwables.Runnable<E> newCloseHandler(final CheckedIterator<T, E> iter) {
         if (iter == null) {
             return EMPTY_CLOSE_HANDLER;
         }
@@ -13181,7 +13194,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         }
     }
 
-    ExceptionalIterator<T, E> iteratorEx() {
+    CheckedIterator<T, E> iteratorEx() {
         return elements;
     }
 
@@ -13358,7 +13371,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         }
     }
 
-    ObjIteratorEx<T> newObjIteratorEx(final ExceptionalIterator<T, E> elements) {
+    ObjIteratorEx<T> newObjIteratorEx(final CheckedIterator<T, E> elements) {
         return new ObjIteratorEx<>() {
             @Override
             public boolean hasNext() {
@@ -13405,8 +13418,8 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @param iter
      * @return
      */
-    static <T, E extends Exception> ExceptionalStream<T, E> newStream(final ExceptionalIterator<T, E> iter) {
-        return new ExceptionalStream<>(iter, null);
+    static <T, E extends Exception> CheckedStream<T, E> newStream(final CheckedIterator<T, E> iter) {
+        return new CheckedStream<>(iter, null);
     }
 
     /**
@@ -13417,9 +13430,9 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @param closeHandlers
      * @return
      */
-    static <T, E extends Exception> ExceptionalStream<T, E> newStream(final ExceptionalIterator<T, E> iter,
+    static <T, E extends Exception> CheckedStream<T, E> newStream(final CheckedIterator<T, E> iter,
             final Deque<Throwables.Runnable<? extends E>> closeHandlers) {
-        return new ExceptionalStream<>(iter, closeHandlers);
+        return new CheckedStream<>(iter, closeHandlers);
     }
 
     /**
@@ -13432,9 +13445,9 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @param closeHandlers
      * @return
      */
-    static <T, E extends Exception> ExceptionalStream<T, E> newStream(final ExceptionalIterator<T, E> iter, final boolean sorted,
+    static <T, E extends Exception> CheckedStream<T, E> newStream(final CheckedIterator<T, E> iter, final boolean sorted,
             final Comparator<? super T> comparator, final Deque<Throwables.Runnable<? extends E>> closeHandlers) {
-        return new ExceptionalStream<>(iter, sorted, comparator, closeHandlers);
+        return new CheckedStream<>(iter, sorted, comparator, closeHandlers);
     }
 
     /**
@@ -13457,8 +13470,8 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         return a == b || (a == null && b == Comparators.NATURAL_ORDER) || (b == null && a == Comparators.NATURAL_ORDER);
     }
 
-    static <T, E extends Exception> ExceptionalIterator<T, E> iterate(final ExceptionalStream<? extends T, E> s) {
-        return s == null ? ExceptionalIterator.EMPTY : (ExceptionalIterator<T, E>) s.iteratorEx();
+    static <T, E extends Exception> CheckedIterator<T, E> iterate(final CheckedStream<? extends T, E> s) {
+        return s == null ? CheckedIterator.EMPTY : (CheckedIterator<T, E>) s.iteratorEx();
     }
 
     static <T> List<T> subList(final List<T> list, final int fromIndex, final int toIndex) {
@@ -13466,18 +13479,18 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
-     * The Class ExceptionalIterator.
+     * The Class CheckedIterator.
      *
      * @param <T>
      * @param <E>
      */
     @Internal
     @com.landawn.abacus.annotation.Immutable
-    public abstract static class ExceptionalIterator<T, E extends Exception> implements Immutable {
+    public abstract static class CheckedIterator<T, E extends Exception> implements Immutable {
 
         /** The Constant EMPTY. */
         @SuppressWarnings("rawtypes")
-        private static final ExceptionalIterator EMPTY = new ExceptionalIterator() {
+        private static final CheckedIterator EMPTY = new CheckedIterator() {
             @Override
             public boolean hasNext() throws Exception {
                 return false;
@@ -13496,7 +13509,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
          * @param <E>
          * @return
          */
-        public static <T, E extends Exception> ExceptionalIterator<T, E> empty() {
+        public static <T, E extends Exception> CheckedIterator<T, E> empty() {
             return EMPTY;
         }
 
@@ -13508,8 +13521,8 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
          * @param val
          * @return
          */
-        public static <T, E extends Exception> ExceptionalIterator<T, E> just(final T val) {
-            return new ExceptionalIterator<>() {
+        public static <T, E extends Exception> CheckedIterator<T, E> just(final T val) {
+            return new CheckedIterator<>() {
                 private boolean done = false;
 
                 @Override
@@ -13539,7 +13552,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
          * @return
          */
         @SafeVarargs
-        public static <T, E extends Exception> ExceptionalIterator<T, E> of(final T... a) {
+        public static <T, E extends Exception> CheckedIterator<T, E> of(final T... a) {
             return N.isEmpty(a) ? EMPTY : of(a, 0, a.length);
         }
 
@@ -13553,14 +13566,14 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
          * @param toIndex
          * @return
          */
-        public static <T, E extends Exception> ExceptionalIterator<T, E> of(final T[] a, final int fromIndex, final int toIndex) {
+        public static <T, E extends Exception> CheckedIterator<T, E> of(final T[] a, final int fromIndex, final int toIndex) {
             N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
             if (fromIndex == toIndex) {
                 return EMPTY;
             }
 
-            return new ExceptionalIterator<>() {
+            return new CheckedIterator<>() {
                 private int cursor = fromIndex;
 
                 @Override
@@ -13601,12 +13614,12 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
          * @param iter
          * @return
          */
-        public static <T, E extends Exception> ExceptionalIterator<T, E> of(final Iterator<? extends T> iter) {
+        public static <T, E extends Exception> CheckedIterator<T, E> of(final Iterator<? extends T> iter) {
             if (iter == null) {
                 return EMPTY;
             }
 
-            return new ExceptionalIterator<>() {
+            return new CheckedIterator<>() {
                 @Override
                 public boolean hasNext() throws E {
                     return iter.hasNext();
@@ -13628,10 +13641,10 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         //         * @return
         //         */
         //        @Beta
-        //        static <T, E extends Exception> ExceptionalIterator<T, E> of(final Throwables.Supplier<T[], E> arraySupplier) {
+        //        static <T, E extends Exception> CheckedIterator<T, E> of(final Throwables.Supplier<T[], E> arraySupplier) {
         //            N.checkArgNotNull(arraySupplier, "arraySupplier");
         //
-        //            return new ExceptionalIterator<>() {
+        //            return new CheckedIterator<>() {
         //                private T[] a;
         //                private int len;
         //                private int position = 0;
@@ -13702,11 +13715,11 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
          * @param iteratorSupplier
          * @return
          */
-        public static <T, E extends Exception> ExceptionalIterator<T, E> defer(final Throwables.Supplier<ExceptionalIterator<T, E>, E> iteratorSupplier) {
+        public static <T, E extends Exception> CheckedIterator<T, E> defer(final Throwables.Supplier<CheckedIterator<T, E>, E> iteratorSupplier) {
             N.checkArgNotNull(iteratorSupplier, "iteratorSupplier");
 
-            return new ExceptionalIterator<>() {
-                private ExceptionalIterator<T, E> iter = null;
+            return new CheckedIterator<>() {
+                private CheckedIterator<T, E> iter = null;
                 private boolean isInitialized = false;
 
                 @Override
@@ -13773,7 +13786,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
          * @param a
          * @return
          */
-        public static <T, E extends Exception> ExceptionalIterator<T, E> concat(final ExceptionalIterator<? extends T, ? extends E>... a) {
+        public static <T, E extends Exception> CheckedIterator<T, E> concat(final CheckedIterator<? extends T, ? extends E>... a) {
             return concat(N.asList(a));
         }
 
@@ -13785,14 +13798,14 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
          * @param c
          * @return
          */
-        public static <T, E extends Exception> ExceptionalIterator<T, E> concat(final Collection<? extends ExceptionalIterator<? extends T, ? extends E>> c) {
+        public static <T, E extends Exception> CheckedIterator<T, E> concat(final Collection<? extends CheckedIterator<? extends T, ? extends E>> c) {
             if (N.isEmpty(c)) {
-                return ExceptionalIterator.empty();
+                return CheckedIterator.empty();
             }
 
-            return new ExceptionalIterator<>() {
-                private final Iterator<? extends ExceptionalIterator<? extends T, ? extends E>> iter = c.iterator();
-                private ExceptionalIterator<? extends T, ? extends E> cur;
+            return new CheckedIterator<>() {
+                private final Iterator<? extends CheckedIterator<? extends T, ? extends E>> iter = c.iterator();
+                private CheckedIterator<? extends T, ? extends E> cur;
 
                 @Override
                 public boolean hasNext() throws E {
@@ -13869,29 +13882,30 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
     // CheckedException -> Maybe makes sense. Checked exception...
     // But what does CheckedStream mean? Checked stream ???
-    //    public static final class CheckedStream<T, E extends Exception> extends ExceptionalStream<T, E> {
+    //    public static final class CheckedStream<T, E extends Exception> extends CheckedStream<T, E> {
     //
-    //        CheckedStream(ExceptionalIterator<T, E> iter, boolean sorted, Comparator<? super T> comparator, Deque<Throwables.Runnable<? extends E>> closeHandlers) {
+    //        CheckedStream(CheckedIterator<T, E> iter, boolean sorted, Comparator<? super T> comparator, Deque<Throwables.Runnable<? extends E>> closeHandlers) {
     //            super(iter, sorted, comparator, closeHandlers);
     //        }
     //    }
 
-    /**
-     *
-     * @param <T>
-     * @param <E>
-     */
-    public static final class CheckedStream<T, E extends Exception> extends ExceptionalStream<T, E> {
-
-        CheckedStream(ExceptionalIterator<T, E> iter, boolean sorted, Comparator<? super T> comparator, Deque<Throwables.Runnable<? extends E>> closeHandlers) {
-            super(iter, sorted, comparator, closeHandlers);
-        }
-    }
+    ///**
+    // *
+    // * @param <T>
+    // * @param <E>
+    // */
+    //public static final class Seq<T> extends CheckedStream<T, RuntimeException> {
+    //
+    //    Seq(CheckedIterator<T, RuntimeException> iter, boolean sorted, Comparator<? super T> comparator,
+    //            Deque<Throwables.Runnable<? extends RuntimeException>> closeHandlers) {
+    //        super(iter, sorted, comparator, closeHandlers);
+    //    }
+    //}
 
     //    /**
     //     * Mostly it's for android.
     //     *
-    //     * @see {@code ExceptionalStream<T, RuntimeException>}
+    //     * @see {@code CheckedStream<T, RuntimeException>}
     //     *
     //     * @deprecated Mostly it's for android.
     //     */
@@ -13906,7 +13920,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     //    /**
     //     * Mostly it's for android.
     //     *
-    //     * @see {@code ExceptionalStream<T, RuntimeException>}
+    //     * @see {@code CheckedStream<T, RuntimeException>}
     //     *
     //     * @deprecated Mostly it's for android.
     //     */
@@ -13917,272 +13931,272 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     //            // singleton for utility class.
     //        }
     //
-    //        public static <T> ExceptionalStream<T, RuntimeException> empty() {
-    //            return ExceptionalStream.<T, RuntimeException> empty();
+    //        public static <T> CheckedStream<T, RuntimeException> empty() {
+    //            return CheckedStream.<T, RuntimeException> empty();
     //        }
     //
-    //        public static <T> ExceptionalStream<T, RuntimeException> just(final T e) {
-    //            return ExceptionalStream.<T, RuntimeException> just(e);
+    //        public static <T> CheckedStream<T, RuntimeException> just(final T e) {
+    //            return CheckedStream.<T, RuntimeException> just(e);
     //        }
     //
-    //        public static <T> ExceptionalStream<T, RuntimeException> ofNullable(final T e) {
-    //            return ExceptionalStream.<T, RuntimeException> ofNullable(e);
+    //        public static <T> CheckedStream<T, RuntimeException> ofNullable(final T e) {
+    //            return CheckedStream.<T, RuntimeException> ofNullable(e);
     //        }
     //
-    //        public static <T> ExceptionalStream<T, RuntimeException> of(final T... a) {
-    //            return ExceptionalStream.<T, RuntimeException> of(a);
+    //        public static <T> CheckedStream<T, RuntimeException> of(final T... a) {
+    //            return CheckedStream.<T, RuntimeException> of(a);
     //        }
     //
-    //        public static <T> ExceptionalStream<T, RuntimeException> of(final Collection<? extends T> c) {
-    //            return ExceptionalStream.<T, RuntimeException> of(c);
+    //        public static <T> CheckedStream<T, RuntimeException> of(final Collection<? extends T> c) {
+    //            return CheckedStream.<T, RuntimeException> of(c);
     //        }
     //
-    //        public static <T> ExceptionalStream<T, RuntimeException> of(final Iterator<? extends T> iter) {
-    //            return ExceptionalStream.<T, RuntimeException> of(iter);
+    //        public static <T> CheckedStream<T, RuntimeException> of(final Iterator<? extends T> iter) {
+    //            return CheckedStream.<T, RuntimeException> of(iter);
     //        }
     //
-    //        public static <T> ExceptionalStream<T, RuntimeException> of(final Iterable<? extends T> iterable) {
-    //            return ExceptionalStream.<T, RuntimeException> of(iterable);
+    //        public static <T> CheckedStream<T, RuntimeException> of(final Iterable<? extends T> iterable) {
+    //            return CheckedStream.<T, RuntimeException> of(iterable);
     //        }
     //
-    //        public static <K, V> ExceptionalStream<Map.Entry<K, V>, RuntimeException> of(final Map<K, V> m) {
-    //            return ExceptionalStream.<K, V, RuntimeException> of(m);
+    //        public static <K, V> CheckedStream<Map.Entry<K, V>, RuntimeException> of(final Map<K, V> m) {
+    //            return CheckedStream.<K, V, RuntimeException> of(m);
     //        }
     //
-    //        public static <T> ExceptionalStream<T, RuntimeException> of(final Stream<? extends T> stream) {
-    //            return ExceptionalStream.<T, RuntimeException> of(stream);
+    //        public static <T> CheckedStream<T, RuntimeException> of(final Stream<? extends T> stream) {
+    //            return CheckedStream.<T, RuntimeException> of(stream);
     //        }
     //
-    //        public static <T> ExceptionalStream<T, RuntimeException> of(final java.util.stream.Stream<? extends T> stream) {
-    //            return ExceptionalStream.<T, RuntimeException> of(stream);
+    //        public static <T> CheckedStream<T, RuntimeException> of(final java.util.stream.Stream<? extends T> stream) {
+    //            return CheckedStream.<T, RuntimeException> of(stream);
     //        }
     //
-    //        public static ExceptionalStream<Boolean, RuntimeException> of(final boolean[] a) {
-    //            return ExceptionalStream.<RuntimeException> of(a);
+    //        public static CheckedStream<Boolean, RuntimeException> of(final boolean[] a) {
+    //            return CheckedStream.<RuntimeException> of(a);
     //        }
     //
-    //        public static ExceptionalStream<Character, RuntimeException> of(final char[] a) {
-    //            return ExceptionalStream.<RuntimeException> of(a);
+    //        public static CheckedStream<Character, RuntimeException> of(final char[] a) {
+    //            return CheckedStream.<RuntimeException> of(a);
     //        }
     //
-    //        public static ExceptionalStream<Byte, RuntimeException> of(final byte[] a) {
-    //            return ExceptionalStream.<RuntimeException> of(a);
+    //        public static CheckedStream<Byte, RuntimeException> of(final byte[] a) {
+    //            return CheckedStream.<RuntimeException> of(a);
     //        }
     //
-    //        public static ExceptionalStream<Short, RuntimeException> of(final short[] a) {
-    //            return ExceptionalStream.<RuntimeException> of(a);
+    //        public static CheckedStream<Short, RuntimeException> of(final short[] a) {
+    //            return CheckedStream.<RuntimeException> of(a);
     //        }
     //
-    //        public static ExceptionalStream<Integer, RuntimeException> of(final int[] a) {
-    //            return ExceptionalStream.<RuntimeException> of(a);
+    //        public static CheckedStream<Integer, RuntimeException> of(final int[] a) {
+    //            return CheckedStream.<RuntimeException> of(a);
     //        }
     //
-    //        public static ExceptionalStream<Long, RuntimeException> of(final long[] a) {
-    //            return ExceptionalStream.<RuntimeException> of(a);
+    //        public static CheckedStream<Long, RuntimeException> of(final long[] a) {
+    //            return CheckedStream.<RuntimeException> of(a);
     //        }
     //
-    //        public static ExceptionalStream<Float, RuntimeException> of(final float[] a) {
-    //            return ExceptionalStream.<RuntimeException> of(a);
+    //        public static CheckedStream<Float, RuntimeException> of(final float[] a) {
+    //            return CheckedStream.<RuntimeException> of(a);
     //        }
     //
-    //        public static ExceptionalStream<Double, RuntimeException> of(final double[] a) {
-    //            return ExceptionalStream.<RuntimeException> of(a);
+    //        public static CheckedStream<Double, RuntimeException> of(final double[] a) {
+    //            return CheckedStream.<RuntimeException> of(a);
     //        }
     //
-    //        public static <T> ExceptionalStream<T, RuntimeException> of(final Optional<T> op) {
-    //            return ExceptionalStream.<T, RuntimeException> of(op);
+    //        public static <T> CheckedStream<T, RuntimeException> of(final Optional<T> op) {
+    //            return CheckedStream.<T, RuntimeException> of(op);
     //        }
     //
-    //        public static <T> ExceptionalStream<T, RuntimeException> of(final java.util.Optional<T> op) {
-    //            return ExceptionalStream.<T, RuntimeException> of(op);
+    //        public static <T> CheckedStream<T, RuntimeException> of(final java.util.Optional<T> op) {
+    //            return CheckedStream.<T, RuntimeException> of(op);
     //        }
     //
-    //        public static <K> ExceptionalStream<K, RuntimeException> ofKeys(final Map<K, ?> map) {
-    //            return ExceptionalStream.<K, RuntimeException> ofKeys(map);
+    //        public static <K> CheckedStream<K, RuntimeException> ofKeys(final Map<K, ?> map) {
+    //            return CheckedStream.<K, RuntimeException> ofKeys(map);
     //        }
     //
-    //        public static <K, V> ExceptionalStream<K, RuntimeException> ofKeys(final Map<K, V> map,
+    //        public static <K, V> CheckedStream<K, RuntimeException> ofKeys(final Map<K, V> map,
     //                final Throwables.Predicate<? super V, RuntimeException> valueFilter) {
-    //            return ExceptionalStream.<K, V, RuntimeException> ofKeys(map, valueFilter);
+    //            return CheckedStream.<K, V, RuntimeException> ofKeys(map, valueFilter);
     //        }
     //
-    //        public static <K, V> ExceptionalStream<K, RuntimeException> ofKeys(final Map<K, V> map,
+    //        public static <K, V> CheckedStream<K, RuntimeException> ofKeys(final Map<K, V> map,
     //                final Throwables.BiPredicate<? super K, ? super V, RuntimeException> filter) {
-    //            return ExceptionalStream.ofKeys(map, filter);
+    //            return CheckedStream.ofKeys(map, filter);
     //        }
     //
-    //        public static <V> ExceptionalStream<V, RuntimeException> ofValues(final Map<?, V> map) {
-    //            return ExceptionalStream.<V, RuntimeException> ofValues(map);
+    //        public static <V> CheckedStream<V, RuntimeException> ofValues(final Map<?, V> map) {
+    //            return CheckedStream.<V, RuntimeException> ofValues(map);
     //        }
     //
-    //        public static <K, V> ExceptionalStream<V, RuntimeException> ofValues(final Map<K, V> map,
+    //        public static <K, V> CheckedStream<V, RuntimeException> ofValues(final Map<K, V> map,
     //                final Throwables.Predicate<? super K, RuntimeException> keyFilter) {
-    //            return ExceptionalStream.<K, V, RuntimeException> ofValues(map, keyFilter);
+    //            return CheckedStream.<K, V, RuntimeException> ofValues(map, keyFilter);
     //        }
     //
-    //        public static <K, V> ExceptionalStream<V, RuntimeException> ofValues(final Map<K, V> map,
+    //        public static <K, V> CheckedStream<V, RuntimeException> ofValues(final Map<K, V> map,
     //                final Throwables.BiPredicate<? super K, ? super V, RuntimeException> filter) {
-    //            return ExceptionalStream.ofValues(map, filter);
+    //            return CheckedStream.ofValues(map, filter);
     //        }
     //
     //        //    @Beta
-    //        //    public static <T> ExceptionalStream<T, RuntimeException> from(final Throwables.Supplier<Collection<? extends T>, RuntimeException> supplier) {
-    //        //        return ExceptionalStream.<T, RuntimeException> from(supplier);
+    //        //    public static <T> CheckedStream<T, RuntimeException> from(final Throwables.Supplier<Collection<? extends T>, RuntimeException> supplier) {
+    //        //        return CheckedStream.<T, RuntimeException> from(supplier);
     //        //    }
     //
-    //        public static <T> ExceptionalStream<T, RuntimeException> defer(
-    //                final Throwables.Supplier<ExceptionalStream<? extends T, ? extends RuntimeException>, RuntimeException> supplier) {
-    //            return ExceptionalStream.<T, RuntimeException> defer(supplier);
+    //        public static <T> CheckedStream<T, RuntimeException> defer(
+    //                final Throwables.Supplier<CheckedStream<? extends T, ? extends RuntimeException>, RuntimeException> supplier) {
+    //            return CheckedStream.<T, RuntimeException> defer(supplier);
     //        }
     //
-    //        public static <T> ExceptionalStream<T, RuntimeException> iterate(final Throwables.BooleanSupplier<? extends RuntimeException> hasNext,
+    //        public static <T> CheckedStream<T, RuntimeException> iterate(final Throwables.BooleanSupplier<? extends RuntimeException> hasNext,
     //                final Throwables.Supplier<? extends T, RuntimeException> next) {
-    //            return ExceptionalStream.<T, RuntimeException> iterate(hasNext, next);
+    //            return CheckedStream.<T, RuntimeException> iterate(hasNext, next);
     //        }
     //
-    //        public static <T> ExceptionalStream<T, RuntimeException> iterate(final T init, final Throwables.BooleanSupplier<? extends RuntimeException> hasNext,
+    //        public static <T> CheckedStream<T, RuntimeException> iterate(final T init, final Throwables.BooleanSupplier<? extends RuntimeException> hasNext,
     //                final Throwables.UnaryOperator<T, ? extends RuntimeException> f) {
-    //            return ExceptionalStream.<T, RuntimeException> iterate(init, hasNext, f);
+    //            return CheckedStream.<T, RuntimeException> iterate(init, hasNext, f);
     //        }
     //
-    //        public static <T> ExceptionalStream<T, RuntimeException> iterate(final T init, final Throwables.Predicate<? super T, RuntimeException> hasNext,
+    //        public static <T> CheckedStream<T, RuntimeException> iterate(final T init, final Throwables.Predicate<? super T, RuntimeException> hasNext,
     //                final Throwables.UnaryOperator<T, RuntimeException> f) {
-    //            return ExceptionalStream.<T, RuntimeException> iterate(init, hasNext, f);
+    //            return CheckedStream.<T, RuntimeException> iterate(init, hasNext, f);
     //        }
     //
-    //        public static <T> ExceptionalStream<T, RuntimeException> iterate(final T init, final Throwables.UnaryOperator<T, RuntimeException> f) {
-    //            return ExceptionalStream.<T, RuntimeException> iterate(init, f);
+    //        public static <T> CheckedStream<T, RuntimeException> iterate(final T init, final Throwables.UnaryOperator<T, RuntimeException> f) {
+    //            return CheckedStream.<T, RuntimeException> iterate(init, f);
     //        }
     //
-    //        public static <T> ExceptionalStream<T, RuntimeException> generate(final Throwables.Supplier<T, RuntimeException> supplier) {
-    //            return ExceptionalStream.<T, RuntimeException> generate(supplier);
+    //        public static <T> CheckedStream<T, RuntimeException> generate(final Throwables.Supplier<T, RuntimeException> supplier) {
+    //            return CheckedStream.<T, RuntimeException> generate(supplier);
     //        }
     //
-    //        public static <T> ExceptionalStream<T, RuntimeException> repeat(final T element, final long n) {
-    //            return ExceptionalStream.<T, RuntimeException> repeat(element, n);
+    //        public static <T> CheckedStream<T, RuntimeException> repeat(final T element, final long n) {
+    //            return CheckedStream.<T, RuntimeException> repeat(element, n);
     //        }
     //
-    //        public static ExceptionalStream<Integer, RuntimeException> range(final int startInclusive, final int endExclusive) {
-    //            return ExceptionalStream.<RuntimeException> range(startInclusive, endExclusive);
+    //        public static CheckedStream<Integer, RuntimeException> range(final int startInclusive, final int endExclusive) {
+    //            return CheckedStream.<RuntimeException> range(startInclusive, endExclusive);
     //        }
     //
-    //        public static ExceptionalStream<Integer, RuntimeException> range(final int startInclusive, final int endExclusive, final int by) {
-    //            return ExceptionalStream.<RuntimeException> range(startInclusive, endExclusive, by);
+    //        public static CheckedStream<Integer, RuntimeException> range(final int startInclusive, final int endExclusive, final int by) {
+    //            return CheckedStream.<RuntimeException> range(startInclusive, endExclusive, by);
     //        }
     //
-    //        public static ExceptionalStream<Integer, RuntimeException> rangeClosed(final int startInclusive, final int endExclusive) {
-    //            return ExceptionalStream.<RuntimeException> rangeClosed(startInclusive, endExclusive);
+    //        public static CheckedStream<Integer, RuntimeException> rangeClosed(final int startInclusive, final int endExclusive) {
+    //            return CheckedStream.<RuntimeException> rangeClosed(startInclusive, endExclusive);
     //        }
     //
-    //        public static ExceptionalStream<Integer, RuntimeException> rangeClosed(final int startInclusive, final int endExclusive, final int by) {
-    //            return ExceptionalStream.<RuntimeException> rangeClosed(startInclusive, endExclusive, by);
-    //        }
-    //
-    //        @SafeVarargs
-    //        public static <T> ExceptionalStream<T, RuntimeException> concat(final T[]... a) {
-    //            return ExceptionalStream.<T, RuntimeException> concat(a);
+    //        public static CheckedStream<Integer, RuntimeException> rangeClosed(final int startInclusive, final int endExclusive, final int by) {
+    //            return CheckedStream.<RuntimeException> rangeClosed(startInclusive, endExclusive, by);
     //        }
     //
     //        @SafeVarargs
-    //        public static <T> ExceptionalStream<T, RuntimeException> concat(final Iterable<? extends T>... a) {
-    //            return ExceptionalStream.<T, RuntimeException> concat(a);
+    //        public static <T> CheckedStream<T, RuntimeException> concat(final T[]... a) {
+    //            return CheckedStream.<T, RuntimeException> concat(a);
     //        }
     //
     //        @SafeVarargs
-    //        public static <T> ExceptionalStream<T, RuntimeException> concat(final Iterator<? extends T>... a) {
-    //            return ExceptionalStream.<T, RuntimeException> concat(a);
+    //        public static <T> CheckedStream<T, RuntimeException> concat(final Iterable<? extends T>... a) {
+    //            return CheckedStream.<T, RuntimeException> concat(a);
     //        }
     //
-    //        public static <A, B, T> ExceptionalStream<T, RuntimeException> zip(final A[] a, final B[] b,
+    //        @SafeVarargs
+    //        public static <T> CheckedStream<T, RuntimeException> concat(final Iterator<? extends T>... a) {
+    //            return CheckedStream.<T, RuntimeException> concat(a);
+    //        }
+    //
+    //        public static <A, B, T> CheckedStream<T, RuntimeException> zip(final A[] a, final B[] b,
     //                final Throwables.BiFunction<? super A, ? super B, T, RuntimeException> zipFunction) {
-    //            return ExceptionalStream.<A, B, T, RuntimeException> zip(a, b, zipFunction);
+    //            return CheckedStream.<A, B, T, RuntimeException> zip(a, b, zipFunction);
     //        }
     //
-    //        public static <A, B, C, T> ExceptionalStream<T, RuntimeException> zip(final A[] a, final B[] b, final C[] c,
+    //        public static <A, B, C, T> CheckedStream<T, RuntimeException> zip(final A[] a, final B[] b, final C[] c,
     //                final Throwables.TriFunction<? super A, ? super B, ? super C, T, RuntimeException> zipFunction) {
-    //            return ExceptionalStream.<A, B, C, T, RuntimeException> zip(a, b, c, zipFunction);
+    //            return CheckedStream.<A, B, C, T, RuntimeException> zip(a, b, c, zipFunction);
     //        }
     //
-    //        public static <A, B, T> ExceptionalStream<T, RuntimeException> zip(final Iterable<? extends A> a, final Iterable<? extends B> b,
+    //        public static <A, B, T> CheckedStream<T, RuntimeException> zip(final Iterable<? extends A> a, final Iterable<? extends B> b,
     //                final Throwables.BiFunction<? super A, ? super B, T, RuntimeException> zipFunction) {
-    //            return ExceptionalStream.<A, B, T, RuntimeException> zip(a, b, zipFunction);
+    //            return CheckedStream.<A, B, T, RuntimeException> zip(a, b, zipFunction);
     //        }
     //
-    //        public static <A, B, C, T> ExceptionalStream<T, RuntimeException> zip(final Iterable<? extends A> a, final Iterable<? extends B> b,
+    //        public static <A, B, C, T> CheckedStream<T, RuntimeException> zip(final Iterable<? extends A> a, final Iterable<? extends B> b,
     //                final Iterable<? extends C> c, final Throwables.TriFunction<? super A, ? super B, ? super C, T, RuntimeException> zipFunction) {
-    //            return ExceptionalStream.<A, B, C, T, RuntimeException> zip(a, b, c, zipFunction);
+    //            return CheckedStream.<A, B, C, T, RuntimeException> zip(a, b, c, zipFunction);
     //        }
     //
-    //        public static <A, B, T> ExceptionalStream<T, RuntimeException> zip(final Iterator<? extends A> a, final Iterator<? extends B> b,
+    //        public static <A, B, T> CheckedStream<T, RuntimeException> zip(final Iterator<? extends A> a, final Iterator<? extends B> b,
     //                final Throwables.BiFunction<? super A, ? super B, T, RuntimeException> zipFunction) {
-    //            return ExceptionalStream.<A, B, T, RuntimeException> zip(a, b, zipFunction);
+    //            return CheckedStream.<A, B, T, RuntimeException> zip(a, b, zipFunction);
     //        }
     //
-    //        public static <A, B, C, T> ExceptionalStream<T, RuntimeException> zip(final Iterator<? extends A> a, final Iterator<? extends B> b,
+    //        public static <A, B, C, T> CheckedStream<T, RuntimeException> zip(final Iterator<? extends A> a, final Iterator<? extends B> b,
     //                final Iterator<? extends C> c, final Throwables.TriFunction<? super A, ? super B, ? super C, T, RuntimeException> zipFunction) {
-    //            return ExceptionalStream.<A, B, C, T, RuntimeException> zip(a, b, c, zipFunction);
+    //            return CheckedStream.<A, B, C, T, RuntimeException> zip(a, b, c, zipFunction);
     //        }
     //
-    //        public static <A, B, T> ExceptionalStream<T, RuntimeException> zip(final A[] a, final B[] b, final A valueForNoneA, final B valueForNoneB,
+    //        public static <A, B, T> CheckedStream<T, RuntimeException> zip(final A[] a, final B[] b, final A valueForNoneA, final B valueForNoneB,
     //                final Throwables.BiFunction<? super A, ? super B, T, RuntimeException> zipFunction) {
-    //            return ExceptionalStream.<A, B, T, RuntimeException> zip(a, b, valueForNoneA, valueForNoneB, zipFunction);
+    //            return CheckedStream.<A, B, T, RuntimeException> zip(a, b, valueForNoneA, valueForNoneB, zipFunction);
     //        }
     //
-    //        public static <A, B, C, T> ExceptionalStream<T, RuntimeException> zip(final A[] a, final B[] b, final C[] c, final A valueForNoneA,
+    //        public static <A, B, C, T> CheckedStream<T, RuntimeException> zip(final A[] a, final B[] b, final C[] c, final A valueForNoneA,
     //                final B valueForNoneB, final C valueForNoneC, final Throwables.TriFunction<? super A, ? super B, ? super C, T, RuntimeException> zipFunction) {
-    //            return ExceptionalStream.<A, B, C, T, RuntimeException> zip(a, b, c, valueForNoneA, valueForNoneB, valueForNoneC, zipFunction);
+    //            return CheckedStream.<A, B, C, T, RuntimeException> zip(a, b, c, valueForNoneA, valueForNoneB, valueForNoneC, zipFunction);
     //        }
     //
-    //        public static <A, B, T> ExceptionalStream<T, RuntimeException> zip(final Iterable<? extends A> a, final Iterable<? extends B> b, final A valueForNoneA,
+    //        public static <A, B, T> CheckedStream<T, RuntimeException> zip(final Iterable<? extends A> a, final Iterable<? extends B> b, final A valueForNoneA,
     //                final B valueForNoneB, final Throwables.BiFunction<? super A, ? super B, T, RuntimeException> zipFunction) {
-    //            return ExceptionalStream.<A, B, T, RuntimeException> zip(a, b, valueForNoneA, valueForNoneB, zipFunction);
+    //            return CheckedStream.<A, B, T, RuntimeException> zip(a, b, valueForNoneA, valueForNoneB, zipFunction);
     //        }
     //
-    //        public static <A, B, C, T> ExceptionalStream<T, RuntimeException> zip(final Iterable<? extends A> a, final Iterable<? extends B> b,
+    //        public static <A, B, C, T> CheckedStream<T, RuntimeException> zip(final Iterable<? extends A> a, final Iterable<? extends B> b,
     //                final Iterable<? extends C> c, final A valueForNoneA, final B valueForNoneB, final C valueForNoneC,
     //                final Throwables.TriFunction<? super A, ? super B, ? super C, T, RuntimeException> zipFunction) {
-    //            return ExceptionalStream.<A, B, C, T, RuntimeException> zip(a, b, c, valueForNoneA, valueForNoneB, valueForNoneC, zipFunction);
+    //            return CheckedStream.<A, B, C, T, RuntimeException> zip(a, b, c, valueForNoneA, valueForNoneB, valueForNoneC, zipFunction);
     //        }
     //
-    //        public static <A, B, T> ExceptionalStream<T, RuntimeException> zip(final Iterator<? extends A> a, final Iterator<? extends B> b, final A valueForNoneA,
+    //        public static <A, B, T> CheckedStream<T, RuntimeException> zip(final Iterator<? extends A> a, final Iterator<? extends B> b, final A valueForNoneA,
     //                final B valueForNoneB, final Throwables.BiFunction<? super A, ? super B, T, RuntimeException> zipFunction) {
-    //            return ExceptionalStream.<A, B, T, RuntimeException> zip(a, b, valueForNoneA, valueForNoneB, zipFunction);
+    //            return CheckedStream.<A, B, T, RuntimeException> zip(a, b, valueForNoneA, valueForNoneB, zipFunction);
     //        }
     //
-    //        public static <A, B, C, T> ExceptionalStream<T, RuntimeException> zip(final Iterator<? extends A> a, final Iterator<? extends B> b,
+    //        public static <A, B, C, T> CheckedStream<T, RuntimeException> zip(final Iterator<? extends A> a, final Iterator<? extends B> b,
     //                final Iterator<? extends C> c, final A valueForNoneA, final B valueForNoneB, final C valueForNoneC,
     //                final Throwables.TriFunction<? super A, ? super B, ? super C, T, RuntimeException> zipFunction) {
-    //            return ExceptionalStream.<A, B, C, T, RuntimeException> zip(a, b, c, valueForNoneA, valueForNoneB, valueForNoneC, zipFunction);
+    //            return CheckedStream.<A, B, C, T, RuntimeException> zip(a, b, c, valueForNoneA, valueForNoneB, valueForNoneC, zipFunction);
     //        }
     //
-    //        public static <T> ExceptionalStream<T, RuntimeException> merge(final T[] a, final T[] b,
+    //        public static <T> CheckedStream<T, RuntimeException> merge(final T[] a, final T[] b,
     //                final Throwables.BiFunction<? super T, ? super T, MergeResult, RuntimeException> nextSelector) {
-    //            return ExceptionalStream.<T, RuntimeException> merge(a, b, nextSelector);
+    //            return CheckedStream.<T, RuntimeException> merge(a, b, nextSelector);
     //        }
     //
-    //        public static <T> ExceptionalStream<T, RuntimeException> merge(final T[] a, final T[] b, final T[] c,
+    //        public static <T> CheckedStream<T, RuntimeException> merge(final T[] a, final T[] b, final T[] c,
     //                final Throwables.BiFunction<? super T, ? super T, MergeResult, RuntimeException> nextSelector) {
-    //            return ExceptionalStream.<T, RuntimeException> merge(a, b, c, nextSelector);
+    //            return CheckedStream.<T, RuntimeException> merge(a, b, c, nextSelector);
     //        }
     //
-    //        public static <T> ExceptionalStream<T, RuntimeException> merge(final Iterable<? extends T> a, final Iterable<? extends T> b,
+    //        public static <T> CheckedStream<T, RuntimeException> merge(final Iterable<? extends T> a, final Iterable<? extends T> b,
     //                final Throwables.BiFunction<? super T, ? super T, MergeResult, RuntimeException> nextSelector) {
-    //            return ExceptionalStream.<T, RuntimeException> merge(a, b, nextSelector);
+    //            return CheckedStream.<T, RuntimeException> merge(a, b, nextSelector);
     //        }
     //
-    //        public static <T> ExceptionalStream<T, RuntimeException> merge(final Iterable<? extends T> a, final Iterable<? extends T> b,
+    //        public static <T> CheckedStream<T, RuntimeException> merge(final Iterable<? extends T> a, final Iterable<? extends T> b,
     //                final Iterable<? extends T> c, final Throwables.BiFunction<? super T, ? super T, MergeResult, RuntimeException> nextSelector) {
-    //            return ExceptionalStream.<T, RuntimeException> merge(a, b, c, nextSelector);
+    //            return CheckedStream.<T, RuntimeException> merge(a, b, c, nextSelector);
     //        }
     //
-    //        public static <T> ExceptionalStream<T, RuntimeException> merge(final Iterator<? extends T> a, final Iterator<? extends T> b,
+    //        public static <T> CheckedStream<T, RuntimeException> merge(final Iterator<? extends T> a, final Iterator<? extends T> b,
     //                final Throwables.BiFunction<? super T, ? super T, MergeResult, RuntimeException> nextSelector) {
-    //            return ExceptionalStream.<T, RuntimeException> merge(a, b, nextSelector);
+    //            return CheckedStream.<T, RuntimeException> merge(a, b, nextSelector);
     //        }
     //
-    //        public static <T> ExceptionalStream<T, RuntimeException> merge(final Iterator<? extends T> a, final Iterator<? extends T> b,
+    //        public static <T> CheckedStream<T, RuntimeException> merge(final Iterator<? extends T> a, final Iterator<? extends T> b,
     //                final Iterator<? extends T> c, final Throwables.BiFunction<? super T, ? super T, MergeResult, RuntimeException> nextSelector) {
-    //            return ExceptionalStream.<T, RuntimeException> merge(a, b, c, nextSelector);
+    //            return CheckedStream.<T, RuntimeException> merge(a, b, c, nextSelector);
     //        }
     //    }
 }
