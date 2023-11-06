@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.sql.Timestamp;
@@ -84,7 +85,7 @@ import com.landawn.abacus.util.function.Supplier;
  * @since 0.8
  */
 @Internal
-@SuppressWarnings("java:S1192")
+@SuppressWarnings({ "java:S1192", "java:S1942", "java:S2143" })
 public final class ParserUtil {
 
     static final Logger logger = LoggerFactory.getLogger(ParserUtil.class);
@@ -1673,7 +1674,7 @@ public final class ParserUtil {
 
             try {
                 return (T) (isFieldAccessible ? field.get(obj) : getMethod.invoke(obj));
-            } catch (Exception e) {
+            } catch (IllegalAccessException | InvocationTargetException e) {
                 throw ExceptionUtil.toRuntimeException(e);
             }
         }
@@ -1723,7 +1724,7 @@ public final class ParserUtil {
                     } else {
                         field.set(obj, propValue); //NOSONAR
                     }
-                } catch (Exception e2) {
+                } catch (IllegalAccessException | InvocationTargetException e2) {
                     throw ExceptionUtil.toRuntimeException(e);
                 }
             }
@@ -2105,7 +2106,7 @@ public final class ParserUtil {
                 final JsonXmlConfig jsonXmlConfig) {
             final com.landawn.abacus.annotation.Type typeAnno = getAnnotation(com.landawn.abacus.annotation.Type.class);
 
-            if (typeAnno != null && (typeAnno.scope() == Scope.ALL || typeAnno.scope() == Scope.PARSER)) {
+            if (typeAnno != null && (typeAnno.scope() == Scope.ALL || typeAnno.scope() == Scope.SERIALIZATION)) {
                 final String typeName = getTypeName(typeAnno, propClass);
 
                 if (Strings.isNotEmpty(typeName)) {
@@ -2149,7 +2150,7 @@ public final class ParserUtil {
 
             final com.landawn.abacus.annotation.Type typeAnno = getAnnotation(com.landawn.abacus.annotation.Type.class);
 
-            if (typeAnno != null && (typeAnno.scope() == Scope.ALL || typeAnno.scope() == Scope.PARSER)) {
+            if (typeAnno != null && (typeAnno.scope() == Scope.ALL || typeAnno.scope() == Scope.SERIALIZATION)) {
                 final String typeName = getTypeName(typeAnno, propClass);
 
                 if (Strings.isNotEmpty(typeName)) {
@@ -2173,7 +2174,7 @@ public final class ParserUtil {
         private String getDBAnnoType(final Field field, final Method getMethod, final Method setMethod, final Class<?> propClass) {
             final com.landawn.abacus.annotation.Type typeAnno = getAnnotation(com.landawn.abacus.annotation.Type.class);
 
-            if (typeAnno != null && (typeAnno.scope() == Scope.ALL || typeAnno.scope() == Scope.DB)) {
+            if (typeAnno != null && (typeAnno.scope() == Scope.ALL || typeAnno.scope() == Scope.PERSISTENCE)) {
                 final String typeName = getTypeName(typeAnno, propClass);
 
                 if (Strings.isNotEmpty(typeName)) {
@@ -2422,7 +2423,7 @@ public final class ParserUtil {
                 } else {
                     try {
                         field.set(obj, propValue); //NOSONAR
-                    } catch (Exception e2) {
+                    } catch (IllegalAccessException e2) {
                         throw ExceptionUtil.toRuntimeException(e);
                     }
                 }

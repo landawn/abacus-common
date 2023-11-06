@@ -99,9 +99,9 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public String declaringName() {
@@ -109,9 +109,9 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public Class<T> clazz() {
@@ -251,7 +251,7 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
     @Override
     public T valueOf(String str) {
         if (str == null) {
-            return null;
+            return null; // NOSONAR
         } else if (str.length() == 0 || "[]".equals(str)) {
             return (T) N.newCollection(typeClass);
         } else {

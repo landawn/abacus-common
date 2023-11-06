@@ -26,6 +26,7 @@ package com.landawn.abacus.util;
 import java.net.InetSocketAddress;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 public final class AddrUtil {
@@ -70,7 +71,7 @@ public final class AddrUtil {
             throw new IllegalArgumentException("Null or empty host list");
         }
 
-        String[] hoststuffs = servers.split(URL_SEPERATOR);
+        String[] hoststuffs = servers.split(URL_SEPERATOR); // NOSONAR
 
         if (N.isEmpty(hoststuffs)) {
             throw new IllegalArgumentException("Invlid addresses: " + servers);
@@ -105,7 +106,7 @@ public final class AddrUtil {
      * @param servers
      * @return
      */
-    public static List<InetSocketAddress> getAddressList(List<String> servers) {
+    public static List<InetSocketAddress> getAddressList(final Collection<String> servers) {
         List<InetSocketAddress> addrs = new ArrayList<>(servers.size());
 
         for (String url : servers) {
@@ -145,7 +146,7 @@ public final class AddrUtil {
      * @param urls
      * @return
      */
-    public static List<InetSocketAddress> getAddressListFromURL(List<URL> urls) {
+    public static List<InetSocketAddress> getAddressListFromURL(final Collection<URL> urls) {
         List<InetSocketAddress> addrs = new ArrayList<>(urls.size());
 
         for (URL server : urls) {

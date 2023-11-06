@@ -14,7 +14,10 @@
 
 package com.landawn.abacus.pool;
 
+
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -122,7 +125,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
         assertNotClosed();
 
         if (e == null) {
-            throw new NullPointerException();
+            throw new IllegalArgumentException();
         }
 
         if (e.activityPrint().isExpired()) {
@@ -196,7 +199,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
         assertNotClosed();
 
         if (e == null) {
-            throw new NullPointerException();
+            throw new IllegalArgumentException();
         }
 
         if (e.activityPrint().isExpired()) {
@@ -268,9 +271,9 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public E take() {
@@ -421,9 +424,9 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public int size() {
@@ -433,9 +436,9 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public int hashCode() {
@@ -454,9 +457,9 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public String toString() {
@@ -589,7 +592,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
      * @param os
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    private void writeObject(java.io.ObjectOutputStream os) throws java.io.IOException {
+    private void writeObject(ObjectOutputStream os) throws IOException {
         lock.lock();
 
         try {
@@ -605,7 +608,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
      * @throws IOException Signals that an I/O exception has occurred.
      * @throws ClassNotFoundException the class not found exception
      */
-    private void readObject(java.io.ObjectInputStream is) throws java.io.IOException, ClassNotFoundException {
+    private void readObject(ObjectInputStream is) throws IOException, ClassNotFoundException {
         lock.lock();
 
         try {

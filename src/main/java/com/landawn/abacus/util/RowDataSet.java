@@ -81,7 +81,7 @@ import com.landawn.abacus.util.stream.Stream;
  * @author Haiyang Li
  * @since 0.8
  */
-@SuppressWarnings({ "java:S6539", "java:S1192", "java:S1854" })
+@SuppressWarnings({ "java:S1192", "java:S1698", "java:S1854", "java:S6539" })
 public class RowDataSet implements DataSet, Cloneable {
 
     static final char PROP_NAME_SEPARATOR = '.';

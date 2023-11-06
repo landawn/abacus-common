@@ -71,7 +71,7 @@ public final class ExceptionUtil {
                 e -> e.getCause() == null ? new UncheckedException(e) : toRuntimeException(e.getCause()));
 
         toRuntimeExceptionFuncMap.put(UndeclaredThrowableException.class,
-                e -> e.getCause() == null ? new UncheckedException(e) : toRuntimeException(e.getCause()));
+                e -> e.getCause() == null ? (UndeclaredThrowableException) e : toRuntimeException(e.getCause()));
     }
 
     private static final Function<Throwable, RuntimeException> RUNTIME_FUNC = e -> (RuntimeException) e;
@@ -106,12 +106,14 @@ public final class ExceptionUtil {
         N.checkArgNotNull(exceptionClass, "exceptionClass");
         N.checkArgNotNull(runtimeExceptionMapper, "runtimeExceptionMapper");
 
+        if (N.isBuiltinClass(exceptionClass)) {
+            throw new IllegalArgumentException("Can't register Exception class with package starting with \"java.\", \"javax.\", \"com.landawn.abacus\": "
+                    + exceptionClass.getPackage().getName());
+        }
+
         if (toRuntimeExceptionFuncMap.containsKey(exceptionClass)) {
             if (!force) {
                 throw new IllegalArgumentException("Exception class: " + ClassUtil.getCanonicalClassName(exceptionClass) + " has already been registered");
-            } else if (exceptionClass.getPackage() != null && Strings.startsWithAny(exceptionClass.getPackage().getName(), "java.", "javax.")) {
-                throw new IllegalArgumentException("Exception class: " + ClassUtil.getCanonicalClassName(exceptionClass)
-                        + " has already been registered. Can't forcedly register class with package starting with \"java.\" or \"javax.\"");
             }
         }
 
@@ -124,29 +126,7 @@ public final class ExceptionUtil {
      * @return
      */
     public static RuntimeException toRuntimeException(final Exception e) {
-        final Class<Exception> cls = (Class<Exception>) e.getClass();
-        Function<Throwable, RuntimeException> func = toRuntimeExceptionFuncMap.get(cls);
-
-        if (func == null) {
-            for (Class<?> key : toRuntimeExceptionFuncMap.keySet()) { //NOSONAR
-                if (key.isAssignableFrom(cls)) {
-                    func = toRuntimeExceptionFuncMap.get(key);
-                    break;
-                }
-            }
-
-            if (func == null) {
-                if (e instanceof RuntimeException) {
-                    func = RUNTIME_FUNC;
-                } else {
-                    func = CHECKED_FUNC;
-                }
-            }
-
-            toRuntimeExceptionFuncMap.put(cls, func);
-        }
-
-        return func.apply(e);
+        return toRuntimeException(e, false);
     }
 
     /**
@@ -175,20 +155,25 @@ public final class ExceptionUtil {
         final Class<Throwable> cls = (Class<Throwable>) e.getClass();
         Function<Throwable, RuntimeException> func = toRuntimeExceptionFuncMap.get(cls);
 
+        Map.Entry<Class<? extends Throwable>, Function<Throwable, RuntimeException>> candicate = null;
+
         if (func == null) {
-            for (Class<?> key : toRuntimeExceptionFuncMap.keySet()) { //NOSONAR
-                if (key.isAssignableFrom(cls)) {
-                    func = toRuntimeExceptionFuncMap.get(key);
-                    break;
+            for (Map.Entry<Class<? extends Throwable>, Function<Throwable, RuntimeException>> entry : toRuntimeExceptionFuncMap.entrySet()) { //NOSONAR
+                if (entry.getKey().isAssignableFrom(cls)) {
+                    if (candicate == null || candicate.getKey().isAssignableFrom(entry.getKey())) {
+                        candicate = entry;
+                    }
                 }
             }
 
-            if (func == null) {
+            if (candicate == null) {
                 if (e instanceof RuntimeException) {
                     func = RUNTIME_FUNC;
                 } else {
                     func = CHECKED_FUNC;
                 }
+            } else {
+                func = candicate.getValue();
             }
 
             toRuntimeExceptionFuncMap.put(cls, func);
@@ -197,7 +182,7 @@ public final class ExceptionUtil {
         return func.apply(e);
     }
 
-    static final java.util.function.Predicate<String> uncheckedExceptionNameTester = Pattern.compile("Unchecked[a-zA-Z0-9]*Exception").asPredicate();
+    static final Predicate<String> uncheckedExceptionNameTester = Pattern.compile("Unchecked[a-zA-Z0-9]*Exception").asPredicate();
     static final Map<Class<? extends Throwable>, Class<? extends Throwable>> runtimeToCheckedExceptionClassMap = new ConcurrentHashMap<>();
 
     /**

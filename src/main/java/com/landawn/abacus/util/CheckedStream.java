@@ -111,7 +111,7 @@ import com.landawn.abacus.util.stream.Stream;
 @LazyEvaluation
 @SequentialOnly
 @com.landawn.abacus.annotation.Immutable
-@SuppressWarnings({ "java:S6539", "java:S1192" })
+@SuppressWarnings({ "java:S1192", "java:S1698", "java:S4968", "java:S6539" })
 public final class CheckedStream<T, E extends Exception> implements Closeable, Immutable {
 
     static final Logger logger = LoggerFactory.getLogger(CheckedStream.class);
@@ -2048,7 +2048,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     private static <E extends Exception> Deque<Throwables.Runnable<? extends E>> mergeCloseHandlers(
             Collection<? extends CheckedStream<?, E>> closeHandlersList) {
         if (N.isEmpty(closeHandlersList)) {
-            return null;
+            return null; // NOSONAR
         }
 
         int count = 0;
@@ -2058,7 +2058,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
         }
 
         if (count == 0) {
-            return null;
+            return null; // NOSONAR
         }
 
         final Deque<Throwables.Runnable<? extends E>> newCloseHandlers = new ArrayDeque<>(count);
@@ -9917,7 +9917,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
         final Function<Object, D> downstreamFinisher = (Function<Object, D>) downstream.finisher();
 
-        final Throwables.Function<T, Boolean, E2> keyMapper = t -> predicate.test(t);
+        final Throwables.Function<T, Boolean, E2> keyMapper = predicate::test;
         final Supplier<Map<Boolean, D>> mapFactory = () -> N.<Boolean, D> newHashMap(2);
         final Map<Boolean, D> map = groupTo(keyMapper, downstream, mapFactory);
 
@@ -11954,13 +11954,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
         if (N.isEmpty(this.closeHandlers)) {
             return Stream.of(newObjIteratorEx(elements));
         } else {
-            return Stream.of(newObjIteratorEx(elements)).onClose(() -> {
-                try {
-                    CheckedStream.this.close();
-                } catch (Exception e) {
-                    throw ExceptionUtil.toRuntimeException(e);
-                }
-            });
+            return Stream.of(newObjIteratorEx(elements)).onClose(CheckedStream.this::close);
         }
     }
 
@@ -11978,13 +11972,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
         if (isEmptyCloseHandlers(closeHandlers)) {
             return StreamSupport.stream(spliterator, false);
         } else {
-            return StreamSupport.stream(spliterator, false).onClose(() -> {
-                try {
-                    CheckedStream.this.close();
-                } catch (Exception e) {
-                    throw ExceptionUtil.toRuntimeException(e);
-                }
-            });
+            return StreamSupport.stream(spliterator, false).onClose(CheckedStream.this::close);
         }
     }
 
@@ -13219,11 +13207,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             try {
                 N.checkArgPositive(arg, argNameOrErrorMsg);
             } finally {
-                try {
-                    close();
-                } catch (Exception e) {
-                    throw ExceptionUtil.toRuntimeException(e); //NOSONAR
-                }
+                close();
             }
         }
 
@@ -13235,11 +13219,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             try {
                 N.checkArgPositive(arg, argNameOrErrorMsg);
             } finally {
-                try {
-                    close();
-                } catch (Exception e) {
-                    throw ExceptionUtil.toRuntimeException(e); //NOSONAR
-                }
+                close();
             }
         }
 
@@ -13258,11 +13238,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             try {
                 N.checkArgNotNegative(arg, argNameOrErrorMsg);
             } finally {
-                try {
-                    close();
-                } catch (Exception e) {
-                    throw ExceptionUtil.toRuntimeException(e); //NOSONAR
-                }
+                close();
             }
         }
 
@@ -13282,11 +13258,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             try {
                 N.checkArgNotNull(obj, errorMessage);
             } finally {
-                try {
-                    close();
-                } catch (Exception e) {
-                    throw ExceptionUtil.toRuntimeException(e); //NOSONAR
-                }
+                close();
             }
         }
 
@@ -13299,11 +13271,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             try {
                 N.checkArgNotEmpty(obj, errorMessage);
             } finally {
-                try {
-                    close();
-                } catch (Exception e) {
-                    throw ExceptionUtil.toRuntimeException(e); //NOSONAR
-                }
+                close();
             }
         }
 
@@ -13320,11 +13288,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             try {
                 N.checkArgument(b, errorMessage);
             } finally {
-                try {
-                    close();
-                } catch (Exception e) {
-                    throw ExceptionUtil.toRuntimeException(e); //NOSONAR
-                }
+                close();
             }
         }
     }
@@ -13341,11 +13305,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             try {
                 N.checkArgument(b, errorMessageTemplate, p1, p2);
             } finally {
-                try {
-                    close();
-                } catch (Exception e) {
-                    throw ExceptionUtil.toRuntimeException(e); //NOSONAR
-                }
+                close();
             }
         }
     }
@@ -13362,11 +13322,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             try {
                 N.checkArgument(b, errorMessageTemplate, p1, p2);
             } finally {
-                try {
-                    close();
-                } catch (Exception e) {
-                    throw ExceptionUtil.toRuntimeException(e); //NOSONAR
-                }
+                close();
             }
         }
     }

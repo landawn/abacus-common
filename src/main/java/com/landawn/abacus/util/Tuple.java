@@ -31,7 +31,7 @@ import com.landawn.abacus.util.stream.Stream;
  * @since 0.8
  */
 @com.landawn.abacus.annotation.Immutable
-@SuppressWarnings("java:S116")
+@SuppressWarnings({ "java:S116", "java:S117" })
 public abstract class Tuple<TP> implements Immutable {
 
     private static final Tuple0 EMPTY = new Tuple0();
@@ -40,9 +40,9 @@ public abstract class Tuple<TP> implements Immutable {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public abstract int arity();
 
@@ -66,9 +66,9 @@ public abstract class Tuple<TP> implements Immutable {
     public abstract boolean contains(final Object objToFind);
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public abstract Object[] toArray();
 
@@ -122,22 +122,22 @@ public abstract class Tuple<TP> implements Immutable {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public Stream<TP> stream() {
         return Stream.of((TP) this);
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <E> 
-     * @param func 
-     * @return 
-     * @throws E 
+     *
+     * @param <T>
+     * @param <E>
+     * @param func
+     * @return
+     * @throws E
      */
     public <T, E extends Exception> Stream<T> stream(final Throwables.Function<? super TP, Stream<T>, E> func) throws E {
         return func.apply((TP) this);
@@ -331,11 +331,11 @@ public abstract class Tuple<TP> implements Immutable {
     }
 
     /**
-     * 
      *
-     * @param <TP> 
-     * @param a 
-     * @return 
+     *
+     * @param <TP>
+     * @param a
+     * @return
      */
     @Beta
     public static <TP extends Tuple<TP>> TP create(final Object[] a) {
@@ -392,11 +392,11 @@ public abstract class Tuple<TP> implements Immutable {
     }
 
     /**
-     * 
      *
-     * @param <TP> 
-     * @param c 
-     * @return 
+     *
+     * @param <TP>
+     * @param c
+     * @return
      */
     @Beta
     public static <TP extends Tuple<TP>> TP create(final Collection<?> c) {
@@ -454,11 +454,11 @@ public abstract class Tuple<TP> implements Immutable {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param tp 
-     * @return 
+     *
+     * @param <T>
+     * @param tp
+     * @return
      */
     @Beta
     public static <T> List<T> toList(Tuple1<? extends T> tp) {
@@ -466,11 +466,11 @@ public abstract class Tuple<TP> implements Immutable {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param tp 
-     * @return 
+     *
+     * @param <T>
+     * @param tp
+     * @return
      */
     @Beta
     public static <T> List<T> toList(Tuple2<? extends T, ? extends T> tp) {
@@ -478,11 +478,11 @@ public abstract class Tuple<TP> implements Immutable {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param tp 
-     * @return 
+     *
+     * @param <T>
+     * @param tp
+     * @return
      */
     @Beta
     public static <T> List<T> toList(Tuple3<? extends T, ? extends T, ? extends T> tp) {
@@ -490,11 +490,11 @@ public abstract class Tuple<TP> implements Immutable {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param tp 
-     * @return 
+     *
+     * @param <T>
+     * @param tp
+     * @return
      */
     @Beta
     public static <T> List<T> toList(Tuple4<? extends T, ? extends T, ? extends T, ? extends T> tp) {
@@ -502,11 +502,11 @@ public abstract class Tuple<TP> implements Immutable {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param tp 
-     * @return 
+     *
+     * @param <T>
+     * @param tp
+     * @return
      */
     @Beta
     public static <T> List<T> toList(Tuple5<? extends T, ? extends T, ? extends T, ? extends T, ? extends T> tp) {
@@ -514,11 +514,11 @@ public abstract class Tuple<TP> implements Immutable {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param tp 
-     * @return 
+     *
+     * @param <T>
+     * @param tp
+     * @return
      */
     @Beta
     public static <T> List<T> toList(Tuple6<? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T> tp) {
@@ -526,11 +526,11 @@ public abstract class Tuple<TP> implements Immutable {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param tp 
-     * @return 
+     *
+     * @param <T>
+     * @param tp
+     * @return
      */
     @Beta
     public static <T> List<T> toList(Tuple7<? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T> tp) {
@@ -538,11 +538,11 @@ public abstract class Tuple<TP> implements Immutable {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param tp 
-     * @return 
+     *
+     * @param <T>
+     * @param tp
+     * @return
      */
     @Beta
     public static <T> List<T> toList(Tuple8<? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T> tp) {
@@ -550,11 +550,11 @@ public abstract class Tuple<TP> implements Immutable {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param tp 
-     * @return 
+     *
+     * @param <T>
+     * @param tp
+     * @return
      */
     @Beta
     public static <T> List<T> toList(
@@ -563,13 +563,13 @@ public abstract class Tuple<TP> implements Immutable {
     }
 
     /**
-     * 
      *
-     * @param <T1> 
-     * @param <T2> 
-     * @param <T3> 
-     * @param tp 
-     * @return 
+     *
+     * @param <T1>
+     * @param <T2>
+     * @param <T3>
+     * @param tp
+     * @return
      */
     @Beta
     public static <T1, T2, T3> Tuple3<T1, T2, T3> flatten(Tuple2<Tuple2<T1, T2>, T3> tp) {
@@ -577,15 +577,15 @@ public abstract class Tuple<TP> implements Immutable {
     }
 
     /**
-     * 
      *
-     * @param <T1> 
-     * @param <T2> 
-     * @param <T3> 
-     * @param <T4> 
-     * @param <T5> 
-     * @param tp 
-     * @return 
+     *
+     * @param <T1>
+     * @param <T2>
+     * @param <T3>
+     * @param <T4>
+     * @param <T5>
+     * @param tp
+     * @return
      */
     @Beta
     public static <T1, T2, T3, T4, T5> Tuple5<T1, T2, T3, T4, T5> flatten(Tuple3<Tuple3<T1, T2, T3>, T4, T5> tp) {
@@ -700,10 +700,10 @@ public abstract class Tuple<TP> implements Immutable {
         }
 
         /**
-         * 
          *
-         * @param objToFind 
-         * @return 
+         *
+         * @param objToFind
+         * @return
          */
         @Override
         public boolean contains(final Object objToFind) {
@@ -860,10 +860,10 @@ public abstract class Tuple<TP> implements Immutable {
         }
 
         /**
-         * 
          *
-         * @param objToFind 
-         * @return 
+         *
+         * @param objToFind
+         * @return
          */
         @Override
         public boolean contains(final Object objToFind) {
@@ -1077,10 +1077,10 @@ public abstract class Tuple<TP> implements Immutable {
         }
 
         /**
-         * 
          *
-         * @param objToFind 
-         * @return 
+         *
+         * @param objToFind
+         * @return
          */
         @Override
         public boolean contains(final Object objToFind) {
@@ -1296,10 +1296,10 @@ public abstract class Tuple<TP> implements Immutable {
         }
 
         /**
-         * 
          *
-         * @param objToFind 
-         * @return 
+         *
+         * @param objToFind
+         * @return
          */
         @Override
         public boolean contains(final Object objToFind) {
@@ -1482,10 +1482,10 @@ public abstract class Tuple<TP> implements Immutable {
         }
 
         /**
-         * 
          *
-         * @param objToFind 
-         * @return 
+         *
+         * @param objToFind
+         * @return
          */
         @Override
         public boolean contains(final Object objToFind) {
@@ -1678,10 +1678,10 @@ public abstract class Tuple<TP> implements Immutable {
         }
 
         /**
-         * 
          *
-         * @param objToFind 
-         * @return 
+         *
+         * @param objToFind
+         * @return
          */
         @Override
         public boolean contains(final Object objToFind) {
@@ -1885,10 +1885,10 @@ public abstract class Tuple<TP> implements Immutable {
         }
 
         /**
-         * 
          *
-         * @param objToFind 
-         * @return 
+         *
+         * @param objToFind
+         * @return
          */
         @Override
         public boolean contains(final Object objToFind) {
@@ -2105,10 +2105,10 @@ public abstract class Tuple<TP> implements Immutable {
         }
 
         /**
-         * 
          *
-         * @param objToFind 
-         * @return 
+         *
+         * @param objToFind
+         * @return
          */
         @Override
         public boolean contains(final Object objToFind) {
@@ -2335,10 +2335,10 @@ public abstract class Tuple<TP> implements Immutable {
         }
 
         /**
-         * 
          *
-         * @param objToFind 
-         * @return 
+         *
+         * @param objToFind
+         * @return
          */
         @Override
         public boolean contains(final Object objToFind) {

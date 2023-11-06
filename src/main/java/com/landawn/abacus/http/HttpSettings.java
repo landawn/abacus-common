@@ -27,9 +27,9 @@ import com.landawn.abacus.util.Strings;
  */
 public final class HttpSettings {
 
-    private int connectionTimeout;
+    private long connectionTimeout;
 
-    private int readTimeout;
+    private long readTimeout;
 
     private SSLSocketFactory sslSocketFactory;
 
@@ -46,15 +46,15 @@ public final class HttpSettings {
     private HttpHeaders headers = null;
 
     /**
-     * 
+     *
      */
     public HttpSettings() { //NOSONAR
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public static HttpSettings create() {
         return new HttpSettings();
@@ -65,7 +65,7 @@ public final class HttpSettings {
      *
      * @return
      */
-    public int getConnectionTimeout() {
+    public long getConnectionTimeout() {
         return connectionTimeout;
     }
 
@@ -75,7 +75,7 @@ public final class HttpSettings {
      * @param connectionTimeout
      * @return
      */
-    public HttpSettings setConnectionTimeout(int connectionTimeout) {
+    public HttpSettings setConnectionTimeout(long connectionTimeout) {
         this.connectionTimeout = connectionTimeout;
 
         return this;
@@ -86,7 +86,7 @@ public final class HttpSettings {
      *
      * @return
      */
-    public int getReadTimeout() {
+    public long getReadTimeout() {
         return readTimeout;
     }
 
@@ -97,7 +97,7 @@ public final class HttpSettings {
      * @param readTimeout
      * @return
      */
-    public HttpSettings setReadTimeout(int readTimeout) {
+    public HttpSettings setReadTimeout(long readTimeout) {
         this.readTimeout = readTimeout;
 
         return this;
@@ -265,10 +265,10 @@ public final class HttpSettings {
     }
 
     /**
-     * 
      *
-     * @param contentType 
-     * @return 
+     *
+     * @param contentType
+     * @return
      */
     public HttpSettings setContentType(final String contentType) {
         header(HttpHeaders.Names.CONTENT_TYPE, contentType);
@@ -277,9 +277,9 @@ public final class HttpSettings {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public String getContentType() {
         String contentType = HttpUtil.getContentType(headers);
@@ -296,10 +296,10 @@ public final class HttpSettings {
     }
 
     /**
-     * 
      *
-     * @param contentEncoding 
-     * @return 
+     *
+     * @param contentEncoding
+     * @return
      */
     public HttpSettings setContentEncoding(final String contentEncoding) {
         header(HttpHeaders.Names.CONTENT_ENCODING, contentEncoding);
@@ -308,9 +308,9 @@ public final class HttpSettings {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public String getContentEncoding() {
         String contentEncoding = HttpUtil.getContentEncoding(headers);
@@ -417,9 +417,9 @@ public final class HttpSettings {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public HttpHeaders headers() {
         if (headers == null) {
@@ -430,9 +430,9 @@ public final class HttpSettings {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public HttpSettings copy() {
         return new HttpSettings().setConnectionTimeout(connectionTimeout)
@@ -447,9 +447,9 @@ public final class HttpSettings {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public String toString() {

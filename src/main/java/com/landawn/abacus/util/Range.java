@@ -313,7 +313,7 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
     public int compareTo(final T element) {
         if (element == null) {
             // Comparable API says throw NPE on null
-            throw new NullPointerException("Element is null");
+            throw new IllegalArgumentException("Element is null");
         }
 
         if (isBefore(element)) {

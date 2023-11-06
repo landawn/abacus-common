@@ -51,10 +51,10 @@ import com.landawn.abacus.parser.ParserUtil.PropInfo;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.util.Array;
 import com.landawn.abacus.util.BufferedJSONWriter;
+import com.landawn.abacus.util.CheckedStream;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.DataSet;
 import com.landawn.abacus.util.EntityId;
-import com.landawn.abacus.util.CheckedStream;
 import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.IdentityHashSet;
 import com.landawn.abacus.util.ImmutableEntry;
@@ -1625,7 +1625,7 @@ final class JSONParserImpl extends AbstractJSONParser {
 
         // No need to close the reader because the InputStream will/should be
         // closely externally.
-        Reader reader = new InputStreamReader(is);
+        Reader reader = new InputStreamReader(is); // NOSONAR
 
         return deserialize(targetClass, reader, config);
     }
@@ -1781,13 +1781,11 @@ final class JSONParserImpl extends AbstractJSONParser {
         // which has less comparison. Fuck???!!!...
         for (int token = firstToken == START_BRACE ? jr.nextToken() : firstToken;; token = jr.nextToken()) {
             switch (token) {
-                case START_QUOTATION_D:
-                case START_QUOTATION_S:
+                case START_QUOTATION_D, START_QUOTATION_S:
 
                     break;
 
-                case END_QUOTATION_D:
-                case END_QUOTATION_S:
+                case END_QUOTATION_D, END_QUOTATION_S:
 
                     if (isPropName) {
                         // propName = jr.getText();
@@ -1998,8 +1996,7 @@ final class JSONParserImpl extends AbstractJSONParser {
 
                     break;
 
-                case END_BRACE:
-                case EOR:
+                case END_BRACE, EOR:
 
                     if (isPropName && propInfo != null /*
                                                         * check for empty json text
@@ -2118,13 +2115,11 @@ final class JSONParserImpl extends AbstractJSONParser {
 
         for (int token = firstToken == START_BRACE ? jr.nextToken() : firstToken;; token = jr.nextToken()) {
             switch (token) {
-                case START_QUOTATION_D:
-                case START_QUOTATION_S:
+                case START_QUOTATION_D, START_QUOTATION_S:
 
                     break;
 
-                case END_QUOTATION_D:
-                case END_QUOTATION_S:
+                case END_QUOTATION_D, END_QUOTATION_S:
 
                     if (isKey) {
                         key = readPropValue(keyType, jr, readNullToEmpty);
@@ -2228,8 +2223,7 @@ final class JSONParserImpl extends AbstractJSONParser {
 
                     break;
 
-                case END_BRACE:
-                case EOR:
+                case END_BRACE, EOR:
 
                     if (isKey && key != null /* check for empty json text {} */) {
                         throw new ParseException(token, getErrorMsg(jr, token));
@@ -2319,13 +2313,11 @@ final class JSONParserImpl extends AbstractJSONParser {
             try {
                 for (int preToken = firstToken, token = firstToken == START_BRACKET ? jr.nextToken() : firstToken;; preToken = token, token = jr.nextToken()) {
                     switch (token) {
-                        case START_QUOTATION_D:
-                        case START_QUOTATION_S:
+                        case START_QUOTATION_D, START_QUOTATION_S:
 
                             break;
 
-                        case END_QUOTATION_D:
-                        case END_QUOTATION_S:
+                        case END_QUOTATION_D, END_QUOTATION_S:
 
                             propValue = readPropValue(eleType, jr, readNullToEmpty);
 
@@ -2367,8 +2359,7 @@ final class JSONParserImpl extends AbstractJSONParser {
 
                             break;
 
-                        case END_BRACKET:
-                        case EOR:
+                        case END_BRACKET, EOR:
 
                             if ((firstToken == START_BRACKET && token != END_BRACKET) || (firstToken != START_BRACKET && token == END_BRACKET)) {
                                 throw new ParseException(token, "The JSON text should be wrapped or unwrapped with \"[]\" or \"{}\"");
@@ -2395,13 +2386,11 @@ final class JSONParserImpl extends AbstractJSONParser {
 
             for (int preToken = firstToken, token = firstToken == START_BRACKET ? jr.nextToken() : firstToken;; preToken = token, token = jr.nextToken()) {
                 switch (token) {
-                    case START_QUOTATION_D:
-                    case START_QUOTATION_S:
+                    case START_QUOTATION_D, START_QUOTATION_S:
 
                         break;
 
-                    case END_QUOTATION_D:
-                    case END_QUOTATION_S:
+                    case END_QUOTATION_D, END_QUOTATION_S:
 
                         propValue = readPropValue(eleType, jr, readNullToEmpty);
 
@@ -2443,8 +2432,7 @@ final class JSONParserImpl extends AbstractJSONParser {
 
                         break;
 
-                    case END_BRACKET:
-                    case EOR:
+                    case END_BRACKET, EOR:
 
                         if ((firstToken == START_BRACKET && token != END_BRACKET) || (firstToken != START_BRACKET && token == END_BRACKET)) {
                             throw new ParseException(token, "The JSON text should be wrapped or unwrapped with \"[]\" or \"{}\"");
@@ -2519,13 +2507,11 @@ final class JSONParserImpl extends AbstractJSONParser {
 
         for (int preToken = firstToken, token = firstToken == START_BRACKET ? jr.nextToken() : firstToken;; preToken = token, token = jr.nextToken()) {
             switch (token) {
-                case START_QUOTATION_D:
-                case START_QUOTATION_S:
+                case START_QUOTATION_D, START_QUOTATION_S:
 
                     break;
 
-                case END_QUOTATION_D:
-                case END_QUOTATION_S:
+                case END_QUOTATION_D, END_QUOTATION_S:
 
                     propValue = readPropValue(eleType, jr, readNullToEmpty);
 
@@ -2567,8 +2553,7 @@ final class JSONParserImpl extends AbstractJSONParser {
 
                     break;
 
-                case END_BRACKET:
-                case EOR:
+                case END_BRACKET, EOR:
 
                     if ((firstToken == START_BRACKET && token != END_BRACKET) || (firstToken != START_BRACKET && token == END_BRACKET)) {
                         throw new ParseException(token, "The JSON text should be wrapped or unwrapped with \"[]\" or \"{}\"");
@@ -2616,14 +2601,11 @@ final class JSONParserImpl extends AbstractJSONParser {
 
         for (int token = firstToken == START_BRACE ? jr.nextToken() : firstToken;; token = jr.nextToken()) {
             switch (token) {
-                case START_QUOTATION_D:
-                case START_QUOTATION_S:
+                case START_QUOTATION_D, START_QUOTATION_S:
 
                     break;
 
-                case END_QUOTATION_D:
-                case END_QUOTATION_S:
-                case COLON:
+                case END_QUOTATION_D, END_QUOTATION_S, COLON:
 
                     if (jr.hasText()) {
                         if (mapEntity == null) {
@@ -2646,8 +2628,7 @@ final class JSONParserImpl extends AbstractJSONParser {
 
                     break;
 
-                case END_BRACE:
-                case EOR:
+                case END_BRACE, EOR:
 
                     if ((firstToken == START_BRACE && token != END_BRACE) || (firstToken != START_BRACE && token == END_BRACE)) {
                         throw new ParseException(token, "The JSON text should be wrapped or unwrapped with \"[]\" or \"{}\"");
@@ -2689,14 +2670,11 @@ final class JSONParserImpl extends AbstractJSONParser {
 
         for (int token = firstToken == START_BRACE ? jr.nextToken() : firstToken;; token = jr.nextToken()) {
             switch (token) {
-                case START_QUOTATION_D:
-                case START_QUOTATION_S:
+                case START_QUOTATION_D, START_QUOTATION_S:
 
                     break;
 
-                case END_QUOTATION_D:
-                case END_QUOTATION_S:
-                case COLON:
+                case END_QUOTATION_D, END_QUOTATION_S, COLON:
 
                     if (jr.hasText()) {
                         if (entityId == null) {
@@ -2719,8 +2697,7 @@ final class JSONParserImpl extends AbstractJSONParser {
 
                     break;
 
-                case END_BRACE:
-                case EOR:
+                case END_BRACE, EOR:
 
                     if ((firstToken == START_BRACE && token != END_BRACE) || (firstToken != START_BRACE && token == END_BRACE)) {
                         throw new ParseException(token, "The JSON text should be wrapped or unwrapped with \"[]\" or \"{}\"");
@@ -2775,13 +2752,11 @@ final class JSONParserImpl extends AbstractJSONParser {
 
         for (int token = firstToken == START_BRACE ? jr.nextToken() : firstToken;; token = jr.nextToken()) {
             switch (token) {
-                case START_QUOTATION_D:
-                case START_QUOTATION_S:
+                case START_QUOTATION_D, START_QUOTATION_S:
 
                     break;
 
-                case END_QUOTATION_D:
-                case END_QUOTATION_S:
+                case END_QUOTATION_D, END_QUOTATION_S:
 
                     if (isKey) {
                         propName = jr.getText();
@@ -2924,8 +2899,7 @@ final class JSONParserImpl extends AbstractJSONParser {
 
                     break;
 
-                case END_BRACE:
-                case EOR:
+                case END_BRACE, EOR:
 
                     if ((firstToken == START_BRACE && token != END_BRACE) || (firstToken != START_BRACE && token == END_BRACE)) {
                         throw new ParseException(token, "The JSON text should be wrapped or unwrapped with \"[]\" or \"{}\"");
@@ -3165,7 +3139,7 @@ final class JSONParserImpl extends AbstractJSONParser {
     @Override
     public <T> CheckedStream<T, IOException> stream(final Class<? extends T> elementClass, final InputStream is,
             final boolean closeInputStreamWhenStreamIsClosed, final JSONDeserializationConfig config) {
-        final Reader reader = new InputStreamReader(is);
+        final Reader reader = new InputStreamReader(is); // NOSONAR
 
         return stream(elementClass, reader, closeInputStreamWhenStreamIsClosed, config);
     }
@@ -3221,14 +3195,8 @@ final class JSONParserImpl extends AbstractJSONParser {
     private <T> Type<T> checkStreamSupportedType(final Class<? extends T> elementClass) {
         final Type<T> eleType = N.typeOf(elementClass);
 
-        switch (eleType.getSerializationType()) {
-            case ENTITY:
-            case MAP:
-            case ARRAY:
-            case COLLECTION:
-            case MAP_ENTITY:
-            case DATA_SET:
-            case ENTITY_ID:
+        switch (eleType.getSerializationType()) { // NOSONAR
+            case ENTITY, MAP, ARRAY, COLLECTION, MAP_ENTITY, DATA_SET, ENTITY_ID:
                 break;
 
             default:

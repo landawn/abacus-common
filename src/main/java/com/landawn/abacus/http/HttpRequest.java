@@ -18,6 +18,7 @@ import java.io.File;
 import java.io.OutputStream;
 import java.io.Writer;
 import java.net.URL;
+import java.time.Duration;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executor;
@@ -27,9 +28,11 @@ import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.util.ContinuableFuture;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
+import com.landawn.abacus.util.URLEncodedUtil;
 
 /**
  *
+ * @see URLEncodedUtil
  * @author Haiyang Li
  * @since 1.3
  */
@@ -215,7 +218,7 @@ public final class HttpRequest {
      * @param connectionTimeout
      * @return
      */
-    public HttpRequest connectionTimeout(int connectionTimeout) {
+    public HttpRequest connectionTimeout(final long connectionTimeout) {
         checkSettings();
 
         settings.setConnectionTimeout(connectionTimeout);
@@ -226,13 +229,41 @@ public final class HttpRequest {
     /**
      *
      *
+     * @param connectionTimeout
+     * @return
+     */
+    public HttpRequest connectionTimeout(final Duration connectionTimeout) {
+        checkSettings();
+
+        settings.setConnectionTimeout(connectionTimeout.toMillis());
+
+        return this;
+    }
+
+    /**
+     *
+     *
      * @param readTimeout
      * @return
      */
-    public HttpRequest readTimeout(int readTimeout) {
+    public HttpRequest readTimeout(long readTimeout) {
         checkSettings();
 
         settings.setReadTimeout(readTimeout);
+
+        return this;
+    }
+
+    /**
+     *
+     *
+     * @param readTimeout
+     * @return
+     */
+    public HttpRequest readTimeout(final Duration readTimeout) {
+        checkSettings();
+
+        settings.setReadTimeout(readTimeout.toMillis());
 
         return this;
     }

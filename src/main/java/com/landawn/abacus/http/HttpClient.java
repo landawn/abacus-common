@@ -48,6 +48,7 @@ import com.landawn.abacus.util.ContinuableFuture;
 import com.landawn.abacus.util.ExceptionUtil;
 import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.Numbers;
 import com.landawn.abacus.util.Objectory;
 import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.URLEncodedUtil;
@@ -861,7 +862,7 @@ public final class HttpClient {
             final Object request, final HttpSettings settings) throws UncheckedIOException {
         final Charset requestCharset = HttpUtil.getRequestCharset(settings == null || settings.headers().isEmpty() ? _settings.headers() : settings.headers());
         final ContentFormat requestContentFormat = getContentFormat(settings);
-        final boolean doOutput = request != null && !(httpMethod.equals(HttpMethod.GET) || httpMethod.equals(HttpMethod.DELETE));
+        final boolean doOutput = request != null && !(httpMethod == HttpMethod.GET || httpMethod == HttpMethod.DELETE);
 
         final HttpURLConnection connection = openConnection(httpMethod, resultClass, request, doOutput, settings);
         final long sentRequestAtMillis = System.currentTimeMillis();
@@ -989,7 +990,8 @@ public final class HttpClient {
      * @return true, if is one way request
      */
     protected boolean isOneWayRequest(final HttpMethod httpMethod, final Class<?> resultClass, final HttpSettings settings) {
-        return HttpMethod.HEAD == httpMethod || Void.class.equals(resultClass) || (settings == null ? _settings.isOneWayRequest() : settings.isOneWayRequest());
+        return HttpMethod.HEAD == httpMethod || resultClass == null || Void.class.equals(resultClass)
+                || (settings == null ? _settings.isOneWayRequest() : settings.isOneWayRequest());
     }
 
     /**
@@ -1053,7 +1055,7 @@ public final class HttpClient {
     }
 
     private boolean requireBody(HttpMethod httpMethod) {
-        return HttpMethod.POST.equals(httpMethod) || HttpMethod.PUT.equals(httpMethod) || HttpMethod.PATCH.equals(httpMethod);
+        return httpMethod == HttpMethod.POST || httpMethod == HttpMethod.PUT || httpMethod == HttpMethod.PATCH;
     }
 
     /**
@@ -1091,7 +1093,7 @@ public final class HttpClient {
 
         try {
             synchronized (_netURL) {
-                if (queryParameters != null && (httpMethod.equals(HttpMethod.GET) || httpMethod.equals(HttpMethod.DELETE))) {
+                if (queryParameters != null && (httpMethod == HttpMethod.GET || httpMethod == HttpMethod.DELETE)) {
                     connection = (HttpURLConnection) URI.create(URLEncodedUtil.encode(_url, queryParameters)).toURL().openConnection();
                 } else {
                     connection = (HttpURLConnection) _netURL.openConnection();
@@ -1108,8 +1110,8 @@ public final class HttpClient {
 
             int connectionTimeoutInMillis = _connectionTimeoutInMillis > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int) _connectionTimeoutInMillis;
 
-            if (settings != null) {
-                connectionTimeoutInMillis = settings.getConnectionTimeout();
+            if (settings != null && settings.getConnectionTimeout() > 0) {
+                connectionTimeoutInMillis = Numbers.toIntExact(settings.getConnectionTimeout());
             }
 
             if (connectionTimeoutInMillis > 0) {
@@ -1118,8 +1120,8 @@ public final class HttpClient {
 
             int readTimeoutInMillis = _readTimeoutInMillis > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int) _readTimeoutInMillis;
 
-            if (settings != null) {
-                readTimeoutInMillis = settings.getReadTimeout();
+            if (settings != null && settings.getReadTimeout() > 0) {
+                readTimeoutInMillis = Numbers.toIntExact(settings.getReadTimeout());
             }
 
             if (readTimeoutInMillis > 0) {

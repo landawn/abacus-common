@@ -1550,7 +1550,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     public static char[] toCharArray(final CharSequence source) {
         if (source == null) {
-            return null;
+            return null; // NOSONAR
         } else if (source.length() == 0) {
             return N.EMPTY_CHAR_ARRAY;
         } else if (source instanceof String) {
@@ -1586,7 +1586,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     public static int[] toCodePoints(final CharSequence str) {
         if (str == null) {
-            return null;
+            return null; // NOSONAR
         } else if (str.length() == 0) {
             return N.EMPTY_INT_ARRAY;
         }
@@ -2428,18 +2428,17 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @return
      */
     private static String replace(final String str, final int fromIndex, final String target, String replacement, int max, boolean ignoreCase) {
-
         // TODO
         //    if (replacement == null) {
         //        throw new IllegalArgumentException("Replacement can't be null");
         //    }
 
-        if (replacement == null) {
-            replacement = "";
-        }
-
         if (isEmpty(str) || isEmpty(target) || max == 0) {
             return str;
+        }
+
+        if (replacement == null) {
+            replacement = "";
         }
 
         final String searchText = ignoreCase ? str.toLowerCase() : str;
@@ -9479,7 +9478,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         if (N.isEmpty(a) || fromIndex == toIndex) {
             return EMPTY_STRING;
         } else if (toIndex - fromIndex == 1) {
-            return trim ? N.toString(a[fromIndex]).trim() : N.toString(a[fromIndex]);
+            return toString(a[fromIndex], trim);
         }
 
         final StringBuilder sb = Objectory.createStringBuilder();
@@ -9490,7 +9489,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
                     sb.append(delimiter);
                 }
 
-                sb.append(trim ? N.toString(a[i]).trim() : N.toString(a[i]));
+                sb.append(toString(a[i], trim));
             }
 
             return sb.toString();
@@ -9550,7 +9549,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
                 return prefix + suffix;
             }
         } else if (toIndex - fromIndex == 1 && isEmpty(prefix) && isEmpty(suffix)) {
-            return trim ? N.toString(a[fromIndex]).trim() : N.toString(a[fromIndex]);
+            return toString(a[fromIndex], trim);
         }
 
         final StringBuilder sb = Objectory.createStringBuilder();
@@ -9562,7 +9561,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
             if (isEmpty(delimiter)) {
                 for (int i = fromIndex; i < toIndex; i++) {
-                    sb.append(trim ? N.toString(a[i]).trim() : N.toString(a[i]));
+                    sb.append(toString(a[i], trim));
                 }
             } else {
                 for (int i = fromIndex; i < toIndex; i++) {
@@ -9570,7 +9569,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
                         sb.append(delimiter);
                     }
 
-                    sb.append(trim ? N.toString(a[i]).trim() : N.toString(a[i]));
+                    sb.append(toString(a[i], trim));
                 }
             }
 
@@ -9678,7 +9677,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
                 }
 
                 if (i > fromIndex) {
-                    sb.append(trim ? N.toString(e).trim() : N.toString(e));
+                    sb.append(toString(e, trim));
                 }
 
                 if (i >= toIndex) {
@@ -9756,7 +9755,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
                 if (isEmpty(delimiter)) {
                     for (int i = fromIndex; i < toIndex; i++) {
-                        sb.append(trim ? N.toString(list.get(i)).trim() : N.toString(list.get(i)));
+                        sb.append(toString(list.get(i), trim));
                     }
                 } else {
                     for (int i = fromIndex; i < toIndex; i++) {
@@ -9764,7 +9763,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
                             sb.append(delimiter);
                         }
 
-                        sb.append(trim ? N.toString(list.get(i)).trim() : N.toString(list.get(i)));
+                        sb.append(toString(list.get(i), trim));
                     }
                 }
             } else {
@@ -9772,7 +9771,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
                 if (isEmpty(delimiter)) {
                     for (Object e : c) {
                         if (i++ >= fromIndex) {
-                            sb.append(trim ? N.toString(e).trim() : N.toString(e));
+                            sb.append(toString(e, trim));
                         }
 
                         if (i >= toIndex) {
@@ -9786,7 +9785,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
                         }
 
                         if (i > fromIndex) {
-                            sb.append(trim ? N.toString(e).trim() : N.toString(e));
+                            sb.append(toString(e, trim));
                         }
 
                         if (i >= toIndex) {
@@ -10188,9 +10187,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
                 }
 
                 if (i > fromIndex) {
-                    sb.append(trim ? N.toString(entry.getKey()).trim() : N.toString(entry.getKey()));
+                    sb.append(toString(entry.getKey(), trim));
                     sb.append(keyValueDelimiter);
-                    sb.append(trim ? N.toString(entry.getValue()).trim() : N.toString(entry.getValue()));
+                    sb.append(toString(entry.getValue(), trim));
                 }
 
                 if (i >= toIndex) {
@@ -10644,6 +10643,18 @@ public abstract sealed class Strings permits Strings.StringUtil {
     //            ObjectFactory.recycle(sb);
     //        }
     //    }
+
+    private static String toString(final Object e, final boolean trim) {
+        if (e == null) {
+            return NULL_STRING;
+        }
+
+        if (trim) {
+            return N.toString(e).trim();
+        } else {
+            return N.toString(e);
+        }
+    }
 
     /**
      * Copied from Google Guava
@@ -11124,7 +11135,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return Strings.EMPTY_STRING;
         }
 
-        return BASE64_ENCODER.encodeToString(str.getBytes());
+        return BASE64_ENCODER.encodeToString(str.getBytes()); // NOSONAR
     }
 
     /**
@@ -11166,7 +11177,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return Strings.EMPTY_STRING;
         }
 
-        return new String(base64Decode(base64String));
+        return new String(base64Decode(base64String)); // NOSONAR
     }
 
     /**
@@ -11222,7 +11233,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return Strings.EMPTY_STRING;
         }
 
-        return new String(BASE64_URL_DECODER.decode(base64String));
+        return new String(BASE64_URL_DECODER.decode(base64String)); // NOSONAR
     }
 
     /**

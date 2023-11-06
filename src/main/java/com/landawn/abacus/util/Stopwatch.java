@@ -210,9 +210,9 @@ public final class Stopwatch {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public Duration elapsed() {
         return Duration.ofNanos(elapsedNanos());
@@ -281,7 +281,7 @@ public final class Stopwatch {
             case NANOSECONDS:
                 return "ns";
             case MICROSECONDS:
-                return "\u03bcs"; // μs
+                return "\u03bcs"; // μs  // NOSONAR
             case MILLISECONDS:
                 return "ms";
             case SECONDS:

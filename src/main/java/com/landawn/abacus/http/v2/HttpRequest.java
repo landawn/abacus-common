@@ -42,7 +42,7 @@ import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.URLEncodedUtil;
 
 /**
- *
+ * @see URLEncodedUtil
  * @author Haiyang Li
  */
 public final class HttpRequest {
@@ -965,7 +965,9 @@ public final class HttpRequest {
     }
 
     private BodyHandler<?> createResponseBodyHandler(final Class<?> resultClass) {
-        if (resultClass == null || resultClass.equals(String.class)) {
+        if (resultClass == null || resultClass.equals(Void.class)) {
+            return BodyHandlers.discarding();
+        } else if (resultClass.equals(String.class)) {
             return BodyHandlers.ofString();
         } else if (byte[].class.equals(resultClass)) {
             return BodyHandlers.ofByteArray();

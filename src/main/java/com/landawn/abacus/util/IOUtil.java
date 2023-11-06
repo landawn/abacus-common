@@ -1789,7 +1789,7 @@ public final class IOUtil {
      * @throws IOException
      */
     public static void writeLine(final OutputStream os, final Object obj, final boolean flush) throws IOException {
-        writeLine(new OutputStreamWriter(os), obj, flush);
+        writeLine(new OutputStreamWriter(os), obj, flush); // NOSONAR
     }
 
     /**
@@ -1922,7 +1922,7 @@ public final class IOUtil {
             return;
         }
 
-        writeLines(new OutputStreamWriter(os), lines, offset, count, flush);
+        writeLines(new OutputStreamWriter(os), lines, offset, count, flush); // NOSONAR
     }
 
     /**
@@ -2117,7 +2117,7 @@ public final class IOUtil {
             return;
         }
 
-        writeLines(new OutputStreamWriter(os), lines, offset, count, flush);
+        writeLines(new OutputStreamWriter(os), lines, offset, count, flush); // NOSONAR
     }
 
     /**
@@ -3897,7 +3897,7 @@ public final class IOUtil {
      */
     public static FileReader newFileReader(final File file) throws UncheckedIOException {
         try {
-            return new FileReader(file);
+            return new FileReader(file); // NOSONAR
         } catch (FileNotFoundException e) {
             throw new UncheckedIOException(e);
         }
@@ -3928,7 +3928,7 @@ public final class IOUtil {
      */
     public static FileWriter newFileWriter(final File file) throws UncheckedIOException {
         try {
-            return new FileWriter(file);
+            return new FileWriter(file); // NOSONAR
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
@@ -4023,7 +4023,7 @@ public final class IOUtil {
      * @throws UncheckedIOException the unchecked IO exception
      */
     public static java.io.BufferedReader newBufferedReader(InputStream is) throws UncheckedIOException {
-        return new java.io.BufferedReader(new InputStreamReader(is));
+        return new java.io.BufferedReader(new InputStreamReader(is)); // NOSONAR
     }
 
     /**
@@ -4079,7 +4079,7 @@ public final class IOUtil {
      * @return
      */
     public static java.io.BufferedWriter newBufferedWriter(OutputStream os) {
-        return new java.io.BufferedWriter(new OutputStreamWriter(os));
+        return new java.io.BufferedWriter(new OutputStreamWriter(os)); // NOSONAR
     }
 
     /**
@@ -5428,7 +5428,7 @@ public final class IOUtil {
             String line = null;
             long bytes = 0;
             while (cnt < byReadingLineNum && (line = br.readLine()) != null) {
-                bytes += line.getBytes().length;
+                bytes += line.getBytes().length; // NOSONAR
 
                 cnt++;
             }

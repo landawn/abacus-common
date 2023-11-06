@@ -20,7 +20,7 @@ import com.landawn.abacus.util.Tuple.Tuple3;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.stream.Stream;
 
-public class HARUtil {
+public final class HARUtil {
 
     private static final Logger logger = LoggerFactory.getLogger(HARUtil.class);
 

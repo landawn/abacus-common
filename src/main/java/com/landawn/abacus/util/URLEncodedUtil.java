@@ -231,25 +231,72 @@ public final class URLEncodedUtil {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param urlQuery 
-     * @param targetClass 
-     * @return 
+     * @param urlQuery
+     * @return
+     */
+    public static ListMultimap<String, String> decodeToMultimap(final String urlQuery) {
+        return decodeToMultimap(urlQuery, Charsets.UTF_8);
+    }
+
+    /**
+     *
+     * @param urlQuery
+     * @param charset
+     * @return
+     */
+    public static ListMultimap<String, String> decodeToMultimap(final String urlQuery, final Charset charset) {
+        final ListMultimap<String, String> result = N.newLinkedListMultimap();
+
+        if (Strings.isEmpty(urlQuery)) {
+            return result;
+        }
+
+        try (final Scanner scanner = new Scanner(urlQuery)) {
+            scanner.useDelimiter(QP_SEP_PATTERN);
+
+            String name = null;
+            String value = null;
+
+            while (scanner.hasNext()) {
+                final String token = scanner.next();
+                final int i = token.indexOf(NAME_VALUE_SEPARATOR);
+
+                if (i != -1) {
+                    name = decodeFormFields(token.substring(0, i).trim(), charset);
+                    value = decodeFormFields(token.substring(i + 1).trim(), charset);
+                } else {
+                    name = decodeFormFields(token.trim(), charset);
+                    value = null;
+                }
+
+                result.put(name, value);
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param urlQuery
+     * @param targetClass
+     * @return
      */
     public static <T> T decode(final String urlQuery, final Class<? extends T> targetClass) {
         return decode(urlQuery, Charsets.UTF_8, targetClass);
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param urlQuery 
-     * @param charset 
-     * @param targetClass 
-     * @return 
+     *
+     * @param <T>
+     * @param urlQuery
+     * @param charset
+     * @param targetClass
+     * @return
      */
     public static <T> T decode(final String urlQuery, final Charset charset, final Class<? extends T> targetClass) {
         final BeanInfo beanInfo = ParserUtil.getBeanInfo(targetClass);
@@ -297,10 +344,10 @@ public final class URLEncodedUtil {
     /**
      * Parameters 2 bean.
      *
-     * @param <T> 
-     * @param parameters 
-     * @param targetClass 
-     * @return 
+     * @param <T>
+     * @param parameters
+     * @param targetClass
+     * @return
      */
     public static <T> T parameters2Bean(final Map<String, String[]> parameters, final Class<? extends T> targetClass) {
         final BeanInfo beanInfo = ParserUtil.getBeanInfo(targetClass);
@@ -440,12 +487,12 @@ public final class URLEncodedUtil {
     }
 
     /**
-     * 
      *
-     * @param output 
-     * @param parameters 
-     * @param charset 
-     * @param namingPolicy 
+     *
+     * @param output
+     * @param parameters
+     * @param charset
+     * @param namingPolicy
      */
     @SuppressWarnings("rawtypes")
     public static void encode(final StringBuilder output, final Object parameters, final Charset charset, final NamingPolicy namingPolicy) {

@@ -97,7 +97,7 @@ public interface KeyedObjectPool<K, E extends Poolable> extends Pool {
      * @param <K> the key type
      * @param <E>
      */
-    public interface MemoryMeasure<K, E> {
+    interface MemoryMeasure<K, E> {
 
         /**
          *

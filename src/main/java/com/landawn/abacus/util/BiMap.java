@@ -394,7 +394,7 @@ public final class BiMap<K, V> implements Map<K, V> {
      */
     private V put(final K key, final V value, final boolean isForce) {
         if ((key == null) || (value == null)) {
-            throw new NullPointerException("key or value can't be null");
+            throw new IllegalArgumentException("key or value can't be null");
         } else if (!isForce && valueMap.containsKey(value)) {
             throw new IllegalArgumentException("Value already exists: " + value);
         }

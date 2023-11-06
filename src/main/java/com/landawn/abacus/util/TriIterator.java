@@ -544,7 +544,7 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      */
     @Override
     @Deprecated
-    public void forEachRemaining(java.util.function.Consumer<? super Triple<A, B, C>> action) {
+    public void forEachRemaining(Consumer<? super Triple<A, B, C>> action) {
         super.forEachRemaining(action);
     }
 
@@ -707,7 +707,7 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
 
         return new TriIterator<>() {
             private final Triple<A, B, C> next = new Triple<>();
-            private final Throwables.TriConsumer<A, B, C, RuntimeException> setNext = (a, b, c) -> next.set(a, b, c);
+            private final Throwables.TriConsumer<A, B, C, RuntimeException> setNext = next::set;
 
             private boolean hasNext = false;
 
@@ -822,7 +822,7 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
     public Optional<Triple<A, B, C>> last() {
         if (hasNext()) {
             final Triple<A, B, C> next = new Triple<>();
-            final Throwables.TriConsumer<A, B, C, RuntimeException> setNext = (a, b, c) -> next.set(a, b, c);
+            final Throwables.TriConsumer<A, B, C, RuntimeException> setNext = next::set;
 
             forEachRemaining(setNext);
 

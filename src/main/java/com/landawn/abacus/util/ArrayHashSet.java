@@ -35,25 +35,25 @@ public class ArrayHashSet<E> implements Set<E> {
     private final Set<Wrapper<E>> set;
 
     /**
-     * 
+     *
      */
     public ArrayHashSet() {
         this.set = N.newHashSet();
     }
 
     /**
-     * 
      *
-     * @param initialCapacity 
+     *
+     * @param initialCapacity
      */
     public ArrayHashSet(final int initialCapacity) {
         this.set = N.newHashSet(initialCapacity);
     }
 
     /**
-     * 
      *
-     * @param setType 
+     *
+     * @param setType
      */
     @SuppressWarnings("rawtypes")
     public ArrayHashSet(final Class<? extends Set> setType) {
@@ -61,9 +61,9 @@ public class ArrayHashSet<E> implements Set<E> {
     }
 
     /**
-     * 
      *
-     * @param coll 
+     *
+     * @param coll
      */
     public ArrayHashSet(final Collection<? extends E> coll) {
         if (N.isEmpty(coll)) {
@@ -198,9 +198,9 @@ public class ArrayHashSet<E> implements Set<E> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public Iterator<E> iterator() {
@@ -208,9 +208,9 @@ public class ArrayHashSet<E> implements Set<E> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public Object[] toArray() {
@@ -255,9 +255,9 @@ public class ArrayHashSet<E> implements Set<E> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public int size() {
@@ -283,9 +283,9 @@ public class ArrayHashSet<E> implements Set<E> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public int hashCode() {
@@ -303,9 +303,9 @@ public class ArrayHashSet<E> implements Set<E> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public String toString() {

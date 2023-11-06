@@ -55,9 +55,9 @@ public class MapType<K, V, T extends Map<K, V>> extends AbstractType<T> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public String declaringName() {
@@ -65,9 +65,9 @@ public class MapType<K, V, T extends Map<K, V>> extends AbstractType<T> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public Class<T> clazz() {
@@ -149,7 +149,7 @@ public class MapType<K, V, T extends Map<K, V>> extends AbstractType<T> {
     @Override
     public T valueOf(String str) {
         if (str == null) {
-            return null;
+            return null; // NOSONAR
         } else if (str.length() == 0 || "{}".equals(str)) {
             return (T) N.newMap(typeClass);
         } else {

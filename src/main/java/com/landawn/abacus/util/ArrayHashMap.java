@@ -36,25 +36,25 @@ public class ArrayHashMap<K, V> implements Map<K, V> {
     private final Map<Wrapper<K>, V> map;
 
     /**
-     * 
+     *
      */
     public ArrayHashMap() {
         map = new HashMap<>();
     }
 
     /**
-     * 
      *
-     * @param initialCapacity 
+     *
+     * @param initialCapacity
      */
     public ArrayHashMap(final int initialCapacity) {
         map = new HashMap<>(initialCapacity);
     }
 
     /**
-     * 
      *
-     * @param mapType 
+     *
+     * @param mapType
      */
     @SuppressWarnings("rawtypes")
     public ArrayHashMap(final Class<? extends Map> mapType) {
@@ -76,9 +76,9 @@ public class ArrayHashMap<K, V> implements Map<K, V> {
     }
 
     /**
-     * 
      *
-     * @param m 
+     *
+     * @param m
      */
     public ArrayHashMap(final Map<? extends K, ? extends V> m) {
         if (N.isEmpty(m)) {
@@ -116,7 +116,7 @@ public class ArrayHashMap<K, V> implements Map<K, V> {
      * @param m
      */
     @Override
-    public void putAll(Map<? extends K, ? extends V> m) {
+    public final void putAll(Map<? extends K, ? extends V> m) {
         if (N.isEmpty(m)) {
             return;
         }
@@ -157,9 +157,9 @@ public class ArrayHashMap<K, V> implements Map<K, V> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public Set<K> keySet() {
@@ -167,9 +167,9 @@ public class ArrayHashMap<K, V> implements Map<K, V> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public Collection<V> values() {
@@ -177,19 +177,19 @@ public class ArrayHashMap<K, V> implements Map<K, V> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
-    public Set<java.util.Map.Entry<K, V>> entrySet() {
+    public Set<Map.Entry<K, V>> entrySet() {
         return new ArrayEntrySet<>(map.entrySet());
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public int size() {
@@ -215,9 +215,9 @@ public class ArrayHashMap<K, V> implements Map<K, V> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public int hashCode() {
@@ -235,9 +235,9 @@ public class ArrayHashMap<K, V> implements Map<K, V> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public String toString() {
@@ -270,7 +270,7 @@ public class ArrayHashMap<K, V> implements Map<K, V> {
          * @return
          */
         @Override
-        public boolean add(java.util.Map.Entry<K, V> e) {
+        public boolean add(Map.Entry<K, V> e) {
             throw new UnsupportedOperationException();
         }
 
@@ -281,7 +281,7 @@ public class ArrayHashMap<K, V> implements Map<K, V> {
          * @return
          */
         @Override
-        public boolean addAll(Collection<? extends java.util.Map.Entry<K, V>> c) {
+        public boolean addAll(Collection<? extends Map.Entry<K, V>> c) {
             throw new UnsupportedOperationException();
         }
 
@@ -347,7 +347,7 @@ public class ArrayHashMap<K, V> implements Map<K, V> {
          * @return
          */
         @Override
-        public Iterator<java.util.Map.Entry<K, V>> iterator() {
+        public Iterator<Map.Entry<K, V>> iterator() {
             return new ArrayEntryIterator<>(set.iterator());
         }
 
@@ -459,7 +459,7 @@ public class ArrayHashMap<K, V> implements Map<K, V> {
      * @param <K> the key type
      * @param <V> the value type
      */
-    static class ArrayEntryIterator<K, V> implements Iterator<java.util.Map.Entry<K, V>> {
+    static class ArrayEntryIterator<K, V> implements Iterator<Map.Entry<K, V>> {
 
         /** The it. */
         private final Iterator<Map.Entry<Wrapper<K>, V>> it;
@@ -488,7 +488,7 @@ public class ArrayHashMap<K, V> implements Map<K, V> {
          * @return
          */
         @Override
-        public java.util.Map.Entry<K, V> next() {
+        public Map.Entry<K, V> next() {
             return new ArrayEntry<>(it.next());
         }
 

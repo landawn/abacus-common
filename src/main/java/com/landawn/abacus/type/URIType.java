@@ -36,9 +36,9 @@ public class URIType extends AbstractType<URI> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public Class<URI> clazz() {
@@ -66,7 +66,7 @@ public class URIType extends AbstractType<URI> {
             return null;
         }
 
-        return java.net.URI.create(str);
+        return java.net.URI.create(str); // NOSONAR
     }
 
     /**

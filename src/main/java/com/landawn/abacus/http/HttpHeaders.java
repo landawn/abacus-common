@@ -531,12 +531,57 @@ public final class HttpHeaders {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public static HttpHeaders create() {
         return new HttpHeaders();
+    }
+
+    /**
+     *
+     * @param name
+     * @param value
+     * @return
+     */
+    public static HttpHeaders of(final String name, final Object value) {
+        N.checkArgNotNull(name, "name");
+
+        return create().set(name, value);
+    }
+
+    /**
+     *
+     * @param name1
+     * @param value1
+     * @param name2
+     * @param value2
+     * @return
+     */
+    public static HttpHeaders of(final String name1, final Object value1, final String name2, final Object value2) {
+        N.checkArgNotNull(name1, "name1");
+        N.checkArgNotNull(name2, "name2");
+
+        return create().set(name1, value1).set(name2, value2);
+    }
+
+    /**
+     *
+     * @param name1
+     * @param value1
+     * @param name2
+     * @param value2
+     * @param name3
+     * @param value3
+     * @return
+     */
+    public static HttpHeaders of(final String name1, final Object value1, final String name2, final Object value2, final String name3, final Object value3) {
+        N.checkArgNotNull(name1, "name1");
+        N.checkArgNotNull(name2, "name2");
+        N.checkArgNotNull(name3, "name3");
+
+        return create().set(name1, value1).set(name2, value2).set(name3, value3);
     }
 
     /**
@@ -558,14 +603,16 @@ public final class HttpHeaders {
     public static HttpHeaders copyOf(final Map<String, ?> headers) {
         N.checkArgNotNull(headers);
 
-        return new HttpHeaders(new HashMap<>(headers));
+        final Map<String, Object> copyMap = N.newMap(headers.getClass(), headers.size());
+
+        return new HttpHeaders(copyMap).setAll(headers);
     }
 
     /**
-     * 
      *
-     * @param headerValue 
-     * @return 
+     *
+     * @param headerValue
+     * @return
      */
     public static String valueOf(final Object headerValue) {
         if (headerValue instanceof String) {
@@ -575,69 +622,10 @@ public final class HttpHeaders {
         } else if (headerValue instanceof Date) {
             return HttpDate.format((Date) headerValue);
         } else if (headerValue instanceof Instant) {
-            return HttpDate.format(new Date(((Instant) headerValue).toEpochMilli()));
+            return HttpDate.format(new Date(((Instant) headerValue).toEpochMilli())); // NOSONAR
         } else {
             return N.stringOf(headerValue);
         }
-    }
-
-    /**
-     *
-     * @param value
-     * @return
-     */
-    public HttpHeaders setAccept(String value) {
-        set(Names.ACCEPT, value);
-
-        return this;
-    }
-
-    /**
-     * Sets the accept encoding.
-     *
-     * @param acceptEncoding
-     * @return
-     */
-    public HttpHeaders setAcceptEncoding(String acceptEncoding) {
-        set(Names.ACCEPT_ENCODING, acceptEncoding);
-
-        return this;
-    }
-
-    /**
-     * Sets the accept charset.
-     *
-     * @param acceptCharset
-     * @return
-     */
-    public HttpHeaders setAcceptCharset(String acceptCharset) {
-        set(Names.ACCEPT_CHARSET, acceptCharset);
-
-        return this;
-    }
-
-    /**
-     * Sets the accept language.
-     *
-     * @param acceptLanguage
-     * @return
-     */
-    public HttpHeaders setAcceptLanguage(String acceptLanguage) {
-        set(Names.ACCEPT_LANGUAGE, acceptLanguage);
-
-        return this;
-    }
-
-    /**
-     * Sets the accept ranges.
-     *
-     * @param acceptRanges
-     * @return
-     */
-    public HttpHeaders setAcceptRanges(String acceptRanges) {
-        set(Names.ACCEPT_RANGES, acceptRanges);
-
-        return this;
     }
 
     /**
@@ -784,6 +772,65 @@ public final class HttpHeaders {
 
     /**
      *
+     * @param value
+     * @return
+     */
+    public HttpHeaders setAccept(String value) {
+        set(Names.ACCEPT, value);
+
+        return this;
+    }
+
+    /**
+     * Sets the accept encoding.
+     *
+     * @param acceptEncoding
+     * @return
+     */
+    public HttpHeaders setAcceptEncoding(String acceptEncoding) {
+        set(Names.ACCEPT_ENCODING, acceptEncoding);
+
+        return this;
+    }
+
+    /**
+     * Sets the accept charset.
+     *
+     * @param acceptCharset
+     * @return
+     */
+    public HttpHeaders setAcceptCharset(String acceptCharset) {
+        set(Names.ACCEPT_CHARSET, acceptCharset);
+
+        return this;
+    }
+
+    /**
+     * Sets the accept language.
+     *
+     * @param acceptLanguage
+     * @return
+     */
+    public HttpHeaders setAcceptLanguage(String acceptLanguage) {
+        set(Names.ACCEPT_LANGUAGE, acceptLanguage);
+
+        return this;
+    }
+
+    /**
+     * Sets the accept ranges.
+     *
+     * @param acceptRanges
+     * @return
+     */
+    public HttpHeaders setAcceptRanges(String acceptRanges) {
+        set(Names.ACCEPT_RANGES, acceptRanges);
+
+        return this;
+    }
+
+    /**
+     *
      * @param name
      * @param value
      * @return
@@ -858,27 +905,29 @@ public final class HttpHeaders {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public Map<String, Object> toMap() {
         return map instanceof LinkedHashMap || map instanceof SortedMap ? new LinkedHashMap<>(map) : new HashMap<>(map);
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public HttpHeaders copy() {
-        return new HttpHeaders().setAll(this.map);
+        final Map<String, Object> copyMap = N.newMap(this.map.getClass(), this.map.size());
+
+        return new HttpHeaders(copyMap).setAll(this.map);
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public int hashCode() {
@@ -896,9 +945,9 @@ public final class HttpHeaders {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public String toString() {

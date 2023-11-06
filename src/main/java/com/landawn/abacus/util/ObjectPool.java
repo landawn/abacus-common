@@ -50,12 +50,12 @@ public final class ObjectPool<K, V> extends AbstractMap<K, V> {
 
     private transient Collection<V> _values = null; //NOSONAR
 
-    private transient Set<java.util.Map.Entry<K, V>> _entrySet; //NOSONAR
+    private transient Set<Map.Entry<K, V>> _entrySet; //NOSONAR
 
     /**
-     * 
      *
-     * @param capacity 
+     *
+     * @param capacity
      */
     @SuppressWarnings("unchecked")
     public ObjectPool(int capacity) {
@@ -98,7 +98,7 @@ public final class ObjectPool<K, V> extends AbstractMap<K, V> {
 
     private V internalPut(K key, V value) {
         if ((key == null) || (value == null)) {
-            throw new NullPointerException();
+            throw new IllegalArgumentException();
         }
 
         final int hash = hash(key);
@@ -231,9 +231,9 @@ public final class ObjectPool<K, V> extends AbstractMap<K, V> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public Set<K> keySet() {
@@ -261,9 +261,9 @@ public final class ObjectPool<K, V> extends AbstractMap<K, V> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public Collection<V> values() {
@@ -295,13 +295,13 @@ public final class ObjectPool<K, V> extends AbstractMap<K, V> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
-    public Set<java.util.Map.Entry<K, V>> entrySet() {
-        Set<java.util.Map.Entry<K, V>> tmp = _entrySet;
+    public Set<Map.Entry<K, V>> entrySet() {
+        Set<Map.Entry<K, V>> tmp = _entrySet;
 
         if (tmp == null) {
             synchronized (table) {
@@ -325,9 +325,9 @@ public final class ObjectPool<K, V> extends AbstractMap<K, V> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public int size() {

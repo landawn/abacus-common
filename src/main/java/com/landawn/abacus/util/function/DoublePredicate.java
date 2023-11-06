@@ -28,31 +28,31 @@ public interface DoublePredicate extends Throwables.DoublePredicate<RuntimeExcep
 
     DoublePredicate ALWAYS_FALSE = value -> false;
 
-    DoublePredicate IS_ZERO = value -> value == 0;
+    DoublePredicate IS_ZERO = value -> N.equals(value, 0);
 
-    DoublePredicate NOT_ZERO = value -> value != 0;
+    DoublePredicate NOT_ZERO = value -> N.compare(value, 0) != 0;
 
-    DoublePredicate IS_POSITIVE = value -> value > 0;
+    DoublePredicate IS_POSITIVE = value -> N.compare(value, 0) > 0;
 
-    DoublePredicate NOT_POSITIVE = value -> value <= 0;
+    DoublePredicate NOT_POSITIVE = value -> N.compare(value, 0) <= 0;
 
-    DoublePredicate IS_NEGATIVE = value -> value < 0;
+    DoublePredicate IS_NEGATIVE = value -> N.compare(value, 0) < 0;
 
-    DoublePredicate NOT_NEGATIVE = value -> value >= 0;
+    DoublePredicate NOT_NEGATIVE = value -> N.compare(value, 0) >= 0;
 
     /**
-     * 
      *
-     * @param value 
-     * @return 
+     *
+     * @param value
+     * @return
      */
     @Override
     boolean test(double value);
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     default DoublePredicate negate() {
@@ -60,10 +60,10 @@ public interface DoublePredicate extends Throwables.DoublePredicate<RuntimeExcep
     }
 
     /**
-     * 
      *
-     * @param other 
-     * @return 
+     *
+     * @param other
+     * @return
      */
     @Override
     default DoublePredicate and(java.util.function.DoublePredicate other) {
@@ -72,10 +72,10 @@ public interface DoublePredicate extends Throwables.DoublePredicate<RuntimeExcep
     }
 
     /**
-     * 
      *
-     * @param other 
-     * @return 
+     *
+     * @param other
+     * @return
      */
     @Override
     default DoublePredicate or(java.util.function.DoublePredicate other) {
@@ -86,8 +86,8 @@ public interface DoublePredicate extends Throwables.DoublePredicate<RuntimeExcep
     /**
      * Returns the specified instance.
      *
-     * @param predicate 
-     * @return 
+     * @param predicate
+     * @return
      */
     static DoublePredicate of(final DoublePredicate predicate) {
         N.checkArgNotNull(predicate);
@@ -96,71 +96,71 @@ public interface DoublePredicate extends Throwables.DoublePredicate<RuntimeExcep
     }
 
     /**
-     * 
      *
-     * @param targetDouble 
-     * @return 
+     *
+     * @param targetDouble
+     * @return
      */
-    static DoublePredicate equal(double targetDouble) { //NOSONAR
-        return value -> value == targetDouble;
+    static DoublePredicate equal(double targetDouble) { // NOSONAR
+        return value -> N.equals(value, targetDouble);
     }
 
     /**
-     * 
      *
-     * @param targetDouble 
-     * @return 
+     *
+     * @param targetDouble
+     * @return
      */
     static DoublePredicate notEqual(double targetDouble) {
-        return value -> value != targetDouble;
+        return value -> N.compare(value, targetDouble) != 0;
     }
 
     /**
-     * 
      *
-     * @param targetDouble 
-     * @return 
+     *
+     * @param targetDouble
+     * @return
      */
     static DoublePredicate greaterThan(double targetDouble) {
         return value -> N.compare(value, targetDouble) > 0;
     }
 
     /**
-     * 
      *
-     * @param targetDouble 
-     * @return 
+     *
+     * @param targetDouble
+     * @return
      */
     static DoublePredicate greaterEqual(double targetDouble) {
         return value -> N.compare(value, targetDouble) >= 0;
     }
 
     /**
-     * 
      *
-     * @param targetDouble 
-     * @return 
+     *
+     * @param targetDouble
+     * @return
      */
     static DoublePredicate lessThan(double targetDouble) {
         return value -> N.compare(value, targetDouble) < 0;
     }
 
     /**
-     * 
      *
-     * @param targetDouble 
-     * @return 
+     *
+     * @param targetDouble
+     * @return
      */
     static DoublePredicate lessEqual(double targetDouble) {
         return value -> N.compare(value, targetDouble) <= 0;
     }
 
     /**
-     * 
      *
-     * @param minValue 
-     * @param maxValue 
-     * @return 
+     *
+     * @param minValue
+     * @param maxValue
+     * @return
      */
     static DoublePredicate between(double minValue, double maxValue) {
         return value -> N.compare(value, minValue) > 0 && N.compare(value, maxValue) < 0;

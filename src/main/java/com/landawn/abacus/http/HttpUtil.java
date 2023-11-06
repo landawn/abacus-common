@@ -220,21 +220,21 @@ public final class HttpUtil {
     }
 
     /**
-     * 
      *
-     * @param code 
-     * @return 
+     *
+     * @param code
+     * @return
      */
     public static boolean isSuccessfulResponseCode(int code) {
         return code >= 200 && code < 300;
     }
 
     /**
-     * 
      *
-     * @param key 
-     * @param value 
-     * @return 
+     *
+     * @param key
+     * @param value
+     * @return
      */
     public static boolean isValidHttpHeader(String key, String value) {
         if (Strings.isEmpty(key) || key.indexOf(HttpHeaders.LF) >= 0 || key.indexOf(':') >= 0) {
@@ -266,10 +266,10 @@ public final class HttpUtil {
     }
 
     /**
-     * 
      *
-     * @param value 
-     * @return 
+     *
+     * @param value
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static String readHttpHeadValue(Object value) {
@@ -293,10 +293,10 @@ public final class HttpUtil {
     }
 
     /**
-     * 
      *
-     * @param httpHeaders 
-     * @return 
+     *
+     * @param httpHeaders
+     * @return
      */
     public static String getContentType(final Map<String, ?> httpHeaders) {
         if (httpHeaders == null) {
@@ -313,10 +313,10 @@ public final class HttpUtil {
     }
 
     /**
-     * 
      *
-     * @param httpHeaders 
-     * @return 
+     *
+     * @param httpHeaders
+     * @return
      */
     public static String getContentType(final HttpHeaders httpHeaders) {
         if (httpHeaders == null) {
@@ -333,10 +333,10 @@ public final class HttpUtil {
     }
 
     /**
-     * 
      *
-     * @param httpSettings 
-     * @return 
+     *
+     * @param httpSettings
+     * @return
      */
     public static String getContentType(final HttpSettings httpSettings) {
         if (httpSettings == null || httpSettings.headers() == null) {
@@ -347,20 +347,20 @@ public final class HttpUtil {
     }
 
     /**
-     * 
      *
-     * @param connection 
-     * @return 
+     *
+     * @param connection
+     * @return
      */
     public static String getContentType(final HttpURLConnection connection) {
         return getContentType(connection.getHeaderFields());
     }
 
     /**
-     * 
      *
-     * @param httpHeaders 
-     * @return 
+     *
+     * @param httpHeaders
+     * @return
      */
     public static String getContentEncoding(final Map<String, ?> httpHeaders) {
         if (httpHeaders == null) {
@@ -377,10 +377,10 @@ public final class HttpUtil {
     }
 
     /**
-     * 
      *
-     * @param httpHeaders 
-     * @return 
+     *
+     * @param httpHeaders
+     * @return
      */
     public static String getContentEncoding(final HttpHeaders httpHeaders) {
         if (httpHeaders == null) {
@@ -397,10 +397,10 @@ public final class HttpUtil {
     }
 
     /**
-     * 
      *
-     * @param httpSettings 
-     * @return 
+     *
+     * @param httpSettings
+     * @return
      */
     public static String getContentEncoding(final HttpSettings httpSettings) {
         if (httpSettings == null || httpSettings.headers() == null) {
@@ -411,20 +411,20 @@ public final class HttpUtil {
     }
 
     /**
-     * 
      *
-     * @param connection 
-     * @return 
+     *
+     * @param connection
+     * @return
      */
     public static String getContentEncoding(final HttpURLConnection connection) {
         return getContentEncoding(connection.getHeaderFields());
     }
 
     /**
-     * 
      *
-     * @param httpHeaders 
-     * @return 
+     *
+     * @param httpHeaders
+     * @return
      */
     public static String getAccept(final Map<String, ?> httpHeaders) {
         if (httpHeaders == null) {
@@ -441,10 +441,10 @@ public final class HttpUtil {
     }
 
     /**
-     * 
      *
-     * @param httpHeaders 
-     * @return 
+     *
+     * @param httpHeaders
+     * @return
      */
     public static String getAccept(final HttpHeaders httpHeaders) {
         if (httpHeaders == null) {
@@ -461,10 +461,10 @@ public final class HttpUtil {
     }
 
     /**
-     * 
      *
-     * @param httpSettings 
-     * @return 
+     *
+     * @param httpSettings
+     * @return
      */
     public static String getAccept(final HttpSettings httpSettings) {
         if (httpSettings == null || httpSettings.headers() == null) {
@@ -475,20 +475,20 @@ public final class HttpUtil {
     }
 
     /**
-     * 
      *
-     * @param connection 
-     * @return 
+     *
+     * @param connection
+     * @return
      */
     public static String getAccept(final HttpURLConnection connection) {
         return getAccept(connection.getHeaderFields());
     }
 
     /**
-     * 
      *
-     * @param httpHeaders 
-     * @return 
+     *
+     * @param httpHeaders
+     * @return
      */
     public static String getAcceptEncoding(final Map<String, ?> httpHeaders) {
         if (httpHeaders == null) {
@@ -505,10 +505,10 @@ public final class HttpUtil {
     }
 
     /**
-     * 
      *
-     * @param httpHeaders 
-     * @return 
+     *
+     * @param httpHeaders
+     * @return
      */
     public static String getAcceptEncoding(final HttpHeaders httpHeaders) {
         if (httpHeaders == null) {
@@ -525,10 +525,10 @@ public final class HttpUtil {
     }
 
     /**
-     * 
      *
-     * @param httpSettings 
-     * @return 
+     *
+     * @param httpSettings
+     * @return
      */
     public static String getAcceptEncoding(final HttpSettings httpSettings) {
         if (httpSettings == null || httpSettings.headers() == null) {
@@ -539,20 +539,20 @@ public final class HttpUtil {
     }
 
     /**
-     * 
      *
-     * @param connection 
-     * @return 
+     *
+     * @param connection
+     * @return
      */
     public static String getAcceptEncoding(final HttpURLConnection connection) {
         return getAcceptEncoding(connection.getHeaderFields());
     }
 
     /**
-     * 
      *
-     * @param httpHeaders 
-     * @return 
+     *
+     * @param httpHeaders
+     * @return
      */
     public static String getAcceptCharset(final Map<String, ?> httpHeaders) {
         if (httpHeaders == null) {
@@ -569,10 +569,10 @@ public final class HttpUtil {
     }
 
     /**
-     * 
      *
-     * @param httpHeaders 
-     * @return 
+     *
+     * @param httpHeaders
+     * @return
      */
     public static String getAcceptCharset(final HttpHeaders httpHeaders) {
         if (httpHeaders == null) {
@@ -589,10 +589,10 @@ public final class HttpUtil {
     }
 
     /**
-     * 
      *
-     * @param httpSettings 
-     * @return 
+     *
+     * @param httpSettings
+     * @return
      */
     public static String getAcceptCharset(final HttpSettings httpSettings) {
         if (httpSettings == null || httpSettings.headers() == null) {
@@ -603,10 +603,10 @@ public final class HttpUtil {
     }
 
     /**
-     * 
      *
-     * @param connection 
-     * @return 
+     *
+     * @param connection
+     * @return
      */
     public static String getAcceptCharset(final HttpURLConnection connection) {
         return getAcceptCharset(connection.getHeaderFields());
@@ -716,11 +716,11 @@ public final class HttpUtil {
     }
 
     /**
-     * 
      *
-     * @param respHeaders 
-     * @param requestContentFormat 
-     * @return 
+     *
+     * @param respHeaders
+     * @param requestContentFormat
+     * @return
      */
     public static ContentFormat getResponseContentFormat(final Map<String, ?> respHeaders, final ContentFormat requestContentFormat) {
         String contentType = getContentType(respHeaders);
@@ -826,7 +826,7 @@ public final class HttpUtil {
      * @return
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    public static OutputStream getOutputStream(final HttpURLConnection connection, final ContentFormat contentFormat, String contentType,
+    public static OutputStream getOutputStream(final HttpURLConnection connection, final ContentFormat contentFormat, String contentType, // NOSONAR
             String contentEncoding) throws IOException {
 
         if (Strings.isEmpty(contentType) && contentFormat != null) {
@@ -880,42 +880,42 @@ public final class HttpUtil {
     }
 
     /**
-     * 
      *
-     * @param headers 
-     * @return 
+     *
+     * @param headers
+     * @return
      */
     public static Charset getRequestCharset(final HttpHeaders headers) {
         return getCharset(getContentType(headers), HttpUtil.DEFAULT_CHARSET);
     }
 
     /**
-     * 
      *
-     * @param headers 
-     * @param requestCharset 
-     * @return 
+     *
+     * @param headers
+     * @param requestCharset
+     * @return
      */
     public static Charset getResponseCharset(Map<String, ?> headers, final Charset requestCharset) {
         return getCharset(getContentType(headers), requestCharset);
     }
 
     /**
-     * 
      *
-     * @param contentType 
-     * @return 
+     *
+     * @param contentType
+     * @return
      */
     public static Charset getCharset(String contentType) {
         return getCharset(contentType, DEFAULT_CHARSET);
     }
 
     /**
-     * 
      *
-     * @param contentType 
-     * @param defaultIfNull 
-     * @return 
+     *
+     * @param contentType
+     * @param defaultIfNull
+     * @return
      */
     public static Charset getCharset(final String contentType, final Charset defaultIfNull) {
         if (Strings.isEmpty(contentType)) {
@@ -944,8 +944,8 @@ public final class HttpUtil {
         // Create a trust manager that does not validate certificate chains
         final TrustManager[] trustAllCerts = { new X509TrustManager() {
             @Override
-            public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-                return null;
+            public X509Certificate[] getAcceptedIssuers() {
+                return null; // NOSONAR
             }
 
             @Override
@@ -1031,8 +1031,8 @@ public final class HttpUtil {
         /**
          *  Returns the date for {@code value}. Returns null if the value couldn't be parsed.
          *
-         * @param value 
-         * @return 
+         * @param value
+         * @return
          */
         public static Date parse(String value) {
             if (value.length() == 0) {
@@ -1074,8 +1074,8 @@ public final class HttpUtil {
         /**
          *  Returns the string for {@code value}.
          *
-         * @param value 
-         * @return 
+         * @param value
+         * @return
          */
         public static String format(Date value) {
             return STANDARD_DATE_FORMAT.get().format(value);

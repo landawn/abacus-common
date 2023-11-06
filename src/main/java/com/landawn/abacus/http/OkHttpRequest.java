@@ -57,6 +57,7 @@ import okhttp3.internal.Util;
 /**
  * Note: This class contains the codes and docs copied from OkHttp: https://square.github.io/okhttp/ under Apache License v2.
  *
+ * @see URLEncodedUtil
  * @since 1.3
  */
 public final class OkHttpRequest {
@@ -709,7 +710,9 @@ public final class OkHttpRequest {
 
                 final InputStream is = HttpUtil.wrapInputStream(resp.body().byteStream(), respContentFormat);
 
-                if (resultClass == null || resultClass.equals(String.class)) {
+                if (resultClass == null || resultClass.equals(Void.class)) {
+                    return null;
+                } else if (resultClass.equals(String.class)) {
                     return (T) IOUtil.readAllToString(is, respCharset);
                 } else if (byte[].class.equals(resultClass)) {
                     return (T) IOUtil.readAllBytes(is);

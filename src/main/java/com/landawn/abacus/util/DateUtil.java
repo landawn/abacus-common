@@ -36,6 +36,9 @@ import javax.xml.datatype.XMLGregorianCalendar;
 
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.exception.UncheckedIOException;
+import com.landawn.abacus.util.DateUtil.DateTimeUtil;
+import com.landawn.abacus.util.DateUtil.Dates;
+import com.landawn.abacus.util.DateUtil.Times;
 
 /**
  * <p>
@@ -46,7 +49,8 @@ import com.landawn.abacus.exception.UncheckedIOException;
  * @author Haiyang Li
  * @since 1.2.6
  */
-public abstract class DateUtil {
+@SuppressWarnings({ "java:S2143" })
+public abstract sealed class DateUtil permits DateTimeUtil, Dates, Times {
 
     private static final String DATE_STR = "date";
     private static final String DATE1_STR = "date1";
@@ -1657,16 +1661,13 @@ public abstract class DateUtil {
             throw new IllegalArgumentException("The amount :" + amount + " is too big for unit: " + unit);
         }
 
-        switch (unit) {
-            case MONTH:
-            case YEAR:
-                final Calendar c = createCalendar(date);
-                c.add(unit.value(), (int) amount);
+        if (unit == CalendarField.MONTH || unit == CalendarField.YEAR) {
+            final Calendar c = createCalendar(date);
+            c.add(unit.value(), (int) amount);
 
-                return createDate(date.getClass(), c.getTimeInMillis());
-
-            default:
-                return createDate(date.getClass(), date.getTime() + toMillis(unit, amount));
+            return createDate(date.getClass(), c.getTimeInMillis());
+        } else {
+            return createDate(date.getClass(), date.getTime() + toMillis(unit, amount));
         }
     }
 
@@ -3473,8 +3474,8 @@ public abstract class DateUtil {
 
         if (cls.equals(java.util.Date.class)) {
             result = new java.util.Date(millis);
-        } else if (cls.equals(java.sql.Date.class)) {
-            result = new java.sql.Date(millis);
+        } else if (cls.equals(java.sql.Date.class)) { // NOSONAR
+            result = new java.sql.Date(millis); // NOSONAR
         } else if (cls.equals(Time.class)) {
             result = new Time(millis);
         } else if (cls.equals(Timestamp.class)) {
@@ -3726,9 +3727,20 @@ public abstract class DateUtil {
      * The Class DateTimeUtil.
      */
     @Beta
-    public static class DateTimeUtil extends DateUtil {
+    public static final class DateTimeUtil extends DateUtil {
 
         private DateTimeUtil() {
+            // singleton.
+        }
+    }
+
+    /**
+     * The Class Dates.
+     */
+    @Beta
+    public static final class Dates extends DateUtil {
+
+        private Dates() {
             // singleton.
         }
     }
@@ -3737,21 +3749,10 @@ public abstract class DateUtil {
      * The Class Times.
      */
     @Beta
-    public static class Times extends DateUtil {
+    public static final class Times extends DateUtil {
 
         private Times() {
             // singleton.
         }
     }
-
-    //    /**
-    //     * The Class Dates.
-    //     */
-    //    @Beta
-    //    public static class Dates extends DateUtil {
-    //
-    //        private Dates() {
-    //            // singleton.
-    //        }
-    //    }
 }

@@ -40,7 +40,7 @@ import com.landawn.abacus.util.Objectory;
  */
 public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool implements KeyedObjectPool<K, E> {
 
-    private static final long serialVersionUID = 2208516321399679864L;
+    private static final long serialVersionUID = 4137548490922758243L;
 
     private final long maxMemorySize;
 
@@ -124,7 +124,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
         assertNotClosed();
 
         if (key == null || e == null) {
-            throw new NullPointerException();
+            throw new IllegalArgumentException();
         }
 
         if (e.activityPrint().isExpired()) {
@@ -313,9 +313,9 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public Set<K> keySet() {
@@ -331,9 +331,9 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public Collection<E> values() {
@@ -397,9 +397,9 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public int size() {
@@ -409,9 +409,9 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public int hashCode() {
@@ -430,9 +430,9 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public String toString() {
@@ -572,7 +572,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
      * @param os
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    private void writeObject(java.io.ObjectOutputStream os) throws java.io.IOException {
+    private void writeObject(java.io.ObjectOutputStream os) throws IOException {
         lock.lock();
 
         try {
@@ -588,7 +588,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
      * @throws IOException Signals that an I/O exception has occurred.
      * @throws ClassNotFoundException the class not found exception
      */
-    private void readObject(java.io.ObjectInputStream is) throws java.io.IOException, ClassNotFoundException {
+    private void readObject(java.io.ObjectInputStream is) throws IOException, ClassNotFoundException {
         lock.lock();
 
         try {

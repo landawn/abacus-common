@@ -179,7 +179,7 @@ public final class MapEntity implements Serializable {
      *
      * @param propNames
      */
-    public void removeAll(Collection<String> propNames) {
+    public void removeAll(Collection<String> propNames) { // NOSONAR
         for (String propName : propNames) {
             remove(propName);
         }

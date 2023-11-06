@@ -30,7 +30,7 @@ import com.landawn.abacus.util.Strings;
  * @author Haiyang Li
  * @since 0.8
  */
-@SuppressWarnings("java:S2160")
+@SuppressWarnings({ "java:S1942", "java:S2143", "java:S2160" })
 public class JUDateType extends AbstractDateType<Date> {
 
     public static final String JU_DATE = "JUDate";
@@ -46,9 +46,9 @@ public class JUDateType extends AbstractDateType<Date> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public String declaringName() {
@@ -56,9 +56,9 @@ public class JUDateType extends AbstractDateType<Date> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public Class<Date> clazz() {

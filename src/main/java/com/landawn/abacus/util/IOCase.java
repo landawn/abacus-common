@@ -138,7 +138,7 @@ enum IOCase {
      */
     public int checkCompareTo(final String str1, final String str2) {
         if (str1 == null || str2 == null) {
-            throw new NullPointerException("The strings must not be null");
+            throw new IllegalArgumentException("The strings must not be null");
         }
         return sensitive ? str1.compareTo(str2) : str1.compareToIgnoreCase(str2);
     }
@@ -156,7 +156,7 @@ enum IOCase {
      */
     public boolean checkEquals(final String str1, final String str2) {
         if (str1 == null || str2 == null) {
-            throw new NullPointerException("The strings must not be null");
+            throw new IllegalArgumentException("The strings must not be null");
         }
         return sensitive ? str1.equals(str2) : str1.equalsIgnoreCase(str2);
     }

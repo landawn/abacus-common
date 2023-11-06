@@ -29,23 +29,23 @@ public interface FloatPredicate extends Throwables.FloatPredicate<RuntimeExcepti
 
     FloatPredicate ALWAYS_FALSE = value -> false;
 
-    FloatPredicate IS_ZERO = value -> value == 0;
+    FloatPredicate IS_ZERO = value -> N.equals(value, 0);
 
-    FloatPredicate NOT_ZERO = value -> value != 0;
+    FloatPredicate NOT_ZERO = value -> N.compare(value, 0) != 0;
 
-    FloatPredicate IS_POSITIVE = value -> value > 0;
+    FloatPredicate IS_POSITIVE = value -> N.compare(value, 0) > 0;
 
-    FloatPredicate NOT_POSITIVE = value -> value <= 0;
+    FloatPredicate NOT_POSITIVE = value -> N.compare(value, 0) <= 0;
 
-    FloatPredicate IS_NEGATIVE = value -> value < 0;
+    FloatPredicate IS_NEGATIVE = value -> N.compare(value, 0) < 0;
 
-    FloatPredicate NOT_NEGATIVE = value -> value >= 0;
+    FloatPredicate NOT_NEGATIVE = value -> N.compare(value, 0) >= 0;
 
     /**
-     * 
      *
-     * @param value 
-     * @return 
+     *
+     * @param value
+     * @return
      */
     @Override
     boolean test(float value);
@@ -53,8 +53,8 @@ public interface FloatPredicate extends Throwables.FloatPredicate<RuntimeExcepti
     /**
      * Returns the specified instance.
      *
-     * @param predicate 
-     * @return 
+     * @param predicate
+     * @return
      */
     static FloatPredicate of(final FloatPredicate predicate) {
         N.checkArgNotNull(predicate);
@@ -63,19 +63,19 @@ public interface FloatPredicate extends Throwables.FloatPredicate<RuntimeExcepti
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     default FloatPredicate negate() {
         return t -> !test(t);
     }
 
     /**
-     * 
      *
-     * @param other 
-     * @return 
+     *
+     * @param other
+     * @return
      */
     default FloatPredicate and(FloatPredicate other) {
         N.checkArgNotNull(other);
@@ -84,10 +84,10 @@ public interface FloatPredicate extends Throwables.FloatPredicate<RuntimeExcepti
     }
 
     /**
-     * 
      *
-     * @param other 
-     * @return 
+     *
+     * @param other
+     * @return
      */
     default FloatPredicate or(FloatPredicate other) {
         N.checkArgNotNull(other);
@@ -96,71 +96,71 @@ public interface FloatPredicate extends Throwables.FloatPredicate<RuntimeExcepti
     }
 
     /**
-     * 
      *
-     * @param targetFloat 
-     * @return 
+     *
+     * @param targetFloat
+     * @return
      */
-    static FloatPredicate equal(float targetFloat) { //NOSONAR
-        return value -> value == targetFloat;
+    static FloatPredicate equal(float targetFloat) { // NOSONAR
+        return value -> N.equals(value, targetFloat);
     }
 
     /**
-     * 
      *
-     * @param targetFloat 
-     * @return 
+     *
+     * @param targetFloat
+     * @return
      */
     static FloatPredicate notEqual(float targetFloat) {
-        return value -> value != targetFloat;
+        return value -> N.compare(value, targetFloat) != 0;
     }
 
     /**
-     * 
      *
-     * @param targetFloat 
-     * @return 
+     *
+     * @param targetFloat
+     * @return
      */
     static FloatPredicate greaterThan(float targetFloat) {
         return value -> N.compare(value, targetFloat) > 0;
     }
 
     /**
-     * 
      *
-     * @param targetFloat 
-     * @return 
+     *
+     * @param targetFloat
+     * @return
      */
     static FloatPredicate greaterEqual(float targetFloat) {
         return value -> N.compare(value, targetFloat) >= 0;
     }
 
     /**
-     * 
      *
-     * @param targetFloat 
-     * @return 
+     *
+     * @param targetFloat
+     * @return
      */
     static FloatPredicate lessThan(float targetFloat) {
         return value -> N.compare(value, targetFloat) < 0;
     }
 
     /**
-     * 
      *
-     * @param targetFloat 
-     * @return 
+     *
+     * @param targetFloat
+     * @return
      */
     static FloatPredicate lessEqual(float targetFloat) {
         return value -> N.compare(value, targetFloat) <= 0;
     }
 
     /**
-     * 
      *
-     * @param minValue 
-     * @param maxValue 
-     * @return 
+     *
+     * @param minValue
+     * @param maxValue
+     * @return
      */
     static FloatPredicate between(float minValue, float maxValue) {
         return value -> N.compare(value, minValue) > 0 && N.compare(value, maxValue) < 0;

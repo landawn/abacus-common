@@ -26,7 +26,7 @@ abstract class AbstractJSONReader implements JSONReader { //NOSONAR
 
     static final long[] POWERS_OF_TEN = { 1L, 10L, 100L, 1_000L, 10_000L, 100_000L, 1_000_000L, 10_000_000L, 100_000_000L, 1_000_000_000L, 10_000_000_000L,
             100_000_000_000L, 1_000_000_000_000L, 10_000_000_000_000L, 100_000_000_000_000L, 1_000_000_000_000_000L, 10_000_000_000_000_000L,
-            100_000_000_000_000_000L, 1000_000_000_000_000_000L, 1_000_000_000_000_000_000L };
+            100_000_000_000_000_000L, 1_000_000_000_000_000_000L };
 
     static final String NULL = Strings.NULL_STRING;
     static final String FALSE = Boolean.FALSE.toString().intern();

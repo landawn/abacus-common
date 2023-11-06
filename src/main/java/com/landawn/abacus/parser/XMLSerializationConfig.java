@@ -38,11 +38,11 @@ public class XMLSerializationConfig extends SerializationConfig<XMLSerialization
     boolean ignoreTypeInfo = defaultIgnoreTypeInfo;
 
     /**
-     * 
+     *
      */
     public XMLSerializationConfig() {
-        setCharQuotation(WD.CHAR_ZERO);
-        setStringQuotation(WD.CHAR_ZERO);
+        setCharQuotation(WD.CHAR_ZERO); // NOSONAR
+        setStringQuotation(WD.CHAR_ZERO); // NOSONAR
     }
 
     /**
@@ -186,9 +186,9 @@ public class XMLSerializationConfig extends SerializationConfig<XMLSerialization
     //    }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public int hashCode() {
@@ -244,9 +244,9 @@ public class XMLSerializationConfig extends SerializationConfig<XMLSerialization
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public String toString() {

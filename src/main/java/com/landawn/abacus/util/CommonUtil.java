@@ -1035,7 +1035,7 @@ sealed class CommonUtil permits N {
 
         final String pkgName = pkg.getName();
 
-        return Strings.isNotEmpty(pkgName) && (pkgName.startsWith("java.") || pkgName.startsWith("com.landawn.abaus."));
+        return Strings.isNotEmpty(pkgName) && (pkgName.startsWith("java.") || pkgName.startsWith("javax.") || pkgName.startsWith("com.landawn.abaus."));
     }
 
     /**

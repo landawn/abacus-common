@@ -14,7 +14,6 @@
 package com.landawn.abacus.util;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -378,7 +377,7 @@ public final class DataSourceUtil {
         }
     }
 
-    public static int[] executeBatch(final PreparedStatement stmt) throws SQLException {
+    public static int[] executeBatch(final Statement stmt) throws SQLException {
         try {
             return stmt.executeBatch();
         } finally {

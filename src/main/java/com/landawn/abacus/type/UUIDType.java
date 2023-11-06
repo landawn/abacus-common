@@ -32,9 +32,9 @@ public class UUIDType extends AbstractType<UUID> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public Class<UUID> clazz() {
@@ -58,6 +58,6 @@ public class UUIDType extends AbstractType<UUID> {
      */
     @Override
     public UUID valueOf(String str) {
-        return Strings.isEmpty(str) ? null : java.util.UUID.fromString(str);
+        return Strings.isEmpty(str) ? null : java.util.UUID.fromString(str); // NOSONAR
     }
 }

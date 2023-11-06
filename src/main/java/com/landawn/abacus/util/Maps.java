@@ -2862,7 +2862,7 @@ public final class Maps {
     public static <M extends Map<String, Object>> M bean2Map(final M resultMap, final Object bean, final Collection<String> selectPropNames,
             NamingPolicy keyNamingPolicy) {
         keyNamingPolicy = keyNamingPolicy == null ? NamingPolicy.LOWER_CAMEL_CASE : keyNamingPolicy;
-        final boolean isLowerCamelCaseOrNoChange = NamingPolicy.LOWER_CAMEL_CASE.equals(keyNamingPolicy) || NamingPolicy.NO_CHANGE.equals(keyNamingPolicy);
+        final boolean isLowerCamelCaseOrNoChange = NamingPolicy.LOWER_CAMEL_CASE == keyNamingPolicy || NamingPolicy.NO_CHANGE == keyNamingPolicy;
         final Class<?> beanClass = bean.getClass();
         final BeanInfo beanInfo = ParserUtil.getBeanInfo(beanClass);
 
@@ -3013,7 +3013,7 @@ public final class Maps {
     public static <M extends Map<String, Object>> M bean2Map(final M resultMap, final Object bean, final boolean ignoreNullProperty,
             final Set<String> ignoredPropNames, NamingPolicy keyNamingPolicy) {
         keyNamingPolicy = keyNamingPolicy == null ? NamingPolicy.LOWER_CAMEL_CASE : keyNamingPolicy;
-        final boolean isLowerCamelCaseOrNoChange = NamingPolicy.LOWER_CAMEL_CASE.equals(keyNamingPolicy) || NamingPolicy.NO_CHANGE.equals(keyNamingPolicy);
+        final boolean isLowerCamelCaseOrNoChange = NamingPolicy.LOWER_CAMEL_CASE == keyNamingPolicy || NamingPolicy.NO_CHANGE == keyNamingPolicy;
         final boolean hasIgnoredPropNames = N.notEmpty(ignoredPropNames);
         final Class<?> beanClass = bean.getClass();
         final BeanInfo beanInfo = ParserUtil.getBeanInfo(beanClass);
@@ -3147,8 +3147,8 @@ public final class Maps {
      */
     public static <M extends Map<String, Object>> M deepBean2Map(final M resultMap, final Object bean, final Collection<String> selectPropNames,
             final NamingPolicy keyNamingPolicy) {
-        final boolean isLowerCamelCaseOrNoChange = keyNamingPolicy == null || NamingPolicy.LOWER_CAMEL_CASE.equals(keyNamingPolicy)
-                || NamingPolicy.NO_CHANGE.equals(keyNamingPolicy);
+        final boolean isLowerCamelCaseOrNoChange = keyNamingPolicy == null || NamingPolicy.LOWER_CAMEL_CASE == keyNamingPolicy
+                || NamingPolicy.NO_CHANGE == keyNamingPolicy;
 
         final Class<?> beanClass = bean.getClass();
         final BeanInfo beanInfo = ParserUtil.getBeanInfo(beanClass);
@@ -3307,8 +3307,8 @@ public final class Maps {
      */
     public static <M extends Map<String, Object>> M deepBean2Map(final M resultMap, final Object bean, final boolean ignoreNullProperty,
             final Set<String> ignoredPropNames, final NamingPolicy keyNamingPolicy) {
-        final boolean isLowerCamelCaseOrNoChange = keyNamingPolicy == null || NamingPolicy.LOWER_CAMEL_CASE.equals(keyNamingPolicy)
-                || NamingPolicy.NO_CHANGE.equals(keyNamingPolicy);
+        final boolean isLowerCamelCaseOrNoChange = keyNamingPolicy == null || NamingPolicy.LOWER_CAMEL_CASE == keyNamingPolicy
+                || NamingPolicy.NO_CHANGE == keyNamingPolicy;
 
         final boolean hasIgnoredPropNames = N.notEmpty(ignoredPropNames);
         final Class<?> beanClass = bean.getClass();
@@ -3452,7 +3452,7 @@ public final class Maps {
     public static <M extends Map<String, Object>> M bean2FlatMap(final M resultMap, final Object bean, final Collection<String> selectPropNames,
             NamingPolicy keyNamingPolicy) {
         keyNamingPolicy = keyNamingPolicy == null ? NamingPolicy.LOWER_CAMEL_CASE : keyNamingPolicy;
-        final boolean isLowerCamelCaseOrNoChange = NamingPolicy.LOWER_CAMEL_CASE.equals(keyNamingPolicy) || NamingPolicy.NO_CHANGE.equals(keyNamingPolicy);
+        final boolean isLowerCamelCaseOrNoChange = NamingPolicy.LOWER_CAMEL_CASE == keyNamingPolicy || NamingPolicy.NO_CHANGE == keyNamingPolicy;
         final Class<?> beanClass = bean.getClass();
         final BeanInfo beanInfo = ParserUtil.getBeanInfo(beanClass);
 
@@ -3611,8 +3611,8 @@ public final class Maps {
 
     static <T extends Map<String, Object>> T bean2FlatMap(final T resultMap, final Object bean, final boolean ignoreNullProperty,
             final Collection<String> ignoredPropNames, final NamingPolicy keyNamingPolicy, final String parentPropName) {
-        final boolean isLowerCamelCaseOrNoChange = keyNamingPolicy == null || NamingPolicy.LOWER_CAMEL_CASE.equals(keyNamingPolicy)
-                || NamingPolicy.NO_CHANGE.equals(keyNamingPolicy);
+        final boolean isLowerCamelCaseOrNoChange = keyNamingPolicy == null || NamingPolicy.LOWER_CAMEL_CASE == keyNamingPolicy
+                || NamingPolicy.NO_CHANGE == keyNamingPolicy;
 
         final boolean hasIgnoredPropNames = N.notEmpty(ignoredPropNames);
         final boolean isNullParentPropName = (parentPropName == null);

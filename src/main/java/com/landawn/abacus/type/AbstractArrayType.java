@@ -63,7 +63,7 @@ public abstract class AbstractArrayType<T> extends AbstractType<T> {
     @Override
     public <E> Collection<E> array2Collection(Class<?> collClass, T x) {
         if (x == null) {
-            return null;
+            return null; // NOSONAR
         }
 
         @SuppressWarnings("rawtypes")
@@ -78,7 +78,7 @@ public abstract class AbstractArrayType<T> extends AbstractType<T> {
      * @return
      */
     protected static String[] split(String str) {
-        String[] strs = str.split(ELEMENT_SEPARATOR);
+        String[] strs = str.split(ELEMENT_SEPARATOR); // NOSONAR
 
         if ((strs.length == 1) && (str.indexOf(WD._COMMA) >= 0)) {
             strs = str.split(WD.COMMA);

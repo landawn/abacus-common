@@ -592,7 +592,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
      */
     @Override
     @Deprecated
-    public void forEachRemaining(java.util.function.Consumer<? super Pair<A, B>> action) {
+    public void forEachRemaining(Consumer<? super Pair<A, B>> action) {
         super.forEachRemaining(action);
     }
 
@@ -753,7 +753,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
 
         return new BiIterator<>() {
             private final Pair<A, B> next = new Pair<>();
-            private final Throwables.BiConsumer<A, B, RuntimeException> setNext = (a, b) -> next.set(a, b);
+            private final Throwables.BiConsumer<A, B, RuntimeException> setNext = next::set;
 
             private boolean hasNext = false;
 
@@ -867,7 +867,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
     public Optional<Pair<A, B>> last() {
         if (hasNext()) {
             final Pair<A, B> next = new Pair<>();
-            final Throwables.BiConsumer<A, B, RuntimeException> setNext = (a, b) -> next.set(a, b);
+            final Throwables.BiConsumer<A, B, RuntimeException> setNext = next::set;
 
             forEachRemaining(setNext);
 

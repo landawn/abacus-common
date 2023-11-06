@@ -34,6 +34,7 @@ import com.landawn.abacus.annotation.NullSafe;
  *
  * @see com.landawn.abacus.util.N
  */
+@SuppressWarnings({ "java:S1168" })
 public class Array {
     static final int CPU_CORES = Runtime.getRuntime().availableProcessors();
 
@@ -1535,12 +1536,14 @@ public class Array {
      * @param element
      * @param n
      * @return
-     * @throws NullPointerException if the specified {@code element} is null.
+     * @throws IllegalArgumentException if the specified {@code element} is null.
      * @see Array#repeat(Object, int, Class)
      * @deprecated prefer to {@link Array#repeat(Object, int, Class)} because this method throws NullPointerException when element is {@code null}
      */
     @Deprecated
-    public static <T> T[] repeat(final T element, final int n) throws NullPointerException {
+    public static <T> T[] repeat(final T element, final int n) throws IllegalArgumentException {
+        N.checkArgNotNull(element, "element");
+
         final T[] a = N.newArray(element.getClass(), n);
         N.fill(a, element);
         return a;
@@ -1570,9 +1573,8 @@ public class Array {
      * @param n
      * @param elementClass
      * @return
-     * @throws NullPointerException
      */
-    public static <T> T[] repeat(final T element, final int n, final Class<? extends T> elementClass) throws NullPointerException {
+    public static <T> T[] repeat(final T element, final int n, final Class<? extends T> elementClass) {
         final T[] a = N.newArray(elementClass, n);
         N.fill(a, element);
         return a;

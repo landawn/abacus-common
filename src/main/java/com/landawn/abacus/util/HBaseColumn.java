@@ -65,34 +65,28 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
         emptyColumnPool.put(String.class, EMPTY_OBJECT_COLUMN);
     }
 
-    public static final Comparator<HBaseColumn<?>> DESC_HBASE_COLUMN_COMPARATOR = new Comparator<>() {
-        @Override
-        public int compare(HBaseColumn<?> o1, HBaseColumn<?> o2) {
-            return o2.version > o1.version ? 1 : o2.version == o1.version ? 0 : -1; // Long.compare(o2.version, o1.version);
-        }
-    };
+    public static final Comparator<HBaseColumn<?>> DESC_HBASE_COLUMN_COMPARATOR = (o1, o2) -> Long.compare(o2.version, o1.version);
 
-    public static final Comparator<Long> DESC_HBASE_VERSION_COMPARATOR = (o1, o2) -> o2.longValue() > o1.longValue() ? 1
-            : o2.longValue() == o1.longValue() ? 0 : -1;
+    public static final Comparator<Long> DESC_HBASE_VERSION_COMPARATOR = (o1, o2) -> Long.compare(o2.longValue(), o1.longValue());
 
     private final T value;
 
     private final long version;
 
     /**
-     * 
      *
-     * @param value 
+     *
+     * @param value
      */
     public HBaseColumn(T value) {
         this(value, LATEST_TIMESTAMP);
     }
 
     /**
-     * 
      *
-     * @param value 
-     * @param version 
+     *
+     * @param value
+     * @param version
      */
     public HBaseColumn(T value, long version) {
         this.value = value;
@@ -314,27 +308,27 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public T value() {
         return value;
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public long version() {
         return version;
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public HBaseColumn<T> copy() {
         return new HBaseColumn<>(this.value, this.version);
@@ -360,9 +354,9 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public int hashCode() {
@@ -395,9 +389,9 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public String toString() {

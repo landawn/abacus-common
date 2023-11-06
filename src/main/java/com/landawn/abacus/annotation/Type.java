@@ -88,12 +88,12 @@ public @interface Type {
         /**
          * Used for json/xml/... serialization/deserialization.
          */
-        PARSER,
+        SERIALIZATION,
 
         /**
          * Used for database column value getter/setter.
          */
-        DB,
+        PERSISTENCE,
 
         /**
          * Used for all scenarios.

@@ -889,7 +889,7 @@ public final class Fn {
     public static <T, U> BiConsumer<T, U> println(final String separator) {
         N.checkArgNotNull(separator);
 
-        switch (separator) {
+        switch (separator) { // NOSONAR
             case "=":
                 return PRINTLN_EQUAL;
 
@@ -3419,11 +3419,11 @@ public final class Fn {
     public static <T> BiFunction<T, T, Integer> compare(final Comparator<? super T> cmp) {
         // N.checkArgNotNull(cmp);
 
-        if (cmp == null || cmp == Comparators.naturalOrder()) {
+        if (cmp == null || cmp == Comparators.naturalOrder()) { // NOSONAR
             return (BiFunction<T, T, Integer>) COMPARE;
         }
 
-        return (a, b) -> cmp.compare(a, b);
+        return cmp::compare;
     }
 
     /**
@@ -9440,22 +9440,22 @@ public final class Fn {
         private static final FloatPredicate NOT_NEGATIVE = t -> t >= 0;
 
         /** The Constant EQUAL. */
-        private static final FloatBiPredicate EQUAL = (t, u) -> t == u;
+        private static final FloatBiPredicate EQUAL = N::equals;
 
         /** The Constant NOT_EQUAL. */
-        private static final FloatBiPredicate NOT_EQUAL = (t, u) -> t != u;
+        private static final FloatBiPredicate NOT_EQUAL = (t, u) -> N.compare(t, u) != 0;
 
         /** The Constant GREATER_THAN. */
-        private static final FloatBiPredicate GREATER_THAN = (t, u) -> t > u;
+        private static final FloatBiPredicate GREATER_THAN = (t, u) -> N.compare(t, u) > 0;
 
         /** The Constant GREATER_EQUAL. */
-        private static final FloatBiPredicate GREATER_EQUAL = (t, u) -> t >= u;
+        private static final FloatBiPredicate GREATER_EQUAL = (t, u) -> N.compare(t, u) >= 0;
 
         /** The Constant LESS_THAN. */
-        private static final FloatBiPredicate LESS_THAN = (t, u) -> t < u;
+        private static final FloatBiPredicate LESS_THAN = (t, u) -> N.compare(t, u) < 0;
 
         /** The Constant LESS_EQUAL. */
-        private static final FloatBiPredicate LESS_EQUAL = (t, u) -> t <= u;
+        private static final FloatBiPredicate LESS_EQUAL = (t, u) -> N.compare(t, u) <= 0;
 
         /** The Constant LEN. */
         private static final Function<float[], Integer> LEN = t -> t == null ? 0 : t.length;

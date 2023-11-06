@@ -49,7 +49,7 @@ public abstract class ParserConfig<C extends ParserConfig<C>> implements Cloneab
      */
     public Collection<String> getIgnoredPropNames(Class<?> cls) {
         if (this.beanIgnoredPropNameMap == null) {
-            return null;
+            return null; // NOSONAR
         }
 
         Collection<String> result = this.beanIgnoredPropNameMap.get(cls);
@@ -101,9 +101,9 @@ public abstract class ParserConfig<C extends ParserConfig<C>> implements Cloneab
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public C copy() {
         try {

@@ -1814,7 +1814,7 @@ public final class Numbers {
                 case 'F':
                     try {
                         final Float f = createFloat(str);
-                        if (!(f.isInfinite() || f.floatValue() == 0.0F && !isZero(mant, dec))) {
+                        if (!(f.isInfinite() || N.equals(f.floatValue(), 0.0F) && !isZero(mant, dec))) {
                             //If it's too big for a float or the float value = 0 and the string
                             //has non-zeros in it, then float does not have the precision we want
                             return f;
@@ -1828,7 +1828,7 @@ public final class Numbers {
                 case 'D':
                     try {
                         final Double d = createDouble(str);
-                        if (!(d.isInfinite() || d.doubleValue() == 0.0D && !isZero(mant, dec))) {
+                        if (!(d.isInfinite() || N.equals(d.doubleValue(), 0.0d) && !isZero(mant, dec))) {
                             return d;
                         }
                     } catch (final NumberFormatException ignored) {
@@ -2608,17 +2608,14 @@ public final class Numbers {
         switch (mode) {
             case UNNECESSARY:
                 checkRoundingUnnecessary(isPowerOfTwo(x)); // fall through
-            case DOWN:
-            case FLOOR:
+            case DOWN, FLOOR:
                 return logFloor;
 
             case UP:
             case CEILING:
                 return isPowerOfTwo(x) ? logFloor : logFloor + 1;
 
-            case HALF_DOWN:
-            case HALF_UP:
-            case HALF_EVEN:
+            case HALF_DOWN, HALF_UP, HALF_EVEN:
                 if (logFloor < SQRT2_PRECOMPUTE_THRESHOLD) {
                     BigInteger halfPower = SQRT2_PRECOMPUTED_BITS.shiftRight(SQRT2_PRECOMPUTE_THRESHOLD - logFloor);
                     if (x.compareTo(halfPower) <= 0) {
@@ -4535,7 +4532,7 @@ public final class Numbers {
 
             case HALF_UP: {
                 double z = Math.rint(x);
-                if (abs(x - z) == 0.5) {
+                if (N.equals(abs(x - z), 0.5)) {
                     return x + Math.copySign(0.5, x);
                 } else {
                     return z;
@@ -4544,7 +4541,7 @@ public final class Numbers {
 
             case HALF_DOWN: {
                 double z = Math.rint(x);
-                if (abs(x - z) == 0.5) {
+                if (N.equals(abs(x - z), 0.5)) {
                     return x;
                 } else {
                     return z;
@@ -4614,7 +4611,7 @@ public final class Numbers {
     public static double round(final double x, final int scale, final RoundingMode roundingMode) {
         final BigDecimal bd = BigDecimal.valueOf(x).setScale(scale, roundingMode == null ? RoundingMode.HALF_UP : roundingMode);
         final double rounded = bd.doubleValue();
-        return rounded == POSITIVE_ZERO ? POSITIVE_ZERO * x : rounded;
+        return N.equals(rounded, POSITIVE_ZERO) ? POSITIVE_ZERO * x : rounded;
     }
 
     static final Map<String, DecimalFormat> decimalFormatPool = ImmutableMap.<String, DecimalFormat> builder()
@@ -4791,7 +4788,7 @@ public final class Numbers {
         checkNonNegative("tolerance", tolerance);
         return Math.copySign(a - b, 1.0) <= tolerance
                 // copySign(x, 1.0) is a branch-free version of abs(x), but with different NaN semantics
-                || (a == b) // needed to ensure that infinities equal themselves
+                || (N.equals(a, b)) // needed to ensure that infinities equal themselves
                 || (Double.isNaN(a) && Double.isNaN(b));
     }
 
@@ -4835,7 +4832,7 @@ public final class Numbers {
      * @return true, if is mathematical integer
      */
     public static boolean isMathematicalInteger(double x) {
-        return isFinite(x) && (x == 0.0 || SIGNIFICAND_BITS - Long.numberOfTrailingZeros(getSignificand(x)) <= getExponent(x));
+        return isFinite(x) && (N.equals(x, 0.0) || SIGNIFICAND_BITS - Long.numberOfTrailingZeros(getSignificand(x)) <= getExponent(x));
     }
 
     /**

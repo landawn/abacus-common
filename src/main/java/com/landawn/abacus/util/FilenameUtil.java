@@ -496,7 +496,7 @@ public final class FilenameUtil {
      * <p>
      * The files names are expected to be normalized.
      * </p>
-     * 
+     *
      * Edge cases:
      * <ul>
      * <li>A {@code directory} must not be null: if null, throw IllegalArgumentException</li>
@@ -1137,7 +1137,7 @@ public final class FilenameUtil {
             filename1 = normalize(filename1);
             filename2 = normalize(filename2);
             if (filename1 == null || filename2 == null) {
-                throw new NullPointerException("Error normalizing one or both of the file names");
+                throw new IllegalArgumentException("Error normalizing one or both of the file names");
             }
         }
         if (caseSensitivity == null) {

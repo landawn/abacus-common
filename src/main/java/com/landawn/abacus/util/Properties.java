@@ -32,7 +32,7 @@ public class Properties<K, V> implements Map<K, V> {
     protected final Map<K, V> values;
 
     /**
-     * 
+     *
      */
     public Properties() {
         this(new ConcurrentHashMap<>());
@@ -66,10 +66,10 @@ public class Properties<K, V> implements Map<K, V> {
     /**
      * To avoid <code>NullPointerException</code> for primitive type if the target property is null or not set.
      *
-     * @param <T> 
-     * @param propName 
-     * @param targetType 
-     * @return 
+     * @param <T>
+     * @param propName
+     * @param targetType
+     * @return
      */
     @SuppressWarnings("unchecked")
     public <T> T get(Object propName, Class<? extends T> targetType) {
@@ -99,11 +99,11 @@ public class Properties<K, V> implements Map<K, V> {
     /**
      * Gets the or default.
      *
-     * @param <T> 
-     * @param propName 
+     * @param <T>
+     * @param propName
      * @param defaultValue is returned if the specified {@code propName} is not contained in this Properties instance or it's null.
-     * @param targetType 
-     * @return 
+     * @param targetType
+     * @return
      */
     public <T> T getOrDefault(Object propName, T defaultValue, Class<? extends T> targetType) {
         Object result = values.get(propName);
@@ -253,9 +253,9 @@ public class Properties<K, V> implements Map<K, V> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public Set<K> keySet() {
@@ -263,9 +263,9 @@ public class Properties<K, V> implements Map<K, V> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public Collection<V> values() {
@@ -273,12 +273,12 @@ public class Properties<K, V> implements Map<K, V> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
-    public Set<java.util.Map.Entry<K, V>> entrySet() {
+    public Set<Map.Entry<K, V>> entrySet() {
         return values.entrySet();
     }
 
@@ -293,9 +293,9 @@ public class Properties<K, V> implements Map<K, V> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public int size() {
@@ -311,9 +311,9 @@ public class Properties<K, V> implements Map<K, V> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public Properties<K, V> copy() {
         final Properties<K, V> copy = new Properties<>();
@@ -324,9 +324,9 @@ public class Properties<K, V> implements Map<K, V> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public int hashCode() {
@@ -344,9 +344,9 @@ public class Properties<K, V> implements Map<K, V> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public String toString() {
