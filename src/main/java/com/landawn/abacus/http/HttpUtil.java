@@ -88,7 +88,7 @@ public final class HttpUtil {
 
     static final AsyncExecutor DEFAULT_ASYNC_EXECUTOR = new AsyncExecutor(DEFAULT_EXECUTOR);
 
-    public static final Charset DEFAULT_CHARSET = Charsets.UTF_8;
+    public static final Charset DEFAULT_CHARSET = Charsets.UTF_8; // It should be utf-8 for web service or http call by default. // IOUtil.DEFAULT_CHARSET
 
     public static final ContentFormat DEFAULT_CONTENT_FORMAT = ContentFormat.JSON;
 

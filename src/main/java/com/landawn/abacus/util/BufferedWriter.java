@@ -53,7 +53,7 @@ public class BufferedWriter extends Writer {
     }
 
     BufferedWriter(OutputStream os) {
-        this(new OutputStreamWriter(os, Charsets.UTF_8));
+        this(new OutputStreamWriter(os, IOUtil.DEFAULT_CHARSET));
     }
 
     BufferedWriter(Writer writer) {

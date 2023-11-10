@@ -813,7 +813,7 @@ public final class PropertiesUtil {
 
             IOUtil.createNewFileIfNotExists(classFile);
 
-            writer = new OutputStreamWriter(IOUtil.newFileOutputStream(classFile), Charsets.UTF_8);
+            writer = new OutputStreamWriter(IOUtil.newFileOutputStream(classFile), IOUtil.DEFAULT_CHARSET);
             writer.write("package " + packageName + ";" + IOUtil.LINE_SEPARATOR);
 
             writer.write(IOUtil.LINE_SEPARATOR);

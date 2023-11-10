@@ -109,7 +109,7 @@ public final class LineIterator extends ObjIterator<String> implements Closeable
      * @see #lineIterator(File, Charset)
      */
     public static LineIterator of(final File file) {
-        return of(file, Charsets.UTF_8);
+        return of(file, IOUtil.DEFAULT_CHARSET);
     }
 
     /**
@@ -167,7 +167,7 @@ public final class LineIterator extends ObjIterator<String> implements Closeable
      * @return
      */
     public static LineIterator of(final InputStream input) {
-        return of(input, Charsets.UTF_8);
+        return of(input, IOUtil.DEFAULT_CHARSET);
     }
 
     /**

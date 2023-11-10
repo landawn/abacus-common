@@ -22,7 +22,6 @@ import static com.landawn.abacus.util.WD._QUOTATION_S;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -1520,13 +1519,13 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
-     * Returns the byte array returned by {@code String#getBytes(StandardCharsets.UTF_8)}, or {@code null} if the specified String is {@code null}.
+     * Returns the byte array returned by {@code String#getBytes(IOUtil.DEFAULT_CHARSET)}, or {@code null} if the specified String is {@code null}.
      *
      * @param string
      * @return
      */
     public static byte[] getBytes(final String string) {
-        return string == null ? null : string.getBytes(StandardCharsets.UTF_8);
+        return string == null ? null : string.getBytes(IOUtil.DEFAULT_CHARSET);
     }
 
     /**
@@ -11409,7 +11408,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *  @since 1.5
      */
     public static boolean isBase64(final String base64) {
-        return isBase64(getBytes(base64, Charsets.UTF_8));
+        return isBase64(getBytes(base64, IOUtil.DEFAULT_CHARSET));
     }
 
     /**

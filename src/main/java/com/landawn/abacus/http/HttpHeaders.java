@@ -472,7 +472,7 @@ public final class HttpHeaders {
         public static final String IMAGE_JPG = "image/jpg";
 
         /** The Constant UTF_8. */
-        public static final String UTF_8 = "UTF-8";
+        public static final String UTF_8 = "utf-8";
 
     }
 

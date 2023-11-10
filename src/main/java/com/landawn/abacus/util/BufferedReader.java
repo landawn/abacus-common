@@ -50,7 +50,7 @@ public final class BufferedReader extends Reader {
     }
 
     BufferedReader(InputStream is) {
-        this(new InputStreamReader(is, Charsets.UTF_8));
+        this(new InputStreamReader(is, IOUtil.DEFAULT_CHARSET));
     }
 
     BufferedReader(Reader reader) {

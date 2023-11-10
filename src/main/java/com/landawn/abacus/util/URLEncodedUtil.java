@@ -189,7 +189,7 @@ public final class URLEncodedUtil {
      * @return
      */
     public static Map<String, String> decode(final String urlQuery) {
-        return decode(urlQuery, Charsets.UTF_8);
+        return decode(urlQuery, IOUtil.DEFAULT_CHARSET);
     }
 
     /**
@@ -236,7 +236,7 @@ public final class URLEncodedUtil {
      * @return
      */
     public static ListMultimap<String, String> decodeToMultimap(final String urlQuery) {
-        return decodeToMultimap(urlQuery, Charsets.UTF_8);
+        return decodeToMultimap(urlQuery, IOUtil.DEFAULT_CHARSET);
     }
 
     /**
@@ -286,7 +286,7 @@ public final class URLEncodedUtil {
      * @return
      */
     public static <T> T decode(final String urlQuery, final Class<? extends T> targetClass) {
-        return decode(urlQuery, Charsets.UTF_8, targetClass);
+        return decode(urlQuery, IOUtil.DEFAULT_CHARSET, targetClass);
     }
 
     /**
@@ -387,7 +387,7 @@ public final class URLEncodedUtil {
      * @return
      */
     public static String encode(final Object parameters) {
-        return encode(parameters, Charsets.UTF_8);
+        return encode(parameters, IOUtil.DEFAULT_CHARSET);
     }
 
     /**
@@ -426,7 +426,7 @@ public final class URLEncodedUtil {
      * @return
      */
     public static String encode(final String url, final Object parameters) {
-        return encode(url, parameters, Charsets.UTF_8);
+        return encode(url, parameters, IOUtil.DEFAULT_CHARSET);
     }
 
     /**
@@ -473,7 +473,7 @@ public final class URLEncodedUtil {
      * @param parameters
      */
     public static void encode(final StringBuilder output, final Object parameters) {
-        encode(output, parameters, Charsets.UTF_8);
+        encode(output, parameters, IOUtil.DEFAULT_CHARSET);
     }
 
     /**
@@ -564,7 +564,7 @@ public final class URLEncodedUtil {
             return null;
         }
 
-        return urlDecode(content, (charset != null) ? charset : Charsets.UTF_8, true);
+        return urlDecode(content, (charset != null) ? charset : IOUtil.DEFAULT_CHARSET, true);
     }
 
     /**
@@ -627,7 +627,7 @@ public final class URLEncodedUtil {
      * @return encoded string
      */
     private static void encodeFormFields(final StringBuilder sb, final String content, final Charset charset) {
-        urlEncode(sb, content, (charset != null) ? charset : Charsets.UTF_8, URLENCODER, true);
+        urlEncode(sb, content, (charset != null) ? charset : IOUtil.DEFAULT_CHARSET, URLENCODER, true);
     }
 
     /**

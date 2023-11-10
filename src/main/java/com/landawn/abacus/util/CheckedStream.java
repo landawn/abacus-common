@@ -1288,7 +1288,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @return
      */
     public static CheckedStream<String, IOException> lines(final File file) {
-        return lines(file, Charsets.UTF_8);
+        return lines(file, IOUtil.DEFAULT_CHARSET);
     }
 
     /**
@@ -1311,7 +1311,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @return
      */
     public static CheckedStream<String, IOException> lines(final Path path) {
-        return lines(path, Charsets.UTF_8);
+        return lines(path, IOUtil.DEFAULT_CHARSET);
     }
 
     /**
@@ -1336,7 +1336,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     public static CheckedStream<String, IOException> lines(final Reader reader) {
         N.checkArgNotNull(reader, "reader");
 
-        return newStream(createLazyLineIterator(null, null, Charsets.UTF_8, reader, false));
+        return newStream(createLazyLineIterator(null, null, IOUtil.DEFAULT_CHARSET, reader, false));
     }
 
     /**
@@ -1432,9 +1432,9 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                             if (reader != null) {
                                 bufferedReader = reader instanceof BufferedReader ? ((BufferedReader) reader) : new BufferedReader(reader);
                             } else if (file != null) {
-                                bufferedReader = IOUtil.newBufferedReader(file, charset == null ? Charsets.UTF_8 : charset);
+                                bufferedReader = IOUtil.newBufferedReader(file, charset == null ? IOUtil.DEFAULT_CHARSET : charset);
                             } else {
-                                bufferedReader = IOUtil.newBufferedReader(path, charset == null ? Charsets.UTF_8 : charset);
+                                bufferedReader = IOUtil.newBufferedReader(path, charset == null ? IOUtil.DEFAULT_CHARSET : charset);
                             }
                         }
 

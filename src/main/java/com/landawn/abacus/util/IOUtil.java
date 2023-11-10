@@ -71,7 +71,11 @@ import com.landawn.abacus.util.Fn.BiPredicates;
  * @version $Revision: 0.8 $
  */
 public final class IOUtil {
+
     private static final Logger logger = LoggerFactory.getLogger(IOUtil.class);
+
+    // Keep it consistent for those methods specified or not specified charset by using the default jvm charset. Should it be UTF-8?  TODO
+    public static final Charset DEFAULT_CHARSET = Charset.defaultCharset(); // StandardCharsets.UTF_8;
 
     // ...
     private static final String JAVA_VENDOR_STR = "java.vendor";
@@ -108,8 +112,8 @@ public final class IOUtil {
                 ClassUtil.setAccessible(deMethod, true);
 
                 char[] chars = "abc".toCharArray();
-                byte[] bytes = ClassUtil.invokeMethod(enMethod, Charsets.UTF_8, chars, 1, 1);
-                char[] chars2 = ClassUtil.invokeMethod(deMethod, Charsets.UTF_8, bytes, 0, bytes.length);
+                byte[] bytes = ClassUtil.invokeMethod(enMethod, DEFAULT_CHARSET, chars, 1, 1);
+                char[] chars2 = ClassUtil.invokeMethod(deMethod, DEFAULT_CHARSET, bytes, 0, bytes.length);
 
                 if (chars2.length == 1 && chars2[0] == 'b') {
                     encodeMethod = enMethod;
@@ -412,7 +416,7 @@ public final class IOUtil {
      * @return
      */
     public static byte[] chars2Bytes(final char[] chars) {
-        return chars2Bytes(chars, Charsets.UTF_8);
+        return chars2Bytes(chars, DEFAULT_CHARSET);
     }
 
     /**
@@ -444,7 +448,7 @@ public final class IOUtil {
             return N.EMPTY_BYTE_ARRAY;
         }
 
-        charset = charset == null ? Charsets.UTF_8 : charset;
+        charset = charset == null ? DEFAULT_CHARSET : charset;
 
         if (stringEncodeMethod == null) {
             return new String(chars, offset, len).getBytes(charset);
@@ -460,7 +464,7 @@ public final class IOUtil {
      * @return
      */
     public static char[] bytes2Chars(final byte[] bytes) {
-        return bytes2Chars(bytes, Charsets.UTF_8);
+        return bytes2Chars(bytes, DEFAULT_CHARSET);
     }
 
     /**
@@ -492,7 +496,7 @@ public final class IOUtil {
             return N.EMPTY_CHAR_ARRAY;
         }
 
-        charset = charset == null ? Charsets.UTF_8 : charset;
+        charset = charset == null ? DEFAULT_CHARSET : charset;
 
         if (stringDecodeMethod == null) {
             return new String(bytes, offset, len, charset).toCharArray();
@@ -508,7 +512,7 @@ public final class IOUtil {
      * @return
      */
     public static InputStream string2InputStream(final String str) {
-        return string2InputStream(str, Charsets.UTF_8);
+        return string2InputStream(str, DEFAULT_CHARSET);
     }
 
     /**
@@ -523,7 +527,7 @@ public final class IOUtil {
             throw new IllegalArgumentException("The input String can't be null.");
         }
 
-        charset = charset == null ? Charsets.UTF_8 : charset;
+        charset = charset == null ? DEFAULT_CHARSET : charset;
 
         return new ByteArrayInputStream(str.getBytes(charset));
     }
@@ -780,7 +784,7 @@ public final class IOUtil {
      * @throws IOException
      */
     public static char[] readChars(final File file, final long offset, final int maxLen) throws IOException {
-        return readChars(file, offset, maxLen, Charsets.UTF_8);
+        return readChars(file, offset, maxLen, DEFAULT_CHARSET);
     }
 
     /**
@@ -838,7 +842,7 @@ public final class IOUtil {
      * @throws IOException
      */
     public static char[] readChars(final InputStream is, final long offset, final int maxLen) throws IOException {
-        return readChars(is, offset, maxLen, Charsets.UTF_8);
+        return readChars(is, offset, maxLen, DEFAULT_CHARSET);
     }
 
     /**
@@ -851,7 +855,7 @@ public final class IOUtil {
      * @throws IOException
      */
     public static char[] readChars(final InputStream is, final long offset, final int maxLen, Charset encoding) throws IOException {
-        encoding = encoding == null ? Charsets.UTF_8 : encoding;
+        encoding = encoding == null ? DEFAULT_CHARSET : encoding;
 
         Reader reader = null;
 
@@ -998,7 +1002,7 @@ public final class IOUtil {
      * @throws UncheckedIOException the unchecked IO exception
      */
     public static String readToString(final File file, final long offset, final int maxLen) throws UncheckedIOException {
-        return readToString(file, offset, maxLen, Charsets.UTF_8);
+        return readToString(file, offset, maxLen, DEFAULT_CHARSET);
     }
 
     /**
@@ -1031,7 +1035,7 @@ public final class IOUtil {
      * @throws UncheckedIOException the unchecked IO exception
      */
     public static String readToString(final InputStream is, final long offset, final int maxLen) throws UncheckedIOException {
-        return readToString(is, offset, maxLen, Charsets.UTF_8);
+        return readToString(is, offset, maxLen, DEFAULT_CHARSET);
     }
 
     /**
@@ -1162,7 +1166,7 @@ public final class IOUtil {
      * @throws IOException
      */
     public static String readFirstLine(final File file) throws IOException {
-        return readFirstLine(file, Charsets.UTF_8);
+        return readFirstLine(file, DEFAULT_CHARSET);
     }
 
     /**
@@ -1193,7 +1197,7 @@ public final class IOUtil {
      * @throws IOException
      */
     public static String readFirstLine(final InputStream is) throws IOException {
-        return readFirstLine(is, Charsets.UTF_8);
+        return readFirstLine(is, DEFAULT_CHARSET);
     }
 
     /**
@@ -1224,7 +1228,7 @@ public final class IOUtil {
      * @throws IOException
      */
     public static String readLastLine(final File file) throws IOException {
-        return readLastLine(file, Charsets.UTF_8);
+        return readLastLine(file, DEFAULT_CHARSET);
     }
 
     /**
@@ -1255,7 +1259,7 @@ public final class IOUtil {
      * @throws IOException
      */
     public static String readLastLine(final InputStream is) throws IOException {
-        return readLastLine(is, Charsets.UTF_8);
+        return readLastLine(is, DEFAULT_CHARSET);
     }
 
     /**
@@ -1302,7 +1306,7 @@ public final class IOUtil {
      * @throws IOException
      */
     public static String readLine(final File file, final int lineIndex) throws IOException {
-        return readLine(file, lineIndex, Charsets.UTF_8);
+        return readLine(file, lineIndex, DEFAULT_CHARSET);
     }
 
     /**
@@ -1335,7 +1339,7 @@ public final class IOUtil {
      * @throws IOException
      */
     public static String readLine(final InputStream is, final int lineIndex) throws IOException {
-        return readLine(is, lineIndex, Charsets.UTF_8);
+        return readLine(is, lineIndex, DEFAULT_CHARSET);
     }
 
     /**
@@ -1471,7 +1475,7 @@ public final class IOUtil {
      * @throws IOException
      */
     public static List<String> readLines(final File file, final int offset, final int count) throws IOException {
-        return readLines(file, offset, count, Charsets.UTF_8);
+        return readLines(file, offset, count, DEFAULT_CHARSET);
     }
 
     /**
@@ -1506,7 +1510,7 @@ public final class IOUtil {
      * @throws IOException
      */
     public static List<String> readLines(final InputStream is, final int offset, final int count) throws IOException {
-        return readLines(is, offset, count, Charsets.UTF_8);
+        return readLines(is, offset, count, DEFAULT_CHARSET);
     }
 
     /**
@@ -1530,7 +1534,7 @@ public final class IOUtil {
      * @return
      */
     static InputStreamReader createReader(final InputStream is, final Charset encoding) {
-        return encoding == null ? new InputStreamReader(is, Charsets.UTF_8) : new InputStreamReader(is, encoding);
+        return encoding == null ? new InputStreamReader(is, DEFAULT_CHARSET) : new InputStreamReader(is, encoding);
     }
 
     /**
@@ -1678,7 +1682,7 @@ public final class IOUtil {
      * @throws IOException
      */
     public static int read(final File file, final char[] buf, final int off, final int len) throws IOException {
-        return read(file, buf, off, len, Charsets.UTF_8);
+        return read(file, buf, off, len, DEFAULT_CHARSET);
     }
 
     /**
@@ -1695,7 +1699,7 @@ public final class IOUtil {
         Reader reader = null;
 
         try { //NOSONAR
-            reader = new InputStreamReader(IOUtil.newFileInputStream(file), charset == null ? Charsets.UTF_8 : charset);
+            reader = new InputStreamReader(IOUtil.newFileInputStream(file), charset == null ? DEFAULT_CHARSET : charset);
 
             return read(reader, buf, off, len);
         } finally {
@@ -2420,7 +2424,7 @@ public final class IOUtil {
      * @throws IOException
      */
     public static void write(final File output, final CharSequence str) throws IOException {
-        write(output, str, Charsets.UTF_8);
+        write(output, str, DEFAULT_CHARSET);
     }
 
     /**
@@ -2431,7 +2435,7 @@ public final class IOUtil {
      * @throws IOException
      */
     public static void write(final File output, final CharSequence str, Charset charset) throws IOException {
-        charset = charset == null ? Charsets.UTF_8 : charset;
+        charset = charset == null ? DEFAULT_CHARSET : charset;
 
         write(output, chars2Bytes(toCharArray(str), charset));
     }
@@ -2465,7 +2469,7 @@ public final class IOUtil {
      * @throws IOException
      */
     public static void write(final OutputStream output, final CharSequence str, final boolean flush) throws IOException {
-        write(output, str, Charsets.UTF_8, flush);
+        write(output, str, DEFAULT_CHARSET, flush);
     }
 
     /**
@@ -2477,7 +2481,7 @@ public final class IOUtil {
      * @throws IOException
      */
     public static void write(final OutputStream output, final CharSequence str, Charset charset, final boolean flush) throws IOException {
-        charset = charset == null ? Charsets.UTF_8 : charset;
+        charset = charset == null ? DEFAULT_CHARSET : charset;
 
         output.write(chars2Bytes(toCharArray(str), charset));
 
@@ -2549,7 +2553,7 @@ public final class IOUtil {
             return;
         }
 
-        write(output, chars, offset, len, Charsets.UTF_8);
+        write(output, chars, offset, len, DEFAULT_CHARSET);
     }
 
     /**
@@ -2611,7 +2615,7 @@ public final class IOUtil {
             return;
         }
 
-        write(output, chars, offset, len, Charsets.UTF_8);
+        write(output, chars, offset, len, DEFAULT_CHARSET);
     }
 
     /**
@@ -2660,7 +2664,7 @@ public final class IOUtil {
             return;
         }
 
-        write(output, chars, offset, len, Charsets.UTF_8, flush);
+        write(output, chars, offset, len, DEFAULT_CHARSET, flush);
     }
 
     /**
@@ -2981,7 +2985,7 @@ public final class IOUtil {
      * @throws IOException
      */
     public static long write(final File output, final Reader input) throws IOException {
-        return write(output, input, Charsets.UTF_8);
+        return write(output, input, DEFAULT_CHARSET);
     }
 
     /**
@@ -3006,7 +3010,7 @@ public final class IOUtil {
      * @throws IOException
      */
     public static long write(final File output, final Reader input, final long offset, final long len) throws IOException {
-        return write(output, input, offset, len, Charsets.UTF_8);
+        return write(output, input, offset, len, DEFAULT_CHARSET);
     }
 
     /**
@@ -3023,7 +3027,7 @@ public final class IOUtil {
         Writer writer = null;
 
         try { //NOSONAR
-            writer = new OutputStreamWriter(IOUtil.newFileOutputStream(output), charset == null ? Charsets.UTF_8 : charset);
+            writer = new OutputStreamWriter(IOUtil.newFileOutputStream(output), charset == null ? DEFAULT_CHARSET : charset);
 
             long result = write(writer, input, offset, len);
 
@@ -3346,7 +3350,7 @@ public final class IOUtil {
             return;
         }
 
-        append(output, chars, offset, len, Charsets.UTF_8);
+        append(output, chars, offset, len, DEFAULT_CHARSET);
     }
 
     /**
@@ -3373,7 +3377,7 @@ public final class IOUtil {
      * @throws IOException
      */
     public static void append(File output, CharSequence str) throws IOException {
-        append(output, str, Charsets.UTF_8);
+        append(output, str, DEFAULT_CHARSET);
     }
 
     /**
@@ -3435,7 +3439,7 @@ public final class IOUtil {
      * @throws IOException
      */
     public static long append(final File output, final Reader input) throws IOException {
-        return append(output, input, Charsets.UTF_8);
+        return append(output, input, DEFAULT_CHARSET);
     }
 
     /**
@@ -3460,7 +3464,7 @@ public final class IOUtil {
      * @throws IOException
      */
     public static long append(final File output, final Reader input, final long offset, final long len) throws IOException {
-        return append(output, input, offset, len, Charsets.UTF_8);
+        return append(output, input, offset, len, DEFAULT_CHARSET);
     }
 
     /**
@@ -3477,7 +3481,7 @@ public final class IOUtil {
         Writer writer = null;
 
         try { //NOSONAR
-            writer = new OutputStreamWriter(new FileOutputStream(output, true), charset == null ? Charsets.UTF_8 : charset);
+            writer = new OutputStreamWriter(new FileOutputStream(output, true), charset == null ? DEFAULT_CHARSET : charset);
 
             long result = write(writer, input, offset, len);
 
@@ -3531,7 +3535,7 @@ public final class IOUtil {
      * @throws IOException
      */
     public static void appendLine(File output, CharSequence str) throws IOException {
-        appendLine(output, str, Charsets.UTF_8);
+        appendLine(output, str, DEFAULT_CHARSET);
     }
 
     /**
@@ -3951,6 +3955,50 @@ public final class IOUtil {
     }
 
     /**
+     *
+     * @param is
+     * @return
+     * @throws UncheckedIOException
+     */
+    public static InputStreamReader newInputStreamReader(final InputStream is) throws UncheckedIOException {
+        return new InputStreamReader(is); // NOSONAR
+    }
+
+    /**
+     *
+     * @param is
+     * @param charset
+     * @return
+     * @throws UncheckedIOException
+     */
+    public static InputStreamReader newInputStreamReader(final InputStream is, final Charset charset) throws UncheckedIOException {
+        return new InputStreamReader(is, charset == null ? DEFAULT_CHARSET : charset); // NOSONAR
+    }
+
+    /**
+     *
+     *
+     * @param os
+     * @return
+     * @throws UncheckedIOException
+     */
+    public static OutputStreamWriter newOutputStreamWriter(final OutputStream os) throws UncheckedIOException {
+        return new OutputStreamWriter(os); // NOSONAR
+    }
+
+    /**
+     *
+     *
+     * @param os
+     * @param charset
+     * @return
+     * @throws UncheckedIOException
+     */
+    public static OutputStreamWriter newOutputStreamWriter(final OutputStream os, final Charset charset) throws UncheckedIOException {
+        return new OutputStreamWriter(os, charset == null ? DEFAULT_CHARSET : charset);
+    }
+
+    /**
      * New buffered reader.
      *
      * @param filePath
@@ -3981,7 +4029,7 @@ public final class IOUtil {
      * @throws UncheckedIOException the unchecked IO exception
      */
     public static java.io.BufferedReader newBufferedReader(File file, Charset charset) throws UncheckedIOException {
-        return new java.io.BufferedReader(new InputStreamReader(IOUtil.newFileInputStream(file), charset == null ? Charsets.UTF_8 : charset));
+        return new java.io.BufferedReader(new InputStreamReader(IOUtil.newFileInputStream(file), charset == null ? DEFAULT_CHARSET : charset));
     }
 
     /**
@@ -3993,7 +4041,7 @@ public final class IOUtil {
      */
     public static java.io.BufferedReader newBufferedReader(Path path) throws UncheckedIOException {
         try {
-            return Files.newBufferedReader(path, Charsets.UTF_8);
+            return Files.newBufferedReader(path, DEFAULT_CHARSET);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
@@ -4035,7 +4083,7 @@ public final class IOUtil {
      * @throws UncheckedIOException the unchecked IO exception
      */
     public static java.io.BufferedReader newBufferedReader(InputStream is, Charset charset) throws UncheckedIOException {
-        return new java.io.BufferedReader(new InputStreamReader(is, charset == null ? Charsets.UTF_8 : charset));
+        return new java.io.BufferedReader(new InputStreamReader(is, charset == null ? DEFAULT_CHARSET : charset));
     }
 
     /**
@@ -4069,7 +4117,7 @@ public final class IOUtil {
      * @throws UncheckedIOException the unchecked IO exception
      */
     public static java.io.BufferedWriter newBufferedWriter(File file, Charset charset) throws UncheckedIOException {
-        return new java.io.BufferedWriter(new OutputStreamWriter(IOUtil.newFileOutputStream(file), charset == null ? Charsets.UTF_8 : charset));
+        return new java.io.BufferedWriter(new OutputStreamWriter(IOUtil.newFileOutputStream(file), charset == null ? DEFAULT_CHARSET : charset));
     }
 
     /**
@@ -4079,7 +4127,7 @@ public final class IOUtil {
      * @return
      */
     public static java.io.BufferedWriter newBufferedWriter(OutputStream os) {
-        return new java.io.BufferedWriter(new OutputStreamWriter(os)); // NOSONAR
+        return new java.io.BufferedWriter(newOutputStreamWriter(os)); // NOSONAR
     }
 
     /**
@@ -4090,7 +4138,7 @@ public final class IOUtil {
      * @return
      */
     public static java.io.BufferedWriter newBufferedWriter(OutputStream os, Charset charset) {
-        return new java.io.BufferedWriter(new OutputStreamWriter(os, charset == null ? Charsets.UTF_8 : charset));
+        return new java.io.BufferedWriter(newOutputStreamWriter(os, charset == null ? DEFAULT_CHARSET : charset));
     }
 
     /**
@@ -5739,7 +5787,7 @@ public final class IOUtil {
                     } finally {
                         if (bytes.position() > 0) {
                             bytes.flip();
-                            buffer.append(Charsets.UTF_8.decode(bytes).toString());
+                            buffer.append(DEFAULT_CHARSET.decode(bytes).toString());
                             bytes.clear();
                         }
                     }

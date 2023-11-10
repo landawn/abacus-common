@@ -137,6 +137,6 @@ public final class WSSecurityUtil {
      * @return
      */
     public static String doPasswordDigest(String nonce, String created, String password) {
-        return doPasswordDigest(nonce.getBytes(Charsets.UTF_8), created.getBytes(Charsets.UTF_8), password.getBytes(Charsets.UTF_8));
+        return doPasswordDigest(nonce.getBytes(IOUtil.DEFAULT_CHARSET), created.getBytes(IOUtil.DEFAULT_CHARSET), password.getBytes(IOUtil.DEFAULT_CHARSET));
     }
 }
