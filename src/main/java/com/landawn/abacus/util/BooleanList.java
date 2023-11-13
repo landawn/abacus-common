@@ -236,7 +236,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * @param index
      * @return
      */
-    public boolean get(int index) {
+    public boolean get(int index) { // NOSONAR
         rangeCheck(index);
 
         return elementData[index];

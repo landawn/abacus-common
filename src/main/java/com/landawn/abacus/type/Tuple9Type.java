@@ -147,7 +147,7 @@ public class Tuple9Type<T1, T2, T3, T4, T5, T6, T7, T8, T9> extends AbstractType
     @Override
     public Tuple9<T1, T2, T3, T4, T5, T6, T7, T8, T9> valueOf(String str) {
         if (Strings.isEmpty(str)) {
-            return null;
+            return null; // NOSONAR
         }
 
         final Object[] a = Utils.jsonParser.deserialize(Object[].class, str, Utils.jdc);

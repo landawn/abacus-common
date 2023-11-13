@@ -79,7 +79,7 @@ public final class InternalUtil {
     @Beta
     static Object[] getInternalArray(final Collection<?> c) {
         if (c == null) {
-            return null;
+            return null; // NOSONAR
         }
 
         if (isListElementDataFieldGettable && listElementDataField != null && c.getClass().equals(ArrayList.class)) {
@@ -92,7 +92,7 @@ public final class InternalUtil {
 
         }
 
-        return null;
+        return null; // NOSONAR
     }
 
     /**
@@ -116,8 +116,8 @@ public final class InternalUtil {
         return N.asList(a);
     }
 
-    static volatile boolean isStringCharsGettable = true;
-    static volatile boolean isStringCharsCreatable = true;
+    static volatile boolean isStringCharsGettable = JavaVersion.of(System.getProperty("java.version")).atMost(JavaVersion.JAVA_1_8);
+    static volatile boolean isStringCharsCreatable = JavaVersion.of(System.getProperty("java.version")).atMost(JavaVersion.JAVA_1_8);
 
     static final Field strValueField;
     static final Constructor<String> sharedStringConstructor;

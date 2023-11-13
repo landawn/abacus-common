@@ -17,7 +17,6 @@ package com.landawn.abacus.http;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.List;
@@ -33,8 +32,8 @@ import com.landawn.abacus.parser.ParserFactory;
 import com.landawn.abacus.parser.ParserUtil;
 import com.landawn.abacus.parser.ParserUtil.BeanInfo;
 import com.landawn.abacus.parser.ParserUtil.PropInfo;
-import com.landawn.abacus.parser.XMLParser;
 import com.landawn.abacus.util.BufferedReader;
+import com.landawn.abacus.util.Charsets;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.ContinuableFuture;
 import com.landawn.abacus.util.IOUtil;
@@ -58,27 +57,36 @@ import okhttp3.internal.Util;
  * Note: This class contains the codes and docs copied from OkHttp: https://square.github.io/okhttp/ under Apache License v2.
  *
  * @see URLEncodedUtil
+ * @see HttpHeaders
  * @since 1.3
  */
 public final class OkHttpRequest {
 
-    private static final MediaType APPLICATION_JSON_MEDIA_TYPE = MediaType.get("application/json");
+    private static final MediaType APPLICATION_JSON_MEDIA_TYPE = MediaType.get(HttpHeaders.Values.APPLICATION_JSON);
+    private static final MediaType APPLICATION_XML_MEDIA_TYPE = MediaType.get(HttpHeaders.Values.APPLICATION_XML);
 
-    static final XMLParser xmlParser = ParserFactory.isXMLAvailable() ? ParserFactory.createXMLParser() : null;
-    static final KryoParser kryoParser = ParserFactory.isKryoAvailable() ? ParserFactory.createKryoParser() : null;
+    private static final KryoParser kryoParser = ParserFactory.isKryoAvailable() ? ParserFactory.createKryoParser() : null;
 
-    static final OkHttpClient defaultClient = new OkHttpClient();
+    private static final OkHttpClient defaultClient = new OkHttpClient();
+
+    private final String url;
+    private final HttpUrl httpUrl;
+
+    private Object query;
 
     private OkHttpClient httpClient;
-    private final Request.Builder builder;
+    private final Request.Builder requestBuilder;
     private RequestBody body;
-    private Request request;
 
     private boolean closeHttpClientAfterExecution = false;
 
-    OkHttpRequest(OkHttpClient httpClient) {
+    OkHttpRequest(final String url, final HttpUrl httpUrl, final OkHttpClient httpClient) {
+        N.checkArgument(!(Strings.isEmpty(url) && httpUrl == null), "'url' can't be null or empty");
+
+        this.url = url;
+        this.httpUrl = httpUrl;
         this.httpClient = httpClient;
-        this.builder = new Request.Builder();
+        this.requestBuilder = new Request.Builder();
     }
 
     /**
@@ -89,9 +97,7 @@ public final class OkHttpRequest {
      * @return
      */
     public static OkHttpRequest create(final String url, final OkHttpClient httpClient) {
-        final OkHttpRequest okHttpRequest = new OkHttpRequest(httpClient);
-        okHttpRequest.builder.url(url);
-        return okHttpRequest;
+        return new OkHttpRequest(url, null, httpClient);
     }
 
     /**
@@ -102,9 +108,7 @@ public final class OkHttpRequest {
      * @return
      */
     public static OkHttpRequest create(final URL url, final OkHttpClient httpClient) {
-        final OkHttpRequest okHttpRequest = new OkHttpRequest(httpClient);
-        okHttpRequest.builder.url(url);
-        return okHttpRequest;
+        return new OkHttpRequest(null, HttpUrl.get(url), httpClient);
     }
 
     /**
@@ -115,9 +119,7 @@ public final class OkHttpRequest {
      * @return
      */
     public static OkHttpRequest create(final HttpUrl url, final OkHttpClient httpClient) {
-        final OkHttpRequest okHttpRequest = new OkHttpRequest(httpClient);
-        okHttpRequest.builder.url(url);
-        return okHttpRequest;
+        return new OkHttpRequest(null, url, httpClient);
     }
 
     /**
@@ -213,7 +215,7 @@ public final class OkHttpRequest {
      * @return
      */
     public OkHttpRequest cacheControl(CacheControl cacheControl) {
-        builder.cacheControl(cacheControl);
+        requestBuilder.cacheControl(cacheControl);
         return this;
     }
 
@@ -225,7 +227,7 @@ public final class OkHttpRequest {
      * @return
      */
     public OkHttpRequest tag(@Nullable Object tag) {
-        builder.tag(tag);
+        requestBuilder.tag(tag);
         return this;
     }
 
@@ -243,7 +245,7 @@ public final class OkHttpRequest {
      * @return
      */
     public <T> OkHttpRequest tag(Class<? super T> type, @Nullable T tag) {
-        builder.tag(type, tag);
+        requestBuilder.tag(type, tag);
         return this;
     }
 
@@ -254,7 +256,7 @@ public final class OkHttpRequest {
      * @return
      */
     public OkHttpRequest basicAuth(String user, Object password) {
-        builder.header(HttpHeaders.Names.AUTHORIZATION, "Basic " + Strings.base64Encode((user + ":" + password).getBytes()));
+        requestBuilder.header(HttpHeaders.Names.AUTHORIZATION, "Basic " + Strings.base64Encode((user + ":" + password).getBytes(Charsets.UTF_8)));
         return this;
     }
 
@@ -266,9 +268,10 @@ public final class OkHttpRequest {
      * @param value
      * @return
      * @see Request.Builder#header(String, String)
+     * @see HttpHeaders
      */
     public OkHttpRequest header(String name, String value) {
-        builder.header(name, value);
+        requestBuilder.header(name, value);
         return this;
     }
 
@@ -282,10 +285,11 @@ public final class OkHttpRequest {
      * @param value2
      * @return
      * @see Request.Builder#header(String, String)
+     * @see HttpHeaders
      */
     public OkHttpRequest headers(String name1, String value1, String name2, String value2) {
-        builder.header(name1, value1);
-        builder.header(name2, value2);
+        requestBuilder.header(name1, value1);
+        requestBuilder.header(name2, value2);
 
         return this;
     }
@@ -302,11 +306,12 @@ public final class OkHttpRequest {
      * @param value3
      * @return
      * @see Request.Builder#header(String, String)
+     * @see HttpHeaders
      */
     public OkHttpRequest headers(String name1, String value1, String name2, String value2, String name3, String value3) {
-        builder.header(name1, value1);
-        builder.header(name2, value2);
-        builder.header(name3, value3);
+        requestBuilder.header(name1, value1);
+        requestBuilder.header(name2, value2);
+        requestBuilder.header(name3, value3);
 
         return this;
     }
@@ -318,11 +323,12 @@ public final class OkHttpRequest {
      * @param headers
      * @return
      * @see Request.Builder#header(String, String)
+     * @see HttpHeaders
      */
     public OkHttpRequest headers(final Map<String, ?> headers) {
         if (N.notEmpty(headers)) {
             for (Map.Entry<String, ?> entry : headers.entrySet()) {
-                builder.header(entry.getKey(), HttpHeaders.valueOf(entry.getValue()));
+                requestBuilder.header(entry.getKey(), HttpHeaders.valueOf(entry.getValue()));
             }
         }
 
@@ -335,9 +341,10 @@ public final class OkHttpRequest {
      * @param headers
      * @return
      * @see Request.Builder#headers(Headers)
+     * @see HttpHeaders
      */
     public OkHttpRequest headers(Headers headers) {
-        builder.headers(headers);
+        requestBuilder.headers(headers);
         return this;
     }
 
@@ -347,11 +354,12 @@ public final class OkHttpRequest {
      * @param headers
      * @return
      * @see Request.Builder#headers(Headers)
+     * @see HttpHeaders
      */
     public OkHttpRequest headers(HttpHeaders headers) {
         if (headers != null && !headers.isEmpty()) {
             for (String headerName : headers.headerNameSet()) {
-                builder.header(headerName, HttpHeaders.valueOf(headers.get(headerName)));
+                requestBuilder.header(headerName, HttpHeaders.valueOf(headers.get(headerName)));
             }
         }
 
@@ -372,7 +380,7 @@ public final class OkHttpRequest {
      */
     @Deprecated
     public OkHttpRequest addHeader(String name, String value) {
-        builder.addHeader(name, value);
+        requestBuilder.addHeader(name, value);
         return this;
     }
 
@@ -384,7 +392,31 @@ public final class OkHttpRequest {
      */
     @Deprecated
     public OkHttpRequest removeHeader(String name) {
-        builder.removeHeader(name);
+        requestBuilder.removeHeader(name);
+        return this;
+    }
+
+    /**
+     * Set query parameters for {@code GET} or {@code DELETE} request.
+     *
+     * @param query
+     * @return
+     */
+    public OkHttpRequest query(final String query) {
+        this.query = query;
+
+        return this;
+    }
+
+    /**
+     * Set query parameters for {@code GET} or {@code DELETE} request.
+     *
+     * @param queryParams
+     * @return
+     */
+    public OkHttpRequest query(final Map<String, ?> queryParams) {
+        this.query = queryParams;
+
         return this;
     }
 
@@ -404,6 +436,24 @@ public final class OkHttpRequest {
      */
     public OkHttpRequest jsonBody(final Object obj) {
         return body(N.toJSON(obj), APPLICATION_JSON_MEDIA_TYPE);
+    }
+
+    /**
+     *
+     * @param xml
+     * @return
+     */
+    public OkHttpRequest xmlBody(final String xml) {
+        return body(xml, APPLICATION_XML_MEDIA_TYPE);
+    }
+
+    /**
+     *
+     * @param obj
+     * @return
+     */
+    public OkHttpRequest xmlBody(final Object obj) {
+        return body(N.toXML(obj), APPLICATION_XML_MEDIA_TYPE);
     }
 
     /**
@@ -673,13 +723,9 @@ public final class OkHttpRequest {
     @Beta
     public Response execute(final HttpMethod httpMethod) throws IOException {
         // body = (body == null && HttpMethod.DELETE.equals(httpMethod)) ? Util.EMPTY_REQUEST : body;
-        request = builder.method(httpMethod.name(), body).build();
+        final Request request = createRequest(httpMethod);
 
-        try {
-            return httpClient.newCall(request).execute();
-        } finally {
-            doAfterExecution();
-        }
+        return execute(request);
     }
 
     /**
@@ -695,8 +741,9 @@ public final class OkHttpRequest {
     public <T> T execute(final HttpMethod httpMethod, final Class<T> resultClass) throws IOException {
         N.checkArgNotNull(resultClass, "resultClass");
         N.checkArgument(!HttpResponse.class.equals(resultClass), "Return type can't be HttpResponse");
+        final Request request = createRequest(httpMethod);
 
-        try (Response resp = execute(httpMethod)) {
+        try (Response resp = execute(request)) {
             if (Response.class.equals(resultClass)) {
                 return (T) resp;
             } else if (resp.isSuccessful()) {
@@ -722,7 +769,7 @@ public final class OkHttpRequest {
                     } else if (respContentFormat == ContentFormat.FormUrlEncoded) {
                         return URLEncodedUtil.decode(IOUtil.readAllToString(is, respCharset), resultClass);
                     } else {
-                        final BufferedReader br = Objectory.createBufferedReader(new InputStreamReader(is, respCharset));
+                        final BufferedReader br = Objectory.createBufferedReader(IOUtil.newInputStreamReader(is, respCharset));
 
                         try {
                             return HttpUtil.getParser(respContentFormat).deserialize(resultClass, br);
@@ -739,10 +786,36 @@ public final class OkHttpRequest {
         }
     }
 
+    private Response execute(final Request request) throws IOException {
+        try {
+            return httpClient.newCall(request).execute();
+        } finally {
+            doAfterExecution();
+        }
+    }
+
     void doAfterExecution() {
         if (closeHttpClientAfterExecution) {
             // Shutdown isn't necessary?
         }
+    }
+
+    private Request createRequest(final HttpMethod httpMethod) {
+        if (query == null || (query instanceof String && Strings.isEmpty((String) query))) {
+            if (httpUrl == null) {
+                requestBuilder.url(HttpUrl.get(url));
+            } else {
+                requestBuilder.url(httpUrl);
+            }
+        } else {
+            if (httpUrl == null) {
+                requestBuilder.url(HttpUrl.get(URLEncodedUtil.encode(url, query)));
+            } else {
+                requestBuilder.url(HttpUrl.get(URLEncodedUtil.encode(httpUrl.toString(), query)));
+            }
+        }
+
+        return requestBuilder.method(httpMethod.name(), body).build();
     }
 
     /**

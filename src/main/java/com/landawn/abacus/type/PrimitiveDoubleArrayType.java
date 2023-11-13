@@ -71,7 +71,7 @@ public final class PrimitiveDoubleArrayType extends AbstractPrimitiveArrayType<d
     @Override
     public String stringOf(double[] x) {
         if (x == null) {
-            return null;
+            return null; // NOSONAR
         } else if (x.length == 0) {
             return "[]";
         }
@@ -105,7 +105,7 @@ public final class PrimitiveDoubleArrayType extends AbstractPrimitiveArrayType<d
     @Override
     public double[] valueOf(String str) {
         if (str == null) {
-            return null;
+            return null; // NOSONAR
         } else if (str.length() == 0 || "[]".equals(str)) {
             return N.EMPTY_DOUBLE_ARRAY;
         }
@@ -183,7 +183,7 @@ public final class PrimitiveDoubleArrayType extends AbstractPrimitiveArrayType<d
     @Override
     public double[] collection2Array(Collection<?> c) {
         if (c == null) {
-            return null;
+            return null; // NOSONAR
         }
 
         double[] a = new double[c.size()];

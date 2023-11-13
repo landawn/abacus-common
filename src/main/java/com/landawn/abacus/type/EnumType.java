@@ -79,18 +79,18 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public EnumBy enumerated() {
         return enumBy;
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public boolean isSerializable() {
@@ -98,9 +98,9 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public boolean isImmutable() {
@@ -108,10 +108,10 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
     }
 
     /**
-     * 
      *
-     * @param x 
-     * @return 
+     *
+     * @param x
+     * @return
      */
     @Override
     public String stringOf(T x) {
@@ -119,16 +119,16 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
     }
 
     /**
-     * 
      *
-     * @param str 
-     * @return 
+     *
+     * @param str
+     * @return
      */
     @Override
     public T valueOf(String str) {
         if (jsonValueType == null) {
             if (Strings.isEmpty(str) || (!hasNull && NULL.equals(str))) {
-                return null;
+                return null; // NOSONAR
             }
 
             if (Strings.isAsciiDigtalInteger(str)) {
@@ -148,10 +148,10 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
     }
 
     /**
-     * 
      *
-     * @param value 
-     * @return 
+     *
+     * @param value
+     * @return
      */
     public T valueOf(final int value) {
         T result = numberEnum.get(value);
@@ -164,12 +164,12 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
     }
 
     /**
-     * 
      *
-     * @param rs 
-     * @param columnIndex 
-     * @return 
-     * @throws SQLException 
+     *
+     * @param rs
+     * @param columnIndex
+     * @return
+     * @throws SQLException
      */
     @Override
     public T get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -185,12 +185,12 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
     }
 
     /**
-     * 
      *
-     * @param rs 
-     * @param columnLabel 
-     * @return 
-     * @throws SQLException 
+     *
+     * @param rs
+     * @param columnLabel
+     * @return
+     * @throws SQLException
      */
     @Override
     public T get(final ResultSet rs, final String columnLabel) throws SQLException {
@@ -206,12 +206,12 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
     }
 
     /**
-     * 
      *
-     * @param stmt 
-     * @param columnIndex 
-     * @param x 
-     * @throws SQLException 
+     *
+     * @param stmt
+     * @param columnIndex
+     * @param x
+     * @throws SQLException
      */
     @Override
     public void set(final PreparedStatement stmt, final int columnIndex, final T x) throws SQLException {
@@ -227,12 +227,12 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
     }
 
     /**
-     * 
      *
-     * @param stmt 
-     * @param parameterName 
-     * @param x 
-     * @throws SQLException 
+     *
+     * @param stmt
+     * @param parameterName
+     * @param x
+     * @throws SQLException
      */
     @Override
     public void set(final CallableStatement stmt, final String parameterName, final T x) throws SQLException {
@@ -248,12 +248,12 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
     }
 
     /**
-     * 
      *
-     * @param writer 
-     * @param x 
-     * @param config 
-     * @throws IOException 
+     *
+     * @param writer
+     * @param x
+     * @param config
+     * @throws IOException
      */
     @SuppressWarnings("rawtypes")
     @Override

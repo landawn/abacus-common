@@ -19,7 +19,6 @@ package com.landawn.abacus.util;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
@@ -4875,7 +4874,7 @@ public class RowDataSet implements DataSet, Cloneable {
         Writer writer = null;
 
         try {
-            writer = new OutputStreamWriter(output);
+            writer = IOUtil.newOutputStreamWriter(output); // NOSONAR
 
             toCSV(writer, columnNames, fromRowIndex, toRowIndex, writeTitle, quoted);
 
@@ -11404,7 +11403,7 @@ public class RowDataSet implements DataSet, Cloneable {
      */
     @Override
     public void println(Collection<String> columnNames, int fromRowIndex, int toRowIndex) throws UncheckedIOException {
-        println(new OutputStreamWriter(System.out), columnNames, fromRowIndex, toRowIndex);
+        println(IOUtil.newOutputStreamWriter(System.out), columnNames, fromRowIndex, toRowIndex); // NOSONAR
     }
 
     /**

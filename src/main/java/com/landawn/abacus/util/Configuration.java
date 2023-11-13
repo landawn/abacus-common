@@ -115,11 +115,11 @@ public abstract class Configuration {
             this.props.putAll(props);
         }
 
-        init();
+        init(); // NOSONAR
 
         if (element != null) {
             for (Map.Entry<String, String> entry : XMLUtil.readAttributes(element).entrySet()) {
-                setAttribute(entry.getKey(), entry.getValue());
+                setAttribute(entry.getKey(), entry.getValue()); // NOSONAR
             }
 
             NodeList childNodeList = element.getChildNodes();
@@ -131,9 +131,9 @@ public abstract class Configuration {
                     if (isTextElement(childNode)) {
                         String attrName = childNode.getNodeName();
                         String attrValue = getTextContent(childNode);
-                        setAttribute(attrName, attrValue);
+                        setAttribute(attrName, attrValue); // NOSONAR
                     } else {
-                        complexElement2Attr((Element) childNode);
+                        complexElement2Attr((Element) childNode); // NOSONAR
                     }
                 }
             }
@@ -726,9 +726,9 @@ public abstract class Configuration {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public int hashCode() {
@@ -746,9 +746,9 @@ public abstract class Configuration {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public String toString() {

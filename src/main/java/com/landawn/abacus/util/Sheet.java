@@ -17,7 +17,6 @@
 package com.landawn.abacus.util;
 
 import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -2887,7 +2886,7 @@ public final class Sheet<R, C, E> implements Cloneable {
      * @throws UncheckedIOException the unchecked IO exception
      */
     public void println(final Collection<R> rowKeySet, final Collection<C> columnKeySet) throws UncheckedIOException {
-        println(new OutputStreamWriter(System.out), rowKeySet, columnKeySet);
+        println(IOUtil.newOutputStreamWriter(System.out), rowKeySet, columnKeySet); // NOSONAR
     }
 
     /**

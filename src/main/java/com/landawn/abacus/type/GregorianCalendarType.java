@@ -39,9 +39,9 @@ public class GregorianCalendarType extends AbstractCalendarType<GregorianCalenda
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public Class<GregorianCalendar> clazz() {
@@ -86,7 +86,7 @@ public class GregorianCalendarType extends AbstractCalendarType<GregorianCalenda
     @Override
     public GregorianCalendar valueOf(char[] cbuf, int offset, int len) {
         if ((cbuf == null) || (len == 0)) {
-            return null;
+            return null; // NOSONAR
         }
 
         if (cbuf[offset + 4] != '-') {
@@ -132,7 +132,7 @@ public class GregorianCalendarType extends AbstractCalendarType<GregorianCalenda
      */
     private static GregorianCalendar asGregorianCalendar(Timestamp value) {
         if (value == null) {
-            return null;
+            return null; // NOSONAR
         }
 
         GregorianCalendar gc = new GregorianCalendar();

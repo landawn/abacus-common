@@ -38,9 +38,9 @@ public class ByteBufferType extends AbstractType<ByteBuffer> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public Class<ByteBuffer> clazz() {
@@ -75,7 +75,7 @@ public class ByteBufferType extends AbstractType<ByteBuffer> {
     @Override
     public ByteBuffer valueOf(String str) {
         if (str == null) {
-            return null;
+            return null; // NOSONAR
         } else if (str.length() == 0) {
             return valueOf(N.EMPTY_BYTE_ARRAY);
         } else {

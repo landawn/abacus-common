@@ -18,7 +18,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
 import java.lang.reflect.Method;
@@ -322,10 +321,10 @@ public final class PropertiesUtil {
     /**
      * Load from XML.
      *
-     * @param <T> 
-     * @param file 
-     * @param targetClass 
-     * @return 
+     * @param <T>
+     * @param file
+     * @param targetClass
+     * @return
      */
     public static <T extends Properties<String, Object>> T loadFromXML(File file, Class<? extends T> targetClass) {
         return loadFromXML(file, false, targetClass);
@@ -334,11 +333,11 @@ public final class PropertiesUtil {
     /**
      * Load from XML.
      *
-     * @param <T> 
-     * @param file 
-     * @param autoRefresh 
-     * @param targetClass 
-     * @return 
+     * @param <T>
+     * @param file
+     * @param autoRefresh
+     * @param targetClass
+     * @return
      */
     public static <T extends Properties<String, Object>> T loadFromXML(File file, boolean autoRefresh, Class<? extends T> targetClass) {
         T properties = null;
@@ -373,10 +372,10 @@ public final class PropertiesUtil {
     /**
      * Load from XML.
      *
-     * @param <T> 
-     * @param is 
-     * @param targetClass 
-     * @return 
+     * @param <T>
+     * @param is
+     * @param targetClass
+     * @return
      */
     public static <T extends Properties<String, Object>> T loadFromXML(InputStream is, Class<? extends T> targetClass) {
         return loadFromXML(null, is, targetClass);
@@ -813,7 +812,7 @@ public final class PropertiesUtil {
 
             IOUtil.createNewFileIfNotExists(classFile);
 
-            writer = new OutputStreamWriter(IOUtil.newFileOutputStream(classFile), IOUtil.DEFAULT_CHARSET);
+            writer = IOUtil.newOutputStreamWriter(IOUtil.newFileOutputStream(classFile), IOUtil.DEFAULT_CHARSET);
             writer.write("package " + packageName + ";" + IOUtil.LINE_SEPARATOR);
 
             writer.write(IOUtil.LINE_SEPARATOR);
@@ -1215,7 +1214,7 @@ public final class PropertiesUtil {
     /**
      * The Class ConfigBean.
      */
-    static class ConfigBean {
+    static final class ConfigBean { // NOSONAR
 
         /** The id. */
         private long id;

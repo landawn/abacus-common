@@ -55,9 +55,9 @@ public class LongMultisetType<E> extends AbstractType<LongMultiset<E>> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public String declaringName() {
@@ -65,9 +65,9 @@ public class LongMultisetType<E> extends AbstractType<LongMultiset<E>> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public Class<LongMultiset<E>> clazz() {
@@ -132,7 +132,7 @@ public class LongMultisetType<E> extends AbstractType<LongMultiset<E>> {
     @Override
     public LongMultiset<E> valueOf(String str) {
         if (Strings.isEmpty(str)) {
-            return null;
+            return null; // NOSONAR
         }
 
         final Map<E, Long> map = Utils.jsonParser.deserialize(Map.class, str, jdc);

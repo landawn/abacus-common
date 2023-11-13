@@ -117,7 +117,7 @@ public class PairType<L, R> extends AbstractType<Pair<L, R>> {
     @Override
     public Pair<L, R> valueOf(String str) {
         if (Strings.isEmpty(str)) {
-            return null;
+            return null; // NOSONAR
         }
 
         final Object[] a = Utils.jsonParser.deserialize(Object[].class, str, Utils.jdc);

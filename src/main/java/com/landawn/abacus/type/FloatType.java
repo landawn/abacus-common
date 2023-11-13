@@ -65,7 +65,7 @@ public final class FloatType extends AbstractFloatType {
         final Object ret = rs.getObject(columnIndex);
 
         if (ret == null) {
-            return null;
+            return null; // NOSONAR
         } else if (ret instanceof Float) {
             return (Float) ret;
         } else {
@@ -85,7 +85,7 @@ public final class FloatType extends AbstractFloatType {
         final Object ret = rs.getObject(columnLabel);
 
         if (ret == null) {
-            return null;
+            return null; // NOSONAR
         } else if (ret instanceof Float) {
             return (Float) ret;
         } else {

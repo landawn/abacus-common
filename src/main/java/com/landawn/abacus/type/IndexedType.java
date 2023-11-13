@@ -56,9 +56,9 @@ public class IndexedType<T> extends AbstractType<Indexed<T>> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public String declaringName() {
@@ -66,9 +66,9 @@ public class IndexedType<T> extends AbstractType<Indexed<T>> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public Class<Indexed<T>> clazz() {
@@ -114,7 +114,7 @@ public class IndexedType<T> extends AbstractType<Indexed<T>> {
     @Override
     public Indexed<T> valueOf(String str) {
         if (Strings.isEmpty(str)) {
-            return null;
+            return null; // NOSONAR
         }
 
         final Object[] a = Utils.jsonParser.deserialize(Object[].class, str, Utils.jdc);

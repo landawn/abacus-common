@@ -30,9 +30,9 @@ public final class Password {
     private final MessageDigest msgDigest;
 
     /**
-     * 
      *
-     * @param algorithm 
+     *
+     * @param algorithm
      */
     public Password(String algorithm) {
         this.algorithm = algorithm;
@@ -65,7 +65,7 @@ public final class Password {
         }
 
         try {
-            return Strings.base64Encode(msgDigest.digest(x.getBytes()));
+            return Strings.base64Encode(msgDigest.digest(x.getBytes(Charsets.UTF_8)));
         } finally {
             msgDigest.reset();
         }
@@ -83,9 +83,9 @@ public final class Password {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public int hashCode() {
@@ -103,9 +103,9 @@ public final class Password {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public String toString() {

@@ -122,7 +122,7 @@ public class TripleType<L, M, R> extends AbstractType<Triple<L, M, R>> {
     @Override
     public Triple<L, M, R> valueOf(String str) {
         if (Strings.isEmpty(str)) {
-            return null;
+            return null; // NOSONAR
         }
 
         final Object[] a = Utils.jsonParser.deserialize(Object[].class, str, Utils.jdc);

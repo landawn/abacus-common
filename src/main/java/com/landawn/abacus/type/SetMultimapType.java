@@ -125,7 +125,7 @@ public class SetMultimapType<K, E> extends AbstractType<SetMultimap<K, E>> {
     @Override
     public SetMultimap<K, E> valueOf(String st) {
         if (Strings.isEmpty(st)) {
-            return null;
+            return null; // NOSONAR
         }
 
         final Map<K, Collection<E>> map = Utils.jsonParser.deserialize(Map.class, st, jdc);

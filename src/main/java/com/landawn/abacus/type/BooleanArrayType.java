@@ -42,7 +42,7 @@ public final class BooleanArrayType extends ObjectArrayType<Boolean> {
     @Override
     public String stringOf(Boolean[] x) {
         if (x == null) {
-            return null;
+            return null; // NOSONAR
         }
 
         final StringBuilder sb = Objectory.createStringBuilder();
@@ -77,7 +77,7 @@ public final class BooleanArrayType extends ObjectArrayType<Boolean> {
     @Override
     public Boolean[] valueOf(String str) {
         if (str == null) {
-            return null;
+            return null; // NOSONAR
         } else if (str.length() == 0 || "[]".equals(str)) {
             return N.EMPTY_BOOLEAN_OBJ_ARRAY;
         }

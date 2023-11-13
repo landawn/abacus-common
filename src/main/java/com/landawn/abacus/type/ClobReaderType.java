@@ -121,6 +121,6 @@ public class ClobReaderType extends ReaderType {
             return clob.getCharacterStream();
         }
 
-        return null;
+        return null; // NOSONAR
     }
 }

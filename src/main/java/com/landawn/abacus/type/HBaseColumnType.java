@@ -53,9 +53,9 @@ public class HBaseColumnType<T> extends AbstractType<HBaseColumn<T>> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public String declaringName() {
@@ -63,9 +63,9 @@ public class HBaseColumnType<T> extends AbstractType<HBaseColumn<T>> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public Class<HBaseColumn<T>> clazz() {
@@ -120,7 +120,7 @@ public class HBaseColumnType<T> extends AbstractType<HBaseColumn<T>> {
     @Override
     public HBaseColumn<T> valueOf(String str) {
         if (Strings.isEmpty(str)) {
-            return null;
+            return null; // NOSONAR
         }
 
         int index = str.indexOf(_SEPERATOR);

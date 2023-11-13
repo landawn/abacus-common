@@ -215,7 +215,7 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
     @Override
     public String stringOf(T x) {
         if (x == null) {
-            return null;
+            return null; // NOSONAR
         }
 
         if (jsonValueType == null) {

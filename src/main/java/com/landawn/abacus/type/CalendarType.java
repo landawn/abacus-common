@@ -41,9 +41,9 @@ public class CalendarType extends AbstractCalendarType<Calendar> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public Class<Calendar> clazz() {
@@ -88,7 +88,7 @@ public class CalendarType extends AbstractCalendarType<Calendar> {
     @Override
     public Calendar valueOf(char[] cbuf, int offset, int len) {
         if ((cbuf == null) || (len == 0)) {
-            return null;
+            return null; // NOSONAR
         }
 
         if (cbuf[offset + 4] != '-') {

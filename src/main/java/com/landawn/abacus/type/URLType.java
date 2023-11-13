@@ -66,7 +66,7 @@ public class URLType extends AbstractType<URL> {
     @Override
     public URL valueOf(String str) {
         if (Strings.isEmpty(str)) {
-            return null;
+            return null; // NOSONAR
         }
 
         try {

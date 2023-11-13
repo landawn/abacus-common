@@ -30,7 +30,7 @@ import java.util.Set;
  * @param <E>
  * @since 0.8
  */
-public class ArrayHashSet<E> implements Set<E> {
+public sealed class ArrayHashSet<E> implements Set<E> permits LinkedArrayHashSet {
 
     private final Set<Wrapper<E>> set;
 
@@ -72,7 +72,7 @@ public class ArrayHashSet<E> implements Set<E> {
             set = N.newHashSet(coll.size());
         }
 
-        addAll(coll);
+        addAll(coll); // NOSONAR
     }
 
     ArrayHashSet(Set<Wrapper<E>> set) {

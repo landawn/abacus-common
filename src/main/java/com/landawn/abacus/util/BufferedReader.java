@@ -16,7 +16,6 @@ package com.landawn.abacus.util;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.Reader;
 
 /**
@@ -50,7 +49,7 @@ public final class BufferedReader extends Reader {
     }
 
     BufferedReader(InputStream is) {
-        this(new InputStreamReader(is, IOUtil.DEFAULT_CHARSET));
+        this(IOUtil.newInputStreamReader(is, IOUtil.DEFAULT_CHARSET));
     }
 
     BufferedReader(Reader reader) {
@@ -419,7 +418,7 @@ public final class BufferedReader extends Reader {
      * @param is
      */
     void reinit(InputStream is) {
-        reinit(new InputStreamReader(is));
+        reinit(IOUtil.newInputStreamReader(is));
     }
 
     /**

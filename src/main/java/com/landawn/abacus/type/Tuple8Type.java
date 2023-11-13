@@ -152,7 +152,7 @@ public class Tuple8Type<T1, T2, T3, T4, T5, T6, T7, T8> extends AbstractType<Tup
     @Override
     public Tuple8<T1, T2, T3, T4, T5, T6, T7, T8> valueOf(String str) {
         if (Strings.isEmpty(str)) {
-            return null;
+            return null; // NOSONAR
         }
 
         final Object[] a = Utils.jsonParser.deserialize(Object[].class, str, Utils.jdc);

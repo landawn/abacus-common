@@ -122,7 +122,7 @@ public class RangeType<T extends Comparable<? super T>> extends AbstractType<Ran
     @Override
     public String stringOf(Range<T> x) {
         if (x == null) {
-            return null;
+            return null; // NOSONAR
         }
 
         final BoundType boundType = x.boundType();
@@ -149,7 +149,7 @@ public class RangeType<T extends Comparable<? super T>> extends AbstractType<Ran
         str = Strings.trim(str);
 
         if (Strings.isEmpty(str)) {
-            return null;
+            return null; // NOSONAR
         }
 
         final String prefix = str.substring(0, 1);

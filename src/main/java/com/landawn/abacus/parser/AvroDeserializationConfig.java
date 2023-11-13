@@ -28,6 +28,10 @@ public class AvroDeserializationConfig extends DeserializationConfig<AvroDeseria
 
     private Schema schema;
 
+    AvroDeserializationConfig() {
+
+    }
+
     /**
      * Gets the schema.
      *
@@ -70,9 +74,9 @@ public class AvroDeserializationConfig extends DeserializationConfig<AvroDeseria
     //    }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public int hashCode() {
@@ -113,9 +117,9 @@ public class AvroDeserializationConfig extends DeserializationConfig<AvroDeseria
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public String toString() {

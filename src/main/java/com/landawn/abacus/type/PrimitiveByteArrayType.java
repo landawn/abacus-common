@@ -88,7 +88,7 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
     @Override
     public String stringOf(byte[] x) {
         if (x == null) {
-            return null;
+            return null; // NOSONAR
         } else if (x.length == 0) {
             return "[]";
         }
@@ -122,7 +122,7 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
     @Override
     public byte[] valueOf(String str) {
         if (str == null) {
-            return null;
+            return null; // NOSONAR
         } else if (str.length() == 0 || "[]".equals(str)) {
             return N.EMPTY_BYTE_ARRAY;
         }
@@ -149,7 +149,7 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
     @Override
     public byte[] valueOf(final Object obj) {
         if (obj == null) {
-            return null;
+            return null; // NOSONAR
         } else if (obj instanceof Blob blob) {
             try {
                 return blob.getBytes(1, (int) blob.length());
@@ -301,7 +301,7 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
     @Override
     public byte[] collection2Array(Collection<?> c) {
         if (c == null) {
-            return null;
+            return null; // NOSONAR
         }
 
         byte[] a = new byte[c.size()];

@@ -33,9 +33,9 @@ public final class ByteType extends AbstractByteType {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
@@ -64,8 +64,8 @@ public final class ByteType extends AbstractByteType {
     public Byte get(ResultSet rs, int columnIndex) throws SQLException {
         final Object ret = rs.getObject(columnIndex);
 
-        if (ret == null) {
-            return null;
+        if (ret == null) { // NOSONAR
+            return null; // NOSONAR
         } else if (ret instanceof Number) {
             return ((Number) ret).byteValue();
         } else {
@@ -85,7 +85,7 @@ public final class ByteType extends AbstractByteType {
         final Object ret = rs.getObject(columnLabel);
 
         if (ret == null) {
-            return null;
+            return null; // NOSONAR
         } else if (ret instanceof Number) {
             return ((Number) ret).byteValue();
         } else {

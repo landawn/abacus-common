@@ -42,7 +42,7 @@ public final class CharacterArrayType extends ObjectArrayType<Character> {
     @Override
     public String stringOf(Character[] x) {
         if (x == null) {
-            return null;
+            return null; // NOSONAR
         } else if (x.length == 0) {
             return "[]";
         }
@@ -81,7 +81,7 @@ public final class CharacterArrayType extends ObjectArrayType<Character> {
     @Override
     public Character[] valueOf(String str) {
         if (str == null) {
-            return null;
+            return null; // NOSONAR
         } else if (str.length() == 0 || "[]".equals(str)) {
             return N.EMPTY_CHAR_OBJ_ARRAY;
         }

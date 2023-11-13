@@ -71,7 +71,7 @@ public final class PrimitiveIntArrayType extends AbstractPrimitiveArrayType<int[
     @Override
     public String stringOf(int[] x) {
         if (x == null) {
-            return null;
+            return null; // NOSONAR
         } else if (x.length == 0) {
             return "[]";
         }
@@ -105,7 +105,7 @@ public final class PrimitiveIntArrayType extends AbstractPrimitiveArrayType<int[
     @Override
     public int[] valueOf(String str) {
         if (str == null) {
-            return null;
+            return null; // NOSONAR
         } else if (str.length() == 0 || "[]".equals(str)) {
             return N.EMPTY_INT_ARRAY;
         }
@@ -183,7 +183,7 @@ public final class PrimitiveIntArrayType extends AbstractPrimitiveArrayType<int[
     @Override
     public int[] collection2Array(Collection<?> c) {
         if (c == null) {
-            return null;
+            return null; // NOSONAR
         }
 
         int[] a = new int[c.size()];

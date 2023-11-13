@@ -69,12 +69,12 @@ public interface NoCachingNoUpdating {
         }
 
         /**
-         * 
          *
-         * @param <T> 
-         * @param componentType 
-         * @param len 
-         * @return 
+         *
+         * @param <T>
+         * @param componentType
+         * @param len
+         * @return
          */
         public static <T> DisposableArray<T> create(final Class<T> componentType, final int len) {
             return new DisposableArray<>(N.newArray(componentType, len));
@@ -161,11 +161,11 @@ public interface NoCachingNoUpdating {
         }
 
         /**
-         * 
          *
-         * @param <E> 
-         * @param action 
-         * @throws E 
+         *
+         * @param <E>
+         * @param action
+         * @throws E
          */
         public <E extends Exception> void forEach(final Throwables.Consumer<? super T, E> action) throws E {
             for (T e : a) {
@@ -174,24 +174,24 @@ public interface NoCachingNoUpdating {
         }
 
         /**
-         * 
          *
-         * @param <R> 
-         * @param <E> 
-         * @param func 
-         * @return 
-         * @throws E 
+         *
+         * @param <R>
+         * @param <E>
+         * @param func
+         * @return
+         * @throws E
          */
         public <R, E extends Exception> R apply(final Throwables.Function<? super T[], ? extends R, E> func) throws E {
             return func.apply(a);
         }
 
         /**
-         * 
          *
-         * @param <E> 
-         * @param action 
-         * @throws E 
+         *
+         * @param <E>
+         * @param action
+         * @throws E
          */
         public <E extends Exception> void accept(final Throwables.Consumer<? super T[], E> action) throws E {
             action.accept(a);
@@ -255,10 +255,10 @@ public interface NoCachingNoUpdating {
         }
 
         /**
-         * 
          *
-         * @param len 
-         * @return 
+         *
+         * @param len
+         * @return
          */
         public static DisposableObjArray create(final int len) {
             return new DisposableObjArray(new Object[len]);
@@ -312,10 +312,10 @@ public interface NoCachingNoUpdating {
         }
 
         /**
-         * 
          *
-         * @param len 
-         * @return 
+         *
+         * @param len
+         * @return
          */
         public static DisposableBooleanArray create(final int len) {
             return new DisposableBooleanArray(new boolean[len]);
@@ -335,7 +335,7 @@ public interface NoCachingNoUpdating {
          * @param index
          * @return
          */
-        public boolean get(final int index) {
+        public boolean get(final int index) { // NOSONAR
             return a[index];
         }
 
@@ -389,11 +389,11 @@ public interface NoCachingNoUpdating {
         }
 
         /**
-         * 
          *
-         * @param <E> 
-         * @param action 
-         * @throws E 
+         *
+         * @param <E>
+         * @param action
+         * @throws E
          */
         public <E extends Exception> void forEach(final Throwables.BooleanConsumer<E> action) throws E {
             for (boolean e : a) {
@@ -402,24 +402,24 @@ public interface NoCachingNoUpdating {
         }
 
         /**
-         * 
          *
-         * @param <R> 
-         * @param <E> 
-         * @param func 
-         * @return 
-         * @throws E 
+         *
+         * @param <R>
+         * @param <E>
+         * @param func
+         * @return
+         * @throws E
          */
         public <R, E extends Exception> R apply(final Throwables.Function<? super boolean[], ? extends R, E> func) throws E {
             return func.apply(a);
         }
 
         /**
-         * 
          *
-         * @param <E> 
-         * @param action 
-         * @throws E 
+         *
+         * @param <E>
+         * @param action
+         * @throws E
          */
         public <E extends Exception> void accept(final Throwables.Consumer<? super boolean[], E> action) throws E {
             action.accept(a);
@@ -487,10 +487,10 @@ public interface NoCachingNoUpdating {
         }
 
         /**
-         * 
          *
-         * @param len 
-         * @return 
+         *
+         * @param len
+         * @return
          */
         public static DisposableCharArray create(final int len) {
             return new DisposableCharArray(new char[len]);
@@ -596,11 +596,11 @@ public interface NoCachingNoUpdating {
         }
 
         /**
-         * 
          *
-         * @param <E> 
-         * @param action 
-         * @throws E 
+         *
+         * @param <E>
+         * @param action
+         * @throws E
          */
         public <E extends Exception> void forEach(final Throwables.CharConsumer<E> action) throws E {
             for (char e : a) {
@@ -609,24 +609,24 @@ public interface NoCachingNoUpdating {
         }
 
         /**
-         * 
          *
-         * @param <R> 
-         * @param <E> 
-         * @param func 
-         * @return 
-         * @throws E 
+         *
+         * @param <R>
+         * @param <E>
+         * @param func
+         * @return
+         * @throws E
          */
         public <R, E extends Exception> R apply(final Throwables.Function<? super char[], ? extends R, E> func) throws E {
             return func.apply(a);
         }
 
         /**
-         * 
          *
-         * @param <E> 
-         * @param action 
-         * @throws E 
+         *
+         * @param <E>
+         * @param action
+         * @throws E
          */
         public <E extends Exception> void accept(final Throwables.Consumer<? super char[], E> action) throws E {
             action.accept(a);
@@ -694,10 +694,10 @@ public interface NoCachingNoUpdating {
         }
 
         /**
-         * 
          *
-         * @param len 
-         * @return 
+         *
+         * @param len
+         * @return
          */
         public static DisposableByteArray create(final int len) {
             return new DisposableByteArray(new byte[len]);
@@ -803,11 +803,11 @@ public interface NoCachingNoUpdating {
         }
 
         /**
-         * 
          *
-         * @param <E> 
-         * @param action 
-         * @throws E 
+         *
+         * @param <E>
+         * @param action
+         * @throws E
          */
         public <E extends Exception> void forEach(final Throwables.ByteConsumer<E> action) throws E {
             for (byte e : a) {
@@ -816,24 +816,24 @@ public interface NoCachingNoUpdating {
         }
 
         /**
-         * 
          *
-         * @param <R> 
-         * @param <E> 
-         * @param func 
-         * @return 
-         * @throws E 
+         *
+         * @param <R>
+         * @param <E>
+         * @param func
+         * @return
+         * @throws E
          */
         public <R, E extends Exception> R apply(final Throwables.Function<? super byte[], ? extends R, E> func) throws E {
             return func.apply(a);
         }
 
         /**
-         * 
          *
-         * @param <E> 
-         * @param action 
-         * @throws E 
+         *
+         * @param <E>
+         * @param action
+         * @throws E
          */
         public <E extends Exception> void accept(final Throwables.Consumer<? super byte[], E> action) throws E {
             action.accept(a);
@@ -901,10 +901,10 @@ public interface NoCachingNoUpdating {
         }
 
         /**
-         * 
          *
-         * @param len 
-         * @return 
+         *
+         * @param len
+         * @return
          */
         public static DisposableShortArray create(final int len) {
             return new DisposableShortArray(new short[len]);
@@ -1010,11 +1010,11 @@ public interface NoCachingNoUpdating {
         }
 
         /**
-         * 
          *
-         * @param <E> 
-         * @param action 
-         * @throws E 
+         *
+         * @param <E>
+         * @param action
+         * @throws E
          */
         public <E extends Exception> void forEach(final Throwables.ShortConsumer<E> action) throws E {
             for (short e : a) {
@@ -1023,24 +1023,24 @@ public interface NoCachingNoUpdating {
         }
 
         /**
-         * 
          *
-         * @param <R> 
-         * @param <E> 
-         * @param func 
-         * @return 
-         * @throws E 
+         *
+         * @param <R>
+         * @param <E>
+         * @param func
+         * @return
+         * @throws E
          */
         public <R, E extends Exception> R apply(final Throwables.Function<? super short[], ? extends R, E> func) throws E {
             return func.apply(a);
         }
 
         /**
-         * 
          *
-         * @param <E> 
-         * @param action 
-         * @throws E 
+         *
+         * @param <E>
+         * @param action
+         * @throws E
          */
         public <E extends Exception> void accept(final Throwables.Consumer<? super short[], E> action) throws E {
             action.accept(a);
@@ -1108,10 +1108,10 @@ public interface NoCachingNoUpdating {
         }
 
         /**
-         * 
          *
-         * @param len 
-         * @return 
+         *
+         * @param len
+         * @return
          */
         public static DisposableIntArray create(final int len) {
             return new DisposableIntArray(new int[len]);
@@ -1217,11 +1217,11 @@ public interface NoCachingNoUpdating {
         }
 
         /**
-         * 
          *
-         * @param <E> 
-         * @param action 
-         * @throws E 
+         *
+         * @param <E>
+         * @param action
+         * @throws E
          */
         public <E extends Exception> void forEach(final Throwables.IntConsumer<E> action) throws E {
             for (int e : a) {
@@ -1230,24 +1230,24 @@ public interface NoCachingNoUpdating {
         }
 
         /**
-         * 
          *
-         * @param <R> 
-         * @param <E> 
-         * @param func 
-         * @return 
-         * @throws E 
+         *
+         * @param <R>
+         * @param <E>
+         * @param func
+         * @return
+         * @throws E
          */
         public <R, E extends Exception> R apply(final Throwables.Function<? super int[], ? extends R, E> func) throws E {
             return func.apply(a);
         }
 
         /**
-         * 
          *
-         * @param <E> 
-         * @param action 
-         * @throws E 
+         *
+         * @param <E>
+         * @param action
+         * @throws E
          */
         public <E extends Exception> void accept(final Throwables.Consumer<? super int[], E> action) throws E {
             action.accept(a);
@@ -1315,10 +1315,10 @@ public interface NoCachingNoUpdating {
         }
 
         /**
-         * 
          *
-         * @param len 
-         * @return 
+         *
+         * @param len
+         * @return
          */
         public static DisposableLongArray create(final int len) {
             return new DisposableLongArray(new long[len]);
@@ -1424,11 +1424,11 @@ public interface NoCachingNoUpdating {
         }
 
         /**
-         * 
          *
-         * @param <E> 
-         * @param action 
-         * @throws E 
+         *
+         * @param <E>
+         * @param action
+         * @throws E
          */
         public <E extends Exception> void forEach(final Throwables.LongConsumer<E> action) throws E {
             for (long e : a) {
@@ -1437,24 +1437,24 @@ public interface NoCachingNoUpdating {
         }
 
         /**
-         * 
          *
-         * @param <R> 
-         * @param <E> 
-         * @param func 
-         * @return 
-         * @throws E 
+         *
+         * @param <R>
+         * @param <E>
+         * @param func
+         * @return
+         * @throws E
          */
         public <R, E extends Exception> R apply(final Throwables.Function<? super long[], ? extends R, E> func) throws E {
             return func.apply(a);
         }
 
         /**
-         * 
          *
-         * @param <E> 
-         * @param action 
-         * @throws E 
+         *
+         * @param <E>
+         * @param action
+         * @throws E
          */
         public <E extends Exception> void accept(final Throwables.Consumer<? super long[], E> action) throws E {
             action.accept(a);
@@ -1522,10 +1522,10 @@ public interface NoCachingNoUpdating {
         }
 
         /**
-         * 
          *
-         * @param len 
-         * @return 
+         *
+         * @param len
+         * @return
          */
         public static DisposableFloatArray create(final int len) {
             return new DisposableFloatArray(new float[len]);
@@ -1631,11 +1631,11 @@ public interface NoCachingNoUpdating {
         }
 
         /**
-         * 
          *
-         * @param <E> 
-         * @param action 
-         * @throws E 
+         *
+         * @param <E>
+         * @param action
+         * @throws E
          */
         public <E extends Exception> void forEach(final Throwables.FloatConsumer<E> action) throws E {
             for (float e : a) {
@@ -1644,24 +1644,24 @@ public interface NoCachingNoUpdating {
         }
 
         /**
-         * 
          *
-         * @param <R> 
-         * @param <E> 
-         * @param func 
-         * @return 
-         * @throws E 
+         *
+         * @param <R>
+         * @param <E>
+         * @param func
+         * @return
+         * @throws E
          */
         public <R, E extends Exception> R apply(final Throwables.Function<? super float[], ? extends R, E> func) throws E {
             return func.apply(a);
         }
 
         /**
-         * 
          *
-         * @param <E> 
-         * @param action 
-         * @throws E 
+         *
+         * @param <E>
+         * @param action
+         * @throws E
          */
         public <E extends Exception> void accept(final Throwables.Consumer<? super float[], E> action) throws E {
             action.accept(a);
@@ -1729,10 +1729,10 @@ public interface NoCachingNoUpdating {
         }
 
         /**
-         * 
          *
-         * @param len 
-         * @return 
+         *
+         * @param len
+         * @return
          */
         public static DisposableDoubleArray create(final int len) {
             return new DisposableDoubleArray(new double[len]);
@@ -1838,11 +1838,11 @@ public interface NoCachingNoUpdating {
         }
 
         /**
-         * 
          *
-         * @param <E> 
-         * @param action 
-         * @throws E 
+         *
+         * @param <E>
+         * @param action
+         * @throws E
          */
         public <E extends Exception> void forEach(final Throwables.DoubleConsumer<E> action) throws E {
             for (double e : a) {
@@ -1851,24 +1851,24 @@ public interface NoCachingNoUpdating {
         }
 
         /**
-         * 
          *
-         * @param <R> 
-         * @param <E> 
-         * @param func 
-         * @return 
-         * @throws E 
+         *
+         * @param <R>
+         * @param <E>
+         * @param func
+         * @return
+         * @throws E
          */
         public <R, E extends Exception> R apply(final Throwables.Function<? super double[], ? extends R, E> func) throws E {
             return func.apply(a);
         }
 
         /**
-         * 
          *
-         * @param <E> 
-         * @param action 
-         * @throws E 
+         *
+         * @param <E>
+         * @param action
+         * @throws E
          */
         public <E extends Exception> void accept(final Throwables.Consumer<? super double[], E> action) throws E {
             action.accept(a);
@@ -1938,11 +1938,11 @@ public interface NoCachingNoUpdating {
         }
 
         /**
-         * 
          *
-         * @param <T> 
-         * @param len 
-         * @return 
+         *
+         * @param <T>
+         * @param len
+         * @return
          */
         public static <T> DisposableDeque<T> create(final int len) {
             return new DisposableDeque<>(new ArrayDeque<>(len));
@@ -2023,11 +2023,11 @@ public interface NoCachingNoUpdating {
         }
 
         /**
-         * 
          *
-         * @param <E> 
-         * @param action 
-         * @throws E 
+         *
+         * @param <E>
+         * @param action
+         * @throws E
          */
         public <E extends Exception> void forEach(final Throwables.Consumer<? super T, E> action) throws E {
             for (T e : deque) {
@@ -2036,24 +2036,24 @@ public interface NoCachingNoUpdating {
         }
 
         /**
-         * 
          *
-         * @param <R> 
-         * @param <E> 
-         * @param func 
-         * @return 
-         * @throws E 
+         *
+         * @param <R>
+         * @param <E>
+         * @param func
+         * @return
+         * @throws E
          */
         public <R, E extends Exception> R apply(final Throwables.Function<? super Deque<T>, ? extends R, E> func) throws E {
             return func.apply(deque);
         }
 
         /**
-         * 
          *
-         * @param <E> 
-         * @param action 
-         * @throws E 
+         *
+         * @param <E>
+         * @param action
+         * @throws E
          */
         public <E extends Exception> void accept(final Throwables.Consumer<? super Deque<T>, E> action) throws E {
             action.accept(deque);
@@ -2142,57 +2142,57 @@ public interface NoCachingNoUpdating {
         }
 
         /**
-         * 
          *
-         * @return 
+         *
+         * @return
          */
         public Map.Entry<K, V> copy() {
             return new AbstractMap.SimpleEntry<>(getKey(), getValue());
         }
 
         /**
-         * 
          *
-         * @param <R> 
-         * @param <E> 
-         * @param func 
-         * @return 
-         * @throws E 
+         *
+         * @param <R>
+         * @param <E>
+         * @param func
+         * @return
+         * @throws E
          */
         public <R, E extends Exception> R apply(final Throwables.Function<? super DisposableEntry<K, V>, ? extends R, E> func) throws E {
             return func.apply(this);
         }
 
         /**
-         * 
          *
-         * @param <R> 
-         * @param <E> 
-         * @param func 
-         * @return 
-         * @throws E 
+         *
+         * @param <R>
+         * @param <E>
+         * @param func
+         * @return
+         * @throws E
          */
         public <R, E extends Exception> R apply(final Throwables.BiFunction<? super K, ? super V, ? extends R, E> func) throws E {
             return func.apply(this.getKey(), this.getValue());
         }
 
         /**
-         * 
          *
-         * @param <E> 
-         * @param action 
-         * @throws E 
+         *
+         * @param <E>
+         * @param action
+         * @throws E
          */
         public <E extends Exception> void accept(final Throwables.Consumer<? super DisposableEntry<K, V>, E> action) throws E {
             action.accept(this);
         }
 
         /**
-         * 
          *
-         * @param <E> 
-         * @param action 
-         * @throws E 
+         *
+         * @param <E>
+         * @param action
+         * @throws E
          */
         public <E extends Exception> void accept(final Throwables.BiConsumer<? super K, ? super V, E> action) throws E {
             action.accept(this.getKey(), this.getValue());
@@ -2247,56 +2247,56 @@ public interface NoCachingNoUpdating {
         }
 
         /**
-         * 
          *
-         * @return 
+         *
+         * @return
          */
         public abstract L left();
 
         /**
-         * 
          *
-         * @return 
+         *
+         * @return
          */
         public abstract R right();
 
         /**
-         * 
          *
-         * @return 
+         *
+         * @return
          */
         public Pair<L, R> copy() {
             return Pair.of(left(), right());
         }
 
         /**
-         * 
          *
-         * @param <U> 
-         * @param <E> 
-         * @param func 
-         * @return 
-         * @throws E 
+         *
+         * @param <U>
+         * @param <E>
+         * @param func
+         * @return
+         * @throws E
          */
         public <U, E extends Exception> U apply(final Throwables.BiFunction<? super L, ? super R, ? extends U, E> func) throws E {
             return func.apply(left(), right());
         }
 
         /**
-         * 
          *
-         * @param <E> 
-         * @param action 
-         * @throws E 
+         *
+         * @param <E>
+         * @param action
+         * @throws E
          */
         public <E extends Exception> void accept(final Throwables.BiConsumer<? super L, ? super R, E> action) throws E {
             action.accept(left(), right());
         }
 
         /**
-         * 
          *
-         * @return 
+         *
+         * @return
          */
         @Override
         public String toString() {
@@ -2351,63 +2351,63 @@ public interface NoCachingNoUpdating {
         }
 
         /**
-         * 
          *
-         * @return 
+         *
+         * @return
          */
         public abstract L left();
 
         /**
-         * 
          *
-         * @return 
+         *
+         * @return
          */
         public abstract M middle();
 
         /**
-         * 
          *
-         * @return 
+         *
+         * @return
          */
         public abstract R right();
 
         /**
-         * 
          *
-         * @return 
+         *
+         * @return
          */
         public Triple<L, M, R> copy() {
             return Triple.of(left(), middle(), right());
         }
 
         /**
-         * 
          *
-         * @param <U> 
-         * @param <E> 
-         * @param func 
-         * @return 
-         * @throws E 
+         *
+         * @param <U>
+         * @param <E>
+         * @param func
+         * @return
+         * @throws E
          */
         public <U, E extends Exception> U apply(final Throwables.TriFunction<? super L, ? super M, ? super R, ? extends U, E> func) throws E {
             return func.apply(left(), middle(), right());
         }
 
         /**
-         * 
          *
-         * @param <E> 
-         * @param action 
-         * @throws E 
+         *
+         * @param <E>
+         * @param action
+         * @throws E
          */
         public <E extends Exception> void accept(final Throwables.TriConsumer<? super L, ? super M, ? super R, E> action) throws E {
             action.accept(left(), middle(), right());
         }
 
         /**
-         * 
          *
-         * @return 
+         *
+         * @return
          */
         @Override
         public String toString() {
@@ -2442,9 +2442,9 @@ public interface NoCachingNoUpdating {
         }
 
         /**
-         * 
          *
-         * @return 
+         *
+         * @return
          */
         public T value() {
             return value;
@@ -2459,9 +2459,9 @@ public interface NoCachingNoUpdating {
         }
 
         /**
-         * 
          *
-         * @return 
+         *
+         * @return
          */
         @Override
         public int hashCode() {
@@ -2489,9 +2489,9 @@ public interface NoCachingNoUpdating {
         }
 
         /**
-         * 
          *
-         * @return 
+         *
+         * @return
          */
         @Override
         public String toString() {

@@ -278,7 +278,7 @@ public final class Throwables {
          * @return
          * @throws E the e
          */
-        boolean getAsBoolean() throws E;
+        boolean getAsBoolean() throws E; // NOSONAR
     }
 
     /**

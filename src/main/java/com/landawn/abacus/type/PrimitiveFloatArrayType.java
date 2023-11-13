@@ -71,7 +71,7 @@ public final class PrimitiveFloatArrayType extends AbstractPrimitiveArrayType<fl
     @Override
     public String stringOf(float[] x) {
         if (x == null) {
-            return null;
+            return null; // NOSONAR
         } else if (x.length == 0) {
             return "[]";
         }
@@ -105,7 +105,7 @@ public final class PrimitiveFloatArrayType extends AbstractPrimitiveArrayType<fl
     @Override
     public float[] valueOf(String str) {
         if (str == null) {
-            return null;
+            return null; // NOSONAR
         } else if (str.length() == 0 || "[]".equals(str)) {
             return N.EMPTY_FLOAT_ARRAY;
         }
@@ -183,7 +183,7 @@ public final class PrimitiveFloatArrayType extends AbstractPrimitiveArrayType<fl
     @Override
     public float[] collection2Array(Collection<?> c) {
         if (c == null) {
-            return null;
+            return null; // NOSONAR
         }
 
         float[] a = new float[c.size()];

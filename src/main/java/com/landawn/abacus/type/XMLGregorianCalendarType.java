@@ -73,7 +73,7 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
     @Override
     public XMLGregorianCalendar valueOf(char[] cbuf, int offset, int len) {
         if ((cbuf == null) || (len == 0)) {
-            return null;
+            return null; // NOSONAR
         }
 
         if (cbuf[offset + 4] != '-') {

@@ -166,7 +166,7 @@ public final class ObjectPool<K, V> extends AbstractMap<K, V> {
                 Entry<K, V> next = e.next;
 
                 if ((hash == e.hash) && key.equals(e.key)) {
-                    if (prev == e) {
+                    if (prev == e) { // NOSONAR
                         table[i] = next;
                     } else {
                         prev.next = next;

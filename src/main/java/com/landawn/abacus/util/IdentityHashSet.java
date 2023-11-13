@@ -23,37 +23,37 @@ import java.util.Iterator;
  *
  * @param <T>
  */
-public class IdentityHashSet<T> extends AbstractSet<T> {
+public final class IdentityHashSet<T> extends AbstractSet<T> {
 
     private static final Object VAL = Boolean.TRUE;
 
     private final IdentityHashMap<T, Object> map;
 
     /**
-     * 
+     *
      */
     public IdentityHashSet() {
         map = new IdentityHashMap<>();
     }
 
     /**
-     * 
      *
-     * @param initialCapacity 
+     *
+     * @param initialCapacity
      */
     public IdentityHashSet(int initialCapacity) {
         map = N.newIdentityHashMap(initialCapacity);
     }
 
     /**
-     * 
      *
-     * @param c 
+     *
+     * @param c
      */
     public IdentityHashSet(Collection<? extends T> c) {
         map = N.newIdentityHashMap(N.size(c));
 
-        addAll(c);
+        addAll(c); // NOSONAR
     }
 
     /**
@@ -174,9 +174,9 @@ public class IdentityHashSet<T> extends AbstractSet<T> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public Iterator<T> iterator() {
@@ -184,9 +184,9 @@ public class IdentityHashSet<T> extends AbstractSet<T> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public Object[] toArray() {
@@ -205,9 +205,9 @@ public class IdentityHashSet<T> extends AbstractSet<T> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public int size() {
@@ -233,10 +233,10 @@ public class IdentityHashSet<T> extends AbstractSet<T> {
     }
 
     /**
-     * 
      *
-     * @param o 
-     * @return 
+     *
+     * @param o
+     * @return
      */
     @SuppressWarnings("rawtypes")
     @Override
@@ -253,9 +253,9 @@ public class IdentityHashSet<T> extends AbstractSet<T> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public int hashCode() {
@@ -263,9 +263,9 @@ public class IdentityHashSet<T> extends AbstractSet<T> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public String toString() {

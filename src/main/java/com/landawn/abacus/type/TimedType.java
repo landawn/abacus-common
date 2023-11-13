@@ -114,7 +114,7 @@ public class TimedType<T> extends AbstractType<Timed<T>> { //NOSONAR
     @Override
     public Timed<T> valueOf(String str) {
         if (Strings.isEmpty(str)) {
-            return null;
+            return null; // NOSONAR
         }
 
         final Object[] a = Utils.jsonParser.deserialize(Object[].class, str, Utils.jdc);

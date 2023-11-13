@@ -43,7 +43,7 @@ public final class FloatArrayType extends ObjectArrayType<Float> {
     @Override
     public String stringOf(Float[] x) {
         if (x == null) {
-            return null;
+            return null; // NOSONAR
         } else if (x.length == 0) {
             return "[]";
         }
@@ -81,7 +81,7 @@ public final class FloatArrayType extends ObjectArrayType<Float> {
     @Override
     public Float[] valueOf(String str) {
         if (str == null) {
-            return null;
+            return null; // NOSONAR
         } else if (str.length() == 0 || "[]".equals(str)) {
             return N.EMPTY_FLOAT_OBJ_ARRAY;
         }

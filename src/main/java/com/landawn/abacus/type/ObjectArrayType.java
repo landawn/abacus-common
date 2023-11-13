@@ -65,9 +65,9 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public Class<T[]> clazz() {
@@ -112,7 +112,7 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
     @Override
     public String stringOf(T[] x) {
         if (x == null) {
-            return null;
+            return null; // NOSONAR
         } else if (x.length == 0) {
             return "[]";
         }
@@ -157,7 +157,7 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
     @Override
     public T[] valueOf(String str) {
         if (str == null) {
-            return null;
+            return null; // NOSONAR
         } else if (str.length() == 0 || "[]".equals(str)) {
             return (T[]) Array.newInstance(elementType.clazz(), 0);
         } else {
@@ -253,7 +253,7 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
     @Override
     public T[] collection2Array(Collection<?> c) {
         if (c == null) {
-            return null;
+            return null; // NOSONAR
         }
 
         Object[] a = N.newArray(typeClass.getComponentType(), c.size());

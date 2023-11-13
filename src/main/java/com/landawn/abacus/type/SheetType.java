@@ -140,7 +140,7 @@ public class SheetType<R, C, E> extends AbstractType<Sheet<R, C, E>> {
     @Override
     public String stringOf(Sheet<R, C, E> x) {
         if (x == null) {
-            return null;
+            return null; // NOSONAR
         }
 
         final Map<Object, Object> m = new LinkedHashMap<>();
@@ -174,7 +174,7 @@ public class SheetType<R, C, E> extends AbstractType<Sheet<R, C, E>> {
     @Override
     public Sheet<R, C, E> valueOf(String str) {
         if (Strings.isEmpty(str)) {
-            return null;
+            return null; // NOSONAR
         }
 
         final Map<String, Object> m = Utils.jsonParser.deserialize(Map.class, str, jdc);

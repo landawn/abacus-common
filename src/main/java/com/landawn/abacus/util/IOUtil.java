@@ -448,7 +448,7 @@ public final class IOUtil {
             return N.EMPTY_BYTE_ARRAY;
         }
 
-        charset = charset == null ? DEFAULT_CHARSET : charset;
+        charset = checkCharset(charset);
 
         if (stringEncodeMethod == null) {
             return new String(chars, offset, len).getBytes(charset);
@@ -496,7 +496,7 @@ public final class IOUtil {
             return N.EMPTY_CHAR_ARRAY;
         }
 
-        charset = charset == null ? DEFAULT_CHARSET : charset;
+        charset = checkCharset(charset);
 
         if (stringDecodeMethod == null) {
             return new String(bytes, offset, len, charset).toCharArray();
@@ -527,7 +527,7 @@ public final class IOUtil {
             throw new IllegalArgumentException("The input String can't be null.");
         }
 
-        charset = charset == null ? DEFAULT_CHARSET : charset;
+        charset = checkCharset(charset);
 
         return new ByteArrayInputStream(str.getBytes(charset));
     }
@@ -855,7 +855,7 @@ public final class IOUtil {
      * @throws IOException
      */
     public static char[] readChars(final InputStream is, final long offset, final int maxLen, Charset encoding) throws IOException {
-        encoding = encoding == null ? DEFAULT_CHARSET : encoding;
+        encoding = checkCharset(encoding);
 
         Reader reader = null;
 
@@ -866,6 +866,10 @@ public final class IOUtil {
         // }
 
         return readChars(reader, offset, maxLen);
+    }
+
+    private static Charset checkCharset(Charset charset) {
+        return charset == null ? DEFAULT_CHARSET : charset;
     }
 
     /**
@@ -1534,7 +1538,7 @@ public final class IOUtil {
      * @return
      */
     static InputStreamReader createReader(final InputStream is, final Charset encoding) {
-        return encoding == null ? new InputStreamReader(is, DEFAULT_CHARSET) : new InputStreamReader(is, encoding);
+        return encoding == null ? IOUtil.newInputStreamReader(is, DEFAULT_CHARSET) : IOUtil.newInputStreamReader(is, encoding);
     }
 
     /**
@@ -1699,7 +1703,7 @@ public final class IOUtil {
         Reader reader = null;
 
         try { //NOSONAR
-            reader = new InputStreamReader(IOUtil.newFileInputStream(file), charset == null ? DEFAULT_CHARSET : charset);
+            reader = IOUtil.newInputStreamReader(IOUtil.newFileInputStream(file), checkCharset(charset));
 
             return read(reader, buf, off, len);
         } finally {
@@ -1793,7 +1797,7 @@ public final class IOUtil {
      * @throws IOException
      */
     public static void writeLine(final OutputStream os, final Object obj, final boolean flush) throws IOException {
-        writeLine(new OutputStreamWriter(os), obj, flush); // NOSONAR
+        writeLine(IOUtil.newOutputStreamWriter(os), obj, flush); // NOSONAR
     }
 
     /**
@@ -1926,7 +1930,7 @@ public final class IOUtil {
             return;
         }
 
-        writeLines(new OutputStreamWriter(os), lines, offset, count, flush); // NOSONAR
+        writeLines(IOUtil.newOutputStreamWriter(os), lines, offset, count, flush); // NOSONAR
     }
 
     /**
@@ -2121,7 +2125,7 @@ public final class IOUtil {
             return;
         }
 
-        writeLines(new OutputStreamWriter(os), lines, offset, count, flush); // NOSONAR
+        writeLines(IOUtil.newOutputStreamWriter(os), lines, offset, count, flush); // NOSONAR
     }
 
     /**
@@ -2435,7 +2439,7 @@ public final class IOUtil {
      * @throws IOException
      */
     public static void write(final File output, final CharSequence str, Charset charset) throws IOException {
-        charset = charset == null ? DEFAULT_CHARSET : charset;
+        charset = checkCharset(charset);
 
         write(output, chars2Bytes(toCharArray(str), charset));
     }
@@ -2481,7 +2485,7 @@ public final class IOUtil {
      * @throws IOException
      */
     public static void write(final OutputStream output, final CharSequence str, Charset charset, final boolean flush) throws IOException {
-        charset = charset == null ? DEFAULT_CHARSET : charset;
+        charset = checkCharset(charset);
 
         output.write(chars2Bytes(toCharArray(str), charset));
 
@@ -3027,7 +3031,7 @@ public final class IOUtil {
         Writer writer = null;
 
         try { //NOSONAR
-            writer = new OutputStreamWriter(IOUtil.newFileOutputStream(output), charset == null ? DEFAULT_CHARSET : charset);
+            writer = IOUtil.newOutputStreamWriter(IOUtil.newFileOutputStream(output), checkCharset(charset));
 
             long result = write(writer, input, offset, len);
 
@@ -3481,7 +3485,7 @@ public final class IOUtil {
         Writer writer = null;
 
         try { //NOSONAR
-            writer = new OutputStreamWriter(new FileOutputStream(output, true), charset == null ? DEFAULT_CHARSET : charset);
+            writer = IOUtil.newOutputStreamWriter(new FileOutputStream(output, true), checkCharset(charset));
 
             long result = write(writer, input, offset, len);
 
@@ -3854,9 +3858,24 @@ public final class IOUtil {
      * @return
      * @throws UncheckedIOException
      */
-    public static FileOutputStream newFileOutputStream(final File file) throws UncheckedIOException {
+    public static FileInputStream newFileInputStream(final File file) throws UncheckedIOException {
         try {
-            return new FileOutputStream(file);
+            return new FileInputStream(file);
+        } catch (FileNotFoundException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    /**
+     *
+     *
+     * @param name
+     * @return
+     * @throws UncheckedIOException
+     */
+    public static FileInputStream newFileInputStream(final String name) throws UncheckedIOException {
+        try {
+            return new FileInputStream(name);
         } catch (FileNotFoundException e) {
             throw new UncheckedIOException(e);
         }
@@ -3869,9 +3888,9 @@ public final class IOUtil {
      * @return
      * @throws UncheckedIOException
      */
-    public static FileInputStream newFileInputStream(final File file) throws UncheckedIOException {
+    public static FileOutputStream newFileOutputStream(final File file) throws UncheckedIOException {
         try {
-            return new FileInputStream(file);
+            return new FileOutputStream(file);
         } catch (FileNotFoundException e) {
             throw new UncheckedIOException(e);
         }
@@ -3972,7 +3991,7 @@ public final class IOUtil {
      * @throws UncheckedIOException
      */
     public static InputStreamReader newInputStreamReader(final InputStream is, final Charset charset) throws UncheckedIOException {
-        return new InputStreamReader(is, charset == null ? DEFAULT_CHARSET : charset); // NOSONAR
+        return new InputStreamReader(is, checkCharset(charset)); // NOSONAR
     }
 
     /**
@@ -3995,7 +4014,7 @@ public final class IOUtil {
      * @throws UncheckedIOException
      */
     public static OutputStreamWriter newOutputStreamWriter(final OutputStream os, final Charset charset) throws UncheckedIOException {
-        return new OutputStreamWriter(os, charset == null ? DEFAULT_CHARSET : charset);
+        return new OutputStreamWriter(os, checkCharset(charset));
     }
 
     /**
@@ -4029,7 +4048,7 @@ public final class IOUtil {
      * @throws UncheckedIOException the unchecked IO exception
      */
     public static java.io.BufferedReader newBufferedReader(File file, Charset charset) throws UncheckedIOException {
-        return new java.io.BufferedReader(new InputStreamReader(IOUtil.newFileInputStream(file), charset == null ? DEFAULT_CHARSET : charset));
+        return new java.io.BufferedReader(IOUtil.newInputStreamReader(IOUtil.newFileInputStream(file), checkCharset(charset)));
     }
 
     /**
@@ -4071,7 +4090,7 @@ public final class IOUtil {
      * @throws UncheckedIOException the unchecked IO exception
      */
     public static java.io.BufferedReader newBufferedReader(InputStream is) throws UncheckedIOException {
-        return new java.io.BufferedReader(new InputStreamReader(is)); // NOSONAR
+        return new java.io.BufferedReader(IOUtil.newInputStreamReader(is)); // NOSONAR
     }
 
     /**
@@ -4083,7 +4102,7 @@ public final class IOUtil {
      * @throws UncheckedIOException the unchecked IO exception
      */
     public static java.io.BufferedReader newBufferedReader(InputStream is, Charset charset) throws UncheckedIOException {
-        return new java.io.BufferedReader(new InputStreamReader(is, charset == null ? DEFAULT_CHARSET : charset));
+        return new java.io.BufferedReader(IOUtil.newInputStreamReader(is, checkCharset(charset)));
     }
 
     /**
@@ -4117,7 +4136,7 @@ public final class IOUtil {
      * @throws UncheckedIOException the unchecked IO exception
      */
     public static java.io.BufferedWriter newBufferedWriter(File file, Charset charset) throws UncheckedIOException {
-        return new java.io.BufferedWriter(new OutputStreamWriter(IOUtil.newFileOutputStream(file), charset == null ? DEFAULT_CHARSET : charset));
+        return new java.io.BufferedWriter(new OutputStreamWriter(IOUtil.newFileOutputStream(file), checkCharset(charset)));
     }
 
     /**
@@ -4138,7 +4157,7 @@ public final class IOUtil {
      * @return
      */
     public static java.io.BufferedWriter newBufferedWriter(OutputStream os, Charset charset) {
-        return new java.io.BufferedWriter(newOutputStreamWriter(os, charset == null ? DEFAULT_CHARSET : charset));
+        return new java.io.BufferedWriter(newOutputStreamWriter(os, checkCharset(charset)));
     }
 
     /**
@@ -5255,7 +5274,7 @@ public final class IOUtil {
                     continue;
                 }
 
-                os = new FileOutputStream(getAbsolutePath(targetDir, ze.getName()));
+                os = IOUtil.newFileOutputStream(getAbsolutePath(targetDir, ze.getName()));
 
                 is = zip.getInputStream(ze);
 
@@ -6560,7 +6579,7 @@ public final class IOUtil {
             is = zf.getInputStream(ze);
             outputZipFile.setValue(zf);
         } else {
-            is = new FileInputStream(file);
+            is = IOUtil.newFileInputStream(file);
         }
 
         return is;

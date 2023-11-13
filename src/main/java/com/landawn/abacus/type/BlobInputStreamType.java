@@ -121,6 +121,6 @@ public class BlobInputStreamType extends InputStreamType {
             return blob.getBinaryStream();
         }
 
-        return null;
+        return null; // NOSONAR
     }
 }

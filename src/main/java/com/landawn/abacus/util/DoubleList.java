@@ -541,7 +541,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
 
         if (isSorted) {
             for (int i = 1; i < size; i++) {
-                if (elementData[i] != elementData[idx]) {
+                if (elementData[i] != elementData[idx]) { // NOSONAR
                     elementData[++idx] = elementData[i];
                 }
             }

@@ -2645,6 +2645,21 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     }
 
     /**
+     * Convert the element to a new value if it's not {@code null}, otherwise skip it.
+     *
+     * @implSpec Same as {@code skipNulls().map(mapper)}.
+     *
+     * @param <R>
+     * @param mapper
+     * @return
+     */
+    @Beta
+    @IntermediateOp
+    public <R> CheckedStream<R, E> mapIfNotNull(final Throwables.Function<? super T, ? extends R, ? extends E> mapper) {
+        return skipNulls().map(mapper);
+    }
+
+    /**
      *
      *
      * @param mapperForFirst

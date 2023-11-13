@@ -43,7 +43,7 @@ public final class LongArrayType extends ObjectArrayType<Long> {
     @Override
     public String stringOf(Long[] x) {
         if (x == null) {
-            return null;
+            return null; // NOSONAR
         } else if (x.length == 0) {
             return "[]";
         }
@@ -81,7 +81,7 @@ public final class LongArrayType extends ObjectArrayType<Long> {
     @Override
     public Long[] valueOf(String str) {
         if (str == null) {
-            return null;
+            return null; // NOSONAR
         } else if (str.length() == 0 || "[]".equals(str)) {
             return N.EMPTY_LONG_OBJ_ARRAY;
         }

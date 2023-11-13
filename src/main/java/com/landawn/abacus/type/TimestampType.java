@@ -87,7 +87,7 @@ public class TimestampType extends AbstractDateType<Timestamp> {
     @Override
     public Timestamp valueOf(char[] cbuf, int offset, int len) {
         if ((cbuf == null) || (len == 0)) {
-            return null;
+            return null; // NOSONAR
         }
 
         if (cbuf[offset + 4] != '-') {

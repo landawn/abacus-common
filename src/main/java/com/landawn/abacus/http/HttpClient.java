@@ -17,9 +17,7 @@ package com.landawn.abacus.http;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
 import java.net.HttpURLConnection;
@@ -882,7 +880,7 @@ public final class HttpClient {
                 } else if (type.isInputStream()) {
                     IOUtil.write(os, (InputStream) request);
                 } else if (type.isReader()) {
-                    final BufferedWriter bw = Objectory.createBufferedWriter(new OutputStreamWriter(os, requestCharset));
+                    final BufferedWriter bw = Objectory.createBufferedWriter(IOUtil.newOutputStreamWriter(os, requestCharset));
 
                     try {
                         IOUtil.write(bw, (Reader) request);
@@ -902,7 +900,7 @@ public final class HttpClient {
                         } else if (requestContentFormat == ContentFormat.FormUrlEncoded) {
                             IOUtil.write(os, URLEncodedUtil.encode(request, requestCharset).getBytes(requestCharset));
                         } else {
-                            final BufferedWriter bw = Objectory.createBufferedWriter(new OutputStreamWriter(os, requestCharset));
+                            final BufferedWriter bw = Objectory.createBufferedWriter(IOUtil.newOutputStreamWriter(os, requestCharset));
 
                             try {
                                 HttpUtil.getParser(requestContentFormat).serialize(bw, request);
@@ -938,7 +936,7 @@ public final class HttpClient {
 
                     return null;
                 } else if (outputWriter != null) {
-                    final BufferedReader br = Objectory.createBufferedReader(new InputStreamReader(is, respCharset));
+                    final BufferedReader br = Objectory.createBufferedReader(IOUtil.newInputStreamReader(is, respCharset));
 
                     try {
                         IOUtil.write(outputWriter, br, true);
@@ -962,7 +960,7 @@ public final class HttpClient {
                             } else if (respContentFormat == ContentFormat.FormUrlEncoded) {
                                 return URLEncodedUtil.decode(IOUtil.readAllToString(is, respCharset), resultClass);
                             } else {
-                                final BufferedReader br = Objectory.createBufferedReader(new InputStreamReader(is, respCharset));
+                                final BufferedReader br = Objectory.createBufferedReader(IOUtil.newInputStreamReader(is, respCharset));
 
                                 try {
                                     return HttpUtil.getParser(respContentFormat).deserialize(resultClass, br);

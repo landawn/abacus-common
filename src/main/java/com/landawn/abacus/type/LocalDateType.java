@@ -38,9 +38,9 @@ public class LocalDateType extends AbstractType<LocalDate> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public Class<LocalDate> clazz() {
@@ -65,7 +65,7 @@ public class LocalDateType extends AbstractType<LocalDate> {
     @Override
     public LocalDate valueOf(String str) {
         if (Strings.isEmpty(str)) {
-            return null;
+            return null; // NOSONAR
         }
 
         if (N.equals(str, SYS_TIME)) {
@@ -85,7 +85,7 @@ public class LocalDateType extends AbstractType<LocalDate> {
     @Override
     public LocalDate valueOf(char[] cbuf, int offset, int len) {
         if ((cbuf == null) || (len == 0)) {
-            return null;
+            return null; // NOSONAR
         }
 
         return valueOf(String.valueOf(cbuf, offset, len));

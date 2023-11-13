@@ -542,7 +542,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
 
         if (isSorted) {
             for (int i = 1; i < size; i++) {
-                if (elementData[i] != elementData[idx]) {
+                if (elementData[i] != elementData[idx]) { // NOSONAR
                     elementData[++idx] = elementData[i];
                 }
             }

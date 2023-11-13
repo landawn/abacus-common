@@ -1265,7 +1265,7 @@ sealed class CommonUtil permits N {
     @SuppressWarnings("unchecked")
     public static <T> T clone(final T obj) {
         if (obj == null) {
-            return null;
+            return null; // NOSONAR
         }
 
         return (T) clone(obj, obj.getClass());
@@ -1325,7 +1325,7 @@ sealed class CommonUtil permits N {
     @SuppressWarnings("unchecked")
     public static <T> T copy(final T bean) {
         if (bean == null) {
-            return null;
+            return null; // NOSONAR
         }
 
         return copy(bean, (Class<T>) bean.getClass());
@@ -1340,7 +1340,7 @@ sealed class CommonUtil permits N {
      */
     public static <T> T copy(final T bean, final Collection<String> selectPropNames) {
         if (bean == null) {
-            return null;
+            return null; // NOSONAR
         }
 
         return copy(bean, selectPropNames, (Class<T>) bean.getClass());
@@ -2012,7 +2012,7 @@ sealed class CommonUtil permits N {
      * @return
      */
     public static <T> T newProxyInstance(final Class<?>[] interfaceClasses, final InvocationHandler h) {
-        return (T) Proxy.newProxyInstance(CommonUtil.class.getClassLoader(), interfaceClasses, h);
+        return (T) Proxy.newProxyInstance(CommonUtil.class.getClassLoader(), interfaceClasses, h); // NOSONAR
     }
 
     /**
@@ -3748,7 +3748,7 @@ sealed class CommonUtil permits N {
      */
     public static boolean[] toBooleanArray(final byte[] a) {
         if (a == null) {
-            return null;
+            return null; // NOSONAR
         } else if (a.length == 0) {
             return EMPTY_BOOLEAN_ARRAY;
         } else {
@@ -3947,7 +3947,7 @@ sealed class CommonUtil permits N {
      */
     public static byte[] toByteArray(final boolean[] a) {
         if (a == null) {
-            return null;
+            return null; // NOSONAR
         } else if (a.length == 0) {
             return EMPTY_BYTE_ARRAY;
         } else {
@@ -4146,7 +4146,7 @@ sealed class CommonUtil permits N {
      */
     public static int[] toIntArray(final char[] a) {
         if (a == null) {
-            return null;
+            return null; // NOSONAR
         } else if (a.length == 0) {
             return EMPTY_INT_ARRAY;
         } else {
@@ -17535,7 +17535,7 @@ sealed class CommonUtil permits N {
      */
     public static boolean[] clone(final boolean[] original) {
         if (original == null) {
-            return null;
+            return null; // NOSONAR
         }
 
         return original.clone();
@@ -17549,7 +17549,7 @@ sealed class CommonUtil permits N {
      */
     public static char[] clone(final char[] original) {
         if (original == null) {
-            return null;
+            return null; // NOSONAR
         }
 
         return original.clone();
@@ -17563,7 +17563,7 @@ sealed class CommonUtil permits N {
      */
     public static byte[] clone(final byte[] original) {
         if (original == null) {
-            return null;
+            return null; // NOSONAR
         }
 
         return original.clone();
@@ -17577,7 +17577,7 @@ sealed class CommonUtil permits N {
      */
     public static short[] clone(final short[] original) {
         if (original == null) {
-            return null;
+            return null; // NOSONAR
         }
 
         return original.clone();
@@ -17591,7 +17591,7 @@ sealed class CommonUtil permits N {
      */
     public static int[] clone(final int[] original) {
         if (original == null) {
-            return null;
+            return null; // NOSONAR
         }
 
         return original.clone();
@@ -17605,7 +17605,7 @@ sealed class CommonUtil permits N {
      */
     public static long[] clone(final long[] original) {
         if (original == null) {
-            return null;
+            return null; // NOSONAR
         }
 
         return original.clone();
@@ -17619,7 +17619,7 @@ sealed class CommonUtil permits N {
      */
     public static float[] clone(final float[] original) {
         if (original == null) {
-            return null;
+            return null; // NOSONAR
         }
 
         return original.clone();
@@ -17633,7 +17633,7 @@ sealed class CommonUtil permits N {
      */
     public static double[] clone(final double[] original) {
         if (original == null) {
-            return null;
+            return null; // NOSONAR
         }
 
         return original.clone();
@@ -17648,7 +17648,7 @@ sealed class CommonUtil permits N {
      */
     public static <T> T[] clone(final T[] original) {
         if (original == null) {
-            return null;
+            return null; // NOSONAR
         }
 
         return original.clone();
@@ -17662,7 +17662,7 @@ sealed class CommonUtil permits N {
      */
     public static boolean[][] clone(final boolean[][] original) {
         if (original == null) {
-            return null;
+            return null; // NOSONAR
         }
 
         final boolean[][] cp = original.clone();
@@ -17682,7 +17682,7 @@ sealed class CommonUtil permits N {
      */
     public static char[][] clone(final char[][] original) {
         if (original == null) {
-            return null;
+            return null; // NOSONAR
         }
 
         final char[][] cp = original.clone();
@@ -17702,7 +17702,7 @@ sealed class CommonUtil permits N {
      */
     public static byte[][] clone(final byte[][] original) {
         if (original == null) {
-            return null;
+            return null; // NOSONAR
         }
 
         final byte[][] cp = original.clone();
@@ -17722,7 +17722,7 @@ sealed class CommonUtil permits N {
      */
     public static short[][] clone(final short[][] original) {
         if (original == null) {
-            return null;
+            return null; // NOSONAR
         }
 
         final short[][] cp = original.clone();
@@ -17742,7 +17742,7 @@ sealed class CommonUtil permits N {
      */
     public static int[][] clone(final int[][] original) {
         if (original == null) {
-            return null;
+            return null; // NOSONAR
         }
 
         final int[][] cp = original.clone();
@@ -17762,7 +17762,7 @@ sealed class CommonUtil permits N {
      */
     public static long[][] clone(final long[][] original) {
         if (original == null) {
-            return null;
+            return null; // NOSONAR
         }
 
         final long[][] cp = original.clone();
@@ -17782,7 +17782,7 @@ sealed class CommonUtil permits N {
      */
     public static float[][] clone(final float[][] original) {
         if (original == null) {
-            return null;
+            return null; // NOSONAR
         }
 
         final float[][] cp = original.clone();
@@ -17802,7 +17802,7 @@ sealed class CommonUtil permits N {
      */
     public static double[][] clone(final double[][] original) {
         if (original == null) {
-            return null;
+            return null; // NOSONAR
         }
 
         final double[][] cp = original.clone();
@@ -17823,7 +17823,7 @@ sealed class CommonUtil permits N {
      */
     public static <T> T[][] clone(final T[][] original) {
         if (original == null) {
-            return null;
+            return null; // NOSONAR
         }
 
         final T[][] cp = original.clone();
@@ -17843,7 +17843,7 @@ sealed class CommonUtil permits N {
      */
     public static boolean[][][] clone(final boolean[][][] original) {
         if (original == null) {
-            return null;
+            return null; // NOSONAR
         }
 
         final boolean[][][] cp = original.clone();
@@ -17863,7 +17863,7 @@ sealed class CommonUtil permits N {
      */
     public static char[][][] clone(final char[][][] original) {
         if (original == null) {
-            return null;
+            return null; // NOSONAR
         }
 
         final char[][][] cp = original.clone();
@@ -17883,7 +17883,7 @@ sealed class CommonUtil permits N {
      */
     public static byte[][][] clone(final byte[][][] original) {
         if (original == null) {
-            return null;
+            return null; // NOSONAR
         }
 
         final byte[][][] cp = original.clone();
@@ -17903,7 +17903,7 @@ sealed class CommonUtil permits N {
      */
     public static short[][][] clone(final short[][][] original) {
         if (original == null) {
-            return null;
+            return null; // NOSONAR
         }
 
         final short[][][] cp = original.clone();
@@ -17923,7 +17923,7 @@ sealed class CommonUtil permits N {
      */
     public static int[][][] clone(final int[][][] original) {
         if (original == null) {
-            return null;
+            return null; // NOSONAR
         }
 
         final int[][][] cp = original.clone();
@@ -17943,7 +17943,7 @@ sealed class CommonUtil permits N {
      */
     public static long[][][] clone(final long[][][] original) {
         if (original == null) {
-            return null;
+            return null; // NOSONAR
         }
 
         final long[][][] cp = original.clone();
@@ -17963,7 +17963,7 @@ sealed class CommonUtil permits N {
      */
     public static float[][][] clone(final float[][][] original) {
         if (original == null) {
-            return null;
+            return null; // NOSONAR
         }
 
         final float[][][] cp = original.clone();
@@ -17983,7 +17983,7 @@ sealed class CommonUtil permits N {
      */
     public static double[][][] clone(final double[][][] original) {
         if (original == null) {
-            return null;
+            return null; // NOSONAR
         }
 
         final double[][][] cp = original.clone();
@@ -18004,7 +18004,7 @@ sealed class CommonUtil permits N {
      */
     public static <T> T[][][] clone(final T[][][] original) {
         if (original == null) {
-            return null;
+            return null; // NOSONAR
         }
 
         final T[][][] cp = original.clone();
@@ -22001,7 +22001,7 @@ sealed class CommonUtil permits N {
             }
         }
 
-        return null;
+        return null; // NOSONAR
     }
 
     /**

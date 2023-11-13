@@ -33,6 +33,8 @@ import com.landawn.abacus.util.URLEncodedUtil;
 /**
  *
  * @see URLEncodedUtil
+ * @see HttpHeaders
+ * @see com.landawn.abacus.http.v2.HttpRequest
  * @author Haiyang Li
  * @since 1.3
  */
@@ -115,6 +117,7 @@ public final class HttpRequest {
      * @param user
      * @param password
      * @return
+     * @see HttpHeaders
      */
     public HttpRequest basicAuth(String user, Object password) {
         checkSettings();
@@ -132,6 +135,7 @@ public final class HttpRequest {
      * @param value
      * @return
      * @see HttpSettings#header(String, Object)
+     * @see HttpHeaders
      */
     public HttpRequest header(String name, Object value) {
         checkSettings();
@@ -151,6 +155,7 @@ public final class HttpRequest {
      * @param value2
      * @return
      * @see HttpSettings#headers(String, Object, String, Object)
+     * @see HttpHeaders
      */
     public HttpRequest headers(String name1, Object value1, String name2, Object value2) {
         checkSettings();
@@ -172,6 +177,7 @@ public final class HttpRequest {
      * @param value3
      * @return
      * @see HttpSettings#headers(String, Object, String, Object, String, Object)
+     * @see HttpHeaders
      */
     public HttpRequest headers(String name1, Object value1, String name2, Object value2, String name3, Object value3) {
         checkSettings();
@@ -188,6 +194,7 @@ public final class HttpRequest {
      * @param headers
      * @return
      * @see HttpSettings#headers(Map)
+     * @see HttpHeaders
      */
     public HttpRequest headers(Map<String, ?> headers) {
         checkSettings();
@@ -203,6 +210,7 @@ public final class HttpRequest {
      * @param headers
      * @return
      * @see HttpSettings#headers(HttpHeaders)
+     * @see HttpHeaders
      */
     public HttpRequest headers(HttpHeaders headers) {
         checkSettings();
@@ -283,7 +291,7 @@ public final class HttpRequest {
     }
 
     /**
-     * Set query parameters for {@code GET} or {@code PUT} request.
+     * Set query parameters for {@code GET} or {@code DELETE} request.
      *
      * @param query
      * @return
@@ -295,7 +303,7 @@ public final class HttpRequest {
     }
 
     /**
-     * Set query parameters for {@code GET} or {@code PUT} request.
+     * Set query parameters for {@code GET} or {@code DELETE} request.
      *
      * @param queryParams
      * @return
@@ -328,6 +336,32 @@ public final class HttpRequest {
         setContentType(HttpHeaders.Values.APPLICATION_JSON);
 
         this.request = N.toJSON(obj);
+
+        return this;
+    }
+
+    /**
+     *
+     * @param xml
+     * @return
+     */
+    public HttpRequest xmlBody(final String xml) {
+        setContentType(HttpHeaders.Values.APPLICATION_XML);
+
+        this.request = xml;
+
+        return this;
+    }
+
+    /**
+     *
+     * @param obj
+     * @return
+     */
+    public HttpRequest xmlBody(final Object obj) {
+        setContentType(HttpHeaders.Values.APPLICATION_XML);
+
+        this.request = N.toXML(obj);
 
         return this;
     }

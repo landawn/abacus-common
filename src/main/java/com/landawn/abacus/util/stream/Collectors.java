@@ -3470,7 +3470,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors {
      * @param mapper
      * @return
      */
-    public static <T> Collector<T, ?, CharSummaryStatistics> summarizingChar(final ToCharFunction<? super T> mapper) {
+    public static <T> Collector<T, ?, CharSummaryStatistics> summarizingChar(final ToCharFunction<? super T> mapper) { // NOSONAR
         final Supplier<CharSummaryStatistics> supplier = SummarizingChar_Supplier;
 
         final BiConsumer<CharSummaryStatistics, T> accumulator = (a, t) -> a.accept(mapper.applyAsChar(t));
@@ -3487,7 +3487,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors {
      * @param mapper
      * @return
      */
-    public static <T> Collector<T, ?, ByteSummaryStatistics> summarizingByte(final ToByteFunction<? super T> mapper) {
+    public static <T> Collector<T, ?, ByteSummaryStatistics> summarizingByte(final ToByteFunction<? super T> mapper) { // NOSONAR
         final Supplier<ByteSummaryStatistics> supplier = SummarizingByte_Supplier;
 
         final BiConsumer<ByteSummaryStatistics, T> accumulator = (a, t) -> a.accept(mapper.applyAsByte(t));
@@ -3504,7 +3504,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors {
      * @param mapper
      * @return
      */
-    public static <T> Collector<T, ?, ShortSummaryStatistics> summarizingShort(final ToShortFunction<? super T> mapper) {
+    public static <T> Collector<T, ?, ShortSummaryStatistics> summarizingShort(final ToShortFunction<? super T> mapper) { // NOSONAR
         final Supplier<ShortSummaryStatistics> supplier = SummarizingShort_Supplier;
 
         final BiConsumer<ShortSummaryStatistics, T> accumulator = (a, t) -> a.accept(mapper.applyAsShort(t));
@@ -3555,7 +3555,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors {
      * @param mapper
      * @return
      */
-    public static <T> Collector<T, ?, FloatSummaryStatistics> summarizingFloat(final ToFloatFunction<? super T> mapper) {
+    public static <T> Collector<T, ?, FloatSummaryStatistics> summarizingFloat(final ToFloatFunction<? super T> mapper) { // NOSONAR
         final Supplier<FloatSummaryStatistics> supplier = SummarizingFloat_Supplier;
 
         final BiConsumer<FloatSummaryStatistics, T> accumulator = (a, t) -> a.accept(mapper.applyAsFloat(t));

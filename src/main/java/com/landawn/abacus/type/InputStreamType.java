@@ -80,9 +80,9 @@ public class InputStreamType extends AbstractType<InputStream> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public Class<InputStream> clazz() {
@@ -117,7 +117,7 @@ public class InputStreamType extends AbstractType<InputStream> {
     @Override
     public InputStream valueOf(String str) {
         if (str == null) {
-            return null;
+            return null; // NOSONAR
         }
 
         if (bytesConstructor != null) {
@@ -138,7 +138,7 @@ public class InputStreamType extends AbstractType<InputStream> {
     @Override
     public InputStream valueOf(final Object obj) {
         if (obj == null) {
-            return null;
+            return null; // NOSONAR
         } else if (obj instanceof Blob blob) {
             try {
                 return blob.getBinaryStream();

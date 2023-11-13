@@ -14,7 +14,6 @@
 
 package com.landawn.abacus.pool;
 
-
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -385,7 +384,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
         lock.lock();
 
         try {
-            vacate((int) (pool.size() * balanceFactor));
+            vacate((int) (pool.size() * balanceFactor)); // NOSONAR
 
             notFull.signalAll();
         } finally {

@@ -70,7 +70,7 @@ public final class PrimitiveBooleanArrayType extends AbstractPrimitiveArrayType<
     @Override
     public String stringOf(boolean[] x) {
         if (x == null) {
-            return null;
+            return null; // NOSONAR
         } else if (x.length == 0) {
             return "[]";
         }
@@ -104,7 +104,7 @@ public final class PrimitiveBooleanArrayType extends AbstractPrimitiveArrayType<
     @Override
     public boolean[] valueOf(String str) {
         if (str == null) {
-            return null;
+            return null; // NOSONAR
         } else if (str.length() == 0 || "[]".equals(str)) {
             return N.EMPTY_BOOLEAN_ARRAY;
         }
@@ -182,7 +182,7 @@ public final class PrimitiveBooleanArrayType extends AbstractPrimitiveArrayType<
     @Override
     public boolean[] collection2Array(Collection<?> c) {
         if (c == null) {
-            return null;
+            return null; // NOSONAR
         }
 
         boolean[] a = new boolean[c.size()];

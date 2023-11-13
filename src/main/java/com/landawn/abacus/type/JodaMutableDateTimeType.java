@@ -43,9 +43,9 @@ public class JodaMutableDateTimeType extends AbstractJodaDateTimeType<MutableDat
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public Class<MutableDateTime> clazz() {
@@ -76,7 +76,7 @@ public class JodaMutableDateTimeType extends AbstractJodaDateTimeType<MutableDat
     @Override
     public MutableDateTime valueOf(String str) {
         if (Strings.isEmpty(str)) {
-            return null;
+            return null; // NOSONAR
         }
 
         if (N.equals(str, SYS_TIME)) {
@@ -96,7 +96,7 @@ public class JodaMutableDateTimeType extends AbstractJodaDateTimeType<MutableDat
     @Override
     public MutableDateTime valueOf(char[] cbuf, int offset, int len) {
         if ((cbuf == null) || (len == 0)) {
-            return null;
+            return null; // NOSONAR
         }
 
         if (cbuf[offset + 4] != '-') {

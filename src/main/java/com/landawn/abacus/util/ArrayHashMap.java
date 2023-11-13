@@ -31,7 +31,7 @@ import java.util.Set;
  * @param <V> the value type
  * @since 0.8
  */
-public class ArrayHashMap<K, V> implements Map<K, V> {
+public sealed class ArrayHashMap<K, V> implements Map<K, V> permits LinkedArrayHashMap {
 
     private final Map<Wrapper<K>, V> map;
 
@@ -87,7 +87,7 @@ public class ArrayHashMap<K, V> implements Map<K, V> {
             map = N.newHashMap(m.size());
         }
 
-        putAll(m);
+        putAll(m); // NOSONAR
     }
 
     /**

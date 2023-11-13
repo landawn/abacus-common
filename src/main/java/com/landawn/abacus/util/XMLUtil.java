@@ -609,7 +609,7 @@ public final class XMLUtil {
      * @return
      */
     public static <T> T xmlDecode(String xml) {
-        InputStream is = new ByteArrayInputStream(xml.getBytes());
+        InputStream is = new ByteArrayInputStream(xml.getBytes(Charsets.UTF_8));
         try (XMLDecoder xmlDecoder = new XMLDecoder(is)) {
             return (T) xmlDecoder.readObject();
         }

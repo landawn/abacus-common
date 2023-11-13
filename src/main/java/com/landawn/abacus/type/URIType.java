@@ -63,7 +63,7 @@ public class URIType extends AbstractType<URI> {
     @Override
     public URI valueOf(String str) {
         if (Strings.isEmpty(str)) {
-            return null;
+            return null; // NOSONAR
         }
 
         return java.net.URI.create(str); // NOSONAR

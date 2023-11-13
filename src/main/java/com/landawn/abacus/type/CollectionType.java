@@ -206,7 +206,7 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
     @Override
     public String stringOf(T x) {
         if (x == null) {
-            return null;
+            return null; // NOSONAR
         } else if (x.size() == 0) {
             return "[]";
         }

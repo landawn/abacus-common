@@ -132,7 +132,7 @@ public class MultisetType<E> extends AbstractType<Multiset<E>> {
     @Override
     public Multiset<E> valueOf(String str) {
         if (Strings.isEmpty(str)) {
-            return null;
+            return null; // NOSONAR
         }
 
         final Map<E, Integer> map = Utils.jsonParser.deserialize(Map.class, str, jdc);

@@ -16,7 +16,6 @@ package com.landawn.abacus.type;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.Writer;
 import java.sql.CallableStatement;
@@ -128,7 +127,7 @@ public class AsciiStreamType extends InputStreamType {
         if (t == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
-            IOUtil.write(writer, new InputStreamReader(t));
+            IOUtil.write(writer, IOUtil.newInputStreamReader(t)); // NOSONAR
         }
     }
 
@@ -148,7 +147,7 @@ public class AsciiStreamType extends InputStreamType {
                 writer.write(config.getStringQuotation());
             }
 
-            final Reader reader = new InputStreamReader(t);
+            final Reader reader = IOUtil.newInputStreamReader(t); // NOSONAR
             final char[] buf = Objectory.createCharArrayBuffer();
 
             try {

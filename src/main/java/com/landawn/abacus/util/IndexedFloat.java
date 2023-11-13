@@ -53,22 +53,22 @@ public final class IndexedFloat extends AbstractIndexed {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public float value() {
         return value;
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public int hashCode() {
-        return (int) index + (int) (value * 31);
+        return (int) index + (int) (value * 31); // NOSONAR
     }
 
     /**
@@ -82,9 +82,9 @@ public final class IndexedFloat extends AbstractIndexed {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public String toString() {

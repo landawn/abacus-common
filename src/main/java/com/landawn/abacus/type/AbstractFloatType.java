@@ -47,7 +47,7 @@ public abstract class AbstractFloatType extends NumberType<Number> {
     @Override
     public String stringOf(Number x) {
         if (x == null) {
-            return null;
+            return null; // NOSONAR
         }
 
         return x.toString();

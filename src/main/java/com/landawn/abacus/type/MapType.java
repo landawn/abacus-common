@@ -132,7 +132,7 @@ public class MapType<K, V, T extends Map<K, V>> extends AbstractType<T> {
     @Override
     public String stringOf(T x) {
         if (x == null) {
-            return null;
+            return null; // NOSONAR
         } else if (x.size() == 0) {
             return "{}";
         }

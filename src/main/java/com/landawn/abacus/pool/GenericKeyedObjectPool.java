@@ -388,7 +388,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
         lock.lock();
 
         try {
-            vacate((int) (pool.size() * balanceFactor));
+            vacate((int) (pool.size() * balanceFactor)); // NOSONAR
 
             notFull.signalAll();
         } finally {

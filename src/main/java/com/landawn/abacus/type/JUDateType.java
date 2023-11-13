@@ -101,7 +101,7 @@ public class JUDateType extends AbstractDateType<Date> {
     @Override
     public Date valueOf(char[] cbuf, int offset, int len) {
         if ((cbuf == null) || (len == 0)) {
-            return null;
+            return null; // NOSONAR
         }
 
         if (cbuf[offset + 4] != '-') {

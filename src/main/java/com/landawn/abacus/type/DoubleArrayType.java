@@ -43,7 +43,7 @@ public final class DoubleArrayType extends ObjectArrayType<Double> {
     @Override
     public String stringOf(Double[] x) {
         if (x == null) {
-            return null;
+            return null; // NOSONAR
         } else if (x.length == 0) {
             return "[]";
         }
@@ -81,7 +81,7 @@ public final class DoubleArrayType extends ObjectArrayType<Double> {
     @Override
     public Double[] valueOf(String str) {
         if (str == null) {
-            return null;
+            return null; // NOSONAR
         } else if (str.length() == 0 || "[]".equals(str)) {
             return N.EMPTY_DOUBLE_OBJ_ARRAY;
         }

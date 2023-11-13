@@ -56,9 +56,9 @@ public class ListMultimapType<K, E> extends AbstractType<ListMultimap<K, E>> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public String declaringName() {
@@ -66,9 +66,9 @@ public class ListMultimapType<K, E> extends AbstractType<ListMultimap<K, E>> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
@@ -125,7 +125,7 @@ public class ListMultimapType<K, E> extends AbstractType<ListMultimap<K, E>> {
     @Override
     public ListMultimap<K, E> valueOf(String st) {
         if (Strings.isEmpty(st)) {
-            return null;
+            return null; // NOSONAR
         }
 
         final Map<K, Collection<E>> map = Utils.jsonParser.deserialize(Map.class, st, jdc);

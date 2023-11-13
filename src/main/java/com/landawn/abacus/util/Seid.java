@@ -77,7 +77,7 @@ public class Seid implements EntityId {
     public Seid(String propName, Object propValue) {
         this(NameUtil.getParentName(propName));
 
-        set(propName, propValue);
+        set(propName, propValue); // NOSONAR
     }
 
     /**
@@ -88,7 +88,7 @@ public class Seid implements EntityId {
     public Seid(Map<String, Object> nameValues) {
         this(NameUtil.getParentName(nameValues.keySet().iterator().next()));
 
-        set(nameValues);
+        set(nameValues); // NOSONAR
     }
 
     /**

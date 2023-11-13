@@ -306,7 +306,7 @@ public final class Iterables {
         do {
             next = iter.next();
 
-            if (next == null && cmp == N.NULL_MIN_COMPARATOR) {
+            if (next == null && cmp == N.NULL_MIN_COMPARATOR) { // NOSONAR
                 return Nullable.of(next);
             } else if (cmp.compare(next, candidate) < 0) {
                 candidate = next;
@@ -433,7 +433,7 @@ public final class Iterables {
         do {
             next = iter.next();
 
-            if (next == null && cmp == N.NULL_MAX_COMPARATOR) {
+            if (next == null && cmp == N.NULL_MAX_COMPARATOR) { // NOSONAR
                 return Nullable.of(next);
             } else if (cmp.compare(next, candidate) > 0) {
                 candidate = next;
@@ -2091,7 +2091,7 @@ public final class Iterables {
      * @return
      */
     public static <K extends Comparable<? super K>> NavigableSet<K> subSet(NavigableSet<K> set, Range<K> range) {
-        if (set.comparator() != null && set.comparator() != N.NATURAL_COMPARATOR) {
+        if (set.comparator() != null && set.comparator() != N.NATURAL_COMPARATOR) { // NOSONAR
             N.checkArgument(set.comparator().compare(range.lowerEndpoint(), range.upperEndpoint()) <= 0,
                     "set is using a custom comparator which is inconsistent with the natural ordering.");
         }

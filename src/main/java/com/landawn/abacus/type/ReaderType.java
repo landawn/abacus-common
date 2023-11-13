@@ -117,7 +117,7 @@ public class ReaderType extends AbstractType<Reader> {
     @Override
     public Reader valueOf(String str) {
         if (str == null) {
-            return null;
+            return null; // NOSONAR
         }
 
         if (stringConstructor != null) {
@@ -138,7 +138,7 @@ public class ReaderType extends AbstractType<Reader> {
     @Override
     public Reader valueOf(final Object obj) {
         if (obj == null) {
-            return null;
+            return null; // NOSONAR
         } else if (obj instanceof Clob clob) {
             try {
                 return clob.getCharacterStream();

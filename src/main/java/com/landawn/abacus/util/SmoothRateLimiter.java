@@ -247,11 +247,11 @@ abstract class SmoothRateLimiter extends RateLimiter {
             thresholdPermits = 0.5 * warmupPeriodMicros / stableIntervalMicros;
             maxPermits = thresholdPermits + 2.0 * warmupPeriodMicros / (stableIntervalMicros + coldIntervalMicros);
             slope = (coldIntervalMicros - stableIntervalMicros) / (maxPermits - thresholdPermits);
-            if (oldMaxPermits == Double.POSITIVE_INFINITY) {
+            if (oldMaxPermits == Double.POSITIVE_INFINITY) { // NOSONAR
                 // if we don't special-case this, we would get storedPermits == NaN, below
                 storedPermits = 0.0;
             } else {
-                storedPermits = (oldMaxPermits == 0.0) ? maxPermits // initial state is cold
+                storedPermits = (oldMaxPermits == 0.0) ? maxPermits // initial state is cold // NOSONAR
                         : storedPermits * maxPermits / oldMaxPermits;
             }
         }
@@ -333,11 +333,11 @@ abstract class SmoothRateLimiter extends RateLimiter {
         void doSetRate(double permitsPerSecond, double stableIntervalMicros) {
             double oldMaxPermits = this.maxPermits;
             maxPermits = maxBurstSeconds * permitsPerSecond;
-            if (oldMaxPermits == Double.POSITIVE_INFINITY) {
+            if (oldMaxPermits == Double.POSITIVE_INFINITY) { // NOSONAR
                 // if we don't special-case this, we would get storedPermits == NaN, below
                 storedPermits = maxPermits;
             } else {
-                storedPermits = (oldMaxPermits == 0.0) ? 0.0 // initial state
+                storedPermits = (oldMaxPermits == 0.0) ? 0.0 // initial state // NOSONAR
                         : storedPermits * maxPermits / oldMaxPermits;
             }
         }

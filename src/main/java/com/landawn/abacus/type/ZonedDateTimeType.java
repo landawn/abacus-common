@@ -81,7 +81,7 @@ public class ZonedDateTimeType extends AbstractType<ZonedDateTime> {
     @Override
     public ZonedDateTime valueOf(String str) {
         if (Strings.isEmpty(str)) {
-            return null;
+            return null; // NOSONAR
         }
 
         if (N.equals(str, SYS_TIME)) {
@@ -110,7 +110,7 @@ public class ZonedDateTimeType extends AbstractType<ZonedDateTime> {
     @Override
     public ZonedDateTime valueOf(char[] cbuf, int offset, int len) {
         if ((cbuf == null) || (len == 0)) {
-            return null;
+            return null; // NOSONAR
         }
 
         if (cbuf[offset + 4] != '-') {

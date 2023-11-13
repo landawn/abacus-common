@@ -16,7 +16,6 @@ package com.landawn.abacus.util;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -53,7 +52,7 @@ public class BufferedWriter extends Writer {
     }
 
     BufferedWriter(OutputStream os) {
-        this(new OutputStreamWriter(os, IOUtil.DEFAULT_CHARSET));
+        this(IOUtil.newOutputStreamWriter(os, IOUtil.DEFAULT_CHARSET));
     }
 
     BufferedWriter(Writer writer) {
@@ -459,7 +458,7 @@ public class BufferedWriter extends Writer {
      * @param os
      */
     void reinit(OutputStream os) {
-        reinit(new OutputStreamWriter(os));
+        reinit(IOUtil.newOutputStreamWriter(os)); // NOSONAR
     }
 
     /**

@@ -20,7 +20,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -435,7 +434,7 @@ final class FileSystemUtil {
             out = proc.getOutputStream();
             err = proc.getErrorStream();
             // default charset is most likely appropriate here
-            inr = new BufferedReader(new InputStreamReader(in, Charset.defaultCharset()));
+            inr = new BufferedReader(IOUtil.newInputStreamReader(in, Charset.defaultCharset()));
             String line = inr.readLine();
             while (line != null && lines.size() < max) {
                 line = line.toLowerCase(Locale.ENGLISH).trim();

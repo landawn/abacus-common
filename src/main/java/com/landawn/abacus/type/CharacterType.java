@@ -31,9 +31,9 @@ public final class CharacterType extends AbstractCharacterType {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public Class<Character> clazz() {
@@ -62,7 +62,7 @@ public final class CharacterType extends AbstractCharacterType {
         final String ret = rs.getString(columnIndex);
 
         if (ret == null) {
-            return null;
+            return null; // NOSONAR
         } else {
             return ret.charAt(0);
         }
@@ -80,7 +80,7 @@ public final class CharacterType extends AbstractCharacterType {
         final String ret = rs.getString(columnLabel);
 
         if (ret == null) {
-            return null;
+            return null; // NOSONAR
         } else {
             return ret.charAt(0);
         }

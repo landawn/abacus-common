@@ -131,7 +131,7 @@ public class MultimapType<K, E, V extends Collection<E>> extends AbstractType<Mu
     @Override
     public Multimap<K, E, V> valueOf(String st) {
         if (Strings.isEmpty(st)) {
-            return null;
+            return null; // NOSONAR
         }
 
         final Map<K, Collection<E>> map = Utils.jsonParser.deserialize(Map.class, st, jdc);

@@ -29,7 +29,6 @@ import static com.landawn.abacus.parser.JSONReader.START_QUOTATION_S;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.io.Writer;
@@ -1625,7 +1624,7 @@ final class JSONParserImpl extends AbstractJSONParser {
 
         // No need to close the reader because the InputStream will/should be
         // closely externally.
-        Reader reader = new InputStreamReader(is); // NOSONAR
+        Reader reader = IOUtil.newInputStreamReader(is); // NOSONAR
 
         return deserialize(targetClass, reader, config);
     }
@@ -3139,7 +3138,7 @@ final class JSONParserImpl extends AbstractJSONParser {
     @Override
     public <T> CheckedStream<T, IOException> stream(final Class<? extends T> elementClass, final InputStream is,
             final boolean closeInputStreamWhenStreamIsClosed, final JSONDeserializationConfig config) {
-        final Reader reader = new InputStreamReader(is); // NOSONAR
+        final Reader reader = IOUtil.newInputStreamReader(is); // NOSONAR
 
         return stream(elementClass, reader, closeInputStreamWhenStreamIsClosed, config);
     }

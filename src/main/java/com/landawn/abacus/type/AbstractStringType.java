@@ -111,7 +111,7 @@ public abstract class AbstractStringType extends AbstractCharSequenceType<String
     @Override
     public String valueOf(final Object obj) {
         if (obj == null) {
-            return null;
+            return null; // NOSONAR
         } else if (obj instanceof Clob clob) {
             try {
                 return clob.getSubString(1, (int) clob.length());

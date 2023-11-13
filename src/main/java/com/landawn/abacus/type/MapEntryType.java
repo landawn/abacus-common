@@ -122,7 +122,7 @@ public class MapEntryType<K, V> extends AbstractType<Map.Entry<K, V>> {
     @Override
     public Map.Entry<K, V> valueOf(String str) {
         if (Strings.isEmpty(str) || "{}".equals(str)) {
-            return null;
+            return null; // NOSONAR
         }
 
         return Utils.jsonParser.deserialize(Clazz.<K, V> ofMap(), str, jdc).entrySet().iterator().next();

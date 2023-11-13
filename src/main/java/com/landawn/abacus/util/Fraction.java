@@ -404,9 +404,9 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public int numerator() {
         return numerator;
@@ -426,9 +426,9 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public int denominator() {
         return denominator;
@@ -458,9 +458,9 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public int properNumerator() {
         return Math.abs(numerator % denominator);
@@ -490,9 +490,9 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public int properWhole() {
         return numerator / denominator;
@@ -534,7 +534,7 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
      */
     @Override
     public float floatValue() {
-        return (float) numerator / (float) denominator;
+        return (float) numerator / (float) denominator; // NOSONAR
     }
 
     /**

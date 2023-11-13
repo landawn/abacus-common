@@ -33,9 +33,9 @@ public final class LongType extends AbstractLongType {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
@@ -65,7 +65,7 @@ public final class LongType extends AbstractLongType {
         final Object ret = rs.getObject(columnIndex);
 
         if (ret == null) {
-            return null;
+            return null; // NOSONAR
         } else if (ret instanceof Long) {
             return (Long) ret;
         } else if (ret instanceof Number) {
@@ -87,7 +87,7 @@ public final class LongType extends AbstractLongType {
         final Object ret = rs.getObject(columnLabel);
 
         if (ret == null) {
-            return null;
+            return null; // NOSONAR
         } else if (ret instanceof Long) {
             return (Long) ret;
         } else if (ret instanceof Number) {

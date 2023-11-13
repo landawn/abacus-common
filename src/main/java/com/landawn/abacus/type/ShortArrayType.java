@@ -43,7 +43,7 @@ public final class ShortArrayType extends ObjectArrayType<Short> {
     @Override
     public String stringOf(Short[] x) {
         if (x == null) {
-            return null;
+            return null; // NOSONAR
         } else if (x.length == 0) {
             return "[]";
         }
@@ -81,7 +81,7 @@ public final class ShortArrayType extends ObjectArrayType<Short> {
     @Override
     public Short[] valueOf(String str) {
         if (str == null) {
-            return null;
+            return null; // NOSONAR
         } else if (str.length() == 0 || "[]".equals(str)) {
             return N.EMPTY_SHORT_OBJ_ARRAY;
         }

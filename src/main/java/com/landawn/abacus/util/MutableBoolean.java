@@ -87,7 +87,7 @@ public final class MutableBoolean implements Mutable, Serializable, Comparable<M
      * @deprecated replace by {@link #value()}.
      */
     @Deprecated
-    public boolean getValue() {
+    public boolean getValue() { // NOSONAR
         return value;
     }
 
@@ -106,7 +106,7 @@ public final class MutableBoolean implements Mutable, Serializable, Comparable<M
      * @param value
      * @return
      */
-    public boolean getAndSet(final boolean value) {
+    public boolean getAndSet(final boolean value) { // NOSONAR
         final boolean result = this.value;
         this.value = value;
         return result;
@@ -128,7 +128,7 @@ public final class MutableBoolean implements Mutable, Serializable, Comparable<M
      *
      * @return
      */
-    public boolean getAndInvert() {
+    public boolean getAndInvert() { // NOSONAR
         final boolean result = value;
         value = !value;
         return result;

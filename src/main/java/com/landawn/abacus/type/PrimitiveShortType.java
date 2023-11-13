@@ -78,7 +78,7 @@ public final class PrimitiveShortType extends AbstractShortType {
         final Object ret = rs.getObject(columnIndex);
 
         if (ret == null) {
-            return null;
+            return null; // NOSONAR
         } else if (ret instanceof Short) {
             return (Short) ret;
         } else if (ret instanceof Number) {
@@ -100,7 +100,7 @@ public final class PrimitiveShortType extends AbstractShortType {
         final Object ret = rs.getObject(columnLabel);
 
         if (ret == null) {
-            return null;
+            return null; // NOSONAR
         } else if (ret instanceof Short) {
             return (Short) ret;
         } else if (ret instanceof Number) {

@@ -72,7 +72,7 @@ public final class PrimitiveLongArrayType extends AbstractPrimitiveArrayType<lon
     @Override
     public String stringOf(long[] x) {
         if (x == null) {
-            return null;
+            return null; // NOSONAR
         } else if (x.length == 0) {
             return "[]";
         }
@@ -106,7 +106,7 @@ public final class PrimitiveLongArrayType extends AbstractPrimitiveArrayType<lon
     @Override
     public long[] valueOf(String str) {
         if (str == null) {
-            return null;
+            return null; // NOSONAR
         } else if (str.length() == 0 || "[]".equals(str)) {
             return N.EMPTY_LONG_ARRAY;
         }
@@ -184,7 +184,7 @@ public final class PrimitiveLongArrayType extends AbstractPrimitiveArrayType<lon
     @Override
     public long[] collection2Array(Collection<?> c) {
         if (c == null) {
-            return null;
+            return null; // NOSONAR
         }
 
         long[] a = new long[c.size()];

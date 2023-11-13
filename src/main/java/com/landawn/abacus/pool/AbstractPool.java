@@ -83,7 +83,7 @@ public abstract class AbstractPool implements Pool {
         this.capacity = capacity;
         this.evictionPolicy = evictionPolicy == null ? EvictionPolicy.LAST_ACCESS_TIME : evictionPolicy;
         this.autoBalance = autoBalance;
-        this.balanceFactor = balanceFactor == 0f ? DEFAULT_BALANCE_FACTOR : balanceFactor;
+        this.balanceFactor = balanceFactor == 0f ? DEFAULT_BALANCE_FACTOR : balanceFactor; // NOSONAR
 
         final Class<?> cls = this.getClass();
 
@@ -128,9 +128,9 @@ public abstract class AbstractPool implements Pool {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public long putCount() {
@@ -138,9 +138,9 @@ public abstract class AbstractPool implements Pool {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public long hitCount() {
@@ -148,9 +148,9 @@ public abstract class AbstractPool implements Pool {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public long missCount() {
@@ -158,9 +158,9 @@ public abstract class AbstractPool implements Pool {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public long evictionCount() {

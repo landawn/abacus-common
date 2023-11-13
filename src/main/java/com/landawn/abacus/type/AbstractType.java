@@ -114,9 +114,9 @@ public abstract class AbstractType<T> implements Type<T> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public String name() {
@@ -124,9 +124,9 @@ public abstract class AbstractType<T> implements Type<T> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public String declaringName() {
@@ -147,9 +147,9 @@ public abstract class AbstractType<T> implements Type<T> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public String xmlName() {
@@ -217,9 +217,9 @@ public abstract class AbstractType<T> implements Type<T> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public boolean isCharSequence() {
@@ -467,9 +467,9 @@ public abstract class AbstractType<T> implements Type<T> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public boolean isObjectType() {
@@ -483,7 +483,7 @@ public abstract class AbstractType<T> implements Type<T> {
      */
     @Override
     public Type<?> getElementType() {
-        return null;
+        return null; // NOSONAR
     }
 
     /**
@@ -497,20 +497,20 @@ public abstract class AbstractType<T> implements Type<T> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public T defaultValue() {
-        return null;
+        return null; // NOSONAR
     }
 
     /**
-     * 
      *
-     * @param value 
-     * @return 
+     *
+     * @param value
+     * @return
      */
     @Override
     public boolean isDefaultValue(final T value) {
@@ -770,9 +770,9 @@ public abstract class AbstractType<T> implements Type<T> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public int hashCode() {

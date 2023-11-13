@@ -836,7 +836,7 @@ public class u {//NOSONAR
          * @return
          * @throws NoSuchElementException the no such element exception
          */
-        public boolean get() throws NoSuchElementException {
+        public boolean get() throws NoSuchElementException { // NOSONAR
             return orElseThrow();
         }
 

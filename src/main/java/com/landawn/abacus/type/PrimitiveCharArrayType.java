@@ -74,7 +74,7 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
     @Override
     public String stringOf(char[] x) {
         if (x == null) {
-            return null;
+            return null; // NOSONAR
         } else if (x.length == 0) {
             return "[]";
         }
@@ -110,7 +110,7 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
     @Override
     public char[] valueOf(String str) {
         if (str == null) {
-            return null;
+            return null; // NOSONAR
         } else if (str.length() == 0 || "[]".equals(str)) {
             return N.EMPTY_CHAR_ARRAY;
         }
@@ -150,7 +150,7 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
     @Override
     public char[] valueOf(final Object obj) {
         if (obj == null) {
-            return null;
+            return null; // NOSONAR
         } else if (obj instanceof Clob clob) {
             try {
                 return clob.getSubString(1, (int) clob.length()).toCharArray();
@@ -247,7 +247,7 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
     @Override
     public char[] collection2Array(Collection<?> c) {
         if (c == null) {
-            return null;
+            return null; // NOSONAR
         }
 
         char[] a = new char[c.size()];

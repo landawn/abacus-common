@@ -2420,7 +2420,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
      *
      * @param <T>
      */
-    static class XmlSAXHandler<T> extends DefaultHandler {
+    static final class XmlSAXHandler<T> extends DefaultHandler { // NOSONAR
 
         private final Holder<T> resultHolder = new Holder<>();
 

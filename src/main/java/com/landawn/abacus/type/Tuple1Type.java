@@ -116,7 +116,7 @@ public class Tuple1Type<T1> extends AbstractType<Tuple1<T1>> {
     @Override
     public Tuple1<T1> valueOf(String str) {
         if (Strings.isEmpty(str)) {
-            return null;
+            return null; // NOSONAR
         }
 
         final Object[] a = Utils.jsonParser.deserialize(Object[].class, str, Utils.jdc);

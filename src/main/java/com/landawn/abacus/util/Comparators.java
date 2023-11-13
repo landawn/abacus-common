@@ -267,7 +267,7 @@ public final class Comparators {
      * @return
      */
     public static <T> Comparator<T> nullsFirst(final Comparator<T> cmp) {
-        if (cmp == null || cmp == NULL_FIRST_COMPARATOR) {
+        if (cmp == null || cmp == NULL_FIRST_COMPARATOR) { // NOSONAR
             return (Comparator<T>) NULL_FIRST_COMPARATOR;
         }
 
@@ -304,7 +304,7 @@ public final class Comparators {
      * @return
      */
     public static <T> Comparator<T> nullsLast(final Comparator<T> cmp) {
-        if (cmp == null || cmp == NULL_LAST_COMPARATOR) {
+        if (cmp == null || cmp == NULL_LAST_COMPARATOR) { // NOSONAR
             return (Comparator<T>) NULL_LAST_COMPARATOR;
         }
 
@@ -796,9 +796,9 @@ public final class Comparators {
      * @return
      */
     public static <T> Comparator<T> reverseOrder(final Comparator<T> cmp) {
-        if (cmp == null || cmp == NATURAL_ORDER) {
+        if (cmp == null || cmp == NATURAL_ORDER) { // NOSONAR
             return REVERSED_ORDER;
-        } else if (cmp == REVERSED_ORDER) {
+        } else if (cmp == REVERSED_ORDER) { // NOSONAR
             return NATURAL_ORDER;
         }
 

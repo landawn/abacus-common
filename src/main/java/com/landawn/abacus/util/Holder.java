@@ -115,7 +115,7 @@ public final class Holder<T> implements Mutable {
      * @return
      * @throws E the e
      */
-    public <E extends Exception> T getAndUpdate(final Throwables.UnaryOperator<T, E> updateFunction) throws E {
+    public <E extends Exception> T getAndUpdate(final Throwables.UnaryOperator<T, E> updateFunction) throws E { // NOSONAR
         final T res = value;
         this.value = updateFunction.apply(value);
         return res;
@@ -129,7 +129,7 @@ public final class Holder<T> implements Mutable {
      * @return
      * @throws E the e
      */
-    public <E extends Exception> T updateAndGet(final Throwables.UnaryOperator<T, E> updateFunction) throws E {
+    public <E extends Exception> T updateAndGet(final Throwables.UnaryOperator<T, E> updateFunction) throws E { // NOSONAR
         this.value = updateFunction.apply(value);
         return value;
     }

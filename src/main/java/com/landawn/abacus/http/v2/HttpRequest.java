@@ -18,7 +18,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.Authenticator;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest.BodyPublisher;
@@ -36,6 +35,7 @@ import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.http.HttpHeaders;
 import com.landawn.abacus.http.HttpMethod;
 import com.landawn.abacus.http.HttpUtil;
+import com.landawn.abacus.util.Charsets;
 import com.landawn.abacus.util.ExceptionUtil;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
@@ -43,16 +43,21 @@ import com.landawn.abacus.util.URLEncodedUtil;
 
 /**
  * @see URLEncodedUtil
+ * @see HttpHeaders
  * @author Haiyang Li
  */
 public final class HttpRequest {
 
     private static final String HTTP_METHOD_STR = "httpMethod";
 
-    static final HttpClient DEFAULT_HTTP_CLIENT = HttpClient.newHttpClient();
+    private static final HttpClient DEFAULT_HTTP_CLIENT = HttpClient.newHttpClient();
 
+    private final String url;
+    private final URI uri;
     private final HttpClient httpClient;
     private final java.net.http.HttpRequest.Builder requestBuilder;
+
+    private Object query;
 
     private HttpClient.Builder clientBuilder;
     private BodyPublisher bodyPublisher;
@@ -61,32 +66,15 @@ public final class HttpRequest {
 
     private boolean closeHttpClientAfterExecution = false;
 
-    HttpRequest(HttpClient httpClient, final HttpClient.Builder clientBuilder, final java.net.http.HttpRequest.Builder requestBuilder) {
+    HttpRequest(final String url, final URI uri, final HttpClient httpClient, final HttpClient.Builder clientBuilder,
+            final java.net.http.HttpRequest.Builder requestBuilder) {
+        N.checkArgument(!(Strings.isEmpty(url) && uri == null), "'uri' or 'url' can't be null or empty");
+
+        this.url = url;
+        this.uri = uri;
         this.httpClient = httpClient;
         this.clientBuilder = clientBuilder;
         this.requestBuilder = N.checkArgNotNull(requestBuilder);
-    }
-
-    /**
-     *
-     * @param url
-     * @return
-     */
-    public static HttpRequest url(final String url) {
-        return url(url, com.landawn.abacus.http.HttpClient.DEFAULT_CONNECTION_TIMEOUT, com.landawn.abacus.http.HttpClient.DEFAULT_READ_TIMEOUT);
-    }
-
-    /**
-     *
-     * @param url
-     * @param connectionTimeoutInMillis
-     * @param readTimeoutInMillis
-     * @return
-     */
-    public static HttpRequest url(final String url, final long connectionTimeoutInMillis, final long readTimeoutInMillis) {
-        return new HttpRequest(null, HttpClient.newBuilder().connectTimeout(Duration.ofMillis(connectionTimeoutInMillis)),
-                java.net.http.HttpRequest.newBuilder().uri(URI.create(url)).timeout(Duration.ofMillis(readTimeoutInMillis)))
-                        .closeHttpClientAfterExecution(true);
     }
 
     /**
@@ -97,8 +85,52 @@ public final class HttpRequest {
      * @return
      * @throws IllegalArgumentException if the scheme of {@code url} is not {@code http} or {@code https}.
      */
-    public static HttpRequest url(String url, final HttpClient httpClient) {
-        return new HttpRequest(httpClient, null, java.net.http.HttpRequest.newBuilder().uri(URI.create(url))).closeHttpClientAfterExecution(false);
+    public static HttpRequest create(String url, final HttpClient httpClient) {
+        return new HttpRequest(url, null, httpClient, null, java.net.http.HttpRequest.newBuilder()).closeHttpClientAfterExecution(false);
+    }
+
+    /**
+     * Sets the URI target of this request.
+     *
+     * @param url
+     * @param httpClient
+     * @return
+     * @throws IllegalArgumentException if the scheme of {@code url} is not {@code http} or {@code https}.
+     */
+    public static HttpRequest create(URL url, final HttpClient httpClient) {
+        return new HttpRequest(url.toString(), null, httpClient, null, java.net.http.HttpRequest.newBuilder()).closeHttpClientAfterExecution(false);
+    }
+
+    /**
+     * Sets the URI target of this request.
+     *
+     * @param uri
+     * @return
+     * @throws IllegalArgumentException if the scheme of {@code url} is not {@code http} or {@code https}.
+     */
+    public static HttpRequest create(URI uri, final HttpClient httpClient) {
+        return new HttpRequest(null, uri, httpClient, null, java.net.http.HttpRequest.newBuilder()).closeHttpClientAfterExecution(false);
+    }
+
+    /**
+     *
+     * @param url
+     * @return
+     */
+    public static HttpRequest url(final String url) {
+        return new HttpRequest(url, null, DEFAULT_HTTP_CLIENT, null, java.net.http.HttpRequest.newBuilder()).closeHttpClientAfterExecution(false);
+    }
+
+    /**
+     *
+     * @param url
+     * @param connectionTimeoutInMillis
+     * @param readTimeoutInMillis
+     * @return
+     */
+    public static HttpRequest url(final String url, final long connectionTimeoutInMillis, final long readTimeoutInMillis) {
+        return new HttpRequest(url, null, null, HttpClient.newBuilder().connectTimeout(Duration.ofMillis(connectionTimeoutInMillis)),
+                java.net.http.HttpRequest.newBuilder().timeout(Duration.ofMillis(readTimeoutInMillis))).closeHttpClientAfterExecution(true);
     }
 
     /**
@@ -109,7 +141,7 @@ public final class HttpRequest {
      * @throws IllegalArgumentException if the scheme of {@code url} is not {@code http} or {@code https}.
      */
     public static HttpRequest url(URL url) {
-        return url(url, com.landawn.abacus.http.HttpClient.DEFAULT_CONNECTION_TIMEOUT, com.landawn.abacus.http.HttpClient.DEFAULT_READ_TIMEOUT);
+        return new HttpRequest(url.toString(), null, DEFAULT_HTTP_CLIENT, null, java.net.http.HttpRequest.newBuilder()).closeHttpClientAfterExecution(false);
     }
 
     /**
@@ -121,40 +153,19 @@ public final class HttpRequest {
      * @return
      */
     public static HttpRequest url(final URL url, final long connectionTimeoutInMillis, final long readTimeoutInMillis) {
-        try {
-            return new HttpRequest(null, HttpClient.newBuilder().connectTimeout(Duration.ofMillis(connectionTimeoutInMillis)),
-                    java.net.http.HttpRequest.newBuilder().uri(url.toURI()).timeout(Duration.ofMillis(readTimeoutInMillis)))
-                            .closeHttpClientAfterExecution(true);
-        } catch (URISyntaxException e) {
-            throw ExceptionUtil.toRuntimeException(e);
-        }
+        return new HttpRequest(url.toString(), null, null, HttpClient.newBuilder().connectTimeout(Duration.ofMillis(connectionTimeoutInMillis)),
+                java.net.http.HttpRequest.newBuilder().timeout(Duration.ofMillis(readTimeoutInMillis))).closeHttpClientAfterExecution(true);
     }
 
     /**
      * Sets the URI target of this request.
      *
-     * @param url
-     * @param httpClient
+     * @param uri
      * @return
      * @throws IllegalArgumentException if the scheme of {@code url} is not {@code http} or {@code https}.
      */
-    public static HttpRequest url(URL url, final HttpClient httpClient) {
-        try {
-            return new HttpRequest(httpClient, null, java.net.http.HttpRequest.newBuilder().uri(url.toURI())).closeHttpClientAfterExecution(false);
-        } catch (URISyntaxException e) {
-            throw ExceptionUtil.toRuntimeException(e);
-        }
-    }
-
-    /**
-     * Sets the URI target of this request.
-     *
-     * @param url
-     * @return
-     * @throws IllegalArgumentException if the scheme of {@code url} is not {@code http} or {@code https}.
-     */
-    public static HttpRequest url(URI url) {
-        return url(url, com.landawn.abacus.http.HttpClient.DEFAULT_CONNECTION_TIMEOUT, com.landawn.abacus.http.HttpClient.DEFAULT_READ_TIMEOUT);
+    public static HttpRequest url(URI uri) {
+        return new HttpRequest(null, uri, DEFAULT_HTTP_CLIENT, null, java.net.http.HttpRequest.newBuilder()).closeHttpClientAfterExecution(false);
     }
 
     /**
@@ -166,19 +177,8 @@ public final class HttpRequest {
      * @return
      */
     public static HttpRequest url(final URI uri, final long connectionTimeoutInMillis, final long readTimeoutInMillis) {
-        return new HttpRequest(null, HttpClient.newBuilder().connectTimeout(Duration.ofMillis(connectionTimeoutInMillis)),
-                java.net.http.HttpRequest.newBuilder().uri(uri).timeout(Duration.ofMillis(readTimeoutInMillis))).closeHttpClientAfterExecution(true);
-    }
-
-    /**
-     * Sets the URI target of this request.
-     *
-     * @param url
-     * @return
-     * @throws IllegalArgumentException if the scheme of {@code url} is not {@code http} or {@code https}.
-     */
-    public static HttpRequest url(URI url, final HttpClient httpClient) {
-        return new HttpRequest(httpClient, null, java.net.http.HttpRequest.newBuilder().uri(url)).closeHttpClientAfterExecution(false);
+        return new HttpRequest(null, uri, null, HttpClient.newBuilder().connectTimeout(Duration.ofMillis(connectionTimeoutInMillis)),
+                java.net.http.HttpRequest.newBuilder().timeout(Duration.ofMillis(readTimeoutInMillis))).closeHttpClientAfterExecution(true);
     }
 
     HttpRequest closeHttpClientAfterExecution(boolean b) {
@@ -261,9 +261,10 @@ public final class HttpRequest {
      * @param user
      * @param password
      * @return
+     * @see HttpHeaders
      */
     public HttpRequest basicAuth(final String user, final Object password) {
-        header(HttpHeaders.Names.AUTHORIZATION, "Basic " + Strings.base64Encode((user + ":" + password).getBytes()));
+        header(HttpHeaders.Names.AUTHORIZATION, "Basic " + Strings.base64Encode((user + ":" + password).getBytes(Charsets.UTF_8)));
 
         return this;
     }
@@ -275,6 +276,7 @@ public final class HttpRequest {
      * @param name
      * @param value
      * @return
+     * @see HttpHeaders
      */
     public HttpRequest header(String name, Object value) {
         requestBuilder.header(name, HttpHeaders.valueOf(value));
@@ -291,6 +293,7 @@ public final class HttpRequest {
      * @param name2
      * @param value2
      * @return
+     * @see HttpHeaders
      */
     public HttpRequest headers(String name1, Object value1, String name2, Object value2) {
         return header(name1, value1).header(name2, value2);
@@ -307,6 +310,7 @@ public final class HttpRequest {
      * @param name3
      * @param value3
      * @return
+     * @see HttpHeaders
      */
     public HttpRequest headers(String name1, Object value1, String name2, Object value2, String name3, Object value3) {
         return header(name1, value1).header(name2, value2).header(name3, value3);
@@ -318,6 +322,7 @@ public final class HttpRequest {
      *
      * @param headers
      * @return
+     * @see HttpHeaders
      */
     public HttpRequest headers(Map<String, ?> headers) {
         if (N.notEmpty(headers)) {
@@ -334,11 +339,36 @@ public final class HttpRequest {
      *
      * @param headers
      * @return
+     * @see HttpHeaders
      */
     public HttpRequest headers(HttpHeaders headers) {
         if (headers != null && !headers.isEmpty()) {
             headers.forEach(this::header);
         }
+
+        return this;
+    }
+
+    /**
+     * Set query parameters for {@code GET} or {@code DELETE} request.
+     *
+     * @param query
+     * @return
+     */
+    public HttpRequest query(final String query) {
+        this.query = query;
+
+        return this;
+    }
+
+    /**
+     * Set query parameters for {@code GET} or {@code DELETE} request.
+     *
+     * @param queryParams
+     * @return
+     */
+    public HttpRequest query(final Map<String, ?> queryParams) {
+        this.query = queryParams;
 
         return this;
     }
@@ -365,6 +395,32 @@ public final class HttpRequest {
         setContentType(HttpHeaders.Values.APPLICATION_JSON);
 
         this.bodyPublisher = BodyPublishers.ofString(N.toJSON(obj));
+
+        return this;
+    }
+
+    /**
+     *
+     * @param xml
+     * @return
+     */
+    public HttpRequest xmlBody(final String xml) {
+        setContentType(HttpHeaders.Values.APPLICATION_XML);
+
+        this.bodyPublisher = BodyPublishers.ofString(xml);
+
+        return this;
+    }
+
+    /**
+     *
+     * @param obj
+     * @return
+     */
+    public HttpRequest xmlBody(final Object obj) {
+        setContentType(HttpHeaders.Values.APPLICATION_XML);
+
+        this.bodyPublisher = BodyPublishers.ofString(N.toXML(obj));
 
         return this;
     }
@@ -617,7 +673,7 @@ public final class HttpRequest {
     public <T> HttpResponse<T> execute(final HttpMethod httpMethod, final HttpResponse.BodyHandler<T> responseBodyHandler) throws UncheckedIOException {
         N.checkArgNotNull(httpMethod, HTTP_METHOD_STR);
 
-        final HttpClient httpClientToUse = checkHttpClient();
+        final HttpClient httpClientToUse = checkUrlAndHttpClient();
 
         try {
             return httpClientToUse.send(requestBuilder.method(httpMethod.name(), checkBodyPublisher()).build(), responseBodyHandler);
@@ -643,7 +699,21 @@ public final class HttpRequest {
         return getBody(execute(httpMethod, responseBodyHandler), resultClass);
     }
 
-    private HttpClient checkHttpClient() {
+    private HttpClient checkUrlAndHttpClient() {
+        if (query == null || (query instanceof String && Strings.isEmpty((String) query))) {
+            if (uri == null) {
+                requestBuilder.uri(URI.create(url));
+            } else {
+                requestBuilder.uri(uri);
+            }
+        } else {
+            if (uri == null) {
+                requestBuilder.uri(URI.create(URLEncodedUtil.encode(url, query)));
+            } else {
+                requestBuilder.uri(URI.create(URLEncodedUtil.encode(uri.toString(), query)));
+            }
+        }
+
         if (httpClient == null || requireNewClient) {
             if (clientBuilder == null) {
                 return DEFAULT_HTTP_CLIENT;
@@ -904,7 +974,7 @@ public final class HttpRequest {
     public <T> CompletableFuture<HttpResponse<T>> asyncExecute(final HttpMethod httpMethod, final HttpResponse.BodyHandler<T> responseBodyHandler) {
         N.checkArgNotNull(httpMethod, HTTP_METHOD_STR);
 
-        final HttpClient httpClientToUse = checkHttpClient();
+        final HttpClient httpClientToUse = checkUrlAndHttpClient();
 
         try {
             return httpClientToUse.sendAsync(requestBuilder.method(httpMethod.name(), checkBodyPublisher()).build(), responseBodyHandler);
@@ -925,7 +995,7 @@ public final class HttpRequest {
     public <T> CompletableFuture<T> asyncExecute(final HttpMethod httpMethod, final Class<T> resultClass) {
         N.checkArgNotNull(httpMethod, HTTP_METHOD_STR);
 
-        final HttpClient httpClientToUse = checkHttpClient();
+        final HttpClient httpClientToUse = checkUrlAndHttpClient();
         final BodyHandler<?> responseBodyHandler = createResponseBodyHandler(resultClass);
 
         try {
@@ -950,7 +1020,7 @@ public final class HttpRequest {
             final PushPromiseHandler<T> pushPromiseHandler) {
         N.checkArgNotNull(httpMethod, HTTP_METHOD_STR);
 
-        final HttpClient httpClientToUse = checkHttpClient();
+        final HttpClient httpClientToUse = checkUrlAndHttpClient();
 
         try {
             return httpClientToUse.sendAsync(requestBuilder.method(httpMethod.name(), checkBodyPublisher()).build(), responseBodyHandler, pushPromiseHandler);

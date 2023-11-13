@@ -2218,15 +2218,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param <T>
      * @param aa
-     * @return
-     * @throws IllegalArgumentException if the specified {@code Array} is <code>null</code>.
+     * @return {@code null} if the specified array {@code aa} is {@code null}.
      */
     @SafeVarargs
-    public static <T> T[] concat(final T[]... aa) throws IllegalArgumentException {
+    public static <T> T[] concat(final T[]... aa) {
         // checkArgNotNull(aa, "aa");
 
         if (aa == null) {
-            return null;
+            return null; // NOSONAR
         } else if (aa.length == 0) {
             return newArray(aa.getClass().getComponentType().getComponentType(), 0);
         } else if (aa.length == 1) {
@@ -2595,7 +2594,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static <T> T[] flatten(final T[][] a) {
         if (a == null) {
-            return null;
+            return null; // NOSONAR
         }
 
         return flatten(a, (Class<T>) a.getClass().getComponentType().getComponentType());
@@ -3591,7 +3590,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         MutableInt val = null;
 
         for (final Collection<? extends T> ec : c) {
-            if (ec == smallest) {
+            if (ec == smallest) { // NOSONAR
                 continue;
             }
 
@@ -13212,7 +13211,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
                 candidate = a[i];
             }
 
-            if (candidate == null && cmp == NULL_MIN_COMPARATOR) {
+            if (candidate == null && cmp == NULL_MIN_COMPARATOR) { // NOSONAR
                 return null;
             }
         }
@@ -13272,7 +13271,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
                     candidate = e;
                 }
 
-                if (candidate == null && cmp == NULL_MIN_COMPARATOR) {
+                if (candidate == null && cmp == NULL_MIN_COMPARATOR) { // NOSONAR
                     return null;
                 }
             }
@@ -13291,7 +13290,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
                         candidate = e;
                     }
 
-                    if (candidate == null && cmp == NULL_MIN_COMPARATOR) {
+                    if (candidate == null && cmp == NULL_MIN_COMPARATOR) { // NOSONAR
                         return null;
                     }
                 }
@@ -13341,7 +13340,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
                 candidate = e;
             }
 
-            if (candidate == null && cmp == NULL_MIN_COMPARATOR) {
+            if (candidate == null && cmp == NULL_MIN_COMPARATOR) { // NOSONAR
                 return null;
             }
         }
@@ -14498,7 +14497,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
                 candidate = a[i];
             }
 
-            if (candidate == null && cmp == NULL_MAX_COMPARATOR) {
+            if (candidate == null && cmp == NULL_MAX_COMPARATOR) { // NOSONAR
                 return null;
             }
         }
@@ -14546,7 +14545,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
                 candidate = e;
             }
 
-            if (candidate == null && cmp == NULL_MAX_COMPARATOR) {
+            if (candidate == null && cmp == NULL_MAX_COMPARATOR) { // NOSONAR
                 return null;
             }
         }
@@ -14605,7 +14604,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
                     candidate = e;
                 }
 
-                if (candidate == null && cmp == NULL_MAX_COMPARATOR) {
+                if (candidate == null && cmp == NULL_MAX_COMPARATOR) { // NOSONAR
                     return null;
                 }
             }
@@ -14626,7 +14625,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
                     }
                 }
 
-                if (candidate == null && cmp == NULL_MAX_COMPARATOR) {
+                if (candidate == null && cmp == NULL_MAX_COMPARATOR) { // NOSONAR
                     return null;
                 }
             }
@@ -22670,7 +22669,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     private static int initSizeForFlatMap(final int size) {
-        return size > MAX_ARRAY_SIZE / LOAD_FACTOR_FOR_FLAT_MAP ? MAX_ARRAY_SIZE : (int) (size * LOAD_FACTOR_FOR_FLAT_MAP);
+        return size > MAX_ARRAY_SIZE / LOAD_FACTOR_FOR_FLAT_MAP ? MAX_ARRAY_SIZE : (int) (size * LOAD_FACTOR_FOR_FLAT_MAP); // NOSONAR
     }
 
     /**
@@ -29193,7 +29192,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         checkArgNotNull(converter);
 
         if (a == null) {
-            return null;
+            return null; // NOSONAR
         } else if (a.length == 0) {
             return a.clone();
         }

@@ -16,7 +16,7 @@ package com.landawn.abacus.util;
 
 import com.landawn.abacus.util.u.OptionalDouble;
 
-public class KahanSummation {
+public final class KahanSummation { // NOSONAR
 
     private long count;
 
@@ -87,18 +87,18 @@ public class KahanSummation {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public long count() {
         return count;
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public double sum() {
         final double tmp = sum + correction;
@@ -111,18 +111,18 @@ public class KahanSummation {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public OptionalDouble average() {
         return count == 0 ? OptionalDouble.empty() : OptionalDouble.of(sum() / count());
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public String toString() {

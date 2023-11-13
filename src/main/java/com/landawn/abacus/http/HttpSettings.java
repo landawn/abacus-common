@@ -18,6 +18,7 @@ import java.util.Map;
 
 import javax.net.ssl.SSLSocketFactory;
 
+import com.landawn.abacus.util.Charsets;
 import com.landawn.abacus.util.Strings;
 
 /**
@@ -129,7 +130,7 @@ public final class HttpSettings {
      *
      * @return
      */
-    public boolean getUseCaches() {
+    public boolean getUseCaches() { // NOSONAR
         return useCaches;
     }
 
@@ -333,7 +334,7 @@ public final class HttpSettings {
      * @return
      */
     public HttpSettings basicAuth(String user, Object password) {
-        return header(HttpHeaders.Names.AUTHORIZATION, "Basic " + Strings.base64Encode((user + ":" + password).getBytes()));
+        return header(HttpHeaders.Names.AUTHORIZATION, "Basic " + Strings.base64Encode((user + ":" + password).getBytes(Charsets.UTF_8)));
     }
 
     /**
@@ -343,6 +344,7 @@ public final class HttpSettings {
      * @param name
      * @param value
      * @return
+     * @see HttpHeaders
      */
     public HttpSettings header(String name, Object value) {
         headers().set(name, value);
@@ -359,6 +361,7 @@ public final class HttpSettings {
      * @param name2
      * @param value2
      * @return
+     * @see HttpHeaders
      */
     public HttpSettings headers(String name1, Object value1, String name2, Object value2) {
         headers().set(name1, value1);
@@ -378,6 +381,7 @@ public final class HttpSettings {
      * @param name3
      * @param value3
      * @return
+     * @see HttpHeaders
      */
     public HttpSettings headers(String name1, Object value1, String name2, Object value2, String name3, Object value3) {
         headers().set(name1, value1);
@@ -393,6 +397,7 @@ public final class HttpSettings {
      *
      * @param headers
      * @return
+     * @see HttpHeaders
      */
     public HttpSettings headers(Map<String, ?> headers) {
         headers().setAll(headers);
@@ -405,6 +410,7 @@ public final class HttpSettings {
      *
      * @param headers
      * @return
+     * @see HttpHeaders
      */
     public HttpSettings headers(HttpHeaders headers) {
         headers().clear();
@@ -420,6 +426,7 @@ public final class HttpSettings {
      *
      *
      * @return
+     * @see HttpHeaders
      */
     public HttpHeaders headers() {
         if (headers == null) {

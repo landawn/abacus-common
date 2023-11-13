@@ -42,9 +42,9 @@ public class DateType extends AbstractDateType<Date> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public Class<Date> clazz() {
@@ -87,7 +87,7 @@ public class DateType extends AbstractDateType<Date> {
     @Override
     public Date valueOf(char[] cbuf, int offset, int len) {
         if ((cbuf == null) || (len == 0)) {
-            return null;
+            return null; // NOSONAR
         }
 
         if (cbuf[offset + 4] != '-') {

@@ -48,7 +48,7 @@ public final class ByteArrayType extends ObjectArrayType<Byte> {
     @Override
     public String stringOf(Byte[] x) {
         if (x == null) {
-            return null;
+            return null; // NOSONAR
         } else if (x.length == 0) {
             return "[]";
         }
@@ -85,7 +85,7 @@ public final class ByteArrayType extends ObjectArrayType<Byte> {
     @Override
     public Byte[] valueOf(String str) {
         if (str == null) {
-            return null;
+            return null; // NOSONAR
         } else if (str.length() == 0 || "[]".equals(str)) {
             return N.EMPTY_BYTE_OBJ_ARRAY;
         }

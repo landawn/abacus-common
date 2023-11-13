@@ -26,6 +26,7 @@ import java.util.function.BiConsumer;
 
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.http.HttpUtil.HttpDate;
+import com.landawn.abacus.util.Charsets;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 
@@ -711,6 +712,12 @@ public final class HttpHeaders {
      */
     public HttpHeaders setAuthorization(String value) {
         set(Names.AUTHORIZATION, value);
+
+        return this;
+    }
+
+    public HttpHeaders setBasicAuthentication(String username, String password) {
+        set(Names.AUTHORIZATION, "Basic " + Strings.base64Encode((username + ":" + password).getBytes(Charsets.UTF_8)));
 
         return this;
     }

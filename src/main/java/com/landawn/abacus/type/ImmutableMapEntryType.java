@@ -65,9 +65,9 @@ public class ImmutableMapEntryType<K, V> extends AbstractType<AbstractMap.Simple
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public String declaringName() {
@@ -75,9 +75,9 @@ public class ImmutableMapEntryType<K, V> extends AbstractType<AbstractMap.Simple
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public Class<AbstractMap.SimpleImmutableEntry<K, V>> clazz() {
@@ -123,7 +123,7 @@ public class ImmutableMapEntryType<K, V> extends AbstractType<AbstractMap.Simple
     @Override
     public AbstractMap.SimpleImmutableEntry<K, V> valueOf(String str) {
         if (Strings.isEmpty(str) || "{}".equals(str)) {
-            return null;
+            return null; // NOSONAR
         }
 
         return ImmutableEntry.copyOf(Utils.jsonParser.deserialize(Clazz.<K, V> ofMap(), str, jdc).entrySet().iterator().next());
