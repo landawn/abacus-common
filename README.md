@@ -205,6 +205,7 @@ compile 'com.landawn:abacus-common:3.9.7'
 
 
 ## User Guide:
+
 Please refer to [Wiki](https://github.com/landawn/abacus-common/wiki)
 
 
@@ -236,4 +237,8 @@ Please refer to [Wiki](https://github.com/landawn/abacus-common/wiki)
 [Spotbugs](https://github.com/spotbugs/spotbugs), [JaCoCo](https://www.eclemma.org/jacoco/)...
 
 ## 
+
+If Proposals is slow with Big class: N, Strings, Stream, Open the class file and explore the methods in outline once. Then test again.
+![image](https://github.com/landawn/abacus-common/assets/16568599/248990bb-f2c8-43e0-956b-edaa1477d5cd)
+
                                ...beyond imagination...
