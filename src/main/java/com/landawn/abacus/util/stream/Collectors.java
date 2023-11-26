@@ -110,6 +110,7 @@ import com.landawn.abacus.util.function.TriFunction;
  * @see {@code java.util.stream.Collectors}
  *
  */
+@SuppressWarnings({ "java:S1694" })
 public abstract sealed class Collectors permits Collectors.MoreCollectors {
     static final Object NONE = new Object(); //NOSONAR
 

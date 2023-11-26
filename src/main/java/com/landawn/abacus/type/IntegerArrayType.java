@@ -17,6 +17,7 @@ package com.landawn.abacus.type;
 import java.io.IOException;
 import java.io.Writer;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.parser.SerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.IOUtil;
@@ -38,8 +39,9 @@ public final class IntegerArrayType extends ObjectArrayType<Integer> {
     /**
      *
      * @param x
-     * @return
+     * @return {@code null} if {@code (x == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     @Override
     public String stringOf(Integer[] x) {
         if (x == null) {
@@ -76,8 +78,9 @@ public final class IntegerArrayType extends ObjectArrayType<Integer> {
     /**
      *
      * @param str
-     * @return
+     * @return {@code null} if {@code (str == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     @Override
     public Integer[] valueOf(String str) {
         if (str == null) {

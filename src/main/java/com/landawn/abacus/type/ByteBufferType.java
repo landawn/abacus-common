@@ -16,6 +16,7 @@ package com.landawn.abacus.type;
 
 import java.nio.ByteBuffer;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
@@ -70,8 +71,9 @@ public class ByteBufferType extends AbstractType<ByteBuffer> {
     /**
      *
      * @param str
-     * @return
+     * @return {@code null} if {@code (str == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     @Override
     public ByteBuffer valueOf(String str) {
         if (str == null) {

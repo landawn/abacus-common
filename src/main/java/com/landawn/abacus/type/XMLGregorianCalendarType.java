@@ -23,6 +23,7 @@ import java.sql.SQLException;
 
 import javax.xml.datatype.XMLGregorianCalendar;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.parser.SerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.DateTimeFormat;
@@ -68,8 +69,9 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
      * @param cbuf
      * @param offset
      * @param len
-     * @return
+     * @return {@code null} if {@code ((cbuf == null) || (len == 0))}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     @Override
     public XMLGregorianCalendar valueOf(char[] cbuf, int offset, int len) {
         if ((cbuf == null) || (len == 0)) {

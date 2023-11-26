@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.AbstractMap;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.parser.JSONDeserializationConfig;
 import com.landawn.abacus.parser.JSONDeserializationConfig.JDC;
@@ -117,8 +118,9 @@ public class ImmutableMapEntryType<K, V> extends AbstractType<AbstractMap.Simple
     /**
      *
      * @param str
-     * @return
+     * @return {@code null} if {@code (Strings.isEmpty(str) || "{}".equals(str))}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     @SuppressWarnings("unchecked")
     @Override
     public AbstractMap.SimpleImmutableEntry<K, V> valueOf(String str) {

@@ -34,6 +34,7 @@ import java.util.concurrent.TimeUnit;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.util.DateUtil.DateTimeUtil;
@@ -49,7 +50,7 @@ import com.landawn.abacus.util.DateUtil.Times;
  * @author Haiyang Li
  * @since 1.2.6
  */
-@SuppressWarnings({ "java:S2143" })
+@SuppressWarnings({ "java:S1694", "java:S2143" })
 public abstract sealed class DateUtil permits DateTimeUtil, Dates, Times {
 
     private static final String DATE_STR = "date";
@@ -682,9 +683,10 @@ public abstract sealed class DateUtil permits DateTimeUtil, Dates, Times {
      * @param date
      * @param format
      * @param timeZone
-     * @return
+     * @return {@code null} if {@code (Strings.isEmpty(date) || (date.length() == 4 && "null".equalsIgnoreCase(date)))}. (auto-generated java doc for return)
      * @throws IllegalArgumentException             if the date given can't be parsed with specified format.
      */
+    @MayReturnNull
     public static java.util.Date parseJUDate(final String date, final String format, final TimeZone timeZone) {
         if (Strings.isEmpty(date) || (date.length() == 4 && "null".equalsIgnoreCase(date))) {
             return null;
@@ -721,8 +723,9 @@ public abstract sealed class DateUtil permits DateTimeUtil, Dates, Times {
      * @param date
      * @param format
      * @param timeZone
-     * @return
+     * @return {@code null} if {@code (Strings.isEmpty(date) || (date.length() == 4 && "null".equalsIgnoreCase(date)))}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static Date parseDate(final String date, final String format, final TimeZone timeZone) {
         if (Strings.isEmpty(date) || (date.length() == 4 && "null".equalsIgnoreCase(date))) {
             return null;
@@ -759,8 +762,9 @@ public abstract sealed class DateUtil permits DateTimeUtil, Dates, Times {
      * @param date
      * @param format
      * @param timeZone
-     * @return
+     * @return {@code null} if {@code (Strings.isEmpty(date) || (date.length() == 4 && "null".equalsIgnoreCase(date)))}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static Time parseTime(final String date, final String format, final TimeZone timeZone) {
         if (Strings.isEmpty(date) || (date.length() == 4 && "null".equalsIgnoreCase(date))) {
             return null;
@@ -797,8 +801,9 @@ public abstract sealed class DateUtil permits DateTimeUtil, Dates, Times {
      * @param date
      * @param format
      * @param timeZone
-     * @return
+     * @return {@code null} if {@code (Strings.isEmpty(date) || (date.length() == 4 && "null".equalsIgnoreCase(date)))}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static Timestamp parseTimestamp(final String date, final String format, final TimeZone timeZone) {
         if (Strings.isEmpty(date) || (date.length() == 4 && "null".equalsIgnoreCase(date))) {
             return null;
@@ -837,8 +842,9 @@ public abstract sealed class DateUtil permits DateTimeUtil, Dates, Times {
      * @param calendar
      * @param format
      * @param timeZone
-     * @return
+     * @return {@code null} if {@code (Strings.isEmpty(calendar) || (calendar.length() == 4 && "null".equalsIgnoreCase(calendar)))}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     @Beta
     public static Calendar parseCalendar(final String calendar, final String format, final TimeZone timeZone) {
         if (Strings.isEmpty(calendar) || (calendar.length() == 4 && "null".equalsIgnoreCase(calendar))) {
@@ -878,8 +884,9 @@ public abstract sealed class DateUtil permits DateTimeUtil, Dates, Times {
      * @param calendar
      * @param format
      * @param timeZone
-     * @return
+     * @return {@code null} if {@code (Strings.isEmpty(calendar) || (calendar.length() == 4 && "null".equalsIgnoreCase(calendar)))}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     @Beta
     public static GregorianCalendar parseGregorianCalendar(final String calendar, final String format, final TimeZone timeZone) {
         if (Strings.isEmpty(calendar) || (calendar.length() == 4 && "null".equalsIgnoreCase(calendar))) {
@@ -919,8 +926,9 @@ public abstract sealed class DateUtil permits DateTimeUtil, Dates, Times {
      * @param calendar
      * @param format
      * @param timeZone
-     * @return
+     * @return {@code null} if {@code (Strings.isEmpty(calendar) || (calendar.length() == 4 && "null".equalsIgnoreCase(calendar)))}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     @Beta
     public static XMLGregorianCalendar parseXMLGregorianCalendar(final String calendar, final String format, final TimeZone timeZone) {
         if (Strings.isEmpty(calendar) || (calendar.length() == 4 && "null".equalsIgnoreCase(calendar))) {
@@ -2285,7 +2293,7 @@ public abstract sealed class DateUtil permits DateTimeUtil, Dates, Times {
      * @throws ArithmeticException if the year is over 280 million
      */
     private static void modify(final Calendar val, final int field, final ModifyType modType) { //NOSONAR
-        if (val.get(Calendar.YEAR) > 280000000) {
+        if (val.get(Calendar.YEAR) > 280_000_000) {
             throw new ArithmeticException("Calendar value too large for accurate calculations");
         }
 

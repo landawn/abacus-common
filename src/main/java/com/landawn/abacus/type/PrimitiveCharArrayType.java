@@ -20,6 +20,7 @@ import java.sql.Clob;
 import java.sql.SQLException;
 import java.util.Collection;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.exception.UncheckedSQLException;
 import com.landawn.abacus.parser.SerializationConfig;
@@ -69,8 +70,9 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
     /**
      *
      * @param x
-     * @return
+     * @return {@code null} if {@code (x == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     @Override
     public String stringOf(char[] x) {
         if (x == null) {
@@ -105,8 +107,9 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
     /**
      *
      * @param str
-     * @return
+     * @return {@code null} if {@code (str == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     @Override
     public char[] valueOf(String str) {
         if (str == null) {
@@ -144,8 +147,9 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
      * 
      *
      * @param obj 
-     * @return 
+     * @return {@code null} if {@code (obj == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     @SuppressFBWarnings
     @Override
     public char[] valueOf(final Object obj) {
@@ -242,8 +246,9 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
      * Collection 2 array.
      *
      * @param c
-     * @return
+     * @return {@code null} if {@code (c == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     @Override
     public char[] collection2Array(Collection<?> c) {
         if (c == null) {

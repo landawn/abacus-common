@@ -60,6 +60,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.exception.ParseException;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.logging.Logger;
@@ -726,8 +727,9 @@ public final class XMLUtil {
      *
      * @param node
      * @param attrName
-     * @return
+     * @return {@code null} if {@code (attrsNode == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static String getAttribute(Node node, String attrName) {
         NamedNodeMap attrsNode = node.getAttributes();
 

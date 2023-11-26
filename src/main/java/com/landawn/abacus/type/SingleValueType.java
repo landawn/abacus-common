@@ -24,6 +24,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.annotation.JsonXmlCreator;
 import com.landawn.abacus.annotation.JsonXmlValue;
 import com.landawn.abacus.parser.SerializationConfig;
@@ -210,8 +211,9 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
      * 
      *
      * @param x 
-     * @return 
+     * @return {@code null} if {@code (x == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     @Override
     public String stringOf(T x) {
         if (x == null) {

@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.Collection;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.parser.SerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.IOUtil;
@@ -66,8 +67,9 @@ public final class PrimitiveIntArrayType extends AbstractPrimitiveArrayType<int[
     /**
      *
      * @param x
-     * @return
+     * @return {@code null} if {@code (x == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     @Override
     public String stringOf(int[] x) {
         if (x == null) {
@@ -100,8 +102,9 @@ public final class PrimitiveIntArrayType extends AbstractPrimitiveArrayType<int[
     /**
      *
      * @param str
-     * @return
+     * @return {@code null} if {@code (str == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     @Override
     public int[] valueOf(String str) {
         if (str == null) {
@@ -178,8 +181,9 @@ public final class PrimitiveIntArrayType extends AbstractPrimitiveArrayType<int[
      * Collection 2 array.
      *
      * @param c
-     * @return
+     * @return {@code null} if {@code (c == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     @Override
     public int[] collection2Array(Collection<?> c) {
         if (c == null) {

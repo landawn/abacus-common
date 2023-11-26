@@ -2555,7 +2555,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                         : ((attrs == null || attrs.getLength() == 0) ? targetClass : getConcreteClass(targetClass, attrs));
             }
 
-            NodeType previousNodeType = (nodeTypeQueue.size() == 0) ? null : nodeTypeQueue.get(nodeTypeQueue.size() - 1);
+            NodeType previousNodeType = (nodeTypeQueue.isEmpty()) ? null : nodeTypeQueue.get(nodeTypeQueue.size() - 1);
             NodeType nodeType = getNodeType(nodeName, previousNodeType);
 
             isNull = (attrs == null || attrs.getLength() == 0) ? false : Boolean.parseBoolean(attrs.getValue(XMLConstants.IS_NULL));
@@ -2897,13 +2897,13 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
 
                 case ARRAY: {
 
-                    if (coll.size() > 0) {
+                    if (!coll.isEmpty()) {
                         array = collection2Array(nodeValueQueue.get(nodeValueQueue.size() - 2).getClass(), coll);
                     } else if (sb.length() > 0) {
                         array = N.valueOf(sb.toString(), typeClass);
                     }
 
-                    if (nodeTypeQueue.size() == 0) {
+                    if (nodeTypeQueue.isEmpty()) {
                         resultHolder.setValue((T) array);
                     }
 
@@ -3076,7 +3076,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                 eleTypeQueue.remove(eleTypeQueue.size() - 1);
             }
 
-            if ((nodeValueQueue.size() > 0)) {
+            if (!nodeValueQueue.isEmpty()) {
                 final Object next = nodeValueQueue.get(nodeValueQueue.size() - 1);
                 beanInfo = beanInfoQueue.get(next);
 

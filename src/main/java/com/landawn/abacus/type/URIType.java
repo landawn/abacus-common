@@ -20,6 +20,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.Strings;
 
 /**
@@ -58,8 +59,9 @@ public class URIType extends AbstractType<URI> {
     /**
      *
      * @param str
-     * @return
+     * @return {@code null} if {@code (Strings.isEmpty(str))}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     @Override
     public URI valueOf(String str) {
         if (Strings.isEmpty(str)) {

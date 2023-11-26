@@ -41,6 +41,7 @@ import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.annotation.JsonXmlField;
 import com.landawn.abacus.exception.ParseException;
 import com.landawn.abacus.exception.UncheckedIOException;
@@ -312,8 +313,9 @@ final class JSONParserImpl extends AbstractJSONParser {
      *
      * @param obj
      * @param config
-     * @return
+     * @return {@code null} if {@code (obj == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     @Override
     public String serialize(final Object obj, final JSONSerializationConfig config) {
         final JSONSerializationConfig configToUse = check(config);

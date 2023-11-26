@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Queue;
 import java.util.Set;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.parser.JSONDeserializationConfig;
 import com.landawn.abacus.parser.JSONDeserializationConfig.JDC;
@@ -201,8 +202,9 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
     /**
      *
      * @param x
-     * @return
+     * @return {@code null} if {@code (x == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     @Override
     public String stringOf(T x) {
         if (x == null) {
@@ -246,8 +248,9 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
     /**
      *
      * @param str
-     * @return
+     * @return {@code null} if {@code (str == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     @Override
     public T valueOf(String str) {
         if (str == null) {

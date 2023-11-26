@@ -17,6 +17,8 @@ package com.landawn.abacus.type;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import com.landawn.abacus.annotation.MayReturnNull;
+
 /**
  *
  * @author Haiyang Li
@@ -54,9 +56,10 @@ public final class CharacterType extends AbstractCharacterType {
      *
      * @param rs
      * @param columnIndex
-     * @return
+     * @return {@code null} if {@code (ret == null)}. (auto-generated java doc for return)
      * @throws SQLException the SQL exception
      */
+    @MayReturnNull
     @Override
     public Character get(ResultSet rs, int columnIndex) throws SQLException {
         final String ret = rs.getString(columnIndex);
@@ -72,9 +75,10 @@ public final class CharacterType extends AbstractCharacterType {
      *
      * @param rs
      * @param columnLabel
-     * @return
+     * @return {@code null} if {@code (ret == null)}. (auto-generated java doc for return)
      * @throws SQLException the SQL exception
      */
+    @MayReturnNull
     @Override
     public Character get(ResultSet rs, String columnLabel) throws SQLException {
         final String ret = rs.getString(columnLabel);

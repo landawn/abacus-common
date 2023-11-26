@@ -21,6 +21,7 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Date;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.DateUtil;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
@@ -96,8 +97,9 @@ public class JUDateType extends AbstractDateType<Date> {
      * @param cbuf
      * @param offset
      * @param len
-     * @return
+     * @return {@code null} if {@code ((cbuf == null) || (len == 0))}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     @Override
     public Date valueOf(char[] cbuf, int offset, int len) {
         if ((cbuf == null) || (len == 0)) {

@@ -21,6 +21,7 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 
@@ -60,8 +61,9 @@ public class LocalDateTimeType extends AbstractType<LocalDateTime> {
     /**
      *
      * @param str
-     * @return
+     * @return {@code null} if {@code (Strings.isEmpty(str))}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     @Override
     public LocalDateTime valueOf(String str) {
         if (Strings.isEmpty(str)) {
@@ -80,8 +82,9 @@ public class LocalDateTimeType extends AbstractType<LocalDateTime> {
      * @param cbuf
      * @param offset
      * @param len
-     * @return
+     * @return {@code null} if {@code ((cbuf == null) || (len == 0))}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     @Override
     public LocalDateTime valueOf(char[] cbuf, int offset, int len) {
         if ((cbuf == null) || (len == 0)) {

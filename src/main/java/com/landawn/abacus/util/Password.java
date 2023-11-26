@@ -18,6 +18,8 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Objects;
 
+import com.landawn.abacus.annotation.MayReturnNull;
+
 /**
  *
  * @author Haiyang Li
@@ -57,8 +59,9 @@ public final class Password {
      * Returns the encrypted password encoded with Base64.
      *
      * @param x
-     * @return
+     * @return {@code null} if {@code (x == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public synchronized String encrypt(String x) {
         if (x == null) {
             return null;

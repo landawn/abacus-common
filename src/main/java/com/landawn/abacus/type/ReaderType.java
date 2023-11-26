@@ -26,6 +26,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.exception.UncheckedSQLException;
@@ -112,8 +113,9 @@ public class ReaderType extends AbstractType<Reader> {
     /**
      *
      * @param str
-     * @return
+     * @return {@code null} if {@code (str == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     @Override
     public Reader valueOf(String str) {
         if (str == null) {
@@ -132,8 +134,9 @@ public class ReaderType extends AbstractType<Reader> {
     /**
      *
      * @param obj
-     * @return
+     * @return {@code null} if {@code (obj == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     @SuppressFBWarnings
     @Override
     public Reader valueOf(final Object obj) {

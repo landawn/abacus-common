@@ -20,6 +20,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.DateUtil;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
@@ -82,8 +83,9 @@ public class TimestampType extends AbstractDateType<Timestamp> {
      * @param cbuf
      * @param offset
      * @param len
-     * @return
+     * @return {@code null} if {@code ((cbuf == null) || (len == 0))}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     @Override
     public Timestamp valueOf(char[] cbuf, int offset, int len) {
         if ((cbuf == null) || (len == 0)) {

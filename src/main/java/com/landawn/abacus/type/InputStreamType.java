@@ -26,6 +26,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.exception.UncheckedSQLException;
 import com.landawn.abacus.parser.SerializationConfig;
@@ -112,8 +113,9 @@ public class InputStreamType extends AbstractType<InputStream> {
     /**
      *
      * @param str
-     * @return
+     * @return {@code null} if {@code (str == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     @Override
     public InputStream valueOf(String str) {
         if (str == null) {
@@ -132,8 +134,9 @@ public class InputStreamType extends AbstractType<InputStream> {
     /**
      *
      * @param obj
-     * @return
+     * @return {@code null} if {@code (obj == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     @SuppressFBWarnings
     @Override
     public InputStream valueOf(final Object obj) {

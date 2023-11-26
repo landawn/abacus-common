@@ -18,6 +18,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.parser.JSONDeserializationConfig;
 import com.landawn.abacus.parser.JSONDeserializationConfig.JDC;
 import com.landawn.abacus.util.ClassUtil;
@@ -125,8 +126,9 @@ public class MultimapType<K, E, V extends Collection<E>> extends AbstractType<Mu
     /**
      *
      * @param st
-     * @return
+     * @return {@code null} if {@code (Strings.isEmpty(st))}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     @SuppressWarnings("unchecked")
     @Override
     public Multimap<K, E, V> valueOf(String st) {

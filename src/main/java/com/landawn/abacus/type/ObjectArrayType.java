@@ -20,6 +20,7 @@ import java.lang.reflect.Array;
 import java.util.Collection;
 import java.util.Collections;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.parser.JSONDeserializationConfig;
 import com.landawn.abacus.parser.JSONDeserializationConfig.JDC;
@@ -107,8 +108,9 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
     /**
      *
      * @param x
-     * @return
+     * @return {@code null} if {@code (x == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     @Override
     public String stringOf(T[] x) {
         if (x == null) {
@@ -152,8 +154,9 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
     /**
      *
      * @param str
-     * @return
+     * @return {@code null} if {@code (str == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     @Override
     public T[] valueOf(String str) {
         if (str == null) {
@@ -248,8 +251,9 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
      * Collection 2 array.
      *
      * @param c
-     * @return
+     * @return {@code null} if {@code (c == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     @Override
     public T[] collection2Array(Collection<?> c) {
         if (c == null) {

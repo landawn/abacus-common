@@ -40,6 +40,7 @@ import com.landawn.abacus.type.TypeFactory;
  * @param <T>
  * @since 0.9
  */
+@SuppressWarnings({ "java:S1694" })
 public abstract class TypeReference<T> {
 
     protected final Type<T> type;
@@ -49,9 +50,9 @@ public abstract class TypeReference<T> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public Type<T> type() {
         return type;

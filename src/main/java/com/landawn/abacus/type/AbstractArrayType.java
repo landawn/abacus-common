@@ -17,6 +17,7 @@ package com.landawn.abacus.type;
 import java.lang.reflect.Array;
 import java.util.Collection;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.WD;
 
@@ -58,8 +59,9 @@ public abstract class AbstractArrayType<T> extends AbstractType<T> {
      * @param <E>
      * @param collClass
      * @param x
-     * @return
+     * @return {@code null} if {@code (x == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     @Override
     public <E> Collection<E> array2Collection(Class<?> collClass, T x) {
         if (x == null) {

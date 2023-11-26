@@ -41,6 +41,7 @@ import com.landawn.abacus.logging.LoggerFactory;
  * @author Haiyang Li
  * @since 0.8
  */
+@SuppressWarnings({ "java:S1694" })
 public abstract class Configuration {
 
     private static final Logger logger = LoggerFactory.getLogger(Configuration.class);

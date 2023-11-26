@@ -17,6 +17,7 @@ package com.landawn.abacus.type;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.Numbers;
 
 /**
@@ -57,9 +58,10 @@ public final class LongType extends AbstractLongType {
      *
      * @param rs
      * @param columnIndex
-     * @return
+     * @return {@code null} if {@code (ret == null)}. (auto-generated java doc for return)
      * @throws SQLException the SQL exception
      */
+    @MayReturnNull
     @Override
     public Long get(ResultSet rs, int columnIndex) throws SQLException {
         final Object ret = rs.getObject(columnIndex);
@@ -79,9 +81,10 @@ public final class LongType extends AbstractLongType {
      *
      * @param rs
      * @param columnLabel
-     * @return
+     * @return {@code null} if {@code (ret == null)}. (auto-generated java doc for return)
      * @throws SQLException the SQL exception
      */
+    @MayReturnNull
     @Override
     public Long get(ResultSet rs, String columnLabel) throws SQLException {
         final Object ret = rs.getObject(columnLabel);

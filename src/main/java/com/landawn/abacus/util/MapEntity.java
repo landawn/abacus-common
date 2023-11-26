@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.annotation.Internal;
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 
@@ -160,8 +161,9 @@ public final class MapEntity implements Serializable {
     /**
      *
      * @param propName
-     * @return
+     * @return {@code null} if {@code (values.size() == 0)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public Object remove(String propName) {
         if (values.size() == 0) {
             return null;

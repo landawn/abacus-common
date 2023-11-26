@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.annotation.JsonXmlField;
 
 /**
@@ -45,8 +46,9 @@ public abstract class ParserConfig<C extends ParserConfig<C>> implements Cloneab
      * Gets the ignored prop names.
      *
      * @param cls
-     * @return
+     * @return {@code null} if {@code (this.beanIgnoredPropNameMap == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public Collection<String> getIgnoredPropNames(Class<?> cls) {
         if (this.beanIgnoredPropNameMap == null) {
             return null; // NOSONAR

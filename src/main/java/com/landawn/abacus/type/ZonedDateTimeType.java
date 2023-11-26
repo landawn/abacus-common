@@ -26,6 +26,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.parser.SerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.DateTimeFormat;
@@ -76,8 +77,9 @@ public class ZonedDateTimeType extends AbstractType<ZonedDateTime> {
     /**
      *
      * @param str
-     * @return
+     * @return {@code null} if {@code (Strings.isEmpty(str))}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     @Override
     public ZonedDateTime valueOf(String str) {
         if (Strings.isEmpty(str)) {
@@ -105,8 +107,9 @@ public class ZonedDateTimeType extends AbstractType<ZonedDateTime> {
      * @param cbuf
      * @param offset
      * @param len
-     * @return
+     * @return {@code null} if {@code ((cbuf == null) || (len == 0))}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     @Override
     public ZonedDateTime valueOf(char[] cbuf, int offset, int len) {
         if ((cbuf == null) || (len == 0)) {

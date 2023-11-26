@@ -23,6 +23,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.NullSafe;
 
@@ -2025,6 +2026,7 @@ public class Array {
      *            a {@code boolean} array
      * @return a {@code Boolean} array, {@code null} if null array input
      */
+    @MayReturnNull
     @SafeVarargs
     public static Boolean[] box(final boolean... a) {
         if (a == null) {
@@ -2039,8 +2041,9 @@ public class Array {
      * @param a
      * @param fromIndex
      * @param toIndex
-     * @return
+     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static Boolean[] box(final boolean[] a, final int fromIndex, final int toIndex) {
         if (a == null) {
             return null;
@@ -2070,6 +2073,7 @@ public class Array {
      *            a {@code char} array
      * @return a {@code Character} array, {@code null} if null array input
      */
+    @MayReturnNull
     @SafeVarargs
     public static Character[] box(final char... a) {
         if (a == null) {
@@ -2084,8 +2088,9 @@ public class Array {
      * @param a
      * @param fromIndex
      * @param toIndex
-     * @return
+     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static Character[] box(final char[] a, final int fromIndex, final int toIndex) {
         if (a == null) {
             return null;
@@ -2115,6 +2120,7 @@ public class Array {
      *            a {@code byte} array
      * @return a {@code Byte} array, {@code null} if null array input
      */
+    @MayReturnNull
     @SafeVarargs
     public static Byte[] box(final byte... a) {
         if (a == null) {
@@ -2129,8 +2135,9 @@ public class Array {
      * @param a
      * @param fromIndex
      * @param toIndex
-     * @return
+     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static Byte[] box(final byte[] a, final int fromIndex, final int toIndex) {
         if (a == null) {
             return null;
@@ -2160,6 +2167,7 @@ public class Array {
      *            a {@code short} array
      * @return a {@code Short} array, {@code null} if null array input
      */
+    @MayReturnNull
     @SafeVarargs
     public static Short[] box(final short... a) {
         if (a == null) {
@@ -2174,8 +2182,9 @@ public class Array {
      * @param a
      * @param fromIndex
      * @param toIndex
-     * @return
+     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static Short[] box(final short[] a, final int fromIndex, final int toIndex) {
         if (a == null) {
             return null;
@@ -2205,6 +2214,7 @@ public class Array {
      *            an {@code int} array
      * @return an {@code Integer} array, {@code null} if null array input
      */
+    @MayReturnNull
     @SafeVarargs
     public static Integer[] box(final int... a) {
         if (a == null) {
@@ -2219,8 +2229,9 @@ public class Array {
      * @param a
      * @param fromIndex
      * @param toIndex
-     * @return
+     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static Integer[] box(final int[] a, final int fromIndex, final int toIndex) {
         if (a == null) {
             return null;
@@ -2250,6 +2261,7 @@ public class Array {
      *            a {@code long} array
      * @return a {@code Long} array, {@code null} if null array input
      */
+    @MayReturnNull
     @SafeVarargs
     public static Long[] box(final long... a) {
         if (a == null) {
@@ -2264,8 +2276,9 @@ public class Array {
      * @param a
      * @param fromIndex
      * @param toIndex
-     * @return
+     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static Long[] box(final long[] a, final int fromIndex, final int toIndex) {
         if (a == null) {
             return null;
@@ -2295,6 +2308,7 @@ public class Array {
      *            a {@code float} array
      * @return a {@code Float} array, {@code null} if null array input
      */
+    @MayReturnNull
     @SafeVarargs
     public static Float[] box(final float... a) {
         if (a == null) {
@@ -2309,8 +2323,9 @@ public class Array {
      * @param a
      * @param fromIndex
      * @param toIndex
-     * @return
+     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static Float[] box(final float[] a, final int fromIndex, final int toIndex) {
         if (a == null) {
             return null;
@@ -2340,6 +2355,7 @@ public class Array {
      *            a {@code double} array
      * @return a {@code Double} array, {@code null} if null array input
      */
+    @MayReturnNull
     @SafeVarargs
     public static Double[] box(final double... a) {
         if (a == null) {
@@ -2354,8 +2370,9 @@ public class Array {
      * @param a
      * @param fromIndex
      * @param toIndex
-     * @return
+     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static Double[] box(final double[] a, final int fromIndex, final int toIndex) {
         if (a == null) {
             return null;
@@ -2375,8 +2392,9 @@ public class Array {
     /**
      *
      * @param a
-     * @return
+     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static Boolean[][] box(boolean[][] a) {
         if (a == null) {
             return null;
@@ -2394,8 +2412,9 @@ public class Array {
     /**
      *
      * @param a
-     * @return
+     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static Character[][] box(char[][] a) {
         if (a == null) {
             return null;
@@ -2413,8 +2432,9 @@ public class Array {
     /**
      *
      * @param a
-     * @return
+     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static Byte[][] box(byte[][] a) {
         if (a == null) {
             return null;
@@ -2432,8 +2452,9 @@ public class Array {
     /**
      *
      * @param a
-     * @return
+     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static Short[][] box(short[][] a) {
         if (a == null) {
             return null;
@@ -2451,8 +2472,9 @@ public class Array {
     /**
      *
      * @param a
-     * @return
+     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static Integer[][] box(int[][] a) {
         if (a == null) {
             return null;
@@ -2470,8 +2492,9 @@ public class Array {
     /**
      *
      * @param a
-     * @return
+     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static Long[][] box(long[][] a) {
         if (a == null) {
             return null;
@@ -2489,8 +2512,9 @@ public class Array {
     /**
      *
      * @param a
-     * @return
+     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static Float[][] box(float[][] a) {
         if (a == null) {
             return null;
@@ -2508,8 +2532,9 @@ public class Array {
     /**
      *
      * @param a
-     * @return
+     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static Double[][] box(double[][] a) {
         if (a == null) {
             return null;
@@ -2527,8 +2552,9 @@ public class Array {
     /**
      *
      * @param a
-     * @return
+     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static Boolean[][][] box(boolean[][][] a) {
         if (a == null) {
             return null;
@@ -2546,8 +2572,9 @@ public class Array {
     /**
      *
      * @param a
-     * @return
+     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static Character[][][] box(char[][][] a) {
         if (a == null) {
             return null;
@@ -2565,8 +2592,9 @@ public class Array {
     /**
      *
      * @param a
-     * @return
+     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static Byte[][][] box(byte[][][] a) {
         if (a == null) {
             return null;
@@ -2584,8 +2612,9 @@ public class Array {
     /**
      *
      * @param a
-     * @return
+     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static Short[][][] box(short[][][] a) {
         if (a == null) {
             return null;
@@ -2603,8 +2632,9 @@ public class Array {
     /**
      *
      * @param a
-     * @return
+     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static Integer[][][] box(int[][][] a) {
         if (a == null) {
             return null;
@@ -2622,8 +2652,9 @@ public class Array {
     /**
      *
      * @param a
-     * @return
+     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static Long[][][] box(long[][][] a) {
         if (a == null) {
             return null;
@@ -2641,8 +2672,9 @@ public class Array {
     /**
      *
      * @param a
-     * @return
+     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static Float[][][] box(float[][][] a) {
         if (a == null) {
             return null;
@@ -2660,8 +2692,9 @@ public class Array {
     /**
      *
      * @param a
-     * @return
+     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static Double[][][] box(double[][][] a) {
         if (a == null) {
             return null;
@@ -2711,6 +2744,7 @@ public class Array {
      *            the value to insert if {@code null} found
      * @return a {@code boolean} array, {@code null} if null array input
      */
+    @MayReturnNull
     public static boolean[] unbox(final Boolean[] a, final boolean valueForNull) {
         if (a == null) {
             return null;
@@ -2725,8 +2759,9 @@ public class Array {
      * @param fromIndex
      * @param toIndex
      * @param valueForNull
-     * @return
+     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static boolean[] unbox(final Boolean[] a, final int fromIndex, final int toIndex, final boolean valueForNull) {
         if (a == null) {
             return null;
@@ -2779,6 +2814,7 @@ public class Array {
      *            the value to insert if {@code null} found
      * @return a {@code char} array, {@code null} if null array input
      */
+    @MayReturnNull
     public static char[] unbox(final Character[] a, final char valueForNull) {
         if (a == null) {
             return null;
@@ -2793,8 +2829,9 @@ public class Array {
      * @param fromIndex
      * @param toIndex
      * @param valueForNull
-     * @return
+     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static char[] unbox(final Character[] a, final int fromIndex, final int toIndex, final char valueForNull) {
         if (a == null) {
             return null;
@@ -2846,6 +2883,7 @@ public class Array {
      *            the value to insert if {@code null} found
      * @return a {@code byte} array, {@code null} if null array input
      */
+    @MayReturnNull
     public static byte[] unbox(final Byte[] a, final byte valueForNull) {
         if (a == null) {
             return null;
@@ -2860,8 +2898,9 @@ public class Array {
      * @param fromIndex
      * @param toIndex
      * @param valueForNull
-     * @return
+     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static byte[] unbox(final Byte[] a, final int fromIndex, final int toIndex, final byte valueForNull) {
         if (a == null) {
             return null;
@@ -2913,6 +2952,7 @@ public class Array {
      *            the value to insert if {@code null} found
      * @return a {@code byte} array, {@code null} if null array input
      */
+    @MayReturnNull
     public static short[] unbox(final Short[] a, final short valueForNull) {
         if (a == null) {
             return null;
@@ -2927,8 +2967,9 @@ public class Array {
      * @param fromIndex
      * @param toIndex
      * @param valueForNull
-     * @return
+     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static short[] unbox(final Short[] a, final int fromIndex, final int toIndex, final short valueForNull) {
         if (a == null) {
             return null;
@@ -2980,6 +3021,7 @@ public class Array {
      *            the value to insert if {@code null} found
      * @return an {@code int} array, {@code null} if null array input
      */
+    @MayReturnNull
     public static int[] unbox(final Integer[] a, final int valueForNull) {
         if (a == null) {
             return null;
@@ -2994,8 +3036,9 @@ public class Array {
      * @param fromIndex
      * @param toIndex
      * @param valueForNull
-     * @return
+     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static int[] unbox(final Integer[] a, final int fromIndex, final int toIndex, final int valueForNull) {
         if (a == null) {
             return null;
@@ -3047,6 +3090,7 @@ public class Array {
      *            the value to insert if {@code null} found
      * @return a {@code long} array, {@code null} if null array input
      */
+    @MayReturnNull
     public static long[] unbox(final Long[] a, final long valueForNull) {
         if (a == null) {
             return null;
@@ -3061,8 +3105,9 @@ public class Array {
      * @param fromIndex
      * @param toIndex
      * @param valueForNull
-     * @return
+     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static long[] unbox(final Long[] a, final int fromIndex, final int toIndex, final long valueForNull) {
         if (a == null) {
             return null;
@@ -3114,6 +3159,7 @@ public class Array {
      *            the value to insert if {@code null} found
      * @return a {@code float} array, {@code null} if null array input
      */
+    @MayReturnNull
     public static float[] unbox(final Float[] a, final float valueForNull) {
         if (a == null) {
             return null;
@@ -3128,8 +3174,9 @@ public class Array {
      * @param fromIndex
      * @param toIndex
      * @param valueForNull
-     * @return
+     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static float[] unbox(final Float[] a, final int fromIndex, final int toIndex, final float valueForNull) {
         if (a == null) {
             return null;
@@ -3181,6 +3228,7 @@ public class Array {
      *            the value to insert if {@code null} found
      * @return a {@code double} array, {@code null} if null array input
      */
+    @MayReturnNull
     public static double[] unbox(final Double[] a, final double valueForNull) {
         if (a == null) {
             return null;
@@ -3195,8 +3243,9 @@ public class Array {
      * @param fromIndex
      * @param toIndex
      * @param valueForNull
-     * @return
+     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static double[] unbox(final Double[] a, final int fromIndex, final int toIndex, final double valueForNull) {
         if (a == null) {
             return null;
@@ -3226,8 +3275,9 @@ public class Array {
      *
      * @param a
      * @param valueForNull
-     * @return
+     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static boolean[][] unbox(Boolean[][] a, boolean valueForNull) {
         if (a == null) {
             return null;
@@ -3255,8 +3305,9 @@ public class Array {
      *
      * @param a
      * @param valueForNull
-     * @return
+     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static char[][] unbox(Character[][] a, char valueForNull) {
         if (a == null) {
             return null;
@@ -3284,8 +3335,9 @@ public class Array {
      *
      * @param a
      * @param valueForNull
-     * @return
+     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static byte[][] unbox(Byte[][] a, byte valueForNull) {
         if (a == null) {
             return null;
@@ -3313,8 +3365,9 @@ public class Array {
      *
      * @param a
      * @param valueForNull
-     * @return
+     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static short[][] unbox(Short[][] a, short valueForNull) {
         if (a == null) {
             return null;
@@ -3342,8 +3395,9 @@ public class Array {
      *
      * @param a
      * @param valueForNull
-     * @return
+     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static int[][] unbox(Integer[][] a, int valueForNull) {
         if (a == null) {
             return null;
@@ -3371,8 +3425,9 @@ public class Array {
      *
      * @param a
      * @param valueForNull
-     * @return
+     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static long[][] unbox(Long[][] a, long valueForNull) {
         if (a == null) {
             return null;
@@ -3400,8 +3455,9 @@ public class Array {
      *
      * @param a
      * @param valueForNull
-     * @return
+     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static float[][] unbox(Float[][] a, float valueForNull) {
         if (a == null) {
             return null;
@@ -3429,8 +3485,9 @@ public class Array {
      *
      * @param a
      * @param valueForNull
-     * @return
+     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static double[][] unbox(Double[][] a, double valueForNull) {
         if (a == null) {
             return null;
@@ -3458,8 +3515,9 @@ public class Array {
      *
      * @param a
      * @param valueForNull
-     * @return
+     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static boolean[][][] unbox(Boolean[][][] a, boolean valueForNull) {
         if (a == null) {
             return null;
@@ -3487,8 +3545,9 @@ public class Array {
      *
      * @param a
      * @param valueForNull
-     * @return
+     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static char[][][] unbox(Character[][][] a, char valueForNull) {
         if (a == null) {
             return null;
@@ -3516,8 +3575,9 @@ public class Array {
      *
      * @param a
      * @param valueForNull
-     * @return
+     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static byte[][][] unbox(Byte[][][] a, byte valueForNull) {
         if (a == null) {
             return null;
@@ -3545,8 +3605,9 @@ public class Array {
      *
      * @param a
      * @param valueForNull
-     * @return
+     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static short[][][] unbox(Short[][][] a, short valueForNull) {
         if (a == null) {
             return null;
@@ -3574,8 +3635,9 @@ public class Array {
      *
      * @param a
      * @param valueForNull
-     * @return
+     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static int[][][] unbox(Integer[][][] a, int valueForNull) {
         if (a == null) {
             return null;
@@ -3603,8 +3665,9 @@ public class Array {
      *
      * @param a
      * @param valueForNull
-     * @return
+     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static long[][][] unbox(Long[][][] a, long valueForNull) {
         if (a == null) {
             return null;
@@ -3632,8 +3695,9 @@ public class Array {
      *
      * @param a
      * @param valueForNull
-     * @return
+     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static float[][][] unbox(Float[][][] a, float valueForNull) {
         if (a == null) {
             return null;
@@ -3661,8 +3725,9 @@ public class Array {
      *
      * @param a
      * @param valueForNull
-     * @return
+     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static double[][][] unbox(Double[][][] a, double valueForNull) {
         if (a == null) {
             return null;

@@ -20,6 +20,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.parser.JSONDeserializationConfig;
 import com.landawn.abacus.parser.JSONDeserializationConfig.JDC;
 import com.landawn.abacus.util.ClassUtil;
@@ -135,8 +136,9 @@ public class SheetType<R, C, E> extends AbstractType<Sheet<R, C, E>> {
     /**
      *
      * @param x
-     * @return
+     * @return {@code null} if {@code (x == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     @Override
     public String stringOf(Sheet<R, C, E> x) {
         if (x == null) {
@@ -169,8 +171,9 @@ public class SheetType<R, C, E> extends AbstractType<Sheet<R, C, E>> {
     /**
      *
      * @param str
-     * @return
+     * @return {@code null} if {@code (Strings.isEmpty(str))}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     @Override
     public Sheet<R, C, E> valueOf(String str) {
         if (Strings.isEmpty(str)) {

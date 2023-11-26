@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.Internal;
 
@@ -147,8 +148,9 @@ public final class ObjectPool<K, V> extends AbstractMap<K, V> {
     /**
      *
      * @param key
-     * @return
+     * @return {@code null} if {@code (_size == 0)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     @Override
     public V remove(Object key) {
         if (_size == 0) {

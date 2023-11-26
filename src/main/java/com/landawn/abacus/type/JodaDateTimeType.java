@@ -22,6 +22,7 @@ import java.sql.Timestamp;
 
 import org.joda.time.DateTime;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 
@@ -71,8 +72,9 @@ public class JodaDateTimeType extends AbstractJodaDateTimeType<DateTime> {
     /**
      *
      * @param str
-     * @return
+     * @return {@code null} if {@code (Strings.isEmpty(str))}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     @Override
     public DateTime valueOf(String str) {
         if (Strings.isEmpty(str)) {
@@ -91,8 +93,9 @@ public class JodaDateTimeType extends AbstractJodaDateTimeType<DateTime> {
      * @param cbuf
      * @param offset
      * @param len
-     * @return
+     * @return {@code null} if {@code ((cbuf == null) || (len == 0))}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     @Override
     public DateTime valueOf(char[] cbuf, int offset, int len) {
         if ((cbuf == null) || (len == 0)) {

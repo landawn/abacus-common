@@ -38,6 +38,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.type.Type;
 
 /**
@@ -45,7 +46,7 @@ import com.landawn.abacus.type.Type;
  *  The purpose of copying the code is to re-organize the APIs.
  * @see DecimalFormat
  */
-@SuppressWarnings("java:S1192")
+@SuppressWarnings({ "java:S1192", "java:S2148" })
 public final class Numbers {
 
     /** Reusable Byte constant for zero. */
@@ -1489,10 +1490,11 @@ public final class Numbers {
      * <br />
      *
      * @param str a <code>String</code> to convert, may be null
-     * @return
+     * @return {@code null} if {@code (str == null)}. (auto-generated java doc for return)
      * @throws NumberFormatException if the value cannot be converted
      * @see #isCreatable(String)
      */
+    @MayReturnNull
     public static Integer createInteger(final String str) throws NumberFormatException {
         if (str == null) {
             return null;
@@ -1515,10 +1517,11 @@ public final class Numbers {
      *
      *
      * @param str a <code>String</code> to convert, may be null
-     * @return
+     * @return {@code null} if {@code (str == null)}. (auto-generated java doc for return)
      * @throws NumberFormatException if the value cannot be converted
      * @see #isCreatable(String)
      */
+    @MayReturnNull
     public static Long createLong(final String str) throws NumberFormatException {
         if (str == null) {
             return null;
@@ -1548,10 +1551,11 @@ public final class Numbers {
      *
      *
      * @param str a <code>String</code> to convert, may be null
-     * @return
+     * @return {@code null} if {@code (str == null)}. (auto-generated java doc for return)
      * @throws NumberFormatException if the value cannot be converted
      * @see #isCreatable(String)
      */
+    @MayReturnNull
     public static Float createFloat(final String str) throws NumberFormatException {
         if (str == null) {
             return null;
@@ -1572,10 +1576,11 @@ public final class Numbers {
      *
      *
      * @param str a <code>String</code> to convert, may be null
-     * @return
+     * @return {@code null} if {@code (str == null)}. (auto-generated java doc for return)
      * @throws NumberFormatException if the value cannot be converted
      * @see #isCreatable(String)
      */
+    @MayReturnNull
     public static Double createDouble(final String str) throws NumberFormatException {
         if (str == null) {
             return null;
@@ -1596,10 +1601,11 @@ public final class Numbers {
      * <br />
      *
      * @param str a <code>String</code> to convert, may be null
-     * @return
+     * @return {@code null} if {@code (str == null)}. (auto-generated java doc for return)
      * @throws NumberFormatException if the value cannot be converted
      * @see #isCreatable(String)
      */
+    @MayReturnNull
     public static BigInteger createBigInteger(final String str) throws NumberFormatException {
         if (str == null) {
             return null;
@@ -1647,10 +1653,11 @@ public final class Numbers {
      *
      *
      * @param str a <code>String</code> to convert, may be null
-     * @return
+     * @return {@code null} if {@code (str == null)}. (auto-generated java doc for return)
      * @throws NumberFormatException if the value cannot be converted
      * @see #isCreatable(String)
      */
+    @MayReturnNull
     public static BigDecimal createBigDecimal(final String str) throws NumberFormatException {
         if (str == null) {
             return null;
@@ -1700,10 +1707,11 @@ public final class Numbers {
      * <br />
      *
      * @param str a String containing a number, may be null
-     * @return
+     * @return {@code null} if {@code (str == null)}. (auto-generated java doc for return)
      * @throws NumberFormatException if the value cannot be converted
      * @see #isCreatable(String)
      */
+    @MayReturnNull
     @SuppressWarnings({ "unchecked" })
     public static Number createNumber(final String str) throws NumberFormatException {
         if (str == null) {
@@ -1899,7 +1907,7 @@ public final class Numbers {
             }
 
             return d;
-        } catch (final NumberFormatException nfe) { // NOPMD
+        } catch (final NumberFormatException nfe) {
             // ignore the bad number
         }
 

@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.parser.KryoParser;
@@ -285,6 +286,7 @@ public final class Sheet<R, C, E> implements Cloneable {
      * @param columnKey
      * @return
      */
+    @MayReturnNull
     public E get(R rowKey, C columnKey) {
         if (_initialized) {
             final int rowIndex = getRowIndex(rowKey);
@@ -305,6 +307,7 @@ public final class Sheet<R, C, E> implements Cloneable {
      * @param columnIndex
      * @return
      */
+    @MayReturnNull
     public E get(int rowIndex, int columnIndex) {
         if (_initialized) {
             return _columnList.get(columnIndex).get(rowIndex);
@@ -415,6 +418,7 @@ public final class Sheet<R, C, E> implements Cloneable {
      * @param columnKey
      * @return
      */
+    @MayReturnNull
     public E remove(R rowKey, C columnKey) {
         checkFrozen();
 
@@ -437,6 +441,7 @@ public final class Sheet<R, C, E> implements Cloneable {
      * @param columnIndex
      * @return
      */
+    @MayReturnNull
     public E remove(int rowIndex, int columnIndex) {
         checkFrozen();
 

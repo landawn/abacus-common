@@ -33,7 +33,7 @@ final class ASMUtil {
 
     private static final Logger logger = LoggerFactory.getLogger(ASMUtil.class);
 
-    private static final boolean isASMAvailable;
+    private static final boolean isASMAvailable; // NOSONAR
 
     static {
         boolean tmp = false;
@@ -46,11 +46,9 @@ final class ASMUtil {
             final Method setMethod = TestBeanA.class.getMethod("setName", String.class);
             final Field field = TestBeanA.class.getDeclaredField("name");
 
-            final com.esotericsoftware.reflectasm.MethodAccess getMethodAccess = com.esotericsoftware.reflectasm.MethodAccess
-                    .get(getMethod.getDeclaringClass());
-            final com.esotericsoftware.reflectasm.MethodAccess setMethodAccess = com.esotericsoftware.reflectasm.MethodAccess
-                    .get(setMethod.getDeclaringClass());
-            final com.esotericsoftware.reflectasm.FieldAccess fieldAccess = com.esotericsoftware.reflectasm.FieldAccess.get(field.getDeclaringClass());
+            final var getMethodAccess = com.esotericsoftware.reflectasm.MethodAccess.get(getMethod.getDeclaringClass());
+            final var setMethodAccess = com.esotericsoftware.reflectasm.MethodAccess.get(setMethod.getDeclaringClass());
+            final var fieldAccess = com.esotericsoftware.reflectasm.FieldAccess.get(field.getDeclaringClass());
 
             final int getMethodAccessIndex = getMethodAccess.getIndex(getMethod.getName(), 0);
             final int setMethodAccessIndex = setMethodAccess.getIndex(setMethod.getName(), setMethod.getParameterTypes());
@@ -62,7 +60,7 @@ final class ASMUtil {
             setMethodAccess.invoke(bean, setMethodAccessIndex, "Tom");
             tmp = Objects.equals(fieldAccess.get(bean, fieldAccessIndex), getMethodAccess.invoke(bean, getMethodAccessIndex));
 
-        } catch (Throwable e) {
+        } catch (Throwable e) { // NOSONAR
             // ignore.
 
             logger.warn("ASM is not avaiable by com.esotericsoftware.reflectasm due to exception: ", e.getClass().getName());

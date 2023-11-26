@@ -309,7 +309,7 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
             }
 
             @Override
-            public T next() {
+            public T next() { // NOSONAR
                 return supplier.get();
             }
         };
@@ -489,6 +489,10 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
 
             @Override
             public T next() {
+                if (hasNext() == false) {
+                    throw new NoSuchElementException();
+                }
+
                 return supplier.apply(init);
             }
         };
@@ -517,6 +521,10 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
 
             @Override
             public T next() {
+                if (hasNext() == false) {
+                    throw new NoSuchElementException();
+                }
+
                 return (prev = supplier.apply(init, prev));
             }
         };

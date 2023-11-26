@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.Map;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.parser.JSONDeserializationConfig;
 import com.landawn.abacus.parser.JSONDeserializationConfig.JDC;
 import com.landawn.abacus.util.ClassUtil;
@@ -127,8 +128,9 @@ public class MapType<K, V, T extends Map<K, V>> extends AbstractType<T> {
     /**
      *
      * @param x
-     * @return
+     * @return {@code null} if {@code (x == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     @Override
     public String stringOf(T x) {
         if (x == null) {
@@ -143,8 +145,9 @@ public class MapType<K, V, T extends Map<K, V>> extends AbstractType<T> {
     /**
      *
      * @param str
-     * @return
+     * @return {@code null} if {@code (str == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     @SuppressWarnings("unchecked")
     @Override
     public T valueOf(String str) {

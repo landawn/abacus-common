@@ -45,6 +45,7 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
 import com.landawn.abacus.annotation.Internal;
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.parser.DeserializationConfig;
 import com.landawn.abacus.parser.JSONParser;
 import com.landawn.abacus.parser.KryoParser;
@@ -296,8 +297,9 @@ public final class HttpUtil {
      *
      *
      * @param httpHeaders
-     * @return
+     * @return {@code null} if {@code (httpHeaders == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static String getContentType(final Map<String, ?> httpHeaders) {
         if (httpHeaders == null) {
             return null;
@@ -316,8 +318,9 @@ public final class HttpUtil {
      *
      *
      * @param httpHeaders
-     * @return
+     * @return {@code null} if {@code (httpHeaders == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static String getContentType(final HttpHeaders httpHeaders) {
         if (httpHeaders == null) {
             return null;
@@ -336,8 +339,9 @@ public final class HttpUtil {
      *
      *
      * @param httpSettings
-     * @return
+     * @return {@code null} if {@code (httpSettings == null || httpSettings.headers() == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static String getContentType(final HttpSettings httpSettings) {
         if (httpSettings == null || httpSettings.headers() == null) {
             return null;
@@ -360,8 +364,9 @@ public final class HttpUtil {
      *
      *
      * @param httpHeaders
-     * @return
+     * @return {@code null} if {@code (httpHeaders == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static String getContentEncoding(final Map<String, ?> httpHeaders) {
         if (httpHeaders == null) {
             return null;
@@ -380,8 +385,9 @@ public final class HttpUtil {
      *
      *
      * @param httpHeaders
-     * @return
+     * @return {@code null} if {@code (httpHeaders == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static String getContentEncoding(final HttpHeaders httpHeaders) {
         if (httpHeaders == null) {
             return null;
@@ -400,8 +406,9 @@ public final class HttpUtil {
      *
      *
      * @param httpSettings
-     * @return
+     * @return {@code null} if {@code (httpSettings == null || httpSettings.headers() == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static String getContentEncoding(final HttpSettings httpSettings) {
         if (httpSettings == null || httpSettings.headers() == null) {
             return null;
@@ -424,8 +431,9 @@ public final class HttpUtil {
      *
      *
      * @param httpHeaders
-     * @return
+     * @return {@code null} if {@code (httpHeaders == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static String getAccept(final Map<String, ?> httpHeaders) {
         if (httpHeaders == null) {
             return null;
@@ -444,8 +452,9 @@ public final class HttpUtil {
      *
      *
      * @param httpHeaders
-     * @return
+     * @return {@code null} if {@code (httpHeaders == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static String getAccept(final HttpHeaders httpHeaders) {
         if (httpHeaders == null) {
             return null;
@@ -464,8 +473,9 @@ public final class HttpUtil {
      *
      *
      * @param httpSettings
-     * @return
+     * @return {@code null} if {@code (httpSettings == null || httpSettings.headers() == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static String getAccept(final HttpSettings httpSettings) {
         if (httpSettings == null || httpSettings.headers() == null) {
             return null;
@@ -488,8 +498,9 @@ public final class HttpUtil {
      *
      *
      * @param httpHeaders
-     * @return
+     * @return {@code null} if {@code (httpHeaders == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static String getAcceptEncoding(final Map<String, ?> httpHeaders) {
         if (httpHeaders == null) {
             return null;
@@ -508,8 +519,9 @@ public final class HttpUtil {
      *
      *
      * @param httpHeaders
-     * @return
+     * @return {@code null} if {@code (httpHeaders == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static String getAcceptEncoding(final HttpHeaders httpHeaders) {
         if (httpHeaders == null) {
             return null;
@@ -528,8 +540,9 @@ public final class HttpUtil {
      *
      *
      * @param httpSettings
-     * @return
+     * @return {@code null} if {@code (httpSettings == null || httpSettings.headers() == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static String getAcceptEncoding(final HttpSettings httpSettings) {
         if (httpSettings == null || httpSettings.headers() == null) {
             return null;
@@ -552,8 +565,9 @@ public final class HttpUtil {
      *
      *
      * @param httpHeaders
-     * @return
+     * @return {@code null} if {@code (httpHeaders == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static String getAcceptCharset(final Map<String, ?> httpHeaders) {
         if (httpHeaders == null) {
             return null;
@@ -572,8 +586,9 @@ public final class HttpUtil {
      *
      *
      * @param httpHeaders
-     * @return
+     * @return {@code null} if {@code (httpHeaders == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static String getAcceptCharset(final HttpHeaders httpHeaders) {
         if (httpHeaders == null) {
             return null;
@@ -592,8 +607,9 @@ public final class HttpUtil {
      *
      *
      * @param httpSettings
-     * @return
+     * @return {@code null} if {@code (httpSettings == null || httpSettings.headers() == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static String getAcceptCharset(final HttpSettings httpSettings) {
         if (httpSettings == null || httpSettings.headers() == null) {
             return null;
@@ -616,8 +632,9 @@ public final class HttpUtil {
      * Gets the content type.
      *
      * @param contentFormat
-     * @return
+     * @return {@code null} if {@code (contentFormat == null || contentFormat == ContentFormat.NONE)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static String getContentType(final ContentFormat contentFormat) {
         if (contentFormat == null || contentFormat == ContentFormat.NONE) {
             return null;
@@ -630,8 +647,9 @@ public final class HttpUtil {
      * Gets the content encoding.
      *
      * @param contentFormat
-     * @return
+     * @return {@code null} if {@code (contentFormat == null || contentFormat == ContentFormat.NONE)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static String getContentEncoding(final ContentFormat contentFormat) {
         if (contentFormat == null || contentFormat == ContentFormat.NONE) {
             return null;
@@ -998,7 +1016,7 @@ public final class HttpUtil {
         /** GMT and UTC are equivalent for our purposes. */
         public static final TimeZone UTC = TimeZone.getTimeZone("GMT");
         /** The last four-digit year: "Fri, 31 Dec 9999 23:59:59 GMT". */
-        public static final long MAX_DATE = 253402300799999L;
+        public static final long MAX_DATE = 253_402_300_799_999L;
 
         /**
          * Most websites serve cookies in the blessed format. Eagerly create the parser to ensure such

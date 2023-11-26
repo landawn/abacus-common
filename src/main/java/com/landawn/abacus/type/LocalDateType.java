@@ -21,6 +21,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 
@@ -60,8 +61,9 @@ public class LocalDateType extends AbstractType<LocalDate> {
     /**
      *
      * @param str
-     * @return
+     * @return {@code null} if {@code (Strings.isEmpty(str))}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     @Override
     public LocalDate valueOf(String str) {
         if (Strings.isEmpty(str)) {
@@ -80,8 +82,9 @@ public class LocalDateType extends AbstractType<LocalDate> {
      * @param cbuf
      * @param offset
      * @param len
-     * @return
+     * @return {@code null} if {@code ((cbuf == null) || (len == 0))}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     @Override
     public LocalDate valueOf(char[] cbuf, int offset, int len) {
         if ((cbuf == null) || (len == 0)) {

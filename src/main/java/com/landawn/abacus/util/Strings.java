@@ -44,6 +44,7 @@ import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
 import com.landawn.abacus.annotation.Beta;
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
 import com.landawn.abacus.util.u.Optional;
@@ -65,6 +66,7 @@ import com.landawn.abacus.util.stream.Stream;
  * @see com.landawn.abacus.util.Iterators
  * @see com.landawn.abacus.util.Maps
  */
+@SuppressWarnings({ "java:S1694" })
 public abstract sealed class Strings permits Strings.StringUtil {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Strings.class);
@@ -177,7 +179,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         }
     }
 
-    private static final Pattern JAVA_IDENTIFIER_PATTERN = Pattern.compile("^([a-zA-Z_$][a-zA-Z\\d_$]*)$");
+    private static final Pattern JAVA_IDENTIFIER_PATTERN = Pattern.compile("^([a-zA-Z_$][a-zA-Z\\d_$]*)$", Pattern.UNICODE_CHARACTER_CLASS);
 
     private static final Encoder BASE64_ENCODER = java.util.Base64.getEncoder();
 
@@ -610,6 +612,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @see StrUtil#firstNonEmpty(CharSequence...)
      * @since 3.8
      */
+    @MayReturnNull
     @SafeVarargs
     public static <T extends CharSequence> T firstNonEmpty(final T... css) {
         if (N.isEmpty(css)) {
@@ -632,6 +635,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @return the first value from {@code css} which is not empty, or {@code null} if there is no non-empty value.
      * @see StrUtil#firstNonEmpty(CharSequence...)
      */
+    @MayReturnNull
     public static <T extends CharSequence> T firstNonEmpty(final Collection<? extends T> css) {
         if (N.isEmpty(css)) {
             return null;
@@ -678,6 +682,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @return the first value from {@code css} which is not empty, or {@code null} if there is no non-blank value.
      * @see StrUtil#firstNonBlank(CharSequence...)
      */
+    @MayReturnNull
     @SafeVarargs
     public static <T extends CharSequence> T firstNonBlank(final T... css) {
         if (N.isEmpty(css)) {
@@ -700,6 +705,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @return the first value from {@code css} which is not empty, or {@code null} if there is no non-blank value.
      * @see StrUtil#firstNonEmpty(CharSequence...)
      */
+    @MayReturnNull
     public static <T extends CharSequence> T firstNonBlank(final Collection<? extends T> css) {
         if (N.isEmpty(css)) {
             return null;
@@ -1240,7 +1246,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param str
      * @param minLength
      * @param padChar
-     * @return
+     * @return the specified String if its length is bigger than {@code minLength}
      */
     @SuppressWarnings("deprecation")
     public static String padStart(String str, final int minLength, final char padChar) {
@@ -1267,7 +1273,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param str
      * @param minLength
      * @param padStr
-     * @return
+     * @return the specified String if its length is bigger than {@code minLength}
      */
     public static String padStart(String str, final int minLength, final String padStr) {
         if (str == null) {
@@ -1323,7 +1329,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param str
      * @param minLength
      * @param padChar
-     * @return
+     * @return the specified String if its length is bigger than {@code minLength}
      */
     @SuppressWarnings("deprecation")
     public static String padEnd(String str, final int minLength, final char padChar) {
@@ -1348,7 +1354,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param str
      * @param minLength
      * @param padStr
-     * @return
+     * @return the specified String if its length is bigger than {@code minLength}
      */
     public static String padEnd(String str, final int minLength, final String padStr) {
         if (str == null) {
@@ -1545,8 +1551,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      *
      * @param source
-     * @return
+     * @return {@code null} if {@code (source == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static char[] toCharArray(final CharSequence source) {
         if (source == null) {
             return null; // NOSONAR
@@ -1580,9 +1587,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * </pre>
      *
      * @param str the character sequence to convert
-     * @return an array of code points
+     * @return an array of code points. {@code null} if {@code (str == null)}. (auto-generated java doc for return)
      * @since 3.6
      */
+    @MayReturnNull
     public static int[] toCodePoints(final CharSequence str) {
         if (str == null) {
             return null; // NOSONAR
@@ -1637,7 +1645,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * @param str
      *            the String to lower case, may be null
-     * @return
+     * @return the specified String if it's {@code null} or empty.
      */
     public static String toLowerCase(final String str) {
         if (str == null || str.length() == 0) {
@@ -1668,7 +1676,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param locale
      *            the locale that defines the case transformation rules, must
      *            not be null
-     * @return
+     * @return the specified String if it's {@code null} or empty.
      * @since 2.5
      */
     public static String toLowerCase(final String str, final Locale locale) {
@@ -1683,7 +1691,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * To lower case with underscore.
      *
      * @param str
-     * @return
+     * @return the specified String if it's {@code null} or empty.
      */
     public static String toLowerCaseWithUnderscore(final String str) {
         if (str == null || str.length() == 0) {
@@ -1757,9 +1765,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * locale (e.g. {@link Locale#ENGLISH}).
      * </p>
      *
-     * @param str
-     *            the String to upper case, may be null
-     * @return
+     * @param str the String to upper case, may be null
+     * @return the specified String if it's {@code null} or empty.
      */
     public static String toUpperCase(final String str) {
         if (str == null || str.length() == 0) {
@@ -1790,7 +1797,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param locale
      *            the locale that defines the case transformation rules, must
      *            not be null
-     * @return
+     * @return the specified String if it's {@code null} or empty.
      * @since 2.5
      */
     public static String toUpperCase(final String str, final Locale locale) {
@@ -1805,7 +1812,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * To upper case with underscore.
      *
      * @param str
-     * @return
+     * @return the specified String if it's {@code null} or empty.
      */
     public static String toUpperCaseWithUnderscore(final String str) {
         if (str == null || str.length() == 0) {
@@ -1848,7 +1855,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      *
      * @param str
-     * @return
+     * @return the specified String if it's {@code null} or empty.
      */
     public static String toCamelCase(final String str) {
         if (str == null || str.length() == 0) {
@@ -1933,9 +1940,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * org.apache.commons.lang3.text.WordUtils.
      * </p>
      *
-     * @param str
-     *            the String to swap case, may be null
-     * @return
+     * @param str the String to swap case, may be null
+     * @return the specified String if it's {@code null} or empty.
      */
     @SuppressWarnings("deprecation")
     public static String swapCase(final String str) {
@@ -1961,7 +1967,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     /**
      *
      * @param str
-     * @return
+     * @return the specified String if it's {@code null} or empty.
      */
     public static String capitalize(final String str) {
         if (str == null || str.length() == 0) {
@@ -1984,7 +1990,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     /**
      *
      * @param str
-     * @return
+     * @return the specified String if it's {@code null} or empty.
      */
     public static String uncapitalize(final String str) {
         if (str == null || str.length() == 0) {
@@ -2010,7 +2016,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * is {@code null} or empty.
      *
      * @param str
-     * @return
+     * @return the specified String if it's {@code null} or empty.
      */
     public static String quoteEscaped(final String str) {
         if (str == null || str.length() == 0) {
@@ -2045,7 +2051,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * @param str
      * @param quoteChar it should be {@code "} or {@code '}.
-     * @return
+     * @return the specified String if it's {@code null} or empty.
      */
     public static String quoteEscaped(final String str, final char quoteChar) {
         if (str == null || str.length() == 0) {
@@ -2573,8 +2579,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param removeStr
      *            the String to search for (case insensitive) and remove, may be
      *            null
-     * @return
-     *         null String input
+     * @return the specified String if it's {@code null} or empty, or removal String is {@code null} or empty.
      * @since 2.4
      */
     public static String removeStartIgnoreCase(final String str, final String removeStr) {
@@ -2615,8 +2620,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *            the source String to search, may be null
      * @param removeStr
      *            the String to search for and remove, may be null
-     * @return
-     *         null String input
+     * @return the specified String if it's {@code null} or empty, or removal String is {@code null} or empty.
      * @since 2.1
      */
     public static String removeEnd(final String str, final String removeStr) {
@@ -2660,8 +2664,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param removeStr
      *            the String to search for (case insensitive) and remove, may be
      *            null
-     * @return
-     *         null String input
+     * @return the specified String if it's {@code null} or empty, or removal String is {@code null} or empty.
      * @since 2.4
      */
     public static String removeEndIgnoreCase(final String str, final String removeStr) {
@@ -2697,8 +2700,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *            the source String to search, may be null
      * @param removeChar
      *            the char to search for and remove, may be null
-     * @return
-     *         null String input
+     * @return the specified String if it's {@code null} or empty.
      * @since 2.1
      */
     public static String removeAll(final String str, final char removeChar) {
@@ -2711,7 +2713,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param str
      * @param fromIndex
      * @param removeChar
-     * @return
+     * @return the specified String if it's {@code null} or empty.
      */
     public static String removeAll(final String str, final int fromIndex, final char removeChar) {
         if (str == null || str.length() == 0) {
@@ -2768,8 +2770,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *            the source String to search, may be null
      * @param removeStr
      *            the String to search for and remove, may be null
-     * @return
-     *         null String input
+     * @return the specified String if it's {@code null} or empty.
      * @since 2.1
      */
     public static String removeAll(final String str, final String removeStr) {
@@ -2782,7 +2783,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param str
      * @param fromIndex
      * @param removeStr
-     * @return
+     * @return the specified String if it's {@code null} or empty.
      */
     public static String removeAll(final String str, final int fromIndex, final String removeStr) {
         if (isEmpty(str) || isEmpty(removeStr)) {
@@ -3301,7 +3302,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *            the String to remove characters from, may be null
      * @param stripChars
      *            the characters to remove, null treated as whitespace
-     * @return
+     * @return the specified String if it's {@code null} or empty.
      */
     public static String strip(final String str, final String stripChars) {
         if (str == null || str.length() == 0) {
@@ -3357,7 +3358,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *            the String to remove characters from, may be null
      * @param stripChars
      *            the characters to remove, null treated as whitespace
-     * @return
+     * @return the specified String if it's {@code null} or empty.
      */
     public static String stripStart(final String str, final String stripChars) {
         if (isEmpty(str) || (stripChars != null && stripChars.isEmpty())) {
@@ -3426,7 +3427,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *            the String to remove characters from, may be null
      * @param stripChars
      *            the set of characters to remove, null treated as whitespace
-     * @return
+     * @return the specified String if it's {@code null} or empty.
      */
     public static String stripEnd(final String str, final String stripChars) {
         if (isEmpty(str) || (stripChars != null && stripChars.isEmpty())) {
@@ -3484,12 +3485,13 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * </pre>
      *
      * @param str
-     * @return input text with diacritics removed
+     * @return input text with diacritics removed. {@code null} if {@code (str == null)}. (auto-generated java doc for return)
      * @since 3.0
      */
     // See also Lucene's ASCIIFoldingFilter (Lucene 2.9) that replaces accented
     // characters by their unaccented equivalent (and uncommitted bug fix:
     // https://issues.apache.org/jira/browse/LUCENE-1343?focusedCommentId=12858907&page=com.atlassian.jira.plugin.system.issuetabpanels%3Acomment-tabpanel#action_12858907).
+    @MayReturnNull
     public static String stripAccents(final String str) {
         if (str == null) {
             return null;
@@ -3769,6 +3771,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @throws IllegalArgumentException If {@code offset} or {@code maxWidth} is less than {@code 0}
      * @since 3.5
      */
+    @MayReturnNull
     public static String truncate(final String str, final int offset, final int maxWidth) {
         N.checkArgNotNegative(offset, "offset");
         N.checkArgNotNegative(maxWidth, "maxWidth");
@@ -3801,7 +3804,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * @param str
      *            the String to delete whitespace from, may be null
-     * @return
+     * @return the specified String if it's {@code null} or empty.
      */
     public static String deleteWhitespace(final String str) {
         if (str == null || str.length() == 0) {
@@ -4027,7 +4030,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param str
      * @param prefix
      * @param suffix
-     * @return
+     * @return the specified String if it's {@code null} or empty.
      */
     public static String unwrap(final String str, final String prefix, final String suffix) {
         N.checkArgNotNull(prefix);
@@ -6795,9 +6798,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * @param str
      * @param inclusiveBeginIndex
-     * @return
+     * @return {@code null} if {@code (str == null || inclusiveBeginIndex < 0 || inclusiveBeginIndex > str.length())}. (auto-generated java doc for return)
      * @see #substring(String, int, int)
      */
+    @MayReturnNull
     public static String substring(String str, int inclusiveBeginIndex) {
         if (str == null || inclusiveBeginIndex < 0 || inclusiveBeginIndex > str.length()) {
             return null;
@@ -6813,8 +6817,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param str
      * @param inclusiveBeginIndex
      * @param exclusiveEndIndex
-     * @return
+     * @return {@code null} if {@code (str == null || inclusiveBeginIndex < 0 || exclusiveEndIndex < 0 || inclusiveBeginIndex > exclusiveEndIndex || inclusiveBeginIndex > str.length())}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static String substring(String str, int inclusiveBeginIndex, int exclusiveEndIndex) {
         if (str == null || inclusiveBeginIndex < 0 || exclusiveEndIndex < 0 || inclusiveBeginIndex > exclusiveEndIndex || inclusiveBeginIndex > str.length()) {
             return null;
@@ -6829,9 +6834,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param str
      * @param inclusiveBeginIndex
      * @param funcOfExclusiveEndIndex {@code exclusiveEndIndex <- funcOfExclusiveEndIndex.applyAsInt(inclusiveBeginIndex) if inclusiveBeginIndex >= 0}
-     * @return
+     * @return {@code null} if {@code (str == null || inclusiveBeginIndex < 0)}. (auto-generated java doc for return)
      * @see #substring(String, int, int)
      */
+    @MayReturnNull
     public static String substring(final String str, final int inclusiveBeginIndex, final IntUnaryOperator funcOfExclusiveEndIndex) {
         if (str == null || inclusiveBeginIndex < 0) {
             return null;
@@ -6846,9 +6852,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param str
      * @param inclusiveBeginIndex
      * @param funcOfExclusiveEndIndex {@code exclusiveEndIndex <- funcOfExclusiveEndIndex.apply(str, inclusiveBeginIndex) if inclusiveBeginIndex >= 0}
-     * @return
+     * @return {@code null} if {@code (str == null || inclusiveBeginIndex < 0)}. (auto-generated java doc for return)
      * @see #substring(String, int, int)
      */
+    @MayReturnNull
     @Beta
     public static String substring(final String str, final int inclusiveBeginIndex, final BiFunction<String, Integer, Integer> funcOfExclusiveEndIndex) {
         if (str == null || inclusiveBeginIndex < 0) {
@@ -6865,9 +6872,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param str
      * @param funcOfInclusiveBeginIndex {@code inclusiveBeginIndex <- funcOfInclusiveBeginIndex.applyAsInt(exclusiveEndIndex)) if exclusiveEndIndex > 0}
      * @param exclusiveEndIndex
-     * @return
+     * @return {@code null} if {@code (str == null || exclusiveEndIndex < 0)}. (auto-generated java doc for return)
      * @see #substring(String, int, int)
      */
+    @MayReturnNull
     public static String substring(final String str, final IntUnaryOperator funcOfInclusiveBeginIndex, final int exclusiveEndIndex) {
         if (str == null || exclusiveEndIndex < 0) {
             return null;
@@ -6883,9 +6891,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param str
      * @param funcOfInclusiveBeginIndex {@code inclusiveBeginIndex <- funcOfInclusiveBeginIndex.apply(str, exclusiveEndIndex)) if exclusiveEndIndex > 0}
      * @param exclusiveEndIndex
-     * @return
+     * @return {@code null} if {@code (str == null || exclusiveEndIndex < 0)}. (auto-generated java doc for return)
      * @see #substring(String, int, int)
      */
+    @MayReturnNull
     @Beta
     public static String substring(final String str, final BiFunction<String, Integer, Integer> funcOfInclusiveBeginIndex, final int exclusiveEndIndex) {
         if (str == null || exclusiveEndIndex < 0) {
@@ -6901,10 +6910,11 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * @param str
      * @param delimiterOfInclusiveBeginIndex {@code inclusiveBeginIndex <- str.indexOf(delimiterOfInclusiveBeginIndex)}
-     * @return
+     * @return {@code null} if {@code (str == null || str.length() == 0)}. (auto-generated java doc for return)
      * @see #substring(String, int)
      * @deprecated
      */
+    @MayReturnNull
     @Deprecated
     public static String substring(String str, char delimiterOfInclusiveBeginIndex) {
         if (str == null || str.length() == 0) {
@@ -6920,10 +6930,11 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * @param str
      * @param delimiterOfInclusiveBeginIndex {@code inclusiveBeginIndex <- str.indexOf(delimiterOfInclusiveBeginIndex)}
-     * @return
+     * @return {@code null} if {@code (str == null || delimiterOfInclusiveBeginIndex == null)}. (auto-generated java doc for return)
      * @see #substring(String, int)
      * @deprecated
      */
+    @MayReturnNull
     @Deprecated
     public static String substring(String str, String delimiterOfInclusiveBeginIndex) {
         if (str == null || delimiterOfInclusiveBeginIndex == null) {
@@ -6943,10 +6954,11 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param str
      * @param inclusiveBeginIndex
      * @param delimiterOfExclusiveEndIndex {@code str.indexOf(delimiterOfExclusiveEndIndex, inclusiveBeginIndex + 1)}
-     * @return
+     * @return {@code null} if {@code (str == null || str.length() == 0 || inclusiveBeginIndex < 0 || inclusiveBeginIndex > str.length())}. (auto-generated java doc for return)
      * @see #substring(String, int, int)
      * @deprecated
      */
+    @MayReturnNull
     @Deprecated
     public static String substring(String str, int inclusiveBeginIndex, char delimiterOfExclusiveEndIndex) {
         if (str == null || str.length() == 0 || inclusiveBeginIndex < 0 || inclusiveBeginIndex > str.length()) {
@@ -6969,10 +6981,11 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param str
      * @param inclusiveBeginIndex
      * @param delimiterOfExclusiveEndIndex {@code exclusiveEndIndex <- str.indexOf(delimiterOfExclusiveEndIndex, inclusiveBeginIndex + 1) if inclusiveBeginIndex >= 0}
-     * @return
+     * @return {@code null} if {@code (str == null || delimiterOfExclusiveEndIndex == null || inclusiveBeginIndex < 0 || inclusiveBeginIndex > str.length())}. (auto-generated java doc for return)
      * @see #substring(String, int, int)
      * @deprecated
      */
+    @MayReturnNull
     @Deprecated
     public static String substring(String str, int inclusiveBeginIndex, String delimiterOfExclusiveEndIndex) {
         if (str == null || delimiterOfExclusiveEndIndex == null || inclusiveBeginIndex < 0 || inclusiveBeginIndex > str.length()) {
@@ -6992,10 +7005,11 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param str
      * @param delimiterOfInclusiveBeginIndex {@code inclusiveBeginIndex <- str.lastIndexOf(delimiterOfInclusiveBeginIndex, exclusiveEndIndex - 1) if exclusiveEndIndex > 0}
      * @param exclusiveEndIndex
-     * @return
+     * @return {@code null} if {@code (str == null || str.length() == 0 || exclusiveEndIndex < 0)}. (auto-generated java doc for return)
      * @see #substring(String, int, int)
      * @deprecated
      */
+    @MayReturnNull
     @Deprecated
     public static String substring(String str, char delimiterOfInclusiveBeginIndex, int exclusiveEndIndex) {
         if (str == null || str.length() == 0 || exclusiveEndIndex < 0) {
@@ -7012,10 +7026,11 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param str
      * @param delimiterOfInclusiveBeginIndex {@code inclusiveBeginIndex <- str.lastIndexOf(delimiterOfInclusiveBeginIndex, exclusiveEndIndex - exclusiveEndIndex - delimiterOfInclusiveBeginIndex.length()) if exclusiveEndIndex > 0}
      * @param exclusiveEndIndex
-     * @return
+     * @return {@code null} if {@code (str == null || delimiterOfInclusiveBeginIndex == null || exclusiveEndIndex < 0)}. (auto-generated java doc for return)
      * @see #substring(String, int, int)
      * @deprecated
      */
+    @MayReturnNull
     @Deprecated
     public static String substring(String str, String delimiterOfInclusiveBeginIndex, int exclusiveEndIndex) {
         if (str == null || delimiterOfInclusiveBeginIndex == null || exclusiveEndIndex < 0) {
@@ -7035,8 +7050,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * @param str
      * @param delimiterOfExclusiveBeginIndex
-     * @return
+     * @return {@code null} if {@code (str == null || str.length() == 0)} OR {@code (index < 0)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static String substringAfter(String str, char delimiterOfExclusiveBeginIndex) {
         if (str == null || str.length() == 0) {
             return null;
@@ -7056,8 +7072,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * @param str
      * @param delimiterOfExclusiveBeginIndex
-     * @return
+     * @return {@code null} if {@code (str == null || delimiterOfExclusiveBeginIndex == null)} OR {@code (index < 0)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static String substringAfter(String str, String delimiterOfExclusiveBeginIndex) {
         if (str == null || delimiterOfExclusiveBeginIndex == null) {
             return null;
@@ -7083,8 +7100,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param str
      * @param delimiterOfExclusiveBeginIndex
      * @param exclusiveEndIndex
-     * @return
+     * @return {@code null} if {@code (str == null || delimiterOfExclusiveBeginIndex == null || exclusiveEndIndex < 0)} OR {@code (index < 0 || index + delimiterOfExclusiveBeginIndex.length() > exclusiveEndIndex)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static String substringAfter(String str, String delimiterOfExclusiveBeginIndex, int exclusiveEndIndex) {
         if (str == null || delimiterOfExclusiveBeginIndex == null || exclusiveEndIndex < 0) {
             return null;
@@ -7110,8 +7128,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * @param str
      * @param delimiterOfExclusiveBeginIndex
-     * @return
+     * @return {@code null} if {@code (str == null || str.length() == 0)} OR {@code (index < 0)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static String substringAfterLast(String str, char delimiterOfExclusiveBeginIndex) {
         if (str == null || str.length() == 0) {
             return null;
@@ -7131,8 +7150,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * @param str
      * @param delimiterOfExclusiveBeginIndex
-     * @return
+     * @return {@code null} if {@code (str == null || delimiterOfExclusiveBeginIndex == null)} OR {@code (index < 0)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static String substringAfterLast(String str, String delimiterOfExclusiveBeginIndex) {
         if (str == null || delimiterOfExclusiveBeginIndex == null) {
             return null;
@@ -7157,8 +7177,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param str
      * @param delimiterOfExclusiveBeginIndex
      * @param exclusiveEndIndex
-     * @return
+     * @return {@code null} if {@code (str == null || delimiterOfExclusiveBeginIndex == null || exclusiveEndIndex < 0)} OR {@code (index < 0 || index + delimiterOfExclusiveBeginIndex.length() > exclusiveEndIndex)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static String substringAfterLast(String str, String delimiterOfExclusiveBeginIndex, int exclusiveEndIndex) {
         if (str == null || delimiterOfExclusiveBeginIndex == null || exclusiveEndIndex < 0) {
             return null;
@@ -7184,9 +7205,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * @param str
      * @param delimitersOfExclusiveBeginIndex
-     * @return
+     * @return {@code null} if {@code (str == null || N.isEmpty(delimitersOfExclusiveBeginIndex))}. (auto-generated java doc for return)
      * @see #substringAfter(String, String)
      */
+    @MayReturnNull
     public static String substringAfterAny(String str, char... delimitersOfExclusiveBeginIndex) {
         if (str == null || N.isEmpty(delimitersOfExclusiveBeginIndex)) {
             return null;
@@ -7210,9 +7232,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * @param str
      * @param delimitersOfExclusiveBeginIndex
-     * @return
+     * @return {@code null} if {@code (str == null || N.isEmpty(delimitersOfExclusiveBeginIndex))}. (auto-generated java doc for return)
      * @see #substringAfter(String, String)
      */
+    @MayReturnNull
     public static String substringAfterAny(String str, String... delimitersOfExclusiveBeginIndex) {
         if (str == null || N.isEmpty(delimitersOfExclusiveBeginIndex)) {
             return null;
@@ -7236,8 +7259,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * @param str
      * @param delimiterOfExclusiveEndIndex
-     * @return
+     * @return {@code null} if {@code (str == null)} OR {@code (index < 0)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static String substringBefore(String str, char delimiterOfExclusiveEndIndex) {
         if (str == null) {
             return null;
@@ -7257,8 +7281,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * @param str
      * @param delimiterOfExclusiveEndIndex
-     * @return
+     * @return {@code null} if {@code (str == null || delimiterOfExclusiveEndIndex == null)} OR {@code (index < 0)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static String substringBefore(String str, String delimiterOfExclusiveEndIndex) {
         if (str == null || delimiterOfExclusiveEndIndex == null) {
             return null;
@@ -7283,8 +7308,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param str
      * @param inclusiveBeginIndex
      * @param delimiterOfExclusiveEndIndex
-     * @return
+     * @return {@code null} if {@code (str == null || delimiterOfExclusiveEndIndex == null || inclusiveBeginIndex < 0 || inclusiveBeginIndex > str.length())} OR {@code (index < 0)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static String substringBefore(String str, int inclusiveBeginIndex, String delimiterOfExclusiveEndIndex) {
         if (str == null || delimiterOfExclusiveEndIndex == null || inclusiveBeginIndex < 0 || inclusiveBeginIndex > str.length()) {
             return null;
@@ -7310,8 +7336,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * @param str
      * @param delimiterOfExclusiveEndIndex
-     * @return
+     * @return {@code null} if {@code (str == null || str.length() == 0)} OR {@code (index < 0)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static String substringBeforeLast(String str, char delimiterOfExclusiveEndIndex) {
         if (str == null || str.length() == 0) {
             return null;
@@ -7331,8 +7358,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * @param str
      * @param delimiterOfExclusiveEndIndex
-     * @return
+     * @return {@code null} if {@code (str == null || delimiterOfExclusiveEndIndex == null)} OR {@code (index < 0)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static String substringBeforeLast(String str, String delimiterOfExclusiveEndIndex) {
         if (str == null || delimiterOfExclusiveEndIndex == null) {
             return null;
@@ -7357,8 +7385,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param str
      * @param inclusiveBeginIndex
      * @param delimiterOfExclusiveEndIndex
-     * @return
+     * @return {@code null} if {@code (str == null || delimiterOfExclusiveEndIndex == null || inclusiveBeginIndex < 0 || inclusiveBeginIndex > str.length())} OR {@code (index < 0 || index < inclusiveBeginIndex)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static String substringBeforeLast(String str, int inclusiveBeginIndex, String delimiterOfExclusiveEndIndex) {
         if (str == null || delimiterOfExclusiveEndIndex == null || inclusiveBeginIndex < 0 || inclusiveBeginIndex > str.length()) {
             return null;
@@ -7384,9 +7413,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * @param str
      * @param delimitersOfExclusiveEndIndex
-     * @return
+     * @return {@code null} if {@code (str == null || N.isEmpty(delimitersOfExclusiveEndIndex))}. (auto-generated java doc for return)
      * @see #substringBefore(String, String)
      */
+    @MayReturnNull
     public static String substringBeforeAny(String str, char... delimitersOfExclusiveEndIndex) {
         if (str == null || N.isEmpty(delimitersOfExclusiveEndIndex)) {
             return null;
@@ -7410,9 +7440,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * @param str
      * @param delimitersOfExclusiveEndIndex
-     * @return
+     * @return {@code null} if {@code (str == null || N.isEmpty(delimitersOfExclusiveEndIndex))}. (auto-generated java doc for return)
      * @see #substringBefore(String, String)
      */
+    @MayReturnNull
     public static String substringBeforeAny(String str, String... delimitersOfExclusiveEndIndex) {
         if (str == null || N.isEmpty(delimitersOfExclusiveEndIndex)) {
             return null;
@@ -7440,6 +7471,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param exclusiveEndIndex
      * @return
      */
+    @MayReturnNull
     public static String substringBetween(String str, int exclusiveBeginIndex, int exclusiveEndIndex) {
         if (str == null || exclusiveBeginIndex < 0 || exclusiveEndIndex < 0 || exclusiveBeginIndex >= exclusiveEndIndex
                 || exclusiveBeginIndex >= str.length()) {
@@ -7454,9 +7486,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param str
      * @param exclusiveBeginIndex
      * @param delimiterOfExclusiveEndIndex
-     * @return
+     * @return {@code null} if {@code (str == null || exclusiveBeginIndex < 0 || exclusiveBeginIndex >= str.length())}. (auto-generated java doc for return)
      * @see #substringBetween(String, int, int)
      */
+    @MayReturnNull
     public static String substringBetween(String str, int exclusiveBeginIndex, char delimiterOfExclusiveEndIndex) {
         if (str == null || exclusiveBeginIndex < 0 || exclusiveBeginIndex >= str.length()) {
             return null;
@@ -7470,9 +7503,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param str
      * @param exclusiveBeginIndex
      * @param delimiterOfExclusiveEndIndex
-     * @return
+     * @return {@code null} if {@code (str == null || delimiterOfExclusiveEndIndex == null || exclusiveBeginIndex < 0 || exclusiveBeginIndex >= str.length())}. (auto-generated java doc for return)
      * @see #substringBetween(String, int, int)
      */
+    @MayReturnNull
     public static String substringBetween(String str, int exclusiveBeginIndex, String delimiterOfExclusiveEndIndex) {
         if (str == null || delimiterOfExclusiveEndIndex == null || exclusiveBeginIndex < 0 || exclusiveBeginIndex >= str.length()) {
             return null;
@@ -7486,9 +7520,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param str
      * @param delimiterOfExclusiveBeginIndex
      * @param exclusiveEndIndex
-     * @return
+     * @return {@code null} if {@code (str == null || exclusiveEndIndex <= 0)}. (auto-generated java doc for return)
      * @see #substringBetween(String, int, int)
      */
+    @MayReturnNull
     public static String substringBetween(String str, char delimiterOfExclusiveBeginIndex, int exclusiveEndIndex) {
         if (str == null || exclusiveEndIndex <= 0) {
             return null;
@@ -7502,9 +7537,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param str
      * @param delimiterOfExclusiveBeginIndex
      * @param exclusiveEndIndex
-     * @return
+     * @return {@code null} if {@code (str == null || delimiterOfExclusiveBeginIndex == null || exclusiveEndIndex < 0)} OR {@code (index < 0)} OR {@code (exclusiveBeginIndex > exclusiveEndIndex)}. (auto-generated java doc for return)
      * @see #substringBetween(String, int, int)
      */
+    @MayReturnNull
     public static String substringBetween(String str, String delimiterOfExclusiveBeginIndex, int exclusiveEndIndex) {
         if (str == null || delimiterOfExclusiveBeginIndex == null || exclusiveEndIndex < 0) {
             return null;
@@ -7531,9 +7567,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param str
      * @param delimiterOfExclusiveBeginIndex
      * @param delimiterOfExclusiveEndIndex
-     * @return
+     * @return {@code null} if {@code (str == null || str.length() <= 1)} OR {@code (startIndex < 0)} OR {@code (endIndex < 0)}. (auto-generated java doc for return)
      * @see #substringBetween(String, int, int)
      */
+    @MayReturnNull
     public static String substringBetween(String str, char delimiterOfExclusiveBeginIndex, char delimiterOfExclusiveEndIndex) {
         if (str == null || str.length() <= 1) {
             return null;
@@ -7593,9 +7630,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param fromIndex start index for {@code delimiterOfExclusive}. {@code str.indexOf(delimiterOfExclusiveBeginIndex, fromIndex)}
      * @param delimiterOfExclusiveBeginIndex
      * @param delimiterOfExclusiveEndIndex
-     * @return
+     * @return {@code null} if {@code (str == null || delimiterOfExclusiveBeginIndex == null || delimiterOfExclusiveEndIndex == null || fromIndex < 0 || fromIndex > str.length())} OR {@code (startIndex < 0)} OR {@code (endIndex < 0)}. (auto-generated java doc for return)
      * @see #substringBetween(String, int, int)
      */
+    @MayReturnNull
     public static String substringBetween(String str, int fromIndex, String delimiterOfExclusiveBeginIndex, String delimiterOfExclusiveEndIndex) {
         if (str == null || delimiterOfExclusiveBeginIndex == null || delimiterOfExclusiveEndIndex == null || fromIndex < 0 || fromIndex > str.length()) {
             return null;
@@ -7692,9 +7730,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param str
      * @param exclusiveBeginIndex
      * @param funcOfExclusiveEndIndex {@code exclusiveEndIndex <- funcOfExclusiveEndIndex.applyAsInt(inclusiveBeginIndex) if inclusiveBeginIndex >= 0}
-     * @return
+     * @return {@code null} if {@code (str == null || exclusiveBeginIndex < 0 || exclusiveBeginIndex >= str.length())}. (auto-generated java doc for return)
      * @see #substringBetween(String, int, int)
      */
+    @MayReturnNull
     public static String substringBetween(String str, int exclusiveBeginIndex, IntUnaryOperator funcOfExclusiveEndIndex) {
         if (str == null || exclusiveBeginIndex < 0 || exclusiveBeginIndex >= str.length()) {
             return null;
@@ -7708,9 +7747,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param str
      * @param exclusiveBeginIndex
      * @param funcOfExclusiveEndIndex {@code exclusiveEndIndex <- funcOfExclusiveEndIndex.apply(str, exclusiveBeginIndex) if inclusiveBeginIndex >= 0}
-     * @return
+     * @return {@code null} if {@code (str == null || exclusiveBeginIndex < 0 || exclusiveBeginIndex >= str.length())}. (auto-generated java doc for return)
      * @see #substringBetween(String, int, int)
      */
+    @MayReturnNull
     @Beta
     public static String substringBetween(String str, int exclusiveBeginIndex, final BiFunction<String, Integer, Integer> funcOfExclusiveEndIndex) {
         if (str == null || exclusiveBeginIndex < 0 || exclusiveBeginIndex >= str.length()) {
@@ -7725,9 +7765,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param str
      * @param funcOfExclusiveBeginIndex {@code exclusiveBeginIndex <- funcOfExclusiveBeginIndex.applyAsInt(exclusiveEndIndex)) if exclusiveEndIndex >= 0}
      * @param exclusiveEndIndex
-     * @return
+     * @return {@code null} if {@code (str == null || exclusiveEndIndex < 0)}. (auto-generated java doc for return)
      * @see #substringBetween(String, int, int)
      */
+    @MayReturnNull
     public static String substringBetween(String str, IntUnaryOperator funcOfExclusiveBeginIndex, int exclusiveEndIndex) {
         if (str == null || exclusiveEndIndex < 0) {
             return null;
@@ -7741,9 +7782,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param str
      * @param funcOfExclusiveBeginIndex {@code exclusiveBeginIndex <- funcOfExclusiveBeginIndex.apply(str, exclusiveEndIndex)) if exclusiveEndIndex >= 0}
      * @param exclusiveEndIndex
-     * @return
+     * @return {@code null} if {@code (str == null || exclusiveEndIndex < 0)}. (auto-generated java doc for return)
      * @see #substringBetween(String, int, int)
      */
+    @MayReturnNull
     @Beta
     public static String substringBetween(String str, final BiFunction<String, Integer, Integer> funcOfExclusiveBeginIndex, int exclusiveEndIndex) {
         if (str == null || exclusiveEndIndex < 0) {
@@ -7758,9 +7800,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param str
      * @param delimiterOfExclusiveBeginIndex
      * @param funcOfExclusiveEndIndex
-     * @return
+     * @return {@code null} if {@code (str == null || delimiterOfExclusiveBeginIndex == null || delimiterOfExclusiveBeginIndex.length() > str.length())} OR {@code (index < 0)}. (auto-generated java doc for return)
      * @see #substringBetween(String, int, int)
      */
+    @MayReturnNull
     public static String substringBetween(String str, String delimiterOfExclusiveBeginIndex, IntUnaryOperator funcOfExclusiveEndIndex) {
         if (str == null || delimiterOfExclusiveBeginIndex == null || delimiterOfExclusiveBeginIndex.length() > str.length()) {
             return null;
@@ -7782,9 +7825,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param str
      * @param funcOfExclusiveBeginIndex (exclusiveBeginIndex <- funcOfExclusiveBeginIndex.applyAsInt(exclusiveEndIndex))
      * @param delimiterOfExclusiveEndIndex (exclusiveEndIndex <- str.lastIndexOf(delimiterOfExclusiveEndIndex))
-     * @return
+     * @return {@code null} if {@code (str == null || delimiterOfExclusiveEndIndex == null || delimiterOfExclusiveEndIndex.length() > str.length())} OR {@code (exclusiveEndIndex < 0)}. (auto-generated java doc for return)
      * @see #substringBetween(String, int, int)
      */
+    @MayReturnNull
     public static String substringBetween(String str, IntUnaryOperator funcOfExclusiveBeginIndex, String delimiterOfExclusiveEndIndex) {
         if (str == null || delimiterOfExclusiveEndIndex == null || delimiterOfExclusiveEndIndex.length() > str.length()) {
             return null;
@@ -10758,7 +10802,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     /**
      *
      * @param str
-     * @return
+     * @return the specified String if it's {@code null} or empty.
      */
     public static String reverse(final String str) {
         if (N.len(str) <= 1) {
@@ -10798,7 +10842,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *            the String to reverse, may be null
      * @param delimiter
      *            the delimiter character to use
-     * @return
+     * @return the specified String if it's {@code null} or empty.
      * @since 2.0
      */
     public static String reverseDelimited(final String str, final char delimiter) {
@@ -10819,7 +10863,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * @param str
      * @param delimiter
-     * @return
+     * @return the specified String if it's {@code null} or empty.
      */
     public static String reverseDelimited(final String str, final String delimiter) {
         if (N.len(str) <= 1) {
@@ -10839,7 +10883,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * Returns a new sorted String if the specified {@code str} is not null or empty, otherwise the specified {@code str} is returned.
      *
      * @param str
-     * @return
+     * @return the specified String if it's {@code null} or empty.
      */
     @SuppressWarnings("deprecation")
     public static String sort(String str) {
@@ -10915,7 +10959,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * @param str
      * @param rnd
-     * @return
+     * @return the specified String if it's {@code null} or empty.
      */
     public static String shuffle(final String str, final Random rnd) {
         final int strLen = N.len(str);

@@ -40,6 +40,7 @@ import java.util.function.Function;
 import java.util.function.IntFunction;
 import java.util.function.Supplier;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.parser.ParserUtil;
 import com.landawn.abacus.parser.ParserUtil.BeanInfo;
 import com.landawn.abacus.parser.ParserUtil.PropInfo;
@@ -1565,6 +1566,7 @@ public final class Maps {
      * @param path
      * @return {@code null} if there is no value found by the specified path.
      */
+    @MayReturnNull
     public static <T> T getByPath(final Map<?, ?> map, final String path) {
         final Object val = getByPathOrDefault(map, path, N.NULL_MASK);
 
@@ -1583,6 +1585,7 @@ public final class Maps {
      * @param targetType
      * @return {@code null} if there is no value found by the specified path.
      */
+    @MayReturnNull
     public static <T> T getByPath(final Map<?, ?> map, final String path, final Class<? extends T> targetType) {
         final Object val = getByPathOrDefault(map, path, N.NULL_MASK);
 
@@ -2112,8 +2115,9 @@ public final class Maps {
      * @param map
      * @param key
      * @param newValue
-     * @return
+     * @return {@code null} if {@code (N.isEmpty(map))}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static <K, V> V replace(final Map<K, V> map, final K key, final V newValue) {
         if (N.isEmpty(map)) {
             return null;
@@ -2615,8 +2619,9 @@ public final class Maps {
      * @param ignoreNullProperty
      * @param ignoreUnmatchedProperty
      * @param targetClass
-     * @return
+     * @return {@code null} if {@code (m == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     @SuppressWarnings("unchecked")
     public static <T> T map2Bean(final Map<String, Object> m, final boolean ignoreNullProperty, final boolean ignoreUnmatchedProperty,
             final Class<? extends T> targetClass) {
@@ -2664,8 +2669,9 @@ public final class Maps {
      * @param m
      * @param selectPropNames
      * @param targetClass
-     * @return
+     * @return {@code null} if {@code (m == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static <T> T map2Bean(final Map<String, Object> m, final Collection<String> selectPropNames, final Class<? extends T> targetClass) {
         checkBeanClass(targetClass);
 

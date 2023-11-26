@@ -6036,6 +6036,7 @@ public final class Fn {
     /**
      * The Class Factory.
      */
+    @SuppressWarnings({ "java:S1694" })
     public abstract static class Factory {
 
         /** The Constant BOOLEAN_ARRAY. */

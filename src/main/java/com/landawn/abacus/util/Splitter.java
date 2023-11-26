@@ -37,7 +37,7 @@ import com.landawn.abacus.util.stream.Stream;
 @SuppressWarnings("java:S1192")
 public final class Splitter {
 
-    public static final Pattern WHITE_SPACE_PATTERN = Pattern.compile("\\s+");
+    public static final Pattern WHITE_SPACE_PATTERN = Pattern.compile("\\s+", Pattern.UNICODE_CHARACTER_CLASS);
 
     private static final SubStringFunc defaultSubStringFunc = (source, start, end) -> source.subSequence(start, end).toString();
 

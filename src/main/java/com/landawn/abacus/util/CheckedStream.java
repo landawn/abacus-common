@@ -13354,7 +13354,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             }
 
             @Override
-            public T next() {
+            public T next() { // NOSONAR
                 try {
                     return elements.next();
                 } catch (Exception e) {

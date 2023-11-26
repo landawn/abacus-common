@@ -84,6 +84,7 @@ import java.util.function.ToLongFunction;
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.Immutable;
 import com.landawn.abacus.annotation.Internal;
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.annotation.NullSafe;
 import com.landawn.abacus.exception.TooManyElementsException;
 import com.landawn.abacus.exception.UncheckedSQLException;
@@ -1262,6 +1263,7 @@ sealed class CommonUtil permits N {
      * @param obj a Java object which must be serializable and deserializable through {@code Kryo} or {@code JSON}.
      * @return {@code null} if {@code bean} is {@code null}
      */
+    @MayReturnNull
     @SuppressWarnings("unchecked")
     public static <T> T clone(final T obj) {
         if (obj == null) {
@@ -1322,6 +1324,7 @@ sealed class CommonUtil permits N {
      *            and setter methods.
      * @return {@code null} if {@code bean} is {@code null}
      */
+    @MayReturnNull
     @SuppressWarnings("unchecked")
     public static <T> T copy(final T bean) {
         if (bean == null) {
@@ -1338,6 +1341,7 @@ sealed class CommonUtil permits N {
      * @param selectPropNames
      * @return {@code null} if {@code bean} is {@code null}
      */
+    @MayReturnNull
     public static <T> T copy(final T bean, final Collection<String> selectPropNames) {
         if (bean == null) {
             return null; // NOSONAR
@@ -3478,7 +3482,7 @@ sealed class CommonUtil permits N {
      * @param <T>
      * @param c
      * @param a
-     * @return
+     * @return the specified array if the specified collection is {@code null} or empty.
      * @throws IllegalArgumentException if the specified {@code Array} is <code>null</code>.
      */
     public static <A, T extends A> A[] toArray(final Collection<? extends T> c, final A[] a) throws IllegalArgumentException {
@@ -3499,7 +3503,7 @@ sealed class CommonUtil permits N {
      * @param fromIndex
      * @param toIndex
      * @param a
-     * @return
+     * @return the specified array if the specified collection is {@code null} or empty.
      * @throws IllegalArgumentException if the specified {@code Array} is <code>null</code>.
      */
     public static <A, T extends A> A[] toArray(final Collection<? extends T> c, final int fromIndex, final int toIndex, final A[] a)
@@ -3744,8 +3748,9 @@ sealed class CommonUtil permits N {
      *
      *
      * @param a
-     * @return
+     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static boolean[] toBooleanArray(final byte[] a) {
         if (a == null) {
             return null; // NOSONAR
@@ -3943,8 +3948,9 @@ sealed class CommonUtil permits N {
      *
      *
      * @param a
-     * @return
+     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static byte[] toByteArray(final boolean[] a) {
         if (a == null) {
             return null; // NOSONAR
@@ -4142,8 +4148,9 @@ sealed class CommonUtil permits N {
      *
      *
      * @param a
-     * @return
+     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static int[] toIntArray(final char[] a) {
         if (a == null) {
             return null; // NOSONAR
@@ -17531,8 +17538,9 @@ sealed class CommonUtil permits N {
      * Clone the original array. <code>null</code> is returned if the input array is <code>null</code>.
      *
      * @param original
-     * @return
+     * @return {@code null} if {@code (original == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static boolean[] clone(final boolean[] original) {
         if (original == null) {
             return null; // NOSONAR
@@ -17545,8 +17553,9 @@ sealed class CommonUtil permits N {
      * Clone the original array. <code>null</code> is returned if the input array is <code>null</code>.
      *
      * @param original
-     * @return
+     * @return {@code null} if {@code (original == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static char[] clone(final char[] original) {
         if (original == null) {
             return null; // NOSONAR
@@ -17559,8 +17568,9 @@ sealed class CommonUtil permits N {
      * Clone the original array. <code>null</code> is returned if the input array is <code>null</code>.
      *
      * @param original
-     * @return
+     * @return {@code null} if {@code (original == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static byte[] clone(final byte[] original) {
         if (original == null) {
             return null; // NOSONAR
@@ -17573,8 +17583,9 @@ sealed class CommonUtil permits N {
      * Clone the original array. <code>null</code> is returned if the input array is <code>null</code>.
      *
      * @param original
-     * @return
+     * @return {@code null} if {@code (original == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static short[] clone(final short[] original) {
         if (original == null) {
             return null; // NOSONAR
@@ -17587,8 +17598,9 @@ sealed class CommonUtil permits N {
      * Clone the original array. <code>null</code> is returned if the input array is <code>null</code>.
      *
      * @param original
-     * @return
+     * @return {@code null} if {@code (original == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static int[] clone(final int[] original) {
         if (original == null) {
             return null; // NOSONAR
@@ -17601,8 +17613,9 @@ sealed class CommonUtil permits N {
      * Clone the original array. <code>null</code> is returned if the input array is <code>null</code>.
      *
      * @param original
-     * @return
+     * @return {@code null} if {@code (original == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static long[] clone(final long[] original) {
         if (original == null) {
             return null; // NOSONAR
@@ -17615,8 +17628,9 @@ sealed class CommonUtil permits N {
      * Clone the original array. <code>null</code> is returned if the input array is <code>null</code>.
      *
      * @param original
-     * @return
+     * @return {@code null} if {@code (original == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static float[] clone(final float[] original) {
         if (original == null) {
             return null; // NOSONAR
@@ -17629,8 +17643,9 @@ sealed class CommonUtil permits N {
      * Clone the original array. <code>null</code> is returned if the input array is <code>null</code>.
      *
      * @param original
-     * @return
+     * @return {@code null} if {@code (original == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static double[] clone(final double[] original) {
         if (original == null) {
             return null; // NOSONAR
@@ -17644,8 +17659,9 @@ sealed class CommonUtil permits N {
      *
      * @param <T>
      * @param original
-     * @return
+     * @return {@code null} if {@code (original == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static <T> T[] clone(final T[] original) {
         if (original == null) {
             return null; // NOSONAR
@@ -17658,8 +17674,9 @@ sealed class CommonUtil permits N {
      * Clone the original array and its sub arrays. <code>null</code> is returned if the input array is <code>null</code>.
      *
      * @param original
-     * @return
+     * @return {@code null} if {@code (original == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static boolean[][] clone(final boolean[][] original) {
         if (original == null) {
             return null; // NOSONAR
@@ -17678,8 +17695,9 @@ sealed class CommonUtil permits N {
      * Clone the original array and its sub arrays. <code>null</code> is returned if the input array is <code>null</code>.
      *
      * @param original
-     * @return
+     * @return {@code null} if {@code (original == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static char[][] clone(final char[][] original) {
         if (original == null) {
             return null; // NOSONAR
@@ -17698,8 +17716,9 @@ sealed class CommonUtil permits N {
      * Clone the original array and its sub arrays. <code>null</code> is returned if the input array is <code>null</code>.
      *
      * @param original
-     * @return
+     * @return {@code null} if {@code (original == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static byte[][] clone(final byte[][] original) {
         if (original == null) {
             return null; // NOSONAR
@@ -17718,8 +17737,9 @@ sealed class CommonUtil permits N {
      * Clone the original array and its sub arrays. <code>null</code> is returned if the input array is <code>null</code>.
      *
      * @param original
-     * @return
+     * @return {@code null} if {@code (original == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static short[][] clone(final short[][] original) {
         if (original == null) {
             return null; // NOSONAR
@@ -17738,8 +17758,9 @@ sealed class CommonUtil permits N {
      * Clone the original array and its sub arrays. <code>null</code> is returned if the input array is <code>null</code>.
      *
      * @param original
-     * @return
+     * @return {@code null} if {@code (original == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static int[][] clone(final int[][] original) {
         if (original == null) {
             return null; // NOSONAR
@@ -17758,8 +17779,9 @@ sealed class CommonUtil permits N {
      * Clone the original array and its sub arrays. <code>null</code> is returned if the input array is <code>null</code>.
      *
      * @param original
-     * @return
+     * @return {@code null} if {@code (original == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static long[][] clone(final long[][] original) {
         if (original == null) {
             return null; // NOSONAR
@@ -17778,8 +17800,9 @@ sealed class CommonUtil permits N {
      * Clone the original array and its sub arrays. <code>null</code> is returned if the input array is <code>null</code>.
      *
      * @param original
-     * @return
+     * @return {@code null} if {@code (original == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static float[][] clone(final float[][] original) {
         if (original == null) {
             return null; // NOSONAR
@@ -17798,8 +17821,9 @@ sealed class CommonUtil permits N {
      * Clone the original array and its sub arrays. <code>null</code> is returned if the input array is <code>null</code>.
      *
      * @param original
-     * @return
+     * @return {@code null} if {@code (original == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static double[][] clone(final double[][] original) {
         if (original == null) {
             return null; // NOSONAR
@@ -17819,8 +17843,9 @@ sealed class CommonUtil permits N {
      *
      * @param <T>
      * @param original
-     * @return
+     * @return {@code null} if {@code (original == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static <T> T[][] clone(final T[][] original) {
         if (original == null) {
             return null; // NOSONAR
@@ -17839,8 +17864,9 @@ sealed class CommonUtil permits N {
      * Clone the original array and its sub arrays. <code>null</code> is returned if the input array is <code>null</code>.
      *
      * @param original
-     * @return
+     * @return {@code null} if {@code (original == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static boolean[][][] clone(final boolean[][][] original) {
         if (original == null) {
             return null; // NOSONAR
@@ -17859,8 +17885,9 @@ sealed class CommonUtil permits N {
      * Clone the original array and its sub arrays. <code>null</code> is returned if the input array is <code>null</code>.
      *
      * @param original
-     * @return
+     * @return {@code null} if {@code (original == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static char[][][] clone(final char[][][] original) {
         if (original == null) {
             return null; // NOSONAR
@@ -17879,8 +17906,9 @@ sealed class CommonUtil permits N {
      * Clone the original array and its sub arrays. <code>null</code> is returned if the input array is <code>null</code>.
      *
      * @param original
-     * @return
+     * @return {@code null} if {@code (original == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static byte[][][] clone(final byte[][][] original) {
         if (original == null) {
             return null; // NOSONAR
@@ -17899,8 +17927,9 @@ sealed class CommonUtil permits N {
      * Clone the original array and its sub arrays. <code>null</code> is returned if the input array is <code>null</code>.
      *
      * @param original
-     * @return
+     * @return {@code null} if {@code (original == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static short[][][] clone(final short[][][] original) {
         if (original == null) {
             return null; // NOSONAR
@@ -17919,8 +17948,9 @@ sealed class CommonUtil permits N {
      * Clone the original array and its sub arrays. <code>null</code> is returned if the input array is <code>null</code>.
      *
      * @param original
-     * @return
+     * @return {@code null} if {@code (original == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static int[][][] clone(final int[][][] original) {
         if (original == null) {
             return null; // NOSONAR
@@ -17939,8 +17969,9 @@ sealed class CommonUtil permits N {
      * Clone the original array and its sub arrays. <code>null</code> is returned if the input array is <code>null</code>.
      *
      * @param original
-     * @return
+     * @return {@code null} if {@code (original == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static long[][][] clone(final long[][][] original) {
         if (original == null) {
             return null; // NOSONAR
@@ -17959,8 +17990,9 @@ sealed class CommonUtil permits N {
      * Clone the original array and its sub arrays. <code>null</code> is returned if the input array is <code>null</code>.
      *
      * @param original
-     * @return
+     * @return {@code null} if {@code (original == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static float[][][] clone(final float[][][] original) {
         if (original == null) {
             return null; // NOSONAR
@@ -17979,8 +18011,9 @@ sealed class CommonUtil permits N {
      * Clone the original array and its sub arrays. <code>null</code> is returned if the input array is <code>null</code>.
      *
      * @param original
-     * @return
+     * @return {@code null} if {@code (original == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static double[][][] clone(final double[][][] original) {
         if (original == null) {
             return null; // NOSONAR
@@ -18000,8 +18033,9 @@ sealed class CommonUtil permits N {
      *
      * @param <T>
      * @param original
-     * @return
+     * @return {@code null} if {@code (original == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     public static <T> T[][][] clone(final T[][][] original) {
         if (original == null) {
             return null; // NOSONAR

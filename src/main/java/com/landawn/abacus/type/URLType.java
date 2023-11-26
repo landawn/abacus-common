@@ -22,6 +22,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.ExceptionUtil;
 import com.landawn.abacus.util.Strings;
 
@@ -61,8 +62,9 @@ public class URLType extends AbstractType<URL> {
     /**
      *
      * @param str
-     * @return
+     * @return {@code null} if {@code (Strings.isEmpty(str))}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     @Override
     public URL valueOf(String str) {
         if (Strings.isEmpty(str)) {

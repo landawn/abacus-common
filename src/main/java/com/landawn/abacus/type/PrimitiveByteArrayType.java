@@ -23,6 +23,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.exception.UncheckedSQLException;
 import com.landawn.abacus.parser.SerializationConfig;
@@ -83,8 +84,9 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
     /**
      *
      * @param x
-     * @return
+     * @return {@code null} if {@code (x == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     @Override
     public String stringOf(byte[] x) {
         if (x == null) {
@@ -117,8 +119,9 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
     /**
      *
      * @param str
-     * @return
+     * @return {@code null} if {@code (str == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     @Override
     public byte[] valueOf(String str) {
         if (str == null) {
@@ -143,8 +146,9 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
     /**
      *
      * @param obj
-     * @return
+     * @return {@code null} if {@code (obj == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     @SuppressFBWarnings
     @Override
     public byte[] valueOf(final Object obj) {
@@ -296,8 +300,9 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
      * Collection 2 array.
      *
      * @param c
-     * @return
+     * @return {@code null} if {@code (c == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     @Override
     public byte[] collection2Array(Collection<?> c) {
         if (c == null) {

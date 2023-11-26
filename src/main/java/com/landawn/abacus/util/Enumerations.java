@@ -46,21 +46,21 @@ public final class Enumerations {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @return 
+     *
+     * @param <T>
+     * @return
      */
     public static <T> Enumeration<T> empty() {
         return EMPTY;
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param single 
-     * @return 
+     *
+     * @param <T>
+     * @param single
+     * @return
      */
     public static <T> Enumeration<T> just(final T single) {
         return new Enumeration<>() {
@@ -85,11 +85,11 @@ public final class Enumerations {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param a 
-     * @return 
+     *
+     * @param <T>
+     * @param a
+     * @return
      */
     public static <T> Enumeration<T> of(final T... a) {
         if (N.isEmpty(a)) {
@@ -117,11 +117,11 @@ public final class Enumerations {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param c 
-     * @return 
+     *
+     * @param <T>
+     * @param c
+     * @return
      */
     public static <T> Enumeration<T> create(final Collection<? extends T> c) {
         if (N.isEmpty(c)) {
@@ -132,11 +132,11 @@ public final class Enumerations {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param iter 
-     * @return 
+     *
+     * @param <T>
+     * @param iter
+     * @return
      */
     public static <T> Enumeration<T> create(final Iterator<? extends T> iter) {
         return new Enumeration<>() {
@@ -203,11 +203,11 @@ public final class Enumerations {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param e 
-     * @return 
+     *
+     * @param <T>
+     * @param e
+     * @return
      */
     public static <T> ObjIterator<T> toIterator(final Enumeration<? extends T> e) {
         if (e == null) {
@@ -221,18 +221,18 @@ public final class Enumerations {
             }
 
             @Override
-            public T next() {
+            public T next() { // NOSONAR
                 return e.nextElement();
             }
         };
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param e 
-     * @return 
+     *
+     * @param <T>
+     * @param e
+     * @return
      */
     public static <T> List<T> toList(final Enumeration<? extends T> e) {
         if (e == null) {
@@ -249,11 +249,11 @@ public final class Enumerations {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param e 
-     * @return 
+     *
+     * @param <T>
+     * @param e
+     * @return
      */
     public static <T> Set<T> toSet(final Enumeration<? extends T> e) {
         if (e == null) {
@@ -270,13 +270,13 @@ public final class Enumerations {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <C> 
-     * @param e 
-     * @param supplier 
-     * @return 
+     *
+     * @param <T>
+     * @param <C>
+     * @param e
+     * @param supplier
+     * @return
      */
     public static <T, C extends Collection<T>> C toCollection(final Enumeration<? extends T> e, final Supplier<? extends C> supplier) {
         final C c = supplier.get();

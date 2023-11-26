@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.Map;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.parser.JSONDeserializationConfig;
 import com.landawn.abacus.parser.JSONDeserializationConfig.JDC;
@@ -116,8 +117,9 @@ public class MapEntryType<K, V> extends AbstractType<Map.Entry<K, V>> {
     /**
      *
      * @param str
-     * @return
+     * @return {@code null} if {@code (Strings.isEmpty(str) || "{}".equals(str))}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     @SuppressWarnings("unchecked")
     @Override
     public Map.Entry<K, V> valueOf(String str) {

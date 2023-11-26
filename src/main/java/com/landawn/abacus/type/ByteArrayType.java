@@ -21,6 +21,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.parser.SerializationConfig;
 import com.landawn.abacus.util.Array;
 import com.landawn.abacus.util.CharacterWriter;
@@ -43,8 +44,9 @@ public final class ByteArrayType extends ObjectArrayType<Byte> {
     /**
      *
      * @param x
-     * @return
+     * @return {@code null} if {@code (x == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     @Override
     public String stringOf(Byte[] x) {
         if (x == null) {
@@ -80,8 +82,9 @@ public final class ByteArrayType extends ObjectArrayType<Byte> {
     /**
      *
      * @param str
-     * @return
+     * @return {@code null} if {@code (str == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     @Override
     public Byte[] valueOf(String str) {
         if (str == null) {

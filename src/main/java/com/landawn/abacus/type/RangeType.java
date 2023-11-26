@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.lang.reflect.Array;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.parser.SerializationConfig;
 import com.landawn.abacus.util.BufferedJSONWriter;
@@ -117,8 +118,9 @@ public class RangeType<T extends Comparable<? super T>> extends AbstractType<Ran
     /**
      *
      * @param x
-     * @return
+     * @return {@code null} if {@code (x == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     @Override
     public String stringOf(Range<T> x) {
         if (x == null) {
@@ -142,8 +144,9 @@ public class RangeType<T extends Comparable<? super T>> extends AbstractType<Ran
     /**
      *
      * @param str
-     * @return
+     * @return {@code null} if {@code (Strings.isEmpty(str))}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     @Override
     public Range<T> valueOf(String str) {
         str = Strings.trim(str);

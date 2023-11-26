@@ -17,6 +17,7 @@ package com.landawn.abacus.type;
 import java.io.IOException;
 import java.io.Writer;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.parser.SerializationConfig;
 import com.landawn.abacus.util.BufferedWriter;
@@ -116,8 +117,9 @@ public class TripleType<L, M, R> extends AbstractType<Triple<L, M, R>> {
     /**
      *
      * @param str
-     * @return
+     * @return {@code null} if {@code (Strings.isEmpty(str))}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     @SuppressWarnings("unchecked")
     @Override
     public Triple<L, M, R> valueOf(String str) {

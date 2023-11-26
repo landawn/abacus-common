@@ -17,6 +17,7 @@ package com.landawn.abacus.type;
 import java.util.Collection;
 import java.util.Map;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.parser.JSONDeserializationConfig;
 import com.landawn.abacus.parser.JSONDeserializationConfig.JDC;
 import com.landawn.abacus.util.ClassUtil;
@@ -119,8 +120,9 @@ public class SetMultimapType<K, E> extends AbstractType<SetMultimap<K, E>> {
     /**
      *
      * @param st
-     * @return
+     * @return {@code null} if {@code (Strings.isEmpty(st))}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     @SuppressWarnings("unchecked")
     @Override
     public SetMultimap<K, E> valueOf(String st) {

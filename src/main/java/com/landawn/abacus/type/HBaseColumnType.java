@@ -14,6 +14,7 @@
 
 package com.landawn.abacus.type;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.HBaseColumn;
 import com.landawn.abacus.util.Strings;
@@ -115,8 +116,9 @@ public class HBaseColumnType<T> extends AbstractType<HBaseColumn<T>> {
     /**
      *
      * @param str
-     * @return
+     * @return {@code null} if {@code (Strings.isEmpty(str))}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     @Override
     public HBaseColumn<T> valueOf(String str) {
         if (Strings.isEmpty(str)) {

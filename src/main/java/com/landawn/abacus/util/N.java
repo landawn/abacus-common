@@ -60,6 +60,7 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import com.landawn.abacus.annotation.Beta;
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.exception.UncheckedException;
 import com.landawn.abacus.parser.DeserializationConfig;
 import com.landawn.abacus.parser.JSONDeserializationConfig;
@@ -2220,6 +2221,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param aa
      * @return {@code null} if the specified array {@code aa} is {@code null}.
      */
+    @MayReturnNull
     @SafeVarargs
     public static <T> T[] concat(final T[]... aa) {
         // checkArgNotNull(aa, "aa");
@@ -2592,6 +2594,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a
      * @return {@code null} if {@code a} is null.
      */
+    @MayReturnNull
     public static <T> T[] flatten(final T[][] a) {
         if (a == null) {
             return null; // NOSONAR
@@ -7237,7 +7240,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a
      * @param elementToRemove the elementToRemove to be removed
      * @return A new array containing the existing elementsToRemove except the first
-     *         occurrence of the specified elementToRemove.
+     *         occurrence of the specified elementToRemove. Or the specified array if it's {@code null} or empty.
      * @throws IllegalArgumentException if the specified {@code Array} is <code>null</code>.
      */
     public static <T> T[] remove(final T[] a, final T elementToRemove) throws IllegalArgumentException {
@@ -7499,7 +7502,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T>
      * @param a
      * @param elementsToRemove
-     * @return
+     * @return the specified array if it's {@code null} or empty.
      * @see Collection#removeAll(Collection)
      * @see N#difference(Object[], Object[])
      */
@@ -7877,7 +7880,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a
      * @param elementToRemove
      * @return A new array containing the existing elementsToRemove except the
-     *         occurrences of the specified elementToRemove.
+     *         occurrences of the specified elementToRemove. Or the specified array if it's {@code null} or empty.
      */
     public static <T> T[] removeAllOccurrences(final T[] a, final T elementToRemove) {
         if (isEmpty(a)) {
@@ -8627,7 +8630,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param <T> the component type of the array
      * @param a
-     * @return A new array containing the existing elements except the duplicates
+     * @return A new array containing the existing elements except the duplicates. Or the specified array if it's {@code null} or empty.
      * @throws NullPointerException if the specified array <code>a</code> is null.
      */
     public static <T> T[] removeDuplicates(final T[] a) {
@@ -8644,7 +8647,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T>
      * @param a
      * @param isSorted
-     * @return
+     * @return the specified array if it's {@code null} or empty.
      */
     public static <T> T[] removeDuplicates(final T[] a, final boolean isSorted) {
         if (isEmpty(a)) {
@@ -8662,7 +8665,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param fromIndex
      * @param toIndex
      * @param isSorted
-     * @return
+     * @return the specified array if it's {@code null} or empty.
      */
     public static <T> T[] removeDuplicates(final T[] a, final int fromIndex, final int toIndex, final boolean isSorted) {
         checkFromToIndex(fromIndex, toIndex, len(a));
@@ -9812,7 +9815,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param fromIndex
      * @param toIndex
      * @param newPositionStartIndex must in the range: [0, String.length - (toIndex - fromIndex)]
-     * @return
+     * @return the specified String if it's {@code null} or empty.
      */
     @SuppressWarnings("deprecation")
     public static String moveRange(final String str, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
@@ -26566,6 +26569,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      * @see Futures
      */
+    @MayReturnNull
     public static ContinuableFuture<Void> asyncExecute(final Throwables.Runnable<? extends Exception> command, final long delayInMillis) {
         return new ContinuableFuture<>(SCHEDULED_EXECUTOR.schedule(() -> {
             command.run();
@@ -26694,6 +26698,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      * @see Futures
      */
+    @MayReturnNull
     public static ContinuableFuture<Void> asyncExecute(final Throwables.Runnable<? extends Exception> cmd, final int retryTimes,
             final long retryIntervallInMillisInMillis, final Predicate<? super Exception> retryCondition) {
         return asyncExecutor.execute((Callable<Void>) () -> {
@@ -28891,6 +28896,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param bool  the Boolean to negate, may be null
      * @return the negated Boolean, or {@code null} if {@code null} input
      */
+    @MayReturnNull
     @Beta
     public static Boolean negate(final Boolean bool) {
         if (bool == null) {
@@ -29183,11 +29189,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <E>
      * @param a
      * @param converter
-     * @return updated copy of {@code a}.
+     * @return updated copy of {@code a}. {@code null} if {@code (a == null)}. (auto-generated java doc for return)
      * @throws E
      * @see {@link #map(Object[], com.landawn.abacus.util.Throwables.Function)}
      * @see {@link N#map(Iterable, com.landawn.abacus.util.Throwables.Function)}
      */
+    @MayReturnNull
     public static <T, E extends Exception> T[] copyThenApply(final T[] a, final Throwables.Function<? super T, ? extends T, E> converter) throws E {
         checkArgNotNull(converter);
 

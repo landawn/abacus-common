@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.Collection;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.parser.SerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.N;
@@ -65,8 +66,9 @@ public final class PrimitiveBooleanArrayType extends AbstractPrimitiveArrayType<
     /**
      *
      * @param x
-     * @return
+     * @return {@code null} if {@code (x == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     @Override
     public String stringOf(boolean[] x) {
         if (x == null) {
@@ -99,8 +101,9 @@ public final class PrimitiveBooleanArrayType extends AbstractPrimitiveArrayType<
     /**
      *
      * @param str
-     * @return
+     * @return {@code null} if {@code (str == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     @Override
     public boolean[] valueOf(String str) {
         if (str == null) {
@@ -177,8 +180,9 @@ public final class PrimitiveBooleanArrayType extends AbstractPrimitiveArrayType<
      * Collection 2 array.
      *
      * @param c
-     * @return
+     * @return {@code null} if {@code (c == null)}. (auto-generated java doc for return)
      */
+    @MayReturnNull
     @Override
     public boolean[] collection2Array(Collection<?> c) {
         if (c == null) {
