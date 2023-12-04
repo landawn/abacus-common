@@ -53,6 +53,9 @@ import java.util.function.Function;
 import java.util.function.IntFunction;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+import java.util.function.ToDoubleFunction;
+import java.util.function.ToIntFunction;
+import java.util.function.ToLongFunction;
 import java.util.stream.Collector;
 import java.util.stream.StreamSupport;
 
@@ -6922,6 +6925,30 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
         }, true, cmp);
     }
 
+    @IntermediateOp
+    @TerminalOpTriggered
+    public CheckedStream<T, E> sortedByInt(ToIntFunction<? super T> keyMapper) {
+        final Comparator<? super T> cmpToUse = Comparators.comparingInt(keyMapper);
+
+        return sorted(cmpToUse);
+    }
+
+    @IntermediateOp
+    @TerminalOpTriggered
+    public CheckedStream<T, E> sortedByLong(ToLongFunction<? super T> keyMapper) {
+        final Comparator<? super T> cmpToUse = Comparators.comparingLong(keyMapper);
+
+        return sorted(cmpToUse);
+    }
+
+    @IntermediateOp
+    @TerminalOpTriggered
+    public CheckedStream<T, E> sortedByDouble(ToDoubleFunction<? super T> keyMapper) {
+        final Comparator<? super T> cmpToUse = Comparators.comparingDouble(keyMapper);
+
+        return sorted(cmpToUse);
+    }
+
     /**
      *
      * @param keyMapper
@@ -6933,7 +6960,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     public CheckedStream<T, E> sortedBy(final Function<? super T, ? extends Comparable> keyMapper) {
         assertNotClosed();
 
-        final Comparator<? super T> comparator = (o1, o2) -> N.compare(keyMapper.apply(o1), keyMapper.apply(o2));
+        final Comparator<? super T> comparator = Comparators.comparingBy(keyMapper);
 
         return sorted(comparator);
     }
@@ -6959,6 +6986,30 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     @TerminalOpTriggered
     public CheckedStream<T, E> reverseSorted(Comparator<? super T> comparator) {
         final Comparator<? super T> cmpToUse = Comparators.reverseOrder(comparator);
+
+        return sorted(cmpToUse);
+    }
+
+    @IntermediateOp
+    @TerminalOpTriggered
+    public CheckedStream<T, E> reverseSortedByInt(ToIntFunction<? super T> keyMapper) {
+        final Comparator<? super T> cmpToUse = Comparators.reversedComparingInt(keyMapper);
+
+        return sorted(cmpToUse);
+    }
+
+    @IntermediateOp
+    @TerminalOpTriggered
+    public CheckedStream<T, E> reverseSortedByLong(ToLongFunction<? super T> keyMapper) {
+        final Comparator<? super T> cmpToUse = Comparators.reversedComparingLong(keyMapper);
+
+        return sorted(cmpToUse);
+    }
+
+    @IntermediateOp
+    @TerminalOpTriggered
+    public CheckedStream<T, E> reverseSortedByDouble(ToDoubleFunction<? super T> keyMapper) {
+        final Comparator<? super T> cmpToUse = Comparators.reversedComparingDouble(keyMapper);
 
         return sorted(cmpToUse);
     }

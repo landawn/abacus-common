@@ -41,6 +41,7 @@ import java.util.UUID;
 import java.util.function.BiFunction;
 import java.util.function.IntUnaryOperator;
 import java.util.function.Supplier;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.landawn.abacus.annotation.Beta;
@@ -181,6 +182,20 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
     private static final Pattern JAVA_IDENTIFIER_PATTERN = Pattern.compile("^([a-zA-Z_$][a-zA-Z\\d_$]*)$", Pattern.UNICODE_CHARACTER_CLASS);
 
+    // https://www.baeldung.com/java-email-validation-regex
+    // https://owasp.org/www-community/OWASP_Validation_Regex_Repository
+    // https://stackoverflow.com/questions/201323/how-can-i-validate-an-email-address-using-a-regular-expression
+    private static final Pattern EMAIL_ADDRESS_RFC_5322_PATTERN = Pattern.compile(
+            "(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|\"(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21\\x23-\\x5b\\x5d-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])*\")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\\[(?:(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9]))\\.){3}(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9])|[a-z0-9-]*[a-z0-9]:(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21-\\x5a\\x53-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])+)\\])",
+            Pattern.UNICODE_CHARACTER_CLASS);
+
+    // https://stackoverflow.com/questions/3809401/what-is-a-good-regular-expression-to-match-a-url
+    private static final Pattern URL_PATTERN = Pattern.compile("[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_\\+.~#?&//=]*)",
+            Pattern.UNICODE_CHARACTER_CLASS);
+
+    private static final Pattern HTTP_URL_PATTERN = Pattern.compile("[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_\\+.~#?&//=]*)",
+            Pattern.UNICODE_CHARACTER_CLASS);
+
     private static final Encoder BASE64_ENCODER = java.util.Base64.getEncoder();
 
     private static final Decoder BASE64_DECODER = java.util.Base64.getDecoder();
@@ -238,6 +253,50 @@ public abstract sealed class Strings permits Strings.StringUtil {
         }
 
         return JAVA_IDENTIFIER_PATTERN.matcher(str).matches();
+    }
+
+    /**
+     *
+     *
+     * @param str
+     * @return
+     * @see #findFirstEmailAddress(String)
+     * @see #findAllEmailAddresses(String)
+     */
+    public static boolean isValidEmailAddress(String str) {
+        if (str == null || str.length() == 0) {
+            return false;
+        }
+
+        return EMAIL_ADDRESS_RFC_5322_PATTERN.matcher(str).matches();
+    }
+
+    /**
+     *
+     *
+     * @param str
+     * @return
+     */
+    public static boolean isValidUrl(String str) {
+        if (str == null || str.length() == 0) {
+            return false;
+        }
+
+        return URL_PATTERN.matcher(str).matches();
+    }
+
+    /**
+     *
+     *
+     * @param str
+     * @return
+     */
+    public static boolean isValidHttpUrl(String str) {
+        if (str == null || str.length() == 0) {
+            return false;
+        }
+
+        return HTTP_URL_PATTERN.matcher(str).matches();
     }
 
     /**
@@ -4049,7 +4108,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * Checks if is lower case.
      *
      * @param ch
-     * @return true, if is lower case
+     * @return true if is lower case
      */
     public static boolean isLowerCase(final char ch) {
         return Character.isLowerCase(ch);
@@ -4059,7 +4118,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * Checks if is ascii lower case.
      *
      * @param ch
-     * @return true, if is ascii lower case
+     * @return true if is ascii lower case
      */
     public static boolean isAsciiLowerCase(final char ch) {
         return (ch >= 'a') && (ch <= 'z');
@@ -4069,7 +4128,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * Checks if is upper case.
      *
      * @param ch
-     * @return true, if is upper case
+     * @return true if is upper case
      */
     public static boolean isUpperCase(final char ch) {
         return Character.isUpperCase(ch);
@@ -4079,7 +4138,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * Checks if is ascii upper case.
      *
      * @param ch
-     * @return true, if is ascii upper case
+     * @return true if is ascii upper case
      */
     public static boolean isAsciiUpperCase(final char ch) {
         return (ch >= 'A') && (ch <= 'Z');
@@ -4089,7 +4148,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * Checks if is all lower case.
      *
      * @param cs
-     * @return true, if is all lower case
+     * @return true if is all lower case
      */
     public static boolean isAllLowerCase(final CharSequence cs) {
         if (isEmpty(cs)) {
@@ -4111,7 +4170,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * Checks if is all upper case.
      *
      * @param cs
-     * @return true, if is all upper case
+     * @return true if is all upper case
      */
     public static boolean isAllUpperCase(final CharSequence cs) {
         if (isEmpty(cs)) {
@@ -4133,7 +4192,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * Copied from Apache Commons Lang: StringUtils#isMixedCase.
      *
      * @param cs
-     * @return true, if is mixed case
+     * @return true if is mixed case
      */
     public static boolean isMixedCase(final CharSequence cs) {
         if (isEmpty(cs) || cs.length() == 1) {
@@ -4167,7 +4226,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * Checks if is digit.
      *
      * @param ch
-     * @return true, if is digit
+     * @return true if is digit
      * @see Character#isDigit(char)
      */
     public static boolean isDigit(final char ch) {
@@ -4178,7 +4237,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * Checks if is letter.
      *
      * @param ch
-     * @return true, if is letter
+     * @return true if is letter
      * @see Character#isLetter(char)
      */
     public static boolean isLetter(final char ch) {
@@ -4189,7 +4248,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * Checks if is letter or digit.
      *
      * @param ch
-     * @return true, if is letter or digit
+     * @return true if is letter or digit
      * @see Character#isLetterOrDigit(char)
      */
     public static boolean isLetterOrDigit(final char ch) {
@@ -4394,7 +4453,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * </pre>
      *
      * @param cs
-     * @return true, if is ascii printable
+     * @return true if is ascii printable. {@code false} is returned if the specified {@code CharSequence} is {@code null}.
      */
     public static boolean isAsciiPrintable(final CharSequence cs) {
         if (cs == null) {
@@ -4416,7 +4475,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * Checks if is ascii alpha.
      *
      * @param cs
-     * @return true, if is ascii alpha
+     * @return true if is ascii alpha, and is non-null. {@code false} is returned if the specified {@code CharSequence} is {@code null} or empty.
      */
     public static boolean isAsciiAlpha(final CharSequence cs) {
         if (isEmpty(cs)) {
@@ -4438,7 +4497,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * Checks if is ascii alpha space.
      *
      * @param cs
-     * @return true, if is ascii alpha space
+     * @return true if is ascii alpha space, and is non-null. {@code false} is returned if the specified {@code CharSequence} is {@code null}.
      */
     public static boolean isAsciiAlphaSpace(final CharSequence cs) {
         if (cs == null) {
@@ -4463,7 +4522,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * Checks if is ascii alphanumeric.
      *
      * @param cs
-     * @return true, if is ascii alphanumeric
+     * @return true if is ascii alphanumeric, and is non-null. {@code false} is returned if the specified {@code CharSequence} is {@code null} or empty.
      */
     public static boolean isAsciiAlphanumeric(final CharSequence cs) {
         if (isEmpty(cs)) {
@@ -4485,7 +4544,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * Checks if is ascii alphanumeric space.
      *
      * @param cs
-     * @return true, if is ascii alphanumeric space
+     * @return true if is ascii alphanumeric space, and is non-null. {@code false} is returned if the specified {@code CharSequence} is {@code null}.
      */
     public static boolean isAsciiAlphanumericSpace(final CharSequence cs) {
         if (cs == null) {
@@ -4510,7 +4569,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * Checks if is ascii numeric.
      *
      * @param cs
-     * @return true, if is ascii numeric
+     * @return true if is ascii numeric, and is non-null. {@code false} is returned if the specified {@code CharSequence} is {@code null} or empty.
      */
     public static boolean isAsciiNumeric(final CharSequence cs) {
         if (isEmpty(cs)) {
@@ -4551,7 +4610,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * @param cs
      *            the CharSequence to check, may be null
-     * @return {@code true} if only contains letters, and is non-null
+     * @return {@code true} if only contains letters, and is non-null. {@code false} is returned if the specified {@code CharSequence} is {@code null} or empty.
      * @since 3.0 Changed signature from isAlpha(String) to
      *        isAlpha(CharSequence)
      * @since 3.0 Changed "" to return false and not true
@@ -4594,7 +4653,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * @param cs
      *            the CharSequence to check, may be null
-     * @return {@code true} if only contains letters and space, and is non-null
+     * @return {@code true} if only contains letters and space, and is non-null. {@code false} is returned if the specified {@code CharSequence} is {@code null}.
      * @since 3.0 Changed signature from isAlphaSpace(String) to
      *        isAlphaSpace(CharSequence)
      */
@@ -4639,7 +4698,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * @param cs
      *            the CharSequence to check, may be null
-     * @return {@code true} if only contains letters or digits, and is non-null
+     * @return {@code true} if only contains letters or digits, and is non-null. {@code false} is returned if the specified {@code CharSequence} is {@code null} or empty.
      * @since 3.0 Changed signature from isAlphanumeric(String) to
      *        isAlphanumeric(CharSequence)
      * @since 3.0 Changed "" to return false and not true
@@ -4683,8 +4742,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * @param cs
      *            the CharSequence to check, may be null
-     * @return {@code true} if only contains letters, digits or space, and is
-     *         non-null
+     * @return {@code true} if only contains letters, digits or space, and is non-null. {@code false} is returned if the specified {@code CharSequence} is {@code null}.
      * @since 3.0 Changed signature from isAlphanumericSpace(String) to
      *        isAlphanumericSpace(CharSequence)
      */
@@ -4741,7 +4799,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * @param cs
      *            the CharSequence to check, may be null
-     * @return {@code true} if only contains digits, and is non-null
+     * @return {@code true} if only contains digits, and is non-null. {@code false} is returned if the specified {@code CharSequence} is {@code null} or empty.
      * @since 3.0 Changed signature from isNumeric(String) to
      *        isNumeric(CharSequence)
      * @since 3.0 Changed "" to return false and not true
@@ -4785,7 +4843,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * @param cs
      *            the CharSequence to check, may be null
-     * @return {@code true} if only contains digits or space, and is non-null
+     * @return {@code true} if only contains digits or space, and is non-null. {@code false} is returned if the specified {@code CharSequence} is {@code null}.
      * @since 3.0 Changed signature from isNumericSpace(String) to
      *        isNumericSpace(CharSequence)
      */
@@ -4827,7 +4885,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * @param cs
      *            the CharSequence to check, may be null
-     * @return {@code true} if only contains whitespace, and is non-null
+     * @return {@code true} if only contains whitespace, and is non-null. {@code false} is returned if the specified {@code CharSequence} is {@code null}.
      * @since 2.0
      * @since 3.0 Changed signature from isWhitespace(String) to
      *        isWhitespace(CharSequence)
@@ -4890,7 +4948,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *  "2E-10" => true
      *
      * @param str
-     * @return true, if is ascii digtal number
+     * @return true if is ascii digtal number
      */
     public static boolean isAsciiDigtalNumber(final String str) {
         if (str == null || str.length() == 0) {
@@ -4994,7 +5052,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *  "2e10" => false
      *
      * @param str
-     * @return true, if is ascii digtal integer
+     * @return true if is ascii digtal integer
      */
     public static boolean isAsciiDigtalInteger(final String str) {
         if (str == null || str.length() == 0) {
@@ -11453,6 +11511,54 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     public static boolean isBase64(final String base64) {
         return isBase64(getBytes(base64, IOUtil.DEFAULT_CHARSET));
+    }
+
+    /**
+     * Return the first found email address or {@code null} if there is no emal address found the specified String.
+     *
+     * @param str
+     * @return
+     * @see #isValidEmailAddress(String)
+     * @see #findAllEmailAddresses(String)
+     */
+    public static String findFirstEmailAddress(final String str) {
+        if (str == null || str.length() == 0) {
+            return null;
+        }
+        final Matcher matcher = EMAIL_ADDRESS_RFC_5322_PATTERN.matcher(str);
+
+        // ^[a-zA-Z0-9_!#$%&’*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$"
+        // Matcher matcher = Pattern.compile("[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+").matcher(str);
+
+        if (matcher.find()) {
+            return matcher.group();
+        }
+
+        return null;
+    }
+
+    /**
+     * Return all the found email addresses or an empty {@code List} if there is no emal address found the specified String.
+     *
+     * @param str
+     * @return
+     * @see #isValidEmailAddress(String)
+     * @see #findAllEmailAddresses(String)
+     */
+    public static List<String> findAllEmailAddresses(final String str) {
+        if (str == null || str.length() == 0) {
+            return new ArrayList<>();
+        }
+
+        final Matcher matcher = EMAIL_ADDRESS_RFC_5322_PATTERN.matcher(str);
+
+        final List<String> result = new ArrayList<>();
+
+        while (matcher.find()) {
+            result.add(matcher.group());
+        }
+
+        return result;
     }
 
     /**

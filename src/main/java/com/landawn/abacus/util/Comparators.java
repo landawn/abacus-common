@@ -806,6 +806,90 @@ public final class Comparators {
     }
 
     /**
+     *
+     * @param <T>
+     * @param keyMapper
+     * @return
+     */
+    public static <T> Comparator<T> reversedComparingChar(final ToCharFunction<? super T> keyMapper) {
+        N.checkArgNotNull(keyMapper);
+
+        return (a, b) -> Character.compare(keyMapper.applyAsChar(b), keyMapper.applyAsChar(a));
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param keyMapper
+     * @return
+     */
+    public static <T> Comparator<T> reversedComparingByte(final ToByteFunction<? super T> keyMapper) {
+        N.checkArgNotNull(keyMapper);
+
+        return (a, b) -> Byte.compare(keyMapper.applyAsByte(b), keyMapper.applyAsByte(a));
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param keyMapper
+     * @return
+     */
+    public static <T> Comparator<T> reversedComparingShort(final ToShortFunction<? super T> keyMapper) {
+        N.checkArgNotNull(keyMapper);
+
+        return (a, b) -> Short.compare(keyMapper.applyAsShort(b), keyMapper.applyAsShort(a));
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param keyMapper
+     * @return
+     */
+    public static <T> Comparator<T> reversedComparingInt(final ToIntFunction<? super T> keyMapper) {
+        N.checkArgNotNull(keyMapper);
+
+        return (a, b) -> Integer.compare(keyMapper.applyAsInt(b), keyMapper.applyAsInt(a));
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param keyMapper
+     * @return
+     */
+    public static <T> Comparator<T> reversedComparingLong(final ToLongFunction<? super T> keyMapper) {
+        N.checkArgNotNull(keyMapper);
+
+        return (a, b) -> Long.compare(keyMapper.applyAsLong(b), keyMapper.applyAsLong(a));
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param keyMapper
+     * @return
+     */
+    public static <T> Comparator<T> reversedComparingFloat(final ToFloatFunction<? super T> keyMapper) {
+        N.checkArgNotNull(keyMapper);
+
+        return (a, b) -> Float.compare(keyMapper.applyAsFloat(b), keyMapper.applyAsFloat(a));
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param keyMapper
+     * @return
+     */
+    public static <T> Comparator<T> reversedComparingDouble(final ToDoubleFunction<? super T> keyMapper) {
+        N.checkArgNotNull(keyMapper);
+
+        return (a, b) -> Double.compare(keyMapper.applyAsDouble(b), keyMapper.applyAsDouble(a));
+    }
+
+    /**
      * Reversed comparing by.
      *
      * @param <T>
