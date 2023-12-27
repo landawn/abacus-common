@@ -110,13 +110,9 @@ import com.landawn.abacus.util.stream.Stream;
 @SuppressWarnings({ "java:S1192", "java:S6539" })
 public final class N extends CommonUtil { // public final class N extends π implements ℕ, ℂ, ℚ, ℝ, ℤ { //  Error while storing the mojo status in Maven
 
-    private static final int CPU_CORES = Runtime.getRuntime().availableProcessors();
+    static final int CPU_CORES = Runtime.getRuntime().availableProcessors();
 
-    private static final float LOAD_FACTOR_FOR_FLAT_MAP = 1.75f;
-
-    private static final int LOAD_FACTOR_FOR_TWO_FLAT_MAP = 2;
-
-    static final AsyncExecutor asyncExecutor = new AsyncExecutor(//
+    static final AsyncExecutor ASYNC_EXECUTOR = new AsyncExecutor(//
             max(64, IOUtil.CPU_CORES * 8), // coreThreadPoolSize
             max(128, IOUtil.CPU_CORES * 16), // maxThreadPoolSize
             180L, TimeUnit.SECONDS);
@@ -130,6 +126,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
         //    executor.setRemoveOnCancelPolicy(true);
         SCHEDULED_EXECUTOR = MoreExecutors.getExitingScheduledExecutorService(executor);
     }
+
+    private static final float LOAD_FACTOR_FOR_FLAT_MAP = 1.75f;
+
+    private static final int LOAD_FACTOR_FOR_TWO_FLAT_MAP = 2;
 
     private N() {
         // Utility class.
@@ -412,7 +412,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T>
      * @param a
      * @return
-     * @see Multiset#create(Collection)
+     * @see Multiset#of(Object[])
      */
     public static <T> Map<T, Integer> occurrencesMap(final T[] a) {
         return occurrencesMap(a, Suppliers.<T, Integer> ofMap());
@@ -424,7 +424,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a
      * @param mapSupplier
      * @return
-     * @see Multiset#create(Collection)
+     * @see Multiset#of(Object[])
      */
     public static <T> Map<T, Integer> occurrencesMap(final T[] a, final Supplier<Map<T, Integer>> mapSupplier) {
         if (isEmpty(a)) {
@@ -517,6 +517,50 @@ public final class N extends CommonUtil { // public final class N extends π imp
         }
 
         return map;
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param a
+     * @return
+     * @see Multiset#of(Object[])
+     */
+    @Beta
+    public static <T> Multiset<T> occurrences(final T[] a) {
+        return Multiset.of(a);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param c
+     * @return
+     * @see Multiset#of(Iterable)
+     */
+    @Beta
+    public static <T> Multiset<T> occurrences(final Iterable<? extends T> c) {
+        if (c == null) {
+            return newMultiset();
+        }
+
+        if (c instanceof Collection) {
+            return Multiset.create((Collection<T>) c);
+        }
+
+        return occurrences(c.iterator());
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param iter
+     * @return
+     * @see Multiset#of(Iterator)
+     */
+    @Beta
+    public static <T> Multiset<T> occurrences(final Iterator<? extends T> iter) {
+        return Multiset.create(iter);
     }
 
     /**
@@ -3757,9 +3801,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
         checkArgNotNull(subColl, "a");
         checkArgNotNull(coll, "b");
 
-        if (isEmpty(coll)) {
+        if (isEmpty(subColl)) {
             return true;
-        } else if (isEmpty(subColl)) {
+        } else if (isEmpty(coll)) {
             return false;
         }
 
@@ -13823,7 +13867,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return Pair.of(a[0], a[0]);
         }
 
-        cmp = cmp == null ? (Comparator<T>) NATURAL_COMPARATOR : cmp;
+        cmp = checkComparator(cmp);
 
         T min = a[0];
         T max = a[0];
@@ -13893,7 +13937,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static <T> Pair<T, T> minMax(final Iterator<? extends T> iter, Comparator<? super T> cmp) throws IllegalArgumentException {
         checkArgument(iter != null && iter.hasNext(), "The spcified iterator can not be null or empty");
 
-        cmp = cmp == null ? (Comparator<T>) NATURAL_COMPARATOR : cmp;
+        cmp = checkComparator(cmp);
 
         T next = iter.next();
         T min = next;
@@ -15248,7 +15292,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #median(int...)
      */
     public static <T> T median(final T a, final T b, final T c, Comparator<? super T> cmp) {
-        cmp = cmp == null ? NATURAL_COMPARATOR : cmp;
+        cmp = checkComparator(cmp);
 
         int ab = cmp.compare(a, b);
         int ac = cmp.compare(a, c);
@@ -15629,7 +15673,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         checkFromToIndex(fromIndex, toIndex, a.length);
 
-        cmp = cmp == null ? NATURAL_COMPARATOR : cmp;
+        cmp = checkComparator(cmp);
 
         final int len = toIndex - fromIndex;
 
@@ -15699,7 +15743,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         checkFromToIndex(fromIndex, toIndex, c.size());
 
-        cmp = cmp == null ? NATURAL_COMPARATOR : cmp;
+        cmp = checkComparator(cmp);
 
         final int len = toIndex - fromIndex;
 
@@ -26559,7 +26603,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see Futures
      */
     public static ContinuableFuture<Void> asyncExecute(final Throwables.Runnable<? extends Exception> command) {
-        return asyncExecutor.execute(command);
+        return ASYNC_EXECUTOR.execute(command);
     }
 
     /**
@@ -26586,7 +26630,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     @SuppressWarnings("deprecation")
     @SafeVarargs
     public static List<ContinuableFuture<Void>> asyncExecute(final Throwables.Runnable<? extends Exception>... commands) {
-        return asyncExecutor.execute(commands);
+        return ASYNC_EXECUTOR.execute(commands);
     }
 
     /**
@@ -26596,7 +26640,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see Futures
      */
     public static List<ContinuableFuture<Void>> asyncExecute(final List<? extends Throwables.Runnable<? extends Exception>> commands) {
-        return asyncExecutor.execute(commands);
+        return ASYNC_EXECUTOR.execute(commands);
     }
 
     /**
@@ -26628,7 +26672,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see Futures
      */
     public static <R> ContinuableFuture<R> asyncExecute(final Callable<R> command) {
-        return asyncExecutor.execute(command);
+        return ASYNC_EXECUTOR.execute(command);
     }
 
     /**
@@ -26653,7 +26697,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     @SuppressWarnings("deprecation")
     @SafeVarargs
     public static <R> List<ContinuableFuture<R>> asyncExecute(final Callable<R>... commands) {
-        return asyncExecutor.execute(commands);
+        return ASYNC_EXECUTOR.execute(commands);
     }
 
     /**
@@ -26664,7 +26708,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see Futures
      */
     public static <R> List<ContinuableFuture<R>> asyncExecute(final Collection<? extends Callable<R>> commands) {
-        return asyncExecutor.execute(commands);
+        return ASYNC_EXECUTOR.execute(commands);
     }
 
     /**
@@ -26701,7 +26745,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     @MayReturnNull
     public static ContinuableFuture<Void> asyncExecute(final Throwables.Runnable<? extends Exception> cmd, final int retryTimes,
             final long retryIntervallInMillisInMillis, final Predicate<? super Exception> retryCondition) {
-        return asyncExecutor.execute((Callable<Void>) () -> {
+        return ASYNC_EXECUTOR.execute((Callable<Void>) () -> {
             Retry.of(retryTimes, retryIntervallInMillisInMillis, retryCondition).run(cmd);
             return null;
         });
@@ -26719,7 +26763,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static <R> ContinuableFuture<R> asyncExecute(final Callable<R> cmd, final int retryTimes, final long retryIntervallInMillisInMillis,
             final BiPredicate<? super R, ? super Exception> retryCondition) {
-        return asyncExecutor.execute((Callable<R>) () -> {
+        return ASYNC_EXECUTOR.execute((Callable<R>) () -> {
             final Retry<R> retry = Retry.of(retryTimes, retryIntervallInMillisInMillis, retryCondition);
             return retry.call(cmd);
         });
@@ -26758,7 +26802,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      */
     public static ObjIterator<Void> asynRun(final Collection<? extends Throwables.Runnable<? extends Exception>> commands) {
-        return asynRun(commands, asyncExecutor.getExecutor());
+        return asynRun(commands, ASYNC_EXECUTOR.getExecutor());
     }
 
     /**
@@ -26870,7 +26914,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      */
     public static <R> ObjIterator<R> asynCall(final Collection<? extends Callable<? extends R>> commands) {
-        return asynCall(commands, asyncExecutor.getExecutor());
+        return asynCall(commands, ASYNC_EXECUTOR.getExecutor());
     }
 
     /**
@@ -27150,7 +27194,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param commands
      */
     public static void runInParallel(final Collection<? extends Throwables.Runnable<? extends Exception>> commands) {
-        runInParallel(commands, asyncExecutor.getExecutor());
+        runInParallel(commands, ASYNC_EXECUTOR.getExecutor());
     }
 
     /**
@@ -27395,7 +27439,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      */
     public static <R> List<R> callInParallel(final Collection<? extends Callable<? extends R>> commands) {
-        return callInParallel(commands, asyncExecutor.getExecutor());
+        return callInParallel(commands, ASYNC_EXECUTOR.getExecutor());
     }
 
     /**
@@ -28994,7 +29038,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param cmp
      * @return
      * @see Collections#reverseOrder(Comparator)
+     * @see Comparators#reverseOrder(Comparator)
+     * @deprecated replaced by {@code Comparators.reverseOrder(Comparator)}
      */
+    @Deprecated
     @Beta
     public static <T> Comparator<T> reverseOrder(final Comparator<T> cmp) {
         return Comparators.reverseOrder(cmp);

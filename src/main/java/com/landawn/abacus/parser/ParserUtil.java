@@ -826,6 +826,16 @@ public final class ParserUtil {
                 } catch (Throwable e) {
                     // ignore
                 }
+
+                if (Strings.isEmpty(tmpTableName)) {
+                    try {
+                        if (this.annotations.containsKey(jakarta.persistence.Table.class)) {
+                            tmpTableName = ((jakarta.persistence.Table) this.annotations.get(jakarta.persistence.Table.class)).name();
+                        }
+                    } catch (Throwable e) {
+                        // ignore
+                    }
+                }
             }
 
             if (Strings.isNotEmpty(tmpTableName) && !tmpTableName.equals(Strings.strip(tmpTableName))) {
@@ -858,6 +868,14 @@ public final class ParserUtil {
             if (tmpIsMarkedToBean == false) {
                 try {
                     tmpIsMarkedToBean = this.annotations.containsKey(javax.persistence.Entity.class);
+                } catch (Throwable e) {
+                    // ignore
+                }
+            }
+
+            if (tmpIsMarkedToBean == false) {
+                try {
+                    tmpIsMarkedToBean = this.annotations.containsKey(jakarta.persistence.Entity.class);
                 } catch (Throwable e) {
                     // ignore
                 }
@@ -1616,6 +1634,14 @@ public final class ParserUtil {
                 }
             }
 
+            if (!tmpIsMarkedToId) {
+                try {
+                    tmpIsMarkedToId = this.annotations.containsKey(jakarta.persistence.Id.class);
+                } catch (Throwable e) {
+                    // ignore
+                }
+            }
+
             this.isMarkedToId = tmpIsMarkedToId;
 
             this.isMarkedToReadOnlyId = this.annotations.containsKey(ReadOnlyId.class) || readOnlyIdPropNames.contains(propName);
@@ -1640,6 +1666,18 @@ public final class ParserUtil {
                     }
                 } catch (Throwable e) {
                     // ignore
+                }
+
+                if (tmpIsMarkedToColumn == false) {
+                    try {
+                        if (this.annotations.containsKey(jakarta.persistence.Column.class)) {
+                            tmpIsMarkedToColumn = true;
+
+                            tmpColumnName = ((jakarta.persistence.Column) this.annotations.get(jakarta.persistence.Column.class)).name();
+                        }
+                    } catch (Throwable e) {
+                        // ignore
+                    }
                 }
             }
 

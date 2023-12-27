@@ -1158,11 +1158,11 @@ public final class TypeFactory {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param cls 
-     * @param type 
+     *
+     * @param <T>
+     * @param cls
+     * @param type
      */
     public static <T> void registerType(final Class<T> cls, final Type<T> type) {
         N.checkArgNotNull(cls, "cls");
@@ -1192,7 +1192,7 @@ public final class TypeFactory {
         N.checkArgNotNull(toStringFunc, "toStringFunc");
         N.checkArgNotNull(fromStringFunc, "fromStringFunc");
 
-        final Type<T> type = new AbstractType<T>(typeName) {
+        final Type<T> type = new AbstractType<>(typeName) {
             @Override
             public Class<T> clazz() {
                 return targetClass;
@@ -1231,7 +1231,7 @@ public final class TypeFactory {
         N.checkArgNotNull(toStringFunc, "toStringFunc");
         N.checkArgNotNull(fromStringFunc, "fromStringFunc");
 
-        final Type<T> type = new AbstractType<T>(typeName) {
+        final Type<T> type = new AbstractType<>(typeName) {
             @Override
             public Class<T> clazz() {
                 return targetClass;

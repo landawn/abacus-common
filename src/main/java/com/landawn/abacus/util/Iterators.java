@@ -203,11 +203,45 @@ public final class Iterators {
     /**
      *
      * @param <T>
+     * @param e
+     * @param n
+     * @return
+     */
+    public static <T> ObjIterator<T> repeat(final T e, final long n) {
+        N.checkArgument(n >= 0, "'n' can't be negative: %s", n); //NOSONAR
+
+        if (n == 0) {
+            return ObjIterator.empty();
+        }
+
+        return new ObjIterator<>() {
+            private long cnt = n;
+
+            @Override
+            public boolean hasNext() {
+                return cnt > 0;
+            }
+
+            @Override
+            public T next() {
+                if (cnt <= 0) {
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+                }
+
+                cnt--;
+                return e;
+            }
+        };
+    }
+
+    /**
+     *
+     * @param <T>
      * @param c
      * @param n
      * @return
      */
-    public static <T> ObjIterator<T> repeatEach(final Collection<? extends T> c, final int n) {
+    public static <T> ObjIterator<T> repeatEach(final Collection<? extends T> c, final long n) {
         N.checkArgument(n >= 0, "'n' can't be negative: %s", n);
 
         if (n == 0 || N.isEmpty(c)) {
@@ -217,7 +251,7 @@ public final class Iterators {
         return new ObjIterator<>() {
             private Iterator<? extends T> iter = c.iterator();
             private T next = null;
-            private int cnt = 0;
+            private long cnt = 0;
 
             @Override
             public boolean hasNext() {
@@ -249,7 +283,7 @@ public final class Iterators {
      * @param n
      * @return
      */
-    public static <T> ObjIterator<T> repeatAll(final Collection<? extends T> c, final int n) {
+    public static <T> ObjIterator<T> repeatAll(final Collection<? extends T> c, final long n) {
         N.checkArgument(n >= 0, "'n' can't be negative: %s", n);
 
         if (n == 0 || N.isEmpty(c)) {
@@ -258,7 +292,7 @@ public final class Iterators {
 
         return new ObjIterator<>() {
             private Iterator<? extends T> iter = null;
-            private int cnt = n;
+            private long cnt = n;
 
             @Override
             public boolean hasNext() {
@@ -289,7 +323,7 @@ public final class Iterators {
      * @param size
      * @return
      */
-    public static <T> ObjIterator<T> repeatEachToSize(final Collection<? extends T> c, final int size) {
+    public static <T> ObjIterator<T> repeatEachToSize(final Collection<? extends T> c, final long size) {
         N.checkArgument(size >= 0, "'size' can't be negative: %s", size);
         N.checkArgument(size == 0 || N.notEmpty(c), "Collection can't be empty or null when size > 0");
 
@@ -298,12 +332,12 @@ public final class Iterators {
         }
 
         return new ObjIterator<>() {
-            private final int n = size / c.size();
-            private int mod = size % c.size();
+            private final long n = size / c.size();
+            private long mod = size % c.size();
 
             private Iterator<? extends T> iter = null;
             private T next = null;
-            private int cnt = mod-- > 0 ? n + 1 : n;
+            private long cnt = mod-- > 0 ? n + 1 : n;
 
             @Override
             public boolean hasNext() {
@@ -339,7 +373,7 @@ public final class Iterators {
      * @param size
      * @return
      */
-    public static <T> ObjIterator<T> repeatAllToSize(final Collection<? extends T> c, final int size) {
+    public static <T> ObjIterator<T> repeatAllToSize(final Collection<? extends T> c, final long size) {
         N.checkArgument(size >= 0, "'size' can't be negative: %s", size);
         N.checkArgument(size == 0 || N.notEmpty(c), "Collection can't be empty or null when size > 0");
 
@@ -349,7 +383,7 @@ public final class Iterators {
 
         return new ObjIterator<>() {
             private Iterator<? extends T> iter = null;
-            private int cnt = size;
+            private long cnt = size;
 
             @Override
             public boolean hasNext() {
@@ -1920,11 +1954,39 @@ public final class Iterators {
      * Returns a new {@code ObjIterator} with {@code null} elements removed.
      *
      * @param <T>
+     * @param c
+     * @return
+     */
+    @Beta
+    public static <T> ObjIterator<T> skipNulls(final Iterable<? extends T> c) {
+        return filter(c, Fn.<T> notNull());
+    }
+
+    /**
+     * Returns a new {@code ObjIterator} with {@code null} elements removed.
+     *
+     * @param <T>
      * @param iter
      * @return
      */
     public static <T> ObjIterator<T> skipNulls(final Iterator<? extends T> iter) {
         return filter(iter, Fn.<T> notNull());
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param c
+     * @return
+     */
+    @Beta
+    public static <T> ObjIterator<T> distinct(final Iterable<? extends T> c) {
+        if (c == null) {
+            return ObjIterator.empty();
+        }
+
+        return distinct(c.iterator());
     }
 
     /**
@@ -1979,11 +2041,31 @@ public final class Iterators {
      *
      *
      * @param <T>
+     * @param c
+     * @return
+     */
+    @Beta
+    public static <T> ObjIterator<T> distinctBy(final Iterable<? extends T> c, final Function<? super T, ?> keyMapper) {
+        N.checkArgNotNull(keyMapper, "keyMapper");
+
+        if (c == null) {
+            return ObjIterator.empty();
+        }
+
+        return distinctBy(c.iterator(), keyMapper);
+    }
+
+    /**
+     *
+     *
+     * @param <T>
      * @param iter
      * @param keyMapper
      * @return
      */
     public static <T> ObjIterator<T> distinctBy(final Iterator<? extends T> iter, final Function<? super T, ?> keyMapper) {
+        N.checkArgNotNull(keyMapper, "keyMapper");
+
         if (iter == null) {
             return ObjIterator.empty();
         }
@@ -2022,6 +2104,24 @@ public final class Iterators {
                 return tmp;
             }
         };
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param c
+     * @param predicate
+     * @return
+     */
+    @Beta
+    public static <T> ObjIterator<T> filter(final Iterable<? extends T> c, final Predicate<? super T> predicate) {
+        N.checkArgNotNull(predicate, "predicate");
+
+        if (c == null) {
+            return ObjIterator.empty();
+        }
+
+        return filter(c.iterator(), predicate);
     }
 
     /**
@@ -2070,6 +2170,24 @@ public final class Iterators {
                 return tmp;
             }
         };
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param c
+     * @param predicate
+     * @return
+     */
+    @Beta
+    public static <T> ObjIterator<T> takeWhile(final Iterable<? extends T> c, final Predicate<? super T> predicate) {
+        N.checkArgNotNull(predicate, "predicate");
+
+        if (c == null) {
+            return ObjIterator.empty();
+        }
+
+        return takeWhile(c.iterator(), predicate);
     }
 
     /**
@@ -2123,6 +2241,24 @@ public final class Iterators {
 
     /**
      *
+     * @param <T>
+     * @param c
+     * @param predicate
+     * @return
+     */
+    @Beta
+    public static <T> ObjIterator<T> takeWhileInclusive(final Iterable<? extends T> c, final Predicate<? super T> predicate) {
+        N.checkArgNotNull(predicate, "predicate");
+
+        if (c == null) {
+            return ObjIterator.empty();
+        }
+
+        return takeWhileInclusive(c.iterator(), predicate);
+    }
+
+    /**
+     *
      *
      * @param <T>
      * @param iter
@@ -2169,6 +2305,24 @@ public final class Iterators {
                 return tmp;
             }
         };
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param c
+     * @param predicate
+     * @return
+     */
+    @Beta
+    public static <T> ObjIterator<T> dropWhile(final Iterable<? extends T> c, final Predicate<? super T> predicate) {
+        N.checkArgNotNull(predicate, "predicate");
+
+        if (c == null) {
+            return ObjIterator.empty();
+        }
+
+        return dropWhile(c.iterator(), predicate);
     }
 
     /**
@@ -2224,6 +2378,24 @@ public final class Iterators {
                 }
             }
         };
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param c
+     * @param predicate
+     * @return
+     */
+    @Beta
+    public static <T> ObjIterator<T> skipUntil(final Iterable<? extends T> c, final Predicate<? super T> predicate) {
+        N.checkArgNotNull(predicate, "predicate");
+
+        if (c == null) {
+            return ObjIterator.empty();
+        }
+
+        return skipUntil(c.iterator(), predicate);
     }
 
     /**
@@ -2285,6 +2457,25 @@ public final class Iterators {
      *
      * @param <T>
      * @param <U>
+     * @param c
+     * @param mapper
+     * @return
+     */
+    @Beta
+    public static <T, U> ObjIterator<U> map(final Iterable<? extends T> c, final Function<? super T, U> mapper) {
+        N.checkArgNotNull(mapper, "mapper"); //NOSONAR
+
+        if (c == null) {
+            return ObjIterator.empty();
+        }
+
+        return map(c.iterator(), mapper);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param <U>
      * @param iter
      * @param mapper
      * @return
@@ -2307,6 +2498,25 @@ public final class Iterators {
                 return mapper.apply(iter.next());
             }
         };
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param <U>
+     * @param c
+     * @param mapper
+     * @return
+     */
+    @Beta
+    public static <T, U> ObjIterator<U> flatMap(final Iterable<? extends T> c, final Function<? super T, ? extends Iterable<? extends U>> mapper) {
+        N.checkArgNotNull(mapper, "mapper"); //NOSONAR
+
+        if (c == null) {
+            return ObjIterator.empty();
+        }
+
+        return flatMap(c.iterator(), mapper);
     }
 
     /**
@@ -2353,6 +2563,25 @@ public final class Iterators {
                 return cur.next();
             }
         };
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param <U>
+     * @param c
+     * @param mapper
+     * @return
+     */
+    @Beta
+    public static <T, U> ObjIterator<U> flatmap(final Iterable<? extends T> c, final Function<? super T, ? extends U[]> mapper) {
+        N.checkArgNotNull(mapper, "mapper"); //NOSONAR
+
+        if (c == null) {
+            return ObjIterator.empty();
+        }
+
+        return flatmap(c.iterator(), mapper);
     }
 
     /**
@@ -2409,11 +2638,11 @@ public final class Iterators {
      * @param <T>
      * @param <E>
      * @param iter
-     * @param elementParser
+     * @param elementConsumer
      * @throws E the e
      */
-    public static <T, E extends Exception> void forEach(final Iterator<? extends T> iter, final Throwables.Consumer<? super T, E> elementParser) throws E {
-        forEach(iter, elementParser, Fn.emptyAction());
+    public static <T, E extends Exception> void forEach(final Iterator<? extends T> iter, final Throwables.Consumer<? super T, E> elementConsumer) throws E {
+        forEach(iter, elementConsumer, Fn.emptyAction());
     }
 
     /**
@@ -2422,14 +2651,14 @@ public final class Iterators {
      * @param <E>
      * @param <E2>
      * @param iter
-     * @param elementParser
+     * @param elementConsumer
      * @param onComplete
      * @throws E the e
      * @throws E2 the e2
      */
     public static <T, E extends Exception, E2 extends Exception> void forEach(final Iterator<? extends T> iter,
-            final Throwables.Consumer<? super T, E> elementParser, final Throwables.Runnable<E2> onComplete) throws E, E2 {
-        forEach(iter, 0, Long.MAX_VALUE, elementParser, onComplete);
+            final Throwables.Consumer<? super T, E> elementConsumer, final Throwables.Runnable<E2> onComplete) throws E, E2 {
+        forEach(iter, 0, Long.MAX_VALUE, elementConsumer, onComplete);
     }
 
     /**
@@ -2439,12 +2668,12 @@ public final class Iterators {
      * @param iter
      * @param offset
      * @param count
-     * @param elementParser
+     * @param elementConsumer
      * @throws E the e
      */
     public static <T, E extends Exception> void forEach(final Iterator<? extends T> iter, final long offset, final long count,
-            final Throwables.Consumer<? super T, E> elementParser) throws E {
-        forEach(iter, offset, count, elementParser, Fn.emptyAction());
+            final Throwables.Consumer<? super T, E> elementConsumer) throws E {
+        forEach(iter, offset, count, elementConsumer, Fn.emptyAction());
     }
 
     /**
@@ -2455,14 +2684,14 @@ public final class Iterators {
      * @param iter
      * @param offset
      * @param count
-     * @param elementParser
+     * @param elementConsumer
      * @param onComplete
      * @throws E the e
      * @throws E2 the e2
      */
     public static <T, E extends Exception, E2 extends Exception> void forEach(final Iterator<? extends T> iter, final long offset, final long count,
-            final Throwables.Consumer<? super T, E> elementParser, final Throwables.Runnable<E2> onComplete) throws E, E2 {
-        forEach(iter, offset, count, 0, 0, elementParser, onComplete);
+            final Throwables.Consumer<? super T, E> elementConsumer, final Throwables.Runnable<E2> onComplete) throws E, E2 {
+        forEach(iter, offset, count, 0, 0, elementConsumer, onComplete);
     }
 
     /**
@@ -2474,12 +2703,12 @@ public final class Iterators {
      * @param count
      * @param processThreadNum
      * @param queueSize
-     * @param elementParser
+     * @param elementConsumer
      * @throws E the e
      */
     public static <T, E extends Exception> void forEach(final Iterator<? extends T> iter, long offset, long count, final int processThreadNum,
-            final int queueSize, final Throwables.Consumer<? super T, E> elementParser) throws E {
-        forEach(iter, offset, count, processThreadNum, queueSize, elementParser, Fn.emptyAction());
+            final int queueSize, final Throwables.Consumer<? super T, E> elementConsumer) throws E {
+        forEach(iter, offset, count, processThreadNum, queueSize, elementConsumer, Fn.emptyAction());
     }
 
     /**
@@ -2493,15 +2722,15 @@ public final class Iterators {
      * @param count
      * @param processThreadNum new threads started to parse/process the lines/records
      * @param queueSize size of queue to save the processing records/lines loaded from source data. Default size is 1024.
-     * @param elementParser
+     * @param elementConsumer
      * @param onComplete
      * @throws E the e
      * @throws E2 the e2
      */
     public static <T, E extends Exception, E2 extends Exception> void forEach(final Iterator<? extends T> iter, long offset, long count,
-            final int processThreadNum, final int queueSize, final Throwables.Consumer<? super T, E> elementParser, final Throwables.Runnable<E2> onComplete)
+            final int processThreadNum, final int queueSize, final Throwables.Consumer<? super T, E> elementConsumer, final Throwables.Runnable<E2> onComplete)
             throws E, E2 {
-        forEach(Array.asList(iter), offset, count, 0, processThreadNum, queueSize, elementParser, onComplete);
+        forEach(Array.asList(iter), offset, count, 0, processThreadNum, queueSize, elementConsumer, onComplete);
     }
 
     /**
@@ -2509,12 +2738,12 @@ public final class Iterators {
      * @param <T>
      * @param <E>
      * @param iterators
-     * @param elementParser
+     * @param elementConsumer
      * @throws E the e
      */
     public static <T, E extends Exception> void forEach(final Collection<? extends Iterator<? extends T>> iterators,
-            final Throwables.Consumer<? super T, E> elementParser) throws E {
-        forEach(iterators, elementParser, Fn.emptyAction());
+            final Throwables.Consumer<? super T, E> elementConsumer) throws E {
+        forEach(iterators, elementConsumer, Fn.emptyAction());
     }
 
     /**
@@ -2523,14 +2752,14 @@ public final class Iterators {
      * @param <E>
      * @param <E2>
      * @param iterators
-     * @param elementParser
+     * @param elementConsumer
      * @param onComplete
      * @throws E the e
      * @throws E2 the e2
      */
     public static <T, E extends Exception, E2 extends Exception> void forEach(final Collection<? extends Iterator<? extends T>> iterators,
-            final Throwables.Consumer<? super T, E> elementParser, final Throwables.Runnable<E2> onComplete) throws E, E2 {
-        forEach(iterators, 0, Long.MAX_VALUE, elementParser, onComplete);
+            final Throwables.Consumer<? super T, E> elementConsumer, final Throwables.Runnable<E2> onComplete) throws E, E2 {
+        forEach(iterators, 0, Long.MAX_VALUE, elementConsumer, onComplete);
     }
 
     /**
@@ -2540,12 +2769,12 @@ public final class Iterators {
      * @param iterators
      * @param offset
      * @param count
-     * @param elementParser
+     * @param elementConsumer
      * @throws E the e
      */
     public static <T, E extends Exception> void forEach(final Collection<? extends Iterator<? extends T>> iterators, final long offset, final long count,
-            final Throwables.Consumer<? super T, E> elementParser) throws E {
-        forEach(iterators, offset, count, elementParser, Fn.emptyAction());
+            final Throwables.Consumer<? super T, E> elementConsumer) throws E {
+        forEach(iterators, offset, count, elementConsumer, Fn.emptyAction());
     }
 
     /**
@@ -2556,14 +2785,14 @@ public final class Iterators {
      * @param iterators
      * @param offset
      * @param count
-     * @param elementParser
+     * @param elementConsumer
      * @param onComplete
      * @throws E the e
      * @throws E2 the e2
      */
     public static <T, E extends Exception, E2 extends Exception> void forEach(final Collection<? extends Iterator<? extends T>> iterators, final long offset,
-            final long count, final Throwables.Consumer<? super T, E> elementParser, final Throwables.Runnable<E2> onComplete) throws E, E2 {
-        forEach(iterators, offset, count, 0, 0, 0, elementParser, onComplete);
+            final long count, final Throwables.Consumer<? super T, E> elementConsumer, final Throwables.Runnable<E2> onComplete) throws E, E2 {
+        forEach(iterators, offset, count, 0, 0, 0, elementConsumer, onComplete);
     }
 
     /**
@@ -2574,12 +2803,12 @@ public final class Iterators {
      * @param readThreadNum
      * @param processThreadNum
      * @param queueSize
-     * @param elementParser
+     * @param elementConsumer
      * @throws E the e
      */
     public static <T, E extends Exception> void forEach(final Collection<? extends Iterator<? extends T>> iterators, final int readThreadNum,
-            final int processThreadNum, final int queueSize, final Throwables.Consumer<? super T, E> elementParser) throws E {
-        forEach(iterators, readThreadNum, processThreadNum, queueSize, elementParser, Fn.emptyAction());
+            final int processThreadNum, final int queueSize, final Throwables.Consumer<? super T, E> elementConsumer) throws E {
+        forEach(iterators, readThreadNum, processThreadNum, queueSize, elementConsumer, Fn.emptyAction());
     }
 
     /**
@@ -2592,15 +2821,15 @@ public final class Iterators {
      * @param readThreadNum
      * @param processThreadNum
      * @param queueSize
-     * @param elementParser
+     * @param elementConsumer
      * @param onComplete
      * @throws E the e
      * @throws E2
      */
     public static <T, E extends Exception, E2 extends Exception> void forEach(final Collection<? extends Iterator<? extends T>> iterators,
-            final int readThreadNum, final int processThreadNum, final int queueSize, final Throwables.Consumer<? super T, E> elementParser,
+            final int readThreadNum, final int processThreadNum, final int queueSize, final Throwables.Consumer<? super T, E> elementConsumer,
             final Throwables.Runnable<E2> onComplete) throws E, E2 {
-        forEach(iterators, 0, Long.MAX_VALUE, readThreadNum, processThreadNum, queueSize, elementParser, onComplete);
+        forEach(iterators, 0, Long.MAX_VALUE, readThreadNum, processThreadNum, queueSize, elementConsumer, onComplete);
     }
 
     /**
@@ -2613,12 +2842,12 @@ public final class Iterators {
      * @param readThreadNum
      * @param processThreadNum
      * @param queueSize
-     * @param elementParser
+     * @param elementConsumer
      * @throws E the e
      */
     public static <T, E extends Exception> void forEach(final Collection<? extends Iterator<? extends T>> iterators, final long offset, final long count,
-            final int readThreadNum, final int processThreadNum, final int queueSize, final Throwables.Consumer<? super T, E> elementParser) throws E {
-        forEach(iterators, offset, count, readThreadNum, processThreadNum, queueSize, elementParser, Fn.emptyAction());
+            final int readThreadNum, final int processThreadNum, final int queueSize, final Throwables.Consumer<? super T, E> elementConsumer) throws E {
+        forEach(iterators, offset, count, readThreadNum, processThreadNum, queueSize, elementConsumer, Fn.emptyAction());
     }
 
     /**
@@ -2633,13 +2862,13 @@ public final class Iterators {
      * @param readThreadNum new threads started to parse/process the lines/records
      * @param processThreadNum new threads started to parse/process the lines/records
      * @param queueSize size of queue to save the processing records/lines loaded from source data. Default size is 1024.
-     * @param elementParser
+     * @param elementConsumer
      * @param onComplete
      * @throws E the e
      * @throws E2 the e2
      */
     public static <T, E extends Exception, E2 extends Exception> void forEach(final Collection<? extends Iterator<? extends T>> iterators, final long offset,
-            final long count, final int readThreadNum, final int processThreadNum, final int queueSize, final Throwables.Consumer<? super T, E> elementParser,
+            final long count, final int readThreadNum, final int processThreadNum, final int queueSize, final Throwables.Consumer<? super T, E> elementConsumer,
             final Throwables.Runnable<E2> onComplete) throws E, E2 {
         N.checkArgument(offset >= 0 && count >= 0, "'offset'=%s and 'count'=%s can not be negative", offset, count);
 
@@ -2659,7 +2888,7 @@ public final class Iterators {
 
             if (processThreadNum == 0) {
                 while (iteratorII.hasNext()) {
-                    elementParser.accept(iteratorII.next());
+                    elementConsumer.accept(iteratorII.next());
                 }
 
                 if (onComplete != null) {
@@ -2685,7 +2914,7 @@ public final class Iterators {
                                     }
                                 }
 
-                                elementParser.accept(element);
+                                elementConsumer.accept(element);
                             }
                         } catch (Exception e) {
                             synchronized (errorHolder) {

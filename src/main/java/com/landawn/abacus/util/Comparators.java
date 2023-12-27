@@ -59,13 +59,7 @@ public final class Comparators {
 
     // It's reversed order of NATURAL_ORDER and null last
     @SuppressWarnings("rawtypes")
-    static final Comparator REVERSED_ORDER;
-    static {
-        //  Collections.reverseOrder(NATURAL_ORDER);
-        // It's reversed order of NATURAL_ORDER and null last
-        final Comparator<? extends Comparable<Object>> reversedOrder = (a, b) -> a == null ? (b == null ? 0 : 1) : (b == null ? -1 : b.compareTo(a));
-        REVERSED_ORDER = reversedOrder;
-    }
+    static final Comparator REVERSED_ORDER = NULL_LAST_REVERSED_ORDER;
 
     static final Comparator<String> COMPARING_IGNORE_CASE = (a, b) -> a == null ? (b == null ? 0 : -1) : (b == null ? 1 : a.compareToIgnoreCase(b));
 
@@ -651,6 +645,17 @@ public final class Comparators {
      *
      *
      * @param <T>
+     * @return
+     */
+    @SuppressWarnings("rawtypes")
+    public static <T extends Comparable> Comparator<T[]> comparingArray() {
+        return comparingArray(NATURAL_ORDER);
+    }
+
+    /**
+     *
+     *
+     * @param <T>
      * @param cmp
      * @return
      */
@@ -678,6 +683,17 @@ public final class Comparators {
 
             return Integer.compare(lenA, lenB);
         };
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @return
+     */
+    @SuppressWarnings("rawtypes")
+    public static <T extends Comparable, C extends Collection<T>> Comparator<C> comparingCollection() {
+        return comparingCollection(NATURAL_ORDER);
     }
 
     /**
@@ -717,6 +733,24 @@ public final class Comparators {
         };
     }
 
+    /**
+     *
+     *
+     * @param <T>
+     * @return
+     */
+    @SuppressWarnings("rawtypes")
+    public static <T extends Comparable, C extends Iterable<T>> Comparator<C> comparingIterable() {
+        return comparingIterable(NATURAL_ORDER);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param <C>
+     * @param cmp
+     * @return
+     */
     public static <T, C extends Iterable<T>> Comparator<C> comparingIterable(final Comparator<? super T> cmp) {
         N.checkArgNotNull(cmp);
 
@@ -742,6 +776,17 @@ public final class Comparators {
 
             return iterA.hasNext() ? 1 : (iterB.hasNext() ? -1 : 0);
         };
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @return
+     */
+    @SuppressWarnings("rawtypes")
+    public static <T extends Comparable, C extends Iterator<T>> Comparator<C> comparingIterator() {
+        return comparingIterator(NATURAL_ORDER);
     }
 
     /**
@@ -803,6 +848,18 @@ public final class Comparators {
         }
 
         return Collections.reverseOrder(cmp);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param keyMapper
+     * @return
+     */
+    public static <T> Comparator<T> reversedComparingBoolean(final ToBooleanFunction<? super T> keyMapper) {
+        N.checkArgNotNull(keyMapper);
+
+        return (a, b) -> Boolean.compare(keyMapper.applyAsBoolean(b), keyMapper.applyAsBoolean(a));
     }
 
     /**

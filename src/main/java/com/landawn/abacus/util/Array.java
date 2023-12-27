@@ -18,13 +18,9 @@ package com.landawn.abacus.util;
 import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.Executor;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.annotation.Beta;
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.annotation.NullSafe;
 
 /**
@@ -37,14 +33,6 @@ import com.landawn.abacus.annotation.NullSafe;
  */
 @SuppressWarnings({ "java:S1168" })
 public class Array {
-    static final int CPU_CORES = Runtime.getRuntime().availableProcessors();
-
-    static final Executor parallelSortExecutor = new ThreadPoolExecutor(Math.min(8, CPU_CORES), CPU_CORES, 180L, TimeUnit.SECONDS, new LinkedBlockingQueue<>());
-
-    static final int MIN_ARRAY_SORT_GRAN = 8192;
-
-    static final int BINARYSEARCH_THRESHOLD = 64;
-
     private Array() {
         // Utility class.
     }
@@ -1538,8 +1526,9 @@ public class Array {
      * @param n
      * @return
      * @throws IllegalArgumentException if the specified {@code element} is null.
-     * @see Array#repeat(Object, int, Class)
-     * @deprecated prefer to {@link Array#repeat(Object, int, Class)} because this method throws NullPointerException when element is {@code null}
+     * @see #repeatNonNull(Object, int)
+     * @see #repeat(Object, int, Class)
+     * @deprecated prefer to {@link Array#repeatNonNull(Object, int)} or {@link Array#repeat(Object, int, Class)} because this method throws NullPointerException when element is {@code null}
      */
     @Deprecated
     public static <T> T[] repeat(final T element, final int n) throws IllegalArgumentException {
@@ -2048,7 +2037,7 @@ public class Array {
         if (a == null) {
             return null;
         } else if (toIndex - fromIndex == 0) {
-            return N.EMPTY_BOOLEAN_OBJECT_ARRAY;
+            return N.EMPTY_BOOLEAN_OBJ_ARRAY;
         }
 
         final Boolean[] result = new Boolean[toIndex - fromIndex];
@@ -2095,7 +2084,7 @@ public class Array {
         if (a == null) {
             return null;
         } else if (toIndex - fromIndex == 0) {
-            return N.EMPTY_CHARACTER_OBJECT_ARRAY;
+            return N.EMPTY_CHAR_OBJ_ARRAY;
         }
 
         final Character[] result = new Character[toIndex - fromIndex];
@@ -2142,7 +2131,7 @@ public class Array {
         if (a == null) {
             return null;
         } else if (toIndex - fromIndex == 0) {
-            return N.EMPTY_BYTE_OBJECT_ARRAY;
+            return N.EMPTY_BYTE_OBJ_ARRAY;
         }
 
         final Byte[] result = new Byte[toIndex - fromIndex];
@@ -2189,7 +2178,7 @@ public class Array {
         if (a == null) {
             return null;
         } else if (toIndex - fromIndex == 0) {
-            return N.EMPTY_SHORT_OBJECT_ARRAY;
+            return N.EMPTY_SHORT_OBJ_ARRAY;
         }
 
         final Short[] result = new Short[toIndex - fromIndex];
@@ -2236,7 +2225,7 @@ public class Array {
         if (a == null) {
             return null;
         } else if (toIndex - fromIndex == 0) {
-            return N.EMPTY_INTEGER_OBJECT_ARRAY;
+            return N.EMPTY_INT_OBJ_ARRAY;
         }
 
         final Integer[] result = new Integer[toIndex - fromIndex];
@@ -2283,7 +2272,7 @@ public class Array {
         if (a == null) {
             return null;
         } else if (toIndex - fromIndex == 0) {
-            return N.EMPTY_LONG_OBJECT_ARRAY;
+            return N.EMPTY_LONG_OBJ_ARRAY;
         }
 
         final Long[] result = new Long[toIndex - fromIndex];
@@ -2330,7 +2319,7 @@ public class Array {
         if (a == null) {
             return null;
         } else if (toIndex - fromIndex == 0) {
-            return N.EMPTY_FLOAT_OBJECT_ARRAY;
+            return N.EMPTY_FLOAT_OBJ_ARRAY;
         }
 
         final Float[] result = new Float[toIndex - fromIndex];
@@ -2377,7 +2366,7 @@ public class Array {
         if (a == null) {
             return null;
         } else if (toIndex - fromIndex == 0) {
-            return N.EMPTY_DOUBLE_OBJECT_ARRAY;
+            return N.EMPTY_DOUBLE_OBJ_ARRAY;
         }
 
         final Double[] result = new Double[toIndex - fromIndex];

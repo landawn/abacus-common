@@ -142,6 +142,16 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
     static final char[] ELEMENT_SEPARATOR_CHAR_ARRAY = ELEMENT_SEPARATOR.toCharArray();
 
+    static final String TRUE = Boolean.TRUE.toString().intern();
+
+    static final char[] TRUE_CHAR_ARRAY = TRUE.toCharArray();
+
+    static final String FALSE = Boolean.FALSE.toString().intern();
+
+    static final char[] FALSE_CHAR_ARRAY = FALSE.toCharArray();
+
+    static final String BACKSLASH_ASTERISK = "*";
+
     /**
      * A regex pattern for recognizing blocks of whitespace characters. The
      * apparent convolutedness of the pattern serves the purpose of ignoring
@@ -1512,6 +1522,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @return
      */
     public static String repeat(final String str, final int repeat) {
+        if (N.len(str) == 1) {
+            return repeat(str.charAt(0), repeat);
+        }
+
         return repeat(str, repeat, EMPTY_STRING);
     }
 
@@ -3634,7 +3648,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         if (str.length() == 1) {
             final char ch = str.charAt(0);
 
-            if (ch == N.CHAR_CR || ch == N.CHAR_LF) {
+            if (ch == CHAR_CR || ch == CHAR_LF) {
                 return EMPTY_STRING;
             }
 
@@ -3644,11 +3658,11 @@ public abstract sealed class Strings permits Strings.StringUtil {
         int lastIdx = str.length() - 1;
         final char last = str.charAt(lastIdx);
 
-        if (last == N.CHAR_LF) {
-            if (str.charAt(lastIdx - 1) == N.CHAR_CR) {
+        if (last == CHAR_LF) {
+            if (str.charAt(lastIdx - 1) == CHAR_CR) {
                 lastIdx--;
             }
-        } else if (last != N.CHAR_CR) {
+        } else if (last != CHAR_CR) {
             lastIdx++;
         }
 
@@ -3712,7 +3726,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
         final int lastIdx = strLen - 1;
 
-        if (str.charAt(lastIdx) == N.CHAR_LF && str.charAt(lastIdx - 1) == N.CHAR_CR) {
+        if (str.charAt(lastIdx) == CHAR_LF && str.charAt(lastIdx - 1) == CHAR_CR) {
             return str.substring(0, lastIdx - 1);
         } else {
             return str.substring(0, lastIdx);
@@ -11112,7 +11126,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @return
      */
     public static char parseChar(final String str) {
-        return Strings.isEmpty(str) ? N.CHAR_ZERO : ((str.length() == 1) ? str.charAt(0) : (char) Integer.parseInt(str));
+        return Strings.isEmpty(str) ? CHAR_ZERO : ((str.length() == 1) ? str.charAt(0) : (char) Integer.parseInt(str));
     }
 
     /**

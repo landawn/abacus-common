@@ -66,7 +66,7 @@ public class BufferedWriter extends Writer {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     public void write(boolean b) throws IOException {
-        write(b ? N.TRUE_CHAR_ARRAY : N.FALSE_CHAR_ARRAY);
+        write(b ? Strings.TRUE_CHAR_ARRAY : Strings.FALSE_CHAR_ARRAY);
     }
 
     /**

@@ -126,94 +126,24 @@ import com.landawn.abacus.util.function.ToFloatFunction;
  */
 @SuppressWarnings({ "java:S1192", "java:S6539" })
 sealed class CommonUtil permits N {
+    static final int BINARYSEARCH_THRESHOLD = 64;
+
+    // ...
+    static final int REVERSE_THRESHOLD = 18;
+
+    static final int FILL_THRESHOLD = 25;
+
+    static final int REPLACEALL_THRESHOLD = 11;
+
+    static final int MIN_SIZE_FOR_COPY_ALL = 9;
+
+    // ...
+    static final Random RAND = new SecureRandom();
+
     // ... it has to be big enough to make it's safety to add element to
     // ArrayBlockingQueue.
     @SuppressWarnings("deprecation")
     static final int POOL_SIZE = InternalUtil.POOL_SIZE;
-
-    /**
-     * An empty immutable {@code Boolean} array.
-     */
-    static final Boolean[] EMPTY_BOOLEAN_OBJECT_ARRAY = {};
-    /**
-     * An empty immutable {@code Character} array.
-     */
-    static final Character[] EMPTY_CHARACTER_OBJECT_ARRAY = {};
-    /**
-     * An empty immutable {@code Byte} array.
-     */
-    static final Byte[] EMPTY_BYTE_OBJECT_ARRAY = {};
-    /**
-     * An empty immutable {@code Short} array.
-     */
-    static final Short[] EMPTY_SHORT_OBJECT_ARRAY = {};
-    /**
-     * An empty immutable {@code Integer} array.
-     */
-    static final Integer[] EMPTY_INTEGER_OBJECT_ARRAY = {};
-    /**
-     * An empty immutable {@code Long} array.
-     */
-    static final Long[] EMPTY_LONG_OBJECT_ARRAY = {};
-    /**
-     * An empty immutable {@code Float} array.
-     */
-    static final Float[] EMPTY_FLOAT_OBJECT_ARRAY = {};
-    /**
-     * An empty immutable {@code Double} array.
-     */
-    static final Double[] EMPTY_DOUBLE_OBJECT_ARRAY = {};
-    /**
-     * An empty immutable {@code Class} array.
-     */
-    static final Class<?>[] EMPTY_CLASS_ARRAY = new Class[0];
-
-    static final String TRUE = Boolean.TRUE.toString().intern();
-
-    static final char[] TRUE_CHAR_ARRAY = TRUE.toCharArray();
-
-    static final String FALSE = Boolean.FALSE.toString().intern();
-
-    static final char[] FALSE_CHAR_ARRAY = FALSE.toCharArray();
-
-    //    /**
-    //     * String with value {@code "null"}.
-    //     * @deprecated replaced by {@code Strings.NULL_STRING}
-    //     * @see Strings#NULL_STRING
-    //     */
-    //    @Deprecated
-    //    public static final String NULL_STRING = "null".intern();
-    //
-    //    /**
-    //     * @deprecated replaced by {@code Strings.NULL_CHAR_ARRAY}
-    //     * @see Strings#NULL_CHAR_ARRAY
-    //     */
-    //    @Deprecated
-    //    public static final char[] NULL_CHAR_ARRAY = NULL_STRING.toCharArray();
-
-    static final char CHAR_ZERO = WD.CHAR_ZERO;
-
-    /**
-     * The Constant CHAR_LF.
-     *
-     * @see <a
-     *      href="http://docs.oracle.com/javase/specs/jls/se7/html/jls-3.html#jls-3.10.6">JLF:
-     *      Escape Sequences for Character and String Literals</a>
-     * @since 2.2
-     */
-    static final char CHAR_LF = WD.CHAR_LF;
-
-    /**
-     * The Constant CHAR_CR.
-     *
-     * @see <a
-     *      href="http://docs.oracle.com/javase/specs/jls/se7/html/jls-3.html#jls-3.10.6">JLF:
-     *      Escape Sequences for Character and String Literals</a>
-     * @since 2.2
-     */
-    static final char CHAR_CR = WD.CHAR_CR;
-
-    static final int BINARYSEARCH_THRESHOLD = 64;
 
     // ...
     /**
@@ -306,30 +236,62 @@ sealed class CommonUtil permits N {
      */
     public static final Object[] EMPTY_OBJECT_ARRAY = {};
 
+    /**
+     * An empty immutable {@code Class} array.
+     */
+    static final Class<?>[] EMPTY_CLASS_ARRAY = new Class[0];
+
+    /**
+     * An empty immutable {@code List}.
+     */
     @SuppressWarnings("rawtypes")
     static final List EMPTY_LIST = Collections.emptyList();
 
+    /**
+     * An empty immutable {@code Set}.
+     */
     @SuppressWarnings("rawtypes")
     static final Set EMPTY_SET = Collections.emptySet();
 
+    /**
+     * An empty immutable {@code SortedSet}.
+     */
     @SuppressWarnings("rawtypes")
     static final SortedSet EMPTY_SORTED_SET = Collections.emptySortedSet();
 
+    /**
+     * An empty immutable {@code NavigableSet}.
+     */
     @SuppressWarnings("rawtypes")
     static final NavigableSet EMPTY_NAVIGABLE_SET = Collections.emptyNavigableSet();
 
+    /**
+     * An empty immutable {@code Map}.
+     */
     @SuppressWarnings("rawtypes")
     static final Map EMPTY_MAP = Collections.emptyMap();
 
+    /**
+     * An empty immutable {@code SortedMap}.
+     */
     @SuppressWarnings("rawtypes")
     static final SortedMap EMPTY_SORTED_MAP = Collections.emptySortedMap();
 
+    /**
+     * An empty immutable {@code NavigableMap}.
+     */
     @SuppressWarnings("rawtypes")
     static final NavigableMap EMPTY_NAVIGABLE_MAP = Collections.emptyNavigableMap();
 
+    /**
+     * An empty immutable {@code Iterator}.
+     */
     @SuppressWarnings("rawtypes")
     static final Iterator EMPTY_ITERATOR = Collections.emptyIterator();
 
+    /**
+     * An empty immutable {@code ListIterator}.
+     */
     @SuppressWarnings("rawtypes")
     static final ListIterator EMPTY_LIST_ITERATOR = Collections.emptyListIterator();
 
@@ -362,45 +324,33 @@ sealed class CommonUtil permits N {
     // ...
     static final Object NULL_MASK = new NullMask();
 
-    static final String BACKSLASH_ASTERISK = "*";
-
-    // ...
-    static final int REVERSE_THRESHOLD = 18;
-
-    static final int FILL_THRESHOLD = 25;
-
-    static final int REPLACEALL_THRESHOLD = 11;
-
-    // ...
-    static final Random RAND = new SecureRandom();
-
     // ...
     static final Map<Class<?>, Object> CLASS_EMPTY_ARRAY = new ConcurrentHashMap<>();
 
     static {
         CLASS_EMPTY_ARRAY.put(boolean.class, EMPTY_BOOLEAN_ARRAY);
-        CLASS_EMPTY_ARRAY.put(Boolean.class, EMPTY_BOOLEAN_OBJECT_ARRAY);
+        CLASS_EMPTY_ARRAY.put(Boolean.class, EMPTY_BOOLEAN_OBJ_ARRAY);
 
         CLASS_EMPTY_ARRAY.put(char.class, EMPTY_CHAR_ARRAY);
-        CLASS_EMPTY_ARRAY.put(Character.class, EMPTY_CHARACTER_OBJECT_ARRAY);
+        CLASS_EMPTY_ARRAY.put(Character.class, EMPTY_CHAR_OBJ_ARRAY);
 
         CLASS_EMPTY_ARRAY.put(byte.class, EMPTY_BYTE_ARRAY);
-        CLASS_EMPTY_ARRAY.put(Byte.class, EMPTY_BYTE_OBJECT_ARRAY);
+        CLASS_EMPTY_ARRAY.put(Byte.class, EMPTY_BYTE_OBJ_ARRAY);
 
         CLASS_EMPTY_ARRAY.put(short.class, EMPTY_SHORT_ARRAY);
-        CLASS_EMPTY_ARRAY.put(Short.class, EMPTY_SHORT_OBJECT_ARRAY);
+        CLASS_EMPTY_ARRAY.put(Short.class, EMPTY_SHORT_OBJ_ARRAY);
 
         CLASS_EMPTY_ARRAY.put(int.class, EMPTY_INT_ARRAY);
-        CLASS_EMPTY_ARRAY.put(Integer.class, EMPTY_INTEGER_OBJECT_ARRAY);
+        CLASS_EMPTY_ARRAY.put(Integer.class, EMPTY_INT_OBJ_ARRAY);
 
         CLASS_EMPTY_ARRAY.put(long.class, EMPTY_LONG_ARRAY);
-        CLASS_EMPTY_ARRAY.put(Long.class, EMPTY_LONG_OBJECT_ARRAY);
+        CLASS_EMPTY_ARRAY.put(Long.class, EMPTY_LONG_OBJ_ARRAY);
 
         CLASS_EMPTY_ARRAY.put(float.class, EMPTY_FLOAT_ARRAY);
-        CLASS_EMPTY_ARRAY.put(Float.class, EMPTY_FLOAT_OBJECT_ARRAY);
+        CLASS_EMPTY_ARRAY.put(Float.class, EMPTY_FLOAT_OBJ_ARRAY);
 
         CLASS_EMPTY_ARRAY.put(double.class, EMPTY_DOUBLE_ARRAY);
-        CLASS_EMPTY_ARRAY.put(Double.class, EMPTY_DOUBLE_OBJECT_ARRAY);
+        CLASS_EMPTY_ARRAY.put(Double.class, EMPTY_DOUBLE_OBJ_ARRAY);
 
         CLASS_EMPTY_ARRAY.put(String.class, EMPTY_STRING_ARRAY);
         CLASS_EMPTY_ARRAY.put(Object.class, EMPTY_OBJECT_ARRAY);
@@ -493,8 +443,6 @@ sealed class CommonUtil permits N {
             charStringCache[i] = String.valueOf((char) i);
         }
     }
-
-    private static final int MIN_SIZE_FOR_COPY_ALL = 9;
 
     CommonUtil() {
         // Utility class.
@@ -592,7 +540,7 @@ sealed class CommonUtil permits N {
      */
     public static char defaultIfNull(Character c) {
         if (c == null) {
-            return CHAR_ZERO;
+            return Strings.CHAR_ZERO;
         }
 
         return c;
@@ -874,12 +822,23 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     *
-     * @param val
+     * @param <T>
+     * @param c
+     * @param defaultColl
      * @return
      */
-    public static String stringOf(final boolean val) {
-        return String.valueOf(val);
+    public static <T extends Collection<?>> T defaultIfEmpty(final T c, final T defaultColl) {
+        return isEmpty(c) ? defaultColl : c;
+    }
+
+    /**
+     * @param <T>
+     * @param m
+     * @param defaultMap
+     * @return
+     */
+    public static <T extends Map<?, ?>> T defaultIfEmpty(final T m, final T defaultMap) {
+        return isEmpty(m) ? defaultMap : m;
     }
 
     /**
@@ -2081,10 +2040,26 @@ sealed class CommonUtil permits N {
      * @param componentType
      * @param length
      * @return T[]
+     * @see Array#newInstance(Class, int)
      */
     @SuppressWarnings("unchecked")
     public static <T> T newArray(final Class<?> componentType, final int length) {
         return (T) Array.newInstance(componentType, length);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param componentType
+     * @param dimensions
+     * @return
+     * @throws IllegalArgumentException
+     * @throws NegativeArraySizeException
+     * @see Array#newInstance(Class, int...)
+     */
+    @SafeVarargs
+    public static <T> T newArray(final Class<?> componentType, final int... dimensions) throws IllegalArgumentException, NegativeArraySizeException {
+        return (T) Array.newInstance(componentType, dimensions);
     }
 
     /**
@@ -8621,9 +8596,7 @@ sealed class CommonUtil permits N {
      *
      * @param a
      * @return
-     * @deprecated replaced by {@link nullToEmpty(Object[], Class)}
      */
-    @Deprecated
     public static Object[] nullToEmpty(final Object[] a) {
         return a == null ? EMPTY_OBJECT_ARRAY : a;
     }
@@ -12199,7 +12172,7 @@ sealed class CommonUtil permits N {
             return 1;
         }
 
-        cmp = cmp == null ? NATURAL_COMPARATOR : cmp;
+        cmp = checkComparator(cmp);
 
         int value = 0;
 
@@ -12232,7 +12205,7 @@ sealed class CommonUtil permits N {
             return 0;
         }
 
-        cmp = cmp == null ? NATURAL_COMPARATOR : cmp;
+        cmp = checkComparator(cmp);
         int value = 0;
 
         for (int i = fromIndexA, j = fromIndexB, k = 0; k < len; i++, j++, k++) {
@@ -12288,7 +12261,7 @@ sealed class CommonUtil permits N {
             return 1;
         }
 
-        cmp = cmp == null ? NATURAL_COMPARATOR : cmp;
+        cmp = checkComparator(cmp);
 
         final Iterator<T> iterA = a.iterator();
         final Iterator<T> iterB = b.iterator();
@@ -12323,7 +12296,7 @@ sealed class CommonUtil permits N {
             return 0;
         }
 
-        cmp = cmp == null ? NATURAL_COMPARATOR : cmp;
+        cmp = checkComparator(cmp);
         final Iterator<T> iterA = a.iterator();
         final Iterator<T> iterB = b.iterator();
 
@@ -12370,6 +12343,32 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Returns default Comparator {@code NATURAL_COMPARATOR} if the specified {@code cmp} is null. Otherwise returns {@code cmp}.
+     *
+     * @param <T>
+     * @param cmp
+     * @return
+     */
+    static <T> Comparator<? super T> checkComparator(Comparator<? super T> cmp) {
+        return cmp == null ? NATURAL_COMPARATOR : cmp;
+    }
+
+    /**
+     * Returns {@code true} is {@code a < b}, otherwise {@code false} is returned.
+     *
+     * @param <T>
+     * @param a
+     * @param b
+     * @param cmp
+     * @return
+     */
+    public static <T> boolean lessThan(final T a, final T b, Comparator<? super T> cmp) {
+        cmp = checkComparator(cmp);
+
+        return cmp.compare(a, b) < 0;
+    }
+
+    /**
      * Returns {@code true} is {@code a <= b}, otherwise {@code false} is returned.
      *
      * @param <T>
@@ -12379,6 +12378,21 @@ sealed class CommonUtil permits N {
      */
     public static <T extends Comparable<? super T>> boolean lessEqual(final T a, final T b) {
         return compare(a, b) <= 0;
+    }
+
+    /**
+     * Returns {@code true} is {@code a <= b}, otherwise {@code false} is returned.
+     *
+     * @param <T>
+     * @param a
+     * @param b
+     * @param cmp
+     * @return
+     */
+    public static <T> boolean lessEqual(final T a, final T b, Comparator<? super T> cmp) {
+        cmp = checkComparator(cmp);
+
+        return cmp.compare(a, b) <= 0;
     }
 
     /**
@@ -12394,6 +12408,21 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Returns {@code true} is {@code a > b}, otherwise {@code false} is returned.
+     *
+     * @param <T>
+     * @param a
+     * @param b
+     * @param cmp
+     * @return
+     */
+    public static <T> boolean greaterThan(final T a, final T b, Comparator<? super T> cmp) {
+        cmp = checkComparator(cmp);
+
+        return cmp.compare(a, b) > 0;
+    }
+
+    /**
      * Returns {@code true} is {@code a >= b}, otherwise {@code false} is returned.
      *
      * @param <T>
@@ -12403,6 +12432,21 @@ sealed class CommonUtil permits N {
      */
     public static <T extends Comparable<? super T>> boolean greaterEqual(final T a, final T b) {
         return compare(a, b) >= 0;
+    }
+
+    /**
+     * Returns {@code true} is {@code a >= b}, otherwise {@code false} is returned.
+     *
+     * @param <T>
+     * @param a
+     * @param b
+     * @param cmp
+     * @return
+     */
+    public static <T> boolean greaterEqual(final T a, final T b, Comparator<? super T> cmp) {
+        cmp = checkComparator(cmp);
+
+        return cmp.compare(a, b) >= 0;
     }
 
     /**
@@ -12423,6 +12467,26 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Returns {@code true} is {@code min < value < max}, otherwise {@code false} is returned.
+     *
+     * @param <T>
+     * @param value
+     * @param min
+     * @param max
+     * @param cmp
+     * @return
+     */
+    public static <T> boolean gtAndLt(final T value, final T min, final T max, Comparator<? super T> cmp) {
+        cmp = checkComparator(cmp);
+
+        if (cmp.compare(value, min) <= 0) {
+            return false;
+        }
+
+        return cmp.compare(value, max) < 0;
+    }
+
+    /**
      * Returns {@code true} is {@code min <= value < max}, otherwise {@code false} is returned.
      *
      * @param <T>
@@ -12437,6 +12501,26 @@ sealed class CommonUtil permits N {
         }
 
         return compare(value, max) < 0;
+    }
+
+    /**
+     * Returns {@code true} is {@code min <= value < max}, otherwise {@code false} is returned.
+     *
+     * @param <T>
+     * @param value
+     * @param min
+     * @param max
+     * @param cmp
+     * @return
+     */
+    public static <T> boolean geAndLt(final T value, final T min, final T max, Comparator<? super T> cmp) {
+        cmp = checkComparator(cmp);
+
+        if (cmp.compare(value, min) < 0) {
+            return false;
+        }
+
+        return cmp.compare(value, max) < 0;
     }
 
     /**
@@ -12457,6 +12541,26 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Returns {@code true} is {@code min <= value <= max}, otherwise {@code false} is returned.
+     *
+     * @param <T>
+     * @param value
+     * @param min
+     * @param max
+     * @param cmp
+     * @return
+     */
+    public static <T> boolean geAndLe(final T value, final T min, final T max, Comparator<? super T> cmp) {
+        cmp = checkComparator(cmp);
+
+        if (cmp.compare(value, min) < 0) {
+            return false;
+        }
+
+        return cmp.compare(value, max) <= 0;
+    }
+
+    /**
      * Returns {@code true} is {@code min < value <= max}, otherwise {@code false} is returned.
      *
      * @param <T>
@@ -12474,6 +12578,26 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Returns {@code true} is {@code min < value <= max}, otherwise {@code false} is returned.
+     *
+     * @param <T>
+     * @param value
+     * @param min
+     * @param max
+     * @param cmp
+     * @return
+     */
+    public static <T> boolean gtAndLe(final T value, final T min, final T max, Comparator<? super T> cmp) {
+        cmp = checkComparator(cmp);
+
+        if (cmp.compare(value, min) <= 0) {
+            return false;
+        }
+
+        return cmp.compare(value, max) <= 0;
+    }
+
+    /**
      *
      * @param <T>
      * @param value
@@ -12485,6 +12609,21 @@ sealed class CommonUtil permits N {
     @Deprecated
     public static <T extends Comparable<? super T>> boolean isBetween(final T value, final T min, final T max) {
         return gtAndLt(value, min, max);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param value
+     * @param min
+     * @param max
+     * @param cmp
+     * @return
+     * @deprecated replaced by {@link #gtAndLt(Comparable, Comparable, Comparable)}
+     */
+    @Deprecated
+    public static <T> boolean isBetween(final T value, final T min, final T max, final Comparator<? super T> cmp) {
+        return gtAndLt(value, min, max, cmp);
     }
 
     /**
@@ -18576,7 +18715,7 @@ sealed class CommonUtil permits N {
      * @return
      */
     public static <T> boolean isSorted(final T[] a, Comparator<? super T> cmp) {
-        cmp = cmp == null ? NATURAL_COMPARATOR : cmp;
+        cmp = checkComparator(cmp);
 
         final int len = N.len(a);
 
@@ -18608,7 +18747,7 @@ sealed class CommonUtil permits N {
     public static <T> boolean isSorted(final T[] a, final int fromIndex, final int toIndex, Comparator<? super T> cmp) {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
-        cmp = cmp == null ? NATURAL_COMPARATOR : cmp;
+        cmp = checkComparator(cmp);
 
         if (toIndex - fromIndex < 2) {
             return true;
@@ -18709,7 +18848,7 @@ sealed class CommonUtil permits N {
             return true;
         }
 
-        cmp = cmp == null ? NATURAL_COMPARATOR : cmp;
+        cmp = checkComparator(cmp);
 
         final Iterator<? extends T> iter = c.iterator();
         T prev = iter.next();
@@ -18745,7 +18884,7 @@ sealed class CommonUtil permits N {
             return true;
         }
 
-        cmp = cmp == null ? NATURAL_COMPARATOR : cmp;
+        cmp = checkComparator(cmp);
 
         final Iterator<? extends T> iter = c.iterator();
         int cursor = 0;
@@ -19896,6 +20035,86 @@ sealed class CommonUtil permits N {
 
     /**
      *
+     * @param <T>
+     * @param a
+     * @param keyMapper
+     */
+    public static <T> void reverseSortByInt(final T[] a, final ToIntFunction<? super T> keyMapper) {
+        sort(a, Comparators.reversedComparingInt(keyMapper));
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param list
+     * @param keyMapper
+     */
+    public static <T> void reverseSortByInt(final List<? extends T> list, final ToIntFunction<? super T> keyMapper) {
+        sort(list, Comparators.reversedComparingInt(keyMapper));
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param a
+     * @param keyMapper
+     */
+    public static <T> void reverseSortByLong(final T[] a, final ToLongFunction<? super T> keyMapper) {
+        sort(a, Comparators.reversedComparingLong(keyMapper));
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param list
+     * @param keyMapper
+     */
+    public static <T> void reverseSortByLong(final List<? extends T> list, final ToLongFunction<? super T> keyMapper) {
+        sort(list, Comparators.reversedComparingLong(keyMapper));
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param a
+     * @param keyMapper
+     */
+    public static <T> void reverseSortByFloat(final T[] a, final ToFloatFunction<? super T> keyMapper) {
+        sort(a, Comparators.reversedComparingFloat(keyMapper));
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param list
+     * @param keyMapper
+     */
+    public static <T> void reverseSortByFloat(final List<? extends T> list, final ToFloatFunction<? super T> keyMapper) {
+        sort(list, Comparators.reversedComparingFloat(keyMapper));
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param a
+     * @param keyMapper
+     */
+    public static <T> void reverseSortByDouble(final T[] a, final ToDoubleFunction<? super T> keyMapper) {
+        sort(a, Comparators.reversedComparingDouble(keyMapper));
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param list
+     * @param keyMapper
+     */
+    public static <T> void reverseSortByDouble(final List<? extends T> list, final ToDoubleFunction<? super T> keyMapper) {
+        sort(list, Comparators.reversedComparingDouble(keyMapper));
+    }
+
+    /**
+     *
      * @param a
      */
     public static void bucketSort(final int[] a) {
@@ -20134,7 +20353,7 @@ sealed class CommonUtil permits N {
             return;
         }
 
-        final Comparator<? super T> comparator = cmp == null ? NATURAL_COMPARATOR : cmp;
+        final Comparator<? super T> comparator = checkComparator(cmp);
         final Multiset<T> multiset = new Multiset<>();
 
         for (int i = fromIndex; i < toIndex; i++) {
@@ -20212,7 +20431,7 @@ sealed class CommonUtil permits N {
             return;
         }
 
-        final Comparator<? super T> comparator = cmp == null ? NATURAL_COMPARATOR : cmp;
+        final Comparator<? super T> comparator = checkComparator(cmp);
         final Multiset<T> multiset = new Multiset<>();
         ListIterator<T> itr = (ListIterator<T>) list.listIterator(fromIndex);
         int i = fromIndex;
@@ -20571,7 +20790,7 @@ sealed class CommonUtil permits N {
             return N.INDEX_NOT_FOUND;
         }
 
-        return Arrays.binarySearch(a, valueToFind, cmp == null ? NATURAL_COMPARATOR : cmp);
+        return Arrays.binarySearch(a, valueToFind, checkComparator(cmp));
     }
 
     /**
@@ -20590,7 +20809,7 @@ sealed class CommonUtil permits N {
             return N.INDEX_NOT_FOUND;
         }
 
-        return Arrays.binarySearch(a, fromIndex, toIndex, valueToFind, cmp == null ? NATURAL_COMPARATOR : cmp);
+        return Arrays.binarySearch(a, fromIndex, toIndex, valueToFind, checkComparator(cmp));
     }
 
     /**
@@ -20659,7 +20878,7 @@ sealed class CommonUtil permits N {
             return N.INDEX_NOT_FOUND;
         }
 
-        cmp = cmp == null ? NATURAL_COMPARATOR : cmp;
+        cmp = checkComparator(cmp);
 
         @SuppressWarnings("deprecation")
         final T[] a = (T[]) InternalUtil.getInternalArray(list);

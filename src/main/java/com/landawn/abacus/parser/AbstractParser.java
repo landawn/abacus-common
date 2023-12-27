@@ -188,7 +188,7 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
 
     static {
         mapOfCreatorAndConvertorForTargetType.put(ImmutableList.class,
-                Tuple.<Function<Class<?>, Object>, Function<Object, Object>> of(t -> new ArrayList<>(), new Function<Object, Object>() {
+                Tuple.<Function<Class<?>, Object>, Function<Object, Object>> of(t -> new ArrayList<>(), new Function<>() {
                     @SuppressWarnings({ "rawtypes", "deprecation" })
                     @Override
                     public Object apply(Object t) {
@@ -197,7 +197,7 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
                 }));
 
         mapOfCreatorAndConvertorForTargetType.put(ImmutableSet.class,
-                Tuple.<Function<Class<?>, Object>, Function<Object, Object>> of(t -> new HashSet<>(), new Function<Object, Object>() {
+                Tuple.<Function<Class<?>, Object>, Function<Object, Object>> of(t -> new HashSet<>(), new Function<>() {
                     @SuppressWarnings({ "rawtypes", "deprecation" })
                     @Override
                     public Object apply(Object t) {
@@ -206,7 +206,7 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
                 }));
 
         mapOfCreatorAndConvertorForTargetType.put(ImmutableSortedSet.class,
-                Tuple.<Function<Class<?>, Object>, Function<Object, Object>> of(t -> new TreeSet<>(), new Function<Object, Object>() {
+                Tuple.<Function<Class<?>, Object>, Function<Object, Object>> of(t -> new TreeSet<>(), new Function<>() {
                     @SuppressWarnings({ "rawtypes", "deprecation" })
                     @Override
                     public Object apply(Object t) {
@@ -215,7 +215,7 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
                 }));
 
         mapOfCreatorAndConvertorForTargetType.put(ImmutableNavigableSet.class,
-                Tuple.<Function<Class<?>, Object>, Function<Object, Object>> of(t -> new TreeSet<>(), new Function<Object, Object>() {
+                Tuple.<Function<Class<?>, Object>, Function<Object, Object>> of(t -> new TreeSet<>(), new Function<>() {
                     @SuppressWarnings({ "rawtypes", "deprecation" })
                     @Override
                     public Object apply(Object t) {
@@ -226,7 +226,7 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
         mapOfCreatorAndConvertorForTargetType.put(ImmutableCollection.class, mapOfCreatorAndConvertorForTargetType.get(ImmutableList.class));
 
         mapOfCreatorAndConvertorForTargetType.put(ImmutableMap.class,
-                Tuple.<Function<Class<?>, Object>, Function<Object, Object>> of(t -> new HashMap<>(), new Function<Object, Object>() {
+                Tuple.<Function<Class<?>, Object>, Function<Object, Object>> of(t -> new HashMap<>(), new Function<>() {
                     @SuppressWarnings({ "rawtypes", "deprecation" })
                     @Override
                     public Object apply(Object t) {
@@ -235,7 +235,7 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
                 }));
 
         mapOfCreatorAndConvertorForTargetType.put(ImmutableBiMap.class,
-                Tuple.<Function<Class<?>, Object>, Function<Object, Object>> of(t -> new BiMap<>(), new Function<Object, Object>() {
+                Tuple.<Function<Class<?>, Object>, Function<Object, Object>> of(t -> new BiMap<>(), new Function<>() {
                     @SuppressWarnings({ "rawtypes", "deprecation" })
                     @Override
                     public Object apply(Object t) {
@@ -244,7 +244,7 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
                 }));
 
         mapOfCreatorAndConvertorForTargetType.put(ImmutableSortedMap.class,
-                Tuple.<Function<Class<?>, Object>, Function<Object, Object>> of(t -> new TreeMap<>(), new Function<Object, Object>() {
+                Tuple.<Function<Class<?>, Object>, Function<Object, Object>> of(t -> new TreeMap<>(), new Function<>() {
                     @SuppressWarnings({ "rawtypes", "deprecation" })
                     @Override
                     public Object apply(Object t) {
@@ -253,7 +253,7 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
                 }));
 
         mapOfCreatorAndConvertorForTargetType.put(ImmutableNavigableMap.class,
-                Tuple.<Function<Class<?>, Object>, Function<Object, Object>> of(t -> new TreeMap<>(), new Function<Object, Object>() {
+                Tuple.<Function<Class<?>, Object>, Function<Object, Object>> of(t -> new TreeMap<>(), new Function<>() {
                     @SuppressWarnings({ "rawtypes", "deprecation" })
                     @Override
                     public Object apply(Object t) {

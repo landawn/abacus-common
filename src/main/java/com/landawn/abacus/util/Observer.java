@@ -247,7 +247,7 @@ public abstract class Observer<T> implements Immutable {
 
         final long intervalDurationInMillis = unit.toMillis(intervalDuration);
 
-        dispatcher.append(new Dispatcher<Object>() {
+        dispatcher.append(new Dispatcher<>() {
             private long prevTimestamp = 0;
             private long lastScheduledTime = 0;
 

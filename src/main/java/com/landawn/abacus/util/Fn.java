@@ -524,7 +524,7 @@ public final class Fn {
     @SequentialOnly
     @Stateful
     public static <T, C extends Collection<T>> Supplier<? extends C> reuse(final java.util.function.Supplier<? extends C> supplier) {
-        return new Supplier<C>() {
+        return new Supplier<>() {
             private C c;
 
             @Override
@@ -557,7 +557,7 @@ public final class Fn {
     @SequentialOnly
     @Stateful
     public static <T, C extends Collection<T>> IntFunction<? extends C> reuse(final java.util.function.IntFunction<? extends C> supplier) {
-        return new IntFunction<C>() {
+        return new IntFunction<>() {
             private C c;
 
             @Override
@@ -6016,7 +6016,7 @@ public final class Fn {
         @SequentialOnly
         @Stateful
         public static <T, C extends Collection<T>> Supplier<? extends C> single(final java.util.function.Supplier<? extends C> supplier) {
-            return new Supplier<C>() {
+            return new Supplier<>() {
                 private C c = null;
 
                 @Override
@@ -6988,7 +6988,7 @@ public final class Fn {
         @SequentialOnly
         @Stateful
         public static <T, C extends Collection<T>> IntFunction<? extends C> single(final java.util.function.IntFunction<? extends C> supplier) {
-            return new IntFunction<C>() {
+            return new IntFunction<>() {
                 private C c = null;
 
                 @Override

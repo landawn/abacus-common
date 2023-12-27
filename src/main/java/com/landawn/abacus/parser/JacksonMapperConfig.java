@@ -27,6 +27,8 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.cfg.BaseSettings;
 import com.fasterxml.jackson.databind.cfg.CoercionConfigs;
 import com.fasterxml.jackson.databind.cfg.ConfigOverrides;
+import com.fasterxml.jackson.databind.cfg.DatatypeFeatures;
+import com.fasterxml.jackson.databind.cfg.DefaultCacheProvider;
 import com.fasterxml.jackson.databind.introspect.BasicClassIntrospector;
 import com.fasterxml.jackson.databind.introspect.DefaultAccessorNamingStrategy;
 import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
@@ -61,7 +63,9 @@ public class JacksonMapperConfig extends MapperConfig {
             // Only for 2.x; 3.x will use more restrictive default
             LaissezFaireSubTypeValidator.instance,
             // Since 2.12:
-            new DefaultAccessorNamingStrategy.Provider());
+            new DefaultAccessorNamingStrategy.Provider(),
+            // Since 2.16:
+            DefaultCacheProvider.defaultInstance());
 
     private SerializationConfig serializationConfig;
 
@@ -240,7 +244,7 @@ public class JacksonMapperConfig extends MapperConfig {
             final SimpleMixInResolver mixins = new SimpleMixInResolver(null);
             final RootNameLookup rootNames = new RootNameLookup();
 
-            serializationConfig = new SerializationConfig(base, subtypeResolver, mixins, rootNames, new ConfigOverrides());
+            serializationConfig = new SerializationConfig(base, subtypeResolver, mixins, rootNames, new ConfigOverrides(), DatatypeFeatures.defaultFeatures());
         }
     }
 
@@ -251,7 +255,8 @@ public class JacksonMapperConfig extends MapperConfig {
             final SimpleMixInResolver mixins = new SimpleMixInResolver(null);
             final RootNameLookup rootNames = new RootNameLookup();
 
-            deserializationConfig = new DeserializationConfig(base, subtypeResolver, mixins, rootNames, new ConfigOverrides(), new CoercionConfigs());
+            deserializationConfig = new DeserializationConfig(base, subtypeResolver, mixins, rootNames, new ConfigOverrides(), new CoercionConfigs(),
+                    DatatypeFeatures.defaultFeatures());
         }
     }
 

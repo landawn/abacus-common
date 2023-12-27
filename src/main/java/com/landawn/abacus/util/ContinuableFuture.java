@@ -52,7 +52,7 @@ public class ContinuableFuture<T> implements Future<T> {
     ContinuableFuture(final Future<T> future, final List<ContinuableFuture<?>> upFutures, final Executor asyncExecutor) {
         this.future = future;
         this.upFutures = upFutures;
-        this.asyncExecutor = asyncExecutor == null ? N.asyncExecutor.getExecutor() : asyncExecutor;
+        this.asyncExecutor = asyncExecutor == null ? N.ASYNC_EXECUTOR.getExecutor() : asyncExecutor;
     }
 
     /**
@@ -62,7 +62,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * @see N#asyncExecute(Throwables.Runnable)
      */
     public static ContinuableFuture<Void> run(final Throwables.Runnable<? extends Exception> action) {
-        return run(action, N.asyncExecutor.getExecutor());
+        return run(action, N.ASYNC_EXECUTOR.getExecutor());
     }
 
     /**
@@ -91,7 +91,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * @see N#asyncExecute(Callable)
      */
     public static <T> ContinuableFuture<T> call(final Callable<T> action) {
-        return call(action, N.asyncExecutor.getExecutor());
+        return call(action, N.ASYNC_EXECUTOR.getExecutor());
     }
 
     /**
@@ -142,7 +142,7 @@ public class ContinuableFuture<T> implements Future<T> {
             public T get(final long timeout, final TimeUnit unit) {
                 return result;
             }
-        }, null, N.asyncExecutor.getExecutor());
+        }, null, N.ASYNC_EXECUTOR.getExecutor());
     }
 
     /**

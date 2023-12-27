@@ -34,12 +34,9 @@ import java.util.concurrent.TimeUnit;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.annotation.Beta;
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.exception.UncheckedIOException;
-import com.landawn.abacus.util.DateUtil.DateTimeUtil;
-import com.landawn.abacus.util.DateUtil.Dates;
-import com.landawn.abacus.util.DateUtil.Times;
 
 /**
  * <p>
@@ -51,7 +48,7 @@ import com.landawn.abacus.util.DateUtil.Times;
  * @since 1.2.6
  */
 @SuppressWarnings({ "java:S1694", "java:S2143" })
-public abstract sealed class DateUtil permits DateTimeUtil, Dates, Times {
+public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Dates, DateUtil.Times {
 
     private static final String DATE_STR = "date";
     private static final String DATE1_STR = "date1";

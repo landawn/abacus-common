@@ -4204,18 +4204,23 @@ public interface DataSet {
 
     /**
      *
-     * @throws UncheckedIOException the unchecked IO exception
      */
-    void println() throws UncheckedIOException;
+    void println();
+
+    /**
+     *
+     * @param fromRowIndex
+     * @param toRowIndex
+     */
+    void println(int fromRowIndex, int toRowIndex);
 
     /**
      *
      * @param columnNames
      * @param fromRowIndex
      * @param toRowIndex
-     * @throws UncheckedIOException the unchecked IO exception
      */
-    void println(Collection<String> columnNames, int fromRowIndex, int toRowIndex) throws UncheckedIOException;
+    void println(Collection<String> columnNames, int fromRowIndex, int toRowIndex);
 
     /**
      *

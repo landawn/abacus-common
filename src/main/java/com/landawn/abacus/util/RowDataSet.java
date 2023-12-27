@@ -11387,11 +11387,20 @@ public class RowDataSet implements DataSet, Cloneable {
 
     /**
      *
-     * @throws UncheckedIOException the unchecked IO exception
      */
     @Override
-    public void println() throws UncheckedIOException {
-        println(_columnNameList, 0, size());
+    public void println() {
+        println(0, size());
+    }
+
+    /**
+     *
+     * @param fromRowIndex
+     * @param toRowIndex
+     */
+    @Override
+    public void println(int fromRowIndex, int toRowIndex) {
+        println(_columnNameList, fromRowIndex, toRowIndex); // NOSONAR
     }
 
     /**
@@ -11399,10 +11408,9 @@ public class RowDataSet implements DataSet, Cloneable {
      * @param columnNames
      * @param fromRowIndex
      * @param toRowIndex
-     * @throws UncheckedIOException the unchecked IO exception
      */
     @Override
-    public void println(Collection<String> columnNames, int fromRowIndex, int toRowIndex) throws UncheckedIOException {
+    public void println(Collection<String> columnNames, int fromRowIndex, int toRowIndex) {
         println(IOUtil.newOutputStreamWriter(System.out), columnNames, fromRowIndex, toRowIndex); // NOSONAR
     }
 

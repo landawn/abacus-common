@@ -615,7 +615,7 @@ public abstract class Configuration {
 
         if (value.contains(WD.ASTERISK)) {
             long result = 1;
-            final String[] strs = Splitter.with(N.BACKSLASH_ASTERISK).splitToArray(value);
+            final String[] strs = Splitter.with(Strings.BACKSLASH_ASTERISK).splitToArray(value);
 
             for (String str : strs) {
                 result *= Numbers.toLong(str.trim());
