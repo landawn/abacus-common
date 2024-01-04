@@ -14,9 +14,11 @@
 
 package com.landawn.abacus.parser;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BiConsumer;
 
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.util.N;
@@ -35,10 +37,12 @@ public class JSONDeserializationConfig extends DeserializationConfig<JSONDeseria
     @SuppressWarnings("rawtypes")
     Class<? extends Map> mapInstanceType = HashMap.class;
 
+    Map<String, BiConsumer<? super Collection<?>, ?>> propHandlerMap = null;
+
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public boolean ignoreNullOrEmpty() {
         return ignoreNullOrEmpty;
@@ -47,8 +51,8 @@ public class JSONDeserializationConfig extends DeserializationConfig<JSONDeseria
     /**
      * Won't set/add/put the value to bean/array/list/map if it's null or empty {@code CharSequence/Array/Collection/Map}.
      *
-     * @param ignoreNullOrEmpty 
-     * @return 
+     * @param ignoreNullOrEmpty
+     * @return
      */
     public JSONDeserializationConfig ignoreNullOrEmpty(boolean ignoreNullOrEmpty) {
         this.ignoreNullOrEmpty = ignoreNullOrEmpty;
@@ -57,9 +61,9 @@ public class JSONDeserializationConfig extends DeserializationConfig<JSONDeseria
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      * @deprecated Use {@link #readNullToEmpty()} instead
      */
     @Deprecated
@@ -80,9 +84,9 @@ public class JSONDeserializationConfig extends DeserializationConfig<JSONDeseria
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public boolean readNullToEmpty() {
         return readNullToEmpty;
@@ -101,9 +105,9 @@ public class JSONDeserializationConfig extends DeserializationConfig<JSONDeseria
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public Class<? extends Map> getMapInstanceType() {
@@ -111,10 +115,10 @@ public class JSONDeserializationConfig extends DeserializationConfig<JSONDeseria
     }
 
     /**
-     * 
      *
-     * @param mapInstanceType 
-     * @return 
+     *
+     * @param mapInstanceType
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public JSONDeserializationConfig setMapInstanceType(Class<? extends Map> mapInstanceType) {
@@ -123,6 +127,36 @@ public class JSONDeserializationConfig extends DeserializationConfig<JSONDeseria
         this.mapInstanceType = mapInstanceType;
 
         return this;
+    }
+
+    /**
+     * Sets property handler/converter for (Big) collection values property.
+     *
+     * @param propName
+     * @param handler the first parameter will be Collection or Map, the second parameter will be the current element or entry
+     * @return
+     */
+    public JSONDeserializationConfig setPropHandler(final String propName, final BiConsumer<? super Collection<?>, ?> handler) {
+        N.checkArgNotEmpty(propName, "propName");
+        N.checkArgNotNull(handler, "handler");
+
+        if (propHandlerMap == null) {
+            propHandlerMap = new HashMap<>();
+        }
+
+        propHandlerMap.put(propName, handler);
+
+        return this;
+    }
+
+    public BiConsumer<? super Collection<?>, ?> getPropHandler(final String propName) {
+        N.checkArgNotEmpty(propName, "propName");
+
+        if (propHandlerMap == null) {
+            return null;
+        }
+
+        return propHandlerMap.get(propName);
     }
 
     //    /**
@@ -146,9 +180,9 @@ public class JSONDeserializationConfig extends DeserializationConfig<JSONDeseria
     //    }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public int hashCode() {
@@ -161,7 +195,8 @@ public class JSONDeserializationConfig extends DeserializationConfig<JSONDeseria
         h = 31 * h + N.hashCode(keyType);
         h = 31 * h + N.hashCode(valueType);
         h = 31 * h + N.hashCode(propTypes);
-        return 31 * h + N.hashCode(mapInstanceType);
+        h = 31 * h + N.hashCode(mapInstanceType);
+        return 31 * h + N.hashCode(propHandlerMap);
     }
 
     /**
@@ -180,7 +215,8 @@ public class JSONDeserializationConfig extends DeserializationConfig<JSONDeseria
             if (N.equals(getIgnoredPropNames(), other.getIgnoredPropNames()) && N.equals(ignoreUnmatchedProperty, other.ignoreUnmatchedProperty) //NOSONAR
                     && N.equals(ignoreNullOrEmpty, other.ignoreNullOrEmpty) && N.equals(readNullToEmpty, other.readNullToEmpty)
                     && N.equals(elementType, other.elementType) && N.equals(keyType, other.keyType) && N.equals(valueType, other.valueType)
-                    && N.equals(propTypes, other.propTypes) && N.equals(mapInstanceType, other.mapInstanceType)) {
+                    && N.equals(propTypes, other.propTypes) && N.equals(mapInstanceType, other.mapInstanceType)
+                    && N.equals(propHandlerMap, other.propHandlerMap)) {
 
                 return true;
             }
@@ -190,16 +226,16 @@ public class JSONDeserializationConfig extends DeserializationConfig<JSONDeseria
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public String toString() {
         return "{ignoredPropNames=" + N.toString(getIgnoredPropNames()) + ", ignoreUnmatchedProperty=" + N.toString(ignoreUnmatchedProperty)
                 + ", ignoreNullOrEmpty=" + N.toString(ignoreNullOrEmpty) + ", readNullToEmpty=" + N.toString(readNullToEmpty) + ", elementType="
                 + N.toString(elementType) + ", keyType=" + N.toString(keyType) + ", valueType=" + N.toString(valueType) + ", propTypes=" + N.toString(propTypes)
-                + ", mapInstanceType=" + N.toString(mapInstanceType) + "}";
+                + ", mapInstanceType=" + N.toString(mapInstanceType) + ", propHandlerMap=" + N.toString(propHandlerMap) + "}";
     }
 
     /**

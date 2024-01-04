@@ -38,11 +38,12 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.annotation.JsonXmlField;
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.exception.ParseException;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.parser.JSONDeserializationConfig.JDC;
@@ -270,7 +271,7 @@ final class JSONParserImpl extends AbstractJSONParser {
                 if (type.isArray()) {
                     return readArray(a, targetClass, jr, config, null, true);
                 } else if (type.isCollection()) {
-                    return readCollection(c, targetClass, jr, config, null, true);
+                    return readCollection(c, targetClass, jr, config, null, null, true);
                 } else {
                     return (T) readNullToEmpty(type, type.valueOf(str), config.readNullToEmpty());
                 }
@@ -285,7 +286,7 @@ final class JSONParserImpl extends AbstractJSONParser {
                 return readArray(a, targetClass, jr, config, null, true);
 
             case COLLECTION:
-                return readCollection(c, targetClass, jr, config, null, true);
+                return readCollection(c, targetClass, jr, config, null, null, true);
 
             case DATA_SET:
                 return readDataSet(targetClass, jr, config, true);
@@ -300,7 +301,7 @@ final class JSONParserImpl extends AbstractJSONParser {
                     if (firstToken == START_BRACE) {
                         return (T) readMap(null, Map.class, jr, config, null, false);
                     } else if (firstToken == START_BRACKET) {
-                        return (T) readCollection(null, List.class, jr, config, null, false);
+                        return (T) readCollection(null, List.class, jr, config, null, null, false);
                     }
                 }
 
@@ -1695,7 +1696,7 @@ final class JSONParserImpl extends AbstractJSONParser {
                 if (type.isArray()) {
                     return readArray(null, targetClass, jr, config, null, isFirstCall);
                 } else if (type.isCollection()) {
-                    return readCollection(null, targetClass, jr, config, null, isFirstCall);
+                    return readCollection(null, targetClass, jr, config, null, null, isFirstCall);
                 } else {
                     return (T) readNullToEmpty(type, type.valueOf(source instanceof String ? (String) source : IOUtil.readAllToString(((Reader) source))),
                             config.readNullToEmpty());
@@ -1711,7 +1712,7 @@ final class JSONParserImpl extends AbstractJSONParser {
                 return readArray(null, targetClass, jr, config, null, isFirstCall);
 
             case COLLECTION:
-                return readCollection(null, targetClass, jr, config, null, isFirstCall);
+                return readCollection(null, targetClass, jr, config, null, null, isFirstCall);
 
             case MAP_ENTITY:
                 return readMapEntity(targetClass, jr, config, isFirstCall);
@@ -1729,7 +1730,7 @@ final class JSONParserImpl extends AbstractJSONParser {
                     if (firstTokenToUse == START_BRACE) {
                         return (T) readMap(null, Map.class, jr, config, null, false);
                     } else if (firstTokenToUse == START_BRACKET) {
-                        return (T) readCollection(null, List.class, jr, config, null, false);
+                        return (T) readCollection(null, List.class, jr, config, null, null, false);
                     }
                 }
 
@@ -1952,9 +1953,8 @@ final class JSONParserImpl extends AbstractJSONParser {
 
                     if (propInfo == null || propInfo.jsonXmlExpose == JsonXmlField.Expose.SERIALIZE_ONLY
                             || (propName != null && ignoredClassPropNames != null && ignoredClassPropNames.contains(propName))) {
-                        propValue = readCollection(null, List.class, jr, defaultJSONDeserializationConfig, null, false);
+                        propValue = readCollection(null, List.class, jr, defaultJSONDeserializationConfig, null, config.getPropHandler(propName), false);
                     } else {
-
                         if (propInfo.isJsonRawValue) {
                             final StringBuilder sb = Objectory.createStringBuilder();
                             sb.append('[');
@@ -1989,7 +1989,7 @@ final class JSONParserImpl extends AbstractJSONParser {
                                 Objectory.recycle(sb);
                             }
                         } else {
-                            propValue = readBracketedValue(propType, jr, config);
+                            propValue = readBracketedValue(propType, config.getPropHandler(propName), jr, config);
                         }
 
                         setPropValue(propInfo, propValue, result, ignoreNullOrEmpty);
@@ -2208,13 +2208,13 @@ final class JSONParserImpl extends AbstractJSONParser {
                 case START_BRACKET:
 
                     if (isKey) {
-                        key = readBracketedValue(keyType, jr, config);
+                        key = readBracketedValue(keyType, null, jr, config);
                         propType = valueType;
                     } else {
                         if (propName != null && ignoredClassPropNames != null && ignoredClassPropNames.contains(propName)) {
-                            readCollection(null, List.class, jr, defaultJSONDeserializationConfig, null, false);
+                            readCollection(null, List.class, jr, defaultJSONDeserializationConfig, null, config.getPropHandler(propName), false);
                         } else {
-                            value = readBracketedValue(propType, jr, config);
+                            value = readBracketedValue(propType, key instanceof String ? config.getPropHandler((String) key) : null, jr, config);
 
                             if (!ignoreNullOrEmpty || (!isNullOrEmptyValue(keyType, key) && !isNullOrEmptyValue(propType, value))) {
                                 result.put(key, value);
@@ -2352,7 +2352,7 @@ final class JSONParserImpl extends AbstractJSONParser {
 
                         case START_BRACKET:
 
-                            propValue = readBracketedValue(eleType, jr, config);
+                            propValue = readBracketedValue(eleType, null, jr, config);
 
                             if (!ignoreNullOrEmpty || !isNullOrEmptyValue(eleType, propValue)) {
                                 c.add(propValue);
@@ -2425,7 +2425,7 @@ final class JSONParserImpl extends AbstractJSONParser {
 
                     case START_BRACKET:
 
-                        propValue = readBracketedValue(eleType, jr, config);
+                        propValue = readBracketedValue(eleType, null, jr, config);
 
                         if (!ignoreNullOrEmpty || !isNullOrEmptyValue(eleType, propValue)) {
                             a[idx++] = propValue;
@@ -2454,6 +2454,8 @@ final class JSONParserImpl extends AbstractJSONParser {
         }
     }
 
+    private static final BiConsumer<Collection<Object>, Object> DEFAULT_PROP_HANDLER = Collection::add;
+
     /**
      *
      * @param <T>
@@ -2462,13 +2464,15 @@ final class JSONParserImpl extends AbstractJSONParser {
      * @param jr
      * @param config
      * @param propType
+     * @param propHandler
      * @param isFirstCall
      * @return
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @SuppressWarnings("unchecked")
     protected <T> T readCollection(final Collection<Object> outResult, final Class<? extends T> targetClass, final JSONReader jr,
-            final JSONDeserializationConfig config, Type<?> propType, boolean isFirstCall) throws IOException {
+            final JSONDeserializationConfig config, Type<?> propType, final BiConsumer<? super Collection<?>, ?> propHandler, boolean isFirstCall)
+            throws IOException {
         Type<?> eleType = defaultValueType;
 
         if (propType != null && (propType.isCollection() || propType.isArray()) && !propType.getElementType().isObjectType()) {
@@ -2479,6 +2483,8 @@ final class JSONParserImpl extends AbstractJSONParser {
 
         final boolean ignoreNullOrEmpty = config.ignoreNullOrEmpty();
         final boolean readNullToEmpty = config.readNullToEmpty();
+        @SuppressWarnings("rawtypes")
+        final BiConsumer<Collection<Object>, Object> propHandlerToUse = propHandler == null ? DEFAULT_PROP_HANDLER : (BiConsumer) propHandler;
 
         final Tuple2<Function<Class<?>, Object>, Function<Object, Object>> creatorAndConvertor = getCreatorAndConvertorForTargetType(targetClass, null);
 
@@ -2500,7 +2506,8 @@ final class JSONParserImpl extends AbstractJSONParser {
             propValue = readPropValue(eleType, jr, readNullToEmpty);
 
             if (!ignoreNullOrEmpty || !isNullOrEmptyValue(eleType, propValue)) {
-                result.add(propValue);
+                // result.add(propValue);
+                propHandlerToUse.accept(result, propValue);
             }
 
             return (T) creatorAndConvertor._2.apply(result);
@@ -2517,7 +2524,8 @@ final class JSONParserImpl extends AbstractJSONParser {
                     propValue = readPropValue(eleType, jr, readNullToEmpty);
 
                     if (!ignoreNullOrEmpty || !isNullOrEmptyValue(eleType, propValue)) {
-                        result.add(propValue);
+                        // result.add(propValue);
+                        propHandlerToUse.accept(result, propValue);
                     }
 
                     break;
@@ -2528,7 +2536,8 @@ final class JSONParserImpl extends AbstractJSONParser {
                         propValue = readPropValue(eleType, jr, readNullToEmpty);
 
                         if (!ignoreNullOrEmpty || !isNullOrEmptyValue(eleType, propValue)) {
-                            result.add(propValue);
+                            // result.add(propValue);
+                            propHandlerToUse.accept(result, propValue);
                         }
                     }
 
@@ -2539,17 +2548,19 @@ final class JSONParserImpl extends AbstractJSONParser {
                     propValue = readBracedValue(eleType, jr, config);
 
                     if (!ignoreNullOrEmpty || !isNullOrEmptyValue(eleType, propValue)) {
-                        result.add(propValue);
+                        // result.add(propValue);
+                        propHandlerToUse.accept(result, propValue);
                     }
 
                     break;
 
                 case START_BRACKET:
 
-                    propValue = readBracketedValue(eleType, jr, config);
+                    propValue = readBracketedValue(eleType, null, jr, config);
 
                     if (!ignoreNullOrEmpty || !isNullOrEmptyValue(eleType, propValue)) {
-                        result.add(propValue);
+                        // result.add(propValue);
+                        propHandlerToUse.accept(result, propValue);
                     }
 
                     break;
@@ -2562,7 +2573,8 @@ final class JSONParserImpl extends AbstractJSONParser {
                         propValue = readPropValue(eleType, jr, readNullToEmpty);
 
                         if (!ignoreNullOrEmpty || !isNullOrEmptyValue(eleType, propValue)) {
-                            result.add(propValue);
+                            // result.add(propValue);
+                            propHandlerToUse.accept(result, propValue);
                         }
                     }
 
@@ -2737,7 +2749,7 @@ final class JSONParserImpl extends AbstractJSONParser {
 
         List<Type<?>> columnTypeList = null;
 
-        String propName = null;
+        String columnName = null;
         Type<?> propValueType = defaultValueType;
         boolean isKey = true;
 
@@ -2760,9 +2772,9 @@ final class JSONParserImpl extends AbstractJSONParser {
                 case END_QUOTATION_D, END_QUOTATION_S:
 
                     if (isKey) {
-                        propName = jr.getText();
+                        columnName = jr.getText();
                     } else {
-                        Integer order = dataSetPropOrder.get(propName);
+                        Integer order = dataSetPropOrder.get(columnName);
                         if (order == null) {
                             throw new ParseException(token, getErrorMsg(jr, token));
                         }
@@ -2802,7 +2814,7 @@ final class JSONParserImpl extends AbstractJSONParser {
                         isKey = false;
 
                         if (jr.hasText()) {
-                            propName = jr.getText();
+                            columnName = jr.getText();
                         }
                     } else {
                         throw new ParseException(token, getErrorMsg(jr, token));
@@ -2818,7 +2830,7 @@ final class JSONParserImpl extends AbstractJSONParser {
                         isKey = true;
 
                         if (jr.hasText()) {
-                            Integer order = dataSetPropOrder.get(propName);
+                            Integer order = dataSetPropOrder.get(columnName);
                             if (order == null) {
                                 throw new ParseException(token, getErrorMsg(jr, token));
                             }
@@ -2855,10 +2867,10 @@ final class JSONParserImpl extends AbstractJSONParser {
                     break;
 
                 case START_BRACKET:
-                    Integer order = dataSetPropOrder.get(propName);
+                    Integer order = dataSetPropOrder.get(columnName);
 
-                    if (order == null || (columnNameList != null && columnNameList.contains(propName))) {
-                        int index = N.indexOf(columnNameList, propName);
+                    if (order == null || (columnNameList != null && columnNameList.contains(columnName))) {
+                        int index = N.indexOf(columnNameList, columnName);
 
                         propValueType = columnTypeList.get(index);
 
@@ -2866,7 +2878,8 @@ final class JSONParserImpl extends AbstractJSONParser {
                             propValueType = defaultValueType;
                         }
 
-                        List<Object> column = readCollection(null, List.class, jr, JDC.create().setElementType(propValueType.clazz()), null, false);
+                        List<Object> column = readCollection(null, List.class, jr, JDC.create().setElementType(propValueType.clazz()), null,
+                                config.getPropHandler(columnName), false);
                         if (columnList == null) {
                             columnList = new ArrayList<>(columnNameList.size());
                             N.fill(columnList, 0, columnNameList.size(), null);
@@ -2877,11 +2890,11 @@ final class JSONParserImpl extends AbstractJSONParser {
                     } else {
                         switch (order) {
                             case 3:
-                                columnNameList = readCollection(null, List.class, jr, jdcForStringElement, null, false);
+                                columnNameList = readCollection(null, List.class, jr, jdcForStringElement, null, null, false);
                                 break;
 
                             case 4:
-                                columnTypeList = readCollection(null, List.class, jr, jdcForTypeElement, null, false);
+                                columnTypeList = readCollection(null, List.class, jr, jdcForTypeElement, null, null, false);
                                 break;
 
                             default:
@@ -2892,8 +2905,8 @@ final class JSONParserImpl extends AbstractJSONParser {
                     break;
 
                 case START_BRACE:
-                    if (!PROPERTIES.equals(propName)) {
-                        throw new ParseException(token, getErrorMsg(jr, token) + ". Key: " + propName + ",  Value: " + jr.getText());
+                    if (!PROPERTIES.equals(columnName)) {
+                        throw new ParseException(token, getErrorMsg(jr, token) + ". Key: " + columnName + ",  Value: " + jr.getText());
                     }
 
                     properties = Properties.create(readMap(null, Map.class, jr, jdcForPropertiesElement, null, false));
@@ -2904,7 +2917,7 @@ final class JSONParserImpl extends AbstractJSONParser {
 
                     if ((firstToken == START_BRACE && token != END_BRACE) || (firstToken != START_BRACE && token == END_BRACE)) {
                         throw new ParseException(token, "The JSON text should be wrapped or unwrapped with \"[]\" or \"{}\"");
-                    } else if (isKey && propName != null) {
+                    } else if (isKey && columnName != null) {
                         throw new ParseException(token, getErrorMsg(jr, token));
                     } else {
                         if (jr.hasText()) {
@@ -2983,7 +2996,8 @@ final class JSONParserImpl extends AbstractJSONParser {
     //    static final int COLON = 9;
     //    static final int COMMA = 10;
 
-    protected Object readBracketedValue(final Type<?> type, final JSONReader jr, JSONDeserializationConfig config) throws IOException {
+    protected Object readBracketedValue(final Type<?> type, final BiConsumer<? super Collection<?>, ?> propHandler, final JSONReader jr,
+            JSONDeserializationConfig config) throws IOException {
         if (N.len(type.getParameterTypes()) == 1) {
             config = config.copy();
             config.setElementType(type.getParameterTypes()[0]);
@@ -2992,9 +3006,9 @@ final class JSONParserImpl extends AbstractJSONParser {
         if (type.isArray()) {
             return readArray(null, type.clazz(), jr, config, type, false);
         } else if (type.isCollection()) {
-            return readCollection(null, type.clazz(), jr, config, type, false);
+            return readCollection(null, type.clazz(), jr, config, type, propHandler, false);
         } else {
-            final List<?> list = readCollection(null, List.class, jr, config, type, false);
+            final List<?> list = readCollection(null, List.class, jr, config, type, propHandler, false);
             final BiFunction<List<?>, Type<?>, Object> converter = list2PairTripleConverterMap.get(type.clazz());
 
             return converter == null ? list : converter.apply(list, type);

@@ -653,6 +653,25 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      *
      * @return
      */
+    public u.Optional<T> firstNonNull() {
+        T next = null;
+
+        while (hasNext()) {
+            next = next();
+
+            if (next != null) {
+                return u.Optional.of(next);
+            }
+        }
+
+        return u.Optional.empty();
+    }
+
+    /**
+     *
+     *
+     * @return
+     */
     public Nullable<T> last() {
         if (hasNext()) {
             T next = next();

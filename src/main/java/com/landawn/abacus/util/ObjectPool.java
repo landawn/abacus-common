@@ -21,9 +21,11 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.Internal;
+import com.landawn.abacus.annotation.MayReturnNull;
+import com.landawn.abacus.logging.Logger;
+import com.landawn.abacus.logging.LoggerFactory;
 
 /**
  * It's is a multiple-thread safety map with fixed size. it's designed for frequent get and few add/remove operation
@@ -38,14 +40,17 @@ import com.landawn.abacus.annotation.Internal;
 @Beta
 @SuppressWarnings("java:S2160")
 public final class ObjectPool<K, V> extends AbstractMap<K, V> {
+    private static final Logger logger = LoggerFactory.getLogger(ObjectPool.class);
 
-    final int capacity;
+    private final int capacity;
 
     private final Entry<K, V>[] table;
 
     private final int indexMask;
 
     private int _size = 0; //NOSONAR
+
+    private boolean isWarningLoggedForCapacity;
 
     private transient Set<K> _keySet = null; //NOSONAR
 
@@ -93,11 +98,11 @@ public final class ObjectPool<K, V> extends AbstractMap<K, V> {
     @Override
     public V put(K key, V value) {
         synchronized (table) {
-            return internalPut(key, value);
+            return putValue(key, value);
         }
     }
 
-    private V internalPut(K key, V value) {
+    private V putValue(K key, V value) {
         if ((key == null) || (value == null)) {
             throw new IllegalArgumentException();
         }
@@ -109,6 +114,16 @@ public final class ObjectPool<K, V> extends AbstractMap<K, V> {
         //                throw new IndexOutOfBoundsException("Object pool is full with capacity=" + capacity);
         //            }
         //
+
+        if (isWarningLoggedForCapacity == false && size() > capacity) {
+            final Set<Map.Entry<K, V>> entrySet = entrySet();
+
+            logger.warn("Pool size={} is bigger than capacity={}, first entry={}, last entry={}", size(), capacity, N.firstElement(entrySet),
+                    N.lastElement(entrySet));
+
+            isWarningLoggedForCapacity = true;
+        }
+
         for (Entry<K, V> entry = table[i]; entry != null; entry = entry.next) {
             if ((hash == entry.hash) && key.equals(entry.key)) {
                 V previousValue = entry.value;
@@ -139,7 +154,7 @@ public final class ObjectPool<K, V> extends AbstractMap<K, V> {
         synchronized (table) {
             for (Map.Entry<? extends K, ? extends V> entry : m.entrySet()) {
                 if (entry.getValue() != null) {
-                    internalPut(entry.getKey(), entry.getValue());
+                    putValue(entry.getKey(), entry.getValue());
                 }
             }
         }

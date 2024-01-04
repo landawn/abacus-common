@@ -84,6 +84,72 @@ public abstract class AbstractLogger implements Logger {
     /**
      *
      * @param template
+     * @param arg1
+     * @param arg2
+     * @param arg3
+     * @param arg4
+     */
+    @Override
+    public void trace(String template, Object arg1, Object arg2, Object arg3, Object arg4) {
+        if (isTraceEnabled()) {
+            trace(format(template, arg1, arg2, arg3, arg4));
+        }
+    }
+
+    /**
+     *
+     * @param template
+     * @param arg1
+     * @param arg2
+     * @param arg3
+     * @param arg4
+     * @param arg5
+     */
+    @Override
+    public void trace(String template, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5) {
+        if (isTraceEnabled()) {
+            trace(format(template, arg1, arg2, arg3, arg4, arg5));
+        }
+    }
+
+    /**
+     *
+     * @param template
+     * @param arg1
+     * @param arg2
+     * @param arg3
+     * @param arg4
+     * @param arg5
+     * @param arg6
+     */
+    @Override
+    public void trace(String template, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6) {
+        if (isTraceEnabled()) {
+            trace(format(template, arg1, arg2, arg3, arg4, arg5, arg6));
+        }
+    }
+
+    /**
+     *
+     * @param template
+     * @param arg1
+     * @param arg2
+     * @param arg3
+     * @param arg4
+     * @param arg5
+     * @param arg6
+     * @param arg7
+     */
+    @Override
+    public void trace(String template, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7) {
+        if (isTraceEnabled()) {
+            trace(format(template, arg1, arg2, arg3, arg4, arg5, arg6, arg7));
+        }
+    }
+
+    /**
+     *
+     * @param template
      * @param args
      */
     @Override
@@ -216,6 +282,72 @@ public abstract class AbstractLogger implements Logger {
     public void debug(String template, Object arg1, Object arg2, Object arg3) {
         if (isDebugEnabled()) {
             debug(format(template, arg1, arg2, arg3));
+        }
+    }
+
+    /**
+     *
+     * @param template
+     * @param arg1
+     * @param arg2
+     * @param arg3
+     * @param arg4
+     */
+    @Override
+    public void debug(String template, Object arg1, Object arg2, Object arg3, Object arg4) {
+        if (isDebugEnabled()) {
+            debug(format(template, arg1, arg2, arg3, arg4));
+        }
+    }
+
+    /**
+     *
+     * @param template
+     * @param arg1
+     * @param arg2
+     * @param arg3
+     * @param arg4
+     * @param arg5
+     */
+    @Override
+    public void debug(String template, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5) {
+        if (isDebugEnabled()) {
+            debug(format(template, arg1, arg2, arg3, arg4, arg5));
+        }
+    }
+
+    /**
+     *
+     * @param template
+     * @param arg1
+     * @param arg2
+     * @param arg3
+     * @param arg4
+     * @param arg5
+     * @param arg6
+     */
+    @Override
+    public void debug(String template, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6) {
+        if (isDebugEnabled()) {
+            debug(format(template, arg1, arg2, arg3, arg4, arg5, arg6));
+        }
+    }
+
+    /**
+     *
+     * @param template
+     * @param arg1
+     * @param arg2
+     * @param arg3
+     * @param arg4
+     * @param arg5
+     * @param arg6
+     * @param arg7
+     */
+    @Override
+    public void debug(String template, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7) {
+        if (isDebugEnabled()) {
+            debug(format(template, arg1, arg2, arg3, arg4, arg5, arg6, arg7));
         }
     }
 
@@ -360,6 +492,72 @@ public abstract class AbstractLogger implements Logger {
     /**
      *
      * @param template
+     * @param arg1
+     * @param arg2
+     * @param arg3
+     * @param arg4
+     */
+    @Override
+    public void info(String template, Object arg1, Object arg2, Object arg3, Object arg4) {
+        if (isInfoEnabled()) {
+            info(format(template, arg1, arg2, arg3, arg4));
+        }
+    }
+
+    /**
+     *
+     * @param template
+     * @param arg1
+     * @param arg2
+     * @param arg3
+     * @param arg4
+     * @param arg5
+     */
+    @Override
+    public void info(String template, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5) {
+        if (isInfoEnabled()) {
+            info(format(template, arg1, arg2, arg3, arg4, arg5));
+        }
+    }
+
+    /**
+     *
+     * @param template
+     * @param arg1
+     * @param arg2
+     * @param arg3
+     * @param arg4
+     * @param arg5
+     * @param arg6
+     */
+    @Override
+    public void info(String template, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6) {
+        if (isInfoEnabled()) {
+            info(format(template, arg1, arg2, arg3, arg4, arg5, arg6));
+        }
+    }
+
+    /**
+     *
+     * @param template
+     * @param arg1
+     * @param arg2
+     * @param arg3
+     * @param arg4
+     * @param arg5
+     * @param arg6
+     * @param arg7
+     */
+    @Override
+    public void info(String template, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7) {
+        if (isInfoEnabled()) {
+            info(format(template, arg1, arg2, arg3, arg4, arg5, arg6, arg7));
+        }
+    }
+
+    /**
+     *
+     * @param template
      * @param args
      */
     @Override
@@ -498,6 +696,72 @@ public abstract class AbstractLogger implements Logger {
     /**
      *
      * @param template
+     * @param arg1
+     * @param arg2
+     * @param arg3
+     * @param arg4
+     */
+    @Override
+    public void warn(String template, Object arg1, Object arg2, Object arg3, Object arg4) {
+        if (isWarnEnabled()) {
+            warn(format(template, arg1, arg2, arg3, arg4));
+        }
+    }
+
+    /**
+     *
+     * @param template
+     * @param arg1
+     * @param arg2
+     * @param arg3
+     * @param arg4
+     * @param arg5
+     */
+    @Override
+    public void warn(String template, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5) {
+        if (isWarnEnabled()) {
+            warn(format(template, arg1, arg2, arg3, arg4, arg5));
+        }
+    }
+
+    /**
+     *
+     * @param template
+     * @param arg1
+     * @param arg2
+     * @param arg3
+     * @param arg4
+     * @param arg5
+     * @param arg6
+     */
+    @Override
+    public void warn(String template, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6) {
+        if (isWarnEnabled()) {
+            warn(format(template, arg1, arg2, arg3, arg4, arg5, arg6));
+        }
+    }
+
+    /**
+     *
+     * @param template
+     * @param arg1
+     * @param arg2
+     * @param arg3
+     * @param arg4
+     * @param arg5
+     * @param arg6
+     * @param arg7
+     */
+    @Override
+    public void warn(String template, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7) {
+        if (isWarnEnabled()) {
+            warn(format(template, arg1, arg2, arg3, arg4, arg5, arg6, arg7));
+        }
+    }
+
+    /**
+     *
+     * @param template
      * @param args
      */
     @Override
@@ -630,6 +894,72 @@ public abstract class AbstractLogger implements Logger {
     public void error(String template, Object arg1, Object arg2, Object arg3) {
         if (isErrorEnabled()) {
             error(format(template, arg1, arg2, arg3));
+        }
+    }
+
+    /**
+     *
+     * @param template
+     * @param arg1
+     * @param arg2
+     * @param arg3
+     * @param arg4
+     */
+    @Override
+    public void error(String template, Object arg1, Object arg2, Object arg3, Object arg4) {
+        if (isErrorEnabled()) {
+            error(format(template, arg1, arg2, arg3, arg4));
+        }
+    }
+
+    /**
+     *
+     * @param template
+     * @param arg1
+     * @param arg2
+     * @param arg3
+     * @param arg4
+     * @param arg5
+     */
+    @Override
+    public void error(String template, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5) {
+        if (isErrorEnabled()) {
+            error(format(template, arg1, arg2, arg3, arg4, arg5));
+        }
+    }
+
+    /**
+     *
+     * @param template
+     * @param arg1
+     * @param arg2
+     * @param arg3
+     * @param arg4
+     * @param arg5
+     * @param arg6
+     */
+    @Override
+    public void error(String template, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6) {
+        if (isErrorEnabled()) {
+            error(format(template, arg1, arg2, arg3, arg4, arg5, arg6));
+        }
+    }
+
+    /**
+     *
+     * @param template
+     * @param arg1
+     * @param arg2
+     * @param arg3
+     * @param arg4
+     * @param arg5
+     * @param arg6
+     * @param arg7
+     */
+    @Override
+    public void error(String template, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7) {
+        if (isErrorEnabled()) {
+            error(format(template, arg1, arg2, arg3, arg4, arg5, arg6, arg7));
         }
     }
 
@@ -896,6 +1226,524 @@ public abstract class AbstractLogger implements Logger {
         } else if (cnt == 2) {
             sb.append(" [");
             sb.append(N.toString(arg3));
+            sb.append(']');
+        }
+
+        final String result = sb.toString();
+
+        Objectory.recycle(sb);
+
+        return result;
+    }
+
+    /**
+     *
+     * @param template
+     * @param arg1
+     * @param arg2
+     * @param arg3
+     * @param arg4
+     * @return
+     */
+    static String format(String template, Object arg1, Object arg2, Object arg3, Object arg4) {
+        template = String.valueOf(template); // null -> "null"
+
+        // start substituting the arguments into the '%s' placeholders
+        final StringBuilder sb = Objectory.createStringBuilder(template.length() + 64);
+
+        String placeholder = "{}";
+        int placeholderStart = template.indexOf(placeholder);
+
+        if (placeholderStart < 0) {
+            placeholder = "%s";
+            placeholderStart = template.indexOf(placeholder);
+        }
+
+        int templateStart = 0;
+        int cnt = 0;
+
+        if (placeholderStart >= 0) {
+            cnt++;
+            sb.append(template, templateStart, placeholderStart);
+            sb.append(N.toString(arg1));
+            templateStart = placeholderStart + 2;
+            placeholderStart = template.indexOf(placeholder, templateStart);
+
+            if (placeholderStart >= 0) {
+                cnt++;
+                sb.append(template, templateStart, placeholderStart);
+                sb.append(N.toString(arg2));
+                templateStart = placeholderStart + 2;
+                placeholderStart = template.indexOf(placeholder, templateStart);
+
+                if (placeholderStart >= 0) {
+                    cnt++;
+                    sb.append(template, templateStart, placeholderStart);
+                    sb.append(N.toString(arg3));
+                    templateStart = placeholderStart + 2;
+                    placeholderStart = template.indexOf(placeholder, templateStart);
+
+                    if (placeholderStart >= 0) {
+                        cnt++;
+                        sb.append(template, templateStart, placeholderStart);
+                        sb.append(N.toString(arg4));
+                        templateStart = placeholderStart + 2;
+                    }
+                }
+            }
+
+            sb.append(template, templateStart, template.length());
+        }
+
+        if (cnt == 0) {
+            sb.append(" [");
+            sb.append(N.toString(arg1));
+            sb.append(", ");
+            sb.append(N.toString(arg2));
+            sb.append(", ");
+            sb.append(N.toString(arg3));
+            sb.append(", ");
+            sb.append(N.toString(arg4));
+            sb.append(']');
+        } else if (cnt == 1) {
+            sb.append(" [");
+            sb.append(N.toString(arg2));
+            sb.append(", ");
+            sb.append(N.toString(arg3));
+            sb.append(", ");
+            sb.append(N.toString(arg4));
+            sb.append(']');
+        } else if (cnt == 2) {
+            sb.append(" [");
+            sb.append(N.toString(arg3));
+            sb.append(", ");
+            sb.append(N.toString(arg4));
+            sb.append(']');
+        } else if (cnt == 3) {
+            sb.append(" [");
+            sb.append(N.toString(arg4));
+            sb.append(']');
+        }
+
+        final String result = sb.toString();
+
+        Objectory.recycle(sb);
+
+        return result;
+    }
+
+    /**
+     *
+     * @param template
+     * @param arg1
+     * @param arg2
+     * @param arg3
+     * @param arg4
+     * @param arg5
+     * @return
+     */
+    static String format(String template, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5) {
+        template = String.valueOf(template); // null -> "null"
+
+        // start substituting the arguments into the '%s' placeholders
+        final StringBuilder sb = Objectory.createStringBuilder(template.length() + 64);
+
+        String placeholder = "{}";
+        int placeholderStart = template.indexOf(placeholder);
+
+        if (placeholderStart < 0) {
+            placeholder = "%s";
+            placeholderStart = template.indexOf(placeholder);
+        }
+
+        int templateStart = 0;
+        int cnt = 0;
+
+        if (placeholderStart >= 0) {
+            cnt++;
+            sb.append(template, templateStart, placeholderStart);
+            sb.append(N.toString(arg1));
+            templateStart = placeholderStart + 2;
+            placeholderStart = template.indexOf(placeholder, templateStart);
+
+            if (placeholderStart >= 0) {
+                cnt++;
+                sb.append(template, templateStart, placeholderStart);
+                sb.append(N.toString(arg2));
+                templateStart = placeholderStart + 2;
+                placeholderStart = template.indexOf(placeholder, templateStart);
+
+                if (placeholderStart >= 0) {
+                    cnt++;
+                    sb.append(template, templateStart, placeholderStart);
+                    sb.append(N.toString(arg3));
+                    templateStart = placeholderStart + 2;
+                    placeholderStart = template.indexOf(placeholder, templateStart);
+
+                    if (placeholderStart >= 0) {
+                        cnt++;
+                        sb.append(template, templateStart, placeholderStart);
+                        sb.append(N.toString(arg4));
+                        templateStart = placeholderStart + 2;
+                        placeholderStart = template.indexOf(placeholder, templateStart);
+
+                        if (placeholderStart >= 0) {
+                            cnt++;
+                            sb.append(template, templateStart, placeholderStart);
+                            sb.append(N.toString(arg5));
+                            templateStart = placeholderStart + 2;
+                        }
+                    }
+                }
+            }
+
+            sb.append(template, templateStart, template.length());
+        }
+
+        if (cnt == 0) {
+            sb.append(" [");
+            sb.append(N.toString(arg1));
+            sb.append(", ");
+            sb.append(N.toString(arg2));
+            sb.append(", ");
+            sb.append(N.toString(arg3));
+            sb.append(", ");
+            sb.append(N.toString(arg4));
+            sb.append(", ");
+            sb.append(N.toString(arg5));
+            sb.append(']');
+        } else if (cnt == 1) {
+            sb.append(" [");
+            sb.append(N.toString(arg2));
+            sb.append(", ");
+            sb.append(N.toString(arg3));
+            sb.append(", ");
+            sb.append(N.toString(arg4));
+            sb.append(", ");
+            sb.append(N.toString(arg5));
+            sb.append(']');
+        } else if (cnt == 2) {
+            sb.append(" [");
+            sb.append(N.toString(arg3));
+            sb.append(", ");
+            sb.append(N.toString(arg4));
+            sb.append(", ");
+            sb.append(N.toString(arg5));
+            sb.append(']');
+        } else if (cnt == 3) {
+            sb.append(" [");
+            sb.append(N.toString(arg4));
+            sb.append(", ");
+            sb.append(N.toString(arg5));
+            sb.append(']');
+        } else if (cnt == 4) {
+            sb.append(" [");
+            sb.append(N.toString(arg5));
+            sb.append(']');
+        }
+
+        final String result = sb.toString();
+
+        Objectory.recycle(sb);
+
+        return result;
+    }
+
+    /**
+     *
+     * @param template
+     * @param arg1
+     * @param arg2
+     * @param arg3
+     * @param arg4
+     * @param arg5
+     * @param arg6
+     * @return
+     */
+    static String format(String template, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6) {
+        template = String.valueOf(template); // null -> "null"
+
+        // start substituting the arguments into the '%s' placeholders
+        final StringBuilder sb = Objectory.createStringBuilder(template.length() + 64);
+
+        String placeholder = "{}";
+        int placeholderStart = template.indexOf(placeholder);
+
+        if (placeholderStart < 0) {
+            placeholder = "%s";
+            placeholderStart = template.indexOf(placeholder);
+        }
+
+        int templateStart = 0;
+        int cnt = 0;
+
+        if (placeholderStart >= 0) {
+            cnt++;
+            sb.append(template, templateStart, placeholderStart);
+            sb.append(N.toString(arg1));
+            templateStart = placeholderStart + 2;
+            placeholderStart = template.indexOf(placeholder, templateStart);
+
+            if (placeholderStart >= 0) {
+                cnt++;
+                sb.append(template, templateStart, placeholderStart);
+                sb.append(N.toString(arg2));
+                templateStart = placeholderStart + 2;
+                placeholderStart = template.indexOf(placeholder, templateStart);
+
+                if (placeholderStart >= 0) {
+                    cnt++;
+                    sb.append(template, templateStart, placeholderStart);
+                    sb.append(N.toString(arg3));
+                    templateStart = placeholderStart + 2;
+                    placeholderStart = template.indexOf(placeholder, templateStart);
+
+                    if (placeholderStart >= 0) {
+                        cnt++;
+                        sb.append(template, templateStart, placeholderStart);
+                        sb.append(N.toString(arg4));
+                        templateStart = placeholderStart + 2;
+                        placeholderStart = template.indexOf(placeholder, templateStart);
+
+                        if (placeholderStart >= 0) {
+                            cnt++;
+                            sb.append(template, templateStart, placeholderStart);
+                            sb.append(N.toString(arg5));
+                            templateStart = placeholderStart + 2;
+                            placeholderStart = template.indexOf(placeholder, templateStart);
+
+                            if (placeholderStart >= 0) {
+                                cnt++;
+                                sb.append(template, templateStart, placeholderStart);
+                                sb.append(N.toString(arg6));
+                                templateStart = placeholderStart + 2;
+                            }
+                        }
+                    }
+                }
+            }
+
+            sb.append(template, templateStart, template.length());
+        }
+
+        if (cnt == 0) {
+            sb.append(" [");
+            sb.append(N.toString(arg1));
+            sb.append(", ");
+            sb.append(N.toString(arg2));
+            sb.append(", ");
+            sb.append(N.toString(arg3));
+            sb.append(", ");
+            sb.append(N.toString(arg4));
+            sb.append(", ");
+            sb.append(N.toString(arg5));
+            sb.append(", ");
+            sb.append(N.toString(arg6));
+            sb.append(']');
+        } else if (cnt == 1) {
+            sb.append(" [");
+            sb.append(N.toString(arg2));
+            sb.append(", ");
+            sb.append(N.toString(arg3));
+            sb.append(", ");
+            sb.append(N.toString(arg4));
+            sb.append(", ");
+            sb.append(N.toString(arg5));
+            sb.append(", ");
+            sb.append(N.toString(arg6));
+            sb.append(']');
+        } else if (cnt == 2) {
+            sb.append(" [");
+            sb.append(N.toString(arg3));
+            sb.append(", ");
+            sb.append(N.toString(arg4));
+            sb.append(", ");
+            sb.append(N.toString(arg5));
+            sb.append(", ");
+            sb.append(N.toString(arg6));
+            sb.append(']');
+        } else if (cnt == 3) {
+            sb.append(" [");
+            sb.append(N.toString(arg4));
+            sb.append(", ");
+            sb.append(N.toString(arg5));
+            sb.append(", ");
+            sb.append(N.toString(arg6));
+            sb.append(']');
+        } else if (cnt == 4) {
+            sb.append(" [");
+            sb.append(N.toString(arg5));
+            sb.append(", ");
+            sb.append(N.toString(arg6));
+            sb.append(']');
+        } else if (cnt == 5) {
+            sb.append(" [");
+            sb.append(N.toString(arg6));
+            sb.append(']');
+        }
+
+        final String result = sb.toString();
+
+        Objectory.recycle(sb);
+
+        return result;
+    }
+
+    /**
+     *
+     * @param template
+     * @param arg1
+     * @param arg2
+     * @param arg3
+     * @param arg4
+     * @param arg5
+     * @param arg6
+     * @param arg7
+     * @return
+     */
+    static String format(String template, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7) {
+        template = String.valueOf(template); // null -> "null"
+
+        // start substituting the arguments into the '%s' placeholders
+        final StringBuilder sb = Objectory.createStringBuilder(template.length() + 64);
+
+        String placeholder = "{}";
+        int placeholderStart = template.indexOf(placeholder);
+
+        if (placeholderStart < 0) {
+            placeholder = "%s";
+            placeholderStart = template.indexOf(placeholder);
+        }
+
+        int templateStart = 0;
+        int cnt = 0;
+
+        if (placeholderStart >= 0) {
+            cnt++;
+            sb.append(template, templateStart, placeholderStart);
+            sb.append(N.toString(arg1));
+            templateStart = placeholderStart + 2;
+            placeholderStart = template.indexOf(placeholder, templateStart);
+
+            if (placeholderStart >= 0) {
+                cnt++;
+                sb.append(template, templateStart, placeholderStart);
+                sb.append(N.toString(arg2));
+                templateStart = placeholderStart + 2;
+                placeholderStart = template.indexOf(placeholder, templateStart);
+
+                if (placeholderStart >= 0) {
+                    cnt++;
+                    sb.append(template, templateStart, placeholderStart);
+                    sb.append(N.toString(arg3));
+                    templateStart = placeholderStart + 2;
+                    placeholderStart = template.indexOf(placeholder, templateStart);
+
+                    if (placeholderStart >= 0) {
+                        cnt++;
+                        sb.append(template, templateStart, placeholderStart);
+                        sb.append(N.toString(arg4));
+                        templateStart = placeholderStart + 2;
+                        placeholderStart = template.indexOf(placeholder, templateStart);
+
+                        if (placeholderStart >= 0) {
+                            cnt++;
+                            sb.append(template, templateStart, placeholderStart);
+                            sb.append(N.toString(arg5));
+                            templateStart = placeholderStart + 2;
+                            placeholderStart = template.indexOf(placeholder, templateStart);
+
+                            if (placeholderStart >= 0) {
+                                cnt++;
+                                sb.append(template, templateStart, placeholderStart);
+                                sb.append(N.toString(arg6));
+                                templateStart = placeholderStart + 2;
+                                placeholderStart = template.indexOf(placeholder, templateStart);
+
+                                if (placeholderStart >= 0) {
+                                    cnt++;
+                                    sb.append(template, templateStart, placeholderStart);
+                                    sb.append(N.toString(arg7));
+                                    templateStart = placeholderStart + 2;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            sb.append(template, templateStart, template.length());
+        }
+
+        if (cnt == 0) {
+            sb.append(" [");
+            sb.append(N.toString(arg1));
+            sb.append(", ");
+            sb.append(N.toString(arg2));
+            sb.append(", ");
+            sb.append(N.toString(arg3));
+            sb.append(", ");
+            sb.append(N.toString(arg4));
+            sb.append(", ");
+            sb.append(N.toString(arg5));
+            sb.append(", ");
+            sb.append(N.toString(arg6));
+            sb.append(", ");
+            sb.append(N.toString(arg7));
+            sb.append(']');
+        } else if (cnt == 1) {
+            sb.append(" [");
+            sb.append(N.toString(arg2));
+            sb.append(", ");
+            sb.append(N.toString(arg3));
+            sb.append(", ");
+            sb.append(N.toString(arg4));
+            sb.append(", ");
+            sb.append(N.toString(arg5));
+            sb.append(", ");
+            sb.append(N.toString(arg6));
+            sb.append(", ");
+            sb.append(N.toString(arg7));
+            sb.append(']');
+        } else if (cnt == 2) {
+            sb.append(" [");
+            sb.append(N.toString(arg3));
+            sb.append(", ");
+            sb.append(N.toString(arg4));
+            sb.append(", ");
+            sb.append(N.toString(arg5));
+            sb.append(", ");
+            sb.append(N.toString(arg6));
+            sb.append(", ");
+            sb.append(N.toString(arg7));
+            sb.append(']');
+        } else if (cnt == 3) {
+            sb.append(" [");
+            sb.append(N.toString(arg4));
+            sb.append(", ");
+            sb.append(N.toString(arg5));
+            sb.append(", ");
+            sb.append(N.toString(arg6));
+            sb.append(", ");
+            sb.append(N.toString(arg7));
+            sb.append(']');
+        } else if (cnt == 4) {
+            sb.append(" [");
+            sb.append(N.toString(arg5));
+            sb.append(", ");
+            sb.append(N.toString(arg6));
+            sb.append(", ");
+            sb.append(N.toString(arg7));
+            sb.append(']');
+        } else if (cnt == 5) {
+            sb.append(" [");
+            sb.append(N.toString(arg6));
+            sb.append(", ");
+            sb.append(N.toString(arg7));
+            sb.append(']');
+        } else if (cnt == 6) {
+            sb.append(" [");
+            sb.append(N.toString(arg7));
             sb.append(']');
         }
 

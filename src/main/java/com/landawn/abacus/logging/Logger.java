@@ -116,6 +116,52 @@ public interface Logger {
     void trace(String template, Object arg1, Object arg2, Object arg3);
 
     /**
+     *
+     * @param template
+     * @param arg1
+     * @param arg2
+     * @param arg3
+     * @param arg4
+     */
+    void trace(String template, Object arg1, Object arg2, Object arg3, Object arg4);
+
+    /**
+     *
+     * @param template
+     * @param arg1
+     * @param arg2
+     * @param arg3
+     * @param arg4
+     * @param arg5
+     */
+    void trace(String template, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5);
+
+    /**
+     *
+     * @param template
+     * @param arg1
+     * @param arg2
+     * @param arg3
+     * @param arg4
+     * @param arg5
+     * @param arg6
+     */
+    void trace(String template, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6);
+
+    /**
+     *
+     * @param template
+     * @param arg1
+     * @param arg2
+     * @param arg3
+     * @param arg4
+     * @param arg5
+     * @param arg6
+     * @param arg7
+     */
+    void trace(String template, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7);
+
+    /**
      * Log a message at the TRACE level according to the specified format and arguments.
      *
      * <p>
@@ -240,6 +286,52 @@ public interface Logger {
      * @param arg3
      */
     void debug(String template, Object arg1, Object arg2, Object arg3);
+
+    /**
+     *
+     * @param template
+     * @param arg1
+     * @param arg2
+     * @param arg3
+     * @param arg4
+     */
+    void debug(String template, Object arg1, Object arg2, Object arg3, Object arg4);
+
+    /**
+     *
+     * @param template
+     * @param arg1
+     * @param arg2
+     * @param arg3
+     * @param arg4
+     * @param arg5
+     */
+    void debug(String template, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5);
+
+    /**
+     *
+     * @param template
+     * @param arg1
+     * @param arg2
+     * @param arg3
+     * @param arg4
+     * @param arg5
+     * @param arg6
+     */
+    void debug(String template, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6);
+
+    /**
+     *
+     * @param template
+     * @param arg1
+     * @param arg2
+     * @param arg3
+     * @param arg4
+     * @param arg5
+     * @param arg6
+     * @param arg7
+     */
+    void debug(String template, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7);
 
     /**
      * Log a message at the DEBUG level according to the specified format and arguments.
@@ -368,6 +460,52 @@ public interface Logger {
     void info(String template, Object arg1, Object arg2, Object arg3);
 
     /**
+     *
+     * @param template
+     * @param arg1
+     * @param arg2
+     * @param arg3
+     * @param arg4
+     */
+    void info(String template, Object arg1, Object arg2, Object arg3, Object arg4);
+
+    /**
+     *
+     * @param template
+     * @param arg1
+     * @param arg2
+     * @param arg3
+     * @param arg4
+     * @param arg5
+     */
+    void info(String template, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5);
+
+    /**
+     *
+     * @param template
+     * @param arg1
+     * @param arg2
+     * @param arg3
+     * @param arg4
+     * @param arg5
+     * @param arg6
+     */
+    void info(String template, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6);
+
+    /**
+     *
+     * @param template
+     * @param arg1
+     * @param arg2
+     * @param arg3
+     * @param arg4
+     * @param arg5
+     * @param arg6
+     * @param arg7
+     */
+    void info(String template, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7);
+
+    /**
      * Log a message at the INFO level according to the specified format and arguments.
      *
      * <p>
@@ -494,6 +632,52 @@ public interface Logger {
     void warn(String template, Object arg1, Object arg2, Object arg3);
 
     /**
+     *
+     * @param template
+     * @param arg1
+     * @param arg2
+     * @param arg3
+     * @param arg4
+     */
+    void warn(String template, Object arg1, Object arg2, Object arg3, Object arg4);
+
+    /**
+     *
+     * @param template
+     * @param arg1
+     * @param arg2
+     * @param arg3
+     * @param arg4
+     * @param arg5
+     */
+    void warn(String template, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5);
+
+    /**
+     *
+     * @param template
+     * @param arg1
+     * @param arg2
+     * @param arg3
+     * @param arg4
+     * @param arg5
+     * @param arg6
+     */
+    void warn(String template, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6);
+
+    /**
+     *
+     * @param template
+     * @param arg1
+     * @param arg2
+     * @param arg3
+     * @param arg4
+     * @param arg5
+     * @param arg6
+     * @param arg7
+     */
+    void warn(String template, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7);
+
+    /**
      * Log a message at the WARNING level according to the specified format and arguments.
      *
      * <p>
@@ -618,6 +802,52 @@ public interface Logger {
      * @param arg3
      */
     void error(String template, Object arg1, Object arg2, Object arg3);
+
+    /**
+     *
+     * @param template
+     * @param arg1
+     * @param arg2
+     * @param arg3
+     * @param arg4
+     */
+    void error(String template, Object arg1, Object arg2, Object arg3, Object arg4);
+
+    /**
+     *
+     * @param template
+     * @param arg1
+     * @param arg2
+     * @param arg3
+     * @param arg4
+     * @param arg5
+     */
+    void error(String template, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5);
+
+    /**
+     *
+     * @param template
+     * @param arg1
+     * @param arg2
+     * @param arg3
+     * @param arg4
+     * @param arg5
+     * @param arg6
+     */
+    void error(String template, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6);
+
+    /**
+     *
+     * @param template
+     * @param arg1
+     * @param arg2
+     * @param arg3
+     * @param arg4
+     * @param arg5
+     * @param arg6
+     * @param arg7
+     */
+    void error(String template, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7);
 
     /**
      * Log a message at the ERROR level according to the specified format and arguments.
