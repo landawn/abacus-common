@@ -132,7 +132,7 @@ public class JSONDeserializationConfig extends DeserializationConfig<JSONDeseria
     /**
      * Sets property handler/converter for (Big) collection values property.
      *
-     * @param propName
+     * @param propName TODO should it be {@code parentEntity.propNameA(subEntity).propNameB...} For examaple: {@code account.devices.model}
      * @param handler the first parameter will be Collection or Map, the second parameter will be the current element or entry
      * @return
      */
@@ -149,6 +149,11 @@ public class JSONDeserializationConfig extends DeserializationConfig<JSONDeseria
         return this;
     }
 
+    /**
+     *
+     * @param propName
+     * @return
+     */
     public BiConsumer<? super Collection<?>, ?> getPropHandler(final String propName) {
         N.checkArgNotEmpty(propName, "propName");
 

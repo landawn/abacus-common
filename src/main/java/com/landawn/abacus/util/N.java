@@ -519,49 +519,49 @@ public final class N extends CommonUtil { // public final class N extends π imp
         return map;
     }
 
-    /**
-     *
-     * @param <T>
-     * @param a
-     * @return
-     * @see Multiset#of(Object[])
-     */
-    @Beta
-    public static <T> Multiset<T> occurrences(final T[] a) {
-        return Multiset.of(a);
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param c
-     * @return
-     * @see Multiset#of(Iterable)
-     */
-    @Beta
-    public static <T> Multiset<T> occurrences(final Iterable<? extends T> c) {
-        if (c == null) {
-            return newMultiset();
-        }
-
-        if (c instanceof Collection) {
-            return Multiset.create((Collection<T>) c);
-        }
-
-        return occurrences(c.iterator());
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param iter
-     * @return
-     * @see Multiset#of(Iterator)
-     */
-    @Beta
-    public static <T> Multiset<T> occurrences(final Iterator<? extends T> iter) {
-        return Multiset.create(iter);
-    }
+    //    /**
+    //     *
+    //     * @param <T>
+    //     * @param a
+    //     * @return
+    //     * @see Multiset#of(Object[])
+    //     */
+    //    @Beta
+    //    public static <T> Multiset<T> occurrences(final T[] a) {
+    //        return Multiset.of(a);
+    //    }
+    //
+    //    /**
+    //     *
+    //     * @param <T>
+    //     * @param c
+    //     * @return
+    //     * @see Multiset#of(Iterable)
+    //     */
+    //    @Beta
+    //    public static <T> Multiset<T> occurrences(final Iterable<? extends T> c) {
+    //        if (c == null) {
+    //            return newMultiset();
+    //        }
+    //
+    //        if (c instanceof Collection) {
+    //            return Multiset.create((Collection<T>) c);
+    //        }
+    //
+    //        return occurrences(c.iterator());
+    //    }
+    //
+    //    /**
+    //     *
+    //     * @param <T>
+    //     * @param iter
+    //     * @return
+    //     * @see Multiset#of(Iterator)
+    //     */
+    //    @Beta
+    //    public static <T> Multiset<T> occurrences(final Iterator<? extends T> iter) {
+    //        return Multiset.create(iter);
+    //    }
 
     /**
      *

@@ -717,39 +717,6 @@ public final class Numbers {
      * @return
      * @see DecimalFormat#format(double)
      */
-    public static String format(final double x, String decimalFormat) {
-        N.checkArgNotNull(decimalFormat, "decimalFormat");
-
-        DecimalFormat df = decimalFormatPool.get(decimalFormat);
-
-        if (df == null) {
-            df = new DecimalFormat(decimalFormat);
-        }
-
-        return df.format(x);
-    }
-
-    /**
-     * <pre>
-     * <code>
-     * Numbers.format(val, "0.0"); --> 12.1
-     * Numbers.format(val, "#.#"); --> 12.1
-     * Numbers.format(val, "0.00"); --> 12.10
-     * Numbers.format(val, "#.##"); --> 12.1
-     * Numbers.format(val, "0.000"); --> 12.105
-     * Numbers.format(val, "#.###"); --> 12.105
-     * Numbers.format(val, "0.0000"); --> 12.1050
-     * Numbers.format(val, "#.####"); --> 12.105
-     * Numbers.format(val, "0.00000"); --> 12.10500
-     * Numbers.format(val, "#.#####"); --> 12.105
-     * </code>
-     * </pre>
-     *
-     * @param x
-     * @param decimalFormat
-     * @return
-     * @see DecimalFormat#format(double)
-     */
     public static String format(final float x, String decimalFormat) {
         N.checkArgNotNull(decimalFormat, "decimalFormat");
 
@@ -783,6 +750,39 @@ public final class Numbers {
         } else {
             return df.format(x.doubleValue());
         }
+    }
+
+    /**
+     * <pre>
+     * <code>
+     * Numbers.format(val, "0.0"); --> 12.1
+     * Numbers.format(val, "#.#"); --> 12.1
+     * Numbers.format(val, "0.00"); --> 12.10
+     * Numbers.format(val, "#.##"); --> 12.1
+     * Numbers.format(val, "0.000"); --> 12.105
+     * Numbers.format(val, "#.###"); --> 12.105
+     * Numbers.format(val, "0.0000"); --> 12.1050
+     * Numbers.format(val, "#.####"); --> 12.105
+     * Numbers.format(val, "0.00000"); --> 12.10500
+     * Numbers.format(val, "#.#####"); --> 12.105
+     * </code>
+     * </pre>
+     *
+     * @param x
+     * @param decimalFormat
+     * @return
+     * @see DecimalFormat#format(double)
+     */
+    public static String format(final double x, String decimalFormat) {
+        N.checkArgNotNull(decimalFormat, "decimalFormat");
+
+        DecimalFormat df = decimalFormatPool.get(decimalFormat);
+
+        if (df == null) {
+            df = new DecimalFormat(decimalFormat);
+        }
+
+        return df.format(x);
     }
 
     /**

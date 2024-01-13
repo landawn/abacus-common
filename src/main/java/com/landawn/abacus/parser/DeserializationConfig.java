@@ -210,7 +210,7 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      * Gets the prop type.
      *
      * @param <T>
-     * @param propName
+     * @param propName TODO should it be {@code parentEntity.propNameA(subEntity).propNameB...} For examaple: {@code account.devices.model}
      * @return
      */
     public <T> Type<T> getPropType(String propName) {
@@ -220,7 +220,7 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
     /**
      * Sets the prop type.
      *
-     * @param propName
+     * @param propName TODO should it be {@code parentEntity.propNameA(subEntity).propNameB...} For examaple: {@code account.devices.model}
      * @param cls
      * @return
      */
@@ -231,7 +231,7 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
     /**
      * Sets the prop type.
      *
-     * @param propName
+     * @param propName TODO should it be {@code parentEntity.propNameA(subEntity).propNameB...} For examaple: {@code account.devices.model}
      * @param type
      * @return
      */
@@ -248,7 +248,7 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
     /**
      * Sets the prop type.
      *
-     * @param propName
+     * @param propName TODO should it be {@code parentEntity.propNameA(subEntity).propNameB...} For examaple: {@code account.devices.model}
      * @param type
      * @return
      */
@@ -267,9 +267,9 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public int hashCode() {
@@ -308,9 +308,9 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public String toString() {

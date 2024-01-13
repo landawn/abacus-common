@@ -208,6 +208,8 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
     public static <K, V> ImmutableMap<K, V> copyOf(final Map<? extends K, ? extends V> map) {
         if (N.isEmpty(map)) {
             return empty();
+        } else if (map instanceof ImmutableMap) {
+            return (ImmutableMap<K, V>) map;
         }
 
         final Map<K, V> tmp = map instanceof IdentityHashMap ? new IdentityHashMap<>(map)
