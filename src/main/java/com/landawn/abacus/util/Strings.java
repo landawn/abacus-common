@@ -2947,9 +2947,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param delimiter
      * @param max
      * @return
-     * @deprecated {@code Splitter} is recommended.
      */
-    @Deprecated
     public static String[] split(final String str, final String delimiter, final int max) {
         return Splitter.with(delimiter).omitEmptyStrings().limit(max).splitToArray(str);
     }
@@ -2961,9 +2959,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param max
      * @param trim
      * @return
-     * @deprecated {@code Splitter} is recommended.
      */
-    @Deprecated
+    @SuppressWarnings("deprecation")
     public static String[] split(final String str, final String delimiter, final int max, final boolean trim) {
         return Splitter.with(delimiter).omitEmptyStrings().trim(trim).limit(max).splitToArray(str);
     }
@@ -3037,9 +3034,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param delimiter
      * @param max
      * @return
-     * @deprecated {@code Splitter} is recommended.
      */
-    @Deprecated
     public static String[] splitPreserveAllTokens(final String str, final String delimiter, final int max) {
         return Splitter.with(delimiter).limit(max).splitToArray(str);
     }
@@ -3052,9 +3047,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param max
      * @param trim
      * @return
-     * @deprecated {@code Splitter} is recommended.
      */
-    @Deprecated
+    @SuppressWarnings("deprecation")
     public static String[] splitPreserveAllTokens(final String str, final String delimiter, final int max, boolean trim) {
         return Splitter.with(delimiter).trim(trim).limit(max).splitToArray(str);
     }

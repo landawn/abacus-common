@@ -390,29 +390,6 @@ sealed class CommonUtil permits N {
     }
 
     // ...
-    static final BiMap<Class<?>, Class<?>> PRIMITIVE_2_WRAPPER = new BiMap<>();
-
-    static {
-        PRIMITIVE_2_WRAPPER.put(boolean.class, Boolean.class);
-        PRIMITIVE_2_WRAPPER.put(char.class, Character.class);
-        PRIMITIVE_2_WRAPPER.put(byte.class, Byte.class);
-        PRIMITIVE_2_WRAPPER.put(short.class, Short.class);
-        PRIMITIVE_2_WRAPPER.put(int.class, Integer.class);
-        PRIMITIVE_2_WRAPPER.put(long.class, Long.class);
-        PRIMITIVE_2_WRAPPER.put(float.class, Float.class);
-        PRIMITIVE_2_WRAPPER.put(double.class, Double.class);
-
-        PRIMITIVE_2_WRAPPER.put(boolean[].class, Boolean[].class);
-        PRIMITIVE_2_WRAPPER.put(char[].class, Character[].class);
-        PRIMITIVE_2_WRAPPER.put(byte[].class, Byte[].class);
-        PRIMITIVE_2_WRAPPER.put(short[].class, Short[].class);
-        PRIMITIVE_2_WRAPPER.put(int[].class, Integer[].class);
-        PRIMITIVE_2_WRAPPER.put(long[].class, Long[].class);
-        PRIMITIVE_2_WRAPPER.put(float[].class, Float[].class);
-        PRIMITIVE_2_WRAPPER.put(double[].class, Double[].class);
-    }
-
-    // ...
     private static final Map<Class<? extends Enum<?>>, ImmutableList<? extends Enum<?>>> enumListPool = new ObjectPool<>(POOL_SIZE);
 
     private static final Map<Class<? extends Enum<?>>, ImmutableSet<? extends Enum<?>>> enumSetPool = new ObjectPool<>(POOL_SIZE);
@@ -978,7 +955,7 @@ sealed class CommonUtil permits N {
         final Package pkg = cls.getPackage();
 
         if (pkg == null) {
-            if (N.isPrimitiveType(cls) || N.isPrimitiveArrayType(cls)) {
+            if (ClassUtil.isPrimitiveType(cls) || ClassUtil.isPrimitiveArrayType(cls)) {
                 return true;
             } else if (cls.isArray()) {
                 Class<?> componentType = cls.getComponentType();
@@ -987,7 +964,7 @@ sealed class CommonUtil permits N {
                     componentType = componentType.getComponentType();
                 }
 
-                return N.isPrimitiveType(cls) || N.isPrimitiveArrayType(cls);
+                return ClassUtil.isPrimitiveType(cls) || ClassUtil.isPrimitiveArrayType(cls);
             }
 
             return false;
@@ -1201,18 +1178,18 @@ sealed class CommonUtil permits N {
         }
     }
 
-    /**
-     * Checks if is bean.
-     *
-     * @param cls
-     * @return true, if is bean
-     * @see ClassUtil#isBeanClass(Class)
-     * @deprecated replaced by {@code ClassUtil.isBeanClass(Class)}
-     */
-    @Deprecated
-    public static boolean isBeanClass(final Class<?> cls) {
-        return ClassUtil.isBeanClass(cls);
-    }
+    //    /**
+    //     * Checks if is bean.
+    //     *
+    //     * @param cls
+    //     * @return true, if is bean
+    //     * @see ClassUtil#isBeanClass(Class)
+    //     * @deprecated replaced by {@code ClassUtil.isBeanClass(Class)}
+    //     */
+    //    @Deprecated
+    //    public static boolean isBeanClass(final Class<?> cls) {
+    //        return ClassUtil.isBeanClass(cls);
+    //    }
 
     private static final Set<Class<?>> notKryoCompatible = newHashSet();
 

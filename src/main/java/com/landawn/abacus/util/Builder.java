@@ -2613,17 +2613,17 @@ public class Builder<T> {
         return new ComparisonBuilder().compare(left, right, comparator);
     }
 
-    /**
-     *
-     * @param <T>
-     * @param left
-     * @param right
-     * @param func
-     * @return
-     */
-    public static <T> ComparisonBuilder compare(T left, T right, BiFunction<? super T, ? super T, Integer> func) {
-        return new ComparisonBuilder().compare(left, right, func);
-    }
+    //    /**
+    //     *
+    //     * @param <T>
+    //     * @param left
+    //     * @param right
+    //     * @param func
+    //     * @return
+    //     */
+    //    public static <T> ComparisonBuilder compare(T left, T right, BiFunction<? super T, ? super T, Integer> func) {
+    //        return new ComparisonBuilder().compare(left, right, func);
+    //    }
 
     /**
      * {@code null} is smaller.
@@ -3051,23 +3051,23 @@ public class Builder<T> {
             return this;
         }
 
-        /**
-         *
-         * @param <T>
-         * @param left
-         * @param right
-         * @param func
-         * @return
-         */
-        public <T> ComparisonBuilder compare(T left, T right, BiFunction<? super T, ? super T, Integer> func) {
-            N.checkArgNotNull(func, "func");
-
-            if (result == 0) {
-                result = func.apply(left, right);
-            }
-
-            return this;
-        }
+        //    /**
+        //     *
+        //     * @param <T>
+        //     * @param left
+        //     * @param right
+        //     * @param func
+        //     * @return
+        //     */
+        //    public <T> ComparisonBuilder compare(T left, T right, BiFunction<? super T, ? super T, Integer> func) {
+        //        N.checkArgNotNull(func, "func");
+        //
+        //        if (result == 0) {
+        //            result = func.apply(left, right);
+        //        }
+        //
+        //        return this;
+        //    }
 
         /**
          * {@code null} is smaller.

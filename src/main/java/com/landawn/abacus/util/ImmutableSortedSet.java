@@ -58,98 +58,98 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
     }
 
     /**
+     * 
      *
-     *
-     * @param <T>
-     * @param e1
-     * @return
+     * @param <T> 
+     * @param e1 
+     * @return 
      */
     public static <T extends Comparable<? super T>> ImmutableSortedSet<T> of(final T e1) {
         return new ImmutableSortedSet<>(new TreeSet<>(N.asList(e1)));
     }
 
     /**
+     * 
      *
-     *
-     * @param <T>
-     * @param e1
-     * @param e2
-     * @return
+     * @param <T> 
+     * @param e1 
+     * @param e2 
+     * @return 
      */
     public static <T extends Comparable<? super T>> ImmutableSortedSet<T> of(final T e1, final T e2) {
         return new ImmutableSortedSet<>(new TreeSet<>(N.asList(e1, e2)));
     }
 
     /**
+     * 
      *
-     *
-     * @param <T>
-     * @param e1
-     * @param e2
-     * @param e3
-     * @return
+     * @param <T> 
+     * @param e1 
+     * @param e2 
+     * @param e3 
+     * @return 
      */
     public static <T extends Comparable<? super T>> ImmutableSortedSet<T> of(final T e1, final T e2, final T e3) {
         return new ImmutableSortedSet<>(new TreeSet<>(N.asList(e1, e2, e3)));
     }
 
     /**
+     * 
      *
-     *
-     * @param <T>
-     * @param e1
-     * @param e2
-     * @param e3
-     * @param e4
-     * @return
+     * @param <T> 
+     * @param e1 
+     * @param e2 
+     * @param e3 
+     * @param e4 
+     * @return 
      */
     public static <T extends Comparable<? super T>> ImmutableSortedSet<T> of(final T e1, final T e2, final T e3, final T e4) {
         return new ImmutableSortedSet<>(new TreeSet<>(N.asList(e1, e2, e3, e4)));
     }
 
     /**
+     * 
      *
-     *
-     * @param <T>
-     * @param e1
-     * @param e2
-     * @param e3
-     * @param e4
-     * @param e5
-     * @return
+     * @param <T> 
+     * @param e1 
+     * @param e2 
+     * @param e3 
+     * @param e4 
+     * @param e5 
+     * @return 
      */
     public static <T extends Comparable<? super T>> ImmutableSortedSet<T> of(final T e1, final T e2, final T e3, final T e4, final T e5) {
         return new ImmutableSortedSet<>(new TreeSet<>(N.asList(e1, e2, e3, e4, e5)));
     }
 
     /**
+     * 
      *
-     *
-     * @param <T>
-     * @param e1
-     * @param e2
-     * @param e3
-     * @param e4
-     * @param e5
-     * @param e6
-     * @return
+     * @param <T> 
+     * @param e1 
+     * @param e2 
+     * @param e3 
+     * @param e4 
+     * @param e5 
+     * @param e6 
+     * @return 
      */
     public static <T extends Comparable<? super T>> ImmutableSortedSet<T> of(final T e1, final T e2, final T e3, final T e4, final T e5, final T e6) {
         return new ImmutableSortedSet<>(new TreeSet<>(N.asList(e1, e2, e3, e4, e5, e6)));
     }
 
     /**
+     * 
      *
-     *
-     * @param <T>
-     * @param e1
-     * @param e2
-     * @param e3
-     * @param e4
-     * @param e5
-     * @param e6
-     * @param e7
-     * @return
+     * @param <T> 
+     * @param e1 
+     * @param e2 
+     * @param e3 
+     * @param e4 
+     * @param e5 
+     * @param e6 
+     * @param e7 
+     * @return 
      */
     public static <T extends Comparable<? super T>> ImmutableSortedSet<T> of(final T e1, final T e2, final T e3, final T e4, final T e5, final T e6,
             final T e7) {
@@ -165,8 +165,6 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
     public static <E> ImmutableSortedSet<E> copyOf(final SortedSet<? extends E> sortedSet) {
         if (N.isEmpty(sortedSet)) {
             return empty();
-        } else if (sortedSet instanceof ImmutableSortedSet) {
-            return (ImmutableSortedSet<E>) sortedSet;
         }
 
         return new ImmutableSortedSet<>(new TreeSet<>(sortedSet));
@@ -191,12 +189,12 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
     }
 
     /**
+     * 
      *
-     *
-     * @param <E>
-     * @param set
-     * @return
-     * @throws UnsupportedOperationException
+     * @param <E> 
+     * @param set 
+     * @return 
+     * @throws UnsupportedOperationException 
      * @deprecated throws {@code UnsupportedOperationException}
      */
     @Deprecated
@@ -205,9 +203,9 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
     }
 
     /**
+     * 
      *
-     *
-     * @return
+     * @return 
      */
     @Override
     public Comparator<? super E> comparator() {
@@ -246,9 +244,9 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
     }
 
     /**
+     * 
      *
-     *
-     * @return
+     * @return 
      */
     @Override
     public E first() {
@@ -256,9 +254,9 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
     }
 
     /**
+     * 
      *
-     *
-     * @return
+     * @return 
      */
     @Override
     public E last() {

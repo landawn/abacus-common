@@ -28280,8 +28280,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
     @SuppressWarnings("unchecked")
     @Beta
     public static <T> Nullable<T> castIfAssignable(final Object val, final Class<? extends T> targetType) {
-        if (isPrimitiveType(targetType)) {
-            return val != null && wrap(targetType).isAssignableFrom(val.getClass()) ? Nullable.of((T) val) : Nullable.<T> empty();
+        if (ClassUtil.isPrimitiveType(targetType)) {
+            return val != null && ClassUtil.wrap(targetType).isAssignableFrom(val.getClass()) ? Nullable.of((T) val) : Nullable.<T> empty();
         }
 
         return val == null || targetType.isAssignableFrom(val.getClass()) ? Nullable.of((T) val) : Nullable.<T> empty();
@@ -28780,83 +28780,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //        return Pair.of(l, r);
     //    }
 
-    /**
-     * Checks if is primitive type.
-     *
-     * @param cls
-     * @return true, if is primitive type
-     */
-    public static boolean isPrimitiveType(final Class<?> cls) {
-        checkArgNotNull(cls, "cls");
-
-        return typeOf(cls).isPrimitiveType();
-    }
-
-    /**
-     * Checks if is wrapper type.
-     *
-     * @param cls
-     * @return true, if is wrapper type
-     */
-    public static boolean isWrapperType(final Class<?> cls) {
-        checkArgNotNull(cls, "cls");
-
-        return typeOf(cls).isPrimitiveWrapper();
-    }
-
-    /**
-     * Checks if is primitive array type.
-     *
-     * @param cls
-     * @return true, if is primitive array type
-     */
-    public static boolean isPrimitiveArrayType(final Class<?> cls) {
-        checkArgNotNull(cls, "cls");
-
-        return typeOf(cls).isPrimitiveArray();
-    }
-
-    /**
-     * Returns the corresponding wrapper type of {@code type} if it is a primitive type; otherwise
-     * returns {@code type} itself. Idempotent.
-     *
-     * <pre>
-     *     wrap(int.class) == Integer.class
-     *     wrap(Integer.class) == Integer.class
-     *     wrap(String.class) == String.class
-     * </pre>
-     *
-     * @param cls
-     * @return
-     */
-    public static Class<?> wrap(final Class<?> cls) {
-        checkArgNotNull(cls, "cls");
-
-        final Class<?> wrapped = PRIMITIVE_2_WRAPPER.get(cls);
-
-        return wrapped == null ? cls : wrapped;
-    }
-
-    /**
-     * Returns the corresponding primitive type of {@code type} if it is a wrapper type; otherwise
-     * returns {@code type} itself. Idempotent.
-     *
-     * <pre>
-     *     unwrap(Integer.class) == int.class
-     *     unwrap(int.class) == int.class
-     *     unwrap(String.class) == String.class
-     * </pre>
-     *
-     * @param cls
-     * @return
-     */
-    public static Class<?> unwrap(final Class<?> cls) {
-        checkArgNotNull(cls, "cls");
-
-        Class<?> unwrapped = PRIMITIVE_2_WRAPPER.getByValue(cls);
-
-        return unwrapped == null ? cls : unwrapped;
-    }
+    
 
     // Boolean utilities
     //--------------------------------------------------------------------------
@@ -29031,21 +28955,22 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //
     //        return bool.booleanValue() ? "yes" : "no";
     //    }
-    /**
-     * Add it because {@code Comparator.reversed()} doesn't work well in some scenarios.
-     *
-     * @param <T>
-     * @param cmp
-     * @return
-     * @see Collections#reverseOrder(Comparator)
-     * @see Comparators#reverseOrder(Comparator)
-     * @deprecated replaced by {@code Comparators.reverseOrder(Comparator)}
-     */
-    @Deprecated
-    @Beta
-    public static <T> Comparator<T> reverseOrder(final Comparator<T> cmp) {
-        return Comparators.reverseOrder(cmp);
-    }
+
+    //    /**
+    //     * Add it because {@code Comparator.reversed()} doesn't work well in some scenarios.
+    //     *
+    //     * @param <T>
+    //     * @param cmp
+    //     * @return
+    //     * @see Collections#reverseOrder(Comparator)
+    //     * @see Comparators#reverseOrder(Comparator)
+    //     * @deprecated replaced by {@code Comparators.reverseOrder(Comparator)}
+    //     */
+    //    @Deprecated
+    //    @Beta
+    //    public static <T> Comparator<T> reverseOrder(final Comparator<T> cmp) {
+    //        return Comparators.reverseOrder(cmp);
+    //    }
 
     /**
      * Returns an {@code unmodifiable view} of the specified {@code Collection}. Or an empty {@code Collection} if the specified {@code collection} is null.

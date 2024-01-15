@@ -1037,10 +1037,8 @@ public class Multimap<K, E, V extends Collection<E>> {
      * @param oldValues
      * @param newValue
      * @return <code>true</code> if this Multimap is modified by this operation, otherwise <code>false</code>.
-     * @deprecated
      */
-    @Deprecated
-    public boolean replaceAll(final K key, final Collection<? extends E> oldValues, final E newValue) {
+    public boolean replaceManyWithOne(final K key, final Collection<? extends E> oldValues, final E newValue) {
         final V val = valueMap.get(key);
 
         if (val == null) {
@@ -1152,10 +1150,9 @@ public class Multimap<K, E, V extends Collection<E>> {
      * @param newValue
      * @return <code>true</code> if this Multimap is modified by this operation, otherwise <code>false</code>.
      * @throws X the x
-     * @deprecated
      */
-    @Deprecated
-    public <X extends Exception> boolean replaceAllIf(Throwables.Predicate<? super K, X> predicate, Collection<? extends E> oldValues, E newValue) throws X {
+    public <X extends Exception> boolean replaceManyWithOneIf(Throwables.Predicate<? super K, X> predicate, Collection<? extends E> oldValues, E newValue)
+            throws X {
         boolean modified = false;
 
         for (Map.Entry<K, V> entry : this.valueMap.entrySet()) {
@@ -1177,11 +1174,9 @@ public class Multimap<K, E, V extends Collection<E>> {
      * @param newValue
      * @return <code>true</code> if this Multimap is modified by this operation, otherwise <code>false</code>.
      * @throws X the x
-     * @deprecated
      */
-    @Deprecated
-    public <X extends Exception> boolean replaceAllIf(Throwables.BiPredicate<? super K, ? super V, X> predicate, Collection<? extends E> oldValues, E newValue)
-            throws X {
+    public <X extends Exception> boolean replaceManyWithOneIf(Throwables.BiPredicate<? super K, ? super V, X> predicate, Collection<? extends E> oldValues,
+            E newValue) throws X {
         boolean modified = false;
 
         for (Map.Entry<K, V> entry : this.valueMap.entrySet()) {

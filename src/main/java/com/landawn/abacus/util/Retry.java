@@ -389,9 +389,7 @@ public final class Retry<T> {
          * @param <E>
          * @param iter
          * @return
-         * @deprecated replaced by {@code RetryR#iterate(Iterator, int)}.
          */
-        @Deprecated
         public <E> Iterator<E> iterate(final Iterator<E> iter) {
             return iterate(iter, Integer.MAX_VALUE);
         }

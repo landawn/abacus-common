@@ -471,15 +471,15 @@ public class u {//NOSONAR
             }
         }
 
-        /**
-         *
-         * @return
-         * @deprecated using {@link #orElseNull()}
-         */
-        @Deprecated
-        public T orNull() {
-            return isPresent() ? value : null;
-        }
+        //    /**
+        //     *
+        //     * @return
+        //     * @deprecated using {@link #orElseNull()}
+        //     */
+        //    @Deprecated
+        //    public T orNull() {
+        //        return isPresent() ? value : null;
+        //    }
 
         /**
          *
@@ -1040,29 +1040,29 @@ public class u {//NOSONAR
             }
         }
 
-        /**
-         *
-         * @return
-         * @deprecated use {@link #orElse(false)}
-         */
-        @Deprecated
-        public boolean orFalse() {
-            return isPresent ? value : false;
-        }
+        //    /**
+        //     *
+        //     * @return
+        //     * @deprecated use {@link #orElse(false)}
+        //     */
+        //    @Deprecated
+        //    public boolean orFalse() {
+        //        return isPresent ? value : false;
+        //    }
 
         //    public boolean orElseFalse() {
         //        return isPresent ? value : false;
         //    }
 
-        /**
-         *
-         * @return
-         * @deprecated use {@link #orElse(true)}
-         */
-        @Deprecated
-        public boolean orTrue() {
-            return isPresent ? value : true;
-        }
+        //    /**
+        //     *
+        //     * @return
+        //     * @deprecated use {@link #orElse(true)}
+        //     */
+        //    @Deprecated
+        //    public boolean orTrue() {
+        //        return isPresent ? value : true;
+        //    }
 
         //    public boolean orElseTrue() {
         //        return isPresent ? value : true;
@@ -1635,15 +1635,15 @@ public class u {//NOSONAR
             }
         }
 
-        /**
-         *
-         * @return
-         * @deprecated use {@link #orElseZero()}
-         */
-        @Deprecated
-        public char orZero() {
-            return isPresent() ? value : 0;
-        }
+        //    /**
+        //     *
+        //     * @return
+        //     * @deprecated use {@link #orElseZero()}
+        //     */
+        //    @Deprecated
+        //    public char orZero() {
+        //        return isPresent() ? value : 0;
+        //    }
 
         /**
          *
@@ -2203,15 +2203,15 @@ public class u {//NOSONAR
             }
         }
 
-        /**
-         *
-         * @return
-         * @deprecated use {@link #orElseZero()}
-         */
-        @Deprecated
-        public byte orZero() {
-            return isPresent ? value : 0;
-        }
+        //    /**
+        //     *
+        //     * @return
+        //     * @deprecated use {@link #orElseZero()}
+        //     */
+        //    @Deprecated
+        //    public byte orZero() {
+        //        return isPresent ? value : 0;
+        //    }
 
         /**
          *
@@ -2771,15 +2771,15 @@ public class u {//NOSONAR
             }
         }
 
-        /**
-         *
-         * @return
-         * @deprecated use {@link #orElseZero()}
-         */
-        @Deprecated
-        public short orZero() {
-            return isPresent ? value : 0;
-        }
+        //    /**
+        //     *
+        //     * @return
+        //     * @deprecated use {@link #orElseZero()}
+        //     */
+        //    @Deprecated
+        //    public short orZero() {
+        //        return isPresent ? value : 0;
+        //    }
 
         /**
          *
@@ -3424,15 +3424,15 @@ public class u {//NOSONAR
             }
         }
 
-        /**
-         *
-         * @return
-         * @deprecated use {@link #orElseZero()}
-         */
-        @Deprecated
-        public int orZero() {
-            return isPresent ? value : 0;
-        }
+        //    /**
+        //     *
+        //     * @return
+        //     * @deprecated use {@link #orElseZero()}
+        //     */
+        //    @Deprecated
+        //    public int orZero() {
+        //        return isPresent ? value : 0;
+        //    }
 
         /**
          *
@@ -4045,15 +4045,15 @@ public class u {//NOSONAR
             }
         }
 
-        /**
-         *
-         * @return
-         * @deprecated use {@link #orElseZero()}
-         */
-        @Deprecated
-        public long orZero() {
-            return isPresent ? value : 0;
-        }
+        //    /**
+        //     *
+        //     * @return
+        //     * @deprecated use {@link #orElseZero()}
+        //     */
+        //    @Deprecated
+        //    public long orZero() {
+        //        return isPresent ? value : 0;
+        //    }
 
         /**
          *
@@ -4638,15 +4638,15 @@ public class u {//NOSONAR
             }
         }
 
-        /**
-         *
-         * @return
-         * @deprecated use {@link #orElseZero()}
-         */
-        @Deprecated
-        public float orZero() {
-            return isPresent ? value : 0;
-        }
+        //    /**
+        //     *
+        //     * @return
+        //     * @deprecated use {@link #orElseZero()}
+        //     */
+        //    @Deprecated
+        //    public float orZero() {
+        //        return isPresent ? value : 0;
+        //    }
 
         /**
          *
@@ -5222,15 +5222,15 @@ public class u {//NOSONAR
             }
         }
 
-        /**
-         *
-         * @return
-         * @deprecated use {@link #orElseZero()}
-         */
-        @Deprecated
-        public double orZero() {
-            return isPresent ? value : 0;
-        }
+        //    /**
+        //     *
+        //     * @return
+        //     * @deprecated use {@link #orElseZero()}
+        //     */
+        //    @Deprecated
+        //    public double orZero() {
+        //        return isPresent ? value : 0;
+        //    }
 
         /**
          *
@@ -6271,15 +6271,15 @@ public class u {//NOSONAR
             }
         }
 
-        /**
-         *
-         * @return
-         * @deprecated using {@link #orElseNull()}
-         */
-        @Deprecated
-        public T orNull() {
-            return isPresent() ? value : null;
-        }
+        //    /**
+        //     *
+        //     * @return
+        //     * @deprecated using {@link #orElseNull()}
+        //     */
+        //    @Deprecated
+        //    public T orNull() {
+        //        return isPresent() ? value : null;
+        //    }
 
         /**
          *

@@ -387,153 +387,153 @@ public final class Maps {
         return result;
     }
 
-    /**
-     *
-     *
-     * @param <T>
-     * @param <K> the key type
-     * @param c
-     * @param keyMapper
-     * @return
-     * @deprecated Use {@link #create(Collection<? extends T>,Function<? super T, ? extends K>)} instead
-     */
-    @Deprecated
-    public static <T, K> Map<K, T> newMap(Collection<? extends T> c, final Function<? super T, ? extends K> keyMapper) {
-        return create(c, keyMapper);
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param c
-     * @param keyMapper
-     * @param valueExtractor
-     * @return
-     * @deprecated Use {@link #create(Collection<? extends T>,Function<? super T, ? extends K>,Function<? super T, ? extends V>)} instead
-     */
-    @Deprecated
-    public static <T, K, V> Map<K, V> newMap(Collection<? extends T> c, final Function<? super T, ? extends K> keyMapper,
-            final Function<? super T, ? extends V> valueExtractor) {
-        return create(c, keyMapper, valueExtractor);
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param <M>
-     * @param c
-     * @param keyMapper
-     * @param valueExtractor
-     * @param mapSupplier
-     * @return
-     * @deprecated Use {@link #create(Collection<? extends T>,Function<? super T, ? extends K>,Function<? super T, ? extends V>,IntFunction<? extends M>)} instead
-     */
-    @Deprecated
-    public static <T, K, V, M extends Map<K, V>> M newMap(Collection<? extends T> c, final Function<? super T, ? extends K> keyMapper,
-            final Function<? super T, ? extends V> valueExtractor, final IntFunction<? extends M> mapSupplier) {
-        return create(c, keyMapper, valueExtractor, mapSupplier);
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param <K>
-     * @param <V>
-     * @param <M>
-     * @param c
-     * @param keyMapper
-     * @param valueExtractor
-     * @param mergeFunction
-     * @param mapSupplier
-     * @return
-     * @deprecated Use {@link #create(Collection<? extends T>,Function<? super T, ? extends K>,Function<? super T, ? extends V>,BinaryOperator<V>,IntFunction<? extends M>)} instead
-     */
-    @Deprecated
-    public static <T, K, V, M extends Map<K, V>> M newMap(Collection<? extends T> c, final Function<? super T, ? extends K> keyMapper,
-            final Function<? super T, ? extends V> valueExtractor, final BinaryOperator<V> mergeFunction, final IntFunction<? extends M> mapSupplier) {
-        return create(c, keyMapper, valueExtractor, mergeFunction, mapSupplier);
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param <K> the key type
-     * @param iter
-     * @param keyMapper
-     * @return
-     * @deprecated Use {@link #create(Iterator<? extends T>,Throwables.Function<? super T, K, E>)} instead
-     */
-    @Deprecated
-    public static <T, K> Map<K, T> newMap(final Iterator<? extends T> iter, final Function<? super T, K> keyMapper) {
-        return create(iter, keyMapper);
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param iter
-     * @param keyMapper
-     * @param valueExtractor
-     * @return
-     * @deprecated Use {@link #create(Iterator<? extends T>,Throwables.Function<? super T, K, E>,Function<? super T, ? extends V>)} instead
-     */
-    @Deprecated
-    public static <T, K, V> Map<K, V> newMap(final Iterator<? extends T> iter, final Function<? super T, K> keyMapper,
-            final Function<? super T, ? extends V> valueExtractor) {
-        return create(iter, keyMapper, valueExtractor);
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param <M>
-     * @param iter
-     * @param keyMapper
-     * @param valueExtractor
-     * @param mapSupplier
-     * @return
-     * @deprecated Use {@link #create(Iterator<? extends T>,Throwables.Function<? super T, K, E>,Function<? super T, ? extends V>,Supplier<? extends M>)} instead
-     */
-    @Deprecated
-    public static <T, K, V, M extends Map<K, V>> M newMap(final Iterator<? extends T> iter, final Function<? super T, K> keyMapper,
-            final Function<? super T, ? extends V> valueExtractor, final Supplier<? extends M> mapSupplier) {
-        return create(iter, keyMapper, valueExtractor, mapSupplier);
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param <K>
-     * @param <V>
-     * @param <M>
-     * @param iter
-     * @param keyMapper
-     * @param valueExtractor
-     * @param mergeFunction
-     * @param mapSupplier
-     * @return
-     * @deprecated Use {@link #create(Iterator<? extends T>,Throwables.Function<? super T, K, E>,Function<? super T, ? extends V>,BinaryOperator<V>,Supplier<? extends M>)} instead
-     */
-    @Deprecated
-    public static <T, K, V, M extends Map<K, V>> M newMap(final Iterator<? extends T> iter, final Function<? super T, K> keyMapper,
-            final Function<? super T, ? extends V> valueExtractor, final BinaryOperator<V> mergeFunction, final Supplier<? extends M> mapSupplier) {
-        return create(iter, keyMapper, valueExtractor, mergeFunction, mapSupplier);
-    }
+    //    /**
+    //     *
+    //     *
+    //     * @param <T>
+    //     * @param <K> the key type
+    //     * @param c
+    //     * @param keyMapper
+    //     * @return
+    //     * @deprecated Use {@link #create(Collection<? extends T>,Function<? super T, ? extends K>)} instead
+    //     */
+    //    @Deprecated
+    //    public static <T, K> Map<K, T> newMap(Collection<? extends T> c, final Function<? super T, ? extends K> keyMapper) {
+    //        return create(c, keyMapper);
+    //    }
+    //
+    //    /**
+    //     *
+    //     *
+    //     * @param <T>
+    //     * @param <K> the key type
+    //     * @param <V> the value type
+    //     * @param c
+    //     * @param keyMapper
+    //     * @param valueExtractor
+    //     * @return
+    //     * @deprecated Use {@link #create(Collection<? extends T>,Function<? super T, ? extends K>,Function<? super T, ? extends V>)} instead
+    //     */
+    //    @Deprecated
+    //    public static <T, K, V> Map<K, V> newMap(Collection<? extends T> c, final Function<? super T, ? extends K> keyMapper,
+    //            final Function<? super T, ? extends V> valueExtractor) {
+    //        return create(c, keyMapper, valueExtractor);
+    //    }
+    //
+    //    /**
+    //     *
+    //     *
+    //     * @param <T>
+    //     * @param <K> the key type
+    //     * @param <V> the value type
+    //     * @param <M>
+    //     * @param c
+    //     * @param keyMapper
+    //     * @param valueExtractor
+    //     * @param mapSupplier
+    //     * @return
+    //     * @deprecated Use {@link #create(Collection<? extends T>,Function<? super T, ? extends K>,Function<? super T, ? extends V>,IntFunction<? extends M>)} instead
+    //     */
+    //    @Deprecated
+    //    public static <T, K, V, M extends Map<K, V>> M newMap(Collection<? extends T> c, final Function<? super T, ? extends K> keyMapper,
+    //            final Function<? super T, ? extends V> valueExtractor, final IntFunction<? extends M> mapSupplier) {
+    //        return create(c, keyMapper, valueExtractor, mapSupplier);
+    //    }
+    //
+    //    /**
+    //     *
+    //     *
+    //     * @param <T>
+    //     * @param <K>
+    //     * @param <V>
+    //     * @param <M>
+    //     * @param c
+    //     * @param keyMapper
+    //     * @param valueExtractor
+    //     * @param mergeFunction
+    //     * @param mapSupplier
+    //     * @return
+    //     * @deprecated Use {@link #create(Collection<? extends T>,Function<? super T, ? extends K>,Function<? super T, ? extends V>,BinaryOperator<V>,IntFunction<? extends M>)} instead
+    //     */
+    //    @Deprecated
+    //    public static <T, K, V, M extends Map<K, V>> M newMap(Collection<? extends T> c, final Function<? super T, ? extends K> keyMapper,
+    //            final Function<? super T, ? extends V> valueExtractor, final BinaryOperator<V> mergeFunction, final IntFunction<? extends M> mapSupplier) {
+    //        return create(c, keyMapper, valueExtractor, mergeFunction, mapSupplier);
+    //    }
+    //
+    //    /**
+    //     *
+    //     *
+    //     * @param <T>
+    //     * @param <K> the key type
+    //     * @param iter
+    //     * @param keyMapper
+    //     * @return
+    //     * @deprecated Use {@link #create(Iterator<? extends T>,Throwables.Function<? super T, K, E>)} instead
+    //     */
+    //    @Deprecated
+    //    public static <T, K> Map<K, T> newMap(final Iterator<? extends T> iter, final Function<? super T, K> keyMapper) {
+    //        return create(iter, keyMapper);
+    //    }
+    //
+    //    /**
+    //     *
+    //     *
+    //     * @param <T>
+    //     * @param <K> the key type
+    //     * @param <V> the value type
+    //     * @param iter
+    //     * @param keyMapper
+    //     * @param valueExtractor
+    //     * @return
+    //     * @deprecated Use {@link #create(Iterator<? extends T>,Throwables.Function<? super T, K, E>,Function<? super T, ? extends V>)} instead
+    //     */
+    //    @Deprecated
+    //    public static <T, K, V> Map<K, V> newMap(final Iterator<? extends T> iter, final Function<? super T, K> keyMapper,
+    //            final Function<? super T, ? extends V> valueExtractor) {
+    //        return create(iter, keyMapper, valueExtractor);
+    //    }
+    //
+    //    /**
+    //     *
+    //     *
+    //     * @param <T>
+    //     * @param <K> the key type
+    //     * @param <V> the value type
+    //     * @param <M>
+    //     * @param iter
+    //     * @param keyMapper
+    //     * @param valueExtractor
+    //     * @param mapSupplier
+    //     * @return
+    //     * @deprecated Use {@link #create(Iterator<? extends T>,Throwables.Function<? super T, K, E>,Function<? super T, ? extends V>,Supplier<? extends M>)} instead
+    //     */
+    //    @Deprecated
+    //    public static <T, K, V, M extends Map<K, V>> M newMap(final Iterator<? extends T> iter, final Function<? super T, K> keyMapper,
+    //            final Function<? super T, ? extends V> valueExtractor, final Supplier<? extends M> mapSupplier) {
+    //        return create(iter, keyMapper, valueExtractor, mapSupplier);
+    //    }
+    //
+    //    /**
+    //     *
+    //     *
+    //     * @param <T>
+    //     * @param <K>
+    //     * @param <V>
+    //     * @param <M>
+    //     * @param iter
+    //     * @param keyMapper
+    //     * @param valueExtractor
+    //     * @param mergeFunction
+    //     * @param mapSupplier
+    //     * @return
+    //     * @deprecated Use {@link #create(Iterator<? extends T>,Throwables.Function<? super T, K, E>,Function<? super T, ? extends V>,BinaryOperator<V>,Supplier<? extends M>)} instead
+    //     */
+    //    @Deprecated
+    //    public static <T, K, V, M extends Map<K, V>> M newMap(final Iterator<? extends T> iter, final Function<? super T, K> keyMapper,
+    //            final Function<? super T, ? extends V> valueExtractor, final BinaryOperator<V> mergeFunction, final Supplier<? extends M> mapSupplier) {
+    //        return create(iter, keyMapper, valueExtractor, mergeFunction, mapSupplier);
+    //    }
 
     /**
      *
@@ -4159,7 +4159,11 @@ public final class Maps {
         public <T> T get(Object key, Class<? extends T> targetType) {
             final V val = map.get(key);
 
-            if (val == null || targetType.isAssignableFrom(val.getClass())) {
+            if (val == null) {
+                return (T) (defaultForPrimitive && ClassUtil.isPrimitiveWrapper(targetType) ? N.defaultValueOf(ClassUtil.unwrap(targetType)) : N.defaultValueOf(targetType));
+            }
+
+            if (targetType.isAssignableFrom(val.getClass())) {
                 return (T) val;
             }
 
@@ -4181,7 +4185,12 @@ public final class Maps {
         public <T> T get(Object key, Type<? extends T> targetType) {
             final V val = map.get(key);
 
-            if (val == null || targetType.clazz().isAssignableFrom(val.getClass())) {
+            if (val == null) {
+                return (T) (defaultForPrimitive && targetType.isPrimitiveWrapper() ? N.defaultValueOf(ClassUtil.unwrap(targetType.clazz()))
+                        : targetType.defaultValue());
+            }
+
+            if (targetType.clazz().isAssignableFrom(val.getClass())) {
                 return (T) val;
             }
 
