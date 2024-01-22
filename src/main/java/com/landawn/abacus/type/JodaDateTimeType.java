@@ -85,7 +85,7 @@ public class JodaDateTimeType extends AbstractJodaDateTimeType<DateTime> {
             return new DateTime(System.currentTimeMillis());
         }
 
-        return str.length() == 20 ? iso8601DateTimeFT.parseDateTime(str) : iso8601TimestampFT.parseDateTime(str);
+        return str.length() == 20 ? jodaISO8601DateTimeFT.parseDateTime(str) : jodaISO8601TimestampFT.parseDateTime(str);
     }
 
     /**

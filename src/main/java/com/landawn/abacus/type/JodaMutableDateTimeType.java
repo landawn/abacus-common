@@ -85,7 +85,7 @@ public class JodaMutableDateTimeType extends AbstractJodaDateTimeType<MutableDat
             return new MutableDateTime(System.currentTimeMillis());
         }
 
-        return str.length() == 20 ? iso8601DateTimeFT.parseMutableDateTime(str) : iso8601TimestampFT.parseMutableDateTime(str);
+        return str.length() == 20 ? jodaISO8601DateTimeFT.parseMutableDateTime(str) : jodaISO8601TimestampFT.parseMutableDateTime(str);
     }
 
     /**

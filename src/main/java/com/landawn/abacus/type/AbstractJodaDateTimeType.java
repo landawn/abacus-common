@@ -17,7 +17,7 @@ package com.landawn.abacus.type;
 import java.io.IOException;
 import java.io.Writer;
 
-import org.joda.time.base.BaseDateTime;
+import org.joda.time.base.AbstractInstant;
 import org.joda.time.format.DateTimeFormatter;
 
 import com.landawn.abacus.parser.SerializationConfig;
@@ -31,11 +31,11 @@ import com.landawn.abacus.util.DateUtil;
  * @param <T>
  * @since 0.8
  */
-public abstract class AbstractJodaDateTimeType<T extends BaseDateTime> extends AbstractType<T> {
+public abstract class AbstractJodaDateTimeType<T extends AbstractInstant> extends AbstractType<T> {
 
-    protected static final DateTimeFormatter iso8601DateTimeFT = org.joda.time.format.DateTimeFormat.forPattern(DateUtil.ISO_8601_DATETIME_FORMAT);
+    protected static final DateTimeFormatter jodaISO8601DateTimeFT = org.joda.time.format.DateTimeFormat.forPattern(DateUtil.ISO_8601_DATETIME_FORMAT);
 
-    protected static final DateTimeFormatter iso8601TimestampFT = org.joda.time.format.DateTimeFormat.forPattern(DateUtil.ISO_8601_TIMESTAMP_FORMAT);
+    protected static final DateTimeFormatter jodaISO8601TimestampFT = org.joda.time.format.DateTimeFormat.forPattern(DateUtil.ISO_8601_TIMESTAMP_FORMAT);
 
     protected AbstractJodaDateTimeType(String typeName) {
         super(typeName);
@@ -68,7 +68,7 @@ public abstract class AbstractJodaDateTimeType<T extends BaseDateTime> extends A
      */
     @Override
     public String stringOf(T x) {
-        return (x == null) ? null : iso8601TimestampFT.print(x);
+        return (x == null) ? null : jodaISO8601TimestampFT.print(x);
     }
 
     /**
@@ -82,7 +82,7 @@ public abstract class AbstractJodaDateTimeType<T extends BaseDateTime> extends A
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
-            iso8601TimestampFT.printTo(writer, x);
+            jodaISO8601TimestampFT.printTo(writer, x);
         }
     }
 
@@ -106,7 +106,7 @@ public abstract class AbstractJodaDateTimeType<T extends BaseDateTime> extends A
             }
 
             if ((config == null) || (config.getDateTimeFormat() == null)) {
-                iso8601TimestampFT.printTo(writer, x);
+                jodaISO8601TimestampFT.printTo(writer, x);
             } else {
                 switch (config.getDateTimeFormat()) {
                     case LONG:
@@ -115,12 +115,12 @@ public abstract class AbstractJodaDateTimeType<T extends BaseDateTime> extends A
                         break;
 
                     case ISO_8601_DATETIME:
-                        iso8601DateTimeFT.printTo(writer, x);
+                        jodaISO8601DateTimeFT.printTo(writer, x);
 
                         break;
 
                     case ISO_8601_TIMESTAMP:
-                        iso8601TimestampFT.printTo(writer, x);
+                        jodaISO8601TimestampFT.printTo(writer, x);
 
                         break;
 

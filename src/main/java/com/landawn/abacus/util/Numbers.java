@@ -1923,6 +1923,7 @@ public final class Numbers {
      *
      * @param str  the {@link String} to check
      * @return {@code true} if str contains only Unicode numeric
+     * @see Strings#isNumeric(String)
      */
     public static boolean isDigits(final String str) {
         return Strings.isNumeric(str);

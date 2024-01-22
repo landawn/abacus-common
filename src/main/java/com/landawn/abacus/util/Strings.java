@@ -219,7 +219,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
-     * Returns the UUID without '-'.
+     * Returns a new UUID String without '-'.
      *
      * @return
      * @see UUID#randomUUID().
@@ -229,7 +229,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
-     * Returns an UUID.
+     * Returns a new UUID String  UUID.
      *
      * @return
      * @see UUID#randomUUID().

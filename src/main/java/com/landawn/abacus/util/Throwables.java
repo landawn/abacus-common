@@ -2989,6 +2989,24 @@ public final class Throwables {
     }
 
     /**
+     * The Interface ObjIntConsumer.
+     *
+     * @param <T>
+     * @param <R>
+     * @param <E>
+     */
+    public interface ObjIntFunction<T, R, E extends Throwable> {
+
+        /**
+         *
+         * @param t
+         * @param u
+         * @throws E the e
+         */
+        R apply(T t, int u) throws E;
+    }
+
+    /**
      * The Interface ObjLongConsumer.
      *
      * @param <T>

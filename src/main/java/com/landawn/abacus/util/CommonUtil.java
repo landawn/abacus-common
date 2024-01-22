@@ -27,6 +27,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Proxy;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.sql.Blob;
 import java.sql.Clob;
@@ -220,13 +222,38 @@ sealed class CommonUtil permits N {
      */
     public static final Double[] EMPTY_DOUBLE_OBJ_ARRAY = {};
     /**
+     * An empty immutable {@code BigInteger} array.
+     */
+    public static final BigInteger[] EMPTY_BIG_INTEGER_ARRAY = {};
+    /**
+     * An empty immutable {@code BigDecimal} array.
+     */
+    public static final BigDecimal[] EMPTY_BIG_DECIMAL_ARRAY = {};
+    /**
      * An empty immutable {@code String} array.
      */
     public static final String[] EMPTY_STRING_ARRAY = {};
     /**
-     * An empty immutable {@code Date} array.
+     * An empty immutable {@code java.util.Date} array.
      */
-    public static final java.util.Date[] EMPTY_DATE_ARRAY = {};
+    public static final java.util.Date[] EMPTY_JU_DATE_ARRAY = {};
+
+    /**
+     * An empty immutable {@code java.sql.Date} array.
+     */
+    public static final java.sql.Date[] EMPTY_DATE_ARRAY = {};
+
+    /**
+     * An empty immutable {@code Time} array.
+     */
+    public static final java.sql.Time[] EMPTY_TIME_ARRAY = {};
+
+    /**
+     * An empty immutable {@code Timestamp} array.
+     */
+    public static final java.sql.Timestamp[] EMPTY_TIMESTAMP_ARRAY = {};
+
+    /**
     /**
      * An empty immutable {@code Calendar} array.
      */
@@ -823,6 +850,15 @@ sealed class CommonUtil permits N {
      * @param val
      * @return
      */
+    public static String stringOf(final boolean val) {
+        return val ? Strings.TRUE : Strings.FALSE;
+    }
+
+    /**
+     *
+     * @param val
+     * @return
+     */
     public static String stringOf(final char val) {
         if (val < 128) {
             return charStringCache[val];
@@ -1176,6 +1212,40 @@ sealed class CommonUtil permits N {
         } else {
             return targetType.valueOf(obj);
         }
+    }
+
+    /**
+     * Returns an empty <code>Nullable</code> if {@code val} is {@code null} while {@code targetType} is primitive or can not be assigned to {@code targetType}.
+     * Please be aware that {@code null} can be assigned to any {@code Object} type except primitive types: {@code boolean/char/byte/short/int/long/double}.
+     *
+     * @param <T>
+     * @param val
+     * @param targetType
+     * @return
+     */
+    @SuppressWarnings("unchecked")
+    @Beta
+    public static <T> Nullable<T> castIfAssignable(final Object val, final Class<? extends T> targetType) {
+        if (ClassUtil.isPrimitiveType(targetType)) {
+            return val != null && ClassUtil.wrap(targetType).isAssignableFrom(val.getClass()) ? Nullable.of((T) val) : Nullable.<T> empty();
+        }
+
+        return val == null || targetType.isAssignableFrom(val.getClass()) ? Nullable.of((T) val) : Nullable.<T> empty();
+    }
+
+    /**
+     * Returns an empty <code>Nullable</code> if {@code val} is {@code null} while {@code targetType} is primitive or can not be assigned to {@code targetType}.
+     * Please be aware that {@code null} can be assigned to any {@code Object} type except primitive types: {@code boolean/char/byte/short/int/long/double}.
+     *
+     * @param <T>
+     * @param val
+     * @param targetType
+     * @return
+     */
+    @SuppressWarnings("unchecked")
+    @Beta
+    public static <T> Nullable<T> castIfAssignable(final Object val, final Type<? extends T> targetType) {
+        return castIfAssignable(val, targetType.clazz());
     }
 
     //    /**
@@ -8510,6 +8580,26 @@ sealed class CommonUtil permits N {
      *
      * @param a
      * @return
+     */
+    public static BigInteger[] nullToEmpty(final BigInteger[] a) {
+        return a == null ? EMPTY_BIG_INTEGER_ARRAY : a;
+    }
+
+    /**
+     * Null to empty.
+     *
+     * @param a
+     * @return
+     */
+    public static BigDecimal[] nullToEmpty(final BigDecimal[] a) {
+        return a == null ? EMPTY_BIG_DECIMAL_ARRAY : a;
+    }
+
+    /**
+     * Null to empty.
+     *
+     * @param a
+     * @return
      * @see Strings#nullToEmpty(String)
      * @see Strings#nullToEmpty(String[])
      */
@@ -8567,6 +8657,56 @@ sealed class CommonUtil permits N {
     //
     //        return a;
     //    }
+
+    /**
+     * Null to empty.
+     *
+     * @param a
+     * @return
+     */
+    public static java.util.Date[] nullToEmpty(final java.util.Date[] a) {
+        return a == null ? EMPTY_JU_DATE_ARRAY : a;
+    }
+
+    /**
+     * Null to empty.
+     *
+     * @param a
+     * @return
+     */
+    public static java.sql.Date[] nullToEmpty(final java.sql.Date[] a) {
+        return a == null ? EMPTY_DATE_ARRAY : a;
+    }
+
+    /**
+     * Null to empty.
+     *
+     * @param a
+     * @return
+     */
+    public static java.sql.Time[] nullToEmpty(final java.sql.Time[] a) {
+        return a == null ? EMPTY_TIME_ARRAY : a;
+    }
+
+    /**
+     * Null to empty.
+     *
+     * @param a
+     * @return
+     */
+    public static java.sql.Timestamp[] nullToEmpty(final java.sql.Timestamp[] a) {
+        return a == null ? EMPTY_TIMESTAMP_ARRAY : a;
+    }
+
+    /**
+     * Null to empty.
+     *
+     * @param a
+     * @return
+     */
+    public static Calendar[] nullToEmpty(final Calendar[] a) {
+        return a == null ? EMPTY_CALENDAR_ARRAY : a;
+    }
 
     /**
      * Null to empty.

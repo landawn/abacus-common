@@ -28172,45 +28172,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
         }
     }
 
-    /**
-     *
-     * @param e
-     * @return
-     * @see ExceptionUtil#toRuntimeException(Throwable)
-     * @see ExceptionUtil#registerRuntimeExceptionMapper(Class,Function)
-     */
-    @Beta
-    public static RuntimeException toRuntimeException(final Exception e) {
-        return ExceptionUtil.toRuntimeException(e);
-    }
-
-    /**
-     * Converts the specified {@code Throwable} to a {@code RuntimeException} if it's a checked {@code exception} or an {@code Error}, otherwise returns itself.
-     *
-     * @param e
-     * @return
-     * @see ExceptionUtil#toRuntimeException(Throwable)
-     * @see ExceptionUtil#registerRuntimeExceptionMapper(Class,Function)
-     */
-    @Beta
-    public static RuntimeException toRuntimeException(final Throwable e) {
-        return ExceptionUtil.toRuntimeException(e);
-    }
-
-    /**
-     * Converts the specified {@code Throwable} to a {@code RuntimeException} if it's a checked {@code exception}, or throw it if it's an {@code Error}. Otherwise returns itself.
-     *
-     * @param e
-     * @param throwIfItIsError
-     * @return
-     * @see ExceptionUtil#toRuntimeException(Throwable, boolean)
-     * @see ExceptionUtil#registerRuntimeExceptionMapper(Class,Function)
-     */
-    @Beta
-    public static RuntimeException toRuntimeException(final Throwable e, final boolean throwIfItIsError) {
-        return ExceptionUtil.toRuntimeException(e, throwIfItIsError);
-    }
-
     //    /**
     //     *
     //     * @param e
@@ -28234,58 +28195,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //    public static Throwable firstCause(final Throwable e) {
     //        return ExceptionUtil.firstCause(e);
     //    }
-
-    /**
-     *
-     * @param <T>
-     * @param obj
-     * @return
-     */
-    @SuppressWarnings("rawtypes")
-    public static <T> T println(final T obj) {
-        if (obj instanceof Collection) {
-            System.out.println(Joiner.with(Strings.ELEMENT_SEPARATOR, "[", "]").reuseCachedBuffer().appendAll((Collection) obj));
-        } else if (obj instanceof Map) {
-            System.out.println(Joiner.with(Strings.ELEMENT_SEPARATOR, "=", "{", "}").reuseCachedBuffer().appendEntries((Map) obj));
-        } else {
-            System.out.println(toString(obj));
-        }
-
-        return obj;
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param format
-     * @param args
-     * @return
-     */
-    @SafeVarargs
-    public static <T> T[] fprintln(final String format, final T... args) {
-        System.out.printf(format, args);
-        System.out.println();
-        return args;
-    }
-
-    /**
-     * Returns an empty <code>Nullable</code> if {@code val} is {@code null} while {@code targetType} is primitive or can not be assigned to {@code targetType}.
-     * Please be aware that {@code null} can be assigned to any {@code Object} type except primitive types: {@code boolean/char/byte/short/int/long/double}.
-     *
-     * @param <T>
-     * @param val
-     * @param targetType
-     * @return
-     */
-    @SuppressWarnings("unchecked")
-    @Beta
-    public static <T> Nullable<T> castIfAssignable(final Object val, final Class<? extends T> targetType) {
-        if (ClassUtil.isPrimitiveType(targetType)) {
-            return val != null && ClassUtil.wrap(targetType).isAssignableFrom(val.getClass()) ? Nullable.of((T) val) : Nullable.<T> empty();
-        }
-
-        return val == null || targetType.isAssignableFrom(val.getClass()) ? Nullable.of((T) val) : Nullable.<T> empty();
-    }
 
     /**
      * Returns a {@code Nullable} with the value returned by {@code action} or an empty {@code Nullable} if exception happens.
@@ -28505,15 +28414,25 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     *
+     * Updates each element in the specified array {@code a} with specified function {@code converter}.
      *
      * @param <T>
-     * @param supplier
-     * @return
+     * @param <E>
+     * @param a
+     * @param converter
+     * @throws E
      */
     @Beta
-    public static <T> LazyInitializer<T> lazyInit(final Supplier<T> supplier) {
-        return LazyInitializer.of(supplier);
+    public static <T, E extends Exception> void applyToEach(final T[] a, final Throwables.Function<? super T, ? extends T, E> converter) throws E {
+        checkArgNotNull(converter);
+
+        if (isEmpty(a)) {
+            return;
+        }
+
+        for (int i = 0, len = a.length; i < len; i++) {
+            a[i] = converter.apply(a[i]);
+        }
     }
 
     /**
@@ -28521,12 +28440,60 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param <T>
      * @param <E>
-     * @param supplier
-     * @return
+     * @param c
+     * @param converter
+     * @throws E
      */
     @Beta
-    public static <T, E extends Exception> Throwables.LazyInitializer<T, E> lazyInitialize(final Throwables.Supplier<T, E> supplier) {
-        return Throwables.LazyInitializer.of(supplier);
+    public static <T, E extends Exception> void applyToEach(final List<T> c, final Throwables.Function<? super T, ? extends T, E> converter) throws E {
+        checkArgNotNull(converter);
+
+        if (isEmpty(c)) {
+            return;
+        }
+
+        if (c instanceof ArrayList) {
+            for (int i = 0, size = c.size(); i < size; i++) {
+                c.set(i, converter.apply(c.get(i)));
+            }
+        } else {
+            final ListIterator<T> iter = c.listIterator();
+
+            while (iter.hasNext()) {
+                iter.set(converter.apply(iter.next()));
+            }
+        }
+    }
+
+    /**
+     * Copy the specified array {@code a} first, then call {@code converter} on the copy.
+     *
+     * @param <T>
+     * @param <E>
+     * @param a
+     * @param converter
+     * @return updated copy of {@code a}. {@code null} if {@code (a == null)}. (auto-generated java doc for return)
+     * @throws E
+     * @see {@link #map(Object[], com.landawn.abacus.util.Throwables.Function)}
+     * @see {@link N#map(Iterable, com.landawn.abacus.util.Throwables.Function)}
+     */
+    @MayReturnNull
+    public static <T, E extends Exception> T[] copyThenApply(final T[] a, final Throwables.Function<? super T, ? extends T, E> converter) throws E {
+        checkArgNotNull(converter);
+
+        if (a == null) {
+            return null; // NOSONAR
+        } else if (a.length == 0) {
+            return a.clone();
+        }
+
+        final T[] copy = a.clone();
+
+        for (int i = 0, len = a.length; i < len; i++) {
+            copy[i] = converter.apply(a[i]);
+        }
+
+        return a;
     }
 
     //    /**
@@ -28779,8 +28746,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //
     //        return Pair.of(l, r);
     //    }
-
-    
 
     // Boolean utilities
     //--------------------------------------------------------------------------
@@ -29103,25 +29068,15 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Updates each element in the specified array {@code a} with specified function {@code converter}.
+     *
      *
      * @param <T>
-     * @param <E>
-     * @param a
-     * @param converter
-     * @throws E
+     * @param supplier
+     * @return
      */
     @Beta
-    public static <T, E extends Exception> void applyToEach(final T[] a, final Throwables.Function<? super T, ? extends T, E> converter) throws E {
-        checkArgNotNull(converter);
-
-        if (isEmpty(a)) {
-            return;
-        }
-
-        for (int i = 0, len = a.length; i < len; i++) {
-            a[i] = converter.apply(a[i]);
-        }
+    public static <T> LazyInitializer<T> lazyInit(final Supplier<T> supplier) {
+        return LazyInitializer.of(supplier);
     }
 
     /**
@@ -29129,59 +29084,107 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param <T>
      * @param <E>
-     * @param c
-     * @param converter
-     * @throws E
+     * @param supplier
+     * @return
      */
     @Beta
-    public static <T, E extends Exception> void applyToEach(final List<T> c, final Throwables.Function<? super T, ? extends T, E> converter) throws E {
-        checkArgNotNull(converter);
+    public static <T, E extends Exception> Throwables.LazyInitializer<T, E> lazyInitialize(final Throwables.Supplier<T, E> supplier) {
+        return Throwables.LazyInitializer.of(supplier);
+    }
 
-        if (isEmpty(c)) {
-            return;
-        }
+    /**
+     *
+     * @param e
+     * @return
+     * @see ExceptionUtil#toRuntimeException(Throwable)
+     * @see ExceptionUtil#registerRuntimeExceptionMapper(Class,Function)
+     */
+    @Beta
+    public static RuntimeException toRuntimeException(final Exception e) {
+        return ExceptionUtil.toRuntimeException(e);
+    }
 
-        if (c instanceof ArrayList) {
-            for (int i = 0, size = c.size(); i < size; i++) {
-                c.set(i, converter.apply(c.get(i)));
-            }
+    /**
+     * Converts the specified {@code Throwable} to a {@code RuntimeException} if it's a checked {@code exception} or an {@code Error}, otherwise returns itself.
+     *
+     * @param e
+     * @return
+     * @see ExceptionUtil#toRuntimeException(Throwable)
+     * @see ExceptionUtil#registerRuntimeExceptionMapper(Class,Function)
+     */
+    @Beta
+    public static RuntimeException toRuntimeException(final Throwable e) {
+        return ExceptionUtil.toRuntimeException(e);
+    }
+
+    /**
+     * Converts the specified {@code Throwable} to a {@code RuntimeException} if it's a checked {@code exception}, or throw it if it's an {@code Error}. Otherwise returns itself.
+     *
+     * @param e
+     * @param throwIfItIsError
+     * @return
+     * @see ExceptionUtil#toRuntimeException(Throwable, boolean)
+     * @see ExceptionUtil#registerRuntimeExceptionMapper(Class,Function)
+     */
+    @Beta
+    public static RuntimeException toRuntimeException(final Throwable e, final boolean throwIfItIsError) {
+        return ExceptionUtil.toRuntimeException(e, throwIfItIsError);
+    }
+
+    //    /**
+    //     *
+    //     * @param e
+    //     * @param type
+    //     * @return
+    //     * @see ExceptionUtil#hasCause(Throwable, Class)
+    //     */
+    //    @Beta
+    //    public static boolean hasCause(final Throwable e, final Class<? extends Throwable> type) {
+    //        return ExceptionUtil.hasCause(e, type);
+    //    }
+    //
+    //    /**
+    //     * Returns the specified {@code Throwable e} if there is no cause found in it ({@code e.getCause() == null}).
+    //     *
+    //     * @param e
+    //     * @return
+    //     * @see ExceptionUtil#firstCause(Throwable)
+    //     */
+    //    @Beta
+    //    public static Throwable firstCause(final Throwable e) {
+    //        return ExceptionUtil.firstCause(e);
+    //    }
+
+    /**
+     *
+     * @param <T>
+     * @param obj
+     * @return
+     */
+    @SuppressWarnings("rawtypes")
+    public static <T> T println(final T obj) {
+        if (obj instanceof Collection) {
+            System.out.println(Joiner.with(Strings.ELEMENT_SEPARATOR, "[", "]").reuseCachedBuffer().appendAll((Collection) obj));
+        } else if (obj instanceof Map) {
+            System.out.println(Joiner.with(Strings.ELEMENT_SEPARATOR, "=", "{", "}").reuseCachedBuffer().appendEntries((Map) obj));
         } else {
-            final ListIterator<T> iter = c.listIterator();
-
-            while (iter.hasNext()) {
-                iter.set(converter.apply(iter.next()));
-            }
+            System.out.println(toString(obj));
         }
+
+        return obj;
     }
 
     /**
-     * Copy the specified array {@code a} first, then call {@code converter} on the copy.
      *
      * @param <T>
-     * @param <E>
-     * @param a
-     * @param converter
-     * @return updated copy of {@code a}. {@code null} if {@code (a == null)}. (auto-generated java doc for return)
-     * @throws E
-     * @see {@link #map(Object[], com.landawn.abacus.util.Throwables.Function)}
-     * @see {@link N#map(Iterable, com.landawn.abacus.util.Throwables.Function)}
+     * @param format
+     * @param args
+     * @return
      */
-    @MayReturnNull
-    public static <T, E extends Exception> T[] copyThenApply(final T[] a, final Throwables.Function<? super T, ? extends T, E> converter) throws E {
-        checkArgNotNull(converter);
-
-        if (a == null) {
-            return null; // NOSONAR
-        } else if (a.length == 0) {
-            return a.clone();
-        }
-
-        final T[] copy = a.clone();
-
-        for (int i = 0, len = a.length; i < len; i++) {
-            copy[i] = converter.apply(a[i]);
-        }
-
-        return a;
+    @SafeVarargs
+    public static <T> T[] fprintln(final String format, final T... args) {
+        System.out.printf(format, args);
+        System.out.println();
+        return args;
     }
 }

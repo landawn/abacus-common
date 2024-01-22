@@ -285,6 +285,7 @@ public final class TypeFactory {
 
             try {
                 if (Class.forName("org.joda.time.DateTime") != null) {
+                    classes.add(com.landawn.abacus.type.JodaInstantType.class);
                     classes.add(com.landawn.abacus.type.JodaDateTimeType.class);
                     classes.add(com.landawn.abacus.type.JodaMutableDateTimeType.class);
                 }
@@ -294,6 +295,7 @@ public final class TypeFactory {
 
             try {
                 if (Class.forName("java.time.ZonedDateTime") != null) {
+                    classes.add(com.landawn.abacus.type.InstantType.class);
                     classes.add(com.landawn.abacus.type.ZonedDateTimeType.class);
                     classes.add(com.landawn.abacus.type.LocalDateType.class);
                     classes.add(com.landawn.abacus.type.LocalTimeType.class);

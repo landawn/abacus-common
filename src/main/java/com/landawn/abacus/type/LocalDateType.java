@@ -103,9 +103,13 @@ public class LocalDateType extends AbstractType<LocalDate> {
      */
     @Override
     public LocalDate get(ResultSet rs, int columnIndex) throws SQLException {
-        Date ts = rs.getDate(columnIndex);
+        try {
+            return rs.getObject(columnIndex, LocalDate.class);
+        } catch (SQLException e) {
+            Date ts = rs.getDate(columnIndex);
 
-        return ts == null ? null : ts.toLocalDate();
+            return ts == null ? null : ts.toLocalDate();
+        }
     }
 
     /**
@@ -117,9 +121,13 @@ public class LocalDateType extends AbstractType<LocalDate> {
      */
     @Override
     public LocalDate get(ResultSet rs, String columnName) throws SQLException {
-        Date ts = rs.getDate(columnName);
+        try {
+            return rs.getObject(columnName, LocalDate.class);
+        } catch (SQLException e) {
+            Date ts = rs.getDate(columnName);
 
-        return ts == null ? null : ts.toLocalDate();
+            return ts == null ? null : ts.toLocalDate();
+        }
     }
 
     /**
@@ -131,7 +139,11 @@ public class LocalDateType extends AbstractType<LocalDate> {
      */
     @Override
     public void set(PreparedStatement stmt, int columnIndex, LocalDate x) throws SQLException {
-        stmt.setDate(columnIndex, x == null ? null : Date.valueOf(x));
+        try {
+            stmt.setObject(columnIndex, x);
+        } catch (SQLException e) {
+            stmt.setDate(columnIndex, x == null ? null : Date.valueOf(x));
+        }
     }
 
     /**
@@ -143,6 +155,10 @@ public class LocalDateType extends AbstractType<LocalDate> {
      */
     @Override
     public void set(CallableStatement stmt, String columnName, LocalDate x) throws SQLException {
-        stmt.setDate(columnName, x == null ? null : Date.valueOf(x));
+        try {
+            stmt.setObject(columnName, x);
+        } catch (SQLException e) {
+            stmt.setDate(columnName, x == null ? null : Date.valueOf(x));
+        }
     }
 }

@@ -103,9 +103,13 @@ public class LocalTimeType extends AbstractType<LocalTime> {
      */
     @Override
     public LocalTime get(ResultSet rs, int columnIndex) throws SQLException {
-        Time ts = rs.getTime(columnIndex);
+        try {
+            return rs.getObject(columnIndex, LocalTime.class);
+        } catch (SQLException e) {
+            Time ts = rs.getTime(columnIndex);
 
-        return ts == null ? null : ts.toLocalTime();
+            return ts == null ? null : ts.toLocalTime();
+        }
     }
 
     /**
@@ -117,9 +121,13 @@ public class LocalTimeType extends AbstractType<LocalTime> {
      */
     @Override
     public LocalTime get(ResultSet rs, String columnName) throws SQLException {
-        Time ts = rs.getTime(columnName);
+        try {
+            return rs.getObject(columnName, LocalTime.class);
+        } catch (SQLException e) {
+            Time ts = rs.getTime(columnName);
 
-        return ts == null ? null : ts.toLocalTime();
+            return ts == null ? null : ts.toLocalTime();
+        }
     }
 
     /**
@@ -131,7 +139,11 @@ public class LocalTimeType extends AbstractType<LocalTime> {
      */
     @Override
     public void set(PreparedStatement stmt, int columnIndex, LocalTime x) throws SQLException {
-        stmt.setTime(columnIndex, x == null ? null : Time.valueOf(x));
+        try {
+            stmt.setObject(columnIndex, x);
+        } catch (SQLException e) {
+            stmt.setTime(columnIndex, x == null ? null : Time.valueOf(x));
+        }
     }
 
     /**
@@ -143,6 +155,10 @@ public class LocalTimeType extends AbstractType<LocalTime> {
      */
     @Override
     public void set(CallableStatement stmt, String columnName, LocalTime x) throws SQLException {
-        stmt.setTime(columnName, x == null ? null : Time.valueOf(x));
+        try {
+            stmt.setObject(columnName, x);
+        } catch (SQLException e) {
+            stmt.setTime(columnName, x == null ? null : Time.valueOf(x));
+        }
     }
 }

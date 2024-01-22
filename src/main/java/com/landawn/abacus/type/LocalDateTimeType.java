@@ -103,9 +103,13 @@ public class LocalDateTimeType extends AbstractType<LocalDateTime> {
      */
     @Override
     public LocalDateTime get(ResultSet rs, int columnIndex) throws SQLException {
-        Timestamp ts = rs.getTimestamp(columnIndex);
+        try {
+            return rs.getObject(columnIndex, LocalDateTime.class);
+        } catch (SQLException e) {
+            Timestamp ts = rs.getTimestamp(columnIndex);
 
-        return ts == null ? null : ts.toLocalDateTime();
+            return ts == null ? null : ts.toLocalDateTime();
+        }
     }
 
     /**
@@ -117,9 +121,13 @@ public class LocalDateTimeType extends AbstractType<LocalDateTime> {
      */
     @Override
     public LocalDateTime get(ResultSet rs, String columnName) throws SQLException {
-        Timestamp ts = rs.getTimestamp(columnName);
+        try {
+            return rs.getObject(columnName, LocalDateTime.class);
+        } catch (SQLException e) {
+            Timestamp ts = rs.getTimestamp(columnName);
 
-        return ts == null ? null : ts.toLocalDateTime();
+            return ts == null ? null : ts.toLocalDateTime();
+        }
     }
 
     /**
@@ -131,7 +139,11 @@ public class LocalDateTimeType extends AbstractType<LocalDateTime> {
      */
     @Override
     public void set(PreparedStatement stmt, int columnIndex, LocalDateTime x) throws SQLException {
-        stmt.setTimestamp(columnIndex, x == null ? null : Timestamp.valueOf(x));
+        try {
+            stmt.setObject(columnIndex, x);
+        } catch (SQLException e) {
+            stmt.setTimestamp(columnIndex, x == null ? null : Timestamp.valueOf(x));
+        }
     }
 
     /**
@@ -143,6 +155,10 @@ public class LocalDateTimeType extends AbstractType<LocalDateTime> {
      */
     @Override
     public void set(CallableStatement stmt, String columnName, LocalDateTime x) throws SQLException {
-        stmt.setTimestamp(columnName, x == null ? null : Timestamp.valueOf(x));
+        try {
+            stmt.setObject(columnName, x);
+        } catch (SQLException e) {
+            stmt.setTimestamp(columnName, x == null ? null : Timestamp.valueOf(x));
+        }
     }
 }

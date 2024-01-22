@@ -997,7 +997,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * Lazy evaluation.
      * <br />
      *
-     * This is equal to: {@code CheckedStream.just(supplier).flatMap(it -> it.get())}.
+     * This is equal to: {@code CheckedStream.just(supplier).flatMap(Throwables.Supplier::get)}.
      *
      * @param <T>
      * @param <E>

@@ -39,7 +39,6 @@ import com.landawn.abacus.util.TypeAttrParser;
  * @since 0.8
  */
 public abstract class AbstractType<T> implements Type<T> {
-
     static final String ELEMENT_SEPARATOR = ", ".intern();
 
     static final char[] ELEMENT_SEPARATOR_CHAR_ARRAY = ELEMENT_SEPARATOR.toCharArray();

@@ -55,9 +55,9 @@ public class ZonedDateTimeType extends AbstractType<ZonedDateTime> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public Class<ZonedDateTime> clazz() {
@@ -71,7 +71,7 @@ public class ZonedDateTimeType extends AbstractType<ZonedDateTime> {
      */
     @Override
     public String stringOf(ZonedDateTime x) {
-        return (x == null) ? null : x.toString();
+        return (x == null) ? null : iso8601TimestampFT.format(x);
     }
 
     /**
@@ -93,13 +93,15 @@ public class ZonedDateTimeType extends AbstractType<ZonedDateTime> {
         if (str.charAt(4) != '-') {
             try {
                 return ZonedDateTime.ofInstant(Instant.ofEpochMilli(Numbers.toLong(str)), DEFAULT_TIME_ZONE);
-            } catch (NumberFormatException e) {
+            } catch (NumberFormatException e2) {
                 // ignore;
             }
         }
 
         return str.length() == 20 ? ZonedDateTime.parse(str, iso8601DateTimeFT)
-                : (str.length() == 24 ? ZonedDateTime.parse(str, iso8601TimestampFT) : ZonedDateTime.parse(str));
+                : (str.length() == 24 ? ZonedDateTime.parse(str, iso8601TimestampFT)
+                        : (str.endsWith("]") ? ZonedDateTime.parse(str)
+                                : ZonedDateTime.ofInstant(DateUtil.parseTimestamp(str).toInstant(), DEFAULT_TIME_ZONE)));
     }
 
     /**
@@ -118,7 +120,7 @@ public class ZonedDateTimeType extends AbstractType<ZonedDateTime> {
 
         if (cbuf[offset + 4] != '-') {
             try {
-                return ZonedDateTime.ofInstant(Instant.ofEpochMilli(AbstractType.parseLong(cbuf, offset, len)), DEFAULT_TIME_ZONE);
+                return ZonedDateTime.ofInstant(Instant.ofEpochMilli(parseLong(cbuf, offset, len)), DEFAULT_TIME_ZONE);
             } catch (NumberFormatException e) {
                 // ignore;
             }
@@ -223,12 +225,12 @@ public class ZonedDateTimeType extends AbstractType<ZonedDateTime> {
                         break;
 
                     case ISO_8601_DATETIME:
-                        writer.write(x.format(iso8601DateTimeFT));
+                        writer.write(iso8601DateTimeFT.format(x));
 
                         break;
 
                     case ISO_8601_TIMESTAMP:
-                        writer.write(stringOf(x));
+                        writer.write(iso8601TimestampFT.format(x));
 
                         break;
 

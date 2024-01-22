@@ -431,6 +431,18 @@ public class Array {
         return a;
     }
 
+    //    /**
+    //     * Returns the input array.
+    //     *
+    //     * @param <T>
+    //     * @param a
+    //     * @return
+    //     */
+    //    @SafeVarargs
+    //    public static <T extends Number> T[] of(final T... a) {
+    //        return a;
+    //    }
+
     /**
      * Returns the input array.
      *
