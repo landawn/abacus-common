@@ -53,11 +53,14 @@ import java.util.concurrent.FutureTask;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
+import java.util.function.Function;
 import java.util.function.IntFunction;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+import java.util.stream.Collector;
 
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.MayReturnNull;
@@ -25226,8 +25229,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      *
      *
-     * @param <K>
      * @param <T>
+     * @param <K>
      * @param <E>
      * @param a
      * @param keyExtractor
@@ -25235,15 +25238,15 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws E
      */
     @Beta
-    public static <K, T, E extends Exception> Map<K, List<T>> groupBy(final T[] a, final Throwables.Function<? super T, ? extends K, E> keyExtractor) throws E {
+    public static <T, K, E extends Exception> Map<K, List<T>> groupBy(final T[] a, final Throwables.Function<? super T, ? extends K, E> keyExtractor) throws E {
         return groupBy(a, keyExtractor, Suppliers.ofMap());
     }
 
     /**
      *
      *
-     * @param <K>
      * @param <T>
+     * @param <K>
      * @param <M>
      * @param <E>
      * @param a
@@ -25253,15 +25256,15 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws E
      */
     @Beta
-    public static <K, T, M extends Map<K, List<T>>, E extends Exception> M groupBy(final T[] a,
+    public static <T, K, M extends Map<K, List<T>>, E extends Exception> M groupBy(final T[] a,
             final Throwables.Function<? super T, ? extends K, E> keyExtractor, final Supplier<M> mapSupplier) throws E {
         return groupBy(a, 0, len(a), keyExtractor, mapSupplier);
     }
 
     /**
      *
-     * @param <K>
      * @param <T>
+     * @param <K>
      * @param <E>
      * @param a
      * @param fromIndex
@@ -25271,7 +25274,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws E
      */
     @Beta
-    public static <K, T, E extends Exception> Map<K, List<T>> groupBy(final T[] a, final int fromIndex, final int toIndex,
+    public static <T, K, E extends Exception> Map<K, List<T>> groupBy(final T[] a, final int fromIndex, final int toIndex,
             final Throwables.Function<? super T, ? extends K, E> keyExtractor) throws E {
         return groupBy(a, fromIndex, toIndex, keyExtractor, Suppliers.ofMap());
     }
@@ -25279,8 +25282,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      *
      *
-     * @param <K>
      * @param <T>
+     * @param <K>
      * @param <M>
      * @param <E>
      * @param a
@@ -25292,7 +25295,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws E
      */
     @Beta
-    public static <K, T, M extends Map<K, List<T>>, E extends Exception> M groupBy(final T[] a, final int fromIndex, final int toIndex,
+    public static <T, K, M extends Map<K, List<T>>, E extends Exception> M groupBy(final T[] a, final int fromIndex, final int toIndex,
             final Throwables.Function<? super T, ? extends K, E> keyExtractor, final Supplier<M> mapSupplier) throws E {
         final int length = len(a);
 
@@ -25323,8 +25326,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      *
      *
-     * @param <K>
      * @param <T>
+     * @param <K>
      * @param <E>
      * @param iter
      * @param keyExtractor
@@ -25332,7 +25335,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws E
      */
     @Beta
-    public static <K, T, E extends Exception> Map<K, List<T>> groupBy(final Iterable<? extends T> iter,
+    public static <T, K, E extends Exception> Map<K, List<T>> groupBy(final Iterable<? extends T> iter,
             final Throwables.Function<? super T, ? extends K, E> keyExtractor) throws E {
         return groupBy(iter, keyExtractor, Suppliers.ofMap());
     }
@@ -25340,8 +25343,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      *
      *
-     * @param <K>
      * @param <T>
+     * @param <K>
      * @param <M>
      * @param <E>
      * @param iter
@@ -25351,7 +25354,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws E
      */
     @Beta
-    public static <K, T, M extends Map<K, List<T>>, E extends Exception> M groupBy(final Iterable<? extends T> iter,
+    public static <T, K, M extends Map<K, List<T>>, E extends Exception> M groupBy(final Iterable<? extends T> iter,
             final Throwables.Function<? super T, ? extends K, E> keyExtractor, final Supplier<M> mapSupplier) throws E {
         checkArgNotNull(keyExtractor, "keyExtractor");
         checkArgNotNull(mapSupplier, "mapSupplier");
@@ -25384,8 +25387,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      *
      *
-     * @param <K>
      * @param <T>
+     * @param <K>
      * @param <E>
      * @param iter
      * @param keyExtractor
@@ -25393,7 +25396,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws E
      */
     @Beta
-    public static <K, T, E extends Exception> Map<K, List<T>> groupBy(final Iterator<? extends T> iter,
+    public static <T, K, E extends Exception> Map<K, List<T>> groupBy(final Iterator<? extends T> iter,
             final Throwables.Function<? super T, ? extends K, E> keyExtractor) throws E {
         return groupBy(iter, keyExtractor, Suppliers.ofMap());
     }
@@ -25401,8 +25404,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      *
      *
-     * @param <K>
      * @param <T>
+     * @param <K>
      * @param <M>
      * @param <E>
      * @param iter
@@ -25412,7 +25415,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws E
      */
     @Beta
-    public static <K, T, M extends Map<K, List<T>>, E extends Exception> M groupBy(final Iterator<? extends T> iter,
+    public static <T, K, M extends Map<K, List<T>>, E extends Exception> M groupBy(final Iterator<? extends T> iter,
             final Throwables.Function<? super T, ? extends K, E> keyExtractor, final Supplier<M> mapSupplier) throws E {
         checkArgNotNull(keyExtractor, "keyExtractor");
         checkArgNotNull(mapSupplier, "mapSupplier");
@@ -25443,6 +25446,156 @@ public final class N extends CommonUtil { // public final class N extends π imp
         }
 
         return ret;
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param <K>
+     * @param <E>
+     * @param iter
+     * @param keyExtractor
+     * @param collector
+     * @return
+     * @throws E
+     */
+    @Beta
+    public static <T, K, R, E extends Exception> Map<K, R> groupBy(final Iterable<? extends T> iter,
+            final Throwables.Function<? super T, ? extends K, E> keyExtractor, final Collector<? super T, ?, R> collector) throws E {
+        return groupBy(iter, keyExtractor, collector, Suppliers.ofMap());
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param <K>
+     * @param <M>
+     * @param <E>
+     * @param iter
+     * @param keyExtractor
+     * @param mapSupplier
+     * @return
+     * @throws E
+     */
+    @Beta
+    public static <T, K, R, M extends Map<K, R>, E extends Exception> M groupBy(final Iterable<? extends T> iter,
+            final Throwables.Function<? super T, ? extends K, E> keyExtractor, final Collector<? super T, ?, R> collector, final Supplier<M> mapSupplier)
+            throws E {
+        checkArgNotNull(keyExtractor, "keyExtractor");
+        checkArgNotNull(collector, "collector");
+        checkArgNotNull(mapSupplier, "mapSupplier");
+
+        final M ret = mapSupplier.get();
+
+        final Supplier<Object> downstreamSupplier = (Supplier<Object>) collector.supplier();
+        final BiConsumer<Object, ? super T> downstreamAccumulator = (BiConsumer<Object, ? super T>) collector.accumulator();
+        final Function<Object, R> downstreamFinisher = (Function<Object, R>) collector.finisher();
+
+        final Map<K, Object> intermediate = (Map<K, Object>) ret;
+
+        if (iter == null) {
+            return ret;
+        }
+
+        K key = null;
+        Object val = null;
+
+        for (T e : iter) {
+            key = keyExtractor.apply(e);
+
+            if (((val = intermediate.get(key)) == null) && ((val = downstreamSupplier.get()) != null)) {
+                intermediate.put(key, val);
+            }
+
+            downstreamAccumulator.accept(val, e);
+        }
+
+        updateIntermediateValue(intermediate, downstreamFinisher);
+
+        return ret;
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param <K>
+     * @param <R>
+     * @param <E>
+     * @param iter
+     * @param collector
+     * @param keyExtractor
+     * @return
+     * @throws E
+     */
+    @Beta
+    public static <K, T, R, E extends Exception> Map<K, R> groupBy(final Iterator<? extends T> iter,
+            final Throwables.Function<? super T, ? extends K, E> keyExtractor, final Collector<? super T, ?, R> collector) throws E {
+        return groupBy(iter, keyExtractor, collector, Suppliers.ofMap());
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param <K>
+     * @param <R>
+     * @param <M>
+     * @param <E>
+     * @param iter
+     * @param keyExtractor
+     * @param collector
+     * @param mapSupplier
+     * @return
+     * @throws E
+     */
+    @Beta
+    public static <K, T, R, M extends Map<K, R>, E extends Exception> M groupBy(final Iterator<? extends T> iter,
+            final Throwables.Function<? super T, ? extends K, E> keyExtractor, final Collector<? super T, ?, R> collector, final Supplier<M> mapSupplier)
+            throws E {
+        checkArgNotNull(keyExtractor, "keyExtractor");
+        checkArgNotNull(collector, "collector");
+        checkArgNotNull(mapSupplier, "mapSupplier");
+
+        final M ret = mapSupplier.get();
+
+        final Supplier<Object> downstreamSupplier = (Supplier<Object>) collector.supplier();
+        final BiConsumer<Object, ? super T> downstreamAccumulator = (BiConsumer<Object, ? super T>) collector.accumulator();
+        final Function<Object, R> downstreamFinisher = (Function<Object, R>) collector.finisher();
+
+        final Map<K, Object> intermediate = (Map<K, Object>) ret;
+
+        if (iter == null) {
+            return ret;
+        }
+
+        T e = null;
+        K key = null;
+        Object val = null;
+
+        while (iter.hasNext()) {
+            e = iter.next();
+
+            key = keyExtractor.apply(e);
+
+            if (((val = intermediate.get(key)) == null) && ((val = downstreamSupplier.get()) != null)) {
+                intermediate.put(key, val);
+            }
+
+            downstreamAccumulator.accept(val, e);
+        }
+
+        updateIntermediateValue(intermediate, downstreamFinisher);
+
+        return ret;
+    }
+
+    static void updateIntermediateValue(final Map<?, Object> intermediate, final Function<Object, ?> downstreamFinisher) {
+        for (Map.Entry<?, Object> entry : intermediate.entrySet()) {
+            entry.setValue(downstreamFinisher.apply(entry.getValue()));
+        }
     }
 
     /**

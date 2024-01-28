@@ -906,7 +906,8 @@ public final class PropertiesUtil {
 
                 if (duplicatedPropNameSet.contains(propName)) {
                     String listPropName = propName + "List";
-                    String elementTypeName = N.typeOf(typeName).isPrimitiveType() ? ClassUtil.getSimpleClassName(ClassUtil.wrap(N.typeOf(typeName).clazz())) : typeName;
+                    String elementTypeName = N.typeOf(typeName).isPrimitiveType() ? ClassUtil.getSimpleClassName(ClassUtil.wrap(N.typeOf(typeName).clazz()))
+                            : typeName;
 
                     writer.write(spaces + "    " + (isPublicField ? "public " : "private ") + "List<" + elementTypeName + "> " + listPropName
                             + " = Collections.synchronizedList(new ArrayList<" + elementTypeName + ">());" + IOUtil.LINE_SEPARATOR);
