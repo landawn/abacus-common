@@ -2574,8 +2574,8 @@ public final class Iterators {
      * @return
      */
     @Beta
-    public static <T, U> ObjIterator<U> flatmap(final Iterable<? extends T> c, final Function<? super T, ? extends U[]> mapper) {
-        N.checkArgNotNull(mapper, "mapper"); //NOSONAR
+    public static <T, U> ObjIterator<U> flatmap(final Iterable<? extends T> c, final Function<? super T, ? extends U[]> mapper) { //NOSONAR
+        N.checkArgNotNull(mapper, "mapper");
 
         if (c == null) {
             return ObjIterator.empty();

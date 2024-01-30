@@ -706,7 +706,6 @@ public final class Splitter {
     }
 
     /**
-     * Split and then.
      *
      * @param <T>
      * @param <E>
@@ -715,10 +714,19 @@ public final class Splitter {
      * @return
      * @throws E the e
      */
-    public <T, E extends Exception> T splitAndThen(final CharSequence source, Throwables.Function<? super List<String>, T, E> converter) throws E {
-        N.checkArgNotNull(converter, "converter");
-
+    public <T, E extends Exception> T splitThenApply(final CharSequence source, final Throwables.Function<? super List<String>, T, E> converter) throws E {
         return converter.apply(split(source));
+    }
+
+    /**
+     *
+     * @param <E>
+     * @param source
+     * @param converter
+     * @throws E the e
+     */
+    public <E extends Exception> void splitThenAccept(final CharSequence source, final Throwables.Consumer<? super List<String>, E> consumer) throws E {
+        consumer.accept(split(source));
     }
 
     /**
@@ -1190,7 +1198,6 @@ public final class Splitter {
         }
 
         /**
-         * Split and then.
          *
          * @param <T>
          * @param <E>
@@ -1199,8 +1206,21 @@ public final class Splitter {
          * @return
          * @throws E the e
          */
-        public <T, E extends Exception> T splitAndThen(final CharSequence source, Throwables.Function<? super Map<String, String>, T, E> converter) throws E {
+        public <T, E extends Exception> T splitThenApply(final CharSequence source, final Throwables.Function<? super Map<String, String>, T, E> converter)
+                throws E {
             return converter.apply(split(source));
+        }
+
+        /**
+         *
+         * @param <E>
+         * @param source
+         * @param converter
+         * @throws E the e
+         */
+        public <E extends Exception> void splitThenAccept(final CharSequence source, final Throwables.Consumer<? super Map<String, String>, E> consumer)
+                throws E {
+            consumer.accept(split(source));
         }
     }
 

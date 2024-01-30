@@ -12466,7 +12466,7 @@ sealed class CommonUtil permits N {
      * @param cmp
      * @return
      */
-    static <T> Comparator<? super T> checkComparator(Comparator<? super T> cmp) {
+    static <T> Comparator<T> checkComparator(Comparator<T> cmp) {
         return cmp == null ? NATURAL_COMPARATOR : cmp;
     }
 
@@ -20230,381 +20230,381 @@ sealed class CommonUtil permits N {
         sort(list, Comparators.reversedComparingDouble(keyMapper));
     }
 
-    /**
-     *
-     * @param a
-     */
-    public static void bucketSort(final int[] a) {
-        if (N.isEmpty(a)) {
-            return;
-        }
-
-        bucketSort(a, 0, a.length);
-    }
-
-    /**
-     *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     */
-    public static void bucketSort(final int[] a, final int fromIndex, final int toIndex) {
-        N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
-
-        if (N.isEmpty(a) || fromIndex == toIndex) {
-            return;
-        }
-
-        if (toIndex - fromIndex < 32) {
-            sort(a, fromIndex, toIndex);
-            return;
-        }
-
-        final Multiset<Integer> multiset = new Multiset<>();
-
-        for (int i = fromIndex; i < toIndex; i++) {
-            multiset.add(a[i]);
-        }
-
-        final Map<Integer, Integer> m = multiset.toMapSortedBy((a1, b) -> N.compare(a1.getKey().intValue(), a1.getKey().intValue()));
-        int idx = fromIndex;
-
-        for (Map.Entry<Integer, Integer> entry : m.entrySet()) {
-            N.fill(a, idx, idx + entry.getValue(), entry.getKey());
-            idx += entry.getValue();
-        }
-    }
-
-    /**
-     *
-     * @param a
-     */
-    public static void bucketSort(final long[] a) {
-        if (N.isEmpty(a)) {
-            return;
-        }
-
-        bucketSort(a, 0, a.length);
-    }
-
-    /**
-     *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     */
-    public static void bucketSort(final long[] a, final int fromIndex, final int toIndex) {
-        N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
-
-        if (N.isEmpty(a) || fromIndex == toIndex) {
-            return;
-        }
-
-        if (toIndex - fromIndex < 32) {
-            sort(a, fromIndex, toIndex);
-            return;
-        }
-
-        final Multiset<Long> multiset = new Multiset<>();
-
-        for (int i = fromIndex; i < toIndex; i++) {
-            multiset.add(a[i]);
-        }
-
-        final Map<Long, Integer> m = multiset.toMapSortedBy((a1, b) -> N.compare(a1.getKey().longValue(), a1.getKey().longValue()));
-
-        int idx = fromIndex;
-
-        for (Map.Entry<Long, Integer> entry : m.entrySet()) {
-            N.fill(a, idx, idx + entry.getValue(), entry.getKey());
-            idx += entry.getValue();
-        }
-    }
-
-    /**
-     *
-     * @param a
-     */
-    public static void bucketSort(final float[] a) {
-        if (N.isEmpty(a)) {
-            return;
-        }
-
-        bucketSort(a, 0, a.length);
-    }
-
-    /**
-     *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     */
-    public static void bucketSort(final float[] a, final int fromIndex, final int toIndex) {
-        N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
-
-        if (N.isEmpty(a) || fromIndex == toIndex) {
-            return;
-        }
-
-        if (toIndex - fromIndex < 32) {
-            sort(a, fromIndex, toIndex);
-            return;
-        }
-
-        final Multiset<Float> multiset = new Multiset<>();
-
-        for (int i = fromIndex; i < toIndex; i++) {
-            multiset.add(a[i]);
-        }
-
-        final Map<Float, Integer> m = multiset.toMapSortedBy((a1, b) -> N.compare(a1.getKey(), a1.getKey()));
-        int idx = fromIndex;
-
-        for (Map.Entry<Float, Integer> entry : m.entrySet()) {
-            N.fill(a, idx, idx + entry.getValue(), entry.getKey());
-            idx += entry.getValue();
-        }
-    }
-
-    /**
-     *
-     * @param a
-     */
-    public static void bucketSort(final double[] a) {
-        if (N.isEmpty(a)) {
-            return;
-        }
-
-        bucketSort(a, 0, a.length);
-    }
-
-    /**
-     *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     */
-    public static void bucketSort(final double[] a, final int fromIndex, final int toIndex) {
-        N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
-
-        if (N.isEmpty(a) || fromIndex == toIndex) {
-            return;
-        }
-
-        if (toIndex - fromIndex < 32) {
-            sort(a, fromIndex, toIndex);
-            return;
-        }
-
-        final Multiset<Double> multiset = new Multiset<>();
-
-        for (int i = fromIndex; i < toIndex; i++) {
-            multiset.add(a[i]);
-        }
-
-        final Map<Double, Integer> m = multiset.toMapSortedBy((a1, b) -> N.compare(a1.getKey(), a1.getKey()));
-        int idx = fromIndex;
-
-        for (Map.Entry<Double, Integer> entry : m.entrySet()) {
-            N.fill(a, idx, idx + entry.getValue(), entry.getKey());
-            idx += entry.getValue();
-        }
-    }
-
-    /**
-     * Note: All the objects with same value will be replaced by first element with the same value.
-     *
-     * @param a
-     */
-    public static void bucketSort(final Object[] a) {
-        if (N.isEmpty(a)) {
-            return;
-        }
-
-        bucketSort(a, 0, a.length);
-    }
-
-    /**
-     * Note: All the objects with same value will be replaced by first element with the same value.
-     *
-     * @param a the elements in the array must implements the <code>Comparable</code> interface.
-     * @param fromIndex
-     * @param toIndex
-     */
-    public static void bucketSort(final Object[] a, final int fromIndex, final int toIndex) {
-        bucketSort(a, fromIndex, toIndex, NATURAL_COMPARATOR);
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param a
-     * @param cmp
-     */
-    public static <T> void bucketSort(final T[] a, final Comparator<? super T> cmp) {
-        if (N.isEmpty(a)) {
-            return;
-        }
-
-        bucketSort(a, 0, a.length, cmp);
-    }
-
-    /**
-     * Note: All the objects with same value will be replaced by first element with the same value.
-     *
-     * @param <T>
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param cmp
-     */
-    public static <T> void bucketSort(final T[] a, final int fromIndex, final int toIndex, final Comparator<? super T> cmp) {
-        N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
-
-        if (N.isEmpty(a) || fromIndex == toIndex) {
-            return;
-        }
-
-        if (toIndex - fromIndex < 32) {
-            sort(a, fromIndex, toIndex, cmp);
-            return;
-        }
-
-        final Comparator<? super T> comparator = checkComparator(cmp);
-        final Multiset<T> multiset = new Multiset<>();
-
-        for (int i = fromIndex; i < toIndex; i++) {
-            multiset.add(a[i]);
-        }
-
-        final Map<T, Integer> m = multiset.toMapSortedBy((a1, b) -> comparator.compare(a1.getKey(), a1.getKey()));
-        int idx = fromIndex;
-
-        for (Map.Entry<T, Integer> entry : m.entrySet()) {
-            N.fill(a, idx, idx + entry.getValue(), entry.getKey());
-            idx += entry.getValue();
-        }
-    }
-
-    /**
-     * Note: All the objects with same value will be replaced by first element with the same value.
-     *
-     * @param <T>
-     * @param list
-     */
-    public static <T extends Comparable<? super T>> void bucketSort(final List<T> list) {
-        if (N.isEmpty(list)) {
-            return;
-        }
-
-        bucketSort(list, 0, list.size());
-    }
-
-    /**
-     * Note: All the objects with same value will be replaced by first element with the same value.
-     *
-     * @param <T>
-     * @param list
-     * @param fromIndex
-     * @param toIndex
-     */
-    public static <T extends Comparable<? super T>> void bucketSort(final List<T> list, final int fromIndex, final int toIndex) {
-        bucketSort(list, fromIndex, toIndex, NATURAL_COMPARATOR);
-    }
-
-    /**
-     * Note: All the objects with same value will be replaced by first element with the same value.
-     *
-     * @param <T>
-     * @param list
-     * @param cmp
-     */
-    public static <T> void bucketSort(final List<? extends T> list, final Comparator<? super T> cmp) {
-        if (N.isEmpty(list)) {
-            return;
-        }
-
-        bucketSort(list, 0, list.size(), cmp);
-    }
-
-    /**
-     * Note: All the objects with same value will be replaced by first element with the same value.
-     *
-     * @param <T>
-     * @param list
-     * @param fromIndex
-     * @param toIndex
-     * @param cmp
-     */
-    public static <T> void bucketSort(final List<? extends T> list, final int fromIndex, final int toIndex, final Comparator<? super T> cmp) {
-        N.checkFromToIndex(fromIndex, toIndex, list == null ? 0 : list.size());
-
-        if ((N.isEmpty(list) && fromIndex == 0 && toIndex == 0) || fromIndex == toIndex) {
-            return;
-        }
-
-        if (toIndex - fromIndex < 32) {
-            sort(list, fromIndex, toIndex, cmp);
-            return;
-        }
-
-        final Comparator<? super T> comparator = checkComparator(cmp);
-        final Multiset<T> multiset = new Multiset<>();
-        ListIterator<T> itr = (ListIterator<T>) list.listIterator(fromIndex);
-        int i = fromIndex;
-
-        while (itr.hasNext()) {
-            if (i++ >= toIndex) {
-                break;
-            }
-
-            multiset.add(itr.next());
-        }
-
-        final Map<T, Integer> m = multiset.toMapSortedBy((a, b) -> comparator.compare(a.getKey(), a.getKey()));
-
-        itr = (ListIterator<T>) list.listIterator(fromIndex);
-
-        for (Map.Entry<T, Integer> entry : m.entrySet()) {
-            final T key = entry.getKey();
-            for (int j = 0; j < entry.getValue(); j++) {
-                itr.next();
-                itr.set(key);
-            }
-        }
-    }
-
-    /**
-     * Bucket sort by.
-     *
-     * @param <T>
-     * @param <U>
-     * @param a
-     * @param keyMapper
-     */
-    public static <T, U extends Comparable<? super U>> void bucketSortBy(final T[] a, final Function<? super T, ? extends U> keyMapper) {
-        if (N.isEmpty(a)) {
-            return;
-        }
-
-        bucketSort(a, Comparators.comparingBy(keyMapper));
-    }
-
-    /**
-     * Bucket sort by.
-     *
-     * @param <T>
-     * @param <U>
-     * @param list
-     * @param keyMapper
-     */
-    public static <T, U extends Comparable<? super U>> void bucketSortBy(final List<? extends T> list, final Function<? super T, ? extends U> keyMapper) {
-        if (N.isEmpty(list)) {
-            return;
-        }
-
-        bucketSort(list, Comparators.comparingBy(keyMapper));
-    }
+    //    /**
+    //     *
+    //     * @param a
+    //     */
+    //    public static void bucketSort(final int[] a) {
+    //        if (N.isEmpty(a)) {
+    //            return;
+    //        }
+    //
+    //        bucketSort(a, 0, a.length);
+    //    }
+    //
+    //    /**
+    //     *
+    //     * @param a
+    //     * @param fromIndex
+    //     * @param toIndex
+    //     */
+    //    public static void bucketSort(final int[] a, final int fromIndex, final int toIndex) {
+    //        N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
+    //
+    //        if (N.isEmpty(a) || fromIndex == toIndex) {
+    //            return;
+    //        }
+    //
+    //        if (toIndex - fromIndex < 32) {
+    //            sort(a, fromIndex, toIndex);
+    //            return;
+    //        }
+    //
+    //        final Multiset<Integer> multiset = new Multiset<>();
+    //
+    //        for (int i = fromIndex; i < toIndex; i++) {
+    //            multiset.add(a[i]);
+    //        }
+    //
+    //        final Map<Integer, Integer> m = multiset.toMapSortedBy((a1, b) -> N.compare(a1.getKey().intValue(), a1.getKey().intValue()));
+    //        int idx = fromIndex;
+    //
+    //        for (Map.Entry<Integer, Integer> entry : m.entrySet()) {
+    //            N.fill(a, idx, idx + entry.getValue(), entry.getKey());
+    //            idx += entry.getValue();
+    //        }
+    //    }
+    //
+    //    /**
+    //     *
+    //     * @param a
+    //     */
+    //    public static void bucketSort(final long[] a) {
+    //        if (N.isEmpty(a)) {
+    //            return;
+    //        }
+    //
+    //        bucketSort(a, 0, a.length);
+    //    }
+    //
+    //    /**
+    //     *
+    //     * @param a
+    //     * @param fromIndex
+    //     * @param toIndex
+    //     */
+    //    public static void bucketSort(final long[] a, final int fromIndex, final int toIndex) {
+    //        N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
+    //
+    //        if (N.isEmpty(a) || fromIndex == toIndex) {
+    //            return;
+    //        }
+    //
+    //        if (toIndex - fromIndex < 32) {
+    //            sort(a, fromIndex, toIndex);
+    //            return;
+    //        }
+    //
+    //        final Multiset<Long> multiset = new Multiset<>();
+    //
+    //        for (int i = fromIndex; i < toIndex; i++) {
+    //            multiset.add(a[i]);
+    //        }
+    //
+    //        final Map<Long, Integer> m = multiset.toMapSortedBy((a1, b) -> N.compare(a1.getKey().longValue(), a1.getKey().longValue()));
+    //
+    //        int idx = fromIndex;
+    //
+    //        for (Map.Entry<Long, Integer> entry : m.entrySet()) {
+    //            N.fill(a, idx, idx + entry.getValue(), entry.getKey());
+    //            idx += entry.getValue();
+    //        }
+    //    }
+    //
+    //    /**
+    //     *
+    //     * @param a
+    //     */
+    //    public static void bucketSort(final float[] a) {
+    //        if (N.isEmpty(a)) {
+    //            return;
+    //        }
+    //
+    //        bucketSort(a, 0, a.length);
+    //    }
+    //
+    //    /**
+    //     *
+    //     * @param a
+    //     * @param fromIndex
+    //     * @param toIndex
+    //     */
+    //    public static void bucketSort(final float[] a, final int fromIndex, final int toIndex) {
+    //        N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
+    //
+    //        if (N.isEmpty(a) || fromIndex == toIndex) {
+    //            return;
+    //        }
+    //
+    //        if (toIndex - fromIndex < 32) {
+    //            sort(a, fromIndex, toIndex);
+    //            return;
+    //        }
+    //
+    //        final Multiset<Float> multiset = new Multiset<>();
+    //
+    //        for (int i = fromIndex; i < toIndex; i++) {
+    //            multiset.add(a[i]);
+    //        }
+    //
+    //        final Map<Float, Integer> m = multiset.toMapSortedBy((a1, b) -> N.compare(a1.getKey(), a1.getKey()));
+    //        int idx = fromIndex;
+    //
+    //        for (Map.Entry<Float, Integer> entry : m.entrySet()) {
+    //            N.fill(a, idx, idx + entry.getValue(), entry.getKey());
+    //            idx += entry.getValue();
+    //        }
+    //    }
+    //
+    //    /**
+    //     *
+    //     * @param a
+    //     */
+    //    public static void bucketSort(final double[] a) {
+    //        if (N.isEmpty(a)) {
+    //            return;
+    //        }
+    //
+    //        bucketSort(a, 0, a.length);
+    //    }
+    //
+    //    /**
+    //     *
+    //     * @param a
+    //     * @param fromIndex
+    //     * @param toIndex
+    //     */
+    //    public static void bucketSort(final double[] a, final int fromIndex, final int toIndex) {
+    //        N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
+    //
+    //        if (N.isEmpty(a) || fromIndex == toIndex) {
+    //            return;
+    //        }
+    //
+    //        if (toIndex - fromIndex < 32) {
+    //            sort(a, fromIndex, toIndex);
+    //            return;
+    //        }
+    //
+    //        final Multiset<Double> multiset = new Multiset<>();
+    //
+    //        for (int i = fromIndex; i < toIndex; i++) {
+    //            multiset.add(a[i]);
+    //        }
+    //
+    //        final Map<Double, Integer> m = multiset.toMapSortedBy((a1, b) -> N.compare(a1.getKey(), a1.getKey()));
+    //        int idx = fromIndex;
+    //
+    //        for (Map.Entry<Double, Integer> entry : m.entrySet()) {
+    //            N.fill(a, idx, idx + entry.getValue(), entry.getKey());
+    //            idx += entry.getValue();
+    //        }
+    //    }
+    //
+    //    /**
+    //     * Note: All the objects with same value will be replaced by first element with the same value.
+    //     *
+    //     * @param a
+    //     */
+    //    public static void bucketSort(final Object[] a) {
+    //        if (N.isEmpty(a)) {
+    //            return;
+    //        }
+    //
+    //        bucketSort(a, 0, a.length);
+    //    }
+    //
+    //    /**
+    //     * Note: All the objects with same value will be replaced by first element with the same value.
+    //     *
+    //     * @param a the elements in the array must implements the <code>Comparable</code> interface.
+    //     * @param fromIndex
+    //     * @param toIndex
+    //     */
+    //    public static void bucketSort(final Object[] a, final int fromIndex, final int toIndex) {
+    //        bucketSort(a, fromIndex, toIndex, NATURAL_COMPARATOR);
+    //    }
+    //
+    //    /**
+    //     *
+    //     * @param <T>
+    //     * @param a
+    //     * @param cmp
+    //     */
+    //    public static <T> void bucketSort(final T[] a, final Comparator<? super T> cmp) {
+    //        if (N.isEmpty(a)) {
+    //            return;
+    //        }
+    //
+    //        bucketSort(a, 0, a.length, cmp);
+    //    }
+    //
+    //    /**
+    //     * Note: All the objects with same value will be replaced by first element with the same value.
+    //     *
+    //     * @param <T>
+    //     * @param a
+    //     * @param fromIndex
+    //     * @param toIndex
+    //     * @param cmp
+    //     */
+    //    public static <T> void bucketSort(final T[] a, final int fromIndex, final int toIndex, final Comparator<? super T> cmp) {
+    //        N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
+    //
+    //        if (N.isEmpty(a) || fromIndex == toIndex) {
+    //            return;
+    //        }
+    //
+    //        if (toIndex - fromIndex < 32) {
+    //            sort(a, fromIndex, toIndex, cmp);
+    //            return;
+    //        }
+    //
+    //        final Comparator<? super T> comparator = checkComparator(cmp);
+    //        final Multiset<T> multiset = new Multiset<>();
+    //
+    //        for (int i = fromIndex; i < toIndex; i++) {
+    //            multiset.add(a[i]);
+    //        }
+    //
+    //        final Map<T, Integer> m = multiset.toMapSortedBy((a1, b) -> comparator.compare(a1.getKey(), a1.getKey()));
+    //        int idx = fromIndex;
+    //
+    //        for (Map.Entry<T, Integer> entry : m.entrySet()) {
+    //            N.fill(a, idx, idx + entry.getValue(), entry.getKey());
+    //            idx += entry.getValue();
+    //        }
+    //    }
+    //
+    //    /**
+    //     * Note: All the objects with same value will be replaced by first element with the same value.
+    //     *
+    //     * @param <T>
+    //     * @param list
+    //     */
+    //    public static <T extends Comparable<? super T>> void bucketSort(final List<T> list) {
+    //        if (N.isEmpty(list)) {
+    //            return;
+    //        }
+    //
+    //        bucketSort(list, 0, list.size());
+    //    }
+    //
+    //    /**
+    //     * Note: All the objects with same value will be replaced by first element with the same value.
+    //     *
+    //     * @param <T>
+    //     * @param list
+    //     * @param fromIndex
+    //     * @param toIndex
+    //     */
+    //    public static <T extends Comparable<? super T>> void bucketSort(final List<T> list, final int fromIndex, final int toIndex) {
+    //        bucketSort(list, fromIndex, toIndex, NATURAL_COMPARATOR);
+    //    }
+    //
+    //    /**
+    //     * Note: All the objects with same value will be replaced by first element with the same value.
+    //     *
+    //     * @param <T>
+    //     * @param list
+    //     * @param cmp
+    //     */
+    //    public static <T> void bucketSort(final List<? extends T> list, final Comparator<? super T> cmp) {
+    //        if (N.isEmpty(list)) {
+    //            return;
+    //        }
+    //
+    //        bucketSort(list, 0, list.size(), cmp);
+    //    }
+    //
+    //    /**
+    //     * Note: All the objects with same value will be replaced by first element with the same value.
+    //     *
+    //     * @param <T>
+    //     * @param list
+    //     * @param fromIndex
+    //     * @param toIndex
+    //     * @param cmp
+    //     */
+    //    public static <T> void bucketSort(final List<? extends T> list, final int fromIndex, final int toIndex, final Comparator<? super T> cmp) {
+    //        N.checkFromToIndex(fromIndex, toIndex, list == null ? 0 : list.size());
+    //
+    //        if ((N.isEmpty(list) && fromIndex == 0 && toIndex == 0) || fromIndex == toIndex) {
+    //            return;
+    //        }
+    //
+    //        if (toIndex - fromIndex < 32) {
+    //            sort(list, fromIndex, toIndex, cmp);
+    //            return;
+    //        }
+    //
+    //        final Comparator<? super T> comparator = checkComparator(cmp);
+    //        final Multiset<T> multiset = new Multiset<>();
+    //        ListIterator<T> itr = (ListIterator<T>) list.listIterator(fromIndex);
+    //        int i = fromIndex;
+    //
+    //        while (itr.hasNext()) {
+    //            if (i++ >= toIndex) {
+    //                break;
+    //            }
+    //
+    //            multiset.add(itr.next());
+    //        }
+    //
+    //        final Map<T, Integer> m = multiset.toMapSortedBy((a, b) -> comparator.compare(a.getKey(), a.getKey()));
+    //
+    //        itr = (ListIterator<T>) list.listIterator(fromIndex);
+    //
+    //        for (Map.Entry<T, Integer> entry : m.entrySet()) {
+    //            final T key = entry.getKey();
+    //            for (int j = 0; j < entry.getValue(); j++) {
+    //                itr.next();
+    //                itr.set(key);
+    //            }
+    //        }
+    //    }
+    //
+    //    /**
+    //     * Bucket sort by.
+    //     *
+    //     * @param <T>
+    //     * @param <U>
+    //     * @param a
+    //     * @param keyMapper
+    //     */
+    //    public static <T, U extends Comparable<? super U>> void bucketSortBy(final T[] a, final Function<? super T, ? extends U> keyMapper) {
+    //        if (N.isEmpty(a)) {
+    //            return;
+    //        }
+    //
+    //        bucketSort(a, Comparators.comparingBy(keyMapper));
+    //    }
+    //
+    //    /**
+    //     * Bucket sort by.
+    //     *
+    //     * @param <T>
+    //     * @param <U>
+    //     * @param list
+    //     * @param keyMapper
+    //     */
+    //    public static <T, U extends Comparable<? super U>> void bucketSortBy(final List<? extends T> list, final Function<? super T, ? extends U> keyMapper) {
+    //        if (N.isEmpty(list)) {
+    //            return;
+    //        }
+    //
+    //        bucketSort(list, Comparators.comparingBy(keyMapper));
+    //    }
 
     /**
      * {@link Arrays#binarySearch(boolean[], boolean)}.

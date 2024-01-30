@@ -154,7 +154,7 @@ public class JSONDeserializationConfig extends DeserializationConfig<JSONDeseria
      * @param propName
      * @return
      */
-    public BiConsumer<? super Collection<?>, ?> getPropHandler(final String propName) {
+    public BiConsumer<? super Collection<?>, ?> getPropHandler(final String propName) { //NOSONAR
         N.checkArgNotEmpty(propName, "propName");
 
         if (propHandlerMap == null) {

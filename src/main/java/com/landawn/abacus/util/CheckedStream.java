@@ -9459,10 +9459,25 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @throws E2
      */
     @TerminalOp
-    public <R, E2 extends Exception> R toListAndThen(Throwables.Function<? super List<T>, R, E2> func) throws E, E2 {
+    public <R, E2 extends Exception> R toListThenApply(Throwables.Function<? super List<T>, R, E2> func) throws E, E2 {
         assertNotClosed();
 
         return func.apply(toList());
+    }
+
+    /**
+     *
+     *
+     * @param <E2>
+     * @param consumer
+     * @throws E
+     * @throws E2
+     */
+    @TerminalOp
+    public <E2 extends Exception> void toListThenAccept(Throwables.Consumer<? super List<T>, E2> consumer) throws E, E2 {
+        assertNotClosed();
+
+        consumer.accept(toList());
     }
 
     /**
@@ -9476,10 +9491,25 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @throws E2
      */
     @TerminalOp
-    public <R, E2 extends Exception> R toSetAndThen(Throwables.Function<? super Set<T>, R, E2> func) throws E, E2 {
+    public <R, E2 extends Exception> R toSetThenApply(Throwables.Function<? super Set<T>, R, E2> func) throws E, E2 {
         assertNotClosed();
 
         return func.apply(toSet());
+    }
+
+    /**
+     *
+     *
+     * @param <E2>
+     * @param consumer
+     * @throws E
+     * @throws E2
+     */
+    @TerminalOp
+    public <E2 extends Exception> void toSetThenAccept(Throwables.Consumer<? super Set<T>, E2> consumer) throws E, E2 {
+        assertNotClosed();
+
+        consumer.accept(toSet());
     }
 
     /**
@@ -9495,11 +9525,27 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @throws E2
      */
     @TerminalOp
-    public <R, CC extends Collection<T>, E2 extends Exception> R toCollectionAndThen(Supplier<? extends CC> supplier,
+    public <R, CC extends Collection<T>, E2 extends Exception> R toCollectionThenApply(Supplier<? extends CC> supplier,
             Throwables.Function<? super CC, R, E2> func) throws E, E2 {
         assertNotClosed();
 
         return func.apply(toCollection(supplier));
+    }
+
+    /**
+     *
+     *
+     * @param <E2>
+     * @param consumer
+     * @throws E
+     * @throws E2
+     */
+    @TerminalOp
+    public <CC extends Collection<T>, E2 extends Exception> void toCollectionThenAccept(Supplier<? extends CC> supplier,
+            Throwables.Consumer<? super CC, E2> consumer) throws E, E2 {
+        assertNotClosed();
+
+        consumer.accept(toCollection(supplier));
     }
 
     /**
@@ -10640,7 +10686,6 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     }
 
     /**
-     * Collect and then.
      *
      * @param <R>
      * @param <RR>
@@ -10652,7 +10697,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @throws E2 the e2
      */
     @TerminalOp
-    public <R, RR, E2 extends Exception> RR collectAndThen(final Collector<? super T, ?, R> collector,
+    public <R, RR, E2 extends Exception> RR collectThenApply(final Collector<? super T, ?, R> collector,
             final Throwables.Function<? super R, ? extends RR, E2> func) throws E, E2 {
         assertNotClosed();
 
@@ -10660,6 +10705,25 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
         checkArgNotNull(func, "func");
 
         return func.apply(collect(collector));
+    }
+
+    /**
+     *
+     * @param <R>
+     * @param <E2>
+     * @param collector
+     * @param consumer
+     * @throws E the e
+     * @throws E2 the e2
+     */
+    @TerminalOp
+    public <R, E2 extends Exception> void collectThenAccept(Collector<? super T, ?, R> collector, Throwables.Consumer<? super R, E2> consumer) throws E, E2 {
+        assertNotClosed();
+
+        checkArgNotNull(collector, "collector");
+        checkArgNotNull(consumer, "consumer");
+
+        consumer.accept(collect(collector));
     }
 
     /**
@@ -13158,9 +13222,8 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     @Beta
     @SequentialOnly
     @IntermediateOp
-    public CheckedStream<T, E> addSubscriber(
-            final Throwables.Consumer<? super CheckedStream<T, E>, ? extends Exception> consumerForNewStreamWithTerminalAction, final int queueSize,
-            final Executor executor) {
+    public CheckedStream<T, E> addSubscriber(final Throwables.Consumer<? super CheckedStream<T, E>, ? extends Exception> consumerForNewStreamWithTerminalAction,
+            final int queueSize, final Executor executor) {
         assertNotClosed();
         checkArgNotNull(consumerForNewStreamWithTerminalAction, "consumerForNewStreamWithTerminalAction");
         checkArgPositive(queueSize, "queueSize");
@@ -13169,10 +13232,11 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
         return addSubscriberForAll(consumerForNewStreamWithTerminalAction, queueSize, executor);
     }
 
-    private CheckedStream<T, E> addSubscriberForAll(final Throwables.Consumer<? super CheckedStream<T, E>, ? extends Exception> consumerForNewStreamWithTerminalAction,
-            final int queueSize, final Executor executor) {
+    private CheckedStream<T, E> addSubscriberForAll(
+            final Throwables.Consumer<? super CheckedStream<T, E>, ? extends Exception> consumerForNewStreamWithTerminalAction, final int queueSize,
+            final Executor executor) {
         final BlockingQueue<T> queue = new ArrayBlockingQueue<>(queueSize <= 0 ? DEFAULT_BUFFERED_SIZE_PER_ITERATOR : queueSize);
-        final CheckedIterator<T, E> elements = iteratorEx();
+        final CheckedIterator<T, E> iter = iteratorEx();
         final T none = (T) NONE;
 
         final MutableBoolean isMainStreamCompleted = MutableBoolean.of(false);
@@ -13194,7 +13258,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                     }
                 }
 
-                return next != null || (isMainStreamCompleted.isTrue() && elements.hasNext());
+                return next != null || (isMainStreamCompleted.isTrue() && iter.hasNext());
             }
 
             @Override
@@ -13203,24 +13267,24 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
-                final T ret = next != null ? (next == none ? null : next) : elements.next();
+                final T ret = next != null ? (next == none ? null : next) : iter.next();
                 next = null;
                 return ret;
             }
         };
 
-        final CheckedIterator<T, E> iter = new CheckedIterator<>() { //NOSONAR
+        final CheckedIterator<T, E> iterA = new CheckedIterator<>() { //NOSONAR
             private boolean isNewStreamStarted = false;
             private ContinuableFuture<Void> futureForNewStream = null;
 
             @Override
             public boolean hasNext() throws E {
-                return elements.hasNext();
+                return iter.hasNext();
             }
 
             @Override
             public T next() throws E {
-                final T next = elements.next();
+                final T next = iter.next();
 
                 queue.add(next == null ? none : next);
 
@@ -13252,25 +13316,25 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                 isNewStreamStarted = true;
 
                 if (executor == null) {
-                    futureForNewStream = newStream(iterForNewStream).asyncRun(consumerForNewStreamWithTerminalAction);
+                    futureForNewStream = newStream(iterForNewStream).asyncRun(consumerForNewStreamWithTerminalAction); //NOSONAR
                 } else {
-                    futureForNewStream = newStream(iterForNewStream).asyncRun(consumerForNewStreamWithTerminalAction, executor);
+                    futureForNewStream = newStream(iterForNewStream).asyncRun(consumerForNewStreamWithTerminalAction, executor); //NOSONAR
                 }
             }
         };
 
-        return newStream(iter, sorted, cmp, mergeCloseHandlers(closeHandlers, iter::close, true));
+        return newStream(iterA, sorted, cmp, mergeCloseHandlers(closeHandlers, iterA::close, true));
     }
 
     /**
-     * Add a new Stream with terminal action to listen/consume the elements filtered by the specified {@code predicate}.
+     * Add a new Stream with terminal action to listen/consume the elements filtered out by the specified {@code predicate}.
      *
      * @param predicate
      * @param consumerForNewStreamWithTerminalAction
      * @return
      * @see #addSubscriber(com.landawn.abacus.util.Throwables.Consumer, int, Executor)
      */
-    public CheckedStream<T, E> addSubscriberByFilter(final Predicate<? super T> predicate,
+    public CheckedStream<T, E> filterWhileAddSubscriber(final Predicate<? super T> predicate,
             final Throwables.Consumer<? super CheckedStream<T, E>, ? extends Exception> consumerForNewStreamWithTerminalAction) {
         assertNotClosed();
         checkArgNotNull(predicate, "predicate");
@@ -13280,7 +13344,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     }
 
     /**
-     * Add a new Stream with terminal action to listen/consume the elements filtered by the specified {@code predicate}.
+     * Add a new Stream with terminal action to listen/consume the elements filtered out by the specified {@code predicate}.
      *
      * @param predicate
      * @param consumerForNewStreamWithTerminalAction
@@ -13289,7 +13353,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @return
      * @see #addSubscriber(com.landawn.abacus.util.Throwables.Consumer, int, Executor)
      */
-    public CheckedStream<T, E> addSubscriberByFilter(final Predicate<? super T> predicate,
+    public CheckedStream<T, E> filterWhileAddSubscriber(final Predicate<? super T> predicate,
             final Throwables.Consumer<? super CheckedStream<T, E>, ? extends Exception> consumerForNewStreamWithTerminalAction, final int queueSize,
             final Executor executor) {
         assertNotClosed();
@@ -13305,7 +13369,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             final Throwables.Consumer<? super CheckedStream<T, E>, ? extends Exception> consumerForNewStreamWithTerminalAction, final int queueSize,
             final Executor executor) {
         final BlockingQueue<T> queue = new ArrayBlockingQueue<>(queueSize <= 0 ? DEFAULT_BUFFERED_SIZE_PER_ITERATOR : queueSize);
-        final CheckedIterator<T, E> elements = iteratorEx();
+        final CheckedIterator<T, E> iter = iteratorEx();
         final T none = (T) NONE;
 
         final MutableBoolean isMainStreamCompleted = MutableBoolean.of(false);
@@ -13328,8 +13392,8 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                 }
 
                 if (next == null && isMainStreamCompleted.isTrue()) {
-                    while (elements.hasNext()) {
-                        next = elements.next();
+                    while (iter.hasNext()) {
+                        next = iter.next();
 
                         if (!predicate.test(next)) {
                             next = next == null ? none : next;
@@ -13350,13 +13414,13 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
-                final T ret = next != null ? (next == none ? null : next) : elements.next();
+                final T ret = next != null ? (next == none ? null : next) : iter.next();
                 next = null;
                 return ret;
             }
         };
 
-        final CheckedIterator<T, E> iter = new CheckedIterator<>() { //NOSONAR
+        final CheckedIterator<T, E> iterA = new CheckedIterator<>() { //NOSONAR
             private boolean isNewStreamStarted = false;
             private ContinuableFuture<Void> futureForNewStream = null;
             private boolean hasNext = false;
@@ -13365,8 +13429,8 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             @Override
             public boolean hasNext() throws E {
                 if (!hasNext) {
-                    while (elements.hasNext()) {
-                        next = elements.next();
+                    while (iter.hasNext()) {
+                        next = iter.next();
 
                         if (predicate.test(next)) {
                             hasNext = true;
@@ -13416,14 +13480,14 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                 isNewStreamStarted = true;
 
                 if (executor == null) {
-                    futureForNewStream = newStream(iterForNewStream).asyncRun(consumerForNewStreamWithTerminalAction);
+                    futureForNewStream = newStream(iterForNewStream).asyncRun(consumerForNewStreamWithTerminalAction); //NOSONAR
                 } else {
-                    futureForNewStream = newStream(iterForNewStream).asyncRun(consumerForNewStreamWithTerminalAction, executor);
+                    futureForNewStream = newStream(iterForNewStream).asyncRun(consumerForNewStreamWithTerminalAction, executor); //NOSONAR
                 }
             }
         };
 
-        return newStream(iter, sorted, cmp, mergeCloseHandlers(closeHandlers, iter::close, true));
+        return newStream(iterA, sorted, cmp, mergeCloseHandlers(closeHandlers, iterA::close, true));
     }
 
     /**
@@ -13434,7 +13498,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @return
      * @see #addSubscriber(com.landawn.abacus.util.Throwables.Consumer, int, Executor)
      */
-    public CheckedStream<T, E> addSubscriberByTakeWhile(final Predicate<? super T> predicate,
+    public CheckedStream<T, E> takeWhileAddSubscriber(final Predicate<? super T> predicate,
             final Throwables.Consumer<? super CheckedStream<T, E>, ? extends Exception> consumerForNewStreamWithTerminalAction) {
         assertNotClosed();
         checkArgNotNull(predicate, "predicate");
@@ -13453,7 +13517,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @return
      * @see #addSubscriber(com.landawn.abacus.util.Throwables.Consumer, int, Executor)
      */
-    public CheckedStream<T, E> addSubscriberByTakeWhile(final Predicate<? super T> predicate,
+    public CheckedStream<T, E> takeWhileAddSubscriber(final Predicate<? super T> predicate,
             final Throwables.Consumer<? super CheckedStream<T, E>, ? extends Exception> consumerForNewStreamWithTerminalAction, final int queueSize,
             final Executor executor) {
         assertNotClosed();
@@ -13469,7 +13533,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             final Throwables.Consumer<? super CheckedStream<T, E>, ? extends Exception> consumerForNewStreamWithTerminalAction, final int queueSize,
             final Executor executor) {
         final BlockingQueue<T> queue = new ArrayBlockingQueue<>(queueSize <= 0 ? DEFAULT_BUFFERED_SIZE_PER_ITERATOR : queueSize);
-        final CheckedIterator<T, E> elements = iteratorEx();
+        final CheckedIterator<T, E> iter = iteratorEx();
         final T none = (T) NONE;
 
         final MutableBoolean isMainStreamCompleted = MutableBoolean.of(false);
@@ -13494,8 +13558,8 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
                 if (next == null) {
                     if (isTokenInMainStream.isFalse()) { // it also means isMainStreamCompleted.isTrue()
-                        while (elements.hasNext()) {
-                            next = elements.next();
+                        while (iter.hasNext()) {
+                            next = iter.next();
 
                             if (!predicate.test(next)) {
                                 next = next == null ? none : next;
@@ -13510,7 +13574,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                     }
                 }
 
-                return next != null || elements.hasNext();
+                return next != null || iter.hasNext();
             }
 
             @Override
@@ -13519,13 +13583,13 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
-                final T ret = next != null ? (next == none ? null : next) : elements.next();
+                final T ret = next != null ? (next == none ? null : next) : iter.next();
                 next = null;
                 return ret;
             }
         };
 
-        final CheckedIterator<T, E> iter = new CheckedIterator<>() { //NOSONAR
+        final CheckedIterator<T, E> iterA = new CheckedIterator<>() { //NOSONAR
             private boolean isNewStreamStarted = false;
             private ContinuableFuture<Void> futureForNewStream = null;
             private boolean hasMore = true;
@@ -13534,8 +13598,8 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
             @Override
             public boolean hasNext() throws E {
-                if (!hasNext && hasMore && elements.hasNext()) {
-                    next = elements.next();
+                if (!hasNext && hasMore && iter.hasNext()) {
+                    next = iter.next();
 
                     if (predicate.test(next)) {
                         hasNext = true;
@@ -13586,14 +13650,14 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                 isNewStreamStarted = true;
 
                 if (executor == null) {
-                    futureForNewStream = newStream(iterForNewStream).asyncRun(consumerForNewStreamWithTerminalAction);
+                    futureForNewStream = newStream(iterForNewStream).asyncRun(consumerForNewStreamWithTerminalAction); //NOSONAR
                 } else {
-                    futureForNewStream = newStream(iterForNewStream).asyncRun(consumerForNewStreamWithTerminalAction, executor);
+                    futureForNewStream = newStream(iterForNewStream).asyncRun(consumerForNewStreamWithTerminalAction, executor); //NOSONAR
                 }
             }
         };
 
-        return newStream(iter, sorted, cmp, mergeCloseHandlers(closeHandlers, iter::close, true));
+        return newStream(iterA, sorted, cmp, mergeCloseHandlers(closeHandlers, iterA::close, true));
     }
 
     /**
@@ -13604,7 +13668,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @return
      * @see #addSubscriber(com.landawn.abacus.util.Throwables.Consumer, int, Executor)
      */
-    public CheckedStream<T, E> addSubscriberByDropWhile(final Predicate<? super T> predicate,
+    public CheckedStream<T, E> dropWhileAddSubscriber(final Predicate<? super T> predicate,
             final Throwables.Consumer<? super CheckedStream<T, E>, ? extends Exception> consumerForNewStreamWithTerminalAction) {
         assertNotClosed();
         checkArgNotNull(predicate, "predicate");
@@ -13623,7 +13687,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @return
      * @see #addSubscriber(com.landawn.abacus.util.Throwables.Consumer, int, Executor)
      */
-    public CheckedStream<T, E> addSubscriberByDropWhile(final Predicate<? super T> predicate,
+    public CheckedStream<T, E> dropWhileAddSubscriber(final Predicate<? super T> predicate,
             final Throwables.Consumer<? super CheckedStream<T, E>, ? extends Exception> consumerForNewStreamWithTerminalAction, final int queueSize,
             final Executor executor) {
         assertNotClosed();
@@ -13639,7 +13703,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             final Throwables.Consumer<? super CheckedStream<T, E>, ? extends Exception> consumerForNewStreamWithTerminalAction, final int queueSize,
             final Executor executor) {
         final BlockingQueue<T> queue = new ArrayBlockingQueue<>(queueSize <= 0 ? DEFAULT_BUFFERED_SIZE_PER_ITERATOR : queueSize);
-        final CheckedIterator<T, E> elements = iteratorEx();
+        final CheckedIterator<T, E> iter = iteratorEx();
         final T none = (T) NONE;
 
         final MutableBoolean isMainStreamCompleted = MutableBoolean.of(false);
@@ -13664,8 +13728,8 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
                 if (next == null) {
                     if (isDroppedInMainStream.isFalse()) { // it also means isMainStreamCompleted.isTrue()
-                        if (elements.hasNext()) {
-                            next = elements.next();
+                        if (iter.hasNext()) {
+                            next = iter.next();
 
                             if (predicate.test(next)) {
                                 next = next == null ? none : next;
@@ -13688,13 +13752,13 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
-                final T ret = next != null ? (next == none ? null : next) : elements.next();
+                final T ret = next != null ? (next == none ? null : next) : iter.next();
                 next = null;
                 return ret;
             }
         };
 
-        final CheckedIterator<T, E> iter = new CheckedIterator<>() { //NOSONAR
+        final CheckedIterator<T, E> iterA = new CheckedIterator<>() { //NOSONAR
             private boolean isNewStreamStarted = false;
             private ContinuableFuture<Void> futureForNewStream = null;
             private boolean hasNext = false;
@@ -13707,8 +13771,8 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                     if (!dropped) {
                         dropped = true;
 
-                        while (elements.hasNext()) {
-                            next = elements.next();
+                        while (iter.hasNext()) {
+                            next = iter.next();
 
                             if (!predicate.test(next)) {
                                 hasNext = true;
@@ -13722,8 +13786,8 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                                 }
                             }
                         }
-                    } else if (elements.hasNext()) {
-                        next = elements.next();
+                    } else if (iter.hasNext()) {
+                        next = iter.next();
                         hasNext = true;
                     }
                 }
@@ -13763,14 +13827,14 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                 isNewStreamStarted = true;
 
                 if (executor == null) {
-                    futureForNewStream = newStream(iterForNewStream).asyncRun(consumerForNewStreamWithTerminalAction);
+                    futureForNewStream = newStream(iterForNewStream).asyncRun(consumerForNewStreamWithTerminalAction); //NOSONAR
                 } else {
-                    futureForNewStream = newStream(iterForNewStream).asyncRun(consumerForNewStreamWithTerminalAction, executor);
+                    futureForNewStream = newStream(iterForNewStream).asyncRun(consumerForNewStreamWithTerminalAction, executor); //NOSONAR
                 }
             }
         };
 
-        return newStream(iter, sorted, cmp, mergeCloseHandlers(closeHandlers, iter::close, true));
+        return newStream(iterA, sorted, cmp, mergeCloseHandlers(closeHandlers, iterA::close, true));
     }
 
     /**
