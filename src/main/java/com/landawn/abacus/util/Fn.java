@@ -43,6 +43,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.NavigableMap;
 import java.util.NavigableSet;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.PriorityQueue;
 import java.util.Queue;
@@ -4819,9 +4820,6 @@ public final class Fn {
         };
     }
 
-    // #######################################9X9#######################################
-    // #######################################9X9#######################################
-
     /**
      *
      * @param <T>
@@ -6030,6 +6028,27 @@ public final class Fn {
                     return c;
                 }
             };
+        }
+
+        private static final Supplier<Exception> EXCEPTION = Exception::new;
+
+        @Beta
+        public static Supplier<Exception> newException() {
+            return EXCEPTION;
+        }
+
+        private static final Supplier<RuntimeException> RUNTIME_EXCEPTION = RuntimeException::new;
+
+        @Beta
+        public static Supplier<RuntimeException> newRuntimException() {
+            return RUNTIME_EXCEPTION;
+        }
+
+        private static final Supplier<NoSuchElementException> NO_SUCH_ELEMENT_EXCEPTION = NoSuchElementException::new;
+
+        @Beta
+        public static Supplier<NoSuchElementException> newNoSuchElementException() {
+            return NO_SUCH_ELEMENT_EXCEPTION;
         }
     }
 

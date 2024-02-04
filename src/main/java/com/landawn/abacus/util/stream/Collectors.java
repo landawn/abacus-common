@@ -875,21 +875,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors {
      *
      *
      * @param <T>
-     * @param <C>
-     * @param collectionFactory
-     * @return
-     */
-    public static <T, C extends Collection<T>> Collector<T, ?, C> toCollection(Supplier<? extends C> collectionFactory) {
-        final BiConsumer<C, T> accumulator = BiConsumers.ofAdd();
-        final BinaryOperator<C> combiner = BinaryOperators.<T, C> ofAddAllToBigger();
-
-        return new CollectorImpl<>(collectionFactory, accumulator, combiner, CH_ID);
-    }
-
-    /**
-     *
-     *
-     * @param <T>
      * @return
      */
     public static <T> Collector<T, ?, List<T>> toList() {
@@ -990,6 +975,47 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors {
      *
      *
      * @param <T>
+     * @param atMostSize
+     * @return
+     */
+    public static <T> Collector<T, ?, List<T>> toList(final int atMostSize) {
+        final Supplier<List<T>> supplier = () -> new ArrayList<>(N.min(256, atMostSize));
+
+        return toCollection(supplier, atMostSize);
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param atMostSize
+     * @return
+     */
+    public static <T> Collector<T, ?, Set<T>> toSet(final int atMostSize) {
+        final Supplier<Set<T>> supplier = () -> N.newHashSet(atMostSize);
+
+        return toCollection(supplier, atMostSize);
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param <C>
+     * @param collectionFactory
+     * @return
+     */
+    public static <T, C extends Collection<T>> Collector<T, ?, C> toCollection(Supplier<? extends C> collectionFactory) {
+        final BiConsumer<C, T> accumulator = BiConsumers.ofAdd();
+        final BinaryOperator<C> combiner = BinaryOperators.<T, C> ofAddAllToBigger();
+
+        return new CollectorImpl<>(collectionFactory, accumulator, combiner, CH_ID);
+    }
+
+    /**
+     *
+     *
+     * @param <T>
      * @param <C>
      * @param collectionFactory
      * @param atMostSize
@@ -1031,26 +1057,30 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors {
      *
      *
      * @param <T>
-     * @param atMostSize
+     * @param <C>
+     * @param supplier
+     * @param accumulator
      * @return
      */
-    public static <T> Collector<T, ?, List<T>> toList(final int atMostSize) {
-        final Supplier<List<T>> supplier = () -> new ArrayList<>(N.min(256, atMostSize));
+    public static <T, C extends Collection<T>> Collector<T, ?, C> toCollection(final Supplier<? extends C> supplier, final BiConsumer<C, T> accumulator) {
+        final BinaryOperator<C> combiner = BinaryOperators.<T, C> ofAddAllToBigger();
 
-        return toCollection(supplier, atMostSize);
+        return toCollection(supplier, accumulator, combiner);
     }
 
     /**
      *
      *
      * @param <T>
-     * @param atMostSize
+     * @param <C>
+     * @param supplier
+     * @param accumulator
+     * @param combiner
      * @return
      */
-    public static <T> Collector<T, ?, Set<T>> toSet(final int atMostSize) {
-        final Supplier<Set<T>> supplier = () -> N.newHashSet(atMostSize);
-
-        return toCollection(supplier, atMostSize);
+    public static <T, C extends Collection<T>> Collector<T, ?, C> toCollection(final Supplier<? extends C> supplier, final BiConsumer<C, T> accumulator,
+            final BinaryOperator<C> combiner) {
+        return new CollectorImpl<>(supplier, accumulator, combiner, CH_ID);
     }
 
     /**

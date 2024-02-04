@@ -50,6 +50,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
 import java.util.function.BinaryOperator;
 import java.util.function.Consumer;
@@ -123,8 +124,11 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
     static final Logger logger = LoggerFactory.getLogger(CheckedStream.class);
 
+    static final String ERROR_MSG_FOR_NO_SUCH_EX = InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX;
     static final int MAX_WAIT_TIME_FOR_QUEUE_OFFER = 10; // unit is milliseconds
     static final int MAX_WAIT_TIME_FOR_QUEUE_POLL = 7; // unit is milliseconds
+
+    static final int MAX_BUFFERED_SIZE = 10240;
     static final int DEFAULT_BUFFERED_SIZE_PER_ITERATOR = 64;
 
     static final Object NONE = N.NULL_MASK;
@@ -287,7 +291,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             @Override
             public T next() throws E {
                 if (position >= len) {
-                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 return a[position++];
@@ -338,7 +342,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                 @Override
                 public T next() throws E {
                     if (position >= len) {
-                        throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+                        throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                     }
 
                     return a[position++];
@@ -1048,7 +1052,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             @Override
             public T next() throws E {
                 if (!hasNextVal && !hasNext()) {
-                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 hasNextVal = false;
@@ -1088,7 +1092,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             @Override
             public T next() throws E {
                 if (!hasNextVal && !hasNext()) {
-                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 hasNextVal = false;
@@ -1134,7 +1138,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             @Override
             public T next() throws E {
                 if (!hasNextVal && !hasNext()) {
-                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 t = cur;
@@ -1223,7 +1227,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             @Override
             public T next() throws E {
                 if (cnt-- <= 0) {
-                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 return element;
@@ -1404,7 +1408,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             @Override
             public File next() {
                 if (!hasNext()) {
-                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 if (subFiles[cursor].isDirectory()) {
@@ -1595,7 +1599,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             @Override
             public T next() throws E {
                 if ((iter == null || !iter.hasNext()) && !hasNext()) {
-                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 return iter.next();
@@ -1925,7 +1929,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             @Override
             public T next() throws E {
                 if (!hasNext()) {
-                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 return zipFunction.apply(iterA.hasNext() ? iterA.next() : valueForNoneA, iterB.hasNext() ? iterB.next() : valueForNoneB);
@@ -1967,7 +1971,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             @Override
             public T next() throws E {
                 if (!hasNext()) {
-                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 return zipFunction.apply(iterA.hasNext() ? iterA.next() : valueForNoneA, iterB.hasNext() ? iterB.next() : valueForNoneB,
@@ -2005,7 +2009,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             @Override
             public T next() throws E {
                 if (!hasNext()) {
-                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 return zipFunction.apply(iterA.hasNext() ? iterA.next() : valueForNoneA, iterB.hasNext() ? iterB.next() : valueForNoneB);
@@ -2047,7 +2051,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             @Override
             public T next() throws E {
                 if (!hasNext()) {
-                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 return zipFunction.apply(iterA.hasNext() ? iterA.next() : valueForNoneA, iterB.hasNext() ? iterB.next() : valueForNoneB,
@@ -2157,7 +2161,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                 } else if (cursorB < lenB) {
                     return b[cursorB++];
                 } else {
-                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
             }
         });
@@ -2341,7 +2345,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                 } else if (iterB.hasNext()) {
                     return iterB.next();
                 } else {
-                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
             }
         });
@@ -2379,7 +2383,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             @Override
             public T next() throws E {
                 if (!hasNext && !hasNext()) {
-                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 hasNext = false;
@@ -2442,7 +2446,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             @Override
             public T next() throws E {
                 if (!hasNext && !hasNext()) {
-                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 hasNext = false;
@@ -2492,7 +2496,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             @Override
             public T next() throws E {
                 if (!hasNext && !hasNext()) {
-                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 hasNext = false;
@@ -2612,7 +2616,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             final Throwables.BinaryOperator<T, ? extends E> mergeFunction) {
         assertNotClosed();
 
-        final Supplier<? extends Map<K, T>> supplier = Suppliers.<K, T> ofMap();
+        final Supplier<? extends Map<K, T>> supplier = Suppliers.<K, T> ofLinkedHashMap();
 
         return groupBy(keyMapper, Fnn.<T, E> identity(), mergeFunction, supplier).map(Fnn.<K, T, E> value());
     }
@@ -2656,7 +2660,9 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     public <K> CheckedStream<T, E> distinctLimitBy(final Throwables.Function<? super T, K, ? extends E> keyMapper,
             final Throwables.BiFunction<? super K, ? super List<T>, Integer, ? extends E> limit) {
 
-        return groupBy(keyMapper) //
+        final Supplier<Map<K, List<T>>> supplier = Suppliers.<K, List<T>> ofLinkedHashMap();
+
+        return groupBy(keyMapper, Fnn.identity(), supplier) //
                 .flatmap(it -> subList(it.getValue(), 0, limit.apply(it.getKey(), it.getValue())));
     }
 
@@ -2869,7 +2875,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             @Override
             public R next() throws E {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
-                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 return cur.next();
@@ -2883,21 +2889,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             }
         };
 
-        final Deque<Throwables.Runnable<? extends E>> newCloseHandlers = mergeCloseHandler(iter);
-
-        return newStream(iter, newCloseHandlers);
-    }
-
-    private Deque<Throwables.Runnable<? extends E>> mergeCloseHandler(final CheckedIterator<?, E> iter) {
-        final Deque<Throwables.Runnable<? extends E>> newCloseHandlers = new ArrayDeque<>(N.size(closeHandlers) + 1);
-
-        if (N.notEmpty(closeHandlers)) {
-            newCloseHandlers.addAll(closeHandlers);
-        }
-
-        newCloseHandlers.add(newCloseHandler(iter));
-
-        return newCloseHandlers;
+        return newStream(iter, mergeCloseHandlers(closeHandlers, iter::close));
     }
 
     /**
@@ -2927,7 +2919,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             @Override
             public R next() throws E {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
-                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 return cur.next();
@@ -2969,7 +2961,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             @Override
             public R next() throws E {
                 if (idx >= len && !hasNext()) {
-                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 return cur[idx++];
@@ -3020,7 +3012,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             @Override
             public R next() throws E {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
-                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 return cur.next();
@@ -3034,9 +3026,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             }
         };
 
-        final Deque<Throwables.Runnable<? extends E>> newCloseHandlers = mergeCloseHandler(iter);
-
-        return newStream(iter, newCloseHandlers);
+        return newStream(iter, mergeCloseHandlers(closeHandlers, iter::close));
     }
 
     //    /**
@@ -3081,7 +3071,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     //            @Override
     //            public R next() throws E {
     //                if ((cur == null || cur.hasNext() == false) && hasNext() == false) {
-    //                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+    //                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
     //                }
     //
     //                return cur.next();
@@ -3149,7 +3139,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     //            @Override
     //            public R next() throws E {
     //                if ((cur == null || cur.hasNext() == false) && hasNext() == false) {
-    //                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+    //                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
     //                }
     //
     //                return cur.next();
@@ -3246,7 +3236,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             @Override
             public Boolean next() throws E {
                 if (idx >= len && !hasNext()) {
-                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 return cur[idx++];
@@ -3289,7 +3279,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             @Override
             public Character next() throws E {
                 if (idx >= len && !hasNext()) {
-                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 return cur[idx++];
@@ -3332,7 +3322,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             @Override
             public Byte next() throws E {
                 if (idx >= len && !hasNext()) {
-                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 return cur[idx++];
@@ -3375,7 +3365,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             @Override
             public Short next() throws E {
                 if (idx >= len && !hasNext()) {
-                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 return cur[idx++];
@@ -3418,7 +3408,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             @Override
             public Integer next() throws E {
                 if (idx >= len && !hasNext()) {
-                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 return cur[idx++];
@@ -3461,7 +3451,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             @Override
             public Long next() throws E {
                 if (idx >= len && !hasNext()) {
-                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 return cur[idx++];
@@ -3504,7 +3494,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             @Override
             public Float next() throws E {
                 if (idx >= len && !hasNext()) {
-                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 return cur[idx++];
@@ -3547,7 +3537,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             @Override
             public Double next() throws E {
                 if (idx >= len && !hasNext()) {
-                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 return cur[idx++];
@@ -3745,7 +3735,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             @Override
             public R next() throws E {
                 if (queue.size() == 0 && !hasNext()) {
-                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 return queue.poll();
@@ -3821,7 +3811,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             @Override
             public R next() throws E {
                 if (!hasNext()) {
-                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 if (ignoreNotPaired) {
@@ -3915,7 +3905,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             @Override
             public R next() throws E {
                 if (!hasNext()) {
-                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 if (ignoreNotPaired) {
@@ -5231,7 +5221,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     //            @Override
     //            public T next() throws E {
     //                if (hasNext() == false) {
-    //                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+    //                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
     //                }
     //
     //                try {
@@ -5269,7 +5259,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     //            @Override
     //            public T next() throws E {
     //                if (hasNext() == false) {
-    //                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+    //                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
     //                }
     //
     //                try {
@@ -5311,7 +5301,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     //            @Override
     //            public T next() throws E {
     //                if (hasNext() == false) {
-    //                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+    //                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
     //                }
     //
     //                try {
@@ -5357,7 +5347,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     //            @Override
     //            public T next() throws E {
     //                if (hasNext() == false) {
-    //                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+    //                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
     //                }
     //
     //                try {
@@ -5430,7 +5420,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     //            @Override
     //            public T next() throws E {
     //                if (hasNext() == false) {
-    //                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+    //                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
     //                }
     //
     //                try {
@@ -5503,7 +5493,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     //            @Override
     //            public T next() throws E {
     //                if (hasNext() == false) {
-    //                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+    //                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
     //                }
     //
     //                try {
@@ -5545,6 +5535,20 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     //
     //        return newStream(iter).onClose(newCloseHandler(iter)).filter(NOT_NULL_MASK);
     //    }
+
+    /**
+     * Throws {@code NoSuchElementException} in terminal operation if this {@code CheckedStream} if empty.
+     *
+     * @return
+     */
+    @IntermediateOp
+    public CheckedStream<T, E> throwIfEmpty() {
+        final Throwables.Supplier<CheckedStream<T, E>, E> tmp = () -> {
+            throw new NoSuchElementException();
+        };
+
+        return this.appendIfEmpty(tmp);
+    }
 
     /**
      *
@@ -5821,7 +5825,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             @Override
             public C next() throws E {
                 if (!hasNext()) {
-                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 final C result = collectionSupplier.apply(chunkSize);
@@ -5875,7 +5879,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             @Override
             public R next() throws E {
                 if (!hasNext()) {
-                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 final Object container = supplier.get();
@@ -5928,7 +5932,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             @Override
             public CheckedStream<T, E> next() throws E {
                 if (!hasNext()) {
-                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 CheckedStream<T, E> result = null;
@@ -6002,7 +6006,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             @Override
             public CheckedStream<T, E> next() throws E {
                 if (!hasNext()) {
-                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 CheckedStream<T, E> result = null;
@@ -6037,7 +6041,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                             @Override
                             public T next() throws E {
                                 if (!hasNext()) {
-                                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+                                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                                 }
 
                                 if (isFirst) {
@@ -6165,7 +6169,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             @Override
             public C next() throws E {
                 if (!hasNext()) {
-                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 if (queue == null) {
@@ -6305,7 +6309,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             @Override
             public R next() throws E {
                 if (!hasNext()) {
-                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 if (increment < windowSize && queue == null) {
@@ -6491,7 +6495,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             @Override
             public T next() throws E {
                 if (cnt >= maxSize) {
-                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 cnt++;
@@ -6565,7 +6569,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                 }
 
                 if (cursor >= to) {
-                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 return aar[cursor++];
@@ -6745,7 +6749,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             @Override
             public T next() throws E {
                 if (!hasNext()) {
-                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 deque.offerLast(elements.next());
@@ -6787,7 +6791,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                 }
 
                 if (cursor <= 0) {
-                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 return aar[--cursor];
@@ -6855,7 +6859,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             @Override
             public T next() throws E {
                 if (!hasNext()) {
-                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 return aar[(start + cnt++) % len];
@@ -7096,7 +7100,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                 }
 
                 if (cursor >= len) {
-                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 return aar[cursor++];
@@ -7174,7 +7178,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             @Override
             public T next() throws E {
                 if (!hasNext()) {
-                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 if (len > 0) {
@@ -7250,7 +7254,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             @Override
             public T next() throws E {
                 if (!hasNext()) {
-                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 if (len > 0) {
@@ -7355,7 +7359,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             @Override
             public T next() throws E {
                 if (!hasNext()) {
-                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 if (toInsert) {
@@ -7425,6 +7429,52 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                 return Indexed.of(t, idx.getAndIncrement());
             }
         });
+    }
+
+    /**
+     * Returns a new Stream with elements from a temporary queue which is filled by reading the elements from this Stream asynchronously with a new thread.
+     * Default queue size is 64.
+     * <br />
+     * Mostly it's for {@code read-write with different threads} mode.
+     *
+     * @return
+     * @see #buffered()
+     */
+    @SequentialOnly
+    @IntermediateOp
+    public CheckedStream<T, E> buffered() {
+        assertNotClosed();
+
+        return buffered(DEFAULT_BUFFERED_SIZE_PER_ITERATOR);
+    }
+
+    /**
+     * Returns a new Stream with elements from a temporary queue which is filled by reading the elements from this Stream asynchronously with a new thread.
+     * <br />
+     * Mostly it's for {@code read-write with different threads} mode.
+     * @param bufferSize
+     * @return
+     * @see #buffered(int)
+     */
+    @SequentialOnly
+    @IntermediateOp
+    public CheckedStream<T, E> buffered(int bufferSize) {
+        assertNotClosed();
+
+        checkArgPositive(bufferSize, "bufferSize");
+
+        return buffered(new ArrayBlockingQueue<>(bufferSize));
+    }
+
+    CheckedStream<T, E> buffered(final ArrayBlockingQueue<T> queueToBuffer) {
+        checkArgNotNull(queueToBuffer, "queueToBuffer");
+        checkArgument(queueToBuffer.isEmpty(), "'queueToBuffer' must be empty");
+
+        final Supplier<CheckedIterator<T, E>> supplier = () -> buffered(iteratorEx(), queueToBuffer);
+
+        return CheckedStream.<Supplier<CheckedIterator<T, E>>, E> just(supplier) //
+                .map(Supplier::get)
+                .flatMap(iter -> newStream(iter, sorted, cmp, mergeCloseHandlers(closeHandlers, iter::close, true)));
     }
 
     /**
@@ -7645,7 +7695,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     //            @Override
     //            public T next() throws E {
     //                if (!hasNext()) {
-    //                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+    //                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
     //                }
     //
     //                ret = next;
@@ -7703,7 +7753,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     //            @Override
     //            public T next() throws E {
     //                if (!hasNext()) {
-    //                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+    //                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
     //                }
     //
     //                ret = next;
@@ -7761,7 +7811,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     //            @Override
     //            public T next() throws E {
     //                if (!hasNext()) {
-    //                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+    //                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
     //                }
     //
     //                ret = next;
@@ -7826,7 +7876,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     //            @Override
     //            public T next() throws E {
     //                if (!hasNext()) {
-    //                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+    //                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
     //                }
     //
     //                ret = next;
@@ -7874,7 +7924,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     //            @Override
     //            public T next() {
     //                if (!hasNext()) {
-    //                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+    //                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
     //                }
     //
     //                ret = next;
@@ -7927,7 +7977,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     //            @Override
     //            public T next() throws E {
     //                if (!hasNext()) {
-    //                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+    //                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
     //                }
     //
     //                ret = next;
@@ -7980,7 +8030,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     //            @Override
     //            public T next() throws E {
     //                if (!hasNext()) {
-    //                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+    //                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
     //                }
     //
     //                ret = next;
@@ -8034,7 +8084,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     //            @Override
     //            public T next() throws E {
     //                if (!hasNext()) {
-    //                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+    //                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
     //                }
     //
     //                ret = next;
@@ -8095,7 +8145,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     //            @Override
     //            public T next() throws E {
     //                if (!hasNext()) {
-    //                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+    //                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
     //                }
     //
     //                ret = next;
@@ -8134,7 +8184,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     //            @Override
     //            public T next() {
     //                if (!hasNext()) {
-    //                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+    //                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
     //                }
     //
     //                ret = next;
@@ -10838,7 +10888,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             }
         };
 
-        return newStream(iter, sorted, cmp, mergeCloseHandlers(closeHandlers, iter::close)); //NOSONAR
+        return newStream(iter, sorted, cmp, mergeCloseHandlers(closeHandlers, iter::close, true)); //NOSONAR
     }
 
     /**
@@ -10894,7 +10944,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             }
         };
 
-        return newStream(iter, sorted, cmp, mergeCloseHandlers(closeHandlers, iter::close)); //NOSONAR
+        return newStream(iter, sorted, cmp, mergeCloseHandlers(closeHandlers, iter::close, true)); //NOSONAR
     }
 
     /**
@@ -10954,7 +11004,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             }
         };
 
-        return newStream(iter, sorted, cmp, mergeCloseHandlers(closeHandlers, iter::close)); //NOSONAR
+        return newStream(iter, sorted, cmp, mergeCloseHandlers(closeHandlers, iter::close, true)); //NOSONAR
     }
 
     /**
@@ -11018,7 +11068,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             }
         };
 
-        return newStream(iter, sorted, cmp, mergeCloseHandlers(closeHandlers, iter::close)); //NOSONAR
+        return newStream(iter, sorted, cmp, mergeCloseHandlers(closeHandlers, iter::close, true)); //NOSONAR
     }
 
     /**
@@ -11078,7 +11128,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             }
         };
 
-        return newStream(iter, sorted, cmp, mergeCloseHandlers(closeHandlers, iter::close)); //NOSONAR
+        return newStream(iter, sorted, cmp, mergeCloseHandlers(closeHandlers, iter::close, true)); //NOSONAR
     }
 
     /**
@@ -11120,7 +11170,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
         };
 
-        return newStream(iter, sorted, cmp, mergeCloseHandlers(closeHandlers, iter::close)); //NOSONAR
+        return newStream(iter, sorted, cmp, mergeCloseHandlers(closeHandlers, iter::close, true)); //NOSONAR
     }
 
     /**
@@ -11185,7 +11235,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             }
         };
 
-        return newStream(iter, sorted, cmp, mergeCloseHandlers(closeHandlers, iter::close)); //NOSONAR
+        return newStream(iter, sorted, cmp, mergeCloseHandlers(closeHandlers, iter::close, true)); //NOSONAR
     }
 
     /**
@@ -11266,7 +11316,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             }
         };
 
-        return newStream(iter, sorted, cmp, mergeCloseHandlers(closeHandlers, iter::close)); //NOSONAR
+        return newStream(iter, sorted, cmp, mergeCloseHandlers(closeHandlers, iter::close, true)); //NOSONAR
     }
 
     /**
@@ -12083,6 +12133,65 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                         throw new RuntimeException(cls + " is no supported for CSV format. Only bean/Map are supported");
                     }
                 }
+
+                bw.flush();
+            } finally {
+                if (!isBufferedWriter) {
+                    Objectory.recycle((BufferedWriter) bw);
+                }
+            }
+
+            return cnt;
+        } finally {
+            close();
+        }
+    }
+
+    @TerminalOp
+    public long persistToJSON(final File output) throws E, IOException {
+        final Writer writer = IOUtil.newFileWriter(output);
+
+        try {
+            return persistToJSON(writer);
+        } finally {
+            IOUtil.close(writer);
+        }
+    }
+
+    @TerminalOp
+    public long persistToJSON(final OutputStream output) throws E, IOException {
+        final BufferedWriter bw = Objectory.createBufferedWriter(output);
+
+        try {
+            return persistToJSON(bw);
+        } finally {
+            IOUtil.close(bw);
+        }
+    }
+
+    @TerminalOp
+    public long persistToJSON(final Writer output) throws E, IOException {
+        assertNotClosed();
+
+        try {
+            final boolean isBufferedWriter = output instanceof BufferedJSONWriter;
+            final BufferedJSONWriter bw = isBufferedWriter ? (BufferedJSONWriter) output : Objectory.createBufferedJSONWriter(output);
+
+            final CheckedIterator<T, E> iter = iteratorEx();
+            long cnt = 0;
+
+            try {
+                bw.write("[");
+                bw.write(IOUtil.LINE_SEPARATOR);
+
+                while (iter.hasNext()) {
+                    N.toJSON(bw, iter.next());
+                    cnt++;
+                }
+
+                bw.write(IOUtil.LINE_SEPARATOR);
+                bw.write("]");
+                bw.write(IOUtil.LINE_SEPARATOR);
 
                 bw.flush();
             } finally {
@@ -12997,7 +13106,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             @Override
             public T next() throws Exception {
                 if (!hasNext && !hasNext()) {
-                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 hasNext = false;
@@ -13082,7 +13191,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             @Override
             public R next() throws Exception {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
-                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 return cur.next();
@@ -13136,7 +13245,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             @Override
             public R next() throws Exception {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
-                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 return cur.next();
@@ -13264,7 +13373,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             @Override
             public T next() throws E {
                 if (!hasNext()) {
-                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 final T ret = next != null ? (next == none ? null : next) : iter.next();
@@ -13411,7 +13520,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             @Override
             public T next() throws E {
                 if (!hasNext()) {
-                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 final T ret = next != null ? (next == none ? null : next) : iter.next();
@@ -13451,7 +13560,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             @Override
             public T next() throws E {
                 if (!hasNext && !hasNext()) {
-                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 hasNext = false;
@@ -13580,7 +13689,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             @Override
             public T next() throws E {
                 if (!hasNext()) {
-                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 final T ret = next != null ? (next == none ? null : next) : iter.next();
@@ -13621,7 +13730,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             @Override
             public T next() throws E {
                 if (!hasNext && !hasNext()) {
-                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 hasNext = false;
@@ -13749,7 +13858,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             @Override
             public T next() throws E {
                 if (!hasNext()) {
-                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 final T ret = next != null ? (next == none ? null : next) : iter.next();
@@ -13798,7 +13907,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             @Override
             public T next() throws E {
                 if (!hasNext && !hasNext()) {
-                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 hasNext = false;
@@ -13915,7 +14024,9 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     public CheckedStream<T, E> onClose(final Throwables.Runnable<? extends E> closeHandler) {
         assertNotClosed();
 
-        checkArgNotNull(closeHandler, "closeHandler");
+        if (isEmptyCloseHandler(closeHandler)) {
+            return this;
+        }
 
         final Deque<Throwables.Runnable<? extends E>> newCloseHandlers = new ArrayDeque<>(N.size(closeHandlers) + 1);
 
@@ -13975,8 +14086,12 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
         }
     }
 
+    static boolean isEmptyCloseHandler(final Throwables.Runnable<?> closeHandler) {
+        return closeHandler == null || closeHandler == EMPTY_CLOSE_HANDLER;
+    }
+
     static boolean isEmptyCloseHandlers(final Collection<? extends Throwables.Runnable<?>> closeHandlers) {
-        return N.isEmpty(closeHandlers) || (closeHandlers.size() == 1 && N.firstOrNullIfEmpty(closeHandlers) == EMPTY_CLOSE_HANDLER);
+        return N.isEmpty(closeHandlers) || isEmptyCloseHandler(N.firstOrNullIfEmpty(closeHandlers));
     }
 
     @SuppressWarnings("rawtypes")
@@ -14264,6 +14379,153 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
         return list.subList(fromIndex, N.min(list.size(), toIndex));
     }
 
+    static <T, E extends Exception> CheckedIterator<T, E> buffered(final CheckedIterator<T, E> iter, final ArrayBlockingQueue<T> queueToBuffer) {
+        return buffered(iter, queueToBuffer, null);
+    }
+
+    static <T, E extends Exception> CheckedIterator<T, E> buffered(final CheckedIterator<T, E> iter, final ArrayBlockingQueue<T> queueToBuffer,
+            final MutableBoolean hasMore) {
+        final MutableBoolean onGoing = MutableBoolean.of(true);
+
+        final T none = (T) NONE;
+        final Holder<Throwable> eHolder = new Holder<>();
+        final MutableBoolean disposableChecked = MutableBoolean.of(false);
+        final AtomicInteger threadCounter = new AtomicInteger(1);
+        boolean noException = false;
+
+        try {
+            N.asyncExecute(() -> {
+                try {
+                    T next = null;
+
+                    while (onGoing.value() && iter.hasNext()) {
+                        next = iter.next();
+
+                        if (next == null) {
+                            next = none;
+                        } else if (disposableChecked.isFalse()) {
+                            disposableChecked.setTrue();
+
+                            if (next instanceof NoCachingNoUpdating) {
+                                throw new RuntimeException("Can't run NoCachingNoUpdating Objects in parallel Stream or Queue");
+                            }
+                        }
+
+                        if (!queueToBuffer.offer(next)) {
+                            while (onGoing.value()) {
+                                if (queueToBuffer.offer(next, MAX_WAIT_TIME_FOR_QUEUE_OFFER, TimeUnit.MILLISECONDS)) {
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                } catch (Exception e) {
+                    setError(eHolder, e, onGoing);
+                } finally {
+                    if (threadCounter.decrementAndGet() == 0) {
+                        if (hasMore != null) {
+                            hasMore.setFalse();
+                        }
+                    }
+                }
+            });
+
+            noException = true;
+        } finally {
+            if (!noException) {
+                onGoing.setFalse();
+
+                if (hasMore != null) {
+                    hasMore.setFalse();
+                }
+            }
+        }
+
+        return new CheckedIterator<>() {
+            private boolean isClosed = false;
+            private T next = null;
+
+            @Override
+            public boolean hasNext() throws E {
+                try {
+                    if (next == null && (next = queueToBuffer.poll()) == null) {
+                        while (onGoing.value() && (threadCounter.get() > 0 || queueToBuffer.size() > 0)) { // (queue.size() > 0 || counter.get() > 0) is wrong. has to check counter first
+                            if ((next = queueToBuffer.poll(MAX_WAIT_TIME_FOR_QUEUE_POLL, TimeUnit.MILLISECONDS)) != null) {
+                                break;
+                            }
+                        }
+                    }
+                } catch (Exception e) {
+                    setError(eHolder, e, onGoing);
+                }
+
+                if (eHolder.value() != null) {
+                    setStopFlagAndThrowException(eHolder, onGoing);
+                }
+
+                return next != null;
+            }
+
+            @Override
+            public T next() throws E {
+                if (next == null && !hasNext()) {
+                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
+                }
+
+                T result = next == NONE ? null : next;
+                next = null;
+
+                return result;
+            }
+
+            @Override
+            public void close() {
+                if (isClosed) {
+                    return;
+                }
+
+                isClosed = true;
+                onGoing.setFalse();
+            }
+        };
+    }
+
+    static void setError(final Holder<Throwable> errorHolder, Throwable e) {
+        synchronized (errorHolder) { //NOSONAR
+            if (errorHolder.value() == null) {
+                errorHolder.setValue(e);
+            } else {
+                errorHolder.value().addSuppressed(e);
+            }
+        }
+    }
+
+    static void setError(final Holder<Throwable> errorHolder, Throwable e, final MutableBoolean onGoing) {
+        // Set error handle first, then set onGoing sign.
+        // If onGoing sign is set first but error has not been set, threads may stop without throwing exception because errorHolder is empty.
+        setError(errorHolder, e);
+
+        onGoing.setFalse();
+    }
+
+    static void setStopFlagAndThrowException(final Holder<Throwable> errorHolder, final MutableBoolean onGoing) {
+        onGoing.setFalse();
+
+        synchronized (errorHolder) { //NOSONAR
+            if (errorHolder.value() != null) {
+                throw toRuntimeException(errorHolder.getAndSet(null), true);
+            }
+        }
+    }
+
+    static RuntimeException toRuntimeException(final Throwable e) {
+        return ExceptionUtil.toRuntimeException(e);
+    }
+
+    static RuntimeException toRuntimeException(final Throwable e, final boolean throwIfItIsError) {
+        return ExceptionUtil.toRuntimeException(e, throwIfItIsError);
+    }
+
     /**
      * The Class CheckedIterator.
      *
@@ -14284,7 +14546,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
             @Override
             public Object next() throws Exception {
-                throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+                throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
             }
         };
 
@@ -14319,7 +14581,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                 @Override
                 public T next() {
                     if (done) {
-                        throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+                        throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                     }
 
                     done = true;
@@ -14370,7 +14632,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                 @Override
                 public T next() {
                     if (cursor >= toIndex) {
-                        throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+                        throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                     }
 
                     return a[cursor++];
@@ -14452,7 +14714,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
         //                    }
         //
         //                    if (position >= len) {
-        //                        throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+        //                        throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
         //                    }
         //
         //                    return a[position++];
@@ -14605,7 +14867,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                 @Override
                 public T next() throws E {
                     if ((cur == null || !cur.hasNext()) && !hasNext()) {
-                        throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+                        throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                     }
 
                     return cur.next();

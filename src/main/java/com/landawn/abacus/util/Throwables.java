@@ -13,6 +13,8 @@
  */
 package com.landawn.abacus.util;
 
+import java.util.Objects;
+
 import com.landawn.abacus.annotation.Beta;
 
 /**
@@ -2982,10 +2984,25 @@ public final class Throwables {
         /**
          *
          * @param t
-         * @param value
+         * @param u
          * @throws E the e
          */
-        void accept(T t, int value) throws E;
+        void accept(T t, int u) throws E;
+
+        /**
+         *
+         *
+         * @param after
+         * @return
+         */
+        default ObjIntConsumer<T, E> andThen(final ObjIntConsumer<? super T, E> after) {
+            N.checkArgNotNull(after);
+
+            return (t, u) -> {
+                accept(t, u);
+                after.accept(t, u);
+            };
+        }
     }
 
     /**
@@ -3001,9 +3018,57 @@ public final class Throwables {
          *
          * @param t
          * @param u
+         * @return
          * @throws E the e
          */
         R apply(T t, int u) throws E;
+
+        /**
+         *
+         *
+         * @param after
+         * @return
+         */
+        default <V> ObjIntFunction<T, V, E> andThen(java.util.function.Function<? super R, ? extends V> after) {
+            N.checkArgNotNull(after);
+
+            return (t, u) -> after.apply(apply(t, u));
+        }
+    }
+
+    /**
+     * The Interface ObjIntPredicate.
+     *
+     * @param <T>
+     * @param <R>
+     * @param <E>
+     */
+    public interface ObjIntPredicate<T, E extends Throwable> {
+
+        /**
+         *
+         * @param t
+         * @param u
+         * @return
+         * @throws E the e
+         */
+        boolean test(T t, int u) throws E;
+
+        default ObjIntPredicate<T, E> negate() {
+            return (t, u) -> !test(t, u);
+        }
+
+        default ObjIntPredicate<T, E> and(ObjIntPredicate<T, E> other) {
+            Objects.requireNonNull(other);
+
+            return (t, u) -> test(t, u) && other.test(t, u);
+        }
+
+        default ObjIntPredicate<T, E> or(ObjIntPredicate<T, E> other) {
+            Objects.requireNonNull(other);
+
+            return (t, u) -> test(t, u) || other.test(t, u);
+        }
     }
 
     /**
@@ -3017,10 +3082,91 @@ public final class Throwables {
         /**
          *
          * @param t
-         * @param value
+         * @param u
          * @throws E the e
          */
-        void accept(T t, long value) throws E;
+        void accept(T t, long u) throws E;
+
+        /**
+         *
+         *
+         * @param after
+         * @return
+         */
+        default ObjLongConsumer<T, E> andThen(final ObjLongConsumer<? super T, E> after) {
+            N.checkArgNotNull(after);
+
+            return (t, u) -> {
+                accept(t, u);
+                after.accept(t, u);
+            };
+        }
+    }
+
+    /**
+     * The Interface ObjLongFunction.
+     *
+     * @param <T>
+     * @param <R>
+     * @param <E>
+     */
+    public interface ObjLongFunction<T, R, E extends Throwable> {
+
+        /**
+         *
+         * @param t
+         * @param u
+         * @return
+         * @throws E the e
+         */
+        R apply(T t, long u) throws E;
+
+        /**
+         *
+         *
+         * @param after
+         * @return
+         */
+        default <V> ObjLongFunction<T, V, E> andThen(java.util.function.Function<? super R, ? extends V> after) {
+            N.checkArgNotNull(after);
+
+            return (t, u) -> after.apply(apply(t, u));
+        }
+    }
+
+    /**
+     * The Interface ObjLongPredicate.
+     *
+     * @param <T>
+     * @param <R>
+     * @param <E>
+     */
+    public interface ObjLongPredicate<T, E extends Throwable> {
+
+        /**
+         *
+         * @param t
+         * @param u
+         * @return
+         * @throws E the e
+         */
+        boolean test(T t, long u) throws E;
+
+        default ObjLongPredicate<T, E> negate() {
+            return (t, u) -> !test(t, u);
+        }
+
+        default ObjLongPredicate<T, E> and(ObjLongPredicate<T, E> other) {
+            Objects.requireNonNull(other);
+
+            return (t, u) -> test(t, u) && other.test(t, u);
+        }
+
+        default ObjLongPredicate<T, E> or(ObjLongPredicate<T, E> other) {
+            Objects.requireNonNull(other);
+
+            return (t, u) -> test(t, u) || other.test(t, u);
+        }
     }
 
     /**
@@ -3051,10 +3197,91 @@ public final class Throwables {
         /**
          *
          * @param t
-         * @param value
+         * @param u
          * @throws E the e
          */
-        void accept(T t, double value) throws E;
+        void accept(T t, double u) throws E;
+
+        /**
+         *
+         *
+         * @param after
+         * @return
+         */
+        default ObjDoubleConsumer<T, E> andThen(final ObjDoubleConsumer<? super T, E> after) {
+            N.checkArgNotNull(after);
+
+            return (t, u) -> {
+                accept(t, u);
+                after.accept(t, u);
+            };
+        }
+    }
+
+    /**
+     * The Interface ObjDoubleFunction.
+     *
+     * @param <T>
+     * @param <R>
+     * @param <E>
+     */
+    public interface ObjDoubleFunction<T, R, E extends Throwable> {
+
+        /**
+         *
+         * @param t
+         * @param u
+         * @return
+         * @throws E the e
+         */
+        R apply(T t, double u) throws E;
+
+        /**
+         *
+         *
+         * @param after
+         * @return
+         */
+        default <V> ObjDoubleFunction<T, V, E> andThen(java.util.function.Function<? super R, ? extends V> after) {
+            N.checkArgNotNull(after);
+
+            return (t, u) -> after.apply(apply(t, u));
+        }
+    }
+
+    /**
+     * The Interface ObjDoublePredicate.
+     *
+     * @param <T>
+     * @param <R>
+     * @param <E>
+     */
+    public interface ObjDoublePredicate<T, E extends Throwable> {
+
+        /**
+         *
+         * @param t
+         * @param u
+         * @return
+         * @throws E the e
+         */
+        boolean test(T t, double u) throws E;
+
+        default ObjDoublePredicate<T, E> negate() {
+            return (t, u) -> !test(t, u);
+        }
+
+        default ObjDoublePredicate<T, E> and(ObjDoublePredicate<T, E> other) {
+            Objects.requireNonNull(other);
+
+            return (t, u) -> test(t, u) && other.test(t, u);
+        }
+
+        default ObjDoublePredicate<T, E> or(ObjDoublePredicate<T, E> other) {
+            Objects.requireNonNull(other);
+
+            return (t, u) -> test(t, u) || other.test(t, u);
+        }
     }
 
     public interface IntObjConsumer<T, E extends Throwable> {
@@ -3079,6 +3306,56 @@ public final class Throwables {
                 accept(i, t);
                 after.accept(i, t);
             };
+        }
+    }
+
+    public interface IntObjFunction<T, R, E extends Throwable> {
+        /**
+        *
+        * @param i
+        * @param t
+        * @return
+        * @throws E
+        */
+        R apply(int i, T t) throws E;
+
+        /**
+         *
+         *
+         * @param <V>
+         * @param after
+         * @return
+         */
+        default <V> IntObjFunction<T, V, E> andThen(java.util.function.Function<? super R, ? extends V> after) {
+            N.checkArgNotNull(after);
+            return (i, t) -> after.apply(apply(i, t));
+        }
+    }
+
+    public interface IntObjPredicate<T, E extends Throwable> {
+        /**
+        *
+        * @param i
+        * @param t
+        * @return
+        * @throws E
+        */
+        boolean test(int i, T t) throws E;
+
+        default IntObjPredicate<T, E> negate() {
+            return (i, t) -> !test(i, t);
+        }
+
+        default IntObjPredicate<T, E> and(IntObjPredicate<T, E> other) {
+            Objects.requireNonNull(other);
+
+            return (i, t) -> test(i, t) && other.test(i, t);
+        }
+
+        default IntObjPredicate<T, E> or(IntObjPredicate<T, E> other) {
+            Objects.requireNonNull(other);
+
+            return (i, t) -> test(i, t) || other.test(i, t);
         }
     }
 
