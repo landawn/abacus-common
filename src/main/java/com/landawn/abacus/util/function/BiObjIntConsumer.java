@@ -19,45 +19,26 @@ import com.landawn.abacus.util.Throwables;
 
 /**
  *
- * @since 0.8
  *
  * @author Haiyang Li
  */
-public interface IndexedFunction<T, R> extends Throwables.IndexedFunction<T, R, RuntimeException> { //NOSONAR
+public interface BiObjIntConsumer<T, U> extends Throwables.BiObjIntConsumer<T, U, RuntimeException> { //NOSONAR
 
-    /**
-    * 
-    *
-    * @param idx 
-    * @param e 
-    * @return 
-    */
     @Override
-    R apply(int idx, T e);
+    void accept(T t, U u, int i);
 
     /**
-     * 
      *
-     * @param <V> 
-     * @param before 
-     * @return 
-     */
-    default <V> IndexedFunction<V, R> compose(IndexedFunction<? super V, ? extends T> before) {
-        N.checkArgNotNull(before);
-
-        return (idx, v) -> apply(idx, before.apply(idx, v));
-    }
-
-    /**
-     * 
      *
-     * @param <V> 
-     * @param after 
-     * @return 
+     * @param after
+     * @return
      */
-    default <V> IndexedFunction<T, V> andThen(IndexedFunction<? super R, ? extends V> after) {
+    default BiObjIntConsumer<T, U> andThen(BiObjIntConsumer<? super T, ? super U> after) {
         N.checkArgNotNull(after);
 
-        return (idx, t) -> after.apply(idx, apply(idx, t));
+        return (t, u, i) -> {
+            accept(t, u, i);
+            after.accept(t, u, i);
+        };
     }
 }

@@ -19,31 +19,30 @@ import com.landawn.abacus.util.Throwables;
 
 /**
  *
- * @since 0.8
  *
  * @author Haiyang Li
  */
 public interface ByteTriFunction<R> extends Throwables.ByteTriFunction<R, RuntimeException> { //NOSONAR
 
     /**
-    * 
     *
-    * @param a 
-    * @param b 
-    * @param c 
-    * @return 
+    *
+    * @param a
+    * @param b
+    * @param c
+    * @return
     */
     @Override
     R apply(byte a, byte b, byte c);
 
     /**
-     * 
      *
-     * @param <V> 
-     * @param after 
-     * @return 
+     *
+     * @param <V>
+     * @param after
+     * @return
      */
-    default <V> ByteTriFunction<V> andThen(Function<? super R, ? extends V> after) {
+    default <V> ByteTriFunction<V> andThen(java.util.function.Function<? super R, ? extends V> after) {
         N.checkArgNotNull(after);
 
         return (a, b, c) -> after.apply(apply(a, b, c));

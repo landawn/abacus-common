@@ -19,7 +19,6 @@ import com.landawn.abacus.util.Throwables;
 
 /**
  * Refer to JDK API documentation at: <a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/package-summary.html">https://docs.oracle.com/javase/8/docs/api/java/util/function/package-summary.html</a>
- * @since 0.8
  *
  * @author Haiyang Li
  */
@@ -42,18 +41,18 @@ public interface LongPredicate extends Throwables.LongPredicate<RuntimeException
     LongPredicate NOT_NEGATIVE = value -> value >= 0;
 
     /**
-     * 
      *
-     * @param value 
-     * @return 
+     *
+     * @param value
+     * @return
      */
     @Override
     boolean test(long value);
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     default LongPredicate negate() {
@@ -61,34 +60,36 @@ public interface LongPredicate extends Throwables.LongPredicate<RuntimeException
     }
 
     /**
-     * 
      *
-     * @param other 
-     * @return 
+     *
+     * @param other
+     * @return
      */
     @Override
     default LongPredicate or(java.util.function.LongPredicate other) {
         N.checkArgNotNull(other);
+
         return value -> test(value) || other.test(value);
     }
 
     /**
-     * 
      *
-     * @param other 
-     * @return 
+     *
+     * @param other
+     * @return
      */
     @Override
     default LongPredicate and(java.util.function.LongPredicate other) {
         N.checkArgNotNull(other);
+
         return value -> test(value) && other.test(value);
     }
 
     /**
      * Returns the specified instance.
      *
-     * @param predicate 
-     * @return 
+     * @param predicate
+     * @return
      */
     static LongPredicate of(final LongPredicate predicate) {
         N.checkArgNotNull(predicate);
@@ -97,71 +98,71 @@ public interface LongPredicate extends Throwables.LongPredicate<RuntimeException
     }
 
     /**
-     * 
      *
-     * @param targetLong 
-     * @return 
+     *
+     * @param targetLong
+     * @return
      */
     static LongPredicate equal(long targetLong) { //NOSONAR
         return value -> value == targetLong;
     }
 
     /**
-     * 
      *
-     * @param targetLong 
-     * @return 
+     *
+     * @param targetLong
+     * @return
      */
     static LongPredicate notEqual(long targetLong) {
         return value -> value != targetLong;
     }
 
     /**
-     * 
      *
-     * @param targetLong 
-     * @return 
+     *
+     * @param targetLong
+     * @return
      */
     static LongPredicate greaterThan(long targetLong) {
         return value -> value > targetLong;
     }
 
     /**
-     * 
      *
-     * @param targetLong 
-     * @return 
+     *
+     * @param targetLong
+     * @return
      */
     static LongPredicate greaterEqual(long targetLong) {
         return value -> value >= targetLong;
     }
 
     /**
-     * 
      *
-     * @param targetLong 
-     * @return 
+     *
+     * @param targetLong
+     * @return
      */
     static LongPredicate lessThan(long targetLong) {
         return value -> value < targetLong;
     }
 
     /**
-     * 
      *
-     * @param targetLong 
-     * @return 
+     *
+     * @param targetLong
+     * @return
      */
     static LongPredicate lessEqual(long targetLong) {
         return value -> value <= targetLong;
     }
 
     /**
-     * 
      *
-     * @param minValue 
-     * @param maxValue 
-     * @return 
+     *
+     * @param minValue
+     * @param maxValue
+     * @return
      */
     static LongPredicate between(long minValue, long maxValue) {
         return value -> value > minValue && value < maxValue;

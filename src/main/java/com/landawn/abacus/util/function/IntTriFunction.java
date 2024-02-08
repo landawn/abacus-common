@@ -19,31 +19,30 @@ import com.landawn.abacus.util.Throwables;
 
 /**
  *
- * @since 0.8
  *
  * @author Haiyang Li
  */
 public interface IntTriFunction<R> extends Throwables.IntTriFunction<R, RuntimeException> { //NOSONAR
 
     /**
-    * 
     *
-    * @param a 
-    * @param b 
-    * @param c 
-    * @return 
+    *
+    * @param a
+    * @param b
+    * @param c
+    * @return
     */
     @Override
     R apply(int a, int b, int c);
 
     /**
-     * 
      *
-     * @param <V> 
-     * @param after 
-     * @return 
+     *
+     * @param <V>
+     * @param after
+     * @return
      */
-    default <V> IntTriFunction<V> andThen(Function<? super R, ? extends V> after) {
+    default <V> IntTriFunction<V> andThen(java.util.function.Function<? super R, ? extends V> after) {
         N.checkArgNotNull(after);
 
         return (a, b, c) -> after.apply(apply(a, b, c));

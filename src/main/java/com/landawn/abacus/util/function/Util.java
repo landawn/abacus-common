@@ -19,7 +19,6 @@ import java.util.Random;
 
 /**
  *
- * @since 0.8
  *
  * @author Haiyang Li
  */

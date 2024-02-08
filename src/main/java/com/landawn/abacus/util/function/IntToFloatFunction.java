@@ -16,7 +16,6 @@ package com.landawn.abacus.util.function;
 
 /**
  *
- * @since 0.8
  *
  * @author Haiyang Li
  */

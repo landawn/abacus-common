@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 HaiYang Li
+ * Copyright (C) 2024 HaiYang Li
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -18,35 +18,30 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Throwables;
 
 /**
- *
- * @since 0.8
+ * Refer to JDK API documentation at: <a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/package-summary.html">https://docs.oracle.com/javase/8/docs/api/java/util/function/package-summary.html</a>
  *
  * @author Haiyang Li
  */
-public interface IndexedBiConsumer<T, U> extends Throwables.IndexedBiConsumer<T, U, RuntimeException> { //NOSONAR
-
+public interface DoubleObjFunction<T, R> extends Throwables.DoubleObjFunction<T, R, RuntimeException> { // NOSONAR
     /**
-    * 
-    *
-    * @param idx 
-    * @param e 
-    * @param u 
-    */
-    @Override
-    void accept(int idx, T e, U u);
-
-    /**
-     * 
      *
-     * @param after 
-     * @return 
+     *
+     * @param t
+     * @param u
+     * @return
      */
-    default IndexedBiConsumer<T, U> andThen(IndexedBiConsumer<? super T, ? super U> after) {
-        N.checkArgNotNull(after);
+    @Override
+    R apply(double t, T u);
 
-        return (idx, e, u) -> {
-            accept(idx, e, u);
-            after.accept(idx, e, u);
-        };
+    /**
+     *
+     *
+     * @param <V>
+     * @param after
+     * @return
+     */
+    default <V> DoubleObjFunction<T, V> andThen(java.util.function.Function<? super R, ? extends V> after) {
+        N.checkArgNotNull(after);
+        return (i, t) -> after.apply(apply(i, t));
     }
 }

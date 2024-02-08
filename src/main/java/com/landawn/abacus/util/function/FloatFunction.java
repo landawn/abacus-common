@@ -19,7 +19,6 @@ import com.landawn.abacus.util.Throwables;
 
 /**
  *
- * @since 0.8
  *
  * @author Haiyang Li
  */
@@ -27,31 +26,31 @@ public interface FloatFunction<R> extends Throwables.FloatFunction<R, RuntimeExc
     FloatFunction<Float> BOX = value -> value;
 
     /**
-     * 
      *
-     * @param value 
-     * @return 
+     *
+     * @param value
+     * @return
      */
     @Override
     R apply(float value);
 
     /**
-     * 
      *
-     * @param <V> 
-     * @param after 
-     * @return 
+     *
+     * @param <V>
+     * @param after
+     * @return
      */
-    default <V> FloatFunction<V> andThen(Function<? super R, ? extends V> after) {
+    default <V> FloatFunction<V> andThen(java.util.function.Function<? super R, ? extends V> after) {
         N.checkArgNotNull(after);
 
         return t -> after.apply(apply(t));
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     static FloatFunction<Float> identity() {
         return t -> t;

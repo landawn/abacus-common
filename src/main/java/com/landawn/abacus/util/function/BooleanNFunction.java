@@ -19,27 +19,26 @@ import com.landawn.abacus.util.Throwables;
 
 /**
  *
- * @since 0.8
  *
  * @author Haiyang Li
  */
 public interface BooleanNFunction<R> extends Throwables.BooleanNFunction<R, RuntimeException> { //NOSONAR
 
     /**
-    * 
     *
-    * @param args 
-    * @return 
+    *
+    * @param args
+    * @return
     */
     @Override
     R apply(boolean... args);
 
     /**
-     * 
      *
-     * @param <V> 
-     * @param after 
-     * @return 
+     *
+     * @param <V>
+     * @param after
+     * @return
      */
     @Override
     default <V> BooleanNFunction<V> andThen(java.util.function.Function<? super R, ? extends V> after) {

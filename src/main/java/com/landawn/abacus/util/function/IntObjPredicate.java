@@ -14,22 +14,32 @@
 
 package com.landawn.abacus.util.function;
 
+import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Throwables;
 
 /**
  * Refer to JDK API documentation at: <a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/package-summary.html">https://docs.oracle.com/javase/8/docs/api/java/util/function/package-summary.html</a>
- * @since 0.8
  *
  * @author Haiyang Li
  */
 public interface IntObjPredicate<T> extends Throwables.IntObjPredicate<T, RuntimeException> { // NOSONAR
-    /**
-     *
-     *
-     * @param t
-     * @param u
-     * @return
-     */
+
     @Override
     boolean test(int t, T u);
+
+    default IntObjPredicate<T> negate() {
+        return (i, t) -> !test(i, t);
+    }
+
+    default IntObjPredicate<T> and(IntObjPredicate<T> other) {
+        N.checkArgNotNull(other);
+
+        return (i, t) -> test(i, t) && other.test(i, t);
+    }
+
+    default IntObjPredicate<T> or(IntObjPredicate<T> other) {
+        N.checkArgNotNull(other);
+
+        return (i, t) -> test(i, t) || other.test(i, t);
+    }
 }

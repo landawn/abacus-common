@@ -13,8 +13,6 @@
  */
 package com.landawn.abacus.util;
 
-import java.util.Objects;
-
 import com.landawn.abacus.annotation.Beta;
 
 /**
@@ -22,7 +20,6 @@ import com.landawn.abacus.annotation.Beta;
  *
  * @author Haiyang Li
  * @param <T>
- * @since 0.8
  */
 @SuppressWarnings({ "java:S6539" })
 public final class Throwables {
@@ -741,245 +738,18 @@ public final class Throwables {
     }
 
     /**
-     * The Interface IndexedConsumer.
-     *
-     * @param <T>
-     * @param <E>
-     */
-    public interface IndexedConsumer<T, E extends Throwable> {
-
-        /**
-         *
-         * @param idx
-         * @param e
-         * @throws E the e
-         */
-        void accept(int idx, T e) throws E;
-    }
-
-    /**
-     * The Interface IndexedBiConsumer.
-     *
-     * @param <T>
-     * @param <U>
-     * @param <E>
-     */
-    public interface IndexedBiConsumer<T, U, E extends Throwable> {
-
-        /**
-         *
-         * @param idx
-         * @param e
-         * @param u
-         * @throws E the e
-         */
-        void accept(int idx, T e, U u) throws E;
-    }
-
-    /**
-     * The Interface IndexedFunction.
-     *
-     * @param <T>
-     * @param <R>
-     * @param <E>
-     */
-    public interface IndexedFunction<T, R, E extends Throwable> {
-
-        /**
-         *
-         * @param idx
-         * @param e
-         * @return
-         * @throws E the e
-         */
-        R apply(int idx, T e) throws E;
-    }
-
-    /**
-     * The Interface IndexedBiFunction.
-     *
-     * @param <T>
-     * @param <U>
-     * @param <R>
-     * @param <E>
-     */
-    public interface IndexedBiFunction<T, U, R, E extends Throwable> {
-
-        /**
-         *
-         * @param idx
-         * @param e
-         * @param u
-         * @return
-         * @throws E the e
-         */
-        R apply(int idx, T e, U u) throws E;
-    }
-
-    /**
-     * The Interface IndexedPredicate.
-     *
-     * @param <T>
-     * @param <E>
-     */
-    public interface IndexedPredicate<T, E extends Throwable> {
-
-        /**
-         *
-         * @param idx
-         * @param e
-         * @return
-         * @throws E the e
-         */
-        boolean test(int idx, T e) throws E;
-    }
-
-    /**
-     * The Interface IndexedBiPredicate.
-     *
-     * @param <T>
-     * @param <U>
-     * @param <E>
-     */
-    public interface IndexedBiPredicate<T, U, E extends Throwable> {
-
-        /**
-         *
-         * @param idx
-         * @param e
-         * @param u
-         * @return
-         * @throws E the e
-         */
-        boolean test(int idx, T e, U u) throws E;
-    }
-
-    /**
-     * The Interface IndexedBooleanConsumer.
+     * The Interface BooleanConsumer.
      *
      * @param <E>
      */
-    public interface IndexedBooleanConsumer<E extends Throwable> {
+    public interface BooleanConsumer<E extends Throwable> {
 
         /**
          *
-         * @param idx
-         * @param e
+         * @param t
          * @throws E the e
          */
-        void accept(int idx, boolean e) throws E;
-    }
-
-    /**
-     * The Interface IndexedCharConsumer.
-     *
-     * @param <E>
-     */
-    public interface IndexedCharConsumer<E extends Throwable> {
-
-        /**
-         *
-         * @param idx
-         * @param e
-         * @throws E the e
-         */
-        void accept(int idx, char e) throws E;
-    }
-
-    /**
-     * The Interface IndexedByteConsumer.
-     *
-     * @param <E>
-     */
-    public interface IndexedByteConsumer<E extends Throwable> {
-
-        /**
-         *
-         * @param idx
-         * @param e
-         * @throws E the e
-         */
-        void accept(int idx, byte e) throws E;
-    }
-
-    /**
-     * The Interface IndexedShortConsumer.
-     *
-     * @param <E>
-     */
-    public interface IndexedShortConsumer<E extends Throwable> {
-
-        /**
-         *
-         * @param idx
-         * @param e
-         * @throws E the e
-         */
-        void accept(int idx, short e) throws E;
-    }
-
-    /**
-     * The Interface IndexedIntConsumer.
-     *
-     * @param <E>
-     */
-    public interface IndexedIntConsumer<E extends Throwable> {
-
-        /**
-         *
-         * @param idx
-         * @param e
-         * @throws E the e
-         */
-        void accept(int idx, int e) throws E;
-    }
-
-    /**
-     * The Interface IndexedLongConsumer.
-     *
-     * @param <E>
-     */
-    public interface IndexedLongConsumer<E extends Throwable> {
-
-        /**
-         *
-         * @param idx
-         * @param e
-         * @throws E the e
-         */
-        void accept(int idx, long e) throws E;
-    }
-
-    /**
-     * The Interface IndexedFloatConsumer.
-     *
-     * @param <E>
-     */
-    public interface IndexedFloatConsumer<E extends Throwable> {
-
-        /**
-         *
-         * @param idx
-         * @param e
-         * @throws E the e
-         */
-        void accept(int idx, float e) throws E;
-    }
-
-    /**
-     * The Interface IndexedDoubleConsumer.
-     *
-     * @param <E>
-     */
-    public interface IndexedDoubleConsumer<E extends Throwable> {
-
-        /**
-         *
-         * @param idx
-         * @param e
-         * @throws E the e
-         */
-        void accept(int idx, double e) throws E;
+        void accept(boolean t) throws E;
     }
 
     /**
@@ -1016,18 +786,18 @@ public final class Throwables {
     }
 
     /**
-     * The Interface BooleanConsumer.
+     * The Interface CharConsumer.
      *
      * @param <E>
      */
-    public interface BooleanConsumer<E extends Throwable> {
+    public interface CharConsumer<E extends Throwable> {
 
         /**
          *
          * @param t
          * @throws E the e
          */
-        void accept(boolean t) throws E;
+        void accept(char t) throws E;
     }
 
     /**
@@ -1064,18 +834,18 @@ public final class Throwables {
     }
 
     /**
-     * The Interface CharConsumer.
+     * The Interface ByteConsumer.
      *
      * @param <E>
      */
-    public interface CharConsumer<E extends Throwable> {
+    public interface ByteConsumer<E extends Throwable> {
 
         /**
          *
          * @param t
          * @throws E the e
          */
-        void accept(char t) throws E;
+        void accept(byte t) throws E;
     }
 
     /**
@@ -1112,18 +882,18 @@ public final class Throwables {
     }
 
     /**
-     * The Interface ByteConsumer.
+     * The Interface ShortConsumer.
      *
      * @param <E>
      */
-    public interface ByteConsumer<E extends Throwable> {
+    public interface ShortConsumer<E extends Throwable> {
 
         /**
          *
          * @param t
          * @throws E the e
          */
-        void accept(byte t) throws E;
+        void accept(short t) throws E;
     }
 
     /**
@@ -1160,18 +930,18 @@ public final class Throwables {
     }
 
     /**
-     * The Interface ShortConsumer.
+     * The Interface IntConsumer.
      *
      * @param <E>
      */
-    public interface ShortConsumer<E extends Throwable> {
+    public interface IntConsumer<E extends Throwable> {
 
         /**
          *
          * @param t
          * @throws E the e
          */
-        void accept(short t) throws E;
+        void accept(int t) throws E;
     }
 
     /**
@@ -1240,18 +1010,18 @@ public final class Throwables {
     }
 
     /**
-     * The Interface IntConsumer.
+     * The Interface LongConsumer.
      *
      * @param <E>
      */
-    public interface IntConsumer<E extends Throwable> {
+    public interface LongConsumer<E extends Throwable> {
 
         /**
          *
          * @param t
          * @throws E the e
          */
-        void accept(int t) throws E;
+        void accept(long t) throws E;
     }
 
     /**
@@ -1320,18 +1090,18 @@ public final class Throwables {
     }
 
     /**
-     * The Interface LongConsumer.
+     * The Interface FloatConsumer.
      *
      * @param <E>
      */
-    public interface LongConsumer<E extends Throwable> {
+    public interface FloatConsumer<E extends Throwable> {
 
         /**
          *
          * @param t
          * @throws E the e
          */
-        void accept(long t) throws E;
+        void accept(float t) throws E;
     }
 
     /**
@@ -1368,18 +1138,18 @@ public final class Throwables {
     }
 
     /**
-     * The Interface FloatConsumer.
+     * The Interface DoubleConsumer.
      *
      * @param <E>
      */
-    public interface FloatConsumer<E extends Throwable> {
+    public interface DoubleConsumer<E extends Throwable> {
 
         /**
          *
          * @param t
          * @throws E the e
          */
-        void accept(float t) throws E;
+        void accept(double t) throws E;
     }
 
     /**
@@ -1445,21 +1215,6 @@ public final class Throwables {
          * @throws E the e
          */
         long applyAsLong(double value) throws E;
-    }
-
-    /**
-     * The Interface DoubleConsumer.
-     *
-     * @param <E>
-     */
-    public interface DoubleConsumer<E extends Throwable> {
-
-        /**
-         *
-         * @param t
-         * @throws E the e
-         */
-        void accept(double t) throws E;
     }
 
     /**
@@ -1607,6 +1362,126 @@ public final class Throwables {
     }
 
     /**
+     * The Interface TriIntFunction.
+     *
+     * @param <A>
+     * @param <B>
+     * @param <E>
+     */
+    public interface ToIntBiFunction<A, B, E extends Throwable> {
+
+        /**
+         *
+         * @param a
+         * @param b
+         * @return
+         * @throws E the e
+         */
+        int applyAsInt(A a, B b) throws E;
+    }
+
+    /**
+     * The Interface TriLongFunction.
+     *
+     * @param <A>
+     * @param <B>
+     * @param <E>
+     */
+    public interface ToLongBiFunction<A, B, E extends Throwable> {
+
+        /**
+         *
+         * @param a
+         * @param b
+         * @return
+         * @throws E the e
+         */
+        long applyAsLong(A a, B b) throws E;
+    }
+
+    /**
+     * The Interface TriDoubleFunction.
+     *
+     * @param <A>
+     * @param <B>
+     * @param <E>
+     */
+    public interface ToDoubleBiFunction<A, B, E extends Throwable> {
+
+        /**
+         *
+         * @param a
+         * @param b
+         * @return
+         * @throws E the e
+         */
+        double applyAsDouble(A a, B b) throws E;
+    }
+
+    /**
+     * The Interface TriIntFunction.
+     *
+     * @param <A>
+     * @param <B>
+     * @param <C>
+     * @param <E>
+     */
+    public interface ToIntTriFunction<A, B, C, E extends Throwable> {
+
+        /**
+         *
+         * @param a
+         * @param b
+         * @param c
+         * @return
+         * @throws E the e
+         */
+        int applyAsInt(A a, B b, C c) throws E;
+    }
+
+    /**
+     * The Interface TriLongFunction.
+     *
+     * @param <A>
+     * @param <B>
+     * @param <C>
+     * @param <E>
+     */
+    public interface ToLongTriFunction<A, B, C, E extends Throwable> {
+
+        /**
+         *
+         * @param a
+         * @param b
+         * @param c
+         * @return
+         * @throws E the e
+         */
+        long applyAsLong(A a, B b, C c) throws E;
+    }
+
+    /**
+     * The Interface TriDoubleFunction.
+     *
+     * @param <A>
+     * @param <B>
+     * @param <C>
+     * @param <E>
+     */
+    public interface ToDoubleTriFunction<A, B, C, E extends Throwable> {
+
+        /**
+         *
+         * @param a
+         * @param b
+         * @param c
+         * @return
+         * @throws E the e
+         */
+        double applyAsDouble(A a, B b, C c) throws E;
+    }
+
+    /**
      * The Interface UnaryOperator.
      *
      * @param <T>
@@ -1630,7 +1505,18 @@ public final class Throwables {
      * @param <T>
      * @param <E>
      */
-    public interface TernaryOperator<T, E extends Throwable> extends BiFunction<T, T, T, E> {
+    public interface TernaryOperator<T, E extends Throwable> {
+
+        /**
+         * Apply as char.
+         *
+         * @param a
+         * @param b
+         * @param c
+         * @return
+         * @throws E the e
+         */
+        T apply(T a, T b, T c) throws E;
     }
 
     /**
@@ -2988,21 +2874,6 @@ public final class Throwables {
          * @throws E the e
          */
         void accept(T t, int u) throws E;
-
-        /**
-         *
-         *
-         * @param after
-         * @return
-         */
-        default ObjIntConsumer<T, E> andThen(final ObjIntConsumer<? super T, E> after) {
-            N.checkArgNotNull(after);
-
-            return (t, u) -> {
-                accept(t, u);
-                after.accept(t, u);
-            };
-        }
     }
 
     /**
@@ -3022,18 +2893,6 @@ public final class Throwables {
          * @throws E the e
          */
         R apply(T t, int u) throws E;
-
-        /**
-         *
-         *
-         * @param after
-         * @return
-         */
-        default <V> ObjIntFunction<T, V, E> andThen(java.util.function.Function<? super R, ? extends V> after) {
-            N.checkArgNotNull(after);
-
-            return (t, u) -> after.apply(apply(t, u));
-        }
     }
 
     /**
@@ -3053,22 +2912,6 @@ public final class Throwables {
          * @throws E the e
          */
         boolean test(T t, int u) throws E;
-
-        default ObjIntPredicate<T, E> negate() {
-            return (t, u) -> !test(t, u);
-        }
-
-        default ObjIntPredicate<T, E> and(ObjIntPredicate<T, E> other) {
-            Objects.requireNonNull(other);
-
-            return (t, u) -> test(t, u) && other.test(t, u);
-        }
-
-        default ObjIntPredicate<T, E> or(ObjIntPredicate<T, E> other) {
-            Objects.requireNonNull(other);
-
-            return (t, u) -> test(t, u) || other.test(t, u);
-        }
     }
 
     /**
@@ -3086,21 +2929,6 @@ public final class Throwables {
          * @throws E the e
          */
         void accept(T t, long u) throws E;
-
-        /**
-         *
-         *
-         * @param after
-         * @return
-         */
-        default ObjLongConsumer<T, E> andThen(final ObjLongConsumer<? super T, E> after) {
-            N.checkArgNotNull(after);
-
-            return (t, u) -> {
-                accept(t, u);
-                after.accept(t, u);
-            };
-        }
     }
 
     /**
@@ -3120,18 +2948,6 @@ public final class Throwables {
          * @throws E the e
          */
         R apply(T t, long u) throws E;
-
-        /**
-         *
-         *
-         * @param after
-         * @return
-         */
-        default <V> ObjLongFunction<T, V, E> andThen(java.util.function.Function<? super R, ? extends V> after) {
-            N.checkArgNotNull(after);
-
-            return (t, u) -> after.apply(apply(t, u));
-        }
     }
 
     /**
@@ -3151,22 +2967,6 @@ public final class Throwables {
          * @throws E the e
          */
         boolean test(T t, long u) throws E;
-
-        default ObjLongPredicate<T, E> negate() {
-            return (t, u) -> !test(t, u);
-        }
-
-        default ObjLongPredicate<T, E> and(ObjLongPredicate<T, E> other) {
-            Objects.requireNonNull(other);
-
-            return (t, u) -> test(t, u) && other.test(t, u);
-        }
-
-        default ObjLongPredicate<T, E> or(ObjLongPredicate<T, E> other) {
-            Objects.requireNonNull(other);
-
-            return (t, u) -> test(t, u) || other.test(t, u);
-        }
     }
 
     /**
@@ -3201,21 +3001,6 @@ public final class Throwables {
          * @throws E the e
          */
         void accept(T t, double u) throws E;
-
-        /**
-         *
-         *
-         * @param after
-         * @return
-         */
-        default ObjDoubleConsumer<T, E> andThen(final ObjDoubleConsumer<? super T, E> after) {
-            N.checkArgNotNull(after);
-
-            return (t, u) -> {
-                accept(t, u);
-                after.accept(t, u);
-            };
-        }
     }
 
     /**
@@ -3235,18 +3020,6 @@ public final class Throwables {
          * @throws E the e
          */
         R apply(T t, double u) throws E;
-
-        /**
-         *
-         *
-         * @param after
-         * @return
-         */
-        default <V> ObjDoubleFunction<T, V, E> andThen(java.util.function.Function<? super R, ? extends V> after) {
-            N.checkArgNotNull(after);
-
-            return (t, u) -> after.apply(apply(t, u));
-        }
     }
 
     /**
@@ -3266,22 +3039,102 @@ public final class Throwables {
          * @throws E the e
          */
         boolean test(T t, double u) throws E;
+    }
 
-        default ObjDoublePredicate<T, E> negate() {
-            return (t, u) -> !test(t, u);
-        }
+    public interface ObjBiIntConsumer<T, E extends Throwable> {
 
-        default ObjDoublePredicate<T, E> and(ObjDoublePredicate<T, E> other) {
-            Objects.requireNonNull(other);
+        /**
+         *
+         * @param t
+         * @param i
+         * @param j
+         * @throws E
+         */
+        void accept(T t, int i, int j) throws E;
+    }
 
-            return (t, u) -> test(t, u) && other.test(t, u);
-        }
+    public interface ObjBiIntFunction<T, R, E extends Throwable> {
 
-        default ObjDoublePredicate<T, E> or(ObjDoublePredicate<T, E> other) {
-            Objects.requireNonNull(other);
+        /**
+         *
+         * @param t
+         * @param i
+         * @param j
+         * @throws E
+         */
+        R apply(T t, int i, int j) throws E;
+    }
 
-            return (t, u) -> test(t, u) || other.test(t, u);
-        }
+    public interface ObjBiIntPredicate<T, E extends Throwable> {
+
+        /**
+         *
+         * @param t
+         * @param i
+         * @param j
+         * @throws E
+         */
+        boolean test(T t, int i, int j) throws E;
+    }
+
+    /**
+     * The Interface IndexedBiConsumer.
+     *
+     * @param <T>
+     * @param <U>
+     * @param <E>
+     */
+    public interface BiObjIntConsumer<T, U, E extends Throwable> {
+
+        /**
+         *
+         * @param t
+         * @param u
+         * @param i
+         * @throws E the e
+         */
+        void accept(T t, U u, int i) throws E;
+    }
+
+    /**
+     * The Interface IndexedBiFunction.
+     *
+     * @param <T>
+     * @param <U>
+     * @param <R>
+     * @param <E>
+     */
+    public interface BiObjIntFunction<T, U, R, E extends Throwable> {
+
+        /**
+         *
+         * @param e
+         * @param u
+         * @param i
+         * @return
+         * @throws E the e
+         */
+        R apply(T e, U u, int i) throws E;
+    }
+
+    /**
+     * The Interface IndexedBiPredicate.
+     *
+     * @param <T>
+     * @param <U>
+     * @param <E>
+     */
+    public interface BiObjIntPredicate<T, U, E extends Throwable> {
+
+        /**
+         *
+         * @param t
+         * @param u
+         * @param i
+         * @return
+         * @throws E the e
+         */
+        boolean test(T t, U u, int i) throws E;
     }
 
     public interface IntObjConsumer<T, E extends Throwable> {
@@ -3292,71 +3145,37 @@ public final class Throwables {
          * @throws E
          */
         void accept(int i, T t) throws E;
-
-        /**
-         *
-         *
-         * @param after
-         * @return
-         */
-        default IntObjConsumer<T, E> andThen(final IntObjConsumer<? super T, E> after) {
-            N.checkArgNotNull(after);
-
-            return (i, t) -> {
-                accept(i, t);
-                after.accept(i, t);
-            };
-        }
     }
 
     public interface IntObjFunction<T, R, E extends Throwable> {
-        /**
-        *
-        * @param i
-        * @param t
-        * @return
-        * @throws E
-        */
-        R apply(int i, T t) throws E;
 
-        /**
-         *
-         *
-         * @param <V>
-         * @param after
-         * @return
-         */
-        default <V> IntObjFunction<T, V, E> andThen(java.util.function.Function<? super R, ? extends V> after) {
-            N.checkArgNotNull(after);
-            return (i, t) -> after.apply(apply(i, t));
-        }
+        R apply(int i, T t) throws E;
     }
 
     public interface IntObjPredicate<T, E extends Throwable> {
-        /**
-        *
-        * @param i
-        * @param t
-        * @return
-        * @throws E
-        */
+
         boolean test(int i, T t) throws E;
+    }
 
-        default IntObjPredicate<T, E> negate() {
-            return (i, t) -> !test(i, t);
-        }
+    public interface IntBiObjConsumer<T, U, E extends Throwable> {
+        /**
+         *
+         * @param i
+         * @param t
+         * @param u
+         * @throws E
+         */
+        void accept(int i, T t, U u) throws E;
+    }
 
-        default IntObjPredicate<T, E> and(IntObjPredicate<T, E> other) {
-            Objects.requireNonNull(other);
+    public interface IntBiObjFunction<T, U, R, E extends Throwable> {
 
-            return (i, t) -> test(i, t) && other.test(i, t);
-        }
+        R apply(int i, T t, U u) throws E;
+    }
 
-        default IntObjPredicate<T, E> or(IntObjPredicate<T, E> other) {
-            Objects.requireNonNull(other);
+    public interface IntBiObjPredicate<T, U, E extends Throwable> {
 
-            return (i, t) -> test(i, t) || other.test(i, t);
-        }
+        boolean test(int i, T t, U u) throws E;
     }
 
     public interface BiIntObjConsumer<T, E extends Throwable> {
@@ -3369,21 +3188,94 @@ public final class Throwables {
          * @throws E
          */
         void accept(int i, int j, T t) throws E;
+    }
+
+    public interface BiIntObjFunction<T, R, E extends Throwable> {
 
         /**
          *
-         *
-         * @param after
-         * @return
+         * @param i
+         * @param j
+         * @param t
+         * @throws E
          */
-        default BiIntObjConsumer<T, E> andThen(final BiIntObjConsumer<? super T, E> after) {
-            N.checkArgNotNull(after);
+        R apply(int i, int j, T t) throws E;
+    }
 
-            return (i, j, t) -> {
-                accept(i, j, t);
-                after.accept(i, j, t);
-            };
-        }
+    public interface BiIntObjPredicate<T, E extends Throwable> {
+
+        /**
+         *
+         * @param i
+         * @param j
+         * @param t
+         * @throws E
+         */
+        boolean test(int i, int j, T t) throws E;
+    }
+
+    public interface LongObjConsumer<T, E extends Throwable> {
+        /**
+         *
+         * @param i
+         * @param t
+         * @throws E
+         */
+        void accept(long i, T t) throws E;
+    }
+
+    public interface LongObjFunction<T, R, E extends Throwable> {
+        /**
+        *
+        * @param i
+        * @param t
+        * @return
+        * @throws E
+        */
+        R apply(long i, T t) throws E;
+    }
+
+    public interface LongObjPredicate<T, E extends Throwable> {
+        /**
+        *
+        * @param i
+        * @param t
+        * @return
+        * @throws E
+        */
+        boolean test(long i, T t) throws E;
+    }
+
+    public interface DoubleObjConsumer<T, E extends Throwable> {
+        /**
+         *
+         * @param i
+         * @param t
+         * @throws E
+         */
+        void accept(double i, T t) throws E;
+    }
+
+    public interface DoubleObjFunction<T, R, E extends Throwable> {
+        /**
+        *
+        * @param i
+        * @param t
+        * @return
+        * @throws E
+        */
+        R apply(double i, T t) throws E;
+    }
+
+    public interface DoubleObjPredicate<T, E extends Throwable> {
+        /**
+        *
+        * @param i
+        * @param t
+        * @return
+        * @throws E
+        */
+        boolean test(double i, T t) throws E;
     }
 
     public interface BooleanNFunction<R, E extends Throwable> {
@@ -3609,6 +3501,134 @@ public final class Throwables {
 
             return args -> after.apply(apply(args));
         }
+    }
+
+    /**
+     * The Interface IndexedBooleanConsumer.
+     *
+     * @param <E>
+     */
+    public interface IndexedBooleanConsumer<E extends Throwable> {
+
+        /**
+         *
+         * @param idx
+         * @param e
+         * @throws E the e
+         */
+        void accept(int idx, boolean e) throws E;
+    }
+
+    /**
+     * The Interface IndexedCharConsumer.
+     *
+     * @param <E>
+     */
+    public interface IndexedCharConsumer<E extends Throwable> {
+
+        /**
+         *
+         * @param idx
+         * @param e
+         * @throws E the e
+         */
+        void accept(int idx, char e) throws E;
+    }
+
+    /**
+     * The Interface IndexedByteConsumer.
+     *
+     * @param <E>
+     */
+    public interface IndexedByteConsumer<E extends Throwable> {
+
+        /**
+         *
+         * @param idx
+         * @param e
+         * @throws E the e
+         */
+        void accept(int idx, byte e) throws E;
+    }
+
+    /**
+     * The Interface IndexedShortConsumer.
+     *
+     * @param <E>
+     */
+    public interface IndexedShortConsumer<E extends Throwable> {
+
+        /**
+         *
+         * @param idx
+         * @param e
+         * @throws E the e
+         */
+        void accept(int idx, short e) throws E;
+    }
+
+    /**
+     * The Interface IndexedIntConsumer.
+     *
+     * @param <E>
+     */
+    public interface IndexedIntConsumer<E extends Throwable> {
+
+        /**
+         *
+         * @param idx
+         * @param e
+         * @throws E the e
+         */
+        void accept(int idx, int e) throws E;
+    }
+
+    /**
+     * The Interface IndexedLongConsumer.
+     *
+     * @param <E>
+     */
+    public interface IndexedLongConsumer<E extends Throwable> {
+
+        /**
+         *
+         * @param idx
+         * @param e
+         * @throws E the e
+         */
+        void accept(int idx, long e) throws E;
+    }
+
+    /**
+     * The Interface IndexedFloatConsumer.
+     *
+     * @param <E>
+     */
+    public interface IndexedFloatConsumer<E extends Throwable> {
+
+        /**
+         *
+         * @param idx
+         * @param e
+         * @throws E the e
+         */
+        void accept(int idx, float e) throws E;
+    }
+
+    /**
+     * The Interface IndexedDoubleConsumer.
+     *
+     * @param <E>
+     */
+    public interface IndexedDoubleConsumer<E extends Throwable> {
+
+        /**
+         *
+         * @param idx
+         * @param e
+         * @throws E the e
+         */
+        void accept(int idx, double e) throws E;
     }
 
     public static final class EE {

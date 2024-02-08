@@ -7466,7 +7466,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
         return buffered(new ArrayBlockingQueue<>(bufferSize));
     }
 
-    CheckedStream<T, E> buffered(final ArrayBlockingQueue<T> queueToBuffer) {
+    CheckedStream<T, E> buffered(final BlockingQueue<T> queueToBuffer) {
         checkArgNotNull(queueToBuffer, "queueToBuffer");
         checkArgument(queueToBuffer.isEmpty(), "'queueToBuffer' must be empty");
 
@@ -8240,7 +8240,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @throws E2 the e2
      */
     @TerminalOp
-    public <E2 extends Exception> void forEachIndexed(Throwables.IndexedConsumer<? super T, E2> action) throws E, E2 {
+    public <E2 extends Exception> void forEachIndexed(Throwables.IntObjConsumer<? super T, E2> action) throws E, E2 {
         assertNotClosed();
 
         checkArgNotNull(action, "action");
@@ -12175,7 +12175,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
         try {
             final boolean isBufferedWriter = output instanceof BufferedJSONWriter;
-            final BufferedJSONWriter bw = isBufferedWriter ? (BufferedJSONWriter) output : Objectory.createBufferedJSONWriter(output);
+            final BufferedJSONWriter bw = isBufferedWriter ? (BufferedJSONWriter) output : Objectory.createBufferedJSONWriter(output); // NOSONAR
 
             final CheckedIterator<T, E> iter = iteratorEx();
             long cnt = 0;
@@ -14379,11 +14379,11 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
         return list.subList(fromIndex, N.min(list.size(), toIndex));
     }
 
-    static <T, E extends Exception> CheckedIterator<T, E> buffered(final CheckedIterator<T, E> iter, final ArrayBlockingQueue<T> queueToBuffer) {
+    static <T, E extends Exception> CheckedIterator<T, E> buffered(final CheckedIterator<T, E> iter, final BlockingQueue<T> queueToBuffer) {
         return buffered(iter, queueToBuffer, null);
     }
 
-    static <T, E extends Exception> CheckedIterator<T, E> buffered(final CheckedIterator<T, E> iter, final ArrayBlockingQueue<T> queueToBuffer,
+    static <T, E extends Exception> CheckedIterator<T, E> buffered(final CheckedIterator<T, E> iter, final BlockingQueue<T> queueToBuffer,
             final MutableBoolean hasMore) {
         final MutableBoolean onGoing = MutableBoolean.of(true);
 

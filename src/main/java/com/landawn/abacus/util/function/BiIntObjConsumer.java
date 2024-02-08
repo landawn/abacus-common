@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 HaiYang Li
+ * Copyright (C) 2024 HaiYang Li
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -14,15 +14,16 @@
 
 package com.landawn.abacus.util.function;
 
+import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Throwables;
 
 /**
  * Refer to JDK API documentation at: <a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/package-summary.html">https://docs.oracle.com/javase/8/docs/api/java/util/function/package-summary.html</a>
- * @since 0.8
  *
  * @author Haiyang Li
  */
 public interface BiIntObjConsumer<T> extends Throwables.BiIntObjConsumer<T, RuntimeException> { // NOSONAR
+
     /**
      *
      *
@@ -33,4 +34,19 @@ public interface BiIntObjConsumer<T> extends Throwables.BiIntObjConsumer<T, Runt
     //NOSONAR
     @Override
     void accept(int i, int j, T t);
+
+    /**
+     *
+     *
+     * @param after
+     * @return
+     */
+    default BiIntObjConsumer<T> andThen(final BiIntObjConsumer<? super T> after) {
+        N.checkArgNotNull(after);
+
+        return (i, j, t) -> {
+            accept(i, j, t);
+            after.accept(i, j, t);
+        };
+    }
 }

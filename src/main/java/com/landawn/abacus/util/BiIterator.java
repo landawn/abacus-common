@@ -27,7 +27,7 @@ import java.util.function.Consumer;
 
 import com.landawn.abacus.util.Fn.Suppliers;
 import com.landawn.abacus.util.u.Optional;
-import com.landawn.abacus.util.function.IndexedConsumer;
+import com.landawn.abacus.util.function.IntObjConsumer;
 import com.landawn.abacus.util.stream.Stream;
 
 /**
@@ -264,7 +264,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
      * @param output
      * @return
      */
-    public static <A, B> BiIterator<A, B> generate(final int fromIndex, final int toIndex, final IndexedConsumer<Pair<A, B>> output) {
+    public static <A, B> BiIterator<A, B> generate(final int fromIndex, final int toIndex, final IntObjConsumer<Pair<A, B>> output) {
         N.checkFromToIndex(fromIndex, toIndex, Integer.MAX_VALUE);
         N.checkArgNotNull(output);
 

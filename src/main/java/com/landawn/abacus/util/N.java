@@ -17879,7 +17879,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param action
      * @throws E the e
      */
-    public static <T, E extends Exception> void forEachIndexed(final T[] a, final Throwables.IndexedConsumer<? super T, E> action) throws E {
+    public static <T, E extends Exception> void forEachIndexed(final T[] a, final Throwables.IntObjConsumer<? super T, E> action) throws E {
         checkArgNotNull(action);
 
         if (isEmpty(a)) {
@@ -17900,7 +17900,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws E the e
      */
     public static <T, E extends Exception> void forEachIndexed(final T[] a, final int fromIndex, final int toIndex,
-            final Throwables.IndexedConsumer<? super T, E> action) throws E {
+            final Throwables.IntObjConsumer<? super T, E> action) throws E {
         checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), fromIndex < toIndex ? toIndex : fromIndex, len(a));
         checkArgNotNull(action);
 
@@ -17927,7 +17927,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param action
      * @throws E the e
      */
-    public static <T, E extends Exception> void forEachIndexed(final Iterable<? extends T> c, final Throwables.IndexedConsumer<? super T, E> action) throws E {
+    public static <T, E extends Exception> void forEachIndexed(final Iterable<? extends T> c, final Throwables.IntObjConsumer<? super T, E> action) throws E {
         checkArgNotNull(action);
 
         if (c == null) {
@@ -17949,7 +17949,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param action
      * @throws E the e
      */
-    public static <T, E extends Exception> void forEachIndexed(final Iterator<? extends T> iter, final Throwables.IndexedConsumer<? super T, E> action)
+    public static <T, E extends Exception> void forEachIndexed(final Iterator<? extends T> iter, final Throwables.IntObjConsumer<? super T, E> action)
             throws E {
         checkArgNotNull(action);
 
@@ -17980,7 +17980,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws E the e
      */
     public static <T, E extends Exception> void forEachIndexed(final Collection<? extends T> c, int fromIndex, final int toIndex,
-            final Throwables.IndexedConsumer<? super T, E> action) throws E {
+            final Throwables.IntObjConsumer<? super T, E> action) throws E {
         checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), fromIndex < toIndex ? toIndex : fromIndex, size(c));
         checkArgNotNull(action);
 
@@ -18073,7 +18073,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param action
      * @throws E the e
      */
-    public static <K, V, E extends Exception> void forEachIndexed(final Map<K, V> map, final Throwables.IndexedConsumer<? super Map.Entry<K, V>, E> action)
+    public static <K, V, E extends Exception> void forEachIndexed(final Map<K, V> map, final Throwables.IntObjConsumer<? super Map.Entry<K, V>, E> action)
             throws E {
         checkArgNotNull(action);
 
@@ -18093,7 +18093,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param action
      * @throws E the e
      */
-    public static <K, V, E extends Exception> void forEachIndexed(final Map<K, V> map, final Throwables.IndexedBiConsumer<? super K, ? super V, E> action)
+    public static <K, V, E extends Exception> void forEachIndexed(final Map<K, V> map, final Throwables.BiObjIntConsumer<? super K, ? super V, E> action)
             throws E {
         checkArgNotNull(action);
 
@@ -18104,7 +18104,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         int idx = 0;
 
         for (Map.Entry<K, V> entry : map.entrySet()) {
-            action.accept(idx++, entry.getKey(), entry.getValue());
+            action.accept(entry.getKey(), entry.getValue(), idx++);
         }
     }
 

@@ -25,31 +25,43 @@ import com.landawn.abacus.util.N;
 public interface NPredicate<T> {
 
     /**
-     * 
      *
-     * @param args 
-     * @return 
+     *
+     * @param args
+     * @return
      */
     boolean test(T... args);
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     default NPredicate<T> negate() {
         return t -> !test(t);
     }
 
     /**
-     * 
      *
-     * @param other 
-     * @return 
+     *
+     * @param other
+     * @return
      */
     default NPredicate<T> and(final NPredicate<? super T> other) {
         N.checkArgNotNull(other);
 
         return t -> test(t) && other.test(t);
+    }
+
+    /**
+     *
+     *
+     * @param other
+     * @return
+     */
+    default NPredicate<T> or(final NPredicate<? super T> other) {
+        N.checkArgNotNull(other);
+
+        return t -> test(t) || other.test(t);
     }
 }

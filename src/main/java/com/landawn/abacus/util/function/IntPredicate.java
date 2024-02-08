@@ -19,7 +19,6 @@ import com.landawn.abacus.util.Throwables;
 
 /**
  * Refer to JDK API documentation at: <a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/package-summary.html">https://docs.oracle.com/javase/8/docs/api/java/util/function/package-summary.html</a>
- * @since 0.8
  *
  * @author Haiyang Li
  */
@@ -42,18 +41,18 @@ public interface IntPredicate extends Throwables.IntPredicate<RuntimeException>,
     IntPredicate NOT_NEGATIVE = value -> value >= 0;
 
     /**
-     * 
      *
-     * @param value 
-     * @return 
+     *
+     * @param value
+     * @return
      */
     @Override
     boolean test(int value);
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     default IntPredicate negate() {
@@ -61,34 +60,36 @@ public interface IntPredicate extends Throwables.IntPredicate<RuntimeException>,
     }
 
     /**
-     * 
      *
-     * @param other 
-     * @return 
+     *
+     * @param other
+     * @return
      */
     @Override
     default IntPredicate and(java.util.function.IntPredicate other) {
         N.checkArgNotNull(other);
+
         return value -> test(value) && other.test(value);
     }
 
     /**
-     * 
      *
-     * @param other 
-     * @return 
+     *
+     * @param other
+     * @return
      */
     @Override
     default IntPredicate or(java.util.function.IntPredicate other) {
         N.checkArgNotNull(other);
+
         return value -> test(value) || other.test(value);
     }
 
     /**
      * Returns the specified instance.
      *
-     * @param predicate 
-     * @return 
+     * @param predicate
+     * @return
      */
     static IntPredicate of(final IntPredicate predicate) {
         N.checkArgNotNull(predicate);
@@ -97,71 +98,71 @@ public interface IntPredicate extends Throwables.IntPredicate<RuntimeException>,
     }
 
     /**
-     * 
      *
-     * @param targetInt 
-     * @return 
+     *
+     * @param targetInt
+     * @return
      */
     static IntPredicate equal(int targetInt) { //NOSONAR
         return value -> value == targetInt;
     }
 
     /**
-     * 
      *
-     * @param targetInt 
-     * @return 
+     *
+     * @param targetInt
+     * @return
      */
     static IntPredicate notEqual(int targetInt) {
         return value -> value != targetInt;
     }
 
     /**
-     * 
      *
-     * @param targetInt 
-     * @return 
+     *
+     * @param targetInt
+     * @return
      */
     static IntPredicate greaterThan(int targetInt) {
         return value -> value > targetInt;
     }
 
     /**
-     * 
      *
-     * @param targetInt 
-     * @return 
+     *
+     * @param targetInt
+     * @return
      */
     static IntPredicate greaterEqual(int targetInt) {
         return value -> value >= targetInt;
     }
 
     /**
-     * 
      *
-     * @param targetInt 
-     * @return 
+     *
+     * @param targetInt
+     * @return
      */
     static IntPredicate lessThan(int targetInt) {
         return value -> value < targetInt;
     }
 
     /**
-     * 
      *
-     * @param targetInt 
-     * @return 
+     *
+     * @param targetInt
+     * @return
      */
     static IntPredicate lessEqual(int targetInt) {
         return value -> value <= targetInt;
     }
 
     /**
-     * 
      *
-     * @param minValue 
-     * @param maxValue 
-     * @return 
+     *
+     * @param minValue
+     * @param maxValue
+     * @return
      */
     static IntPredicate between(int minValue, int maxValue) {
         return value -> value > minValue && value < maxValue;

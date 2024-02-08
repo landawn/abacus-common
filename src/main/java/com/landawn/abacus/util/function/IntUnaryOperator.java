@@ -19,49 +19,50 @@ import com.landawn.abacus.util.Throwables;
 
 /**
  * Refer to JDK API documentation at: <a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/package-summary.html">https://docs.oracle.com/javase/8/docs/api/java/util/function/package-summary.html</a>
- * @since 0.8
  *
  * @author Haiyang Li
  */
 public interface IntUnaryOperator extends Throwables.IntUnaryOperator<RuntimeException>, java.util.function.IntUnaryOperator { //NOSONAR
 
     /**
-    * 
     *
-    * @param operand 
-    * @return 
+    *
+    * @param operand
+    * @return
     */
     @Override
     int applyAsInt(int operand);
 
     /**
-     * 
      *
-     * @param before 
-     * @return 
+     *
+     * @param before
+     * @return
      */
     @Override
     default IntUnaryOperator compose(java.util.function.IntUnaryOperator before) {
         N.checkArgNotNull(before);
+
         return (int v) -> applyAsInt(before.applyAsInt(v));
     }
 
     /**
-     * 
      *
-     * @param after 
-     * @return 
+     *
+     * @param after
+     * @return
      */
     @Override
     default IntUnaryOperator andThen(java.util.function.IntUnaryOperator after) {
         N.checkArgNotNull(after);
+
         return (int t) -> after.applyAsInt(applyAsInt(t));
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     static IntUnaryOperator identity() {
         return t -> t;

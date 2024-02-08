@@ -24,7 +24,7 @@ import java.util.function.Consumer;
 
 import com.landawn.abacus.util.Fn.Suppliers;
 import com.landawn.abacus.util.u.Optional;
-import com.landawn.abacus.util.function.IndexedConsumer;
+import com.landawn.abacus.util.function.IntObjConsumer;
 import com.landawn.abacus.util.function.TriFunction;
 import com.landawn.abacus.util.function.TriPredicate;
 import com.landawn.abacus.util.stream.Stream;
@@ -186,7 +186,7 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      * @param output
      * @return
      */
-    public static <A, B, C> TriIterator<A, B, C> generate(final int fromIndex, final int toIndex, final IndexedConsumer<Triple<A, B, C>> output) {
+    public static <A, B, C> TriIterator<A, B, C> generate(final int fromIndex, final int toIndex, final IntObjConsumer<Triple<A, B, C>> output) {
         N.checkFromToIndex(fromIndex, toIndex, Integer.MAX_VALUE);
         N.checkArgNotNull(output);
 

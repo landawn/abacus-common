@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 HaiYang Li
+ * Copyright (C) 2024 HaiYang Li
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -18,34 +18,33 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Throwables;
 
 /**
- *
- * @since 0.8
+ * Refer to JDK API documentation at: <a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/package-summary.html">https://docs.oracle.com/javase/8/docs/api/java/util/function/package-summary.html</a>
  *
  * @author Haiyang Li
  */
-public interface IndexedConsumer<T> extends Throwables.IndexedConsumer<T, RuntimeException> { //NOSONAR
-
+public interface LongObjConsumer<T> extends Throwables.LongObjConsumer<T, RuntimeException> { // NOSONAR
     /**
-    * 
-    *
-    * @param idx 
-    * @param e 
-    */
-    @Override
-    void accept(int idx, T e);
-
-    /**
-     * 
      *
-     * @param after 
-     * @return 
+     *
+     * @param i
+     * @param t
      */
-    default IndexedConsumer<T> andThen(IndexedConsumer<? super T> after) {
+    //NOSONAR
+    @Override
+    void accept(long i, T t);
+
+    /**
+     *
+     *
+     * @param after
+     * @return
+     */
+    default LongObjConsumer<T> andThen(final LongObjConsumer<? super T> after) {
         N.checkArgNotNull(after);
 
-        return (idx, e) -> {
-            accept(idx, e);
-            after.accept(idx, e);
+        return (i, t) -> {
+            accept(i, t);
+            after.accept(i, t);
         };
     }
 }

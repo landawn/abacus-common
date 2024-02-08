@@ -19,30 +19,16 @@ import com.landawn.abacus.util.Throwables;
 
 /**
  *
- * @since 0.8
  *
  * @author Haiyang Li
  */
 public interface LongBiFunction<R> extends Throwables.LongBiFunction<R, RuntimeException> { //NOSONAR
 
-    /**
-    * 
-    *
-    * @param t 
-    * @param u 
-    * @return 
-    */
     @Override
     R apply(long t, long u);
 
-    /**
-     * 
-     *
-     * @param <V> 
-     * @param after 
-     * @return 
-     */
-    default <V> LongBiFunction<V> andThen(Function<? super R, ? extends V> after) {
+
+    default <V> LongBiFunction<V> andThen(java.util.function.Function<? super R, ? extends V> after) {
         N.checkArgNotNull(after);
 
         return (t, u) -> after.apply(apply(t, u));

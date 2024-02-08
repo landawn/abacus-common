@@ -20,53 +20,54 @@ import com.landawn.abacus.util.Throwables;
 
 /**
  * Refer to JDK API documentation at: <a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/package-summary.html">https://docs.oracle.com/javase/8/docs/api/java/util/function/package-summary.html</a>
- * @since 0.8
  *
  * @author Haiyang Li
  */
 public interface Function<T, R> extends Throwables.Function<T, R, RuntimeException>, java.util.function.Function<T, R> { //NOSONAR
 
     /**
-    * 
     *
-    * @param <T> 
-    * @return 
+    *
+    * @param <T>
+    * @return
     */
     static <T> Function<T, T> identity() {
         return Fn.identity();
     }
 
     /**
-     * 
      *
-     * @param <V> 
-     * @param before 
-     * @return 
+     *
+     * @param <V>
+     * @param before
+     * @return
      */
     @Override
     default <V> Function<V, R> compose(java.util.function.Function<? super V, ? extends T> before) {
         N.checkArgNotNull(before);
+
         return (V v) -> apply(before.apply(v));
     }
 
     /**
-     * 
      *
-     * @param <V> 
-     * @param after 
-     * @return 
+     *
+     * @param <V>
+     * @param after
+     * @return
      */
     @Override
     default <V> Function<T, V> andThen(java.util.function.Function<? super R, ? extends V> after) {
         N.checkArgNotNull(after);
+
         return (T t) -> after.apply(apply(t));
     }
 
     /**
-     * 
      *
-     * @param <E> 
-     * @return 
+     *
+     * @param <E>
+     * @return
      */
     default <E extends Throwable> Throwables.Function<T, R, E> toThrowable() {
         return (Throwables.Function<T, R, E>) this;

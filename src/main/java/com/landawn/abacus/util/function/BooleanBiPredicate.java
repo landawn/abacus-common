@@ -19,7 +19,6 @@ import com.landawn.abacus.util.Throwables;
 
 /**
  *
- * @since 0.8
  *
  * @author Haiyang Li
  */
@@ -38,29 +37,29 @@ public interface BooleanBiPredicate extends Throwables.BooleanBiPredicate<Runtim
     BooleanBiPredicate NOT_EQUAL = (t, u) -> t != u;
 
     /**
-     * 
      *
-     * @param t 
-     * @param u 
-     * @return 
+     *
+     * @param t
+     * @param u
+     * @return
      */
     @Override
     boolean test(boolean t, boolean u);
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     default BooleanBiPredicate negate() {
         return (t, u) -> !test(t, u);
     }
 
     /**
-     * 
      *
-     * @param other 
-     * @return 
+     *
+     * @param other
+     * @return
      */
     default BooleanBiPredicate and(BooleanBiPredicate other) {
         N.checkArgNotNull(other);
@@ -69,10 +68,10 @@ public interface BooleanBiPredicate extends Throwables.BooleanBiPredicate<Runtim
     }
 
     /**
-     * 
      *
-     * @param other 
-     * @return 
+     *
+     * @param other
+     * @return
      */
     default BooleanBiPredicate or(BooleanBiPredicate other) {
         N.checkArgNotNull(other);

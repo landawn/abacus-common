@@ -68,7 +68,7 @@ import com.landawn.abacus.util.NoCachingNoUpdating.DisposableObjArray;
 import com.landawn.abacus.util.Tuple.Tuple2;
 import com.landawn.abacus.util.Tuple.Tuple3;
 import com.landawn.abacus.util.u.Optional;
-import com.landawn.abacus.util.function.IndexedConsumer;
+import com.landawn.abacus.util.function.IntObjConsumer;
 import com.landawn.abacus.util.stream.Collectors;
 import com.landawn.abacus.util.stream.IntStream;
 import com.landawn.abacus.util.stream.ObjIteratorEx;
@@ -2358,7 +2358,7 @@ public class RowDataSet implements DataSet, Cloneable {
         final List<Object> columnA = _columnList.get(checkColumnName(columnNameA));
         final List<Object> columnB = _columnList.get(checkColumnName(columnNameB));
 
-        final IndexedConsumer<Pair<A, B>> output = new IndexedConsumer<>() {
+        final IntObjConsumer<Pair<A, B>> output = new IntObjConsumer<>() {
             private final int expectedModCount = modCount;
 
             @Override
@@ -2409,7 +2409,7 @@ public class RowDataSet implements DataSet, Cloneable {
         final List<Object> columnB = _columnList.get(checkColumnName(columnNameB));
         final List<Object> columnC = _columnList.get(checkColumnName(columnNameC));
 
-        final IndexedConsumer<Triple<A, B, C>> output = new IndexedConsumer<>() {
+        final IntObjConsumer<Triple<A, B, C>> output = new IntObjConsumer<>() {
             private final int expectedModCount = modCount;
 
             @Override

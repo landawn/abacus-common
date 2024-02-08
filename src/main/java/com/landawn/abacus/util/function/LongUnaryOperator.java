@@ -19,49 +19,44 @@ import com.landawn.abacus.util.Throwables;
 
 /**
  * Refer to JDK API documentation at: <a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/package-summary.html">https://docs.oracle.com/javase/8/docs/api/java/util/function/package-summary.html</a>
- * @since 0.8
  *
  * @author Haiyang Li
  */
 public interface LongUnaryOperator extends Throwables.LongUnaryOperator<RuntimeException>, java.util.function.LongUnaryOperator { //NOSONAR
 
-    /**
-    * 
-    *
-    * @param operand 
-    * @return 
-    */
     @Override
     long applyAsLong(long operand);
 
     /**
-     * 
      *
-     * @param before 
-     * @return 
+     *
+     * @param before
+     * @return
      */
     @Override
     default LongUnaryOperator compose(java.util.function.LongUnaryOperator before) {
         N.checkArgNotNull(before);
+
         return (long v) -> applyAsLong(before.applyAsLong(v));
     }
 
     /**
-     * 
      *
-     * @param after 
-     * @return 
+     *
+     * @param after
+     * @return
      */
     @Override
     default LongUnaryOperator andThen(java.util.function.LongUnaryOperator after) {
         N.checkArgNotNull(after);
+
         return (long t) -> after.applyAsLong(applyAsLong(t));
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     static LongUnaryOperator identity() {
         return t -> t;

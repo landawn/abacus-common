@@ -797,7 +797,7 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      * @param action
      * @throws E the e
      */
-    public <E extends Exception> void foreachIndexed(Throwables.IndexedConsumer<? super T, E> action) throws E {
+    public <E extends Exception> void foreachIndexed(Throwables.IntObjConsumer<? super T, E> action) throws E {
         N.checkArgNotNull(action);
 
         int idx = 0;

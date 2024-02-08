@@ -14,11 +14,11 @@
 
 package com.landawn.abacus.util.function;
 
+import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Throwables;
 
 /**
  * Refer to JDK API documentation at: <a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/package-summary.html">https://docs.oracle.com/javase/8/docs/api/java/util/function/package-summary.html</a>
- * @since 0.8
  *
  * @author Haiyang Li
  */
@@ -32,4 +32,19 @@ public interface ObjIntConsumer<T> extends Throwables.ObjIntConsumer<T, RuntimeE
     //NOSONAR
     @Override
     void accept(T t, int value);
+
+    /**
+     *
+     *
+     * @param after
+     * @return
+     */
+    default ObjIntConsumer<T> andThen(final ObjIntConsumer<? super T> after) {
+        N.checkArgNotNull(after);
+
+        return (t, u) -> {
+            accept(t, u);
+            after.accept(t, u);
+        };
+    }
 }

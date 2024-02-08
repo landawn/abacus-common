@@ -19,49 +19,50 @@ import com.landawn.abacus.util.Throwables;
 
 /**
  * Refer to JDK API documentation at: <a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/package-summary.html">https://docs.oracle.com/javase/8/docs/api/java/util/function/package-summary.html</a>
- * @since 0.8
  *
  * @author Haiyang Li
  */
 public interface DoubleUnaryOperator extends Throwables.DoubleUnaryOperator<RuntimeException>, java.util.function.DoubleUnaryOperator { //NOSONAR
 
     /**
-    * 
     *
-    * @param operand 
-    * @return 
+    *
+    * @param operand
+    * @return
     */
     @Override
     double applyAsDouble(double operand);
 
     /**
-     * 
      *
-     * @param before 
-     * @return 
+     *
+     * @param before
+     * @return
      */
     @Override
     default DoubleUnaryOperator compose(java.util.function.DoubleUnaryOperator before) {
         N.checkArgNotNull(before);
+
         return (double v) -> applyAsDouble(before.applyAsDouble(v));
     }
 
     /**
-     * 
      *
-     * @param after 
-     * @return 
+     *
+     * @param after
+     * @return
      */
     @Override
     default DoubleUnaryOperator andThen(java.util.function.DoubleUnaryOperator after) {
         N.checkArgNotNull(after);
+
         return (double t) -> after.applyAsDouble(applyAsDouble(t));
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     static DoubleUnaryOperator identity() {
         return t -> t;

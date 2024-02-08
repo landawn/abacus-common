@@ -311,7 +311,7 @@ public final class LineIterator extends ObjIterator<String> implements Closeable
      * @throws E the e
      */
     @Override
-    public <E extends Exception> void foreachIndexed(Throwables.IndexedConsumer<? super String, E> action) throws E {
+    public <E extends Exception> void foreachIndexed(Throwables.IntObjConsumer<? super String, E> action) throws E {
         N.checkArgNotNull(action);
 
         int idx = 0;

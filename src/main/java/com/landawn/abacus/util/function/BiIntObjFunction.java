@@ -18,34 +18,32 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Throwables;
 
 /**
- *
- * @since 0.8
+ * Refer to JDK API documentation at: <a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/package-summary.html">https://docs.oracle.com/javase/8/docs/api/java/util/function/package-summary.html</a>
  *
  * @author Haiyang Li
  */
-public interface IndexedBiFunction<T, U, R> extends Throwables.IndexedBiFunction<T, U, R, RuntimeException> { //NOSONAR
+public interface BiIntObjFunction<T, R> extends Throwables.BiIntObjFunction<T, R, RuntimeException> { // NOSONAR
 
     /**
-    * 
-    *
-    * @param idx 
-    * @param e 
-    * @param u 
-    * @return 
-    */
-    @Override
-    R apply(int idx, T e, U u);
-
-    /**
-     * 
      *
-     * @param <V> 
-     * @param after 
-     * @return 
+     * @param i
+     * @param j
+     * @param t
      */
-    default <V> IndexedBiFunction<T, U, V> andThen(IndexedFunction<? super R, ? extends V> after) {
+    //NOSONAR
+    @Override
+    R apply(int i, int j, T t);
+
+    /**
+     *
+     *
+     * @param <V>
+     * @param after
+     * @return
+     */
+    default <V> BiIntObjFunction<T, V> andThen(java.util.function.Function<? super R, ? extends V> after) {
         N.checkArgNotNull(after);
 
-        return (idx, e, u) -> after.apply(idx, apply(idx, e, u));
+        return (i, j, t) -> after.apply(apply(i, j, t));
     }
 }

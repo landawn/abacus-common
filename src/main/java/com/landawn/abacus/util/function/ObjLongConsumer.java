@@ -14,22 +14,37 @@
 
 package com.landawn.abacus.util.function;
 
+import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Throwables;
 
 /**
  * Refer to JDK API documentation at: <a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/package-summary.html">https://docs.oracle.com/javase/8/docs/api/java/util/function/package-summary.html</a>
- * @since 0.8
  *
  * @author Haiyang Li
  */
 public interface ObjLongConsumer<T> extends Throwables.ObjLongConsumer<T, RuntimeException>, java.util.function.ObjLongConsumer<T> { //NOSONAR
 
     /**
-    * 
     *
-    * @param t 
-    * @param value 
+    *
+    * @param t
+    * @param value
     */
     @Override
     void accept(T t, long value);
+
+    /**
+     *
+     *
+     * @param after
+     * @return
+     */
+    default ObjLongConsumer<T> andThen(final ObjLongConsumer<? super T> after) {
+        N.checkArgNotNull(after);
+
+        return (t, u) -> {
+            accept(t, u);
+            after.accept(t, u);
+        };
+    }
 }

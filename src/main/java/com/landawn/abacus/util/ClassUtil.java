@@ -1636,7 +1636,7 @@ public final class ClassUtil {
     public static String getParameterizedTypeNameByField(final Field field) {
         String typeName = formatParameterizedTypeName(field.getGenericType().getTypeName());
 
-        if (Strings.isNotEmpty(typeName) && typeName.indexOf('<') > 0 && typeName.indexOf('>') > 0) {
+        if (Strings.isNotEmpty(typeName) && typeName.indexOf('<') > 0 && typeName.indexOf('>') > 0) { // NOSONAR
             try {
                 Type<Object> type = N.typeOf(typeName);
 
@@ -1670,7 +1670,7 @@ public final class ClassUtil {
 
         Class<?> methodType = null;
 
-        if (Strings.isNotEmpty(typeName) && typeName.indexOf('<') > 0 && typeName.indexOf('>') > 0) {
+        if (Strings.isNotEmpty(typeName) && typeName.indexOf('<') > 0 && typeName.indexOf('>') > 0) { // NOSONAR
             try {
                 final Type<Object> type = N.typeOf(typeName);
                 methodType = N.notEmpty(genericParameterTypes) ? method.getParameterTypes()[0] : method.getReturnType();

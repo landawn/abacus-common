@@ -15,31 +15,48 @@
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Fn.UnaryOperators;
+import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Throwables;
 
 /**
  * Refer to JDK API documentation at: <a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/package-summary.html">https://docs.oracle.com/javase/8/docs/api/java/util/function/package-summary.html</a>
- * @since 0.8
  *
  * @author Haiyang Li
  */
 public interface UnaryOperator<T> extends Function<T, T>, Throwables.UnaryOperator<T, RuntimeException>, java.util.function.UnaryOperator<T> { //NOSONAR
 
     /**
-    * 
-    *
-    * @param <T> 
-    * @return 
-    */
+     *
+     * @param before
+     * @return
+     */
+    default UnaryOperator<T> compose(java.util.function.UnaryOperator<T> before) {
+        N.checkArgNotNull(before);
+
+        return t -> apply(before.apply(t));
+    }
+
+    /**
+     *
+     *
+     * @param after
+     * @return
+     */
+    default UnaryOperator<T> andThen(java.util.function.UnaryOperator<T> after) {
+        N.checkArgNotNull(after);
+
+        return t -> after.apply(apply(t));
+    }
+
     static <T> UnaryOperator<T> identity() {
         return UnaryOperators.identity();
     }
 
     /**
-     * 
      *
-     * @param <E> 
-     * @return 
+     *
+     * @param <E>
+     * @return
      */
     @Override
     default <E extends Throwable> Throwables.UnaryOperator<T, E> toThrowable() {

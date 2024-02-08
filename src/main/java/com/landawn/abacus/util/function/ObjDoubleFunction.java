@@ -14,11 +14,11 @@
 
 package com.landawn.abacus.util.function;
 
+import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Throwables;
 
 /**
  * Refer to JDK API documentation at: <a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/package-summary.html">https://docs.oracle.com/javase/8/docs/api/java/util/function/package-summary.html</a>
- * @since 0.8
  *
  * @author Haiyang Li
  */
@@ -33,4 +33,16 @@ public interface ObjDoubleFunction<T, R> extends Throwables.ObjDoubleFunction<T,
     //NOSONAR
     @Override
     R apply(T t, double u);
+
+    /**
+     *
+     *
+     * @param after
+     * @return
+     */
+    default <V> ObjDoubleFunction<T, V> andThen(java.util.function.Function<? super R, ? extends V> after) {
+        N.checkArgNotNull(after);
+
+        return (t, u) -> after.apply(apply(t, u));
+    }
 }

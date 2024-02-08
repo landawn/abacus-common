@@ -14,20 +14,21 @@
 
 package com.landawn.abacus.util.function;
 
+import com.landawn.abacus.util.Throwables;
+
 /**
  * Refer to JDK API documentation at: <a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/package-summary.html">https://docs.oracle.com/javase/8/docs/api/java/util/function/package-summary.html</a>
- * @since 0.8
  *
  * @author Haiyang Li
  */
-public interface ToLongBiFunction<T, U> extends java.util.function.ToLongBiFunction<T, U> { //NOSONAR
+public interface ToLongBiFunction<T, U> extends Throwables.ToLongBiFunction<T, U, RuntimeException>, java.util.function.ToLongBiFunction<T, U> { //NOSONAR
 
     /**
-    * 
     *
-    * @param t 
-    * @param u 
-    * @return 
+    *
+    * @param t
+    * @param u
+    * @return
     */
     @Override
     long applyAsLong(T t, U u);

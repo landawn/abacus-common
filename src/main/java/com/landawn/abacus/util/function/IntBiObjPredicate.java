@@ -19,53 +19,44 @@ import com.landawn.abacus.util.Throwables;
 
 /**
  *
- * @since 0.8
  *
  * @author Haiyang Li
  */
-public interface IndexedBiPredicate<T, U> extends Throwables.IndexedBiPredicate<T, U, RuntimeException> { //NOSONAR
+public interface IntBiObjPredicate<T, U> extends Throwables.IntBiObjPredicate<T, U, RuntimeException> { //NOSONAR
 
-    /**
-    * 
-    *
-    * @param idx 
-    * @param e 
-    * @param u 
-    * @return 
-    */
     @Override
-    boolean test(int idx, T e, U u);
+    boolean test(int i, T t, U u);
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
-    default IndexedBiPredicate<T, U> negate() {
-        return (idx, e, u) -> !test(idx, e, u);
+    default IntBiObjPredicate<T, U> negate() {
+        return (i, t, u) -> !test(i, t, u);
     }
 
     /**
-     * 
      *
-     * @param other 
-     * @return 
+     *
+     * @param other
+     * @return
      */
-    default IndexedBiPredicate<T, U> and(IndexedBiPredicate<? super T, ? super U> other) {
+    default IntBiObjPredicate<T, U> and(IntBiObjPredicate<? super T, ? super U> other) {
         N.checkArgNotNull(other);
 
-        return (idx, e, u) -> test(idx, e, u) && other.test(idx, e, u);
+        return (i, t, u) -> test(i, t, u) && other.test(i, t, u);
     }
 
     /**
-     * 
      *
-     * @param other 
-     * @return 
+     *
+     * @param other
+     * @return
      */
-    default IndexedBiPredicate<T, U> or(IndexedBiPredicate<? super T, ? super U> other) {
+    default IntBiObjPredicate<T, U> or(IntBiObjPredicate<? super T, ? super U> other) {
         N.checkArgNotNull(other);
 
-        return (idx, e, u) -> test(idx, e, u) || other.test(idx, e, u);
+        return (i, t, u) -> test(i, t, u) || other.test(i, t, u);
     }
 }

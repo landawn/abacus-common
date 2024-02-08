@@ -19,7 +19,6 @@ import com.landawn.abacus.util.Throwables;
 
 /**
  * Refer to JDK API documentation at: <a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/package-summary.html">https://docs.oracle.com/javase/8/docs/api/java/util/function/package-summary.html</a>
- * @since 0.8
  *
  * @author Haiyang Li
  */
@@ -68,6 +67,7 @@ public interface DoublePredicate extends Throwables.DoublePredicate<RuntimeExcep
     @Override
     default DoublePredicate and(java.util.function.DoublePredicate other) {
         N.checkArgNotNull(other);
+
         return value -> test(value) && other.test(value);
     }
 
@@ -80,6 +80,7 @@ public interface DoublePredicate extends Throwables.DoublePredicate<RuntimeExcep
     @Override
     default DoublePredicate or(java.util.function.DoublePredicate other) {
         N.checkArgNotNull(other);
+
         return value -> test(value) || other.test(value);
     }
 

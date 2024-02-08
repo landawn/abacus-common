@@ -227,7 +227,7 @@ public final class ImmutableArray<T> implements Immutable {
      * @param consumer 
      * @throws E 
      */
-    public <E extends Exception> void forEachIndexed(final Throwables.IndexedConsumer<T, E> consumer) throws E {
+    public <E extends Exception> void forEachIndexed(final Throwables.IntObjConsumer<T, E> consumer) throws E {
         N.checkArgNotNull(consumer, "consumer");
 
         for (int i = 0; i < length; i++) {

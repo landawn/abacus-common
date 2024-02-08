@@ -19,30 +19,29 @@ import com.landawn.abacus.util.Throwables;
 
 /**
  *
- * @since 0.8
  *
  * @author Haiyang Li
  */
 public interface ShortBiFunction<R> extends Throwables.ShortBiFunction<R, RuntimeException> { //NOSONAR
 
     /**
-    * 
     *
-    * @param t 
-    * @param u 
-    * @return 
+    *
+    * @param t
+    * @param u
+    * @return
     */
     @Override
     R apply(short t, short u);
 
     /**
-     * 
      *
-     * @param <V> 
-     * @param after 
-     * @return 
+     *
+     * @param <V>
+     * @param after
+     * @return
      */
-    default <V> ShortBiFunction<V> andThen(Function<? super R, ? extends V> after) {
+    default <V> ShortBiFunction<V> andThen(java.util.function.Function<? super R, ? extends V> after) {
         N.checkArgNotNull(after);
 
         return (t, u) -> after.apply(apply(t, u));

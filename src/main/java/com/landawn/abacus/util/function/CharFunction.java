@@ -19,7 +19,6 @@ import com.landawn.abacus.util.Throwables;
 
 /**
  *
- * @since 0.8
  *
  * @author Haiyang Li
  */
@@ -27,31 +26,31 @@ public interface CharFunction<R> extends Throwables.CharFunction<R, RuntimeExcep
     CharFunction<Character> BOX = value -> value;
 
     /**
-     * 
      *
-     * @param value 
-     * @return 
+     *
+     * @param value
+     * @return
      */
     @Override
     R apply(char value);
 
     /**
-     * 
      *
-     * @param <V> 
-     * @param after 
-     * @return 
+     *
+     * @param <V>
+     * @param after
+     * @return
      */
-    default <V> CharFunction<V> andThen(Function<? super R, ? extends V> after) {
+    default <V> CharFunction<V> andThen(java.util.function.Function<? super R, ? extends V> after) {
         N.checkArgNotNull(after);
 
         return t -> after.apply(apply(t));
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     static CharFunction<Character> identity() {
         return t -> t;

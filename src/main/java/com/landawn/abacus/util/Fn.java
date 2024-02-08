@@ -119,17 +119,17 @@ import com.landawn.abacus.util.function.FloatConsumer;
 import com.landawn.abacus.util.function.FloatFunction;
 import com.landawn.abacus.util.function.FloatPredicate;
 import com.landawn.abacus.util.function.Function;
-import com.landawn.abacus.util.function.IndexedBiConsumer;
-import com.landawn.abacus.util.function.IndexedBiFunction;
-import com.landawn.abacus.util.function.IndexedBiPredicate;
-import com.landawn.abacus.util.function.IndexedConsumer;
-import com.landawn.abacus.util.function.IndexedFunction;
-import com.landawn.abacus.util.function.IndexedPredicate;
 import com.landawn.abacus.util.function.IntBiFunction;
+import com.landawn.abacus.util.function.IntBiObjConsumer;
+import com.landawn.abacus.util.function.IntBiObjFunction;
+import com.landawn.abacus.util.function.IntBiObjPredicate;
 import com.landawn.abacus.util.function.IntBiPredicate;
 import com.landawn.abacus.util.function.IntBinaryOperator;
 import com.landawn.abacus.util.function.IntConsumer;
 import com.landawn.abacus.util.function.IntFunction;
+import com.landawn.abacus.util.function.IntObjConsumer;
+import com.landawn.abacus.util.function.IntObjFunction;
+import com.landawn.abacus.util.function.IntObjPredicate;
 import com.landawn.abacus.util.function.IntPredicate;
 import com.landawn.abacus.util.function.LongBiFunction;
 import com.landawn.abacus.util.function.LongBiPredicate;
@@ -3172,7 +3172,7 @@ public final class Fn {
     @Beta
     @SequentialOnly
     @Stateful
-    public static <T> Predicate<T> indexed(final IndexedPredicate<T> predicate) {
+    public static <T> Predicate<T> indexed(final IntObjPredicate<T> predicate) {
         return Predicates.indexed(predicate);
     }
 
@@ -7050,7 +7050,7 @@ public final class Fn {
         @Beta
         @SequentialOnly
         @Stateful
-        public static <T> Predicate<T> indexed(final IndexedPredicate<T> predicate) {
+        public static <T> Predicate<T> indexed(final IntObjPredicate<T> predicate) {
             N.checkArgNotNull(predicate);
 
             return new Predicate<>() {
@@ -7241,7 +7241,7 @@ public final class Fn {
         @Beta
         @SequentialOnly
         @Stateful
-        public static <T, U> BiPredicate<T, U> indexed(final IndexedBiPredicate<T, U> predicate) {
+        public static <T, U> BiPredicate<T, U> indexed(final IntBiObjPredicate<T, U> predicate) {
             N.checkArgNotNull(predicate);
 
             return new BiPredicate<>() {
@@ -7312,7 +7312,7 @@ public final class Fn {
         @Beta
         @SequentialOnly
         @Stateful
-        public static <T> Consumer<T> indexed(final IndexedConsumer<T> action) {
+        public static <T> Consumer<T> indexed(final IntObjConsumer<T> action) {
             N.checkArgNotNull(action);
 
             return new Consumer<>() {
@@ -7514,7 +7514,7 @@ public final class Fn {
         @Beta
         @SequentialOnly
         @Stateful
-        public static <T, U> BiConsumer<T, U> indexed(final IndexedBiConsumer<T, U> action) {
+        public static <T, U> BiConsumer<T, U> indexed(final IntBiObjConsumer<T, U> action) {
             N.checkArgNotNull(action);
 
             return new BiConsumer<>() {
@@ -7556,7 +7556,7 @@ public final class Fn {
         @Beta
         @SequentialOnly
         @Stateful
-        public static <T, R> Function<T, R> indexed(final IndexedFunction<T, ? extends R> func) {
+        public static <T, R> Function<T, R> indexed(final IntObjFunction<T, ? extends R> func) {
             N.checkArgNotNull(func);
 
             return new Function<>() {
@@ -7795,7 +7795,7 @@ public final class Fn {
         @Beta
         @SequentialOnly
         @Stateful
-        public static <T, U, R> BiFunction<T, U, R> indexed(final IndexedBiFunction<T, U, ? extends R> func) {
+        public static <T, U, R> BiFunction<T, U, R> indexed(final IntBiObjFunction<T, U, ? extends R> func) {
             N.checkArgNotNull(func);
 
             return new BiFunction<>() {

@@ -19,25 +19,24 @@ import com.landawn.abacus.util.Throwables;
 
 /**
  * Refer to JDK API documentation at: <a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/package-summary.html">https://docs.oracle.com/javase/8/docs/api/java/util/function/package-summary.html</a>
- * @since 0.8
  *
  * @author Haiyang Li
  */
 public interface Predicate<T> extends Throwables.Predicate<T, RuntimeException>, java.util.function.Predicate<T> { //NOSONAR
 
     /**
-    * 
     *
-    * @param value 
-    * @return 
+    *
+    * @param value
+    * @return
     */
     @Override
     boolean test(T value);
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     default Predicate<T> negate() {
@@ -45,22 +44,36 @@ public interface Predicate<T> extends Throwables.Predicate<T, RuntimeException>,
     }
 
     /**
-     * 
      *
-     * @param other 
-     * @return 
+     *
+     * @param other
+     * @return
      */
     @Override
     default Predicate<T> and(java.util.function.Predicate<? super T> other) {
         N.checkArgNotNull(other);
+
         return t -> test(t) && other.test(t);
     }
 
     /**
-     * 
      *
-     * @param <E> 
-     * @return 
+     *
+     * @param other
+     * @return
+     */
+    @Override
+    default Predicate<T> or(java.util.function.Predicate<? super T> other) {
+        N.checkArgNotNull(other);
+
+        return t -> test(t) || other.test(t);
+    }
+
+    /**
+     *
+     *
+     * @param <E>
+     * @return
      */
     default <E extends Throwable> Throwables.Predicate<T, E> toThrowable() {
         return (Throwables.Predicate<T, E>) this;
