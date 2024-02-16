@@ -197,9 +197,10 @@ public class JSONDeserializationConfig extends DeserializationConfig<JSONDeseria
         h = 31 * h + N.hashCode(ignoreNullOrEmpty);
         h = 31 * h + N.hashCode(readNullToEmpty);
         h = 31 * h + N.hashCode(elementType);
-        h = 31 * h + N.hashCode(keyType);
-        h = 31 * h + N.hashCode(valueType);
-        h = 31 * h + N.hashCode(propTypes);
+        h = 31 * h + N.hashCode(mapKeyType);
+        h = 31 * h + N.hashCode(mapValueType);
+        h = 31 * h + N.hashCode(valueTypeMap);
+        h = 31 * h + N.hashCode(beanInfoForValueTypes);
         h = 31 * h + N.hashCode(mapInstanceType);
         return 31 * h + N.hashCode(propHandlerMap);
     }
@@ -219,9 +220,9 @@ public class JSONDeserializationConfig extends DeserializationConfig<JSONDeseria
         if (obj instanceof JSONDeserializationConfig other) {
             if (N.equals(getIgnoredPropNames(), other.getIgnoredPropNames()) && N.equals(ignoreUnmatchedProperty, other.ignoreUnmatchedProperty) //NOSONAR
                     && N.equals(ignoreNullOrEmpty, other.ignoreNullOrEmpty) && N.equals(readNullToEmpty, other.readNullToEmpty)
-                    && N.equals(elementType, other.elementType) && N.equals(keyType, other.keyType) && N.equals(valueType, other.valueType)
-                    && N.equals(propTypes, other.propTypes) && N.equals(mapInstanceType, other.mapInstanceType)
-                    && N.equals(propHandlerMap, other.propHandlerMap)) {
+                    && N.equals(elementType, other.elementType) && N.equals(mapKeyType, other.mapKeyType) && N.equals(mapValueType, other.mapValueType)
+                    && N.equals(valueTypeMap, other.valueTypeMap) && N.equals(beanInfoForValueTypes, other.beanInfoForValueTypes)
+                    && N.equals(mapInstanceType, other.mapInstanceType) && N.equals(propHandlerMap, other.propHandlerMap)) {
 
                 return true;
             }
@@ -239,8 +240,9 @@ public class JSONDeserializationConfig extends DeserializationConfig<JSONDeseria
     public String toString() {
         return "{ignoredPropNames=" + N.toString(getIgnoredPropNames()) + ", ignoreUnmatchedProperty=" + N.toString(ignoreUnmatchedProperty)
                 + ", ignoreNullOrEmpty=" + N.toString(ignoreNullOrEmpty) + ", readNullToEmpty=" + N.toString(readNullToEmpty) + ", elementType="
-                + N.toString(elementType) + ", keyType=" + N.toString(keyType) + ", valueType=" + N.toString(valueType) + ", propTypes=" + N.toString(propTypes)
-                + ", mapInstanceType=" + N.toString(mapInstanceType) + ", propHandlerMap=" + N.toString(propHandlerMap) + "}";
+                + N.toString(elementType) + ", mapKeyType=" + N.toString(mapKeyType) + ", mapValueType=" + N.toString(mapValueType) + ", valueTypeMap="
+                + N.toString(valueTypeMap) + ", beanInfoForValueTypes=" + N.toString(beanInfoForValueTypes) + ", mapInstanceType=" + N.toString(mapInstanceType)
+                + ", propHandlerMap=" + N.toString(propHandlerMap) + "}";
     }
 
     /**

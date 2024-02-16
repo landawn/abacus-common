@@ -22,7 +22,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import com.landawn.abacus.parser.SerializationConfig;
+import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.Strings;
 
@@ -136,7 +136,7 @@ public class AtomicBooleanType extends AbstractAtomicType<AtomicBoolean> {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void writeCharacter(CharacterWriter writer, AtomicBoolean x, SerializationConfig<?> config) throws IOException {
+    public void writeCharacter(CharacterWriter writer, AtomicBoolean x, JSONXMLSerializationConfig<?> config) throws IOException {
         write(writer, x);
     }
 }

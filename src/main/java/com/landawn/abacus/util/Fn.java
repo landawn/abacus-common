@@ -2994,6 +2994,31 @@ public final class Fn {
     }
 
     /**
+     *
+     * @param <T>
+     * @param count
+     * @return
+     */
+    @Beta
+    @Stateful
+    public static <T> Predicate<T> atMost(final int count) {
+        // TODO cnt or atMost? skip(atMost(n)/limit(atMots(n)/dropWhile(atMost(n)/takeWhile(atMost(n)
+        // TODO cnt or atMost? skip(cnt(n)/limit(cnt(n)/dropWhile(cnt(n)/takeWhile(cnt(n)
+        // public static <T> Predicate<T> cnt(final int count) {
+
+        N.checkArgNotNegative(count, "count");
+
+        return new Predicate<>() {
+            private final AtomicInteger counter = new AtomicInteger(count);
+
+            @Override
+            public boolean test(T t) {
+                return counter.getAndDecrement() > 0;
+            }
+        };
+    }
+
+    /**
      * Returns a stateful <code>Predicate</code>. Don't save or cache for reuse or use it in parallel stream.
      *
      * @param <T>
@@ -10751,6 +10776,28 @@ public final class Fn {
             N.checkArgNotNull(triPredicate);
 
             return (a, b, c) -> !triPredicate.test(a, b, c);
+        }
+
+        /**
+         *
+         * @param <T>
+         * @param <E>
+         * @param count
+         * @return
+         */
+        @Beta
+        @Stateful
+        public static <T, E extends Throwable> Throwables.Predicate<T, E> atMost(final int count) {
+            N.checkArgNotNegative(count, "count");
+
+            return new Throwables.Predicate<>() {
+                private final AtomicInteger counter = new AtomicInteger(count);
+
+                @Override
+                public boolean test(T t) {
+                    return counter.getAndDecrement() > 0;
+                }
+            };
         }
 
         /**

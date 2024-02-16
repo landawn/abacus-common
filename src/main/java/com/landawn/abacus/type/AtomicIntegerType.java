@@ -22,7 +22,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import com.landawn.abacus.parser.SerializationConfig;
+import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.Strings;
@@ -141,7 +141,7 @@ public class AtomicIntegerType extends AbstractAtomicType<AtomicInteger> {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void writeCharacter(CharacterWriter writer, AtomicInteger x, SerializationConfig<?> config) throws IOException {
+    public void writeCharacter(CharacterWriter writer, AtomicInteger x, JSONXMLSerializationConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

@@ -27,7 +27,7 @@ import java.sql.SQLException;
 import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.annotation.JsonXmlCreator;
 import com.landawn.abacus.annotation.JsonXmlValue;
-import com.landawn.abacus.parser.SerializationConfig;
+import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.N;
@@ -415,7 +415,7 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
      * @throws IOException 
      */
     @Override
-    public void writeCharacter(CharacterWriter writer, T x, SerializationConfig<?> config) throws IOException {
+    public void writeCharacter(CharacterWriter writer, T x, JSONXMLSerializationConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

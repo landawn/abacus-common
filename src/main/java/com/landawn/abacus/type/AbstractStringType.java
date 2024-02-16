@@ -25,7 +25,7 @@ import java.sql.SQLException;
 import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.exception.UncheckedSQLException;
-import com.landawn.abacus.parser.SerializationConfig;
+import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
@@ -202,7 +202,7 @@ public abstract class AbstractStringType extends AbstractCharSequenceType<String
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void writeCharacter(CharacterWriter writer, String x, SerializationConfig<?> config) throws IOException {
+    public void writeCharacter(CharacterWriter writer, String x, JSONXMLSerializationConfig<?> config) throws IOException {
         x = x == null && config != null && config.writeNullStringAsEmpty() ? Strings.EMPTY_STRING : x;
 
         if (x == null) {

@@ -18,7 +18,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.Date;
 
-import com.landawn.abacus.parser.SerializationConfig;
+import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.DateTimeFormat;
 import com.landawn.abacus.util.DateUtil;
@@ -89,7 +89,7 @@ public abstract class AbstractDateType<T extends Date> extends AbstractType<T> {
      */
     @SuppressWarnings("null")
     @Override
-    public void writeCharacter(CharacterWriter writer, T x, SerializationConfig<?> config) throws IOException {
+    public void writeCharacter(CharacterWriter writer, T x, JSONXMLSerializationConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

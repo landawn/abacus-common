@@ -18,9 +18,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.landawn.abacus.annotation.SuppressFBWarnings;
-import com.landawn.abacus.util.DateTimeFormat;
 import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.NamingPolicy;
 
 /**
  *
@@ -34,7 +32,7 @@ public class KryoSerializationConfig extends SerializationConfig<KryoSerializati
     private boolean writeClass = defaultWriteClass;
 
     /**
-     * 
+     *
      */
     public KryoSerializationConfig() { //NOSONAR
     }
@@ -58,297 +56,6 @@ public class KryoSerializationConfig extends SerializationConfig<KryoSerializati
         this.writeClass = writeClass;
 
         return this;
-    }
-
-    /**
-     * Gets the char quotation.
-     *
-     * @return
-     * @deprecated UnsupportedOperationException
-     */
-    @Deprecated
-    @Override
-    public char getCharQuotation() {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * Sets the char quotation.
-     *
-     * @param charQuotation
-     * @return
-     * @deprecated UnsupportedOperationException
-     */
-    @Deprecated
-    @Override
-    public KryoSerializationConfig setCharQuotation(char charQuotation) {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * Gets the string quotation.
-     *
-     * @return
-     * @deprecated UnsupportedOperationException
-     */
-    @Deprecated
-    @Override
-    public char getStringQuotation() {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * Sets the string quotation.
-     *
-     * @param stringQuotation
-     * @return
-     * @deprecated UnsupportedOperationException
-     */
-    @Deprecated
-    @Override
-    public KryoSerializationConfig setStringQuotation(char stringQuotation) {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * The default format is: <code>LONG</code>.
-     *
-     * @return
-     * @deprecated UnsupportedOperationException
-     */
-    @Deprecated
-    @Override
-    public DateTimeFormat getDateTimeFormat() {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * Sets the date time format.
-     *
-     * @param dateTimeFormat
-     * @return
-     * @deprecated UnsupportedOperationException
-     */
-    @Deprecated
-    @Override
-    public KryoSerializationConfig setDateTimeFormat(DateTimeFormat dateTimeFormat) {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * Checks if is pretty format.
-     *
-     * @return true, if is pretty format
-     * @deprecated UnsupportedOperationException
-     */
-    @Deprecated
-    @Override
-    public boolean prettyFormat() {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * Sets the pretty format.
-     *
-     * @param prettyFormat
-     * @return
-     * @deprecated UnsupportedOperationException
-     */
-    @Deprecated
-    @Override
-    public KryoSerializationConfig prettyFormat(boolean prettyFormat) {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * Gets the indentation.
-     *
-     * @return
-     * @deprecated UnsupportedOperationException
-     */
-    @Deprecated
-    @Override
-    public String getIndentation() {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * Sets the indentation.
-     *
-     * @param indentation
-     * @return
-     * @deprecated UnsupportedOperationException
-     */
-    @Deprecated
-    @Override
-    public KryoSerializationConfig setIndentation(String indentation) {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * Gets the prop naming policy.
-     *
-     * @return
-     * @deprecated UnsupportedOperationException
-     */
-    @Deprecated
-    @Override
-    public NamingPolicy getPropNamingPolicy() {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * Sets the prop naming policy.
-     *
-     * @param propNamingPolicy
-     * @return
-     * @deprecated UnsupportedOperationException
-     */
-    @Deprecated
-    @Override
-    public KryoSerializationConfig setPropNamingPolicy(NamingPolicy propNamingPolicy) {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * Support circular reference.
-     *
-     * @return true, if successful
-     * @deprecated UnsupportedOperationException
-     */
-    @Deprecated
-    @Override
-    public boolean supportCircularReference() {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * Support circular reference.
-     *
-     * @param supportCircularReference
-     * @return
-     * @deprecated UnsupportedOperationException
-     */
-    @Deprecated
-    @Override
-    public KryoSerializationConfig supportCircularReference(boolean supportCircularReference) {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     *
-     * @return
-     * @deprecated UnsupportedOperationException
-     */
-    @Deprecated
-    @Override
-    public boolean writeLongAsString() {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     *
-     * @param writeLongAsString
-     * @return
-     * @deprecated UnsupportedOperationException
-     */
-    @Deprecated
-    @Override
-    public KryoSerializationConfig writeLongAsString(boolean writeLongAsString) {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     *
-     * @return
-     * @deprecated UnsupportedOperationException
-     */
-    @Deprecated
-    @Override
-    public boolean writeNullStringAsEmpty() {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * 
-     *
-     * @param writeNullNumberAsZero 
-     * @return 
-     * @deprecated UnsupportedOperationException
-     */
-    @Deprecated
-    @Override
-    public KryoSerializationConfig writeNullStringAsEmpty(boolean writeNullNumberAsZero) {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     *
-     * @return
-     * @deprecated UnsupportedOperationException
-     */
-    @Deprecated
-    @Override
-    public boolean writeNullNumberAsZero() {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     *
-     * @param writeNullNumberAsZero
-     * @return
-     * @deprecated UnsupportedOperationException
-     */
-    @Deprecated
-    @Override
-    public KryoSerializationConfig writeNullNumberAsZero(boolean writeNullNumberAsZero) {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     *
-     * @return
-     * @deprecated UnsupportedOperationException
-     */
-    @Deprecated
-    @Override
-    public boolean writeNullBooleanAsFalse() {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     *
-     * @param writeNullBooleanAsFalse
-     * @return
-     * @deprecated UnsupportedOperationException
-     */
-    @Deprecated
-    @Override
-    public KryoSerializationConfig writeNullBooleanAsFalse(boolean writeNullBooleanAsFalse) {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     *
-     * @return
-     * @deprecated UnsupportedOperationException
-     */
-    @Deprecated
-    @Override
-    public boolean writeBigDecimalAsPlain() {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     *
-     * @param writeBigDecimalAsPlain
-     * @return
-     * @deprecated UnsupportedOperationException
-     */
-    @Deprecated
-    @Override
-    public KryoSerializationConfig writeBigDecimalAsPlain(boolean writeBigDecimalAsPlain) {
-        throw new UnsupportedOperationException();
     }
 
     //    /**
@@ -377,9 +84,9 @@ public class KryoSerializationConfig extends SerializationConfig<KryoSerializati
     //    }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public int hashCode() {
@@ -387,7 +94,6 @@ public class KryoSerializationConfig extends SerializationConfig<KryoSerializati
         h = 31 * h + N.hashCode(getIgnoredPropNames());
         h = 31 * h + N.hashCode(getExclusion());
         h = 31 * h + N.hashCode(skipTransientField());
-        h = 31 * h + N.hashCode(getIgnoredPropNames());
         return 31 * h + N.hashCode(writeClass);
     }
 
@@ -415,14 +121,14 @@ public class KryoSerializationConfig extends SerializationConfig<KryoSerializati
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public String toString() {
         return "{ignoredPropNames=" + N.toString(getIgnoredPropNames()) + ", exclusion=" + N.toString(getExclusion()) + ", skipTransientField="
-                + N.toString(skipTransientField()) + ", ignoredPropNames=" + N.toString(getIgnoredPropNames()) + ", writeClass=" + N.toString(writeClass) + "}";
+                + N.toString(skipTransientField()) + ", writeClass=" + N.toString(writeClass) + "}";
     }
 
     /**

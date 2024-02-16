@@ -23,7 +23,7 @@ import java.sql.SQLException;
 import java.sql.Types;
 
 import com.landawn.abacus.annotation.MayReturnNull;
-import com.landawn.abacus.parser.SerializationConfig;
+import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.N;
@@ -173,7 +173,7 @@ public abstract class AbstractLongType extends NumberType<Number> {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void writeCharacter(CharacterWriter writer, Number x, SerializationConfig<?> config) throws IOException {
+    public void writeCharacter(CharacterWriter writer, Number x, JSONXMLSerializationConfig<?> config) throws IOException {
         x = x == null && config != null && config.writeNullNumberAsZero() ? Numbers.LONG_ZERO : x;
 
         if (x == null) {

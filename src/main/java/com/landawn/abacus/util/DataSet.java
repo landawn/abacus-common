@@ -23,6 +23,7 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.IntFunction;
 import java.util.stream.Collector;
@@ -33,6 +34,8 @@ import com.landawn.abacus.util.NoCachingNoUpdating.DisposableObjArray;
 import com.landawn.abacus.util.Tuple.Tuple2;
 import com.landawn.abacus.util.Tuple.Tuple3;
 import com.landawn.abacus.util.u.Optional;
+import com.landawn.abacus.util.function.IntObjFunction;
+import com.landawn.abacus.util.function.TriFunction;
 import com.landawn.abacus.util.stream.Stream;
 
 /**
@@ -75,6 +78,13 @@ public interface DataSet {
     ImmutableList<String> columnNameList();
 
     /**
+     * Return the count of columns in this DataSet.
+     *
+     * @return
+     */
+    int columnCount();
+
+    /**
      *
      * @param columnIndex
      * @return
@@ -84,12 +94,12 @@ public interface DataSet {
     /**
      *
      * @param columnName
-     * @return -1 if the specified <code>columnName</code> is not found
+     * @return -1 if the specified {@code columnName} is not found
      */
     int getColumnIndex(String columnName);
 
     /**
-     * -1 is set to the element in the returned array if the mapping column name is not included in this <code>DataSet</code>.
+     * -1 is set to the element in the returned array if the mapping column name is not included in this {@code DataSet}.
      *
      * @param columnNames
      * @return
@@ -104,10 +114,10 @@ public interface DataSet {
     boolean containsColumn(String columnName);
 
     /**
-     * Check if this <code>DataSet</code> contains all the specified columns.
+     * Check if this {@code DataSet} contains all the specified columns.
      *
      * @param columnNames
-     * @return <code>true</code> if all the specified columns are included in the this <code>DataSet</code>
+     * @return {@code true} if all the specified columns are included in the this {@code DataSet}
      */
     boolean containsAllColumns(Collection<String> columnNames);
 
@@ -253,9 +263,13 @@ public interface DataSet {
      * There is NO underline auto-conversion from column value to target type: {@code T}.
      * So the column values must be the type which is assignable to target type.
      *
+     * <br />
+     * Using {@code get(int)} for better performance.
+     *
      * @param <T>
      * @param columnName
      * @return
+     * @see #get(int)
      */
     <T> T get(String columnName);
 
@@ -359,6 +373,9 @@ public interface DataSet {
      * There is NO underline auto-conversion from column value to target type: {@code Boolean}.
      * So the column values must be the type which is assignable to target type.
      *
+     * <br />
+     * Using {@code getBoolean(int)} for better performance.
+     *
      * @param columnName
      * @return
      */
@@ -380,6 +397,9 @@ public interface DataSet {
      * <br />
      * There is NO underline auto-conversion from column value to target type: {@code Character}.
      * So the column values must be the type which is assignable to target type.
+     *
+     * <br />
+     * Using {@code getChar(int)} for better performance.
      *
      * @param columnName
      * @return
@@ -403,6 +423,9 @@ public interface DataSet {
      * There is NO underline auto-conversion from column value to target type: {@code Byte}.
      * So the column values must be the type which is assignable to target type, or {@code Number}.
      *
+     * <br />
+     * Using {@code getByte(int)} for better performance.
+     *
      * @param columnName
      * @return
      */
@@ -424,6 +447,9 @@ public interface DataSet {
      * <br />
      * There is NO underline auto-conversion from column value to target type: {@code Short}.
      * So the column values must be the type which is assignable to target type, or {@code Number}.
+     *
+     * <br />
+     * Using {@code getShort(int)} for better performance.
      *
      * @param columnName
      * @return
@@ -447,6 +473,9 @@ public interface DataSet {
      * There is NO underline auto-conversion from column value to target type: {@code Integer}.
      * So the column values must be the type which is assignable to target type, or {@code Number}.
      *
+     * <br />
+     * Using {@code getInt(int)} for better performance.
+     *
      * @param columnName
      * @return
      */
@@ -468,6 +497,9 @@ public interface DataSet {
      * <br />
      * There is NO underline auto-conversion from column value to target type: {@code Long}.
      * So the column values must be the type which is assignable to target type, or {@code Number}.
+     *
+     * <br />
+     * Using {@code getLong(int)} for better performance.
      *
      * @param columnName
      * @return
@@ -491,6 +523,9 @@ public interface DataSet {
      * There is NO underline auto-conversion from column value to target type: {@code Float}.
      * So the column values must be the type which is assignable to target type, or {@code Number}.
      *
+     * <br />
+     * Using {@code getFloat(int)} for better performance.
+     *
      * @param columnName
      * @return
      */
@@ -513,6 +548,9 @@ public interface DataSet {
      * There is NO underline auto-conversion from column value to target type: {@code Double}.
      * So the column values must be the type which is assignable to target type, or {@code Number}.
      *
+     * <br />
+     * Using {@code getDouble(int)} for better performance.
+     *
      * @param columnName
      * @return
      */
@@ -529,6 +567,9 @@ public interface DataSet {
     /**
      * Checks if is null.
      *
+     * <br />
+     * Using {@code isNull(int)} for better performance.
+     *
      * @param columnName
      * @return true, if is null
      */
@@ -542,6 +583,9 @@ public interface DataSet {
     void set(int columnIndex, Object value);
 
     /**
+     *
+     * <br />
+     * Using {@code set(int, Object)} for better performance.
      *
      * @param columnName
      * @param value
@@ -577,46 +621,44 @@ public interface DataSet {
 
     /**
      *
-     * @param columnName
+     * @param newColumnName
      * @param column
      */
-    void addColumn(String columnName, List<?> column);
+    void addColumn(String newColumnName, List<?> column);
 
     /**
      *
-     * @param columnIndex position to add.
-     * @param columnName
+     * @param newColumnPosition position to add.
+     * @param newColumnName
      * @param column
      */
-    void addColumn(int columnIndex, String columnName, List<?> column);
+    void addColumn(int newColumnPosition, String newColumnName, List<?> column);
 
     /**
-     * Generate the new column values from the specified column by the specified <code>Function</code>.
+     * Generate the new column values from the specified column by the specified {@code Function}.
      *
-     * @param <T>
      * @param <E>
      * @param newColumnName
      * @param fromColumnName
      * @param func
      * @throws E the e
      */
-    <T, E extends Exception> void addColumn(String newColumnName, String fromColumnName, Throwables.Function<T, ?, E> func) throws E;
+    <E extends Exception> void addColumn(String newColumnName, String fromColumnName, Throwables.Function<?, ?, E> func) throws E;
 
     /**
-     * Generate the new column values from the specified column by the specified <code>Function</code>.
+     * Generate the new column values from the specified column by the specified {@code Function}.
      *
-     * @param <T>
      * @param <E>
-     * @param columnIndex
+     * @param newColumnPosition
      * @param newColumnName
      * @param fromColumnName
      * @param func
      * @throws E the e
      */
-    <T, E extends Exception> void addColumn(int columnIndex, String newColumnName, String fromColumnName, Throwables.Function<T, ?, E> func) throws E;
+    <E extends Exception> void addColumn(int newColumnPosition, String newColumnName, String fromColumnName, Throwables.Function<?, ?, E> func) throws E;
 
     /**
-     * Generate the new column values from the specified columns by the specified <code>Function</code>.
+     * Generate the new column values from the specified columns by the specified {@code Function}.
      *
      * @param <E>
      * @param newColumnName
@@ -628,20 +670,20 @@ public interface DataSet {
             throws E;
 
     /**
-     * Generate the new column values from the specified columns by the specified <code>Function</code>.
+     * Generate the new column values from the specified columns by the specified {@code Function}.
      *
      * @param <E>
-     * @param columnIndex
+     * @param newColumnPosition
      * @param newColumnName
      * @param fromColumnNames
      * @param func DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
      * @throws E the e
      */
-    <E extends Exception> void addColumn(int columnIndex, String newColumnName, Collection<String> fromColumnNames,
+    <E extends Exception> void addColumn(int newColumnPosition, String newColumnName, Collection<String> fromColumnNames,
             Throwables.Function<? super DisposableObjArray, ?, E> func) throws E;
 
     /**
-     * Generate the new column values from the specified columns by the specified <code>Function</code>.
+     * Generate the new column values from the specified columns by the specified {@code Function}.
      *
      * @param <E>
      * @param newColumnName
@@ -652,20 +694,20 @@ public interface DataSet {
     <E extends Exception> void addColumn(String newColumnName, Tuple2<String, String> fromColumnNames, Throwables.BiFunction<?, ?, ?, E> func) throws E;
 
     /**
-     * Generate the new column values from the specified columns by the specified <code>Function</code>.
+     * Generate the new column values from the specified columns by the specified {@code Function}.
      *
      * @param <E>
-     * @param columnIndex
+     * @param newColumnPosition
      * @param newColumnName
      * @param fromColumnNames
      * @param func
      * @throws E the e
      */
-    <E extends Exception> void addColumn(int columnIndex, String newColumnName, Tuple2<String, String> fromColumnNames, Throwables.BiFunction<?, ?, ?, E> func)
-            throws E;
+    <E extends Exception> void addColumn(int newColumnPosition, String newColumnName, Tuple2<String, String> fromColumnNames,
+            Throwables.BiFunction<?, ?, ?, E> func) throws E;
 
     /**
-     * Generate the new column values from the specified columns by the specified <code>Function</code>.
+     * Generate the new column values from the specified columns by the specified {@code Function}.
      *
      * @param <E>
      * @param newColumnName
@@ -677,16 +719,16 @@ public interface DataSet {
             throws E;
 
     /**
-     * Generate the new column values from the specified columns by the specified <code>Function</code>.
+     * Generate the new column values from the specified columns by the specified {@code Function}.
      *
      * @param <E>
-     * @param columnIndex
+     * @param newColumnPosition
      * @param newColumnName
      * @param fromColumnNames
      * @param func
      * @throws E the e
      */
-    <E extends Exception> void addColumn(int columnIndex, String newColumnName, Tuple3<String, String, String> fromColumnNames,
+    <E extends Exception> void addColumn(int newColumnPosition, String newColumnName, Tuple3<String, String, String> fromColumnNames,
             Throwables.TriFunction<?, ?, ?, ?, E> func) throws E;
 
     /**
@@ -764,7 +806,7 @@ public interface DataSet {
     //    /**
     //     * convert the specified columns to target types.
     //     *
-    //     * @param targetColumnTypes fill the element with <code>null</code> if don't wan to convert the target column.
+    //     * @param targetColumnTypes fill the element with {@code null} if don't wan to convert the target column.
     //     */
     //    void convertColumn(Class<?>[] targetColumnTypes);
     //
@@ -833,50 +875,46 @@ public interface DataSet {
 
     /**
      *
-     * @param <T>
      * @param <E>
      * @param columnName
      * @param newColumnNames
      * @param divideFunc
      * @throws E the e
      */
-    <T, E extends Exception> void divideColumn(String columnName, Collection<String> newColumnNames, Throwables.Function<T, ? extends List<?>, E> divideFunc)
+    <E extends Exception> void divideColumn(String columnName, Collection<String> newColumnNames, Throwables.Function<?, ? extends List<?>, E> divideFunc)
             throws E;
 
     /**
      *
-     * @param <T>
      * @param <E>
      * @param columnName
      * @param newColumnNames
      * @param output
      * @throws E the e
      */
-    <T, E extends Exception> void divideColumn(String columnName, Collection<String> newColumnNames, Throwables.BiConsumer<T, Object[], E> output) throws E;
+    <E extends Exception> void divideColumn(String columnName, Collection<String> newColumnNames, Throwables.BiConsumer<?, Object[], E> output) throws E;
 
     /**
      *
-     * @param <T>
      * @param <E>
      * @param columnName
      * @param newColumnNames
      * @param output
      * @throws E the e
      */
-    <T, E extends Exception> void divideColumn(String columnName, Tuple2<String, String> newColumnNames,
-            Throwables.BiConsumer<T, Pair<Object, Object>, E> output) throws E;
+    <E extends Exception> void divideColumn(String columnName, Tuple2<String, String> newColumnNames, Throwables.BiConsumer<?, Pair<Object, Object>, E> output)
+            throws E;
 
     /**
      *
-     * @param <T>
      * @param <E>
      * @param columnName
      * @param newColumnNames
      * @param output
      * @throws E the e
      */
-    <T, E extends Exception> void divideColumn(String columnName, Tuple3<String, String, String> newColumnNames,
-            Throwables.BiConsumer<T, Triple<Object, Object, Object>, E> output) throws E;
+    <E extends Exception> void divideColumn(String columnName, Tuple3<String, String, String> newColumnNames,
+            Throwables.BiConsumer<?, Triple<Object, Object, Object>, E> output) throws E;
 
     /**
      * Adds the row.
@@ -888,10 +926,10 @@ public interface DataSet {
     /**
      * Adds the row.
      *
-     * @param rowIndex
+     * @param newRowPosition
      * @param row can be Object[]/List/Map/Bean with getter/setter methods
      */
-    void addRow(int rowIndex, Object row);
+    void addRow(int newRowPosition, Object row);
 
     /**
      * Removes the row.
@@ -955,6 +993,26 @@ public interface DataSet {
     <E extends Exception> void replaceIf(Throwables.Predicate<?, E> func, Object newValue) throws E;
 
     /**
+     * Prepend the specified {@code other} into this {@code DataSet}.
+     * <br />
+     * The columns of two {@code DataSet} must be same.
+     *
+     * @param other
+     * @see #merge(DataSet, boolean)
+     */
+    void prepend(DataSet other);
+
+    /**
+     * Append the specified {@code other} into this {@code DataSet}.
+     * <br />
+     * The columns of two {@code DataSet} must be same.
+     *
+     * @param other
+     * @see #merge(DataSet, boolean)
+     */
+    void append(DataSet other);
+
+    /**
      * Returns the current row number.
      *
      * @return
@@ -992,11 +1050,11 @@ public interface DataSet {
      *
      * @param <T>
      * @param rowClass it can be Object[]/List/Set/Map/Bean
-     * @param columnNames
      * @param rowIndex
+     * @param columnNames
      * @return
      */
-    <T> T getRow(Class<? extends T> rowClass, Collection<String> columnNames, int rowIndex);
+    <T> T getRow(Class<? extends T> rowClass, int rowIndex, Collection<String> columnNames);
 
     /**
      * Gets the row.
@@ -1010,14 +1068,13 @@ public interface DataSet {
 
     /**
      * Gets the row.
-     *
-     * @param <T>
-     * @param columnNames
      * @param rowIndex
+     * @param columnNames
      * @param rowSupplier it can be Object[]/List/Set/Map/Bean
+     * @param <T>
      * @return
      */
-    <T> T getRow(Collection<String> columnNames, int rowIndex, IntFunction<? extends T> rowSupplier);
+    <T> T getRow(int rowIndex, Collection<String> columnNames, IntFunction<? extends T> rowSupplier);
 
     /**
      *
@@ -1142,15 +1199,15 @@ public interface DataSet {
      * Performs the given action for each row of the {@code DataSet}
      * until all rows have been processed or the action throws an
      * exception.
-     *
-     * @param <E>
-     * @param columnNames
      * @param fromRowIndex
      * @param toRowIndex
+     * @param columnNames
      * @param action DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
+     *
+     * @param <E>
      * @throws E the e
      */
-    <E extends Exception> void forEach(Collection<String> columnNames, int fromRowIndex, int toRowIndex,
+    <E extends Exception> void forEach(int fromRowIndex, int toRowIndex, Collection<String> columnNames,
             Throwables.Consumer<? super DisposableObjArray, E> action) throws E;
 
     /**
@@ -1164,14 +1221,14 @@ public interface DataSet {
 
     /**
      *
-     * @param <E>
-     * @param columnNames
      * @param fromRowIndex
      * @param toRowIndex
+     * @param columnNames
      * @param action
+     * @param <E>
      * @throws E the e
      */
-    <E extends Exception> void forEach(Tuple2<String, String> columnNames, int fromRowIndex, int toRowIndex, Throwables.BiConsumer<?, ?, E> action) throws E;
+    <E extends Exception> void forEach(int fromRowIndex, int toRowIndex, Tuple2<String, String> columnNames, Throwables.BiConsumer<?, ?, E> action) throws E;
 
     /**
      *
@@ -1184,14 +1241,14 @@ public interface DataSet {
 
     /**
      *
-     * @param <E>
-     * @param columnNames
      * @param fromRowIndex
      * @param toRowIndex
+     * @param columnNames
      * @param action
+     * @param <E>
      * @throws E the e
      */
-    <E extends Exception> void forEach(Tuple3<String, String, String> columnNames, int fromRowIndex, int toRowIndex, Throwables.TriConsumer<?, ?, ?, E> action)
+    <E extends Exception> void forEach(int fromRowIndex, int toRowIndex, Tuple3<String, String, String> columnNames, Throwables.TriConsumer<?, ?, ?, E> action)
             throws E;
 
     /**
@@ -1240,12 +1297,12 @@ public interface DataSet {
      *
      * @param <T>
      * @param rowClass it can be Object[]/List/Set/Map/Bean
-     * @param columnNames
      * @param fromRowIndex
      * @param toRowIndex
+     * @param columnNames
      * @return
      */
-    <T> List<T> toList(Class<? extends T> rowClass, Collection<String> columnNames, int fromRowIndex, int toRowIndex);
+    <T> List<T> toList(Class<? extends T> rowClass, int fromRowIndex, int toRowIndex, Collection<String> columnNames);
 
     /**
      *
@@ -1279,14 +1336,14 @@ public interface DataSet {
     /**
      *
      *
-     * @param <T>
-     * @param columnNames
      * @param fromRowIndex
      * @param toRowIndex
+     * @param columnNames
      * @param rowSupplier it can be Object[]/List/Set/Map/Bean
+     * @param <T>
      * @return
      */
-    <T> List<T> toList(Collection<String> columnNames, int fromRowIndex, int toRowIndex, IntFunction<? extends T> rowSupplier);
+    <T> List<T> toList(int fromRowIndex, int toRowIndex, Collection<String> columnNames, IntFunction<? extends T> rowSupplier);
 
     /**
      *
@@ -1390,13 +1447,13 @@ public interface DataSet {
      *
      * @param <T>
      * @param beanClass
-     * @param columnNames
      * @param fromRowIndex
      * @param toRowIndex
+     * @param columnNames
      * @param prefixAndFieldNameMap
      * @return
      */
-    <T> List<T> toEntities(Class<? extends T> beanClass, Collection<String> columnNames, int fromRowIndex, int toRowIndex,
+    <T> List<T> toEntities(Class<? extends T> beanClass, int fromRowIndex, int toRowIndex, Collection<String> columnNames,
             Map<String, String> prefixAndFieldNameMap);
 
     /**
@@ -1469,29 +1526,41 @@ public interface DataSet {
 
     /**
      *
-     * @param <K> the key type
-     * @param <V> the value type
      * @param keyColumnName
      * @param valueColumnName
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @return
-     */
-    <K, V> Map<K, V> toMap(String keyColumnName, String valueColumnName, int fromRowIndex, int toRowIndex);
-
-    /**
-     *
+     * @param supplier
      * @param <K> the key type
      * @param <V> the value type
      * @param <M>
-     * @param keyColumnName
-     * @param valueColumnName
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param supplier
      * @return
      */
-    <K, V, M extends Map<K, V>> M toMap(String keyColumnName, String valueColumnName, int fromRowIndex, int toRowIndex, IntFunction<? extends M> supplier);
+    <K, V, M extends Map<K, V>> M toMap(String keyColumnName, String valueColumnName, IntFunction<? extends M> supplier);
+
+    /**
+     *
+     * @param fromRowIndex
+     * @param toRowIndex
+     * @param keyColumnName
+     * @param valueColumnName
+     * @param <K> the key type
+     * @param <V> the value type
+     * @return
+     */
+    <K, V> Map<K, V> toMap(int fromRowIndex, int toRowIndex, String keyColumnName, String valueColumnName);
+
+    /**
+     *
+     * @param fromRowIndex
+     * @param toRowIndex
+     * @param keyColumnName
+     * @param valueColumnName
+     * @param supplier
+     * @param <K> the key type
+     * @param <V> the value type
+     * @param <M>
+     * @return
+     */
+    <K, V, M extends Map<K, V>> M toMap(int fromRowIndex, int toRowIndex, String keyColumnName, String valueColumnName, IntFunction<? extends M> supplier);
 
     /**
      *
@@ -1508,14 +1577,28 @@ public interface DataSet {
      *
      * @param <K> the key type
      * @param <V> the value type
+     * @param <M>
      * @param rowClass it can be Object[]/List/Set/Map/Bean
      * @param keyColumnName
      * @param valueColumnNames
-     * @param fromRowIndex
-     * @param toRowIndex
+     * @param supplier
      * @return
      */
-    <K, V> Map<K, V> toMap(Class<? extends V> rowClass, String keyColumnName, Collection<String> valueColumnNames, int fromRowIndex, int toRowIndex);
+    <K, V, M extends Map<K, V>> M toMap(Class<? extends V> rowClass, String keyColumnName, Collection<String> valueColumnNames,
+            IntFunction<? extends M> supplier);
+
+    /**
+     *
+     * @param <K> the key type
+     * @param <V> the value type
+     * @param rowClass it can be Object[]/List/Set/Map/Bean
+     * @param fromRowIndex
+     * @param toRowIndex
+     * @param keyColumnName
+     * @param valueColumnNames
+     * @return
+     */
+    <K, V> Map<K, V> toMap(Class<? extends V> rowClass, int fromRowIndex, int toRowIndex, String keyColumnName, Collection<String> valueColumnNames);
 
     /**
      *
@@ -1523,15 +1606,15 @@ public interface DataSet {
      * @param <V> the value type
      * @param <M>
      * @param rowClass it can be Object[]/List/Set/Map/Bean
-     * @param keyColumnName
-     * @param valueColumnNames
      * @param fromRowIndex
      * @param toRowIndex
+     * @param keyColumnName
+     * @param valueColumnNames
      * @param supplier
      * @return
      */
-    <K, V, M extends Map<K, V>> M toMap(Class<? extends V> rowClass, String keyColumnName, Collection<String> valueColumnNames, int fromRowIndex,
-            int toRowIndex, IntFunction<? extends M> supplier);
+    <K, V, M extends Map<K, V>> M toMap(Class<? extends V> rowClass, int fromRowIndex, int toRowIndex, String keyColumnName,
+            Collection<String> valueColumnNames, IntFunction<? extends M> supplier);
 
     /**
      *
@@ -1548,32 +1631,47 @@ public interface DataSet {
     /**
      *
      *
-     * @param <K> the key type
-     * @param <V> the value type
      * @param keyColumnName
      * @param valueColumnNames
-     * @param fromRowIndex
-     * @param toRowIndex
      * @param rowSupplier it can be Object[]/List/Set/Map/Bean
+     * @param supplier
+     * @param <K> the key type
+     * @param <V> the value type
+     * @param <M>
      * @return
      */
-    <K, V> Map<K, V> toMap(String keyColumnName, Collection<String> valueColumnNames, int fromRowIndex, int toRowIndex, IntFunction<? extends V> rowSupplier);
+    <K, V, M extends Map<K, V>> M toMap(String keyColumnName, Collection<String> valueColumnNames, IntFunction<? extends V> rowSupplier,
+            IntFunction<? extends M> supplier);
 
     /**
      *
      *
+     * @param fromRowIndex
+     * @param toRowIndex
+     * @param keyColumnName
+     * @param valueColumnNames
+     * @param rowSupplier it can be Object[]/List/Set/Map/Bean
+     * @param <K> the key type
+     * @param <V> the value type
+     * @return
+     */
+    <K, V> Map<K, V> toMap(int fromRowIndex, int toRowIndex, String keyColumnName, Collection<String> valueColumnNames, IntFunction<? extends V> rowSupplier);
+
+    /**
+     *
+     *
+     * @param fromRowIndex
+     * @param toRowIndex
+     * @param keyColumnName
+     * @param valueColumnNames
+     * @param rowSupplier it can be Object[]/List/Set/Map/Bean
+     * @param supplier
      * @param <K> the key type
      * @param <V> the value type
      * @param <M>
-     * @param keyColumnName
-     * @param valueColumnNames
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param rowSupplier it can be Object[]/List/Set/Map/Bean
-     * @param supplier
      * @return
      */
-    <K, V, M extends Map<K, V>> M toMap(String keyColumnName, Collection<String> valueColumnNames, int fromRowIndex, int toRowIndex,
+    <K, V, M extends Map<K, V>> M toMap(int fromRowIndex, int toRowIndex, String keyColumnName, Collection<String> valueColumnNames,
             IntFunction<? extends V> rowSupplier, IntFunction<? extends M> supplier);
 
     /**
@@ -1588,30 +1686,43 @@ public interface DataSet {
 
     /**
      *
-     * @param <K> the key type
-     * @param <E>
      * @param keyColumnName
      * @param valueColumnName
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @return
-     */
-    <K, E> ListMultimap<K, E> toMultimap(String keyColumnName, String valueColumnName, int fromRowIndex, int toRowIndex);
-
-    /**
-     *
+     * @param supplier
      * @param <K> the key type
      * @param <E>
      * @param <V> the value type
      * @param <M>
-     * @param keyColumnName
-     * @param valueColumnName
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param supplier
      * @return
      */
-    <K, E, V extends Collection<E>, M extends Multimap<K, E, V>> M toMultimap(String keyColumnName, String valueColumnName, int fromRowIndex, int toRowIndex,
+    <K, E, V extends Collection<E>, M extends Multimap<K, E, V>> M toMultimap(String keyColumnName, String valueColumnName, IntFunction<? extends M> supplier);
+
+    /**
+     *
+     * @param fromRowIndex
+     * @param toRowIndex
+     * @param keyColumnName
+     * @param valueColumnName
+     * @param <K> the key type
+     * @param <E>
+     * @return
+     */
+    <K, E> ListMultimap<K, E> toMultimap(int fromRowIndex, int toRowIndex, String keyColumnName, String valueColumnName);
+
+    /**
+     *
+     * @param fromRowIndex
+     * @param toRowIndex
+     * @param keyColumnName
+     * @param valueColumnName
+     * @param supplier
+     * @param <K> the key type
+     * @param <E>
+     * @param <V> the value type
+     * @param <M>
+     * @return
+     */
+    <K, E, V extends Collection<E>, M extends Multimap<K, E, V>> M toMultimap(int fromRowIndex, int toRowIndex, String keyColumnName, String valueColumnName,
             IntFunction<? extends M> supplier);
 
     /**
@@ -1629,15 +1740,30 @@ public interface DataSet {
      *
      * @param <K> the key type
      * @param <E>
+     * @param <V> the value type
+     * @param <M>
      * @param rowClass it can be Object[]/List/Set/Map/Bean
      * @param keyColumnName
      * @param valueColumnNames
-     * @param fromRowIndex
-     * @param toRowIndex
+     * @param supplier
      * @return
      */
-    <K, E> ListMultimap<K, E> toMultimap(Class<? extends E> rowClass, String keyColumnName, Collection<String> valueColumnNames, int fromRowIndex,
-            int toRowIndex);
+    <K, E, V extends Collection<E>, M extends Multimap<K, E, V>> M toMultimap(Class<? extends E> rowClass, String keyColumnName,
+            Collection<String> valueColumnNames, IntFunction<? extends M> supplier);
+
+    /**
+     *
+     * @param <K> the key type
+     * @param <E>
+     * @param rowClass it can be Object[]/List/Set/Map/Bean
+     * @param fromRowIndex
+     * @param toRowIndex
+     * @param keyColumnName
+     * @param valueColumnNames
+     * @return
+     */
+    <K, E> ListMultimap<K, E> toMultimap(Class<? extends E> rowClass, int fromRowIndex, int toRowIndex, String keyColumnName,
+            Collection<String> valueColumnNames);
 
     /**
      *
@@ -1646,15 +1772,15 @@ public interface DataSet {
      * @param <V> the value type
      * @param <M>
      * @param rowClass it can be Object[]/List/Set/Map/Bean
-     * @param keyColumnName
-     * @param valueColumnNames
      * @param fromRowIndex
      * @param toRowIndex
+     * @param keyColumnName
+     * @param valueColumnNames
      * @param supplier
      * @return
      */
-    <K, E, V extends Collection<E>, M extends Multimap<K, E, V>> M toMultimap(Class<? extends E> rowClass, String keyColumnName,
-            Collection<String> valueColumnNames, int fromRowIndex, int toRowIndex, IntFunction<? extends M> supplier);
+    <K, E, V extends Collection<E>, M extends Multimap<K, E, V>> M toMultimap(Class<? extends E> rowClass, int fromRowIndex, int toRowIndex,
+            String keyColumnName, Collection<String> valueColumnNames, IntFunction<? extends M> supplier);
 
     /**
      *
@@ -1671,35 +1797,51 @@ public interface DataSet {
     /**
      *
      *
-     * @param <K> the key type
-     * @param <E>
      * @param keyColumnName
      * @param valueColumnNames
-     * @param fromRowIndex
-     * @param toRowIndex
      * @param rowSupplier it can be Object[]/List/Set/Map/Bean
+     * @param supplier
+     * @param <K> the key type
+     * @param <E>
+     * @param <V> the value type
+     * @param <M>
      * @return
      */
-    <K, E> ListMultimap<K, E> toMultimap(String keyColumnName, Collection<String> valueColumnNames, int fromRowIndex, int toRowIndex,
+    <K, E, V extends Collection<E>, M extends Multimap<K, E, V>> M toMultimap(String keyColumnName, Collection<String> valueColumnNames,
+            IntFunction<? extends E> rowSupplier, IntFunction<? extends M> supplier);
+
+    /**
+     *
+     *
+     * @param fromRowIndex
+     * @param toRowIndex
+     * @param keyColumnName
+     * @param valueColumnNames
+     * @param rowSupplier it can be Object[]/List/Set/Map/Bean
+     * @param <K> the key type
+     * @param <E>
+     * @return
+     */
+    <K, E> ListMultimap<K, E> toMultimap(int fromRowIndex, int toRowIndex, String keyColumnName, Collection<String> valueColumnNames,
             IntFunction<? extends E> rowSupplier);
 
     /**
      *
      *
+     * @param fromRowIndex
+     * @param toRowIndex
+     * @param keyColumnName
+     * @param valueColumnNames
+     * @param rowSupplier it can be Object[]/List/Set/Map/Bean
+     * @param supplier
      * @param <K> the key type
      * @param <E>
      * @param <V> the value type
      * @param <M>
-     * @param keyColumnName
-     * @param valueColumnNames
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param rowSupplier it can be Object[]/List/Set/Map/Bean
-     * @param supplier
      * @return
      */
-    <K, E, V extends Collection<E>, M extends Multimap<K, E, V>> M toMultimap(String keyColumnName, Collection<String> valueColumnNames, int fromRowIndex,
-            int toRowIndex, IntFunction<? extends E> rowSupplier, IntFunction<? extends M> supplier);
+    <K, E, V extends Collection<E>, M extends Multimap<K, E, V>> M toMultimap(int fromRowIndex, int toRowIndex, String keyColumnName,
+            Collection<String> valueColumnNames, IntFunction<? extends E> rowSupplier, IntFunction<? extends M> supplier);
 
     /**
      *
@@ -1718,12 +1860,12 @@ public interface DataSet {
 
     /**
      *
-     * @param columnNames
      * @param fromRowIndex
      * @param toRowIndex
+     * @param columnNames
      * @return
      */
-    String toJSON(Collection<String> columnNames, int fromRowIndex, int toRowIndex);
+    String toJSON(int fromRowIndex, int toRowIndex, Collection<String> columnNames);
 
     /**
      *
@@ -1744,12 +1886,12 @@ public interface DataSet {
     /**
      *
      * @param output
-     * @param columnNames
      * @param fromRowIndex
      * @param toRowIndex
+     * @param columnNames
      * @throws UncheckedIOException the unchecked IO exception
      */
-    void toJSON(File output, Collection<String> columnNames, int fromRowIndex, int toRowIndex) throws UncheckedIOException;
+    void toJSON(File output, int fromRowIndex, int toRowIndex, Collection<String> columnNames) throws UncheckedIOException;
 
     /**
      *
@@ -1770,12 +1912,12 @@ public interface DataSet {
     /**
      *
      * @param output
-     * @param columnNames
      * @param fromRowIndex
      * @param toRowIndex
+     * @param columnNames
      * @throws UncheckedIOException the unchecked IO exception
      */
-    void toJSON(OutputStream output, Collection<String> columnNames, int fromRowIndex, int toRowIndex) throws UncheckedIOException;
+    void toJSON(OutputStream output, int fromRowIndex, int toRowIndex, Collection<String> columnNames) throws UncheckedIOException;
 
     /**
      *
@@ -1796,12 +1938,12 @@ public interface DataSet {
     /**
      *
      * @param output
-     * @param columnNames
      * @param fromRowIndex
      * @param toRowIndex
+     * @param columnNames
      * @throws UncheckedIOException the unchecked IO exception
      */
-    void toJSON(Writer output, Collection<String> columnNames, int fromRowIndex, int toRowIndex) throws UncheckedIOException;
+    void toJSON(Writer output, int fromRowIndex, int toRowIndex, Collection<String> columnNames) throws UncheckedIOException;
 
     /**
      *
@@ -1836,22 +1978,22 @@ public interface DataSet {
 
     /**
      *
-     * @param columnNames
      * @param fromRowIndex
      * @param toRowIndex
+     * @param columnNames
      * @return
      */
-    String toXML(Collection<String> columnNames, int fromRowIndex, int toRowIndex);
+    String toXML(int fromRowIndex, int toRowIndex, Collection<String> columnNames);
 
     /**
      *
-     * @param columnNames
      * @param fromRowIndex
      * @param toRowIndex
+     * @param columnNames
      * @param rowElementName
      * @return
      */
-    String toXML(Collection<String> columnNames, int fromRowIndex, int toRowIndex, String rowElementName);
+    String toXML(int fromRowIndex, int toRowIndex, Collection<String> columnNames, String rowElementName);
 
     /**
      *
@@ -1890,23 +2032,23 @@ public interface DataSet {
     /**
      *
      * @param output
-     * @param columnNames
      * @param fromRowIndex
      * @param toRowIndex
+     * @param columnNames
      * @throws UncheckedIOException the unchecked IO exception
      */
-    void toXML(File output, Collection<String> columnNames, int fromRowIndex, int toRowIndex) throws UncheckedIOException;
+    void toXML(File output, int fromRowIndex, int toRowIndex, Collection<String> columnNames) throws UncheckedIOException;
 
     /**
      *
      * @param output
-     * @param columnNames
      * @param fromRowIndex
      * @param toRowIndex
+     * @param columnNames
      * @param rowElementName
      * @throws UncheckedIOException the unchecked IO exception
      */
-    void toXML(File output, Collection<String> columnNames, int fromRowIndex, int toRowIndex, String rowElementName) throws UncheckedIOException;
+    void toXML(File output, int fromRowIndex, int toRowIndex, Collection<String> columnNames, String rowElementName) throws UncheckedIOException;
 
     /**
      *
@@ -1945,23 +2087,23 @@ public interface DataSet {
     /**
      *
      * @param output
-     * @param columnNames
      * @param fromRowIndex
      * @param toRowIndex
+     * @param columnNames
      * @throws UncheckedIOException the unchecked IO exception
      */
-    void toXML(OutputStream output, Collection<String> columnNames, int fromRowIndex, int toRowIndex) throws UncheckedIOException;
+    void toXML(OutputStream output, int fromRowIndex, int toRowIndex, Collection<String> columnNames) throws UncheckedIOException;
 
     /**
      *
      * @param output
-     * @param columnNames
      * @param fromRowIndex
      * @param toRowIndex
+     * @param columnNames
      * @param rowElementName
      * @throws UncheckedIOException the unchecked IO exception
      */
-    void toXML(OutputStream output, Collection<String> columnNames, int fromRowIndex, int toRowIndex, String rowElementName) throws UncheckedIOException;
+    void toXML(OutputStream output, int fromRowIndex, int toRowIndex, Collection<String> columnNames, String rowElementName) throws UncheckedIOException;
 
     /**
      *
@@ -2000,23 +2142,23 @@ public interface DataSet {
     /**
      *
      * @param output
-     * @param columnNames
      * @param fromRowIndex
      * @param toRowIndex
+     * @param columnNames
      * @throws UncheckedIOException the unchecked IO exception
      */
-    void toXML(Writer output, Collection<String> columnNames, int fromRowIndex, int toRowIndex) throws UncheckedIOException;
+    void toXML(Writer output, int fromRowIndex, int toRowIndex, Collection<String> columnNames) throws UncheckedIOException;
 
     /**
      *
      * @param output
-     * @param columnNames
      * @param fromRowIndex
      * @param toRowIndex
+     * @param columnNames
      * @param rowElementName
      * @throws UncheckedIOException the unchecked IO exception
      */
-    void toXML(Writer output, Collection<String> columnNames, int fromRowIndex, int toRowIndex, String rowElementName) throws UncheckedIOException;
+    void toXML(Writer output, int fromRowIndex, int toRowIndex, Collection<String> columnNames, String rowElementName) throws UncheckedIOException;
 
     /**
      * Each line in the output file/Writer is an array of JSON String without root bracket.
@@ -2027,13 +2169,13 @@ public interface DataSet {
 
     /**
      * Each line in the output file/Writer is an array of JSON String without root bracket.
-     *
-     * @param columnNames
      * @param fromRowIndex
      * @param toRowIndex
+     * @param columnNames
+     *
      * @return
      */
-    String toCSV(Collection<String> columnNames, int fromRowIndex, int toRowIndex);
+    String toCSV(int fromRowIndex, int toRowIndex, Collection<String> columnNames);
 
     /**
      * Each line in the output file/Writer is an array of JSON String without root bracket.
@@ -2046,15 +2188,15 @@ public interface DataSet {
 
     /**
      * Each line in the output file/Writer is an array of JSON String without root bracket.
-     *
-     * @param columnNames
      * @param fromRowIndex
      * @param toRowIndex
+     * @param columnNames
      * @param writeTitle
      * @param quoteValue
+     *
      * @return
      */
-    String toCSV(Collection<String> columnNames, int fromRowIndex, int toRowIndex, boolean writeTitle, boolean quoteValue);
+    String toCSV(int fromRowIndex, int toRowIndex, Collection<String> columnNames, boolean writeTitle, boolean quoteValue);
 
     /**
      * Each line in the output file/Writer is an array of JSON String without root bracket.
@@ -2068,12 +2210,12 @@ public interface DataSet {
      * Each line in the output file/Writer is an array of JSON String without root bracket.
      *
      * @param output
-     * @param columnNames
      * @param fromRowIndex
      * @param toRowIndex
+     * @param columnNames
      * @throws UncheckedIOException the unchecked IO exception
      */
-    void toCSV(File output, Collection<String> columnNames, int fromRowIndex, int toRowIndex) throws UncheckedIOException;
+    void toCSV(File output, int fromRowIndex, int toRowIndex, Collection<String> columnNames) throws UncheckedIOException;
 
     /**
      * Each line in the output file/Writer is an array of JSON String without root bracket.
@@ -2089,14 +2231,14 @@ public interface DataSet {
      * Each line in the output file/Writer is an array of JSON String without root bracket.
      *
      * @param output
-     * @param columnNames
      * @param fromRowIndex
      * @param toRowIndex
+     * @param columnNames
      * @param writeTitle
      * @param quoteValue
      * @throws UncheckedIOException the unchecked IO exception
      */
-    void toCSV(File output, Collection<String> columnNames, int fromRowIndex, int toRowIndex, boolean writeTitle, boolean quoteValue)
+    void toCSV(File output, int fromRowIndex, int toRowIndex, Collection<String> columnNames, boolean writeTitle, boolean quoteValue)
             throws UncheckedIOException;
 
     /**
@@ -2111,12 +2253,12 @@ public interface DataSet {
      * Each line in the output file/Writer is an array of JSON String without root bracket.
      *
      * @param output
-     * @param columnNames
      * @param fromRowIndex
      * @param toRowIndex
+     * @param columnNames
      * @throws UncheckedIOException the unchecked IO exception
      */
-    void toCSV(OutputStream output, Collection<String> columnNames, int fromRowIndex, int toRowIndex) throws UncheckedIOException;
+    void toCSV(OutputStream output, int fromRowIndex, int toRowIndex, Collection<String> columnNames) throws UncheckedIOException;
 
     /**
      * Each line in the output file/Writer is an array of JSON String without root bracket.
@@ -2132,14 +2274,14 @@ public interface DataSet {
      * Each line in the output file/Writer is an array of JSON String without root bracket.
      *
      * @param output
-     * @param columnNames
      * @param fromRowIndex
      * @param toRowIndex
+     * @param columnNames
      * @param writeTitle
      * @param quoteValue
      * @throws UncheckedIOException the unchecked IO exception
      */
-    void toCSV(OutputStream output, Collection<String> columnNames, int fromRowIndex, int toRowIndex, boolean writeTitle, boolean quoteValue)
+    void toCSV(OutputStream output, int fromRowIndex, int toRowIndex, Collection<String> columnNames, boolean writeTitle, boolean quoteValue)
             throws UncheckedIOException;
 
     /**
@@ -2154,12 +2296,12 @@ public interface DataSet {
      * Each line in the output file/Writer is an array of JSON String without root bracket.
      *
      * @param output
-     * @param columnNames
      * @param fromRowIndex
      * @param toRowIndex
+     * @param columnNames
      * @throws UncheckedIOException the unchecked IO exception
      */
-    void toCSV(Writer output, Collection<String> columnNames, int fromRowIndex, int toRowIndex) throws UncheckedIOException;
+    void toCSV(Writer output, int fromRowIndex, int toRowIndex, Collection<String> columnNames) throws UncheckedIOException;
 
     /**
      * Each line in the output file/Writer is an array of JSON String without root bracket.
@@ -2175,14 +2317,14 @@ public interface DataSet {
      * Each line in the output file/Writer is an array of JSON String without root bracket.
      *
      * @param output
-     * @param columnNames
      * @param fromRowIndex
      * @param toRowIndex
+     * @param columnNames
      * @param writeTitle
      * @param quoteValue
      * @throws UncheckedIOException the unchecked IO exception
      */
-    void toCSV(Writer output, Collection<String> columnNames, int fromRowIndex, int toRowIndex, boolean writeTitle, boolean quoteValue)
+    void toCSV(Writer output, int fromRowIndex, int toRowIndex, Collection<String> columnNames, boolean writeTitle, boolean quoteValue)
             throws UncheckedIOException;
 
     //    /**
@@ -2196,55 +2338,54 @@ public interface DataSet {
 
     /**
      *
-     * @param <T>
-     * @param columnName
+     * @param keyColumnName
      * @param aggregateResultColumnName
      * @param aggregateOnColumnName
      * @param collector
      * @return
      */
-    <T> DataSet groupBy(String columnName, String aggregateResultColumnName, String aggregateOnColumnName, Collector<T, ?, ?> collector);
+    DataSet groupBy(String keyColumnName, String aggregateResultColumnName, String aggregateOnColumnName, Collector<?, ?, ?> collector);
+
+    //    /**
+    //     *
+    //     * @param <T>
+    //     * @param <E>
+    //     * @param keyColumnName
+    //     * @param aggregateResultColumnName
+    //     * @param aggregateOnColumnName
+    //     * @param func
+    //     * @return
+    //     * @throws E the e
+    //     */
+    //    <T, E extends Exception> DataSet groupBy(String keyColumnName, String aggregateResultColumnName, String aggregateOnColumnName,
+    //            Throwables.Function<Stream<T>, ?, E> func) throws E;
 
     /**
      *
-     * @param <T>
-     * @param <E>
-     * @param columnName
-     * @param aggregateResultColumnName
-     * @param aggregateOnColumnName
-     * @param func
-     * @return
-     * @throws E the e
-     */
-    <T, E extends Exception> DataSet groupBy(String columnName, String aggregateResultColumnName, String aggregateOnColumnName,
-            Throwables.Function<Stream<T>, ?, E> func) throws E;
-
-    /**
-     *
-     * @param columnName
+     * @param keyColumnName
      * @param aggregateResultColumnName
      * @param aggregateOnColumnNames
      * @param rowClass
      * @return
      */
-    DataSet groupBy(String columnName, String aggregateResultColumnName, Collection<String> aggregateOnColumnNames, Class<?> rowClass);
+    DataSet groupBy(String keyColumnName, String aggregateResultColumnName, Collection<String> aggregateOnColumnNames, Class<?> rowClass);
 
     /**
      *
-     * @param columnName
+     * @param keyColumnName
      * @param aggregateResultColumnName
      * @param aggregateOnColumnNames
      * @param collector
      * @return
      */
-    DataSet groupBy(String columnName, String aggregateResultColumnName, Collection<String> aggregateOnColumnNames,
+    DataSet groupBy(String keyColumnName, String aggregateResultColumnName, Collection<String> aggregateOnColumnNames,
             Collector<? super Object[], ?, ?> collector);
 
     /**
      *
      * @param <T>
      * @param <E>
-     * @param columnName
+     * @param keyColumnName
      * @param aggregateResultColumnName
      * @param aggregateOnColumnNames
      * @param rowMapper DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
@@ -2252,8 +2393,8 @@ public interface DataSet {
      * @return
      * @throws E the e
      */
-    <T, E extends Exception> DataSet groupBy(String columnName, String aggregateResultColumnName, Collection<String> aggregateOnColumnNames,
-            Throwables.Function<? super DisposableObjArray, T, E> rowMapper, Collector<? super T, ?, ?> collector) throws E;
+    <T, E extends Exception> DataSet groupBy(String keyColumnName, String aggregateResultColumnName, Collection<String> aggregateOnColumnNames,
+            Throwables.Function<? super DisposableObjArray, ? extends T, E> rowMapper, Collector<? super T, ?, ?> collector) throws E;
 
     //    /**
     //     *
@@ -2270,10 +2411,8 @@ public interface DataSet {
 
     /**
      *
-     * @param <K> the key type
-     * @param <T>
      * @param <E>
-     * @param columnName
+     * @param keyColumnName
      * @param keyMapper
      * @param aggregateResultColumnName
      * @param aggregateOnColumnName
@@ -2281,32 +2420,30 @@ public interface DataSet {
      * @return
      * @throws E the e
      */
-    <K, T, E extends Exception> DataSet groupBy(String columnName, Throwables.Function<K, ?, E> keyMapper, String aggregateResultColumnName,
-            String aggregateOnColumnName, Collector<T, ?, ?> collector) throws E;
+    <E extends Exception> DataSet groupBy(String keyColumnName, Throwables.Function<?, ?, E> keyMapper, String aggregateResultColumnName,
+            String aggregateOnColumnName, Collector<?, ?, ?> collector) throws E;
 
-    /**
-     *
-     * @param <K> the key type
-     * @param <T>
-     * @param <E>
-     * @param <E2>
-     * @param columnName
-     * @param keyMapper
-     * @param aggregateResultColumnName
-     * @param aggregateOnColumnName
-     * @param func
-     * @return
-     * @throws E the e
-     * @throws E2 the e2
-     */
-    <K, T, E extends Exception, E2 extends Exception> DataSet groupBy(String columnName, Throwables.Function<K, ?, E> keyMapper,
-            String aggregateResultColumnName, String aggregateOnColumnName, Throwables.Function<Stream<T>, ?, E2> func) throws E, E2;
+    //    /**
+    //     *
+    //     * @param <T>
+    //     * @param <E>
+    //     * @param <E2>
+    //     * @param keyColumnName
+    //     * @param keyMapper
+    //     * @param aggregateResultColumnName
+    //     * @param aggregateOnColumnName
+    //     * @param func
+    //     * @return
+    //     * @throws E the e
+    //     * @throws E2 the e2
+    //     */
+    //    <T, E extends Exception, E2 extends Exception> DataSet groupBy(String keyColumnName, Throwables.Function<?, ?, E> keyMapper,
+    //            String aggregateResultColumnName, String aggregateOnColumnName, Throwables.Function<Stream<T>, ?, E2> func) throws E, E2;
 
     /**
     *
-    * @param <K> the key type
     * @param <E>
-    * @param columnName
+    * @param keyColumnName
     * @param keyMapper
     * @param aggregateResultColumnName
     * @param aggregateOnColumnNames
@@ -2314,14 +2451,13 @@ public interface DataSet {
     * @return
     * @throws E the e
     */
-    <K, E extends Exception> DataSet groupBy(String columnName, Throwables.Function<K, ?, E> keyMapper, String aggregateResultColumnName,
+    <E extends Exception> DataSet groupBy(String keyColumnName, Throwables.Function<?, ?, E> keyMapper, String aggregateResultColumnName,
             Collection<String> aggregateOnColumnNames, Class<?> rowClass) throws E;
 
     /**
      *
-     * @param <K> the key type
      * @param <E>
-     * @param columnName
+     * @param keyColumnName
      * @param keyMapper
      * @param aggregateResultColumnName
      * @param aggregateOnColumnNames
@@ -2329,16 +2465,15 @@ public interface DataSet {
      * @return
      * @throws E the e
      */
-    <K, E extends Exception> DataSet groupBy(String columnName, Throwables.Function<K, ?, E> keyMapper, String aggregateResultColumnName,
+    <E extends Exception> DataSet groupBy(String keyColumnName, Throwables.Function<?, ?, E> keyMapper, String aggregateResultColumnName,
             Collection<String> aggregateOnColumnNames, Collector<? super Object[], ?, ?> collector) throws E;
 
     /**
      *
-     * @param <K> the key type
      * @param <T>
      * @param <E>
      * @param <E2>
-     * @param columnName
+     * @param keyColumnName
      * @param keyMapper DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
      * @param aggregateResultColumnName
      * @param aggregateOnColumnNames
@@ -2348,9 +2483,9 @@ public interface DataSet {
      * @throws E the e
      * @throws E2 the e2
      */
-    <K, T, E extends Exception, E2 extends Exception> DataSet groupBy(String columnName, Throwables.Function<K, ?, E> keyMapper,
-            String aggregateResultColumnName, Collection<String> aggregateOnColumnNames, Throwables.Function<? super DisposableObjArray, T, E2> rowMapper,
-            Collector<? super T, ?, ?> collector) throws E, E2;
+    <T, E extends Exception, E2 extends Exception> DataSet groupBy(String keyColumnName, Throwables.Function<?, ?, E> keyMapper,
+            String aggregateResultColumnName, Collection<String> aggregateOnColumnNames,
+            Throwables.Function<? super DisposableObjArray, ? extends T, E2> rowMapper, Collector<? super T, ?, ?> collector) throws E, E2;
 
     /**
      *
@@ -2361,55 +2496,54 @@ public interface DataSet {
 
     /**
      *
-     * @param <T>
-     * @param columnNames
+     * @param keyColumnNames
      * @param aggregateResultColumnName
      * @param aggregateOnColumnName
      * @param collector
      * @return
      */
-    <T> DataSet groupBy(Collection<String> columnNames, String aggregateResultColumnName, String aggregateOnColumnName, Collector<T, ?, ?> collector);
+    DataSet groupBy(Collection<String> keyColumnNames, String aggregateResultColumnName, String aggregateOnColumnName, Collector<?, ?, ?> collector);
+
+    //    /**
+    //     *
+    //     * @param <T>
+    //     * @param <E>
+    //     * @param keyColumnNames
+    //     * @param aggregateResultColumnName
+    //     * @param aggregateOnColumnName
+    //     * @param func
+    //     * @return
+    //     * @throws E the e
+    //     */
+    //    <T, E extends Exception> DataSet groupBy(Collection<String> keyColumnNames, String aggregateResultColumnName, String aggregateOnColumnName,
+    //            Throwables.Function<Stream<T>, ?, E> func) throws E;
 
     /**
      *
-     * @param <T>
-     * @param <E>
-     * @param columnNames
-     * @param aggregateResultColumnName
-     * @param aggregateOnColumnName
-     * @param func
-     * @return
-     * @throws E the e
-     */
-    <T, E extends Exception> DataSet groupBy(Collection<String> columnNames, String aggregateResultColumnName, String aggregateOnColumnName,
-            Throwables.Function<Stream<T>, ?, E> func) throws E;
-
-    /**
-     *
-     * @param columnNames
+     * @param keyColumnNames
      * @param aggregateResultColumnName
      * @param aggregateOnColumnNames
      * @param rowClass
      * @return
      */
-    DataSet groupBy(Collection<String> columnNames, String aggregateResultColumnName, Collection<String> aggregateOnColumnNames, Class<?> rowClass);
+    DataSet groupBy(Collection<String> keyColumnNames, String aggregateResultColumnName, Collection<String> aggregateOnColumnNames, Class<?> rowClass);
 
     /**
      *
-     * @param columnNames
+     * @param keyColumnNames
      * @param aggregateResultColumnName
      * @param aggregateOnColumnNames
      * @param collector
      * @return
      */
-    DataSet groupBy(Collection<String> columnNames, String aggregateResultColumnName, Collection<String> aggregateOnColumnNames,
+    DataSet groupBy(Collection<String> keyColumnNames, String aggregateResultColumnName, Collection<String> aggregateOnColumnNames,
             Collector<? super Object[], ?, ?> collector);
 
     /**
      *
      * @param <T>
      * @param <E>
-     * @param columnNames
+     * @param keyColumnNames
      * @param aggregateResultColumnName
      * @param aggregateOnColumnNames
      * @param rowMapper DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
@@ -2417,24 +2551,23 @@ public interface DataSet {
      * @return
      * @throws E the e
      */
-    <T, E extends Exception> DataSet groupBy(Collection<String> columnNames, String aggregateResultColumnName, Collection<String> aggregateOnColumnNames,
-            Throwables.Function<? super DisposableObjArray, T, E> rowMapper, Collector<? super T, ?, ?> collector) throws E;
+    <T, E extends Exception> DataSet groupBy(Collection<String> keyColumnNames, String aggregateResultColumnName, Collection<String> aggregateOnColumnNames,
+            Throwables.Function<? super DisposableObjArray, ? extends T, E> rowMapper, Collector<? super T, ?, ?> collector) throws E;
 
     /**
      *
      * @param <E>
-     * @param columnNames
+     * @param keyColumnNames
      * @param keyMapper DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
      * @return
      * @throws E the e
      */
-    <E extends Exception> DataSet groupBy(Collection<String> columnNames, Throwables.Function<? super DisposableObjArray, ?, E> keyMapper) throws E;
+    <E extends Exception> DataSet groupBy(Collection<String> keyColumnNames, Throwables.Function<? super DisposableObjArray, ?, E> keyMapper) throws E;
 
     /**
      *
-     * @param <T>
      * @param <E>
-     * @param columnNames
+     * @param keyColumnNames
      * @param keyMapper DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
      * @param aggregateResultColumnName
      * @param aggregateOnColumnName
@@ -2442,31 +2575,31 @@ public interface DataSet {
      * @return
      * @throws E the e
      */
-    <T, E extends Exception> DataSet groupBy(Collection<String> columnNames, Throwables.Function<? super DisposableObjArray, ?, E> keyMapper,
-            String aggregateResultColumnName, String aggregateOnColumnName, Collector<T, ?, ?> collector) throws E;
+    <E extends Exception> DataSet groupBy(Collection<String> keyColumnNames, Throwables.Function<? super DisposableObjArray, ?, E> keyMapper,
+            String aggregateResultColumnName, String aggregateOnColumnName, Collector<?, ?, ?> collector) throws E;
 
-    /**
-     *
-     * @param <T>
-     * @param <E>
-     * @param <E2>
-     * @param columnNames
-     * @param keyMapper DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
-     * @param aggregateResultColumnName
-     * @param aggregateOnColumnName
-     * @param func
-     * @return
-     * @throws E the e
-     * @throws E2 the e2
-     */
-    <T, E extends Exception, E2 extends Exception> DataSet groupBy(Collection<String> columnNames,
-            Throwables.Function<? super DisposableObjArray, ?, E> keyMapper, String aggregateResultColumnName, String aggregateOnColumnName,
-            Throwables.Function<Stream<T>, ?, E2> func) throws E, E2;
+    //    /**
+    //     *
+    //     * @param <T>
+    //     * @param <E>
+    //     * @param <E2>
+    //     * @param keyColumnNames
+    //     * @param keyMapper DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
+    //     * @param aggregateResultColumnName
+    //     * @param aggregateOnColumnName
+    //     * @param func
+    //     * @return
+    //     * @throws E the e
+    //     * @throws E2 the e2
+    //     */
+    //    <T, E extends Exception, E2 extends Exception> DataSet groupBy(Collection<String> keyColumnNames,
+    //            Throwables.Function<? super DisposableObjArray, ?, E> keyMapper, String aggregateResultColumnName, String aggregateOnColumnName,
+    //            Throwables.Function<Stream<T>, ?, E2> func) throws E, E2;
 
     /**
     *
     * @param <E>
-    * @param columnNames
+    * @param keyColumnNames
     * @param keyMapper DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
     * @param aggregateResultColumnName
     * @param aggregateOnColumnNames
@@ -2474,13 +2607,13 @@ public interface DataSet {
     * @return
     * @throws E the e
     */
-    <E extends Exception> DataSet groupBy(Collection<String> columnNames, Throwables.Function<? super DisposableObjArray, ?, E> keyMapper,
+    <E extends Exception> DataSet groupBy(Collection<String> keyColumnNames, Throwables.Function<? super DisposableObjArray, ?, E> keyMapper,
             String aggregateResultColumnName, Collection<String> aggregateOnColumnNames, Class<?> rowClass) throws E;
 
     /**
      *
      * @param <E>
-     * @param columnNames
+     * @param keyColumnNames
      * @param keyMapper DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
      * @param aggregateResultColumnName
      * @param aggregateOnColumnNames
@@ -2488,7 +2621,7 @@ public interface DataSet {
      * @return
      * @throws E the e
      */
-    <E extends Exception> DataSet groupBy(Collection<String> columnNames, Throwables.Function<? super DisposableObjArray, ?, E> keyMapper,
+    <E extends Exception> DataSet groupBy(Collection<String> keyColumnNames, Throwables.Function<? super DisposableObjArray, ?, E> keyMapper,
             String aggregateResultColumnName, Collection<String> aggregateOnColumnNames, Collector<? super Object[], ?, ?> collector) throws E;
 
     /**
@@ -2496,7 +2629,7 @@ public interface DataSet {
      * @param <T>
      * @param <E>
      * @param <E2>
-     * @param columnNames
+     * @param keyColumnNames
      * @param keyMapper DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
      * @param aggregateResultColumnName
      * @param aggregateOnColumnNames
@@ -2506,9 +2639,9 @@ public interface DataSet {
      * @throws E the e
      * @throws E2 the e2
      */
-    <T, E extends Exception, E2 extends Exception> DataSet groupBy(Collection<String> columnNames,
+    <T, E extends Exception, E2 extends Exception> DataSet groupBy(Collection<String> keyColumnNames,
             Throwables.Function<? super DisposableObjArray, ?, E> keyMapper, String aggregateResultColumnName, Collection<String> aggregateOnColumnNames,
-            Throwables.Function<? super DisposableObjArray, T, E2> rowMapper, Collector<? super T, ?, ?> collector) throws E, E2;
+            Throwables.Function<? super DisposableObjArray, ? extends T, E2> rowMapper, Collector<? super T, ?, ?> collector) throws E, E2;
 
     /**
      *
@@ -2521,7 +2654,6 @@ public interface DataSet {
 
     /**
      *
-     * @param <T>
      * @param columnNames
      * @param aggregateResultColumnName
      * @param aggregateOnColumnName
@@ -2530,21 +2662,21 @@ public interface DataSet {
      * @see Iterables#rollup(Collection)
      */
     @Beta
-    <T> Stream<DataSet> rollup(Collection<String> columnNames, String aggregateResultColumnName, String aggregateOnColumnName, Collector<T, ?, ?> collector);
+    Stream<DataSet> rollup(Collection<String> columnNames, String aggregateResultColumnName, String aggregateOnColumnName, Collector<?, ?, ?> collector);
 
-    /**
-     *
-     * @param <T>
-     * @param columnNames
-     * @param aggregateResultColumnName
-     * @param aggregateOnColumnName
-     * @param func
-     * @return
-     * @see Iterables#rollup(Collection)
-     */
-    @Beta
-    <T> Stream<DataSet> rollup(Collection<String> columnNames, String aggregateResultColumnName, String aggregateOnColumnName,
-            Throwables.Function<Stream<T>, ?, ? extends Exception> func);
+    //    /**
+    //     *
+    //     * @param <T>
+    //     * @param columnNames
+    //     * @param aggregateResultColumnName
+    //     * @param aggregateOnColumnName
+    //     * @param func
+    //     * @return
+    //     * @see Iterables#rollup(Collection)
+    //     */
+    //    @Beta
+    //    <T> Stream<DataSet> rollup(Collection<String> columnNames, String aggregateResultColumnName, String aggregateOnColumnName,
+    //            Throwables.Function<Stream<T>, ?, ? extends Exception> func);
 
     /**
      *
@@ -2584,7 +2716,7 @@ public interface DataSet {
      */
     @Beta
     <T> Stream<DataSet> rollup(Collection<String> columnNames, String aggregateResultColumnName, Collection<String> aggregateOnColumnNames,
-            Throwables.Function<? super DisposableObjArray, T, ? extends Exception> rowMapper, Collector<? super T, ?, ?> collector);
+            Throwables.Function<? super DisposableObjArray, ? extends T, ? extends Exception> rowMapper, Collector<? super T, ?, ?> collector);
 
     /**
      *
@@ -2598,7 +2730,6 @@ public interface DataSet {
 
     /**
      *
-     * @param <T>
      * @param columnNames
      * @param keyMapper DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
      * @param aggregateResultColumnName
@@ -2608,23 +2739,23 @@ public interface DataSet {
      * @see Iterables#rollup(Collection)
      */
     @Beta
-    <T> Stream<DataSet> rollup(Collection<String> columnNames, Throwables.Function<? super DisposableObjArray, ?, ? extends Exception> keyMapper,
-            String aggregateResultColumnName, String aggregateOnColumnName, Collector<T, ?, ?> collector);
+    Stream<DataSet> rollup(Collection<String> columnNames, Throwables.Function<? super DisposableObjArray, ?, ? extends Exception> keyMapper,
+            String aggregateResultColumnName, String aggregateOnColumnName, Collector<?, ?, ?> collector);
 
-    /**
-     *
-     * @param <T>
-     * @param columnNames
-     * @param keyMapper DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
-     * @param aggregateResultColumnName
-     * @param aggregateOnColumnName
-     * @param func
-     * @return
-     * @see Iterables#rollup(Collection)
-     */
-    @Beta
-    <T> Stream<DataSet> rollup(Collection<String> columnNames, Throwables.Function<? super DisposableObjArray, ?, ? extends Exception> keyMapper,
-            String aggregateResultColumnName, String aggregateOnColumnName, Throwables.Function<Stream<T>, ?, ? extends Exception> func);
+    //    /**
+    //     *
+    //     * @param <T>
+    //     * @param columnNames
+    //     * @param keyMapper DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
+    //     * @param aggregateResultColumnName
+    //     * @param aggregateOnColumnName
+    //     * @param func
+    //     * @return
+    //     * @see Iterables#rollup(Collection)
+    //     */
+    //    @Beta
+    //    <T> Stream<DataSet> rollup(Collection<String> columnNames, Throwables.Function<? super DisposableObjArray, ?, ? extends Exception> keyMapper,
+    //            String aggregateResultColumnName, String aggregateOnColumnName, Throwables.Function<Stream<T>, ?, ? extends Exception> func);
 
     /**
     *
@@ -2669,7 +2800,7 @@ public interface DataSet {
     @Beta
     <T> Stream<DataSet> rollup(Collection<String> columnNames, Throwables.Function<? super DisposableObjArray, ?, ? extends Exception> keyMapper,
             String aggregateResultColumnName, Collection<String> aggregateOnColumnNames,
-            Throwables.Function<? super DisposableObjArray, T, ? extends Exception> rowMapper, Collector<? super T, ?, ?> collector);
+            Throwables.Function<? super DisposableObjArray, ? extends T, ? extends Exception> rowMapper, Collector<? super T, ?, ?> collector);
 
     /**
      *
@@ -2682,7 +2813,6 @@ public interface DataSet {
 
     /**
      *
-     * @param <T>
      * @param columnNames
      * @param aggregateResultColumnName
      * @param aggregateOnColumnName
@@ -2691,21 +2821,21 @@ public interface DataSet {
      * @see Iterables#powerSet(java.util.Set)
      */
     @Beta
-    <T> Stream<DataSet> cube(Collection<String> columnNames, String aggregateResultColumnName, String aggregateOnColumnName, Collector<T, ?, ?> collector);
+    Stream<DataSet> cube(Collection<String> columnNames, String aggregateResultColumnName, String aggregateOnColumnName, Collector<?, ?, ?> collector);
 
-    /**
-     *
-     * @param <T>
-     * @param columnNames
-     * @param aggregateResultColumnName
-     * @param aggregateOnColumnName
-     * @param func
-     * @return
-     * @see Iterables#powerSet(java.util.Set)
-     */
-    @Beta
-    <T> Stream<DataSet> cube(Collection<String> columnNames, String aggregateResultColumnName, String aggregateOnColumnName,
-            Throwables.Function<Stream<T>, ?, ? extends Exception> func);
+    //    /**
+    //     *
+    //     * @param <T>
+    //     * @param columnNames
+    //     * @param aggregateResultColumnName
+    //     * @param aggregateOnColumnName
+    //     * @param func
+    //     * @return
+    //     * @see Iterables#powerSet(java.util.Set)
+    //     */
+    //    @Beta
+    //    <T> Stream<DataSet> cube(Collection<String> columnNames, String aggregateResultColumnName, String aggregateOnColumnName,
+    //            Throwables.Function<Stream<T>, ?, ? extends Exception> func);
 
     /**
     *
@@ -2745,7 +2875,7 @@ public interface DataSet {
      */
     @Beta
     <T> Stream<DataSet> cube(Collection<String> columnNames, String aggregateResultColumnName, Collection<String> aggregateOnColumnNames,
-            Throwables.Function<? super DisposableObjArray, T, ? extends Exception> rowMapper, Collector<? super T, ?, ?> collector);
+            Throwables.Function<? super DisposableObjArray, ? extends T, ? extends Exception> rowMapper, Collector<? super T, ?, ?> collector);
 
     /**
      *
@@ -2759,7 +2889,6 @@ public interface DataSet {
 
     /**
      *
-     * @param <T>
      * @param columnNames
      * @param keyMapper DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
      * @param aggregateResultColumnName
@@ -2769,23 +2898,23 @@ public interface DataSet {
      * @see Iterables#powerSet(java.util.Set)
      */
     @Beta
-    <T> Stream<DataSet> cube(Collection<String> columnNames, Throwables.Function<? super DisposableObjArray, ?, ? extends Exception> keyMapper,
-            String aggregateResultColumnName, String aggregateOnColumnName, Collector<T, ?, ?> collector);
+    Stream<DataSet> cube(Collection<String> columnNames, Throwables.Function<? super DisposableObjArray, ?, ? extends Exception> keyMapper,
+            String aggregateResultColumnName, String aggregateOnColumnName, Collector<?, ?, ?> collector);
 
-    /**
-     *
-     * @param <T>
-     * @param columnNames
-     * @param keyMapper DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
-     * @param aggregateResultColumnName
-     * @param aggregateOnColumnName
-     * @param func
-     * @return
-     * @see Iterables#powerSet(java.util.Set)
-     */
-    @Beta
-    <T> Stream<DataSet> cube(Collection<String> columnNames, Throwables.Function<? super DisposableObjArray, ?, ? extends Exception> keyMapper,
-            String aggregateResultColumnName, String aggregateOnColumnName, Throwables.Function<Stream<T>, ?, ? extends Exception> func);
+    //    /**
+    //     *
+    //     * @param <T>
+    //     * @param columnNames
+    //     * @param keyMapper DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
+    //     * @param aggregateResultColumnName
+    //     * @param aggregateOnColumnName
+    //     * @param func
+    //     * @return
+    //     * @see Iterables#powerSet(java.util.Set)
+    //     */
+    //    @Beta
+    //    <T> Stream<DataSet> cube(Collection<String> columnNames, Throwables.Function<? super DisposableObjArray, ?, ? extends Exception> keyMapper,
+    //            String aggregateResultColumnName, String aggregateOnColumnName, Throwables.Function<Stream<T>, ?, ? extends Exception> func);
 
     /**
     *
@@ -2830,25 +2959,42 @@ public interface DataSet {
     @Beta
     <T> Stream<DataSet> cube(Collection<String> columnNames, Throwables.Function<? super DisposableObjArray, ?, ? extends Exception> keyMapper,
             String aggregateResultColumnName, Collection<String> aggregateOnColumnNames,
-            Throwables.Function<? super DisposableObjArray, T, ? extends Exception> rowMapper, Collector<? super T, ?, ?> collector);
+            Throwables.Function<? super DisposableObjArray, ? extends T, ? extends Exception> rowMapper, Collector<? super T, ?, ?> collector);
 
     /**
-     *
-     * @param <R>
-     * @param <C>
-     * @param <U>
-     * @param <T>
-     * @param <E>
-     * @param groupByColumnName
-     * @param pivotColumnName
-     * @param aggColumnName
-     * @param aggFunc
-     * @return
-     * @throws E the e
-     */
+    *
+    * @param <R>
+    * @param <C>
+    * @param <T>
+    * @param <E>
+    * @param groupByColumnName
+    * @param pivotColumnName
+    * @param aggColumnName
+    * @param aggFunc
+    * @return
+    * @throws E the e
+    */
     @Beta
-    <R, C, U, T, E extends Exception> Sheet<R, C, T> pivot(String groupByColumnName, String pivotColumnName, String aggColumnName,
-            Throwables.Function<Stream<U>, ? extends T, E> aggFunc) throws E;
+    <R, C, T, E extends Exception> Sheet<R, C, T> pivot(String groupByColumnName, String pivotColumnName, String aggColumnName,
+            Collector<?, ?, ? extends T> collector) throws E;
+
+    //    /**
+    //     *
+    //     * @param <R>
+    //     * @param <C>
+    //     * @param <U>
+    //     * @param <T>
+    //     * @param <E>
+    //     * @param groupByColumnName
+    //     * @param pivotColumnName
+    //     * @param aggColumnName
+    //     * @param aggFunc
+    //     * @return
+    //     * @throws E the e
+    //     */
+    //    @Beta
+    //    <R, C, U, T, E extends Exception> Sheet<R, C, T> pivot(String groupByColumnName, String pivotColumnName, String aggColumnName,
+    //            Throwables.Function<Stream<U>, ? extends T, E> aggFunc) throws E;
 
     /**
      *
@@ -2882,7 +3028,7 @@ public interface DataSet {
      */
     @Beta
     <R, C, U, T, E extends Exception> Sheet<R, C, T> pivot(String groupByColumnName, String pivotColumnName, Collection<String> aggColumnNames,
-            Throwables.Function<? super DisposableObjArray, U, E> rowMapper, Collector<? super U, ?, ? extends T> collector) throws E;
+            Throwables.Function<? super DisposableObjArray, ? extends U, E> rowMapper, Collector<? super U, ?, ? extends T> collector) throws E;
 
     /**
      *
@@ -3005,14 +3151,14 @@ public interface DataSet {
     DataSet topBy(Collection<String> columnNames, int n, Function<? super DisposableObjArray, ? extends Comparable> keyMapper);
 
     /**
-     * Returns a new <code>DataSet</code> with the rows de-duplicated by the values in all columns.
+     * Returns a new {@code DataSet} with the rows de-duplicated by the values in all columns.
      *
      * @return a new DataSet
      */
     DataSet distinct();
 
     /**
-     * Returns a new <code>DataSet</code> with the rows de-duplicated by the value in the specified column.
+     * Returns a new {@code DataSet} with the rows de-duplicated by the value in the specified column.
      *
      * @param columnName
      * @return a new DataSet
@@ -3020,7 +3166,7 @@ public interface DataSet {
     DataSet distinctBy(String columnName);
 
     /**
-     * Returns a new <code>DataSet</code> with the rows de-duplicated by the value in the specified column from the specified <code>fromRowIndex</code> to <code>toRowIndex</code>.
+     * Returns a new {@code DataSet} with the rows de-duplicated by the value in the specified column from the specified {@code fromRowIndex} to {@code toRowIndex}.
      *
      * @param <K> the key type
      * @param <E>
@@ -3029,10 +3175,10 @@ public interface DataSet {
      * @return
      * @throws E the e
      */
-    <K, E extends Exception> DataSet distinctBy(String columnName, Throwables.Function<K, ?, E> keyMapper) throws E;
+    <E extends Exception> DataSet distinctBy(String columnName, Throwables.Function<?, ?, E> keyMapper) throws E;
 
     /**
-     * Returns a new <code>DataSet</code> with the rows de-duplicated by the values in the specified columns.
+     * Returns a new {@code DataSet} with the rows de-duplicated by the values in the specified columns.
      *
      * @param columnNames
      * @return a new DataSet
@@ -3040,7 +3186,7 @@ public interface DataSet {
     DataSet distinctBy(Collection<String> columnNames);
 
     /**
-     * Returns a new <code>DataSet</code> with the rows de-duplicated by the values in the specified columns from the specified <code>fromRowIndex</code> to <code>toRowIndex</code>.
+     * Returns a new {@code DataSet} with the rows de-duplicated by the values in the specified columns from the specified {@code fromRowIndex} to {@code toRowIndex}.
      *
      * @param <E>
      * @param columnNames
@@ -3115,28 +3261,28 @@ public interface DataSet {
 
     /**
      *
-     * @param <E>
-     * @param columnNames
      * @param fromRowIndex
      * @param toRowIndex
+     * @param columnNames
      * @param filter
+     * @param <E>
      * @return
      * @throws E the e
      */
-    <E extends Exception> DataSet filter(Tuple2<String, String> columnNames, int fromRowIndex, int toRowIndex, Throwables.BiPredicate<?, ?, E> filter) throws E;
+    <E extends Exception> DataSet filter(int fromRowIndex, int toRowIndex, Tuple2<String, String> columnNames, Throwables.BiPredicate<?, ?, E> filter) throws E;
 
     /**
      *
-     * @param <E>
-     * @param columnNames
      * @param fromRowIndex
      * @param toRowIndex
+     * @param columnNames
      * @param filter
      * @param max
+     * @param <E>
      * @return
      * @throws E the e
      */
-    <E extends Exception> DataSet filter(Tuple2<String, String> columnNames, int fromRowIndex, int toRowIndex, Throwables.BiPredicate<?, ?, E> filter, int max)
+    <E extends Exception> DataSet filter(int fromRowIndex, int toRowIndex, Tuple2<String, String> columnNames, Throwables.BiPredicate<?, ?, E> filter, int max)
             throws E;
 
     /**
@@ -3162,45 +3308,43 @@ public interface DataSet {
 
     /**
      *
-     * @param <E>
-     * @param columnNames
      * @param fromRowIndex
      * @param toRowIndex
+     * @param columnNames
      * @param filter
+     * @param <E>
      * @return
      * @throws E the e
      */
-    <E extends Exception> DataSet filter(Tuple3<String, String, String> columnNames, int fromRowIndex, int toRowIndex,
+    <E extends Exception> DataSet filter(int fromRowIndex, int toRowIndex, Tuple3<String, String, String> columnNames,
             Throwables.TriPredicate<?, ?, ?, E> filter) throws E;
 
     /**
      *
-     * @param <E>
-     * @param columnNames
      * @param fromRowIndex
      * @param toRowIndex
+     * @param columnNames
      * @param filter
      * @param max
+     * @param <E>
      * @return
      * @throws E the e
      */
-    <E extends Exception> DataSet filter(Tuple3<String, String, String> columnNames, int fromRowIndex, int toRowIndex,
+    <E extends Exception> DataSet filter(int fromRowIndex, int toRowIndex, Tuple3<String, String, String> columnNames,
             Throwables.TriPredicate<?, ?, ?, E> filter, int max) throws E;
 
     /**
      *
-     * @param <T>
      * @param <E>
      * @param columnName
      * @param filter
      * @return
      * @throws E the e
      */
-    <T, E extends Exception> DataSet filter(String columnName, Throwables.Predicate<T, E> filter) throws E;
+    <E extends Exception> DataSet filter(String columnName, Throwables.Predicate<?, E> filter) throws E;
 
     /**
      *
-     * @param <T>
      * @param <E>
      * @param columnName
      * @param filter
@@ -3208,34 +3352,32 @@ public interface DataSet {
      * @return
      * @throws E the e
      */
-    <T, E extends Exception> DataSet filter(String columnName, Throwables.Predicate<T, E> filter, int max) throws E;
+    <E extends Exception> DataSet filter(String columnName, Throwables.Predicate<?, E> filter, int max) throws E;
 
     /**
      *
-     * @param <T>
-     * @param <E>
-     * @param columnName
      * @param fromRowIndex
      * @param toRowIndex
+     * @param columnName
      * @param filter
+     * @param <E>
      * @return
      * @throws E the e
      */
-    <T, E extends Exception> DataSet filter(String columnName, int fromRowIndex, int toRowIndex, Throwables.Predicate<T, E> filter) throws E;
+    <E extends Exception> DataSet filter(int fromRowIndex, int toRowIndex, String columnName, Throwables.Predicate<?, E> filter) throws E;
 
     /**
      *
-     * @param <T>
-     * @param <E>
-     * @param columnName
      * @param fromRowIndex
      * @param toRowIndex
+     * @param columnName
      * @param filter
      * @param max
+     * @param <E>
      * @return
      * @throws E the e
      */
-    <T, E extends Exception> DataSet filter(String columnName, int fromRowIndex, int toRowIndex, Throwables.Predicate<T, E> filter, int max) throws E;
+    <E extends Exception> DataSet filter(int fromRowIndex, int toRowIndex, String columnName, Throwables.Predicate<?, E> filter, int max) throws E;
 
     /**
      *
@@ -3260,172 +3402,172 @@ public interface DataSet {
 
     /**
      *
-     * @param <E>
-     * @param columnNames
      * @param fromRowIndex
      * @param toRowIndex
+     * @param columnNames
      * @param filter DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
+     * @param <E>
      * @return
      * @throws E the e
      */
-    <E extends Exception> DataSet filter(Collection<String> columnNames, int fromRowIndex, int toRowIndex,
+    <E extends Exception> DataSet filter(int fromRowIndex, int toRowIndex, Collection<String> columnNames,
             Throwables.Predicate<? super DisposableObjArray, E> filter) throws E;
 
     /**
      *
-     * @param <E>
-     * @param columnNames
      * @param fromRowIndex
      * @param toRowIndex
+     * @param columnNames
      * @param filter DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
      * @param max
+     * @param <E>
      * @return
      * @throws E the e
      */
-    <E extends Exception> DataSet filter(Collection<String> columnNames, int fromRowIndex, int toRowIndex,
+    <E extends Exception> DataSet filter(int fromRowIndex, int toRowIndex, Collection<String> columnNames,
             Throwables.Predicate<? super DisposableObjArray, E> filter, int max) throws E;
 
     /**
      *
      * @param <E>
      * @param fromColumnName
-     * @param mapper
      * @param newColumnName
      * @param copyingColumnName
+     * @param mapper
      * @return
      * @throws E the e
      */
-    <E extends Exception> DataSet map(String fromColumnName, Throwables.Function<?, ?, E> mapper, String newColumnName, String copyingColumnName) throws E;
+    <E extends Exception> DataSet map(String fromColumnName, String newColumnName, String copyingColumnName, Throwables.Function<?, ?, E> mapper) throws E;
 
     /**
      *
      * @param <E>
      * @param fromColumnName
-     * @param mapper
      * @param newColumnName
      * @param copyingColumnNames
+     * @param mapper
      * @return
      * @throws E the e
      */
-    <E extends Exception> DataSet map(String fromColumnName, Throwables.Function<?, ?, E> mapper, String newColumnName, Collection<String> copyingColumnNames)
+    <E extends Exception> DataSet map(String fromColumnName, String newColumnName, Collection<String> copyingColumnNames, Throwables.Function<?, ?, E> mapper)
             throws E;
 
     /**
      *
      * @param <E>
      * @param fromColumnNames
-     * @param mapper
      * @param newColumnName
      * @param copyingColumnNames
+     * @param mapper
      * @return
      * @throws E the e
      */
-    <E extends Exception> DataSet map(Tuple2<String, String> fromColumnNames, Throwables.BiFunction<?, ?, ?, E> mapper, String newColumnName,
-            Collection<String> copyingColumnNames) throws E;
+    <E extends Exception> DataSet map(Tuple2<String, String> fromColumnNames, String newColumnName, Collection<String> copyingColumnNames,
+            Throwables.BiFunction<?, ?, ?, E> mapper) throws E;
 
     /**
      *
      * @param <E>
      * @param fromColumnNames
-     * @param mapper
      * @param newColumnName
      * @param copyingColumnNames
+     * @param mapper
      * @return
      * @throws E the e
      */
-    <E extends Exception> DataSet map(Tuple3<String, String, String> fromColumnNames, Throwables.TriFunction<?, ?, ?, ?, E> mapper, String newColumnName,
-            Collection<String> copyingColumnNames) throws E;
+    <E extends Exception> DataSet map(Tuple3<String, String, String> fromColumnNames, String newColumnName, Collection<String> copyingColumnNames,
+            Throwables.TriFunction<?, ?, ?, ?, E> mapper) throws E;
 
     /**
      *
      * @param <E>
      * @param fromColumnNames
+     * @param newColumnName
+     * @param copyingColumnNames
      * @param mapper DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
-     * @param newColumnName
-     * @param copyingColumnNames
      * @return
      * @throws E the e
      */
-    <E extends Exception> DataSet map(Collection<String> fromColumnNames, Throwables.Function<DisposableObjArray, ?, E> mapper, String newColumnName,
-            Collection<String> copyingColumnNames) throws E;
+    <E extends Exception> DataSet map(Collection<String> fromColumnNames, String newColumnName, Collection<String> copyingColumnNames,
+            Throwables.Function<? super DisposableObjArray, ?, E> mapper) throws E;
 
     /**
      *
      * @param <E>
      * @param fromColumnName
-     * @param mapper
      * @param newColumnName
      * @param copyingColumnName
+     * @param mapper
      * @return
      * @throws E the e
      */
-    <E extends Exception> DataSet flatMap(String fromColumnName, Throwables.Function<?, ? extends Collection<?>, E> mapper, String newColumnName,
-            String copyingColumnName) throws E;
+    <E extends Exception> DataSet flatMap(String fromColumnName, String newColumnName, String copyingColumnName,
+            Throwables.Function<?, ? extends Collection<?>, E> mapper) throws E;
 
     /**
      *
      * @param <E>
      * @param fromColumnName
-     * @param mapper
      * @param newColumnName
      * @param copyingColumnNames
+     * @param mapper
      * @return
      * @throws E the e
      */
-    <E extends Exception> DataSet flatMap(String fromColumnName, Throwables.Function<?, ? extends Collection<?>, E> mapper, String newColumnName,
-            Collection<String> copyingColumnNames) throws E;
+    <E extends Exception> DataSet flatMap(String fromColumnName, String newColumnName, Collection<String> copyingColumnNames,
+            Throwables.Function<?, ? extends Collection<?>, E> mapper) throws E;
 
     /**
      *
      * @param <E>
      * @param fromColumnNames
-     * @param mapper
      * @param newColumnName
      * @param copyingColumnNames
+     * @param mapper
      * @return
      * @throws E the e
      */
-    <E extends Exception> DataSet flatMap(Tuple2<String, String> fromColumnNames, Throwables.BiFunction<?, ?, ? extends Collection<?>, E> mapper,
-            String newColumnName, Collection<String> copyingColumnNames) throws E;
+    <E extends Exception> DataSet flatMap(Tuple2<String, String> fromColumnNames, String newColumnName, Collection<String> copyingColumnNames,
+            Throwables.BiFunction<?, ?, ? extends Collection<?>, E> mapper) throws E;
 
     /**
      *
      * @param <E>
      * @param fromColumnNames
-     * @param mapper
      * @param newColumnName
      * @param copyingColumnNames
+     * @param mapper
      * @return
      * @throws E the e
      */
-    <E extends Exception> DataSet flatMap(Tuple3<String, String, String> fromColumnNames, Throwables.TriFunction<?, ?, ?, ? extends Collection<?>, E> mapper,
-            String newColumnName, Collection<String> copyingColumnNames) throws E;
+    <E extends Exception> DataSet flatMap(Tuple3<String, String, String> fromColumnNames, String newColumnName, Collection<String> copyingColumnNames,
+            Throwables.TriFunction<?, ?, ?, ? extends Collection<?>, E> mapper) throws E;
 
     /**
      *
      * @param <E>
      * @param fromColumnNames
+     * @param newColumnName
+     * @param copyingColumnNames
      * @param mapper DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
-     * @param newColumnName
-     * @param copyingColumnNames
      * @return
      * @throws E the e
      */
-    <E extends Exception> DataSet flatMap(Collection<String> fromColumnNames, Throwables.Function<DisposableObjArray, ? extends Collection<?>, E> mapper,
-            String newColumnName, Collection<String> copyingColumnNames) throws E;
+    <E extends Exception> DataSet flatMap(Collection<String> fromColumnNames, String newColumnName, Collection<String> copyingColumnNames,
+            Throwables.Function<? super DisposableObjArray, ? extends Collection<?>, E> mapper) throws E;
 
     /**
-     * Returns a new <code>DataSet</code> that is limited to the rows where there is a match in both <code>this DataSet</code> and <code>right DataSet</code>.
+     * Returns a new {@code DataSet} that is limited to the rows where there is a match in both this {@code DataSet} and right {@code DataSet}.
      *
      * @param right
      * @param columnName
-     * @param refColumnName
+     * @param joinColumnNameOnRight
      * @return a new DataSet
      */
-    DataSet innerJoin(DataSet right, String columnName, String refColumnName);
+    DataSet innerJoin(DataSet right, String columnName, String joinColumnNameOnRight);
 
     /**
-     * Returns a new <code>DataSet</code> that is limited to the rows where there is a match in both <code>this DataSet</code> and <code>right DataSet</code>.
+     * Returns a new {@code DataSet} that is limited to the rows where there is a match in both this {@code DataSet} and right {@code DataSet}.
      *
      * @param right
      * @param onColumnNames
@@ -3434,7 +3576,7 @@ public interface DataSet {
     DataSet innerJoin(DataSet right, Map<String, String> onColumnNames);
 
     /**
-     * Returns a new <code>DataSet</code> that is limited to the rows where there is a match in both <code>this DataSet</code> and <code>right DataSet</code>.
+     * Returns a new {@code DataSet} that is limited to the rows where there is a match in both this {@code DataSet} and right {@code DataSet}.
      *
      * @param right
      * @param onColumnNames
@@ -3445,7 +3587,7 @@ public interface DataSet {
     DataSet innerJoin(DataSet right, Map<String, String> onColumnNames, String newColumnName, Class<?> newColumnClass);
 
     /**
-     * Returns a new <code>DataSet</code> that is limited to the rows where there is a match in both <code>this DataSet</code> and <code>right DataSet</code>.
+     * Returns a new {@code DataSet} that is limited to the rows where there is a match in both this {@code DataSet} and right {@code DataSet}.
      *
      * @param right
      * @param onColumnNames
@@ -3459,17 +3601,17 @@ public interface DataSet {
             IntFunction<? extends Collection> collSupplier);
 
     /**
-     * Returns a new <code>DataSet</code> that has all the rows from this <code>DataSet</code> and the rows from the specified <code>right DataSet</code> if they have a match with the rows from the this <code>DataSet</code>.
+     * Returns a new {@code DataSet} that has all the rows from this {@code DataSet} and the rows from the specified right {@code DataSet} if they have a match with the rows from the this {@code DataSet}.
      *
      * @param right
      * @param columnName
-     * @param refColumnName
+     * @param joinColumnNameOnRight
      * @return a new DataSet
      */
-    DataSet leftJoin(DataSet right, String columnName, String refColumnName);
+    DataSet leftJoin(DataSet right, String columnName, String joinColumnNameOnRight);
 
     /**
-     * Returns a new <code>DataSet</code> that has all the rows from this <code>DataSet</code> and the rows from the specified <code>right DataSet</code> if they have a match with the rows from the this <code>DataSet</code>.
+     * Returns a new {@code DataSet} that has all the rows from this {@code DataSet} and the rows from the specified right {@code DataSet} if they have a match with the rows from the this {@code DataSet}.
      *
      * @param right
      * @param onColumnNames
@@ -3478,7 +3620,7 @@ public interface DataSet {
     DataSet leftJoin(DataSet right, Map<String, String> onColumnNames);
 
     /**
-     * Returns a new <code>DataSet</code> that has all the rows from this <code>DataSet</code> and the rows from the specified <code>right DataSet</code> if they have a match with the rows from the this <code>DataSet</code>.
+     * Returns a new {@code DataSet} that has all the rows from this {@code DataSet} and the rows from the specified right {@code DataSet} if they have a match with the rows from the this {@code DataSet}.
      *
      * @param right
      * @param onColumnNames
@@ -3489,7 +3631,7 @@ public interface DataSet {
     DataSet leftJoin(DataSet right, Map<String, String> onColumnNames, String newColumnName, Class<?> newColumnClass);
 
     /**
-     * Returns a new <code>DataSet</code> that has all the rows from this <code>DataSet</code> and the rows from the specified <code>right DataSet</code> if they have a match with the rows from the this <code>DataSet</code>.
+     * Returns a new {@code DataSet} that has all the rows from this {@code DataSet} and the rows from the specified right {@code DataSet} if they have a match with the rows from the this {@code DataSet}.
      *
      * @param right
      * @param onColumnNames
@@ -3503,17 +3645,17 @@ public interface DataSet {
             IntFunction<? extends Collection> collSupplier);
 
     /**
-     * Returns a new <code>DataSet</code> that has all the rows from the specified right <code>DataSet</code> and the rows from <code>this DataSet</code> if they have a match with the rows from the right <code>DataSet</code>.
+     * Returns a new {@code DataSet} that has all the rows from the specified right {@code DataSet} and the rows from this {@code DataSet} if they have a match with the rows from the right {@code DataSet}.
      *
      * @param right
      * @param columnName
-     * @param refColumnName
+     * @param joinColumnNameOnRight
      * @return a new DataSet
      */
-    DataSet rightJoin(DataSet right, String columnName, String refColumnName);
+    DataSet rightJoin(DataSet right, String columnName, String joinColumnNameOnRight);
 
     /**
-     * Returns a new <code>DataSet</code> that has all the rows from the specified right <code>DataSet</code> and the rows from <code>this DataSet</code> if they have a match with the rows from the right <code>DataSet</code>.
+     * Returns a new {@code DataSet} that has all the rows from the specified right {@code DataSet} and the rows from this {@code DataSet} if they have a match with the rows from the right {@code DataSet}.
      *
      * @param right
      * @param onColumnNames
@@ -3522,7 +3664,7 @@ public interface DataSet {
     DataSet rightJoin(DataSet right, Map<String, String> onColumnNames);
 
     /**
-     * Returns a new <code>DataSet</code> that has all the rows from the specified right <code>DataSet</code> and the rows from <code>this DataSet</code> if they have a match with the rows from the right <code>DataSet</code>.
+     * Returns a new {@code DataSet} that has all the rows from the specified right {@code DataSet} and the rows from this {@code DataSet} if they have a match with the rows from the right {@code DataSet}.
      *
      * @param right
      * @param onColumnNames
@@ -3533,7 +3675,7 @@ public interface DataSet {
     DataSet rightJoin(DataSet right, Map<String, String> onColumnNames, String newColumnName, Class<?> newColumnClass);
 
     /**
-     * Returns a new <code>DataSet</code> that has all the rows from the specified right <code>DataSet</code> and the rows from <code>this DataSet</code> if they have a match with the rows from the right <code>DataSet</code>.
+     * Returns a new {@code DataSet} that has all the rows from the specified right {@code DataSet} and the rows from this {@code DataSet} if they have a match with the rows from the right {@code DataSet}.
      *
      * @param right
      * @param onColumnNames
@@ -3547,17 +3689,17 @@ public interface DataSet {
             IntFunction<? extends Collection> collSupplier);
 
     /**
-     * Returns a new <code>DataSet</code> that has all the rows from this <code>DataSet</code> and the specified <code>right DataSet</code>, regardless of whether there are any matches.
+     * Returns a new {@code DataSet} that has all the rows from this {@code DataSet} and the specified right {@code DataSet}, regardless of whether there are any matches.
      *
      * @param right
      * @param columnName
-     * @param refColumnName
+     * @param joinColumnNameOnRight
      * @return a new DataSet
      */
-    DataSet fullJoin(DataSet right, String columnName, String refColumnName);
+    DataSet fullJoin(DataSet right, String columnName, String joinColumnNameOnRight);
 
     /**
-     * Returns a new <code>DataSet</code> that has all the rows from this <code>DataSet</code> and the specified <code>right DataSet</code>, regardless of whether there are any matches.
+     * Returns a new {@code DataSet} that has all the rows from this {@code DataSet} and the specified right {@code DataSet}, regardless of whether there are any matches.
      *
      * @param right
      * @param onColumnNames
@@ -3566,7 +3708,7 @@ public interface DataSet {
     DataSet fullJoin(DataSet right, Map<String, String> onColumnNames);
 
     /**
-     * Returns a new <code>DataSet</code> that has all the rows from this <code>DataSet</code> and the specified <code>right DataSet</code>, regardless of whether there are any matches.
+     * Returns a new {@code DataSet} that has all the rows from this {@code DataSet} and the specified right {@code DataSet}, regardless of whether there are any matches.
      *
      * @param right
      * @param onColumnNames
@@ -3577,7 +3719,7 @@ public interface DataSet {
     DataSet fullJoin(DataSet right, Map<String, String> onColumnNames, String newColumnName, Class<?> newColumnClass);
 
     /**
-     * Returns a new <code>DataSet</code> that has all the rows from this <code>DataSet</code> and the specified <code>right DataSet</code>, regardless of whether there are any matches.
+     * Returns a new {@code DataSet} that has all the rows from this {@code DataSet} and the specified right {@code DataSet}, regardless of whether there are any matches.
      *
      * @param right
      * @param onColumnNames
@@ -3591,24 +3733,86 @@ public interface DataSet {
             IntFunction<? extends Collection> collSupplier);
 
     /**
-     * Returns a new <code>DataSet</code>. Duplicated row in the specified {@code DataSet} will be eliminated.
+     * Returns a new {@code DataSet}. Duplicated rows in the returned {@code DataSet} will be eliminated.
      *
-     * @param dataSet
+     * @param other
      * @return a new DataSet
      */
-    DataSet union(DataSet dataSet);
+    DataSet union(DataSet other);
 
     /**
-     * Returns a new <code>DataSet</code>. Duplicated row in the specified {@code DataSet} will not be eliminated.
+     * Returns a new {@code DataSet}. Duplicated rows in the returned {@code DataSet} will be eliminated.
      *
-     * @param dataSet
+     * @param other
+     * @param requiresSameColumns
      * @return a new DataSet
      */
-    DataSet unionAll(DataSet dataSet);
+    DataSet union(DataSet other, boolean requiresSameColumns);
+
+    /**
+     * Returns a new {@code DataSet}. Duplicated rows in the returned {@code DataSet} will be eliminated.
+     *
+     * @param other
+     * @param keyColumnNames
+     * @return a new DataSet
+     */
+    DataSet union(DataSet other, Collection<String> keyColumnNames);
+
+    /**
+     * Returns a new {@code DataSet}. Duplicated rows in the returned {@code DataSet} will be eliminated.
+     *
+     * @param other
+     * @param keyColumnNames
+     * @param requiresSameColumns
+     * @return a new DataSet
+     */
+    DataSet union(DataSet other, Collection<String> keyColumnNames, boolean requiresSameColumns);
+
+    /**
+     * Returns a new {@code DataSet}. Duplicated rows in the returned {@code DataSet} will not be eliminated.
+     *
+     * @param other
+     * @return a new DataSet
+     * @see #merge(DataSet)
+     */
+    DataSet unionAll(DataSet other);
+
+    /**
+     * Returns a new {@code DataSet}. Duplicated rows in the returned {@code DataSet} will not be eliminated.
+     *
+     * @param other
+     * @param requiresSameColumns
+     * @return a new DataSet
+     * @see #merge(DataSet, boolean)
+     */
+    DataSet unionAll(DataSet other, boolean requiresSameColumns);
 
     /**
      * Returns a new {@code DataSet} with all rows from this DataSet and which also appear in the specified {@code other} in common columns.
-     * This operation removes duplicate rows from the final result set.
+     * Duplicated rows in the returned {@code DataSet} will be eliminated.
+     *
+     * @param other
+     * @param keyColumnNames this parameter won't be used. adding it here to be consistent with {@code union(DataSet, Collection)}
+     * @return a new DataSet
+     */
+    @Beta
+    DataSet unionAll(DataSet other, Collection<String> keyColumnNames);
+
+    /**
+     * Returns a new {@code DataSet} with all rows from this DataSet and which also appear in the specified {@code other} in common columns.
+     * Duplicated rows in the returned {@code DataSet} will be eliminated.
+     *
+     * @param other
+     * @param keyColumnNames this parameter won't be used. adding it here to be consistent with {@code union(DataSet, Collection, boolean)}
+     * @param requiresSameColumns
+     * @return a new DataSet
+     */
+    @Beta
+    DataSet unionAll(DataSet other, Collection<String> keyColumnNames, boolean requiresSameColumns);
+
+    /**
+     * Returns a new {@code DataSet} with all rows from this DataSet and which also appear in the specified {@code other} in common columns.
+     * Duplicated rows in the returned {@code DataSet} will be eliminated.
      *
      * @param other
      * @return
@@ -3617,109 +3821,364 @@ public interface DataSet {
 
     /**
      * Returns a new {@code DataSet} with all rows from this DataSet and which also appear in the specified {@code other} in common columns.
-     * This operation doesn't remove duplicate rows from the final result set.
+     * Duplicated rows in the returned {@code DataSet} will be eliminated.
+     *
+     * @param other
+     * @param requiresSameColumns
+     * @return
+     */
+    DataSet intersect(DataSet other, boolean requiresSameColumns);
+
+    /**
+     * Returns a new {@code DataSet} with all rows from this DataSet and which also appear in the specified {@code other} in common columns.
+     * Duplicated rows in the returned {@code DataSet} will be eliminated.
+     *
+     * @param other
+     * @param keyColumnNames
+     * @param keyColumns
+     * @return
+     */
+    DataSet intersect(DataSet other, Collection<String> keyColumnNames);
+
+    /**
+     * Returns a new {@code DataSet} with all rows from this DataSet and which also appear in the specified {@code other} in common columns.
+     * Duplicated rows in the returned {@code DataSet} will be eliminated.
+     *
+     * @param other
+     * @param keyColumnNames
+     * @param requiresSameColumns
+     * @return
+     */
+    DataSet intersect(DataSet other, Collection<String> keyColumnNames, boolean requiresSameColumns);
+
+    /**
+     * Returns a new {@code DataSet} with all rows from this DataSet and which also appear in the specified {@code other} in common columns..
+     * Duplicated rows in the returned {@code DataSet} will not be eliminated.
      *
      * @param other
      * @return
-     * @see java.util.Collection#retainAll(Collection)
      */
     DataSet intersectAll(DataSet other);
 
     /**
-     * Returns a new {@code DataSet} with all rows from this DataSet and which also appear in the specified {@code other} in common columns by occurrences.
-     * This operation only cares the occurrences of rows in both {@code DataSet}. it doesn't remove duplicate.
+     * Returns a new {@code DataSet} with all rows from this DataSet and which also appear in the specified {@code other} in common columns.
+     * Duplicated rows in the returned {@code DataSet} will not be eliminated.
      *
-     * @param dataSet
-     * @return a new DataSet
-     * @see com.landawn.abacus.util.IntList#intersection(com.landawn.abacus.util.IntList)
+     * @param other
+     * @param requiresSameColumns
+     * @return
      */
-    DataSet intersection(DataSet dataSet);
+    DataSet intersectAll(DataSet other, boolean requiresSameColumns);
+
+    /**
+     * Returns a new {@code DataSet} with all rows from this DataSet and which also appear in the specified {@code other} in common columns..
+     * Duplicated rows in the returned {@code DataSet} will not be eliminated.
+     *
+     * @param other
+     * @param keyColumnNames
+     * @return
+     */
+    DataSet intersectAll(DataSet other, Collection<String> keyColumnNames);
+
+    /**
+     * Returns a new {@code DataSet} with all rows from this DataSet and which also appear in the specified {@code other} in common columns.
+     * Duplicated rows in the returned {@code DataSet} will not be eliminated.
+     *
+     * @param other
+     * @param keyColumnNames
+     * @param requiresSameColumns
+     * @return
+     */
+    DataSet intersectAll(DataSet other, Collection<String> keyColumnNames, boolean requiresSameColumns);
 
     /**
      * Returns a new {@code DataSet} with all rows from this DataSet and which not appear in the specified {@code other} in common columns.
+     * Duplicated rows in the returned {@code DataSet} will be eliminated.
      *
      * @param other
      * @return
-     * @see java.util.Collection#removeAll(Collection)
      */
     DataSet except(DataSet other);
 
     /**
-     * Returns a new <code>DataSet</code> with different rows in common columns from the specified {@code DataSet}, occurrences matter.
+     * Returns a new {@code DataSet} with all rows from this DataSet and which not appear in the specified {@code other} in common columns.
+     * Duplicated rows in the returned {@code DataSet} will be eliminated.
      *
-     * @param dataSet
+     * @param other
+     * @param requiresSameColumns
+     * @return
+     */
+    DataSet except(DataSet other, boolean requiresSameColumns);
+
+    /**
+     * Returns a new {@code DataSet} with all rows from this DataSet and which not appear in the specified {@code other} in common columns.
+     * Duplicated rows in the returned {@code DataSet} will be eliminated.
+     *
+     * @param other
+     * @param keyColumnNames
+     * @return
+     */
+    DataSet except(DataSet other, Collection<String> keyColumnNames);
+
+    /**
+     * Returns a new {@code DataSet} with all rows from this DataSet and which not appear in the specified {@code other} in common columns.
+     * Duplicated rows in the returned {@code DataSet} will be eliminated.
+     *
+     * @param other
+     * @param keyColumnNames
+     * @param requiresSameColumns
+     * @return
+     */
+    DataSet except(DataSet other, Collection<String> keyColumnNames, boolean requiresSameColumns);
+
+    /**
+     * Returns a new {@code DataSet} with all rows from this DataSet and which not appear in the specified {@code other} in common columns.
+     * Duplicated rows in the returned {@code DataSet} will not be eliminated.
+     *
+     * @param other
+     * @return
+     */
+    DataSet exceptAll(DataSet other);
+
+    /**
+     * Returns a new {@code DataSet} with all rows from this DataSet and which not appear in the specified {@code other} in common columns.
+     * Duplicated rows in the returned {@code DataSet} will not be eliminated.
+     *
+     * @param other
+     * @param requiresSameColumns
+     * @return
+     */
+    DataSet exceptAll(DataSet other, boolean requiresSameColumns);
+
+    /**
+     * Returns a new {@code DataSet} with all rows from this DataSet and which not appear in the specified {@code other} in common columns.
+     * Duplicated rows in the returned {@code DataSet} will not be eliminated.
+     *
+     * @param other
+     * @param keyColumnNames
+     * @return
+     */
+    DataSet exceptAll(DataSet other, Collection<String> keyColumnNames);
+
+    /**
+     * Returns a new {@code DataSet} with all rows from this DataSet and which not appear in the specified {@code other} in common columns.
+     * Duplicated rows in the returned {@code DataSet} will not be eliminated.
+     *
+     * @param other
+     * @param keyColumnNames
+     * @param requiresSameColumns
+     * @return
+     */
+    DataSet exceptAll(DataSet other, Collection<String> keyColumnNames, boolean requiresSameColumns);
+
+    /**
+     * Returns a new {@code DataSet} with all rows from this DataSet and which also appear in the specified {@code other} in common columns. Occurrences are considered.
+     * Duplicated rows in the returned {@code DataSet} will not be eliminated.
+     *
+     * @param other
+     * @return a new DataSet
+     * @see com.landawn.abacus.util.IntList#intersection(com.landawn.abacus.util.IntList)
+     */
+    DataSet intersection(DataSet other);
+
+    /**
+     * Returns a new {@code DataSet} with all rows from this DataSet and which also appear in the specified {@code other} in common columns. Occurrences are considered.
+     * Duplicated rows in the returned {@code DataSet} will not be eliminated.
+     *
+     * @param other
+     * @param requiresSameColumns
+     * @return a new DataSet
+     * @see com.landawn.abacus.util.IntList#intersection(com.landawn.abacus.util.IntList)
+     */
+    DataSet intersection(DataSet other, boolean requiresSameColumns);
+
+    /**
+     * Returns a new {@code DataSet} with all rows from this DataSet and which also appear in the specified {@code other} in common columns. Occurrences are considered.
+     * Duplicated rows in the returned {@code DataSet} will not be eliminated.
+     *
+     * @param other
+     * @param keyColumnNames
+     * @return a new DataSet
+     * @see com.landawn.abacus.util.IntList#intersection(com.landawn.abacus.util.IntList)
+     */
+    DataSet intersection(DataSet other, Collection<String> keyColumnNames);
+
+    /**
+     * Returns a new {@code DataSet} with all rows from this DataSet and which also appear in the specified {@code other} in common columns. Occurrences are considered.
+     * Duplicated rows in the returned {@code DataSet} will not be eliminated.
+     *
+     * @param other
+     * @param keyColumnNames
+     * @param requiresSameColumns
+     * @return a new DataSet
+     * @see com.landawn.abacus.util.IntList#intersection(com.landawn.abacus.util.IntList)
+     */
+    DataSet intersection(DataSet other, Collection<String> keyColumnNames, boolean requiresSameColumns);
+
+    /**
+     * Returns a new {@code DataSet} with all rows from this DataSet and which not appear in the specified {@code other} in common columns. Occurrences are considered.
+     * Duplicated rows in the returned {@code DataSet} will not be eliminated.
+     *
+     * @param other
      * @return a new DataSet
      * @see com.landawn.abacus.util.IntList#difference(com.landawn.abacus.util.IntList)
      */
-    DataSet difference(DataSet dataSet);
+    DataSet difference(DataSet other);
 
     /**
+     * Returns a new {@code DataSet} with all rows from this DataSet and which not appear in the specified {@code other} in common columns. Occurrences are considered.
+     * Duplicated rows in the returned {@code DataSet} will not be eliminated.
      *
-     * @param dataSet
+     * @param other
+     * @param requiresSameColumns
+     * @return a new DataSet
+     * @see com.landawn.abacus.util.IntList#difference(com.landawn.abacus.util.IntList)
+     */
+    DataSet difference(DataSet other, boolean requiresSameColumns);
+
+    /**
+     * Returns a new {@code DataSet} with all rows from this DataSet and which not appear in the specified {@code other} in common columns. Occurrences are considered.
+     * Duplicated rows in the returned {@code DataSet} will not be eliminated.
+     *
+     * @param other
+     * @param keyColumnNames
+     * @return a new DataSet
+     * @see com.landawn.abacus.util.IntList#difference(com.landawn.abacus.util.IntList)
+     */
+    DataSet difference(DataSet other, Collection<String> keyColumnNames);
+
+    /**
+     * Returns a new {@code DataSet} with all rows from this DataSet and which not appear in the specified {@code other} in common columns. Occurrences are considered.
+     * Duplicated rows in the returned {@code DataSet} will not be eliminated.
+     *
+     * @param other
+     * @param keyColumnNames
+     * @param requiresSameColumns
+     * @return a new DataSet
+     * @see com.landawn.abacus.util.IntList#difference(com.landawn.abacus.util.IntList)
+     */
+    DataSet difference(DataSet other, Collection<String> keyColumnNames, boolean requiresSameColumns);
+
+    /**
+     * Returns a new {@code DataSet} with all rows from this DataSet and which also appear in the specified {@code other} in common columns or vice versa. Occurrences are considered.
+     *
+     * @param other
      * @return
      * @see com.landawn.abacus.util.IntList#symmetricDifference(com.landawn.abacus.util.IntList)
      */
-    DataSet symmetricDifference(DataSet dataSet);
+    DataSet symmetricDifference(DataSet other);
 
     /**
-     * Returns a new <code>DataSet</code> by appending the specified <code>from</code> <code>DataSet</code> into this <code>DataSet</code>.
+     * Returns a new {@code DataSet} with all rows from this DataSet and which also appear in the specified {@code other} in common columns or vice versa. Occurrences are considered.
+     * Duplicated rows in the returned {@code DataSet} will not be eliminated.
      *
-     * @param from
+     * @param other
+     * @param requiresSameColumns
+     * @return
+     * @see com.landawn.abacus.util.IntList#symmetricDifference(com.landawn.abacus.util.IntList)
+     */
+    DataSet symmetricDifference(DataSet other, boolean requiresSameColumns);
+
+    /**
+     * Returns a new {@code DataSet} with all rows from this DataSet and which also appear in the specified {@code other} in common columns or vice versa. Occurrences are considered.
+     *
+     * @param other
+     * @param keyColumnNames
+     * @return
+     * @see com.landawn.abacus.util.IntList#symmetricDifference(com.landawn.abacus.util.IntList)
+     */
+    DataSet symmetricDifference(DataSet other, Collection<String> keyColumnNames);
+
+    /**
+     * Returns a new {@code DataSet} with all rows from this DataSet and which also appear in the specified {@code other} in common columns or vice versa. Occurrences are considered.
+     * Duplicated rows in the returned {@code DataSet} will not be eliminated.
+     *
+     * @param other
+     * @param keyColumnNames
+     * @param requiresSameColumns
+     * @return
+     * @see com.landawn.abacus.util.IntList#symmetricDifference(com.landawn.abacus.util.IntList)
+     */
+    DataSet symmetricDifference(DataSet other, Collection<String> keyColumnNames, boolean requiresSameColumns);
+
+    /**
+     * Returns a new {@code DataSet} by appending the specified {@code other} into this {@code DataSet}.
+     *
+     * @param other
      * @return
      */
-    DataSet merge(DataSet from);
+    DataSet merge(DataSet other);
 
     /**
-     * Returns a new <code>DataSet</code> by appending the specified <code>from</code> <code>DataSet</code> into this <code>DataSet</code>.
+     * Returns a new {@code DataSet} by appending the specified {@code other} into this {@code DataSet}.
      *
-     * @param from
-     * @param columnNames
+     * @param other
+     * @param requiresSameColumns
      * @return
      */
-    DataSet merge(DataSet from, Collection<String> columnNames);
+    DataSet merge(DataSet other, boolean requiresSameColumns);
 
     /**
-     * Returns a new <code>DataSet</code> by appending the specified <code>from</code> <code>DataSet</code> from <code>fromRowIndex</code> to <code>toRowIndex</code> into this <code>DataSet</code>.
+     * Returns a new {@code DataSet} by appending the specified {@code other} into this {@code DataSet}.
      *
-     * @param from
+     * @param other
+     * @param columnNames selected column names from {@code other} {@code DataSet} to merge.
+     * @return
+     */
+    DataSet merge(DataSet other, Collection<String> columnNames);
+
+    /**
+     * Returns a new {@code DataSet} by appending the specified {@code other} from {@code fromRowIndex} to {@code toRowIndex} into this {@code DataSet}.
+     *
+     * @param other
      * @param fromRowIndex
      * @param toRowIndex
      * @return
      */
-    DataSet merge(DataSet from, int fromRowIndex, int toRowIndex);
+    DataSet merge(DataSet other, int fromRowIndex, int toRowIndex);
 
     /**
-     * Returns a new <code>DataSet</code> by appending the specified <code>columnNames</code> in <code>from</code> <code>DataSet</code> from <code>fromRowIndex</code> to <code>toRowIndex</code> into this <code>DataSet</code>.
+     * Returns a new {@code DataSet} by appending the specified {@code columnNames} in {@code other} from {@code fromRowIndex} to {@code toRowIndex} into this {@code DataSet}.
      *
-     * @param from
-     * @param columnNames
+     * @param other
      * @param fromRowIndex
      * @param toRowIndex
+     * @param columnNames selected column names from {@code other} {@code DataSet} to merge.
      * @return
      */
-    DataSet merge(DataSet from, Collection<String> columnNames, int fromRowIndex, int toRowIndex);
+    DataSet merge(DataSet other, int fromRowIndex, int toRowIndex, Collection<String> columnNames);
+
+    //    /**
+    //     *
+    //     * @param a
+    //     * @param b
+    //     * @return
+    //     * @deprecated replaced by {@link #merge(Collection)}
+    //     */
+    //    @Deprecated
+    //    DataSet merge(final DataSet a, final DataSet b);
 
     /**
      *
-     * @param a
-     * @param b
+     * @param others
      * @return
      */
-    DataSet merge(final DataSet a, final DataSet b);
+    DataSet merge(final Collection<? extends DataSet> others);
 
     /**
      *
-     * @param dss
+     * @param others
+     * @param requiresSameColumns
      * @return
      */
-    DataSet merge(final Collection<? extends DataSet> dss);
+    DataSet merge(final Collection<? extends DataSet> others, boolean requiresSameColumns);
 
     /**
      *
-     * @param b
+     * @param other
      * @return
      */
-    DataSet cartesianProduct(DataSet b);
+    DataSet cartesianProduct(DataSet other);
 
     /**
      * Returns consecutive sub lists of this DataSet, each of the same chunkSize (the list may be smaller), or an empty List if this DataSet is empty.
@@ -3797,26 +4256,26 @@ public interface DataSet {
 
     /**
      * Returns a frozen slice view on this {@code DataSet}.
-     *
-     * @param columnNames
      * @param fromRowIndex
      * @param toRowIndex
+     * @param columnNames
+     *
      * @return a copy of this DataSet
      * @see List#subList(int, int).
      */
-    DataSet slice(Collection<String> columnNames, int fromRowIndex, int toRowIndex);
+    DataSet slice(int fromRowIndex, int toRowIndex, Collection<String> columnNames);
 
     /**
-     * Returns the copy of this <code>DataSet</code>.
-     * The frozen status of the copy will always be false, even the original <code>DataSet</code> is frozen.
+     * Returns the copy of this {@code DataSet}.
+     * The frozen status of the copy will always be false, even the original {@code DataSet} is frozen.
      *
      * @return a copy of this DataSet
      */
     DataSet copy();
 
     /**
-     * Returns the copy of this <code>DataSet</code> with specified column name list.
-     * The frozen status of the copy will always be false, even the original <code>DataSet</code> is frozen.
+     * Returns the copy of this {@code DataSet} with specified column name list.
+     * The frozen status of the copy will always be false, even the original {@code DataSet} is frozen.
      *
      * @param columnNames
      * @return a copy of this DataSet
@@ -3824,8 +4283,8 @@ public interface DataSet {
     DataSet copy(Collection<String> columnNames);
 
     /**
-     * Returns the copy of this <code>DataSet</code> from the specified <code>fromRowIndex</code> to <code>toRowIndex</code>.
-     * The frozen status of the copy will always be false, even the original <code>DataSet</code> is frozen.
+     * Returns the copy of this {@code DataSet} from the specified {@code fromRowIndex} to {@code toRowIndex}.
+     * The frozen status of the copy will always be false, even the original {@code DataSet} is frozen.
      *
      * @param fromRowIndex
      * @param toRowIndex
@@ -3834,25 +4293,25 @@ public interface DataSet {
     DataSet copy(int fromRowIndex, int toRowIndex);
 
     /**
-     * Returns the copy of this <code>DataSet</code> with specified column name list from the specified <code>fromRowIndex</code> to <code>toRowIndex</code>.
-     * The frozen status of the copy will always be false, even the original <code>DataSet</code> is frozen.
-     *
-     * @param columnNames
+     * Returns the copy of this {@code DataSet} with specified column name list from the specified {@code fromRowIndex} to {@code toRowIndex}.
+     * The frozen status of the copy will always be false, even the original {@code DataSet} is frozen.
      * @param fromRowIndex
      * @param toRowIndex
+     * @param columnNames
+     *
      * @return a copy of this DataSet
      */
-    DataSet copy(Collection<String> columnNames, int fromRowIndex, int toRowIndex);
+    DataSet copy(int fromRowIndex, int toRowIndex, Collection<String> columnNames);
 
     /**
-     * Deeply copy each element in this <code>DataSet</code> by Serialization/Deserialization.
+     * Deeply copy each element in this {@code DataSet} by Serialization/Deserialization.
      *
      * @return
      */
     DataSet clone(); //NOSONAR
 
     /**
-     * Deeply copy each element in this <code>DataSet</code> by Serialization/Deserialization.
+     * Deeply copy each element in this {@code DataSet} by Serialization/Deserialization.
      *
      * @param freeze
      * @return
@@ -3871,15 +4330,15 @@ public interface DataSet {
 
     /**
      *
-     * @param <A>
-     * @param <B>
-     * @param columnNameA
-     * @param columnNameB
      * @param fromRowIndex
      * @param toRowIndex
+     * @param columnNameA
+     * @param columnNameB
+     * @param <A>
+     * @param <B>
      * @return
      */
-    <A, B> BiIterator<A, B> iterator(String columnNameA, String columnNameB, int fromRowIndex, int toRowIndex);
+    <A, B> BiIterator<A, B> iterator(int fromRowIndex, int toRowIndex, String columnNameA, String columnNameB);
 
     /**
      *
@@ -3895,17 +4354,17 @@ public interface DataSet {
 
     /**
      *
-     * @param <A>
-     * @param <B>
-     * @param <C>
+     * @param fromRowIndex
+     * @param toRowIndex
      * @param columnNameA
      * @param columnNameB
      * @param columnNameC
-     * @param fromRowIndex
-     * @param toRowIndex
+     * @param <A>
+     * @param <B>
+     * @param <C>
      * @return
      */
-    <A, B, C> TriIterator<A, B, C> iterator(String columnNameA, String columnNameB, String columnNameC, int fromRowIndex, int toRowIndex);
+    <A, B, C> TriIterator<A, B, C> iterator(int fromRowIndex, int toRowIndex, String columnNameA, String columnNameB, String columnNameC);
 
     /**
      *
@@ -3932,13 +4391,13 @@ public interface DataSet {
 
     /**
      *
-     * @param <T>
-     * @param columnName
      * @param fromRowIndex
      * @param toRowIndex
+     * @param columnName
+     * @param <T>
      * @return
      */
-    <T> Stream<T> stream(String columnName, int fromRowIndex, int toRowIndex);
+    <T> Stream<T> stream(int fromRowIndex, int toRowIndex, String columnName);
 
     // The method stream(Collection<String>, Function<? super NoCachingNoUpdating.DisposableObjArray,Object[]>) is ambiguous for the type
     //    /**
@@ -3947,7 +4406,7 @@ public interface DataSet {
     //     * @param rowMapper DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
     //     * @return
     //     */
-    //    <T> Stream<T> stream(Function<? super DisposableObjArray, T> rowMapper);
+    //    <T> Stream<T> stream(Function<? super DisposableObjArray, ? extends T> rowMapper);
     //
     //    /**
     //     *
@@ -3957,7 +4416,7 @@ public interface DataSet {
     //     * @param rowMapper DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
     //     * @return
     //     */
-    //    <T> Stream<T> stream(int fromRowIndex, int toRowIndex, Function<? super DisposableObjArray, T> rowMapper);
+    //    <T> Stream<T> stream(int fromRowIndex, int toRowIndex, Function<? super DisposableObjArray, ? extends T> rowMapper);
     //
     //    /**
     //     *
@@ -3966,7 +4425,7 @@ public interface DataSet {
     //     * @param rowMapper DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
     //     * @return
     //     */
-    //    <T> Stream<T> stream(Collection<String> columnNames, Function<? super DisposableObjArray, T> rowMapper);
+    //    <T> Stream<T> stream(Collection<String> columnNames, Function<? super DisposableObjArray, ? extends T> rowMapper);
     //
     //    /**
     //     *
@@ -3977,7 +4436,7 @@ public interface DataSet {
     //     * @param rowMapper DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
     //     * @return
     //     */
-    //    <T> Stream<T> stream(Collection<String> columnNames, int fromRowIndex, int toRowIndex, Function<? super DisposableObjArray, T> rowMapper);
+    //    <T> Stream<T> stream(Collection<String> columnNames, int fromRowIndex, int toRowIndex, Function<? super DisposableObjArray, ? extends T> rowMapper);
 
     /**
      *
@@ -4010,12 +4469,12 @@ public interface DataSet {
      *
      * @param <T>
      * @param rowClass it can be Object[]/List/Set/Map/Bean
-     * @param columnNames
      * @param fromRowIndex
      * @param toRowIndex
+     * @param columnNames
      * @return
      */
-    <T> Stream<T> stream(Class<? extends T> rowClass, Collection<String> columnNames, int fromRowIndex, int toRowIndex);
+    <T> Stream<T> stream(Class<? extends T> rowClass, int fromRowIndex, int toRowIndex, Collection<String> columnNames);
 
     /**
      *
@@ -4049,14 +4508,14 @@ public interface DataSet {
     /**
      *
      *
-     * @param <T>
-     * @param columnNames
      * @param fromRowIndex
      * @param toRowIndex
+     * @param columnNames
      * @param rowSupplier it can be Object[]/List/Set/Map/Bean
+     * @param <T>
      * @return
      */
-    <T> Stream<T> stream(Collection<String> columnNames, int fromRowIndex, int toRowIndex, IntFunction<? extends T> rowSupplier);
+    <T> Stream<T> stream(int fromRowIndex, int toRowIndex, Collection<String> columnNames, IntFunction<? extends T> rowSupplier);
 
     /**
     *
@@ -4092,14 +4551,97 @@ public interface DataSet {
     *
     * @param <T>
     * @param beanClass
-    * @param columnNames
-    * @param fromRowIndex
-    * @param toRowIndex
-    * @param prefixAndFieldNameMap
+     * @param fromRowIndex
+     * @param toRowIndex
+     * @param columnNames
+     * @param prefixAndFieldNameMap
     * @return
     */
-    <T> Stream<T> stream(Class<? extends T> beanClass, Collection<String> columnNames, int fromRowIndex, int toRowIndex,
+    <T> Stream<T> stream(Class<? extends T> beanClass, int fromRowIndex, int toRowIndex, Collection<String> columnNames,
             Map<String, String> prefixAndFieldNameMap);
+
+    /**
+     *
+     * @param <T>
+     * @param rowMapper
+     * @return
+     */
+    <T> Stream<T> stream(IntObjFunction<? super DisposableObjArray, ? extends T> rowMapper);
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param fromRowIndex
+     * @param toRowIndex
+     * @param rowMapper
+     * @return
+     */
+    <T> Stream<T> stream(int fromRowIndex, int toRowIndex, IntObjFunction<? super DisposableObjArray, ? extends T> rowMapper);
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param columnNames
+     * @param rowMapper
+     * @return
+     */
+    <T> Stream<T> stream(Collection<String> columnNames, IntObjFunction<? super DisposableObjArray, ? extends T> rowMapper);
+
+    /**
+     *
+     *
+     * @param fromRowIndex
+     * @param toRowIndex
+     * @param columnNames
+     * @param rowMapper
+     * @param <T>
+     * @return
+     */
+    <T> Stream<T> stream(int fromRowIndex, int toRowIndex, Collection<String> columnNames, IntObjFunction<? super DisposableObjArray, ? extends T> rowMapper);
+
+    /**
+     *
+     * @param <T>
+     * @param columnNames
+     * @param rowMapper
+     * @return
+     */
+    <T> Stream<T> stream(Tuple2<String, String> columnNames, BiFunction<?, ?, ? extends T> rowMapper);
+
+    /**
+     *
+     *
+     * @param fromRowIndex
+     * @param toRowIndex
+     * @param columnNames
+     * @param rowMapper
+     * @param <T>
+     * @return
+     */
+    <T> Stream<T> stream(int fromRowIndex, int toRowIndex, Tuple2<String, String> columnNames, BiFunction<?, ?, ? extends T> rowMapper);
+
+    /**
+     *
+     * @param <T>
+     * @param columnNames
+     * @param rowMapper
+     * @return
+     */
+    <T> Stream<T> stream(Tuple3<String, String, String> columnNames, TriFunction<?, ?, ?, ? extends T> rowMapper);
+
+    /**
+     *
+     *
+     * @param fromRowIndex
+     * @param toRowIndex
+     * @param columnNames
+     * @param rowMapper
+     * @param <T>
+     * @return
+     */
+    <T> Stream<T> stream(int fromRowIndex, int toRowIndex, Tuple3<String, String, String> columnNames, TriFunction<?, ?, ?, ? extends T> rowMapper);
 
     /**
      *
@@ -4216,11 +4758,11 @@ public interface DataSet {
 
     /**
      *
-     * @param columnNames
      * @param fromRowIndex
      * @param toRowIndex
+     * @param columnNames
      */
-    void println(Collection<String> columnNames, int fromRowIndex, int toRowIndex);
+    void println(int fromRowIndex, int toRowIndex, Collection<String> columnNames);
 
     /**
      *
@@ -4235,11 +4777,11 @@ public interface DataSet {
      *
      * @param <W>
      * @param outputWriter
-     * @param columnNames
      * @param fromRowIndex
      * @param toRowIndex
+     * @param columnNames
      * @return
      * @throws UncheckedIOException the unchecked IO exception
      */
-    <W extends Writer> W println(W outputWriter, Collection<String> columnNames, int fromRowIndex, int toRowIndex) throws UncheckedIOException;
+    <W extends Writer> W println(W outputWriter, int fromRowIndex, int toRowIndex, Collection<String> columnNames) throws UncheckedIOException;
 }

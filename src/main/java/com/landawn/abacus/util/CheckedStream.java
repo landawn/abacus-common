@@ -13362,7 +13362,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                                 next = queue.poll(MAX_WAIT_TIME_FOR_QUEUE_POLL, TimeUnit.MILLISECONDS);
                             } while (next == null && (isMainStreamCompleted.isFalse() || queue.size() > 0));
                         } catch (InterruptedException e) {
-                            throw new RuntimeException(e);
+                            throw toRuntimeException(e);
                         }
                     }
                 }
@@ -13495,7 +13495,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                                 next = queue.poll(MAX_WAIT_TIME_FOR_QUEUE_POLL, TimeUnit.MILLISECONDS);
                             } while (next == null && (isMainStreamCompleted.isFalse() || queue.size() > 0));
                         } catch (InterruptedException e) {
-                            throw new RuntimeException(e);
+                            throw toRuntimeException(e);
                         }
                     }
                 }
@@ -13660,7 +13660,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                                 next = queue.poll(MAX_WAIT_TIME_FOR_QUEUE_POLL, TimeUnit.MILLISECONDS);
                             } while (next == null && ((isTokenInMainStream.isFalse() && isMainStreamCompleted.isFalse()) || queue.size() > 0));
                         } catch (InterruptedException e) {
-                            throw new RuntimeException(e);
+                            throw toRuntimeException(e);
                         }
                     }
                 }
@@ -13830,7 +13830,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                                 next = queue.poll(MAX_WAIT_TIME_FOR_QUEUE_POLL, TimeUnit.MILLISECONDS);
                             } while (next == null && ((isDroppedInMainStream.isFalse() && isMainStreamCompleted.isFalse()) || queue.size() > 0));
                         } catch (InterruptedException e) {
-                            throw new RuntimeException(e);
+                            throw toRuntimeException(e);
                         }
                     }
                 }

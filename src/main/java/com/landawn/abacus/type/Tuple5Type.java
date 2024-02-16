@@ -19,7 +19,7 @@ import java.io.Writer;
 
 import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.exception.UncheckedIOException;
-import com.landawn.abacus.parser.SerializationConfig;
+import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.BufferedWriter;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.ClassUtil;
@@ -202,7 +202,7 @@ public class Tuple5Type<T1, T2, T3, T4, T5> extends AbstractType<Tuple5<T1, T2, 
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void writeCharacter(CharacterWriter writer, Tuple5<T1, T2, T3, T4, T5> x, SerializationConfig<?> config) throws IOException {
+    public void writeCharacter(CharacterWriter writer, Tuple5<T1, T2, T3, T4, T5> x, JSONXMLSerializationConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

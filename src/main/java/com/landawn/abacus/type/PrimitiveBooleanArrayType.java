@@ -19,7 +19,7 @@ import java.io.Writer;
 import java.util.Collection;
 
 import com.landawn.abacus.annotation.MayReturnNull;
-import com.landawn.abacus.parser.SerializationConfig;
+import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Objectory;
@@ -158,7 +158,7 @@ public final class PrimitiveBooleanArrayType extends AbstractPrimitiveArrayType<
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void writeCharacter(CharacterWriter writer, boolean[] x, SerializationConfig<?> config) throws IOException {
+    public void writeCharacter(CharacterWriter writer, boolean[] x, JSONXMLSerializationConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

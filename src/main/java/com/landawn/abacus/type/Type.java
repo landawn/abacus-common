@@ -43,7 +43,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import com.landawn.abacus.parser.SerializationConfig;
+import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.Array;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.ClassUtil;
@@ -71,11 +71,11 @@ public interface Type<T> {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param typeRef 
-     * @return 
+     *
+     * @param <T>
+     * @param typeRef
+     * @return
      */
     static <T> Type<T> of(final TypeReference<T> typeRef) {
         return typeRef.type();
@@ -432,30 +432,30 @@ public interface Type<T> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     String name();
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     String declaringName();
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     String xmlName();
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     Class<T> clazz();
 
@@ -502,9 +502,9 @@ public interface Type<T> {
     boolean isString();
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     boolean isCharSequence();
 
@@ -819,7 +819,7 @@ public interface Type<T> {
      * @param config
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    void writeCharacter(CharacterWriter writer, T x, SerializationConfig<?> config) throws IOException;
+    void writeCharacter(CharacterWriter writer, T x, JSONXMLSerializationConfig<?> config) throws IOException;
 
     /**
      * Collection 2 array.

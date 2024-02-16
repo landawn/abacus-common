@@ -27,7 +27,7 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 
 import com.landawn.abacus.annotation.MayReturnNull;
-import com.landawn.abacus.parser.SerializationConfig;
+import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.DateTimeFormat;
 import com.landawn.abacus.util.DateUtil;
@@ -205,7 +205,7 @@ public class ZonedDateTimeType extends AbstractType<ZonedDateTime> {
      */
     @SuppressWarnings("null")
     @Override
-    public void writeCharacter(CharacterWriter writer, ZonedDateTime x, SerializationConfig<?> config) throws IOException {
+    public void writeCharacter(CharacterWriter writer, ZonedDateTime x, JSONXMLSerializationConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

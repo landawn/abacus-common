@@ -17,7 +17,10 @@ package com.landawn.abacus.parser;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.landawn.abacus.parser.ParserUtil.BeanInfo;
+import com.landawn.abacus.parser.ParserUtil.PropInfo;
 import com.landawn.abacus.type.Type;
+import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.N;
 
 /**
@@ -32,11 +35,13 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
 
     Type<?> elementType;
 
-    Type<?> keyType;
+    Type<?> mapKeyType;
 
-    Type<?> valueType;
+    Type<?> mapValueType;
 
-    Map<String, Type<?>> propTypes;
+    Map<String, Type<?>> valueTypeMap;
+
+    BeanInfo beanInfoForValueTypes;
 
     /**
      * Checks if is ignore unknown property.
@@ -108,7 +113,7 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      * @return
      */
     public <T> Type<T> getMapKeyType() {
-        return (Type<T>) keyType;
+        return (Type<T>) mapKeyType;
     }
 
     /**
@@ -128,7 +133,7 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      * @return
      */
     public C setMapKeyType(Type<?> keyType) {
-        this.keyType = keyType;
+        this.mapKeyType = keyType;
 
         return (C) this;
     }
@@ -150,7 +155,7 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      * @return
      */
     public <T> Type<T> getMapValueType() {
-        return (Type<T>) valueType;
+        return (Type<T>) mapValueType;
     }
 
     /**
@@ -170,7 +175,7 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      * @return
      */
     public C setMapValueType(Type<?> valueType) {
-        this.valueType = valueType;
+        this.mapValueType = valueType;
 
         return (C) this;
     }
@@ -185,85 +190,139 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
         return this.setMapValueType(N.typeOf(valueType));
     }
 
-    /**
-     * Gets the prop types.
-     *
-     * @return
-     */
-    public Map<String, Type<?>> getPropTypes() { //NOSONAR
-        return propTypes;
+    public boolean hasValueTypes() {
+        return beanInfoForValueTypes != null || N.notEmpty(valueTypeMap);
     }
 
     /**
-     * Sets the prop types.
-     *
-     * @param propTypes
-     * @return
-     */
-    public C setPropTypes(Map<String, Type<?>> propTypes) {
-        this.propTypes = propTypes;
-
-        return (C) this;
-    }
-
-    /**
-     * Gets the prop type.
+     * Gets the value type by key name.
      *
      * @param <T>
-     * @param propName TODO should it be {@code parentEntity.propNameA(subEntity).propNameB...} For examaple: {@code account.devices.model}
+     * @param keyName TODO should it be {@code parentEntity.propNameA(subEntity).propNameB...} For examaple: {@code account.devices.model}
      * @return
      */
-    public <T> Type<T> getPropType(String propName) {
-        return propTypes == null ? null : (Type<T>) propTypes.get(propName);
+    public <T> Type<T> getValueType(final String keyName) {
+        return getValueType(keyName, null);
     }
 
     /**
-     * Sets the prop type.
+     * Gets the value type by key name.
      *
-     * @param propName TODO should it be {@code parentEntity.propNameA(subEntity).propNameB...} For examaple: {@code account.devices.model}
-     * @param cls
+     * @param <T>
+     * @param keyName TODO should it be {@code parentEntity.propNameA(subEntity).propNameB...} For examaple: {@code account.devices.model}
+     * @param defaultType
      * @return
      */
-    public C setPropType(String propName, Class<?> cls) {
-        return setPropType(propName, N.typeOf(cls));
+    public <T> Type<T> getValueType(final String keyName, final Type<T> defaultType) {
+        Type<T> ret = null;
+
+        if (valueTypeMap != null) {
+            ret = (Type<T>) valueTypeMap.get(keyName);
+        }
+
+        if (ret == null && beanInfoForValueTypes != null) {
+            final PropInfo propInfo = beanInfoForValueTypes.getPropInfo(keyName);
+
+            if (propInfo != null) {
+                ret = (Type<T>) propInfo.type;
+            }
+        }
+
+        return ret == null ? defaultType : ret;
     }
 
     /**
-     * Sets the prop type.
+     * Gets the value type class by key name.
      *
-     * @param propName TODO should it be {@code parentEntity.propNameA(subEntity).propNameB...} For examaple: {@code account.devices.model}
+     * @param <T>
+     * @param keyName TODO should it be {@code parentEntity.propNameA(subEntity).propNameB...} For examaple: {@code account.devices.model}
+     * @return
+     */
+    public <T> Class<T> getValueTypeClass(final String keyName) {
+        return getValueTypeClass(keyName, null);
+    }
+
+    /**
+     * Gets the value type class by key name.
+     *
+     * @param <T>
+     * @param keyName TODO should it be {@code parentEntity.propNameA(subEntity).propNameB...} For examaple: {@code account.devices.model}
+     * @param defaultTypeClass
+     * @return
+     */
+    public <T> Class<T> getValueTypeClass(final String keyName, final Class<T> defaultTypeClass) {
+        final Type<T> ret = getValueType(keyName);
+
+        return ret == null ? defaultTypeClass : ret.clazz();
+    }
+
+    /**
+     * Sets value type with key name.
+     *
+     * @param keyName TODO should it be {@code parentEntity.propNameA(subEntity).propNameB...} For examaple: {@code account.devices.model}
+     * @param typeClass
+     * @return
+     */
+    public C setValueType(String keyName, Class<?> typeClass) {
+        return setValueType(keyName, N.typeOf(typeClass));
+    }
+
+    /**
+     * Sets value type with key name.
+     *
+     * @param keyName TODO should it be {@code parentEntity.propNameA(subEntity).propNameB...} For examaple: {@code account.devices.model}
      * @param type
      * @return
      */
-    public C setPropType(String propName, Type<?> type) {
-        if (propTypes == null) {
-            propTypes = new HashMap<>();
+    public C setValueType(String keyName, Type<?> type) {
+        if (valueTypeMap == null) {
+            valueTypeMap = new HashMap<>();
         }
 
-        this.propTypes.put(propName, type);
+        this.valueTypeMap.put(keyName, type);
 
         return (C) this;
     }
 
     /**
-     * Sets the prop type.
+     * Sets value type with key name.
      *
-     * @param propName TODO should it be {@code parentEntity.propNameA(subEntity).propNameB...} For examaple: {@code account.devices.model}
-     * @param type
+     * @param keyName TODO should it be {@code parentEntity.propNameA(subEntity).propNameB...} For examaple: {@code account.devices.model}
+     * @param typeName
      * @return
      */
-    public C setPropType(String propName, String type) {
-        return setPropType(propName, N.typeOf(type));
+    public C setValueType(String keyName, String typeName) {
+        return setValueType(keyName, N.typeOf(typeName));
     }
 
     /**
-     * Checks for prop type.
+     * Sets value types with key names.
      *
-     * @param propName
-     * @return true, if successful
+     * @param valueTypes
+     * @return
      */
-    public boolean hasPropType(String propName) {
-        return propTypes != null && propTypes.containsKey(propName);
+    public C setValueTypes(final Map<String, Type<?>> valueTypes) {
+        this.valueTypeMap = valueTypes;
+
+        return (C) this;
+    }
+
+    /**
+     * Sets value types by bean class.
+     *
+     * @param beanClass
+     * @return
+     */
+    public C setValueTypesByBeanClass(final Class<?> beanClass) {
+        if (beanClass == null) {
+            this.beanInfoForValueTypes = null;
+        } else {
+            N.checkArgument(ClassUtil.isBeanClass(beanClass), "{} is not a valid bean class", beanClass);
+
+            this.beanInfoForValueTypes = ParserUtil.getBeanInfo(beanClass);
+        }
+
+        return (C) this;
     }
 
     /**
@@ -277,9 +336,10 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
         h = 31 * h + N.hashCode(getIgnoredPropNames());
         h = 31 * h + N.hashCode(ignoreUnmatchedProperty);
         h = 31 * h + N.hashCode(elementType);
-        h = 31 * h + N.hashCode(keyType);
-        h = 31 * h + N.hashCode(valueType);
-        return 31 * h + N.hashCode(propTypes);
+        h = 31 * h + N.hashCode(mapKeyType);
+        h = 31 * h + N.hashCode(mapValueType);
+        h = 31 * h + N.hashCode(valueTypeMap);
+        return 31 * h + N.hashCode(beanInfoForValueTypes);
     }
 
     /**
@@ -297,8 +357,8 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
             final DeserializationConfig<C> other = (DeserializationConfig<C>) obj;
 
             if (N.equals(getIgnoredPropNames(), other.getIgnoredPropNames()) && N.equals(ignoreUnmatchedProperty, other.ignoreUnmatchedProperty)
-                    && N.equals(elementType, other.elementType) && N.equals(keyType, other.keyType) && N.equals(valueType, other.valueType)
-                    && N.equals(propTypes, other.propTypes)) {
+                    && N.equals(elementType, other.elementType) && N.equals(mapKeyType, other.mapKeyType) && N.equals(mapValueType, other.mapValueType)
+                    && N.equals(valueTypeMap, other.valueTypeMap) && N.equals(beanInfoForValueTypes, other.beanInfoForValueTypes)) {
 
                 return true;
             }
@@ -315,7 +375,7 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
     @Override
     public String toString() {
         return "{ignoredPropNames=" + N.toString(getIgnoredPropNames()) + ", ignoreUnmatchedProperty=" + N.toString(ignoreUnmatchedProperty) + ", elementType="
-                + N.toString(elementType) + ", keyType=" + N.toString(keyType) + ", valueType=" + N.toString(valueType) + ", propTypes=" + N.toString(propTypes)
-                + "}";
+                + N.toString(elementType) + ", mapKeyType=" + N.toString(mapKeyType) + ", mapValueType=" + N.toString(mapValueType) + ", valueTypeMap="
+                + N.toString(valueTypeMap) + ", beanInfoForValueTypes=" + N.toString(beanInfoForValueTypes) + "}";
     }
 }

@@ -24,7 +24,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.landawn.abacus.parser.SerializationConfig;
+import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.N;
@@ -651,7 +651,7 @@ public abstract class AbstractType<T> implements Type<T> {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void writeCharacter(CharacterWriter writer, T x, SerializationConfig<?> config) throws IOException {
+    public void writeCharacter(CharacterWriter writer, T x, JSONXMLSerializationConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

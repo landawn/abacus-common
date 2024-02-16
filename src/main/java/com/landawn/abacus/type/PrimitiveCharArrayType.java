@@ -23,7 +23,7 @@ import java.util.Collection;
 import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.exception.UncheckedSQLException;
-import com.landawn.abacus.parser.SerializationConfig;
+import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Objectory;
@@ -205,7 +205,7 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void writeCharacter(CharacterWriter writer, char[] x, SerializationConfig<?> config) throws IOException {
+    public void writeCharacter(CharacterWriter writer, char[] x, JSONXMLSerializationConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

@@ -28,14 +28,14 @@ public interface PaginatedDataSet extends Iterable<DataSet> {
      * Returns a frozen {@code DataSet}.
      *
      * @return a frozen {@code DataSet}.
-     * @see DataSet#slice(java.util.Collection, int, int)
+     * @see DataSet#slice(int, int, java.util.Collection)
      */
     DataSet currentPage();
 
     /**
      *
      * @return a frozen {@code DataSet}.
-     * @see DataSet#slice(java.util.Collection, int, int)
+     * @see DataSet#slice(int, int, java.util.Collection)
      */
     DataSet previousPage();
 
@@ -49,7 +49,7 @@ public interface PaginatedDataSet extends Iterable<DataSet> {
     /**
      *
      * @return a frozen {@code DataSet}.
-     * @see DataSet#slice(java.util.Collection, int, int)
+     * @see DataSet#slice(int, int, java.util.Collection)
      */
     DataSet nextPage();
 
@@ -57,7 +57,7 @@ public interface PaginatedDataSet extends Iterable<DataSet> {
      * Returns the first page.
      *
      * @return a frozen {@code DataSet}.
-     * @see DataSet#slice(java.util.Collection, int, int)
+     * @see DataSet#slice(int, int, java.util.Collection)
      */
     Optional<DataSet> firstPage();
 
@@ -65,7 +65,7 @@ public interface PaginatedDataSet extends Iterable<DataSet> {
      * Returns the last page.
      *
      * @return a frozen {@code DataSet}.
-     * @see DataSet#slice(java.util.Collection, int, int)
+     * @see DataSet#slice(int, int, java.util.Collection)
      */
     Optional<DataSet> lastPage();
 
@@ -74,7 +74,7 @@ public interface PaginatedDataSet extends Iterable<DataSet> {
      * @param pageNum
      * @return a frozen {@code DataSet}.
      * @throws IllegalArgumentException the illegal argument exception
-     * @see DataSet#slice(java.util.Collection, int, int)
+     * @see DataSet#slice(int, int, java.util.Collection)
      */
     DataSet getPage(int pageNum);
 

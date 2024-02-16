@@ -17,7 +17,6 @@
 package com.landawn.abacus.util;
 
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import com.landawn.abacus.annotation.Internal;
 import com.landawn.abacus.annotation.SuppressFBWarnings;
@@ -39,9 +38,9 @@ public final class NameUtil {
 
     private static final Map<String, String> simpleNamePool = new ObjectPool<>(POOL_SIZE);
 
-    private static final Map<String, Map<String, String>> parentCanonicalNamePool = new ConcurrentHashMap<>();
-
     private static final Map<String, String> parentNamePool = new ObjectPool<>(POOL_SIZE);
+
+    // private static final Map<String, Map<String, String>> parentCanonicalNamePool = new ConcurrentHashMap<>();
 
     private NameUtil() {
         // singlton
@@ -81,7 +80,7 @@ public final class NameUtil {
      */
     public static String cacheName(String name, boolean force) {
         synchronized (cachedNamePool) {
-            if (force || !cachedNamePool.containsKey(name)) {
+            if (cachedNamePool.size() < POOL_SIZE && (force || !cachedNamePool.containsKey(name))) {
                 name = name.intern();
 
                 cachedNamePool.put(name, name);
@@ -102,47 +101,47 @@ public final class NameUtil {
         return name.length() > parentName.length() && name.charAt(parentName.length()) == '.' && parentName.equals(getParentName(name));
     }
 
-    /**
-     * Gets the canonical name.
-     *
-     * @param parentName
-     * @param name
-     * @return
-     *         or the original string if the specified <code>name</code> starts with <code>parentName + "."</code>, otherwise, an empty string "".
-     */
-    public static String getCanonicalName(String parentName, String name) {
-        String canonicalName = null;
-        Map<String, String> canonicalNameMap = parentCanonicalNamePool.get(parentName);
-
-        if (canonicalNameMap == null) {
-            synchronized (parentCanonicalNamePool) {
-                canonicalNameMap = parentCanonicalNamePool.get(parentName);
-
-                if (canonicalNameMap == null) {
-                    canonicalNameMap = new ConcurrentHashMap<>();
-                    parentCanonicalNamePool.put(parentName, canonicalNameMap);
-                }
-            }
-        }
-
-        canonicalName = canonicalNameMap.get(name);
-
-        if (canonicalName == null) {
-            int idx = name.indexOf(WD._PERIOD);
-
-            if (idx < 0) {
-                canonicalName = getCachedName(parentName + "." + name);
-            } else if (parentName.equals(getParentName(name))) {
-                canonicalName = getCachedName(canonicalName);
-            } else {
-                canonicalName = Strings.EMPTY_STRING;
-            }
-
-            canonicalNameMap.put(name, canonicalName);
-        }
-
-        return canonicalName;
-    }
+    //    /**
+    //     * Gets the canonical name.
+    //     *
+    //     * @param parentName
+    //     * @param name
+    //     * @return
+    //     *         or the original string if the specified <code>name</code> starts with <code>parentName + "."</code>, otherwise, an empty string "".
+    //     */
+    //    public static String getCanonicalName(String parentName, String name) {
+    //        String canonicalName = null;
+    //        Map<String, String> canonicalNameMap = parentCanonicalNamePool.get(parentName);
+    //
+    //        if (canonicalNameMap == null) {
+    //            synchronized (parentCanonicalNamePool) {
+    //                canonicalNameMap = parentCanonicalNamePool.get(parentName);
+    //
+    //                if (canonicalNameMap == null) {
+    //                    canonicalNameMap = new ConcurrentHashMap<>();
+    //                    parentCanonicalNamePool.put(parentName, canonicalNameMap);
+    //                }
+    //            }
+    //        }
+    //
+    //        canonicalName = canonicalNameMap.get(name);
+    //
+    //        if (canonicalName == null) {
+    //            int idx = name.indexOf(WD._PERIOD);
+    //
+    //            if (idx < 0) {
+    //                canonicalName = getCachedName(parentName + "." + name);
+    //            } else if (parentName.equals(getParentName(name))) {
+    //                canonicalName = getCachedName(canonicalName);
+    //            } else {
+    //                canonicalName = Strings.EMPTY_STRING;
+    //            }
+    //
+    //            canonicalNameMap.put(name, canonicalName);
+    //        }
+    //
+    //        return canonicalName;
+    //    }
 
     /**
      * Gets the simple name.
@@ -162,7 +161,9 @@ public final class NameUtil {
                 simplePropName = getCachedName(name.substring(idx + 1));
             }
 
-            simpleNamePool.put(name, simplePropName);
+            if (simpleNamePool.size() < POOL_SIZE) {
+                simpleNamePool.put(name, simplePropName);
+            }
         }
 
         return simplePropName;
@@ -186,7 +187,9 @@ public final class NameUtil {
                 parentName = NameUtil.getCachedName(name.substring(0, indx));
             }
 
-            parentNamePool.put(name, parentName);
+            if (parentNamePool.size() < POOL_SIZE) {
+                parentNamePool.put(name, parentName);
+            }
         }
 
         return parentName;

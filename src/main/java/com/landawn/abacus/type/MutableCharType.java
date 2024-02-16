@@ -11,7 +11,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import com.landawn.abacus.parser.SerializationConfig;
+import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.MutableChar;
@@ -132,7 +132,7 @@ public class MutableCharType extends MutableType<MutableChar> {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void writeCharacter(CharacterWriter writer, MutableChar x, SerializationConfig<?> config) throws IOException {
+    public void writeCharacter(CharacterWriter writer, MutableChar x, JSONXMLSerializationConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

@@ -26,7 +26,9 @@ import com.landawn.abacus.type.Type;
  */
 interface JSONReader {
     // < 32 = ' ' (Space) White space
-    int EOR = -1;
+    int EOF = -1;
+
+    int UNDEFINED = 0;
 
     int START_BRACE = 1;
 

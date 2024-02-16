@@ -3396,6 +3396,25 @@ sealed class CommonUtil permits N {
      * @return
      */
     public static DataSet merge(final Collection<? extends DataSet> dss) {
+        return merge(dss, false);
+    }
+
+    /**
+     *
+     *
+     * @param dss
+     * @return
+     */
+    public static DataSet merge(final Collection<? extends DataSet> dss, final boolean requiresSameColumns) {
+        if (requiresSameColumns && size(dss) > 1) {
+            final Iterator<? extends DataSet> iter = dss.iterator();
+            final DataSet firstDataSet = iter.next();
+
+            if (iter.hasNext()) {
+                checkIfColumnNamesAreSame(firstDataSet, iter.next());
+            }
+        }
+
         if (N.isEmpty(dss)) {
             return N.newEmptyDataSet();
         } else if (dss.size() == 1) {
@@ -3444,6 +3463,13 @@ sealed class CommonUtil permits N {
             }
 
             return new RowDataSet(newColumnNameList, newColumnList, props);
+        }
+    }
+
+    private static void checkIfColumnNamesAreSame(DataSet a, DataSet b) {
+        if (!(a.columnNameList().size() == b.columnNameList().size() && a.columnNameList().containsAll(b.columnNameList())
+                && b.columnNameList().containsAll(a.columnNameList()))) {
+            throw new IllegalArgumentException("These two DataSets don't have same column names: " + a.columnNameList() + ", " + b.columnNameList());
         }
     }
 

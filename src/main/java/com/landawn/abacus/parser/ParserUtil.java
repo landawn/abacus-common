@@ -2049,7 +2049,7 @@ public final class ParserUtil {
          * @param config
          * @throws IOException Signals that an I/O exception has occurred.
          */
-        public void writePropValue(CharacterWriter writer, Object x, SerializationConfig<?> config) throws IOException {
+        public void writePropValue(CharacterWriter writer, Object x, JSONXMLSerializationConfig<?> config) throws IOException {
             if (hasFormat) {
                 if (x == null) {
                     writer.write(NULL_CHAR_ARRAY);

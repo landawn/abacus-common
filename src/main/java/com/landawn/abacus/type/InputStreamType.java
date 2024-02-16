@@ -29,7 +29,7 @@ import java.sql.SQLException;
 import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.exception.UncheckedSQLException;
-import com.landawn.abacus.parser.SerializationConfig;
+import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.IOUtil;
@@ -250,7 +250,7 @@ public class InputStreamType extends AbstractType<InputStream> {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void writeCharacter(CharacterWriter writer, InputStream t, SerializationConfig<?> config) throws IOException {
+    public void writeCharacter(CharacterWriter writer, InputStream t, JSONXMLSerializationConfig<?> config) throws IOException {
         if (t == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

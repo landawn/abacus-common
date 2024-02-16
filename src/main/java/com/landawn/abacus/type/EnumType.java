@@ -26,7 +26,7 @@ import java.util.Map;
 
 import com.landawn.abacus.annotation.JsonXmlField;
 import com.landawn.abacus.annotation.Type.EnumBy;
-import com.landawn.abacus.parser.SerializationConfig;
+import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.BiMap;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.ClassUtil;
@@ -257,7 +257,7 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
      */
     @SuppressWarnings("rawtypes")
     @Override
-    public void writeCharacter(final CharacterWriter writer, final T x, final SerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final T x, final JSONXMLSerializationConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

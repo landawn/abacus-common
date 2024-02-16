@@ -30,7 +30,7 @@ import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.exception.UncheckedSQLException;
-import com.landawn.abacus.parser.SerializationConfig;
+import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.IOUtil;
@@ -250,7 +250,7 @@ public class ReaderType extends AbstractType<Reader> {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void writeCharacter(CharacterWriter writer, Reader x, SerializationConfig<?> config) throws IOException {
+    public void writeCharacter(CharacterWriter writer, Reader x, JSONXMLSerializationConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

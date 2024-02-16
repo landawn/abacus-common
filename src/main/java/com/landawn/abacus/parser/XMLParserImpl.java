@@ -1186,10 +1186,10 @@ final class XMLParserImpl extends AbstractXMLParser {
         }
 
         final XMLDeserializationConfig configToUse = check(config);
-        boolean hasPropTypes = N.notEmpty(configToUse.getPropTypes());
+        boolean hasPropTypes = configToUse.hasValueTypes();
 
-        if (hasPropTypes && xmlReader.getEventType() == XMLStreamConstants.START_ELEMENT && configToUse.hasPropType(xmlReader.getLocalName())) {
-            targetClass = configToUse.getPropType(xmlReader.getLocalName()).clazz();
+        if (hasPropTypes && xmlReader.getEventType() == XMLStreamConstants.START_ELEMENT) {
+            targetClass = configToUse.getValueTypeClass(xmlReader.getLocalName(), targetClass);
         }
 
         final SerializationType serializationType = getDeserializationType(targetClass);
@@ -1228,7 +1228,7 @@ final class XMLParserImpl extends AbstractXMLParser {
                                     }
                                 }
 
-                                propType = hasPropTypes ? configToUse.getPropType(propName) : null;
+                                propType = hasPropTypes ? configToUse.getValueType(propName) : null;
 
                                 if (propType == null) {
                                     if (propInfo.jsonXmlType.isSerializable()) {
@@ -1427,7 +1427,7 @@ final class XMLParserImpl extends AbstractXMLParser {
 
                             if (propName == null) {
                                 propName = xmlReader.getLocalName();
-                                propType = hasPropTypes ? configToUse.getPropType(propName) : null;
+                                propType = hasPropTypes ? configToUse.getValueType(propName) : null;
 
                                 if (propType == null) {
                                     attrCount = xmlReader.getAttributeCount();
@@ -1599,7 +1599,7 @@ final class XMLParserImpl extends AbstractXMLParser {
 
                             if (propName == null) {
                                 propName = xmlReader.getLocalName();
-                                propType = hasPropTypes ? configToUse.getPropType(propName) : null;
+                                propType = hasPropTypes ? configToUse.getValueType(propName) : null;
 
                                 if (propType == null) {
                                     attrCount = xmlReader.getAttributeCount();
@@ -1972,7 +1972,7 @@ final class XMLParserImpl extends AbstractXMLParser {
 
         final XMLDeserializationConfig configToUse = check(config);
 
-        boolean hasPropTypes = N.notEmpty(configToUse.getPropTypes());
+        boolean hasPropTypes = configToUse.hasValueTypes();
         Class<?> targetClass = null;
 
         if (isFirstCall) {
@@ -1987,7 +1987,7 @@ final class XMLParserImpl extends AbstractXMLParser {
                     nodeName = Strings.isNotEmpty(nameAttr) ? nameAttr : node.getNodeName();
                 }
 
-                targetClass = hasPropTypes && configToUse.hasPropType(nodeName) ? configToUse.getPropType(nodeName).clazz() : null;
+                targetClass = hasPropTypes ? configToUse.getValueTypeClass(nodeName, null) : null;
             } else {
                 targetClass = propType.clazz();
             }
@@ -2048,7 +2048,7 @@ final class XMLParserImpl extends AbstractXMLParser {
                         }
                     }
 
-                    propType = hasPropTypes ? configToUse.getPropType(propName) : null;
+                    propType = hasPropTypes ? configToUse.getValueType(propName) : null;
 
                     if (propType == null) {
                         if (propInfo.jsonXmlType.isSerializable()) {
@@ -2120,7 +2120,7 @@ final class XMLParserImpl extends AbstractXMLParser {
                         continue;
                     }
 
-                    propType = hasPropTypes ? configToUse.getPropType(propName) : null;
+                    propType = hasPropTypes ? configToUse.getValueType(propName) : null;
 
                     if (propType == null) {
                         propType = ignoreTypeInfo ? valueType : N.typeOf(getConcreteClass(valueType.clazz(), propNode));
@@ -2180,7 +2180,7 @@ final class XMLParserImpl extends AbstractXMLParser {
                         continue;
                     }
 
-                    propType = hasPropTypes ? configToUse.getPropType(propName) : null;
+                    propType = hasPropTypes ? configToUse.getValueType(propName) : null;
 
                     if (propType == null) {
                         propType = ignoreTypeInfo ? valueType : N.typeOf(getConcreteClass(valueType.clazz(), propNode));
@@ -2242,7 +2242,7 @@ final class XMLParserImpl extends AbstractXMLParser {
 
                         propName = isTagByPropertyName ? eleNode.getNodeName() : XMLUtil.getAttribute(eleNode, XMLConstants.NAME); //NOSONAR
 
-                        propType = hasPropTypes ? configToUse.getPropType(propName) : null;
+                        propType = hasPropTypes ? configToUse.getValueType(propName) : null;
 
                         if (propType == null) {
                             propType = ignoreTypeInfo ? eleType : N.typeOf(getConcreteClass(eleType.clazz(), eleNode));
@@ -2305,7 +2305,7 @@ final class XMLParserImpl extends AbstractXMLParser {
 
                     propName = isTagByPropertyName ? eleNode.getNodeName() : XMLUtil.getAttribute(eleNode, XMLConstants.NAME); //NOSONAR
 
-                    propType = hasPropTypes ? configToUse.getPropType(propName) : null;
+                    propType = hasPropTypes ? configToUse.getValueType(propName) : null;
 
                     if (propType == null) {
                         propType = ignoreTypeInfo ? eleType : N.typeOf(getConcreteClass(eleType.clazz(), eleNode));

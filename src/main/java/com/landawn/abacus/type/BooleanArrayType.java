@@ -18,7 +18,7 @@ import java.io.IOException;
 import java.io.Writer;
 
 import com.landawn.abacus.annotation.MayReturnNull;
-import com.landawn.abacus.parser.SerializationConfig;
+import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Objectory;
@@ -139,7 +139,7 @@ public final class BooleanArrayType extends ObjectArrayType<Boolean> {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void writeCharacter(CharacterWriter writer, Boolean[] x, SerializationConfig<?> config) throws IOException {
+    public void writeCharacter(CharacterWriter writer, Boolean[] x, JSONXMLSerializationConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

@@ -21,7 +21,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Calendar;
 
-import com.landawn.abacus.parser.SerializationConfig;
+import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.DateTimeFormat;
 import com.landawn.abacus.util.DateUtil;
@@ -116,7 +116,7 @@ public abstract class AbstractCalendarType<T extends Calendar> extends AbstractT
      */
     @SuppressWarnings("null")
     @Override
-    public void writeCharacter(CharacterWriter writer, T x, SerializationConfig<?> config) throws IOException {
+    public void writeCharacter(CharacterWriter writer, T x, JSONXMLSerializationConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

@@ -24,7 +24,7 @@ import java.sql.SQLException;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import com.landawn.abacus.annotation.MayReturnNull;
-import com.landawn.abacus.parser.SerializationConfig;
+import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.DateTimeFormat;
 import com.landawn.abacus.util.DateUtil;
@@ -171,7 +171,7 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
      */
     @SuppressWarnings("null")
     @Override
-    public void writeCharacter(CharacterWriter writer, XMLGregorianCalendar x, SerializationConfig<?> config) throws IOException {
+    public void writeCharacter(CharacterWriter writer, XMLGregorianCalendar x, JSONXMLSerializationConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

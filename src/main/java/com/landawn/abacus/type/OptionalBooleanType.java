@@ -11,7 +11,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import com.landawn.abacus.parser.SerializationConfig;
+import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
@@ -149,7 +149,7 @@ public class OptionalBooleanType extends AbstractOptionalType<OptionalBoolean> {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void writeCharacter(CharacterWriter writer, OptionalBoolean x, SerializationConfig<?> config) throws IOException {
+    public void writeCharacter(CharacterWriter writer, OptionalBoolean x, JSONXMLSerializationConfig<?> config) throws IOException {
         writer.write((x == null || x.isEmpty()) ? NULL_CHAR_ARRAY : (x.get() ? TRUE_CHAR_ARRAY : FALSE_CHAR_ARRAY));
     }
 }

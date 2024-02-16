@@ -26,7 +26,7 @@ import com.landawn.abacus.util.N;
  * @author Haiyang Li
  * @since 0.8
  */
-public class JSONSerializationConfig extends SerializationConfig<JSONSerializationConfig> {
+public class JSONSerializationConfig extends JSONXMLSerializationConfig<JSONSerializationConfig> {
 
     protected static final boolean defaultQuotePropName = true;
 
@@ -47,7 +47,7 @@ public class JSONSerializationConfig extends SerializationConfig<JSONSerializati
     boolean bracketRootValue = defaultBracketRootValue;
 
     /**
-     * 
+     *
      */
     public JSONSerializationConfig() { //NOSONAR
     }
@@ -257,9 +257,9 @@ public class JSONSerializationConfig extends SerializationConfig<JSONSerializati
     //    }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public int hashCode() {
@@ -280,7 +280,6 @@ public class JSONSerializationConfig extends SerializationConfig<JSONSerializati
         h = 31 * h + N.hashCode(writeBigDecimalAsPlain());
         h = 31 * h + N.hashCode(getIndentation());
         h = 31 * h + N.hashCode(getPropNamingPolicy());
-        h = 31 * h + N.hashCode(getIgnoredPropNames());
         h = 31 * h + N.hashCode(quotePropName);
         h = 31 * h + N.hashCode(quoteMapKey);
         h = 31 * h + N.hashCode(wrapRootValue);
@@ -319,9 +318,9 @@ public class JSONSerializationConfig extends SerializationConfig<JSONSerializati
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public String toString() {
@@ -332,9 +331,8 @@ public class JSONSerializationConfig extends SerializationConfig<JSONSerializati
                 + N.toString(writeNullStringAsEmpty) + ", writeNullNumberAsZero=" + N.toString(writeNullNumberAsZero) + ", writeNullBooleanAsFalse="
                 + N.toString(writeNullBooleanAsFalse) + ", writeNullToEmpty=" + N.toString(writeNullToEmpty) + ", writeBigDecimalAsPlain="
                 + N.toString(writeBigDecimalAsPlain()) + ", indentation=" + N.toString(getIndentation()) + ", propNamingPolicy="
-                + N.toString(getPropNamingPolicy()) + ", ignoredPropNames=" + N.toString(getIgnoredPropNames()) + ", quotePropName=" + N.toString(quotePropName)
-                + ", quoteMapKey=" + N.toString(quoteMapKey) + ", wrapRootValue=" + N.toString(wrapRootValue) + ", bracketRootValue="
-                + N.toString(bracketRootValue) + "}";
+                + N.toString(getPropNamingPolicy()) + ", quotePropName=" + N.toString(quotePropName) + ", quoteMapKey=" + N.toString(quoteMapKey)
+                + ", wrapRootValue=" + N.toString(wrapRootValue) + ", bracketRootValue=" + N.toString(bracketRootValue) + "}";
     }
 
     /**

@@ -31,7 +31,7 @@ import com.landawn.abacus.annotation.MayReturnNull;
  */
 public abstract class ParserConfig<C extends ParserConfig<C>> implements Cloneable {
 
-    Map<Class<?>, Set<String>> beanIgnoredPropNameMap = null;
+    Map<Class<?>, Set<String>> ignoredBeanPropNameMap = null;
 
     /**
      * Gets the ignored prop names.
@@ -39,7 +39,7 @@ public abstract class ParserConfig<C extends ParserConfig<C>> implements Cloneab
      * @return
      */
     public Map<Class<?>, Set<String>> getIgnoredPropNames() {
-        return beanIgnoredPropNameMap;
+        return ignoredBeanPropNameMap;
     }
 
     /**
@@ -50,14 +50,14 @@ public abstract class ParserConfig<C extends ParserConfig<C>> implements Cloneab
      */
     @MayReturnNull
     public Collection<String> getIgnoredPropNames(Class<?> cls) {
-        if (this.beanIgnoredPropNameMap == null) {
+        if (this.ignoredBeanPropNameMap == null) {
             return null; // NOSONAR
         }
 
-        Collection<String> result = this.beanIgnoredPropNameMap.get(cls);
+        Collection<String> result = this.ignoredBeanPropNameMap.get(cls);
 
         if (result == null) {
-            result = this.beanIgnoredPropNameMap.get(Object.class);
+            result = this.ignoredBeanPropNameMap.get(Object.class);
         }
 
         return result;
@@ -81,11 +81,11 @@ public abstract class ParserConfig<C extends ParserConfig<C>> implements Cloneab
      * @return
      */
     public C setIgnoredPropNames(Class<?> cls, Set<String> ignoredPropNames) {
-        if (this.beanIgnoredPropNameMap == null) {
-            this.beanIgnoredPropNameMap = new HashMap<>();
+        if (this.ignoredBeanPropNameMap == null) {
+            this.ignoredBeanPropNameMap = new HashMap<>();
         }
 
-        this.beanIgnoredPropNameMap.put(cls, ignoredPropNames);
+        this.ignoredBeanPropNameMap.put(cls, ignoredPropNames);
 
         return (C) this;
     }
@@ -97,7 +97,7 @@ public abstract class ParserConfig<C extends ParserConfig<C>> implements Cloneab
      * @return
      */
     public C setIgnoredPropNames(Map<Class<?>, Set<String>> ignoredPropNames) {
-        this.beanIgnoredPropNameMap = ignoredPropNames;
+        this.ignoredBeanPropNameMap = ignoredPropNames;
 
         return (C) this;
     }

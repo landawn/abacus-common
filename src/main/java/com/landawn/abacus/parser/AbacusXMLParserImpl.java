@@ -1115,7 +1115,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
             Type<?> propType, PropInfo propInfo, boolean checkedAttr, boolean isTagByPropertyName, boolean ignoreTypeInfo, boolean isFirstCall)
             throws XMLStreamException {
 
-        final boolean hasPropTypes = N.notEmpty(config.getPropTypes());
+        final boolean hasPropTypes = config.hasValueTypes();
         String nodeName = null;
 
         if (checkedAttr) {
@@ -1125,9 +1125,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
             nodeName = Strings.isNotEmpty(nameAttr) ? nameAttr : xmlReader.getLocalName();
         }
 
-        if (hasPropTypes && config.hasPropType(nodeName)) {
-            targetClass = config.getPropType(nodeName).clazz();
-        }
+        targetClass = hasPropTypes ? config.getValueTypeClass(nodeName, targetClass) : targetClass;
 
         targetClass = checkedAttr ? (ignoreTypeInfo ? targetClass : getConcreteClass(targetClass, xmlReader)) : getConcreteClass(targetClass, xmlReader);
         NodeType nodeType = null;
@@ -1214,7 +1212,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                                     }
                                 }
 
-                                propType = hasPropTypes ? config.getPropType(propName) : null;
+                                propType = hasPropTypes ? config.getValueType(propName) : null;
 
                                 if (propType == null) {
                                     if (propInfo.jsonXmlType.isSerializable()) {
@@ -1467,7 +1465,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                             entryValueType = Strings.isEmpty(typeAttr) ? valueType : N.typeOf(typeAttr);
 
                             if (hasPropTypes && isStringKey) {
-                                Type<?> tmpType = config.getPropType(N.toString(key));
+                                Type<?> tmpType = config.getValueType(N.toString(key));
                                 if (tmpType != null) {
                                     entryValueType = tmpType;
                                 }
@@ -1882,7 +1880,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
             return null;
         }
 
-        final boolean hasPropTypes = N.notEmpty(config.getPropTypes());
+        final boolean hasPropTypes = config.hasValueTypes();
 
         String nodeName = checkedAttr ? (isTagByPropertyName ? node.getNodeName() : XMLUtil.getAttribute(node, XMLConstants.NAME))
                 : XMLUtil.getAttribute(node, XMLConstants.NAME);
@@ -1894,7 +1892,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
             targetClass = inputClass;
         } else {
             if (propType == null || String.class.equals(propType.clazz()) || propType.isObjectType()) {
-                targetClass = hasPropTypes && config.hasPropType(nodeName) ? config.getPropType(nodeName).clazz() : null;
+                targetClass = hasPropTypes ? config.getValueTypeClass(nodeName, null) : null;
             } else {
                 targetClass = propType.clazz();
             }
@@ -1974,7 +1972,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                         }
                     }
 
-                    propType = hasPropTypes ? config.getPropType(propName) : null;
+                    propType = hasPropTypes ? config.getValueType(propName) : null;
 
                     if (propType == null) {
                         if (propInfo.jsonXmlType.isSerializable()) {
@@ -2093,7 +2091,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                         continue;
                     }
 
-                    propValueType = hasPropTypes && isStringKey ? config.getPropType(N.toString(propKey)) : null;
+                    propValueType = hasPropTypes && isStringKey ? config.getValueType(N.toString(propKey)) : null;
 
                     if (propValueType == null) {
                         propValueClass = checkedAttr ? (ignoreTypeInfo ? valueType.clazz() : getConcreteClass(valueType.clazz(), propValueNode))
@@ -2434,8 +2432,6 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
 
         private boolean hasPropTypes = false;
 
-        private Map<String, Type<?>> propTypes;
-
         private boolean ignoreUnmatchedProperty;
 
         private Collection<String> mapIgnoredPropNames;
@@ -2542,7 +2538,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                 targetClass = inputClass;
             } else {
                 if (propType == null || String.class.equals(propType.clazz()) || propType.isObjectType()) {
-                    targetClass = hasPropTypes && config.hasPropType(nodeName) ? config.getPropType(nodeName).clazz() : null;
+                    targetClass = hasPropTypes ? config.getValueTypeClass(nodeName, null) : null;
                 } else {
                     targetClass = propType.clazz();
                 }
@@ -2575,9 +2571,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                         beanOrPropNameQueue.add(beanOrPropName);
                     }
 
-                    if (hasPropTypes && config.hasPropType(beanOrPropName)) {
-                        typeClass = propTypes.get(beanOrPropName).clazz();
-                    }
+                    typeClass = hasPropTypes ? config.getValueTypeClass(beanOrPropName, typeClass) : typeClass;
 
                     if (typeClass == null || !N.typeOf(typeClass).isBean()) {
                         if ((eleType != null) && ClassUtil.isBeanClass(eleType.clazz())) {
@@ -2792,7 +2786,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                     }
 
                     if (hasPropTypes) {
-                        propType = propTypes.get(beanOrPropName);
+                        propType = config.getValueType(beanOrPropName);
 
                         if (propType == null) {
                             propType = ignoreTypeInfo ? propInfo.jsonXmlType : N.typeOf(getConcreteClass(propInfo.clazz, attrs));
@@ -2834,7 +2828,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                     if (hasPropTypes) {
                         Object key = keyQueue.get(keyQueue.size() - 1);
                         if (key != null && key.getClass() == String.class) {
-                            propType = propTypes.get(key);
+                            propType = config.getValueType((String) key);
 
                             if (propType == null) {
                                 propType = ignoreTypeInfo ? valueType : N.typeOf(getConcreteClass(valueType.clazz(), attrs));
@@ -3106,8 +3100,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
 
         private void setConfig(XMLDeserializationConfig config) {
             this.config = config;
-            propTypes = config.getPropTypes();
-            hasPropTypes = N.notEmpty(propTypes);
+            hasPropTypes = config.hasValueTypes();
             ignoreUnmatchedProperty = config.ignoreUnmatchedProperty();
             mapIgnoredPropNames = config.getIgnoredPropNames(Map.class);
         }
@@ -3124,7 +3117,6 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
 
             // ...
             hasPropTypes = false;
-            propTypes = null;
             ignoreUnmatchedProperty = false;
             mapIgnoredPropNames = null;
 

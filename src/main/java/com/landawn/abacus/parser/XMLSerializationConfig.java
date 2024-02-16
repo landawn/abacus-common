@@ -27,7 +27,7 @@ import com.landawn.abacus.util.WD;
  * @author Haiyang Li
  * @since 0.8
  */
-public class XMLSerializationConfig extends SerializationConfig<XMLSerializationConfig> {
+public class XMLSerializationConfig extends JSONXMLSerializationConfig<XMLSerializationConfig> {
 
     protected static final boolean defaultTagByPropertyName = true;
 
@@ -208,7 +208,6 @@ public class XMLSerializationConfig extends SerializationConfig<XMLSerialization
         h = 31 * h + N.hashCode(writeBigDecimalAsPlain());
         h = 31 * h + N.hashCode(getIndentation());
         h = 31 * h + N.hashCode(getPropNamingPolicy());
-        h = 31 * h + N.hashCode(getIgnoredPropNames());
         h = 31 * h + N.hashCode(tagByPropertyName);
         return 31 * h + N.hashCode(ignoreTypeInfo);
     }
@@ -256,9 +255,8 @@ public class XMLSerializationConfig extends SerializationConfig<XMLSerialization
                 + N.toString(supportCircularReference()) + ", writeLongAsString=" + N.toString(writeLongAsString()) + ", writeNullStringAsEmpty="
                 + N.toString(writeNullStringAsEmpty) + ", writeNullNumberAsZero=" + N.toString(writeNullNumberAsZero) + ", writeNullBooleanAsFalse="
                 + N.toString(writeNullBooleanAsFalse) + ", writeBigDecimalAsPlain=" + N.toString(writeBigDecimalAsPlain()) + ", indentation="
-                + N.toString(getIndentation()) + ", propNamingPolicy=" + N.toString(getPropNamingPolicy()) + ", ignoredPropNames="
-                + N.toString(getIgnoredPropNames()) + ", tagByPropertyName=" + N.toString(tagByPropertyName) + ", ignoreTypeInfo=" + N.toString(ignoreTypeInfo)
-                + "}";
+                + N.toString(getIndentation()) + ", propNamingPolicy=" + N.toString(getPropNamingPolicy()) + ", tagByPropertyName="
+                + N.toString(tagByPropertyName) + ", ignoreTypeInfo=" + N.toString(ignoreTypeInfo) + "}";
     }
 
     /**

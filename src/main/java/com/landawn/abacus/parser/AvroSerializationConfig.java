@@ -20,9 +20,7 @@ import java.util.Set;
 import org.apache.avro.Schema;
 
 import com.landawn.abacus.annotation.SuppressFBWarnings;
-import com.landawn.abacus.util.DateTimeFormat;
 import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.NamingPolicy;
 
 /**
  *
@@ -34,7 +32,7 @@ public class AvroSerializationConfig extends SerializationConfig<AvroSerializati
     private Schema schema;
 
     /**
-     * 
+     *
      */
     public AvroSerializationConfig() { //NOSONAR
     }
@@ -58,297 +56,6 @@ public class AvroSerializationConfig extends SerializationConfig<AvroSerializati
         this.schema = schema;
 
         return this;
-    }
-
-    /**
-     * Gets the char quotation.
-     *
-     * @return
-     * @deprecated UnsupportedOperationException
-     */
-    @Deprecated
-    @Override
-    public char getCharQuotation() {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * Sets the char quotation.
-     *
-     * @param charQuotation
-     * @return
-     * @deprecated UnsupportedOperationException
-     */
-    @Deprecated
-    @Override
-    public AvroSerializationConfig setCharQuotation(char charQuotation) {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * Gets the string quotation.
-     *
-     * @return
-     * @deprecated UnsupportedOperationException
-     */
-    @Deprecated
-    @Override
-    public char getStringQuotation() {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * Sets the string quotation.
-     *
-     * @param stringQuotation
-     * @return
-     * @deprecated UnsupportedOperationException
-     */
-    @Deprecated
-    @Override
-    public AvroSerializationConfig setStringQuotation(char stringQuotation) {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * The default format is: <code>LONG</code>.
-     *
-     * @return
-     * @deprecated UnsupportedOperationException
-     */
-    @Deprecated
-    @Override
-    public DateTimeFormat getDateTimeFormat() {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * Sets the date time format.
-     *
-     * @param dateTimeFormat
-     * @return
-     * @deprecated UnsupportedOperationException
-     */
-    @Deprecated
-    @Override
-    public AvroSerializationConfig setDateTimeFormat(DateTimeFormat dateTimeFormat) {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * Checks if is pretty format.
-     *
-     * @return true, if is pretty format
-     * @deprecated UnsupportedOperationException
-     */
-    @Deprecated
-    @Override
-    public boolean prettyFormat() {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * Sets the pretty format.
-     *
-     * @param prettyFormat
-     * @return
-     * @deprecated UnsupportedOperationException
-     */
-    @Deprecated
-    @Override
-    public AvroSerializationConfig prettyFormat(boolean prettyFormat) {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * Gets the indentation.
-     *
-     * @return
-     * @deprecated UnsupportedOperationException
-     */
-    @Deprecated
-    @Override
-    public String getIndentation() {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * Sets the indentation.
-     *
-     * @param indentation
-     * @return
-     * @deprecated UnsupportedOperationException
-     */
-    @Deprecated
-    @Override
-    public AvroSerializationConfig setIndentation(String indentation) {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * Gets the prop naming policy.
-     *
-     * @return
-     * @deprecated UnsupportedOperationException
-     */
-    @Deprecated
-    @Override
-    public NamingPolicy getPropNamingPolicy() {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * Sets the prop naming policy.
-     *
-     * @param propNamingPolicy
-     * @return
-     * @deprecated UnsupportedOperationException
-     */
-    @Deprecated
-    @Override
-    public AvroSerializationConfig setPropNamingPolicy(NamingPolicy propNamingPolicy) {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * Support circular reference.
-     *
-     * @return true, if successful
-     * @deprecated UnsupportedOperationException
-     */
-    @Deprecated
-    @Override
-    public boolean supportCircularReference() {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * Support circular reference.
-     *
-     * @param supportCircularReference
-     * @return
-     * @deprecated UnsupportedOperationException
-     */
-    @Deprecated
-    @Override
-    public AvroSerializationConfig supportCircularReference(boolean supportCircularReference) {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     *
-     * @return
-     * @deprecated UnsupportedOperationException
-     */
-    @Deprecated
-    @Override
-    public boolean writeLongAsString() {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     *
-     * @param writeLongAsString
-     * @return
-     * @deprecated UnsupportedOperationException
-     */
-    @Deprecated
-    @Override
-    public AvroSerializationConfig writeLongAsString(boolean writeLongAsString) {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     *
-     * @return
-     * @deprecated UnsupportedOperationException
-     */
-    @Deprecated
-    @Override
-    public boolean writeNullStringAsEmpty() {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * 
-     *
-     * @param writeNullNumberAsZero 
-     * @return 
-     * @deprecated UnsupportedOperationException
-     */
-    @Deprecated
-    @Override
-    public AvroSerializationConfig writeNullStringAsEmpty(boolean writeNullNumberAsZero) {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     *
-     * @return
-     * @deprecated UnsupportedOperationException
-     */
-    @Deprecated
-    @Override
-    public boolean writeNullNumberAsZero() {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     *
-     * @param writeNullNumberAsZero
-     * @return
-     * @deprecated UnsupportedOperationException
-     */
-    @Deprecated
-    @Override
-    public AvroSerializationConfig writeNullNumberAsZero(boolean writeNullNumberAsZero) {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     *
-     * @return
-     * @deprecated UnsupportedOperationException
-     */
-    @Deprecated
-    @Override
-    public boolean writeNullBooleanAsFalse() {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     *
-     * @param writeNullBooleanAsFalse
-     * @return
-     * @deprecated UnsupportedOperationException
-     */
-    @Deprecated
-    @Override
-    public AvroSerializationConfig writeNullBooleanAsFalse(boolean writeNullBooleanAsFalse) {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     *
-     * @return
-     * @deprecated UnsupportedOperationException
-     */
-    @Deprecated
-    @Override
-    public boolean writeBigDecimalAsPlain() {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     *
-     * @param writeBigDecimalAsPlain
-     * @return
-     * @deprecated UnsupportedOperationException
-     */
-    @Deprecated
-    @Override
-    public AvroSerializationConfig writeBigDecimalAsPlain(boolean writeBigDecimalAsPlain) {
-        throw new UnsupportedOperationException();
     }
 
     //    /**
@@ -377,9 +84,9 @@ public class AvroSerializationConfig extends SerializationConfig<AvroSerializati
     //    }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public int hashCode() {
@@ -387,7 +94,6 @@ public class AvroSerializationConfig extends SerializationConfig<AvroSerializati
         h = 31 * h + N.hashCode(getIgnoredPropNames());
         h = 31 * h + N.hashCode(getExclusion());
         h = 31 * h + N.hashCode(skipTransientField());
-        h = 31 * h + N.hashCode(getIgnoredPropNames());
         return 31 * h + N.hashCode(schema);
     }
 
@@ -415,14 +121,14 @@ public class AvroSerializationConfig extends SerializationConfig<AvroSerializati
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public String toString() {
         return "{ignoredPropNames=" + N.toString(getIgnoredPropNames()) + ", exclusion=" + N.toString(getExclusion()) + ", skipTransientField="
-                + N.toString(skipTransientField()) + ", ignoredPropNames=" + N.toString(getIgnoredPropNames()) + ", schema=" + N.toString(schema) + "}";
+                + N.toString(skipTransientField()) + ", schema=" + N.toString(schema) + "}";
     }
 
     /**

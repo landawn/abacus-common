@@ -22,7 +22,7 @@ import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.parser.JSONDeserializationConfig;
 import com.landawn.abacus.parser.JSONDeserializationConfig.JDC;
-import com.landawn.abacus.parser.SerializationConfig;
+import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.BufferedWriter;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.Clazz;
@@ -175,7 +175,7 @@ public class ImmutableMapEntryType<K, V> extends AbstractType<AbstractMap.Simple
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void writeCharacter(CharacterWriter writer, AbstractMap.SimpleImmutableEntry<K, V> x, SerializationConfig<?> config) throws IOException {
+    public void writeCharacter(CharacterWriter writer, AbstractMap.SimpleImmutableEntry<K, V> x, JSONXMLSerializationConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

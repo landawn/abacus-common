@@ -21,7 +21,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import com.landawn.abacus.parser.SerializationConfig;
+import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.Duration;
 import com.landawn.abacus.util.IOUtil;
@@ -142,7 +142,7 @@ public class DurationType extends AbstractType<Duration> {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void writeCharacter(CharacterWriter writer, Duration x, SerializationConfig<?> config) throws IOException {
+    public void writeCharacter(CharacterWriter writer, Duration x, JSONXMLSerializationConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

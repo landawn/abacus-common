@@ -20,7 +20,7 @@ import java.io.Writer;
 import org.joda.time.base.AbstractInstant;
 import org.joda.time.format.DateTimeFormatter;
 
-import com.landawn.abacus.parser.SerializationConfig;
+import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.DateTimeFormat;
 import com.landawn.abacus.util.DateUtil;
@@ -95,7 +95,7 @@ public abstract class AbstractJodaDateTimeType<T extends AbstractInstant> extend
      */
     @SuppressWarnings("null")
     @Override
-    public void writeCharacter(CharacterWriter writer, T x, SerializationConfig<?> config) throws IOException {
+    public void writeCharacter(CharacterWriter writer, T x, JSONXMLSerializationConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

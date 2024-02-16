@@ -443,17 +443,17 @@ public final class IOUtil {
      * @param charset
      * @return
      */
-    public static byte[] chars2Bytes(final char[] chars, final int offset, final int len, Charset charset) {
-        if (len == 0 && N.len(chars) >= offset) {
+    public static byte[] chars2Bytes(final char[] chars, final int offset, final int count, Charset charset) {
+        if (count == 0 && N.len(chars) >= offset) {
             return N.EMPTY_BYTE_ARRAY;
         }
 
         charset = checkCharset(charset);
 
         if (stringEncodeMethod == null) {
-            return new String(chars, offset, len).getBytes(charset);
+            return new String(chars, offset, count).getBytes(charset);
         } else {
-            return ClassUtil.invokeMethod(stringEncodeMethod, charset, chars, offset, len);
+            return ClassUtil.invokeMethod(stringEncodeMethod, charset, chars, offset, count);
         }
     }
 
@@ -491,17 +491,17 @@ public final class IOUtil {
      * @param charset
      * @return
      */
-    public static char[] bytes2Chars(final byte[] bytes, final int offset, final int len, Charset charset) {
-        if (len == 0 && N.len(bytes) >= offset) {
+    public static char[] bytes2Chars(final byte[] bytes, final int offset, final int count, Charset charset) {
+        if (count == 0 && N.len(bytes) >= offset) {
             return N.EMPTY_CHAR_ARRAY;
         }
 
         charset = checkCharset(charset);
 
         if (stringDecodeMethod == null) {
-            return new String(bytes, offset, len, charset).toCharArray();
+            return new String(bytes, offset, count, charset).toCharArray();
         } else {
-            return ClassUtil.invokeMethod(stringDecodeMethod, charset, bytes, offset, len);
+            return ClassUtil.invokeMethod(stringDecodeMethod, charset, bytes, offset, count);
         }
     }
 
@@ -2552,12 +2552,12 @@ public final class IOUtil {
      * @param len
      * @throws IOException
      */
-    public static void write(final File output, final char[] chars, final int offset, final int len) throws IOException {
-        if (len == 0 && N.len(chars) >= offset) {
+    public static void write(final File output, final char[] chars, final int offset, final int count) throws IOException {
+        if (count == 0 && N.len(chars) >= offset) {
             return;
         }
 
-        write(output, chars, offset, len, DEFAULT_CHARSET);
+        write(output, chars, offset, count, DEFAULT_CHARSET);
     }
 
     /**
@@ -2569,12 +2569,12 @@ public final class IOUtil {
      * @param charset
      * @throws IOException
      */
-    public static void write(final File output, final char[] chars, final int offset, final int len, final Charset charset) throws IOException {
-        if (len == 0 && N.len(chars) >= offset) {
+    public static void write(final File output, final char[] chars, final int offset, final int count, final Charset charset) throws IOException {
+        if (count == 0 && N.len(chars) >= offset) {
             return;
         }
 
-        write(output, chars2Bytes(chars, offset, len, charset));
+        write(output, chars2Bytes(chars, offset, count, charset));
     }
 
     /**
@@ -2614,12 +2614,12 @@ public final class IOUtil {
      * @param len
      * @throws IOException
      */
-    public static void write(final OutputStream output, final char[] chars, final int offset, final int len) throws IOException {
-        if (len == 0 && N.len(chars) >= offset) {
+    public static void write(final OutputStream output, final char[] chars, final int offset, final int count) throws IOException {
+        if (count == 0 && N.len(chars) >= offset) {
             return;
         }
 
-        write(output, chars, offset, len, DEFAULT_CHARSET);
+        write(output, chars, offset, count, DEFAULT_CHARSET);
     }
 
     /**
@@ -2631,12 +2631,12 @@ public final class IOUtil {
      * @param charset
      * @throws IOException
      */
-    public static void write(final OutputStream output, final char[] chars, final int offset, final int len, final Charset charset) throws IOException {
-        if (len == 0 && N.len(chars) >= offset) {
+    public static void write(final OutputStream output, final char[] chars, final int offset, final int count, final Charset charset) throws IOException {
+        if (count == 0 && N.len(chars) >= offset) {
             return;
         }
 
-        write(output, chars, offset, len, charset, false);
+        write(output, chars, offset, count, charset, false);
     }
 
     /**
@@ -2663,12 +2663,12 @@ public final class IOUtil {
      * @param flush
      * @throws IOException
      */
-    public static void write(final OutputStream output, final char[] chars, final int offset, final int len, final boolean flush) throws IOException {
-        if (len == 0 && N.len(chars) >= offset) {
+    public static void write(final OutputStream output, final char[] chars, final int offset, final int count, final boolean flush) throws IOException {
+        if (count == 0 && N.len(chars) >= offset) {
             return;
         }
 
-        write(output, chars, offset, len, DEFAULT_CHARSET, flush);
+        write(output, chars, offset, count, DEFAULT_CHARSET, flush);
     }
 
     /**
@@ -2681,13 +2681,13 @@ public final class IOUtil {
      * @param flush
      * @throws IOException
      */
-    public static void write(final OutputStream output, final char[] chars, final int offset, final int len, final Charset charset, final boolean flush)
+    public static void write(final OutputStream output, final char[] chars, final int offset, final int count, final Charset charset, final boolean flush)
             throws IOException {
-        if (len == 0 && N.len(chars) >= offset) {
+        if (count == 0 && N.len(chars) >= offset) {
             return;
         }
 
-        write(output, chars2Bytes(chars, offset, len, charset), flush);
+        write(output, chars2Bytes(chars, offset, count, charset), flush);
     }
 
     /**
@@ -2712,12 +2712,12 @@ public final class IOUtil {
      * @param len
      * @throws IOException
      */
-    public static void write(final Writer output, final char[] chars, final int offset, final int len) throws IOException {
-        if (len == 0 && N.len(chars) >= offset) {
+    public static void write(final Writer output, final char[] chars, final int offset, final int count) throws IOException {
+        if (count == 0 && N.len(chars) >= offset) {
             return;
         }
 
-        write(output, chars, offset, len, false);
+        write(output, chars, offset, count, false);
     }
 
     /**
@@ -2744,12 +2744,12 @@ public final class IOUtil {
      * @param flush
      * @throws IOException
      */
-    public static void write(final Writer output, final char[] chars, final int offset, final int len, final boolean flush) throws IOException {
-        if (len == 0 && N.len(chars) >= offset) {
+    public static void write(final Writer output, final char[] chars, final int offset, final int count, final boolean flush) throws IOException {
+        if (count == 0 && N.len(chars) >= offset) {
             return;
         }
 
-        output.write(chars, offset, len);
+        output.write(chars, offset, count);
 
         if (flush) {
             output.flush();
@@ -2778,8 +2778,8 @@ public final class IOUtil {
      * @param len
      * @throws IOException
      */
-    public static void write(final File output, final byte[] bytes, final int offset, final int len) throws IOException {
-        if (len == 0 && N.len(bytes) >= offset) {
+    public static void write(final File output, final byte[] bytes, final int offset, final int count) throws IOException {
+        if (count == 0 && N.len(bytes) >= offset) {
             return;
         }
 
@@ -2790,7 +2790,7 @@ public final class IOUtil {
 
             os = IOUtil.newFileOutputStream(output);
 
-            write(os, bytes, offset, len);
+            write(os, bytes, offset, count);
 
             os.flush();
         } finally {
@@ -2820,12 +2820,12 @@ public final class IOUtil {
      * @param len
      * @throws IOException
      */
-    public static void write(final OutputStream output, final byte[] bytes, final int offset, final int len) throws IOException {
-        if (len == 0 && N.len(bytes) >= offset) {
+    public static void write(final OutputStream output, final byte[] bytes, final int offset, final int count) throws IOException {
+        if (count == 0 && N.len(bytes) >= offset) {
             return;
         }
 
-        write(output, bytes, offset, len, false);
+        write(output, bytes, offset, count, false);
     }
 
     /**
@@ -2852,12 +2852,12 @@ public final class IOUtil {
      * @param flush
      * @throws IOException
      */
-    public static void write(final OutputStream output, final byte[] bytes, final int offset, final int len, final boolean flush) throws IOException {
-        if (len == 0 && N.len(bytes) >= offset) {
+    public static void write(final OutputStream output, final byte[] bytes, final int offset, final int count, final boolean flush) throws IOException {
+        if (count == 0 && N.len(bytes) >= offset) {
             return;
         }
 
-        output.write(bytes, offset, len);
+        output.write(bytes, offset, count);
 
         if (flush) {
             output.flush();
@@ -2885,7 +2885,7 @@ public final class IOUtil {
      * @return
      * @throws IOException
      */
-    public static long write(final File output, final InputStream input, final long offset, final long len) throws IOException {
+    public static long write(final File output, final InputStream input, final long offset, final long count) throws IOException {
         OutputStream os = null;
 
         try {
@@ -2893,7 +2893,7 @@ public final class IOUtil {
 
             os = IOUtil.newFileOutputStream(output);
 
-            long result = write(os, input, offset, len);
+            long result = write(os, input, offset, count);
 
             os.flush();
 
@@ -2923,8 +2923,8 @@ public final class IOUtil {
      * @return
      * @throws IOException
      */
-    public static long write(final OutputStream output, final InputStream input, final long offset, final long len) throws IOException {
-        return write(output, input, offset, len, false);
+    public static long write(final OutputStream output, final InputStream input, final long offset, final long count) throws IOException {
+        return write(output, input, offset, count, false);
     }
 
     /**
@@ -2944,31 +2944,41 @@ public final class IOUtil {
      * @param output
      * @param input
      * @param offset by byte
-     * @param len by byte
+     * @param count by byte
      * @param flush
      * @return
      * @throws IOException
      */
-    public static long write(final OutputStream output, final InputStream input, final long offset, final long len, final boolean flush) throws IOException {
+    public static long write(final OutputStream output, final InputStream input, final long offset, final long count, final boolean flush) throws IOException {
+        N.checkArgNotNull(output, "output");
+        N.checkArgNotNull(input, "input");
+
+        N.checkArgNotNegative(offset, "offset");
+        N.checkArgNotNegative(count, "count");
+
         final byte[] buf = Objectory.createByteArrayBuffer();
 
         try {
             if (offset > 0) {
-                skipFully(input, offset);
+                long skipped = skip(input, offset);
+
+                if (skipped < offset) {
+                    return 0;
+                }
             }
 
-            if (len == 0) {
+            if (count == 0) {
                 return 0;
             }
 
             final int bufLength = buf.length;
             long totalCount = 0;
-            int count = 0;
+            int cnt = 0;
 
-            while ((totalCount < len) && (EOF != (count = read(input, buf, 0, (int) Math.min(len - totalCount, bufLength))))) {
-                output.write(buf, 0, count);
+            while ((totalCount < count) && (EOF != (cnt = read(input, buf, 0, (int) Math.min(count - totalCount, bufLength))))) {
+                output.write(buf, 0, cnt);
 
-                totalCount += count;
+                totalCount += cnt;
             }
 
             if (flush) {
@@ -3013,8 +3023,8 @@ public final class IOUtil {
      * @return
      * @throws IOException
      */
-    public static long write(final File output, final Reader input, final long offset, final long len) throws IOException {
-        return write(output, input, offset, len, DEFAULT_CHARSET);
+    public static long write(final File output, final Reader input, final long offset, final long count) throws IOException {
+        return write(output, input, offset, count, DEFAULT_CHARSET);
     }
 
     /**
@@ -3027,13 +3037,13 @@ public final class IOUtil {
      * @return
      * @throws IOException
      */
-    public static long write(final File output, final Reader input, final long offset, final long len, final Charset charset) throws IOException {
+    public static long write(final File output, final Reader input, final long offset, final long count, final Charset charset) throws IOException {
         Writer writer = null;
 
         try { //NOSONAR
             writer = IOUtil.newOutputStreamWriter(IOUtil.newFileOutputStream(output), checkCharset(charset));
 
-            long result = write(writer, input, offset, len);
+            long result = write(writer, input, offset, count);
 
             writer.flush();
 
@@ -3063,8 +3073,8 @@ public final class IOUtil {
      * @return
      * @throws IOException
      */
-    public static long write(final Writer output, final Reader input, final long offset, final long len) throws IOException {
-        return write(output, input, offset, len, false);
+    public static long write(final Writer output, final Reader input, final long offset, final long count) throws IOException {
+        return write(output, input, offset, count, false);
     }
 
     /**
@@ -3084,12 +3094,18 @@ public final class IOUtil {
      * @param output
      * @param input
      * @param offset by char
-     * @param len by char
+     * @param count by char
      * @param flush
      * @return
      * @throws IOException
      */
-    public static long write(final Writer output, final Reader input, final long offset, final long len, final boolean flush) throws IOException {
+    public static long write(final Writer output, final Reader input, final long offset, final long count, final boolean flush) throws IOException {
+        N.checkArgNotNull(output, "output");
+        N.checkArgNotNull(input, "input");
+
+        N.checkArgNotNegative(offset, "offset");
+        N.checkArgNotNegative(count, "count");
+
         final char[] buf = Objectory.createCharArrayBuffer();
 
         try {
@@ -3097,18 +3113,18 @@ public final class IOUtil {
                 skipFully(input, offset);
             }
 
-            if (len == 0) {
+            if (count == 0) {
                 return 0;
             }
 
             final int bufLength = buf.length;
             long totalCount = 0;
-            int count = 0;
+            int cnt = 0;
 
-            while ((totalCount < len) && (EOF != (count = read(input, buf, 0, (int) Math.min(len - totalCount, bufLength))))) {
-                output.write(buf, 0, count);
+            while ((totalCount < count) && (EOF != (cnt = read(input, buf, 0, (int) Math.min(count - totalCount, bufLength))))) {
+                output.write(buf, 0, cnt);
 
-                totalCount += count;
+                totalCount += cnt;
             }
 
             if (flush) {
@@ -3141,7 +3157,7 @@ public final class IOUtil {
      * @return
      * @throws IOException
      */
-    public static long write(final File output, final File input, final long offset, final long len) throws IOException {
+    public static long write(final File output, final File input, final long offset, final long count) throws IOException {
         OutputStream os = null;
         InputStream is = null;
 
@@ -3149,7 +3165,7 @@ public final class IOUtil {
             os = IOUtil.newFileOutputStream(output);
             is = IOUtil.newFileInputStream(input);
 
-            return write(os, is, offset, len, true);
+            return write(os, is, offset, count, true);
         } finally {
             closeQuietly(os);
             closeQuietly(is);
@@ -3176,8 +3192,8 @@ public final class IOUtil {
      * @return
      * @throws IOException
      */
-    public static long write(final OutputStream output, final File input, final long offset, final long len) throws IOException {
-        return write(output, input, offset, len, false);
+    public static long write(final OutputStream output, final File input, final long offset, final long count) throws IOException {
+        return write(output, input, offset, count, false);
     }
 
     /**
@@ -3202,12 +3218,12 @@ public final class IOUtil {
      * @return
      * @throws IOException
      */
-    public static long write(final OutputStream output, final File input, final long offset, final long len, final boolean flush) throws IOException {
+    public static long write(final OutputStream output, final File input, final long offset, final long count, final boolean flush) throws IOException {
         InputStream is = null;
         try {
             is = IOUtil.newFileInputStream(input);
 
-            return write(output, is, offset, len, flush);
+            return write(output, is, offset, count, flush);
         } finally {
             closeQuietly(is);
         }
@@ -3233,8 +3249,8 @@ public final class IOUtil {
      * @return
      * @throws IOException
      */
-    public static long write(final Writer output, final File input, final long offset, final long len) throws IOException {
-        return write(output, input, offset, len, false);
+    public static long write(final Writer output, final File input, final long offset, final long count) throws IOException {
+        return write(output, input, offset, count, false);
     }
 
     /**
@@ -3259,12 +3275,12 @@ public final class IOUtil {
      * @return
      * @throws IOException
      */
-    public static long write(final Writer output, final File input, final long offset, final long len, final boolean flush) throws IOException {
+    public static long write(final Writer output, final File input, final long offset, final long count, final boolean flush) throws IOException {
         Reader reader = null;
         try {
             reader = IOUtil.newBufferedReader(input);
 
-            return write(output, reader, offset, len, flush);
+            return write(output, reader, offset, count, flush);
         } finally {
             closeQuietly(reader);
         }
@@ -3292,8 +3308,8 @@ public final class IOUtil {
      * @param len
      * @throws IOException
      */
-    public static void append(final File output, final byte[] bytes, final int offset, final int len) throws IOException {
-        if (len == 0 && N.len(bytes) >= offset) {
+    public static void append(final File output, final byte[] bytes, final int offset, final int count) throws IOException {
+        if (count == 0 && N.len(bytes) >= offset) {
             return;
         }
 
@@ -3304,7 +3320,7 @@ public final class IOUtil {
 
             os = new FileOutputStream(output, true);
 
-            write(os, bytes, offset, len);
+            write(os, bytes, offset, count);
 
             os.flush();
         } finally {
@@ -3349,12 +3365,12 @@ public final class IOUtil {
      * @param len
      * @throws IOException
      */
-    public static void append(final File output, final char[] chars, final int offset, final int len) throws IOException {
-        if (len == 0 && N.len(chars) >= offset) {
+    public static void append(final File output, final char[] chars, final int offset, final int count) throws IOException {
+        if (count == 0 && N.len(chars) >= offset) {
             return;
         }
 
-        append(output, chars, offset, len, DEFAULT_CHARSET);
+        append(output, chars, offset, count, DEFAULT_CHARSET);
     }
 
     /**
@@ -3366,12 +3382,12 @@ public final class IOUtil {
      * @param charset
      * @throws IOException
      */
-    public static void append(final File output, final char[] chars, final int offset, final int len, final Charset charset) throws IOException {
-        if (len == 0 && N.len(chars) >= offset) {
+    public static void append(final File output, final char[] chars, final int offset, final int count, final Charset charset) throws IOException {
+        if (count == 0 && N.len(chars) >= offset) {
             return;
         }
 
-        append(output, chars2Bytes(chars, offset, len, charset));
+        append(output, chars2Bytes(chars, offset, count, charset));
     }
 
     /**
@@ -3417,7 +3433,7 @@ public final class IOUtil {
      * @return
      * @throws IOException
      */
-    public static long append(final File output, final InputStream input, final long offset, final long len) throws IOException {
+    public static long append(final File output, final InputStream input, final long offset, final long count) throws IOException {
         OutputStream os = null;
 
         try { //NOSONAR
@@ -3425,7 +3441,7 @@ public final class IOUtil {
 
             os = new FileOutputStream(output, true);
 
-            long result = write(os, input, offset, len);
+            long result = write(os, input, offset, count);
 
             os.flush();
 
@@ -3467,8 +3483,8 @@ public final class IOUtil {
      * @return
      * @throws IOException
      */
-    public static long append(final File output, final Reader input, final long offset, final long len) throws IOException {
-        return append(output, input, offset, len, DEFAULT_CHARSET);
+    public static long append(final File output, final Reader input, final long offset, final long count) throws IOException {
+        return append(output, input, offset, count, DEFAULT_CHARSET);
     }
 
     /**
@@ -3481,13 +3497,13 @@ public final class IOUtil {
      * @return
      * @throws IOException
      */
-    public static long append(final File output, final Reader input, final long offset, final long len, final Charset charset) throws IOException {
+    public static long append(final File output, final Reader input, final long offset, final long count, final Charset charset) throws IOException {
         Writer writer = null;
 
         try { //NOSONAR
             writer = IOUtil.newOutputStreamWriter(new FileOutputStream(output, true), checkCharset(charset));
 
-            long result = write(writer, input, offset, len);
+            long result = write(writer, input, offset, count);
 
             writer.flush();
 
@@ -3517,7 +3533,7 @@ public final class IOUtil {
      * @return
      * @throws IOException
      */
-    public static long append(final File output, final File input, final long offset, final long len) throws IOException {
+    public static long append(final File output, final File input, final long offset, final long count) throws IOException {
         OutputStream os = null;
         InputStream is = null;
 
@@ -3525,7 +3541,7 @@ public final class IOUtil {
             os = new FileOutputStream(output, true);
             is = IOUtil.newFileInputStream(input);
 
-            return write(os, is, offset, len, true);
+            return write(os, is, offset, count, true);
         } finally {
             closeQuietly(os);
             closeQuietly(is);
@@ -3719,23 +3735,23 @@ public final class IOUtil {
      * @param file the file to map
      * @param mode the mode to use when mapping {@code file}
      * @param offset
-     * @param len
+     * @param count
      * @return a buffer reflecting {@code file}
      * @throws IOException
      * @see FileChannel#map(MapMode, long, long)
      * @since 2.0
      */
-    public static MappedByteBuffer map(File file, MapMode mode, long offset, long len) throws IOException {
+    public static MappedByteBuffer map(File file, MapMode mode, long offset, long count) throws IOException {
         N.checkArgNotNull(file);
         N.checkArgNotNull(mode);
         N.checkArgNotNegative(offset, "offset");
-        N.checkArgNotNegative(len, "len");
+        N.checkArgNotNegative(count, "count");
 
         RandomAccessFile raf = null;
 
         try { //NOSONAR
             raf = new RandomAccessFile(file, mode == MapMode.READ_ONLY ? "r" : "rw");
-            return raf.getChannel().map(mode, offset, len);
+            return raf.getChannel().map(mode, offset, count);
         } finally {
             IOUtil.closeQuietly(raf);
         }
@@ -4343,7 +4359,7 @@ public final class IOUtil {
      *
      * @param c
      */
-    public static void closeAll(final Collection<? extends AutoCloseable> c) {
+    public static void closeAll(final Iterable<? extends AutoCloseable> c) {
         if (N.isEmpty(c)) {
             return;
         }
@@ -4401,7 +4417,7 @@ public final class IOUtil {
      *
      * @param c
      */
-    public static void closeAllQuietly(final Collection<? extends AutoCloseable> c) {
+    public static void closeAllQuietly(final Iterable<? extends AutoCloseable> c) {
         if (N.isEmpty(c)) {
             return;
         }
@@ -4779,6 +4795,20 @@ public final class IOUtil {
     }
 
     /**
+     *
+     * @param file
+     * @return
+     */
+    public static boolean deleteQuietly(File file) {
+        try {
+            return deleteIfExists(file);
+        } catch (Throwable e) {
+            logger.error("Failed to delete file: " + file, e);
+            return false;
+        }
+    }
+
+    /**
      * Delete the specified file and all its sub files/directories if it's a directory.
      *
      * @param file
@@ -4817,32 +4847,36 @@ public final class IOUtil {
     }
 
     /**
+     * Delete the specified <code>file</code> if it's a file or its sub files/directories if it's a directory.
      *
-     * @param dir
-     * @return {@code false} if the file or some of its sub files if it's directory can't be deleted.
+     *
+     * @param <E>
+     * @param file
+     * @return
+     * @throws E
      */
-    public static boolean deleteFiles(final File dir) {
-        return deleteFiles(dir, BiPredicates.alwaysTrue());
+    public static <E extends Exception> boolean deleteFiles(final File file) throws E {
+        return deleteFiles(file, BiPredicates.alwaysTrue());
     }
 
     /**
-     * Delete the specified <code>dir</code> if it's a file or its sub files/directories if it's a directory with the specified filter.
+     * Delete the specified <code>file</code> if it's a file or its sub files/directories if it's a directory with the specified filter.
      *
      * @param <E>
-     * @param dir
+     * @param file
      * @param filter
-     * @return {@code false} if the file or some of its sub files if it's directory can't be deleted.
+     * @return {@code false} if the file or some of its sub files/directories can't be deleted.
      * @throws E the e
      * @see Files#delete(Path)
      * @see Files#deleteIfExists(Path)
      */
-    public static <E extends Exception> boolean deleteFiles(final File dir, Throwables.BiPredicate<? super File, ? super File, E> filter) throws E {
-        if ((dir == null) || !dir.exists()) {
+    public static <E extends Exception> boolean deleteFiles(final File file, Throwables.BiPredicate<? super File, ? super File, E> filter) throws E {
+        if ((file == null) || !file.exists()) {
             return false;
         }
 
-        if (dir.isDirectory()) {
-            final File[] files = dir.listFiles();
+        if (file.isDirectory()) {
+            final File[] files = file.listFiles();
 
             if (N.isEmpty(files)) {
                 return true;
@@ -4853,7 +4887,7 @@ public final class IOUtil {
                     continue;
                 }
 
-                if (filter == null || filter.test(dir, subFile)) {
+                if (filter == null || filter.test(file, subFile)) {
                     if (subFile.isFile()) {
                         if (!subFile.delete()) { //NOSONAR
                             return false;
@@ -4870,8 +4904,8 @@ public final class IOUtil {
                 }
             }
         } else {
-            if (filter == null || filter.test(dir.getParentFile(), dir)) {
-                return dir.delete(); //NOSONAR
+            if (filter == null || filter.test(file.getParentFile(), file)) {
+                return file.delete(); //NOSONAR
             }
         }
 
@@ -4883,14 +4917,14 @@ public final class IOUtil {
      *
      * @param directory directory to clean
      * @return {@code false} if some of its sub files can't be deleted.
-     * @see IOUtil#deleteFiles
+     * @see #deleteFiles(File, com.landawn.abacus.util.Throwables.BiPredicate)
      */
     public static boolean cleanDirectory(final File directory) {
         if (directory == null || !directory.isDirectory()) {
             return true;
         }
 
-        return deleteFiles(directory);
+        return deleteFiles(directory, BiPredicates.alwaysTrue());
     }
 
     static void createNewFileIfNotExists(final File file) throws IOException {

@@ -17,7 +17,7 @@ package com.landawn.abacus.type;
 import java.io.IOException;
 import java.io.Writer;
 
-import com.landawn.abacus.parser.SerializationConfig;
+import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 
 /**
@@ -115,7 +115,7 @@ public class BooleanCharType extends AbstractType<Boolean> {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void writeCharacter(CharacterWriter writer, Boolean x, SerializationConfig<?> config) throws IOException {
+    public void writeCharacter(CharacterWriter writer, Boolean x, JSONXMLSerializationConfig<?> config) throws IOException {
         final char ch = config == null ? 0 : config.getCharQuotation();
 
         if (ch == 0) {

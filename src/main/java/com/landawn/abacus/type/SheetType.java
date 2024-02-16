@@ -80,7 +80,7 @@ public class SheetType<R, C, E> extends AbstractType<Sheet<R, C, E>> {
         final Type<?> rowKeyListType = TypeFactory.getType("List<" + rowKeyTypeName + ">");
         final Type<?> columnKeyListType = TypeFactory.getType("List<" + columnKeyTypeName + ">");
         final Type<?> rowListType = TypeFactory.getType("List<List<" + elementTypeName + ">>");
-        this.jdc = JDC.create().setPropType(ROW_KEY_SET, rowKeyListType).setPropType(COLUMN_KEY_SET, columnKeyListType).setPropType(ROW_LIST, rowListType);
+        this.jdc = JDC.create().setValueType(ROW_KEY_SET, rowKeyListType).setValueType(COLUMN_KEY_SET, columnKeyListType).setValueType(ROW_LIST, rowListType);
     }
 
     /**
