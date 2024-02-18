@@ -136,7 +136,7 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      *
      * @param indices 
      */
-    public abstract void deleteAll(int... indices);
+    public abstract void deleteAllByIndices(int... indices);
 
     /**
      * 

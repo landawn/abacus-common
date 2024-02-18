@@ -3976,14 +3976,32 @@ public final class Throwables {
     }
 
     public static final class LazyInitializer<T, E extends Throwable> implements Throwables.Supplier<T, E> {
+        private final Supplier<T, E> supplier;
         private volatile boolean initialized = false;
         private volatile T value = null; //NOSONAR
-        private final Supplier<T, E> supplier;
 
         LazyInitializer(final Throwables.Supplier<T, E> supplier) {
             N.checkArgNotNull(supplier, "supplier");
 
             this.supplier = supplier;
+        }
+
+        /**
+         *
+         *
+         * @param <T>
+         * @param <E>
+         * @param supplier
+         * @return
+         */
+        public static <T, E extends Throwable> LazyInitializer<T, E> of(final Throwables.Supplier<T, E> supplier) {
+            N.checkArgNotNull(supplier);
+
+            if (supplier instanceof LazyInitializer) {
+                return (LazyInitializer<T, E>) supplier;
+            }
+
+            return new LazyInitializer<>(supplier);
         }
 
         /**
@@ -4006,24 +4024,6 @@ public final class Throwables {
             }
 
             return value;
-        }
-
-        /**
-         *
-         *
-         * @param <T>
-         * @param <E>
-         * @param supplier
-         * @return
-         */
-        public static <T, E extends Throwable> LazyInitializer<T, E> of(final Throwables.Supplier<T, E> supplier) {
-            N.checkArgNotNull(supplier);
-
-            if (supplier instanceof LazyInitializer) {
-                return (LazyInitializer<T, E>) supplier;
-            }
-
-            return new LazyInitializer<>(supplier);
         }
     }
 }

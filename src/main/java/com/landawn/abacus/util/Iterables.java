@@ -38,6 +38,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.function.Function;
 
+import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.util.Range.BoundType;
 import com.landawn.abacus.util.u.Nullable;
 import com.landawn.abacus.util.u.Optional;
@@ -149,83 +150,6 @@ public final class Iterables {
     @SafeVarargs
     public static OptionalDouble min(final double... a) {
         return a == null || a.length == 0 ? OptionalDouble.empty() : OptionalDouble.of(N.min(a));
-    }
-
-    /**
-     * Returns {@code OptionalChar.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
-     *
-     * @param a
-     * @return
-     */
-    @SafeVarargs
-    public static OptionalChar max(final char... a) {
-        return a == null || a.length == 0 ? OptionalChar.empty() : OptionalChar.of(N.max(a));
-    }
-
-    /**
-     * Returns {@code OptionalByte.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
-     *
-     * @param a
-     * @return
-     */
-    @SafeVarargs
-    public static OptionalByte max(final byte... a) {
-        return a == null || a.length == 0 ? OptionalByte.empty() : OptionalByte.of(N.max(a));
-    }
-
-    /**
-     * Returns {@code OptionalShort.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
-     *
-     * @param a
-     * @return
-     */
-    @SafeVarargs
-    public static OptionalShort max(final short... a) {
-        return a == null || a.length == 0 ? OptionalShort.empty() : OptionalShort.of(N.max(a));
-    }
-
-    /**
-     * Returns {@code OptionalInt.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
-     *
-     * @param a
-     * @return
-     */
-    @SafeVarargs
-    public static OptionalInt max(final int... a) {
-        return a == null || a.length == 0 ? OptionalInt.empty() : OptionalInt.of(N.max(a));
-    }
-
-    /**
-     * Returns {@code OptionalLong.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
-     *
-     * @param a
-     * @return
-     */
-    @SafeVarargs
-    public static OptionalLong max(final long... a) {
-        return a == null || a.length == 0 ? OptionalLong.empty() : OptionalLong.of(N.max(a));
-    }
-
-    /**
-     * Returns {@code OptionalFloat.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
-     *
-     * @param a
-     * @return
-     */
-    @SafeVarargs
-    public static OptionalFloat max(final float... a) {
-        return a == null || a.length == 0 ? OptionalFloat.empty() : OptionalFloat.of(N.max(a));
-    }
-
-    /**
-     * Returns {@code OptionalDouble.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
-     *
-     * @param a
-     * @return
-     */
-    @SafeVarargs
-    public static OptionalDouble max(final double... a) {
-        return a == null || a.length == 0 ? OptionalDouble.empty() : OptionalDouble.of(N.max(a));
     }
 
     /**
@@ -356,6 +280,173 @@ public final class Iterables {
     }
 
     /**
+     * Returns the minimum {@code int} value extracted from the specified array {@code a} by {@code valueExtractor}, or {@code defaultValue} if {@code a} is null or empty.
+     *
+     * @param <T>
+     * @param <E>
+     * @param a
+     * @param defaultValue
+     * @return
+     * @throws E
+     */
+    @Beta
+    public static <T, E extends Exception> OptionalInt minInt(final T[] a, final Throwables.ToIntFunction<? super T, E> valueExtractor) throws E {
+        if (N.isEmpty(a)) {
+            return OptionalInt.empty();
+        }
+
+        int candicate = valueExtractor.applyAsInt(a[0]);
+        int next = 0;
+
+        for (int i = 1, len = a.length; i < len; i++) {
+            next = valueExtractor.applyAsInt(a[i]);
+
+            if (next < candicate) {
+                candicate = next;
+            }
+        }
+
+        return OptionalInt.of(candicate);
+    }
+
+    /**
+     * Returns the minimum {@code long} value extracted from the specified array {@code a} by {@code valueExtractor}, or {@code defaultValue} if {@code a} is null or empty.
+     *
+     * @param <T>
+     * @param <E>
+     * @param a
+     * @param defaultValue
+     * @return
+     * @throws E
+     */
+    @Beta
+    public static <T, E extends Exception> OptionalLong minLong(final T[] a, final Throwables.ToLongFunction<? super T, E> valueExtractor) throws E {
+        if (N.isEmpty(a)) {
+            return OptionalLong.empty();
+        }
+
+        long candicate = valueExtractor.applyAsLong(a[0]);
+        long next = 0;
+
+        for (int i = 1, len = a.length; i < len; i++) {
+            next = valueExtractor.applyAsLong(a[i]);
+
+            if (next < candicate) {
+                candicate = next;
+            }
+        }
+
+        return OptionalLong.of(candicate);
+    }
+
+    /**
+     * Returns the minimum {@code double} value extracted from the specified array {@code a} by {@code valueExtractor}, or {@code defaultValue} if {@code a} is null or empty.
+     *
+     * @param <T>
+     * @param <E>
+     * @param a
+     * @param defaultValue
+     * @return
+     * @throws E
+     */
+    @Beta
+    public static <T, E extends Exception> OptionalDouble minDouble(final T[] a, final Throwables.ToDoubleFunction<? super T, E> valueExtractor) throws E {
+        if (N.isEmpty(a)) {
+            return OptionalDouble.empty();
+        }
+
+        double candicate = valueExtractor.applyAsDouble(a[0]);
+        double next = 0;
+
+        for (int i = 1, len = a.length; i < len; i++) {
+            next = valueExtractor.applyAsDouble(a[i]);
+
+            if (N.compare(next, candicate) < 0) {
+                candicate = next;
+            }
+        }
+
+        return OptionalDouble.of(candicate);
+    }
+
+    /**
+     * Returns {@code OptionalChar.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
+     *
+     * @param a
+     * @return
+     */
+    @SafeVarargs
+    public static OptionalChar max(final char... a) {
+        return a == null || a.length == 0 ? OptionalChar.empty() : OptionalChar.of(N.max(a));
+    }
+
+    /**
+     * Returns {@code OptionalByte.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
+     *
+     * @param a
+     * @return
+     */
+    @SafeVarargs
+    public static OptionalByte max(final byte... a) {
+        return a == null || a.length == 0 ? OptionalByte.empty() : OptionalByte.of(N.max(a));
+    }
+
+    /**
+     * Returns {@code OptionalShort.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
+     *
+     * @param a
+     * @return
+     */
+    @SafeVarargs
+    public static OptionalShort max(final short... a) {
+        return a == null || a.length == 0 ? OptionalShort.empty() : OptionalShort.of(N.max(a));
+    }
+
+    /**
+     * Returns {@code OptionalInt.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
+     *
+     * @param a
+     * @return
+     */
+    @SafeVarargs
+    public static OptionalInt max(final int... a) {
+        return a == null || a.length == 0 ? OptionalInt.empty() : OptionalInt.of(N.max(a));
+    }
+
+    /**
+     * Returns {@code OptionalLong.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
+     *
+     * @param a
+     * @return
+     */
+    @SafeVarargs
+    public static OptionalLong max(final long... a) {
+        return a == null || a.length == 0 ? OptionalLong.empty() : OptionalLong.of(N.max(a));
+    }
+
+    /**
+     * Returns {@code OptionalFloat.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
+     *
+     * @param a
+     * @return
+     */
+    @SafeVarargs
+    public static OptionalFloat max(final float... a) {
+        return a == null || a.length == 0 ? OptionalFloat.empty() : OptionalFloat.of(N.max(a));
+    }
+
+    /**
+     * Returns {@code OptionalDouble.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
+     *
+     * @param a
+     * @return
+     */
+    @SafeVarargs
+    public static OptionalDouble max(final double... a) {
+        return a == null || a.length == 0 ? OptionalDouble.empty() : OptionalDouble.of(N.max(a));
+    }
+
+    /**
      * Returns {@code Nullable.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
      *
      * @param <T>
@@ -483,6 +574,96 @@ public final class Iterables {
     }
 
     /**
+     * Returns the maximum {@code int} value extracted from the specified array {@code a} by {@code valueExtractor}, or {@code defaultValue} if {@code a} is null or empty.
+     *
+     * @param <T>
+     * @param <E>
+     * @param a
+     * @param defaultValue
+     * @return
+     * @throws E
+     */
+    @Beta
+    public static <T, E extends Exception> OptionalInt maxInt(final T[] a, final Throwables.ToIntFunction<? super T, E> valueExtractor) throws E {
+        if (N.isEmpty(a)) {
+            return OptionalInt.empty();
+        }
+
+        int candicate = valueExtractor.applyAsInt(a[0]);
+        int next = 0;
+
+        for (int i = 1, len = a.length; i < len; i++) {
+            next = valueExtractor.applyAsInt(a[i]);
+
+            if (next > candicate) {
+                candicate = next;
+            }
+        }
+
+        return OptionalInt.of(candicate);
+    }
+
+    /**
+     * Returns the maximum {@code long} value extracted from the specified array {@code a} by {@code valueExtractor}, or {@code defaultValue} if {@code a} is null or empty.
+     *
+     * @param <T>
+     * @param <E>
+     * @param a
+     * @param defaultValue
+     * @return
+     * @throws E
+     */
+    @Beta
+    public static <T, E extends Exception> OptionalLong maxLong(final T[] a, final Throwables.ToLongFunction<? super T, E> valueExtractor) throws E {
+        if (N.isEmpty(a)) {
+            return OptionalLong.empty();
+        }
+
+        long candicate = valueExtractor.applyAsLong(a[0]);
+        long next = 0;
+
+        for (int i = 1, len = a.length; i < len; i++) {
+            next = valueExtractor.applyAsLong(a[i]);
+
+            if (next > candicate) {
+                candicate = next;
+            }
+        }
+
+        return OptionalLong.of(candicate);
+    }
+
+    /**
+     * Returns the maximum {@code double} value extracted from the specified array {@code a} by {@code valueExtractor}, or {@code defaultValue} if {@code a} is null or empty.
+     *
+     * @param <T>
+     * @param <E>
+     * @param a
+     * @param defaultValue
+     * @return
+     * @throws E
+     */
+    @Beta
+    public static <T, E extends Exception> OptionalDouble maxDouble(final T[] a, final Throwables.ToDoubleFunction<? super T, E> valueExtractor) throws E {
+        if (N.isEmpty(a)) {
+            return OptionalDouble.empty();
+        }
+
+        double candicate = valueExtractor.applyAsDouble(a[0]);
+        double next = 0;
+
+        for (int i = 1, len = a.length; i < len; i++) {
+            next = valueExtractor.applyAsDouble(a[i]);
+
+            if (N.compare(next, candicate) > 0) {
+                candicate = next;
+            }
+        }
+
+        return OptionalDouble.of(candicate);
+    }
+
+    /**
      *
      * @param <T>
      * @param a
@@ -566,23 +747,23 @@ public final class Iterables {
      * Returns {@code Nullable.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
      *
      * @param <T>
-     * @param c
-     * @return
-     */
-    public static <T extends Comparable<? super T>> Nullable<T> median(final Collection<? extends T> c) {
-        return N.isEmpty(c) ? Nullable.<T> empty() : Nullable.of(N.median(c));
-    }
-
-    /**
-     * Returns {@code Nullable.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
-     *
-     * @param <T>
      * @param a
      * @param cmp
      * @return
      */
     public static <T> Nullable<T> median(final T[] a, final Comparator<? super T> cmp) {
         return N.isEmpty(a) ? Nullable.<T> empty() : Nullable.of(N.median(a, cmp));
+    }
+
+    /**
+     * Returns {@code Nullable.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
+     *
+     * @param <T>
+     * @param c
+     * @return
+     */
+    public static <T extends Comparable<? super T>> Nullable<T> median(final Collection<? extends T> c) {
+        return N.isEmpty(c) ? Nullable.<T> empty() : Nullable.of(N.median(c));
     }
 
     /**
@@ -627,37 +808,12 @@ public final class Iterables {
      * Returns {@code Nullable.empty()} if the specified {@code Array/Collection} is {@code null} or empty, or its length/size is less than {@code k}.
      *
      * @param <T>
-     * @param c
-     * @param k
-     * @return
-     */
-    public static <T extends Comparable<? super T>> Nullable<T> kthLargest(final Collection<? extends T> c, final int k) {
-        return N.isEmpty(c) || c.size() < k ? Nullable.<T> empty() : Nullable.of(N.kthLargest(c, k));
-    }
-
-    /**
-     * Returns {@code Nullable.empty()} if the specified {@code Array/Collection} is {@code null} or empty, or its length/size is less than {@code k}.
-     *
-     * @param <T>
      * @param a
      * @param k
      * @return
      */
     public static <T extends Comparable<? super T>> Nullable<T> kthLargest(final T[] a, final int k) {
         return N.isEmpty(a) || a.length < k ? Nullable.<T> empty() : Nullable.of(N.kthLargest(a, k));
-    }
-
-    /**
-     * Returns {@code Nullable.empty()} if the specified {@code Array/Collection} is {@code null} or empty, or its length/size is less than {@code k}.
-     *
-     * @param <T>
-     * @param c
-     * @param k
-     * @param cmp
-     * @return
-     */
-    public static <T> Nullable<T> kthLargest(final Collection<? extends T> c, final int k, final Comparator<? super T> cmp) {
-        return N.isEmpty(c) || c.size() < k ? Nullable.<T> empty() : Nullable.of(N.kthLargest(c, k, cmp));
     }
 
     /**
@@ -671,6 +827,31 @@ public final class Iterables {
      */
     public static <T> Nullable<T> kthLargest(final T[] a, final int k, final Comparator<? super T> cmp) {
         return N.isEmpty(a) || a.length < k ? Nullable.<T> empty() : Nullable.of(N.kthLargest(a, k, cmp));
+    }
+
+    /**
+     * Returns {@code Nullable.empty()} if the specified {@code Array/Collection} is {@code null} or empty, or its length/size is less than {@code k}.
+     *
+     * @param <T>
+     * @param c
+     * @param k
+     * @return
+     */
+    public static <T extends Comparable<? super T>> Nullable<T> kthLargest(final Collection<? extends T> c, final int k) {
+        return N.isEmpty(c) || c.size() < k ? Nullable.<T> empty() : Nullable.of(N.kthLargest(c, k));
+    }
+
+    /**
+     * Returns {@code Nullable.empty()} if the specified {@code Array/Collection} is {@code null} or empty, or its length/size is less than {@code k}.
+     *
+     * @param <T>
+     * @param c
+     * @param k
+     * @param cmp
+     * @return
+     */
+    public static <T> Nullable<T> kthLargest(final Collection<? extends T> c, final int k, final Comparator<? super T> cmp) {
+        return N.isEmpty(c) || c.size() < k ? Nullable.<T> empty() : Nullable.of(N.kthLargest(c, k, cmp));
     }
 
     /**
@@ -927,38 +1108,6 @@ public final class Iterables {
      *
      * @param <T>
      * @param c
-     * @return
-     */
-    public static <T extends Number> OptionalDouble averageInt(final Iterable<? extends T> c) {
-        return averageInt(c, Fn.numToInt());
-    }
-
-    /**
-     * Returns {@code OptionalDouble.empty()} if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
-     *
-     * @param <T>
-     * @param <E>
-     * @param c
-     * @param func
-     * @return
-     * @throws E the e
-     */
-    public static <T, E extends Exception> OptionalDouble averageInt(final Iterable<? extends T> c, final Throwables.ToIntFunction<? super T, E> func)
-            throws E {
-        final Iterator<? extends T> iter = c == null ? ObjIterator.<T> empty() : c.iterator();
-
-        if (iter.hasNext() == false) {
-            return OptionalDouble.empty();
-        }
-
-        return OptionalDouble.of(N.averageInt(c, func));
-    }
-
-    /**
-     * Returns {@code OptionalDouble.empty()} if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
-     *
-     * @param <T>
-     * @param c
      * @param fromIndex
      * @param toIndex
      * @return
@@ -988,6 +1137,38 @@ public final class Iterables {
         }
 
         return OptionalDouble.of(N.averageInt(c, fromIndex, toIndex, func));
+    }
+
+    /**
+     * Returns {@code OptionalDouble.empty()} if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
+     *
+     * @param <T>
+     * @param c
+     * @return
+     */
+    public static <T extends Number> OptionalDouble averageInt(final Iterable<? extends T> c) {
+        return averageInt(c, Fn.numToInt());
+    }
+
+    /**
+     * Returns {@code OptionalDouble.empty()} if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
+     *
+     * @param <T>
+     * @param <E>
+     * @param c
+     * @param func
+     * @return
+     * @throws E the e
+     */
+    public static <T, E extends Exception> OptionalDouble averageInt(final Iterable<? extends T> c, final Throwables.ToIntFunction<? super T, E> func)
+            throws E {
+        final Iterator<? extends T> iter = c == null ? ObjIterator.<T> empty() : c.iterator();
+
+        if (iter.hasNext() == false) {
+            return OptionalDouble.empty();
+        }
+
+        return OptionalDouble.of(N.averageInt(c, func));
     }
 
     /**
@@ -1060,38 +1241,6 @@ public final class Iterables {
      *
      * @param <T>
      * @param c
-     * @return
-     */
-    public static <T extends Number> OptionalDouble averageLong(final Iterable<? extends T> c) {
-        return averageLong(c, Fn.numToLong());
-    }
-
-    /**
-     * Returns {@code OptionalDouble.empty()} if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
-     *
-     * @param <T>
-     * @param <E>
-     * @param c
-     * @param func
-     * @return
-     * @throws E the e
-     */
-    public static <T, E extends Exception> OptionalDouble averageLong(final Iterable<? extends T> c, final Throwables.ToLongFunction<? super T, E> func)
-            throws E {
-        final Iterator<? extends T> iter = c == null ? ObjIterator.<T> empty() : c.iterator();
-
-        if (iter.hasNext() == false) {
-            return OptionalDouble.empty();
-        }
-
-        return OptionalDouble.of(N.averageLong(c, func));
-    }
-
-    /**
-     * Returns {@code OptionalDouble.empty()} if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
-     *
-     * @param <T>
-     * @param c
      * @param fromIndex
      * @param toIndex
      * @return
@@ -1121,6 +1270,38 @@ public final class Iterables {
         }
 
         return OptionalDouble.of(N.averageLong(c, fromIndex, toIndex, func));
+    }
+
+    /**
+     * Returns {@code OptionalDouble.empty()} if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
+     *
+     * @param <T>
+     * @param c
+     * @return
+     */
+    public static <T extends Number> OptionalDouble averageLong(final Iterable<? extends T> c) {
+        return averageLong(c, Fn.numToLong());
+    }
+
+    /**
+     * Returns {@code OptionalDouble.empty()} if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
+     *
+     * @param <T>
+     * @param <E>
+     * @param c
+     * @param func
+     * @return
+     * @throws E the e
+     */
+    public static <T, E extends Exception> OptionalDouble averageLong(final Iterable<? extends T> c, final Throwables.ToLongFunction<? super T, E> func)
+            throws E {
+        final Iterator<? extends T> iter = c == null ? ObjIterator.<T> empty() : c.iterator();
+
+        if (iter.hasNext() == false) {
+            return OptionalDouble.empty();
+        }
+
+        return OptionalDouble.of(N.averageLong(c, func));
     }
 
     /**
@@ -1199,42 +1380,6 @@ public final class Iterables {
      *
      * @param <T>
      * @param c
-     * @return
-     */
-    public static <T extends Number> OptionalDouble averageDouble(final Iterable<? extends T> c) {
-        return averageDouble(c, Fn.numToDouble());
-    }
-
-    /**
-     * Returns {@code OptionalDouble.empty()} if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
-     *
-     * @param <T>
-     * @param <E>
-     * @param c
-     * @param func
-     * @return
-     * @throws E the e
-     */
-    public static <T, E extends Exception> OptionalDouble averageDouble(final Iterable<? extends T> c, final Throwables.ToDoubleFunction<? super T, E> func)
-            throws E {
-        if (c == null) {
-            return OptionalDouble.empty();
-        }
-
-        final KahanSummation summation = new KahanSummation();
-
-        for (T e : c) {
-            summation.add(func.applyAsDouble(e));
-        }
-
-        return summation.average();
-    }
-
-    /**
-     * Returns {@code OptionalDouble.empty()} if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
-     *
-     * @param <T>
-     * @param c
      * @param fromIndex
      * @param toIndex
      * @return
@@ -1285,6 +1430,42 @@ public final class Iterables {
                     break;
                 }
             }
+        }
+
+        return summation.average();
+    }
+
+    /**
+     * Returns {@code OptionalDouble.empty()} if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
+     *
+     * @param <T>
+     * @param c
+     * @return
+     */
+    public static <T extends Number> OptionalDouble averageDouble(final Iterable<? extends T> c) {
+        return averageDouble(c, Fn.numToDouble());
+    }
+
+    /**
+     * Returns {@code OptionalDouble.empty()} if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
+     *
+     * @param <T>
+     * @param <E>
+     * @param c
+     * @param func
+     * @return
+     * @throws E the e
+     */
+    public static <T, E extends Exception> OptionalDouble averageDouble(final Iterable<? extends T> c, final Throwables.ToDoubleFunction<? super T, E> func)
+            throws E {
+        if (c == null) {
+            return OptionalDouble.empty();
+        }
+
+        final KahanSummation summation = new KahanSummation();
+
+        for (T e : c) {
+            summation.add(func.applyAsDouble(e));
         }
 
         return summation.average();
@@ -1354,6 +1535,7 @@ public final class Iterables {
      * @param a
      * @param objToFind
      * @return
+     * @see Index#of(Object[], Object)
      */
     public static OptionalInt indexOf(final Object[] a, final Object objToFind) {
         return Index.of(a, objToFind);
@@ -1365,6 +1547,7 @@ public final class Iterables {
      * @param c
      * @param objToFind
      * @return
+     * @see Index#of(Collection, Object)
      */
     public static OptionalInt indexOf(final Collection<?> c, final Object objToFind) {
         return Index.of(c, objToFind);
@@ -1376,6 +1559,7 @@ public final class Iterables {
      * @param a
      * @param objToFind
      * @return
+     * @see Index#last(Object[], Object)
      */
     public static OptionalInt lastIndexOf(final Object[] a, final Object objToFind) {
         return Index.last(a, objToFind);
@@ -1387,131 +1571,10 @@ public final class Iterables {
      * @param c
      * @param objToFind
      * @return
+     * @see Index#last(Collection, Object)
      */
     public static OptionalInt lastIndexOf(final Collection<?> c, final Object objToFind) {
         return Index.last(c, objToFind);
-    }
-
-    /**
-     * Find first or last index.
-     *
-     * @param <T>
-     * @param <E>
-     * @param <E2>
-     * @param a
-     * @param predicateForFirst
-     * @param predicateForLast
-     * @return the optional int
-     * @throws E the e
-     * @throws E2 the e2
-     */
-    public static <T, E extends Exception, E2 extends Exception> OptionalInt findFirstOrLastIndex(final T[] a,
-            final Throwables.Predicate<? super T, E> predicateForFirst, final Throwables.Predicate<? super T, E2> predicateForLast) throws E, E2 {
-        if (N.isEmpty(a)) {
-            return OptionalInt.empty();
-        }
-
-        final OptionalInt res = N.findFirstIndex(a, predicateForFirst);
-
-        return res.isPresent() ? res : N.findLastIndex(a, predicateForLast);
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param <E>
-     * @param <E2>
-     * @param c
-     * @param predicateForFirst
-     * @param predicateForLast
-     * @return
-     * @throws E
-     * @throws E2
-     */
-    public static <T, E extends Exception, E2 extends Exception> OptionalInt findFirstOrLastIndex(final Collection<? extends T> c,
-            final Throwables.Predicate<? super T, E> predicateForFirst, final Throwables.Predicate<? super T, E2> predicateForLast) throws E, E2 {
-        if (N.isEmpty(c)) {
-            return OptionalInt.empty();
-        }
-
-        final OptionalInt res = N.findFirstIndex(c, predicateForFirst);
-
-        return res.isPresent() ? res : N.findLastIndex(c, predicateForLast);
-    }
-
-    /**
-     * Find first and last index.
-     *
-     * @param <T>
-     * @param <E>
-     * @param a
-     * @param predicate
-     * @return the pair
-     * @throws E the e
-     */
-    public static <T, E extends Exception> Pair<OptionalInt, OptionalInt> findFirstAndLastIndex(final T[] a, final Throwables.Predicate<? super T, E> predicate)
-            throws E {
-        return findFirstAndLastIndex(a, predicate, predicate);
-    }
-
-    /**
-     * Find first and last index.
-     *
-     * @param <T>
-     * @param <E>
-     * @param <E2>
-     * @param a
-     * @param predicateForFirst
-     * @param predicateForLast
-     * @return the pair
-     * @throws E the e
-     * @throws E2 the e2
-     */
-    public static <T, E extends Exception, E2 extends Exception> Pair<OptionalInt, OptionalInt> findFirstAndLastIndex(final T[] a,
-            final Throwables.Predicate<? super T, E> predicateForFirst, final Throwables.Predicate<? super T, E2> predicateForLast) throws E, E2 {
-        if (N.isEmpty(a)) {
-            return Pair.of(OptionalInt.empty(), OptionalInt.empty());
-        }
-
-        return Pair.of(N.findFirstIndex(a, predicateForFirst), N.findLastIndex(a, predicateForLast));
-    }
-
-    /**
-     * Find first and last index.
-     *
-     * @param <T>
-     * @param <E>
-     * @param c
-     * @param predicate
-     * @return the pair
-     * @throws E the e
-     */
-    public static <T, E extends Exception> Pair<OptionalInt, OptionalInt> findFirstAndLastIndex(final Collection<? extends T> c,
-            final Throwables.Predicate<? super T, E> predicate) throws E {
-        return findFirstAndLastIndex(c, predicate, predicate);
-    }
-
-    /**
-     * Find first and last index.
-     *
-     * @param <T>
-     * @param <E>
-     * @param <E2>
-     * @param c
-     * @param predicateForFirst
-     * @param predicateForLast
-     * @return the pair
-     * @throws E the e
-     * @throws E2 the e2
-     */
-    public static <T, E extends Exception, E2 extends Exception> Pair<OptionalInt, OptionalInt> findFirstAndLastIndex(final Collection<? extends T> c,
-            final Throwables.Predicate<? super T, E> predicateForFirst, final Throwables.Predicate<? super T, E2> predicateForLast) throws E, E2 {
-        if (N.isEmpty(c)) {
-            return Pair.of(OptionalInt.empty(), OptionalInt.empty());
-        }
-
-        return Pair.of(N.findFirstIndex(c, predicateForFirst), N.findLastIndex(c, predicateForLast));
     }
 
     /**
@@ -1560,6 +1623,54 @@ public final class Iterables {
         final Nullable<T> res = N.findFirst(c, predicateForFirst);
 
         return res.isPresent() ? res : N.findLast(c, predicateForLast);
+    }
+
+    /**
+     * Find first or last index.
+     *
+     * @param <T>
+     * @param <E>
+     * @param <E2>
+     * @param a
+     * @param predicateForFirst
+     * @param predicateForLast
+     * @return the optional int
+     * @throws E the e
+     * @throws E2 the e2
+     */
+    public static <T, E extends Exception, E2 extends Exception> OptionalInt findFirstOrLastIndex(final T[] a,
+            final Throwables.Predicate<? super T, E> predicateForFirst, final Throwables.Predicate<? super T, E2> predicateForLast) throws E, E2 {
+        if (N.isEmpty(a)) {
+            return OptionalInt.empty();
+        }
+
+        final OptionalInt res = N.findFirstIndex(a, predicateForFirst);
+
+        return res.isPresent() ? res : N.findLastIndex(a, predicateForLast);
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param <E>
+     * @param <E2>
+     * @param c
+     * @param predicateForFirst
+     * @param predicateForLast
+     * @return
+     * @throws E
+     * @throws E2
+     */
+    public static <T, E extends Exception, E2 extends Exception> OptionalInt findFirstOrLastIndex(final Collection<? extends T> c,
+            final Throwables.Predicate<? super T, E> predicateForFirst, final Throwables.Predicate<? super T, E2> predicateForLast) throws E, E2 {
+        if (N.isEmpty(c)) {
+            return OptionalInt.empty();
+        }
+
+        final OptionalInt res = N.findFirstIndex(c, predicateForFirst);
+
+        return res.isPresent() ? res : N.findLastIndex(c, predicateForLast);
     }
 
     /**
@@ -1634,6 +1745,80 @@ public final class Iterables {
         }
 
         return Pair.of(N.findFirst(c, predicateForFirst), N.findLast(c, predicateForLast));
+    }
+
+    /**
+     * Find first and last index.
+     *
+     * @param <T>
+     * @param <E>
+     * @param a
+     * @param predicate
+     * @return the pair
+     * @throws E the e
+     */
+    public static <T, E extends Exception> Pair<OptionalInt, OptionalInt> findFirstAndLastIndex(final T[] a, final Throwables.Predicate<? super T, E> predicate)
+            throws E {
+        return findFirstAndLastIndex(a, predicate, predicate);
+    }
+
+    /**
+     * Find first and last index.
+     *
+     * @param <T>
+     * @param <E>
+     * @param <E2>
+     * @param a
+     * @param predicateForFirst
+     * @param predicateForLast
+     * @return the pair
+     * @throws E the e
+     * @throws E2 the e2
+     */
+    public static <T, E extends Exception, E2 extends Exception> Pair<OptionalInt, OptionalInt> findFirstAndLastIndex(final T[] a,
+            final Throwables.Predicate<? super T, E> predicateForFirst, final Throwables.Predicate<? super T, E2> predicateForLast) throws E, E2 {
+        if (N.isEmpty(a)) {
+            return Pair.of(OptionalInt.empty(), OptionalInt.empty());
+        }
+
+        return Pair.of(N.findFirstIndex(a, predicateForFirst), N.findLastIndex(a, predicateForLast));
+    }
+
+    /**
+     * Find first and last index.
+     *
+     * @param <T>
+     * @param <E>
+     * @param c
+     * @param predicate
+     * @return the pair
+     * @throws E the e
+     */
+    public static <T, E extends Exception> Pair<OptionalInt, OptionalInt> findFirstAndLastIndex(final Collection<? extends T> c,
+            final Throwables.Predicate<? super T, E> predicate) throws E {
+        return findFirstAndLastIndex(c, predicate, predicate);
+    }
+
+    /**
+     * Find first and last index.
+     *
+     * @param <T>
+     * @param <E>
+     * @param <E2>
+     * @param c
+     * @param predicateForFirst
+     * @param predicateForLast
+     * @return the pair
+     * @throws E the e
+     * @throws E2 the e2
+     */
+    public static <T, E extends Exception, E2 extends Exception> Pair<OptionalInt, OptionalInt> findFirstAndLastIndex(final Collection<? extends T> c,
+            final Throwables.Predicate<? super T, E> predicateForFirst, final Throwables.Predicate<? super T, E2> predicateForLast) throws E, E2 {
+        if (N.isEmpty(c)) {
+            return Pair.of(OptionalInt.empty(), OptionalInt.empty());
+        }
+
+        return Pair.of(N.findFirstIndex(c, predicateForFirst), N.findLastIndex(c, predicateForLast));
     }
 
     public abstract static class SetView<E> extends ImmutableSet<E> {

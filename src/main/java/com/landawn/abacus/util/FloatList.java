@@ -659,12 +659,12 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      */
     @Override
     @SafeVarargs
-    public final void deleteAll(int... indices) {
+    public final void deleteAllByIndices(int... indices) {
         if (N.isEmpty(indices)) {
             return;
         }
 
-        final float[] tmp = N.deleteAll(elementData, indices);
+        final float[] tmp = N.deleteAllByIndices(elementData, indices);
         N.copy(tmp, 0, elementData, 0, tmp.length);
         N.fill(elementData, tmp.length, size, 0f);
         size = tmp.length;

@@ -2953,8 +2953,8 @@ public final class IOUtil {
         N.checkArgNotNull(output, "output");
         N.checkArgNotNull(input, "input");
 
-        N.checkArgNotNegative(offset, "offset");
-        N.checkArgNotNegative(count, "count");
+        N.checkArgNotNegative(offset, "offset"); // NOSONAR
+        N.checkArgNotNegative(count, "count"); // NOSONAR
 
         final byte[] buf = Objectory.createByteArrayBuffer();
 
@@ -4855,7 +4855,7 @@ public final class IOUtil {
      * @return
      * @throws E
      */
-    public static <E extends Exception> boolean deleteFiles(final File file) throws E {
+    public static boolean deleteFiles(final File file) {
         return deleteFiles(file, BiPredicates.alwaysTrue());
     }
 

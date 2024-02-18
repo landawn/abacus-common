@@ -235,13 +235,15 @@ public final class Iterators {
     }
 
     /**
+     * Repeats the elements in the specified Collection one by one.
      *
      * @param <T>
      * @param c
      * @param n
      * @return
+     * @see N#repeatElements(Collection, int)
      */
-    public static <T> ObjIterator<T> repeatEach(final Collection<? extends T> c, final long n) {
+    public static <T> ObjIterator<T> repeatElements(final Collection<? extends T> c, final long n) {
         N.checkArgument(n >= 0, "'n' can't be negative: %s", n);
 
         if (n == 0 || N.isEmpty(c)) {
@@ -277,13 +279,15 @@ public final class Iterators {
     }
 
     /**
+     * Repeats the whole specified Collection {@code n} times.
      *
      * @param <T>
      * @param c
      * @param n
      * @return
+     * @see N#repeatCollection(Collection, int)
      */
-    public static <T> ObjIterator<T> repeatAll(final Collection<? extends T> c, final long n) {
+    public static <T> ObjIterator<T> repeatCollection(final Collection<? extends T> c, final long n) {
         N.checkArgument(n >= 0, "'n' can't be negative: %s", n);
 
         if (n == 0 || N.isEmpty(c)) {
@@ -316,14 +320,15 @@ public final class Iterators {
     }
 
     /**
-     * Repeat each to size.
+     * Repeats the elements in the specified Collection one by one till reach the specified size.
      *
      * @param <T>
      * @param c
      * @param size
      * @return
+     * @see N#repeatElementsToSize(Collection, int)
      */
-    public static <T> ObjIterator<T> repeatEachToSize(final Collection<? extends T> c, final long size) {
+    public static <T> ObjIterator<T> repeatElementsToSize(final Collection<? extends T> c, final long size) {
         N.checkArgument(size >= 0, "'size' can't be negative: %s", size);
         N.checkArgument(size == 0 || N.notEmpty(c), "Collection can't be empty or null when size > 0");
 
@@ -366,14 +371,15 @@ public final class Iterators {
     }
 
     /**
-     * Repeat all to size.
+     * Repeats the whole specified Collection till reach the specified size.
      *
      * @param <T>
      * @param c
      * @param size
      * @return
+     * @see N#repeatCollectionToSize(Collection, int)
      */
-    public static <T> ObjIterator<T> repeatAllToSize(final Collection<? extends T> c, final long size) {
+    public static <T> ObjIterator<T> repeatCollectionToSize(final Collection<? extends T> c, final long size) {
         N.checkArgument(size >= 0, "'size' can't be negative: %s", size);
         N.checkArgument(size == 0 || N.notEmpty(c), "Collection can't be empty or null when size > 0");
 
@@ -1441,52 +1447,52 @@ public final class Iterators {
     /**
      *
      * @param <T>
-     * @param a should be in non-descending order as this method does not sort its input.
-     * @param b should be in non-descending order as this method does not sort its input.
+     * @param sortedA should be in non-descending order as this method does not sort its input.
+     * @param sortedB should be in non-descending order as this method does not sort its input.
      * @return
      */
     @SuppressWarnings("rawtypes")
-    public static <T extends Comparable> ObjIterator<T> mergeSorted(final Iterator<? extends T> a, final Iterator<? extends T> b) {
-        return mergeSorted(a, b, N.NATURAL_COMPARATOR);
+    public static <T extends Comparable> ObjIterator<T> mergeSorted(final Iterator<? extends T> sortedA, final Iterator<? extends T> sortedB) {
+        return mergeSorted(sortedA, sortedB, N.NATURAL_COMPARATOR);
     }
 
     /**
      *
      * @param <T>
-     * @param a should be in non-descending order as this method does not sort its input.
-     * @param b should be in non-descending order as this method does not sort its input.
+     * @param sortedA should be in non-descending order as this method does not sort its input.
+     * @param sortedB should be in non-descending order as this method does not sort its input.
      * @param cmp
      * @return
      */
-    public static <T> ObjIterator<T> mergeSorted(final Iterator<? extends T> a, final Iterator<? extends T> b, final Comparator<? super T> cmp) {
+    public static <T> ObjIterator<T> mergeSorted(final Iterator<? extends T> sortedA, final Iterator<? extends T> sortedB, final Comparator<? super T> cmp) {
         N.checkArgNotNull(cmp);
 
-        return merge(a, b, MergeResult.minFirst(cmp));
+        return merge(sortedA, sortedB, MergeResult.minFirst(cmp));
     }
 
     /**
      *
      * @param <T>
-     * @param a should be in non-descending order as this method does not sort its input.
-     * @param b should be in non-descending order as this method does not sort its input.
+     * @param sortedA should be in non-descending order as this method does not sort its input.
+     * @param sortedB should be in non-descending order as this method does not sort its input.
      * @return
      */
     @SuppressWarnings("rawtypes")
-    public static <T extends Comparable> ObjIterator<T> mergeSorted(final Iterable<? extends T> a, final Iterable<? extends T> b) {
-        return mergeSorted(a, b, N.NATURAL_COMPARATOR);
+    public static <T extends Comparable> ObjIterator<T> mergeSorted(final Iterable<? extends T> sortedA, final Iterable<? extends T> sortedB) {
+        return mergeSorted(sortedA, sortedB, N.NATURAL_COMPARATOR);
     }
 
     /**
      *
      * @param <T>
-     * @param a should be in non-descending order as this method does not sort its input.
-     * @param b should be in non-descending order as this method does not sort its input.
+     * @param sortedA should be in non-descending order as this method does not sort its input.
+     * @param sortedB should be in non-descending order as this method does not sort its input.
      * @param cmp
      * @return
      */
-    public static <T> ObjIterator<T> mergeSorted(final Iterable<? extends T> a, final Iterable<? extends T> b, final Comparator<? super T> cmp) {
-        final Iterator<? extends T> iterA = N.iterate(a);
-        final Iterator<? extends T> iterB = N.iterate(b);
+    public static <T> ObjIterator<T> mergeSorted(final Iterable<? extends T> sortedA, final Iterable<? extends T> sortedB, final Comparator<? super T> cmp) {
+        final Iterator<? extends T> iterA = N.iterate(sortedA);
+        final Iterator<? extends T> iterB = N.iterate(sortedB);
 
         return mergeSorted(iterA, iterB, cmp);
     }

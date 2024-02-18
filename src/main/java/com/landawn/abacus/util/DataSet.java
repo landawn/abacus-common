@@ -56,6 +56,14 @@ import com.landawn.abacus.util.stream.Stream;
  */
 public interface DataSet {
 
+    /**
+     * Returns an empty immutable {@code DataSet}.
+     * @return
+     */
+    static DataSet empty() {
+        return RowDataSet.EMPTY_DATA_SET;
+    }
+
     //    /**
     //     * Returns the bean name associated with the query.
     //     *

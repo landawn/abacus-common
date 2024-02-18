@@ -746,12 +746,12 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      */
     @Override
     @SafeVarargs
-    public final void deleteAll(int... indices) {
+    public final void deleteAllByIndices(int... indices) {
         if (N.isEmpty(indices)) {
             return;
         }
 
-        final char[] tmp = N.deleteAll(elementData, indices);
+        final char[] tmp = N.deleteAllByIndices(elementData, indices);
         N.copy(tmp, 0, elementData, 0, tmp.length);
         N.fill(elementData, tmp.length, size, (char) 0);
         size = tmp.length;

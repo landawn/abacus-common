@@ -703,12 +703,12 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      */
     @Override
     @SafeVarargs
-    public final void deleteAll(int... indices) {
+    public final void deleteAllByIndices(int... indices) {
         if (N.isEmpty(indices)) {
             return;
         }
 
-        final byte[] tmp = N.deleteAll(elementData, indices);
+        final byte[] tmp = N.deleteAllByIndices(elementData, indices);
         N.copy(tmp, 0, elementData, 0, tmp.length);
         N.fill(elementData, tmp.length, size, (byte) 0);
         size = tmp.length;

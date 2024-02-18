@@ -2343,11 +2343,130 @@ public final class Index {
             return bitSet;
         }
 
-        final Iterator<?> iter = c.iterator();
+        if (c instanceof List && c instanceof RandomAccess) {
+            final List<?> list = (List<?>) c;
 
-        for (int i = N.max(startIndex, 0); iter.hasNext(); i++) {
-            if (N.equals(iter.next(), valueToFind)) {
-                bitSet.set(i);
+            for (int idx = N.max(startIndex, 0); idx < size; idx++) {
+                if (N.equals(list.get(idx), valueToFind)) {
+                    bitSet.set(idx);
+                }
+            }
+        } else {
+            final Iterator<?> iter = c.iterator();
+            int idx = 0;
+
+            while (idx < startIndex) {
+                iter.next();
+                idx++;
+            }
+
+            while (iter.hasNext()) {
+                if (N.equals(iter.next(), valueToFind)) {
+                    bitSet.set(idx);
+                }
+
+                idx++;
+            }
+        }
+
+        return bitSet;
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param <E>
+     * @param a
+     * @param predicate
+     * @return the indices of all found target value/element in the specified {@code Collection/Array}.
+     * @throws E
+     */
+    public static <T, E extends Exception> BitSet allOf(final T[] a, final Throwables.Predicate<? super T, E> predicate) throws E {
+        return allOf(a, 0, predicate);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param <E>
+     * @param a
+     * @param startIndex
+     * @param predicate
+     * @return the indices of all found target value/element in the specified {@code Collection/Array}.
+     * @throws E
+     */
+    public static <T, E extends Exception> BitSet allOf(final T[] a, int startIndex, final Throwables.Predicate<? super T, E> predicate) throws E {
+        final BitSet bitSet = new BitSet();
+        final int len = N.len(a);
+
+        if (len == 0 || startIndex >= len) {
+            return bitSet;
+        }
+
+        for (int idx = N.max(startIndex, 0); idx < len; idx++) {
+            if (predicate.test(a[idx])) {
+                bitSet.set(idx);
+            }
+        }
+
+        return bitSet;
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param <E>
+     * @param c
+     * @param predicate
+     * @return the indices of all found target value/element in the specified {@code Collection/Array}.
+     * @throws E
+     */
+    public static <T, E extends Exception> BitSet allOf(final Collection<? extends T> c, final Throwables.Predicate<? super T, E> predicate) throws E {
+        return allOf(c, 0, predicate);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param <E>
+     * @param c
+     * @param startIndex
+     * @param predicate
+     * @return the indices of all found target value/element in the specified {@code Collection/Array}.
+     * @throws E
+     */
+    public static <T, E extends Exception> BitSet allOf(final Collection<? extends T> c, int startIndex, final Throwables.Predicate<? super T, E> predicate)
+            throws E {
+        final BitSet bitSet = new BitSet();
+        final int size = N.size(c);
+
+        if (size == 0 || startIndex >= size) {
+            return bitSet;
+        }
+
+        if (c instanceof List && c instanceof RandomAccess) {
+            final List<? extends T> list = (List<? extends T>) c;
+
+            for (int idx = N.max(startIndex, 0); idx < size; idx++) {
+                if (predicate.test(list.get(idx))) {
+                    bitSet.set(idx);
+                }
+            }
+        } else {
+            final Iterator<? extends T> iter = c.iterator();
+            int idx = 0;
+
+            while (idx < startIndex) {
+                iter.next();
+                idx++;
+            }
+
+            while (iter.hasNext()) {
+                if (predicate.test(iter.next())) {
+                    bitSet.set(idx);
+                }
+
+                idx++;
             }
         }
 

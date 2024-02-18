@@ -128,6 +128,21 @@ public final class Sheet<R, C, V> implements Cloneable {
         }
     }
 
+    @SuppressWarnings("rawtypes")
+    private static final Sheet EMPTY_SHEET = new Sheet<>(N.emptyList(), N.emptyList(), new Object[0][0]);
+
+    static {
+        EMPTY_SHEET.freeze();
+    }
+
+    /**
+     * Returns an empty immutable {@code Sheet}.
+     * @return
+     */
+    public static <R, C, V> Sheet<R, C, V> empty() {
+        return EMPTY_SHEET;
+    }
+
     /**
      *
      * @param <R>
@@ -1755,6 +1770,15 @@ public final class Sheet<R, C, V> implements Cloneable {
                 }
             }
         }
+    }
+
+    /**
+     * Returns {@code true} if row key set or column key set is empty, otherwise {@code false}.
+     *
+     * @return
+     */
+    public boolean isEmpty() {
+        return _rowKeySet.isEmpty() || _columnKeySet.isEmpty();
     }
 
     /**

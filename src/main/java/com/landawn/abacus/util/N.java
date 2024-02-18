@@ -1614,17 +1614,18 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * </pre>
      *
      * @param <T>
-     * @param maxCount max count of chunk want to split {@code totalSize} into.
+     * @param maxChunkCount max count of chunk want to split {@code totalSize} into.
      * @param totalSize
      * @param sizeSmallerFirst
      * @param func
      * @return the stream
      */
-    public static <T> Stream<T> splitByCount(final int maxCount, final int totalSize, final boolean sizeSmallerFirst, final IntBiFunction<? extends T> func) {
+    public static <T> Stream<T> splitByCount(final int maxChunkCount, final int totalSize, final boolean sizeSmallerFirst,
+            final IntBiFunction<? extends T> func) {
         if (sizeSmallerFirst) {
-            return splitByCountSmallerFirst(maxCount, totalSize, func);
+            return splitByCountSmallerFirst(maxChunkCount, totalSize, func);
         } else {
-            return splitByCountSmallerLast(maxCount, totalSize, func);
+            return splitByCountSmallerLast(maxChunkCount, totalSize, func);
         }
     }
 
@@ -1638,13 +1639,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * </pre>
      *
      * @param <T>
-     * @param maxCount
+     * @param maxChunkCount
      * @param totalSize
      * @param func
      * @return the stream
      */
-    static <T> Stream<T> splitByCountSmallerFirst(final int maxCount, final int totalSize, final IntBiFunction<? extends T> func) {
-        checkArgPositive(maxCount, "maxCount");
+    static <T> Stream<T> splitByCountSmallerFirst(final int maxChunkCount, final int totalSize, final IntBiFunction<? extends T> func) {
+        checkArgPositive(maxChunkCount, "maxCount");
         checkArgNotNegative(totalSize, "totalSize");
         checkArgNotNull(func, "func");
 
@@ -1653,10 +1654,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
         }
 
         final Iterator<T> iter = new ObjIteratorEx<>() {
-            private final int smallerSize = Math.max(totalSize / maxCount, 1);
-            private final int biggerSize = totalSize % maxCount == 0 ? totalSize / maxCount : totalSize / maxCount + 1;
-            private int count = totalSize >= maxCount ? maxCount : totalSize;
-            private int biggerCount = totalSize % maxCount;
+            private final int smallerSize = Math.max(totalSize / maxChunkCount, 1);
+            private final int biggerSize = totalSize % maxChunkCount == 0 ? totalSize / maxChunkCount : totalSize / maxChunkCount + 1;
+            private int count = totalSize >= maxChunkCount ? maxChunkCount : totalSize;
+            private int biggerCount = totalSize % maxChunkCount;
             private int cursor = 0;
 
             @Override
@@ -1703,13 +1704,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * </pre>
      *
      * @param <T>
-     * @param maxCount
+     * @param maxChunkCount
      * @param totalSize
      * @param func
      * @return the stream
      */
-    static <T> Stream<T> splitByCountSmallerLast(final int maxCount, final int totalSize, final IntBiFunction<? extends T> func) {
-        checkArgPositive(maxCount, "maxCount");
+    static <T> Stream<T> splitByCountSmallerLast(final int maxChunkCount, final int totalSize, final IntBiFunction<? extends T> func) {
+        checkArgPositive(maxChunkCount, "maxCount");
         checkArgNotNegative(totalSize, "totalSize");
         checkArgNotNull(func, "func");
 
@@ -1718,10 +1719,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
         }
 
         final Iterator<T> iter = new ObjIteratorEx<>() {
-            private final int smallerSize = Math.max(totalSize / maxCount, 1);
-            private final int biggerSize = totalSize % maxCount == 0 ? totalSize / maxCount : totalSize / maxCount + 1;
-            private int count = totalSize >= maxCount ? maxCount : totalSize;
-            private int smallerCount = count - totalSize % maxCount;
+            private final int smallerSize = Math.max(totalSize / maxChunkCount, 1);
+            private final int biggerSize = totalSize % maxChunkCount == 0 ? totalSize / maxChunkCount : totalSize / maxChunkCount + 1;
+            private int count = totalSize >= maxChunkCount ? maxChunkCount : totalSize;
+            private int smallerCount = count - totalSize % maxChunkCount;
             private int cursor = 0;
 
             @Override
@@ -5993,7 +5994,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return A new array containing the existing elements except the element
      *         at the specified position.
      */
-    public static boolean[] delete(final boolean[] a, final int index) {
+    public static boolean[] deleteByIndex(final boolean[] a, final int index) {
         checkArgNotNull(a, "a");
 
         final boolean[] result = new boolean[a.length - 1];
@@ -6027,7 +6028,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return A new array containing the existing elements except the element
      *         at the specified position.
      */
-    public static char[] delete(final char[] a, final int index) {
+    public static char[] deleteByIndex(final char[] a, final int index) {
         checkArgNotNull(a, "a");
 
         final char[] result = new char[a.length - 1];
@@ -6061,7 +6062,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return A new array containing the existing elements except the element
      *         at the specified position.
      */
-    public static byte[] delete(final byte[] a, final int index) {
+    public static byte[] deleteByIndex(final byte[] a, final int index) {
         checkArgNotNull(a, "a");
 
         final byte[] result = new byte[a.length - 1];
@@ -6095,7 +6096,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return A new array containing the existing elements except the element
      *         at the specified position.
      */
-    public static short[] delete(final short[] a, final int index) {
+    public static short[] deleteByIndex(final short[] a, final int index) {
         checkArgNotNull(a, "a");
 
         final short[] result = new short[a.length - 1];
@@ -6129,7 +6130,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return A new array containing the existing elements except the element
      *         at the specified position.
      */
-    public static int[] delete(final int[] a, final int index) {
+    public static int[] deleteByIndex(final int[] a, final int index) {
         checkArgNotNull(a, "a");
 
         final int[] result = new int[a.length - 1];
@@ -6163,7 +6164,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return A new array containing the existing elements except the element
      *         at the specified position.
      */
-    public static long[] delete(final long[] a, final int index) {
+    public static long[] deleteByIndex(final long[] a, final int index) {
         checkArgNotNull(a, "a");
 
         final long[] result = new long[a.length - 1];
@@ -6197,7 +6198,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return A new array containing the existing elements except the element
      *         at the specified position.
      */
-    public static float[] delete(final float[] a, final int index) {
+    public static float[] deleteByIndex(final float[] a, final int index) {
         checkArgNotNull(a, "a");
 
         final float[] result = new float[a.length - 1];
@@ -6231,7 +6232,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return A new array containing the existing elements except the element
      *         at the specified position.
      */
-    public static double[] delete(final double[] a, final int index) {
+    public static double[] deleteByIndex(final double[] a, final int index) {
         checkArgNotNull(a, "a");
 
         final double[] result = new double[a.length - 1];
@@ -6267,7 +6268,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *         at the specified position.
      * @throws IllegalArgumentException if the specified {@code Array} is <code>null</code>.
      */
-    public static <T> T[] delete(final T[] a, final int index) throws IllegalArgumentException {
+    public static <T> T[] deleteByIndex(final T[] a, final int index) throws IllegalArgumentException {
         checkArgNotNull(a, "a");
 
         final T[] result = newArray(a.getClass().getComponentType(), a.length - 1);
@@ -6315,7 +6316,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * </p>
      *
      * <pre>
-     * deleteAll([true, false, true], 0, 2) = [false]
+     * deleteAllByIndices([true, false, true], 0, 2) = [false]
      * removeAll([true, false, true], 1, 2) = [true]
      * </pre>
      *
@@ -6327,11 +6328,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *         specified positions.
      */
     @SafeVarargs
-    public static boolean[] deleteAll(final boolean[] a, int... indices) {
+    public static boolean[] deleteAllByIndices(final boolean[] a, int... indices) {
         if (isEmpty(indices)) {
             return a == null ? EMPTY_BOOLEAN_ARRAY : a.clone();
         } else if (indices.length == 1) {
-            return delete(a, indices[0]);
+            return deleteByIndex(a, indices[0]);
         }
 
         indices = indices.clone();
@@ -6383,12 +6384,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * </p>
      *
      * <pre>
-     * deleteAll([1], 0)             = []
-     * deleteAll([2, 6], 0)          = [6]
-     * deleteAll([2, 6], 0, 1)       = []
-     * deleteAll([2, 6, 3], 1, 2)    = [2]
-     * deleteAll([2, 6, 3], 0, 2)    = [6]
-     * deleteAll([2, 6, 3], 0, 1, 2) = []
+     * deleteAllByIndices([1], 0)             = []
+     * deleteAllByIndices([2, 6], 0)          = [6]
+     * deleteAllByIndices([2, 6], 0, 1)       = []
+     * deleteAllByIndices([2, 6, 3], 1, 2)    = [2]
+     * deleteAllByIndices([2, 6, 3], 0, 2)    = [6]
+     * deleteAllByIndices([2, 6, 3], 0, 1, 2) = []
      * </pre>
      *
      * @param a
@@ -6397,11 +6398,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *         specified positions.
      */
     @SafeVarargs
-    public static char[] deleteAll(final char[] a, int... indices) {
+    public static char[] deleteAllByIndices(final char[] a, int... indices) {
         if (isEmpty(indices)) {
             return a == null ? EMPTY_CHAR_ARRAY : a.clone();
         } else if (indices.length == 1) {
-            return delete(a, indices[0]);
+            return deleteByIndex(a, indices[0]);
         }
 
         indices = indices.clone();
@@ -6453,12 +6454,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * </p>
      *
      * <pre>
-     * deleteAll([1], 0)             = []
-     * deleteAll([2, 6], 0)          = [6]
-     * deleteAll([2, 6], 0, 1)       = []
-     * deleteAll([2, 6, 3], 1, 2)    = [2]
-     * deleteAll([2, 6, 3], 0, 2)    = [6]
-     * deleteAll([2, 6, 3], 0, 1, 2) = []
+     * deleteAllByIndices([1], 0)             = []
+     * deleteAllByIndices([2, 6], 0)          = [6]
+     * deleteAllByIndices([2, 6], 0, 1)       = []
+     * deleteAllByIndices([2, 6, 3], 1, 2)    = [2]
+     * deleteAllByIndices([2, 6, 3], 0, 2)    = [6]
+     * deleteAllByIndices([2, 6, 3], 0, 1, 2) = []
      * </pre>
      *
      * @param a
@@ -6467,11 +6468,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *         specified positions.
      */
     @SafeVarargs
-    public static byte[] deleteAll(final byte[] a, int... indices) {
+    public static byte[] deleteAllByIndices(final byte[] a, int... indices) {
         if (isEmpty(indices)) {
             return a == null ? EMPTY_BYTE_ARRAY : a.clone();
         } else if (indices.length == 1) {
-            return delete(a, indices[0]);
+            return deleteByIndex(a, indices[0]);
         }
 
         indices = indices.clone();
@@ -6523,12 +6524,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * </p>
      *
      * <pre>
-     * deleteAll([1], 0)             = []
-     * deleteAll([2, 6], 0)          = [6]
-     * deleteAll([2, 6], 0, 1)       = []
-     * deleteAll([2, 6, 3], 1, 2)    = [2]
-     * deleteAll([2, 6, 3], 0, 2)    = [6]
-     * deleteAll([2, 6, 3], 0, 1, 2) = []
+     * deleteAllByIndices([1], 0)             = []
+     * deleteAllByIndices([2, 6], 0)          = [6]
+     * deleteAllByIndices([2, 6], 0, 1)       = []
+     * deleteAllByIndices([2, 6, 3], 1, 2)    = [2]
+     * deleteAllByIndices([2, 6, 3], 0, 2)    = [6]
+     * deleteAllByIndices([2, 6, 3], 0, 1, 2) = []
      * </pre>
      *
      * @param a
@@ -6537,11 +6538,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *         specified positions.
      */
     @SafeVarargs
-    public static short[] deleteAll(final short[] a, int... indices) {
+    public static short[] deleteAllByIndices(final short[] a, int... indices) {
         if (isEmpty(indices)) {
             return a == null ? EMPTY_SHORT_ARRAY : a.clone();
         } else if (indices.length == 1) {
-            return delete(a, indices[0]);
+            return deleteByIndex(a, indices[0]);
         }
 
         indices = indices.clone();
@@ -6593,12 +6594,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * </p>
      *
      * <pre>
-     * deleteAll([1], 0)             = []
-     * deleteAll([2, 6], 0)          = [6]
-     * deleteAll([2, 6], 0, 1)       = []
-     * deleteAll([2, 6, 3], 1, 2)    = [2]
-     * deleteAll([2, 6, 3], 0, 2)    = [6]
-     * deleteAll([2, 6, 3], 0, 1, 2) = []
+     * deleteAllByIndices([1], 0)             = []
+     * deleteAllByIndices([2, 6], 0)          = [6]
+     * deleteAllByIndices([2, 6], 0, 1)       = []
+     * deleteAllByIndices([2, 6, 3], 1, 2)    = [2]
+     * deleteAllByIndices([2, 6, 3], 0, 2)    = [6]
+     * deleteAllByIndices([2, 6, 3], 0, 1, 2) = []
      * </pre>
      *
      * @param a
@@ -6609,11 +6610,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *             array.length), or if the array is {@code null}.
      */
     @SafeVarargs
-    public static int[] deleteAll(final int[] a, int... indices) {
+    public static int[] deleteAllByIndices(final int[] a, int... indices) {
         if (isEmpty(indices)) {
             return a == null ? EMPTY_INT_ARRAY : a.clone();
         } else if (indices.length == 1) {
-            return delete(a, indices[0]);
+            return deleteByIndex(a, indices[0]);
         }
 
         indices = indices.clone();
@@ -6665,12 +6666,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * </p>
      *
      * <pre>
-     * deleteAll([1], 0)             = []
-     * deleteAll([2, 6], 0)          = [6]
-     * deleteAll([2, 6], 0, 1)       = []
-     * deleteAll([2, 6, 3], 1, 2)    = [2]
-     * deleteAll([2, 6, 3], 0, 2)    = [6]
-     * deleteAll([2, 6, 3], 0, 1, 2) = []
+     * deleteAllByIndices([1], 0)             = []
+     * deleteAllByIndices([2, 6], 0)          = [6]
+     * deleteAllByIndices([2, 6], 0, 1)       = []
+     * deleteAllByIndices([2, 6, 3], 1, 2)    = [2]
+     * deleteAllByIndices([2, 6, 3], 0, 2)    = [6]
+     * deleteAllByIndices([2, 6, 3], 0, 1, 2) = []
      * </pre>
      *
      * @param a
@@ -6681,11 +6682,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *         specified positions.
      */
     @SafeVarargs
-    public static long[] deleteAll(final long[] a, int... indices) {
+    public static long[] deleteAllByIndices(final long[] a, int... indices) {
         if (isEmpty(indices)) {
             return a == null ? EMPTY_LONG_ARRAY : a.clone();
         } else if (indices.length == 1) {
-            return delete(a, indices[0]);
+            return deleteByIndex(a, indices[0]);
         }
 
         indices = indices.clone();
@@ -6737,12 +6738,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * </p>
      *
      * <pre>
-     * deleteAll([1], 0)             = []
-     * deleteAll([2, 6], 0)          = [6]
-     * deleteAll([2, 6], 0, 1)       = []
-     * deleteAll([2, 6, 3], 1, 2)    = [2]
-     * deleteAll([2, 6, 3], 0, 2)    = [6]
-     * deleteAll([2, 6, 3], 0, 1, 2) = []
+     * deleteAllByIndices([1], 0)             = []
+     * deleteAllByIndices([2, 6], 0)          = [6]
+     * deleteAllByIndices([2, 6], 0, 1)       = []
+     * deleteAllByIndices([2, 6, 3], 1, 2)    = [2]
+     * deleteAllByIndices([2, 6, 3], 0, 2)    = [6]
+     * deleteAllByIndices([2, 6, 3], 0, 1, 2) = []
      * </pre>
      *
      * @param a
@@ -6751,11 +6752,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *         specified positions.
      */
     @SafeVarargs
-    public static float[] deleteAll(final float[] a, int... indices) {
+    public static float[] deleteAllByIndices(final float[] a, int... indices) {
         if (isEmpty(indices)) {
             return a == null ? EMPTY_FLOAT_ARRAY : a.clone();
         } else if (indices.length == 1) {
-            return delete(a, indices[0]);
+            return deleteByIndex(a, indices[0]);
         }
 
         indices = indices.clone();
@@ -6807,12 +6808,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * </p>
      *
      * <pre>
-     * deleteAll([1], 0)             = []
-     * deleteAll([2, 6], 0)          = [6]
-     * deleteAll([2, 6], 0, 1)       = []
-     * deleteAll([2, 6, 3], 1, 2)    = [2]
-     * deleteAll([2, 6, 3], 0, 2)    = [6]
-     * deleteAll([2, 6, 3], 0, 1, 2) = []
+     * deleteAllByIndices([1], 0)             = []
+     * deleteAllByIndices([2, 6], 0)          = [6]
+     * deleteAllByIndices([2, 6], 0, 1)       = []
+     * deleteAllByIndices([2, 6, 3], 1, 2)    = [2]
+     * deleteAllByIndices([2, 6, 3], 0, 2)    = [6]
+     * deleteAllByIndices([2, 6, 3], 0, 1, 2) = []
      * </pre>
      *
      * @param a
@@ -6821,11 +6822,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *         specified positions.
      */
     @SafeVarargs
-    public static double[] deleteAll(final double[] a, int... indices) {
+    public static double[] deleteAllByIndices(final double[] a, int... indices) {
         if (isEmpty(indices)) {
             return a == null ? EMPTY_DOUBLE_ARRAY : a.clone();
         } else if (indices.length == 1) {
-            return delete(a, indices[0]);
+            return deleteByIndex(a, indices[0]);
         }
 
         indices = indices.clone();
@@ -6873,11 +6874,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException
      */
     @SafeVarargs
-    public static String[] deleteAll(final String[] a, int... indices) throws IllegalArgumentException {
+    public static String[] deleteAllByIndices(final String[] a, int... indices) throws IllegalArgumentException {
         if (isEmpty(indices)) {
             return a == null ? EMPTY_STRING_ARRAY : a.clone();
         } else if (indices.length == 1) {
-            return delete(a, indices[0]);
+            return deleteByIndex(a, indices[0]);
         }
 
         indices = indices.clone();
@@ -6899,8 +6900,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      *
      * <pre>
-     * deleteAll(["a", "b", "c"], 0, 2) = ["b"]
-     * deleteAll(["a", "b", "c"], 1, 2) = ["a"]
+     * deleteAllByIndices(["a", "b", "c"], 0, 2) = ["b"]
+     * deleteAllByIndices(["a", "b", "c"], 1, 2) = ["a"]
      * </pre>
      *
      * @param <T> the component type of the array
@@ -6911,13 +6912,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException if the specified {@code Array} is <code>null</code>.
      */
     @SafeVarargs
-    public static <T> T[] deleteAll(final T[] a, int... indices) throws IllegalArgumentException {
+    public static <T> T[] deleteAllByIndices(final T[] a, int... indices) throws IllegalArgumentException {
         checkArgNotNull(a, "a");
 
         if (isEmpty(indices)) {
             return a.clone();
         } else if (indices.length == 1) {
-            return delete(a, indices[0]);
+            return deleteByIndex(a, indices[0]);
         }
 
         indices = indices.clone();
@@ -6977,7 +6978,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     @SuppressWarnings("rawtypes")
     @SafeVarargs
-    public static boolean deleteAll(final List<?> list, int... indices) {
+    public static boolean deleteAllByIndices(final List<?> list, int... indices) {
         checkArgNotNull(list);
 
         if (isEmpty(indices)) {
@@ -7046,7 +7047,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         int index = indexOf(a, 0, elementToRemove);
 
-        return index == INDEX_NOT_FOUND ? a.clone() : delete(a, index);
+        return index == INDEX_NOT_FOUND ? a.clone() : deleteByIndex(a, index);
     }
 
     /**
@@ -7075,7 +7076,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         int index = indexOf(a, 0, elementToRemove);
 
-        return index == INDEX_NOT_FOUND ? a.clone() : delete(a, index);
+        return index == INDEX_NOT_FOUND ? a.clone() : deleteByIndex(a, index);
     }
 
     /**
@@ -7104,7 +7105,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         int index = indexOf(a, 0, elementToRemove);
 
-        return index == INDEX_NOT_FOUND ? a.clone() : delete(a, index);
+        return index == INDEX_NOT_FOUND ? a.clone() : deleteByIndex(a, index);
     }
 
     /**
@@ -7133,7 +7134,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         int index = indexOf(a, 0, elementToRemove);
 
-        return index == INDEX_NOT_FOUND ? a.clone() : delete(a, index);
+        return index == INDEX_NOT_FOUND ? a.clone() : deleteByIndex(a, index);
     }
 
     /**
@@ -7162,7 +7163,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         int index = indexOf(a, 0, elementToRemove);
 
-        return index == INDEX_NOT_FOUND ? a.clone() : delete(a, index);
+        return index == INDEX_NOT_FOUND ? a.clone() : deleteByIndex(a, index);
     }
 
     /**
@@ -7191,7 +7192,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         int index = indexOf(a, 0, elementToRemove);
 
-        return index == INDEX_NOT_FOUND ? a.clone() : delete(a, index);
+        return index == INDEX_NOT_FOUND ? a.clone() : deleteByIndex(a, index);
     }
 
     /**
@@ -7220,7 +7221,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         int index = indexOf(a, 0, elementToRemove);
 
-        return index == INDEX_NOT_FOUND ? a.clone() : delete(a, index);
+        return index == INDEX_NOT_FOUND ? a.clone() : deleteByIndex(a, index);
     }
 
     /**
@@ -7249,7 +7250,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         int index = indexOf(a, 0, elementToRemove);
 
-        return index == INDEX_NOT_FOUND ? a.clone() : delete(a, index);
+        return index == INDEX_NOT_FOUND ? a.clone() : deleteByIndex(a, index);
     }
 
     /**
@@ -7266,7 +7267,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         int index = indexOf(a, 0, elementToRemove);
 
-        return index == INDEX_NOT_FOUND ? a.clone() : delete(a, index);
+        return index == INDEX_NOT_FOUND ? a.clone() : deleteByIndex(a, index);
     }
 
     /**
@@ -7297,7 +7298,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         int index = indexOf(a, 0, elementToRemove);
 
-        return index == INDEX_NOT_FOUND ? a.clone() : delete(a, index);
+        return index == INDEX_NOT_FOUND ? a.clone() : deleteByIndex(a, index);
     }
 
     /**
@@ -27744,7 +27745,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws E2
      */
     public static <T, E extends Exception, E2 extends Exception> void runByBatch(final T[] a, final int batchSize,
-            final Throwables.Consumer<? super T, E> elementConsumer, final Throwables.Runnable<E2> batchAction) throws E, E2 {
+            final Throwables.IntObjConsumer<? super T, E> elementConsumer, final Throwables.Runnable<E2> batchAction) throws E, E2 {
         if (isEmpty(a)) {
             return;
         }
@@ -27765,7 +27766,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws E2
      */
     public static <T, E extends Exception, E2 extends Exception> void runByBatch(final Iterable<? extends T> iter, final int batchSize,
-            final Throwables.Consumer<? super T, E> elementConsumer, final Throwables.Runnable<E2> batchAction) throws E, E2 {
+            final Throwables.IntObjConsumer<? super T, E> elementConsumer, final Throwables.Runnable<E2> batchAction) throws E, E2 {
         if (iter == null) {
             return;
         }
@@ -27786,7 +27787,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws E2
      */
     public static <T, E extends Exception, E2 extends Exception> void runByBatch(final Iterator<? extends T> iter, final int batchSize,
-            final Throwables.Consumer<? super T, E> elementConsumer, final Throwables.Runnable<E2> batchAction) throws E, E2 {
+            final Throwables.IntObjConsumer<? super T, E> elementConsumer, final Throwables.Runnable<E2> batchAction) throws E, E2 {
         checkArgPositive(batchSize, "batchSize");
         checkArgNotNull(elementConsumer, "elementConsumer");
         checkArgNotNull(batchAction, "batchAction");
@@ -27798,7 +27799,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         int cnt = 0;
 
         while (iter.hasNext()) {
-            elementConsumer.accept(iter.next());
+            elementConsumer.accept(cnt, iter.next());
             cnt++;
 
             if (cnt % batchSize == 0) {
@@ -27916,7 +27917,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws E2
      */
     public static <T, R, E extends Exception, E2 extends Exception> List<R> callByBatch(final T[] a, final int batchSize,
-            final Throwables.Consumer<? super T, E> elementConsumer, final Throwables.Callable<? extends R, E2> batchAction) throws E, E2 {
+            final Throwables.IntObjConsumer<? super T, E> elementConsumer, final Throwables.Callable<? extends R, E2> batchAction) throws E, E2 {
         if (isEmpty(a)) {
             return new ArrayList<>(0);
         }
@@ -27937,7 +27938,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws E2
      */
     public static <T, R, E extends Exception, E2 extends Exception> List<R> callByBatch(final Iterable<? extends T> iter, final int batchSize,
-            final Throwables.Consumer<? super T, E> elementConsumer, final Throwables.Callable<? extends R, E2> batchAction) throws E, E2 {
+            final Throwables.IntObjConsumer<? super T, E> elementConsumer, final Throwables.Callable<? extends R, E2> batchAction) throws E, E2 {
         if (iter == null) {
             return new ArrayList<>(0);
         }
@@ -27959,7 +27960,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws E2
      */
     public static <T, R, E extends Exception, E2 extends Exception> List<R> callByBatch(final Iterator<? extends T> iter, final int batchSize,
-            final Throwables.Consumer<? super T, E> elementConsumer, final Throwables.Callable<? extends R, E2> batchAction) throws E, E2 {
+            final Throwables.IntObjConsumer<? super T, E> elementConsumer, final Throwables.Callable<? extends R, E2> batchAction) throws E, E2 {
         checkArgPositive(batchSize, "batchSize");
         checkArgNotNull(elementConsumer, "elementConsumer");
         checkArgNotNull(batchAction, "batchAction");
@@ -27972,7 +27973,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         int cnt = 0;
 
         while (iter.hasNext()) {
-            elementConsumer.accept(iter.next());
+            elementConsumer.accept(cnt, iter.next());
             cnt++;
 
             if (cnt % batchSize == 0) {

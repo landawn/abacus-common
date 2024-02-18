@@ -85,6 +85,12 @@ import com.landawn.abacus.util.stream.Stream;
 @SuppressWarnings({ "java:S1192", "java:S1698", "java:S1854", "java:S6539" })
 public class RowDataSet implements DataSet, Cloneable {
 
+    static final DataSet EMPTY_DATA_SET = new RowDataSet(N.emptyList(), N.emptyList());
+
+    static {
+        EMPTY_DATA_SET.freeze();
+    }
+
     static final char PROP_NAME_SEPARATOR = '.';
 
     static final String NULL_STRING = "null".intern();
@@ -1845,7 +1851,7 @@ public class RowDataSet implements DataSet, Cloneable {
         }
 
         for (int i = 0, len = this._columnList.size(); i < len; i++) {
-            N.deleteAll(_columnList.get(i), indices);
+            N.deleteAllByIndices(_columnList.get(i), indices);
         }
 
         modCount++;
@@ -8666,7 +8672,7 @@ public class RowDataSet implements DataSet, Cloneable {
      * @param joinColumnNameOnRight
      * @return
      */
-    private List<String> getRightColumnNames(final DataSet right, @SuppressWarnings("unused") final String joinColumnNameOnRight) {
+    private List<String> getRightColumnNames(final DataSet right, @SuppressWarnings("unused") final String joinColumnNameOnRight) { // NOSONAR
         final List<String> rightColumnNames = new ArrayList<>(right.columnNameList());
 
         // How to handle join columns with same name for full join.
@@ -8687,7 +8693,7 @@ public class RowDataSet implements DataSet, Cloneable {
      * @param rightColumnNames
      */
     private void initColumnIndexes(final int[] leftJoinColumnIndexes, final int[] rightJoinColumnIndexes, final DataSet right,
-            final Map<String, String> onColumnNames, @SuppressWarnings("unused") final List<String> rightColumnNames) {
+            final Map<String, String> onColumnNames, @SuppressWarnings("unused") final List<String> rightColumnNames) { // NOSONAR
         int i = 0;
         for (Map.Entry<String, String> entry : onColumnNames.entrySet()) {
             leftJoinColumnIndexes[i] = checkColumnName(entry.getKey());
@@ -9160,7 +9166,7 @@ public class RowDataSet implements DataSet, Cloneable {
      * @param leftColumnNames
      */
     private void initColumnIndexesForRightJoin(final int[] leftJoinColumnIndexes, final int[] rightJoinColumnIndexes, final DataSet right,
-            final Map<String, String> onColumnNames, @SuppressWarnings("unused") final List<String> leftColumnNames) {
+            final Map<String, String> onColumnNames, @SuppressWarnings("unused") final List<String> leftColumnNames) { // NOSONAR
         int i = 0;
         for (Map.Entry<String, String> entry : onColumnNames.entrySet()) {
             leftJoinColumnIndexes[i] = checkColumnName(entry.getKey());
@@ -9212,7 +9218,7 @@ public class RowDataSet implements DataSet, Cloneable {
      * @param joinColumnNameOnRight
      * @return
      */
-    private List<String> getLeftColumnNamesForRightJoin(@SuppressWarnings("unused") final String joinColumnNameOnRight) {
+    private List<String> getLeftColumnNamesForRightJoin(@SuppressWarnings("unused") final String joinColumnNameOnRight) { // NOSONAR
         final List<String> leftColumnNames = new ArrayList<>(_columnNameList);
 
         // How to handle join columns with same name for full join.

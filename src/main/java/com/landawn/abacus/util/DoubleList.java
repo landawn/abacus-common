@@ -658,12 +658,12 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      */
     @Override
     @SafeVarargs
-    public final void deleteAll(int... indices) {
+    public final void deleteAllByIndices(int... indices) {
         if (N.isEmpty(indices)) {
             return;
         }
 
-        final double[] tmp = N.deleteAll(elementData, indices);
+        final double[] tmp = N.deleteAllByIndices(elementData, indices);
         N.copy(tmp, 0, elementData, 0, tmp.length);
         N.fill(elementData, tmp.length, size, 0d);
         size = tmp.length;

@@ -5208,7 +5208,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param str
      * @param substrs
      * @return
-     * @see #smallestIndexOfAll(String, String...)
+     * @see #smallestindicesOfAll(String, String...)
      */
     @SafeVarargs
     public static int indexOfAny(final String str, final String... substrs) {
@@ -5222,7 +5222,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param fromIndex
      * @param substrs
      * @return
-     * @see #smallestIndexOfAll(String, int, String...)
+     * @see #smallestindicesOfAll(String, int, String...)
      */
     @SafeVarargs
     public static int indexOfAny(final String str, final int fromIndex, final String... substrs) {
@@ -5642,7 +5642,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param str
      * @param substrs
      * @return
-     * @see #largestIndexOfAll(String, String...)
+     * @see #largestindicesOfAll(String, String...)
      */
     @SafeVarargs
     public static int lastIndexOfAny(final String str, final String... substrs) {
@@ -5715,8 +5715,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @see #indexOfAny(String, String...)
      */
     @SafeVarargs
-    public static int smallestIndexOfAll(final String str, final String... substrs) {
-        return smallestIndexOfAll(str, 0, substrs);
+    public static int smallestindicesOfAll(final String str, final String... substrs) {
+        return smallestindicesOfAll(str, 0, substrs);
     }
 
     /**
@@ -5730,7 +5730,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @see #indexOfAny(String, int, String...)
      */
     @SafeVarargs
-    public static int smallestIndexOfAll(final String str, final int fromIndex, final String... substrs) {
+    public static int smallestindicesOfAll(final String str, final int fromIndex, final String... substrs) {
         if (str == null || N.isEmpty(substrs)) {
             return N.INDEX_NOT_FOUND;
         }
@@ -5764,8 +5764,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @see #indexOfAny(String, String...)
      */
     @SafeVarargs
-    public static int largestIndexOfAll(final String str, final String... substrs) {
-        return largestIndexOfAll(str, 0, substrs);
+    public static int largestindicesOfAll(final String str, final String... substrs) {
+        return largestindicesOfAll(str, 0, substrs);
     }
 
     /**
@@ -5779,7 +5779,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @see #indexOfAny(String, int, String...)
      */
     @SafeVarargs
-    public static int largestIndexOfAll(final String str, final int fromIndex, final String... substrs) {
+    public static int largestindicesOfAll(final String str, final int fromIndex, final String... substrs) {
         if (str == null || N.isEmpty(substrs)) {
             return N.INDEX_NOT_FOUND;
         }
@@ -5812,8 +5812,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @see #indexOfAny(String, String...)
      */
     @SafeVarargs
-    public static int smallestLastIndexOfAll(final String str, final String... substrs) {
-        return smallestLastIndexOfAll(str, N.len(str), substrs);
+    public static int smallestLastindicesOfAll(final String str, final String... substrs) {
+        return smallestLastindicesOfAll(str, N.len(str), substrs);
     }
 
     /**
@@ -5827,7 +5827,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @see #indexOfAny(String, int, String...)
      */
     @SafeVarargs
-    public static int smallestLastIndexOfAll(final String str, final int fromIndex, final String... substrs) {
+    public static int smallestLastindicesOfAll(final String str, final int fromIndex, final String... substrs) {
         if (str == null || N.isEmpty(substrs)) {
             return N.INDEX_NOT_FOUND;
         }
@@ -5861,8 +5861,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @see #indexOfAny(String, String...)
      */
     @SafeVarargs
-    public static int largestLastIndexOfAll(final String str, final String... substrs) {
-        return largestLastIndexOfAll(str, N.len(str), substrs);
+    public static int largestLastindicesOfAll(final String str, final String... substrs) {
+        return largestLastindicesOfAll(str, N.len(str), substrs);
     }
 
     /**
@@ -5876,7 +5876,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @see #indexOfAny(String, int, String...)
      */
     @SafeVarargs
-    public static int largestLastIndexOfAll(final String str, final int fromIndex, final String... substrs) {
+    public static int largestLastindicesOfAll(final String str, final int fromIndex, final String... substrs) {
         if (str == null || N.isEmpty(substrs)) {
             return N.INDEX_NOT_FOUND;
         }

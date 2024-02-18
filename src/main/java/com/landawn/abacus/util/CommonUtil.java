@@ -258,10 +258,16 @@ sealed class CommonUtil permits N {
      * An empty immutable {@code Calendar} array.
      */
     public static final Calendar[] EMPTY_CALENDAR_ARRAY = {};
+
     /**
      * An empty immutable {@code Object} array.
      */
     public static final Object[] EMPTY_OBJECT_ARRAY = {};
+
+    //    /**
+    //     * An empty immutable {@code DataSet}.
+    //     */
+    //    public static final DataSet EMPTY_DATA_SET = RowDataSet.EMPTY_DATA_SET;
 
     /**
      * An empty immutable {@code Class} array.
@@ -7075,7 +7081,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an empty immutable {@code List}.
+     * Returns an empty immutable  {@code List}.
      *
      * @param <T>
      * @return
@@ -7087,7 +7093,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an empty immutable {@code Set}.
+     * Returns an empty immutable  {@code Set}.
      *
      * @param <T>
      * @return
@@ -7099,7 +7105,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an empty immutable {@code SortedSet}.
+     * Returns an empty immutable  {@code SortedSet}.
      *
      * @param <T>
      * @return
@@ -7111,7 +7117,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an empty immutable {@code NavigableSet}.
+     * Returns an empty immutable  {@code NavigableSet}.
      *
      * @param <T>
      * @return
@@ -7123,7 +7129,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an empty immutable {@code Map}.
+     * Returns an empty immutable  {@code Map}.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -7136,7 +7142,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an empty immutable {@code SortedMap}.
+     * Returns an empty immutable  {@code SortedMap}.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -7149,7 +7155,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an empty immutable {@code NavigableMap}.
+     * Returns an empty immutable  {@code NavigableMap}.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -7162,7 +7168,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an empty immutable {@code Iterator}.
+     * Returns an empty immutable  {@code Iterator}.
      *
      * @param <T>
      * @return
@@ -7173,7 +7179,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an empty immutable {@code ListIterator}.
+     * Returns an empty immutable  {@code ListIterator}.
      *
      * @param <T>
      * @return
@@ -7187,13 +7193,24 @@ sealed class CommonUtil permits N {
     private static final ByteArrayInputStream EMPTY_INPUT_STREAM = new ByteArrayInputStream(EMPTY_BYTE_ARRAY);
 
     /**
-     * Returns an empty immutable {@code InputStream}.
+     * Returns an empty immutable  {@code InputStream}.
      *
      * @return
      */
     @Immutable
     public static InputStream emptyInputStream() {
         return EMPTY_INPUT_STREAM;
+    }
+
+    /**
+     * Returns an unmodifiable empty {@code DataSet}.
+     *
+     * @return
+     * @see DataSet#empty()
+     */
+    @Immutable
+    public static DataSet emptyDataSet() {
+        return DataSet.empty();
     }
 
     /**
@@ -8411,7 +8428,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an immutable empty list if the specified List is <code>null</code>, otherwise itself is returned.
+     * Returns an empty immutable list if the specified List is <code>null</code>, otherwise itself is returned.
      *
      * @param <T>
      * @param list
@@ -8423,7 +8440,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an immutable empty set if the specified Set is <code>null</code>, otherwise itself is returned.
+     * Returns an empty immutable set if the specified Set is <code>null</code>, otherwise itself is returned.
      *
      * @param <T>
      * @param set
@@ -8435,7 +8452,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an immutable empty <code>SortedSet</code> if the specified SortedSet is <code>null</code>, otherwise itself is returned.
+     * Returns an empty immutable <code>SortedSet</code> if the specified SortedSet is <code>null</code>, otherwise itself is returned.
      *
      * @param <T>
      * @param set
@@ -8447,7 +8464,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an immutable empty <code>NavigableSet</code> if the specified NavigableSet is <code>null</code>, otherwise itself is returned.
+     * Returns an empty immutable <code>NavigableSet</code> if the specified NavigableSet is <code>null</code>, otherwise itself is returned.
      *
      * @param <T>
      * @param set
@@ -8459,7 +8476,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an immutable empty map if the specified Map is <code>null</code>, otherwise itself is returned.
+     * Returns an empty immutable map if the specified Map is <code>null</code>, otherwise itself is returned.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -8472,7 +8489,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an immutable empty <code>SortedMap</code> if the specified SortedMap is <code>null</code>, otherwise itself is returned.
+     * Returns an empty immutable <code>SortedMap</code> if the specified SortedMap is <code>null</code>, otherwise itself is returned.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -8485,7 +8502,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an immutable empty <code>NavigableMap</code> if the specified NavigableMap is <code>null</code>, otherwise itself is returned.
+     * Returns an empty immutable <code>NavigableMap</code> if the specified NavigableMap is <code>null</code>, otherwise itself is returned.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -8498,7 +8515,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an immutable empty <code>Iterator</code> if the specified Iterator is <code>null</code>, otherwise itself is returned.
+     * Returns an empty immutable <code>Iterator</code> if the specified Iterator is <code>null</code>, otherwise itself is returned.
      *
      * @param <T>
      * @param iter
@@ -8510,7 +8527,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an immutable empty <code>ListIterator</code> if the specified ListIterator is <code>null</code>, otherwise itself is returned.
+     * Returns an empty immutable <code>ListIterator</code> if the specified ListIterator is <code>null</code>, otherwise itself is returned.
      *
      * @param <T>
      * @param iter
@@ -8771,7 +8788,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an immutable empty Collection if the specified ImmutableCollection is <code>null</code>, otherwise itself is returned.
+     * Returns an empty immutable Collection if the specified ImmutableCollection is <code>null</code>, otherwise itself is returned.
      *
      * @param <T>
      * @param c
@@ -8782,7 +8799,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an immutable empty list if the specified ImmutableList is <code>null</code>, otherwise itself is returned.
+     * Returns an empty immutable list if the specified ImmutableList is <code>null</code>, otherwise itself is returned.
      *
      * @param <T>
      * @param list
@@ -8793,7 +8810,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an immutable empty list if the specified ImmutableSet is <code>null</code>, otherwise itself is returned.
+     * Returns an empty immutable list if the specified ImmutableSet is <code>null</code>, otherwise itself is returned.
      *
      * @param <T>
      * @param set
@@ -8804,7 +8821,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an immutable empty list if the specified ImmutableSortedSet is <code>null</code>, otherwise itself is returned.
+     * Returns an empty immutable list if the specified ImmutableSortedSet is <code>null</code>, otherwise itself is returned.
      *
      * @param <T>
      * @param set
@@ -8815,7 +8832,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an immutable empty list if the specified ImmutableNavigableSet is <code>null</code>, otherwise itself is returned.
+     * Returns an empty immutable list if the specified ImmutableNavigableSet is <code>null</code>, otherwise itself is returned.
      *
      * @param <T>
      * @param set
@@ -8826,7 +8843,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an immutable empty map if the specified ImmutableMap is <code>null</code>, otherwise itself is returned.
+     * Returns an empty immutable map if the specified ImmutableMap is <code>null</code>, otherwise itself is returned.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -8838,7 +8855,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an immutable empty map if the specified ImmutableSortedMap is <code>null</code>, otherwise itself is returned.
+     * Returns an empty immutable map if the specified ImmutableSortedMap is <code>null</code>, otherwise itself is returned.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -8850,7 +8867,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an immutable empty map if the specified ImmutableNavigableMap is <code>null</code>, otherwise itself is returned.
+     * Returns an empty immutable map if the specified ImmutableNavigableMap is <code>null</code>, otherwise itself is returned.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -8862,7 +8879,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an immutable empty map if the specified ImmutableBiMap is <code>null</code>, otherwise itself is returned.
+     * Returns an empty immutable map if the specified ImmutableBiMap is <code>null</code>, otherwise itself is returned.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -16436,7 +16453,7 @@ sealed class CommonUtil permits N {
      * @param value
      * @param n
      * @return
-     * @see Collections#nCopies(int, Object)
+     * @see Iterators#repeat(Object, int)
      */
     public static <T> List<T> repeat(final T value, final int n) {
         checkArgNotNegative(n, "n");
@@ -16451,7 +16468,7 @@ sealed class CommonUtil permits N {
      *
      * <pre>
      * <code>
-     * repeatEach(N.asList(1, 2, 3), 2) => [1, 1, 2, 2, 3, 3]
+     * repeatElements(N.asList(1, 2, 3), 2) => [1, 1, 2, 2, 3, 3]
      * </code>
      * </pre>
      *
@@ -16459,6 +16476,7 @@ sealed class CommonUtil permits N {
      * @param c
      * @param n
      * @return
+     * @see Iterators#repeatElements(Collection, long)
      */
     public static <T> List<T> repeatElements(final Collection<? extends T> c, final int n) {
         checkArgNotNegative(n, "n");
@@ -16479,9 +16497,11 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Repeats the whole specified Collection {@code n} times.
+     *
      * <pre>
      * <code>
-     * repeatAll(N.asList(1, 2, 3), 2) => [1, 2, 3, 1, 2, 3]
+     * repeatCollection(N.asList(1, 2, 3), 2) => [1, 2, 3, 1, 2, 3]
      * </code>
      * </pre>
      *
@@ -16489,6 +16509,7 @@ sealed class CommonUtil permits N {
      * @param c
      * @param n
      * @return
+     * @see Iterators#repeatCollection(Collection, long)
      */
     public static <T> List<T> repeatCollection(final Collection<T> c, final int n) {
         checkArgNotNegative(n, "n");
@@ -16519,6 +16540,7 @@ sealed class CommonUtil permits N {
      * @param c
      * @param size
      * @return
+     * @see Iterators#repeatElementsToSize(Collection, long)
      */
     public static <T> List<T> repeatElementsToSize(final Collection<T> c, final int size) {
         checkArgNotNegative(size, "size");
@@ -16534,7 +16556,7 @@ sealed class CommonUtil permits N {
         final List<T> result = new ArrayList<>(size);
 
         for (T e : c) {
-            for (int i = 0, len = mod-- > 0 ? n + 1 : n; i < len; i++) {
+            for (int i = 0, cnt = mod-- > 0 ? n + 1 : n; i < cnt; i++) {
                 result.add(e);
             }
 
@@ -16547,9 +16569,11 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Repeats the whole specified Collection till reach the specified size.
+     *
      * <pre>
      * <code>
-     * repeatAllToSize(N.asList(1, 2, 3), 5) => [1, 2, 3, 1, 2]
+     * repeatCollectionToSize(N.asList(1, 2, 3), 5) => [1, 2, 3, 1, 2]
      * </code>
      * </pre>
      *
@@ -16557,6 +16581,7 @@ sealed class CommonUtil permits N {
      * @param c
      * @param size
      * @return
+     * @see Iterators#repeatCollectionToSize(Collection, long)
      */
     public static <T> List<T> repeatCollectionToSize(final Collection<? extends T> c, final int size) {
         checkArgNotNegative(size, "size");
@@ -16574,7 +16599,7 @@ sealed class CommonUtil permits N {
             } else {
                 final Iterator<? extends T> iter = c.iterator();
 
-                for (int i = 0, len = size - result.size(); i < len; i++) {
+                for (int i = 0, cnt = size - result.size(); i < cnt; i++) {
                     result.add(iter.next());
                 }
             }
@@ -21037,43 +21062,43 @@ sealed class CommonUtil permits N {
         }
     }
 
-    /**
-     * Binary search by.
-     *
-     * @param <T>
-     * @param <U>
-     * @param a
-     * @param valueToFind
-     * @param valueToFindMapper
-     * @return
-     */
-    public static <T, U extends Comparable<? super U>> int binarySearchBy(final T[] a, final T valueToFind,
-            final Function<? super T, ? extends U> valueToFindMapper) {
-        if (N.isEmpty(a)) {
-            return N.INDEX_NOT_FOUND;
-        }
-
-        return Arrays.binarySearch(a, valueToFind, Comparators.comparingBy(valueToFindMapper));
-    }
-
-    /**
-     * Binary search by.
-     *
-     * @param <T>
-     * @param <U>
-     * @param list
-     * @param valueToFind
-     * @param valueToFindMapper
-     * @return
-     */
-    public static <T, U extends Comparable<? super U>> int binarySearchBy(final List<? extends T> list, final T valueToFind,
-            final Function<? super T, ? extends U> valueToFindMapper) {
-        if (N.isEmpty(list)) {
-            return N.INDEX_NOT_FOUND;
-        }
-
-        return binarySearch(list, valueToFind, Comparators.comparingBy(valueToFindMapper));
-    }
+    //    /**
+    //     * Binary search by.
+    //     *
+    //     * @param <T>
+    //     * @param <U>
+    //     * @param a
+    //     * @param valueToFind
+    //     * @param valueToFindMapper
+    //     * @return
+    //     */
+    //    public static <T, U extends Comparable<? super U>> int binarySearchBy(final T[] a, final T valueToFind,
+    //            final Function<? super T, ? extends U> valueToFindMapper) {
+    //        if (N.isEmpty(a)) {
+    //            return N.INDEX_NOT_FOUND;
+    //        }
+    //
+    //        return Arrays.binarySearch(a, valueToFind, Comparators.comparingBy(valueToFindMapper));
+    //    }
+    //
+    //    /**
+    //     * Binary search by.
+    //     *
+    //     * @param <T>
+    //     * @param <U>
+    //     * @param list
+    //     * @param valueToFind
+    //     * @param valueToFindMapper
+    //     * @return
+    //     */
+    //    public static <T, U extends Comparable<? super U>> int binarySearchBy(final List<? extends T> list, final T valueToFind,
+    //            final Function<? super T, ? extends U> valueToFindMapper) {
+    //        if (N.isEmpty(list)) {
+    //            return N.INDEX_NOT_FOUND;
+    //        }
+    //
+    //        return binarySearch(list, valueToFind, Comparators.comparingBy(valueToFindMapper));
+    //    }
 
     private static <T> int indexedBinarySearch(final List<? extends T> l, final int fromIndex, final int toIndex, final T valueToFind,
             final Comparator<? super T> cmp) {
@@ -21144,7 +21169,7 @@ sealed class CommonUtil permits N {
      *
      * @param a
      * @param valueToFind
-     * @return
+     * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
      */
     public static int indexOf(final boolean[] a, final boolean valueToFind) {
         return indexOf(a, 0, valueToFind);
@@ -21155,7 +21180,7 @@ sealed class CommonUtil permits N {
      * @param a
      * @param startIndex the index from which to start the search.
      * @param valueToFind
-     * @return
+     * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
      */
     public static int indexOf(final boolean[] a, final int startIndex, final boolean valueToFind) {
         final int len = len(a);
@@ -21177,7 +21202,7 @@ sealed class CommonUtil permits N {
      *
      * @param a
      * @param valueToFind
-     * @return
+     * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
      */
     public static int indexOf(final char[] a, final char valueToFind) {
         return indexOf(a, 0, valueToFind);
@@ -21188,7 +21213,7 @@ sealed class CommonUtil permits N {
      * @param a
      * @param startIndex the index from which to start the search.
      * @param valueToFind
-     * @return
+     * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
      */
     public static int indexOf(final char[] a, final int startIndex, final char valueToFind) {
         final int len = len(a);
@@ -21210,7 +21235,7 @@ sealed class CommonUtil permits N {
      *
      * @param a
      * @param valueToFind
-     * @return
+     * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
      */
     public static int indexOf(final byte[] a, final byte valueToFind) {
         return indexOf(a, 0, valueToFind);
@@ -21222,7 +21247,7 @@ sealed class CommonUtil permits N {
      * @param a
      * @param startIndex the index from which to start the search.
      * @param valueToFind
-     * @return
+     * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
      */
     public static int indexOf(final byte[] a, final int startIndex, final byte valueToFind) {
         final int len = len(a);
@@ -21244,7 +21269,7 @@ sealed class CommonUtil permits N {
      *
      * @param a
      * @param valueToFind
-     * @return
+     * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
      */
     public static int indexOf(final short[] a, final short valueToFind) {
         return indexOf(a, 0, valueToFind);
@@ -21255,7 +21280,7 @@ sealed class CommonUtil permits N {
      * @param a
      * @param startIndex the index from which to start the search.
      * @param valueToFind
-     * @return
+     * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
      */
     public static int indexOf(final short[] a, final int startIndex, final short valueToFind) {
         final int len = len(a);
@@ -21277,7 +21302,7 @@ sealed class CommonUtil permits N {
      *
      * @param a
      * @param valueToFind
-     * @return
+     * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
      */
     public static int indexOf(final int[] a, final int valueToFind) {
         return indexOf(a, 0, valueToFind);
@@ -21288,7 +21313,7 @@ sealed class CommonUtil permits N {
      * @param a
      * @param startIndex the index from which to start the search.
      * @param valueToFind
-     * @return
+     * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
      */
     public static int indexOf(final int[] a, final int startIndex, final int valueToFind) {
         final int len = len(a);
@@ -21310,7 +21335,7 @@ sealed class CommonUtil permits N {
      *
      * @param a
      * @param valueToFind
-     * @return
+     * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
      */
     public static int indexOf(final long[] a, final long valueToFind) {
         return indexOf(a, 0, valueToFind);
@@ -21321,7 +21346,7 @@ sealed class CommonUtil permits N {
      * @param a
      * @param startIndex the index from which to start the search.
      * @param valueToFind
-     * @return
+     * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
      */
     public static int indexOf(final long[] a, final int startIndex, final long valueToFind) {
         final int len = len(a);
@@ -21343,7 +21368,7 @@ sealed class CommonUtil permits N {
      *
      * @param a
      * @param valueToFind
-     * @return
+     * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
      */
     public static int indexOf(final float[] a, final float valueToFind) {
         return indexOf(a, 0, valueToFind);
@@ -21354,7 +21379,7 @@ sealed class CommonUtil permits N {
      * @param a
      * @param startIndex the index from which to start the search.
      * @param valueToFind
-     * @return
+     * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
      */
     public static int indexOf(final float[] a, final int startIndex, final float valueToFind) {
         final int len = len(a);
@@ -21376,7 +21401,7 @@ sealed class CommonUtil permits N {
      *
      * @param a
      * @param valueToFind
-     * @return
+     * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
      */
     public static int indexOf(final double[] a, final double valueToFind) {
         return indexOf(a, 0, valueToFind);
@@ -21387,7 +21412,7 @@ sealed class CommonUtil permits N {
      * @param a
      * @param startIndex the index from which to start the search.
      * @param valueToFind
-     * @return
+     * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
      */
     public static int indexOf(final double[] a, final int startIndex, final double valueToFind) {
         final int len = len(a);
@@ -21462,7 +21487,7 @@ sealed class CommonUtil permits N {
      *
      * @param a
      * @param valueToFind
-     * @return
+     * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
      */
     public static int indexOf(final Object[] a, final Object valueToFind) {
         return indexOf(a, 0, valueToFind);
@@ -21473,7 +21498,7 @@ sealed class CommonUtil permits N {
      * @param a
      * @param startIndex the index from which to start the search.
      * @param valueToFind
-     * @return
+     * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
      */
     public static int indexOf(final Object[] a, final int startIndex, final Object valueToFind) {
         final int len = len(a);
@@ -21495,7 +21520,7 @@ sealed class CommonUtil permits N {
      *
      * @param c
      * @param valueToFind
-     * @return
+     * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
      */
     public static int indexOf(final Collection<?> c, final Object valueToFind) {
         return indexOf(c, 0, valueToFind);
@@ -21507,7 +21532,7 @@ sealed class CommonUtil permits N {
      * @param c
      * @param startIndex the index from which to start the search.
      * @param valueToFind
-     * @return
+     * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
      */
     public static int indexOf(final Collection<?> c, final int startIndex, final Object valueToFind) {
         final int len = size(c);
@@ -21560,7 +21585,7 @@ sealed class CommonUtil permits N {
      *
      * @param iter
      * @param valueToFind
-     * @return
+     * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
      */
     public static int indexOf(final Iterator<?> iter, final Object valueToFind) {
         return indexOf(iter, 0, valueToFind);
@@ -21569,31 +21594,10 @@ sealed class CommonUtil permits N {
     /**
      *
      *
-     * @param a
-     * @param valueToFind
-     * @return
-     */
-    public static int indexOfIgnoreCase(final String[] a, final String valueToFind) {
-        if (N.isEmpty(a)) {
-            return N.INDEX_NOT_FOUND;
-        }
-
-        for (int i = 0, len = a.length; i < len; i++) {
-            if (N.equalsIgnoreCase(a[i], valueToFind)) {
-                return i;
-            }
-        }
-
-        return N.INDEX_NOT_FOUND;
-    }
-
-    /**
-     *
-     *
      * @param iter
      * @param startIndex
      * @param valueToFind
-     * @return
+     * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
      */
     public static int indexOf(final Iterator<?> iter, final int startIndex, final Object valueToFind) {
         if (iter == null) {
@@ -21633,7 +21637,7 @@ sealed class CommonUtil permits N {
      *
      * @param sourceList
      * @param subListToFind
-     * @return
+     * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
      * @see java.util.Collections#indexOfSubList(List, List)
      */
     public static int indexOfSubList(final List<?> sourceList, final List<?> subListToFind) {
@@ -21645,11 +21649,61 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Index of sub list.
+     *
+     * @param sourceList
+     * @param subListToFind
+     * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
+     * @see Index#lastOfSubList(List, int, List)
+     */
+    public static int indexOfSubList(final List<?> sourceList, final int startIndex, final List<?> subListToFind) {
+        if (isEmpty(sourceList) || isEmpty(subListToFind)) {
+            return INDEX_NOT_FOUND;
+        }
+
+        return Index.ofSubList(sourceList, startIndex, subListToFind).orElse(INDEX_NOT_FOUND);
+    }
+
+    /**
+     *
+     *
+     * @param a
+     * @param valueToFind
+     * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
+     */
+    public static int indexOfIgnoreCase(final String[] a, final String valueToFind) {
+        return indexOfIgnoreCase(a, 0, valueToFind);
+    }
+
+    /**
+     *
+     *
+     * @param a
+     * @param valueToFind
+     * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
+     */
+    public static int indexOfIgnoreCase(final String[] a, final int startIndex, final String valueToFind) {
+        final int len = len(a);
+
+        if (len == 0 || startIndex >= len) {
+            return INDEX_NOT_FOUND;
+        }
+
+        for (int i = startIndex; i < len; i++) {
+            if (N.equalsIgnoreCase(a[i], valueToFind)) {
+                return i;
+            }
+        }
+
+        return N.INDEX_NOT_FOUND;
+    }
+
+    /**
      * Last index of.
      *
      * @param a
      * @param valueToFind
-     * @return
+     * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
      */
     public static int lastIndexOf(final boolean[] a, final boolean valueToFind) {
         return lastIndexOf(a, a.length - 1, valueToFind);
@@ -21661,7 +21715,7 @@ sealed class CommonUtil permits N {
      * @param a
      * @param startIndexFromBack the start index to traverse backwards from
      * @param valueToFind
-     * @return
+     * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
      */
     public static int lastIndexOf(final boolean[] a, final int startIndexFromBack, final boolean valueToFind) {
         final int len = len(a);
@@ -21684,7 +21738,7 @@ sealed class CommonUtil permits N {
      *
      * @param a
      * @param valueToFind
-     * @return
+     * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
      */
     public static int lastIndexOf(final char[] a, final char valueToFind) {
         if (isEmpty(a)) {
@@ -21700,7 +21754,7 @@ sealed class CommonUtil permits N {
      * @param a
      * @param startIndexFromBack the start index to traverse backwards from
      * @param valueToFind
-     * @return
+     * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
      */
     public static int lastIndexOf(final char[] a, final int startIndexFromBack, final char valueToFind) {
         final int len = len(a);
@@ -21723,7 +21777,7 @@ sealed class CommonUtil permits N {
      *
      * @param a
      * @param valueToFind
-     * @return
+     * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
      */
     public static int lastIndexOf(final byte[] a, final byte valueToFind) {
         if (isEmpty(a)) {
@@ -21740,7 +21794,7 @@ sealed class CommonUtil permits N {
      * @param a
      * @param startIndexFromBack the start index to traverse backwards from
      * @param valueToFind
-     * @return
+     * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
      */
     public static int lastIndexOf(final byte[] a, final int startIndexFromBack, final byte valueToFind) {
         final int len = len(a);
@@ -21763,7 +21817,7 @@ sealed class CommonUtil permits N {
      *
      * @param a
      * @param valueToFind
-     * @return
+     * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
      */
     public static int lastIndexOf(final short[] a, final short valueToFind) {
         if (isEmpty(a)) {
@@ -21779,7 +21833,7 @@ sealed class CommonUtil permits N {
      * @param a
      * @param startIndexFromBack the start index to traverse backwards from
      * @param valueToFind
-     * @return
+     * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
      */
     public static int lastIndexOf(final short[] a, final int startIndexFromBack, final short valueToFind) {
         final int len = len(a);
@@ -21802,7 +21856,7 @@ sealed class CommonUtil permits N {
      *
      * @param a
      * @param valueToFind
-     * @return
+     * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
      */
     public static int lastIndexOf(final int[] a, final int valueToFind) {
         if (isEmpty(a)) {
@@ -21818,7 +21872,7 @@ sealed class CommonUtil permits N {
      * @param a
      * @param startIndexFromBack the start index to traverse backwards from
      * @param valueToFind
-     * @return
+     * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
      */
     public static int lastIndexOf(final int[] a, final int startIndexFromBack, final int valueToFind) {
         final int len = len(a);
@@ -21841,7 +21895,7 @@ sealed class CommonUtil permits N {
      *
      * @param a
      * @param valueToFind
-     * @return
+     * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
      */
     public static int lastIndexOf(final long[] a, final long valueToFind) {
         if (isEmpty(a)) {
@@ -21857,7 +21911,7 @@ sealed class CommonUtil permits N {
      * @param a
      * @param startIndexFromBack the start index to traverse backwards from
      * @param valueToFind
-     * @return
+     * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
      */
     public static int lastIndexOf(final long[] a, final int startIndexFromBack, final long valueToFind) {
         final int len = len(a);
@@ -21880,7 +21934,7 @@ sealed class CommonUtil permits N {
      *
      * @param a
      * @param valueToFind
-     * @return
+     * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
      */
     public static int lastIndexOf(final float[] a, final float valueToFind) {
         if (isEmpty(a)) {
@@ -21896,7 +21950,7 @@ sealed class CommonUtil permits N {
      * @param a
      * @param startIndexFromBack the start index to traverse backwards from
      * @param valueToFind
-     * @return
+     * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
      */
     public static int lastIndexOf(final float[] a, final int startIndexFromBack, final float valueToFind) {
         final int len = len(a);
@@ -21919,7 +21973,7 @@ sealed class CommonUtil permits N {
      *
      * @param a
      * @param valueToFind
-     * @return
+     * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
      */
     public static int lastIndexOf(final double[] a, final double valueToFind) {
         if (isEmpty(a)) {
@@ -21935,7 +21989,7 @@ sealed class CommonUtil permits N {
      * @param a
      * @param startIndexFromBack the start index to traverse backwards from
      * @param valueToFind
-     * @return
+     * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
      */
     public static int lastIndexOf(final double[] a, final int startIndexFromBack, final double valueToFind) {
         final int len = len(a);
@@ -22011,7 +22065,7 @@ sealed class CommonUtil permits N {
      *
      * @param a
      * @param valueToFind
-     * @return
+     * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
      */
     public static int lastIndexOf(final Object[] a, final Object valueToFind) {
         if (isEmpty(a)) {
@@ -22027,7 +22081,7 @@ sealed class CommonUtil permits N {
      * @param a
      * @param startIndexFromBack the start index to traverse backwards from
      * @param valueToFind
-     * @return
+     * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
      */
     public static int lastIndexOf(final Object[] a, final int startIndexFromBack, final Object valueToFind) {
         final int len = len(a);
@@ -22050,7 +22104,7 @@ sealed class CommonUtil permits N {
      *
      * @param c
      * @param valueToFind
-     * @return
+     * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
      */
     public static int lastIndexOf(final Collection<?> c, final Object valueToFind) {
         if (isEmpty(c)) {
@@ -22066,7 +22120,7 @@ sealed class CommonUtil permits N {
      * @param c
      * @param startIndexFromBack the start index to traverse backwards from
      * @param valueToFind
-     * @return
+     * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
      */
     public static int lastIndexOf(final Collection<?> c, final int startIndexFromBack, final Object valueToFind) {
         final int size = N.size(c);
@@ -22107,32 +22161,11 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     *
-     *
-     * @param a
-     * @param valueToFind
-     * @return
-     */
-    public static int lastIndexOfIgnoreCase(final String[] a, final String valueToFind) {
-        if (N.isEmpty(a)) {
-            return N.INDEX_NOT_FOUND;
-        }
-
-        for (int i = a.length - 1; i >= 0; i--) {
-            if (N.equalsIgnoreCase(a[i], valueToFind)) {
-                return i;
-            }
-        }
-
-        return N.INDEX_NOT_FOUND;
-    }
-
-    /**
      * Last index of sub list.
      *
      * @param sourceList
      * @param subListToFind
-     * @return
+     * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
      * @see java.util.Collections#lastIndexOfSubList(List, List)
      */
     public static int lastIndexOfSubList(final List<?> sourceList, final List<?> subListToFind) {
@@ -22144,13 +22177,61 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Last index of sub list.
+     *
+     * @param sourceList
+     * @param startIndexFromBack
+     * @param subListToFind
+     * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
+     * @see java.util.Collections#lastIndexOfSubList(List, List)
+     */
+    public static int lastIndexOfSubList(final List<?> sourceList, final int startIndexFromBack, final List<?> subListToFind) {
+        if (isEmpty(sourceList) || isEmpty(subListToFind)) {
+            return INDEX_NOT_FOUND;
+        }
+
+        return Index.lastOfSubList(sourceList, startIndexFromBack, subListToFind).orElse(INDEX_NOT_FOUND);
+    }
+
+    /**
+     *
+     *
+     * @param a
+     * @param valueToFind
+     * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
+     */
+    public static int lastIndexOfIgnoreCase(final String[] a, final String valueToFind) {
+        if (isEmpty(a)) {
+            return INDEX_NOT_FOUND;
+        }
+
+        return lastIndexOfIgnoreCase(a, a.length - 1, valueToFind);
+    }
+
+    public static int lastIndexOfIgnoreCase(final String[] a, final int startIndexFromBack, final String valueToFind) {
+        final int len = len(a);
+
+        if (len == 0 || startIndexFromBack < 0) {
+            return INDEX_NOT_FOUND;
+        }
+
+        for (int i = N.min(startIndexFromBack, len - 1); i >= 0; i--) {
+            if (N.equalsIgnoreCase(a[i], valueToFind)) {
+                return i;
+            }
+        }
+
+        return N.INDEX_NOT_FOUND;
+    }
+
+    /**
      * Find first index.
      *
      * @param <T>
      * @param <E>
      * @param a
      * @param predicate
-     * @return the optional int
+     * @return an {@code OptionalInt} with the index of found target value/element, or an empty {@code OptionalInt} no target value/element found.
      * @throws E the e
      */
     public static <T, E extends Exception> OptionalInt findFirstIndex(final T[] a, final Throwables.Predicate<? super T, E> predicate) throws E {
@@ -22176,7 +22257,7 @@ sealed class CommonUtil permits N {
      * @param a
      * @param valueToFind
      * @param predicate
-     * @return the optional int
+     * @return an {@code OptionalInt} with the index of found target value/element, or an empty {@code OptionalInt} no target value/element found.
      * @throws E the e
      */
     public static <T, U, E extends Exception> OptionalInt findFirstIndex(final T[] a, final U valueToFind,
@@ -22201,7 +22282,7 @@ sealed class CommonUtil permits N {
      * @param <E>
      * @param c
      * @param predicate
-     * @return the optional int
+     * @return an {@code OptionalInt} with the index of found target value/element, or an empty {@code OptionalInt} no target value/element found.
      * @throws E the e
      */
     public static <T, E extends Exception> OptionalInt findFirstIndex(final Collection<? extends T> c, final Throwables.Predicate<? super T, E> predicate)
@@ -22232,7 +22313,7 @@ sealed class CommonUtil permits N {
      * @param c
      * @param valueToFind
      * @param predicate
-     * @return the optional int
+     * @return an {@code OptionalInt} with the index of found target value/element, or an empty {@code OptionalInt} no target value/element found.
      * @throws E the e
      */
     public static <T, U, E extends Exception> OptionalInt findFirstIndex(final Collection<? extends T> c, final U valueToFind,
@@ -22261,7 +22342,7 @@ sealed class CommonUtil permits N {
      * @param <E>
      * @param a
      * @param predicate
-     * @return the optional int
+     * @return an {@code OptionalInt} with the index of found target value/element, or an empty {@code OptionalInt} no target value/element found.
      * @throws E the e
      */
     public static <T, E extends Exception> OptionalInt findLastIndex(final T[] a, final Throwables.Predicate<? super T, E> predicate) throws E {
@@ -22287,7 +22368,7 @@ sealed class CommonUtil permits N {
      * @param a
      * @param valueToFind
      * @param predicate
-     * @return the optional int
+     * @return an {@code OptionalInt} with the index of found target value/element, or an empty {@code OptionalInt} no target value/element found.
      * @throws E the e
      */
     public static <T, U, E extends Exception> OptionalInt findLastIndex(final T[] a, final U valueToFind,
@@ -22312,7 +22393,7 @@ sealed class CommonUtil permits N {
      * @param <E>
      * @param c
      * @param predicate
-     * @return the optional int
+     * @return an {@code OptionalInt} with the index of found target value/element, or an empty {@code OptionalInt} no target value/element found.
      * @throws E the e
      */
     public static <T, E extends Exception> OptionalInt findLastIndex(final Collection<? extends T> c, final Throwables.Predicate<? super T, E> predicate)
@@ -22366,7 +22447,7 @@ sealed class CommonUtil permits N {
      * @param c
      * @param valueToFind
      * @param predicate
-     * @return
+     * @return an {@code OptionalInt} with the index of found target value/element, or an empty {@code OptionalInt} no target value/element found.
      * @throws E
      */
     public static <T, U, E extends Exception> OptionalInt findLastIndex(final Collection<? extends T> c, final U valueToFind,
@@ -22378,6 +22459,393 @@ sealed class CommonUtil permits N {
         final Throwables.Predicate<? super T, E> predicate2 = t -> predicate.test(t, valueToFind);
 
         return findLastIndex(c, predicate2);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param a
+     * @return the indices of all minimum value/element in the specified {@code Collection/Array}.
+     */
+    public static <T extends Comparable<? super T>> int[] indicesOfAllMin(final T[] a) throws IllegalArgumentException {
+        return indicesOfAllMin(a, NATURAL_COMPARATOR);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param a
+     * @param cmp
+     * @return the indices of all minimum value/element in the specified {@code Collection/Array}.
+     */
+    public static <T> int[] indicesOfAllMin(final T[] a, Comparator<? super T> cmp) throws IllegalArgumentException {
+        if (isEmpty(a)) {
+            return EMPTY_INT_ARRAY;
+        }
+
+        cmp = cmp == null ? (Comparator<T>) NULL_MAX_COMPARATOR : cmp;
+        final IntList result = new IntList();
+        final int len = N.len(a);
+        T candidate = a[0];
+        int cp = 0;
+
+        result.add(0);
+
+        for (int idx = 1; idx < len; idx++) {
+            cp = cmp.compare(a[idx], candidate);
+
+            if (cp == 0) {
+                result.add(idx);
+            } else if (cp < 0) {
+                result.clear();
+                result.add(idx);
+                candidate = a[idx];
+            }
+        }
+
+        return result.toArray();
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param c
+     * @return the indices of all minimum value/element in the specified {@code Collection/Array}.
+     */
+    public static <T extends Comparable<? super T>> int[] indicesOfAllMin(final Collection<? extends T> c) throws IllegalArgumentException {
+        return indicesOfAllMin(c, NATURAL_COMPARATOR);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param c
+     * @param cmp
+     * @return the indices of all minimum value/element in the specified {@code Collection/Array}.
+     */
+    public static <T> int[] indicesOfAllMin(final Collection<? extends T> c, Comparator<? super T> cmp) throws IllegalArgumentException {
+        if (isEmpty(c)) {
+            return EMPTY_INT_ARRAY;
+        }
+
+        cmp = cmp == null ? (Comparator<T>) NULL_MAX_COMPARATOR : cmp;
+        final IntList result = new IntList();
+        final Iterator<? extends T> iter = c.iterator();
+
+        T candidate = iter.next();
+        T next = null;
+        int cp = 0;
+        int idx = 0;
+
+        result.add(idx++);
+
+        while (iter.hasNext()) {
+            next = iter.next();
+            cp = cmp.compare(next, candidate);
+
+            if (cp == 0) {
+                result.add(idx);
+            } else if (cp < 0) {
+                result.clear();
+                result.add(idx);
+                candidate = next;
+            }
+
+            idx++;
+        }
+
+        return result.toArray();
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param a
+     * @return the indices of all maximum value/element in the specified {@code Collection/Array}.
+     */
+    public static <T extends Comparable<? super T>> int[] indicesOfAllMax(final T[] a) throws IllegalArgumentException {
+        return indicesOfAllMax(a, NATURAL_COMPARATOR);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param a
+     * @param cmp
+     * @return the indices of all maximum value/element in the specified {@code Collection/Array}.
+     */
+    public static <T> int[] indicesOfAllMax(final T[] a, Comparator<? super T> cmp) throws IllegalArgumentException {
+        if (isEmpty(a)) {
+            return EMPTY_INT_ARRAY;
+        }
+
+        cmp = cmp == null ? (Comparator<T>) NULL_MIN_COMPARATOR : cmp;
+        final IntList result = new IntList();
+        final int len = N.len(a);
+        T candidate = a[0];
+        int cp = 0;
+
+        result.add(0);
+
+        for (int idx = 1; idx < len; idx++) {
+            cp = cmp.compare(a[idx], candidate);
+
+            if (cp == 0) {
+                result.add(idx);
+            } else if (cp > 0) {
+                result.clear();
+                result.add(idx);
+                candidate = a[idx];
+            }
+        }
+
+        return result.toArray();
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param c
+     * @return the indices of all maximum value/element in the specified {@code Collection/Array}.
+     */
+    public static <T extends Comparable<? super T>> int[] indicesOfAllMax(final Collection<? extends T> c) throws IllegalArgumentException {
+        return indicesOfAllMax(c, NATURAL_COMPARATOR);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param c
+     * @param cmp
+     * @return the indices of all maximum value/element in the specified {@code Collection/Array}.
+     */
+    public static <T> int[] indicesOfAllMax(final Collection<? extends T> c, Comparator<? super T> cmp) throws IllegalArgumentException {
+        if (isEmpty(c)) {
+            return EMPTY_INT_ARRAY;
+        }
+
+        cmp = cmp == null ? (Comparator<T>) NULL_MIN_COMPARATOR : cmp;
+        final IntList result = new IntList();
+        final Iterator<? extends T> iter = c.iterator();
+
+        T candidate = iter.next();
+        T next = null;
+        int cp = 0;
+        int idx = 0;
+
+        result.add(idx++);
+
+        while (iter.hasNext()) {
+            next = iter.next();
+            cp = cmp.compare(next, candidate);
+
+            if (cp == 0) {
+                result.add(idx);
+            } else if (cp > 0) {
+                result.clear();
+                result.add(idx);
+                candidate = next;
+            }
+
+            idx++;
+        }
+
+        return result.toArray();
+    }
+
+    /**
+     *
+     * @param a
+     * @param valueToFind
+     * @return the indices of all found target value/element in the specified {@code Collection/Array}.
+     */
+    public static int[] indicesOfAll(final Object[] a, final Object valueToFind) {
+        return indicesOfAll(a, 0, valueToFind);
+    }
+
+    /**
+     *
+     * @param a
+     * @param startIndex
+     * @param valueToFind
+     * @return the indices of all found target value/element in the specified {@code Collection/Array}.
+     */
+    public static int[] indicesOfAll(final Object[] a, int startIndex, final Object valueToFind) {
+        final int len = N.len(a);
+
+        if (len == 0 || startIndex >= len) {
+            return EMPTY_INT_ARRAY;
+        }
+
+        final IntList result = new IntList();
+
+        for (int idx = N.max(startIndex, 0); idx < len; idx++) {
+            if (N.equals(a[idx], valueToFind)) {
+                result.add(idx);
+            }
+        }
+
+        return result.toArray();
+    }
+
+    /**
+     *
+     * @param c
+     * @param valueToFind
+     * @return the indices of all found target value/element in the specified {@code Collection/Array}.
+     */
+    public static int[] indicesOfAll(final Collection<?> c, final Object valueToFind) {
+        return indicesOfAll(c, 0, valueToFind);
+    }
+
+    /**
+     *
+     * @param c
+     * @param startIndex
+     * @param valueToFind
+     * @return the indices of all found target value/element in the specified {@code Collection/Array}.
+     */
+    public static int[] indicesOfAll(final Collection<?> c, int startIndex, final Object valueToFind) {
+        final int size = N.size(c);
+
+        if (size == 0 || startIndex >= size) {
+            return EMPTY_INT_ARRAY;
+        }
+
+        final IntList result = new IntList();
+
+        if (c instanceof List && c instanceof RandomAccess) {
+            final List<?> list = (List<?>) c;
+
+            for (int idx = N.max(startIndex, 0); idx < size; idx++) {
+                if (N.equals(list.get(idx), valueToFind)) {
+                    result.add(idx);
+                }
+            }
+        } else {
+            final Iterator<?> iter = c.iterator();
+
+            int idx = 0;
+
+            while (idx < startIndex) {
+                iter.next();
+                idx++;
+            }
+
+            while (iter.hasNext()) {
+                if (N.equals(iter.next(), valueToFind)) {
+                    result.add(idx);
+                }
+
+                idx++;
+            }
+        }
+
+        return result.toArray();
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param <E>
+     * @param a
+     * @param predicate
+     * @return the indices of all found target value/element in the specified {@code Collection/Array}.
+     * @throws E
+     */
+    public static <T, E extends Exception> int[] indicesOfAll(final T[] a, final Throwables.Predicate<? super T, E> predicate) throws E {
+        return indicesOfAll(a, 0, predicate);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param <E>
+     * @param a
+     * @param startIndex
+     * @param predicate
+     * @return the indices of all found target value/element in the specified {@code Collection/Array}.
+     * @throws E
+     */
+    public static <T, E extends Exception> int[] indicesOfAll(final T[] a, int startIndex, final Throwables.Predicate<? super T, E> predicate) throws E {
+        final int len = N.len(a);
+
+        if (len == 0 || startIndex >= len) {
+            return EMPTY_INT_ARRAY;
+        }
+
+        final IntList result = new IntList();
+
+        for (int idx = N.max(startIndex, 0); idx < len; idx++) {
+            if (predicate.test(a[idx])) {
+                result.add(idx);
+            }
+        }
+
+        return result.toArray();
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param <E>
+     * @param c
+     * @param predicate
+     * @return the indices of all found target value/element in the specified {@code Collection/Array}.
+     * @throws E
+     */
+    public static <T, E extends Exception> int[] indicesOfAll(final Collection<? extends T> c, final Throwables.Predicate<? super T, E> predicate) throws E {
+        return indicesOfAll(c, 0, predicate);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param <E>
+     * @param c
+     * @param startIndex
+     * @param predicate
+     * @return the indices of all found target value/element in the specified {@code Collection/Array}.
+     * @throws E
+     */
+    public static <T, E extends Exception> int[] indicesOfAll(final Collection<? extends T> c, int startIndex,
+            final Throwables.Predicate<? super T, E> predicate) throws E {
+        final int size = N.size(c);
+
+        if (size == 0 || startIndex >= size) {
+            return EMPTY_INT_ARRAY;
+        }
+
+        final IntList result = new IntList();
+
+        if (c instanceof List && c instanceof RandomAccess) {
+            final List<? extends T> list = (List<? extends T>) c;
+
+            for (int i = N.max(startIndex, 0); i < size; i++) {
+                if (predicate.test(list.get(i))) {
+                    result.add(i);
+                }
+            }
+        } else {
+            final Iterator<? extends T> iter = c.iterator();
+
+            int idx = 0;
+
+            while (idx < startIndex) {
+                iter.next();
+                idx++;
+            }
+
+            while (iter.hasNext()) {
+                if (predicate.test(iter.next())) {
+                    result.add(idx);
+                }
+
+                idx++;
+            }
+        }
+
+        return result.toArray();
     }
 
     static <T> Iterator<T> getDescendingIteratorIfPossible(final Iterable<? extends T> c) {
