@@ -36,7 +36,6 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.function.BiFunction;
 import java.util.function.BinaryOperator;
-import java.util.function.Function;
 import java.util.function.IntFunction;
 import java.util.function.Supplier;
 
@@ -45,6 +44,7 @@ import com.landawn.abacus.parser.ParserUtil;
 import com.landawn.abacus.parser.ParserUtil.BeanInfo;
 import com.landawn.abacus.parser.ParserUtil.PropInfo;
 import com.landawn.abacus.type.Type;
+import com.landawn.abacus.util.Fn.Factory;
 import com.landawn.abacus.util.Fn.IntFunctions;
 import com.landawn.abacus.util.Fn.Suppliers;
 import com.landawn.abacus.util.u.Nullable;
@@ -76,316 +76,340 @@ public final class Maps {
     }
 
     /**
-     *
-     * @param <T>
-     * @param <K> the key type
-     * @param c
-     * @param keyMapper
-     * @return
-     */
-    public static <T, K> Map<K, T> create(Collection<? extends T> c, final Function<? super T, ? extends K> keyMapper) {
-        N.checkArgNotNull(keyMapper);
-
-        if (N.isEmpty(c)) {
-            return new HashMap<>();
-        }
-
-        final Map<K, T> result = N.newHashMap(c.size());
-
-        for (T e : c) {
-            result.put(keyMapper.apply(e), e);
-        }
-
-        return result;
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param c
-     * @param keyMapper
-     * @param valueExtractor
-     * @return
-     */
-    public static <T, K, V> Map<K, V> create(Collection<? extends T> c, final Function<? super T, ? extends K> keyMapper,
-            final Function<? super T, ? extends V> valueExtractor) {
-        N.checkArgNotNull(keyMapper);
-        N.checkArgNotNull(valueExtractor);
-
-        if (N.isEmpty(c)) {
-            return new HashMap<>();
-        }
-
-        final Map<K, V> result = N.newHashMap(c.size());
-
-        for (T e : c) {
-            result.put(keyMapper.apply(e), valueExtractor.apply(e));
-        }
-
-        return result;
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param <M>
-     * @param c
-     * @param keyMapper
-     * @param valueExtractor
-     * @param mapSupplier
-     * @return
-     */
-    public static <T, K, V, M extends Map<K, V>> M create(Collection<? extends T> c, final Function<? super T, ? extends K> keyMapper,
-            final Function<? super T, ? extends V> valueExtractor, final IntFunction<? extends M> mapSupplier) {
-        N.checkArgNotNull(keyMapper);
-        N.checkArgNotNull(valueExtractor);
-        N.checkArgNotNull(mapSupplier);
-
-        if (N.isEmpty(c)) {
-            return mapSupplier.apply(0);
-        }
-
-        final M result = mapSupplier.apply(c.size());
-
-        for (T e : c) {
-            result.put(keyMapper.apply(e), valueExtractor.apply(e));
-        }
-
-        return result;
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param <K>
-     * @param <V>
-     * @param <M>
-     * @param c
-     * @param keyMapper
-     * @param valueExtractor
-     * @param mergeFunction
-     * @param mapSupplier
-     * @return
-     */
-    public static <T, K, V, M extends Map<K, V>> M create(Collection<? extends T> c, final Function<? super T, ? extends K> keyMapper,
-            final Function<? super T, ? extends V> valueExtractor, final BinaryOperator<V> mergeFunction, final IntFunction<? extends M> mapSupplier) {
-        N.checkArgNotNull(keyMapper);
-        N.checkArgNotNull(valueExtractor);
-        N.checkArgNotNull(mergeFunction);
-        N.checkArgNotNull(mapSupplier);
-
-        if (N.isEmpty(c)) {
-            return mapSupplier.apply(0);
-        }
-
-        final M result = mapSupplier.apply(c.size());
-        K key = null;
-
-        for (T e : c) {
-            key = keyMapper.apply(e);
-
-            final V oldValue = result.get(key);
-
-            if (oldValue == null && !result.containsKey(key)) {
-                result.put(key, valueExtractor.apply(e));
-            } else {
-                result.put(key, mergeFunction.apply(oldValue, valueExtractor.apply(e)));
-            }
-        }
-
-        return result;
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param <K> the key type
-     * @param iter
-     * @param keyMapper
-     * @return
-     */
-    public static <T, K> Map<K, T> create(final Iterator<? extends T> iter, final Function<? super T, K> keyMapper) {
-        N.checkArgNotNull(keyMapper);
-
-        if (iter == null) {
-            return new HashMap<>();
-        }
-
-        final Map<K, T> result = new HashMap<>();
-        T e = null;
-
-        while (iter.hasNext()) {
-            e = iter.next();
-            result.put(keyMapper.apply(e), e);
-        }
-
-        return result;
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param iter
-     * @param keyMapper
-     * @param valueExtractor
-     * @return
-     */
-    public static <T, K, V> Map<K, V> create(final Iterator<? extends T> iter, final Function<? super T, K> keyMapper,
-            final Function<? super T, ? extends V> valueExtractor) {
-        N.checkArgNotNull(keyMapper);
-        N.checkArgNotNull(valueExtractor);
-
-        if (iter == null) {
-            return new HashMap<>();
-        }
-
-        final Map<K, V> result = new HashMap<>();
-        T e = null;
-
-        while (iter.hasNext()) {
-            e = iter.next();
-            result.put(keyMapper.apply(e), valueExtractor.apply(e));
-        }
-
-        return result;
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param <M>
-     * @param iter
-     * @param keyMapper
-     * @param valueExtractor
-     * @param mapSupplier
-     * @return
-     */
-    public static <T, K, V, M extends Map<K, V>> M create(final Iterator<? extends T> iter, final Function<? super T, K> keyMapper,
-            final Function<? super T, ? extends V> valueExtractor, final Supplier<? extends M> mapSupplier) {
-        N.checkArgNotNull(keyMapper);
-        N.checkArgNotNull(valueExtractor);
-        N.checkArgNotNull(mapSupplier);
-
-        if (iter == null) {
-            return mapSupplier.get();
-        }
-
-        final M result = mapSupplier.get();
-        T e = null;
-
-        while (iter.hasNext()) {
-            e = iter.next();
-            result.put(keyMapper.apply(e), valueExtractor.apply(e));
-        }
-
-        return result;
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param <K>
-     * @param <V>
-     * @param <M>
-     * @param iter
-     * @param keyMapper
-     * @param valueExtractor
-     * @param mergeFunction
-     * @param mapSupplier
-     * @return
-     */
-    public static <T, K, V, M extends Map<K, V>> M create(final Iterator<? extends T> iter, final Function<? super T, K> keyMapper,
-            final Function<? super T, ? extends V> valueExtractor, final BinaryOperator<V> mergeFunction, final Supplier<? extends M> mapSupplier) {
-        N.checkArgNotNull(keyMapper);
-        N.checkArgNotNull(valueExtractor);
-        N.checkArgNotNull(mergeFunction);
-        N.checkArgNotNull(mapSupplier);
-
-        if (iter == null) {
-            return mapSupplier.get();
-        }
-
-        final M result = mapSupplier.get();
-        T e = null;
-        K key = null;
-
-        while (iter.hasNext()) {
-            e = iter.next();
-            key = keyMapper.apply(e);
-
-            final V oldValue = result.get(key);
-
-            if (oldValue == null && !result.containsKey(key)) {
-                result.put(key, valueExtractor.apply(e));
-            } else {
-                result.put(key, mergeFunction.apply(oldValue, valueExtractor.apply(e)));
-            }
-        }
-
-        return result;
-    }
-
-    /**
+     * Returns an immutable key set of the specified {@code map}.
+     * An empty immutable set is returned if the specified {@code map} is {@code null} or empty.
      *
      * @param <K>
-     * @param <V>
-     * @param <V2>
      * @param map
-     * @param valueMapper
      * @return
      */
-    public static <K, V, V2> Map<K, V2> create(final Map<? extends K, ? extends V> map, final Function<? super V, V2> valueMapper) {
-        N.checkArgNotNull(valueMapper);
-
-        if (map == null) {
-            return new HashMap<>();
-        }
-
-        final Map<K, V2> result = Maps.newTargetMap(map);
-
-        for (Map.Entry<? extends K, ? extends V> entry : map.entrySet()) {
-            result.put(entry.getKey(), valueMapper.apply(entry.getValue()));
-        }
-
-        return result;
+    @SuppressWarnings("deprecation")
+    public static <K> ImmutableSet<K> keys(Map<? extends K, ?> map) {
+        return N.isEmpty(map) ? ImmutableSet.empty() : ImmutableSet.wrap(map.keySet());
     }
 
     /**
+     * Returns an immutable value collection of the specified {@code map}.
+     * An empty immutable collection is returned if the specified {@code map} is {@code null} or empty.
+     *
+     * @param <V>
+     * @param map
+     * @return
+     */
+    @SuppressWarnings("deprecation")
+    public static <V> ImmutableCollection<V> values(Map<?, ? extends V> map) {
+        return N.isEmpty(map) ? ImmutableSet.empty() : ImmutableCollection.wrap(map.values());
+    }
+
+    /**
+     * Returns an immutable entry set of the specified {@code map}.
+     * An empty immutable entry set is returned if the specified {@code map} is {@code null} or empty.
      *
      * @param <K>
      * @param <V>
-     * @param <V2>
-     * @param <M>
      * @param map
-     * @param valueMapper
-     * @param mapSupplier
      * @return
      */
-    public static <K, V, V2, M extends Map<K, V2>> M create(final Map<? extends K, ? extends V> map, final Function<? super V, V2> valueMapper,
-            final IntFunction<? extends M> mapSupplier) {
-        N.checkArgNotNull(valueMapper);
-        N.checkArgNotNull(mapSupplier);
-
-        if (map == null) {
-            return mapSupplier.apply(0);
-        }
-
-        final M result = mapSupplier.apply(map.size());
-
-        for (Map.Entry<? extends K, ? extends V> entry : map.entrySet()) {
-            result.put(entry.getKey(), valueMapper.apply(entry.getValue()));
-        }
-
-        return result;
+    @SuppressWarnings({ "deprecation", "rawtypes" })
+    public static <K, V> ImmutableSet<Map.Entry<K, V>> entrySet(Map<? extends K, ? extends V> map) {
+        return N.isEmpty(map) ? ImmutableSet.empty() : ImmutableSet.wrap((Set) map.entrySet());
     }
+
+    //    /**
+    //     *
+    //     * @param <T>
+    //     * @param <K> the key type
+    //     * @param c
+    //     * @param keyMapper
+    //     * @return
+    //     */
+    //    public static <T, K> Map<K, T> create(Iterable<? extends T> c, final Function<? super T, ? extends K> keyMapper) {
+    //        N.checkArgNotNull(keyMapper);
+    //
+    //        final Map<K, T> result = N.newHashMap(c instanceof Collection ? ((Collection<T>) c).size() : 0);
+    //
+    //        for (T e : c) {
+    //            result.put(keyMapper.apply(e), e);
+    //        }
+    //
+    //        return result;
+    //    }
+    //
+    //    /**
+    //     *
+    //     * @param <T>
+    //     * @param <K> the key type
+    //     * @param <V> the value type
+    //     * @param c
+    //     * @param keyMapper
+    //     * @param valueExtractor
+    //     * @return
+    //     */
+    //    public static <T, K, V> Map<K, V> create(Iterable<? extends T> c, final Function<? super T, ? extends K> keyMapper,
+    //            final Function<? super T, ? extends V> valueExtractor) {
+    //        N.checkArgNotNull(keyMapper);
+    //        N.checkArgNotNull(valueExtractor);
+    //
+    //        final Map<K, V> result = N.newHashMap(c instanceof Collection ? ((Collection<T>) c).size() : 0);
+    //
+    //        for (T e : c) {
+    //            result.put(keyMapper.apply(e), valueExtractor.apply(e));
+    //        }
+    //
+    //        return result;
+    //    }
+    //
+    //    /**
+    //     *
+    //     * @param <T>
+    //     * @param <K> the key type
+    //     * @param <V> the value type
+    //     * @param <M>
+    //     * @param c
+    //     * @param keyMapper
+    //     * @param valueExtractor
+    //     * @param mapSupplier
+    //     * @return
+    //     */
+    //    public static <T, K, V, M extends Map<K, V>> M create(Iterable<? extends T> c, final Function<? super T, ? extends K> keyMapper,
+    //            final Function<? super T, ? extends V> valueExtractor, final IntFunction<? extends M> mapSupplier) {
+    //        N.checkArgNotNull(keyMapper);
+    //        N.checkArgNotNull(valueExtractor);
+    //        N.checkArgNotNull(mapSupplier);
+    //
+    //        final M result = mapSupplier.apply(c instanceof Collection ? ((Collection<T>) c).size() : 0);
+    //
+    //        for (T e : c) {
+    //            result.put(keyMapper.apply(e), valueExtractor.apply(e));
+    //        }
+    //
+    //        return result;
+    //    }
+    //
+    //    /**
+    //     *
+    //     * @param <T>
+    //     * @param <K>
+    //     * @param <V>
+    //     * @param <M>
+    //     * @param c
+    //     * @param keyMapper
+    //     * @param valueExtractor
+    //     * @param mergeFunction
+    //     * @param mapSupplier
+    //     * @return
+    //     */
+    //    public static <T, K, V, M extends Map<K, V>> M create(Iterable<? extends T> c, final Function<? super T, ? extends K> keyMapper,
+    //            final Function<? super T, ? extends V> valueExtractor, final BinaryOperator<V> mergeFunction, final IntFunction<? extends M> mapSupplier) {
+    //        N.checkArgNotNull(keyMapper);
+    //        N.checkArgNotNull(valueExtractor);
+    //        N.checkArgNotNull(mergeFunction);
+    //        N.checkArgNotNull(mapSupplier);
+    //
+    //        final M result = mapSupplier.apply(c instanceof Collection ? ((Collection<T>) c).size() : 0);
+    //        K key = null;
+    //
+    //        for (T e : c) {
+    //            key = keyMapper.apply(e);
+    //
+    //            final V oldValue = result.get(key);
+    //
+    //            if (oldValue == null && !result.containsKey(key)) {
+    //                result.put(key, valueExtractor.apply(e));
+    //            } else {
+    //                result.put(key, mergeFunction.apply(oldValue, valueExtractor.apply(e)));
+    //            }
+    //        }
+    //
+    //        return result;
+    //    }
+    //
+    //    /**
+    //     *
+    //     * @param <T>
+    //     * @param <K> the key type
+    //     * @param iter
+    //     * @param keyMapper
+    //     * @return
+    //     */
+    //    public static <T, K> Map<K, T> create(final Iterator<? extends T> iter, final Function<? super T, K> keyMapper) {
+    //        N.checkArgNotNull(keyMapper);
+    //
+    //        if (iter == null) {
+    //            return new HashMap<>();
+    //        }
+    //
+    //        final Map<K, T> result = new HashMap<>();
+    //        T e = null;
+    //
+    //        while (iter.hasNext()) {
+    //            e = iter.next();
+    //            result.put(keyMapper.apply(e), e);
+    //        }
+    //
+    //        return result;
+    //    }
+    //
+    //    /**
+    //     *
+    //     * @param <T>
+    //     * @param <K> the key type
+    //     * @param <V> the value type
+    //     * @param iter
+    //     * @param keyMapper
+    //     * @param valueExtractor
+    //     * @return
+    //     */
+    //    public static <T, K, V> Map<K, V> create(final Iterator<? extends T> iter, final Function<? super T, K> keyMapper,
+    //            final Function<? super T, ? extends V> valueExtractor) {
+    //        N.checkArgNotNull(keyMapper);
+    //        N.checkArgNotNull(valueExtractor);
+    //
+    //        if (iter == null) {
+    //            return new HashMap<>();
+    //        }
+    //
+    //        final Map<K, V> result = new HashMap<>();
+    //        T e = null;
+    //
+    //        while (iter.hasNext()) {
+    //            e = iter.next();
+    //            result.put(keyMapper.apply(e), valueExtractor.apply(e));
+    //        }
+    //
+    //        return result;
+    //    }
+    //
+    //    /**
+    //     *
+    //     * @param <T>
+    //     * @param <K> the key type
+    //     * @param <V> the value type
+    //     * @param <M>
+    //     * @param iter
+    //     * @param keyMapper
+    //     * @param valueExtractor
+    //     * @param mapSupplier
+    //     * @return
+    //     */
+    //    public static <T, K, V, M extends Map<K, V>> M create(final Iterator<? extends T> iter, final Function<? super T, K> keyMapper,
+    //            final Function<? super T, ? extends V> valueExtractor, final Supplier<? extends M> mapSupplier) {
+    //        N.checkArgNotNull(keyMapper);
+    //        N.checkArgNotNull(valueExtractor);
+    //        N.checkArgNotNull(mapSupplier);
+    //
+    //        if (iter == null) {
+    //            return mapSupplier.get();
+    //        }
+    //
+    //        final M result = mapSupplier.get();
+    //        T e = null;
+    //
+    //        while (iter.hasNext()) {
+    //            e = iter.next();
+    //            result.put(keyMapper.apply(e), valueExtractor.apply(e));
+    //        }
+    //
+    //        return result;
+    //    }
+    //
+    //    /**
+    //     *
+    //     * @param <T>
+    //     * @param <K>
+    //     * @param <V>
+    //     * @param <M>
+    //     * @param iter
+    //     * @param keyMapper
+    //     * @param valueExtractor
+    //     * @param mergeFunction
+    //     * @param mapSupplier
+    //     * @return
+    //     */
+    //    public static <T, K, V, M extends Map<K, V>> M create(final Iterator<? extends T> iter, final Function<? super T, K> keyMapper,
+    //            final Function<? super T, ? extends V> valueExtractor, final BinaryOperator<V> mergeFunction, final Supplier<? extends M> mapSupplier) {
+    //        N.checkArgNotNull(keyMapper);
+    //        N.checkArgNotNull(valueExtractor);
+    //        N.checkArgNotNull(mergeFunction);
+    //        N.checkArgNotNull(mapSupplier);
+    //
+    //        if (iter == null) {
+    //            return mapSupplier.get();
+    //        }
+    //
+    //        final M result = mapSupplier.get();
+    //        T e = null;
+    //        K key = null;
+    //
+    //        while (iter.hasNext()) {
+    //            e = iter.next();
+    //            key = keyMapper.apply(e);
+    //
+    //            final V oldValue = result.get(key);
+    //
+    //            if (oldValue == null && !result.containsKey(key)) {
+    //                result.put(key, valueExtractor.apply(e));
+    //            } else {
+    //                result.put(key, mergeFunction.apply(oldValue, valueExtractor.apply(e)));
+    //            }
+    //        }
+    //
+    //        return result;
+    //    }
+    //
+    //    /**
+    //     *
+    //     * @param <K>
+    //     * @param <V>
+    //     * @param <V2>
+    //     * @param map
+    //     * @param valueMapper
+    //     * @return
+    //     */
+    //    public static <K, V, V2> Map<K, V2> create(final Map<? extends K, ? extends V> map, final Function<? super V, V2> valueMapper) {
+    //        N.checkArgNotNull(valueMapper);
+    //
+    //        if (map == null) {
+    //            return new HashMap<>();
+    //        }
+    //
+    //        final Map<K, V2> result = Maps.newTargetMap(map);
+    //
+    //        for (Map.Entry<? extends K, ? extends V> entry : map.entrySet()) {
+    //            result.put(entry.getKey(), valueMapper.apply(entry.getValue()));
+    //        }
+    //
+    //        return result;
+    //    }
+    //
+    //    /**
+    //     *
+    //     * @param <K>
+    //     * @param <V>
+    //     * @param <V2>
+    //     * @param <M>
+    //     * @param map
+    //     * @param valueMapper
+    //     * @param mapSupplier
+    //     * @return
+    //     */
+    //    public static <K, V, V2, M extends Map<K, V2>> M create(final Map<? extends K, ? extends V> map, final Function<? super V, V2> valueMapper,
+    //            final IntFunction<? extends M> mapSupplier) {
+    //        N.checkArgNotNull(valueMapper);
+    //        N.checkArgNotNull(mapSupplier);
+    //
+    //        if (map == null) {
+    //            return mapSupplier.apply(0);
+    //        }
+    //
+    //        final M result = mapSupplier.apply(map.size());
+    //
+    //        for (Map.Entry<? extends K, ? extends V> entry : map.entrySet()) {
+    //            result.put(entry.getKey(), valueMapper.apply(entry.getValue()));
+    //        }
+    //
+    //        return result;
+    //    }
 
     //    /**
     //     *
@@ -622,7 +646,7 @@ public final class Maps {
      * @param values
      * @return
      */
-    public static <K, V> Map<K, V> zip(final Collection<? extends K> keys, final Collection<? extends V> values) {
+    public static <K, V> Map<K, V> zip(final Iterable<? extends K> keys, final Iterable<? extends V> values) {
         if (N.isEmpty(keys) || N.isEmpty(values)) {
             return new HashMap<>();
         }
@@ -630,7 +654,8 @@ public final class Maps {
         final Iterator<? extends K> keyIter = keys.iterator();
         final Iterator<? extends V> valueIter = values.iterator();
 
-        final int minLen = N.min(keys.size(), values.size());
+        final int minLen = N.min(keys instanceof Collection ? ((Collection<K>) keys).size() : 0,
+                values instanceof Collection ? ((Collection<V>) values).size() : 0);
         final Map<K, V> result = N.newHashMap(minLen);
 
         for (int i = 0; i < minLen; i++) {
@@ -651,17 +676,18 @@ public final class Maps {
      * @param mapSupplier
      * @return
      */
-    public static <K, V, M extends Map<K, V>> Map<K, V> zip(final Collection<? extends K> keys, final Collection<? extends V> values,
+    public static <K, V, M extends Map<K, V>> M zip(final Iterable<? extends K> keys, final Iterable<? extends V> values,
             final IntFunction<? extends M> mapSupplier) {
         if (N.isEmpty(keys) || N.isEmpty(values)) {
-            return new HashMap<>();
+            return mapSupplier.apply(0);
         }
 
         final Iterator<? extends K> keyIter = keys.iterator();
         final Iterator<? extends V> valueIter = values.iterator();
 
-        final int minLen = N.min(keys.size(), values.size());
-        final Map<K, V> result = mapSupplier.apply(minLen);
+        final int minLen = N.min(keys instanceof Collection ? ((Collection<K>) keys).size() : 0,
+                values instanceof Collection ? ((Collection<V>) values).size() : 0);
+        final M result = mapSupplier.apply(minLen);
 
         for (int i = 0; i < minLen; i++) {
             result.put(keyIter.next(), valueIter.next());
@@ -682,20 +708,79 @@ public final class Maps {
      * @param mapSupplier
      * @return
      */
-    public static <K, V, M extends Map<K, V>> Map<K, V> zip(final Collection<? extends K> keys, final Collection<? extends V> values,
-            final BinaryOperator<V> mergeFunction, final IntFunction<? extends M> mapSupplier) {
+    public static <K, V, M extends Map<K, V>> M zip(final Iterable<? extends K> keys, final Iterable<? extends V> values, final BinaryOperator<V> mergeFunction,
+            final IntFunction<? extends M> mapSupplier) {
         if (N.isEmpty(keys) || N.isEmpty(values)) {
-            return new HashMap<>();
+            return mapSupplier.apply(0);
         }
 
         final Iterator<? extends K> keyIter = keys.iterator();
         final Iterator<? extends V> valueIter = values.iterator();
 
-        final int minLen = N.min(keys.size(), values.size());
-        final Map<K, V> result = mapSupplier.apply(minLen);
+        final int minLen = N.min(keys instanceof Collection ? ((Collection<K>) keys).size() : 0,
+                values instanceof Collection ? ((Collection<V>) values).size() : 0);
+        final M result = mapSupplier.apply(minLen);
 
         for (int i = 0; i < minLen; i++) {
             result.merge(keyIter.next(), valueIter.next(), mergeFunction);
+        }
+
+        return result;
+    }
+
+    /**
+     *
+     *
+     * @param <K>
+     * @param <V>
+     * @param <M>
+     * @param keys
+     * @param values
+     * @param defaultForKey
+     * @param defaultForValue
+     * @return
+     */
+    public static <K, V> Map<K, V> zip(final Iterable<? extends K> keys, final Iterable<? extends V> values, final K defaultForKey, final V defaultForValue) {
+        return zip(keys, values, defaultForKey, defaultForValue, Fn.selectFirst(), Factory.ofMap());
+    }
+
+    /**
+     *
+     *
+     * @param <K>
+     * @param <V>
+     * @param <M>
+     * @param keys
+     * @param values
+     * @param defaultForKey
+     * @param defaultForValue
+     * @param mergeFunction
+     * @param mapSupplier
+     * @return
+     */
+    public static <K, V, M extends Map<K, V>> M zip(final Iterable<? extends K> keys, final Iterable<? extends V> values, final K defaultForKey,
+            final V defaultForValue, final BinaryOperator<V> mergeFunction, final IntFunction<? extends M> mapSupplier) {
+        if (N.isEmpty(keys) || N.isEmpty(values)) {
+            return mapSupplier.apply(0);
+        }
+
+        final Iterator<? extends K> keyIter = keys.iterator();
+        final Iterator<? extends V> valueIter = values.iterator();
+
+        final int maxLen = N.max(keys instanceof Collection ? ((Collection<K>) keys).size() : 0,
+                values instanceof Collection ? ((Collection<V>) values).size() : 0);
+        final M result = mapSupplier.apply(maxLen);
+
+        while (keyIter.hasNext() && valueIter.hasNext()) {
+            result.merge(keyIter.next(), valueIter.next(), mergeFunction);
+        }
+
+        while (keyIter.hasNext()) {
+            result.merge(keyIter.next(), defaultForValue, mergeFunction);
+        }
+
+        while (valueIter.hasNext()) {
+            result.merge(defaultForKey, valueIter.next(), mergeFunction);
         }
 
         return result;
@@ -1537,25 +1622,25 @@ public final class Maps {
      * <code>
         Map map = N.asMap("key1", "val1");
         assertEquals("val1", Maps.getByPath(map, "key1"));
-    
+
         map = N.asMap("key1", N.asList("val1"));
         assertEquals("val1", Maps.getByPath(map, "key1[0]"));
-    
+
         map = N.asMap("key1", N.asSet("val1"));
         assertEquals("val1", Maps.getByPath(map, "key1[0]"));
-    
+
         map = N.asMap("key1", N.asList(N.asLinkedHashSet("val1", "val2")));
         assertEquals("val2", Maps.getByPath(map, "key1[0][1]"));
-    
+
         map = N.asMap("key1", N.asSet(N.asList(N.asSet("val1"))));
         assertEquals("val1", Maps.getByPath(map, "key1[0][0][0]"));
-    
+
         map = N.asMap("key1", N.asList(N.asLinkedHashSet("val1", N.asMap("key2", "val22"))));
         assertEquals("val22", Maps.getByPath(map, "key1[0][1].key2"));
-    
+
         map = N.asMap("key1", N.asList(N.asLinkedHashSet("val1", N.asMap("key2", N.asList("val22", N.asMap("key3", "val33"))))));
         assertEquals("val33", Maps.getByPath(map, "key1[0][1].key2[1].key3"));
-    
+
         map = N.asMap("key1", N.asList(N.asLinkedHashSet("val1", N.asMap("key2", N.asList("val22", N.asMap("key3", "val33"))))));
         assertNull(Maps.getByPath(map, "key1[0][2].key2[1].key3"));
      * </code>
