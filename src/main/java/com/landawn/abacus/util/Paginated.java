@@ -20,25 +20,8 @@ import com.landawn.abacus.util.stream.Stream;
 /**
  *
  * @author Haiyang Li
- * @since 0.8
  */
-public interface PaginatedDataSet extends Iterable<DataSet> {
-
-    /**
-     * Returns a frozen {@code DataSet}.
-     *
-     * @return a frozen {@code DataSet}.
-     * @see DataSet#slice(int, int, java.util.Collection)
-     */
-    DataSet currentPage();
-
-    /**
-     *
-     * @return a frozen {@code DataSet}.
-     * @see DataSet#slice(int, int, java.util.Collection)
-     */
-    DataSet previousPage();
-
+public interface Paginated<T> extends Iterable<T> {
     /**
      * Checks for next.
      *
@@ -48,42 +31,50 @@ public interface PaginatedDataSet extends Iterable<DataSet> {
 
     /**
      *
-     * @return a frozen {@code DataSet}.
-     * @see DataSet#slice(int, int, java.util.Collection)
+     * @retur
      */
-    DataSet nextPage();
+    T nextPage();
+
+    /**
+     *
+     * @return
+     */
+    T currentPage();
+
+    /**
+     *
+     * @retur
+     */
+    T previousPage();
 
     /**
      * Returns the first page.
      *
-     * @return a frozen {@code DataSet}.
-     * @see DataSet#slice(int, int, java.util.Collection)
+     * @return
      */
-    Optional<DataSet> firstPage();
+    Optional<T> firstPage();
 
     /**
      * Returns the last page.
      *
-     * @return a frozen {@code DataSet}.
-     * @see DataSet#slice(int, int, java.util.Collection)
+     * @return
      */
-    Optional<DataSet> lastPage();
+    Optional<T> lastPage();
 
     /**
      *
      * @param pageNum
-     * @return a frozen {@code DataSet}.
+     * @return
      * @throws IllegalArgumentException the illegal argument exception
-     * @see DataSet#slice(int, int, java.util.Collection)
      */
-    DataSet getPage(int pageNum);
+    T getPage(int pageNum);
 
     /**
      *
      * @param pageNum
      * @return
      */
-    PaginatedDataSet absolute(int pageNum);
+    Paginated<T> absolute(int pageNum);
 
     /**
      *
@@ -98,7 +89,7 @@ public interface PaginatedDataSet extends Iterable<DataSet> {
     int pageSize();
 
     /**
-     * 
+     *
      *
      * @return int
      * @see #totalPages()
@@ -114,9 +105,9 @@ public interface PaginatedDataSet extends Iterable<DataSet> {
     int totalPages();
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
-    Stream<DataSet> stream();
+    Stream<T> stream();
 }

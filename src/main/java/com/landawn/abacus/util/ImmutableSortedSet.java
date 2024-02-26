@@ -175,9 +175,7 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
      * @param <E>
      * @param sortedSet
      * @return an {@code ImmutableSortedSet} backed by the specified {@code sortedSet}
-     * @deprecated the ImmutableSortedSet may be modified through the specified {@code sortedSet}
      */
-    @Deprecated
     public static <E> ImmutableSortedSet<E> wrap(final SortedSet<? extends E> sortedSet) {
         if (sortedSet == null) {
             return empty();

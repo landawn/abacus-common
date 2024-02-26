@@ -1328,7 +1328,6 @@ public final class LongMultiset<T> implements Iterable<T> {
      *
      * @return
      */
-    @SuppressWarnings("deprecation")
     public ImmutableSet<T> elements() {
         return ImmutableSet.wrap(valueMap.keySet());
     }
@@ -1521,7 +1520,6 @@ public final class LongMultiset<T> implements Iterable<T> {
      *
      * @return
      */
-    @SuppressWarnings("deprecation")
     public ImmutableMap<T, Long> toImmutableMap() {
         return ImmutableMap.wrap(toMap());
     }
@@ -1532,7 +1530,6 @@ public final class LongMultiset<T> implements Iterable<T> {
      * @param mapSupplier
      * @return
      */
-    @SuppressWarnings("deprecation")
     public ImmutableMap<T, Long> toImmutableMap(final IntFunction<? extends Map<T, Long>> mapSupplier) {
         return ImmutableMap.wrap(toMap(mapSupplier));
     }

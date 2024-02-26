@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Deque;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -53,7 +54,7 @@ public interface NoCachingNoUpdating {
     @SequentialOnly
     @Stateful
     @SuppressFBWarnings("CN_IDIOM_NO_SUPER_CALL")
-    public static class DisposableArray<T> implements NoCachingNoUpdating, Cloneable {
+    public static class DisposableArray<T> implements NoCachingNoUpdating, Cloneable, Iterable<T> {
 
         /** The a. */
         private final T[] a;
@@ -215,6 +216,11 @@ public interface NoCachingNoUpdating {
          */
         public String join(String delimiter, String prefix, String suffix) {
             return Strings.join(a, delimiter, prefix, suffix);
+        }
+
+        @Override
+        public Iterator<T> iterator() {
+            return ObjIterator.of(a);
         }
 
         /**

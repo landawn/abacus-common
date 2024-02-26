@@ -1915,11 +1915,9 @@ public final class Numbers {
     }
 
     /**
-     * Checks whether the {@link String} contains only
-     * digit characters.
+     * Checks whether the {@link String} contains only digit characters.
      *
-     * <p>{@code null} and empty String will return
-     * {@code false}.</p>
+     * <p>{@code null} and empty String will return {@code false}.</p>
      *
      * @param str  the {@link String} to check
      * @return {@code true} if str contains only Unicode numeric

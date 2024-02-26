@@ -4379,7 +4379,7 @@ public interface DataSet {
      * @param pageSize
      * @return
      */
-    PaginatedDataSet paginate(int pageSize);
+    Paginated<DataSet> paginate(int pageSize);
 
     /**
      *
@@ -4387,7 +4387,7 @@ public interface DataSet {
      * @param pageSize
      * @return
      */
-    PaginatedDataSet paginate(Collection<String> columnNames, int pageSize);
+    Paginated<DataSet> paginate(Collection<String> columnNames, int pageSize);
 
     /**
      *

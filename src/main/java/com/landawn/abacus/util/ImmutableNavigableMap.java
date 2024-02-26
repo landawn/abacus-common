@@ -255,9 +255,7 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * @param <V> the value type
      * @param navigableMap
      * @return an {@code ImmutableNavigableMap} backed by the specified {@code navigableMap}
-     * @deprecated the ImmutableNavigableMap may be modified through the specified {@code navigableMap}
      */
-    @Deprecated
     public static <K, V> ImmutableNavigableMap<K, V> wrap(final NavigableMap<? extends K, ? extends V> navigableMap) {
         if (navigableMap == null) {
             return empty();
@@ -424,7 +422,6 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      *
      * @return
      */
-    @SuppressWarnings("deprecation")
     @Override
     public ImmutableNavigableSet<K> navigableKeySet() {
         return ImmutableNavigableSet.wrap(navigableMap.navigableKeySet());
@@ -435,7 +432,6 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      *
      * @return
      */
-    @SuppressWarnings("deprecation")
     @Override
     public ImmutableNavigableSet<K> descendingKeySet() {
         return ImmutableNavigableSet.wrap(navigableMap.descendingKeySet());

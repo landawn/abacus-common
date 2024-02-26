@@ -9455,7 +9455,6 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @return
      * @throws E the e
      */
-    @SuppressWarnings("deprecation")
     @TerminalOp
     public ImmutableList<T> toImmutableList() throws E {
         return ImmutableList.wrap(toList());
@@ -9466,7 +9465,6 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @return
      * @throws E the e
      */
-    @SuppressWarnings("deprecation")
     @TerminalOp
     public ImmutableSet<T> toImmutableSet() throws E {
         return ImmutableSet.wrap(toSet());
@@ -9616,7 +9614,6 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @see {@link Fn.Fnn#replacingMerger()}
      * @see {@link Fn.Fnn#ignoringMerger()}
      */
-    @SuppressWarnings("deprecation")
     @TerminalOp
     public <K, V, E2 extends Exception, E3 extends Exception> ImmutableMap<K, V> toImmutableMap(final Throwables.Function<? super T, ? extends K, E2> keyMapper,
             final Throwables.Function<? super T, ? extends V, E3> valueMapper) throws E, E2, E3, IllegalStateException {
@@ -9643,7 +9640,6 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @see {@link Fn.Fnn#replacingMerger()}
      * @see {@link Fn.Fnn#ignoringMerger()}
      */
-    @SuppressWarnings("deprecation")
     @TerminalOp
     public <K, V, E2 extends Exception, E3 extends Exception, E4 extends Exception> ImmutableMap<K, V> toImmutableMap(
             final Throwables.Function<? super T, ? extends K, E2> keyMapper, final Throwables.Function<? super T, ? extends V, E3> valueMapper,

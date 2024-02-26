@@ -262,7 +262,6 @@ public final class ImmutableArray<T> implements Immutable {
      *
      * @return 
      */
-    @SuppressWarnings("deprecation")
     public ImmutableList<T> asList() {
         return ImmutableList.wrap(N.asList(elements));
     }

@@ -43,7 +43,8 @@ import com.landawn.abacus.util.stream.Stream;
  *
  * @author haiyangl
  * @param <T>
- * @since 0.8
+ * @see ImmutableList#builder()
+ * @see ImmutableSet#builder()
  */
 @SuppressWarnings({ "java:S6539" })
 public class Builder<T> {
@@ -322,7 +323,9 @@ public class Builder<T> {
      * @param mapper
      * @return
      * @throws E the e
+     * @deprecated
      */
+    @Deprecated
     public <R, E extends Exception> Builder<R> map(final Throwables.Function<? super T, ? extends R, E> mapper) throws E {
         return of(mapper.apply(val));
     }
@@ -334,7 +337,9 @@ public class Builder<T> {
      * @return <code>Optional</code> with the value if <code>predicate</code> returns true,
      * otherwise, return an empty <code>Optional</code>
      * @throws E the e
+     * @deprecated
      */
+    @Deprecated
     public <E extends Exception> Optional<T> filter(final Throwables.Predicate<? super T, E> predicate) throws E {
         return predicate.test(val) ? Optional.of(val) : Optional.<T> empty();
     }
@@ -2455,6 +2460,34 @@ public class Builder<T> {
          */
         public <E extends Exception> DataSetBuilder replaceIf(Throwables.Predicate<?, E> predicate, Object newValue) throws E {
             val.replaceIf(predicate, newValue);
+
+            return this;
+        }
+
+        /**
+         * Prepend the specified {@code other} into this {@code DataSet}.
+         * <br />
+         * The columns of two {@code DataSet} must be same.
+         *
+         * @param other
+         * @see DataSet#prepend(DataSet)
+         */
+        public DataSetBuilder prepend(DataSet other) {
+            val.prepend(other);
+
+            return this;
+        }
+
+        /**
+         * Append the specified {@code other} into this {@code DataSet}.
+         * <br />
+         * The columns of two {@code DataSet} must be same.
+         *
+         * @param other
+         * @see DataSet#append(DataSet)
+         */
+        public DataSetBuilder append(DataSet other) {
+            val.append(other);
 
             return this;
         }

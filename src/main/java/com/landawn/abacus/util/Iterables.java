@@ -2730,7 +2730,6 @@ public final class Iterables {
          * @param c
          * @return the immutable map
          */
-        @SuppressWarnings("deprecation")
         private static <E> ImmutableMap<E, Integer> indexMap(final Collection<E> c) {
             final Map<E, Integer> map = new LinkedHashMap<>();
 

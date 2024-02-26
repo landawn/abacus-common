@@ -73,7 +73,6 @@ abstract class ImmutableIterator<T> implements java.util.Iterator<T>, Immutable 
      *
      * @return 
      */
-    @SuppressWarnings("deprecation")
     public ImmutableList<T> toImmutableList() {
         return ImmutableList.wrap(toCollection(Suppliers.<T> ofList()));
     }
@@ -83,7 +82,6 @@ abstract class ImmutableIterator<T> implements java.util.Iterator<T>, Immutable 
      *
      * @return 
      */
-    @SuppressWarnings("deprecation")
     public ImmutableSet<T> toImmutableSet() {
         return ImmutableSet.wrap(toSet());
     }

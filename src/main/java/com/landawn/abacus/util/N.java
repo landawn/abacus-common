@@ -894,7 +894,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param toIndex
      * @return the immutable collection<? extends t>
      */
-    @SuppressWarnings("deprecation")
     public static <T> ImmutableList<T> slice(final List<? extends T> c, final int fromIndex, final int toIndex) {
         checkFromToIndex(fromIndex, toIndex, size(c));
 

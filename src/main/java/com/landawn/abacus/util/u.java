@@ -701,6 +701,19 @@ public class u {//NOSONAR
          *
          * @return
          */
+        @Beta
+        public Nullable<T> toNullable() {
+            if (isPresent()) {
+                return Nullable.of(value);
+            } else {
+                return Nullable.empty();
+            }
+        }
+
+        /**
+         *
+         * @return
+         */
         public java.util.Optional<T> toJdkOptional() {
             if (isPresent()) {
                 return java.util.Optional.of(value);

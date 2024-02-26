@@ -270,9 +270,7 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
      * @param <V> the value type
      * @param sortedMap
      * @return an {@code ImmutableSortedMap} backed by the specified {@code sortedMap}
-     * @deprecated the ImmutableSortedMap may be modified through the specified {@code sortedMap}
      */
-    @Deprecated
     public static <K, V> ImmutableSortedMap<K, V> wrap(final SortedMap<? extends K, ? extends V> sortedMap) {
         if (sortedMap == null) {
             return empty();

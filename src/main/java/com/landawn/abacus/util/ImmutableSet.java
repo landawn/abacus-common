@@ -48,109 +48,109 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param e 
-     * @return 
+     *
+     * @param <T>
+     * @param e
+     * @return
      */
     public static <T> ImmutableSet<T> just(T e) {
         return new ImmutableSet<>(Collections.singleton(e));
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param e1 
-     * @return 
+     *
+     * @param <T>
+     * @param e1
+     * @return
      */
     public static <T> ImmutableSet<T> of(final T e1) {
         return new ImmutableSet<>(N.asSet(e1));
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param e1 
-     * @param e2 
-     * @return 
+     *
+     * @param <T>
+     * @param e1
+     * @param e2
+     * @return
      */
     public static <T> ImmutableSet<T> of(final T e1, final T e2) {
         return new ImmutableSet<>(N.asSet(e1, e2));
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param e1 
-     * @param e2 
-     * @param e3 
-     * @return 
+     *
+     * @param <T>
+     * @param e1
+     * @param e2
+     * @param e3
+     * @return
      */
     public static <T> ImmutableSet<T> of(final T e1, final T e2, final T e3) {
         return new ImmutableSet<>(N.asSet(e1, e2, e3));
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param e1 
-     * @param e2 
-     * @param e3 
-     * @param e4 
-     * @return 
+     *
+     * @param <T>
+     * @param e1
+     * @param e2
+     * @param e3
+     * @param e4
+     * @return
      */
     public static <T> ImmutableSet<T> of(final T e1, final T e2, final T e3, final T e4) {
         return new ImmutableSet<>(N.asSet(e1, e2, e3, e4));
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param e1 
-     * @param e2 
-     * @param e3 
-     * @param e4 
-     * @param e5 
-     * @return 
+     *
+     * @param <T>
+     * @param e1
+     * @param e2
+     * @param e3
+     * @param e4
+     * @param e5
+     * @return
      */
     public static <T> ImmutableSet<T> of(final T e1, final T e2, final T e3, final T e4, final T e5) {
         return new ImmutableSet<>(N.asSet(e1, e2, e3, e4, e5));
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param e1 
-     * @param e2 
-     * @param e3 
-     * @param e4 
-     * @param e5 
-     * @param e6 
-     * @return 
+     *
+     * @param <T>
+     * @param e1
+     * @param e2
+     * @param e3
+     * @param e4
+     * @param e5
+     * @param e6
+     * @return
      */
     public static <T> ImmutableSet<T> of(final T e1, final T e2, final T e3, final T e4, final T e5, final T e6) {
         return new ImmutableSet<>(N.asSet(e1, e2, e3, e4, e5, e6));
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param e1 
-     * @param e2 
-     * @param e3 
-     * @param e4 
-     * @param e5 
-     * @param e6 
-     * @param e7 
-     * @return 
+     *
+     * @param <T>
+     * @param e1
+     * @param e2
+     * @param e3
+     * @param e4
+     * @param e5
+     * @param e6
+     * @param e7
+     * @return
      */
     public static <T> ImmutableSet<T> of(final T e1, final T e2, final T e3, final T e4, final T e5, final T e6, final T e7) {
         return new ImmutableSet<>(N.asSet(e1, e2, e3, e4, e5, e6, e7));
@@ -192,9 +192,7 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      * @param <E>
      * @param set
      * @return an {@code ImmutableSet} backed by the specified {@code set}
-     * @deprecated the ImmutableSet may be modified through the specified {@code set}
      */
-    @Deprecated
     public static <E> ImmutableSet<E> wrap(final Set<? extends E> set) {
         if (set == null) {
             return empty();
@@ -206,12 +204,12 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
     }
 
     /**
-     * 
      *
-     * @param <E> 
-     * @param c 
-     * @return 
-     * @throws UnsupportedOperationException 
+     *
+     * @param <E>
+     * @param c
+     * @return
+     * @throws UnsupportedOperationException
      * @deprecated throws {@code UnsupportedOperationException}
      */
     @Deprecated
@@ -220,68 +218,83 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
     }
 
     /**
-     * 
      *
-     * @param <E> 
-     * @return 
+     *
+     * @param <E>
+     * @return
      */
     public static <E> Builder<E> builder() {
-        return new Builder<>();
+        return new Builder<>(new HashSet<>());
+    }
+
+    /**
+     *
+     *
+     * @param <E>
+     * @param holder
+     * @return
+     */
+    public static <E> Builder<E> builder(final Set<E> holder) {
+        return new Builder<>(holder);
     }
 
     public static final class Builder<E> {
-        private final Set<E> ret = new HashSet<>();
+        private final Set<E> set;
+
+        Builder(final Set<E> holder) {
+            this.set = holder;
+        }
 
         /**
-         * 
          *
-         * @param element 
-         * @return 
+         *
+         * @param element
+         * @return
          */
         public Builder<E> add(final E element) {
-            ret.add(element);
+            set.add(element);
 
             return this;
         }
 
         /**
-         * 
          *
-         * @param elements 
-         * @return 
+         *
+         * @param elements
+         * @return
          */
         public Builder<E> add(final E... elements) {
             if (N.notEmpty(elements)) {
-                ret.addAll(Arrays.asList(elements));
+                set.addAll(Arrays.asList(elements));
             }
 
             return this;
         }
 
         /**
-         * 
          *
-         * @param c 
-         * @return 
+         *
+         * @param c
+         * @return
          */
         public Builder<E> addAll(final Collection<? extends E> c) {
             if (N.notEmpty(c)) {
-                ret.addAll(c);
+                set.addAll(c);
             }
 
             return this;
         }
 
         /**
-         * 
          *
-         * @param iter 
-         * @return 
+         *
+         * @param iter
+         * @return
          */
         public Builder<E> addAll(final Iterator<? extends E> iter) {
             if (iter != null) {
                 while (iter.hasNext()) {
-                    ret.add(iter.next());
+                    set.add(iter.next());
                 }
             }
 
@@ -289,12 +302,12 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
         }
 
         /**
-         * 
          *
-         * @return 
+         *
+         * @return
          */
         public ImmutableSet<E> build() {
-            return new ImmutableSet<>(ret);
+            return new ImmutableSet<>(set);
         }
     }
 }

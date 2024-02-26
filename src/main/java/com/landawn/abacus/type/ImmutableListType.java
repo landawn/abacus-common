@@ -170,7 +170,6 @@ public class ImmutableListType<E> extends AbstractType<ImmutableList<E>> {
      * @param str
      * @return
      */
-    @SuppressWarnings("deprecation")
     @Override
     public ImmutableList<E> valueOf(String str) {
         return ImmutableList.wrap(listType.valueOf(str));

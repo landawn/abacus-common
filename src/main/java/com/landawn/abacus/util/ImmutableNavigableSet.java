@@ -173,9 +173,7 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      * @param <E>
      * @param navigableSet
      * @return an {@code ImmutableNavigableSet} backed by the specified {@code navigableSet}
-     * @deprecated the ImmutableNavigableSet may be modified through the specified {@code navigableSet}
      */
-    @Deprecated
     public static <E> ImmutableNavigableSet<E> wrap(final NavigableSet<? extends E> navigableSet) {
         if (navigableSet == null) {
             return empty();

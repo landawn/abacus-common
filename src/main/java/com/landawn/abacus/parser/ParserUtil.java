@@ -38,6 +38,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.UUID;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 import com.landawn.abacus.annotation.AccessFieldByMethod;
 import com.landawn.abacus.annotation.Beta;
@@ -76,8 +78,6 @@ import com.landawn.abacus.util.Strings.StrUtil;
 import com.landawn.abacus.util.Tuple.Tuple3;
 import com.landawn.abacus.util.WD;
 import com.landawn.abacus.util.u.Optional;
-import com.landawn.abacus.util.function.Function;
-import com.landawn.abacus.util.function.Supplier;
 
 /**
  *
@@ -609,7 +609,7 @@ public final class ParserUtil {
 
         public final boolean isImmutable;
         private final boolean isByBuilder;
-        private final Tuple3<Class<?>, Supplier<Object>, Function<Object, Object>> builderInfo;
+        private final Tuple3<Class<?>, ? extends Supplier<Object>, ? extends Function<Object, Object>> builderInfo;
 
         public final boolean isMarkedToBean;
 
@@ -1166,7 +1166,6 @@ public final class ParserUtil {
          * @param propName
          * @return
          */
-        @SuppressWarnings("deprecation")
         public List<PropInfo> getPropInfoQueue(String propName) {
             List<PropInfo> propInfoQueue = propInfoQueueMap.get(propName);
 

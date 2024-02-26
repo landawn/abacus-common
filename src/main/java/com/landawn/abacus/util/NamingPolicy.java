@@ -14,8 +14,9 @@
 
 package com.landawn.abacus.util;
 
+import java.util.function.Function;
+
 import com.landawn.abacus.annotation.Beta;
-import com.landawn.abacus.util.function.Function;
 
 /**
  * The Enum NamingPolicy.

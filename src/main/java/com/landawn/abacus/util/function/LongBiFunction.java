@@ -27,7 +27,6 @@ public interface LongBiFunction<R> extends Throwables.LongBiFunction<R, RuntimeE
     @Override
     R apply(long t, long u);
 
-
     default <V> LongBiFunction<V> andThen(java.util.function.Function<? super R, ? extends V> after) {
         N.checkArgNotNull(after);
 

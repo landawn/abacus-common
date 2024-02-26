@@ -1856,7 +1856,6 @@ sealed class CommonUtil permits N {
      * @param enumClass
      * @return
      */
-    @SuppressWarnings("deprecation")
     public static <E extends Enum<E>> ImmutableList<E> enumListOf(final Class<E> enumClass) {
         ImmutableList<E> enumList = (ImmutableList<E>) enumListPool.get(enumClass);
 
@@ -1876,7 +1875,6 @@ sealed class CommonUtil permits N {
      * @param enumClass
      * @return
      */
-    @SuppressWarnings("deprecation")
     public static <E extends Enum<E>> ImmutableSet<E> enumSetOf(final Class<E> enumClass) {
         ImmutableSet<E> enumSet = (ImmutableSet<E>) enumSetPool.get(enumClass);
 
@@ -1896,7 +1894,6 @@ sealed class CommonUtil permits N {
      * @param enumClass
      * @return
      */
-    @SuppressWarnings("deprecation")
     public static <E extends Enum<E>> ImmutableBiMap<E, String> enumMapOf(final Class<E> enumClass) {
         ImmutableBiMap<E, String> enumMap = (ImmutableBiMap<E, String>) enumMapPool.get(enumClass);
 
@@ -2037,7 +2034,7 @@ sealed class CommonUtil permits N {
      * @param targetClass
      * @return
      * @see Suppliers#ofCollection(Class)
-     * @see Suppliers#registerForCollection(Class, com.landawn.abacus.util.function.Supplier)
+     * @see Suppliers#registerForCollection(Class, java.util.function.Supplier)
      */
     @SuppressWarnings("rawtypes")
     public static <T> Collection<T> newCollection(final Class<? extends Collection> targetClass) {
@@ -2051,7 +2048,7 @@ sealed class CommonUtil permits N {
      * @param size
      * @return
      * @see IntFunctions#ofCollection(Class)
-     * @see IntFunctions#registerForCollection(Class, com.landawn.abacus.util.function.IntFunction)
+     * @see IntFunctions#registerForCollection(Class, java.util.function.IntFunction)
      */
     @SuppressWarnings("rawtypes")
     public static <T> Collection<T> newCollection(final Class<? extends Collection> targetClass, final int size) {
@@ -2065,7 +2062,7 @@ sealed class CommonUtil permits N {
      * @param targetClass
      * @return
      * @see Suppliers#ofMap(Class)
-     * @see Suppliers#registerForMap(Class, com.landawn.abacus.util.function.Supplier)
+     * @see Suppliers#registerForMap(Class, java.util.function.Supplier)
      */
     @SuppressWarnings("rawtypes")
     public static <K, V> Map<K, V> newMap(final Class<? extends Map> targetClass) {
@@ -2080,7 +2077,7 @@ sealed class CommonUtil permits N {
      * @param size
      * @return
      * @see IntFunctions#ofMap(Class)
-     * @see IntFunctions#registerForMap(Class, com.landawn.abacus.util.function.IntFunction)
+     * @see IntFunctions#registerForMap(Class, java.util.function.IntFunction)
      */
     @SuppressWarnings("rawtypes")
     public static <K, V> Map<K, V> newMap(final Class<? extends Map> targetClass, final int size) {

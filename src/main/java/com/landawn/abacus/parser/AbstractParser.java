@@ -189,37 +189,33 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
     static {
         mapOfCreatorAndConvertorForTargetType.put(ImmutableList.class,
                 Tuple.<Function<Class<?>, Object>, Function<Object, Object>> of(t -> new ArrayList<>(), new Function<>() {
-                    @SuppressWarnings({ "rawtypes", "deprecation" })
                     @Override
                     public Object apply(Object t) {
-                        return ImmutableList.wrap((List) t);
+                        return ImmutableList.wrap((List<?>) t);
                     }
                 }));
 
         mapOfCreatorAndConvertorForTargetType.put(ImmutableSet.class,
                 Tuple.<Function<Class<?>, Object>, Function<Object, Object>> of(t -> new HashSet<>(), new Function<>() {
-                    @SuppressWarnings({ "rawtypes", "deprecation" })
                     @Override
                     public Object apply(Object t) {
-                        return ImmutableSet.wrap((Set) t);
+                        return ImmutableSet.wrap((Set<?>) t);
                     }
                 }));
 
         mapOfCreatorAndConvertorForTargetType.put(ImmutableSortedSet.class,
                 Tuple.<Function<Class<?>, Object>, Function<Object, Object>> of(t -> new TreeSet<>(), new Function<>() {
-                    @SuppressWarnings({ "rawtypes", "deprecation" })
                     @Override
                     public Object apply(Object t) {
-                        return ImmutableSortedSet.wrap((SortedSet) t);
+                        return ImmutableSortedSet.wrap((SortedSet<?>) t);
                     }
                 }));
 
         mapOfCreatorAndConvertorForTargetType.put(ImmutableNavigableSet.class,
                 Tuple.<Function<Class<?>, Object>, Function<Object, Object>> of(t -> new TreeSet<>(), new Function<>() {
-                    @SuppressWarnings({ "rawtypes", "deprecation" })
                     @Override
                     public Object apply(Object t) {
-                        return ImmutableNavigableSet.wrap((NavigableSet) t);
+                        return ImmutableNavigableSet.wrap((NavigableSet<?>) t);
                     }
                 }));
 
@@ -227,37 +223,33 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
 
         mapOfCreatorAndConvertorForTargetType.put(ImmutableMap.class,
                 Tuple.<Function<Class<?>, Object>, Function<Object, Object>> of(t -> new HashMap<>(), new Function<>() {
-                    @SuppressWarnings({ "rawtypes", "deprecation" })
                     @Override
                     public Object apply(Object t) {
-                        return ImmutableMap.wrap((Map) t);
+                        return ImmutableMap.wrap((Map<?, ?>) t);
                     }
                 }));
 
         mapOfCreatorAndConvertorForTargetType.put(ImmutableBiMap.class,
                 Tuple.<Function<Class<?>, Object>, Function<Object, Object>> of(t -> new BiMap<>(), new Function<>() {
-                    @SuppressWarnings({ "rawtypes", "deprecation" })
                     @Override
                     public Object apply(Object t) {
-                        return ImmutableBiMap.wrap((BiMap) t);
+                        return ImmutableBiMap.wrap((BiMap<?, ?>) t);
                     }
                 }));
 
         mapOfCreatorAndConvertorForTargetType.put(ImmutableSortedMap.class,
                 Tuple.<Function<Class<?>, Object>, Function<Object, Object>> of(t -> new TreeMap<>(), new Function<>() {
-                    @SuppressWarnings({ "rawtypes", "deprecation" })
                     @Override
                     public Object apply(Object t) {
-                        return ImmutableSortedMap.wrap((SortedMap) t);
+                        return ImmutableSortedMap.wrap((SortedMap<?, ?>) t);
                     }
                 }));
 
         mapOfCreatorAndConvertorForTargetType.put(ImmutableNavigableMap.class,
                 Tuple.<Function<Class<?>, Object>, Function<Object, Object>> of(t -> new TreeMap<>(), new Function<>() {
-                    @SuppressWarnings({ "rawtypes", "deprecation" })
                     @Override
                     public Object apply(Object t) {
-                        return ImmutableNavigableMap.wrap((NavigableMap) t);
+                        return ImmutableNavigableMap.wrap((NavigableMap<?, ?>) t);
                     }
                 }));
 

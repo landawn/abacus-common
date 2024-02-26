@@ -203,7 +203,6 @@ public class RowDataSet implements DataSet, Cloneable {
      *
      * @return
      */
-    @SuppressWarnings("deprecation")
     @Override
     public ImmutableList<String> columnNameList() {
         // return _columnNameList;
@@ -921,7 +920,7 @@ public class RowDataSet implements DataSet, Cloneable {
      * @param columnIndex
      * @return
      */
-    @SuppressWarnings({ "unchecked", "rawtypes", "deprecation" })
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     public <T> ImmutableList<T> getColumn(final int columnIndex) {
         // return (List<T>) _columnList.get(columnIndex);
@@ -11123,7 +11122,7 @@ public class RowDataSet implements DataSet, Cloneable {
      * @return
      */
     @Override
-    public PaginatedDataSet paginate(final int pageSize) {
+    public Paginated<DataSet> paginate(final int pageSize) {
         return paginate(_columnNameList, pageSize);
     }
 
@@ -11135,8 +11134,8 @@ public class RowDataSet implements DataSet, Cloneable {
      * @return
      */
     @Override
-    public PaginatedDataSet paginate(final Collection<String> columnNames, final int pageSize) {
-        return new PaginatedRowDataSet(N.isEmpty(columnNames) ? _columnNameList : columnNames, pageSize);
+    public Paginated<DataSet> paginate(final Collection<String> columnNames, final int pageSize) {
+        return new PaginatedDataSet(N.isEmpty(columnNames) ? _columnNameList : columnNames, pageSize);
     }
 
     //    @SuppressWarnings("rawtypes")
@@ -12373,8 +12372,7 @@ public class RowDataSet implements DataSet, Cloneable {
      * @author Haiyang Li
      * @version $Revision: 0.8 $ 07/01/15
      */
-    private class PaginatedRowDataSet implements PaginatedDataSet {
-
+    private class PaginatedDataSet implements Paginated<DataSet> {
         /** The expected mod count. */
         private final int expectedModCount = modCount;
 
@@ -12397,7 +12395,10 @@ public class RowDataSet implements DataSet, Cloneable {
          *
          * @param pageSize
          */
-        private PaginatedRowDataSet(final Collection<String> columnNames, final int pageSize) {
+        private PaginatedDataSet(final Collection<String> columnNames, final int pageSize) {
+            // N.checkArgNotEmpty(columnNames, "columnNames"); // empty DataSet.
+            N.checkArgPositive(pageSize, "pageSize");
+
             this.columnNames = columnNames;
             this.pageSize = pageSize;
 
@@ -12412,7 +12413,27 @@ public class RowDataSet implements DataSet, Cloneable {
          */
         @Override
         public Iterator<DataSet> iterator() {
-            return new Itr();
+            return new ObjIterator<>() {
+                private int cursor = 0;
+
+                @Override
+                public boolean hasNext() {
+                    return cursor < totalPages;
+                }
+
+                @Override
+                public DataSet next() {
+                    checkConcurrentModification();
+
+                    if (!hasNext()) {
+                        throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+                    }
+
+                    DataSet ret = getPage(cursor);
+                    cursor++;
+                    return ret;
+                }
+            };
         }
 
         /**
@@ -12422,16 +12443,7 @@ public class RowDataSet implements DataSet, Cloneable {
          */
         @Override
         public boolean hasNext() {
-            return currentPageNum < pageCount();
-        }
-
-        /**
-         *
-         * @return
-         */
-        @Override
-        public DataSet currentPage() {
-            return getPage(currentPageNum);
+            return currentPageNum < totalPages;
         }
 
         /**
@@ -12441,6 +12453,15 @@ public class RowDataSet implements DataSet, Cloneable {
         @Override
         public DataSet nextPage() {
             return absolute(currentPageNum + 1).currentPage();
+        }
+
+        /**
+         *
+         * @return
+         */
+        @Override
+        public DataSet currentPage() {
+            return getPage(currentPageNum);
         }
 
         /**
@@ -12501,7 +12522,7 @@ public class RowDataSet implements DataSet, Cloneable {
          * @return
          */
         @Override
-        public PaginatedDataSet absolute(final int pageNumber) {
+        public Paginated<DataSet> absolute(final int pageNumber) {
             checkPageNumber(pageNumber);
 
             currentPageNum = pageNumber;
@@ -12531,7 +12552,9 @@ public class RowDataSet implements DataSet, Cloneable {
         /**
          *
          * @return
+         * @deprecated
          */
+        @Deprecated
         @Override
         public int pageCount() {
             return totalPages;
@@ -12569,52 +12592,6 @@ public class RowDataSet implements DataSet, Cloneable {
         private void checkPageNumber(final int pageNumber) {
             if ((pageNumber < 0) || (pageNumber >= pageCount())) {
                 throw new IllegalArgumentException(pageNumber + " out of page index [0, " + pageCount() + ")");
-            }
-        }
-
-        /**
-         * The Class Itr.
-         */
-        private class Itr implements Iterator<DataSet> {
-
-            /** The cursor. */
-            int cursor = 0;
-
-            /**
-             * Checks for next.
-             *
-             * @return true, if successful
-             */
-            @Override
-            public boolean hasNext() {
-                return cursor < pageCount();
-            }
-
-            /**
-             *
-             * @return
-             */
-            @Override
-            public DataSet next() {
-                checkConcurrentModification();
-
-                try {
-                    DataSet next = getPage(cursor);
-                    cursor++;
-
-                    return next;
-                } catch (IndexOutOfBoundsException e) {
-                    checkConcurrentModification();
-                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
-                }
-            }
-
-            /**
-             * Removes the.
-             */
-            @Override
-            public void remove() {
-                throw new UnsupportedOperationException();
             }
         }
     }

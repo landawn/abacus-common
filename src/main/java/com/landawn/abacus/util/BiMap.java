@@ -490,7 +490,6 @@ public final class BiMap<K, V> implements Map<K, V> {
      *
      * @return
      */
-    @SuppressWarnings("deprecation")
     @Override
     public ImmutableSet<K> keySet() {
         return ImmutableSet.wrap(keyMap.keySet());
@@ -501,7 +500,6 @@ public final class BiMap<K, V> implements Map<K, V> {
      *
      * @return
      */
-    @SuppressWarnings("deprecation")
     @Override
     public ImmutableSet<V> values() {
         return ImmutableSet.wrap(valueMap.keySet());
@@ -512,7 +510,6 @@ public final class BiMap<K, V> implements Map<K, V> {
      *
      * @return
      */
-    @SuppressWarnings("deprecation")
     @Override
     public ImmutableSet<Map.Entry<K, V>> entrySet() {
         return ImmutableSet.wrap(new AbstractSet<>() {

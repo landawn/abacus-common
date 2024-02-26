@@ -797,7 +797,6 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      *
      * @return
      */
-    @SuppressWarnings("deprecation")
     public ImmutableMap<K, ImmutableSet<E>> toImmutableMap() {
         final Map<K, ImmutableSet<E>> map = Maps.newTargetMap(valueMap);
 
@@ -814,7 +813,6 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * @param mapSupplier
      * @return
      */
-    @SuppressWarnings("deprecation")
     public ImmutableMap<K, ImmutableSet<E>> toImmutableMap(final IntFunction<? extends Map<K, ImmutableSet<E>>> mapSupplier) {
         final Map<K, ImmutableSet<E>> map = mapSupplier.apply(valueMap.size());
 
