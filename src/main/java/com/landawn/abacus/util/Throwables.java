@@ -13,7 +13,13 @@
  */
 package com.landawn.abacus.util;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.NoSuchElementException;
+
 import com.landawn.abacus.annotation.Beta;
+import com.landawn.abacus.util.u.Nullable;
 
 /**
  * Catch checked exception and convert it to <code>RuntimeException</code>.
@@ -166,6 +172,259 @@ public final class Throwables {
                 return defaultValue;
             } else {
                 throw ExceptionUtil.toRuntimeException(e, true);
+            }
+        }
+    }
+
+    @SuppressWarnings({ "java:S6548" })
+    public static abstract class ObjIterator<T, E extends Throwable> implements Immutable {
+
+        @SuppressWarnings("rawtypes")
+        private static final ObjIterator EMPTY = new ObjIterator() {
+            @Override
+            public boolean hasNext() {
+                return false;
+            }
+
+            @Override
+            public Object next() {
+                throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+            }
+        };
+
+        /**
+         *
+         * @param <T>
+         * @return
+         */
+        public static <T, E extends Throwable> ObjIterator<T, E> empty() {
+            return EMPTY;
+        }
+
+        public static <T, E extends Throwable> ObjIterator<T, E> just(final T val) {
+            return new ObjIterator<>() {
+                private boolean done = false;
+
+                @Override
+                public boolean hasNext() {
+                    return !done;
+                }
+
+                @Override
+                public T next() {
+                    if (done) {
+                        throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+                    }
+
+                    done = true;
+
+                    return val;
+                }
+            };
+        }
+
+        public static <T, E extends Throwable> ObjIterator<T, E> of(final Iterable<? extends T> iterable) {
+            if (iterable == null) {
+                return empty();
+            }
+
+            final Iterator<? extends T> iter = iterable.iterator();
+
+            return new ObjIterator<>() {
+                @Override
+                public boolean hasNext() {
+                    return iter.hasNext();
+                }
+
+                @Override
+                public T next() throws E {
+                    return iter.next();
+                }
+            };
+        }
+
+        public abstract boolean hasNext() throws E;
+
+        public abstract T next() throws E;
+
+        /**
+         *
+         *
+         * @param predicate
+         * @return
+         */
+        public ObjIterator<T, E> filter(final Throwables.Predicate<? super T, E> predicate) {
+            final ObjIterator<T, E> iter = this;
+
+            return new ObjIterator<>() {
+                private final T NONE = (T) N.NULL_MASK; //NOSONAR
+                private T next = NONE;
+                private T tmp = null;
+
+                @Override
+                public boolean hasNext() throws E {
+                    if (next == NONE) {
+                        while (iter.hasNext()) {
+                            tmp = iter.next();
+
+                            if (predicate.test(tmp)) {
+                                next = tmp;
+                                break;
+                            }
+                        }
+                    }
+
+                    return next != NONE;
+                }
+
+                @Override
+                public T next() throws E {
+                    if (!hasNext()) {
+                        throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+                    }
+
+                    tmp = next;
+                    next = NONE;
+                    return tmp;
+                }
+            };
+        }
+
+        public <U> ObjIterator<U, E> map(final Throwables.Function<? super T, U, E> mapper) {
+            final ObjIterator<T, E> iter = this;
+
+            return new ObjIterator<>() {
+                @Override
+                public boolean hasNext() throws E {
+                    return iter.hasNext();
+                }
+
+                @Override
+                public U next() throws E {
+                    return mapper.apply(iter.next());
+                }
+            };
+        }
+
+        /**
+         *
+         *
+         * @return
+         */
+        public Nullable<T> first() throws E {
+            if (hasNext()) {
+                return Nullable.of(next());
+            } else {
+                return Nullable.<T> empty();
+            }
+        }
+
+        /**
+         *
+         *
+         * @return
+         */
+        public u.Optional<T> firstNonNull() throws E {
+            T next = null;
+
+            while (hasNext()) {
+                next = next();
+
+                if (next != null) {
+                    return u.Optional.of(next);
+                }
+            }
+
+            return u.Optional.empty();
+        }
+
+        /**
+         *
+         *
+         * @return
+         */
+        public Nullable<T> last() throws E {
+            if (hasNext()) {
+                T next = next();
+
+                while (hasNext()) {
+                    next = next();
+                }
+
+                return Nullable.of(next);
+            } else {
+                return Nullable.<T> empty();
+            }
+        }
+
+        /**
+         *
+         *
+         * @return
+         */
+        public Object[] toArray() throws E {
+            return toArray(N.EMPTY_OBJECT_ARRAY);
+        }
+
+        /**
+         *
+         *
+         * @param <A>
+         * @param a
+         * @return
+         */
+        public <A> A[] toArray(A[] a) throws E {
+            return toList().toArray(a);
+        }
+
+        /**
+         *
+         *
+         * @return
+         */
+        public List<T> toList() throws E {
+            final List<T> list = new ArrayList<>();
+
+            while (hasNext()) {
+                list.add(next());
+            }
+
+            return list;
+        }
+
+        public void forEachRemaining(java.util.function.Consumer<? super T> action) throws E {
+            N.checkArgNotNull(action);
+
+            while (hasNext()) {
+                action.accept(next());
+            }
+        }
+
+        /**
+         *
+         * @param action
+         * @throws E the e
+         */
+        public void foreachRemaining(Throwables.Consumer<? super T, E> action) throws E {
+            N.checkArgNotNull(action);
+
+            while (hasNext()) {
+                action.accept(next());
+            }
+        }
+
+        /**
+         *
+         * @param action
+         * @throws E the e
+         */
+        public void foreachIndexed(Throwables.IntObjConsumer<? super T, E> action) throws E {
+            N.checkArgNotNull(action);
+
+            int idx = 0;
+
+            while (hasNext()) {
+                action.accept(idx++, next());
             }
         }
     }

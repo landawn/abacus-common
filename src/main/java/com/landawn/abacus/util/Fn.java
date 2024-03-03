@@ -400,15 +400,15 @@ public final class Fn {
         // for extension.
     }
 
-    /**
-     *
-     * @param <T>
-     * @param supplier
-     * @return
-     */
-    public static <T> T get(final java.util.function.Supplier<T> supplier) {
-        return supplier.get();
-    }
+    //    /**
+    //     *
+    //     * @param <T>
+    //     * @param supplier
+    //     * @return
+    //     */
+    //    public static <T> T get(final java.util.function.Supplier<T> supplier) {
+    //        return supplier.get();
+    //    }
 
     /**
      * Returns a {@code Supplier} which returns a single instance created by calling the specified {@code supplier.get()}.

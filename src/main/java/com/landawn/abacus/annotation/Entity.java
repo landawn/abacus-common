@@ -27,9 +27,17 @@ import java.lang.annotation.Target;
 public @interface Entity {
 
     /**
-     * 
      *
-     * @return 
+     * @return
+     * @deprecated use {@code name} to specify attribute explicitly.
+     */
+    @Deprecated
+    String value() default "";
+
+    /**
+     *
+     *
+     * @return
      */
     String name() default "";
 }

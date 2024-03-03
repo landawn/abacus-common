@@ -54,7 +54,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
-import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.function.IntFunction;
@@ -17603,11 +17602,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a
      * @param action
      * @throws E the e
-     * @deprecated use traditional for-loop
      */
-    @Deprecated
     public static <T, E extends Exception> void forEach(final int startInclusive, final int endExclusive, final T a,
-            Throwables.ObjIntConsumer<? super T, E> action) throws E {
+            Throwables.IntObjConsumer<? super T, E> action) throws E {
         forEach(startInclusive, endExclusive, 1, a, action);
     }
 
@@ -17621,11 +17618,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a
      * @param action
      * @throws E the e
-     * @deprecated use traditional for-loop
      */
-    @Deprecated
     public static <T, E extends Exception> void forEach(final int startInclusive, final int endExclusive, final int step, final T a,
-            Throwables.ObjIntConsumer<? super T, E> action) throws E {
+            Throwables.IntObjConsumer<? super T, E> action) throws E {
         checkArgument(step != 0, "The input parameter 'step' can not be zero");
 
         if (endExclusive == startInclusive || endExclusive > startInclusive != step > 0) {
@@ -17636,7 +17631,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         int start = startInclusive;
 
         while (len-- > 0) {
-            action.accept(a, start);
+            action.accept(start, a);
             start += step;
         }
     }
@@ -24291,77 +24286,21 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static <T, E extends Exception> List<T> merge(final Iterable<? extends T> a, final Iterable<? extends T> b,
             final Throwables.BiFunction<? super T, ? super T, MergeResult, E> nextSelector) throws E {
-        if (a == null) {
-            return b == null ? new ArrayList<>() : (b instanceof Collection ? new ArrayList<>((Collection<T>) b) : toList(b.iterator()));
-        } else if (b == null) {
-            return (a instanceof Collection ? new ArrayList<>((Collection<T>) a) : toList(a.iterator()));
-        }
-
-        final List<T> result = new ArrayList<>(getSizeOrDefault(a, 0) + getSizeOrDefault(b, 0));
-        final Iterator<? extends T> iterA = a.iterator();
-        final Iterator<? extends T> iterB = b.iterator();
-
-        T nextA = null;
-        T nextB = null;
-        boolean hasNextA = false;
-        boolean hasNextB = false;
-
-        while (hasNextA || hasNextB || iterA.hasNext() || iterB.hasNext()) {
-            if (hasNextA) {
-                if (iterB.hasNext()) {
-                    if (nextSelector.apply(nextA, (nextB = iterB.next())) == MergeResult.TAKE_FIRST) {
-                        hasNextA = false;
-                        hasNextB = true;
-                        result.add(nextA);
-                    } else {
-                        result.add(nextB);
-                    }
-                } else {
-                    hasNextA = false;
-                    result.add(nextA);
-                }
-            } else if (hasNextB) {
-                if (iterA.hasNext()) {
-                    if (nextSelector.apply((nextA = iterA.next()), nextB) == MergeResult.TAKE_FIRST) {
-                        result.add(nextA);
-                    } else {
-                        hasNextA = true;
-                        hasNextB = false;
-                        result.add(nextB);
-                    }
-                } else {
-                    hasNextB = false;
-                    result.add(nextB);
-                }
-            } else if (iterA.hasNext()) {
-                if (iterB.hasNext()) {
-                    if (nextSelector.apply((nextA = iterA.next()), (nextB = iterB.next())) == MergeResult.TAKE_FIRST) {
-                        hasNextB = true;
-                        result.add(nextA);
-                    } else {
-                        hasNextA = true;
-                        result.add(nextB);
-                    }
-                } else {
-                    result.add(iterA.next());
-                }
-            } else {
-                result.add(iterB.next());
-            }
-        }
-
-        return result;
+        return merge(N.asList(a, b), nextSelector, Factory.ofList());
     }
 
     /**
      *
      *
      * @param <T>
+     * @param <E>
      * @param c
      * @param nextSelector
      * @return
+     * @throws E the e
      */
-    public static <T> List<T> merge(final Collection<? extends Iterable<? extends T>> c, final BiFunction<? super T, ? super T, MergeResult> nextSelector) {
+    public static <T, E extends Exception> List<T> merge(final Collection<? extends Iterable<? extends T>> c,
+            final Throwables.BiFunction<? super T, ? super T, MergeResult, E> nextSelector) throws E {
         return merge(c, nextSelector, Factory.ofList());
     }
 
@@ -24369,99 +24308,170 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      *
      * @param <T>
+     * @param <E>
      * @param <C>
      * @param c
      * @param nextSelector
      * @param supplier
-     * @return
+     * @
+     * @throws E the e
      */
-    public static <T, C extends Collection<T>> C merge(final Collection<? extends Iterable<? extends T>> c,
-            final BiFunction<? super T, ? super T, MergeResult> nextSelector, final IntFunction<? extends C> supplier) {
-        int size = 0;
+    public static <T, C extends Collection<T>, E extends Exception> C merge(final Collection<? extends Iterable<? extends T>> c,
+            final Throwables.BiFunction<? super T, ? super T, MergeResult, E> nextSelector, final IntFunction<? extends C> supplier) throws E {
+        if (N.isEmpty(c)) {
+            return supplier.apply(0);
+        } else if (c.size() == 1) {
+            final Iterable<? extends T> a = N.firstOrNullIfEmpty(c);
+            return a == null ? supplier.apply(0) : N.toCollection(a, () -> supplier.apply(getSizeOrDefault(a, 0)));
+        } else if (c.size() == 2) {
+            final Iterator<? extends Iterable<? extends T>> iter = c.iterator();
+            final Iterable<? extends T> a = iter.next();
+            final Iterable<? extends T> b = iter.next();
 
-        for (Iterable<? extends T> e : c) {
-            size += getSizeOrDefault(e, 0);
+            if (a == null) {
+                return b == null ? supplier.apply(0) : N.toCollection(b, () -> supplier.apply(getSizeOrDefault(b, 0)));
+            } else if (b == null) {
+                return N.toCollection(a, () -> supplier.apply(getSizeOrDefault(a, 0)));
+            }
+
+            final C ret = supplier.apply(getSizeOrDefault(a, 0) + getSizeOrDefault(b, 0));
+            final Iterator<? extends T> iterA = a.iterator();
+            final Iterator<? extends T> iterB = b.iterator();
+
+            T nextA = null;
+            T nextB = null;
+            boolean hasNextA = false;
+            boolean hasNextB = false;
+
+            while (hasNextA || hasNextB || iterA.hasNext() || iterB.hasNext()) {
+                if (hasNextA) {
+                    if (iterB.hasNext()) {
+                        if (nextSelector.apply(nextA, (nextB = iterB.next())) == MergeResult.TAKE_FIRST) {
+                            hasNextA = false;
+                            hasNextB = true;
+                            ret.add(nextA);
+                        } else {
+                            ret.add(nextB);
+                        }
+                    } else {
+                        hasNextA = false;
+                        ret.add(nextA);
+                    }
+                } else if (hasNextB) {
+                    if (iterA.hasNext()) {
+                        if (nextSelector.apply((nextA = iterA.next()), nextB) == MergeResult.TAKE_FIRST) {
+                            ret.add(nextA);
+                        } else {
+                            hasNextA = true;
+                            hasNextB = false;
+                            ret.add(nextB);
+                        }
+                    } else {
+                        hasNextB = false;
+                        ret.add(nextB);
+                    }
+                } else if (iterA.hasNext()) {
+                    if (iterB.hasNext()) {
+                        if (nextSelector.apply((nextA = iterA.next()), (nextB = iterB.next())) == MergeResult.TAKE_FIRST) {
+                            hasNextB = true;
+                            ret.add(nextA);
+                        } else {
+                            hasNextA = true;
+                            ret.add(nextB);
+                        }
+                    } else {
+                        ret.add(iterA.next());
+                    }
+                } else {
+                    ret.add(iterB.next());
+                }
+            }
+
+            return ret;
+        } else {
+            int totalSize = 0;
+            Throwables.ObjIterator<T, E> mergedIter = Throwables.ObjIterator.empty();
+            Iterator<? extends T> iter = null;
+
+            for (Iterable<? extends T> e : c) {
+                iter = e == null ? null : e.iterator();
+
+                if (iter == null || iter.hasNext() == false) {
+                    continue;
+                }
+
+                totalSize += getSizeOrDefault(e, 0);
+
+                final Throwables.ObjIterator<T, E> iterA = mergedIter;
+                final Iterator<? extends T> iterB = iter;
+
+                mergedIter = new Throwables.ObjIterator<>() {
+                    private T nextA = null;
+                    private T nextB = null;
+                    private boolean hasNextA = false;
+                    private boolean hasNextB = false;
+
+                    @Override
+                    public boolean hasNext() throws E {
+                        return hasNextA || hasNextB || iterA.hasNext() || iterB.hasNext();
+                    }
+
+                    @Override
+                    public T next() throws E {
+                        if (hasNextA) {
+                            if (iterB.hasNext()) {
+                                if (nextSelector.apply(nextA, (nextB = iterB.next())) == MergeResult.TAKE_FIRST) {
+                                    hasNextA = false;
+                                    hasNextB = true;
+                                    return nextA;
+                                } else {
+                                    return nextB;
+                                }
+                            } else {
+                                hasNextA = false;
+                                return nextA;
+                            }
+                        } else if (hasNextB) {
+                            if (iterA.hasNext()) {
+                                if (nextSelector.apply((nextA = iterA.next()), nextB) == MergeResult.TAKE_FIRST) {
+                                    return nextA;
+                                } else {
+                                    hasNextA = true;
+                                    hasNextB = false;
+                                    return nextB;
+                                }
+                            } else {
+                                hasNextB = false;
+                                return nextB;
+                            }
+                        } else if (iterA.hasNext()) {
+                            if (iterB.hasNext()) {
+                                if (nextSelector.apply((nextA = iterA.next()), (nextB = iterB.next())) == MergeResult.TAKE_FIRST) {
+                                    hasNextB = true;
+                                    return nextA;
+                                } else {
+                                    hasNextA = true;
+                                    return nextB;
+                                }
+                            } else {
+                                return iterA.next();
+                            }
+                        } else {
+                            return iterB.next();
+                        }
+                    }
+                };
+            }
+
+            final C ret = supplier.apply(totalSize);
+
+            while (mergedIter.hasNext()) {
+                ret.add(mergedIter.next());
+            }
+
+            return ret;
         }
-
-        final int totalCount = size;
-
-        final Supplier<? extends C> tmp = () -> supplier.apply(totalCount);
-
-        return toCollection(Iterators.mergeIterables(c, nextSelector), tmp);
     }
-
-    //    /**
-    //     *
-    //     * @param <T>
-    //     * @param a
-    //     * @param b
-    //     * @param nextSelector
-    //     * @return
-    //     * @see {@code Iterators.merge(Iterator, Iterator, BiFunction)}
-    //     */
-    //    public static <T, E extends Exception> List<T> merge(final Iterator<? extends T> a, final Iterator<? extends T> b,
-    //            final Throwables.BiFunction<? super T, ? super T, MergeResult, E> nextSelector) throws E {
-    //        if (a == null) {
-    //            return b == null ? new ArrayList<>() : toList(b);
-    //        } else if (b == null) {
-    //            return toList(a);
-    //        }
-    //
-    //        final List<T> result = new ArrayList<>(9);
-    //        final Iterator<? extends T> iterA = a;
-    //        final Iterator<? extends T> iterB = b;
-    //
-    //        T nextA = null;
-    //        T nextB = null;
-    //        boolean hasNextA = false;
-    //        boolean hasNextB = false;
-    //
-    //        while (hasNextA || hasNextB || iterA.hasNext() || iterB.hasNext()) {
-    //            if (hasNextA) {
-    //                if (iterB.hasNext()) {
-    //                    if (nextSelector.apply(nextA, (nextB = iterB.next())) == MergeResult.TAKE_FIRST) {
-    //                        hasNextA = false;
-    //                        hasNextB = true;
-    //                        result.add(nextA);
-    //                    } else {
-    //                        result.add(nextB);
-    //                    }
-    //                } else {
-    //                    hasNextA = false;
-    //                    result.add(nextA);
-    //                }
-    //            } else if (hasNextB) {
-    //                if (iterA.hasNext()) {
-    //                    if (nextSelector.apply((nextA = iterA.next()), nextB) == MergeResult.TAKE_FIRST) {
-    //                        result.add(nextA);
-    //                    } else {
-    //                        hasNextA = true;
-    //                        hasNextB = false;
-    //                        result.add(nextB);
-    //                    }
-    //                } else {
-    //                    hasNextB = false;
-    //                    result.add(nextB);
-    //                }
-    //            } else if (iterA.hasNext()) {
-    //                if (iterB.hasNext()) {
-    //                    if (nextSelector.apply((nextA = iterA.next()), (nextB = iterB.next())) == MergeResult.TAKE_FIRST) {
-    //                        hasNextB = true;
-    //                        result.add(nextA);
-    //                    } else {
-    //                        hasNextA = true;
-    //                        result.add(nextB);
-    //                    }
-    //                } else {
-    //                    result.add(iterA.next());
-    //                }
-    //            } else {
-    //                result.add(iterB.next());
-    //            }
-    //        }
-    //
-    //        return result;
-    //    }
 
     /**
      *
@@ -26953,6 +26963,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param commands
      * @return
+     * @see Futures#iterate(Collection)
+     * @see Futures#iteratte(Collection)
      */
     public static ObjIterator<Void> asynRun(final Collection<? extends Throwables.Runnable<? extends Exception>> commands) {
         return asynRun(commands, ASYNC_EXECUTOR.getExecutor());
@@ -26968,6 +26980,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param commands
      * @param executor
      * @return
+     * @see Futures#iterate(Collection)
+     * @see Futures#iteratte(Collection)
      */
     public static ObjIterator<Void> asynRun(final Collection<? extends Throwables.Runnable<? extends Exception>> commands, final Executor executor) {
         checkArgNotNull(executor, "executor");
@@ -27065,6 +27079,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <R>
      * @param commands
      * @return
+     * @see Futures#iterate(Collection)
+     * @see Futures#iteratte(Collection)
      */
     public static <R> ObjIterator<R> asynCall(final Collection<? extends Callable<? extends R>> commands) {
         return asynCall(commands, ASYNC_EXECUTOR.getExecutor());
@@ -27081,6 +27097,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param commands
      * @param executor
      * @return
+     * @see Futures#iterate(Collection)
+     * @see Futures#iteratte(Collection)
      */
     public static <R> ObjIterator<R> asynCall(final Collection<? extends Callable<? extends R>> commands, final Executor executor) {
         checkArgNotNull(executor, "executor");

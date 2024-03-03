@@ -1548,11 +1548,11 @@ sealed class CommonUtil permits N {
      *            and setter methods.
      * @param targetBean a Java Object what allows access to properties using getter
      *            and setter methods.
-     * @param filter
+     * @param propFilter
      * @return {@code targetBean}
      * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
      */
-    public static <T> T merge(final Object sourceBean, final T targetBean, final BiPredicate<String, ?> filter) throws IllegalArgumentException {
+    public static <T> T merge(final Object sourceBean, final T targetBean, final BiPredicate<String, ?> propFilter) throws IllegalArgumentException {
         N.checkArgNotNull(targetBean, "targetBean");
 
         if (sourceBean == null) {
@@ -1561,7 +1561,7 @@ sealed class CommonUtil permits N {
 
         final BeanInfo srcBeanInfo = ParserUtil.getBeanInfo(sourceBean.getClass());
         final BeanInfo targetBeanInfo = ParserUtil.getBeanInfo(targetBean.getClass());
-        final BiPredicate<String, Object> objFilter = (BiPredicate<String, Object>) filter;
+        final BiPredicate<String, Object> objFilter = (BiPredicate<String, Object>) propFilter;
 
         Object propValue = null;
 
@@ -1714,12 +1714,12 @@ sealed class CommonUtil permits N {
      *            and setter methods.
      * @param targetBean a Java Object what allows access to properties using getter
      *            and setter methods.
-     * @param filter
+     * @param propFilter
      * @param mergeFunc the first parameter is source property value, the second parameter is target property value.
      * @return {@code targetBean}
      * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
      */
-    public static <T> T merge(final Object sourceBean, final T targetBean, final BiPredicate<String, ?> filter, final BinaryOperator<?> mergeFunc)
+    public static <T> T merge(final Object sourceBean, final T targetBean, final BiPredicate<String, ?> propFilter, final BinaryOperator<?> mergeFunc)
             throws IllegalArgumentException {
         N.checkArgNotNull(targetBean, "targetBean");
 
@@ -1729,7 +1729,7 @@ sealed class CommonUtil permits N {
 
         final BeanInfo srcBeanInfo = ParserUtil.getBeanInfo(sourceBean.getClass());
         final BeanInfo targetBeanInfo = ParserUtil.getBeanInfo(targetBean.getClass());
-        final BiPredicate<String, Object> objFilter = (BiPredicate<String, Object>) filter;
+        final BiPredicate<String, Object> objFilter = (BiPredicate<String, Object>) propFilter;
         final BinaryOperator<Object> objMergeFunc = (BinaryOperator<Object>) mergeFunc;
 
         Object propValue = null;
@@ -5514,6 +5514,10 @@ sealed class CommonUtil permits N {
     public static <T, K> Map<K, T> toMap(Iterable<? extends T> c, final Function<? super T, ? extends K> keyMapper) {
         N.checkArgNotNull(keyMapper);
 
+        if (c == null) {
+            return new HashMap<>(0);
+        }
+
         final Map<K, T> result = N.newHashMap(c instanceof Collection ? ((Collection<T>) c).size() : 0);
 
         for (T e : c) {
@@ -5537,6 +5541,10 @@ sealed class CommonUtil permits N {
             final Function<? super T, ? extends V> valueExtractor) {
         N.checkArgNotNull(keyMapper);
         N.checkArgNotNull(valueExtractor);
+
+        if (c == null) {
+            return new HashMap<>(0);
+        }
 
         final Map<K, V> result = N.newHashMap(c instanceof Collection ? ((Collection<T>) c).size() : 0);
 
@@ -5564,6 +5572,10 @@ sealed class CommonUtil permits N {
         N.checkArgNotNull(keyMapper);
         N.checkArgNotNull(valueExtractor);
         N.checkArgNotNull(mapSupplier);
+
+        if (c == null) {
+            return mapSupplier.apply(0);
+        }
 
         final M result = mapSupplier.apply(c instanceof Collection ? ((Collection<T>) c).size() : 0);
 
@@ -5593,6 +5605,10 @@ sealed class CommonUtil permits N {
         N.checkArgNotNull(valueExtractor);
         N.checkArgNotNull(mergeFunction);
         N.checkArgNotNull(mapSupplier);
+
+        if (c == null) {
+            return mapSupplier.apply(0);
+        }
 
         final M result = mapSupplier.apply(c instanceof Collection ? ((Collection<T>) c).size() : 0);
         K key = null;
