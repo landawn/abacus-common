@@ -8639,7 +8639,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
         checkArgNotNull(keyMapper, "keyMapper");
 
-        final Comparator<? super T> comparator = Comparators.comparingByIfNotNullOrElseNullsLast(keyMapper);
+        final Comparator<? super T> comparator = Comparators.nullsLastBy(keyMapper);
 
         try {
             return min(comparator);
@@ -8702,7 +8702,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
         checkArgNotNull(keyMapper, "keyMapper");
 
-        final Comparator<? super T> comparator = Comparators.comparingByIfNotNullOrElseNullsFirst(keyMapper);
+        final Comparator<? super T> comparator = Comparators.nullsFirstBy(keyMapper);
 
         try {
             return max(comparator);

@@ -250,7 +250,7 @@ public final class Iterables {
      */
     @SuppressWarnings("rawtypes")
     public static <T> Nullable<T> minBy(final T[] a, final Function<? super T, ? extends Comparable> keyMapper) {
-        return min(a, Comparators.comparingByIfNotNullOrElseNullsLast(keyMapper));
+        return min(a, Comparators.nullsLastBy(keyMapper));
     }
 
     /**
@@ -263,7 +263,7 @@ public final class Iterables {
      */
     @SuppressWarnings("rawtypes")
     public static <T> Nullable<T> minBy(final Iterable<? extends T> c, final Function<? super T, ? extends Comparable> keyMapper) {
-        return min(c, Comparators.comparingByIfNotNullOrElseNullsLast(keyMapper));
+        return min(c, Comparators.nullsLastBy(keyMapper));
     }
 
     /**
@@ -276,16 +276,16 @@ public final class Iterables {
      */
     @SuppressWarnings("rawtypes")
     public static <T> Nullable<T> minBy(final Iterator<? extends T> iter, final Function<? super T, ? extends Comparable> keyMapper) {
-        return min(iter, Comparators.comparingByIfNotNullOrElseNullsLast(keyMapper));
+        return min(iter, Comparators.nullsLastBy(keyMapper));
     }
 
     /**
-     * Returns the minimum {@code int} value extracted from the specified array {@code a} by {@code valueExtractor}, or {@code defaultValue} if {@code a} is null or empty.
+     * Returns {@code OptionalInt.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
      *
      * @param <T>
      * @param <E>
      * @param a
-     * @param defaultValue
+     * @param valueExtractor
      * @return
      * @throws E
      */
@@ -310,12 +310,63 @@ public final class Iterables {
     }
 
     /**
-     * Returns the minimum {@code long} value extracted from the specified array {@code a} by {@code valueExtractor}, or {@code defaultValue} if {@code a} is null or empty.
+     * Returns {@code OptionalInt.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
+     *
+     * @param <T>
+     * @param <E>
+     * @param c
+     * @param valueExtractor
+     * @return
+     * @throws E
+     */
+    @Beta
+    public static <T, E extends Exception> OptionalInt minInt(final Iterable<? extends T> c, final Throwables.ToIntFunction<? super T, E> valueExtractor)
+            throws E {
+        if (c == null) {
+            return OptionalInt.empty();
+        }
+
+        return minInt(c.iterator(), valueExtractor);
+    }
+
+    /**
+     * Returns {@code OptionalInt.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
+     *
+     * @param <T>
+     * @param <E>
+     * @param iter
+     * @param valueExtractor
+     * @return
+     * @throws E
+     */
+    @Beta
+    public static <T, E extends Exception> OptionalInt minInt(final Iterator<? extends T> iter, final Throwables.ToIntFunction<? super T, E> valueExtractor)
+            throws E {
+        if (iter == null || !iter.hasNext()) {
+            return OptionalInt.empty();
+        }
+
+        int candicate = valueExtractor.applyAsInt(iter.next());
+        int next = 0;
+
+        while (iter.hasNext()) {
+            next = valueExtractor.applyAsInt(iter.next());
+
+            if (next < candicate) {
+                candicate = next;
+            }
+        }
+
+        return OptionalInt.of(candicate);
+    }
+
+    /**
+     * Returns {@code OptionalLong.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
      *
      * @param <T>
      * @param <E>
      * @param a
-     * @param defaultValue
+     * @param valueExtractor
      * @return
      * @throws E
      */
@@ -340,12 +391,63 @@ public final class Iterables {
     }
 
     /**
-     * Returns the minimum {@code double} value extracted from the specified array {@code a} by {@code valueExtractor}, or {@code defaultValue} if {@code a} is null or empty.
+     * Returns {@code OptionalLong.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
+     *
+     * @param <T>
+     * @param <E>
+     * @param c
+     * @param valueExtractor
+     * @return
+     * @throws E
+     */
+    @Beta
+    public static <T, E extends Exception> OptionalLong minLong(final Iterable<? extends T> c, final Throwables.ToLongFunction<? super T, E> valueExtractor)
+            throws E {
+        if (c == null) {
+            return OptionalLong.empty();
+        }
+
+        return minLong(c.iterator(), valueExtractor);
+    }
+
+    /**
+     * Returns {@code OptionalLong.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
+     *
+     * @param <T>
+     * @param <E>
+     * @param iter
+     * @param valueExtractor
+     * @return
+     * @throws E
+     */
+    @Beta
+    public static <T, E extends Exception> OptionalLong minLong(final Iterator<? extends T> iter, final Throwables.ToLongFunction<? super T, E> valueExtractor)
+            throws E {
+        if (iter == null || !iter.hasNext()) {
+            return OptionalLong.empty();
+        }
+
+        long candicate = valueExtractor.applyAsLong(iter.next());
+        long next = 0;
+
+        while (iter.hasNext()) {
+            next = valueExtractor.applyAsLong(iter.next());
+
+            if (next < candicate) {
+                candicate = next;
+            }
+        }
+
+        return OptionalLong.of(candicate);
+    }
+
+    /**
+     * Returns {@code OptionalDouble.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
      *
      * @param <T>
      * @param <E>
      * @param a
-     * @param defaultValue
+     * @param valueExtractor
      * @return
      * @throws E
      */
@@ -360,6 +462,57 @@ public final class Iterables {
 
         for (int i = 1, len = a.length; i < len; i++) {
             next = valueExtractor.applyAsDouble(a[i]);
+
+            if (N.compare(next, candicate) < 0) {
+                candicate = next;
+            }
+        }
+
+        return OptionalDouble.of(candicate);
+    }
+
+    /**
+     * Returns {@code OptionalDouble.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
+     *
+     * @param <T>
+     * @param <E>
+     * @param c
+     * @param valueExtractor
+     * @return
+     * @throws E
+     */
+    @Beta
+    public static <T, E extends Exception> OptionalDouble minDouble(final Iterable<? extends T> c,
+            final Throwables.ToDoubleFunction<? super T, E> valueExtractor) throws E {
+        if (c == null) {
+            return OptionalDouble.empty();
+        }
+
+        return minDouble(c.iterator(), valueExtractor);
+    }
+
+    /**
+     * Returns {@code OptionalDouble.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
+     *
+     * @param <T>
+     * @param <E>
+     * @param iter
+     * @param valueExtractor
+     * @return
+     * @throws E
+     */
+    @Beta
+    public static <T, E extends Exception> OptionalDouble minDouble(final Iterator<? extends T> iter,
+            final Throwables.ToDoubleFunction<? super T, E> valueExtractor) throws E {
+        if (iter == null || !iter.hasNext()) {
+            return OptionalDouble.empty();
+        }
+
+        double candicate = valueExtractor.applyAsDouble(iter.next());
+        double next = 0;
+
+        while (iter.hasNext()) {
+            next = valueExtractor.applyAsDouble(iter.next());
 
             if (N.compare(next, candicate) < 0) {
                 candicate = next;
@@ -544,7 +697,7 @@ public final class Iterables {
      */
     @SuppressWarnings("rawtypes")
     public static <T> Nullable<T> maxBy(final T[] a, final Function<? super T, ? extends Comparable> keyMapper) {
-        return max(a, Comparators.comparingByIfNotNullOrElseNullsFirst(keyMapper));
+        return max(a, Comparators.nullsFirstBy(keyMapper));
     }
 
     /**
@@ -557,7 +710,7 @@ public final class Iterables {
      */
     @SuppressWarnings("rawtypes")
     public static <T> Nullable<T> maxBy(final Iterable<? extends T> c, final Function<? super T, ? extends Comparable> keyMapper) {
-        return max(c, Comparators.comparingByIfNotNullOrElseNullsFirst(keyMapper));
+        return max(c, Comparators.nullsFirstBy(keyMapper));
     }
 
     /**
@@ -570,16 +723,16 @@ public final class Iterables {
      */
     @SuppressWarnings("rawtypes")
     public static <T> Nullable<T> maxBy(final Iterator<? extends T> iter, final Function<? super T, ? extends Comparable> keyMapper) {
-        return max(iter, Comparators.comparingByIfNotNullOrElseNullsFirst(keyMapper));
+        return max(iter, Comparators.nullsFirstBy(keyMapper));
     }
 
     /**
-     * Returns the maximum {@code int} value extracted from the specified array {@code a} by {@code valueExtractor}, or {@code defaultValue} if {@code a} is null or empty.
+     * Returns {@code OptionalInt.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
      *
      * @param <T>
      * @param <E>
      * @param a
-     * @param defaultValue
+     * @param valueExtractor
      * @return
      * @throws E
      */
@@ -604,12 +757,63 @@ public final class Iterables {
     }
 
     /**
-     * Returns the maximum {@code long} value extracted from the specified array {@code a} by {@code valueExtractor}, or {@code defaultValue} if {@code a} is null or empty.
+     * Returns {@code OptionalInt.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
+     *
+     * @param <T>
+     * @param <E>
+     * @param c
+     * @param valueExtractor
+     * @return
+     * @throws E
+     */
+    @Beta
+    public static <T, E extends Exception> OptionalInt maxInt(final Iterable<? extends T> c, final Throwables.ToIntFunction<? super T, E> valueExtractor)
+            throws E {
+        if (c == null) {
+            return OptionalInt.empty();
+        }
+
+        return maxInt(c.iterator(), valueExtractor);
+    }
+
+    /**
+     * Returns {@code OptionalInt.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
+     *
+     * @param <T>
+     * @param <E>
+     * @param iter
+     * @param valueExtractor
+     * @return
+     * @throws E
+     */
+    @Beta
+    public static <T, E extends Exception> OptionalInt maxInt(final Iterator<? extends T> iter, final Throwables.ToIntFunction<? super T, E> valueExtractor)
+            throws E {
+        if (iter == null || !iter.hasNext()) {
+            return OptionalInt.empty();
+        }
+
+        int candicate = valueExtractor.applyAsInt(iter.next());
+        int next = 0;
+
+        while (iter.hasNext()) {
+            next = valueExtractor.applyAsInt(iter.next());
+
+            if (next > candicate) {
+                candicate = next;
+            }
+        }
+
+        return OptionalInt.of(candicate);
+    }
+
+    /**
+     * Returns {@code OptionalLong.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
      *
      * @param <T>
      * @param <E>
      * @param a
-     * @param defaultValue
+     * @param valueExtractor
      * @return
      * @throws E
      */
@@ -634,12 +838,63 @@ public final class Iterables {
     }
 
     /**
-     * Returns the maximum {@code double} value extracted from the specified array {@code a} by {@code valueExtractor}, or {@code defaultValue} if {@code a} is null or empty.
+     * Returns {@code OptionalLong.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
+     *
+     * @param <T>
+     * @param <E>
+     * @param c
+     * @param valueExtractor
+     * @return
+     * @throws E
+     */
+    @Beta
+    public static <T, E extends Exception> OptionalLong maxLong(final Iterable<? extends T> c, final Throwables.ToLongFunction<? super T, E> valueExtractor)
+            throws E {
+        if (c == null) {
+            return OptionalLong.empty();
+        }
+
+        return maxLong(c.iterator(), valueExtractor);
+    }
+
+    /**
+     * Returns {@code OptionalLong.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
+     *
+     * @param <T>
+     * @param <E>
+     * @param iter
+     * @param valueExtractor
+     * @return
+     * @throws E
+     */
+    @Beta
+    public static <T, E extends Exception> OptionalLong maxLong(final Iterator<? extends T> iter, final Throwables.ToLongFunction<? super T, E> valueExtractor)
+            throws E {
+        if (iter == null || !iter.hasNext()) {
+            return OptionalLong.empty();
+        }
+
+        long candicate = valueExtractor.applyAsLong(iter.next());
+        long next = 0;
+
+        while (iter.hasNext()) {
+            next = valueExtractor.applyAsLong(iter.next());
+
+            if (next > candicate) {
+                candicate = next;
+            }
+        }
+
+        return OptionalLong.of(candicate);
+    }
+
+    /**
+     * Returns {@code OptionalDouble.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
      *
      * @param <T>
      * @param <E>
      * @param a
-     * @param defaultValue
+     * @param valueExtractor
      * @return
      * @throws E
      */
@@ -654,6 +909,57 @@ public final class Iterables {
 
         for (int i = 1, len = a.length; i < len; i++) {
             next = valueExtractor.applyAsDouble(a[i]);
+
+            if (N.compare(next, candicate) > 0) {
+                candicate = next;
+            }
+        }
+
+        return OptionalDouble.of(candicate);
+    }
+
+    /**
+     * Returns {@code OptionalDouble.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
+     *
+     * @param <T>
+     * @param <E>
+     * @param c
+     * @param valueExtractor
+     * @return
+     * @throws E
+     */
+    @Beta
+    public static <T, E extends Exception> OptionalDouble maxDouble(final Iterable<? extends T> c,
+            final Throwables.ToDoubleFunction<? super T, E> valueExtractor) throws E {
+        if (c == null) {
+            return OptionalDouble.empty();
+        }
+
+        return maxDouble(c.iterator(), valueExtractor);
+    }
+
+    /**
+     * Returns {@code OptionalDouble.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
+     *
+     * @param <T>
+     * @param <E>
+     * @param iter
+     * @param valueExtractor
+     * @return
+     * @throws E
+     */
+    @Beta
+    public static <T, E extends Exception> OptionalDouble maxDouble(final Iterator<? extends T> iter,
+            final Throwables.ToDoubleFunction<? super T, E> valueExtractor) throws E {
+        if (iter == null || !iter.hasNext()) {
+            return OptionalDouble.empty();
+        }
+
+        double candicate = valueExtractor.applyAsDouble(iter.next());
+        double next = 0;
+
+        while (iter.hasNext()) {
+            next = valueExtractor.applyAsDouble(iter.next());
 
             if (N.compare(next, candicate) > 0) {
                 candicate = next;

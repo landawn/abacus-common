@@ -2401,7 +2401,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors {
      */
     @SuppressWarnings("rawtypes")
     public static <T> Collector<T, ?, Optional<T>> minBy(final Function<? super T, ? extends Comparable> keyMapper) {
-        return min(Comparators.comparingByIfNotNullOrElseNullsLast(keyMapper));
+        return min(Comparators.nullsLastBy(keyMapper));
     }
 
     /**
@@ -2415,7 +2415,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors {
     @SuppressWarnings("rawtypes")
     public static <T> Collector<T, ?, T> minByOrElseGet(final Function<? super T, ? extends Comparable> keyMapper,
             final Supplier<? extends T> supplierForEmpty) {
-        return minOrElseGet(Comparators.comparingByIfNotNullOrElseNullsLast(keyMapper), supplierForEmpty);
+        return minOrElseGet(Comparators.nullsLastBy(keyMapper), supplierForEmpty);
     }
 
     /**
@@ -2427,7 +2427,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors {
      */
     @SuppressWarnings("rawtypes")
     public static <T> Collector<T, ?, T> minByOrElseThrow(final Function<? super T, ? extends Comparable> keyMapper) {
-        return minOrElseThrow(Comparators.comparingByIfNotNullOrElseNullsLast(keyMapper));
+        return minOrElseThrow(Comparators.nullsLastBy(keyMapper));
     }
 
     /**
@@ -2441,7 +2441,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors {
     @SuppressWarnings("rawtypes")
     public static <T> Collector<T, ?, T> minByOrElseThrow(final Function<? super T, ? extends Comparable> keyMapper,
             final Supplier<? extends RuntimeException> exceptionSupplier) {
-        return minOrElseThrow(Comparators.comparingByIfNotNullOrElseNullsLast(keyMapper), exceptionSupplier);
+        return minOrElseThrow(Comparators.nullsLastBy(keyMapper), exceptionSupplier);
     }
 
     /**
@@ -2565,7 +2565,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors {
      */
     @SuppressWarnings("rawtypes")
     public static <T> Collector<T, ?, Optional<T>> maxBy(final Function<? super T, ? extends Comparable> keyMapper) {
-        return max(Comparators.comparingByIfNotNullOrElseNullsFirst(keyMapper));
+        return max(Comparators.nullsFirstBy(keyMapper));
     }
 
     /**
@@ -2579,7 +2579,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors {
     @SuppressWarnings("rawtypes")
     public static <T> Collector<T, ?, T> maxByOrElseGet(final Function<? super T, ? extends Comparable> keyMapper,
             final Supplier<? extends T> supplierForEmpty) {
-        return maxOrElseGet(Comparators.comparingByIfNotNullOrElseNullsFirst(keyMapper), supplierForEmpty);
+        return maxOrElseGet(Comparators.nullsFirstBy(keyMapper), supplierForEmpty);
     }
 
     /**
@@ -2591,7 +2591,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors {
      */
     @SuppressWarnings("rawtypes")
     public static <T> Collector<T, ?, T> maxByOrElseThrow(final Function<? super T, ? extends Comparable> keyMapper) {
-        return maxOrElseThrow(Comparators.comparingByIfNotNullOrElseNullsFirst(keyMapper));
+        return maxOrElseThrow(Comparators.nullsFirstBy(keyMapper));
     }
 
     /**
@@ -2605,7 +2605,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors {
     @SuppressWarnings("rawtypes")
     public static <T> Collector<T, ?, T> maxByOrElseThrow(final Function<? super T, ? extends Comparable> keyMapper,
             final Supplier<? extends RuntimeException> exceptionSupplier) {
-        return maxOrElseThrow(Comparators.comparingByIfNotNullOrElseNullsFirst(keyMapper), exceptionSupplier);
+        return maxOrElseThrow(Comparators.nullsFirstBy(keyMapper), exceptionSupplier);
     }
 
     /**

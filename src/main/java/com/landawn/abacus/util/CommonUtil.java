@@ -139,6 +139,8 @@ sealed class CommonUtil permits N {
 
     static final int MIN_SIZE_FOR_COPY_ALL = 9;
 
+    static final int DEFAULT_SIZE_FOR_NEW_COLLECTION = 9;
+
     // ...
     static final Random RAND = new SecureRandom();
 
@@ -2838,22 +2840,6 @@ sealed class CommonUtil permits N {
      *
      * @param <K> the key type
      * @param <E>
-     * @param m
-     * @return
-     */
-    public static <K, E> ListMultimap<K, E> newListMultimap(final Map<? extends K, ? extends E> m) {
-        final ListMultimap<K, E> multiMap = newListMultimap(size(m));
-
-        multiMap.putAll(m);
-
-        return multiMap;
-    }
-
-    /**
-     * New list multimap.
-     *
-     * @param <K> the key type
-     * @param <E>
      * @param mapType
      * @return
      */
@@ -2888,6 +2874,49 @@ sealed class CommonUtil permits N {
     public static <K, E> ListMultimap<K, E> newListMultimap(final Supplier<? extends Map<K, List<E>>> mapSupplier,
             final Supplier<? extends List<E>> valueSupplier) {
         return new ListMultimap<>(mapSupplier, valueSupplier);
+    }
+
+    /**
+     * New list multimap.
+     *
+     * @param <K> the key type
+     * @param <E>
+     * @param m
+     * @return
+     */
+    public static <K, E> ListMultimap<K, E> newListMultimap(final Map<? extends K, ? extends E> m) {
+        final ListMultimap<K, E> multiMap = newListMultimap(size(m));
+
+        multiMap.putAll(m);
+
+        return multiMap;
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param <K> the key type
+     * @param c
+     * @param keyMapper
+     * @return
+     */
+    public static <T, K> ListMultimap<K, T> newListMultimap(final Collection<? extends T> c, final Function<? super T, ? extends K> keyMapper) {
+        return ListMultimap.create(c, keyMapper);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param <K> the key type
+     * @param <E>
+     * @param c
+     * @param keyMapper
+     * @param valueExtractor
+     * @return
+     */
+    public static <T, K, E> ListMultimap<K, E> newListMultimap(final Collection<? extends T> c, final Function<? super T, ? extends K> keyMapper,
+            final Function<? super T, ? extends E> valueExtractor) {
+        return ListMultimap.create(c, keyMapper, valueExtractor);
     }
 
     /**
@@ -2984,22 +3013,6 @@ sealed class CommonUtil permits N {
      *
      * @param <K> the key type
      * @param <E>
-     * @param m
-     * @return
-     */
-    public static <K, E> SetMultimap<K, E> newSetMultimap(final Map<? extends K, ? extends E> m) {
-        final SetMultimap<K, E> multiMap = newSetMultimap(N.size(m));
-
-        multiMap.putAll(m);
-
-        return multiMap;
-    }
-
-    /**
-     * New set multimap.
-     *
-     * @param <K> the key type
-     * @param <E>
      * @param mapType
      * @return
      */
@@ -3034,6 +3047,49 @@ sealed class CommonUtil permits N {
     public static <K, E> SetMultimap<K, E> newSetMultimap(final Supplier<? extends Map<K, Set<E>>> mapSupplier,
             final Supplier<? extends Set<E>> valueSupplier) {
         return new SetMultimap<>(mapSupplier, valueSupplier);
+    }
+
+    /**
+     * New set multimap.
+     *
+     * @param <K> the key type
+     * @param <E>
+     * @param m
+     * @return
+     */
+    public static <K, E> SetMultimap<K, E> newSetMultimap(final Map<? extends K, ? extends E> m) {
+        final SetMultimap<K, E> multiMap = newSetMultimap(N.size(m));
+
+        multiMap.putAll(m);
+
+        return multiMap;
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param <K> the key type
+     * @param c
+     * @param keyMapper
+     * @return
+     */
+    public static <T, K> SetMultimap<K, T> newSetMultimap(final Collection<? extends T> c, final Function<? super T, ? extends K> keyMapper) {
+        return SetMultimap.create(c, keyMapper);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param <K> the key type
+     * @param <E>
+     * @param c
+     * @param keyMapper
+     * @param valueExtractor
+     * @return
+     */
+    public static <T, K, E> SetMultimap<K, E> newSetMultimap(final Collection<? extends T> c, final Function<? super T, ? extends K> keyMapper,
+            final Function<? super T, ? extends E> valueExtractor) {
+        return SetMultimap.create(c, keyMapper, valueExtractor);
     }
 
     /**
@@ -5460,23 +5516,31 @@ sealed class CommonUtil permits N {
      *
      * @param <T>
      * @param <C>
-     * @param iter
+     * @param c
      * @param supplier
      * @return
      */
-    public static <T, C extends Collection<T>> C toCollection(final Iterable<? extends T> iter, final Supplier<? extends C> supplier) {
-        if (iter == null) {
-            return supplier.get();
+    public static <T, C extends Collection<T>> C toCollection(final Iterable<? extends T> c, final IntFunction<? extends C> supplier) {
+        if (c == null) {
+            return supplier.apply(0);
         }
 
-        if (iter instanceof Collection) {
-            final C c = supplier.get();
+        if (c instanceof Collection) {
+            final Collection<T> tmp = (Collection<T>) c;
+            final C ret = supplier.apply(tmp.size());
 
-            c.addAll((Collection<T>) iter);
+            ret.addAll(tmp);
 
-            return c;
+            return ret;
         } else {
-            return toCollection(iter.iterator(), supplier);
+            final Iterator<? extends T> iter = c.iterator();
+            final C ret = supplier.apply(0);
+
+            while (iter.hasNext()) {
+                ret.add(iter.next());
+            }
+
+            return ret;
         }
     }
 
@@ -11932,9 +11996,9 @@ sealed class CommonUtil permits N {
      * @return
      */
     public static <T1 extends Comparable<T1>, T2 extends Comparable<T2>> int compare(T1 a1, T1 b1, T2 a2, T2 b2) {
-        int res = compare(a1, b1);
+        int ret = compare(a1, b1);
 
-        return res == 0 ? compare(a2, b2) : res;
+        return ret == 0 ? compare(a2, b2) : ret;
     }
 
     /**
@@ -11954,12 +12018,12 @@ sealed class CommonUtil permits N {
      */
     @SuppressWarnings("java:S1871")
     public static <T1 extends Comparable<T1>, T2 extends Comparable<T2>, T3 extends Comparable<T3>> int compare(T1 a1, T1 b1, T2 a2, T2 b2, T3 a3, T3 b3) {
-        int res = 0;
+        int ret = 0;
 
-        if ((res = compare(a1, b1)) != 0) {
-            return res;
-        } else if ((res = compare(a2, b2)) != 0) {
-            return res;
+        if ((ret = compare(a1, b1)) != 0) {
+            return ret;
+        } else if ((ret = compare(a2, b2)) != 0) {
+            return ret;
         }
 
         return compare(a3, b3);
@@ -11989,14 +12053,14 @@ sealed class CommonUtil permits N {
     @SuppressWarnings("java:S1871")
     public static <T1 extends Comparable<T1>, T2 extends Comparable<T2>, T3 extends Comparable<T3>, T4 extends Comparable<T4>> int compare(T1 a1, T1 b1, T2 a2,
             T2 b2, T3 a3, T3 b3, T4 a4, T4 b4) {
-        int res = 0;
+        int ret = 0;
 
-        if ((res = compare(a1, b1)) != 0) {
-            return res;
-        } else if ((res = compare(a2, b2)) != 0) {
-            return res;
-        } else if ((res = compare(a3, b3)) != 0) {
-            return res;
+        if ((ret = compare(a1, b1)) != 0) {
+            return ret;
+        } else if ((ret = compare(a2, b2)) != 0) {
+            return ret;
+        } else if ((ret = compare(a3, b3)) != 0) {
+            return ret;
         }
 
         return compare(a4, b4);
@@ -12029,16 +12093,16 @@ sealed class CommonUtil permits N {
     @SuppressWarnings("java:S1871")
     public static <T1 extends Comparable<T1>, T2 extends Comparable<T2>, T3 extends Comparable<T3>, T4 extends Comparable<T4>, T5 extends Comparable<T5>> int compare(
             T1 a1, T1 b1, T2 a2, T2 b2, T3 a3, T3 b3, T4 a4, T4 b4, T5 a5, T5 b5) {
-        int res = 0;
+        int ret = 0;
 
-        if ((res = compare(a1, b1)) != 0) {
-            return res;
-        } else if ((res = compare(a2, b2)) != 0) {
-            return res;
-        } else if ((res = compare(a3, b3)) != 0) {
-            return res;
-        } else if ((res = compare(a4, b4)) != 0) {
-            return res;
+        if ((ret = compare(a1, b1)) != 0) {
+            return ret;
+        } else if ((ret = compare(a2, b2)) != 0) {
+            return ret;
+        } else if ((ret = compare(a3, b3)) != 0) {
+            return ret;
+        } else if ((ret = compare(a4, b4)) != 0) {
+            return ret;
         }
 
         return compare(a5, b5);
@@ -12074,18 +12138,18 @@ sealed class CommonUtil permits N {
     @SuppressWarnings("java:S1871")
     public static <T1 extends Comparable<T1>, T2 extends Comparable<T2>, T3 extends Comparable<T3>, T4 extends Comparable<T4>, T5 extends Comparable<T5>, T6 extends Comparable<T6>> int compare(
             T1 a1, T1 b1, T2 a2, T2 b2, T3 a3, T3 b3, T4 a4, T4 b4, T5 a5, T5 b5, T6 a6, T6 b6) {
-        int res = 0;
+        int ret = 0;
 
-        if ((res = compare(a1, b1)) != 0) {
-            return res;
-        } else if ((res = compare(a2, b2)) != 0) {
-            return res;
-        } else if ((res = compare(a3, b3)) != 0) {
-            return res;
-        } else if ((res = compare(a4, b4)) != 0) {
-            return res;
-        } else if ((res = compare(a5, b5)) != 0) {
-            return res;
+        if ((ret = compare(a1, b1)) != 0) {
+            return ret;
+        } else if ((ret = compare(a2, b2)) != 0) {
+            return ret;
+        } else if ((ret = compare(a3, b3)) != 0) {
+            return ret;
+        } else if ((ret = compare(a4, b4)) != 0) {
+            return ret;
+        } else if ((ret = compare(a5, b5)) != 0) {
+            return ret;
         }
 
         return compare(a6, b6);
@@ -12124,20 +12188,20 @@ sealed class CommonUtil permits N {
     @SuppressWarnings("java:S1871")
     public static <T1 extends Comparable<T1>, T2 extends Comparable<T2>, T3 extends Comparable<T3>, T4 extends Comparable<T4>, T5 extends Comparable<T5>, T6 extends Comparable<T6>, T7 extends Comparable<T7>> int compare(
             T1 a1, T1 b1, T2 a2, T2 b2, T3 a3, T3 b3, T4 a4, T4 b4, T5 a5, T5 b5, T6 a6, T6 b6, T7 a7, T7 b7) {
-        int res = 0;
+        int ret = 0;
 
-        if ((res = compare(a1, b1)) != 0) {
-            return res;
-        } else if ((res = compare(a2, b2)) != 0) {
-            return res;
-        } else if ((res = compare(a3, b3)) != 0) {
-            return res;
-        } else if ((res = compare(a4, b4)) != 0) {
-            return res;
-        } else if ((res = compare(a5, b5)) != 0) {
-            return res;
-        } else if ((res = compare(a6, b6)) != 0) {
-            return res;
+        if ((ret = compare(a1, b1)) != 0) {
+            return ret;
+        } else if ((ret = compare(a2, b2)) != 0) {
+            return ret;
+        } else if ((ret = compare(a3, b3)) != 0) {
+            return ret;
+        } else if ((ret = compare(a4, b4)) != 0) {
+            return ret;
+        } else if ((ret = compare(a5, b5)) != 0) {
+            return ret;
+        } else if ((ret = compare(a6, b6)) != 0) {
+            return ret;
         }
 
         return compare(a7, b7);
@@ -12450,11 +12514,11 @@ sealed class CommonUtil permits N {
             return 1;
         }
 
-        int value = 0;
+        int ret = 0;
 
         for (int i = 0, minLen = N.min(a.length, b.length); i < minLen; i++) {
-            if ((value = Float.compare(a[i], b[i])) != 0) {
-                return value;
+            if ((ret = Float.compare(a[i], b[i])) != 0) {
+                return ret;
             }
         }
 
@@ -12479,11 +12543,11 @@ sealed class CommonUtil permits N {
             return 0;
         }
 
-        int value = 0;
+        int ret = 0;
 
         for (int i = fromIndexA, j = fromIndexB, k = 0; k < len; i++, j++, k++) {
-            if ((value = Float.compare(a[i], b[j])) != 0) {
-                return value;
+            if ((ret = Float.compare(a[i], b[j])) != 0) {
+                return ret;
             }
         }
 
@@ -12503,11 +12567,11 @@ sealed class CommonUtil permits N {
             return 1;
         }
 
-        int value = 0;
+        int ret = 0;
 
         for (int i = 0, minLen = N.min(a.length, b.length); i < minLen; i++) {
-            if ((value = Double.compare(a[i], b[i])) != 0) {
-                return value;
+            if ((ret = Double.compare(a[i], b[i])) != 0) {
+                return ret;
             }
         }
 
@@ -12532,11 +12596,11 @@ sealed class CommonUtil permits N {
             return 0;
         }
 
-        int value = 0;
+        int ret = 0;
 
         for (int i = fromIndexA, j = fromIndexB, k = 0; k < len; i++, j++, k++) {
-            if ((value = Double.compare(a[i], b[j])) != 0) {
-                return value;
+            if ((ret = Double.compare(a[i], b[j])) != 0) {
+                return ret;
             }
         }
 
@@ -12589,11 +12653,11 @@ sealed class CommonUtil permits N {
 
         cmp = checkComparator(cmp);
 
-        int value = 0;
+        int ret = 0;
 
         for (int i = 0, minLen = N.min(a.length, b.length); i < minLen; i++) {
-            if ((value = cmp.compare(a[i], b[i])) != 0) {
-                return value;
+            if ((ret = cmp.compare(a[i], b[i])) != 0) {
+                return ret;
             }
         }
 
@@ -12621,28 +12685,15 @@ sealed class CommonUtil permits N {
         }
 
         cmp = checkComparator(cmp);
-        int value = 0;
+        int ret = 0;
 
         for (int i = fromIndexA, j = fromIndexB, k = 0; k < len; i++, j++, k++) {
-            if ((value = cmp.compare(a[i], b[j])) != 0) {
-                return value;
+            if ((ret = cmp.compare(a[i], b[j])) != 0) {
+                return ret;
             }
         }
 
         return 0;
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param a
-     * @param b
-     * @return
-     */
-    public static <T extends Comparable<? super T>> int compare(final Collection<T> a, final Collection<T> b) {
-        final Comparator<T> cmp = NATURAL_COMPARATOR;
-
-        return compare(a, b, cmp);
     }
 
     /**
@@ -12666,29 +12717,25 @@ sealed class CommonUtil permits N {
      * @param <T>
      * @param a
      * @param b
-     * @param cmp
      * @return
      */
-    public static <T> int compare(final Collection<T> a, final Collection<T> b, Comparator<? super T> cmp) {
-        if (isEmpty(a)) {
-            return isEmpty(b) ? 0 : -1;
-        } else if (isEmpty(b)) {
-            return 1;
-        }
+    public static <T extends Comparable<? super T>> int compare(final Iterable<T> a, final Iterable<T> b) {
+        final Comparator<T> cmp = NATURAL_COMPARATOR;
 
-        cmp = checkComparator(cmp);
+        return compare(a, b, cmp);
+    }
 
-        final Iterator<T> iterA = a.iterator();
-        final Iterator<T> iterB = b.iterator();
-        int value = 0;
+    /**
+     *
+     * @param <T>
+     * @param a
+     * @param b
+     * @return
+     */
+    public static <T extends Comparable<? super T>> int compare(final Iterator<T> a, final Iterator<T> b) {
+        final Comparator<T> cmp = NATURAL_COMPARATOR;
 
-        for (int i = 0, minLen = N.min(a.size(), b.size()); i < minLen; i++) {
-            if ((value = cmp.compare(iterA.next(), iterB.next())) != 0) {
-                return value;
-            }
-        }
-
-        return Integer.compare(a.size(), b.size());
+        return compare(a, b, cmp);
     }
 
     /**
@@ -12723,15 +12770,59 @@ sealed class CommonUtil permits N {
             iterB.next();
         }
 
-        int value = 0;
+        int ret = 0;
 
         for (int i = 0; i < len; i++) {
-            if ((value = cmp.compare(iterA.next(), iterB.next())) != 0) {
-                return value;
+            if ((ret = cmp.compare(iterA.next(), iterB.next())) != 0) {
+                return ret;
             }
         }
 
         return 0;
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param a
+     * @param b
+     * @param cmp
+     * @return
+     */
+    public static <T> int compare(final Iterable<T> a, final Iterable<T> b, Comparator<? super T> cmp) {
+        if (isEmpty(a)) {
+            return isEmpty(b) ? 0 : -1;
+        } else if (isEmpty(b)) {
+            return 1;
+        }
+
+        cmp = checkComparator(cmp);
+
+        return compare(a.iterator(), b.iterator(), cmp);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param a
+     * @param b
+     * @param cmp
+     * @return
+     */
+    public static <T> int compare(final Iterator<T> a, final Iterator<T> b, Comparator<? super T> cmp) {
+        cmp = checkComparator(cmp);
+
+        final Iterator<T> iterA = a == null ? ObjIterator.empty() : a;
+        final Iterator<T> iterB = b == null ? ObjIterator.empty() : b;
+        int ret = 0;
+
+        while (iterA.hasNext() && iterB.hasNext()) {
+            if ((ret = cmp.compare(iterA.next(), iterB.next())) != 0) {
+                return ret;
+            }
+        }
+
+        return iterA.hasNext() ? 1 : (iterB.hasNext() ? -1 : 0);
     }
 
     /**
@@ -12743,6 +12834,17 @@ sealed class CommonUtil permits N {
      */
     public static int compareIgnoreCase(final String a, final String b) {
         return a == null ? (b == null ? 0 : -1) : (b == null ? 1 : a.compareToIgnoreCase(b));
+    }
+
+    /**
+     * Compare ignore case.
+     *
+     * @param a
+     * @param b
+     * @return
+     */
+    public static int compareIgnoreCase(final String[] a, final String[] b) {
+        return compare(a, b, Comparators.comparingIgnoreCase());
     }
 
     /**

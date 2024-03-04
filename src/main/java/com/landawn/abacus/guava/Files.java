@@ -22,11 +22,13 @@ import java.io.OutputStream;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel.MapMode;
 import java.nio.charset.Charset;
+import java.nio.file.LinkOption;
 import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.nio.file.attribute.FileAttribute;
 import java.util.List;
 
+import com.google.common.base.Predicate;
 import com.google.common.graph.Traverser;
 import com.google.common.io.ByteSink;
 import com.google.common.io.ByteSource;
@@ -387,18 +389,18 @@ public abstract class Files { //NOSONAR
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public static Traverser<File> fileTraverser() {
         return com.google.common.io.Files.fileTraverser();
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public static Traverser<Path> pathTraverser() {
         return com.google.common.io.MoreFiles.fileTraverser();
@@ -435,6 +437,22 @@ public abstract class Files { //NOSONAR
     @SafeVarargs
     public static void deleteDirectoryContents(Path path, RecursiveDeleteOption... options) throws IOException {
         com.google.common.io.MoreFiles.deleteDirectoryContents(path, options);
+    }
+
+    /**
+     * Returns a predicate that returns the result of {@link java.nio.file.Files#isDirectory(Path,
+     * LinkOption...)} on input paths with the given link options.
+     */
+    public static Predicate<Path> isDirectory(LinkOption... options) {
+        return MoreFiles.isDirectory(options);
+    }
+
+    /**
+     * Returns a predicate that returns the result of {@link java.nio.file.Files#isRegularFile(Path,
+     * LinkOption...)} on input paths with the given link options.
+     */
+    public static Predicate<Path> isRegularFile(LinkOption... options) {
+        return MoreFiles.isRegularFile(options);
     }
 
     /**

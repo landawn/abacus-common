@@ -3244,7 +3244,7 @@ public class RowDataSet implements DataSet, Cloneable {
                     continue;
                 }
 
-                rowKey = getHashKey(key);
+                rowKey = hashKey(key);
                 bean = idBeanMap.get(rowKey);
 
                 if (bean == null) {
@@ -5128,7 +5128,7 @@ public class RowDataSet implements DataSet, Cloneable {
         List<Object> val = null;
 
         for (int i = 0, size = keyColumn.size(); i < size; i++) {
-            key = getHashKey(keyColumn.get(i));
+            key = hashKey(keyColumn.get(i));
             val = map.get(key);
 
             if (val == null) {
@@ -5232,7 +5232,7 @@ public class RowDataSet implements DataSet, Cloneable {
         for (int rowIndex = 0; rowIndex < size; rowIndex++) {
             value = groupByColumn.get(rowIndex);
 
-            if (keySet.add(getHashKey(keyMapper2.apply(value)))) {
+            if (keySet.add(hashKey(keyMapper2.apply(value)))) {
                 keyColumn.add(value);
             }
         }
@@ -5293,7 +5293,7 @@ public class RowDataSet implements DataSet, Cloneable {
 
         for (int rowIndex = 0; rowIndex < size; rowIndex++) {
             value = groupByColumn.get(rowIndex);
-            key = getHashKey(keyMapper2.apply(value));
+            key = hashKey(keyMapper2.apply(value));
 
             collectorRowIndex = keyRowIndexMap.get(key);
 
@@ -5367,7 +5367,7 @@ public class RowDataSet implements DataSet, Cloneable {
         List<Object> val = null;
 
         for (int i = 0, size = keyColumn.size(); i < size; i++) {
-            key = getHashKey(keyMapper2.apply(keyColumn.get(i)));
+            key = hashKey(keyMapper2.apply(keyColumn.get(i)));
             val = map.get(key);
 
             if (val == null) {
@@ -5470,7 +5470,7 @@ public class RowDataSet implements DataSet, Cloneable {
 
         for (int rowIndex = 0; rowIndex < size; rowIndex++) {
             value = groupByColumn.get(rowIndex);
-            key = getHashKey(keyMapper2.apply(value));
+            key = hashKey(keyMapper2.apply(value));
 
             collectorRowIndex = keyRowIndexMap.get(key);
 
@@ -5703,7 +5703,7 @@ public class RowDataSet implements DataSet, Cloneable {
 
                     keyRow = Objectory.createObjectArray(keyColumnCount);
                 }
-            } else if (keyRowSet.add(getHashKey(keyMapper.apply(disposableArray)))) {
+            } else if (keyRowSet.add(hashKey(keyMapper.apply(disposableArray)))) {
                 for (int i = 0; i < keyColumnCount; i++) {
                     newColumnList.get(i).add(keyRow[i]);
                 }
@@ -5787,7 +5787,7 @@ public class RowDataSet implements DataSet, Cloneable {
                 keyRow[i] = _columnList.get(keyColumnIndexes[i]).get(rowIndex);
             }
 
-            key = isNullOrIdentityKeyMapper ? Wrapper.of(keyRow) : getHashKey(keyMapper.apply(disposableArray));
+            key = isNullOrIdentityKeyMapper ? Wrapper.of(keyRow) : hashKey(keyMapper.apply(disposableArray));
             collectorRowIndex = keyRowIndexMap.get(key);
 
             if (collectorRowIndex == null) {
@@ -5918,7 +5918,7 @@ public class RowDataSet implements DataSet, Cloneable {
                 keyRow[i] = _columnList.get(keyColumnIndexes[i]).get(rowIndex);
             }
 
-            key = getHashKey(keyMapper.apply(keyDisposableArray));
+            key = hashKey(keyMapper.apply(keyDisposableArray));
             val = keyRowMap.get(key);
 
             if (val == null) {
@@ -6030,7 +6030,7 @@ public class RowDataSet implements DataSet, Cloneable {
                 keyRow[i] = _columnList.get(keyColumnIndexes[i]).get(rowIndex);
             }
 
-            key = isNullOrIdentityKeyMapper ? Wrapper.of(keyRow) : getHashKey(keyMapper.apply(keyDisposableArray));
+            key = isNullOrIdentityKeyMapper ? Wrapper.of(keyRow) : hashKey(keyMapper.apply(keyDisposableArray));
             collectorRowIndex = keyRowIndexMap.get(key);
 
             if (collectorRowIndex == null) {
@@ -7098,7 +7098,7 @@ public class RowDataSet implements DataSet, Cloneable {
 
         for (int rowIndex = 0; rowIndex < size; rowIndex++) {
             value = _columnList.get(columnIndex).get(rowIndex);
-            key = getHashKey(keyMapper2 == null ? value : keyMapper2.apply(value));
+            key = hashKey(keyMapper2 == null ? value : keyMapper2.apply(value));
 
             if (rowSet.add(key)) {
                 for (int i = 0; i < columnCount; i++) {
@@ -7171,7 +7171,7 @@ public class RowDataSet implements DataSet, Cloneable {
 
                     row = Objectory.createObjectArray(columnCount);
                 }
-            } else if (rowSet.add(getHashKey(keyMapper.apply(disposableArray)))) {
+            } else if (rowSet.add(hashKey(keyMapper.apply(disposableArray)))) {
                 for (int columnIndex = 0; columnIndex < columnCount; columnIndex++) {
                     newColumnList.get(columnIndex).add(_columnList.get(columnIndex).get(rowIndex));
                 }
@@ -8365,7 +8365,7 @@ public class RowDataSet implements DataSet, Cloneable {
             Object hashKey = null;
 
             for (int rightRowIndex = 0, rightDataSetSize = right.size(); rightRowIndex < rightDataSetSize; rightRowIndex++) {
-                hashKey = getHashKey(rightJoinColumn.get(rightRowIndex));
+                hashKey = hashKey(rightJoinColumn.get(rightRowIndex));
                 putRowIndex(joinColumnRightRowIndexMap, hashKey, rightRowIndex);
             }
 
@@ -8373,7 +8373,7 @@ public class RowDataSet implements DataSet, Cloneable {
             List<Integer> rightRowIndexList = null;
 
             for (int leftRowIndex = 0, size = size(); leftRowIndex < size; leftRowIndex++) {
-                hashKey = getHashKey(leftJoinColumn.get(leftRowIndex));
+                hashKey = hashKey(leftJoinColumn.get(leftRowIndex));
                 rightRowIndexList = joinColumnRightRowIndexMap.get(hashKey);
 
                 join(newColumnList, right, isLeftJoin, leftRowIndex, rightRowIndexList, rightColumnIndexes);
@@ -8520,7 +8520,7 @@ public class RowDataSet implements DataSet, Cloneable {
             Object hashKey = null;
 
             for (int rightRowIndex = 0, rightDataSetSize = right.size(); rightRowIndex < rightDataSetSize; rightRowIndex++) {
-                hashKey = getHashKey(rightJoinColumn.get(rightRowIndex));
+                hashKey = hashKey(rightJoinColumn.get(rightRowIndex));
                 putRowIndex(joinColumnRightRowIndexMap, hashKey, rightRowIndex);
             }
 
@@ -8528,7 +8528,7 @@ public class RowDataSet implements DataSet, Cloneable {
             List<Integer> rightRowIndexList = null;
 
             for (int leftRowIndex = 0, size = size(); leftRowIndex < size; leftRowIndex++) {
-                hashKey = getHashKey(leftJoinColumn.get(leftRowIndex));
+                hashKey = hashKey(leftJoinColumn.get(leftRowIndex));
                 rightRowIndexList = joinColumnRightRowIndexMap.get(hashKey);
 
                 join(newColumnList, right, isLeftJoin, newColumnClass, newColumnIndex, leftRowIndex, rightRowIndexList);
@@ -8889,14 +8889,14 @@ public class RowDataSet implements DataSet, Cloneable {
             Object hashKey = null;
 
             for (int rightRowIndex = 0, rightDataSetSize = right.size(); rightRowIndex < rightDataSetSize; rightRowIndex++) {
-                hashKey = getHashKey(rightJoinColumn.get(rightRowIndex));
+                hashKey = hashKey(rightJoinColumn.get(rightRowIndex));
                 putRowIndex(joinColumnRightRowIndexMap, hashKey, rightRowIndex);
             }
 
             final int newColumnIndex = newColumnList.size() - 1;
 
             for (int leftRowIndex = 0, size = size(); leftRowIndex < size; leftRowIndex++) {
-                hashKey = getHashKey(leftJoinColumn.get(leftRowIndex));
+                hashKey = hashKey(leftJoinColumn.get(leftRowIndex));
                 rightRowIndexList = joinColumnRightRowIndexMap.get(hashKey);
 
                 join(newColumnList, right, isLeftJoin, newColumnClass, collSupplier, newColumnIndex, leftRowIndex, rightRowIndexList);
@@ -9045,7 +9045,7 @@ public class RowDataSet implements DataSet, Cloneable {
             Object hashKey = null;
 
             for (int leftRowIndex = 0, leftDataSetSize = this.size(); leftRowIndex < leftDataSetSize; leftRowIndex++) {
-                hashKey = getHashKey(leftJoinColumn.get(leftRowIndex));
+                hashKey = hashKey(leftJoinColumn.get(leftRowIndex));
                 putRowIndex(joinColumnLeftRowIndexMap, hashKey, leftRowIndex);
             }
 
@@ -9053,7 +9053,7 @@ public class RowDataSet implements DataSet, Cloneable {
             final int[] rightColumnIndexes = right.getColumnIndexes(rightColumnNames);
 
             for (int rightRowIndex = 0, rightDataSetSize = right.size(); rightRowIndex < rightDataSetSize; rightRowIndex++) {
-                hashKey = getHashKey(rightJoinColumn.get(rightRowIndex));
+                hashKey = hashKey(rightJoinColumn.get(rightRowIndex));
                 leftRowIndexList = joinColumnLeftRowIndexMap.get(hashKey);
 
                 rightJoin(newColumnList, right, rightRowIndex, rightColumnIndexes, leftColumnIndexes, leftRowIndexList);
@@ -9262,7 +9262,7 @@ public class RowDataSet implements DataSet, Cloneable {
             Object hashKey = null;
 
             for (int leftRowIndex = 0, leftDataSetSize = this.size(); leftRowIndex < leftDataSetSize; leftRowIndex++) {
-                hashKey = getHashKey(leftJoinColumn.get(leftRowIndex));
+                hashKey = hashKey(leftJoinColumn.get(leftRowIndex));
                 putRowIndex(joinColumnLeftRowIndexMap, hashKey, leftRowIndex);
             }
 
@@ -9271,7 +9271,7 @@ public class RowDataSet implements DataSet, Cloneable {
             List<Integer> leftRowIndexList = null;
 
             for (int rightRowIndex = 0, rightDataSetSize = right.size(); rightRowIndex < rightDataSetSize; rightRowIndex++) {
-                hashKey = getHashKey(rightJoinColumn.get(rightRowIndex));
+                hashKey = hashKey(rightJoinColumn.get(rightRowIndex));
                 leftRowIndexList = joinColumnLeftRowIndexMap.get(hashKey);
 
                 rightJoin(newColumnList, right, newColumnClass, newColumnIndex, rightRowIndex, leftRowIndexList, leftColumnIndexes);
@@ -9426,14 +9426,14 @@ public class RowDataSet implements DataSet, Cloneable {
             Object hashKey = null;
 
             for (int leftRowIndex = 0, leftDataSetSize = this.size(); leftRowIndex < leftDataSetSize; leftRowIndex++) {
-                hashKey = getHashKey(leftJoinColumn.get(leftRowIndex));
+                hashKey = hashKey(leftJoinColumn.get(leftRowIndex));
                 putRowIndex(joinColumnLeftRowIndexMap, hashKey, leftRowIndex);
             }
 
             final Map<Object, List<Integer>> joinColumnRightRowIndexMap = new LinkedHashMap<>();
 
             for (int rightRowIndex = 0, rightDataSetSize = right.size(); rightRowIndex < rightDataSetSize; rightRowIndex++) {
-                hashKey = getHashKey(rightJoinColumn.get(rightRowIndex));
+                hashKey = hashKey(rightJoinColumn.get(rightRowIndex));
                 putRowIndex(joinColumnRightRowIndexMap, hashKey, rightRowIndex);
             }
 
@@ -9611,7 +9611,7 @@ public class RowDataSet implements DataSet, Cloneable {
             Object hashKey = null;
 
             for (int rightRowIndex = 0, rightDataSetSize = right.size(); rightRowIndex < rightDataSetSize; rightRowIndex++) {
-                hashKey = getHashKey(rightJoinColumn.get(rightRowIndex));
+                hashKey = hashKey(rightJoinColumn.get(rightRowIndex));
                 putRowIndex(joinColumnRightRowIndexMap, hashKey, rightRowIndex);
             }
 
@@ -9619,7 +9619,7 @@ public class RowDataSet implements DataSet, Cloneable {
             final Set<Object> joinColumnLeftRowIndexSet = N.newHashSet();
 
             for (int leftRowIndex = 0, size = size(); leftRowIndex < size; leftRowIndex++) {
-                hashKey = getHashKey(leftJoinColumn.get(leftRowIndex));
+                hashKey = hashKey(leftJoinColumn.get(leftRowIndex));
                 rightRowIndexList = joinColumnRightRowIndexMap.get(hashKey);
 
                 fullJoin(newColumnList, right, leftRowIndex, rightRowIndexList, rightColumnIndexes);
@@ -9788,7 +9788,7 @@ public class RowDataSet implements DataSet, Cloneable {
             Object hashKey = null;
 
             for (int rightRowIndex = 0, rightDataSetSize = right.size(); rightRowIndex < rightDataSetSize; rightRowIndex++) {
-                hashKey = getHashKey(rightJoinColumn.get(rightRowIndex));
+                hashKey = hashKey(rightJoinColumn.get(rightRowIndex));
                 putRowIndex(joinColumnRightRowIndexMap, hashKey, rightRowIndex);
             }
 
@@ -9796,7 +9796,7 @@ public class RowDataSet implements DataSet, Cloneable {
             final Set<Object> joinColumnLeftRowIndexSet = N.newHashSet();
 
             for (int leftRowIndex = 0, size = size(); leftRowIndex < size; leftRowIndex++) {
-                hashKey = getHashKey(leftJoinColumn.get(leftRowIndex));
+                hashKey = hashKey(leftJoinColumn.get(leftRowIndex));
                 rightRowIndexList = joinColumnRightRowIndexMap.get(hashKey);
 
                 fullJoin(newColumnList, right, newColumnClass, newColumnIndex, leftRowIndex, rightRowIndexList);
@@ -9964,7 +9964,7 @@ public class RowDataSet implements DataSet, Cloneable {
             Object hashKey = null;
 
             for (int rightRowIndex = 0, rightDataSetSize = right.size(); rightRowIndex < rightDataSetSize; rightRowIndex++) {
-                hashKey = getHashKey(rightJoinColumn.get(rightRowIndex));
+                hashKey = hashKey(rightJoinColumn.get(rightRowIndex));
                 putRowIndex(joinColumnRightRowIndexMap, hashKey, rightRowIndex);
             }
 
@@ -9973,7 +9973,7 @@ public class RowDataSet implements DataSet, Cloneable {
             List<Integer> rightRowIndexList = null;
 
             for (int leftRowIndex = 0, size = size(); leftRowIndex < size; leftRowIndex++) {
-                hashKey = getHashKey(leftJoinColumn.get(leftRowIndex));
+                hashKey = hashKey(leftJoinColumn.get(leftRowIndex));
                 rightRowIndexList = joinColumnRightRowIndexMap.get(hashKey);
 
                 fullJoin(newColumnList, right, newColumnClass, collSupplier, newColumnIndex, leftRowIndex, rightRowIndexList);
@@ -10171,7 +10171,7 @@ public class RowDataSet implements DataSet, Cloneable {
                 final List<Object> keyColumn = _columnList.get(keyColumnIndex);
 
                 for (int rowIndex = 0, rowCount = this.size(); rowIndex < rowCount; rowIndex++) {
-                    if (addedRowKeySet.add(getHashKey(keyColumn.get(rowIndex)))) {
+                    if (addedRowKeySet.add(hashKey(keyColumn.get(rowIndex)))) {
                         for (int i = 0; i < thisColumnCount; i++) {
                             newColumnList.get(i).add(_columnList.get(i).get(rowIndex));
                         }
@@ -10200,7 +10200,7 @@ public class RowDataSet implements DataSet, Cloneable {
                 int cnt = 0;
 
                 for (int rowIndex = 0, rowCount = other.size(); rowIndex < rowCount; rowIndex++) {
-                    if (addedRowKeySet.add(getHashKey(keyColumnInOther.get(rowIndex)))) {
+                    if (addedRowKeySet.add(hashKey(keyColumnInOther.get(rowIndex)))) {
                         for (int i = 0; i < otherColumnCount; i++) {
                             newColumnList.get(otherNewColumnIndexes[i]).add(columnsInOther[i].get(rowIndex));
                         }
@@ -10448,7 +10448,7 @@ public class RowDataSet implements DataSet, Cloneable {
             final Set<Object> rowKeySet = N.newHashSet();
 
             for (Object e : keyColumnInOther) {
-                rowKeySet.add(getHashKey(e));
+                rowKeySet.add(hashKey(e));
             }
 
             final List<Object> keyColumn = _columnList.get(keyColumnIndex);
@@ -10456,7 +10456,7 @@ public class RowDataSet implements DataSet, Cloneable {
             Object hashKey = null;
 
             for (int rowIndex = 0; rowIndex < size; rowIndex++) {
-                hashKey = getHashKey(keyColumn.get(rowIndex));
+                hashKey = hashKey(keyColumn.get(rowIndex));
 
                 if (rowKeySet.contains(hashKey) == retain && (deduplicate == false || addedRowKeySet.add(hashKey))) {
                     for (int i = 0; i < newColumnCount; i++) {
@@ -10629,13 +10629,13 @@ public class RowDataSet implements DataSet, Cloneable {
             final Multiset<Object> rowKeySet = new Multiset<>();
 
             for (Object val : keyColumnInOther) {
-                rowKeySet.add(getHashKey(val));
+                rowKeySet.add(hashKey(val));
             }
 
             final List<Object> keyColumn = _columnList.get(keyColumnIndex);
 
             for (int rowIndex = 0; rowIndex < size; rowIndex++) {
-                if ((rowKeySet.getAndRemove(getHashKey(keyColumn.get(rowIndex))) > 0) == retain) {
+                if ((rowKeySet.getAndRemove(hashKey(keyColumn.get(rowIndex))) > 0) == retain) {
                     for (int i = 0; i < keyColumnCount; i++) {
                         newColumnList.get(i).add(_columnList.get(i).get(rowIndex));
                     }
@@ -12362,8 +12362,8 @@ public class RowDataSet implements DataSet, Cloneable {
      * @param obj
      * @return
      */
-    static Object getHashKey(Object obj) {
-        return obj == null || !obj.getClass().isArray() ? obj : Wrapper.of(obj);
+    static Object hashKey(Object obj) {
+        return N.hashKey(obj);
     }
 
     /**

@@ -353,28 +353,47 @@ public final class Comparators {
      * @param <U>
      * @param keyMapper
      * @return
-     * @see #naturalOrder()
-     * @see #nullsFirst()
+     * @see #comparingByIfNotNullOrElseNullsFirst(Function)
+     * @see #comparingByIfNotNullOrElseNullsLast(Function)
+     */
+    public static <T, U extends Comparable<? super U>> Comparator<T> nullsFirstBy(final Function<? super T, ? extends U> keyMapper) {
+        N.checkArgNotNull(keyMapper);
+
+        return (a, b) -> NULL_FIRST_COMPARATOR.compare(keyMapper.apply(a), keyMapper.apply(b));
+    }
+
+    /**
+     * Comparing the key/value extracted by {@code keyMapper} by {@code nullsLast()} comparator.
+     *
+     * @param <T>
+     * @param <U>
+     * @param keyMapper
+     * @return
+     * @see #comparingByIfNotNullOrElseNullsFirst(Function)
+     * @see #comparingByIfNotNullOrElseNullsLast(Function)
+     */
+    public static <T, U extends Comparable<? super U>> Comparator<T> nullsLastBy(final Function<? super T, ? extends U> keyMapper) {
+        N.checkArgNotNull(keyMapper);
+
+        return (a, b) -> NULL_LAST_COMPARATOR.compare(keyMapper.apply(a), keyMapper.apply(b));
+    }
+
+    /**
+     * Comparing the key/value extracted by {@code keyMapper} by {@code nullsFirst()} comparator.
+     *
+     * @param <T>
+     * @param <U>
+     * @param keyMapper
+     * @return
+     * @see #nullsFirstBy(Function)
+     * @see #nullsLastBy(Function)
+     * @see #comparingByIfNotNullOrElseNullsFirst(Function)
+     * @see #comparingByIfNotNullOrElseNullsLast(Function)
      */
     public static <T, U extends Comparable<? super U>> Comparator<T> comparingBy(final Function<? super T, ? extends U> keyMapper) {
         N.checkArgNotNull(keyMapper);
 
         return (a, b) -> NATURAL_ORDER.compare(keyMapper.apply(a), keyMapper.apply(b));
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param <U>
-     * @param keyMapper
-     * @param keyComparator
-     * @return
-     */
-    public static <T, U> Comparator<T> comparingBy(final Function<? super T, ? extends U> keyMapper, final Comparator<? super U> keyComparator) {
-        N.checkArgNotNull(keyMapper);
-        N.checkArgNotNull(keyComparator);
-
-        return (a, b) -> keyComparator.compare(keyMapper.apply(a), keyMapper.apply(b));
     }
 
     /**
@@ -409,6 +428,55 @@ public final class Comparators {
         final Comparator<U> cmp = (Comparator) NULL_LAST_COMPARATOR;
 
         return (a, b) -> a == null ? (b == null ? 0 : 1) : (b == null ? -1 : cmp.compare(keyMapper.apply(a), keyMapper.apply(b)));
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param <U>
+     * @param keyMapper
+     * @param keyComparator
+     * @return
+     * @see #comparingByIfNotNullOrElseNullsFirst(Function, Comparator)
+     * @see #comparingByIfNotNullOrElseNullsLast(Function, Comparator)
+     */
+    public static <T, U> Comparator<T> comparingBy(final Function<? super T, ? extends U> keyMapper, final Comparator<? super U> keyComparator) {
+        N.checkArgNotNull(keyMapper);
+        N.checkArgNotNull(keyComparator);
+
+        return (a, b) -> keyComparator.compare(keyMapper.apply(a), keyMapper.apply(b));
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param <U>
+     * @param keyMapper
+     * @param keyComparator
+     * @return
+     */
+    public static <T, U> Comparator<T> comparingByIfNotNullOrElseNullsFirst(final Function<? super T, ? extends U> keyMapper,
+            final Comparator<? super U> keyComparator) {
+        N.checkArgNotNull(keyMapper);
+        N.checkArgNotNull(keyComparator);
+
+        return (a, b) -> a == null ? (b == null ? 0 : -1) : (b == null ? 1 : keyComparator.compare(keyMapper.apply(a), keyMapper.apply(b)));
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param <U>
+     * @param keyMapper
+     * @param keyComparator
+     * @return
+     */
+    public static <T, U> Comparator<T> comparingByIfNotNullOrElseNullsLast(final Function<? super T, ? extends U> keyMapper,
+            final Comparator<? super U> keyComparator) {
+        N.checkArgNotNull(keyMapper);
+        N.checkArgNotNull(keyComparator);
+
+        return (a, b) -> a == null ? (b == null ? 0 : 1) : (b == null ? -1 : keyComparator.compare(keyMapper.apply(a), keyMapper.apply(b)));
     }
 
     /**
@@ -953,11 +1021,49 @@ public final class Comparators {
      * @param <U>
      * @param keyMapper
      * @return
+     * @see #reversedComparingByIfNotNullOrElseNullsFirst(Function)
+     * @see #reversedComparingByIfNotNullOrElseNullsLast(Function)
      */
     public static <T, U extends Comparable<? super U>> Comparator<T> reversedComparingBy(final Function<? super T, ? extends U> keyMapper) {
         N.checkArgNotNull(keyMapper);
 
         return (a, b) -> REVERSED_ORDER.compare(keyMapper.apply(a), keyMapper.apply(b));
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param <U>
+     * @param keyMapper
+     * @return
+     */
+    @Beta
+    public static <T, U extends Comparable<? super U>> Comparator<T> reversedComparingByIfNotNullOrElseNullsFirst(
+            final Function<? super T, ? extends U> keyMapper) {
+        N.checkArgNotNull(keyMapper);
+
+        @SuppressWarnings("rawtypes")
+        final Comparator<U> cmp = (Comparator) NULL_FIRST_REVERSED_ORDER;
+
+        return (a, b) -> a == null ? (b == null ? 0 : -1) : (b == null ? 1 : cmp.compare(keyMapper.apply(a), keyMapper.apply(b)));
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param <U>
+     * @param keyMapper
+     * @return
+     */
+    @Beta
+    public static <T, U extends Comparable<? super U>> Comparator<T> reversedComparingByIfNotNullOrElseNullsLast(
+            final Function<? super T, ? extends U> keyMapper) {
+        N.checkArgNotNull(keyMapper);
+
+        @SuppressWarnings("rawtypes")
+        final Comparator<U> cmp = (Comparator) NULL_LAST_REVERSED_ORDER;
+
+        return (a, b) -> a == null ? (b == null ? 0 : 1) : (b == null ? -1 : cmp.compare(keyMapper.apply(a), keyMapper.apply(b)));
     }
 
     /**
@@ -1014,41 +1120,5 @@ public final class Comparators {
         final Comparator<? super V> reversedOrder = reverseOrder(cmp);
 
         return (a, b) -> reversedOrder.compare(a.getValue(), b.getValue());
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param <U>
-     * @param keyMapper
-     * @return
-     */
-    @Beta
-    public static <T, U extends Comparable<? super U>> Comparator<T> reversedComparingByIfNotNullOrElseNullsFirst(
-            final Function<? super T, ? extends U> keyMapper) {
-        N.checkArgNotNull(keyMapper);
-
-        @SuppressWarnings("rawtypes")
-        final Comparator<U> cmp = (Comparator) NULL_FIRST_REVERSED_ORDER;
-
-        return (a, b) -> a == null ? (b == null ? 0 : -1) : (b == null ? 1 : cmp.compare(keyMapper.apply(a), keyMapper.apply(b)));
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param <U>
-     * @param keyMapper
-     * @return
-     */
-    @Beta
-    public static <T, U extends Comparable<? super U>> Comparator<T> reversedComparingByIfNotNullOrElseNullsLast(
-            final Function<? super T, ? extends U> keyMapper) {
-        N.checkArgNotNull(keyMapper);
-
-        @SuppressWarnings("rawtypes")
-        final Comparator<U> cmp = (Comparator) NULL_LAST_REVERSED_ORDER;
-
-        return (a, b) -> a == null ? (b == null ? 0 : 1) : (b == null ? -1 : cmp.compare(keyMapper.apply(a), keyMapper.apply(b)));
     }
 }

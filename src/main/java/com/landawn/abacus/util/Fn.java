@@ -3263,7 +3263,7 @@ public final class Fn {
     @SuppressWarnings("rawtypes")
     public static <T> BinaryOperator<T> minBy(final java.util.function.Function<? super T, ? extends Comparable> keyMapper) {
         N.checkArgNotNull(keyMapper);
-        final Comparator<? super T> comparator = Comparators.comparingByIfNotNullOrElseNullsLast(keyMapper);
+        final Comparator<? super T> comparator = Comparators.nullsLastBy(keyMapper);
 
         return (a, b) -> comparator.compare(a, b) <= 0 ? a : b;
     }
@@ -3350,7 +3350,7 @@ public final class Fn {
     @SuppressWarnings("rawtypes")
     public static <T> BinaryOperator<T> maxBy(final java.util.function.Function<? super T, ? extends Comparable> keyMapper) {
         N.checkArgNotNull(keyMapper);
-        final Comparator<? super T> comparator = Comparators.comparingByIfNotNullOrElseNullsFirst(keyMapper);
+        final Comparator<? super T> comparator = Comparators.nullsFirstBy(keyMapper);
 
         return (a, b) -> comparator.compare(a, b) >= 0 ? a : b;
     }
@@ -8468,7 +8468,7 @@ public final class Fn {
      * @author haiyangl
      *
      */
-    public static final class FnC {
+    public static final class FC {
 
         /** The Constant IS_ZERO. */
         private static final CharPredicate IS_ZERO = t -> t == 0;
@@ -8497,7 +8497,7 @@ public final class Fn {
         /** The Constant LEN. */
         private static final Function<char[], Integer> LEN = t -> t == null ? 0 : t.length;
 
-        private FnC() {
+        private FC() {
         }
 
         /**
@@ -8652,7 +8652,7 @@ public final class Fn {
      * @author haiyangl
      *
      */
-    public static final class FnB {
+    public static final class FB {
 
         /** The Constant POSITIVE. */
         private static final BytePredicate POSITIVE = t -> t > 0;
@@ -8681,7 +8681,7 @@ public final class Fn {
         /** The Constant LEN. */
         private static final Function<byte[], Integer> LEN = t -> t == null ? 0 : t.length;
 
-        private FnB() {
+        private FB() {
         }
 
         /**
@@ -8858,7 +8858,7 @@ public final class Fn {
      * @author haiyangl
      *
      */
-    public static final class FnS {
+    public static final class FS {
 
         /** The Constant POSITIVE. */
         private static final ShortPredicate POSITIVE = t -> t > 0;
@@ -8887,7 +8887,7 @@ public final class Fn {
         /** The Constant LEN. */
         private static final Function<short[], Integer> LEN = t -> t == null ? 0 : t.length;
 
-        private FnS() {
+        private FS() {
         }
 
         /**
@@ -9064,7 +9064,7 @@ public final class Fn {
      * @author haiyangl
      *
      */
-    public static final class FnI {
+    public static final class FI {
 
         /** The Constant POSITIVE. */
         private static final IntPredicate POSITIVE = t -> t > 0;
@@ -9093,7 +9093,7 @@ public final class Fn {
         /** The Constant LEN. */
         private static final Function<int[], Integer> LEN = t -> t == null ? 0 : t.length;
 
-        private FnI() {
+        private FI() {
         }
 
         /**
@@ -9270,7 +9270,7 @@ public final class Fn {
      * @author haiyangl
      *
      */
-    public static final class FnL {
+    public static final class FL {
 
         /** The Constant POSITIVE. */
         private static final LongPredicate POSITIVE = t -> t > 0;
@@ -9299,7 +9299,7 @@ public final class Fn {
         /** The Constant LEN. */
         private static final Function<long[], Integer> LEN = t -> t == null ? 0 : t.length;
 
-        private FnL() {
+        private FL() {
         }
 
         /**
@@ -9476,7 +9476,7 @@ public final class Fn {
      * @author haiyangl
      *
      */
-    public static final class FnF {
+    public static final class FF {
 
         /** The Constant POSITIVE. */
         private static final FloatPredicate POSITIVE = t -> t > 0;
@@ -9505,7 +9505,7 @@ public final class Fn {
         /** The Constant LEN. */
         private static final Function<float[], Integer> LEN = t -> t == null ? 0 : t.length;
 
-        private FnF() {
+        private FF() {
         }
 
         /**
@@ -9682,7 +9682,7 @@ public final class Fn {
      * @author haiyangl
      *
      */
-    public static final class FnD {
+    public static final class FD {
 
         /** The Constant POSITIVE. */
         private static final DoublePredicate POSITIVE = t -> t > 0;
@@ -9711,7 +9711,7 @@ public final class Fn {
         /** The Constant LEN. */
         private static final Function<double[], Integer> LEN = t -> t == null ? 0 : t.length;
 
-        private FnD() {
+        private FD() {
         }
 
         /**
