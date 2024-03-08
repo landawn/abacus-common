@@ -9197,7 +9197,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return Strings.EMPTY_STRING;
         }
 
-        return Strings.concat(str.substring(0, fromIndex) + str.subSequence(toIndex, len));
+        return Strings.concat(str.substring(0, fromIndex) + str.substring(toIndex, len));
     }
 
     /**

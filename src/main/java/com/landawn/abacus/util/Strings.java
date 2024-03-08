@@ -37,6 +37,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
 import java.util.RandomAccess;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.BiFunction;
 import java.util.function.IntUnaryOperator;
@@ -2061,6 +2062,83 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
+     * Capitalize all the words from the specified split by {@code ' '}
+     *
+     * @param str
+     * @return the specified String if it's {@code null} or empty.
+     */
+    public static String capitalizeFully(final String str) {
+        return capitalizeFully(str, " ");
+    }
+
+    /**
+     * Capitalize all the words from the specified split by {@code delimiter}
+     *
+     * @param str
+     * @param delimiters
+     * @return the specified String if it's {@code null} or empty.
+     */
+    public static String capitalizeFully(final String str, final String delimiter) {
+        if (str == null || str.length() == 0) {
+            return str;
+        }
+
+        final String strLowerCase = str.toLowerCase();
+        final String[] words = splitPreserveAllTokens(strLowerCase, delimiter);
+
+        N.applyToEach(words, Strings::capitalize);
+
+        return join(words, delimiter);
+    }
+
+    /**
+     * Capitalize all the words from the specified split by {@code delimiter}
+     *
+     * @param str
+     * @param delimiters
+     * @param excludedWordsInLowerCase
+     * @return the specified String if it's {@code null} or empty.
+     */
+    public static String capitalizeFully(final String str, final String delimiter, final String... excludedWordsInLowerCase) {
+        if (str == null || str.length() == 0) {
+            return str;
+        }
+
+        if (N.isEmpty(excludedWordsInLowerCase)) {
+            return capitalizeFully(str, delimiter);
+        }
+
+        return capitalizeFully(str, delimiter, N.toSet(excludedWordsInLowerCase));
+    }
+
+    /**
+     *
+     * @param str
+     * @param delimiter
+     * @param excludedWordsInLowerCase
+     * @return
+     */
+    public static String capitalizeFully(final String str, final String delimiter, final Collection<String> excludedWordsInLowerCase) {
+        if (str == null || str.length() == 0) {
+            return str;
+        }
+
+        if (N.isEmpty(excludedWordsInLowerCase)) {
+            return capitalizeFully(str, delimiter);
+        }
+
+        final String strLowerCase = str.toLowerCase();
+        final String[] words = splitPreserveAllTokens(strLowerCase, delimiter);
+        final Collection<String> excludedWordSet = excludedWordsInLowerCase instanceof Set || (excludedWordsInLowerCase.size() <= 3 && words.length <= 3)
+                ? excludedWordsInLowerCase
+                : N.newHashSet(excludedWordsInLowerCase);
+
+        N.applyToEach(words, e -> excludedWordSet.contains(e) ? e : capitalize(e));
+
+        return join(words, delimiter);
+    }
+
+    /**
      *
      * @param str
      * @return the specified String if it's {@code null} or empty.
@@ -2578,6 +2656,109 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     public static String replacePattern(final String source, final String regex, final String replacement) {
         return Pattern.compile(regex, Pattern.DOTALL).matcher(source).replaceAll(replacement);
+    }
+
+    /**
+     * Replace the substring at {@code str.substring(fromIndex, toIndex) with the specified {@code replacement}
+     *
+     * @param str
+     * @param fromIndex
+     * @param toIndex
+     * @param replacement
+     * @return
+     * @see #substring(String, int, int)
+     */
+    public static String replace(final String str, final int fromIndex, final int toIndex, final String replacement) {
+        N.checkFromToIndex(fromIndex, toIndex, N.len(str));
+
+        if (N.isEmpty(str)) {
+            return replacement == null ? str : replacement;
+        } else if (fromIndex == toIndex && N.isEmpty(replacement)) {
+            return str;
+        }
+
+        return str.substring(0, fromIndex) + N.nullToEmpty(replacement) + str.substring(toIndex);
+    }
+
+    /**
+     *
+     *
+     * @param str
+     * @param delimiterOfExclusiveBeginIndex
+     * @param delimiterOfExclusiveEndIndex
+     * @param replacement
+     * @return
+     * @see #substringBetween(String, String, String)
+     */
+    public static String replaceBetween(String str, String delimiterOfExclusiveBeginIndex, String delimiterOfExclusiveEndIndex, final String replacement) {
+        if (str == null || delimiterOfExclusiveBeginIndex == null || delimiterOfExclusiveEndIndex == null) {
+            return str;
+        }
+
+        int startIndex = str.indexOf(delimiterOfExclusiveBeginIndex);
+
+        if (startIndex < 0) {
+            return str;
+        }
+
+        startIndex += delimiterOfExclusiveBeginIndex.length();
+
+        final int endIndex = str.indexOf(delimiterOfExclusiveEndIndex, startIndex);
+
+        if (endIndex < 0) {
+            return str;
+        }
+
+        return replace(str, startIndex, endIndex, replacement);
+    }
+
+    /**
+     *
+     *
+     * @param str
+     * @param delimiterOfExclusiveBeginIndex
+     * @param replacement
+     * @return
+     * @see #substringAfter(String, String)
+     */
+    public static String replaceAfter(String str, String delimiterOfExclusiveBeginIndex, final String replacement) {
+        if (str == null || delimiterOfExclusiveBeginIndex == null) {
+            return str;
+        }
+
+        int startIndex = str.indexOf(delimiterOfExclusiveBeginIndex);
+
+        if (startIndex < 0) {
+            return str;
+        }
+
+        startIndex += delimiterOfExclusiveBeginIndex.length();
+
+        return replace(str, startIndex, str.length(), replacement);
+    }
+
+    /**
+     *
+     *
+     * @param str
+     * @param delimiterOfExclusiveEndIndex
+     * @param replacement
+     * @return
+     *
+     * @see #substringBefore(String, String)
+     */
+    public static String replaceBefore(String str, String delimiterOfExclusiveEndIndex, final String replacement) {
+        if (str == null || delimiterOfExclusiveEndIndex == null) {
+            return str;
+        }
+
+        int endIndex = str.indexOf(delimiterOfExclusiveEndIndex);
+
+        if (endIndex < 0) {
+            return str;
+        }
+
+        return replace(str, 0, endIndex, replacement);
     }
 
     // Remove
@@ -6675,7 +6856,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         } else if (p == b.length()) {
             return b;
         } else {
-            return a.subSequence(0, p).toString();
+            return a.substring(0, p);
         }
     }
 
@@ -6746,7 +6927,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         } else if (s == bLength) {
             return b;
         } else {
-            return a.subSequence(aLength - s, aLength).toString();
+            return a.substring(aLength - s, aLength);
         }
     }
 
@@ -7359,13 +7540,13 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return EMPTY_STRING;
         }
 
-        int index = str.indexOf(delimiterOfExclusiveEndIndex);
+        int endIndex = str.indexOf(delimiterOfExclusiveEndIndex);
 
-        if (index < 0) {
+        if (endIndex < 0) {
             return null;
         }
 
-        return str.substring(0, index);
+        return str.substring(0, endIndex);
     }
 
     /**
