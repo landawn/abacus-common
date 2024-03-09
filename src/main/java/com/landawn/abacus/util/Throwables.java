@@ -177,7 +177,7 @@ public final class Throwables {
     }
 
     @SuppressWarnings({ "java:S6548" })
-    public static abstract class ObjIterator<T, E extends Throwable> implements Immutable {
+    public abstract static class ObjIterator<T, E extends Throwable> implements Immutable {
 
         @SuppressWarnings("rawtypes")
         private static final ObjIterator EMPTY = new ObjIterator() {
@@ -392,7 +392,7 @@ public final class Throwables {
             return list;
         }
 
-        public void forEachRemaining(java.util.function.Consumer<? super T> action) throws E {
+        public void forEachRemaining(java.util.function.Consumer<? super T> action) throws E { // NOSONAR
             N.checkArgNotNull(action);
 
             while (hasNext()) {
@@ -405,7 +405,7 @@ public final class Throwables {
          * @param action
          * @throws E the e
          */
-        public void foreachRemaining(Throwables.Consumer<? super T, E> action) throws E {
+        public void foreachRemaining(Throwables.Consumer<? super T, E> action) throws E { // NOSONAR
             N.checkArgNotNull(action);
 
             while (hasNext()) {
@@ -3397,6 +3397,10 @@ public final class Throwables {
     }
 
     public interface IntObjConsumer<T, E extends Throwable> {
+        static <T, E extends Throwable> IntObjConsumer<T, E> of(IntObjConsumer<T, E> consumer) {
+            return consumer;
+        }
+
         /**
          *
          * @param i
@@ -3407,11 +3411,17 @@ public final class Throwables {
     }
 
     public interface IntObjFunction<T, R, E extends Throwable> {
+        static <T, R, E extends Throwable> IntObjFunction<T, R, E> of(IntObjFunction<T, R, E> func) {
+            return func;
+        }
 
         R apply(int i, T t) throws E;
     }
 
     public interface IntObjPredicate<T, E extends Throwable> {
+        static <T, E extends Throwable> IntObjPredicate<T, E> of(IntObjPredicate<T, E> predicate) {
+            return predicate;
+        }
 
         boolean test(int i, T t) throws E;
     }

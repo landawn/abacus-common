@@ -444,7 +444,7 @@ public abstract class Files { //NOSONAR
      * LinkOption...)} on input paths with the given link options.
      */
     public static Predicate<Path> isDirectory(LinkOption... options) {
-        return MoreFiles.isDirectory(options);
+        return com.google.common.io.MoreFiles.isDirectory(options);
     }
 
     /**
@@ -452,7 +452,7 @@ public abstract class Files { //NOSONAR
      * LinkOption...)} on input paths with the given link options.
      */
     public static Predicate<Path> isRegularFile(LinkOption... options) {
-        return MoreFiles.isRegularFile(options);
+        return com.google.common.io.MoreFiles.isRegularFile(options);
     }
 
     /**

@@ -3464,6 +3464,7 @@ public final class Fn {
             try {
                 return f.get();
             } catch (InterruptedException | ExecutionException e) {
+                Thread.currentThread().interrupt();
                 // throw ExceptionUtil.toRuntimeException(e);
                 return defaultValue;
             }

@@ -5375,8 +5375,8 @@ public class Array {
     //    }
 
     @Beta
-    public static final class ArrayEx extends Array {
-        private ArrayEx() {
+    public static final class ArrayUtil extends Array {
+        private ArrayUtil() {
             // utility class
         }
     }

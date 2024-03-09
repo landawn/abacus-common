@@ -47,12 +47,14 @@ import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
@@ -63,7 +65,6 @@ import java.util.stream.Collector;
 
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.MayReturnNull;
-import com.landawn.abacus.exception.UncheckedException;
 import com.landawn.abacus.parser.DeserializationConfig;
 import com.landawn.abacus.parser.JSONDeserializationConfig;
 import com.landawn.abacus.parser.JSONDeserializationConfig.JDC;
@@ -73,6 +74,7 @@ import com.landawn.abacus.parser.XMLDeserializationConfig.XDC;
 import com.landawn.abacus.parser.XMLSerializationConfig;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.util.Fn.Factory;
+import com.landawn.abacus.util.Fn.Fnn;
 import com.landawn.abacus.util.Fn.IntFunctions;
 import com.landawn.abacus.util.Fn.Suppliers;
 import com.landawn.abacus.util.Iterables.Slice;
@@ -17999,49 +18001,37 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
-     * @param <T>
+     * @param <A>
+     * @param <B>
+     * @param <C>
      * @param <E>
      * @param a
+     * @param b
+     * @param c
+     * @param valueForNoneA
+     * @param valueForNoneB
+     * @param valueForNoneC
      * @param action
      * @throws E the e
      */
-    public static <T, E extends Exception> void forEachIndexed(final T[] a, final Throwables.IntObjConsumer<? super T, E> action) throws E {
+    public static <A, B, C, E extends Exception> void forEach(final Iterator<A> a, final Iterator<B> b, final Iterator<C> c, final A valueForNoneA,
+            final B valueForNoneB, final C valueForNoneC, final Throwables.TriConsumer<? super A, ? super B, ? super C, E> action) throws E {
         checkArgNotNull(action);
 
-        if (isEmpty(a)) {
-            return;
-        }
+        final Iterator<A> iterA = a == null ? ObjIterator.<A> empty() : a;
+        final Iterator<B> iterB = b == null ? ObjIterator.<B> empty() : b;
+        final Iterator<C> iterC = b == null ? ObjIterator.<C> empty() : c;
 
-        forEachIndexed(a, 0, a.length, action);
-    }
+        A nextA = null;
+        B nextB = null;
+        C nextC = null;
 
-    /**
-     *
-     * @param <T>
-     * @param <E>
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param action
-     * @throws E the e
-     */
-    public static <T, E extends Exception> void forEachIndexed(final T[] a, final int fromIndex, final int toIndex,
-            final Throwables.IntObjConsumer<? super T, E> action) throws E {
-        checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), fromIndex < toIndex ? toIndex : fromIndex, len(a));
-        checkArgNotNull(action);
+        while (iterA.hasNext() || iterB.hasNext() || iterC.hasNext()) {
+            nextA = iterA.hasNext() ? iterA.next() : valueForNoneA;
+            nextB = iterB.hasNext() ? iterB.next() : valueForNoneB;
+            nextC = iterC.hasNext() ? iterC.next() : valueForNoneC;
 
-        if (isEmpty(a) || fromIndex == toIndex) {
-            return;
-        }
-
-        if (fromIndex <= toIndex) {
-            for (int i = fromIndex; i < toIndex; i++) {
-                action.accept(i, a[i]);
-            }
-        } else {
-            for (int i = min(a.length - 1, fromIndex); i > toIndex; i--) {
-                action.accept(i, a[i]);
-            }
+            action.accept(nextA, nextB, nextC);
         }
     }
 
@@ -18050,21 +18040,32 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T>
      * @param <E>
      * @param c
-     * @param action
-     * @throws E the e
+     * @param elementConsumer
+     * @param processThreadNum
+     * @see {@link Fnn#c(com.landawn.abacus.util.Throwables.Consumer)}
+     * @see {@link Fnn#f(com.landawn.abacus.util.Throwables.Function)
      */
-    public static <T, E extends Exception> void forEachIndexed(final Iterable<? extends T> c, final Throwables.IntObjConsumer<? super T, E> action) throws E {
-        checkArgNotNull(action);
+    public static <T, E extends Exception> void forEach(final Iterable<? extends T> c, final Throwables.Consumer<? super T, E> elementConsumer,
+            final int processThreadNum) {
+        forEach(c, elementConsumer, processThreadNum, N.ASYNC_EXECUTOR.getExecutor());
+    }
 
-        if (c == null) {
-            return;
-        }
+    /**
+     *
+     * @param <T>
+     * @param <E>
+     * @param c
+     * @param elementConsumer
+     * @param processThreadNum
+     * @param executor
+     * @see {@link Fnn#c(com.landawn.abacus.util.Throwables.Consumer)}
+     * @see {@link Fnn#f(com.landawn.abacus.util.Throwables.Function)
+     */
+    public static <T, E extends Exception> void forEach(final Iterable<? extends T> c, final Throwables.Consumer<? super T, E> elementConsumer,
+            final int processThreadNum, final Executor executor) {
+        final int size = c instanceof Collection ? ((Collection<T>) c).size() : Integer.MAX_VALUE;
 
-        int idx = 0;
-
-        for (T e : c) {
-            action.accept(idx++, e);
-        }
+        forEach(c == null ? ObjIterator.<T> empty() : c.iterator(), elementConsumer, N.min(size, processThreadNum), executor);
     }
 
     /**
@@ -18072,167 +18073,213 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T>
      * @param <E>
      * @param iter
-     * @param action
-     * @throws E the e
+     * @param elementConsumer
+     * @param processThreadNum
+     * @see {@link Fnn#c(com.landawn.abacus.util.Throwables.Consumer)}
+     * @see {@link Fnn#f(com.landawn.abacus.util.Throwables.Function)
      */
-    public static <T, E extends Exception> void forEachIndexed(final Iterator<? extends T> iter, final Throwables.IntObjConsumer<? super T, E> action)
-            throws E {
-        checkArgNotNull(action);
-
-        if (iter == null) {
-            return;
-        }
-
-        int idx = 0;
-
-        while (iter.hasNext()) {
-            action.accept(idx++, iter.next());
-        }
+    public static <T, E extends Exception> void forEach(final Iterator<? extends T> iter, final Throwables.Consumer<? super T, E> elementConsumer,
+            final int processThreadNum) {
+        forEach(iter, elementConsumer, processThreadNum, N.ASYNC_EXECUTOR.getExecutor());
     }
 
     /**
-     * Mostly it's designed for one-step operation to complete the operation in one step.
-     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
-     *
-     * Note: This is NOT a replacement of traditional for loop statement.
-     * The traditional for loop is still recommended in regular programming.
      *
      * @param <T>
      * @param <E>
-     * @param c
-     * @param fromIndex
-     * @param toIndex
-     * @param action
-     * @throws E the e
+     * @param iter
+     * @param elementConsumer
+     * @param processThreadNum
+     * @see {@link Fnn#c(com.landawn.abacus.util.Throwables.Consumer)}
+     * @see {@link Fnn#f(com.landawn.abacus.util.Throwables.Function)
      */
-    public static <T, E extends Exception> void forEachIndexed(final Collection<? extends T> c, int fromIndex, final int toIndex,
-            final Throwables.IntObjConsumer<? super T, E> action) throws E {
-        checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), fromIndex < toIndex ? toIndex : fromIndex, size(c));
-        checkArgNotNull(action);
+    public static <T, E extends Exception> void forEach(final Iterator<? extends T> iter, final Throwables.Consumer<? super T, E> elementConsumer,
+            final int processThreadNum, final Executor executor) {
+        N.checkArgNotNull(elementConsumer, "elementConsumer");
+        N.checkArgPositive(processThreadNum, "processThreadNum");
+        N.checkArgNotNull(executor, "executor");
 
-        if ((isEmpty(c) && fromIndex == 0 && toIndex == 0) || fromIndex == toIndex) {
-            return;
-        }
+        final Iterator<? extends T> iteratorII = iter == null ? ObjIterator.<T> empty() : iter;
+        final CountDownLatch latch = new CountDownLatch(processThreadNum);
+        final Holder<Exception> errorHolder = new Holder<>();
 
-        fromIndex = min(c.size() - 1, fromIndex);
+        for (int i = 0; i < processThreadNum; i++) {
+            executor.execute(() -> {
+                T element = null;
 
-        if (c instanceof List && c instanceof RandomAccess) {
-            final List<T> list = (List<T>) c;
+                try {
+                    while (errorHolder.value() == null) {
+                        synchronized (iteratorII) {
+                            if (iteratorII.hasNext()) {
+                                element = iteratorII.next();
+                            } else {
+                                break;
+                            }
+                        }
 
-            if (fromIndex <= toIndex) {
-                for (int i = fromIndex; i < toIndex; i++) {
-                    action.accept(i, list.get(i));
-                }
-            } else {
-                for (int i = fromIndex; i > toIndex; i--) {
-                    action.accept(i, list.get(i));
-                }
-            }
-        } else {
-            if (fromIndex < toIndex) {
-                final Iterator<? extends T> iter = c.iterator();
-                int idx = 0;
-
-                while (idx < fromIndex && iter.hasNext()) {
-                    iter.next();
-                    idx++;
-                }
-
-                while (iter.hasNext()) {
-                    action.accept(idx, iter.next());
-
-                    if (++idx >= toIndex) {
-                        break;
+                        elementConsumer.accept(element);
                     }
-                }
-            } else {
-                final Iterator<T> descendingIterator = getDescendingIteratorIfPossible(c);
-
-                if (descendingIterator != null) {
-                    int idx = c.size() - 1;
-
-                    while (idx > fromIndex && descendingIterator.hasNext()) {
-                        descendingIterator.next();
-                        idx--;
-                    }
-
-                    while (descendingIterator.hasNext()) {
-                        action.accept(idx, descendingIterator.next());
-
-                        if (--idx <= toIndex) {
-                            break;
+                } catch (Exception e) {
+                    synchronized (errorHolder) {
+                        if (errorHolder.value() == null) {
+                            errorHolder.setValue(e);
+                        } else {
+                            errorHolder.value().addSuppressed(e);
                         }
                     }
-                } else {
-                    final Iterator<? extends T> iter = c.iterator();
-                    int idx = 0;
-
-                    while (idx <= toIndex && iter.hasNext()) {
-                        iter.next();
-                        idx++;
-                    }
-
-                    final T[] a = (T[]) new Object[fromIndex - toIndex];
-
-                    while (iter.hasNext()) {
-                        a[idx - 1 - toIndex] = iter.next();
-
-                        if (idx++ >= fromIndex) {
-                            break;
-                        }
-                    }
-
-                    for (int i = a.length - 1; i >= 0; i--) {
-                        action.accept(i + toIndex + 1, a[i]);
-                    }
+                } finally {
+                    latch.countDown();
                 }
-            }
+            });
+        }
+
+        try {
+            latch.await();
+        } catch (InterruptedException e) {
+            // Thread.currentThread().interrupt();
+            N.toRuntimeException(e);
+        }
+
+        if (errorHolder.value() != null) {
+            throw ExceptionUtil.toRuntimeException(errorHolder.value());
         }
     }
 
-    /**
-     *
-     * @param <K>
-     * @param <V>
-     * @param <E>
-     * @param map
-     * @param action
-     * @throws E the e
-     */
-    public static <K, V, E extends Exception> void forEachIndexed(final Map<K, V> map, final Throwables.IntObjConsumer<? super Map.Entry<K, V>, E> action)
-            throws E {
-        checkArgNotNull(action);
-
-        if (isEmpty(map)) {
-            return;
-        }
-
-        forEachIndexed(map.entrySet(), action);
-    }
-
-    /**
-     *
-     * @param <K>
-     * @param <V>
-     * @param <E>
-     * @param map
-     * @param action
-     * @throws E the e
-     */
-    public static <K, V, E extends Exception> void forEachIndexed(final Map<K, V> map, final Throwables.IntBiObjConsumer<? super K, ? super V, E> action)
-            throws E {
-        checkArgNotNull(action);
-
-        if (isEmpty(map)) {
-            return;
-        }
-
-        int idx = 0;
-
-        for (Map.Entry<K, V> entry : map.entrySet()) {
-            action.accept(idx++, entry.getKey(), entry.getValue());
-        }
-    }
+    // commented out because of ambiguous and not be consistent with other forEach methods because it has return values.
+    //    /**
+    //     * Returns a result list kept the same order as the input {@code Iterable/Iterator}.
+    //     *
+    //     * @param <T>
+    //     * @param <R>
+    //     * @param <E>
+    //     * @param c
+    //     * @param elementMapper
+    //     * @param processThreadNum
+    //     * @see {@link Fnn#f(com.landawn.abacus.util.Throwables.Function)
+    //     * @see {@link Fnn#c(com.landawn.abacus.util.Throwables.Consumer)}
+    //     */
+    //    @Beta
+    //    public static <T, R, E extends Exception> List<R> forEach(final Iterable<? extends T> c, final Throwables.Function<? super T, R, E> elementMapper,
+    //            final int processThreadNum) {
+    //        return forEach(c, elementMapper, processThreadNum, N.ASYNC_EXECUTOR.getExecutor());
+    //    }
+    //
+    //    /**
+    //     * Returns a result list kept the same order as the input {@code Iterable/Iterator}.
+    //     *
+    //     * @param <T>
+    //     * @param <R>
+    //     * @param <E>
+    //     * @param c
+    //     * @param elementMapper
+    //     * @param processThreadNum
+    //     * @param executor
+    //     * @see {@link Fnn#f(com.landawn.abacus.util.Throwables.Function)
+    //     * @see {@link Fnn#c(com.landawn.abacus.util.Throwables.Consumer)}
+    //     */
+    //    @Beta
+    //    public static <T, R, E extends Exception> List<R> forEach(final Iterable<? extends T> c, final Throwables.Function<? super T, R, E> elementMapper,
+    //            final int processThreadNum, final Executor executor) {
+    //        final int size = c instanceof Collection ? ((Collection<T>) c).size() : Integer.MAX_VALUE;
+    //
+    //        return forEach(c == null ? ObjIterator.<T> empty() : c.iterator(), elementMapper, N.min(size, processThreadNum), executor);
+    //    }
+    //
+    //    /**
+    //     * Returns a result list kept the same order as the input {@code Iterable/Iterator}.
+    //     *
+    //     * @param <T>
+    //     * @param <R>
+    //     * @param <E>
+    //     * @param iter
+    //     * @param elementConsumer
+    //     * @param processThreadNum
+    //     * @see {@link Fnn#f(com.landawn.abacus.util.Throwables.Function)
+    //     * @see {@link Fnn#c(com.landawn.abacus.util.Throwables.Consumer)}
+    //     */
+    //    @Beta
+    //    public static <T, R, E extends Exception> List<R> forEach(final Iterator<? extends T> iter, final Throwables.Function<? super T, R, E> elementMapper,
+    //            final int processThreadNum) {
+    //        return forEach(iter, elementMapper, processThreadNum, N.ASYNC_EXECUTOR.getExecutor());
+    //    }
+    //
+    //    /**
+    //     * Returns a result list kept the same order as the input {@code Iterable/Iterator}.
+    //     *
+    //     * @param <T>
+    //     * @param <R>
+    //     * @param <E>
+    //     * @param iter
+    //     * @param elementMapper
+    //     * @param processThreadNum
+    //     * @see {@link Fnn#f(com.landawn.abacus.util.Throwables.Function)
+    //     * @see {@link Fnn#c(com.landawn.abacus.util.Throwables.Consumer)}
+    //     */
+    //    @Beta
+    //    public static <T, R, E extends Exception> List<R> forEach(final Iterator<? extends T> iter, final Throwables.Function<? super T, R, E> elementMapper,
+    //            final int processThreadNum, final Executor executor) {
+    //        N.checkArgNotNull(elementMapper, "elementMapper");
+    //        N.checkArgPositive(processThreadNum, "processThreadNum");
+    //        N.checkArgNotNull(executor, "executor");
+    //
+    //        final Iterator<? extends T> iterToUse = iter == null ? ObjIterator.<T> empty() : iter;
+    //        final CountDownLatch latch = new CountDownLatch(processThreadNum);
+    //        final AtomicInteger index = new AtomicInteger(0);
+    //        final Holder<Exception> errorHolder = new Holder<>();
+    //        final List<Indexed<R>> result = new ArrayList<>();
+    //
+    //        for (int i = 0; i < processThreadNum; i++) {
+    //            executor.execute(() -> {
+    //                int idx = 0;
+    //                T element = null;
+    //                R ret = null;
+    //
+    //                try {
+    //                    while (errorHolder.value() == null) {
+    //                        synchronized (iterToUse) {
+    //                            if (iterToUse.hasNext()) {
+    //                                idx = index.getAndIncrement();
+    //                                element = iterToUse.next();
+    //                            } else {
+    //                                break;
+    //                            }
+    //                        }
+    //
+    //                        ret = elementMapper.apply(element);
+    //
+    //                        synchronized (result) {
+    //                            result.add(Indexed.of(ret, idx));
+    //                        }
+    //                    }
+    //                } catch (Exception e) {
+    //                    synchronized (errorHolder) {
+    //                        if (errorHolder.value() == null) {
+    //                            errorHolder.setValue(e);
+    //                        } else {
+    //                            errorHolder.value().addSuppressed(e);
+    //                        }
+    //                    }
+    //                } finally {
+    //                    latch.countDown();
+    //                }
+    //            });
+    //        }
+    //
+    //        try {
+    //            latch.await();
+    //        } catch (InterruptedException e) {
+    //            Thread.currentThread().interrupt();
+    //            N.toRuntimeException(e);
+    //        }
+    //
+    //        if (errorHolder.value() != null) {
+    //            throw ExceptionUtil.toRuntimeException(errorHolder.value());
+    //        }
+    //
+    //        N.sort(result, Comparators.comparingInt(Indexed::index));
+    //
+    //        return N.map(result, Indexed::value);
+    //    }
 
     /**
      *
@@ -18753,42 +18800,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     *
-     * @param <A>
-     * @param <B>
-     * @param <C>
-     * @param <E>
-     * @param a
-     * @param b
-     * @param c
-     * @param valueForNoneA
-     * @param valueForNoneB
-     * @param valueForNoneC
-     * @param action
-     * @throws E the e
-     */
-    public static <A, B, C, E extends Exception> void forEach(final Iterator<A> a, final Iterator<B> b, final Iterator<C> c, final A valueForNoneA,
-            final B valueForNoneB, final C valueForNoneC, final Throwables.TriConsumer<? super A, ? super B, ? super C, E> action) throws E {
-        checkArgNotNull(action);
-
-        final Iterator<A> iterA = a == null ? ObjIterator.<A> empty() : a;
-        final Iterator<B> iterB = b == null ? ObjIterator.<B> empty() : b;
-        final Iterator<C> iterC = b == null ? ObjIterator.<C> empty() : c;
-
-        A nextA = null;
-        B nextB = null;
-        C nextC = null;
-
-        while (iterA.hasNext() || iterB.hasNext() || iterC.hasNext()) {
-            nextA = iterA.hasNext() ? iterA.next() : valueForNoneA;
-            nextB = iterB.hasNext() ? iterB.next() : valueForNoneB;
-            nextC = iterC.hasNext() ? iterC.next() : valueForNoneC;
-
-            action.accept(nextA, nextB, nextC);
-        }
-    }
-
-    /**
      * For each non null.
      *
      * @param <T>
@@ -19111,6 +19122,492 @@ public final class N extends CommonUtil { // public final class N extends π imp
             }
         }
     }
+
+    /**
+     *
+     * @param <T>
+     * @param <E>
+     * @param a
+     * @param action
+     * @throws E the e
+     */
+    public static <T, E extends Exception> void forEachIndexed(final T[] a, final Throwables.IntObjConsumer<? super T, E> action) throws E {
+        checkArgNotNull(action);
+
+        if (isEmpty(a)) {
+            return;
+        }
+
+        forEachIndexed(a, 0, a.length, action);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param <E>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param action
+     * @throws E the e
+     */
+    public static <T, E extends Exception> void forEachIndexed(final T[] a, final int fromIndex, final int toIndex,
+            final Throwables.IntObjConsumer<? super T, E> action) throws E {
+        checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), fromIndex < toIndex ? toIndex : fromIndex, len(a));
+        checkArgNotNull(action);
+
+        if (isEmpty(a) || fromIndex == toIndex) {
+            return;
+        }
+
+        if (fromIndex <= toIndex) {
+            for (int i = fromIndex; i < toIndex; i++) {
+                action.accept(i, a[i]);
+            }
+        } else {
+            for (int i = min(a.length - 1, fromIndex); i > toIndex; i--) {
+                action.accept(i, a[i]);
+            }
+        }
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param <E>
+     * @param c
+     * @param action
+     * @throws E the e
+     */
+    public static <T, E extends Exception> void forEachIndexed(final Iterable<? extends T> c, final Throwables.IntObjConsumer<? super T, E> action) throws E {
+        checkArgNotNull(action);
+
+        if (c == null) {
+            return;
+        }
+
+        int idx = 0;
+
+        for (T e : c) {
+            action.accept(idx++, e);
+        }
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param <E>
+     * @param iter
+     * @param action
+     * @throws E the e
+     */
+    public static <T, E extends Exception> void forEachIndexed(final Iterator<? extends T> iter, final Throwables.IntObjConsumer<? super T, E> action)
+            throws E {
+        checkArgNotNull(action);
+
+        if (iter == null) {
+            return;
+        }
+
+        int idx = 0;
+
+        while (iter.hasNext()) {
+            action.accept(idx++, iter.next());
+        }
+    }
+
+    /**
+     * Mostly it's designed for one-step operation to complete the operation in one step.
+     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
+     *
+     * Note: This is NOT a replacement of traditional for loop statement.
+     * The traditional for loop is still recommended in regular programming.
+     *
+     * @param <T>
+     * @param <E>
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @param action
+     * @throws E the e
+     */
+    public static <T, E extends Exception> void forEachIndexed(final Collection<? extends T> c, int fromIndex, final int toIndex,
+            final Throwables.IntObjConsumer<? super T, E> action) throws E {
+        checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), fromIndex < toIndex ? toIndex : fromIndex, size(c));
+        checkArgNotNull(action);
+
+        if ((isEmpty(c) && fromIndex == 0 && toIndex == 0) || fromIndex == toIndex) {
+            return;
+        }
+
+        fromIndex = min(c.size() - 1, fromIndex);
+
+        if (c instanceof List && c instanceof RandomAccess) {
+            final List<T> list = (List<T>) c;
+
+            if (fromIndex <= toIndex) {
+                for (int i = fromIndex; i < toIndex; i++) {
+                    action.accept(i, list.get(i));
+                }
+            } else {
+                for (int i = fromIndex; i > toIndex; i--) {
+                    action.accept(i, list.get(i));
+                }
+            }
+        } else {
+            if (fromIndex < toIndex) {
+                final Iterator<? extends T> iter = c.iterator();
+                int idx = 0;
+
+                while (idx < fromIndex && iter.hasNext()) {
+                    iter.next();
+                    idx++;
+                }
+
+                while (iter.hasNext()) {
+                    action.accept(idx, iter.next());
+
+                    if (++idx >= toIndex) {
+                        break;
+                    }
+                }
+            } else {
+                final Iterator<T> descendingIterator = getDescendingIteratorIfPossible(c);
+
+                if (descendingIterator != null) {
+                    int idx = c.size() - 1;
+
+                    while (idx > fromIndex && descendingIterator.hasNext()) {
+                        descendingIterator.next();
+                        idx--;
+                    }
+
+                    while (descendingIterator.hasNext()) {
+                        action.accept(idx, descendingIterator.next());
+
+                        if (--idx <= toIndex) {
+                            break;
+                        }
+                    }
+                } else {
+                    final Iterator<? extends T> iter = c.iterator();
+                    int idx = 0;
+
+                    while (idx <= toIndex && iter.hasNext()) {
+                        iter.next();
+                        idx++;
+                    }
+
+                    final T[] a = (T[]) new Object[fromIndex - toIndex];
+
+                    while (iter.hasNext()) {
+                        a[idx - 1 - toIndex] = iter.next();
+
+                        if (idx++ >= fromIndex) {
+                            break;
+                        }
+                    }
+
+                    for (int i = a.length - 1; i >= 0; i--) {
+                        action.accept(i + toIndex + 1, a[i]);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     *
+     * @param <K>
+     * @param <V>
+     * @param <E>
+     * @param map
+     * @param action
+     * @throws E the e
+     */
+    public static <K, V, E extends Exception> void forEachIndexed(final Map<K, V> map, final Throwables.IntObjConsumer<? super Map.Entry<K, V>, E> action)
+            throws E {
+        checkArgNotNull(action);
+
+        if (isEmpty(map)) {
+            return;
+        }
+
+        forEachIndexed(map.entrySet(), action);
+    }
+
+    /**
+     *
+     * @param <K>
+     * @param <V>
+     * @param <E>
+     * @param map
+     * @param action
+     * @throws E the e
+     */
+    public static <K, V, E extends Exception> void forEachIndexed(final Map<K, V> map, final Throwables.IntBiObjConsumer<? super K, ? super V, E> action)
+            throws E {
+        checkArgNotNull(action);
+
+        if (isEmpty(map)) {
+            return;
+        }
+
+        int idx = 0;
+
+        for (Map.Entry<K, V> entry : map.entrySet()) {
+            action.accept(idx++, entry.getKey(), entry.getValue());
+        }
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param <E>
+     * @param c
+     * @param elementConsumer
+     * @param processThreadNum
+     * @see Throwables.IntObjConsumer#of(com.landawn.abacus.util.Throwables.IntObjConsumer)
+     * @see Throwables.IntObjFunction#of(com.landawn.abacus.util.Throwables.IntObjFunction)
+     */
+    public static <T, E extends Exception> void forEachIndexed(final Iterable<? extends T> c, final Throwables.IntObjConsumer<? super T, E> elementConsumer,
+            final int processThreadNum) {
+        forEachIndexed(c, elementConsumer, processThreadNum, N.ASYNC_EXECUTOR.getExecutor());
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param <E>
+     * @param c
+     * @param elementConsumer
+     * @param processThreadNum
+     * @param executor
+     * @see Throwables.IntObjConsumer#of(com.landawn.abacus.util.Throwables.IntObjConsumer)
+     * @see Throwables.IntObjFunction#of(com.landawn.abacus.util.Throwables.IntObjFunction)
+     */
+    public static <T, E extends Exception> void forEachIndexed(final Iterable<? extends T> c, final Throwables.IntObjConsumer<? super T, E> elementConsumer,
+            final int processThreadNum, final Executor executor) {
+        final int size = c instanceof Collection ? ((Collection<T>) c).size() : Integer.MAX_VALUE;
+
+        forEachIndexed(c == null ? ObjIterator.<T> empty() : c.iterator(), elementConsumer, N.min(size, processThreadNum), executor);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param <E>
+     * @param iter
+     * @param elementConsumer
+     * @param processThreadNum
+     * @see Throwables.IntObjConsumer#of(com.landawn.abacus.util.Throwables.IntObjConsumer)
+     * @see Throwables.IntObjFunction#of(com.landawn.abacus.util.Throwables.IntObjFunction)
+     */
+    public static <T, E extends Exception> void forEachIndexed(final Iterator<? extends T> iter, final Throwables.IntObjConsumer<? super T, E> elementConsumer,
+            final int processThreadNum) {
+        forEachIndexed(iter, elementConsumer, processThreadNum, N.ASYNC_EXECUTOR.getExecutor());
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param <E>
+     * @param iter
+     * @param elementConsumer
+     * @param processThreadNum
+     * @see Throwables.IntObjConsumer#of(com.landawn.abacus.util.Throwables.IntObjConsumer)
+     * @see Throwables.IntObjFunction#of(com.landawn.abacus.util.Throwables.IntObjFunction)
+     */
+    public static <T, E extends Exception> void forEachIndexed(final Iterator<? extends T> iter, final Throwables.IntObjConsumer<? super T, E> elementConsumer,
+            final int processThreadNum, final Executor executor) {
+        N.checkArgNotNull(elementConsumer, "elementConsumer");
+        N.checkArgPositive(processThreadNum, "processThreadNum");
+        N.checkArgNotNull(executor, "executor");
+
+        final Iterator<? extends T> iteratorII = iter == null ? ObjIterator.<T> empty() : iter;
+        final CountDownLatch latch = new CountDownLatch(processThreadNum);
+        final AtomicInteger index = new AtomicInteger(0);
+        final Holder<Exception> errorHolder = new Holder<>();
+
+        for (int i = 0; i < processThreadNum; i++) {
+            executor.execute(() -> {
+                int idx = 0;
+                T element = null;
+
+                try {
+                    while (errorHolder.value() == null) {
+                        synchronized (iteratorII) {
+                            if (iteratorII.hasNext()) {
+                                idx = index.getAndIncrement();
+                                element = iteratorII.next();
+                            } else {
+                                break;
+                            }
+                        }
+
+                        elementConsumer.accept(idx, element);
+                    }
+                } catch (Exception e) {
+                    synchronized (errorHolder) {
+                        if (errorHolder.value() == null) {
+                            errorHolder.setValue(e);
+                        } else {
+                            errorHolder.value().addSuppressed(e);
+                        }
+                    }
+                } finally {
+                    latch.countDown();
+                }
+            });
+        }
+
+        try {
+            latch.await();
+        } catch (InterruptedException e) {
+            // Thread.currentThread().interrupt();
+            N.toRuntimeException(e);
+        }
+
+        if (errorHolder.value() != null) {
+            throw ExceptionUtil.toRuntimeException(errorHolder.value());
+        }
+    }
+
+    // commented out because of ambiguous and not be consistent with other forEach methods because it has return values.
+    //    /**
+    //     * Returns a result list kept the same order as the input {@code Iterable/Iterator}.
+    //     *
+    //     * @param <T>
+    //     * @param <R>
+    //     * @param <E>
+    //     * @param c
+    //     * @param elementMapper
+    //     * @param processThreadNum
+    //     * @see Throwables.IntObjFunction#of(com.landawn.abacus.util.Throwables.IntObjFunction)
+    //     * @see Throwables.IntObjConsumer#of(com.landawn.abacus.util.Throwables.IntObjConsumer)
+    //     */
+    //    @Beta
+    //    public static <T, R, E extends Exception> List<R> forEachIndexed(final Iterable<? extends T> c,
+    //            final Throwables.IntObjFunction<? super T, R, E> elementMapper, final int processThreadNum) {
+    //        return forEachIndexed(c, elementMapper, processThreadNum, N.ASYNC_EXECUTOR.getExecutor());
+    //    }
+    //
+    //    /**
+    //     * Returns a result list kept the same order as the input {@code Iterable/Iterator}.
+    //     *
+    //     * @param <T>
+    //     * @param <R>
+    //     * @param <E>
+    //     * @param c
+    //     * @param elementMapper
+    //     * @param processThreadNum
+    //     * @param executor
+    //     * @see Throwables.IntObjFunction#of(com.landawn.abacus.util.Throwables.IntObjFunction)
+    //     * @see Throwables.IntObjConsumer#of(com.landawn.abacus.util.Throwables.IntObjConsumer)
+    //     */
+    //    @Beta
+    //    public static <T, R, E extends Exception> List<R> forEachIndexed(final Iterable<? extends T> c,
+    //            final Throwables.IntObjFunction<? super T, R, E> elementMapper, final int processThreadNum, final Executor executor) {
+    //        final int size = c instanceof Collection ? ((Collection<T>) c).size() : Integer.MAX_VALUE;
+    //
+    //        return forEachIndexed(c == null ? ObjIterator.<T> empty() : c.iterator(), elementMapper, N.min(size, processThreadNum), executor);
+    //    }
+    //
+    //    /**
+    //     * Returns a result list kept the same order as the input {@code Iterable/Iterator}.
+    //     *
+    //     * @param <T>
+    //     * @param <R>
+    //     * @param <E>
+    //     * @param iter
+    //     * @param elementConsumer
+    //     * @param processThreadNum
+    //     * @see Throwables.IntObjFunction#of(com.landawn.abacus.util.Throwables.IntObjFunction)
+    //     * @see Throwables.IntObjConsumer#of(com.landawn.abacus.util.Throwables.IntObjConsumer)
+    //     */
+    //    @Beta
+    //    public static <T, R, E extends Exception> List<R> forEachIndexed(final Iterator<? extends T> iter,
+    //            final Throwables.IntObjFunction<? super T, R, E> elementMapper, final int processThreadNum) {
+    //        return forEachIndexed(iter, elementMapper, processThreadNum, N.ASYNC_EXECUTOR.getExecutor());
+    //    }
+    //
+    //    /**
+    //     * Returns a result list kept the same order as the input {@code Iterable/Iterator}.
+    //     *
+    //     * @param <T>
+    //     * @param <R>
+    //     * @param <E>
+    //     * @param iter
+    //     * @param elementMapper
+    //     * @param processThreadNum
+    //     * @see Throwables.IntObjFunction#of(com.landawn.abacus.util.Throwables.IntObjFunction)
+    //     * @see Throwables.IntObjConsumer#of(com.landawn.abacus.util.Throwables.IntObjConsumer)
+    //     */
+    //    @Beta
+    //    public static <T, R, E extends Exception> List<R> forEachIndexed(final Iterator<? extends T> iter,
+    //            final Throwables.IntObjFunction<? super T, R, E> elementMapper, final int processThreadNum, final Executor executor) {
+    //        N.checkArgNotNull(elementMapper, "elementMapper");
+    //        N.checkArgPositive(processThreadNum, "processThreadNum");
+    //        N.checkArgNotNull(executor, "executor");
+    //
+    //        final Iterator<? extends T> iterToUse = iter == null ? ObjIterator.<T> empty() : iter;
+    //        final CountDownLatch latch = new CountDownLatch(processThreadNum);
+    //        final AtomicInteger index = new AtomicInteger(0);
+    //        final Holder<Exception> errorHolder = new Holder<>();
+    //        final List<Indexed<R>> result = new ArrayList<>();
+    //
+    //        for (int i = 0; i < processThreadNum; i++) {
+    //            executor.execute(() -> {
+    //                int idx = 0;
+    //                T element = null;
+    //                R ret = null;
+    //
+    //                try {
+    //                    while (errorHolder.value() == null) {
+    //                        synchronized (iterToUse) {
+    //                            if (iterToUse.hasNext()) {
+    //                                idx = index.getAndIncrement();
+    //                                element = iterToUse.next();
+    //                            } else {
+    //                                break;
+    //                            }
+    //                        }
+    //
+    //                        ret = elementMapper.apply(idx, element);
+    //
+    //                        synchronized (result) {
+    //                            result.add(Indexed.of(ret, idx));
+    //                        }
+    //                    }
+    //                } catch (Exception e) {
+    //                    synchronized (errorHolder) {
+    //                        if (errorHolder.value() == null) {
+    //                            errorHolder.setValue(e);
+    //                        } else {
+    //                            errorHolder.value().addSuppressed(e);
+    //                        }
+    //                    }
+    //                } finally {
+    //                    latch.countDown();
+    //                }
+    //            });
+    //        }
+    //
+    //        try {
+    //            latch.await();
+    //        } catch (InterruptedException e) {
+    //            Thread.currentThread().interrupt();
+    //            N.toRuntimeException(e);
+    //        }
+    //
+    //        if (errorHolder.value() != null) {
+    //            throw ExceptionUtil.toRuntimeException(errorHolder.value());
+    //        }
+    //
+    //        N.sort(result, Comparators.comparingInt(Indexed::index));
+    //
+    //        return N.map(result, Indexed::value);
+    //    }
 
     /**
      * For each pair.
@@ -28500,8 +28997,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         int cnt = 0;
 
         while (iter.hasNext()) {
-            elementConsumer.accept(cnt, iter.next());
-            cnt++;
+            elementConsumer.accept(cnt++, iter.next());
 
             if (cnt % batchSize == 0) {
                 result.add(batchAction.call());
@@ -28747,7 +29243,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         try {
             TimeUnit.MILLISECONDS.sleep(timeoutInMillis);
         } catch (InterruptedException e) {
-            throw new UncheckedException(e);
+            throw toRuntimeException(e);
         }
     }
 
@@ -28767,7 +29263,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         try {
             unit.sleep(timeout);
         } catch (InterruptedException e) {
-            throw new UncheckedException(e);
+            throw toRuntimeException(e);
         }
     }
 

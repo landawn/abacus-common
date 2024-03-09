@@ -2079,6 +2079,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @return the specified String if it's {@code null} or empty.
      */
     public static String capitalizeFully(final String str, final String delimiter) {
+        N.checkArgNotEmpty(delimiter, "delimiter"); // NOSONAR
+
         if (str == null || str.length() == 0) {
             return str;
         }
@@ -2100,6 +2102,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @return the specified String if it's {@code null} or empty.
      */
     public static String capitalizeFully(final String str, final String delimiter, final String... excludedWordsInLowerCase) {
+        N.checkArgNotEmpty(delimiter, "delimiter"); // NOSONAR
+
         if (str == null || str.length() == 0) {
             return str;
         }
@@ -2119,6 +2123,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @return
      */
     public static String capitalizeFully(final String str, final String delimiter, final Collection<String> excludedWordsInLowerCase) {
+        N.checkArgNotEmpty(delimiter, "delimiter"); // NOSONAR
+
         if (str == null || str.length() == 0) {
             return str;
         }

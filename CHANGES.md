@@ -1,3 +1,7 @@
+### 3.10.13
+
+* Improvements and bug fix.
+
 ### 3.10.12
 
 * Improvements and bug fix.
