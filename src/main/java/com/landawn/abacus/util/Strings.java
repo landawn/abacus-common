@@ -39,7 +39,6 @@ import java.util.Random;
 import java.util.RandomAccess;
 import java.util.Set;
 import java.util.UUID;
-import java.util.function.BiFunction;
 import java.util.function.IntUnaryOperator;
 import java.util.function.Supplier;
 import java.util.regex.Matcher;
@@ -7099,24 +7098,24 @@ public abstract sealed class Strings permits Strings.StringUtil {
         return substring(str, inclusiveBeginIndex, funcOfExclusiveEndIndex.applyAsInt(inclusiveBeginIndex));
     }
 
-    /**
-     * Returns {@code null} if {@code (str == null || inclusiveBeginIndex < 0)}, or {@code funcOfExclusiveEndIndex.apply(str, inclusiveBeginIndex) < 0}.
-     *
-     * @param str
-     * @param inclusiveBeginIndex
-     * @param funcOfExclusiveEndIndex {@code exclusiveEndIndex <- funcOfExclusiveEndIndex.apply(str, inclusiveBeginIndex) if inclusiveBeginIndex >= 0}
-     * @return {@code null} if {@code (str == null || inclusiveBeginIndex < 0)}. (auto-generated java doc for return)
-     * @see #substring(String, int, int)
-     */
-    @MayReturnNull
-    @Beta
-    public static String substring(final String str, final int inclusiveBeginIndex, final BiFunction<String, Integer, Integer> funcOfExclusiveEndIndex) {
-        if (str == null || inclusiveBeginIndex < 0) {
-            return null;
-        }
-
-        return substring(str, inclusiveBeginIndex, funcOfExclusiveEndIndex.apply(str, inclusiveBeginIndex));
-    }
+    //    /**
+    //     * Returns {@code null} if {@code (str == null || inclusiveBeginIndex < 0)}, or {@code funcOfExclusiveEndIndex.apply(str, inclusiveBeginIndex) < 0}.
+    //     *
+    //     * @param str
+    //     * @param inclusiveBeginIndex
+    //     * @param funcOfExclusiveEndIndex {@code exclusiveEndIndex <- funcOfExclusiveEndIndex.apply(str, inclusiveBeginIndex) if inclusiveBeginIndex >= 0}
+    //     * @return {@code null} if {@code (str == null || inclusiveBeginIndex < 0)}. (auto-generated java doc for return)
+    //     * @see #substring(String, int, int)
+    //     */
+    //    @MayReturnNull
+    //    @Beta
+    //    public static String substring(final String str, final int inclusiveBeginIndex, final BiFunction<String, Integer, Integer> funcOfExclusiveEndIndex) {
+    //        if (str == null || inclusiveBeginIndex < 0) {
+    //            return null;
+    //        }
+    //
+    //        return substring(str, inclusiveBeginIndex, funcOfExclusiveEndIndex.apply(str, inclusiveBeginIndex));
+    //    }
 
     /**
      * Returns {@code null} if {@code (str == null || exclusiveEndIndex < 0)}, or {@code funcOfInclusiveBeginIndex.applyAsInt(exclusiveEndIndex) < 0}.
@@ -7137,25 +7136,25 @@ public abstract sealed class Strings permits Strings.StringUtil {
         return substring(str, funcOfInclusiveBeginIndex.applyAsInt(exclusiveEndIndex), exclusiveEndIndex);
     }
 
-    /**
-     * Returns {@code null} if {@code (str == null || exclusiveEndIndex < 0)}, or {@code funcOfInclusiveBeginIndex.apply(str, exclusiveEndIndex) < 0}.
-     *
-     *
-     * @param str
-     * @param funcOfInclusiveBeginIndex {@code inclusiveBeginIndex <- funcOfInclusiveBeginIndex.apply(str, exclusiveEndIndex)) if exclusiveEndIndex > 0}
-     * @param exclusiveEndIndex
-     * @return {@code null} if {@code (str == null || exclusiveEndIndex < 0)}. (auto-generated java doc for return)
-     * @see #substring(String, int, int)
-     */
-    @MayReturnNull
-    @Beta
-    public static String substring(final String str, final BiFunction<String, Integer, Integer> funcOfInclusiveBeginIndex, final int exclusiveEndIndex) {
-        if (str == null || exclusiveEndIndex < 0) {
-            return null;
-        }
-
-        return substring(str, funcOfInclusiveBeginIndex.apply(str, exclusiveEndIndex), exclusiveEndIndex);
-    }
+    //    /**
+    //     * Returns {@code null} if {@code (str == null || exclusiveEndIndex < 0)}, or {@code funcOfInclusiveBeginIndex.apply(str, exclusiveEndIndex) < 0}.
+    //     *
+    //     *
+    //     * @param str
+    //     * @param funcOfInclusiveBeginIndex {@code inclusiveBeginIndex <- funcOfInclusiveBeginIndex.apply(str, exclusiveEndIndex)) if exclusiveEndIndex > 0}
+    //     * @param exclusiveEndIndex
+    //     * @return {@code null} if {@code (str == null || exclusiveEndIndex < 0)}. (auto-generated java doc for return)
+    //     * @see #substring(String, int, int)
+    //     */
+    //    @MayReturnNull
+    //    @Beta
+    //    public static String substring(final String str, final BiFunction<String, Integer, Integer> funcOfInclusiveBeginIndex, final int exclusiveEndIndex) {
+    //        if (str == null || exclusiveEndIndex < 0) {
+    //            return null;
+    //        }
+    //
+    //        return substring(str, funcOfInclusiveBeginIndex.apply(str, exclusiveEndIndex), exclusiveEndIndex);
+    //    }
 
     /**
      * Returns {@code null} if {@code (str == null || str.length() == 0)}, or {@code str.indexOf(delimiterOfInclusiveBeginIndex) < 0},
@@ -7995,23 +7994,23 @@ public abstract sealed class Strings permits Strings.StringUtil {
         return substringBetween(str, exclusiveBeginIndex, funcOfExclusiveEndIndex.applyAsInt(exclusiveBeginIndex));
     }
 
-    /**
-     *
-     * @param str
-     * @param exclusiveBeginIndex
-     * @param funcOfExclusiveEndIndex {@code exclusiveEndIndex <- funcOfExclusiveEndIndex.apply(str, exclusiveBeginIndex) if inclusiveBeginIndex >= 0}
-     * @return {@code null} if {@code (str == null || exclusiveBeginIndex < 0 || exclusiveBeginIndex >= str.length())}. (auto-generated java doc for return)
-     * @see #substringBetween(String, int, int)
-     */
-    @MayReturnNull
-    @Beta
-    public static String substringBetween(String str, int exclusiveBeginIndex, final BiFunction<String, Integer, Integer> funcOfExclusiveEndIndex) {
-        if (str == null || exclusiveBeginIndex < 0 || exclusiveBeginIndex >= str.length()) {
-            return null;
-        }
-
-        return substringBetween(str, exclusiveBeginIndex, funcOfExclusiveEndIndex.apply(str, exclusiveBeginIndex));
-    }
+    //    /**
+    //     *
+    //     * @param str
+    //     * @param exclusiveBeginIndex
+    //     * @param funcOfExclusiveEndIndex {@code exclusiveEndIndex <- funcOfExclusiveEndIndex.apply(str, exclusiveBeginIndex) if inclusiveBeginIndex >= 0}
+    //     * @return {@code null} if {@code (str == null || exclusiveBeginIndex < 0 || exclusiveBeginIndex >= str.length())}. (auto-generated java doc for return)
+    //     * @see #substringBetween(String, int, int)
+    //     */
+    //    @MayReturnNull
+    //    @Beta
+    //    public static String substringBetween(String str, int exclusiveBeginIndex, final BiFunction<String, Integer, Integer> funcOfExclusiveEndIndex) {
+    //        if (str == null || exclusiveBeginIndex < 0 || exclusiveBeginIndex >= str.length()) {
+    //            return null;
+    //        }
+    //
+    //        return substringBetween(str, exclusiveBeginIndex, funcOfExclusiveEndIndex.apply(str, exclusiveBeginIndex));
+    //    }
 
     /**
      *
@@ -8030,23 +8029,23 @@ public abstract sealed class Strings permits Strings.StringUtil {
         return substringBetween(str, funcOfExclusiveBeginIndex.applyAsInt(exclusiveEndIndex), exclusiveEndIndex);
     }
 
-    /**
-     *
-     * @param str
-     * @param funcOfExclusiveBeginIndex {@code exclusiveBeginIndex <- funcOfExclusiveBeginIndex.apply(str, exclusiveEndIndex)) if exclusiveEndIndex >= 0}
-     * @param exclusiveEndIndex
-     * @return {@code null} if {@code (str == null || exclusiveEndIndex < 0)}. (auto-generated java doc for return)
-     * @see #substringBetween(String, int, int)
-     */
-    @MayReturnNull
-    @Beta
-    public static String substringBetween(String str, final BiFunction<String, Integer, Integer> funcOfExclusiveBeginIndex, int exclusiveEndIndex) {
-        if (str == null || exclusiveEndIndex < 0) {
-            return null;
-        }
-
-        return substringBetween(str, funcOfExclusiveBeginIndex.apply(str, exclusiveEndIndex), exclusiveEndIndex);
-    }
+    //    /**
+    //     *
+    //     * @param str
+    //     * @param funcOfExclusiveBeginIndex {@code exclusiveBeginIndex <- funcOfExclusiveBeginIndex.apply(str, exclusiveEndIndex)) if exclusiveEndIndex >= 0}
+    //     * @param exclusiveEndIndex
+    //     * @return {@code null} if {@code (str == null || exclusiveEndIndex < 0)}. (auto-generated java doc for return)
+    //     * @see #substringBetween(String, int, int)
+    //     */
+    //    @MayReturnNull
+    //    @Beta
+    //    public static String substringBetween(String str, final BiFunction<String, Integer, Integer> funcOfExclusiveBeginIndex, int exclusiveEndIndex) {
+    //        if (str == null || exclusiveEndIndex < 0) {
+    //            return null;
+    //        }
+    //
+    //        return substringBetween(str, funcOfExclusiveBeginIndex.apply(str, exclusiveEndIndex), exclusiveEndIndex);
+    //    }
 
     /**
      *
@@ -11834,20 +11833,20 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return Optional.ofNullable(Strings.substring(str, inclusiveBeginIndex, funcOfExclusiveEndIndex));
         }
 
-        /**
-         * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}
-         *
-         * @param str
-         * @param inclusiveBeginIndex
-         * @param funcOfExclusiveEndIndex
-         * @return
-         * @see #substring(String, int, int)
-         */
-        @Beta
-        public static Optional<String> substring(final String str, final int inclusiveBeginIndex,
-                final BiFunction<String, Integer, Integer> funcOfExclusiveEndIndex) {
-            return Optional.ofNullable(Strings.substring(str, inclusiveBeginIndex, funcOfExclusiveEndIndex));
-        }
+        //        /**
+        //         * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}
+        //         *
+        //         * @param str
+        //         * @param inclusiveBeginIndex
+        //         * @param funcOfExclusiveEndIndex
+        //         * @return
+        //         * @see #substring(String, int, int)
+        //         */
+        //        @Beta
+        //        public static Optional<String> substring(final String str, final int inclusiveBeginIndex,
+        //                final BiFunction<String, Integer, Integer> funcOfExclusiveEndIndex) {
+        //            return Optional.ofNullable(Strings.substring(str, inclusiveBeginIndex, funcOfExclusiveEndIndex));
+        //        }
 
         /**
          * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}
@@ -11862,20 +11861,20 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return Optional.ofNullable(Strings.substring(str, funcOfInclusiveBeginIndex, exclusiveEndIndex));
         }
 
-        /**
-         * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}
-         *
-         * @param str
-         * @param funcOfInclusiveBeginIndex
-         * @param exclusiveEndIndex
-         * @return
-         * @see #substring(String, int, int)
-         */
-        @Beta
-        public static Optional<String> substring(final String str, final BiFunction<String, Integer, Integer> funcOfInclusiveBeginIndex,
-                final int exclusiveEndIndex) {
-            return Optional.ofNullable(Strings.substring(str, funcOfInclusiveBeginIndex, exclusiveEndIndex));
-        }
+        //        /**
+        //         * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}
+        //         *
+        //         * @param str
+        //         * @param funcOfInclusiveBeginIndex
+        //         * @param exclusiveEndIndex
+        //         * @return
+        //         * @see #substring(String, int, int)
+        //         */
+        //        @Beta
+        //        public static Optional<String> substring(final String str, final BiFunction<String, Integer, Integer> funcOfInclusiveBeginIndex,
+        //                final int exclusiveEndIndex) {
+        //            return Optional.ofNullable(Strings.substring(str, funcOfInclusiveBeginIndex, exclusiveEndIndex));
+        //        }
 
         //    /**
         //     * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}
@@ -12905,20 +12904,20 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return Optional.ofNullable(Strings.substringBetween(str, exclusiveBeginIndex, funcOfExclusiveEndIndex));
         }
 
-        /**
-         * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}
-         *
-         * @param str
-         * @param exclusiveBeginIndex
-         * @param funcOfExclusiveEndIndex {@code exclusiveEndIndex <- funcOfExclusiveEndIndex.apply(str, exclusiveBeginIndex) if inclusiveBeginIndex >= 0}
-         * @return
-         * @see #substringBetween(String, int, int)
-         */
-        @Beta
-        public static Optional<String> substringBetween(final String str, final int exclusiveBeginIndex,
-                final BiFunction<String, Integer, Integer> funcOfExclusiveEndIndex) {
-            return Optional.ofNullable(Strings.substringBetween(str, exclusiveBeginIndex, funcOfExclusiveEndIndex));
-        }
+        //        /**
+        //         * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}
+        //         *
+        //         * @param str
+        //         * @param exclusiveBeginIndex
+        //         * @param funcOfExclusiveEndIndex {@code exclusiveEndIndex <- funcOfExclusiveEndIndex.apply(str, exclusiveBeginIndex) if inclusiveBeginIndex >= 0}
+        //         * @return
+        //         * @see #substringBetween(String, int, int)
+        //         */
+        //        @Beta
+        //        public static Optional<String> substringBetween(final String str, final int exclusiveBeginIndex,
+        //                final BiFunction<String, Integer, Integer> funcOfExclusiveEndIndex) {
+        //            return Optional.ofNullable(Strings.substringBetween(str, exclusiveBeginIndex, funcOfExclusiveEndIndex));
+        //        }
 
         /**
          * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}
@@ -12933,20 +12932,20 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return Optional.ofNullable(Strings.substringBetween(str, funcOfExclusiveBeginIndex, exclusiveEndIndex));
         }
 
-        /**
-         * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}
-         *
-         * @param str
-         * @param funcOfExclusiveBeginIndex {@code exclusiveBeginIndex <- funcOfExclusiveBeginIndex.apply(str, exclusiveEndIndex)) if exclusiveEndIndex >= 0}
-         * @param exclusiveEndIndex
-         * @return
-         * @see #substringBetween(String, int, int)
-         */
-        @Beta
-        public static Optional<String> substringBetween(final String str, final BiFunction<String, Integer, Integer> funcOfExclusiveBeginIndex,
-                final int exclusiveEndIndex) {
-            return Optional.ofNullable(Strings.substringBetween(str, funcOfExclusiveBeginIndex, exclusiveEndIndex));
-        }
+        //        /**
+        //         * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}
+        //         *
+        //         * @param str
+        //         * @param funcOfExclusiveBeginIndex {@code exclusiveBeginIndex <- funcOfExclusiveBeginIndex.apply(str, exclusiveEndIndex)) if exclusiveEndIndex >= 0}
+        //         * @param exclusiveEndIndex
+        //         * @return
+        //         * @see #substringBetween(String, int, int)
+        //         */
+        //        @Beta
+        //        public static Optional<String> substringBetween(final String str, final BiFunction<String, Integer, Integer> funcOfExclusiveBeginIndex,
+        //                final int exclusiveEndIndex) {
+        //            return Optional.ofNullable(Strings.substringBetween(str, funcOfExclusiveBeginIndex, exclusiveEndIndex));
+        //        }
 
         /**
          * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}

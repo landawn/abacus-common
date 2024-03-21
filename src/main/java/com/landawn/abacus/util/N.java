@@ -18100,7 +18100,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         N.checkArgNotNull(executor, "executor");
 
         final Iterator<? extends T> iteratorII = iter == null ? ObjIterator.<T> empty() : iter;
-        final CountDownLatch latch = new CountDownLatch(processThreadNum);
+        final CountDownLatch countDownLatch = new CountDownLatch(processThreadNum);
         final Holder<Exception> errorHolder = new Holder<>();
 
         for (int i = 0; i < processThreadNum; i++) {
@@ -18128,15 +18128,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
                         }
                     }
                 } finally {
-                    latch.countDown();
+                    countDownLatch.countDown();
                 }
             });
         }
 
         try {
-            latch.await();
+            countDownLatch.await();
         } catch (InterruptedException e) {
-            // Thread.currentThread().interrupt();
             N.toRuntimeException(e);
         }
 
@@ -18268,7 +18267,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //        try {
     //            latch.await();
     //        } catch (InterruptedException e) {
-    //            Thread.currentThread().interrupt();
     //            N.toRuntimeException(e);
     //        }
     //
@@ -19425,7 +19423,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         N.checkArgNotNull(executor, "executor");
 
         final Iterator<? extends T> iteratorII = iter == null ? ObjIterator.<T> empty() : iter;
-        final CountDownLatch latch = new CountDownLatch(processThreadNum);
+        final CountDownLatch countDownLatch = new CountDownLatch(processThreadNum);
         final AtomicInteger index = new AtomicInteger(0);
         final Holder<Exception> errorHolder = new Holder<>();
 
@@ -19456,15 +19454,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
                         }
                     }
                 } finally {
-                    latch.countDown();
+                    countDownLatch.countDown();
                 }
             });
         }
 
         try {
-            latch.await();
+            countDownLatch.await();
         } catch (InterruptedException e) {
-            // Thread.currentThread().interrupt();
             N.toRuntimeException(e);
         }
 
@@ -19596,7 +19593,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //        try {
     //            latch.await();
     //        } catch (InterruptedException e) {
-    //            Thread.currentThread().interrupt();
     //            N.toRuntimeException(e);
     //        }
     //
@@ -27735,6 +27731,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param retryCondition
      * @see Retry#of(int, long, Predicate)
      * @see Retry#of(int, long, Predicate)
+     * @see Fn#jr(Runnable)
+     * @see Fn#jc(Callable)
      */
     public static void execute(final Throwables.Runnable<? extends Exception> cmd, final int retryTimes, final long retryIntervallInMillis,
             final Predicate<? super Exception> retryCondition) {
@@ -27755,6 +27753,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      * @see Retry#of(int, long, Predicate)
      * @see Retry#of(int, long, Predicate)
+     * @see Fn#jr(Runnable)
+     * @see Fn#jc(Callable)
      */
     public static <R> R execute(final Callable<R> cmd, final int retryTimes, final long retryIntervallInMillis,
             final BiPredicate<? super R, ? super Exception> retryCondition) {
@@ -27771,6 +27771,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param command
      * @return
      * @see Futures
+     * @see Fn#jr(Runnable)
+     * @see Fn#jc(Callable)
      */
     public static ContinuableFuture<Void> asyncExecute(final Throwables.Runnable<? extends Exception> command) {
         return ASYNC_EXECUTOR.execute(command);
@@ -27782,6 +27784,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param delayInMillis
      * @return
      * @see Futures
+     * @see Fn#jr(Runnable)
+     * @see Fn#jc(Callable)
      */
     @MayReturnNull
     public static ContinuableFuture<Void> asyncExecute(final Throwables.Runnable<? extends Exception> command, final long delayInMillis) {
@@ -27796,6 +27800,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param commands
      * @return
      * @see Futures
+     * @see Fn#jr(Runnable)
+     * @see Fn#jc(Callable)
      */
     @SuppressWarnings("deprecation")
     @SafeVarargs
@@ -27808,6 +27814,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param commands
      * @return
      * @see Futures
+     * @see Fn#jr(Runnable)
+     * @see Fn#jc(Callable)
      */
     public static List<ContinuableFuture<Void>> asyncExecute(final List<? extends Throwables.Runnable<? extends Exception>> commands) {
         return ASYNC_EXECUTOR.execute(commands);
@@ -27819,6 +27827,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param executor
      * @return
      * @see Futures
+     * @see Fn#jr(Runnable)
+     * @see Fn#jc(Callable)
      */
     public static List<ContinuableFuture<Void>> asyncExecute(final List<? extends Throwables.Runnable<? extends Exception>> commands, final Executor executor) {
         if (isEmpty(commands)) {
@@ -27840,6 +27850,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param command
      * @return
      * @see Futures
+     * @see Fn#jr(Runnable)
+     * @see Fn#jc(Callable)
      */
     public static <R> ContinuableFuture<R> asyncExecute(final Callable<R> command) {
         return ASYNC_EXECUTOR.execute(command);
@@ -27852,6 +27864,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param delayInMillis
      * @return
      * @see Futures
+     * @see Fn#jr(Runnable)
+     * @see Fn#jc(Callable)
      */
     public static <R> ContinuableFuture<R> asyncExecute(final Callable<R> command, final long delayInMillis) {
         return new ContinuableFuture<>(SCHEDULED_EXECUTOR.schedule(command, delayInMillis, TimeUnit.MILLISECONDS));
@@ -27863,6 +27877,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param commands
      * @return
      * @see Futures
+     * @see Fn#jr(Runnable)
+     * @see Fn#jc(Callable)
      */
     @SuppressWarnings("deprecation")
     @SafeVarargs
@@ -27876,6 +27892,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param commands
      * @return
      * @see Futures
+     * @see Fn#jr(Runnable)
+     * @see Fn#jc(Callable)
      */
     public static <R> List<ContinuableFuture<R>> asyncExecute(final Collection<? extends Callable<R>> commands) {
         return ASYNC_EXECUTOR.execute(commands);
@@ -27888,6 +27906,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param executor
      * @return
      * @see Futures
+     * @see Fn#jr(Runnable)
+     * @see Fn#jc(Callable)
      */
     public static <R> List<ContinuableFuture<R>> asyncExecute(final Collection<? extends Callable<R>> commands, final Executor executor) {
         if (isEmpty(commands)) {
@@ -27911,6 +27931,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param retryCondition
      * @return
      * @see Futures
+     * @see Fn#jr(Runnable)
+     * @see Fn#jc(Callable)
      */
     @MayReturnNull
     public static ContinuableFuture<Void> asyncExecute(final Throwables.Runnable<? extends Exception> cmd, final int retryTimes,
@@ -27930,6 +27952,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param retryCondition
      * @return
      * @see Futures
+     * @see Fn#jr(Runnable)
+     * @see Fn#jc(Callable)
      */
     public static <R> ContinuableFuture<R> asyncExecute(final Callable<R> cmd, final int retryTimes, final long retryIntervallInMillisInMillis,
             final BiPredicate<? super R, ? super Exception> retryCondition) {
@@ -27945,6 +27969,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param command
      * @param executor
      * @return
+     * @see Fn#jr(Runnable)
+     * @see Fn#jc(Callable)
      */
     public static ContinuableFuture<Void> asyncExecute(final Throwables.Runnable<? extends Exception> command, final Executor executor) {
         return ContinuableFuture.run(command, executor);
@@ -27957,6 +27983,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param command
      * @param executor
      * @return
+     * @see Fn#jr(Runnable)
+     * @see Fn#jc(Callable)
      */
     public static <R> ContinuableFuture<R> asyncExecute(final Callable<R> command, final Executor executor) {
         return ContinuableFuture.call(command, executor);

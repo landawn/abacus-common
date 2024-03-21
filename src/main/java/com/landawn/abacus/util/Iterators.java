@@ -26,9 +26,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -2901,13 +2901,11 @@ public final class Iterators {
                     onComplete.run();
                 }
             } else {
-                final AtomicInteger activeThreadNum = new AtomicInteger();
+                final CountDownLatch countDownLatch = new CountDownLatch(processThreadNum);
                 final ExecutorService executorService = Executors.newFixedThreadPool(processThreadNum);
                 final Holder<Exception> errorHolder = new Holder<>();
 
                 for (int i = 0; i < processThreadNum; i++) {
-                    activeThreadNum.incrementAndGet();
-
                     executorService.execute(() -> {
                         T element = null;
                         try {
@@ -2931,13 +2929,15 @@ public final class Iterators {
                                 }
                             }
                         } finally {
-                            activeThreadNum.decrementAndGet();
+                            countDownLatch.countDown();
                         }
                     });
                 }
 
-                while (activeThreadNum.get() > 0) {
-                    N.sleep(1);
+                try {
+                    countDownLatch.await();
+                } catch (InterruptedException e) {
+                    N.toRuntimeException(e);
                 }
 
                 if (errorHolder.value() == null && onComplete != null) {

@@ -125,7 +125,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     static final Logger logger = LoggerFactory.getLogger(CheckedStream.class);
 
     static final String ERROR_MSG_FOR_NO_SUCH_EX = InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX;
-    static final int MAX_WAIT_TIME_FOR_QUEUE_OFFER = 10; // unit is milliseconds
+    static final int MAX_WAIT_TIME_FOR_QUEUE_OFFER = 9; // unit is milliseconds
     static final int MAX_WAIT_TIME_FOR_QUEUE_POLL = 7; // unit is milliseconds
 
     static final int MAX_BUFFERED_SIZE = 10240;

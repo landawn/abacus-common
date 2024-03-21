@@ -63,7 +63,10 @@ public final class ExceptionUtil {
 
         toRuntimeExceptionFuncMap.put(ParseException.class, e -> new UncheckedParseException((ParseException) e));
 
-        toRuntimeExceptionFuncMap.put(InterruptedException.class, e -> new UncheckedInterruptedException((InterruptedException) e));
+        toRuntimeExceptionFuncMap.put(InterruptedException.class, e -> {
+            Thread.currentThread().interrupt();// TODO is it needed ? is it right to do here?
+            return new UncheckedInterruptedException((InterruptedException) e);
+        });
 
         toRuntimeExceptionFuncMap.put(ExecutionException.class, e -> e.getCause() == null ? new UncheckedException(e) : toRuntimeException(e.getCause()));
 

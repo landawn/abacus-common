@@ -193,17 +193,17 @@ public final class Fn {
 
     private static final Timer timer = new Timer();
 
-    @SuppressWarnings("rawtypes")
-    public static final IntFunction<Map<String, Object>> FACTORY_OF_MAP = (IntFunction) Factory.MAP_FACTORY;
-
-    @SuppressWarnings("rawtypes")
-    public static final IntFunction<LinkedHashMap<String, Object>> FACTORY_OF_LINKED_HASH_MAP = (IntFunction) Factory.LINKED_HASH_MAP_FACTORY;
-
-    @SuppressWarnings("rawtypes")
-    public static final Supplier<Map<String, Object>> SUPPLIER_OF_MAP = (Supplier) Suppliers.MAP;
-
-    @SuppressWarnings("rawtypes")
-    public static final Supplier<LinkedHashMap<String, Object>> SUPPLIER_OF_LINKED_HASH_MAP = (Supplier) Suppliers.LINKED_HASH_MAP;
+    //    @SuppressWarnings("rawtypes")
+    //    public static final IntFunction<Map<String, Object>> FACTORY_OF_MAP = (IntFunction) Factory.MAP_FACTORY;
+    //
+    //    @SuppressWarnings("rawtypes")
+    //    public static final IntFunction<LinkedHashMap<String, Object>> FACTORY_OF_LINKED_HASH_MAP = (IntFunction) Factory.LINKED_HASH_MAP_FACTORY;
+    //
+    //    @SuppressWarnings("rawtypes")
+    //    public static final Supplier<Map<String, Object>> SUPPLIER_OF_MAP = (Supplier) Suppliers.MAP;
+    //
+    //    @SuppressWarnings("rawtypes")
+    //    public static final Supplier<LinkedHashMap<String, Object>> SUPPLIER_OF_LINKED_HASH_MAP = (Supplier) Suppliers.LINKED_HASH_MAP;
 
     private static final Runnable EMPTY_ACTION = () -> {
     };
@@ -508,71 +508,71 @@ public final class Fn {
         };
     }
 
-    /**
-     * Only for temporary use in sequential stream/single thread, not for parallel stream/multiple threads.
-     * The returned Collection will clean up before it's returned every time when {@code get} is called.
-     * Don't save the returned Collection object or use it to save objects.
-     *
-     * @param <T>
-     * @param <C>
-     * @param supplier
-     * @return
-     * @see {@code Stream.split/sliding};
-     * @deprecated
-     */
-    @Deprecated
-    @Beta
-    @SequentialOnly
-    @Stateful
-    public static <T, C extends Collection<T>> Supplier<? extends C> reuse(final java.util.function.Supplier<? extends C> supplier) {
-        return new Supplier<>() {
-            private C c;
-
-            @Override
-            public C get() {
-                if (c == null) {
-                    c = supplier.get();
-                } else if (c.size() > 0) {
-                    c.clear();
-                }
-
-                return c;
-            }
-        };
-    }
-
-    /**
-     * Only for temporary use in sequential stream/single thread, not for parallel stream/multiple threads.
-     * The returned Collection will clean up before it's returned every time when {@code get} is called.
-     * Don't save the returned Collection object or use it to save objects.
-     *
-     * @param <T>
-     * @param <C>
-     * @param supplier
-     * @return
-     * @see {@code Stream.split/sliding};
-     * @deprecated
-     */
-    @Deprecated
-    @Beta
-    @SequentialOnly
-    @Stateful
-    public static <T, C extends Collection<T>> IntFunction<? extends C> reuse(final java.util.function.IntFunction<? extends C> supplier) {
-        return new IntFunction<>() {
-            private C c;
-
-            @Override
-            public C apply(int size) {
-                if (c == null) {
-                    c = supplier.apply(size);
-                } else if (c.size() > 0) {
-                    c.clear();
-                }
-
-                return c;
-            }
-        };
-    }
+    //    /**
+    //     * Only for temporary use in sequential stream/single thread, not for parallel stream/multiple threads.
+    //     * The returned Collection will clean up before it's returned every time when {@code get} is called.
+    //     * Don't save the returned Collection object or use it to save objects.
+    //     *
+    //     * @param <T>
+    //     * @param <C>
+    //     * @param supplier
+    //     * @return
+    //     * @see {@code Stream.split/sliding};
+    //     * @deprecated
+    //     */
+    //    @Deprecated
+    //    @Beta
+    //    @SequentialOnly
+    //    @Stateful
+    //    public static <T, C extends Collection<T>> Supplier<? extends C> reuse(final java.util.function.Supplier<? extends C> supplier) {
+    //        return new Supplier<>() {
+    //            private C c;
+    //
+    //            @Override
+    //            public C get() {
+    //                if (c == null) {
+    //                    c = supplier.get();
+    //                } else if (c.size() > 0) {
+    //                    c.clear();
+    //                }
+    //
+    //                return c;
+    //            }
+    //        };
+    //    }
+    //
+    //    /**
+    //     * Only for temporary use in sequential stream/single thread, not for parallel stream/multiple threads.
+    //     * The returned Collection will clean up before it's returned every time when {@code get} is called.
+    //     * Don't save the returned Collection object or use it to save objects.
+    //     *
+    //     * @param <T>
+    //     * @param <C>
+    //     * @param supplier
+    //     * @return
+    //     * @see {@code Stream.split/sliding};
+    //     * @deprecated
+    //     */
+    //    @Deprecated
+    //    @Beta
+    //    @SequentialOnly
+    //    @Stateful
+    //    public static <T, C extends Collection<T>> IntFunction<? extends C> reuse(final java.util.function.IntFunction<? extends C> supplier) {
+    //        return new IntFunction<>() {
+    //            private C c;
+    //
+    //            @Override
+    //            public C apply(int size) {
+    //                if (c == null) {
+    //                    c = supplier.apply(size);
+    //                } else if (c.size() > 0) {
+    //                    c.clear();
+    //                }
+    //
+    //                return c;
+    //            }
+    //        };
+    //    }
 
     /**
      *
@@ -4741,6 +4741,29 @@ public final class Fn {
      * @return
      */
     public static <R> Callable<R> c(final Callable<R> callable) {
+        N.checkArgNotNull(callable);
+
+        return callable;
+    }
+
+    /**
+     *
+     * @param runnable
+     * @return
+     */
+    public static java.lang.Runnable jr(final java.lang.Runnable runnable) {
+        N.checkArgNotNull(runnable);
+
+        return runnable;
+    }
+
+    /**
+     *
+     * @param <R>
+     * @param callable
+     * @return
+     */
+    public static <R> java.util.concurrent.Callable<R> jc(final java.util.concurrent.Callable<R> callable) {
         N.checkArgNotNull(callable);
 
         return callable;

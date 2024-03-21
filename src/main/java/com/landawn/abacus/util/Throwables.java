@@ -1864,6 +1864,25 @@ public final class Throwables {
     }
 
     /**
+     * The Interface IntObjOperator.
+     *
+     * @param <E>
+     */
+    @Beta
+    public interface IntObjOperator<T, E extends Throwable> {
+
+        /**
+         * Apply as int.
+         *
+         * @param operand
+         * @param obj
+         * @return
+         * @throws E the e
+         */
+        int applyAsInt(int operand, T obj) throws E;
+    }
+
+    /**
      * The Interface LongUnaryOperator.
      *
      * @param <E>
