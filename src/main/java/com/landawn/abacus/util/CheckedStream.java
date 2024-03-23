@@ -33,6 +33,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Deque;
+import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -13277,6 +13278,1899 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
     // #######################################9X9#######################################
     // #######################################9X9#######################################
+
+    /**
+     * The time complexity is <i>O(n * m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
+     *
+     * @param <U>
+     * @param b
+     * @return
+     */
+    @IntermediateOp
+    public <U> CheckedStream<Pair<T, U>, E> crossJoin(final Collection<? extends U> b) {
+        return crossJoin(b, Fnn.<T, U, E> pair());
+    }
+
+    /**
+     * The time complexity is <i>O(n * m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
+     *
+     * @param <U>
+     * @param <R>
+     * @param b
+     * @param func
+     * @return
+     */
+    @IntermediateOp
+    public <U, R> CheckedStream<R, E> crossJoin(final Collection<? extends U> b,
+            final Throwables.BiFunction<? super T, ? super U, ? extends R, ? extends E> func) {
+        assertNotClosed();
+
+        return flatMap(t -> CheckedStream.<U, E> of(b).map(u -> func.apply(t, u)));
+    }
+
+    /**
+     * The time complexity is <i>O(n * m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
+     *
+     * @param <U>
+     * @param <R>
+     * @param b will be loaded to memory. If {@code b} is too big to load to memory, please use {@code b.cronJoin(this, ...)}
+     * @param func
+     * @return
+     */
+    @IntermediateOp
+    public <U, R> CheckedStream<R, E> crossJoin(final CheckedStream<U, ? extends E> b,
+            final Throwables.BiFunction<? super T, ? super U, ? extends R, ? extends E> func) {
+        assertNotClosed();
+
+        checkArgNotNull(b, "stream 'b' can not be null");
+
+        return flatMap(new Throwables.Function<T, CheckedStream<R, E>, E>() {
+            private Collection<? extends U> c = null;
+
+            @Override
+            public CheckedStream<R, E> apply(final T t) throws E {
+                if (c == null) {
+                    c = b.toList();
+                }
+
+                return CheckedStream.<U, E> of(c).map(u -> func.apply(t, u));
+            }
+        }).onClose(newCloseHandler(b));
+    }
+
+    /**
+     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
+     *
+     * @param <U>
+     * @param <K>
+     * @param b
+     * @param leftKeyMapper
+     * @param rightKeyMapper
+     * @return
+     */
+    @IntermediateOp
+    public <U, K> CheckedStream<Pair<T, U>, E> innerJoin(final Collection<? extends U> b,
+            final Throwables.Function<? super T, ? extends K, ? extends E> leftKeyMapper,
+            final Throwables.Function<? super U, ? extends K, ? extends E> rightKeyMapper) {
+        return innerJoin(b, leftKeyMapper, rightKeyMapper, Fnn.<T, U, E> pair());
+    }
+
+    /**
+     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
+     *
+     * @param <U>
+     * @param <K>
+     * @param <R>
+     * @param b
+     * @param leftKeyMapper
+     * @param rightKeyMapper
+     * @param func
+     * @return
+     */
+    @IntermediateOp
+    public <U, K, R> CheckedStream<R, E> innerJoin(final Collection<? extends U> b,
+            final Throwables.Function<? super T, ? extends K, ? extends E> leftKeyMapper,
+            final Throwables.Function<? super U, ? extends K, ? extends E> rightKeyMapper,
+            final Throwables.BiFunction<? super T, ? super U, ? extends R, ? extends E> func) {
+        assertNotClosed();
+
+        return flatMap(new Throwables.Function<T, CheckedStream<R, E>, E>() {
+            private ListMultimap<K, U> rightKeyMap = null;
+
+            @Override
+            public CheckedStream<R, E> apply(final T t) throws E {
+                if (rightKeyMap == null) {
+                    rightKeyMap = createListMultimap(b, rightKeyMapper);
+                }
+
+                return CheckedStream.<U, E> of(rightKeyMap.get(leftKeyMapper.apply(t))).map(u -> func.apply(t, u));
+            }
+        });
+    }
+
+    /**
+     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
+     *
+     * @param <K>
+     * @param b
+     * @param keyMapper
+     * @return
+     */
+    public <K> CheckedStream<Pair<T, T>, E> innerJoin(final Collection<? extends T> b,
+            final Throwables.Function<? super T, ? extends K, ? extends E> keyMapper) {
+        return innerJoin(b, keyMapper, Fnn.<T, T, E> pair());
+    }
+
+    /**
+     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
+     *
+     * @param <K>
+     * @param <R>
+     * @param b
+     * @param keyMapper
+     * @param func
+     * @return
+     */
+    @IntermediateOp
+    public <K, R> CheckedStream<R, E> innerJoin(final Collection<? extends T> b, final Throwables.Function<? super T, ? extends K, ? extends E> keyMapper,
+            final Throwables.BiFunction<? super T, ? super T, ? extends R, ? extends E> func) {
+        return innerJoin(b, keyMapper, keyMapper, func);
+    }
+
+    /**
+     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
+     *
+     * @param <U>
+     * @param <K>
+     * @param <R>
+     * @param b will be loaded to memory. If {@code b} is too big to load to memory, please use {@code b.innerJoin(this, ...)}
+     * @param leftKeyMapper
+     * @param rightKeyMapper
+     * @param func
+     * @return
+     */
+    @IntermediateOp
+    public <U, K, R> CheckedStream<R, E> innerJoin(final CheckedStream<U, ? extends E> b,
+            final Throwables.Function<? super T, ? extends K, ? extends E> leftKeyMapper,
+            final Throwables.Function<? super U, ? extends K, ? extends E> rightKeyMapper,
+            final Throwables.BiFunction<? super T, ? super U, ? extends R, ? extends E> func) {
+        assertNotClosed();
+
+        checkArgNotNull(b, "stream 'b' can not be null");
+
+        return flatMap(new Throwables.Function<T, CheckedStream<R, E>, E>() {
+            private ListMultimap<K, U> rightKeyMap = null;
+
+            @Override
+            public CheckedStream<R, E> apply(final T t) throws E {
+                if (rightKeyMap == null) {
+                    rightKeyMap = (ListMultimap<K, U>) b.toMultimap(rightKeyMapper);
+                }
+
+                return CheckedStream.<U, E> of(rightKeyMap.get(leftKeyMapper.apply(t))).map(u -> func.apply(t, u));
+            }
+        }).onClose(newCloseHandler(b));
+    }
+
+    /**
+     * The time complexity is <i>O(n * m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
+     *
+     * @param <U>
+     * @param b
+     * @param predicate
+     * @return
+     * @deprecated The time complexity is <i>O(n * m). You should try {@code innerJoin(Collection, Function, Function)} first.
+     */
+    @Deprecated
+    @SuppressWarnings("rawtypes")
+    @IntermediateOp
+    public <U> CheckedStream<Pair<T, U>, E> innerJoin(final Collection<? extends U> b,
+            final Throwables.BiPredicate<? super T, ? super U, ? extends E> predicate) {
+        return innerJoin(b, predicate, (Throwables.BiFunction) Fn.pair());
+    }
+
+    /**
+     * The time complexity is <i>O(n * m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
+     *
+     * @param <U>
+     * @param <R>
+     * @param b
+     * @param predicate
+     * @param func
+     * @return
+     * @deprecated The time complexity is <i>O(n * m). You should try {@code innerJoin(Collection, Function, Function, BiFunction)} first.
+     */
+    @Deprecated
+    @IntermediateOp
+    public <U, R> CheckedStream<R, E> innerJoin(final Collection<? extends U> b, final Throwables.BiPredicate<? super T, ? super U, ? extends E> predicate,
+            final Throwables.BiFunction<? super T, ? super U, ? extends R, ? extends E> func) {
+        assertNotClosed();
+
+        return flatMap(t -> CheckedStream.<U, E> of(b).filter(u -> predicate.test(t, u)).map(u -> func.apply(t, u)));
+    }
+
+    /**
+     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
+     *
+     * @param <U>
+     * @param <K>
+     * @param b
+     * @param leftKeyMapper
+     * @param rightKeyMapper
+     * @return
+     */
+    @IntermediateOp
+    public <U, K> CheckedStream<Pair<T, U>, E> fullJoin(final Collection<? extends U> b,
+            final Throwables.Function<? super T, ? extends K, ? extends E> leftKeyMapper,
+            final Throwables.Function<? super U, ? extends K, ? extends E> rightKeyMapper) {
+        return fullJoin(b, leftKeyMapper, rightKeyMapper, Fnn.<T, U, E> pair());
+    }
+
+    /**
+     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
+     *
+     * @param <U>
+     * @param <K>
+     * @param <R>
+     * @param b
+     * @param leftKeyMapper
+     * @param rightKeyMapper
+     * @param func
+     * @return
+     */
+    @IntermediateOp
+    public <U, K, R> CheckedStream<R, E> fullJoin(final Collection<? extends U> b, final Throwables.Function<? super T, ? extends K, ? extends E> leftKeyMapper,
+            final Throwables.Function<? super U, ? extends K, ? extends E> rightKeyMapper,
+            final Throwables.BiFunction<? super T, ? super U, ? extends R, ? extends E> func) {
+        assertNotClosed();
+
+        final Map<U, U> joinedRights = new IdentityHashMap<>();
+
+        return flatMap(new Throwables.Function<T, CheckedStream<R, E>, E>() {
+            private ListMultimap<K, U> rightKeyMap = null;
+
+            @Override
+            public CheckedStream<R, E> apply(final T t) throws E {
+                if (rightKeyMap == null) {
+                    rightKeyMap = createListMultimap(b, rightKeyMapper);
+                }
+
+                final List<U> values = rightKeyMap.get(leftKeyMapper.apply(t));
+
+                return N.isEmpty(values) ? CheckedStream.of(func.apply(t, (U) null)) : CheckedStream.<U, E> of(values).map(u -> {
+                    joinedRights.put(u, u);
+
+                    return func.apply(t, u);
+                });
+            }
+        }).append(CheckedStream.<U, E> of(b).filter(u -> !joinedRights.containsKey(u)).map(u -> func.apply((T) null, u)));
+    }
+
+    @SuppressWarnings("rawtypes")
+    private static final Throwables.Function HOLDER_VALUE_GETTER;
+
+    static {
+        final Throwables.Function<Holder<Object>, Object, Exception> func = Holder::value;
+        HOLDER_VALUE_GETTER = func;
+    }
+
+    /**
+     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
+     *
+     * @param <K>
+     * @param b
+     * @param keyMapper
+     * @return
+     */
+    public <K> CheckedStream<Pair<T, T>, E> fullJoin(final Collection<? extends T> b,
+            final Throwables.Function<? super T, ? extends K, ? extends E> keyMapper) {
+        return fullJoin(b, keyMapper, Fnn.<T, T, E> pair());
+    }
+
+    /**
+     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
+     *
+     * @param <K>
+     * @param <R>
+     * @param b
+     * @param keyMapper
+     * @param func
+     * @return
+     */
+    @IntermediateOp
+    public <K, R> CheckedStream<R, E> fullJoin(final Collection<? extends T> b, final Throwables.Function<? super T, ? extends K, ? extends E> keyMapper,
+            final Throwables.BiFunction<? super T, ? super T, ? extends R, ? extends E> func) {
+        return fullJoin(b, keyMapper, keyMapper, func);
+    }
+
+    /**
+     *
+     *
+     * @param <U>
+     * @param <K>
+     * @param <R>
+     * @param b will be loaded to memory. If {@code b} is too big to load to memory, please use {@code b.fullJoin(this, ...)}
+     * @param leftKeyMapper
+     * @param rightKeyMapper
+     * @param func
+     * @return
+     */
+    @IntermediateOp
+    public <U, K, R> CheckedStream<R, E> fullJoin(final CheckedStream<U, ? extends E> b,
+            final Throwables.Function<? super T, ? extends K, ? extends E> leftKeyMapper,
+            final Throwables.Function<? super U, ? extends K, ? extends E> rightKeyMapper,
+            final Throwables.BiFunction<? super T, ? super U, ? extends R, ? extends E> func) {
+        assertNotClosed();
+
+        checkArgNotNull(b, "stream 'b' can not be null");
+
+        final Map<U, U> joinedRights = new IdentityHashMap<>();
+        final Holder<List<U>> holder = new Holder<>();
+
+        return flatMap(new Throwables.Function<T, CheckedStream<R, E>, E>() {
+            private List<U> c = null;
+            private ListMultimap<K, U> rightKeyMap = null;
+
+            @Override
+            public CheckedStream<R, E> apply(final T t) throws E {
+                if (rightKeyMap == null) {
+                    c = b.toList();
+                    rightKeyMap = createListMultimap(c, rightKeyMapper);
+                    holder.setValue(c);
+                }
+
+                final List<U> values = rightKeyMap.get(leftKeyMapper.apply(t));
+
+                return N.isEmpty(values) ? CheckedStream.of(func.apply(t, (U) null)) : CheckedStream.<U, E> of(values).map(u -> {
+                    joinedRights.put(u, u);
+
+                    return func.apply(t, u);
+                });
+            }
+        }).append(CheckedStream.<Holder<List<U>>, E> of(holder)
+                .flatmap((Throwables.Function<Holder<List<U>>, List<U>, E>) HOLDER_VALUE_GETTER)
+                .filter(u -> !joinedRights.containsKey(u))
+                .map(u -> func.apply((T) null, u))).onClose(newCloseHandler(b));
+    }
+
+    /**
+     * The time complexity is <i>O(n * m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
+     *
+     * @param <U>
+     * @param b
+     * @param predicate
+     * @return
+     * @deprecated The time complexity is <i>O(n * m). You should try {@code fullJoin(Collection, Function, Function)} first.
+     */
+    @Deprecated
+    @SuppressWarnings("rawtypes")
+    @IntermediateOp
+    public <U> CheckedStream<Pair<T, U>, E> fullJoin(final Collection<? extends U> b,
+            final Throwables.BiPredicate<? super T, ? super U, ? extends E> predicate) {
+        return fullJoin(b, predicate, (Throwables.BiFunction) Fn.pair());
+    }
+
+    /**
+     * The time complexity is <i>O(n * m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
+     *
+     * @param <U>
+     * @param <R>
+     * @param b
+     * @param predicate
+     * @param func
+     * @return
+     * @deprecated The time complexity is <i>O(n * m). You should try {@code fullJoin(Collection, Function, Function, BiFunction)} first.
+     */
+    @Deprecated
+    @IntermediateOp
+    public <U, R> CheckedStream<R, E> fullJoin(final Collection<? extends U> b, final Throwables.BiPredicate<? super T, ? super U, ? extends E> predicate,
+            final Throwables.BiFunction<? super T, ? super U, ? extends R, ? extends E> func) {
+        assertNotClosed();
+
+        final Map<U, U> joinedRights = new IdentityHashMap<>();
+
+        return flatMap(t -> CheckedStream.<U, E> of(b).filter(u -> predicate.test(t, u)).map(u -> {
+            joinedRights.put(u, u);
+
+            return (R) func.apply(t, u);
+        }).appendIfEmpty(() -> CheckedStream.<T, E> just(t).map(tt -> func.apply(t, (U) null))))
+                .append(CheckedStream.<U, E> of(b).filter(u -> !joinedRights.containsKey(u)).map(u -> func.apply((T) null, u)));
+    }
+
+    /**
+     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
+     *
+     * @param <U>
+     * @param <K>
+     * @param b
+     * @param leftKeyMapper
+     * @param rightKeyMapper
+     * @return
+     */
+    @IntermediateOp
+    public <U, K> CheckedStream<Pair<T, U>, E> leftJoin(final Collection<? extends U> b,
+            final Throwables.Function<? super T, ? extends K, ? extends E> leftKeyMapper,
+            final Throwables.Function<? super U, ? extends K, ? extends E> rightKeyMapper) {
+        return leftJoin(b, leftKeyMapper, rightKeyMapper, Fnn.<T, U, E> pair());
+    }
+
+    /**
+     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
+     *
+     * @param <U>
+     * @param <K>
+     * @param <R>
+     * @param b
+     * @param leftKeyMapper
+     * @param rightKeyMapper
+     * @param func
+     * @return
+     */
+    @IntermediateOp
+    public <U, K, R> CheckedStream<R, E> leftJoin(final Collection<? extends U> b, final Throwables.Function<? super T, ? extends K, ? extends E> leftKeyMapper,
+            final Throwables.Function<? super U, ? extends K, ? extends E> rightKeyMapper,
+            final Throwables.BiFunction<? super T, ? super U, ? extends R, ? extends E> func) {
+        assertNotClosed();
+
+        return flatMap(new Throwables.Function<T, CheckedStream<R, E>, E>() {
+            private ListMultimap<K, U> rightKeyMap = null;
+
+            @Override
+            public CheckedStream<R, E> apply(final T t) throws E {
+                if (rightKeyMap == null) {
+                    rightKeyMap = createListMultimap(b, rightKeyMapper);
+                }
+
+                final List<U> values = rightKeyMap.get(leftKeyMapper.apply(t));
+
+                return N.isEmpty(values) ? CheckedStream.<R, E> of(func.apply(t, (U) null)) : CheckedStream.<U, E> of(values).map(u -> func.apply(t, u));
+            }
+        });
+    }
+
+    /**
+     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
+     *
+     * @param <K>
+     * @param b
+     * @param keyMapper
+     * @return
+     */
+    public <K> CheckedStream<Pair<T, T>, E> leftJoin(final Collection<? extends T> b,
+            final Throwables.Function<? super T, ? extends K, ? extends E> keyMapper) {
+        return leftJoin(b, keyMapper, Fnn.<T, T, E> pair());
+    }
+
+    /**
+     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
+     *
+     * @param <K>
+     * @param <R>
+     * @param b
+     * @param keyMapper
+     * @param func
+     * @return
+     */
+    @IntermediateOp
+    public <K, R> CheckedStream<R, E> leftJoin(final Collection<? extends T> b, final Throwables.Function<? super T, ? extends K, ? extends E> keyMapper,
+            final Throwables.BiFunction<? super T, ? super T, ? extends R, ? extends E> func) {
+        return leftJoin(b, keyMapper, keyMapper, func);
+    }
+
+    /**
+     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
+     *
+     * @param <U>
+     * @param <K>
+     * @param <R>
+     * @param b will be loaded to memory. If {@code b} is too big to load to memory, please use {@code b.leftJoin(this, ...)}
+     * @param leftKeyMapper
+     * @param rightKeyMapper
+     * @param func
+     * @return
+     */
+    @IntermediateOp
+    public <U, K, R> CheckedStream<R, E> leftJoin(final CheckedStream<U, ? extends E> b,
+            final Throwables.Function<? super T, ? extends K, ? extends E> leftKeyMapper,
+            final Throwables.Function<? super U, ? extends K, ? extends E> rightKeyMapper,
+            final Throwables.BiFunction<? super T, ? super U, ? extends R, ? extends E> func) {
+        assertNotClosed();
+
+        checkArgNotNull(b, "stream 'b' can not be null");
+
+        return flatMap(new Throwables.Function<T, CheckedStream<R, E>, E>() {
+            private ListMultimap<K, U> rightKeyMap = null;
+
+            @Override
+            public CheckedStream<R, E> apply(final T t) throws E {
+                if (rightKeyMap == null) {
+                    rightKeyMap = (ListMultimap<K, U>) b.toMultimap(rightKeyMapper);
+                }
+
+                final List<U> values = rightKeyMap.get(leftKeyMapper.apply(t));
+
+                return N.isEmpty(values) ? CheckedStream.<R, E> of(func.apply(t, (U) null)) : CheckedStream.<U, E> of(values).map(u -> func.apply(t, u));
+            }
+        }).onClose(newCloseHandler(b));
+    }
+
+    /**
+     * The time complexity is <i>O(n * m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
+     *
+     * @param <U>
+     * @param b
+     * @param predicate
+     * @return
+     * @deprecated The time complexity is <i>O(n * m). You should try {@code leftJoin(Collection, Function, Function)} first.
+     */
+    @Deprecated
+    @SuppressWarnings("rawtypes")
+    @IntermediateOp
+    public <U> CheckedStream<Pair<T, U>, E> leftJoin(final Collection<? extends U> b,
+            final Throwables.BiPredicate<? super T, ? super U, ? extends E> predicate) {
+        return leftJoin(b, predicate, (Throwables.BiFunction) Fn.pair());
+    }
+
+    /**
+     * The time complexity is <i>O(n * m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
+     *
+     * @param <U>
+     * @param <R>
+     * @param b
+     * @param predicate
+     * @param func
+     * @return
+     * @deprecated The time complexity is <i>O(n * m). You should try {@code leftJoin(Collection, Function, Function, BiFunction)} first.
+     */
+    @Deprecated
+    @IntermediateOp
+    public <U, R> CheckedStream<R, E> leftJoin(final Collection<? extends U> b, final Throwables.BiPredicate<? super T, ? super U, ? extends E> predicate,
+            final Throwables.BiFunction<? super T, ? super U, ? extends R, ? extends E> func) {
+        assertNotClosed();
+
+        return flatMap(t -> CheckedStream.<U, E> of(b)
+                .filter(u -> predicate.test(t, u))
+                .map(u -> (R) func.apply(t, u))
+                .appendIfEmpty(() -> CheckedStream.<T, E> just(t).map(tt -> func.apply(t, (U) null))));
+    }
+
+    /**
+     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
+     *
+     * @param <U>
+     * @param <K>
+     * @param b
+     * @param leftKeyMapper
+     * @param rightKeyMapper
+     * @return
+     */
+    @IntermediateOp
+    public <U, K> CheckedStream<Pair<T, U>, E> rightJoin(final Collection<? extends U> b,
+            final Throwables.Function<? super T, ? extends K, ? extends E> leftKeyMapper,
+            final Throwables.Function<? super U, ? extends K, ? extends E> rightKeyMapper) {
+        return rightJoin(b, leftKeyMapper, rightKeyMapper, Fnn.<T, U, E> pair());
+    }
+
+    /**
+     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
+     *
+     * @param <U>
+     * @param <K>
+     * @param <R>
+     * @param b
+     * @param leftKeyMapper
+     * @param rightKeyMapper
+     * @param func
+     * @return
+     */
+    @IntermediateOp
+    public <U, K, R> CheckedStream<R, E> rightJoin(final Collection<? extends U> b,
+            final Throwables.Function<? super T, ? extends K, ? extends E> leftKeyMapper,
+            final Throwables.Function<? super U, ? extends K, ? extends E> rightKeyMapper,
+            final Throwables.BiFunction<? super T, ? super U, ? extends R, ? extends E> func) {
+        assertNotClosed();
+
+        final Map<U, U> joinedRights = new IdentityHashMap<>();
+
+        return flatMap(new Throwables.Function<T, CheckedStream<R, E>, E>() {
+            private ListMultimap<K, U> rightKeyMap = null;
+
+            @Override
+            public CheckedStream<R, E> apply(final T t) throws E {
+                if (rightKeyMap == null) {
+                    rightKeyMap = createListMultimap(b, rightKeyMapper);
+                }
+
+                return CheckedStream.<U, E> of(rightKeyMap.get(leftKeyMapper.apply(t))).map(u -> {
+                    joinedRights.put(u, u);
+
+                    return func.apply(t, u);
+                });
+            }
+        }).append(CheckedStream.<U, E> of(b).filter(u -> !joinedRights.containsKey(u)).map(u -> func.apply((T) null, u)));
+    }
+
+    /**
+     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
+     *
+     * @param <K>
+     * @param b
+     * @param keyMapper
+     * @return
+     */
+    public <K> CheckedStream<Pair<T, T>, E> rightJoin(final Collection<? extends T> b,
+            final Throwables.Function<? super T, ? extends K, ? extends E> keyMapper) {
+        return rightJoin(b, keyMapper, Fnn.<T, T, E> pair());
+    }
+
+    /**
+     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
+     *
+     * @param <K>
+     * @param <R>
+     * @param b
+     * @param keyMapper
+     * @param func
+     * @return
+     */
+    @IntermediateOp
+    public <K, R> CheckedStream<R, E> rightJoin(final Collection<? extends T> b, final Throwables.Function<? super T, ? extends K, ? extends E> keyMapper,
+            final Throwables.BiFunction<? super T, ? super T, ? extends R, ? extends E> func) {
+        return rightJoin(b, keyMapper, keyMapper, func);
+    }
+
+    /**
+     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
+     *
+     * @param <U>
+     * @param <K>
+     * @param <R>
+     * @param b will be loaded to memory. If {@code b} is too big to load to memory, please use {@code b.rightJoin(this, ...)}
+     * @param leftKeyMapper
+     * @param rightKeyMapper
+     * @param func
+     * @return
+     */
+    @IntermediateOp
+    public <U, K, R> CheckedStream<R, E> rightJoin(final CheckedStream<U, ? extends E> b,
+            final Throwables.Function<? super T, ? extends K, ? extends E> leftKeyMapper,
+            final Throwables.Function<? super U, ? extends K, ? extends E> rightKeyMapper,
+            final Throwables.BiFunction<? super T, ? super U, ? extends R, ? extends E> func) {
+        assertNotClosed();
+
+        checkArgNotNull(b, "stream 'b' can not be null");
+
+        final Map<U, U> joinedRights = new IdentityHashMap<>();
+        final Holder<List<U>> holder = new Holder<>();
+
+        return flatMap(new Throwables.Function<T, CheckedStream<R, E>, E>() {
+            private List<U> c = null;
+            private ListMultimap<K, U> rightKeyMap = null;
+
+            @Override
+            public CheckedStream<R, E> apply(final T t) throws E {
+                if (rightKeyMap == null) {
+                    c = b.toList();
+                    rightKeyMap = createListMultimap(c, rightKeyMapper);
+                    holder.setValue(c);
+                }
+
+                return CheckedStream.<U, E> of(rightKeyMap.get(leftKeyMapper.apply(t))).map(u -> {
+                    joinedRights.put(u, u);
+
+                    return func.apply(t, u);
+                });
+            }
+        }).append(CheckedStream.<Holder<List<U>>, E> of(holder)
+                .flatmap((Throwables.Function<Holder<List<U>>, List<U>, E>) HOLDER_VALUE_GETTER)
+                .filter(u -> !joinedRights.containsKey(u))
+                .map(u -> func.apply((T) null, u))).onClose(newCloseHandler(b));
+    }
+
+    /**
+     * The time complexity is <i>O(n * m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
+     *
+     * @param <U>
+     * @param b
+     * @param predicate
+     * @return
+     * @deprecated The time complexity is <i>O(n * m). You should try {@code rightJoin(Collection, Function, Function)} first.
+     */
+    @Deprecated
+    @SuppressWarnings("rawtypes")
+    @IntermediateOp
+    public <U> CheckedStream<Pair<T, U>, E> rightJoin(final Collection<? extends U> b,
+            final Throwables.BiPredicate<? super T, ? super U, ? extends E> predicate) {
+        return rightJoin(b, predicate, (Throwables.BiFunction) Fn.pair());
+    }
+
+    /**
+     * The time complexity is <i>O(n * m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
+     *
+     * @param <U>
+     * @param <R>
+     * @param b
+     * @param predicate
+     * @param func
+     * @return
+     * @deprecated The time complexity is <i>O(n * m). You should try {@code rightJoin(Collection, Function, Function, BiFunction)} first.
+     */
+    @Deprecated
+    @IntermediateOp
+    public <U, R> CheckedStream<R, E> rightJoin(final Collection<? extends U> b, final Throwables.BiPredicate<? super T, ? super U, ? extends E> predicate,
+            final Throwables.BiFunction<? super T, ? super U, ? extends R, ? extends E> func) {
+        assertNotClosed();
+
+        final Map<U, U> joinedRights = new IdentityHashMap<>();
+
+        return flatMap(t -> CheckedStream.<U, E> of(b).filter(u -> predicate.test(t, u)).map(u -> {
+            joinedRights.put(u, u);
+
+            return (R) func.apply(t, u);
+        })).append(CheckedStream.<U, E> of(b).filter(u -> !joinedRights.containsKey(u)).map(u -> func.apply((T) null, u)));
+    }
+
+    /**
+     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
+     *
+     * @param <U>
+     * @param <K>
+     * @param b
+     * @param leftKeyMapper
+     * @param rightKeyMapper
+     * @return
+     */
+    @IntermediateOp
+    public <U, K> CheckedStream<Pair<T, List<U>>, E> groupJoin(final Collection<? extends U> b,
+            final Throwables.Function<? super T, ? extends K, ? extends E> leftKeyMapper,
+            final Throwables.Function<? super U, ? extends K, ? extends E> rightKeyMapper) {
+        return groupJoin(b, leftKeyMapper, rightKeyMapper, Fnn.<T, List<U>, E> pair());
+    }
+
+    /**
+     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
+     *
+     * @param <U>
+     * @param <K>
+     * @param <R>
+     * @param b
+     * @param leftKeyMapper
+     * @param rightKeyMapper
+     * @param func
+     * @return
+     */
+    @IntermediateOp
+    public <U, K, R> CheckedStream<R, E> groupJoin(final Collection<? extends U> b,
+            final Throwables.Function<? super T, ? extends K, ? extends E> leftKeyMapper,
+            final Throwables.Function<? super U, ? extends K, ? extends E> rightKeyMapper,
+            final Throwables.BiFunction<? super T, ? super List<U>, ? extends R, ? extends E> func) {
+        assertNotClosed();
+
+        final Throwables.Function<T, R, E> mapper = new Throwables.Function<>() {
+            private volatile boolean initialized = false;
+            private volatile Map<K, List<U>> map = null; //NOSONAR
+            private List<U> val = null;
+
+            @Override
+            public R apply(T t) throws E {
+                if (!initialized) {
+                    init();
+                }
+
+                val = map.get(leftKeyMapper.apply(t));
+
+                if (val == null) {
+                    return func.apply(t, new ArrayList<>(0));
+                } else {
+                    return func.apply(t, val);
+                }
+            }
+
+            private void init() throws E {
+                if (!initialized) {
+                    initialized = true;
+
+                    map = CheckedStream.<U, E> of(b).groupTo(rightKeyMapper);
+                }
+            }
+        };
+
+        return map(mapper);
+    }
+
+    /**
+     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
+     *
+     * @param <K>
+     * @param b
+     * @param keyMapper
+     * @return
+     */
+    public <K> CheckedStream<Pair<T, List<T>>, E> groupJoin(final Collection<? extends T> b,
+            final Throwables.Function<? super T, ? extends K, ? extends E> keyMapper) {
+        return groupJoin(b, keyMapper, Fnn.<T, List<T>, E> pair());
+    }
+
+    /**
+     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
+     *
+     * @param <K>
+     * @param <R>
+     * @param b
+     * @param keyMapper
+     * @param func
+     * @return
+     */
+    @IntermediateOp
+    public <K, R> CheckedStream<R, E> groupJoin(final Collection<? extends T> b, final Throwables.Function<? super T, ? extends K, ? extends E> keyMapper,
+            final Throwables.BiFunction<? super T, ? super List<T>, ? extends R, ? extends E> func) {
+        return groupJoin(b, keyMapper, keyMapper, func);
+    }
+
+    /**
+     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
+     *
+     * @param <U>
+     * @param <K>
+     * @param <R>
+     * @param b will be loaded to memory. If {@code b} is too big to load to memory, please use {@code b.groupJoin(this, ...)}
+     * @param leftKeyMapper
+     * @param rightKeyMapper
+     * @param func
+     * @return
+     */
+    @IntermediateOp
+    public <U, K, R> CheckedStream<R, E> groupJoin(final CheckedStream<U, ? extends E> b,
+            final Throwables.Function<? super T, ? extends K, ? extends E> leftKeyMapper,
+            final Throwables.Function<? super U, ? extends K, ? extends E> rightKeyMapper,
+            final Throwables.BiFunction<? super T, ? super List<U>, ? extends R, ? extends E> func) {
+        assertNotClosed();
+
+        checkArgNotNull(b, "stream 'b' can not be null");
+
+        final Throwables.Function<T, R, E> mapper = new Throwables.Function<>() {
+            private volatile boolean initialized = false;
+            private volatile Map<K, List<U>> map = null; //NOSONAR
+            private List<U> val = null;
+
+            @Override
+            public R apply(T t) throws E {
+                if (!initialized) {
+                    init();
+                }
+
+                val = map.get(leftKeyMapper.apply(t));
+
+                if (val == null) {
+                    return func.apply(t, new ArrayList<>(0));
+                } else {
+                    return func.apply(t, val);
+                }
+            }
+
+            @SuppressWarnings("rawtypes")
+            private void init() throws E {
+                if (!initialized) {
+                    initialized = true;
+
+                    map = (Map) b.groupTo(rightKeyMapper);
+                }
+            }
+        };
+
+        return map(mapper).onClose(newCloseHandler(b));
+    }
+
+    /**
+     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
+     *
+     * @param <U>
+     * @param <K>
+     * @param b
+     * @param leftKeyMapper
+     * @param rightKeyMapper
+     * @param mergeFunction
+     * @return
+     */
+    @IntermediateOp
+    public <U, K> CheckedStream<Pair<T, U>, E> groupJoin(final Collection<? extends U> b,
+            final Throwables.Function<? super T, ? extends K, ? extends E> leftKeyMapper,
+            final Throwables.Function<? super U, ? extends K, ? extends E> rightKeyMapper, final Throwables.BinaryOperator<U, ? extends E> mergeFunction) {
+        return groupJoin(b, leftKeyMapper, rightKeyMapper, mergeFunction, Fnn.<T, U, E> pair());
+    }
+
+    /**
+     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
+     *
+     * @param <U>
+     * @param <K>
+     * @param <R>
+     * @param b
+     * @param leftKeyMapper
+     * @param rightKeyMapper
+     * @param mergeFunction
+     * @param func
+     * @return
+     */
+    @IntermediateOp
+    public <U, K, R> CheckedStream<R, E> groupJoin(final Collection<? extends U> b,
+            final Throwables.Function<? super T, ? extends K, ? extends E> leftKeyMapper,
+            final Throwables.Function<? super U, ? extends K, ? extends E> rightKeyMapper, final Throwables.BinaryOperator<U, ? extends E> mergeFunction,
+            final Throwables.BiFunction<? super T, ? super U, ? extends R, ? extends E> func) {
+        assertNotClosed();
+
+        final Throwables.Function<T, R, E> mapper = new Throwables.Function<>() {
+            private volatile boolean initialized = false;
+            private volatile Map<K, U> map = null; //NOSONAR
+            private U val = null;
+
+            @Override
+            public R apply(T t) throws E {
+                if (!initialized) {
+                    init();
+                }
+
+                val = map.get(leftKeyMapper.apply(t));
+
+                if (val == null) {
+                    return func.apply(t, null);
+                } else {
+                    return func.apply(t, val);
+                }
+            }
+
+            private void init() throws E {
+                if (!initialized) {
+                    initialized = true;
+
+                    map = CheckedStream.<U, E> of(b).toMap(rightKeyMapper, Fnn.<U, E> identity(), mergeFunction);
+                }
+            }
+        };
+
+        return map(mapper);
+    }
+
+    /**
+     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
+     *
+     * @param <U>
+     * @param <K>
+     * @param <R>
+     * @param b will be loaded to memory. If {@code b} is too big to load to memory, please use {@code b.groupJoin(this, ...)}
+     * @param leftKeyMapper
+     * @param rightKeyMapper
+     * @param mergeFunction
+     * @param func
+     * @return
+     */
+    @IntermediateOp
+    public <U, K, R> CheckedStream<R, E> groupJoin(final CheckedStream<U, ? extends E> b,
+            final Throwables.Function<? super T, ? extends K, ? extends E> leftKeyMapper,
+            final Throwables.Function<? super U, ? extends K, ? extends E> rightKeyMapper, final Throwables.BinaryOperator<U, ? extends E> mergeFunction,
+            final Throwables.BiFunction<? super T, ? super U, ? extends R, ? extends E> func) {
+        assertNotClosed();
+
+        checkArgNotNull(b, "stream 'b' can not be null");
+
+        final Throwables.Function<T, R, E> mapper = new Throwables.Function<>() {
+            private volatile boolean initialized = false;
+            private volatile Map<K, U> map = null; //NOSONAR
+            private U val = null;
+
+            @Override
+            public R apply(T t) throws E {
+                if (!initialized) {
+                    init();
+                }
+
+                val = map.get(leftKeyMapper.apply(t));
+
+                if (val == null) {
+                    return func.apply(t, null);
+                } else {
+                    return func.apply(t, val);
+                }
+            }
+
+            private void init() throws E {
+                if (!initialized) {
+                    initialized = true;
+
+                    map = b.toMap(rightKeyMapper, Fnn.<U, E> identity(), mergeFunction);
+                }
+            }
+        };
+
+        return map(mapper).onClose(newCloseHandler(b));
+    }
+
+    /**
+     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
+     *
+     * @param <U>
+     * @param <K>
+     * @param <D>
+     * @param b
+     * @param leftKeyMapper
+     * @param rightKeyMapper
+     * @param downstream
+     * @return
+     */
+    @IntermediateOp
+    public <U, K, D> CheckedStream<Pair<T, D>, E> groupJoin(final Collection<? extends U> b,
+            final Throwables.Function<? super T, ? extends K, ? extends E> leftKeyMapper,
+            final Throwables.Function<? super U, ? extends K, ? extends E> rightKeyMapper, final Collector<? super U, ?, D> downstream) {
+        return groupJoin(b, leftKeyMapper, rightKeyMapper, downstream, Fnn.<T, D, E> pair());
+    }
+
+    /**
+     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
+     *
+     * @param <U>
+     * @param <K>
+     * @param <D>
+     * @param <R>
+     * @param b
+     * @param leftKeyMapper
+     * @param rightKeyMapper
+     * @param downstream
+     * @param func
+     * @return
+     */
+    @IntermediateOp
+    public <U, K, D, R> CheckedStream<R, E> groupJoin(final Collection<? extends U> b,
+            final Throwables.Function<? super T, ? extends K, ? extends E> leftKeyMapper,
+            final Throwables.Function<? super U, ? extends K, ? extends E> rightKeyMapper, final Collector<? super U, ?, D> downstream,
+            final Throwables.BiFunction<? super T, ? super D, ? extends R, ? extends E> func) {
+        assertNotClosed();
+
+        final Throwables.Function<T, R, E> mapper = new Throwables.Function<>() {
+            private volatile boolean initialized = false;
+            private volatile Map<K, D> map = null; //NOSONAR
+            private D val = null;
+
+            @Override
+            public R apply(T t) throws E {
+                if (!initialized) {
+                    init();
+                }
+
+                val = map.get(leftKeyMapper.apply(t));
+
+                if (val == null) {
+                    return func.apply(t, CheckedStream.<U, E> empty().collect(downstream));
+                } else {
+                    return func.apply(t, val);
+                }
+            }
+
+            private void init() throws E {
+                if (!initialized) {
+                    initialized = true;
+
+                    map = CheckedStream.<U, E> of(b).groupTo(rightKeyMapper, Fnn.<U, E> identity(), downstream);
+                }
+            }
+        };
+
+        return map(mapper);
+    }
+
+    /**
+     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
+     *
+     *
+     * @param <K>
+     * @param <D>
+     * @param b
+     * @param keyMapper
+     * @param downstream
+     * @return
+     */
+    @IntermediateOp
+    public <K, D> CheckedStream<Pair<T, D>, E> groupJoin(final Collection<? extends T> b,
+            final Throwables.Function<? super T, ? extends K, ? extends E> keyMapper, final Collector<? super T, ?, D> downstream) {
+        return groupJoin(b, keyMapper, keyMapper, downstream);
+    }
+
+    /**
+     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
+     *
+     *
+     * @param <K>
+     * @param <D>
+     * @param <R>
+     * @param b
+     * @param keyMapper
+     * @param downstream
+     * @param func
+     * @return
+     */
+    @IntermediateOp
+    public <K, D, R> CheckedStream<R, E> groupJoin(final Collection<? extends T> b, final Throwables.Function<? super T, ? extends K, ? extends E> keyMapper,
+            final Collector<? super T, ?, D> downstream, final Throwables.BiFunction<? super T, ? super D, ? extends R, ? extends E> func) {
+        return groupJoin(b, keyMapper, keyMapper, downstream, func);
+    }
+
+    /**
+     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
+     *
+     * @param <U>
+     * @param <K>
+     * @param <D>
+     * @param <R>
+     * @param b
+     * @param leftKeyMapper
+     * @param rightKeyMapper
+     * @param downstream
+     * @param func
+     * @return
+     */
+    @IntermediateOp
+    public <U, K, D, R> CheckedStream<R, E> groupJoin(final CheckedStream<U, ? extends E> b,
+            final Throwables.Function<? super T, ? extends K, ? extends E> leftKeyMapper,
+            final Throwables.Function<? super U, ? extends K, ? extends E> rightKeyMapper, final Collector<? super U, ?, D> downstream,
+            final Throwables.BiFunction<? super T, ? super D, ? extends R, ? extends E> func) {
+        assertNotClosed();
+
+        checkArgNotNull(b, "stream 'b' can not be null");
+
+        final Throwables.Function<T, R, E> mapper = new Throwables.Function<>() {
+            private volatile boolean initialized = false;
+            private volatile Map<K, D> map = null; //NOSONAR
+            private D val = null;
+
+            @Override
+            public R apply(T t) throws E {
+                if (!initialized) {
+                    init();
+                }
+
+                val = map.get(leftKeyMapper.apply(t));
+
+                if (val == null) {
+                    return func.apply(t, CheckedStream.<U, E> empty().collect(downstream));
+                } else {
+                    return func.apply(t, val);
+                }
+            }
+
+            private void init() throws E {
+                if (!initialized) {
+                    initialized = true;
+
+                    map = b.groupTo(rightKeyMapper, Fnn.<U, E> identity(), downstream);
+                }
+            }
+        };
+
+        return map(mapper).onClose(newCloseHandler(b));
+    }
+
+    /**
+     *
+     * @param <U>
+     * @param b should be ordered
+     * @param predicate
+     * @return
+     */
+    @Beta
+    @IntermediateOp
+    public <U> CheckedStream<Pair<T, List<U>>, E> joinByRange(final Iterator<U> b, final Throwables.BiPredicate<? super T, ? super U, ? extends E> predicate) {
+        assertNotClosed();
+
+        checkArgNotNull(b, "Iterator 'b' can not be null");
+        checkArgNotNull(predicate, "'predicate' can not be null");
+
+        final Throwables.Function<T, Pair<T, List<U>>, E> mapper = new Throwables.Function<>() {
+            private final Iterator<U> iter = b;
+            private final U none = (U) NONE;
+            private U next = none;
+
+            @Override
+            public Pair<T, List<U>> apply(T t) throws E {
+                final List<U> list = new ArrayList<>();
+
+                if (next == none) {
+                    if (iter.hasNext()) {
+                        next = iter.next();
+                    } else {
+                        return Pair.of(t, list);
+                    }
+                }
+
+                while (predicate.test(t, next)) {
+                    list.add(next);
+
+                    if (iter.hasNext()) {
+                        next = iter.next();
+                    } else {
+                        next = none;
+                        break;
+                    }
+                }
+
+                return Pair.of(t, list);
+            }
+        };
+
+        return map(mapper);
+    }
+
+    /**
+     *
+     * @param <U>
+     * @param <R>
+     * @param b should be ordered
+     * @param predicate
+     * @param collector
+     * @return
+     */
+    @Beta
+    @IntermediateOp
+    public <U, R> CheckedStream<Pair<T, R>, E> joinByRange(final Iterator<U> b, final Throwables.BiPredicate<? super T, ? super U, ? extends E> predicate,
+            final Collector<? super U, ?, R> collector) {
+        return joinByRange(b, predicate, collector, Fnn.pair());
+    }
+
+    /**
+     *
+     * @param <U>
+     * @param <D>
+     * @param <R>
+     * @param b should be ordered
+     * @param predicate
+     * @param collector
+     * @param func
+     * @return
+     */
+    @Beta
+    @IntermediateOp
+    public <U, D, R> CheckedStream<R, E> joinByRange(final Iterator<U> b, final Throwables.BiPredicate<? super T, ? super U, ? extends E> predicate,
+            final Collector<? super U, ?, D> collector, final Throwables.BiFunction<? super T, ? super D, ? extends R, ? extends E> func) {
+        assertNotClosed();
+
+        checkArgNotNull(b, "Iterator 'b' can not be null");
+        checkArgNotNull(predicate, "'predicate' can not be null");
+        checkArgNotNull(collector, "'collector' can not be null");
+        checkArgNotNull(func, "'func' can not be null");
+
+        final Supplier<Object> supplier = (Supplier<Object>) collector.supplier();
+        final BiConsumer<Object, ? super U> accumulator = (BiConsumer<Object, ? super U>) collector.accumulator();
+        final Function<Object, D> finisher = (Function<Object, D>) collector.finisher();
+
+        final Throwables.Function<T, R, E> mapper = new Throwables.Function<>() {
+            private final Iterator<U> iter = b;
+            private final U none = (U) NONE;
+            private U next = none;
+
+            @Override
+            public R apply(T t) throws E {
+                final Object container = supplier.get();
+
+                if (next == none) {
+                    if (iter.hasNext()) {
+                        next = iter.next();
+                    } else {
+                        return func.apply(t, finisher.apply(container));
+                    }
+                }
+
+                while (predicate.test(t, next)) {
+                    accumulator.accept(container, next);
+
+                    if (iter.hasNext()) {
+                        next = iter.next();
+                    } else {
+                        next = none;
+                        break;
+                    }
+                }
+
+                return func.apply(t, finisher.apply(container));
+            }
+        };
+
+        return map(mapper);
+    }
+
+    /**
+     *
+     * @param <U>
+     * @param <D>
+     * @param <R>
+     * @param b should be ordered
+     * @param predicate
+     * @param collector
+     * @param func
+     * @param mapperForUnJoinedEelements
+     *       In a lot of scenarios, there could be an previous element which is took out from the specified {@code Iterator b} but not joined, you may need to consider including that element in this {@code mapperForUnJoinedEelements}.
+     *       <br />
+     *       This input {@code Iterator} is the input {@code b}
+     * @return
+     */
+    @Beta
+    @IntermediateOp
+    public <U, D, R> CheckedStream<R, E> joinByRange(final Iterator<U> b, final Throwables.BiPredicate<? super T, ? super U, ? extends E> predicate,
+            final Collector<? super U, ?, D> collector, final Throwables.BiFunction<? super T, ? super D, ? extends R, ? extends E> func,
+            final Throwables.Function<Iterator<U>, CheckedStream<R, E>, ? extends E> mapperForUnJoinedEelements) {
+        assertNotClosed();
+
+        checkArgNotNull(b, "Iterator 'b' can not be null");
+        checkArgNotNull(predicate, "'predicate' can not be null");
+        checkArgNotNull(collector, "'collector' can not be null");
+        checkArgNotNull(func, "'func' can not be null");
+        checkArgNotNull(mapperForUnJoinedEelements, "'mapperForUnJoinedEelements' can not be null");
+
+        final Supplier<Object> supplier = (Supplier<Object>) collector.supplier();
+        final BiConsumer<Object, ? super U> accumulator = (BiConsumer<Object, ? super U>) collector.accumulator();
+        final Function<Object, D> finisher = (Function<Object, D>) collector.finisher();
+
+        final U none = (U) NONE;
+        final Holder<U> nextValueHolder = Holder.of(none);
+
+        final Throwables.Function<T, R, E> mapper = new Throwables.Function<>() {
+            private final Iterator<U> iter = b;
+            private U next = none;
+
+            @Override
+            public R apply(T t) throws E {
+                final Object container = supplier.get();
+
+                if (next == none) {
+                    if (iter.hasNext()) {
+                        next = iter.next();
+                    } else {
+                        return func.apply(t, finisher.apply(container));
+                    }
+                }
+
+                while (predicate.test(t, next)) {
+                    accumulator.accept(container, next);
+
+                    if (iter.hasNext()) {
+                        next = iter.next();
+                    } else {
+                        next = none;
+                        break;
+                    }
+                }
+
+                nextValueHolder.setValue(next);
+
+                return func.apply(t, finisher.apply(container));
+            }
+        };
+
+        final Throwables.Supplier<CheckedStream<R, E>, E> tmp = () -> nextValueHolder.value() == none ? CheckedStream.<R, E> empty()
+                : mapperForUnJoinedEelements.apply(Iterators.concat(ObjIterator.of(nextValueHolder.value()), b));
+
+        return map(mapper).append(CheckedStream.defer(tmp));
+    }
+
+    /**
+     *
+     * @param <U>
+     * @param b should be ordered. It will be closed along with this {@code CheckedStream}
+     * @param predicate
+     * @return
+     */
+    @Beta
+    @IntermediateOp
+    public <U> CheckedStream<Pair<T, List<U>>, E> joinByRange(final Stream<U> b, final Throwables.BiPredicate<? super T, ? super U, ? extends E> predicate) {
+        assertNotClosed();
+
+        checkArgNotNull(b, "Stream 'b' can not be null");
+        checkArgNotNull(predicate, "'predicate' can not be null");
+
+        return joinByRange(b.iterator(), predicate).onClose(newCloseHandler(b));
+    }
+
+    /**
+     *
+     * @param <U>
+     * @param <R>
+     * @param b should be ordered. It will be closed along with this {@code CheckedStream}
+     * @param predicate
+     * @param collector
+     * @return
+     */
+    @Beta
+    @IntermediateOp
+    public <U, R> CheckedStream<Pair<T, R>, E> joinByRange(final Stream<U> b, final Throwables.BiPredicate<? super T, ? super U, ? extends E> predicate,
+            final Collector<? super U, ?, R> collector) {
+        return joinByRange(b, predicate, collector, Fnn.pair());
+    }
+
+    /**
+     *
+     * @param <U>
+     * @param <D>
+     * @param <R>
+     * @param b should be ordered. It will be closed along with this {@code CheckedStream}
+     * @param predicate
+     * @param collector
+     * @param func
+     * @return
+     */
+    @Beta
+    @IntermediateOp
+    public <U, D, R> CheckedStream<R, E> joinByRange(final Stream<U> b, final Throwables.BiPredicate<? super T, ? super U, ? extends E> predicate,
+            final Collector<? super U, ?, D> collector, final Throwables.BiFunction<? super T, ? super D, ? extends R, ? extends E> func) {
+        assertNotClosed();
+
+        checkArgNotNull(b, "Stream 'b' can not be null");
+        checkArgNotNull(predicate, "'predicate' can not be null");
+        checkArgNotNull(collector, "'collector' can not be null");
+        checkArgNotNull(func, "'func' can not be null");
+
+        return ((CheckedStream<R, E>) joinByRange(b.iterator(), predicate, collector, func)).onClose(newCloseHandler(b));
+    }
+
+    /**
+     *
+     * @param <U>
+     * @param <D>
+     * @param <R>
+     * @param b should be ordered. It will be closed along with this {@code CheckedStream}
+     * @param predicate
+     * @param collector
+     * @param func
+     * @param mapperForUnJoinedEelements
+     *       In a lot of scenarios, there could be an previous element which is took out from the specified {@code Iterator b} but not joined, you may need to consider including that element in this {@code mapperForUnJoinedEelements}.
+     *       <br />
+     *       This input {@code Iterator} comes from {@code b.iterator()}.
+     * @return
+     */
+    @Beta
+    @IntermediateOp
+    public <U, D, R> CheckedStream<R, E> joinByRange(final Stream<U> b, final Throwables.BiPredicate<? super T, ? super U, ? extends E> predicate,
+            final Collector<? super U, ?, D> collector, final Throwables.BiFunction<? super T, ? super D, ? extends R, ? extends E> func,
+            final Throwables.Function<Iterator<U>, CheckedStream<R, E>, ? extends E> mapperForUnJoinedEelements) {
+        assertNotClosed();
+
+        checkArgNotNull(b, "Stream 'b' can not be null");
+        checkArgNotNull(predicate, "'predicate' can not be null");
+        checkArgNotNull(collector, "'collector' can not be null");
+        checkArgNotNull(func, "'func' can not be null");
+        checkArgNotNull(mapperForUnJoinedEelements, "'mapperForUnJoinedEelements' can not be null");
+
+        return joinByRange(b.iterator(), predicate, collector, func, mapperForUnJoinedEelements).onClose(newCloseHandler(b));
+    }
+
+    /**
+     *
+     * @param <U>
+     * @param b should be ordered. It will be closed along with this {@code CheckedStream}
+     * @param predicate
+     * @return
+     */
+    @Beta
+    @IntermediateOp
+    public <U> CheckedStream<Pair<T, List<U>>, E> joinByRange(final CheckedStream<U, ? extends E> b,
+            final Throwables.BiPredicate<? super T, ? super U, ? extends E> predicate) {
+        assertNotClosed();
+
+        checkArgNotNull(b, "CheckedStream 'b' can not be null");
+        checkArgNotNull(predicate, "'predicate' can not be null");
+
+        final Throwables.Function<T, Pair<T, List<U>>, E> mapper = new Throwables.Function<>() {
+            private final CheckedIterator<U, ? extends E> iter = b.iteratorEx();
+            private final U none = (U) NONE;
+            private U next = none;
+
+            @Override
+            public Pair<T, List<U>> apply(T t) throws E {
+                final List<U> list = new ArrayList<>();
+
+                if (next == none) {
+                    if (iter.hasNext()) {
+                        next = iter.next();
+                    } else {
+                        return Pair.of(t, list);
+                    }
+                }
+
+                while (predicate.test(t, next)) {
+                    list.add(next);
+
+                    if (iter.hasNext()) {
+                        next = iter.next();
+                    } else {
+                        next = none;
+                        break;
+                    }
+                }
+
+                return Pair.of(t, list);
+            }
+        };
+
+        return map(mapper).onClose(newCloseHandler(b));
+    }
+
+    /**
+     *
+     * @param <U>
+     * @param <R>
+     * @param b should be ordered. It will be closed along with this {@code CheckedStream}
+     * @param predicate
+     * @param collector
+     * @return
+     */
+    @Beta
+    @IntermediateOp
+    public <U, R> CheckedStream<Pair<T, R>, E> joinByRange(final CheckedStream<U, ? extends E> b,
+            final Throwables.BiPredicate<? super T, ? super U, ? extends E> predicate, final Collector<? super U, ?, R> collector) {
+        return joinByRange(b, predicate, collector, Fnn.pair());
+    }
+
+    /**
+     *
+     * @param <U>
+     * @param <D>
+     * @param <R>
+     * @param b should be ordered. It will be closed along with this {@code CheckedStream}
+     * @param predicate
+     * @param collector
+     * @param func
+     * @return
+     */
+    @Beta
+    @IntermediateOp
+    public <U, D, R> CheckedStream<R, E> joinByRange(final CheckedStream<U, ? extends E> b,
+            final Throwables.BiPredicate<? super T, ? super U, ? extends E> predicate, final Collector<? super U, ?, D> collector,
+            final Throwables.BiFunction<? super T, ? super D, ? extends R, ? extends E> func) {
+        assertNotClosed();
+
+        checkArgNotNull(b, "CheckedStream 'b' can not be null");
+        checkArgNotNull(predicate, "'predicate' can not be null");
+        checkArgNotNull(collector, "'collector' can not be null");
+        checkArgNotNull(func, "'func' can not be null");
+
+        final Supplier<Object> supplier = (Supplier<Object>) collector.supplier();
+        final BiConsumer<Object, ? super U> accumulator = (BiConsumer<Object, ? super U>) collector.accumulator();
+        final Function<Object, D> finisher = (Function<Object, D>) collector.finisher();
+
+        final Throwables.Function<T, R, E> mapper = new Throwables.Function<>() {
+            private final CheckedIterator<U, ? extends E> iter = b.iteratorEx();
+            private final U none = (U) NONE;
+            private U next = none;
+
+            @Override
+            public R apply(T t) throws E {
+                final Object container = supplier.get();
+
+                if (next == none) {
+                    if (iter.hasNext()) {
+                        next = iter.next();
+                    } else {
+                        return func.apply(t, finisher.apply(container));
+                    }
+                }
+
+                while (predicate.test(t, next)) {
+                    accumulator.accept(container, next);
+
+                    if (iter.hasNext()) {
+                        next = iter.next();
+                    } else {
+                        next = none;
+                        break;
+                    }
+                }
+
+                return func.apply(t, finisher.apply(container));
+            }
+        };
+
+        return map(mapper).onClose(newCloseHandler(b));
+    }
+
+    /**
+     *
+     * @param <U>
+     * @param <D>
+     * @param <R>
+     * @param b should be ordered. It will be closed along with this {@code CheckedStream}
+     * @param predicate
+     * @param collector
+     * @param func
+     * @param mapperForUnJoinedEelements
+     *       In a lot of scenarios, there could be an previous element which is took out from the specified {@code Iterator b} but not joined, you may need to consider including that element in this {@code mapperForUnJoinedEelements}.
+     *       <br />
+     *       This input {@code CheckedIterator} comes from {@code b.iterator()}.
+     * @return
+     */
+    @Beta
+    @IntermediateOp
+    public <U, D, R> CheckedStream<R, E> joinByRange(final CheckedStream<U, ? extends E> b,
+            final Throwables.BiPredicate<? super T, ? super U, ? extends E> predicate, final Collector<? super U, ?, D> collector,
+            final Throwables.BiFunction<? super T, ? super D, ? extends R, ? extends E> func,
+            final Throwables.Function<CheckedIterator<U, E>, CheckedStream<R, E>, ? extends E> mapperForUnJoinedEelements) {
+        assertNotClosed();
+
+        checkArgNotNull(b, "CheckedStream 'b' can not be null");
+        checkArgNotNull(predicate, "'predicate' can not be null");
+        checkArgNotNull(collector, "'collector' can not be null");
+        checkArgNotNull(func, "'func' can not be null");
+        checkArgNotNull(mapperForUnJoinedEelements, "'mapperForUnJoinedEelements' can not be null");
+
+        final Supplier<Object> supplier = (Supplier<Object>) collector.supplier();
+        final BiConsumer<Object, ? super U> accumulator = (BiConsumer<Object, ? super U>) collector.accumulator();
+        final Function<Object, D> finisher = (Function<Object, D>) collector.finisher();
+        final U none = (U) NONE;
+        final Holder<U> nextValueHolder = Holder.of(none);
+        final CheckedIterator<U, ? extends E> iter = b.iteratorEx();
+
+        final Throwables.Function<T, R, E> mapper = new Throwables.Function<>() {
+            private U next = none;
+
+            @Override
+            public R apply(T t) throws E {
+                final Object container = supplier.get();
+
+                if (next == none) {
+                    if (iter.hasNext()) {
+                        next = iter.next();
+                    } else {
+                        return func.apply(t, finisher.apply(container));
+                    }
+                }
+
+                while (predicate.test(t, next)) {
+                    accumulator.accept(container, next);
+
+                    if (iter.hasNext()) {
+                        next = iter.next();
+                    } else {
+                        next = none;
+                        break;
+                    }
+                }
+
+                nextValueHolder.setValue(next);
+
+                return func.apply(t, finisher.apply(container));
+            }
+        };
+
+        final Throwables.Supplier<CheckedStream<R, E>, E> tmp = () -> nextValueHolder.value() == none ? CheckedStream.<R, E> empty()
+                : mapperForUnJoinedEelements.apply(CheckedIterator.concat(CheckedIterator.of(nextValueHolder.value()), iter));
+
+        return map(mapper).append(CheckedStream.defer(tmp)).onClose(newCloseHandler(b));
+    }
+
+    /**
+     * If there is no value to join and want to skip that element, {@code joinFunc} can return {@code null} and then skip the {@code null} element by {@code stream.join(b, joinFunc).skipNulls()}.
+     *
+     *
+     * @param <B>
+     * @param <R>
+     * @param b
+     * @param joinFunc
+     * @return
+     */
+    @Beta
+    @IntermediateOp
+    public <B extends Collection<?>, R> CheckedStream<R, E> join(final B b,
+            final Throwables.BiFunction<? super T, ? super B, ? extends R, ? extends E> joinFunc) {
+        assertNotClosed();
+
+        checkArgNotNull(b, "Collection 'b' can not be null");
+        checkArgNotNull(joinFunc, "'joinFunc' can not be null");
+
+        final Throwables.Function<T, R, E> mapper = t -> joinFunc.apply(t, b);
+
+        return map(mapper);
+    }
+
+    /**
+     * If there is no value to join and want to skip that element, {@code joinFunc} can return {@code null} and then skip the {@code null} element by {@code stream.join(b, joinFunc).skipNulls()}.
+     *
+     * @param <B>
+     * @param <R>
+     * @param b
+     * @param joinFunc
+     * @return
+     */
+    @Beta
+    @IntermediateOp
+    public <B extends Map<?, ?>, R> CheckedStream<R, E> join(final B b, final Throwables.BiFunction<? super T, ? super B, ? extends R, ? extends E> joinFunc) {
+        assertNotClosed();
+
+        checkArgNotNull(b, "Map 'b' can not be null");
+        checkArgNotNull(joinFunc, "'joinFunc' can not be null");
+
+        final Throwables.Function<T, R, E> mapper = t -> joinFunc.apply(t, b);
+
+        return map(mapper);
+    }
+
+    /**
+     * If there is no value to join and want to skip that element, {@code joinFunc} can return {@code null} and then skip the {@code null} element by {@code stream.join(b, joinFunc).skipNulls()}.
+     *
+     *
+     * @param <B>
+     * @param <R>
+     * @param b should be ordered
+     * @param joinFunc
+     * @return
+     */
+    @Beta
+    @IntermediateOp
+    public <B extends Iterator<?>, R> CheckedStream<R, E> join(final B b,
+            final Throwables.BiFunction<? super T, ? super B, ? extends R, ? extends E> joinFunc) {
+        assertNotClosed();
+
+        checkArgNotNull(b, "Iterator 'b' can not be null");
+        checkArgNotNull(joinFunc, "'joinFunc' can not be null");
+
+        final Throwables.Function<T, R, E> mapper = t -> joinFunc.apply(t, b);
+
+        return map(mapper);
+    }
+
+    /**
+     * If there is no value to join and want to skip that element, {@code joinFunc} can return {@code null} and then skip the {@code null} element by {@code stream.join(b, joinFunc).skipNulls()}.
+     *
+     * @param <U>
+     * @param <B>
+     * @param <R>
+     * @param b should be ordered
+     * @param joinFunc
+     * @param mapperForUnJoinedEelements In a lot of scenarios, there could be an previous element which is took out from the specified {@code Iterator b} but not joined, you may need to consider including that element in this {@code mapperForUnJoinedEelements}
+     * @return
+     */
+    @Beta
+    @IntermediateOp
+    public <U, B extends Iterator<U>, R> CheckedStream<R, E> join(final B b,
+            final Throwables.BiFunction<? super T, ? super B, ? extends R, ? extends E> joinFunc,
+            final Throwables.Function<? super Iterator<U>, CheckedStream<R, E>, ? extends E> mapperForUnJoinedEelements) {
+        assertNotClosed();
+
+        checkArgNotNull(b, "Iterator 'b' can not be null");
+        checkArgNotNull(joinFunc, "'joinFunc' can not be null");
+        checkArgNotNull(mapperForUnJoinedEelements, "'mapperForUnJoinedEelements' can not be null");
+
+        final Throwables.Function<T, R, E> mapper = t -> joinFunc.apply(t, b);
+
+        Throwables.Supplier<? extends CheckedStream<R, E>, E> supplier = () -> mapperForUnJoinedEelements.apply(b);
+
+        return map(mapper).append(CheckedStream.<R, E> defer(supplier));
+    }
+
+    /**
+     * If there is no value to join and want to skip that element, {@code joinFunc} can return {@code null} and then skip the {@code null} element by {@code stream.join(b, joinFunc).skipNulls()}.
+     *
+     * @param <U>
+     * @param <R>
+     * @param b should be ordered. It will be closed along with this stream. It can also be closed earlier by {@code joinFunc}.
+     * @param joinFunc
+     * @return
+     */
+    @Beta
+    @IntermediateOp
+    public <U, R> CheckedStream<R, E> join(final Stream<U> b, final Throwables.BiFunction<? super T, ? super Iterator<U>, ? extends R, ? extends E> joinFunc) {
+        assertNotClosed();
+
+        checkArgNotNull(b, "Stream 'b' can not be null");
+        checkArgNotNull(joinFunc, "'joinFunc' can not be null");
+
+        return ((CheckedStream<R, E>) join(b.iterator(), joinFunc)).onClose(newCloseHandler(b));
+    }
+
+    /**
+     * If there is no value to join and want to skip that element, {@code joinFunc} can return {@code null} and then skip the {@code null} element by {@code stream.join(b, joinFunc).skipNulls()}.
+     *
+     * @param <U>
+     * @param <R>
+     * @param b should be ordered. It will be closed along with this stream. It can also be closed earlier by {@code joinFunc}.
+     * @param joinFunc
+     * @param mapperForUnJoinedEelements In a lot of scenarios, there could be an previous element which is took out from the specified {@code Iterator b} but not joined, you may need to consider including that element in this {@code mapperForUnJoinedEelements}
+     * @return
+     */
+    @Beta
+    @IntermediateOp
+    public <U, R> CheckedStream<R, E> join(final Stream<U> b, final Throwables.BiFunction<? super T, ? super Iterator<U>, ? extends R, ? extends E> joinFunc,
+            final Throwables.Function<? super Iterator<U>, CheckedStream<R, E>, ? extends E> mapperForUnJoinedEelements) {
+        assertNotClosed();
+
+        checkArgNotNull(b, "Stream 'b' can not be null");
+        checkArgNotNull(joinFunc, "'joinFunc' can not be null");
+        checkArgNotNull(mapperForUnJoinedEelements, "'mapperForUnJoinedEelements' can not be null");
+
+        return join(b.iterator(), joinFunc, mapperForUnJoinedEelements).onClose(newCloseHandler(b));
+    }
+
+    /**
+     * If there is no value to join and want to skip that element, {@code joinFunc} can return {@code null} and then skip the {@code null} element by {@code stream.join(b, joinFunc).skipNulls()}.
+     *
+     *
+     * @param <U>
+     * @param <R>
+     * @param b should be ordered. It will be closed along with this stream. It can also be closed earlier by {@code joinFunc}.
+     * @param joinFunc
+     * @return
+     */
+    @Beta
+    @IntermediateOp
+    public <U, R> CheckedStream<R, E> join(final CheckedStream<U, ? extends E> b,
+            final Throwables.BiFunction<? super T, ? super CheckedIterator<U, ? extends E>, ? extends R, ? extends E> joinFunc) {
+        assertNotClosed();
+
+        checkArgNotNull(b, "CheckedStream 'b' can not be null");
+        checkArgNotNull(joinFunc, "'joinFunc' can not be null");
+
+        final CheckedIterator<U, ? extends E> iter = b.iteratorEx();
+
+        final Throwables.Function<T, R, E> mapper = t -> joinFunc.apply(t, iter);
+
+        return map(mapper).onClose(newCloseHandler(b));
+    }
+
+    /**
+     * If there is no value to join and want to skip that element, {@code joinFunc} can return {@code null} and then skip the {@code null} element by {@code stream.join(b, joinFunc).skipNulls()}.
+     *
+     *
+     * @param <U>
+     * @param <R>
+     * @param b should be ordered. It will be closed along with this stream. It can also be closed earlier by {@code joinFunc}.
+     * @param joinFunc
+     * @param mapperForUnJoinedEelements In a lot of scenarios, there could be an previous element which is took out from the specified {@code Iterator b} but not joined, you may need to consider including that element in this {@code mapperForUnJoinedEelements}
+     * @return
+     */
+    @Beta
+    @IntermediateOp
+    public <U, R> CheckedStream<R, E> join(final CheckedStream<U, ? extends E> b,
+            final Throwables.BiFunction<? super T, ? super CheckedIterator<U, ? extends E>, ? extends R, ? extends E> joinFunc,
+            final Throwables.Function<? super CheckedIterator<U, ? extends E>, CheckedStream<R, E>, ? extends E> mapperForUnJoinedEelements) {
+        assertNotClosed();
+
+        checkArgNotNull(b, "CheckedStream 'b' can not be null");
+        checkArgNotNull(joinFunc, "'joinFunc' can not be null");
+        checkArgNotNull(mapperForUnJoinedEelements, "'mapperForUnJoinedEelements' can not be null");
+
+        final CheckedIterator<U, ? extends E> iter = b.iteratorEx();
+
+        final Throwables.Function<T, R, E> mapper = t -> joinFunc.apply(t, iter);
+
+        final Throwables.Supplier<? extends CheckedStream<R, E>, E> supplier = () -> mapperForUnJoinedEelements.apply(iter);
+
+        return map(mapper).append(CheckedStream.defer(supplier)).onClose(newCloseHandler(b));
+    }
+
+    static <T, K, E extends Exception> ListMultimap<K, T> createListMultimap(final Collection<? extends T> c,
+            final Throwables.Function<? super T, ? extends K, E> keyMapper) throws E {
+        N.checkArgNotNull(keyMapper);
+
+        final ListMultimap<K, T> multimap = N.newListMultimap(N.size(c));
+
+        if (N.notEmpty(c)) {
+            for (T e : c) {
+                multimap.put(keyMapper.apply(e), e);
+            }
+        }
+
+        return multimap;
+    }
+
+    private static <E extends Exception> Throwables.Runnable<E> newCloseHandler(final CheckedStream<?, E> b) {
+        if (b == null || N.isEmpty(b.closeHandlers)) {
+            return EMPTY_CLOSE_HANDLER;
+        }
+
+        return b::close;
+    }
+
+    private static <E extends Exception> Throwables.Runnable<E> newCloseHandler(final Stream<?> b) {
+        if (b == null) {
+            return EMPTY_CLOSE_HANDLER;
+        }
+
+        return b::close;
+    }
 
     /**
      * Add a new Stream with terminal action to listen/consume the elements from upstream.
