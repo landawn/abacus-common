@@ -1,6 +1,10 @@
+### 3.10.16
+
+* Improvements JavaDoc.
+
 ### 3.10.15
 
-* Improvements and bug fix.
+* Support joins.
 
 ### 3.10.14
 
