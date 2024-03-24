@@ -1660,7 +1660,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors {
      * The operation performed by the returned collector is equivalent to
      * {@code stream.filter(predicate).collect(downstream)}. This collector is
      * mostly useful as a downstream collector in cascaded operation involving
-     * {@link #pairing(Collector, Collector, BiFunction)} collector.
+     * {@link MoreCollectors#combine(Collector, Collector, BiFunction)} collector.
      *
      * <p>
      * This method is similar to {@code Collectors.filtering} method which
@@ -1676,7 +1676,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors {
      * @return a collector which applies the predicate to the input elements and
      *         provides the elements for which predicate returned true to the
      *         downstream collector
-     * @see #pairing(Collector, Collector, BiFunction)
+     * @see MoreCollectors#combine(Collector, Collector, BiFunction)
      * @since 0.4.0
      */
     public static <T, A, R> Collector<T, ?, R> filtering(final Predicate<? super T> predicate, final Collector<? super T, A, R> downstream) {
@@ -2862,7 +2862,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors {
      * {@code Collector}.
      *
      * @param <T> the type of the input elements
-     * @param <A> the intermediate accumulation type of the downstream collector
      * @param <R> the result type of the downstream reduction
      * @param downstream a {@code Collector} implementing the downstream
      *        reduction
@@ -2886,7 +2885,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors {
      * specified downstream {@code Collector}.
      *
      * @param <T> the type of the input elements
-     * @param <A> the intermediate accumulation type of the downstream collector
      * @param <R> the result type of the downstream reduction
      * @param comparator a {@code Comparator} to compare the elements
      * @param downstream a {@code Collector} implementing the downstream
@@ -5989,6 +5987,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors {
          * @param downstream2
          * @param downstream3
          * @param downstream4
+         * @param merger
          * @return
          */
         @SuppressWarnings("rawtypes")

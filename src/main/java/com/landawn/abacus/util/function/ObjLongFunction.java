@@ -34,10 +34,11 @@ public interface ObjLongFunction<T, R> extends Throwables.ObjLongFunction<T, R, 
     R apply(T t, long u);
 
     /**
+     * 
      *
-     *
-     * @param after
-     * @return
+     * @param <V> 
+     * @param after 
+     * @return 
      */
     default <V> ObjLongFunction<T, V> andThen(java.util.function.Function<? super R, ? extends V> after) {
         N.checkArgNotNull(after);

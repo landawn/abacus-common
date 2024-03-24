@@ -53,7 +53,7 @@ import com.landawn.abacus.logging.LoggerFactory;
  * <code>
  * Profiler.run(threadNum, bigLoopNum / 1000, roundNum, "yourMethod", () ->
  *  {
- *      for (int i = 0; i < 1000; i++) {
+ *      for (int i = 0; i &lt; 1000; i++) {
  *          yourMethod();
  *      }
  *  });

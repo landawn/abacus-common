@@ -32,51 +32,114 @@ final class GuavaHashFunction implements HashFunction {
         return new GuavaHashFunction(gHashFunction);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public Hasher newHasher() {
         return GuavaHasher.wrap(gHashFunction.newHasher());
     }
 
+    /**
+     * 
+     *
+     * @param expectedInputSize 
+     * @return 
+     */
     @Override
     public Hasher newHasher(final int expectedInputSize) {
         return GuavaHasher.wrap(gHashFunction.newHasher(expectedInputSize));
     }
 
+    /**
+     * 
+     *
+     * @param input 
+     * @return 
+     */
     @Override
     public HashCode hash(final int input) {
         return gHashFunction.hashInt(input);
     }
 
+    /**
+     * 
+     *
+     * @param input 
+     * @return 
+     */
     @Override
     public HashCode hash(final long input) {
         return gHashFunction.hashLong(input);
     }
 
+    /**
+     * 
+     *
+     * @param input 
+     * @return 
+     */
     @Override
     public HashCode hash(final byte[] input) {
         return gHashFunction.hashBytes(input);
     }
 
+    /**
+     * 
+     *
+     * @param input 
+     * @param off 
+     * @param len 
+     * @return 
+     */
     @Override
     public HashCode hash(final byte[] input, final int off, final int len) {
         return gHashFunction.hashBytes(input, off, len);
     }
 
+    /**
+     * 
+     *
+     * @param input 
+     * @return 
+     */
     @Override
     public HashCode hash(final CharSequence input) {
         return gHashFunction.hashUnencodedChars(input);
     }
 
+    /**
+     * 
+     *
+     * @param input 
+     * @param charset 
+     * @return 
+     */
     @Override
     public HashCode hash(final CharSequence input, final Charset charset) {
         return gHashFunction.hashString(input, charset);
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param instance 
+     * @param funnel 
+     * @return 
+     */
     @Override
     public <T> HashCode hash(final T instance, final Funnel<? super T> funnel) {
         return gHashFunction.hashObject(instance, funnel);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public int bits() {
         return gHashFunction.bits();

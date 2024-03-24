@@ -30,6 +30,7 @@ public enum LockMode {
      *
      * @deprecated not supported at present.
      */
+    @Deprecated
     A(2),
     /**
      * Others can't modify(update) if lock on this level.
@@ -44,6 +45,7 @@ public enum LockMode {
      *
      * @deprecated not supported at present.
      */
+    @Deprecated
     RA(R.intValue + A.intValue),
     /**
      * Others can't read by bean id (but can query by condition) and modify(update) if lock on this level.
@@ -58,12 +60,14 @@ public enum LockMode {
      *
      * @deprecated not supported at present.
      */
+    @Deprecated
     AU(A.intValue + U.intValue),
     /**
      * Others can't add(insert) and delete if lock on this level.
      *
      * @deprecated not supported at present.
      */
+    @Deprecated
     AD(A.intValue + D.intValue),
     /**
      * Others can't modify(update) and delete if lock on this level.
@@ -75,12 +79,14 @@ public enum LockMode {
      *
      * @deprecated not supported at present.
      */
+    @Deprecated
     RAU(R.intValue + A.intValue + U.intValue),
     /**
      * Others can't read by bean id (but can query by condition), add(insert) and delete if lock on this level.
      *
      * @deprecated not supported at present.
      */
+    @Deprecated
     RAD(R.intValue + A.intValue + D.intValue),
     /**
      * Others can't read by bean id (but can query by condition), modify(update) and delete if lock on this level.
@@ -91,6 +97,7 @@ public enum LockMode {
      *
      * @deprecated not supported at present.
      */
+    @Deprecated
     AUD(A.intValue + U.intValue + D.intValue),
 
     /**
@@ -99,6 +106,7 @@ public enum LockMode {
      *
      * @deprecated not supported at present.
      */
+    @Deprecated
     RAUD(R.intValue + A.intValue + U.intValue + D.intValue);
 
     private final int intValue;

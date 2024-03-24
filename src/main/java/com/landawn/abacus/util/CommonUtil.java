@@ -1922,13 +1922,13 @@ sealed class CommonUtil permits N {
      * @param cls
      * @return T
      * @see Suppliers#ofCollection(Class)
-     * @see Suppliers#registerForCollection(Class, com.landawn.abacus.util.function.Supplier)
+     * @see Suppliers#registerForCollection(Class, java.util.function.Supplier)
      * @see Suppliers#ofMap(Class)
-     * @see Suppliers#registerForMap(Class, com.landawn.abacus.util.function.Supplier)
+     * @see Suppliers#registerForMap(Class, java.util.function.Supplier)
      * @see IntFunctions#ofCollection(Class)
-     * @see IntFunctions#registerForCollection(Class, com.landawn.abacus.util.function.IntFunction)
+     * @see IntFunctions#registerForCollection(Class, java.util.function.IntFunction)
      * @see IntFunctions#ofMap(Class)
-     * @see IntFunctions#registerForMap(Class, com.landawn.abacus.util.function.IntFunction)
+     * @see IntFunctions#registerForMap(Class, java.util.function.IntFunction)
      */
     @SuppressWarnings("rawtypes")
     public static <T> T newInstance(final Class<T> cls) {
@@ -3462,6 +3462,7 @@ sealed class CommonUtil permits N {
      *
      *
      * @param dss
+     * @param requiresSameColumns
      * @return
      */
     public static DataSet merge(final Collection<? extends DataSet> dss, final boolean requiresSameColumns) {
@@ -9721,10 +9722,25 @@ sealed class CommonUtil permits N {
         return false;
     }
 
+    /**
+     *
+     *
+     * @param a
+     * @param b
+     * @return
+     */
     public static boolean anyEmpty(final CharSequence a, final CharSequence b) {
         return isEmpty(a) || isEmpty(b);
     }
 
+    /**
+     *
+     *
+     * @param a
+     * @param b
+     * @param c
+     * @return
+     */
     public static boolean anyEmpty(final CharSequence a, final CharSequence b, final CharSequence c) {
         return isEmpty(a) || isEmpty(b) || isEmpty(c);
     }
@@ -9747,7 +9763,7 @@ sealed class CommonUtil permits N {
      *
      * @param css the CharSequences to check, may be null or empty
      * @return {@code true} if any of the CharSequences are empty or null
-     * @see Strings#anyEmpty(CharSequence...)
+     * @see Strings#isAnyEmpty(CharSequence...)
      * @since 3.2
      */
     public static boolean anyEmpty(final CharSequence... css) {
@@ -9768,7 +9784,7 @@ sealed class CommonUtil permits N {
      *
      * @param css
      * @return
-     * @see Strings#anyEmpty(CharSequence...)
+     * @see Strings#isAnyEmpty(CharSequence...)
      */
     public static boolean anyEmpty(final Collection<? extends CharSequence> css) {
         if (N.isEmpty(css)) {
@@ -9832,10 +9848,25 @@ sealed class CommonUtil permits N {
         return a == null || a.size() == 0 || b == null || b.size() == 0 || c == null || c.size() == 0;
     }
 
+    /**
+     *
+     *
+     * @param a
+     * @param b
+     * @return
+     */
     public static boolean anyBlank(final CharSequence a, final CharSequence b) {
         return isBlank(a) || isBlank(b);
     }
 
+    /**
+     *
+     *
+     * @param a
+     * @param b
+     * @param c
+     * @return
+     */
     public static boolean anyBlank(final CharSequence a, final CharSequence b, final CharSequence c) {
         return isBlank(a) || isBlank(b) || isBlank(c);
     }
@@ -9861,7 +9892,7 @@ sealed class CommonUtil permits N {
      *
      * @param css the CharSequences to check, may be null or empty
      * @return {@code true} if any of the CharSequences are empty or null or whitespace only
-     * @see Strings#anyBlank(CharSequence...)
+     * @see Strings#isAnyBlank(CharSequence...)
      * @since 3.2
      */
     public static boolean anyBlank(final CharSequence... css) {
@@ -9882,7 +9913,7 @@ sealed class CommonUtil permits N {
      *
      * @param css
      * @return
-     * @see Strings#anyBlank(Collection)
+     * @see Strings#isAnyBlank(Collection)
      */
     public static boolean anyBlank(final Collection<? extends CharSequence> css) {
         if (N.isEmpty(css)) {
@@ -9965,10 +9996,25 @@ sealed class CommonUtil permits N {
         return true;
     }
 
+    /**
+     *
+     *
+     * @param a
+     * @param b
+     * @return
+     */
     public static boolean allEmpty(final CharSequence a, final CharSequence b) {
         return isEmpty(a) && isEmpty(b);
     }
 
+    /**
+     *
+     *
+     * @param a
+     * @param b
+     * @param c
+     * @return
+     */
     public static boolean allEmpty(final CharSequence a, final CharSequence b, final CharSequence c) {
         return isEmpty(a) && isEmpty(b) && isEmpty(c);
     }
@@ -9990,7 +10036,7 @@ sealed class CommonUtil permits N {
      *
      * @param css the CharSequences to check, may be null or empty
      * @return {@code true} if all of the CharSequences are empty or null
-     * @see Strings#allEmpty(CharSequence...)
+     * @see Strings#isAllEmpty(CharSequence...)
      * @since 3.6
      */
     public static boolean allEmpty(final CharSequence... css) {
@@ -10011,7 +10057,7 @@ sealed class CommonUtil permits N {
      *
      * @param css
      * @return
-     * @see Strings#allEmpty(Collection)
+     * @see Strings#isAllEmpty(Collection)
      */
     public static boolean allEmpty(final Collection<? extends CharSequence> css) {
         if (N.isEmpty(css)) {
@@ -10072,10 +10118,25 @@ sealed class CommonUtil permits N {
         return isEmpty(a) && isEmpty(b) && isEmpty(c);
     }
 
+    /**
+     *
+     *
+     * @param a
+     * @param b
+     * @return
+     */
     public static boolean allBlank(final CharSequence a, final CharSequence b) {
         return isBlank(a) && isBlank(b);
     }
 
+    /**
+     *
+     *
+     * @param a
+     * @param b
+     * @param c
+     * @return
+     */
     public static boolean allBlank(final CharSequence a, final CharSequence b, final CharSequence c) {
         return isBlank(a) && isBlank(b) && isBlank(c);
     }
@@ -10099,7 +10160,7 @@ sealed class CommonUtil permits N {
      *
      * @param css the CharSequences to check, may be null or empty
      * @return {@code true} if all of the CharSequences are empty or null or whitespace only
-     * @see Strings#allBlank(CharSequence...)
+     * @see Strings#isAllBlank(CharSequence...)
      * @since 3.6
      */
     public static boolean allBlank(final CharSequence... css) {
@@ -10120,7 +10181,7 @@ sealed class CommonUtil permits N {
      *
      * @param css
      * @return
-     * @see Strings#allBlank(Collection)
+     * @see Strings#isAllBlank(Collection)
      */
     public static boolean allBlank(final Collection<? extends CharSequence> css) {
         if (N.isEmpty(css)) {
@@ -10552,7 +10613,7 @@ sealed class CommonUtil permits N {
      * @return
      * @throws IllegalArgumentException if the specified parameter is {@code null}, empty ("") or whitespace only.
      * @see Strings#isBlank(CharSequence)
-     * @see Strings#notBlank(CharSequence)
+     * @see Strings#isNotBlank(CharSequence)
      */
     // DON'T change 'OrEmptyOrBlank' to 'OrBlank' because of the occurring order in the auto-completed context menu.
     public static <T extends CharSequence> T checkArgNotBlank(final T arg, final String msg) {
@@ -13724,7 +13785,7 @@ sealed class CommonUtil permits N {
      * @param bean1
      * @param bean2
      * @return
-     * @see MapDifference#of(Object, Object)
+     * @see Difference.MapDifference#of(Object, Object)
      */
     public static boolean equalsByCommonProps(final Object bean1, final Object bean2) {
         N.checkArgNotNull(bean1);
@@ -13759,7 +13820,7 @@ sealed class CommonUtil permits N {
      * @param bean2
      * @param propNamesToCompare
      * @return
-     * @see MapDifference#of(Object, Object)
+     * @see Difference.MapDifference#of(Object, Object)
      */
     public static boolean equalsByCommonProps(final Object bean1, final Object bean2, final Collection<String> propNamesToCompare) {
         N.checkArgNotNull(bean1);
@@ -18015,7 +18076,7 @@ sealed class CommonUtil permits N {
      * @param fromIndex
      * @param toIndex
      * @return
-     * @see Arrays#copyOfRange(T[], int, int)
+     * @see Arrays#copyOfRange(Object[], int, int)
      */
     public static <T> T[] copyOfRange(final T[] original, final int fromIndex, final int toIndex) {
         if (fromIndex == 0 && toIndex == original.length) {
@@ -18103,7 +18164,7 @@ sealed class CommonUtil permits N {
      * @param fromIndex
      * @param toIndex
      * @return
-     * @see Arrays#copyOfRange(T[], int, int)
+     * @see Arrays#copyOfRange(Object[], int, int)
      */
     public static <T> List<T> copyOfRange(final List<T> c, final int fromIndex, final int toIndex) {
         checkFromToIndex(fromIndex, toIndex, c.size());
@@ -22009,6 +22070,7 @@ sealed class CommonUtil permits N {
      * Index of sub list.
      *
      * @param sourceList
+     * @param startIndex
      * @param subListToFind
      * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
      * @see Index#lastOfSubList(List, int, List)
@@ -22036,6 +22098,7 @@ sealed class CommonUtil permits N {
      *
      *
      * @param a
+     * @param startIndex
      * @param valueToFind
      * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
      */
@@ -22565,6 +22628,14 @@ sealed class CommonUtil permits N {
         return lastIndexOfIgnoreCase(a, a.length - 1, valueToFind);
     }
 
+    /**
+     *
+     *
+     * @param a
+     * @param startIndexFromBack
+     * @param valueToFind
+     * @return
+     */
     public static int lastIndexOfIgnoreCase(final String[] a, final int startIndexFromBack, final String valueToFind) {
         final int len = len(a);
 
@@ -22820,9 +22891,11 @@ sealed class CommonUtil permits N {
 
     /**
      *
+     *
      * @param <T>
      * @param a
      * @return the indices of all minimum value/element in the specified {@code Collection/Array}.
+     * @throws IllegalArgumentException
      */
     public static <T extends Comparable<? super T>> int[] indicesOfAllMin(final T[] a) throws IllegalArgumentException {
         return indicesOfAllMin(a, NATURAL_COMPARATOR);
@@ -22830,10 +22903,12 @@ sealed class CommonUtil permits N {
 
     /**
      *
+     *
      * @param <T>
      * @param a
      * @param cmp
      * @return the indices of all minimum value/element in the specified {@code Collection/Array}.
+     * @throws IllegalArgumentException
      */
     public static <T> int[] indicesOfAllMin(final T[] a, Comparator<? super T> cmp) throws IllegalArgumentException {
         if (isEmpty(a)) {
@@ -22865,9 +22940,11 @@ sealed class CommonUtil permits N {
 
     /**
      *
+     *
      * @param <T>
      * @param c
      * @return the indices of all minimum value/element in the specified {@code Collection/Array}.
+     * @throws IllegalArgumentException
      */
     public static <T extends Comparable<? super T>> int[] indicesOfAllMin(final Collection<? extends T> c) throws IllegalArgumentException {
         return indicesOfAllMin(c, NATURAL_COMPARATOR);
@@ -22875,10 +22952,12 @@ sealed class CommonUtil permits N {
 
     /**
      *
+     *
      * @param <T>
      * @param c
      * @param cmp
      * @return the indices of all minimum value/element in the specified {@code Collection/Array}.
+     * @throws IllegalArgumentException
      */
     public static <T> int[] indicesOfAllMin(final Collection<? extends T> c, Comparator<? super T> cmp) throws IllegalArgumentException {
         if (isEmpty(c)) {
@@ -22916,9 +22995,11 @@ sealed class CommonUtil permits N {
 
     /**
      *
+     *
      * @param <T>
      * @param a
      * @return the indices of all maximum value/element in the specified {@code Collection/Array}.
+     * @throws IllegalArgumentException
      */
     public static <T extends Comparable<? super T>> int[] indicesOfAllMax(final T[] a) throws IllegalArgumentException {
         return indicesOfAllMax(a, NATURAL_COMPARATOR);
@@ -22926,10 +23007,12 @@ sealed class CommonUtil permits N {
 
     /**
      *
+     *
      * @param <T>
      * @param a
      * @param cmp
      * @return the indices of all maximum value/element in the specified {@code Collection/Array}.
+     * @throws IllegalArgumentException
      */
     public static <T> int[] indicesOfAllMax(final T[] a, Comparator<? super T> cmp) throws IllegalArgumentException {
         if (isEmpty(a)) {
@@ -22961,9 +23044,11 @@ sealed class CommonUtil permits N {
 
     /**
      *
+     *
      * @param <T>
      * @param c
      * @return the indices of all maximum value/element in the specified {@code Collection/Array}.
+     * @throws IllegalArgumentException
      */
     public static <T extends Comparable<? super T>> int[] indicesOfAllMax(final Collection<? extends T> c) throws IllegalArgumentException {
         return indicesOfAllMax(c, NATURAL_COMPARATOR);
@@ -22971,10 +23056,12 @@ sealed class CommonUtil permits N {
 
     /**
      *
+     *
      * @param <T>
      * @param c
      * @param cmp
      * @return the indices of all maximum value/element in the specified {@code Collection/Array}.
+     * @throws IllegalArgumentException
      */
     public static <T> int[] indicesOfAllMax(final Collection<? extends T> c, Comparator<? super T> cmp) throws IllegalArgumentException {
         if (isEmpty(c)) {

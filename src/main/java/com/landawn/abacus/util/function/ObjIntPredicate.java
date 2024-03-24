@@ -33,16 +33,33 @@ public interface ObjIntPredicate<T> extends Throwables.ObjIntPredicate<T, Runtim
     @Override
     boolean test(T t, int u);
 
+    /**
+     * 
+     *
+     * @return 
+     */
     default ObjIntPredicate<T> negate() {
         return (t, u) -> !test(t, u);
     }
 
+    /**
+     * 
+     *
+     * @param other 
+     * @return 
+     */
     default ObjIntPredicate<T> and(ObjIntPredicate<T> other) {
         N.checkArgNotNull(other);
 
         return (t, u) -> test(t, u) && other.test(t, u);
     }
 
+    /**
+     * 
+     *
+     * @param other 
+     * @return 
+     */
     default ObjIntPredicate<T> or(ObjIntPredicate<T> other) {
         N.checkArgNotNull(other);
 

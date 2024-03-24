@@ -30,8 +30,10 @@ public interface Paginated<T> extends Iterable<T> {
     boolean hasNext();
 
     /**
+     * 
      *
-     * @retur
+     * @return 
+     * @retur 
      */
     T nextPage();
 
@@ -42,8 +44,10 @@ public interface Paginated<T> extends Iterable<T> {
     T currentPage();
 
     /**
+     * 
      *
-     * @retur
+     * @return 
+     * @retur 
      */
     T previousPage();
 

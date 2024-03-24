@@ -1746,7 +1746,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      *
      *    long result = elementData[0];
      *
-     *    for (int i = 1; i < size; i++) {
+     *    for (int i = 1; i &lt; size; i++) {
      *        result = accumulator.applyAsLong(result, elementData[i]);
      *    }
      *
@@ -1783,7 +1783,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      *
      *     long result = identity;
      *
-     *     for (int i = 0; i < size; i++) {
+     *     for (int i = 0; i &lt; size; i++) {
      *         result = accumulator.applyAsLong(result, elementData[i]);
      *    }
      *

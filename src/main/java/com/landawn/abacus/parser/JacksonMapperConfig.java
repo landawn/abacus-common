@@ -147,9 +147,10 @@ public class JacksonMapperConfig extends MapperConfig {
     }
 
     /**
+     * 
      *
-     * @param feature
-     * @return
+     * @param features 
+     * @return 
      */
     public JacksonMapperConfig without(SerializationFeature... features) {
         initSerializationConfig();
@@ -273,14 +274,33 @@ public class JacksonMapperConfig extends MapperConfig {
             return new JacksonMapperConfig();
         }
 
+        /**
+         * 
+         *
+         * @param serializationConfig 
+         * @return 
+         */
         public static JacksonMapperConfig create(SerializationConfig serializationConfig) {
             return new JacksonMapperConfig(serializationConfig, null);
         }
 
+        /**
+         * 
+         *
+         * @param deserializationConfig 
+         * @return 
+         */
         public static JacksonMapperConfig create(DeserializationConfig deserializationConfig) {
             return new JacksonMapperConfig(null, deserializationConfig);
         }
 
+        /**
+         * 
+         *
+         * @param serializationConfig 
+         * @param deserializationConfig 
+         * @return 
+         */
         public static JacksonMapperConfig create(SerializationConfig serializationConfig, DeserializationConfig deserializationConfig) {
             return new JacksonMapperConfig(serializationConfig, deserializationConfig);
         }

@@ -41,7 +41,7 @@ import com.landawn.abacus.util.stream.Stream;
 /**
  *
  * @author Haiyang Li
- * @see com.landawn.abacus.util.Build.DataSetBuilder
+ * @see com.landawn.abacus.util.Builder.DataSetBuilder
  * @see com.landawn.abacus.jdbc.JdbcUtil
  * @see com.landawn.abacus.util.CSVUtil
  * @see com.landawn.abacus.util.Fn.Factory
@@ -1076,10 +1076,11 @@ public interface DataSet {
 
     /**
      * Gets the row.
+     *
+     * @param <T>
      * @param rowIndex
      * @param columnNames
      * @param rowSupplier it can be Object[]/List/Set/Map/Bean
-     * @param <T>
      * @return
      */
     <T> T getRow(int rowIndex, Collection<String> columnNames, IntFunction<? extends T> rowSupplier);
@@ -1207,12 +1208,12 @@ public interface DataSet {
      * Performs the given action for each row of the {@code DataSet}
      * until all rows have been processed or the action throws an
      * exception.
+     *
+     * @param <E>
      * @param fromRowIndex
      * @param toRowIndex
      * @param columnNames
      * @param action DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
-     *
-     * @param <E>
      * @throws E the e
      */
     <E extends Exception> void forEach(int fromRowIndex, int toRowIndex, Collection<String> columnNames,
@@ -1229,11 +1230,12 @@ public interface DataSet {
 
     /**
      *
+     *
+     * @param <E>
      * @param fromRowIndex
      * @param toRowIndex
      * @param columnNames
      * @param action
-     * @param <E>
      * @throws E the e
      */
     <E extends Exception> void forEach(int fromRowIndex, int toRowIndex, Tuple2<String, String> columnNames, Throwables.BiConsumer<?, ?, E> action) throws E;
@@ -1249,11 +1251,12 @@ public interface DataSet {
 
     /**
      *
+     *
+     * @param <E>
      * @param fromRowIndex
      * @param toRowIndex
      * @param columnNames
      * @param action
-     * @param <E>
      * @throws E the e
      */
     <E extends Exception> void forEach(int fromRowIndex, int toRowIndex, Tuple3<String, String, String> columnNames, Throwables.TriConsumer<?, ?, ?, E> action)
@@ -1344,11 +1347,11 @@ public interface DataSet {
     /**
      *
      *
+     * @param <T>
      * @param fromRowIndex
      * @param toRowIndex
      * @param columnNames
      * @param rowSupplier it can be Object[]/List/Set/Map/Bean
-     * @param <T>
      * @return
      */
     <T> List<T> toList(int fromRowIndex, int toRowIndex, Collection<String> columnNames, IntFunction<? extends T> rowSupplier);
@@ -1534,38 +1537,41 @@ public interface DataSet {
 
     /**
      *
-     * @param keyColumnName
-     * @param valueColumnName
-     * @param supplier
+     *
      * @param <K> the key type
      * @param <V> the value type
      * @param <M>
+     * @param keyColumnName
+     * @param valueColumnName
+     * @param supplier
      * @return
      */
     <K, V, M extends Map<K, V>> M toMap(String keyColumnName, String valueColumnName, IntFunction<? extends M> supplier);
 
     /**
      *
+     *
+     * @param <K> the key type
+     * @param <V> the value type
      * @param fromRowIndex
      * @param toRowIndex
      * @param keyColumnName
      * @param valueColumnName
-     * @param <K> the key type
-     * @param <V> the value type
      * @return
      */
     <K, V> Map<K, V> toMap(int fromRowIndex, int toRowIndex, String keyColumnName, String valueColumnName);
 
     /**
      *
+     *
+     * @param <K> the key type
+     * @param <V> the value type
+     * @param <M>
      * @param fromRowIndex
      * @param toRowIndex
      * @param keyColumnName
      * @param valueColumnName
      * @param supplier
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param <M>
      * @return
      */
     <K, V, M extends Map<K, V>> M toMap(int fromRowIndex, int toRowIndex, String keyColumnName, String valueColumnName, IntFunction<? extends M> supplier);
@@ -1639,13 +1645,13 @@ public interface DataSet {
     /**
      *
      *
+     * @param <K> the key type
+     * @param <V> the value type
+     * @param <M>
      * @param keyColumnName
      * @param valueColumnNames
      * @param rowSupplier it can be Object[]/List/Set/Map/Bean
      * @param supplier
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param <M>
      * @return
      */
     <K, V, M extends Map<K, V>> M toMap(String keyColumnName, Collection<String> valueColumnNames, IntFunction<? extends V> rowSupplier,
@@ -1654,13 +1660,13 @@ public interface DataSet {
     /**
      *
      *
+     * @param <K> the key type
+     * @param <V> the value type
      * @param fromRowIndex
      * @param toRowIndex
      * @param keyColumnName
      * @param valueColumnNames
      * @param rowSupplier it can be Object[]/List/Set/Map/Bean
-     * @param <K> the key type
-     * @param <V> the value type
      * @return
      */
     <K, V> Map<K, V> toMap(int fromRowIndex, int toRowIndex, String keyColumnName, Collection<String> valueColumnNames, IntFunction<? extends V> rowSupplier);
@@ -1668,15 +1674,15 @@ public interface DataSet {
     /**
      *
      *
+     * @param <K> the key type
+     * @param <V> the value type
+     * @param <M>
      * @param fromRowIndex
      * @param toRowIndex
      * @param keyColumnName
      * @param valueColumnNames
      * @param rowSupplier it can be Object[]/List/Set/Map/Bean
      * @param supplier
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param <M>
      * @return
      */
     <K, V, M extends Map<K, V>> M toMap(int fromRowIndex, int toRowIndex, String keyColumnName, Collection<String> valueColumnNames,
@@ -1694,40 +1700,43 @@ public interface DataSet {
 
     /**
      *
-     * @param keyColumnName
-     * @param valueColumnName
-     * @param supplier
+     *
      * @param <K> the key type
      * @param <E>
      * @param <V> the value type
      * @param <M>
+     * @param keyColumnName
+     * @param valueColumnName
+     * @param supplier
      * @return
      */
     <K, E, V extends Collection<E>, M extends Multimap<K, E, V>> M toMultimap(String keyColumnName, String valueColumnName, IntFunction<? extends M> supplier);
 
     /**
      *
+     *
+     * @param <K> the key type
+     * @param <E>
      * @param fromRowIndex
      * @param toRowIndex
      * @param keyColumnName
      * @param valueColumnName
-     * @param <K> the key type
-     * @param <E>
      * @return
      */
     <K, E> ListMultimap<K, E> toMultimap(int fromRowIndex, int toRowIndex, String keyColumnName, String valueColumnName);
 
     /**
      *
+     *
+     * @param <K> the key type
+     * @param <E>
+     * @param <V> the value type
+     * @param <M>
      * @param fromRowIndex
      * @param toRowIndex
      * @param keyColumnName
      * @param valueColumnName
      * @param supplier
-     * @param <K> the key type
-     * @param <E>
-     * @param <V> the value type
-     * @param <M>
      * @return
      */
     <K, E, V extends Collection<E>, M extends Multimap<K, E, V>> M toMultimap(int fromRowIndex, int toRowIndex, String keyColumnName, String valueColumnName,
@@ -1805,14 +1814,14 @@ public interface DataSet {
     /**
      *
      *
-     * @param keyColumnName
-     * @param valueColumnNames
-     * @param rowSupplier it can be Object[]/List/Set/Map/Bean
-     * @param supplier
      * @param <K> the key type
      * @param <E>
      * @param <V> the value type
      * @param <M>
+     * @param keyColumnName
+     * @param valueColumnNames
+     * @param rowSupplier it can be Object[]/List/Set/Map/Bean
+     * @param supplier
      * @return
      */
     <K, E, V extends Collection<E>, M extends Multimap<K, E, V>> M toMultimap(String keyColumnName, Collection<String> valueColumnNames,
@@ -1821,13 +1830,13 @@ public interface DataSet {
     /**
      *
      *
+     * @param <K> the key type
+     * @param <E>
      * @param fromRowIndex
      * @param toRowIndex
      * @param keyColumnName
      * @param valueColumnNames
      * @param rowSupplier it can be Object[]/List/Set/Map/Bean
-     * @param <K> the key type
-     * @param <E>
      * @return
      */
     <K, E> ListMultimap<K, E> toMultimap(int fromRowIndex, int toRowIndex, String keyColumnName, Collection<String> valueColumnNames,
@@ -1836,16 +1845,16 @@ public interface DataSet {
     /**
      *
      *
+     * @param <K> the key type
+     * @param <E>
+     * @param <V> the value type
+     * @param <M>
      * @param fromRowIndex
      * @param toRowIndex
      * @param keyColumnName
      * @param valueColumnNames
      * @param rowSupplier it can be Object[]/List/Set/Map/Bean
      * @param supplier
-     * @param <K> the key type
-     * @param <E>
-     * @param <V> the value type
-     * @param <M>
      * @return
      */
     <K, E, V extends Collection<E>, M extends Multimap<K, E, V>> M toMultimap(int fromRowIndex, int toRowIndex, String keyColumnName,
@@ -2970,18 +2979,19 @@ public interface DataSet {
             Throwables.Function<? super DisposableObjArray, ? extends T, ? extends Exception> rowMapper, Collector<? super T, ?, ?> collector);
 
     /**
-    *
-    * @param <R>
-    * @param <C>
-    * @param <T>
-    * @param <E>
-    * @param groupByColumnName
-    * @param pivotColumnName
-    * @param aggColumnName
-    * @param aggFunc
-    * @return
-    * @throws E the e
-    */
+     *
+     *
+     * @param <R>
+     * @param <C>
+     * @param <T>
+     * @param <E>
+     * @param groupByColumnName
+     * @param pivotColumnName
+     * @param aggColumnName
+     * @param collector
+     * @return
+     * @throws E the e
+     */
     @Beta
     <R, C, T, E extends Exception> Sheet<R, C, T> pivot(String groupByColumnName, String pivotColumnName, String aggColumnName,
             Collector<?, ?, ? extends T> collector) throws E;
@@ -3176,7 +3186,6 @@ public interface DataSet {
     /**
      * Returns a new {@code DataSet} with the rows de-duplicated by the value in the specified column from the specified {@code fromRowIndex} to {@code toRowIndex}.
      *
-     * @param <K> the key type
      * @param <E>
      * @param columnName
      * @param keyMapper don't change value of the input parameter.
@@ -3269,11 +3278,12 @@ public interface DataSet {
 
     /**
      *
+     *
+     * @param <E>
      * @param fromRowIndex
      * @param toRowIndex
      * @param columnNames
      * @param filter
-     * @param <E>
      * @return
      * @throws E the e
      */
@@ -3281,12 +3291,13 @@ public interface DataSet {
 
     /**
      *
+     *
+     * @param <E>
      * @param fromRowIndex
      * @param toRowIndex
      * @param columnNames
      * @param filter
      * @param max
-     * @param <E>
      * @return
      * @throws E the e
      */
@@ -3316,11 +3327,12 @@ public interface DataSet {
 
     /**
      *
+     *
+     * @param <E>
      * @param fromRowIndex
      * @param toRowIndex
      * @param columnNames
      * @param filter
-     * @param <E>
      * @return
      * @throws E the e
      */
@@ -3329,12 +3341,13 @@ public interface DataSet {
 
     /**
      *
+     *
+     * @param <E>
      * @param fromRowIndex
      * @param toRowIndex
      * @param columnNames
      * @param filter
      * @param max
-     * @param <E>
      * @return
      * @throws E the e
      */
@@ -3364,11 +3377,12 @@ public interface DataSet {
 
     /**
      *
+     *
+     * @param <E>
      * @param fromRowIndex
      * @param toRowIndex
      * @param columnName
      * @param filter
-     * @param <E>
      * @return
      * @throws E the e
      */
@@ -3376,12 +3390,13 @@ public interface DataSet {
 
     /**
      *
+     *
+     * @param <E>
      * @param fromRowIndex
      * @param toRowIndex
      * @param columnName
      * @param filter
      * @param max
-     * @param <E>
      * @return
      * @throws E the e
      */
@@ -3410,11 +3425,12 @@ public interface DataSet {
 
     /**
      *
+     *
+     * @param <E>
      * @param fromRowIndex
      * @param toRowIndex
      * @param columnNames
      * @param filter DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
-     * @param <E>
      * @return
      * @throws E the e
      */
@@ -3423,12 +3439,13 @@ public interface DataSet {
 
     /**
      *
+     *
+     * @param <E>
      * @param fromRowIndex
      * @param toRowIndex
      * @param columnNames
      * @param filter DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
      * @param max
-     * @param <E>
      * @return
      * @throws E the e
      */
@@ -3843,7 +3860,6 @@ public interface DataSet {
      *
      * @param other
      * @param keyColumnNames
-     * @param keyColumns
      * @return
      */
     DataSet intersect(DataSet other, Collection<String> keyColumnNames);
@@ -4338,12 +4354,13 @@ public interface DataSet {
 
     /**
      *
+     *
+     * @param <A>
+     * @param <B>
      * @param fromRowIndex
      * @param toRowIndex
      * @param columnNameA
      * @param columnNameB
-     * @param <A>
-     * @param <B>
      * @return
      */
     <A, B> BiIterator<A, B> iterator(int fromRowIndex, int toRowIndex, String columnNameA, String columnNameB);
@@ -4362,14 +4379,15 @@ public interface DataSet {
 
     /**
      *
+     *
+     * @param <A>
+     * @param <B>
+     * @param <C>
      * @param fromRowIndex
      * @param toRowIndex
      * @param columnNameA
      * @param columnNameB
      * @param columnNameC
-     * @param <A>
-     * @param <B>
-     * @param <C>
      * @return
      */
     <A, B, C> TriIterator<A, B, C> iterator(int fromRowIndex, int toRowIndex, String columnNameA, String columnNameB, String columnNameC);
@@ -4399,10 +4417,11 @@ public interface DataSet {
 
     /**
      *
+     *
+     * @param <T>
      * @param fromRowIndex
      * @param toRowIndex
      * @param columnName
-     * @param <T>
      * @return
      */
     <T> Stream<T> stream(int fromRowIndex, int toRowIndex, String columnName);
@@ -4516,11 +4535,11 @@ public interface DataSet {
     /**
      *
      *
+     * @param <T>
      * @param fromRowIndex
      * @param toRowIndex
      * @param columnNames
      * @param rowSupplier it can be Object[]/List/Set/Map/Bean
-     * @param <T>
      * @return
      */
     <T> Stream<T> stream(int fromRowIndex, int toRowIndex, Collection<String> columnNames, IntFunction<? extends T> rowSupplier);
@@ -4600,11 +4619,11 @@ public interface DataSet {
     /**
      *
      *
+     * @param <T>
      * @param fromRowIndex
      * @param toRowIndex
      * @param columnNames
      * @param rowMapper
-     * @param <T>
      * @return
      */
     <T> Stream<T> stream(int fromRowIndex, int toRowIndex, Collection<String> columnNames, IntObjFunction<? super DisposableObjArray, ? extends T> rowMapper);
@@ -4621,11 +4640,11 @@ public interface DataSet {
     /**
      *
      *
+     * @param <T>
      * @param fromRowIndex
      * @param toRowIndex
      * @param columnNames
      * @param rowMapper
-     * @param <T>
      * @return
      */
     <T> Stream<T> stream(int fromRowIndex, int toRowIndex, Tuple2<String, String> columnNames, BiFunction<?, ?, ? extends T> rowMapper);
@@ -4642,11 +4661,11 @@ public interface DataSet {
     /**
      *
      *
+     * @param <T>
      * @param fromRowIndex
      * @param toRowIndex
      * @param columnNames
      * @param rowMapper
-     * @param <T>
      * @return
      */
     <T> Stream<T> stream(int fromRowIndex, int toRowIndex, Tuple3<String, String, String> columnNames, TriFunction<?, ?, ?, ? extends T> rowMapper);

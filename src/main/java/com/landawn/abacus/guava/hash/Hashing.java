@@ -70,12 +70,14 @@ public final class Hashing {
      * Returns a hash function implementing the <a
      * href="https://github.com/aappleby/smhasher/blob/master/src/MurmurHash3.cpp">32-bit murmur3
      * algorithm, x86 variant</a> (little-endian variant), using the given seed value.
-     *
+     * 
      * <p>The exact C++ equivalent is the MurmurHash3_x86_32 function (Murmur3A).
-     *
+     * 
      * <p>This method is called {@code murmur3_32_fixed} because it fixes a bug in the {@code
      * HashFunction} returned by the original {@code murmur3_32} method.
      *
+     * @param seed 
+     * @return 
      * @since 31.0
      */
     public static HashFunction murmur3_32(int seed) { //NOSONAR
@@ -86,12 +88,13 @@ public final class Hashing {
      * Returns a hash function implementing the <a
      * href="https://github.com/aappleby/smhasher/blob/master/src/MurmurHash3.cpp">32-bit murmur3
      * algorithm, x86 variant</a> (little-endian variant), using a seed value of zero.
-     *
+     * 
      * <p>The exact C++ equivalent is the MurmurHash3_x86_32 function (Murmur3A).
-     *
+     * 
      * <p>This method is called {@code murmur3_32_fixed} because it fixes a bug in the {@code
      * HashFunction} returned by the original {@code murmur3_32} method.
      *
+     * @return 
      * @since 31.0
      */
     public static HashFunction murmur3_32() { //NOSONAR
@@ -152,6 +155,7 @@ public final class Hashing {
     /**
      * Returns a hash function implementing the MD5 hash algorithm (128 hash bits).
      *
+     * @return 
      * @deprecated If you must interoperate with a system that requires MD5, then use this method,
      *     despite its deprecation. But if you can choose your hash function, avoid MD5, which is
      *     neither fast nor secure. As of January 2017, we suggest:
@@ -169,6 +173,7 @@ public final class Hashing {
     /**
      * Returns a hash function implementing the SHA-1 algorithm (160 hash bits).
      *
+     * @return 
      * @deprecated If you must interoperate with a system that requires SHA-1, then use this method,
      *     despite its deprecation. But if you can choose your hash function, avoid SHA-1, which is
      *     neither fast nor secure. As of January 2017, we suggest:

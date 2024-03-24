@@ -137,7 +137,11 @@ public final class Sheet<R, C, V> implements Cloneable {
 
     /**
      * Returns an empty immutable {@code Sheet}.
-     * @return
+     *
+     * @param <R> 
+     * @param <C> 
+     * @param <V> 
+     * @return 
      */
     public static <R, C, V> Sheet<R, C, V> empty() {
         return EMPTY_SHEET;
@@ -1383,10 +1387,18 @@ public final class Sheet<R, C, V> implements Cloneable {
         }
     }
 
+    /**
+     * 
+     */
     public void sortByRow() {
         sortByRow((Comparator<R>) Comparator.naturalOrder());
     }
 
+    /**
+     * 
+     *
+     * @param cmp 
+     */
     public void sortByRow(final Comparator<? super R> cmp) {
         checkFrozen();
 
@@ -1450,10 +1462,18 @@ public final class Sheet<R, C, V> implements Cloneable {
         }
     }
 
+    /**
+     * 
+     */
     public void sortByColumn() {
         sortByColumn((Comparator<C>) Comparator.naturalOrder());
     }
 
+    /**
+     * 
+     *
+     * @param cmp 
+     */
     public void sortByColumn(final Comparator<? super C> cmp) {
         checkFrozen();
 

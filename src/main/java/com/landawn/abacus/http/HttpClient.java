@@ -774,12 +774,13 @@ public final class HttpClient {
     }
 
     /**
+     * 
      *
-     * @param httpMethod
-     * @param resultClass
-     * @param request
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param httpMethod 
+     * @param resultClass 
+     * @param request 
+     * @return 
      * @throws UncheckedIOException the unchecked IO exception
      */
     public <T> T execute(final HttpMethod httpMethod, final Class<T> resultClass, final Object request) throws UncheckedIOException {
@@ -787,13 +788,14 @@ public final class HttpClient {
     }
 
     /**
+     * 
      *
-     * @param httpMethod
-     * @param resultClass
-     * @param request
-     * @param settings
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param httpMethod 
+     * @param resultClass 
+     * @param request 
+     * @param settings 
+     * @return 
      * @throws UncheckedIOException the unchecked IO exception
      */
     public <T> T execute(final HttpMethod httpMethod, final Class<T> resultClass, final Object request, final HttpSettings settings)
@@ -1570,25 +1572,27 @@ public final class HttpClient {
     }
 
     /**
+     * 
      *
-     * @param httpMethod
-     * @param resultClass
-     * @param request
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param httpMethod 
+     * @param resultClass 
+     * @param request 
+     * @return 
      */
     public <T> ContinuableFuture<T> asyncExecute(final HttpMethod httpMethod, final Class<T> resultClass, final Object request) {
         return asyncExecute(httpMethod, resultClass, request, _settings);
     }
 
     /**
+     * 
      *
-     * @param httpMethod
-     * @param resultClass
-     * @param request
-     * @param settings
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param httpMethod 
+     * @param resultClass 
+     * @param request 
+     * @param settings 
+     * @return 
      */
     public <T> ContinuableFuture<T> asyncExecute(final HttpMethod httpMethod, final Class<T> resultClass, final Object request, final HttpSettings settings) {
         final Callable<T> cmd = () -> execute(httpMethod, resultClass, request, settings);

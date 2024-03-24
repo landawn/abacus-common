@@ -301,6 +301,12 @@ public final class MapEntity implements Serializable {
         return values.toString();
     }
 
+    /**
+     * 
+     *
+     * @param entityName 
+     * @return 
+     */
     public static MapEntityBuilder builder(final String entityName) {
         return new MapEntityBuilder(entityName);
     }
@@ -312,12 +318,24 @@ public final class MapEntity implements Serializable {
             mapEntity = new MapEntity(entityName);
         }
 
+        /**
+         * 
+         *
+         * @param idPropName 
+         * @param idPropVal 
+         * @return 
+         */
         public MapEntityBuilder put(final String idPropName, final Object idPropVal) {
             mapEntity.set(idPropName, idPropVal);
 
             return this;
         }
 
+        /**
+         * 
+         *
+         * @return 
+         */
         public MapEntity build() {
             return mapEntity;
         }

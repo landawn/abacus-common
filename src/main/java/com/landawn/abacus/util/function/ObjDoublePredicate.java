@@ -33,16 +33,33 @@ public interface ObjDoublePredicate<T> extends Throwables.ObjDoublePredicate<T, 
     @Override
     boolean test(T t, double u);
 
+    /**
+     * 
+     *
+     * @return 
+     */
     default ObjDoublePredicate<T> negate() {
         return (t, u) -> !test(t, u);
     }
 
+    /**
+     * 
+     *
+     * @param other 
+     * @return 
+     */
     default ObjDoublePredicate<T> and(ObjDoublePredicate<T> other) {
         N.checkArgNotNull(other);
 
         return (t, u) -> test(t, u) && other.test(t, u);
     }
 
+    /**
+     * 
+     *
+     * @param other 
+     * @return 
+     */
     default ObjDoublePredicate<T> or(ObjDoublePredicate<T> other) {
         N.checkArgNotNull(other);
 

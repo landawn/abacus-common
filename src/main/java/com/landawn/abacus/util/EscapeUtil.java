@@ -557,7 +557,6 @@ public final class EscapeUtil {
      *
      * @param input the {@code String} to unescape, may be null
      * @return a new unescaped {@code String}, {@code null} if null string input
-     * @see #escapeXml(String)
      * @see #escapeXml10(String)
      * @see #escapeXml11(String)
      */

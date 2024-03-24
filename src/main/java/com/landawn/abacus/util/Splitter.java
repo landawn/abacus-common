@@ -717,10 +717,11 @@ public final class Splitter {
     }
 
     /**
+     * 
      *
-     * @param <E>
-     * @param source
-     * @param converter
+     * @param <E> 
+     * @param source 
+     * @param consumer 
      * @throws E the e
      */
     public <E extends Exception> void splitThenAccept(final CharSequence source, final Throwables.Consumer<? super List<String>, E> consumer) throws E {
@@ -1208,10 +1209,11 @@ public final class Splitter {
         }
 
         /**
+         * 
          *
-         * @param <E>
-         * @param source
-         * @param converter
+         * @param <E> 
+         * @param source 
+         * @param consumer 
          * @throws E the e
          */
         public <E extends Exception> void splitThenAccept(final CharSequence source, final Throwables.Consumer<? super Map<String, String>, E> consumer)

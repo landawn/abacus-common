@@ -1894,7 +1894,7 @@ public final class Joiner implements Closeable {
      * suffix as the next element if it is non-empty. If the given {@code
      * StringJoiner} is empty, the call has no effect.
      *
-     * <p>A {@code StringJoiner} is empty if {@link #addAll(CharSequence) add()}
+     * <p>A {@code StringJoiner} is empty if append/appendAll
      * has never been called, and if {@code merge()} has never been called
      * with a non-empty {@code StringJoiner} argument.
      *

@@ -53,7 +53,6 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
-import java.util.function.BinaryOperator;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.IntFunction;
@@ -107,12 +106,12 @@ import com.landawn.abacus.util.stream.Stream;
  * @param <E>
  * @since 1.3
  *
- * @see BaseStream
+ * @see com.landawn.abacus.util.stream.BaseStream
  * @see Stream
  * @see IntStream
  * @see LongStream
  * @see DoubleStream
- * @see Collectorsa
+ * @see Collectors
  * @see com.landawn.abacus.util.Fn.Fnn
  * @see com.landawn.abacus.util.Comparators
  * @see com.landawn.abacus.util.ExceptionUtil
@@ -2559,7 +2558,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      *
      * @param mergeFunction
      * @return
-     * @see #groupBy(Function, Function, BinaryOperator)
+     * @see #groupBy(Throwables.Function, Throwables.Function, Throwables.BinaryOperator)
      */
     @IntermediateOp
     @TerminalOpTriggered
@@ -2572,7 +2571,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      *
      * @param occurrencesFilter
      * @return
-     * @see #groupBy(Function, Collector)
+     * @see #groupBy(Throwables.Function, Collector)
      */
     @IntermediateOp
     @TerminalOpTriggered
@@ -2609,7 +2608,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @param keyMapper
      * @param mergeFunction
      * @return
-     * @see #groupBy(Function, Function, BinaryOperator)
+     * @see #groupBy(Throwables.Function, Throwables.Function, Throwables.BinaryOperator)
      */
     @IntermediateOp
     @TerminalOpTriggered
@@ -2629,7 +2628,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @param keyMapper
      * @param occurrencesFilter
      * @return
-     * @see #groupBy(Function, Collector)
+     * @see #groupBy(Throwables.Function, Collector)
      */
     @IntermediateOp
     @TerminalOpTriggered
@@ -2648,13 +2647,13 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     }
 
     /**
-     * Distinct and limit by {@code keyMapper}
+     * Distinct and limit by {@code keyMapper}.
      *
      * @param <K>
      * @param keyMapper
      * @param limit
      * @return
-     * @see #groupBy(Function, Collector)
+     * @see #groupBy(Throwables.Function, Collector)
      */
     @IntermediateOp
     @TerminalOpTriggered
@@ -2693,11 +2692,10 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     /**
      * Convert the element to a new value if it's not {@code null}, otherwise skip it.
      *
-     * @implSpec Same as {@code skipNulls().map(mapper)}.
-     *
      * @param <R>
      * @param mapper
      * @return
+     * @implSpec Same as {@code skipNulls().map(mapper)}.
      */
     @Beta
     @IntermediateOp
@@ -3757,9 +3755,10 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
     /**
      *
+     *
+     * @param <R>
      * @param increment
      * @param mapper
-     * @param <R>
      * @return
      */
     @IntermediateOp
@@ -3769,10 +3768,11 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
     /**
      *
+     *
+     * @param <R>
      * @param increment
      * @param ignoreNotPaired
      * @param mapper
-     * @param <R>
      * @return
      */
     @IntermediateOp
@@ -3843,9 +3843,10 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
     /**
      *
+     *
+     * @param <R>
      * @param increment
      * @param mapper
-     * @param <R>
      * @return
      */
     @IntermediateOp
@@ -3855,10 +3856,11 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
     /**
      *
+     *
+     * @param <R>
      * @param increment
      * @param ignoreNotPaired
      * @param mapper
-     * @param <R>
      * @return
      */
     @IntermediateOp
@@ -6966,6 +6968,12 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
         }, true, cmp);
     }
 
+    /**
+     *
+     *
+     * @param keyMapper
+     * @return
+     */
     @IntermediateOp
     @TerminalOpTriggered
     public CheckedStream<T, E> sortedByInt(ToIntFunction<? super T> keyMapper) {
@@ -6974,6 +6982,12 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
         return sorted(cmpToUse);
     }
 
+    /**
+     *
+     *
+     * @param keyMapper
+     * @return
+     */
     @IntermediateOp
     @TerminalOpTriggered
     public CheckedStream<T, E> sortedByLong(ToLongFunction<? super T> keyMapper) {
@@ -6982,6 +6996,12 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
         return sorted(cmpToUse);
     }
 
+    /**
+     *
+     *
+     * @param keyMapper
+     * @return
+     */
     @IntermediateOp
     @TerminalOpTriggered
     public CheckedStream<T, E> sortedByDouble(ToDoubleFunction<? super T> keyMapper) {
@@ -7031,6 +7051,12 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
         return sorted(cmpToUse);
     }
 
+    /**
+     *
+     *
+     * @param keyMapper
+     * @return
+     */
     @IntermediateOp
     @TerminalOpTriggered
     public CheckedStream<T, E> reverseSortedByInt(ToIntFunction<? super T> keyMapper) {
@@ -7039,6 +7065,12 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
         return sorted(cmpToUse);
     }
 
+    /**
+     *
+     *
+     * @param keyMapper
+     * @return
+     */
     @IntermediateOp
     @TerminalOpTriggered
     public CheckedStream<T, E> reverseSortedByLong(ToLongFunction<? super T> keyMapper) {
@@ -7047,6 +7079,12 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
         return sorted(cmpToUse);
     }
 
+    /**
+     *
+     *
+     * @param keyMapper
+     * @return
+     */
     @IntermediateOp
     @TerminalOpTriggered
     public CheckedStream<T, E> reverseSortedByDouble(ToDoubleFunction<? super T> keyMapper) {
@@ -8436,10 +8474,10 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
     /**
      * For each pair.
-     * @param increment
-     * @param action
      *
      * @param <E2>
+     * @param increment
+     * @param action
      * @throws E the e
      * @throws E2 the e2
      */
@@ -8495,10 +8533,10 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
     /**
      * For each triple.
-     * @param increment
-     * @param action
      *
      * @param <E2>
+     * @param increment
+     * @param action
      * @throws E the e
      * @throws E2 the e2
      */
@@ -8549,9 +8587,9 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     /**
      *
      *
+     * @param <E2>
      * @param threadNum
      * @param action
-     * @param <E2>
      * @throws E the e
      * @throws E2 the e2
      */
@@ -8572,10 +8610,10 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     /**
      *
      *
+     * @param <E2>
      * @param threadNum
      * @param action
      * @param executor
-     * @param <E2>
      * @throws E the e
      * @throws E2 the e2
      */
@@ -9584,7 +9622,9 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     /**
      *
      *
+     * @param <CC>
      * @param <E2>
+     * @param supplier
      * @param consumer
      * @throws E
      * @throws E2
@@ -12144,6 +12184,14 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
         }
     }
 
+    /**
+     *
+     *
+     * @param output
+     * @return
+     * @throws E
+     * @throws IOException
+     */
     @TerminalOp
     public long persistToJSON(final File output) throws E, IOException {
         final Writer writer = IOUtil.newFileWriter(output);
@@ -12155,6 +12203,14 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
         }
     }
 
+    /**
+     *
+     *
+     * @param output
+     * @return
+     * @throws E
+     * @throws IOException
+     */
     @TerminalOp
     public long persistToJSON(final OutputStream output) throws E, IOException {
         final BufferedWriter bw = Objectory.createBufferedWriter(output);
@@ -12166,6 +12222,14 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
         }
     }
 
+    /**
+     *
+     *
+     * @param output
+     * @return
+     * @throws E
+     * @throws IOException
+     */
     @TerminalOp
     public long persistToJSON(final Writer output) throws E, IOException {
         assertNotClosed();
@@ -15216,6 +15280,8 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * </pre>
      *
      * @param consumerForNewStreamWithTerminalAction
+     * @param queueSize
+     * @param executor
      * @return
      */
     @Beta

@@ -378,10 +378,25 @@ public abstract sealed class Strings permits Strings.StringUtil {
     //        return (cs != null) && (cs.length() > 0);
     //    }
 
+    /**
+     *
+     *
+     * @param a
+     * @param b
+     * @return
+     */
     public static boolean isAllEmpty(final CharSequence a, final CharSequence b) {
         return isEmpty(a) && isEmpty(b);
     }
 
+    /**
+     *
+     *
+     * @param a
+     * @param b
+     * @param c
+     * @return
+     */
     public static boolean isAllEmpty(final CharSequence a, final CharSequence b, final CharSequence c) {
         return isEmpty(a) && isEmpty(b) && isEmpty(c);
     }
@@ -403,7 +418,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * @param css the CharSequences to check, may be null or empty
      * @return {@code true} if all of the CharSequences are empty or null
-     * @see Strings#allEmpty(CharSequence...)
+     * @see Strings#isAllEmpty(CharSequence...)
      * @since 3.6
      */
     public static boolean isAllEmpty(final CharSequence... css) {
@@ -424,7 +439,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * @param css
      * @return
-     * @see Strings#allEmpty(Collection)
+     * @see Strings#isAllEmpty(Collection)
      */
     public static boolean isAllEmpty(final Collection<? extends CharSequence> css) {
         if (N.isEmpty(css)) {
@@ -440,10 +455,25 @@ public abstract sealed class Strings permits Strings.StringUtil {
         return true;
     }
 
+    /**
+     *
+     *
+     * @param a
+     * @param b
+     * @return
+     */
     public static boolean isAllBlank(final CharSequence a, final CharSequence b) {
         return isBlank(a) && isBlank(b);
     }
 
+    /**
+     *
+     *
+     * @param a
+     * @param b
+     * @param c
+     * @return
+     */
     public static boolean isAllBlank(final CharSequence a, final CharSequence b, final CharSequence c) {
         return isBlank(a) && isBlank(b) && isBlank(c);
     }
@@ -467,7 +497,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * @param css the CharSequences to check, may be null or empty
      * @return {@code true} if all of the CharSequences are empty or null or whitespace only
-     * @see Strings#allBlank(CharSequence...)
+     * @see Strings#isAllBlank(CharSequence...)
      * @since 3.6
      */
     public static boolean isAllBlank(final CharSequence... css) {
@@ -488,7 +518,6 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * @param css
      * @return
-     * @see Strings#allBlank(Collection)
      */
     public static boolean isAllBlank(final Collection<? extends CharSequence> css) {
         if (N.isEmpty(css)) {
@@ -504,10 +533,25 @@ public abstract sealed class Strings permits Strings.StringUtil {
         return true;
     }
 
+    /**
+     *
+     *
+     * @param a
+     * @param b
+     * @return
+     */
     public static boolean isAnyEmpty(final CharSequence a, final CharSequence b) {
         return isEmpty(a) || isEmpty(b);
     }
 
+    /**
+     *
+     *
+     * @param a
+     * @param b
+     * @param c
+     * @return
+     */
     public static boolean isAnyEmpty(final CharSequence a, final CharSequence b, final CharSequence c) {
         return isEmpty(a) || isEmpty(b) || isEmpty(c);
     }
@@ -530,7 +574,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * @param css the CharSequences to check, may be null or empty
      * @return {@code true} if any of the CharSequences are empty or null
-     * @see Strings#anyEmpty(CharSequence...)
+     * @see Strings#isAnyEmpty(CharSequence...)
      * @since 3.2
      */
     public static boolean isAnyEmpty(final CharSequence... css) {
@@ -551,7 +595,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * @param css
      * @return
-     * @see Strings#anyEmpty(CharSequence...)
+     * @see Strings#isAnyEmpty(CharSequence...)
      */
     public static boolean isAnyEmpty(final Collection<? extends CharSequence> css) {
         if (N.isEmpty(css)) {
@@ -567,10 +611,25 @@ public abstract sealed class Strings permits Strings.StringUtil {
         return false;
     }
 
+    /**
+     *
+     *
+     * @param a
+     * @param b
+     * @return
+     */
     public static boolean isAnyBlank(final CharSequence a, final CharSequence b) {
         return isBlank(a) || isBlank(b);
     }
 
+    /**
+     *
+     *
+     * @param a
+     * @param b
+     * @param c
+     * @return
+     */
     public static boolean isAnyBlank(final CharSequence a, final CharSequence b, final CharSequence c) {
         return isBlank(a) || isBlank(b) || isBlank(c);
     }
@@ -596,7 +655,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * @param css the CharSequences to check, may be null or empty
      * @return {@code true} if any of the CharSequences are empty or null or whitespace only
-     * @see Strings#anyBlank(CharSequence...)
+     * @see Strings#isAnyBlank(CharSequence...)
      * @since 3.2
      */
     public static boolean isAnyBlank(final CharSequence... css) {
@@ -617,7 +676,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * @param css
      * @return
-     * @see Strings#anyBlank(Collection)
+     * @see Strings#isAnyBlank(Collection)
      */
     public static boolean isAnyBlank(final Collection<? extends CharSequence> css) {
         if (N.isEmpty(css)) {
@@ -1619,6 +1678,15 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
+     *
+     * @param string
+     * @return
+     */
+    public static byte[] getBytesUtf8(final String string) {
+        return getBytes(string, Charsets.UTF_8);
+    }
+
+    /**
      * Returns the char array of the specified CharSequence, or {@code null} if the specified String is {@code null}.
      *
      *
@@ -2061,7 +2129,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
-     * Capitalize all the words from the specified split by {@code ' '}
+     * Capitalize all the words from the specified split by {@code ' '}.
      *
      * @param str
      * @return the specified String if it's {@code null} or empty.
@@ -2071,10 +2139,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
-     * Capitalize all the words from the specified split by {@code delimiter}
+     * Capitalize all the words from the specified split by {@code delimiter}.
      *
      * @param str
-     * @param delimiters
+     * @param delimiter
      * @return the specified String if it's {@code null} or empty.
      */
     public static String capitalizeFully(final String str, final String delimiter) {
@@ -2093,10 +2161,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
-     * Capitalize all the words from the specified split by {@code delimiter}
+     * Capitalize all the words from the specified split by {@code delimiter}.
      *
      * @param str
-     * @param delimiters
+     * @param delimiter
      * @param excludedWordsInLowerCase
      * @return the specified String if it's {@code null} or empty.
      */
@@ -2347,8 +2415,6 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param target the String to search for, may be null
      * @param replacement the String to replace it with, may be null
      * @return
-     *         String input
-     * @see #replaceAll(String text, String searchString, String replacement, int max)
      */
     public static String replaceAll(final String str, final String target, final String replacement) {
         return replaceAll(str, 0, target, replacement);
@@ -2387,7 +2453,6 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param replacement the String to replace with, may be null
      * @return the text with any replacements processed,
      *  {@code null} if null String input
-     * @see #replace(String text, String searchString, String replacement, int max)
      */
     public static String replaceFirst(final String str, final String target, final String replacement) {
         return replaceFirst(str, 0, target, replacement);
@@ -2426,7 +2491,6 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param replacement the String to replace with, may be null
      * @return the text with any replacements processed,
      *  {@code null} if null String input
-     * @see #replace(String text, String searchString, String replacement, int max)
      * @deprecated Use {@link #replaceFirst(String,String,String)} instead
      */
     @Deprecated
@@ -2664,7 +2728,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
-     * Replace the substring at {@code str.substring(fromIndex, toIndex) with the specified {@code replacement}
+     * Replace the substring at {@code str.substring(fromIndex, toIndex)} with the specified {@code replacement}
      *
      * @param str
      * @param fromIndex
@@ -5114,14 +5178,13 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <code>Null</code> and empty String will return <code>false</code>.
      * </p>
      *
-     * @param str
-     *            the <code>String</code> to check
+     * @param str            the <code>String</code> to check
      * @return <code>true</code> if the string is a correctly formatted number
-     * @since 3.3 the code supports hex {@code 0Xhhh} and octal {@code 0ddd}
-     *        validation
      * @see Numbers#isNumber(String)
      * @see Numbers#isCreatable(String)
      * @see Numbers#isParsable(String)
+     * @since 3.3 the code supports hex {@code 0Xhhh} and octal {@code 0ddd}
+     *        validation
      * @deprecated use {@link Numbers#isNumber(String)} instead
      */
     @Deprecated
@@ -5599,14 +5662,14 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * the index returned is the largest value <i>k</i> such that: <blockquote>
      *
      * <pre>
-     * (this.charAt(<i>k</i>) == ch) && (<i>k</i> &lt;= fromIndex)
+     * {@code (this.charAt(<i>k</i>) == ch) && (<i>k</i> <= fromIndex)}
      * </pre>
      *
      * </blockquote> is true. For other values of <code>ch</code>, it is the
      * largest value <i>k</i> such that: <blockquote>
      *
      * <pre>
-     * (this.codePointAt(<i>k</i>) == ch) && (<i>k</i> &lt;= fromIndex)
+     * {@code (this.codePointAt(<i>k</i>) == ch) && (<i>k</i> &lt;= fromIndex)}
      * </pre>
      *
      * </blockquote> is true. In either case, if no such character occurs in
@@ -5662,7 +5725,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * The returned index is the largest value <i>k</i> for which: <blockquote>
      *
      * <pre>
-     * <i>k</i> &lt;= fromIndex && str.startsWith(substr, <i>k</i>)
+     * {@code <i>k</i> <= fromIndex && str.startsWith(substr, <i>k</i>)}
      * </pre>
      *
      * </blockquote> If no such value of <i>k</i> exists, then {@code -1} is
@@ -11796,7 +11859,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         }
 
         /**
-         * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}
+         * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}.
          *
          * @param str
          * @param inclusiveBeginIndex
@@ -11808,7 +11871,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         }
 
         /**
-         * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}
+         * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}.
          *
          * @param str
          * @param inclusiveBeginIndex
@@ -11821,7 +11884,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         }
 
         /**
-         * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}
+         * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}.
          *
          * @param str
          * @param inclusiveBeginIndex
@@ -11849,7 +11912,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         //        }
 
         /**
-         * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}
+         * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}.
          *
          * @param str
          * @param funcOfInclusiveBeginIndex
@@ -12312,7 +12375,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         //    }
 
         /**
-         * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}
+         * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}.
          *
          * @param str
          * @param delimiterOfExclusiveBeginIndex
@@ -12325,7 +12388,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         }
 
         /**
-         * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}
+         * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}.
          *
          * @param str
          * @param delimiterOfExclusiveBeginIndex
@@ -12338,7 +12401,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         }
 
         /**
-         * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}
+         * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}.
          *
          * @param str
          * @param delimiterOfExclusiveBeginIndex
@@ -12352,7 +12415,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         }
 
         /**
-         * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}
+         * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}.
          *
          * @param str
          * @param delimiterOfExclusiveBeginIndex
@@ -12365,7 +12428,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         }
 
         /**
-         * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}
+         * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}.
          *
          * @param str
          * @param delimiterOfExclusiveBeginIndex
@@ -12378,7 +12441,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         }
 
         /**
-         * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}
+         * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}.
          *
          * @param str
          * @param delimiterOfExclusiveBeginIndex
@@ -12392,7 +12455,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         }
 
         /**
-         * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}
+         * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}.
          *
          * @param str
          * @param delimitersOfExclusiveBeginIndex
@@ -12405,7 +12468,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         }
 
         /**
-         * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}
+         * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}.
          *
          * @param str
          * @param delimitersOfExclusiveBeginIndex
@@ -12418,7 +12481,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         }
 
         /**
-         * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}
+         * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}.
          *
          * @param str
          * @param delimiterOfExclusiveEndIndex
@@ -12431,7 +12494,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         }
 
         /**
-         * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}
+         * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}.
          *
          * @param str
          * @param delimiterOfExclusiveEndIndex
@@ -12444,7 +12507,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         }
 
         /**
-         * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}
+         * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}.
          *
          * @param str
          * @param inclusiveBeginIndex
@@ -12458,7 +12521,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         }
 
         /**
-         * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}
+         * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}.
          *
          * @param str
          * @param delimiterOfExclusiveEndIndex
@@ -12471,7 +12534,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         }
 
         /**
-         * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}
+         * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}.
          *
          * @param str
          * @param delimiterOfExclusiveEndIndex
@@ -12484,7 +12547,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         }
 
         /**
-         * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}
+         * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}.
          *
          * @param str
          * @param inclusiveBeginIndex
@@ -12498,7 +12561,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         }
 
         /**
-         * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}
+         * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}.
          *
          * @param str
          * @param delimitersOfExclusiveEndIndex
@@ -12511,7 +12574,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         }
 
         /**
-         * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}
+         * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}.
          *
          * @param str
          * @param delimitersOfExclusiveEndIndex
@@ -12772,7 +12835,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         }
 
         /**
-         * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}
+         * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}.
          *
          * @param str
          * @param exclusiveBeginIndex
@@ -12785,7 +12848,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         }
 
         /**
-         * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}
+         * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}.
          *
          * @param str
          * @param exclusiveBeginIndex
@@ -12798,7 +12861,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         }
 
         /**
-         * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}
+         * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}.
          *
          * @param str
          * @param exclusiveBeginIndex
@@ -12811,7 +12874,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         }
 
         /**
-         * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}
+         * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}.
          *
          * @param str
          * @param delimiterOfExclusiveBeginIndex
@@ -12824,7 +12887,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         }
 
         /**
-         * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}
+         * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}.
          *
          * @param str
          * @param delimiterOfExclusiveBeginIndex
@@ -12837,7 +12900,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         }
 
         /**
-         * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}
+         * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}.
          *
          * @param str
          * @param delimiterOfExclusiveBeginIndex
@@ -12850,7 +12913,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         }
 
         /**
-         * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}
+         * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}.
          *
          * @param str
          * @param tag
@@ -12863,8 +12926,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         }
 
         /**
-         * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}
-         *
+         * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}.
          *
          * @param str
          * @param delimiterOfExclusiveBeginIndex
@@ -12877,8 +12939,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         }
 
         /**
-         * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}
-         *
+         * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}.
          *
          * @param str
          * @param fromIndex
@@ -12892,7 +12953,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         }
 
         /**
-         * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}
+         * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}.
          *
          * @param str
          * @param exclusiveBeginIndex
@@ -12920,7 +12981,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         //        }
 
         /**
-         * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}
+         * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}.
          *
          * @param str
          * @param funcOfExclusiveBeginIndex
@@ -12948,7 +13009,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         //        }
 
         /**
-         * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}
+         * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}.
          *
          * @param str
          * @param delimiterOfExclusiveBeginIndex

@@ -42,6 +42,12 @@ public final class DataSourceUtil {
         // utility class.
     }
 
+    /**
+     * 
+     *
+     * @param conn 
+     * @param ds 
+     */
     public static void releaseConnection(final Connection conn, final javax.sql.DataSource ds) {
         if (conn == null) {
             return;
@@ -377,6 +383,13 @@ public final class DataSourceUtil {
         }
     }
 
+    /**
+     * 
+     *
+     * @param stmt 
+     * @return 
+     * @throws SQLException 
+     */
     public static int[] executeBatch(final Statement stmt) throws SQLException {
         try {
             return stmt.executeBatch();

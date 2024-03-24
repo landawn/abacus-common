@@ -218,6 +218,11 @@ public interface NoCachingNoUpdating {
             return Strings.join(a, delimiter, prefix, suffix);
         }
 
+        /**
+         * 
+         *
+         * @return 
+         */
         @Override
         public Iterator<T> iterator() {
             return ObjIterator.of(a);

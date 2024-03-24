@@ -1949,7 +1949,7 @@ public final class Iterators {
      * @param <T>
      * @param iter
      * @return
-     * @deprecated Use {@link #skipNulls(Iterator<? extends T>)} instead
+     * @deprecated Use {@link #skipNulls(Iterator)} instead
      */
     @Deprecated
     public static <T> ObjIterator<T> skipNull(final Iterator<? extends T> iter) {
@@ -2048,6 +2048,7 @@ public final class Iterators {
      *
      * @param <T>
      * @param c
+     * @param keyMapper
      * @return
      */
     @Beta

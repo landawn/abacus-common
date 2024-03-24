@@ -210,6 +210,11 @@ public class RowDataSet implements DataSet, Cloneable {
         return ImmutableList.wrap(_columnNameList);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public int columnCount() {
         return _columnNameList.size();
@@ -1972,6 +1977,11 @@ public class RowDataSet implements DataSet, Cloneable {
         modCount++;
     }
 
+    /**
+     * 
+     *
+     * @param other 
+     */
     @Override
     public void prepend(final DataSet other) {
         checkFrozen();
@@ -1990,6 +2000,11 @@ public class RowDataSet implements DataSet, Cloneable {
         modCount++;
     }
 
+    /**
+     * 
+     *
+     * @param other 
+     */
     @Override
     public void append(final DataSet other) {
         checkFrozen();
@@ -2087,11 +2102,12 @@ public class RowDataSet implements DataSet, Cloneable {
 
     /**
      * Gets the row.
-     * @param rowIndex
-     * @param columnNames
-     * @param rowSupplier
-     * @param <T>
-     * @return
+     *
+     * @param <T> 
+     * @param rowIndex 
+     * @param columnNames 
+     * @param rowSupplier 
+     * @return 
      */
     @Override
     public <T> T getRow(int rowIndex, Collection<String> columnNames, IntFunction<? extends T> rowSupplier) {
@@ -2384,14 +2400,15 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
+     * 
      *
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param columnNameA
-     * @param columnNameB
-     * @param <A>
-     * @param <B>
-     * @return
+     * @param <A> 
+     * @param <B> 
+     * @param fromRowIndex 
+     * @param toRowIndex 
+     * @param columnNameA 
+     * @param columnNameB 
+     * @return 
      */
     @Override
     public <A, B> BiIterator<A, B> iterator(final int fromRowIndex, final int toRowIndex, final String columnNameA, final String columnNameB) {
@@ -2431,16 +2448,17 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
+     * 
      *
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param columnNameA
-     * @param columnNameB
-     * @param columnNameC
-     * @param <A>
-     * @param <B>
-     * @param <C>
-     * @return
+     * @param <A> 
+     * @param <B> 
+     * @param <C> 
+     * @param fromRowIndex 
+     * @param toRowIndex 
+     * @param columnNameA 
+     * @param columnNameB 
+     * @param columnNameC 
+     * @return 
      */
     @Override
     public <A, B, C> TriIterator<A, B, C> iterator(final int fromRowIndex, final int toRowIndex, final String columnNameA, final String columnNameB,
@@ -2504,12 +2522,13 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
+     * 
      *
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param columnNames
-     * @param action
-     * @param <E>
+     * @param <E> 
+     * @param fromRowIndex 
+     * @param toRowIndex 
+     * @param columnNames 
+     * @param action 
      * @throws E the e
      */
     @Override
@@ -2559,12 +2578,13 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
+     * 
      *
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param columnNames
-     * @param action
-     * @param <E>
+     * @param <E> 
+     * @param fromRowIndex 
+     * @param toRowIndex 
+     * @param columnNames 
+     * @param action 
      * @throws E the e
      */
     @Override
@@ -2607,12 +2627,13 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
+     * 
      *
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param columnNames
-     * @param action
-     * @param <E>
+     * @param <E> 
+     * @param fromRowIndex 
+     * @param toRowIndex 
+     * @param columnNames 
+     * @param action 
      * @throws E the e
      */
     @Override
@@ -2756,14 +2777,14 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
+     * 
      *
-     *
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param columnNames
-     * @param rowSupplier
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param fromRowIndex 
+     * @param toRowIndex 
+     * @param columnNames 
+     * @param rowSupplier 
+     * @return 
      */
     @Override
     public <T> List<T> toList(int fromRowIndex, int toRowIndex, Collection<String> columnNames, IntFunction<? extends T> rowSupplier) {
@@ -3518,20 +3539,32 @@ public class RowDataSet implements DataSet, Cloneable {
         return toMap(0, size(), keyColumnName, valueColumnName);
     }
 
+    /**
+     * 
+     *
+     * @param <K> 
+     * @param <V> 
+     * @param <M> 
+     * @param keyColumnName 
+     * @param valueColumnName 
+     * @param supplier 
+     * @return 
+     */
     @Override
     public <K, V, M extends Map<K, V>> M toMap(String keyColumnName, String valueColumnName, IntFunction<? extends M> supplier) {
         return toMap(0, size(), keyColumnName, valueColumnName, supplier);
     }
 
     /**
+     * 
      *
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param keyColumnName
-     * @param valueColumnName
      * @param <K> the key type
      * @param <V> the value type
-     * @return
+     * @param fromRowIndex 
+     * @param toRowIndex 
+     * @param keyColumnName 
+     * @param valueColumnName 
+     * @return 
      */
     @Override
     public <K, V> Map<K, V> toMap(final int fromRowIndex, final int toRowIndex, final String keyColumnName, final String valueColumnName) {
@@ -3539,16 +3572,17 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
+     * 
      *
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param keyColumnName
-     * @param valueColumnName
-     * @param supplier
      * @param <K> the key type
      * @param <V> the value type
-     * @param <M>
-     * @return
+     * @param <M> 
+     * @param fromRowIndex 
+     * @param toRowIndex 
+     * @param keyColumnName 
+     * @param valueColumnName 
+     * @param supplier 
+     * @return 
      */
     @Override
     public <K, V, M extends Map<K, V>> M toMap(int fromRowIndex, int toRowIndex, String keyColumnName, String valueColumnName,
@@ -3581,6 +3615,18 @@ public class RowDataSet implements DataSet, Cloneable {
         return toMap(rowClass, 0, size(), keyColumnName, valueColumnNames);
     }
 
+    /**
+     * 
+     *
+     * @param <K> 
+     * @param <V> 
+     * @param <M> 
+     * @param rowClass 
+     * @param keyColumnName 
+     * @param valueColumnNames 
+     * @param supplier 
+     * @return 
+     */
     @Override
     public <K, V, M extends Map<K, V>> M toMap(Class<? extends V> rowClass, String keyColumnName, Collection<String> valueColumnNames,
             IntFunction<? extends M> supplier) {
@@ -3715,6 +3761,18 @@ public class RowDataSet implements DataSet, Cloneable {
         return toMap(0, size(), keyColumnName, valueColumnNames, rowSupplier);
     }
 
+    /**
+     * 
+     *
+     * @param <K> 
+     * @param <V> 
+     * @param <M> 
+     * @param keyColumnName 
+     * @param valueColumnNames 
+     * @param rowSupplier 
+     * @param supplier 
+     * @return 
+     */
     @Override
     public <K, V, M extends Map<K, V>> M toMap(String keyColumnName, Collection<String> valueColumnNames, IntFunction<? extends V> rowSupplier,
             IntFunction<? extends M> supplier) {
@@ -3722,16 +3780,16 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
+     * 
      *
-     *
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param keyColumnName
-     * @param valueColumnNames
-     * @param rowSupplier
      * @param <K> the key type
      * @param <V> the value type
-     * @return
+     * @param fromRowIndex 
+     * @param toRowIndex 
+     * @param keyColumnName 
+     * @param valueColumnNames 
+     * @param rowSupplier 
+     * @return 
      */
     @Override
     public <K, V> Map<K, V> toMap(int fromRowIndex, int toRowIndex, String keyColumnName, Collection<String> valueColumnNames,
@@ -3740,18 +3798,18 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
+     * 
      *
-     *
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param keyColumnName
-     * @param valueColumnNames
-     * @param rowSupplier
-     * @param supplier
      * @param <K> the key type
      * @param <V> the value type
-     * @param <M>
-     * @return
+     * @param <M> 
+     * @param fromRowIndex 
+     * @param toRowIndex 
+     * @param keyColumnName 
+     * @param valueColumnNames 
+     * @param rowSupplier 
+     * @param supplier 
+     * @return 
      */
     @Override
     public <K, V, M extends Map<K, V>> M toMap(int fromRowIndex, int toRowIndex, String keyColumnName, Collection<String> valueColumnNames,
@@ -3839,6 +3897,18 @@ public class RowDataSet implements DataSet, Cloneable {
         return toMultimap(0, size(), keyColumnName, valueColumnName);
     }
 
+    /**
+     * 
+     *
+     * @param <K> 
+     * @param <E> 
+     * @param <V> 
+     * @param <M> 
+     * @param keyColumnName 
+     * @param valueColumnName 
+     * @param supplier 
+     * @return 
+     */
     @Override
     public <K, E, V extends Collection<E>, M extends Multimap<K, E, V>> M toMultimap(String keyColumnName, String valueColumnName,
             IntFunction<? extends M> supplier) {
@@ -3846,14 +3916,15 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
+     * 
      *
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param keyColumnName
-     * @param valueColumnName
      * @param <K> the key type
-     * @param <E>
-     * @return
+     * @param <E> 
+     * @param fromRowIndex 
+     * @param toRowIndex 
+     * @param keyColumnName 
+     * @param valueColumnName 
+     * @return 
      */
     @Override
     public <K, E> ListMultimap<K, E> toMultimap(final int fromRowIndex, final int toRowIndex, final String keyColumnName, final String valueColumnName) {
@@ -3861,17 +3932,18 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
+     * 
      *
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param keyColumnName
-     * @param valueColumnName
-     * @param supplier
      * @param <K> the key type
-     * @param <E>
+     * @param <E> 
      * @param <V> the value type
-     * @param <M>
-     * @return
+     * @param <M> 
+     * @param fromRowIndex 
+     * @param toRowIndex 
+     * @param keyColumnName 
+     * @param valueColumnName 
+     * @param supplier 
+     * @return 
      */
     @Override
     public <K, E, V extends Collection<E>, M extends Multimap<K, E, V>> M toMultimap(int fromRowIndex, int toRowIndex, String keyColumnName,
@@ -3904,6 +3976,19 @@ public class RowDataSet implements DataSet, Cloneable {
         return toMultimap(rowClass, 0, size(), keyColumnName, valueColumnNames);
     }
 
+    /**
+     * 
+     *
+     * @param <K> 
+     * @param <E> 
+     * @param <V> 
+     * @param <M> 
+     * @param rowClass 
+     * @param keyColumnName 
+     * @param valueColumnNames 
+     * @param supplier 
+     * @return 
+     */
     @Override
     public <K, E, V extends Collection<E>, M extends Multimap<K, E, V>> M toMultimap(Class<? extends E> rowClass, String keyColumnName,
             Collection<String> valueColumnNames, IntFunction<? extends M> supplier) {
@@ -4041,6 +4126,19 @@ public class RowDataSet implements DataSet, Cloneable {
         return toMultimap(0, size(), keyColumnName, valueColumnNames, rowSupplier);
     }
 
+    /**
+     * 
+     *
+     * @param <K> 
+     * @param <E> 
+     * @param <V> 
+     * @param <M> 
+     * @param keyColumnName 
+     * @param valueColumnNames 
+     * @param rowSupplier 
+     * @param supplier 
+     * @return 
+     */
     @Override
     public <K, E, V extends Collection<E>, M extends Multimap<K, E, V>> M toMultimap(String keyColumnName, Collection<String> valueColumnNames,
             IntFunction<? extends E> rowSupplier, IntFunction<? extends M> supplier) {
@@ -4048,16 +4146,16 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
+     * 
      *
-     *
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param keyColumnName
-     * @param valueColumnNames
-     * @param rowSupplier
      * @param <K> the key type
-     * @param <E>
-     * @return
+     * @param <E> 
+     * @param fromRowIndex 
+     * @param toRowIndex 
+     * @param keyColumnName 
+     * @param valueColumnNames 
+     * @param rowSupplier 
+     * @return 
      */
     @Override
     public <K, E> ListMultimap<K, E> toMultimap(int fromRowIndex, int toRowIndex, String keyColumnName, Collection<String> valueColumnNames,
@@ -4067,19 +4165,19 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
+     * 
      *
-     *
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param keyColumnName
-     * @param valueColumnNames
-     * @param rowSupplier
-     * @param supplier
      * @param <K> the key type
-     * @param <E>
+     * @param <E> 
      * @param <V> the value type
-     * @param <M>
-     * @return
+     * @param <M> 
+     * @param fromRowIndex 
+     * @param toRowIndex 
+     * @param keyColumnName 
+     * @param valueColumnNames 
+     * @param rowSupplier 
+     * @param supplier 
+     * @return 
      */
     @Override
     public <K, E, V extends Collection<E>, M extends Multimap<K, E, V>> M toMultimap(int fromRowIndex, int toRowIndex, String keyColumnName,
@@ -5506,13 +5604,13 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
+     * 
      *
-     * @param <T>
-     * @param keyColumnNames
-     * @param aggregateResultColumnName
-     * @param aggregateOnColumnName
-     * @param collector
-     * @return
+     * @param keyColumnNames 
+     * @param aggregateResultColumnName 
+     * @param aggregateOnColumnName 
+     * @param collector 
+     * @return 
      */
     @Override
     public DataSet groupBy(Collection<String> keyColumnNames, String aggregateResultColumnName, String aggregateOnColumnName,
@@ -6075,6 +6173,20 @@ public class RowDataSet implements DataSet, Cloneable {
         return new RowDataSet(newColumnNameList, newColumnList);
     }
 
+    /**
+     * 
+     *
+     * @param <R> 
+     * @param <C> 
+     * @param <T> 
+     * @param <E> 
+     * @param groupByColumnName 
+     * @param pivotColumnName 
+     * @param aggColumnName 
+     * @param collector 
+     * @return 
+     * @throws E 
+     */
     @Override
     public <R, C, T, E extends Exception> Sheet<R, C, T> pivot(String groupByColumnName, String pivotColumnName, String aggColumnName,
             Collector<?, ?, ? extends T> collector) throws E {
@@ -6091,6 +6203,18 @@ public class RowDataSet implements DataSet, Cloneable {
     //        return pivot(groupedDataSet);
     //    }
 
+    /**
+     * 
+     *
+     * @param <R> 
+     * @param <C> 
+     * @param <T> 
+     * @param groupByColumnName 
+     * @param pivotColumnName 
+     * @param aggColumnNames 
+     * @param collector 
+     * @return 
+     */
     @Override
     public <R, C, T> Sheet<R, C, T> pivot(String groupByColumnName, String pivotColumnName, Collection<String> aggColumnNames,
             Collector<? super Object[], ?, ? extends T> collector) {
@@ -6101,6 +6225,22 @@ public class RowDataSet implements DataSet, Cloneable {
         return pivot(groupedDataSet);
     }
 
+    /**
+     * 
+     *
+     * @param <R> 
+     * @param <C> 
+     * @param <U> 
+     * @param <T> 
+     * @param <E> 
+     * @param groupByColumnName 
+     * @param pivotColumnName 
+     * @param aggColumnNames 
+     * @param rowMapper 
+     * @param collector 
+     * @return 
+     * @throws E 
+     */
     @Override
     public <R, C, U, T, E extends Exception> Sheet<R, C, T> pivot(String groupByColumnName, String pivotColumnName, Collection<String> aggColumnNames,
             Throwables.Function<? super DisposableObjArray, ? extends U, E> rowMapper, Collector<? super U, ?, ? extends T> collector) throws E {
@@ -6254,14 +6394,14 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
+     * 
      *
-     * @param <T>
-     * @param columnNames
-     * @param keyMapper
-     * @param aggregateResultColumnName
-     * @param aggregateOnColumnName
-     * @param collector
-     * @return
+     * @param columnNames 
+     * @param keyMapper 
+     * @param aggregateResultColumnName 
+     * @param aggregateOnColumnName 
+     * @param collector 
+     * @return 
      */
     @Override
     public Stream<DataSet> rollup(final Collection<String> columnNames, final Throwables.Function<? super DisposableObjArray, ?, ? extends Exception> keyMapper,
@@ -7279,13 +7419,14 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
+     * 
      *
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param columnNames
-     * @param filter
-     * @param <E>
-     * @return
+     * @param <E> 
+     * @param fromRowIndex 
+     * @param toRowIndex 
+     * @param columnNames 
+     * @param filter 
+     * @return 
      * @throws E the e
      */
     @Override
@@ -7295,14 +7436,15 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
+     * 
      *
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param columnNames
-     * @param filter
-     * @param max
-     * @param <E>
-     * @return
+     * @param <E> 
+     * @param fromRowIndex 
+     * @param toRowIndex 
+     * @param columnNames 
+     * @param filter 
+     * @param max 
+     * @return 
      * @throws E the e
      */
     @Override
@@ -7375,13 +7517,14 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
+     * 
      *
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param columnNames
-     * @param filter
-     * @param <E>
-     * @return
+     * @param <E> 
+     * @param fromRowIndex 
+     * @param toRowIndex 
+     * @param columnNames 
+     * @param filter 
+     * @return 
      * @throws E the e
      */
     @Override
@@ -7391,14 +7534,15 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
+     * 
      *
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param columnNames
-     * @param filter
-     * @param max
-     * @param <E>
-     * @return
+     * @param <E> 
+     * @param fromRowIndex 
+     * @param toRowIndex 
+     * @param columnNames 
+     * @param filter 
+     * @param max 
+     * @return 
      * @throws E the e
      */
     @Override
@@ -7473,13 +7617,14 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
+     * 
      *
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param columnName
-     * @param filter
-     * @param <E>
-     * @return
+     * @param <E> 
+     * @param fromRowIndex 
+     * @param toRowIndex 
+     * @param columnName 
+     * @param filter 
+     * @return 
      * @throws E the e
      */
     @Override
@@ -7489,14 +7634,15 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
+     * 
      *
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param columnName
-     * @param filter
-     * @param max
-     * @param <E>
-     * @return
+     * @param <E> 
+     * @param fromRowIndex 
+     * @param toRowIndex 
+     * @param columnName 
+     * @param filter 
+     * @param max 
+     * @return 
      * @throws E the e
      */
     @Override
@@ -7568,13 +7714,14 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
+     * 
      *
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param columnNames
-     * @param filter
-     * @param <E>
-     * @return
+     * @param <E> 
+     * @param fromRowIndex 
+     * @param toRowIndex 
+     * @param columnNames 
+     * @param filter 
+     * @return 
      * @throws E the e
      */
     @Override
@@ -7584,14 +7731,15 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
+     * 
      *
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param columnNames
-     * @param filter
-     * @param max
-     * @param <E>
-     * @return
+     * @param <E> 
+     * @param fromRowIndex 
+     * @param toRowIndex 
+     * @param columnNames 
+     * @param filter 
+     * @param max 
+     * @return 
      * @throws E the e
      */
     @Override
@@ -10119,21 +10267,49 @@ public class RowDataSet implements DataSet, Cloneable {
         }
     }
 
+    /**
+     * 
+     *
+     * @param other 
+     * @return 
+     */
     @Override
     public DataSet union(final DataSet other) {
         return union(other, false);
     }
 
+    /**
+     * 
+     *
+     * @param other 
+     * @param requiresSameColumns 
+     * @return 
+     */
     @Override
     public DataSet union(final DataSet other, boolean requiresSameColumns) {
         return union(other, getKeyColumnNames(other), requiresSameColumns);
     }
 
+    /**
+     * 
+     *
+     * @param other 
+     * @param keyColumnNames 
+     * @return 
+     */
     @Override
     public DataSet union(final DataSet other, final Collection<String> keyColumnNames) {
         return union(other, keyColumnNames, false);
     }
 
+    /**
+     * 
+     *
+     * @param other 
+     * @param keyColumnNames 
+     * @param requiresSameColumns 
+     * @return 
+     */
     @Override
     public DataSet union(final DataSet other, final Collection<String> keyColumnNames, boolean requiresSameColumns) {
         checkColumnNames(other, keyColumnNames, requiresSameColumns);
@@ -10319,101 +10495,241 @@ public class RowDataSet implements DataSet, Cloneable {
         return result;
     }
 
+    /**
+     * 
+     *
+     * @param other 
+     * @return 
+     */
     @Override
     public DataSet unionAll(final DataSet other) {
         return unionAll(other, false);
     }
 
+    /**
+     * 
+     *
+     * @param other 
+     * @param requiresSameColumns 
+     * @return 
+     */
     @Override
     public DataSet unionAll(final DataSet other, boolean requiresSameColumns) {
         return merge(other, requiresSameColumns);
     }
 
+    /**
+     * 
+     *
+     * @param other 
+     * @param keyColumnNames 
+     * @return 
+     */
     @Override
     public DataSet unionAll(DataSet other, Collection<String> keyColumnNames) {
         return unionAll(other);
     }
 
+    /**
+     * 
+     *
+     * @param other 
+     * @param keyColumnNames 
+     * @param requiresSameColumns 
+     * @return 
+     */
     @Override
     public DataSet unionAll(DataSet other, Collection<String> keyColumnNames, boolean requiresSameColumns) {
         return unionAll(other, requiresSameColumns);
     }
 
+    /**
+     * 
+     *
+     * @param other 
+     * @return 
+     */
     @Override
     public DataSet intersect(final DataSet other) {
         return intersect(other, false);
     }
 
+    /**
+     * 
+     *
+     * @param other 
+     * @param requiresSameColumns 
+     * @return 
+     */
     @Override
     public DataSet intersect(final DataSet other, boolean requiresSameColumns) {
         return removeAll(other, getKeyColumnNames(other), requiresSameColumns, true, true);
     }
 
+    /**
+     * 
+     *
+     * @param other 
+     * @param keyColumnNames 
+     * @return 
+     */
     @Override
     public DataSet intersect(final DataSet other, final Collection<String> keyColumnNames) {
         return intersect(other, keyColumnNames, false);
     }
 
+    /**
+     * 
+     *
+     * @param other 
+     * @param keyColumnNames 
+     * @param requiresSameColumns 
+     * @return 
+     */
     @Override
     public DataSet intersect(final DataSet other, final Collection<String> keyColumnNames, boolean requiresSameColumns) {
         return removeAll(other, keyColumnNames, requiresSameColumns, true, true);
     }
 
+    /**
+     * 
+     *
+     * @param other 
+     * @return 
+     */
     @Override
     public DataSet intersectAll(final DataSet other) {
         return intersectAll(other, false);
     }
 
+    /**
+     * 
+     *
+     * @param other 
+     * @param requiresSameColumns 
+     * @return 
+     */
     @Override
     public DataSet intersectAll(final DataSet other, boolean requiresSameColumns) {
         return removeAll(other, getKeyColumnNames(other), requiresSameColumns, true, false);
     }
 
+    /**
+     * 
+     *
+     * @param other 
+     * @param keyColumnNames 
+     * @return 
+     */
     @Override
     public DataSet intersectAll(final DataSet other, final Collection<String> keyColumnNames) {
         return intersectAll(other, keyColumnNames, false);
     }
 
+    /**
+     * 
+     *
+     * @param other 
+     * @param keyColumnNames 
+     * @param requiresSameColumns 
+     * @return 
+     */
     @Override
     public DataSet intersectAll(final DataSet other, final Collection<String> keyColumnNames, boolean requiresSameColumns) {
         return removeAll(other, keyColumnNames, requiresSameColumns, true, false);
     }
 
+    /**
+     * 
+     *
+     * @param other 
+     * @return 
+     */
     @Override
     public DataSet except(final DataSet other) {
         return except(other, false);
     }
 
+    /**
+     * 
+     *
+     * @param other 
+     * @param requiresSameColumns 
+     * @return 
+     */
     @Override
     public DataSet except(final DataSet other, boolean requiresSameColumns) {
         return removeAll(other, getKeyColumnNames(other), requiresSameColumns, false, true);
     }
 
+    /**
+     * 
+     *
+     * @param other 
+     * @param keyColumnNames 
+     * @return 
+     */
     @Override
     public DataSet except(final DataSet other, final Collection<String> keyColumnNames) {
         return except(other, keyColumnNames, false);
     }
 
+    /**
+     * 
+     *
+     * @param other 
+     * @param keyColumnNames 
+     * @param requiresSameColumns 
+     * @return 
+     */
     @Override
     public DataSet except(final DataSet other, final Collection<String> keyColumnNames, boolean requiresSameColumns) {
         return removeAll(other, keyColumnNames, requiresSameColumns, false, true);
     }
 
+    /**
+     * 
+     *
+     * @param other 
+     * @return 
+     */
     @Override
     public DataSet exceptAll(final DataSet other) {
         return exceptAll(other, false);
     }
 
+    /**
+     * 
+     *
+     * @param other 
+     * @param requiresSameColumns 
+     * @return 
+     */
     @Override
     public DataSet exceptAll(final DataSet other, boolean requiresSameColumns) {
         return removeAll(other, getKeyColumnNames(other), requiresSameColumns, false, false);
     }
 
+    /**
+     * 
+     *
+     * @param other 
+     * @param keyColumnNames 
+     * @return 
+     */
     @Override
     public DataSet exceptAll(final DataSet other, final Collection<String> keyColumnNames) {
         return exceptAll(other, keyColumnNames, false);
     }
 
+    /**
+     * 
+     *
+     * @param other 
+     * @param keyColumnNames 
+     * @param requiresSameColumns 
+     * @return 
+     */
     @Override
     public DataSet exceptAll(final DataSet other, final Collection<String> keyColumnNames, boolean requiresSameColumns) {
         return removeAll(other, keyColumnNames, requiresSameColumns, false, false);
@@ -10539,51 +10855,120 @@ public class RowDataSet implements DataSet, Cloneable {
         return new RowDataSet(newColumnNameList, newColumnList);
     }
 
+    /**
+     * 
+     *
+     * @param other 
+     * @return 
+     */
     @Override
     public DataSet intersection(final DataSet other) {
         return intersection(other, false);
     }
 
+    /**
+     * 
+     *
+     * @param other 
+     * @param requiresSameColumns 
+     * @return 
+     */
     @Override
     public DataSet intersection(final DataSet other, boolean requiresSameColumns) {
         return removeOccurrences(other, getKeyColumnNames(other), requiresSameColumns, true);
     }
 
+    /**
+     * 
+     *
+     * @param other 
+     * @param keyColumnNames 
+     * @return 
+     */
     @Override
     public DataSet intersection(final DataSet other, final Collection<String> keyColumnNames) {
         return intersection(other, keyColumnNames, false);
     }
 
+    /**
+     * 
+     *
+     * @param other 
+     * @param keyColumnNames 
+     * @param requiresSameColumns 
+     * @return 
+     */
     @Override
     public DataSet intersection(final DataSet other, final Collection<String> keyColumnNames, boolean requiresSameColumns) {
         return removeOccurrences(other, keyColumnNames, requiresSameColumns, true);
     }
 
+    /**
+     * 
+     *
+     * @param other 
+     * @return 
+     */
     @Override
     public DataSet difference(final DataSet other) {
         return difference(other, false);
     }
 
+    /**
+     * 
+     *
+     * @param other 
+     * @param requiresSameColumns 
+     * @return 
+     */
     @Override
     public DataSet difference(final DataSet other, boolean requiresSameColumns) {
         return removeOccurrences(other, getKeyColumnNames(other), requiresSameColumns, false);
     }
 
+    /**
+     * 
+     *
+     * @param other 
+     * @param keyColumnNames 
+     * @return 
+     */
     @Override
     public DataSet difference(final DataSet other, final Collection<String> keyColumnNames) {
         return difference(other, keyColumnNames, false);
     }
 
+    /**
+     * 
+     *
+     * @param other 
+     * @param keyColumnNames 
+     * @param requiresSameColumns 
+     * @return 
+     */
     @Override
     public DataSet difference(final DataSet other, final Collection<String> keyColumnNames, boolean requiresSameColumns) {
         return removeOccurrences(other, keyColumnNames, requiresSameColumns, false);
     }
 
+    /**
+     * 
+     *
+     * @param other 
+     * @return 
+     */
     @Override
     public DataSet symmetricDifference(final DataSet other) {
         return symmetricDifference(other, false);
     }
 
+    /**
+     * 
+     *
+     * @param other 
+     * @param requiresSameColumns 
+     * @return 
+     */
     @Override
     public DataSet symmetricDifference(final DataSet other, boolean requiresSameColumns) {
         final Collection<String> keyColumnNames = getKeyColumnNames(other);
@@ -10591,11 +10976,26 @@ public class RowDataSet implements DataSet, Cloneable {
         return this.difference(other, keyColumnNames, requiresSameColumns).merge(other.difference(this, keyColumnNames, requiresSameColumns));
     }
 
+    /**
+     * 
+     *
+     * @param other 
+     * @param keyColumnNames 
+     * @return 
+     */
     @Override
     public DataSet symmetricDifference(final DataSet other, final Collection<String> keyColumnNames) {
         return symmetricDifference(other, keyColumnNames, false);
     }
 
+    /**
+     * 
+     *
+     * @param other 
+     * @param keyColumnNames 
+     * @param requiresSameColumns 
+     * @return 
+     */
     @Override
     public DataSet symmetricDifference(final DataSet other, final Collection<String> keyColumnNames, boolean requiresSameColumns) {
         return this.difference(other, keyColumnNames, requiresSameColumns).merge(other.difference(this, keyColumnNames, requiresSameColumns));
@@ -10702,11 +11102,24 @@ public class RowDataSet implements DataSet, Cloneable {
         return new RowDataSet(newColumnNameList, newColumnList);
     }
 
+    /**
+     * 
+     *
+     * @param other 
+     * @return 
+     */
     @Override
     public DataSet merge(final DataSet other) {
         return merge(other, false);
     }
 
+    /**
+     * 
+     *
+     * @param other 
+     * @param requiresSameColumns 
+     * @return 
+     */
     @Override
     public DataSet merge(final DataSet other, boolean requiresSameColumns) {
         checkIfColumnNamesAreSame(other, requiresSameColumns);
@@ -11177,12 +11590,13 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
+     * 
      *
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param columnName
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param fromRowIndex 
+     * @param toRowIndex 
+     * @param columnName 
+     * @return 
      */
     @Override
     public <T> Stream<T> stream(int fromRowIndex, int toRowIndex, final String columnName) {
@@ -11426,14 +11840,14 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
+     * 
      *
-     *
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param columnNames
-     * @param rowSupplier
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param fromRowIndex 
+     * @param toRowIndex 
+     * @param columnNames 
+     * @param rowSupplier 
+     * @return 
      */
     @Override
     public <T> Stream<T> stream(final int fromRowIndex, final int toRowIndex, final Collection<String> columnNames,
@@ -11580,21 +11994,55 @@ public class RowDataSet implements DataSet, Cloneable {
         });
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param rowMapper 
+     * @return 
+     */
     @Override
     public <T> Stream<T> stream(IntObjFunction<? super DisposableObjArray, ? extends T> rowMapper) {
         return stream(0, size(), rowMapper);
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param fromRowIndex 
+     * @param toRowIndex 
+     * @param rowMapper 
+     * @return 
+     */
     @Override
     public <T> Stream<T> stream(int fromRowIndex, int toRowIndex, IntObjFunction<? super DisposableObjArray, ? extends T> rowMapper) {
         return stream(fromRowIndex, toRowIndex, _columnNameList, rowMapper);
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param columnNames 
+     * @param rowMapper 
+     * @return 
+     */
     @Override
     public <T> Stream<T> stream(Collection<String> columnNames, IntObjFunction<? super DisposableObjArray, ? extends T> rowMapper) {
         return stream(0, size(), columnNames, rowMapper);
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param fromRowIndex 
+     * @param toRowIndex 
+     * @param inputColumnNames 
+     * @param rowMapper 
+     * @return 
+     */
     @Override
     public <T> Stream<T> stream(int fromRowIndex, int toRowIndex, Collection<String> inputColumnNames,
             IntObjFunction<? super DisposableObjArray, ? extends T> rowMapper) {
@@ -11660,11 +12108,29 @@ public class RowDataSet implements DataSet, Cloneable {
         });
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param columnNames 
+     * @param rowMapper 
+     * @return 
+     */
     @Override
     public <T> Stream<T> stream(Tuple2<String, String> columnNames, BiFunction<?, ?, ? extends T> rowMapper) {
         return stream(0, size(), columnNames, rowMapper);
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param fromRowIndex 
+     * @param toRowIndex 
+     * @param columnNames 
+     * @param rowMapper 
+     * @return 
+     */
     @Override
     public <T> Stream<T> stream(int fromRowIndex, int toRowIndex, Tuple2<String, String> columnNames, BiFunction<?, ?, ? extends T> rowMapper) {
         checkRowIndex(fromRowIndex, toRowIndex);
@@ -11721,11 +12187,29 @@ public class RowDataSet implements DataSet, Cloneable {
         });
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param columnNames 
+     * @param rowMapper 
+     * @return 
+     */
     @Override
     public <T> Stream<T> stream(Tuple3<String, String, String> columnNames, TriFunction<?, ?, ?, ? extends T> rowMapper) {
         return stream(0, size(), columnNames, rowMapper);
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param fromRowIndex 
+     * @param toRowIndex 
+     * @param columnNames 
+     * @param rowMapper 
+     * @return 
+     */
     @Override
     public <T> Stream<T> stream(int fromRowIndex, int toRowIndex, Tuple3<String, String, String> columnNames, TriFunction<?, ?, ?, ? extends T> rowMapper) {
         checkRowIndex(fromRowIndex, toRowIndex);

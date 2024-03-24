@@ -24,6 +24,13 @@ import com.landawn.abacus.util.Throwables;
  */
 public interface BiObjIntConsumer<T, U> extends Throwables.BiObjIntConsumer<T, U, RuntimeException> { //NOSONAR
 
+    /**
+    * 
+    *
+    * @param t 
+    * @param u 
+    * @param i 
+    */
     @Override
     void accept(T t, U u, int i);
 

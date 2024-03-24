@@ -43,14 +43,14 @@ import java.util.concurrent.LinkedBlockingQueue;
  * But the returned Class by all the methods doesn't have the actual parameterized type informations. For example:
  * <pre>
  * <code>
- * Class&ltList&ltString&gt&gt clazz = Clazz.ofList(String.class);
+ * {@code Class<List<String>> clazz = Clazz.ofList(String.class);}
  * // clazz doesn't have the actual type parameters information.
  * // you won't be able to get type parameter {@code String} by: cls.getTypeParameters();
  * // To save the real type parameters: you need to either:
- * Type&ltList&ltString&gt&gt type = Type.of("List&ltString&gt"); // or Type.ofList(String.class)
+ * {@code Type<List<String>> type = Type.of("List<String>"); // or Type.ofList(String.class)}
  *
  * // Or
- * Type&ltList&ltString&gt&gt type = new TypeReference&ltList&ltString&gt&gt() {}.type();
+ * {@code Type<List<String>> type = new TypeReference<List<String>>() {}.type();}
  *
  * </code>
  * </pre>

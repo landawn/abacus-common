@@ -104,8 +104,9 @@ public final class HttpRequest {
     /**
      * Sets the URI target of this request.
      *
-     * @param uri
-     * @return
+     * @param uri 
+     * @param httpClient 
+     * @return 
      * @throws IllegalArgumentException if the scheme of {@code url} is not {@code http} or {@code https}.
      */
     public static HttpRequest create(URI uri, final HttpClient httpClient) {
@@ -662,11 +663,12 @@ public final class HttpRequest {
     }
 
     /**
+     * 
      *
-     * @param httpMethod
-     * @param responseBodyHandler
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param httpMethod 
+     * @param responseBodyHandler 
+     * @return 
      * @throws UncheckedIOException the unchecked IO exception
      */
     @Beta
@@ -685,11 +687,12 @@ public final class HttpRequest {
     }
 
     /**
+     * 
      *
-     * @param httpMethod
-     * @param resultClass
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param httpMethod 
+     * @param resultClass 
+     * @return 
      * @throws UncheckedIOException the unchecked IO exception
      */
     @Beta
@@ -963,12 +966,12 @@ public final class HttpRequest {
     }
 
     /**
+     * 
      *
-     *
-     * @param httpMethod
-     * @param responseBodyHandler
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param httpMethod 
+     * @param responseBodyHandler 
+     * @return 
      */
     @Beta
     public <T> CompletableFuture<HttpResponse<T>> asyncExecute(final HttpMethod httpMethod, final HttpResponse.BodyHandler<T> responseBodyHandler) {

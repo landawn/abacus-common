@@ -729,13 +729,13 @@ public final class OkHttpRequest {
     }
 
     /**
+     * 
      *
-     *
-     * @param httpMethod
-     * @param resultClass
-     * @param <T>
-     * @return
-     * @throws IOException
+     * @param <T> 
+     * @param httpMethod 
+     * @param resultClass 
+     * @return 
+     * @throws IOException 
      */
     @Beta
     public <T> T execute(final HttpMethod httpMethod, final Class<T> resultClass) throws IOException {
@@ -1071,12 +1071,12 @@ public final class OkHttpRequest {
     }
 
     /**
+     * 
      *
-     *
-     * @param httpMethod
-     * @param resultClass
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param httpMethod 
+     * @param resultClass 
+     * @return 
      */
     @Beta
     public <T> ContinuableFuture<T> asyncExecute(final HttpMethod httpMethod, final Class<T> resultClass) {
@@ -1084,13 +1084,13 @@ public final class OkHttpRequest {
     }
 
     /**
+     * 
      *
-     *
-     * @param httpMethod
-     * @param resultClass
-     * @param executor
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param httpMethod 
+     * @param resultClass 
+     * @param executor 
+     * @return 
      */
     @Beta
     public <T> ContinuableFuture<T> asyncExecute(final HttpMethod httpMethod, final Class<T> resultClass, final Executor executor) {

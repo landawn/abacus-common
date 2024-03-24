@@ -25,25 +25,44 @@ import com.landawn.abacus.util.Throwables;
 public interface BiIntObjPredicate<T> extends Throwables.BiIntObjPredicate<T, RuntimeException> { // NOSONAR
 
     /**
-     *
-     * @param i
-     * @param j
-     * @param t
-     */
+    * 
+    *
+    * @param i 
+    * @param j 
+    * @param t 
+    * @return 
+    */
     //NOSONAR
     @Override
     boolean test(int i, int j, T t);
 
+    /**
+     * 
+     *
+     * @return 
+     */
     default BiIntObjPredicate<T> negate() {
         return (i, j, t) -> !test(i, j, t);
     }
 
+    /**
+     * 
+     *
+     * @param other 
+     * @return 
+     */
     default BiIntObjPredicate<T> and(BiIntObjPredicate<T> other) {
         N.checkArgNotNull(other);
 
         return (i, j, t) -> test(i, j, t) && other.test(i, j, t);
     }
 
+    /**
+     * 
+     *
+     * @param other 
+     * @return 
+     */
     default BiIntObjPredicate<T> or(BiIntObjPredicate<T> other) {
         N.checkArgNotNull(other);
 

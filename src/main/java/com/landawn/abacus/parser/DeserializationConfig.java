@@ -190,6 +190,11 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
         return this.setMapValueType(N.typeOf(valueType));
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public boolean hasValueTypes() {
         return beanInfoForValueTypes != null || N.notEmpty(valueTypeMap);
     }

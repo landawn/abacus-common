@@ -1791,7 +1791,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      *
      *    char result = elementData[0];
      *
-     *    for (int i = 1; i < size; i++) {
+     *    for (int i = 1; i &lt; size; i++) {
      *        result = accumulator.applyAsChar(result, elementData[i]);
      *    }
      *
@@ -1828,7 +1828,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      *
      *     char result = identity;
      *
-     *     for (int i = 0; i < size; i++) {
+     *     for (int i = 0; i &lt; size; i++) {
      *         result = accumulator.applyAsChar(result, elementData[i]);
      *    }
      *

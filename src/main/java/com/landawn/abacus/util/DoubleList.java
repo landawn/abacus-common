@@ -1703,7 +1703,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      *
      *    double result = elementData[0];
      *
-     *    for (int i = 1; i < size; i++) {
+     *    for (int i = 1; i &lt; size; i++) {
      *        result = accumulator.applyAsDouble(result, elementData[i]);
      *    }
      *
@@ -1740,7 +1740,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      *
      *     double result = identity;
      *
-     *     for (int i = 0; i < size; i++) {
+     *     for (int i = 0; i &lt; size; i++) {
      *         result = accumulator.applyAsDouble(result, elementData[i]);
      *    }
      *

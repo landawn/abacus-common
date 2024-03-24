@@ -24,6 +24,14 @@ import com.landawn.abacus.util.Throwables;
  */
 public interface IntBiObjPredicate<T, U> extends Throwables.IntBiObjPredicate<T, U, RuntimeException> { //NOSONAR
 
+    /**
+    * 
+    *
+    * @param i 
+    * @param t 
+    * @param u 
+    * @return 
+    */
     @Override
     boolean test(int i, T t, U u);
 

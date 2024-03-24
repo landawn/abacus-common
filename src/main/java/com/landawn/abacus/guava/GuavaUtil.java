@@ -22,6 +22,15 @@ public class GuavaUtil {
         // Utility class.
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param <U> 
+     * @param range 
+     * @param mapper 
+     * @return 
+     */
     public static <T extends Comparable<? super T>, U extends Comparable<? super U>> Range<U> transform(final Range<T> range, final Function<T, U> mapper) {
         if (range.hasLowerBound() && range.hasUpperBound()) {
             return Range.range(mapper.apply(range.lowerEndpoint()), range.lowerBoundType(), mapper.apply(range.upperEndpoint()), range.upperBoundType());

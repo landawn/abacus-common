@@ -32,7 +32,7 @@ import java.io.Serializable;
  * {@code MutableChar} is NOT thread-safe.
  *
  * @version $Id: MutableChar.java 1669791 2015-03-28 15:22:59Z britter $
- * @see Char
+ * @see Character
  * @since 2.1
  */
 public final class MutableChar implements Mutable, Serializable, Comparable<MutableChar> {
@@ -65,9 +65,9 @@ public final class MutableChar implements Mutable, Serializable, Comparable<Muta
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public char value() {
         return value;

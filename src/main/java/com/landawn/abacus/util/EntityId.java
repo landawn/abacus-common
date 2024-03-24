@@ -219,10 +219,21 @@ public interface EntityId {
      */
     boolean isEmpty();
 
+    /**
+     * 
+     *
+     * @return 
+     */
     static EntityIdBuilder builder() {
         return new EntityIdBuilder();
     }
 
+    /**
+     * 
+     *
+     * @param entityName 
+     * @return 
+     */
     static EntityIdBuilder builder(final String entityName) {
         return new EntityIdBuilder(entityName);
     }
@@ -238,6 +249,13 @@ public interface EntityId {
             entityId = new Seid(entityName);
         }
 
+        /**
+         * 
+         *
+         * @param idPropName 
+         * @param idPropVal 
+         * @return 
+         */
         @SuppressWarnings("deprecation")
         public EntityIdBuilder put(final String idPropName, final Object idPropVal) {
             if (entityId == null) {
@@ -249,6 +267,11 @@ public interface EntityId {
             return this;
         }
 
+        /**
+         * 
+         *
+         * @return 
+         */
         @SuppressWarnings("deprecation")
         public EntityId build() {
             if (entityId == null) {

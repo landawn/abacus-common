@@ -1024,7 +1024,7 @@ public final class Numbers {
      * @param defaultValueForNull
      * @return {@code defaultValueForNull} if the specified {@code obj} is null.
      * @throws NumberFormatException If the specified {@code obj} is not a {@code Number} and {@code obj.toString()} is not a parsable {@code int}.
-     * @see #toInteger(String, int)
+     * @see #toInt(String, int)
      */
     public static int toInt(final Object obj, final int defaultValueForNull) throws NumberFormatException {
         if (obj == null) {
@@ -2004,6 +2004,8 @@ public final class Numbers {
      *
      * It's same as {@code isCreatable(String)}.
      *
+     * @param str
+     * @return
      * @see #isCreatable(String)
      * @see #isParsable(String)
      */

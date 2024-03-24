@@ -24,6 +24,14 @@ import com.landawn.abacus.util.Throwables;
  */
 public interface IntBiObjFunction<T, U, R> extends Throwables.IntBiObjFunction<T, U, R, RuntimeException> { //NOSONAR
 
+    /**
+    * 
+    *
+    * @param i 
+    * @param t 
+    * @param u 
+    * @return 
+    */
     @Override
     R apply(int i, T t, U u);
 

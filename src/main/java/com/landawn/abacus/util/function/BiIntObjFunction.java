@@ -25,11 +25,13 @@ import com.landawn.abacus.util.Throwables;
 public interface BiIntObjFunction<T, R> extends Throwables.BiIntObjFunction<T, R, RuntimeException> { // NOSONAR
 
     /**
-     *
-     * @param i
-     * @param j
-     * @param t
-     */
+    * 
+    *
+    * @param i 
+    * @param j 
+    * @param t 
+    * @return 
+    */
     //NOSONAR
     @Override
     R apply(int i, int j, T t);

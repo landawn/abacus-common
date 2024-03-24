@@ -24,6 +24,12 @@ import com.landawn.abacus.util.Throwables;
  */
 public interface LongUnaryOperator extends Throwables.LongUnaryOperator<RuntimeException>, java.util.function.LongUnaryOperator { //NOSONAR
 
+    /**
+    * 
+    *
+    * @param operand 
+    * @return 
+    */
     @Override
     long applyAsLong(long operand);
 

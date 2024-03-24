@@ -172,11 +172,11 @@ import com.landawn.abacus.util.function.UnaryOperator;
  * <pre>
  * <code>
  *
- * Map<String, Integer> map = N.asMap("a", 1, "b", 2, "c", 3);
+ * {@code Map<String, Integer> map = N.asMap("a", 1, "b", 2, "c", 3);}
  * // Instead of
- * Stream.of(map).filter(e -> e.getKey().equals("a") || e.getKey().equals("b")).toMap(e -> e.getKey(), e -> e.getValue());
+ * {@code Stream.of(map).filter(e -> e.getKey().equals("a") || e.getKey().equals("b")).toMap(e -> e.getKey(), e -> e.getValue());}
  * // Using Fn
- * Stream.of(map).filter(Fn.testByKey(k -> k.equals("a") || k.equals("b"))).collect(Collectors.toMap());
+ * {@code Stream.of(map).filter(Fn.testByKey(k -> k.equals("a") || k.equals("b"))).collect(Collectors.toMap());}
  *
  * </code>
  * </pre>
@@ -6081,6 +6081,11 @@ public final class Fn {
 
         private static final Supplier<Exception> EXCEPTION = Exception::new;
 
+        /**
+         *
+         *
+         * @return
+         */
         @Beta
         public static Supplier<Exception> newException() {
             return EXCEPTION;
@@ -6088,6 +6093,11 @@ public final class Fn {
 
         private static final Supplier<RuntimeException> RUNTIME_EXCEPTION = RuntimeException::new;
 
+        /**
+         *
+         *
+         * @return
+         */
         @Beta
         public static Supplier<RuntimeException> newRuntimException() {
             return RUNTIME_EXCEPTION;
@@ -6095,6 +6105,11 @@ public final class Fn {
 
         private static final Supplier<NoSuchElementException> NO_SUCH_ELEMENT_EXCEPTION = NoSuchElementException::new;
 
+        /**
+         *
+         *
+         * @return
+         */
         @Beta
         public static Supplier<NoSuchElementException> newNoSuchElementException() {
             return NO_SUCH_ELEMENT_EXCEPTION;

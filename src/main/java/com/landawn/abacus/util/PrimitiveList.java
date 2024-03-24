@@ -59,211 +59,211 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
     public abstract A array();
 
     /**
-     * 
      *
-     * @param c 
-     * @return 
+     *
+     * @param c
+     * @return
      */
     public abstract boolean addAll(L c);
 
     /**
-     * 
      *
-     * @param index 
-     * @param c 
-     * @return 
+     *
+     * @param index
+     * @param c
+     * @return
      */
     public abstract boolean addAll(int index, L c);
 
     /**
-     * 
      *
-     * @param a 
-     * @return 
+     *
+     * @param a
+     * @return
      */
     public abstract boolean addAll(A a);
 
     /**
-     * 
      *
-     * @param index 
-     * @param a 
-     * @return 
+     *
+     * @param index
+     * @param a
+     * @return
      */
     public abstract boolean addAll(int index, A a);
 
     /**
-     * 
      *
-     * @param c 
-     * @return 
+     *
+     * @param c
+     * @return
      */
     public abstract boolean removeAll(L c);
 
     /**
-     * 
      *
-     * @param a 
-     * @return 
+     *
+     * @param a
+     * @return
      */
     public abstract boolean removeAll(A a);
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public abstract boolean removeDuplicates();
 
     /**
-     * 
      *
-     * @param c 
-     * @return 
+     *
+     * @param c
+     * @return
      */
     public abstract boolean retainAll(L c);
 
     /**
-     * 
      *
-     * @param a 
-     * @return 
+     *
+     * @param a
+     * @return
      */
     public abstract boolean retainAll(A a);
 
     /**
-     * 
      *
-     * @param indices 
+     *
+     * @param indices
      */
     public abstract void deleteAllByIndices(int... indices);
 
     /**
-     * 
      *
-     * @param fromIndex 
-     * @param toIndex 
+     *
+     * @param fromIndex
+     * @param toIndex
      */
     public abstract void deleteRange(int fromIndex, int toIndex);
 
     /**
-     * 
      *
-     * @param fromIndex 
-     * @param toIndex 
-     * @param newPositionStartIndex 
+     *
+     * @param fromIndex
+     * @param toIndex
+     * @param newPositionStartIndex
      */
     public abstract void moveRange(int fromIndex, int toIndex, int newPositionStartIndex);
 
     /**
-     * 
      *
-     * @param fromIndex 
-     * @param toIndex 
-     * @param replacement 
+     *
+     * @param fromIndex
+     * @param toIndex
+     * @param replacement
      */
     public abstract void replaceRange(int fromIndex, int toIndex, A replacement);
 
     /**
-     * 
      *
-     * @param l 
-     * @return 
+     *
+     * @param l
+     * @return
      */
     public abstract boolean containsAny(L l);
 
     /**
-     * 
      *
-     * @param a 
-     * @return 
+     *
+     * @param a
+     * @return
      */
     public abstract boolean containsAny(A a);
 
     /**
-     * 
      *
-     * @param l 
-     * @return 
+     *
+     * @param l
+     * @return
      */
     public abstract boolean containsAll(L l);
 
     /**
-     * 
      *
-     * @param a 
-     * @return 
+     *
+     * @param a
+     * @return
      */
     public abstract boolean containsAll(A a);
 
     /**
-     * 
      *
-     * @param l 
-     * @return 
+     *
+     * @param l
+     * @return
      */
     public abstract boolean disjoint(L l);
 
     /**
-     * 
      *
-     * @param a 
-     * @return 
+     *
+     * @param a
+     * @return
      */
     public abstract boolean disjoint(A a);
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public abstract boolean hasDuplicates();
 
     /**
-     * 
      *
-     * @param b 
-     * @return 
+     *
+     * @param b
+     * @return
      */
     public abstract L intersection(final L b);
 
     /**
-     * 
      *
-     * @param a 
-     * @return 
+     *
+     * @param a
+     * @return
      */
     public abstract L intersection(final A a);
 
     /**
-     * 
      *
-     * @param b 
-     * @return 
+     *
+     * @param b
+     * @return
      */
     public abstract L difference(final L b);
 
     /**
-     * 
      *
-     * @param a 
-     * @return 
+     *
+     * @param a
+     * @return
      */
     public abstract L difference(final A a);
 
     /**
-     * 
      *
-     * @param b 
-     * @return 
+     *
+     * @param b
+     * @return
      */
     public abstract L symmetricDifference(final L b);
 
     /**
-     * 
      *
-     * @param a 
-     * @return 
+     *
+     * @param a
+     * @return
      */
     public abstract L symmetricDifference(final A a);
 
@@ -284,59 +284,59 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
     public abstract L distinct(final int fromIndex, final int toIndex);
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public abstract boolean isSorted();
 
     /**
-     * 
+     *
      */
     public abstract void sort();
 
     /**
-     * 
+     *
      */
     public abstract void reverseSort();
 
     /**
-     * 
+     *
      */
     public abstract void reverse();
 
     /**
-     * 
      *
-     * @param fromIndex 
-     * @param toIndex 
+     *
+     * @param fromIndex
+     * @param toIndex
      */
     public abstract void reverse(final int fromIndex, final int toIndex);
 
     /**
-     * 
      *
-     * @param distance 
+     *
+     * @param distance
      */
     public abstract void rotate(int distance);
 
     /**
-     * 
+     *
      */
     public abstract void shuffle();
 
     /**
-     * 
      *
-     * @param rnd 
+     *
+     * @param rnd
      */
     public abstract void shuffle(final Random rnd);
 
     /**
-     * 
      *
-     * @param i 
-     * @param j 
+     *
+     * @param i
+     * @param j
      */
     public abstract void swap(int i, int j);
 
@@ -415,9 +415,9 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
     //    public abstract List<L> split(final int fromIndex, final int toIndex, P predicate);
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public String join() {
         return join(Strings.ELEMENT_SEPARATOR);
@@ -470,7 +470,7 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
     public abstract String join(final int fromIndex, final int toIndex, final String delimiter);
 
     /**
-     * Trim to size and return {@code this) list. There is no new list instance created.
+     * Trim to size and return {@code this} list. There is no new list instance created.
      *
      * @return this List with trailing unused space removed.
      */
@@ -490,23 +490,23 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
     public abstract boolean isEmpty();
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public abstract int size();
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public abstract A toArray();
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public List<B> toList() {
         return toList(0, size());
@@ -523,9 +523,9 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public Set<B> toSet() {
         return toSet(0, size());
@@ -562,9 +562,9 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
     public abstract <C extends Collection<B>> C toCollection(final int fromIndex, final int toIndex, final IntFunction<? extends C> supplier);
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public Multiset<B> toMultiset() {
         return toMultiset(0, size());
@@ -634,15 +634,15 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
     /**
      * Accept if not empty.
      *
-     * @param <E> 
-     * @param action 
-     * @return 
+     * @param <E>
+     * @param action
+     * @return
      * @throws E the e
      */
     public abstract <E extends Exception> OrElse acceptIfNotEmpty(Throwables.Consumer<? super L, E> action) throws E;
 
     /**
-     * 
+     *
      */
     public void println() {
         N.println(toString());

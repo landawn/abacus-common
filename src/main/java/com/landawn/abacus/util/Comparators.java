@@ -754,10 +754,11 @@ public final class Comparators {
     }
 
     /**
+     * 
      *
-     *
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param <C> 
+     * @return 
      */
     @SuppressWarnings("rawtypes")
     public static <T extends Comparable, C extends Collection<T>> Comparator<C> comparingCollection() {
@@ -802,10 +803,11 @@ public final class Comparators {
     }
 
     /**
+     * 
      *
-     *
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param <C> 
+     * @return 
      */
     @SuppressWarnings("rawtypes")
     public static <T extends Comparable, C extends Iterable<T>> Comparator<C> comparingIterable() {
@@ -847,10 +849,11 @@ public final class Comparators {
     }
 
     /**
+     * 
      *
-     *
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param <C> 
+     * @return 
      */
     @SuppressWarnings("rawtypes")
     public static <T extends Comparable, C extends Iterator<T>> Comparator<C> comparingIterator() {

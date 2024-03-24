@@ -2469,7 +2469,8 @@ public class Builder<T> {
          * <br />
          * The columns of two {@code DataSet} must be same.
          *
-         * @param other
+         * @param other 
+         * @return 
          * @see DataSet#prepend(DataSet)
          */
         public DataSetBuilder prepend(DataSet other) {
@@ -2483,7 +2484,8 @@ public class Builder<T> {
          * <br />
          * The columns of two {@code DataSet} must be same.
          *
-         * @param other
+         * @param other 
+         * @return 
          * @see DataSet#append(DataSet)
          */
         public DataSetBuilder append(DataSet other) {

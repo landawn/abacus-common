@@ -33,16 +33,33 @@ public interface LongObjPredicate<T> extends Throwables.LongObjPredicate<T, Runt
     @Override
     boolean test(long t, T u);
 
+    /**
+     * 
+     *
+     * @return 
+     */
     default LongObjPredicate<T> negate() {
         return (i, t) -> !test(i, t);
     }
 
+    /**
+     * 
+     *
+     * @param other 
+     * @return 
+     */
     default LongObjPredicate<T> and(LongObjPredicate<T> other) {
         N.checkArgNotNull(other);
 
         return (i, t) -> test(i, t) && other.test(i, t);
     }
 
+    /**
+     * 
+     *
+     * @param other 
+     * @return 
+     */
     default LongObjPredicate<T> or(LongObjPredicate<T> other) {
         N.checkArgNotNull(other);
 

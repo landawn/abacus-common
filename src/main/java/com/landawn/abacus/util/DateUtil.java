@@ -288,7 +288,6 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
      *
      * @param amount
      * @param unit
-     * @return
      * @return a new {@code Time} by Adding or subtracting the specified amount of time to current {@code java.sql.Time}.
      */
     @Beta
@@ -311,10 +310,8 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
     /**
      * Adds or subtracts the specified amount of time with the given time unit to current {@code java.sql.Timestamp}
      *
-     *
      * @param amount
      * @param unit
-     * @return
      * @return a new {@code Timestamp} by Adding or subtracting the specified amount of time to current {@code java.sql.Timestamp}.
      */
     @Beta
@@ -1074,9 +1071,8 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
     //    }
 
     /**
-     * Format current date with format {@code yyyy-MM-dd}
+     * Format current date with format {@code yyyy-MM-dd}.
      *
-     * @param date
      * @return
      */
     @Beta
@@ -1085,9 +1081,8 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
     }
 
     /**
-     * Format current date with format with specified {@code yyyy-MM-dd HH:mm:ss).
+     * Format current date with format with specified {@code yyyy-MM-dd HH:mm:ss}.
      *
-     * @param date
      * @return
      */
     @Beta
@@ -1096,10 +1091,8 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
     }
 
     /**
-     * Format current date with format with specified {@code yyyy-MM-dd'T'HH:mm:ss'Z').
+     * Format current date with format with specified {@code yyyy-MM-dd'T'HH:mm:ss'Z'}.
      *
-     * @param date
-     * @param format
      * @return
      */
     public static String formatCurrentDateTime() {
@@ -1107,10 +1100,8 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
     }
 
     /**
-     * Format current date with format with specified {@code yyyy-MM-dd'T'HH:mm:ss.SSS'Z').
+     * Format current date with format with specified {@code yyyy-MM-dd'T'HH:mm:ss.SSS'Z'}.
      *
-     * @param date
-     * @param format
      * @return
      */
     public static String formatCurrentTimestamp() {
@@ -2485,7 +2476,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
      * @param field the field from {@code Calendar}
      * @return <code>true</code> if equal; otherwise <code>false</code>
      * @throws IllegalArgumentException if any argument is <code>null</code>
-     * @see #truncate(Date, int)
+     * @see #truncate(java.util.Date, int)
      * @see #truncatedEquals(Calendar, Calendar, int)
      * @since 3.0
      */
@@ -3104,6 +3095,13 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
                 && cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR);
     }
 
+    /**
+     *
+     *
+     * @param date1
+     * @param date2
+     * @return
+     */
     public static boolean isSameMonth(final java.util.Date date1, final java.util.Date date2) {
         N.checkArgNotNull(date1, DATE1_STR);
         N.checkArgNotNull(date2, DATE2_STR);
@@ -3117,6 +3115,13 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
         return isSameMonth(cal1, cal2);
     }
 
+    /**
+     *
+     *
+     * @param cal1
+     * @param cal2
+     * @return
+     */
     public static boolean isSameMonth(final Calendar cal1, final Calendar cal2) {
         N.checkArgNotNull(cal1, CAL1_STR);
         N.checkArgNotNull(cal2, CAL2_STR);
@@ -3125,6 +3130,13 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
                 && cal1.get(Calendar.MONTH) == cal2.get(Calendar.MONTH);
     }
 
+    /**
+     *
+     *
+     * @param date1
+     * @param date2
+     * @return
+     */
     public static boolean isSameYear(final java.util.Date date1, final java.util.Date date2) {
         N.checkArgNotNull(date1, DATE1_STR);
         N.checkArgNotNull(date2, DATE2_STR);
@@ -3138,6 +3150,13 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
         return isSameYear(cal1, cal2);
     }
 
+    /**
+     *
+     *
+     * @param cal1
+     * @param cal2
+     * @return
+     */
     public static boolean isSameYear(final Calendar cal1, final Calendar cal2) {
         N.checkArgNotNull(cal1, CAL1_STR);
         N.checkArgNotNull(cal2, CAL2_STR);
@@ -3692,6 +3711,12 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
         CEILING
     }
 
+    /**
+     *
+     *
+     * @param date
+     * @return
+     */
     public static boolean isLastDateOfMonth(final java.util.Date date) {
         N.checkArgNotNull(date, DATE_STR);
 
@@ -3701,6 +3726,12 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
         return cal.get(Calendar.DAY_OF_MONTH) == cal.getActualMaximum(Calendar.DAY_OF_MONTH);
     }
 
+    /**
+     *
+     *
+     * @param date
+     * @return
+     */
     public static boolean isLastDateOfYear(final java.util.Date date) {
         N.checkArgNotNull(date, DATE_STR);
 
@@ -3710,6 +3741,12 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
         return cal.get(Calendar.DAY_OF_YEAR) == cal.getActualMaximum(Calendar.DAY_OF_YEAR);
     }
 
+    /**
+     *
+     *
+     * @param date
+     * @return
+     */
     public static int getLastDateOfMonth(final java.util.Date date) {
         N.checkArgNotNull(date, DATE_STR);
 
@@ -3719,6 +3756,12 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
         return cal.getActualMaximum(Calendar.DAY_OF_MONTH);
     }
 
+    /**
+     *
+     *
+     * @param date
+     * @return
+     */
     public static int getLastDateOfYear(final java.util.Date date) {
         N.checkArgNotNull(date, DATE_STR);
 

@@ -27,44 +27,44 @@ import com.landawn.abacus.annotation.Type.EnumBy;
 public @interface JsonXmlField {
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     String name() default "";
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     String[] alias() default {};
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     String type() default "";
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     EnumBy enumerated() default EnumBy.NAME;
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     String dateFormat() default "";
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     String timeZone() default "";
 
@@ -96,9 +96,9 @@ public @interface JsonXmlField {
     //    int ordinal() default -1;
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     Expose expose() default Expose.DEFAULT;
 
@@ -106,6 +106,7 @@ public @interface JsonXmlField {
         /**
          * @deprecated don't need to set it. It's {@code DEFAULT} by default.
          */
+        @Deprecated
         DEFAULT,
 
         SERIALIZE_ONLY,

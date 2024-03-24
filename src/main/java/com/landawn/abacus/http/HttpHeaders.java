@@ -716,6 +716,13 @@ public final class HttpHeaders {
         return this;
     }
 
+    /**
+     * 
+     *
+     * @param username 
+     * @param password 
+     * @return 
+     */
     public HttpHeaders setBasicAuthentication(String username, String password) {
         set(Names.AUTHORIZATION, "Basic " + Strings.base64Encode((username + ":" + password).getBytes(Charsets.UTF_8)));
 

@@ -272,6 +272,11 @@ public final class IOUtil {
         // no instance;
     }
 
+    /**
+     *
+     *
+     * @return
+     */
     public static String getHostName() {
         String ret = hostName;
 
@@ -439,7 +444,7 @@ public final class IOUtil {
      *
      * @param chars
      * @param offset
-     * @param len
+     * @param count
      * @param charset
      * @return
      */
@@ -487,7 +492,7 @@ public final class IOUtil {
      *
      * @param bytes
      * @param offset
-     * @param len
+     * @param count
      * @param charset
      * @return
      */
@@ -2546,10 +2551,11 @@ public final class IOUtil {
 
     /**
      *
+     *
      * @param output
      * @param chars
      * @param offset
-     * @param len
+     * @param count
      * @throws IOException
      */
     public static void write(final File output, final char[] chars, final int offset, final int count) throws IOException {
@@ -2562,10 +2568,11 @@ public final class IOUtil {
 
     /**
      *
+     *
      * @param output
      * @param chars
      * @param offset
-     * @param len
+     * @param count
      * @param charset
      * @throws IOException
      */
@@ -2608,10 +2615,11 @@ public final class IOUtil {
 
     /**
      *
+     *
      * @param output
      * @param chars
      * @param offset
-     * @param len
+     * @param count
      * @throws IOException
      */
     public static void write(final OutputStream output, final char[] chars, final int offset, final int count) throws IOException {
@@ -2624,10 +2632,11 @@ public final class IOUtil {
 
     /**
      *
+     *
      * @param output
      * @param chars
      * @param offset
-     * @param len
+     * @param count
      * @param charset
      * @throws IOException
      */
@@ -2656,10 +2665,11 @@ public final class IOUtil {
 
     /**
      *
+     *
      * @param output
      * @param chars
      * @param offset
-     * @param len
+     * @param count
      * @param flush
      * @throws IOException
      */
@@ -2673,10 +2683,11 @@ public final class IOUtil {
 
     /**
      *
+     *
      * @param output
      * @param chars
      * @param offset
-     * @param len
+     * @param count
      * @param charset
      * @param flush
      * @throws IOException
@@ -2706,10 +2717,11 @@ public final class IOUtil {
 
     /**
      *
+     *
      * @param output
      * @param chars
      * @param offset
-     * @param len
+     * @param count
      * @throws IOException
      */
     public static void write(final Writer output, final char[] chars, final int offset, final int count) throws IOException {
@@ -2737,10 +2749,11 @@ public final class IOUtil {
 
     /**
      *
+     *
      * @param output
      * @param chars
      * @param offset
-     * @param len
+     * @param count
      * @param flush
      * @throws IOException
      */
@@ -2772,10 +2785,11 @@ public final class IOUtil {
 
     /**
      *
+     *
      * @param output
      * @param bytes
      * @param offset
-     * @param len
+     * @param count
      * @throws IOException
      */
     public static void write(final File output, final byte[] bytes, final int offset, final int count) throws IOException {
@@ -2814,10 +2828,11 @@ public final class IOUtil {
 
     /**
      *
+     *
      * @param output
      * @param bytes
      * @param offset
-     * @param len
+     * @param count
      * @throws IOException
      */
     public static void write(final OutputStream output, final byte[] bytes, final int offset, final int count) throws IOException {
@@ -2845,10 +2860,11 @@ public final class IOUtil {
 
     /**
      *
+     *
      * @param output
      * @param bytes
      * @param offset
-     * @param len
+     * @param count
      * @param flush
      * @throws IOException
      */
@@ -2878,10 +2894,11 @@ public final class IOUtil {
 
     /**
      *
+     *
      * @param output
      * @param input
      * @param offset by byte
-     * @param len by byte
+     * @param count
      * @return
      * @throws IOException
      */
@@ -2916,10 +2933,11 @@ public final class IOUtil {
 
     /**
      *
+     *
      * @param output
      * @param input
      * @param offset
-     * @param len
+     * @param count
      * @return
      * @throws IOException
      */
@@ -3016,10 +3034,11 @@ public final class IOUtil {
 
     /**
      *
+     *
      * @param output
      * @param input
      * @param offset
-     * @param len
+     * @param count
      * @return
      * @throws IOException
      */
@@ -3029,10 +3048,11 @@ public final class IOUtil {
 
     /**
      *
+     *
      * @param output
      * @param input
      * @param offset by char
-     * @param len by char
+     * @param count
      * @param charset
      * @return
      * @throws IOException
@@ -3066,10 +3086,11 @@ public final class IOUtil {
 
     /**
      *
+     *
      * @param output
      * @param input
      * @param offset
-     * @param len
+     * @param count
      * @return
      * @throws IOException
      */
@@ -3150,10 +3171,11 @@ public final class IOUtil {
 
     /**
      *
+     *
      * @param output
      * @param input
      * @param offset
-     * @param len
+     * @param count
      * @return
      * @throws IOException
      */
@@ -3185,10 +3207,11 @@ public final class IOUtil {
 
     /**
      *
+     *
      * @param output
      * @param input
      * @param offset
-     * @param len
+     * @param count
      * @return
      * @throws IOException
      */
@@ -3210,10 +3233,11 @@ public final class IOUtil {
 
     /**
      *
+     *
      * @param output
      * @param input
      * @param offset by byte
-     * @param len by byte
+     * @param count
      * @param flush
      * @return
      * @throws IOException
@@ -3242,10 +3266,11 @@ public final class IOUtil {
 
     /**
      *
+     *
      * @param output
      * @param input
      * @param offset
-     * @param len
+     * @param count
      * @return
      * @throws IOException
      */
@@ -3267,10 +3292,11 @@ public final class IOUtil {
 
     /**
      *
+     *
      * @param output
      * @param input
      * @param offset by char
-     * @param len by char
+     * @param count
      * @param flush
      * @return
      * @throws IOException
@@ -3302,10 +3328,11 @@ public final class IOUtil {
 
     /**
      *
+     *
      * @param output
      * @param bytes
      * @param offset
-     * @param len
+     * @param count
      * @throws IOException
      */
     public static void append(final File output, final byte[] bytes, final int offset, final int count) throws IOException {
@@ -3359,10 +3386,11 @@ public final class IOUtil {
 
     /**
      *
+     *
      * @param output
      * @param chars
      * @param offset
-     * @param len
+     * @param count
      * @throws IOException
      */
     public static void append(final File output, final char[] chars, final int offset, final int count) throws IOException {
@@ -3375,10 +3403,11 @@ public final class IOUtil {
 
     /**
      *
+     *
      * @param output
      * @param chars
      * @param offset
-     * @param len
+     * @param count
      * @param charset
      * @throws IOException
      */
@@ -3426,10 +3455,11 @@ public final class IOUtil {
 
     /**
      *
+     *
      * @param output
      * @param input
      * @param offset by byte
-     * @param len by byte
+     * @param count
      * @return
      * @throws IOException
      */
@@ -3476,10 +3506,11 @@ public final class IOUtil {
 
     /**
      *
+     *
      * @param output
      * @param input
      * @param offset
-     * @param len
+     * @param count
      * @return
      * @throws IOException
      */
@@ -3489,10 +3520,11 @@ public final class IOUtil {
 
     /**
      *
+     *
      * @param output
      * @param input
      * @param offset by char
-     * @param len by char
+     * @param count
      * @param charset
      * @return
      * @throws IOException
@@ -3526,10 +3558,11 @@ public final class IOUtil {
 
     /**
      *
+     *
      * @param output
      * @param input
      * @param offset
-     * @param len
+     * @param count
      * @return
      * @throws IOException
      */
@@ -3697,7 +3730,7 @@ public final class IOUtil {
      *
      * <p>Files are mapped from offset 0 to its length.
      *
-     * <p>This only works for files <= {@link Integer#MAX_VALUE} bytes.
+     * <p>This only works for files {@code <= {@link Integer#MAX_VALUE}} bytes.
      *
      * @param file the file to map
      * @param mode the mode to use when mapping {@code file}
@@ -3730,7 +3763,7 @@ public final class IOUtil {
      * it will be created with the requested {@code size}. Thus this method is
      * useful for creating memory mapped files which do not yet exist.
      *
-     * <p>This only works for files <= {@link Integer#MAX_VALUE} bytes.
+     * <p>This only works for files {@code <= {@link Integer#MAX_VALUE}} bytes.
      *
      * @param file the file to map
      * @param mode the mode to use when mapping {@code file}
@@ -4849,11 +4882,8 @@ public final class IOUtil {
     /**
      * Delete the specified <code>file</code> if it's a file or its sub files/directories if it's a directory.
      *
-     *
-     * @param <E>
      * @param file
      * @return
-     * @throws E
      */
     public static boolean deleteFiles(final File file) {
         return deleteFiles(file, BiPredicates.alwaysTrue());

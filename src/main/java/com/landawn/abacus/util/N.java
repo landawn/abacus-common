@@ -874,7 +874,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a
      * @param fromIndex
      * @param toIndex
-     * @return the immutable collection<? extends t>
+     * @return an {@code ImmutableList<T>}
      */
     public static <T> ImmutableList<T> slice(final T[] a, final int fromIndex, final int toIndex) {
         checkFromToIndex(fromIndex, toIndex, len(a));
@@ -893,7 +893,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param c
      * @param fromIndex
      * @param toIndex
-     * @return the immutable collection<? extends t>
+     * @return an {@code ImmutableList<T>}
      */
     public static <T> ImmutableList<T> slice(final List<? extends T> c, final int fromIndex, final int toIndex) {
         checkFromToIndex(fromIndex, toIndex, size(c));
@@ -912,7 +912,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param c
      * @param fromIndex
      * @param toIndex
-     * @return the immutable collection<? extends t>
+     * @return an {@code ImmutableCollection<T>}
      */
     public static <T> ImmutableCollection<T> slice(final Collection<? extends T> c, final int fromIndex, final int toIndex) {
         checkFromToIndex(fromIndex, toIndex, size(c));
@@ -3382,7 +3382,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param b
      * @return
      * @see IntList#symmetricDifference(IntList)
-     * @see CommonUtil#difference(int[], int[])
+     * @see #difference(int[], int[])
      */
     public static int[] symmetricDifference(final int[] a, final int[] b) {
         if (isEmpty(a)) {
@@ -4664,9 +4664,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * A fake method defined to remind user to use {@code replaceAll} when {@code update/updateAll/updateIf} is searched.
      *
      * @throws UnsupportedOperationException
-     * @deprecated use {@code replaceAll}
      * @see #replaceAll(Object[], com.landawn.abacus.util.Throwables.UnaryOperator)
      * @see #replaceAll(Object[], Object, Object)
+     * @deprecated use {@code replaceAll}
      */
     @Deprecated
     public static void updateAllUsingReplaceAllInstead() throws UnsupportedOperationException {
@@ -4676,10 +4676,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      * A fake method defined to remind user to use {@code replaceIf} when {@code update/updateAll/updateIf} is searched.
      *
-     *
      * @throws UnsupportedOperationException
-     * @deprecated use {@code replaceIf}
      * @see #replaceIf(Object[], com.landawn.abacus.util.Throwables.Predicate, Object)
+     * @deprecated use {@code replaceIf}
      */
     @Deprecated
     public static void updateIfUsingReplaceIfInstead() throws UnsupportedOperationException {
@@ -12524,7 +12523,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T>
      * @param a
      * @return
-     * @see Iterables#averageDouble(Object[])
+     * @see Iterables#averageDouble(Number[])
      */
     public static <T extends Number> double averageDouble(final T[] a) {
         return averageDouble(a, Fn.numToDouble());
@@ -12629,7 +12628,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T>
      * @param c
      * @return
-     * @see Iterables#averageDouble(Collection)
+     * @see Iterables#averageDouble(Iterable)
      */
     public static <T extends Number> double averageDouble(final Iterable<? extends T> c) {
         return averageDouble(c, Fn.numToDouble());
@@ -12644,7 +12643,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param func
      * @return
      * @throws E the e
-     * @see Iterables#averageDouble(Collection, Throwables.ToDoubleFunction)
+     * @see Iterables#averageDouble(Iterable, Throwables.ToDoubleFunction)
      */
     public static <T, E extends Exception> double averageDouble(final Iterable<? extends T> c, final Throwables.ToDoubleFunction<? super T, E> func) throws E {
         if (c == null) {
@@ -13355,7 +13354,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param toIndex
      * @return
      * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
-     * @see Iterables#min(Collection)
+     * @see Iterables#min(Iterable)
      */
     public static <T extends Comparable<? super T>> T min(final Collection<? extends T> c, final int fromIndex, final int toIndex)
             throws IllegalArgumentException {
@@ -13434,7 +13433,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param c
      * @return
      * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
-     * @see Iterables#min(Collection)
+     * @see Iterables#min(Iterable)
      */
     public static <T extends Comparable<? super T>> T min(final Iterable<? extends T> c) throws IllegalArgumentException {
         return min(c, (Comparator<T>) NULL_MAX_COMPARATOR);
@@ -13447,7 +13446,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param cmp
      * @return
      * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
-     * @see Iterables#min(Collection, Comparator)
+     * @see Iterables#min(Iterable, Comparator)
      */
     public static <T> T min(final Iterable<? extends T> c, Comparator<? super T> cmp) throws IllegalArgumentException {
         if (c instanceof Collection) {
@@ -13466,7 +13465,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param iter
      * @return
      * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
-     * @see Iterables#min(Collection)
+     * @see Iterables#min(Iterable)
      */
     public static <T extends Comparable<? super T>> T min(final Iterator<? extends T> iter) throws IllegalArgumentException {
         return min(iter, (Comparator<T>) NULL_MAX_COMPARATOR);
@@ -13479,7 +13478,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param cmp
      * @return
      * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
-     * @see Iterables#min(Collection, Comparator)
+     * @see Iterables#min(Iterable, Comparator)
      */
     public static <T> T min(final Iterator<? extends T> iter, Comparator<? super T> cmp) throws IllegalArgumentException {
         N.checkArgument(!isEmpty(iter), "The spcified Collection/Iterable/Iterator can not be null or empty");
@@ -13625,6 +13624,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <R>
      * @param <E>
      * @param a
+     * @param valueExtractor
      * @param defaultValue
      * @return
      * @throws E
@@ -13657,6 +13657,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <R>
      * @param <E>
      * @param c
+     * @param valueExtractor
      * @param defaultValue
      * @return
      * @throws E
@@ -13677,6 +13678,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <R>
      * @param <E>
      * @param iter
+     * @param valueExtractor
      * @param defaultValue
      * @return
      * @throws E
@@ -13707,6 +13709,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T>
      * @param <E>
      * @param a
+     * @param valueExtractor
      * @param defaultValue
      * @return
      * @throws E
@@ -13738,6 +13741,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T>
      * @param <E>
      * @param c
+     * @param valueExtractor
      * @param defaultValue
      * @return
      * @throws E
@@ -13758,6 +13762,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T>
      * @param <E>
      * @param iter
+     * @param valueExtractor
      * @param defaultValue
      * @return
      * @throws E
@@ -13789,6 +13794,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T>
      * @param <E>
      * @param a
+     * @param valueExtractor
      * @param defaultValue
      * @return
      * @throws E
@@ -13820,6 +13826,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T>
      * @param <E>
      * @param c
+     * @param valueExtractor
      * @param defaultValue
      * @return
      * @throws E
@@ -13840,6 +13847,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T>
      * @param <E>
      * @param iter
+     * @param valueExtractor
      * @param defaultValue
      * @return
      * @throws E
@@ -13871,6 +13879,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T>
      * @param <E>
      * @param a
+     * @param valueExtractor
      * @param defaultValue
      * @return
      * @throws E
@@ -13902,6 +13911,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T>
      * @param <E>
      * @param c
+     * @param valueExtractor
      * @param defaultValue
      * @return
      * @throws E
@@ -13922,6 +13932,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T>
      * @param <E>
      * @param iter
+     * @param valueExtractor
      * @param defaultValue
      * @return
      * @throws E
@@ -14747,7 +14758,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param c
      * @return
      * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
-     * @see Iterables#min(Collection)
+     * @see Iterables#max(Iterable)
      */
     public static <T extends Comparable<? super T>> T max(final Iterable<? extends T> c) throws IllegalArgumentException {
         return max(c, (Comparator<T>) NULL_MIN_COMPARATOR);
@@ -14760,7 +14771,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param cmp
      * @return
      * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
-     * @see Iterables#min(Collection, Comparator)
+     * @see Iterables#max(Iterable, Comparator)
      */
     public static <T> T max(final Iterable<? extends T> c, Comparator<? super T> cmp) throws IllegalArgumentException {
         if (c instanceof Collection) {
@@ -14779,7 +14790,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param iter
      * @return
      * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
-     * @see Iterables#min(Collection)
+     * @see Iterables#max(Iterable)
      */
     public static <T extends Comparable<? super T>> T max(final Iterator<? extends T> iter) throws IllegalArgumentException {
         return max(iter, (Comparator<T>) NULL_MIN_COMPARATOR);
@@ -14792,7 +14803,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param cmp
      * @return
      * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
-     * @see Iterables#min(Collection, Comparator)
+     * @see Iterables#max(Iterable, Comparator)
      */
     public static <T> T max(final Iterator<? extends T> iter, Comparator<? super T> cmp) throws IllegalArgumentException {
         N.checkArgument(!isEmpty(iter), "The spcified Collection/Iterable/Iterator can not be null or empty");
@@ -14891,7 +14902,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T>
      * @param iter
      * @return
-     * @see Iterables#maxAll(Iterator)
      */
     public static <T extends Comparable<? super T>> List<T> maxAll(final Iterator<? extends T> iter) {
         return maxAll(iter, NULL_MIN_COMPARATOR);
@@ -14903,7 +14913,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param iter
      * @param cmp
      * @return
-     * @see Iterables#maxAll(Iterator, Comparator)
      */
     public static <T> List<T> maxAll(final Iterator<? extends T> iter, Comparator<? super T> cmp) {
         cmp = cmp == null ? (Comparator<T>) NULL_MIN_COMPARATOR : cmp;
@@ -14938,6 +14947,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <R>
      * @param <E>
      * @param a
+     * @param valueExtractor
      * @param defaultValue
      * @return
      * @throws E
@@ -14970,6 +14980,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <R>
      * @param <E>
      * @param c
+     * @param valueExtractor
      * @param defaultValue
      * @return
      * @throws E
@@ -14990,6 +15001,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <R>
      * @param <E>
      * @param iter
+     * @param valueExtractor
      * @param defaultValue
      * @return
      * @throws E
@@ -15020,6 +15032,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T>
      * @param <E>
      * @param a
+     * @param valueExtractor
      * @param defaultValue
      * @return
      * @throws E
@@ -15051,6 +15064,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T>
      * @param <E>
      * @param c
+     * @param valueExtractor
      * @param defaultValue
      * @return
      * @throws E
@@ -15071,6 +15085,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T>
      * @param <E>
      * @param iter
+     * @param valueExtractor
      * @param defaultValue
      * @return
      * @throws E
@@ -15102,6 +15117,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T>
      * @param <E>
      * @param a
+     * @param valueExtractor
      * @param defaultValue
      * @return
      * @throws E
@@ -15133,6 +15149,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T>
      * @param <E>
      * @param c
+     * @param valueExtractor
      * @param defaultValue
      * @return
      * @throws E
@@ -15153,6 +15170,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T>
      * @param <E>
      * @param iter
+     * @param valueExtractor
      * @param defaultValue
      * @return
      * @throws E
@@ -15184,6 +15202,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T>
      * @param <E>
      * @param a
+     * @param valueExtractor
      * @param defaultValue
      * @return
      * @throws E
@@ -15215,6 +15234,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T>
      * @param <E>
      * @param c
+     * @param valueExtractor
      * @param defaultValue
      * @return
      * @throws E
@@ -15235,6 +15255,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T>
      * @param <E>
      * @param iter
+     * @param valueExtractor
      * @param defaultValue
      * @return
      * @throws E
@@ -18085,11 +18106,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <T>
      * @param <E>
      * @param iter
      * @param elementConsumer
      * @param processThreadNum
+     * @param executor
      * @see {@link Fnn#c(com.landawn.abacus.util.Throwables.Consumer)}
      * @see {@link Fnn#f(com.landawn.abacus.util.Throwables.Function)
      */
@@ -19408,11 +19431,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <T>
      * @param <E>
      * @param iter
      * @param elementConsumer
      * @param processThreadNum
+     * @param executor
      * @see Throwables.IntObjConsumer#of(com.landawn.abacus.util.Throwables.IntObjConsumer)
      * @see Throwables.IntObjFunction#of(com.landawn.abacus.util.Throwables.IntObjFunction)
      */
@@ -23899,7 +23924,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T>
      * @param <C>
      * @param <E>
-     * @param c
+     * @param iter
      * @param keyMapper don't change value of the input parameter.
      * @param supplier
      * @return
@@ -25008,13 +25033,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      *
      * @param <T>
-     * @param <E>
      * @param <C>
+     * @param <E>
      * @param c
      * @param nextSelector
      * @param supplier
-     * @
+     * @return
      * @throws E the e
+     * @
      */
     public static <T, C extends Collection<T>, E extends Exception> C merge(final Collection<? extends Iterable<? extends T>> c,
             final Throwables.BiFunction<? super T, ? super T, MergeResult, E> nextSelector, final IntFunction<? extends C> supplier) throws E {
@@ -26160,6 +26186,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <T>
      * @param <K>
      * @param <V>
@@ -26170,6 +26197,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param valueExtractor
      * @return
      * @throws E
+     * @throws E2
      */
     @Beta
     public static <T, K, V, E extends Exception, E2 extends Exception> Map<K, List<V>> groupBy(final Iterable<? extends T> c,
@@ -26305,13 +26333,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param <T>
      * @param <K>
+     * @param <R>
      * @param <E>
      * @param c
      * @param keyExtractor
      * @param collector
      * @return
      * @throws E
-     * @throws E2
      */
     @Beta
     public static <T, K, R, E extends Exception> Map<K, R> groupBy(final Iterable<? extends T> c,
@@ -26324,10 +26352,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param <T>
      * @param <K>
+     * @param <R>
      * @param <M>
      * @param <E>
      * @param c
      * @param keyExtractor
+     * @param collector
      * @param mapSupplier
      * @return
      * @throws E
@@ -26373,13 +26403,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      *
      *
-     * @param <T>
      * @param <K>
+     * @param <T>
      * @param <R>
      * @param <E>
      * @param iter
-     * @param collector
      * @param keyExtractor
+     * @param collector
      * @return
      * @throws E
      */
@@ -26392,8 +26422,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      *
      *
-     * @param <T>
      * @param <K>
+     * @param <T>
      * @param <R>
      * @param <M>
      * @param <E>
@@ -28459,7 +28489,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param command to be completed in current thread.
      * @param command2 to be completed in another thread.
      * @return
-     * @see Fn#jr2c(Runnable)
+     * @see Fn#r2c(Runnable)
      */
     public static <R, R2> Tuple2<R, R2> callInParallel(final Callable<R> command, final Callable<R2> command2) {
         final ContinuableFuture<R2> f2 = asyncExecute(command2);
@@ -28495,7 +28525,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param command2 to be completed in another thread.
      * @param command3 to be completed in another thread.
      * @return
-     * @see Fn#jr2c(Runnable)
+     * @see Fn#r2c(Runnable)
      */
     public static <R, R2, R3> Tuple3<R, R2, R3> callInParallel(final Callable<R> command, final Callable<R2> command2, final Callable<R3> command3) {
         final ContinuableFuture<R2> f2 = asyncExecute(command2);
@@ -28539,7 +28569,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param command3 to be completed in another thread.
      * @param command4 to be completed in another thread.
      * @return
-     * @see Fn#jr2c(Runnable)
+     * @see Fn#r2c(Runnable)
      */
     public static <R, R2, R3, R4> Tuple4<R, R2, R3, R4> callInParallel(final Callable<R> command, final Callable<R2> command2, final Callable<R3> command3,
             final Callable<R4> command4) {
@@ -28592,7 +28622,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param command4 to be completed in another thread.
      * @param command5 to be completed in another thread.
      * @return
-     * @see Fn#jr2c(Runnable)
+     * @see Fn#r2c(Runnable)
      */
     public static <R, R2, R3, R4, R5> Tuple5<R, R2, R3, R4, R5> callInParallel(final Callable<R> command, final Callable<R2> command2,
             final Callable<R3> command3, final Callable<R4> command4, final Callable<R5> command5) {
@@ -28866,12 +28896,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <T>
      * @param <R>
      * @param <E>
      * @param a
      * @param batchSize
      * @param batchAction
+     * @return
      * @throws E
      */
     public static <T, R, E extends Exception> List<R> callByBatch(final T[] a, final int batchSize,
@@ -28884,15 +28916,17 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-    *
-    * @param <T>
-    * @param <R>
-    * @param <E>
-    * @param iter
-    * @param batchSize
-    * @param batchAction
-    * @throws E
-    */
+     *
+     *
+     * @param <T>
+     * @param <R>
+     * @param <E>
+     * @param iter
+     * @param batchSize
+     * @param batchAction
+     * @return
+     * @throws E
+     */
     public static <T, R, E extends Exception> List<R> callByBatch(Iterable<? extends T> iter, final int batchSize,
             final Throwables.Function<? super List<? extends T>, R, E> batchAction) throws E {
         checkArgPositive(batchSize, "batchSize");
@@ -28918,15 +28952,17 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-    *
-    * @param <T>
-    * @param <R>
-    * @param <E>
-    * @param iter
-    * @param batchSize
-    * @param batchAction
-    * @throws E
-    */
+     *
+     *
+     * @param <T>
+     * @param <R>
+     * @param <E>
+     * @param iter
+     * @param batchSize
+     * @param batchAction
+     * @return
+     * @throws E
+     */
     public static <T, R, E extends Exception> List<R> callByBatch(final Iterator<? extends T> iter, final int batchSize,
             final Throwables.Function<? super List<? extends T>, R, E> batchAction) throws E {
         checkArgPositive(batchSize, "batchSize");
@@ -28957,6 +28993,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <T>
      * @param <R>
      * @param <E>
@@ -28965,6 +29002,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param batchSize
      * @param elementConsumer
      * @param batchAction
+     * @return
      * @throws E
      * @throws E2
      */
@@ -28979,13 +29017,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <T>
+     * @param <R>
      * @param <E>
      * @param <E2>
      * @param iter
      * @param batchSize
      * @param elementConsumer
      * @param batchAction
+     * @return
      * @throws E
      * @throws E2
      */
@@ -29000,6 +29041,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <T>
      * @param <R>
      * @param <E>
@@ -29008,6 +29050,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param batchSize
      * @param elementConsumer
      * @param batchAction
+     * @return
      * @throws E
      * @throws E2
      */
@@ -29998,6 +30041,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      * Returns {@code true} if the specified {@code boolean} is {@code Boolean.FALSE}, not {@code null} or {@code Boolean.TRUE}.
      *
+     * @param bool
      * @return
      */
     @Beta
@@ -30045,8 +30089,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * <p>Negates boolean values in the specified boolean array</p>
-     *
+     * <p>Negates boolean values in the specified boolean array</p>.
      *
      * @param a
      */
@@ -30060,7 +30103,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * <p>Negates boolean values {@code fromIndex} to {@code toIndex} in the specified boolean array</p>
+     * <p>Negates boolean values {@code fromIndex} to {@code toIndex} in the specified boolean array</p>.
      *
      * @param a
      * @param fromIndex

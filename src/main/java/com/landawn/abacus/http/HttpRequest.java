@@ -544,11 +544,12 @@ public final class HttpRequest {
     }
 
     /**
+     * 
      *
-     * @param httpMethod
-     * @param resultClass
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param httpMethod 
+     * @param resultClass 
+     * @return 
      * @throws UncheckedIOException the unchecked IO exception
      */
     @Beta
@@ -879,12 +880,12 @@ public final class HttpRequest {
     }
 
     /**
+     * 
      *
-     *
-     * @param httpMethod
-     * @param resultClass
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param httpMethod 
+     * @param resultClass 
+     * @return 
      */
     @Beta
     public <T> ContinuableFuture<T> asyncExecute(final HttpMethod httpMethod, final Class<T> resultClass) {
@@ -896,13 +897,13 @@ public final class HttpRequest {
     }
 
     /**
+     * 
      *
-     *
-     * @param httpMethod
-     * @param resultClass
-     * @param executor
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param httpMethod 
+     * @param resultClass 
+     * @param executor 
+     * @return 
      */
     @Beta
     public <T> ContinuableFuture<T> asyncExecute(final HttpMethod httpMethod, final Class<T> resultClass, final Executor executor) {

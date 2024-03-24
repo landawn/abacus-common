@@ -34,6 +34,12 @@ final class GuavaHasher implements Hasher {
         return new GuavaHasher(gHasher);
     }
 
+    /**
+     * 
+     *
+     * @param b 
+     * @return 
+     */
     @Override
     public Hasher put(final byte b) {
         gHasher.putByte(b);
@@ -41,6 +47,12 @@ final class GuavaHasher implements Hasher {
         return this;
     }
 
+    /**
+     * 
+     *
+     * @param bytes 
+     * @return 
+     */
     @Override
     public Hasher put(final byte[] bytes) {
         gHasher.putBytes(bytes);
@@ -48,6 +60,14 @@ final class GuavaHasher implements Hasher {
         return this;
     }
 
+    /**
+     * 
+     *
+     * @param bytes 
+     * @param off 
+     * @param len 
+     * @return 
+     */
     @Override
     public Hasher put(final byte[] bytes, final int off, final int len) {
         gHasher.putBytes(bytes, off, len);
@@ -55,6 +75,12 @@ final class GuavaHasher implements Hasher {
         return this;
     }
 
+    /**
+     * 
+     *
+     * @param bytes 
+     * @return 
+     */
     @Override
     public Hasher put(final ByteBuffer bytes) {
         gHasher.putBytes(bytes);
@@ -62,6 +88,12 @@ final class GuavaHasher implements Hasher {
         return this;
     }
 
+    /**
+     * 
+     *
+     * @param s 
+     * @return 
+     */
     @Override
     public Hasher put(final short s) {
         gHasher.putShort(s);
@@ -69,6 +101,12 @@ final class GuavaHasher implements Hasher {
         return this;
     }
 
+    /**
+     * 
+     *
+     * @param i 
+     * @return 
+     */
     @Override
     public Hasher put(final int i) {
         gHasher.putInt(i);
@@ -76,6 +114,12 @@ final class GuavaHasher implements Hasher {
         return this;
     }
 
+    /**
+     * 
+     *
+     * @param l 
+     * @return 
+     */
     @Override
     public Hasher put(final long l) {
         gHasher.putLong(l);
@@ -83,6 +127,12 @@ final class GuavaHasher implements Hasher {
         return this;
     }
 
+    /**
+     * 
+     *
+     * @param f 
+     * @return 
+     */
     @Override
     public Hasher put(final float f) {
         gHasher.putFloat(f);
@@ -90,6 +140,12 @@ final class GuavaHasher implements Hasher {
         return this;
     }
 
+    /**
+     * 
+     *
+     * @param d 
+     * @return 
+     */
     @Override
     public Hasher put(final double d) {
         gHasher.putDouble(d);
@@ -97,6 +153,12 @@ final class GuavaHasher implements Hasher {
         return this;
     }
 
+    /**
+     * 
+     *
+     * @param b 
+     * @return 
+     */
     @Override
     public Hasher put(final boolean b) {
         gHasher.putBoolean(b);
@@ -104,6 +166,12 @@ final class GuavaHasher implements Hasher {
         return this;
     }
 
+    /**
+     * 
+     *
+     * @param c 
+     * @return 
+     */
     @Override
     public Hasher put(final char c) {
         gHasher.putChar(c);
@@ -111,11 +179,25 @@ final class GuavaHasher implements Hasher {
         return this;
     }
 
+    /**
+     * 
+     *
+     * @param chars 
+     * @return 
+     */
     @Override
     public Hasher put(final char[] chars) {
         return put(chars, 0, N.len(chars));
     }
 
+    /**
+     * 
+     *
+     * @param chars 
+     * @param off 
+     * @param len 
+     * @return 
+     */
     @Override
     public Hasher put(final char[] chars, final int off, final int len) {
         N.checkFromIndexSize(off, len, N.len(chars));
@@ -127,6 +209,12 @@ final class GuavaHasher implements Hasher {
         return this;
     }
 
+    /**
+     * 
+     *
+     * @param charSequence 
+     * @return 
+     */
     @Override
     public Hasher put(final CharSequence charSequence) {
         gHasher.putUnencodedChars(charSequence);
@@ -134,6 +222,13 @@ final class GuavaHasher implements Hasher {
         return this;
     }
 
+    /**
+     * 
+     *
+     * @param charSequence 
+     * @param charset 
+     * @return 
+     */
     @Override
     public Hasher put(final CharSequence charSequence, final Charset charset) {
         gHasher.putString(charSequence, charset);
@@ -141,6 +236,14 @@ final class GuavaHasher implements Hasher {
         return this;
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param instance 
+     * @param funnel 
+     * @return 
+     */
     @Override
     public <T> Hasher put(final T instance, final Funnel<? super T> funnel) {
         gHasher.putObject(instance, funnel);
@@ -148,6 +251,11 @@ final class GuavaHasher implements Hasher {
         return this;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public HashCode hash() {
         return gHasher.hash();

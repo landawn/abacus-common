@@ -48,6 +48,12 @@ public interface UnaryOperator<T> extends Function<T, T>, Throwables.UnaryOperat
         return t -> after.apply(apply(t));
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @return 
+     */
     static <T> UnaryOperator<T> identity() {
         return UnaryOperators.identity();
     }

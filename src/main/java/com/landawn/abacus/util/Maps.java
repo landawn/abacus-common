@@ -727,16 +727,15 @@ public final class Maps {
     }
 
     /**
+     * 
      *
-     *
-     * @param <K>
-     * @param <V>
-     * @param <M>
-     * @param keys
-     * @param values
-     * @param defaultForKey
-     * @param defaultForValue
-     * @return
+     * @param <K> 
+     * @param <V> 
+     * @param keys 
+     * @param values 
+     * @param defaultForKey 
+     * @param defaultForValue 
+     * @return 
      */
     public static <K, V> Map<K, V> zip(final Iterable<? extends K> keys, final Iterable<? extends V> values, final K defaultForKey, final V defaultForValue) {
         return zip(keys, values, defaultForKey, defaultForValue, Fn.selectFirst(), Factory.ofMap());
@@ -2377,9 +2376,6 @@ public final class Maps {
      * @param <V> the value type
      * @param map
      * @return
-     * @see Multimap#invertFrom(Map, Supplier)
-     * @see ListMultimap#invertFrom(Map)
-     * @see ListMultimap#invertFrom(Map)
      */
     public static <K, V> Map<V, K> invert(final Map<K, V> map) {
         if (map == null) {
@@ -2432,9 +2428,6 @@ public final class Maps {
      * @param <V> the value type
      * @param map
      * @return
-     * @see Multimap#flatInvertFrom(Map, Supplier)
-     * @see ListMultimap#flatInvertFrom(Map)
-     * @see SetMultimap#flatInvertFrom(Map)
      */
     public static <K, V> Map<V, List<K>> flatInvert(final Map<K, ? extends Collection<? extends V>> map) {
         if (map == null) {

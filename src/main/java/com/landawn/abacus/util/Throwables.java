@@ -25,7 +25,6 @@ import com.landawn.abacus.util.u.Nullable;
  * Catch checked exception and convert it to <code>RuntimeException</code>.
  *
  * @author Haiyang Li
- * @param <T>
  */
 @SuppressWarnings({ "java:S6539" })
 public final class Throwables {
@@ -193,14 +192,24 @@ public final class Throwables {
         };
 
         /**
+         * 
          *
-         * @param <T>
-         * @return
+         * @param <T> 
+         * @param <E> 
+         * @return 
          */
         public static <T, E extends Throwable> ObjIterator<T, E> empty() {
             return EMPTY;
         }
 
+        /**
+         * 
+         *
+         * @param <T> 
+         * @param <E> 
+         * @param val 
+         * @return 
+         */
         public static <T, E extends Throwable> ObjIterator<T, E> just(final T val) {
             return new ObjIterator<>() {
                 private boolean done = false;
@@ -223,6 +232,14 @@ public final class Throwables {
             };
         }
 
+        /**
+         * 
+         *
+         * @param <T> 
+         * @param <E> 
+         * @param iterable 
+         * @return 
+         */
         public static <T, E extends Throwable> ObjIterator<T, E> of(final Iterable<? extends T> iterable) {
             if (iterable == null) {
                 return empty();
@@ -243,8 +260,20 @@ public final class Throwables {
             };
         }
 
+        /**
+         * 
+         *
+         * @return 
+         * @throws E 
+         */
         public abstract boolean hasNext() throws E;
 
+        /**
+         * 
+         *
+         * @return 
+         * @throws E 
+         */
         public abstract T next() throws E;
 
         /**
@@ -290,6 +319,13 @@ public final class Throwables {
             };
         }
 
+        /**
+         * 
+         *
+         * @param <U> 
+         * @param mapper 
+         * @return 
+         */
         public <U> ObjIterator<U, E> map(final Throwables.Function<? super T, U, E> mapper) {
             final ObjIterator<T, E> iter = this;
 
@@ -307,9 +343,10 @@ public final class Throwables {
         }
 
         /**
+         * 
          *
-         *
-         * @return
+         * @return 
+         * @throws E 
          */
         public Nullable<T> first() throws E {
             if (hasNext()) {
@@ -320,9 +357,10 @@ public final class Throwables {
         }
 
         /**
+         * 
          *
-         *
-         * @return
+         * @return 
+         * @throws E 
          */
         public u.Optional<T> firstNonNull() throws E {
             T next = null;
@@ -339,9 +377,10 @@ public final class Throwables {
         }
 
         /**
+         * 
          *
-         *
-         * @return
+         * @return 
+         * @throws E 
          */
         public Nullable<T> last() throws E {
             if (hasNext()) {
@@ -358,29 +397,32 @@ public final class Throwables {
         }
 
         /**
+         * 
          *
-         *
-         * @return
+         * @return 
+         * @throws E 
          */
         public Object[] toArray() throws E {
             return toArray(N.EMPTY_OBJECT_ARRAY);
         }
 
         /**
+         * 
          *
-         *
-         * @param <A>
-         * @param a
-         * @return
+         * @param <A> 
+         * @param a 
+         * @return 
+         * @throws E 
          */
         public <A> A[] toArray(A[] a) throws E {
             return toList().toArray(a);
         }
 
         /**
+         * 
          *
-         *
-         * @return
+         * @return 
+         * @throws E 
          */
         public List<T> toList() throws E {
             final List<T> list = new ArrayList<>();
@@ -392,6 +434,12 @@ public final class Throwables {
             return list;
         }
 
+        /**
+         * 
+         *
+         * @param action 
+         * @throws E 
+         */
         public void forEachRemaining(java.util.function.Consumer<? super T> action) throws E { // NOSONAR
             N.checkArgNotNull(action);
 
@@ -3177,7 +3225,6 @@ public final class Throwables {
      * The Interface ObjIntPredicate.
      *
      * @param <T>
-     * @param <R>
      * @param <E>
      */
     public interface ObjIntPredicate<T, E extends Throwable> {
@@ -3232,7 +3279,6 @@ public final class Throwables {
      * The Interface ObjLongPredicate.
      *
      * @param <T>
-     * @param <R>
      * @param <E>
      */
     public interface ObjLongPredicate<T, E extends Throwable> {
@@ -3304,7 +3350,6 @@ public final class Throwables {
      * The Interface ObjDoublePredicate.
      *
      * @param <T>
-     * @param <R>
      * @param <E>
      */
     public interface ObjDoublePredicate<T, E extends Throwable> {
@@ -3334,11 +3379,13 @@ public final class Throwables {
     public interface ObjBiIntFunction<T, R, E extends Throwable> {
 
         /**
+         * 
          *
-         * @param t
-         * @param i
-         * @param j
-         * @throws E
+         * @param t 
+         * @param i 
+         * @param j 
+         * @return 
+         * @throws E 
          */
         R apply(T t, int i, int j) throws E;
     }
@@ -3346,11 +3393,13 @@ public final class Throwables {
     public interface ObjBiIntPredicate<T, E extends Throwable> {
 
         /**
+         * 
          *
-         * @param t
-         * @param i
-         * @param j
-         * @throws E
+         * @param t 
+         * @param i 
+         * @param j 
+         * @return 
+         * @throws E 
          */
         boolean test(T t, int i, int j) throws E;
     }
@@ -3416,6 +3465,15 @@ public final class Throwables {
     }
 
     public interface IntObjConsumer<T, E extends Throwable> {
+
+        /**
+         * 
+         *
+         * @param <T> 
+         * @param <E> 
+         * @param consumer 
+         * @return 
+         */
         static <T, E extends Throwable> IntObjConsumer<T, E> of(IntObjConsumer<T, E> consumer) {
             return consumer;
         }
@@ -3430,18 +3488,53 @@ public final class Throwables {
     }
 
     public interface IntObjFunction<T, R, E extends Throwable> {
+
+        /**
+         * 
+         *
+         * @param <T> 
+         * @param <R> 
+         * @param <E> 
+         * @param func 
+         * @return 
+         */
         static <T, R, E extends Throwable> IntObjFunction<T, R, E> of(IntObjFunction<T, R, E> func) {
             return func;
         }
 
+        /**
+         * 
+         *
+         * @param i 
+         * @param t 
+         * @return 
+         * @throws E 
+         */
         R apply(int i, T t) throws E;
     }
 
     public interface IntObjPredicate<T, E extends Throwable> {
+
+        /**
+         * 
+         *
+         * @param <T> 
+         * @param <E> 
+         * @param predicate 
+         * @return 
+         */
         static <T, E extends Throwable> IntObjPredicate<T, E> of(IntObjPredicate<T, E> predicate) {
             return predicate;
         }
 
+        /**
+         * 
+         *
+         * @param i 
+         * @param t 
+         * @return 
+         * @throws E 
+         */
         boolean test(int i, T t) throws E;
     }
 
@@ -3458,11 +3551,29 @@ public final class Throwables {
 
     public interface IntBiObjFunction<T, U, R, E extends Throwable> {
 
+        /**
+         * 
+         *
+         * @param i 
+         * @param t 
+         * @param u 
+         * @return 
+         * @throws E 
+         */
         R apply(int i, T t, U u) throws E;
     }
 
     public interface IntBiObjPredicate<T, U, E extends Throwable> {
 
+        /**
+         * 
+         *
+         * @param i 
+         * @param t 
+         * @param u 
+         * @return 
+         * @throws E 
+         */
         boolean test(int i, T t, U u) throws E;
     }
 
@@ -3481,11 +3592,13 @@ public final class Throwables {
     public interface BiIntObjFunction<T, R, E extends Throwable> {
 
         /**
+         * 
          *
-         * @param i
-         * @param j
-         * @param t
-         * @throws E
+         * @param i 
+         * @param j 
+         * @param t 
+         * @return 
+         * @throws E 
          */
         R apply(int i, int j, T t) throws E;
     }
@@ -3493,11 +3606,13 @@ public final class Throwables {
     public interface BiIntObjPredicate<T, E extends Throwable> {
 
         /**
+         * 
          *
-         * @param i
-         * @param j
-         * @param t
-         * @throws E
+         * @param i 
+         * @param j 
+         * @param t 
+         * @return 
+         * @throws E 
          */
         boolean test(int i, int j, T t) throws E;
     }

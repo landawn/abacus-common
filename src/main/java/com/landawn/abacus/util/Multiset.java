@@ -49,7 +49,7 @@ import com.landawn.abacus.util.stream.Stream;
  * occurrences of an element in a Multiset is called the <i>count</i> of that
  * element (the terms "frequency" and "multiplicity" are equivalent, but not
  * used in this API). Since the count of an element is represented as an {@code
- * int}, a Multiset may never contain more than {@link MutableInt#MAX_VALUE}
+ * int}, a Multiset may never contain more than {@link Integer#MAX_VALUE}
  * occurrences of any one element.
  *
  * @author Haiyang Li

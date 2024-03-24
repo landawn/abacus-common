@@ -170,7 +170,7 @@ public final class WD {
     public static final char _AMPERSAND = '&';
 
     /**
-     * Field AMPERSAND. (value is ""&"")
+     * Field AMPERSAND. (value is {@code "&"})
      */
     public static final String AMPERSAND = "&";
 
@@ -205,7 +205,7 @@ public final class WD {
     public static final char _LESS_THAN = '<';
 
     /**
-     * Field LESS_THAN. (value is ""<"")
+     * Field LESS_THAN. (value is {@code "<"})
      */
     public static final String LESS_THAN = "<";
 
