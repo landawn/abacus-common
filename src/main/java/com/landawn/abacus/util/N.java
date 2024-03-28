@@ -10388,6 +10388,39 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      *
      * @param <T>
+     * @param a
+     * @param startInclusive
+     * @param endExclusive
+     * @return
+     */
+    public static <T> T[] skipRange(final T[] a, final int startInclusive, final int endExclusive) {
+        final int len = len(a);
+
+        checkFromToIndex(startInclusive, endExclusive, len);
+
+        if (a == null) {
+            return a;
+        } else if (startInclusive == endExclusive) {
+            return a.clone();
+        }
+
+        final T[] ret = N.newArray(a.getClass().getComponentType(), len - (endExclusive - startInclusive));
+
+        if (startInclusive > 0) {
+            N.copy(a, 0, ret, 0, startInclusive);
+        }
+
+        if (endExclusive < len) {
+            N.copy(a, endExclusive, ret, startInclusive, len - endExclusive);
+        }
+
+        return ret;
+    }
+
+    /**
+     *
+     *
+     * @param <T>
      * @param c
      * @param startInclusive
      * @param endExclusive

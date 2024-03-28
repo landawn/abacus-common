@@ -39,6 +39,7 @@ import java.util.Random;
 import java.util.RandomAccess;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Function;
 import java.util.function.IntUnaryOperator;
 import java.util.function.Supplier;
 import java.util.regex.Matcher;
@@ -2105,6 +2106,41 @@ public abstract sealed class Strings permits Strings.StringUtil {
         return InternalUtil.newString(cbuf, true);
     }
 
+    // Copied from Apache commons Lang under Apache License v2.
+    /**
+     *
+     * @param str
+     * @return the specified String if it's {@code null} or empty.
+     */
+    public static String uncapitalize(final String str) {
+        if (str == null || str.length() == 0) {
+            return str;
+        }
+
+        final int firstCodePoint = str.codePointAt(0);
+        final int newCodePoint = Character.toLowerCase(firstCodePoint);
+
+        if (firstCodePoint == newCodePoint) {
+            // already uncapitalize
+            return str;
+        }
+
+        final int strLen = str.length();
+
+        final int[] newCodePoints = new int[strLen]; // cannot be longer than the char array
+        int outOffset = 0;
+        newCodePoints[outOffset++] = newCodePoint; // copy the first code point
+
+        for (int inOffset = Character.charCount(firstCodePoint); inOffset < strLen;) {
+            final int codePoint = str.codePointAt(inOffset);
+            newCodePoints[outOffset++] = codePoint; // copy the remaining ones
+            inOffset += Character.charCount(codePoint);
+        }
+
+        return new String(newCodePoints, 0, outOffset);
+    }
+
+    // Copied from Apache commons Lang under Apache License v2.
     /**
      *
      * @param str
@@ -2115,17 +2151,26 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return str;
         }
 
-        char ch = str.charAt(0);
+        final int firstCodepoint = str.codePointAt(0);
+        final int newCodePoint = Character.toTitleCase(firstCodepoint);
 
-        if (Character.isTitleCase(ch)) {
+        if (firstCodepoint == newCodePoint) {
+            // already capitalized
             return str;
         }
 
-        if (str.length() == 1) {
-            return String.valueOf(Character.toTitleCase(ch));
-        } else {
-            return Character.toTitleCase(ch) + str.substring(1);
+        final int strLen = str.length();
+        final int[] newCodePoints = new int[strLen]; // cannot be longer than the char array
+        int outOffset = 0;
+        newCodePoints[outOffset++] = newCodePoint; // copy the first code point
+
+        for (int inOffset = Character.charCount(firstCodepoint); inOffset < strLen;) {
+            final int codePoint = str.codePointAt(inOffset);
+            newCodePoints[outOffset++] = codePoint; // copy the remaining ones
+            inOffset += Character.charCount(codePoint);
         }
+
+        return new String(newCodePoints, 0, outOffset);
     }
 
     /**
@@ -2144,6 +2189,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param str
      * @param delimiter
      * @return the specified String if it's {@code null} or empty.
+     * @see #convertWords(String, String, Collection, Function)
      */
     public static String capitalizeFully(final String str, final String delimiter) {
         N.checkArgNotEmpty(delimiter, "delimiter"); // NOSONAR
@@ -2152,8 +2198,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return str;
         }
 
-        final String strLowerCase = str.toLowerCase();
-        final String[] words = splitPreserveAllTokens(strLowerCase, delimiter);
+        final String[] words = splitPreserveAllTokens(str, delimiter);
 
         N.applyToEach(words, Strings::capitalize);
 
@@ -2165,46 +2210,46 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * @param str
      * @param delimiter
-     * @param excludedWordsInLowerCase
+     * @param excludedWords
      * @return the specified String if it's {@code null} or empty.
+     * @see #convertWords(String, String, Collection, Function)
      */
-    public static String capitalizeFully(final String str, final String delimiter, final String... excludedWordsInLowerCase) {
+    public static String capitalizeFully(final String str, final String delimiter, final String... excludedWords) {
         N.checkArgNotEmpty(delimiter, "delimiter"); // NOSONAR
 
         if (str == null || str.length() == 0) {
             return str;
         }
 
-        if (N.isEmpty(excludedWordsInLowerCase)) {
+        if (N.isEmpty(excludedWords)) {
             return capitalizeFully(str, delimiter);
         }
 
-        return capitalizeFully(str, delimiter, N.toSet(excludedWordsInLowerCase));
+        return capitalizeFully(str, delimiter, N.toSet(excludedWords));
     }
 
     /**
      *
      * @param str
      * @param delimiter
-     * @param excludedWordsInLowerCase
+     * @param excludedWords
      * @return
+     * @see #convertWords(String, String, Collection, Function)
      */
-    public static String capitalizeFully(final String str, final String delimiter, final Collection<String> excludedWordsInLowerCase) {
+    public static String capitalizeFully(final String str, final String delimiter, final Collection<String> excludedWords) {
         N.checkArgNotEmpty(delimiter, "delimiter"); // NOSONAR
 
         if (str == null || str.length() == 0) {
             return str;
         }
 
-        if (N.isEmpty(excludedWordsInLowerCase)) {
+        if (N.isEmpty(excludedWords)) {
             return capitalizeFully(str, delimiter);
         }
 
-        final String strLowerCase = str.toLowerCase();
-        final String[] words = splitPreserveAllTokens(strLowerCase, delimiter);
-        final Collection<String> excludedWordSet = excludedWordsInLowerCase instanceof Set || (excludedWordsInLowerCase.size() <= 3 && words.length <= 3)
-                ? excludedWordsInLowerCase
-                : N.newHashSet(excludedWordsInLowerCase);
+        final String[] words = splitPreserveAllTokens(str, delimiter);
+        final Collection<String> excludedWordSet = excludedWords instanceof Set || (excludedWords.size() <= 3 && words.length <= 3) ? excludedWords
+                : N.newHashSet(excludedWords);
 
         N.applyToEach(words, e -> excludedWordSet.contains(e) ? e : capitalize(e));
 
@@ -2212,26 +2257,65 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
+     * Converts all the words from the specified split by {@code ' '} by the specified Function {@code converter}.
      *
      * @param str
      * @return the specified String if it's {@code null} or empty.
      */
-    public static String uncapitalize(final String str) {
+    public static String convertWords(final String str, final Function<String, String> converter) {
+        return convertWords(str, " ", converter);
+    }
+
+    /**
+     * Converts all the words from the specified split by {@code delimiter} by the specified Function {@code converter}.
+     *
+     * @param str
+     * @param delimiter
+     * @return the specified String if it's {@code null} or empty.
+     */
+    public static String convertWords(final String str, final String delimiter, final Function<String, String> converter) {
+        N.checkArgNotEmpty(delimiter, "delimiter"); // NOSONAR
+
         if (str == null || str.length() == 0) {
             return str;
         }
 
-        char ch = str.charAt(0);
+        final String[] words = splitPreserveAllTokens(str, delimiter);
 
-        if (Character.isLowerCase(ch)) {
+        for (int i = 0, len = words.length; i < len; i++) {
+            words[i] = converter.apply(words[i]);
+        }
+
+        return join(words, delimiter);
+    }
+
+    /**
+     * Converts all the words from the specified split by {@code delimiter} by the specified Function {@code converter}.
+     *
+     * @param str
+     * @param delimiter
+     * @param excludedWords
+     * @return
+     */
+    public static String convertWords(final String str, final String delimiter, final Collection<String> excludedWords,
+            final Function<String, String> converter) {
+        N.checkArgNotEmpty(delimiter, "delimiter"); // NOSONAR
+
+        if (str == null || str.length() == 0) {
             return str;
         }
 
-        if (str.length() == 1) {
-            return String.valueOf(Character.toLowerCase(ch));
-        } else {
-            return Character.toLowerCase(ch) + str.substring(1);
+        if (N.isEmpty(excludedWords)) {
+            return convertWords(str, delimiter, converter);
         }
+
+        final String[] words = splitPreserveAllTokens(str, delimiter);
+        final Collection<String> excludedWordSet = excludedWords instanceof Set || (excludedWords.size() <= 3 && words.length <= 3) ? excludedWords
+                : N.newHashSet(excludedWords);
+
+        N.applyToEach(words, e -> excludedWordSet.contains(e) ? e : converter.apply(e));
+
+        return join(words, delimiter);
     }
 
     /**
