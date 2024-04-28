@@ -424,6 +424,76 @@ public final class Fn {
         return LazyInitializer.of(supplier);
     }
 
+    // Copied from Google Guava under Apache License v2.
+    /**
+     * Copied from Google Guava under Apache License v2.
+     * <br />
+     * <br />
+     *
+     * Returns a supplier that caches the instance supplied by the delegate and removes the cached
+     * value after the specified time has passed. Subsequent calls to {@code get()} return the cached
+     * value if the expiration time has not passed. After the expiration time, a new value is
+     * retrieved, cached, and returned. See: <a
+     * href="http://en.wikipedia.org/wiki/Memoization">memoization</a>
+     *
+     * <p>The returned supplier is thread-safe. The supplier's serialized form does not contain the
+     * cached value, which will be recalculated when {@code get()} is called on the reserialized
+     * instance. The actual memoization does not happen when the underlying delegate throws an
+     * exception.
+     *
+     * <p>When the underlying delegate throws an exception then this memoizing supplier will keep
+     * delegating calls until it returns valid data.
+     *
+     * @param duration the length of time after a value is created that it should stop being returned
+     *     by subsequent {@code get()} calls
+     * @param unit the unit that {@code duration} is expressed in
+     * @throws IllegalArgumentException if {@code duration} is not positive
+     * @since 2.0
+     */
+    @Beta
+    @SequentialOnly
+    @Stateful
+    public static <T> Supplier<T> memoizeWithExpiration(final java.util.function.Supplier<T> supplier, final long duration, final TimeUnit unit) {
+        N.checkArgNotNull(supplier, "supplier");
+        N.checkArgument(duration > 0, "duration (%s %s) must be > 0", duration, unit);
+
+        return new Supplier<>() {
+            private final java.util.function.Supplier<T> delegate = supplier;
+            private final long durationNanos = unit.toNanos(duration);
+            private transient volatile T value;
+            // The special value 0 means "not yet initialized".
+            private transient volatile long expirationNanos = 0;
+
+            @Override
+            public T get() {
+                // Another variant of Double Checked Locking.
+                //
+                // We use two volatile reads. We could reduce this to one by
+                // putting our fields into a holder class, but (at least on x86)
+                // the extra memory consumption and indirection are more
+                // expensive than the extra volatile reads.
+                long nanos = expirationNanos;
+                long now = System.nanoTime();
+                if (nanos == 0 || now - nanos >= 0) {
+                    synchronized (this) {
+                        if (nanos == expirationNanos) { // recheck for lost race
+                            T t = delegate.get();
+                            value = t;
+                            nanos = now + durationNanos;
+                            // In the very unlikely event that nanos is 0, set it to 1;
+                            // no one will notice 1 ns of tardiness.
+                            expirationNanos = (nanos == 0) ? 1 : nanos;
+                            return t;
+                        }
+                    }
+                }
+
+                // This is safe because we checked `expirationNanos.`
+                return value;
+            }
+        };
+    }
+
     //    /**
     //     *
     //     * @param <T>

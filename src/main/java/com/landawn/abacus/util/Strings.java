@@ -2048,7 +2048,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @return
      */
     public static char swapCase(final char ch) {
-        return Character.isLowerCase(ch) ? Character.toUpperCase(ch) : Character.toLowerCase(ch);
+        return Character.isUpperCase(ch) || Character.isTitleCase(ch) ? Character.toLowerCase(ch)
+                : (Character.isLowerCase(ch) ? Character.toUpperCase(ch) : ch);
     }
 
     /**
@@ -2085,25 +2086,31 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param str the String to swap case, may be null
      * @return the specified String if it's {@code null} or empty.
      */
-    @SuppressWarnings("deprecation")
     public static String swapCase(final String str) {
-        if (str == null || str.length() == 0) {
+        if (isEmpty(str)) {
             return str;
         }
 
-        final char[] cbuf = str.toCharArray();
-        char ch = 0;
-        for (int i = 0, len = cbuf.length; i < len; i++) {
-            ch = cbuf[i];
+        final int strLen = str.length();
+        final int[] newCodePoints = new int[strLen]; // cannot be longer than the char array
+        int outOffset = 0;
+        int oldCodepoint, newCodePoint;
 
-            if (Character.isUpperCase(ch) || Character.isTitleCase(ch)) {
-                cbuf[i] = Character.toLowerCase(ch);
-            } else if (Character.isLowerCase(ch)) {
-                cbuf[i] = Character.toUpperCase(ch);
+        for (int i = 0; i < strLen; i += Character.charCount(newCodePoint)) {
+            oldCodepoint = str.codePointAt(i);
+
+            if (Character.isUpperCase(oldCodepoint) || Character.isTitleCase(oldCodepoint)) {
+                newCodePoint = Character.toLowerCase(oldCodepoint);
+            } else if (Character.isLowerCase(oldCodepoint)) {
+                newCodePoint = Character.toUpperCase(oldCodepoint);
+            } else {
+                newCodePoint = oldCodepoint;
             }
+
+            newCodePoints[outOffset++] = newCodePoint;
         }
 
-        return InternalUtil.newString(cbuf, true);
+        return new String(newCodePoints, 0, outOffset);
     }
 
     // Copied from Apache commons Lang under Apache License v2.
@@ -4500,7 +4507,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         final int len = cs.length();
 
         for (int i = 0; i < len; i++) {
-            if (Character.isUpperCase(cs.charAt(i))) {
+            if (!Character.isLowerCase(cs.charAt(i))) {
                 return false;
             }
         }
@@ -4522,7 +4529,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         final int len = cs.length();
 
         for (int i = 0; i < len; i++) {
-            if (Character.isLowerCase(cs.charAt(i))) {
+            if (!Character.isUpperCase(cs.charAt(i))) {
                 return false;
             }
         }
