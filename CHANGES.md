@@ -1,3 +1,7 @@
+### 3.10.19
+
+* Improvements JavaDoc.
+
 ### 3.10.18
 
 * Improvements JavaDoc.

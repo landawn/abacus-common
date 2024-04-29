@@ -30356,7 +30356,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      */
     @Beta
-    public static <T> LazyInitializer<T> lazyInit(final Supplier<T> supplier) {
+    public static <T> com.landawn.abacus.util.function.Supplier<T> lazyInit(final Supplier<T> supplier) {
         return LazyInitializer.of(supplier);
     }
 
@@ -30369,7 +30369,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      */
     @Beta
-    public static <T, E extends Exception> Throwables.LazyInitializer<T, E> lazyInitialize(final Throwables.Supplier<T, E> supplier) {
+    public static <T, E extends Exception> Throwables.Supplier<T, E> lazyInitialize(final Throwables.Supplier<T, E> supplier) {
         return Throwables.LazyInitializer.of(supplier);
     }
 

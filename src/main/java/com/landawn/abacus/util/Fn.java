@@ -417,9 +417,6 @@ public final class Fn {
      * @param supplier
      * @return
      */
-    @Beta
-    @SequentialOnly
-    @Stateful
     public static <T> Supplier<T> memoize(final java.util.function.Supplier<T> supplier) {
         return LazyInitializer.of(supplier);
     }
@@ -450,9 +447,6 @@ public final class Fn {
      * @throws IllegalArgumentException if {@code duration} is not positive
      * @since 2.0
      */
-    @Beta
-    @SequentialOnly
-    @Stateful
     public static <T> Supplier<T> memoizeWithExpiration(final java.util.function.Supplier<T> supplier, final long duration, final TimeUnit unit) {
         N.checkArgNotNull(supplier, "supplier");
         N.checkArgument(duration > 0, "duration (%s %s) must be > 0", duration, unit);
@@ -534,13 +528,11 @@ public final class Fn {
      * @param func
      * @return
      */
-    @Beta
-    @SequentialOnly
-    @Stateful
     public static <T, R> Function<T, R> memoize(final java.util.function.Function<? super T, ? extends R> func) {
         return new Function<>() {
-            private volatile R resultForNull = (R) NONE; //NOSONAR
-            private volatile Map<T, R> resultMap = null; //NOSONAR
+            private final R none = (R) NONE;
+            private final Map<T, R> resultMap = new ConcurrentHashMap<>();
+            private volatile R resultForNull = none; //NOSONAR
 
             @Override
             public R apply(T t) {
@@ -549,9 +541,9 @@ public final class Fn {
                 if (t == null) {
                     result = resultForNull;
 
-                    if (result == NONE) {
+                    if (result == none) {
                         synchronized (this) {
-                            if (resultForNull == NONE) {
+                            if (resultForNull == none) {
                                 resultForNull = func.apply(t);
                             }
 
@@ -559,21 +551,15 @@ public final class Fn {
                         }
                     }
                 } else {
-                    synchronized (this) {
-                        if (resultMap == null) {
-                            resultMap = new HashMap<>();
-                        }
+                    result = resultMap.get(t);
 
-                        result = resultMap.get(t);
-
-                        if (result == null && !resultMap.containsKey(t)) {
-                            result = func.apply(t);
-                            resultMap.put(t, result);
-                        }
+                    if (result == null) {
+                        result = func.apply(t);
+                        resultMap.put(t, result == null ? none : result);
                     }
                 }
 
-                return result;
+                return result == none ? null : result;
             }
         };
     }
@@ -10010,8 +9996,120 @@ public final class Fn {
          * @param supplier
          * @return
          */
-        public static <T, E extends Throwable> Throwables.LazyInitializer<T, E> memoize(final Throwables.Supplier<T, E> supplier) {
+        public static <T, E extends Throwable> Throwables.Supplier<T, E> memoize(final Throwables.Supplier<T, E> supplier) {
             return Throwables.LazyInitializer.of(supplier);
+        }
+
+        // Copied from Google Guava under Apache License v2.
+        /**
+         * Copied from Google Guava under Apache License v2.
+         * <br />
+         * <br />
+         *
+         * Returns a supplier that caches the instance supplied by the delegate and removes the cached
+         * value after the specified time has passed. Subsequent calls to {@code get()} return the cached
+         * value if the expiration time has not passed. After the expiration time, a new value is
+         * retrieved, cached, and returned. See: <a
+         * href="http://en.wikipedia.org/wiki/Memoization">memoization</a>
+         *
+         * <p>The returned supplier is thread-safe. The supplier's serialized form does not contain the
+         * cached value, which will be recalculated when {@code get()} is called on the reserialized
+         * instance. The actual memoization does not happen when the underlying delegate throws an
+         * exception.
+         *
+         * <p>When the underlying delegate throws an exception then this memoizing supplier will keep
+         * delegating calls until it returns valid data.
+         *
+         * @param duration the length of time after a value is created that it should stop being returned
+         *     by subsequent {@code get()} calls
+         * @param unit the unit that {@code duration} is expressed in
+         * @throws IllegalArgumentException if {@code duration} is not positive
+         * @since 2.0
+         */
+        public static <T, E extends Throwable> Throwables.Supplier<T, E> memoizeWithExpiration(final Throwables.Supplier<T, E> supplier, final long duration,
+                final TimeUnit unit) {
+            N.checkArgNotNull(supplier, "supplier");
+            N.checkArgument(duration > 0, "duration (%s %s) must be > 0", duration, unit);
+
+            return new Throwables.Supplier<>() {
+                private final Throwables.Supplier<T, E> delegate = supplier;
+                private final long durationNanos = unit.toNanos(duration);
+                private transient volatile T value;
+                // The special value 0 means "not yet initialized".
+                private transient volatile long expirationNanos = 0;
+
+                @Override
+                public T get() throws E {
+                    // Another variant of Double Checked Locking.
+                    //
+                    // We use two volatile reads. We could reduce this to one by
+                    // putting our fields into a holder class, but (at least on x86)
+                    // the extra memory consumption and indirection are more
+                    // expensive than the extra volatile reads.
+                    long nanos = expirationNanos;
+                    long now = System.nanoTime();
+                    if (nanos == 0 || now - nanos >= 0) {
+                        synchronized (this) {
+                            if (nanos == expirationNanos) { // recheck for lost race
+                                T t = delegate.get();
+                                value = t;
+                                nanos = now + durationNanos;
+                                // In the very unlikely event that nanos is 0, set it to 1;
+                                // no one will notice 1 ns of tardiness.
+                                expirationNanos = (nanos == 0) ? 1 : nanos;
+                                return t;
+                            }
+                        }
+                    }
+
+                    // This is safe because we checked `expirationNanos.`
+                    return value;
+                }
+            };
+        }
+
+        /**
+         *
+         * @param <T>
+         * @param <R>
+         * @param <E>
+         * @param func
+         * @return
+         */
+        public static <T, R, E extends Throwable> Throwables.Function<T, R, E> memoize(final Throwables.Function<? super T, ? extends R, E> func) {
+            return new Throwables.Function<>() {
+                private final R none = (R) NONE;
+                private final Map<T, R> resultMap = new ConcurrentHashMap<>();
+                private volatile R resultForNull = none; //NOSONAR
+
+                @Override
+                public R apply(T t) throws E {
+                    R result = null;
+
+                    if (t == null) {
+                        result = resultForNull;
+
+                        if (result == none) {
+                            synchronized (this) {
+                                if (resultForNull == none) {
+                                    resultForNull = func.apply(t);
+                                }
+
+                                result = resultForNull;
+                            }
+                        }
+                    } else {
+                        result = resultMap.get(t);
+
+                        if (result == null) {
+                            result = func.apply(t);
+                            resultMap.put(t, result == null ? none : result);
+                        }
+                    }
+
+                    return result == none ? null : result;
+                }
+            };
         }
 
         /**
