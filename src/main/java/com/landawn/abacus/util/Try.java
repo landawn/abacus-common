@@ -5,6 +5,8 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
+import com.landawn.abacus.annotation.Beta;
+
 /*
  * Copyright (C) 2019 HaiYang Li
  *
@@ -20,10 +22,6 @@ import java.util.function.Supplier;
  */
 
 public final class Try<T extends AutoCloseable> {
-    private static final AutoCloseable EMPTY = () -> {
-        // Do nothing.
-    };
-
     private final T targetResource;
     private final Throwables.Supplier<T, ? extends Exception> targetResourceSupplier;
     private final Runnable finalAction;
@@ -35,11 +33,11 @@ public final class Try<T extends AutoCloseable> {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param targetResource 
-     * @return 
+     *
+     * @param <T>
+     * @param targetResource
+     * @return
      */
     public static <T extends AutoCloseable> Try<T> with(final T targetResource) {
         N.checkArgNotNull(targetResource, "targetResourceSupplier");//NOSONAR
@@ -48,12 +46,12 @@ public final class Try<T extends AutoCloseable> {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param targetResource 
-     * @param finalAction 
-     * @return 
+     *
+     * @param <T>
+     * @param targetResource
+     * @param finalAction
+     * @return
      */
     public static <T extends AutoCloseable> Try<T> with(final T targetResource, final Runnable finalAction) {
         N.checkArgNotNull(targetResource, "targetResourceSupplier");
@@ -63,11 +61,11 @@ public final class Try<T extends AutoCloseable> {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param targetResourceSupplier 
-     * @return 
+     *
+     * @param <T>
+     * @param targetResourceSupplier
+     * @return
      */
     public static <T extends AutoCloseable> Try<T> with(final Throwables.Supplier<T, ? extends Exception> targetResourceSupplier) {
         N.checkArgNotNull(targetResourceSupplier, "targetResourceSupplier");
@@ -75,31 +73,18 @@ public final class Try<T extends AutoCloseable> {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param targetResourceSupplier 
-     * @param finalAction 
-     * @return 
+     *
+     * @param <T>
+     * @param targetResourceSupplier
+     * @param finalAction
+     * @return
      */
     public static <T extends AutoCloseable> Try<T> with(final Throwables.Supplier<T, ? extends Exception> targetResourceSupplier, final Runnable finalAction) {
         N.checkArgNotNull(targetResourceSupplier, "targetResourceSupplier");
         N.checkArgNotNull(finalAction, "finalAction");
 
         return new Try<>(null, targetResourceSupplier, finalAction);
-    }
-
-    /**
-     * 
-     *
-     * @param <T> 
-     * @param finalAction 
-     * @return 
-     */
-    public static <T extends AutoCloseable> Try<T> with(final Runnable finalAction) {
-        N.checkArgNotNull(finalAction);
-
-        return new Try<>(null, null, finalAction);
     }
 
     /**
@@ -125,6 +110,22 @@ public final class Try<T extends AutoCloseable> {
             cmd.run();
         } catch (Exception e) {
             actionOnError.accept(e);
+        }
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param targetResource
+     * @param cmd
+     * @throws RuntimeException if some error happens
+     */
+    @Beta
+    public static <T extends AutoCloseable> void run(final T targetResource, final Throwables.Consumer<? super T, ? extends Exception> cmd) {
+        try (final T autoCloseable = targetResource) {
+            cmd.accept(autoCloseable);
+        } catch (Exception e) {
+            throw ExceptionUtil.toRuntimeException(e);
         }
     }
 
@@ -230,6 +231,23 @@ public final class Try<T extends AutoCloseable> {
         }
     }
 
+    /**
+     *
+     * @param <T>
+     * @param <R>
+     * @param targetResource
+     * @param cmd
+     * @throws RuntimeException if some error happens
+     */
+    @Beta
+    public static <T extends AutoCloseable, R> R call(final T targetResource, final Throwables.Function<? super T, ? extends R, ? extends Exception> cmd) {
+        try (final T autoCloseable = targetResource) {
+            return cmd.apply(autoCloseable);
+        } catch (Exception e) {
+            throw ExceptionUtil.toRuntimeException(e);
+        }
+    }
+
     //    /**
     //     *
     //     * @return
@@ -243,8 +261,8 @@ public final class Try<T extends AutoCloseable> {
      * @param cmd
      */
     public void run(final Throwables.Consumer<? super T, ? extends Exception> cmd) {
-        try (final AutoCloseable c = targetResource == null ? (targetResourceSupplier == null ? EMPTY : targetResourceSupplier.get()) : targetResource) {
-            cmd.accept(targetResource);
+        try (final T closeable = targetResource == null ? (targetResourceSupplier == null ? null : targetResourceSupplier.get()) : targetResource) {
+            cmd.accept(closeable);
         } catch (Exception e) {
             throw ExceptionUtil.toRuntimeException(e);
         } finally {
@@ -260,8 +278,8 @@ public final class Try<T extends AutoCloseable> {
      * @param actionOnError
      */
     public void run(final Throwables.Consumer<? super T, ? extends Exception> cmd, final Consumer<? super Exception> actionOnError) {
-        try (final AutoCloseable c = targetResource == null ? (targetResourceSupplier == null ? EMPTY : targetResourceSupplier.get()) : targetResource) {
-            cmd.accept(targetResource);
+        try (final T closeable = targetResource == null ? (targetResourceSupplier == null ? null : targetResourceSupplier.get()) : targetResource) {
+            cmd.accept(closeable);
         } catch (Exception e) {
             actionOnError.accept(e);
         } finally {
@@ -277,9 +295,9 @@ public final class Try<T extends AutoCloseable> {
      * @param cmd
      * @return
      */
-    public <R> R call(final Throwables.Function<? super T, R, ? extends Exception> cmd) {
-        try (final AutoCloseable c = targetResource == null ? (targetResourceSupplier == null ? EMPTY : targetResourceSupplier.get()) : targetResource) {
-            return cmd.apply(targetResource);
+    public <R> R call(final Throwables.Function<? super T, ? extends R, ? extends Exception> cmd) {
+        try (final T closeable = targetResource == null ? (targetResourceSupplier == null ? null : targetResourceSupplier.get()) : targetResource) {
+            return cmd.apply(closeable);
         } catch (Exception e) {
             throw ExceptionUtil.toRuntimeException(e);
         } finally {
@@ -296,9 +314,10 @@ public final class Try<T extends AutoCloseable> {
      * @param actionOnError
      * @return
      */
-    public <R> R call(final Throwables.Function<? super T, R, ? extends Exception> cmd, final Function<? super Exception, ? extends R> actionOnError) {
-        try (final AutoCloseable c = targetResource == null ? (targetResourceSupplier == null ? EMPTY : targetResourceSupplier.get()) : targetResource) {
-            return cmd.apply(targetResource);
+    public <R> R call(final Throwables.Function<? super T, ? extends R, ? extends Exception> cmd,
+            final Function<? super Exception, ? extends R> actionOnError) {
+        try (final T closeable = targetResource == null ? (targetResourceSupplier == null ? null : targetResourceSupplier.get()) : targetResource) {
+            return cmd.apply(closeable);
         } catch (Exception e) {
             return actionOnError.apply(e);
         } finally {
@@ -315,9 +334,9 @@ public final class Try<T extends AutoCloseable> {
      * @param supplier
      * @return
      */
-    public <R> R call(final Throwables.Function<? super T, R, ? extends Exception> cmd, final Supplier<R> supplier) {
-        try (final AutoCloseable c = targetResource == null ? (targetResourceSupplier == null ? EMPTY : targetResourceSupplier.get()) : targetResource) {
-            return cmd.apply(targetResource);
+    public <R> R call(final Throwables.Function<? super T, ? extends R, ? extends Exception> cmd, final Supplier<R> supplier) {
+        try (final T closeable = targetResource == null ? (targetResourceSupplier == null ? null : targetResourceSupplier.get()) : targetResource) {
+            return cmd.apply(closeable);
         } catch (Exception e) {
             return supplier.get();
         } finally {
@@ -334,9 +353,9 @@ public final class Try<T extends AutoCloseable> {
      * @param defaultValue
      * @return
      */
-    public <R> R call(final Throwables.Function<? super T, R, ? extends Exception> cmd, final R defaultValue) {
-        try (final AutoCloseable c = targetResource == null ? (targetResourceSupplier == null ? EMPTY : targetResourceSupplier.get()) : targetResource) {
-            return cmd.apply(targetResource);
+    public <R> R call(final Throwables.Function<? super T, ? extends R, ? extends Exception> cmd, final R defaultValue) {
+        try (final T closeable = targetResource == null ? (targetResourceSupplier == null ? null : targetResourceSupplier.get()) : targetResource) {
+            return cmd.apply(closeable);
         } catch (Exception e) {
             return defaultValue;
         } finally {
@@ -354,10 +373,10 @@ public final class Try<T extends AutoCloseable> {
      * @param supplier
      * @return
      */
-    public <R> R call(final Throwables.Function<? super T, R, ? extends Exception> cmd, final Predicate<? super Exception> predicate,
+    public <R> R call(final Throwables.Function<? super T, ? extends R, ? extends Exception> cmd, final Predicate<? super Exception> predicate,
             final Supplier<R> supplier) {
-        try (final AutoCloseable c = targetResource == null ? (targetResourceSupplier == null ? EMPTY : targetResourceSupplier.get()) : targetResource) {
-            return cmd.apply(targetResource);
+        try (final T closeable = targetResource == null ? (targetResourceSupplier == null ? null : targetResourceSupplier.get()) : targetResource) {
+            return cmd.apply(closeable);
         } catch (Exception e) {
             if (predicate.test(e)) {
                 return supplier.get();
@@ -379,9 +398,10 @@ public final class Try<T extends AutoCloseable> {
      * @param defaultValue
      * @return
      */
-    public <R> R call(final Throwables.Function<? super T, R, ? extends Exception> cmd, final Predicate<? super Exception> predicate, final R defaultValue) {
-        try (final AutoCloseable c = targetResource == null ? (targetResourceSupplier == null ? EMPTY : targetResourceSupplier.get()) : targetResource) {
-            return cmd.apply(targetResource);
+    public <R> R call(final Throwables.Function<? super T, ? extends R, ? extends Exception> cmd, final Predicate<? super Exception> predicate,
+            final R defaultValue) {
+        try (final T closeable = targetResource == null ? (targetResourceSupplier == null ? null : targetResourceSupplier.get()) : targetResource) {
+            return cmd.apply(closeable);
         } catch (Exception e) {
             if (predicate.test(e)) {
                 return defaultValue;

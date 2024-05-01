@@ -36,6 +36,18 @@ public final class Wrapper<T> implements Immutable {
 
     static final BiPredicate<Object, Object> arrayEqualsFunction = N::deepEquals;
 
+    static final Function<Object, String> defaultToStringFunction = N::toString;
+
+    @SuppressWarnings("rawtypes")
+    private static final Wrapper WRAPPER_FOR_NULL_ARRAY = new Wrapper<>(null, arrayHashFunction, arrayEqualsFunction);
+
+    @SuppressWarnings("rawtypes")
+    private static final Map<Object, Wrapper> arrayWapperPool = new ConcurrentHashMap<>();
+
+    static {
+        arrayWapperPool.put(boolean.class, new Wrapper<>(new boolean[0], arrayHashFunction, arrayEqualsFunction));
+    }
+
     private final T value;
 
     private final ToIntFunction<? super T> hashFunction;
@@ -47,7 +59,7 @@ public final class Wrapper<T> implements Immutable {
     private int hashCode;
 
     private Wrapper(T value, ToIntFunction<? super T> hashFunction, BiPredicate<? super T, ? super T> equalsFunction) {
-        this(value, hashFunction, equalsFunction, null);
+        this(value, hashFunction, equalsFunction, defaultToStringFunction);
     }
 
     private Wrapper(T value, ToIntFunction<? super T> hashFunction, BiPredicate<? super T, ? super T> equalsFunction,
@@ -56,17 +68,6 @@ public final class Wrapper<T> implements Immutable {
         this.hashFunction = hashFunction;
         this.equalsFunction = equalsFunction;
         this.toStringFunction = toStringFunction;
-
-    }
-
-    @SuppressWarnings("rawtypes")
-    private static final Wrapper WRAPPER_FOR_NULL_ARRAY = new Wrapper<>(null, arrayHashFunction, arrayEqualsFunction);
-
-    @SuppressWarnings("rawtypes")
-    private static final Map<Object, Wrapper> arrayWapperPool = new ConcurrentHashMap<>();
-
-    static {
-        arrayWapperPool.put(boolean.class, new Wrapper<>(new boolean[0], arrayHashFunction, arrayEqualsFunction));
     }
 
     /**
@@ -109,7 +110,7 @@ public final class Wrapper<T> implements Immutable {
         N.checkArgNotNull(hashFunction, "hashFunction");
         N.checkArgNotNull(equalsFunction, "equalsFunction");
 
-        return new Wrapper<>(value, hashFunction, equalsFunction);
+        return new Wrapper<>(value, hashFunction, equalsFunction, defaultToStringFunction);
     }
 
     /**
@@ -131,9 +132,9 @@ public final class Wrapper<T> implements Immutable {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public T value() {
         return value;
@@ -148,9 +149,9 @@ public final class Wrapper<T> implements Immutable {
     //    }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public int hashCode() {
@@ -172,20 +173,12 @@ public final class Wrapper<T> implements Immutable {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public String toString() {
-        if (toStringFunction == null) {
-            if (value == null) {
-                return "Wrapper[null]";
-            } else {
-                return String.format("Wrapper[%s]", N.toString(value));
-            }
-        } else {
-            return toStringFunction.apply(value);
-        }
+        return String.format("Wrapper[%s]", toStringFunction.apply(value));
     }
 }

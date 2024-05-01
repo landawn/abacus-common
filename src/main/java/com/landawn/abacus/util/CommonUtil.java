@@ -33,6 +33,9 @@ import java.security.SecureRandom;
 import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.SQLException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.AbstractMap;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -260,6 +263,24 @@ sealed class CommonUtil permits N {
      * An empty immutable {@code Calendar} array.
      */
     public static final Calendar[] EMPTY_CALENDAR_ARRAY = {};
+
+    /**
+    /**
+     * An empty immutable {@code LocalDate} array.
+     */
+    public static final LocalDate[] EMPTY_LOCAL_DATE_ARRAY = {};
+
+    /**
+    /**
+     * An empty immutable {@code LocalTime} array.
+     */
+    public static final LocalTime[] EMPTY_LOCAL_TIME_ARRAY = {};
+
+    /**
+    /**
+     * An empty immutable {@code LocalDateTime} array.
+     */
+    public static final LocalDateTime[] EMPTY_LOCAL_DATE_TIME_ARRAY = {};
 
     /**
      * An empty immutable {@code Object} array.
