@@ -5,8 +5,6 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
-import com.landawn.abacus.annotation.Beta;
-
 /*
  * Copyright (C) 2019 HaiYang Li
  *
@@ -113,21 +111,21 @@ public final class Try<T extends AutoCloseable> {
         }
     }
 
-    /**
-     *
-     * @param <T>
-     * @param targetResource
-     * @param cmd
-     * @throws RuntimeException if some error happens
-     */
-    @Beta
-    public static <T extends AutoCloseable> void run(final T targetResource, final Throwables.Consumer<? super T, ? extends Exception> cmd) {
-        try (final T autoCloseable = targetResource) {
-            cmd.accept(autoCloseable);
-        } catch (Exception e) {
-            throw ExceptionUtil.toRuntimeException(e);
-        }
-    }
+    //    /**
+    //     *
+    //     * @param <T>
+    //     * @param targetResource
+    //     * @param cmd
+    //     * @throws RuntimeException if some error happens
+    //     */
+    //    @Beta
+    //    public static <T extends AutoCloseable> void run(final T targetResource, final Throwables.Consumer<? super T, ? extends Exception> cmd) {
+    //        try (final T autoCloseable = targetResource) {
+    //            cmd.accept(autoCloseable);
+    //        } catch (Exception e) {
+    //            throw ExceptionUtil.toRuntimeException(e);
+    //        }
+    //    }
 
     /**
      *
@@ -231,22 +229,22 @@ public final class Try<T extends AutoCloseable> {
         }
     }
 
-    /**
-     *
-     * @param <T>
-     * @param <R>
-     * @param targetResource
-     * @param cmd
-     * @throws RuntimeException if some error happens
-     */
-    @Beta
-    public static <T extends AutoCloseable, R> R call(final T targetResource, final Throwables.Function<? super T, ? extends R, ? extends Exception> cmd) {
-        try (final T autoCloseable = targetResource) {
-            return cmd.apply(autoCloseable);
-        } catch (Exception e) {
-            throw ExceptionUtil.toRuntimeException(e);
-        }
-    }
+    //    /**
+    //     *
+    //     * @param <T>
+    //     * @param <R>
+    //     * @param targetResource
+    //     * @param cmd
+    //     * @throws RuntimeException if some error happens
+    //     */
+    //    @Beta
+    //    public static <T extends AutoCloseable, R> R call(final T targetResource, final Throwables.Function<? super T, ? extends R, ? extends Exception> cmd) {
+    //        try (final T autoCloseable = targetResource) {
+    //            return cmd.apply(autoCloseable);
+    //        } catch (Exception e) {
+    //            throw ExceptionUtil.toRuntimeException(e);
+    //        }
+    //    }
 
     //    /**
     //     *
