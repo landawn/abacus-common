@@ -14,7 +14,6 @@
 package com.landawn.abacus.util;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -175,21 +174,21 @@ public final class Throwables {
         }
     }
 
+    @SuppressWarnings("rawtypes")
+    private static final Throwables.Iterator EMPTY = new Throwables.Iterator() {
+        @Override
+        public boolean hasNext() {
+            return false;
+        }
+
+        @Override
+        public Object next() {
+            throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+        }
+    };
+
     @SuppressWarnings({ "java:S6548" })
-    public abstract static class ObjIterator<T, E extends Throwable> implements Immutable {
-
-        @SuppressWarnings("rawtypes")
-        private static final ObjIterator EMPTY = new ObjIterator() {
-            @Override
-            public boolean hasNext() {
-                return false;
-            }
-
-            @Override
-            public Object next() {
-                throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
-            }
-        };
+    public interface Iterator<T, E extends Throwable> extends Immutable {
 
         /**
          *
@@ -198,7 +197,7 @@ public final class Throwables {
          * @param <E>
          * @return
          */
-        public static <T, E extends Throwable> ObjIterator<T, E> empty() {
+        static <T, E extends Throwable> Iterator<T, E> empty() {
             return EMPTY;
         }
 
@@ -210,8 +209,8 @@ public final class Throwables {
          * @param val
          * @return
          */
-        public static <T, E extends Throwable> ObjIterator<T, E> just(final T val) {
-            return new ObjIterator<>() {
+        static <T, E extends Throwable> Iterator<T, E> just(final T val) {
+            return new Throwables.Iterator<>() {
                 private boolean done = false;
 
                 @Override
@@ -240,14 +239,14 @@ public final class Throwables {
          * @param iterable
          * @return
          */
-        public static <T, E extends Throwable> ObjIterator<T, E> of(final Iterable<? extends T> iterable) {
+        static <T, E extends Throwable> Iterator<T, E> of(final Iterable<? extends T> iterable) {
             if (iterable == null) {
                 return empty();
             }
 
-            final Iterator<? extends T> iter = iterable.iterator();
+            final java.util.Iterator<? extends T> iter = iterable.iterator();
 
-            return new ObjIterator<>() {
+            return new Throwables.Iterator<>() {
                 @Override
                 public boolean hasNext() {
                     return iter.hasNext();
@@ -266,7 +265,7 @@ public final class Throwables {
          * @return
          * @throws E
          */
-        public abstract boolean hasNext() throws E;
+        boolean hasNext() throws E;
 
         /**
          *
@@ -274,7 +273,7 @@ public final class Throwables {
          * @return
          * @throws E
          */
-        public abstract T next() throws E;
+        T next() throws E;
 
         /**
          *
@@ -282,10 +281,10 @@ public final class Throwables {
          * @param predicate
          * @return
          */
-        public ObjIterator<T, E> filter(final Throwables.Predicate<? super T, E> predicate) {
-            final ObjIterator<T, E> iter = this;
+        default Throwables.Iterator<T, E> filter(final Throwables.Predicate<? super T, E> predicate) {
+            final Throwables.Iterator<T, E> iter = this;
 
-            return new ObjIterator<>() {
+            return new Throwables.Iterator<>() {
                 private final T NONE = (T) N.NULL_MASK; //NOSONAR
                 private T next = NONE;
                 private T tmp = null;
@@ -326,10 +325,10 @@ public final class Throwables {
          * @param mapper
          * @return
          */
-        public <U> ObjIterator<U, E> map(final Throwables.Function<? super T, U, E> mapper) {
-            final ObjIterator<T, E> iter = this;
+        default <U> Iterator<U, E> map(final Throwables.Function<? super T, U, E> mapper) {
+            final Throwables.Iterator<T, E> iter = this;
 
-            return new ObjIterator<>() {
+            return new Throwables.Iterator<>() {
                 @Override
                 public boolean hasNext() throws E {
                     return iter.hasNext();
@@ -348,7 +347,7 @@ public final class Throwables {
          * @return
          * @throws E
          */
-        public Nullable<T> first() throws E {
+        default Nullable<T> first() throws E {
             if (hasNext()) {
                 return Nullable.of(next());
             } else {
@@ -362,7 +361,7 @@ public final class Throwables {
          * @return
          * @throws E
          */
-        public u.Optional<T> firstNonNull() throws E {
+        default u.Optional<T> firstNonNull() throws E {
             T next = null;
 
             while (hasNext()) {
@@ -382,7 +381,7 @@ public final class Throwables {
          * @return
          * @throws E
          */
-        public Nullable<T> last() throws E {
+        default Nullable<T> last() throws E {
             if (hasNext()) {
                 T next = next();
 
@@ -402,7 +401,7 @@ public final class Throwables {
          * @return
          * @throws E
          */
-        public Object[] toArray() throws E {
+        default Object[] toArray() throws E {
             return toArray(N.EMPTY_OBJECT_ARRAY);
         }
 
@@ -414,7 +413,7 @@ public final class Throwables {
          * @return
          * @throws E
          */
-        public <A> A[] toArray(A[] a) throws E {
+        default <A> A[] toArray(A[] a) throws E {
             return toList().toArray(a);
         }
 
@@ -424,7 +423,7 @@ public final class Throwables {
          * @return
          * @throws E
          */
-        public List<T> toList() throws E {
+        default List<T> toList() throws E {
             final List<T> list = new ArrayList<>();
 
             while (hasNext()) {
@@ -440,7 +439,7 @@ public final class Throwables {
          * @param action
          * @throws E
          */
-        public void forEachRemaining(java.util.function.Consumer<? super T> action) throws E { // NOSONAR
+        default void forEachRemaining(java.util.function.Consumer<? super T> action) throws E { // NOSONAR
             N.checkArgNotNull(action);
 
             while (hasNext()) {
@@ -453,7 +452,7 @@ public final class Throwables {
          * @param action
          * @throws E the e
          */
-        public void foreachRemaining(Throwables.Consumer<? super T, E> action) throws E { // NOSONAR
+        default void foreachRemaining(Throwables.Consumer<? super T, E> action) throws E { // NOSONAR
             N.checkArgNotNull(action);
 
             while (hasNext()) {
@@ -466,7 +465,7 @@ public final class Throwables {
          * @param action
          * @throws E the e
          */
-        public void foreachIndexed(Throwables.IntObjConsumer<? super T, E> action) throws E {
+        default void foreachIndexed(Throwables.IntObjConsumer<? super T, E> action) throws E {
             N.checkArgNotNull(action);
 
             int idx = 0;

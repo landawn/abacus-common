@@ -25149,7 +25149,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return ret;
         } else {
             int totalSize = 0;
-            Throwables.ObjIterator<T, E> mergedIter = Throwables.ObjIterator.empty();
+            Throwables.Iterator<T, E> mergedIter = Throwables.Iterator.empty();
             Iterator<? extends T> iter = null;
 
             for (Iterable<? extends T> e : c) {
@@ -25161,10 +25161,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
                 totalSize += getSizeOrDefault(e, 0);
 
-                final Throwables.ObjIterator<T, E> iterA = mergedIter;
+                final Throwables.Iterator<T, E> iterA = mergedIter;
                 final Iterator<? extends T> iterB = iter;
 
-                mergedIter = new Throwables.ObjIterator<>() {
+                mergedIter = new Throwables.Iterator<>() {
                     private T nextA = null;
                     private T nextB = null;
                     private boolean hasNextA = false;
