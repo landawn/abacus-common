@@ -67,13 +67,13 @@ public final class Retry<T> {
 
     /**
      *
-     * @param <R>
+     * @param <T>
      * @param retryTimes
      * @param retryIntervallInMillis
      * @param retryCondition
      * @return
      */
-    public static <R> Retry<R> of(final int retryTimes, final long retryIntervallInMillis, final BiPredicate<? super R, ? super Exception> retryCondition) {
+    public static <T> Retry<T> of(final int retryTimes, final long retryIntervallInMillis, final BiPredicate<? super T, ? super Exception> retryCondition) {
         N.checkArgNotNegative(retryTimes, "retryTimes");
         N.checkArgNotNegative(retryIntervallInMillis, "retryIntervallInMillis");
         N.checkArgNotNull(retryCondition);
@@ -205,10 +205,10 @@ public final class Retry<T> {
         }
     }
 
-    public static final class RetryR<T> {
+    public static final class R<T> {
 
         @SuppressWarnings("hiding")
-        private static final Logger logger = LoggerFactory.getLogger(RetryR.class);
+        private static final Logger logger = LoggerFactory.getLogger(R.class);
 
         private final int retryTimes;
 
@@ -219,7 +219,7 @@ public final class Retry<T> {
         /** The retry condition 2. */
         private final BiPredicate<? super T, ? super RuntimeException> retryCondition2;
 
-        RetryR(final int retryTimes, final long retryIntervallInMillis, final Predicate<? super RuntimeException> retryCondition,
+        R(final int retryTimes, final long retryIntervallInMillis, final Predicate<? super RuntimeException> retryCondition,
                 final BiPredicate<? super T, ? super RuntimeException> retryCondition2) {
 
             this.retryTimes = retryTimes;
@@ -235,29 +235,29 @@ public final class Retry<T> {
          * @param retryCondition
          * @return
          */
-        public static RetryR<Void> of(final int retryTimes, final long retryIntervallInMillis, final Predicate<? super RuntimeException> retryCondition) {
+        public static R<Void> of(final int retryTimes, final long retryIntervallInMillis, final Predicate<? super RuntimeException> retryCondition) {
             N.checkArgNotNegative(retryTimes, "retryTimes");
             N.checkArgNotNegative(retryIntervallInMillis, "retryIntervallInMillis");
             N.checkArgNotNull(retryCondition);
 
-            return new RetryR<>(retryTimes, retryIntervallInMillis, retryCondition, null);
+            return new R<>(retryTimes, retryIntervallInMillis, retryCondition, null);
         }
 
         /**
          *
-         * @param <R>
+         * @param <T>
          * @param retryTimes
          * @param retryIntervallInMillis
          * @param retryCondition
          * @return
          */
-        public static <R> RetryR<R> of(final int retryTimes, final long retryIntervallInMillis,
-                final BiPredicate<? super R, ? super RuntimeException> retryCondition) {
+        public static <T> R<T> of(final int retryTimes, final long retryIntervallInMillis,
+                final BiPredicate<? super T, ? super RuntimeException> retryCondition) {
             N.checkArgNotNegative(retryTimes, "retryTimes");
             N.checkArgNotNegative(retryIntervallInMillis, "retryIntervallInMillis");
             N.checkArgNotNull(retryCondition);
 
-            return new RetryR<>(retryTimes, retryIntervallInMillis, null, retryCondition);
+            return new R<>(retryTimes, retryIntervallInMillis, null, retryCondition);
         }
 
         /**

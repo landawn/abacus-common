@@ -15695,6 +15695,22 @@ sealed class CommonUtil permits N {
 
     /**
      *
+     * @param c
+     */
+    public static <T> List<T> reverseToList(final Collection<? extends T> c) {
+        if (isEmpty(c)) {
+            return new ArrayList<>(0);
+        }
+
+        final List<T> result = new ArrayList<>(c);
+
+        reverse(result);
+
+        return result;
+    }
+
+    /**
+     *
      * @param a
      * @param distance
      */

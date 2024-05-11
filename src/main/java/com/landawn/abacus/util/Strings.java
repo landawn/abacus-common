@@ -8411,6 +8411,47 @@ public abstract sealed class Strings permits Strings.StringUtil {
     /**
      *
      * @param str
+     * @param fromIndex
+     * @param toIndex
+     * @param replacement
+     * @return
+     * @see N#replaceRange(String, int, int, String)
+     */
+    @Beta
+    public static String replaceRange(final String str, final int fromIndex, final int toIndex, final String replacement) {
+        return N.replaceRange(str, fromIndex, toIndex, replacement);
+    }
+
+    /**
+     *
+     * @param str
+     * @param fromIndex
+     * @param toIndex
+     * @param newPositionStartIndex
+     * @return
+     * @see N#moveRange(String, int, int, int)
+     */
+    @Beta
+    public static String moveRange(final String str, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
+        return N.moveRange(str, fromIndex, toIndex, newPositionStartIndex);
+    }
+
+    /**
+     *
+     * @param str
+     * @param fromIndex
+     * @param toIndex
+     * @return
+     * @see N#deleteRange(String, int, int)
+     */
+    @Beta
+    public static String deleteRange(String str, final int fromIndex, final int toIndex) {
+        return N.deleteRange(str, fromIndex, toIndex);
+    }
+
+    /**
+     *
+     * @param str
      * @return
      */
     public static OptionalChar firstChar(final String str) {
