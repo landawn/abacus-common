@@ -15,18 +15,15 @@
 package com.landawn.abacus.type;
 
 import java.io.IOException;
-import java.io.Writer;
 
 import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
-import com.landawn.abacus.util.BufferedWriter;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.Indexed;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Numbers;
-import com.landawn.abacus.util.Objectory;
 import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.WD;
 
@@ -129,37 +126,22 @@ public class IndexedType<T> extends AbstractType<Indexed<T>> {
 
     /**
      *
-     * @param writer
+     * @param appendable
      * @param x
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void write(Writer writer, Indexed<T> x) throws IOException {
+    public void appendTo(Appendable appendable, Indexed<T> x) throws IOException {
         if (x == null) {
-            writer.write(NULL_CHAR_ARRAY);
+            appendable.append(NULL_STRING);
         } else {
-            boolean isBufferedWriter = writer instanceof BufferedWriter || writer instanceof java.io.BufferedWriter;
-            final Writer bw = isBufferedWriter ? writer : Objectory.createBufferedWriter(writer);
+            appendable.append(WD._BRACKET_L);
 
-            try {
-                bw.write(WD._BRACKET_L);
+            appendable.append(String.valueOf(x.longIndex()));
+            appendable.append(ELEMENT_SEPARATOR);
+            valueType.appendTo(appendable, x.value());
 
-                bw.write(String.valueOf(x.longIndex()));
-                bw.write(ELEMENT_SEPARATOR_CHAR_ARRAY);
-                valueType.write(bw, x.value());
-
-                bw.write(WD._BRACKET_R);
-
-                if (!isBufferedWriter) {
-                    bw.flush();
-                }
-            } catch (IOException e) {
-                throw new UncheckedIOException(e);
-            } finally {
-                if (!isBufferedWriter) {
-                    Objectory.recycle((BufferedWriter) bw);
-                }
-            }
+            appendable.append(WD._BRACKET_R);
         }
     }
 

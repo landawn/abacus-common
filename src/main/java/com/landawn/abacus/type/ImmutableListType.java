@@ -15,7 +15,6 @@
 package com.landawn.abacus.type;
 
 import java.io.IOException;
-import java.io.Writer;
 import java.util.List;
 
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
@@ -182,8 +181,8 @@ public class ImmutableListType<E> extends AbstractType<ImmutableList<E>> {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void write(Writer writer, ImmutableList<E> x) throws IOException {
-        listType.write(writer, x);
+    public void appendTo(Appendable writer, ImmutableList<E> x) throws IOException {
+        listType.appendTo(writer, x);
     }
 
     /**

@@ -8415,8 +8415,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param toIndex
      * @param replacement
      * @return
+     * @deprecated Replaced By {@code N.replaceRange(String, int, int, String)}
      * @see N#replaceRange(String, int, int, String)
      */
+    @Deprecated
     @Beta
     public static String replaceRange(final String str, final int fromIndex, final int toIndex, final String replacement) {
         return N.replaceRange(str, fromIndex, toIndex, replacement);
@@ -8429,8 +8431,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param toIndex
      * @param newPositionStartIndex
      * @return
+     * @deprecated Replaced By {@code N.moveRange(String, int, int, int)}
      * @see N#moveRange(String, int, int, int)
      */
+    @Deprecated
     @Beta
     public static String moveRange(final String str, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
         return N.moveRange(str, fromIndex, toIndex, newPositionStartIndex);
@@ -8442,8 +8446,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param fromIndex
      * @param toIndex
      * @return
+     * @deprecated Replaced By {@code N.deleteRange(String, int, int)}
      * @see N#deleteRange(String, int, int)
      */
+    @Deprecated
     @Beta
     public static String deleteRange(String str, final int fromIndex, final int toIndex) {
         return N.deleteRange(str, fromIndex, toIndex);

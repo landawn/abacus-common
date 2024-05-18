@@ -15,7 +15,6 @@
 package com.landawn.abacus.type;
 
 import java.io.IOException;
-import java.io.Writer;
 import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -135,16 +134,16 @@ public abstract class AbstractFloatType extends NumberType<Number> {
 
     /**
      *
-     * @param writer
+     * @param appendable
      * @param x
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void write(Writer writer, Number x) throws IOException {
+    public void appendTo(Appendable appendable, Number x) throws IOException {
         if (x == null) {
-            writer.write(NULL_CHAR_ARRAY);
+            appendable.append(NULL_STRING);
         } else {
-            IOUtil.write(writer, Numbers.toFloat(x));
+            appendable.append(x.toString());
         }
     }
 

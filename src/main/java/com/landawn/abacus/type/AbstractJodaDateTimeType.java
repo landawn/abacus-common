@@ -15,7 +15,6 @@
 package com.landawn.abacus.type;
 
 import java.io.IOException;
-import java.io.Writer;
 
 import org.joda.time.base.AbstractInstant;
 import org.joda.time.format.DateTimeFormatter;
@@ -73,16 +72,16 @@ public abstract class AbstractJodaDateTimeType<T extends AbstractInstant> extend
 
     /**
      *
-     * @param writer
+     * @param appendable
      * @param x
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void write(Writer writer, T x) throws IOException {
+    public void appendTo(Appendable appendable, T x) throws IOException {
         if (x == null) {
-            writer.write(NULL_CHAR_ARRAY);
+            appendable.append(NULL_STRING);
         } else {
-            jodaISO8601TimestampFT.printTo(writer, x);
+            jodaISO8601TimestampFT.printTo(appendable, x);
         }
     }
 

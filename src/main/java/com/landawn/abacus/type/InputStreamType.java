@@ -17,6 +17,7 @@ package com.landawn.abacus.type;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.Writer;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
@@ -229,16 +230,22 @@ public class InputStreamType extends AbstractType<InputStream> {
 
     /**
      *
-     * @param writer
-     * @param t
+     * @param appendable
+     * @param x
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void write(Writer writer, InputStream t) throws IOException {
-        if (t == null) {
-            writer.write(NULL_CHAR_ARRAY);
+    public void appendTo(Appendable appendable, InputStream x) throws IOException {
+        if (x == null) {
+            appendable.append(NULL_STRING);
         } else {
-            writer.write(Strings.base64Encode(IOUtil.readAllBytes(t)));
+            if (appendable instanceof Writer) {
+                final Writer writer = (Writer) appendable;
+
+                IOUtil.write(writer, new InputStreamReader(x));
+            } else {
+                appendable.append(IOUtil.readAllToString(x));
+            }
         }
     }
 

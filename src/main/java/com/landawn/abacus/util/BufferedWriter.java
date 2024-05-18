@@ -141,7 +141,7 @@ public class BufferedWriter extends Writer {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     public void write(Date date) throws IOException {
-        DateUtil.format(this, date, null, null);
+        DateUtil.formatTo(this, date, null, null);
     }
 
     /**
@@ -150,7 +150,7 @@ public class BufferedWriter extends Writer {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     public void write(Calendar c) throws IOException {
-        DateUtil.format(this, c, null, null);
+        DateUtil.formatTo(this, c, null, null);
     }
 
     /**
@@ -159,7 +159,7 @@ public class BufferedWriter extends Writer {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     public void write(XMLGregorianCalendar c) throws IOException {
-        DateUtil.format(this, c, null, null);
+        DateUtil.formatTo(this, c, null, null);
     }
 
     /**

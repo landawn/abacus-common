@@ -59,9 +59,9 @@ public class Tuple1Type<T1> extends AbstractType<Tuple1<T1>> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public String declaringName() {
@@ -69,9 +69,9 @@ public class Tuple1Type<T1> extends AbstractType<Tuple1<T1>> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public Class<Tuple1<T1>> clazz() {
@@ -130,34 +130,43 @@ public class Tuple1Type<T1> extends AbstractType<Tuple1<T1>> {
 
     /**
      *
-     * @param writer
+     * @param appendable
      * @param x
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void write(Writer writer, Tuple1<T1> x) throws IOException {
+    public void appendTo(Appendable appendable, Tuple1<T1> x) throws IOException {
         if (x == null) {
-            writer.write(NULL_CHAR_ARRAY);
+            appendable.append(NULL_STRING);
         } else {
-            boolean isBufferedWriter = writer instanceof BufferedWriter || writer instanceof java.io.BufferedWriter;
-            final Writer bw = isBufferedWriter ? writer : Objectory.createBufferedWriter(writer);
+            if (appendable instanceof Writer) {
+                final Writer writer = (Writer) appendable;
+                boolean isBufferedWriter = writer instanceof BufferedWriter || writer instanceof java.io.BufferedWriter;
+                final Writer bw = isBufferedWriter ? writer : Objectory.createBufferedWriter(writer); //NOSONAR
 
-            try {
-                bw.write(WD._BRACKET_L);
+                try {
+                    bw.write(WD._BRACKET_L);
 
-                type1.write(bw, x._1);
+                    type1.appendTo(bw, x._1);
 
-                bw.write(WD._BRACKET_R);
+                    bw.write(WD._BRACKET_R);
 
-                if (!isBufferedWriter) {
-                    bw.flush();
+                    if (!isBufferedWriter) {
+                        bw.flush();
+                    }
+                } catch (IOException e) {
+                    throw new UncheckedIOException(e);
+                } finally {
+                    if (!isBufferedWriter) {
+                        Objectory.recycle((BufferedWriter) bw);
+                    }
                 }
-            } catch (IOException e) {
-                throw new UncheckedIOException(e);
-            } finally {
-                if (!isBufferedWriter) {
-                    Objectory.recycle((BufferedWriter) bw);
-                }
+            } else {
+                appendable.append(WD._BRACKET_L);
+
+                type1.appendTo(appendable, x._1);
+
+                appendable.append(WD._BRACKET_R);
             }
         }
     }

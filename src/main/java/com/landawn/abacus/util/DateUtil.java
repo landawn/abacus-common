@@ -188,6 +188,10 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
         }
     }
 
+    static final Map<String, DateTimeFormatter> dtfPool = ImmutableMap.<String, DateTimeFormatter> builder()
+            .put("uuuu-MM-dd", DateTimeFormatter.ISO_LOCAL_DATE)
+            .build();
+
     DateUtil() {
         // singleton
     }
@@ -1074,6 +1078,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
      * Format current date with format {@code yyyy-MM-dd}.
      *
      * @return
+     * @see DateTimeFormatter#format(java.time.temporal.TemporalAccessor)
      */
     @Beta
     public static String formatLocalDate() {
@@ -1084,6 +1089,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
      * Format current date with format with specified {@code yyyy-MM-dd HH:mm:ss}.
      *
      * @return
+     * @see DateTimeFormatter#format(java.time.temporal.TemporalAccessor)
      */
     @Beta
     public static String formatLocalDateTime() {
@@ -1094,6 +1100,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
      * Format current date with format with specified {@code yyyy-MM-dd'T'HH:mm:ss'Z'}.
      *
      * @return
+     * @see DateTimeFormatter#format(java.time.temporal.TemporalAccessor)
      */
     public static String formatCurrentDateTime() {
         return format(currentDate(), ISO_8601_DATETIME_FORMAT);
@@ -1103,6 +1110,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
      * Format current date with format with specified {@code yyyy-MM-dd'T'HH:mm:ss.SSS'Z'}.
      *
      * @return
+     * @see DateTimeFormatter#format(java.time.temporal.TemporalAccessor)
      */
     public static String formatCurrentTimestamp() {
         return format(currentTimestamp(), ISO_8601_TIMESTAMP_FORMAT);
@@ -1113,6 +1121,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
      *
      * @param date
      * @return
+     * @see DateTimeFormatter#format(java.time.temporal.TemporalAccessor)
      */
     public static String format(final java.util.Date date) {
         return format(date, null, null);
@@ -1123,6 +1132,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
      * @param date
      * @param format
      * @return
+     * @see DateTimeFormatter#format(java.time.temporal.TemporalAccessor)
      */
     public static String format(final java.util.Date date, final String format) {
         return format(date, format, null);
@@ -1134,6 +1144,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
      * @param format
      * @param timeZone
      * @return
+     * @see DateTimeFormatter#format(java.time.temporal.TemporalAccessor)
      */
     public static String format(final java.util.Date date, final String format, final TimeZone timeZone) {
         return formatDate(null, date, format, timeZone);
@@ -1141,38 +1152,9 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
 
     /**
      *
-     * @param writer
-     * @param date
-     */
-    public static void format(final Writer writer, final java.util.Date date) {
-        format(writer, date, null, null);
-    }
-
-    /**
-     *
-     * @param writer
-     * @param date
-     * @param format
-     */
-    public static void format(final Writer writer, final java.util.Date date, final String format) {
-        formatDate(writer, date, format, null);
-    }
-
-    /**
-     *
-     * @param writer
-     * @param date
-     * @param format
-     * @param timeZone
-     */
-    public static void format(final Writer writer, final java.util.Date date, final String format, final TimeZone timeZone) {
-        formatDate(writer, date, format, timeZone);
-    }
-
-    /**
-     *
      * @param c
      * @return
+     * @see DateTimeFormatter#format(java.time.temporal.TemporalAccessor)
      */
     public static String format(final Calendar c) {
         return format(c, null, null);
@@ -1183,6 +1165,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
      * @param c
      * @param format
      * @return
+     * @see DateTimeFormatter#format(java.time.temporal.TemporalAccessor)
      */
     public static String format(final Calendar c, final String format) {
         return format(c, format, null);
@@ -1194,6 +1177,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
      * @param format
      * @param timeZone
      * @return
+     * @see DateTimeFormatter#format(java.time.temporal.TemporalAccessor)
      */
     public static String format(final Calendar c, final String format, final TimeZone timeZone) {
         if ((format == null) && (timeZone == null)) {
@@ -1213,42 +1197,9 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
 
     /**
      *
-     * @param writer
-     * @param c
-     */
-    public static void format(final Writer writer, final Calendar c) {
-        format(writer, c, null, null);
-    }
-
-    /**
-     *
-     * @param writer
-     * @param c
-     * @param format
-     */
-    public static void format(final Writer writer, final Calendar c, final String format) {
-        format(writer, c, format, null);
-    }
-
-    /**
-     *
-     * @param writer
-     * @param c
-     * @param format
-     * @param timeZone
-     */
-    public static void format(final Writer writer, final Calendar c, final String format, final TimeZone timeZone) {
-        if ((format == null) && (timeZone == null)) {
-            fastDateFormat(null, writer, c.getTimeInMillis(), false);
-        } else {
-            format(writer, createJUDate(c), format, timeZone);
-        }
-    }
-
-    /**
-     *
      * @param c
      * @return
+     * @see DateTimeFormatter#format(java.time.temporal.TemporalAccessor)
      */
     public static String format(final XMLGregorianCalendar c) {
         return format(c, null, null);
@@ -1259,6 +1210,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
      * @param c
      * @param format
      * @return
+     * @see DateTimeFormatter#format(java.time.temporal.TemporalAccessor)
      */
     public static String format(final XMLGregorianCalendar c, final String format) {
         return format(c, format, null);
@@ -1270,6 +1222,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
      * @param format
      * @param timeZone
      * @return
+     * @see DateTimeFormatter#format(java.time.temporal.TemporalAccessor)
      */
     public static String format(final XMLGregorianCalendar c, final String format, final TimeZone timeZone) {
         if ((format == null) && (timeZone == null)) {
@@ -1289,41 +1242,268 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
 
     /**
      *
-     * @param writer
-     * @param c
+     * @param appendable
+     * @param date
+     * @see DateTimeFormatter#formatTo(java.time.temporal.TemporalAccessor, Appendable)
      */
-    public static void format(final Writer writer, final XMLGregorianCalendar c) {
-        format(writer, c, null, null);
+    public static void formatTo(final Appendable appendable, final java.util.Date date) {
+        formatTo(appendable, date, null, null);
     }
 
     /**
      *
-     * @param writer
+     * @param appendable
+     * @param date
+     * @param format
+     * @see DateTimeFormatter#formatTo(java.time.temporal.TemporalAccessor, Appendable)
+     */
+    public static void formatTo(final Appendable appendable, final java.util.Date date, final String format) {
+        formatDate(appendable, date, format, null);
+    }
+
+    /**
+     *
+     * @param appendable
+     * @param date
+     * @param format
+     * @param timeZone
+     * @see DateTimeFormatter#formatTo(java.time.temporal.TemporalAccessor, Appendable)
+     */
+    public static void formatTo(final Appendable appendable, final java.util.Date date, final String format, final TimeZone timeZone) {
+        formatDate(appendable, date, format, timeZone);
+    }
+
+    /**
+     *
+     * @param appendable
+     * @param c
+     * @see DateTimeFormatter#formatTo(java.time.temporal.TemporalAccessor, Appendable)
+     */
+    public static void formatTo(final Appendable appendable, final Calendar c) {
+        formatTo(appendable, c, null, null);
+    }
+
+    /**
+     *
+     * @param appendable
      * @param c
      * @param format
+     * @see DateTimeFormatter#formatTo(java.time.temporal.TemporalAccessor, Appendable)
      */
-    public static void format(final Writer writer, final XMLGregorianCalendar c, final String format) {
-        format(writer, c, format, null);
+    public static void formatTo(final Appendable appendable, final Calendar c, final String format) {
+        formatTo(appendable, c, format, null);
     }
 
     /**
      *
-     * @param writer
+     * @param appendable
      * @param c
      * @param format
      * @param timeZone
+     * @see DateTimeFormatter#formatTo(java.time.temporal.TemporalAccessor, Appendable)
      */
-    public static void format(final Writer writer, final XMLGregorianCalendar c, final String format, final TimeZone timeZone) {
+    public static void formatTo(final Appendable appendable, final Calendar c, final String format, final TimeZone timeZone) {
         if ((format == null) && (timeZone == null)) {
-            fastDateFormat(null, writer, c.toGregorianCalendar().getTimeInMillis(), false);
+            fastDateFormat(null, appendable, c.getTimeInMillis(), false);
         } else {
-            format(writer, createJUDate(c.toGregorianCalendar()), format, timeZone);
+            formatTo(appendable, createJUDate(c), format, timeZone);
         }
     }
 
-    static final Map<String, DateTimeFormatter> dtfPool = ImmutableMap.<String, DateTimeFormatter> builder()
-            .put("uuuu-MM-dd", DateTimeFormatter.ISO_LOCAL_DATE)
-            .build();
+    /**
+     *
+     * @param appendable
+     * @param c
+     * @see DateTimeFormatter#formatTo(java.time.temporal.TemporalAccessor, Appendable)
+     */
+    public static void formatTo(final Appendable appendable, final XMLGregorianCalendar c) {
+        formatTo(appendable, c, null, null);
+    }
+
+    /**
+     *
+     * @param appendable
+     * @param c
+     * @param format
+     * @see DateTimeFormatter#formatTo(java.time.temporal.TemporalAccessor, Appendable)
+     */
+    public static void formatTo(final Appendable appendable, final XMLGregorianCalendar c, final String format) {
+        formatTo(appendable, c, format, null);
+    }
+
+    /**
+     *
+     * @param appendable
+     * @param c
+     * @param format
+     * @param timeZone
+     * @see DateTimeFormatter#formatTo(java.time.temporal.TemporalAccessor, Appendable)
+     */
+    public static void formatTo(final Appendable appendable, final XMLGregorianCalendar c, final String format, final TimeZone timeZone) {
+        if ((format == null) && (timeZone == null)) {
+            fastDateFormat(null, appendable, c.toGregorianCalendar().getTimeInMillis(), false);
+        } else {
+            formatTo(appendable, createJUDate(c.toGregorianCalendar()), format, timeZone);
+        }
+    }
+
+    /**
+     *
+     * @param appendable
+     * @param date
+     * @param format
+     * @param timeZone
+     * @return
+     */
+    private static String formatDate(final Appendable appendable, final java.util.Date date, String format, TimeZone timeZone) {
+        boolean isTimestamp = date instanceof Timestamp;
+
+        if ((format == null) && (timeZone == null)) {
+            if (appendable == null) {
+                final StringBuilder sb = Objectory.createStringBuilder();
+
+                fastDateFormat(sb, null, date.getTime(), isTimestamp);
+
+                String str = sb.toString();
+
+                Objectory.recycle(sb);
+
+                return str;
+            } else {
+                fastDateFormat(null, appendable, date.getTime(), isTimestamp);
+
+                return null;
+            }
+        }
+
+        if (format == null) {
+            format = isTimestamp ? ISO_8601_TIMESTAMP_FORMAT : ISO_8601_DATETIME_FORMAT;
+        }
+
+        timeZone = checkTimeZone(format, timeZone);
+
+        DateFormat sdf = getSDF(format, timeZone);
+
+        String str = sdf.format(date);
+
+        if (appendable != null) {
+            try {
+                appendable.append(str);
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
+        }
+
+        recycleSDF(format, timeZone, sdf);
+
+        return str;
+    }
+
+    /**
+     * Fast date format.
+     * @param sb TODO
+     * @param appendable
+     * @param timeInMillis
+     * @param isTimestamp
+     */
+    private static void fastDateFormat(final StringBuilder sb, final Appendable appendable, final long timeInMillis, final boolean isTimestamp) {
+        Calendar c = utcCalendarPool.poll();
+
+        if (c == null) {
+            c = Calendar.getInstance(UTC_TIME_ZONE);
+        }
+
+        c.setTimeInMillis(timeInMillis);
+
+        int year = c.get(Calendar.YEAR);
+        int month = c.get(Calendar.MONTH) + 1;
+        int day = c.get(Calendar.DAY_OF_MONTH);
+        int hour = c.get(Calendar.HOUR_OF_DAY);
+        int minute = c.get(Calendar.MINUTE);
+        int second = c.get(Calendar.SECOND);
+
+        char[] utcTimestamp = utcTimestampFormatCharsPool.poll();
+
+        if (utcTimestamp == null) {
+            utcTimestamp = new char[24];
+            utcTimestamp[4] = '-';
+            utcTimestamp[7] = '-';
+            utcTimestamp[10] = 'T';
+            utcTimestamp[13] = ':';
+            utcTimestamp[16] = ':';
+            utcTimestamp[19] = '.';
+            utcTimestamp[23] = 'Z';
+        }
+        //
+        // copy(cbufOfSTDInt[4][year], 0, utcTimestamp, 0, 4);
+        // copy(cbufOfSTDInt[2][month], 0, utcTimestamp, 5, 2);
+        // copy(cbufOfSTDInt[2][day], 0, utcTimestamp, 8, 2);
+        // copy(cbufOfSTDInt[2][hour], 0, utcTimestamp, 11, 2);
+        // copy(cbufOfSTDInt[2][minute], 0, utcTimestamp, 14, 2);
+        // copy(cbufOfSTDInt[2][second], 0, utcTimestamp, 17, 2);
+        //
+        utcTimestamp[0] = cbufOfSTDInt[4][year][0];
+        utcTimestamp[1] = cbufOfSTDInt[4][year][1];
+        utcTimestamp[2] = cbufOfSTDInt[4][year][2];
+        utcTimestamp[3] = cbufOfSTDInt[4][year][3];
+
+        utcTimestamp[5] = cbufOfSTDInt[2][month][0];
+        utcTimestamp[6] = cbufOfSTDInt[2][month][1];
+
+        utcTimestamp[8] = cbufOfSTDInt[2][day][0];
+        utcTimestamp[9] = cbufOfSTDInt[2][day][1];
+
+        utcTimestamp[11] = cbufOfSTDInt[2][hour][0];
+        utcTimestamp[12] = cbufOfSTDInt[2][hour][1];
+
+        utcTimestamp[14] = cbufOfSTDInt[2][minute][0];
+        utcTimestamp[15] = cbufOfSTDInt[2][minute][1];
+
+        utcTimestamp[17] = cbufOfSTDInt[2][second][0];
+        utcTimestamp[18] = cbufOfSTDInt[2][second][1];
+
+        if (isTimestamp) {
+            utcTimestamp[19] = '.';
+
+            int milliSecond = c.get(Calendar.MILLISECOND);
+            // copy(cbufOfSTDInt[3][milliSecond], 0, utcTimestamp,
+            // 20, 3);
+            utcTimestamp[20] = cbufOfSTDInt[3][milliSecond][0];
+            utcTimestamp[21] = cbufOfSTDInt[3][milliSecond][1];
+            utcTimestamp[22] = cbufOfSTDInt[3][milliSecond][2];
+        } else {
+            utcTimestamp[19] = 'Z';
+        }
+
+        try {
+            if (isTimestamp) {
+                if (sb == null) {
+                    if (appendable instanceof Writer) {
+                        ((Writer) appendable).write(utcTimestamp);
+                    } else {
+                        appendable.append(String.valueOf(utcTimestamp));
+                    }
+                } else {
+                    sb.append(utcTimestamp);
+                }
+            } else {
+                if (sb == null) {
+                    if (appendable instanceof Writer) {
+                        ((Writer) appendable).write(utcTimestamp, 0, 20);
+                    } else {
+                        appendable.append(String.valueOf(utcTimestamp, 0, 20));
+                    }
+                } else {
+                    sb.append(utcTimestamp, 0, 20);
+                }
+            }
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        } finally {
+            utcCalendarPool.add(c);
+            utcTimestampFormatCharsPool.add(utcTimestamp);
+        }
+    }
 
     //    // https://stackoverflow.com/questions/47698046/datetimeformatter-iso-local-date-vs-datetimeformatter-ofpatternyyyy-mm-dd-in
     //    /**
@@ -1391,43 +1571,43 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
     //
     //    /**
     //     *
-    //     * @param writer
+    //     * @param appendable
     //     * @param zonedDateTime
     //     */
-    //    public static void format(final Writer writer, final ZonedDateTime zonedDateTime) {
-    //        format(writer, zonedDateTime, null, null);
+    //    public static void formatTo(final Appendable appendable, final ZonedDateTime zonedDateTime) {
+    //        format(appendable, zonedDateTime, null, null);
     //    }
     //
     //    /**
     //     *
-    //     * @param writer
+    //     * @param appendable
     //     * @param zonedDateTime
     //     * @param format
     //     */
-    //    public static void format(final Writer writer, final ZonedDateTime zonedDateTime, final String format) {
-    //        formatZonedDateTime(writer, zonedDateTime, format, null);
+    //    public static void formatTo(final Appendable appendable, final ZonedDateTime zonedDateTime, final String format) {
+    //        formatZonedDateTime(appendable, zonedDateTime, format, null);
     //    }
     //
     //    /**
     //     *
-    //     * @param writer
+    //     * @param appendable
     //     * @param zonedDateTime
     //     * @param format
     //     * @param timeZone
     //     */
-    //    public static void format(final Writer writer, final ZonedDateTime zonedDateTime, final String format, final TimeZone timeZone) {
-    //        formatZonedDateTime(writer, zonedDateTime, format, timeZone);
+    //    public static void formatTo(final Appendable appendable, final ZonedDateTime zonedDateTime, final String format, final TimeZone timeZone) {
+    //        formatZonedDateTime(appendable, zonedDateTime, format, timeZone);
     //    }
     //
     //    /**
     //     *
-    //     * @param writer
+    //     * @param appendable
     //     * @param date
     //     * @param format
     //     * @param timeZone
     //     * @return
     //     */
-    //    private static String formatZonedDateTime(final Writer writer, final ZonedDateTime zonedDateTime, String format, TimeZone timeZone) {
+    //    private static String formatZonedDateTime(final Appendable appendable, final ZonedDateTime zonedDateTime, String format, TimeZone timeZone) {
     //        String ret = null;
     //
     //        if (format == null) {
@@ -3539,156 +3719,6 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
         }
 
         return (T) result;
-    }
-
-    /**
-     *
-     * @param writer
-     * @param date
-     * @param format
-     * @param timeZone
-     * @return
-     */
-    private static String formatDate(final Writer writer, final java.util.Date date, String format, TimeZone timeZone) {
-        boolean isTimestamp = date instanceof Timestamp;
-
-        if ((format == null) && (timeZone == null)) {
-            if (writer == null) {
-                final StringBuilder sb = Objectory.createStringBuilder();
-
-                fastDateFormat(sb, null, date.getTime(), isTimestamp);
-
-                String str = sb.toString();
-
-                Objectory.recycle(sb);
-
-                return str;
-            } else {
-                fastDateFormat(null, writer, date.getTime(), isTimestamp);
-
-                return null;
-            }
-        }
-
-        if (format == null) {
-            format = isTimestamp ? ISO_8601_TIMESTAMP_FORMAT : ISO_8601_DATETIME_FORMAT;
-        }
-
-        timeZone = checkTimeZone(format, timeZone);
-
-        DateFormat sdf = getSDF(format, timeZone);
-
-        String str = sdf.format(date);
-
-        if (writer != null) {
-            try {
-                writer.write(str);
-            } catch (IOException e) {
-                throw new UncheckedIOException(e);
-            }
-        }
-
-        recycleSDF(format, timeZone, sdf);
-
-        return str;
-    }
-
-    /**
-     * Fast date format.
-     * @param sb TODO
-     * @param writer
-     * @param timeInMillis
-     * @param isTimestamp
-     */
-    private static void fastDateFormat(final StringBuilder sb, final Writer writer, final long timeInMillis, final boolean isTimestamp) {
-        Calendar c = utcCalendarPool.poll();
-
-        if (c == null) {
-            c = Calendar.getInstance(UTC_TIME_ZONE);
-        }
-
-        c.setTimeInMillis(timeInMillis);
-
-        int year = c.get(Calendar.YEAR);
-        int month = c.get(Calendar.MONTH) + 1;
-        int day = c.get(Calendar.DAY_OF_MONTH);
-        int hour = c.get(Calendar.HOUR_OF_DAY);
-        int minute = c.get(Calendar.MINUTE);
-        int second = c.get(Calendar.SECOND);
-
-        char[] utcTimestamp = utcTimestampFormatCharsPool.poll();
-
-        if (utcTimestamp == null) {
-            utcTimestamp = new char[24];
-            utcTimestamp[4] = '-';
-            utcTimestamp[7] = '-';
-            utcTimestamp[10] = 'T';
-            utcTimestamp[13] = ':';
-            utcTimestamp[16] = ':';
-            utcTimestamp[19] = '.';
-            utcTimestamp[23] = 'Z';
-        }
-        //
-        // copy(cbufOfSTDInt[4][year], 0, utcTimestamp, 0, 4);
-        // copy(cbufOfSTDInt[2][month], 0, utcTimestamp, 5, 2);
-        // copy(cbufOfSTDInt[2][day], 0, utcTimestamp, 8, 2);
-        // copy(cbufOfSTDInt[2][hour], 0, utcTimestamp, 11, 2);
-        // copy(cbufOfSTDInt[2][minute], 0, utcTimestamp, 14, 2);
-        // copy(cbufOfSTDInt[2][second], 0, utcTimestamp, 17, 2);
-        //
-        utcTimestamp[0] = cbufOfSTDInt[4][year][0];
-        utcTimestamp[1] = cbufOfSTDInt[4][year][1];
-        utcTimestamp[2] = cbufOfSTDInt[4][year][2];
-        utcTimestamp[3] = cbufOfSTDInt[4][year][3];
-
-        utcTimestamp[5] = cbufOfSTDInt[2][month][0];
-        utcTimestamp[6] = cbufOfSTDInt[2][month][1];
-
-        utcTimestamp[8] = cbufOfSTDInt[2][day][0];
-        utcTimestamp[9] = cbufOfSTDInt[2][day][1];
-
-        utcTimestamp[11] = cbufOfSTDInt[2][hour][0];
-        utcTimestamp[12] = cbufOfSTDInt[2][hour][1];
-
-        utcTimestamp[14] = cbufOfSTDInt[2][minute][0];
-        utcTimestamp[15] = cbufOfSTDInt[2][minute][1];
-
-        utcTimestamp[17] = cbufOfSTDInt[2][second][0];
-        utcTimestamp[18] = cbufOfSTDInt[2][second][1];
-
-        if (isTimestamp) {
-            utcTimestamp[19] = '.';
-
-            int milliSecond = c.get(Calendar.MILLISECOND);
-            // copy(cbufOfSTDInt[3][milliSecond], 0, utcTimestamp,
-            // 20, 3);
-            utcTimestamp[20] = cbufOfSTDInt[3][milliSecond][0];
-            utcTimestamp[21] = cbufOfSTDInt[3][milliSecond][1];
-            utcTimestamp[22] = cbufOfSTDInt[3][milliSecond][2];
-        } else {
-            utcTimestamp[19] = 'Z';
-        }
-
-        try {
-            if (isTimestamp) {
-                if (sb == null) {
-                    writer.write(utcTimestamp);
-                } else {
-                    sb.append(utcTimestamp);
-                }
-            } else {
-                if (sb == null) {
-                    writer.write(utcTimestamp, 0, 20);
-                } else {
-                    sb.append(utcTimestamp, 0, 20);
-                }
-            }
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        } finally {
-            utcCalendarPool.add(c);
-            utcTimestampFormatCharsPool.add(utcTimestamp);
-        }
     }
 
     /**

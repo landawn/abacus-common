@@ -3743,6 +3743,362 @@ public class Array {
         return result;
     }
 
+    /**
+     *
+     * @param a
+     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
+     */
+    @MayReturnNull
+    @Beta
+    public static boolean[][] transpose(final boolean[][] a) {
+        checkIfMatrixArray(a);
+
+        if (a == null) {
+            return a;
+        } else if (a.length == 0) {
+            return a.clone();
+        }
+
+        final int rows = a.length;
+        final int cols = a[0].length;
+
+        final boolean[][] c = new boolean[cols][rows];
+
+        if (rows <= cols) {
+            for (int j = 0; j < rows; j++) {
+                for (int i = 0; i < cols; i++) {
+                    c[i][j] = a[j][i];
+                }
+            }
+        } else {
+            for (int i = 0; i < cols; i++) {
+                for (int j = 0; j < rows; j++) {
+                    c[i][j] = a[j][i];
+                }
+            }
+        }
+
+        return c;
+    }
+
+    /**
+     *
+     * @param a
+     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
+     */
+    @MayReturnNull
+    @Beta
+    public static char[][] transpose(final char[][] a) {
+        checkIfMatrixArray(a);
+
+        if (a == null) {
+            return a;
+        } else if (a.length == 0) {
+            return a.clone();
+        }
+
+        final int rows = a.length;
+        final int cols = a[0].length;
+
+        final char[][] c = new char[cols][rows];
+
+        if (rows <= cols) {
+            for (int j = 0; j < rows; j++) {
+                for (int i = 0; i < cols; i++) {
+                    c[i][j] = a[j][i];
+                }
+            }
+        } else {
+            for (int i = 0; i < cols; i++) {
+                for (int j = 0; j < rows; j++) {
+                    c[i][j] = a[j][i];
+                }
+            }
+        }
+
+        return c;
+    }
+
+    /**
+     *
+     * @param a
+     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
+     */
+    @MayReturnNull
+    @Beta
+    public static byte[][] transpose(final byte[][] a) {
+        checkIfMatrixArray(a);
+
+        if (a == null) {
+            return a;
+        } else if (a.length == 0) {
+            return a.clone();
+        }
+
+        final int rows = a.length;
+        final int cols = a[0].length;
+
+        final byte[][] c = new byte[cols][rows];
+
+        if (rows <= cols) {
+            for (int j = 0; j < rows; j++) {
+                for (int i = 0; i < cols; i++) {
+                    c[i][j] = a[j][i];
+                }
+            }
+        } else {
+            for (int i = 0; i < cols; i++) {
+                for (int j = 0; j < rows; j++) {
+                    c[i][j] = a[j][i];
+                }
+            }
+        }
+
+        return c;
+    }
+
+    /**
+     *
+     * @param a
+     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
+     */
+    @MayReturnNull
+    @Beta
+    public static short[][] transpose(final short[][] a) {
+        checkIfMatrixArray(a);
+
+        if (a == null) {
+            return a;
+        } else if (a.length == 0) {
+            return a.clone();
+        }
+
+        final int rows = a.length;
+        final int cols = a[0].length;
+
+        final short[][] c = new short[cols][rows];
+
+        if (rows <= cols) {
+            for (int j = 0; j < rows; j++) {
+                for (int i = 0; i < cols; i++) {
+                    c[i][j] = a[j][i];
+                }
+            }
+        } else {
+            for (int i = 0; i < cols; i++) {
+                for (int j = 0; j < rows; j++) {
+                    c[i][j] = a[j][i];
+                }
+            }
+        }
+
+        return c;
+    }
+
+    /**
+     *
+     * @param a
+     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
+     */
+    @MayReturnNull
+    @Beta
+    public static int[][] transpose(final int[][] a) {
+        checkIfMatrixArray(a);
+
+        if (a == null) {
+            return a;
+        } else if (a.length == 0) {
+            return a.clone();
+        }
+
+        final int rows = a.length;
+        final int cols = a[0].length;
+
+        final int[][] c = new int[cols][rows];
+
+        if (rows <= cols) {
+            for (int j = 0; j < rows; j++) {
+                for (int i = 0; i < cols; i++) {
+                    c[i][j] = a[j][i];
+                }
+            }
+        } else {
+            for (int i = 0; i < cols; i++) {
+                for (int j = 0; j < rows; j++) {
+                    c[i][j] = a[j][i];
+                }
+            }
+        }
+
+        return c;
+    }
+
+    /**
+     *
+     * @param a
+     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
+     */
+    @MayReturnNull
+    @Beta
+    public static long[][] transpose(final long[][] a) {
+        checkIfMatrixArray(a);
+
+        if (a == null) {
+            return a;
+        } else if (a.length == 0) {
+            return a.clone();
+        }
+
+        final int rows = a.length;
+        final int cols = a[0].length;
+
+        final long[][] c = new long[cols][rows];
+
+        if (rows <= cols) {
+            for (int j = 0; j < rows; j++) {
+                for (int i = 0; i < cols; i++) {
+                    c[i][j] = a[j][i];
+                }
+            }
+        } else {
+            for (int i = 0; i < cols; i++) {
+                for (int j = 0; j < rows; j++) {
+                    c[i][j] = a[j][i];
+                }
+            }
+        }
+
+        return c;
+    }
+
+    /**
+     *
+     * @param a
+     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
+     */
+    @MayReturnNull
+    @Beta
+    public static float[][] transpose(final float[][] a) {
+        checkIfMatrixArray(a);
+
+        if (a == null) {
+            return a;
+        } else if (a.length == 0) {
+            return a.clone();
+        }
+
+        final int rows = a.length;
+        final int cols = a[0].length;
+
+        final float[][] c = new float[cols][rows];
+
+        if (rows <= cols) {
+            for (int j = 0; j < rows; j++) {
+                for (int i = 0; i < cols; i++) {
+                    c[i][j] = a[j][i];
+                }
+            }
+        } else {
+            for (int i = 0; i < cols; i++) {
+                for (int j = 0; j < rows; j++) {
+                    c[i][j] = a[j][i];
+                }
+            }
+        }
+
+        return c;
+    }
+
+    /**
+     *
+     * @param a
+     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
+     */
+    @MayReturnNull
+    @Beta
+    public static double[][] transpose(final double[][] a) {
+        checkIfMatrixArray(a);
+
+        if (a == null) {
+            return a;
+        } else if (a.length == 0) {
+            return a.clone();
+        }
+
+        final int rows = a.length;
+        final int cols = a[0].length;
+
+        final double[][] c = new double[cols][rows];
+
+        if (rows <= cols) {
+            for (int j = 0; j < rows; j++) {
+                for (int i = 0; i < cols; i++) {
+                    c[i][j] = a[j][i];
+                }
+            }
+        } else {
+            for (int i = 0; i < cols; i++) {
+                for (int j = 0; j < rows; j++) {
+                    c[i][j] = a[j][i];
+                }
+            }
+        }
+
+        return c;
+    }
+
+    /**
+     *
+     * @param a
+     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
+     */
+    @MayReturnNull
+    @Beta
+    public static <T> T[][] transpose(final T[][] a) {
+        checkIfMatrixArray(a);
+
+        if (a == null) {
+            return a;
+        } else if (a.length == 0) {
+            return a.clone();
+        }
+
+        final int rows = a.length;
+        final int cols = a[0].length;
+
+        final T[][] c = newInstance(a[0].getClass().getComponentType(), cols, rows);
+
+        if (rows <= cols) {
+            for (int j = 0; j < rows; j++) {
+                for (int i = 0; i < cols; i++) {
+                    c[i][j] = a[j][i];
+                }
+            }
+        } else {
+            for (int i = 0; i < cols; i++) {
+                for (int j = 0; j < rows; j++) {
+                    c[i][j] = a[j][i];
+                }
+            }
+        }
+
+        return c;
+    }
+
+    private static void checkIfMatrixArray(final Object[] a) {
+        if (a == null || a.length <= 1) {
+            return;
+        }
+
+        final int cols = getLength(a[0]);
+
+        for (int i = 1, len = a.length; i < len; i++) {
+            if (getLength(a[i]) != cols) {
+                throw new IllegalArgumentException("The length of sub arrays must be same");
+            }
+        }
+    }
+
     //    // TODO It seems there is some bug in  Arrays.parallelSort(a, fromIndex, toIndex). see below test:
     //
     //    @Test

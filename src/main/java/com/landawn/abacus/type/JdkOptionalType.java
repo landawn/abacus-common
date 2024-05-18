@@ -5,7 +5,6 @@
 package com.landawn.abacus.type;
 
 import java.io.IOException;
-import java.io.Writer;
 import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -169,17 +168,17 @@ public class JdkOptionalType<T> extends AbstractOptionalType<Optional<T>> {
 
     /**
      *
-     * @param writer
+     * @param appendable
      * @param x
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void write(Writer writer, Optional<T> x) throws IOException {
+    public void appendTo(Appendable appendable, Optional<T> x) throws IOException {
         if (x == null || x.isEmpty()) { //NOSONAR
-            writer.write(NULL_CHAR_ARRAY);
+            appendable.append(NULL_STRING);
         } else {
             // elementType.write(writer, x.get());
-            N.typeOf(x.get().getClass()).write(writer, x.get());
+            N.typeOf(x.get().getClass()).appendTo(appendable, x.get());
         }
     }
 

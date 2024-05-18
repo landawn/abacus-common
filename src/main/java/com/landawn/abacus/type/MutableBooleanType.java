@@ -5,7 +5,6 @@
 package com.landawn.abacus.type;
 
 import java.io.IOException;
-import java.io.Writer;
 import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -31,9 +30,9 @@ public class MutableBooleanType extends MutableType<MutableBoolean> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public Class<MutableBoolean> clazz() {
@@ -120,13 +119,13 @@ public class MutableBooleanType extends MutableType<MutableBoolean> {
 
     /**
      *
-     * @param writer
+     * @param appendable
      * @param x
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void write(Writer writer, MutableBoolean x) throws IOException {
-        writer.write((x == null) ? NULL_CHAR_ARRAY : (x.value() ? TRUE_CHAR_ARRAY : FALSE_CHAR_ARRAY));
+    public void appendTo(Appendable appendable, MutableBoolean x) throws IOException {
+        appendable.append((x == null) ? NULL_STRING : (x.value() ? TRUE_STRING : FALSE_STRING));
     }
 
     /**

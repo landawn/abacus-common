@@ -15,7 +15,6 @@
 package com.landawn.abacus.type;
 
 import java.io.IOException;
-import java.io.Writer;
 import java.util.Set;
 
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
@@ -182,8 +181,8 @@ public class ImmutableSetType<E> extends AbstractType<ImmutableSet<E>> {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void write(Writer writer, ImmutableSet<E> x) throws IOException {
-        setType.write(writer, x);
+    public void appendTo(Appendable writer, ImmutableSet<E> x) throws IOException {
+        setType.appendTo(writer, x);
     }
 
     /**

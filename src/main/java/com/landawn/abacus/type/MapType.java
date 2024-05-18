@@ -162,18 +162,23 @@ public class MapType<K, V, T extends Map<K, V>> extends AbstractType<T> {
 
     /**
      *
-     * @param writer
+     * @param appendable
      * @param x
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void write(Writer writer, T x) throws IOException {
+    public void appendTo(Appendable appendable, T x) throws IOException {
         if (x == null) {
-            writer.write(NULL_CHAR_ARRAY);
+            appendable.append(NULL_STRING);
         } else {
             // writer.write(stringOf(x));
 
-            Utils.jsonParser.serialize(writer, x, Utils.jsc);
+            if (appendable instanceof Writer) {
+                final Writer writer = (Writer) appendable;
+                Utils.jsonParser.serialize(writer, x, Utils.jsc);
+            } else {
+                appendable.append(Utils.jsonParser.serialize(x, Utils.jsc));
+            }
         }
     }
 

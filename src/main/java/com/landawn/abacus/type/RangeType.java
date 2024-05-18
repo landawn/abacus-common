@@ -66,9 +66,9 @@ public class RangeType<T extends Comparable<? super T>> extends AbstractType<Ran
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public String declaringName() {
@@ -76,9 +76,9 @@ public class RangeType<T extends Comparable<? super T>> extends AbstractType<Ran
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public Class<Range<T>> clazz() {
@@ -169,14 +169,14 @@ public class RangeType<T extends Comparable<? super T>> extends AbstractType<Ran
 
     /**
      *
-     * @param writer
+     * @param appendable
      * @param x
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void write(Writer writer, Range<T> x) throws IOException {
+    public void appendTo(Appendable appendable, Range<T> x) throws IOException {
         if (x == null) {
-            writer.write(NULL_CHAR_ARRAY);
+            appendable.append(NULL_STRING);
         } else {
             final BoundType boundType = x.boundType();
             final String prefix = (boundType == BoundType.OPEN_OPEN || boundType == BoundType.OPEN_CLOSED) ? "(" : "[";
@@ -189,27 +189,38 @@ public class RangeType<T extends Comparable<? super T>> extends AbstractType<Ran
                 type = TypeFactory.getType(x.upperEndpoint().getClass());
             }
 
-            boolean isBufferedWriter = writer instanceof BufferedWriter || writer instanceof java.io.BufferedWriter;
-            final Writer bw = isBufferedWriter ? writer : Objectory.createBufferedWriter(writer);
+            if (appendable instanceof Writer) {
+                final Writer writer = (Writer) appendable;
+                boolean isBufferedWriter = writer instanceof BufferedWriter || writer instanceof java.io.BufferedWriter;
+                final Writer bw = isBufferedWriter ? writer : Objectory.createBufferedWriter(writer); //NOSONAR
 
-            try {
-                bw.write(prefix);
+                try {
+                    bw.write(prefix);
 
-                type.write(bw, x.lowerEndpoint());
-                bw.write(ELEMENT_SEPARATOR_CHAR_ARRAY);
-                type.write(bw, x.upperEndpoint());
+                    type.appendTo(bw, x.lowerEndpoint());
+                    bw.write(ELEMENT_SEPARATOR_CHAR_ARRAY);
+                    type.appendTo(bw, x.upperEndpoint());
 
-                bw.write(postfix);
+                    bw.write(postfix);
 
-                if (!isBufferedWriter) {
-                    bw.flush();
+                    if (!isBufferedWriter) {
+                        bw.flush();
+                    }
+                } catch (IOException e) {
+                    throw new UncheckedIOException(e);
+                } finally {
+                    if (!isBufferedWriter) {
+                        Objectory.recycle((BufferedWriter) bw);
+                    }
                 }
-            } catch (IOException e) {
-                throw new UncheckedIOException(e);
-            } finally {
-                if (!isBufferedWriter) {
-                    Objectory.recycle((BufferedWriter) bw);
-                }
+            } else {
+                appendable.append(prefix);
+
+                type.appendTo(appendable, x.lowerEndpoint());
+                appendable.append(ELEMENT_SEPARATOR);
+                type.appendTo(appendable, x.upperEndpoint());
+
+                appendable.append(postfix);
             }
         }
     }

@@ -264,45 +264,65 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
 
     /**
      *
-     * @param writer
+     * @param appendable
      * @param x
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void write(Writer writer, T x) throws IOException {
+    public void appendTo(Appendable appendable, T x) throws IOException {
         if (x == null) {
-            writer.write(NULL_CHAR_ARRAY);
+            appendable.append(NULL_STRING);
         } else {
-            boolean isBufferedWriter = writer instanceof BufferedWriter || writer instanceof java.io.BufferedWriter;
-            final Writer bw = isBufferedWriter ? writer : Objectory.createBufferedWriter(writer); //NOSONAR
+            if (appendable instanceof Writer) {
+                final Writer writer = (Writer) appendable;
+                boolean isBufferedWriter = writer instanceof BufferedWriter || writer instanceof java.io.BufferedWriter;
+                final Writer bw = isBufferedWriter ? writer : Objectory.createBufferedWriter(writer); //NOSONAR
 
-            try {
-                bw.write(WD._BRACKET_L);
+                try {
+                    bw.write(WD._BRACKET_L);
+
+                    int i = 0;
+                    for (E e : x) {
+                        if (i++ > 0) {
+                            bw.write(ELEMENT_SEPARATOR_CHAR_ARRAY);
+                        }
+
+                        if (e == null) {
+                            bw.write(NULL_CHAR_ARRAY);
+                        } else {
+                            elementType.appendTo(bw, e);
+                        }
+                    }
+
+                    bw.write(WD._BRACKET_R);
+
+                    if (!isBufferedWriter) {
+                        bw.flush();
+                    }
+                } catch (IOException e) {
+                    throw new UncheckedIOException(e);
+                } finally {
+                    if (!isBufferedWriter) {
+                        Objectory.recycle((BufferedWriter) bw);
+                    }
+                }
+            } else {
+                appendable.append(WD._BRACKET_L);
 
                 int i = 0;
                 for (E e : x) {
                     if (i++ > 0) {
-                        bw.write(ELEMENT_SEPARATOR_CHAR_ARRAY);
+                        appendable.append(ELEMENT_SEPARATOR);
                     }
 
                     if (e == null) {
-                        bw.write(NULL_CHAR_ARRAY);
+                        appendable.append(NULL_STRING);
                     } else {
-                        elementType.write(bw, e);
+                        elementType.appendTo(appendable, e);
                     }
                 }
 
-                bw.write(WD._BRACKET_R);
-
-                if (!isBufferedWriter) {
-                    bw.flush();
-                }
-            } catch (IOException e) {
-                throw new UncheckedIOException(e);
-            } finally {
-                if (!isBufferedWriter) {
-                    Objectory.recycle((BufferedWriter) bw);
-                }
+                appendable.append(WD._BRACKET_R);
             }
         }
     }

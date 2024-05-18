@@ -5,7 +5,6 @@
 package com.landawn.abacus.type;
 
 import java.io.IOException;
-import java.io.Writer;
 import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -13,7 +12,6 @@ import java.sql.SQLException;
 
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
-import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.MutableFloat;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Numbers;
@@ -33,9 +31,9 @@ public class MutableFloatType extends MutableType<MutableFloat> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public Class<MutableFloat> clazz() {
@@ -112,16 +110,16 @@ public class MutableFloatType extends MutableType<MutableFloat> {
 
     /**
      *
-     * @param writer
+     * @param appendable
      * @param x
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void write(Writer writer, MutableFloat x) throws IOException {
+    public void appendTo(Appendable appendable, MutableFloat x) throws IOException {
         if (x == null) {
-            writer.write(NULL_CHAR_ARRAY);
+            appendable.append(NULL_STRING);
         } else {
-            IOUtil.write(writer, x.floatValue());
+            appendable.append(String.valueOf(x.floatValue()));
         }
     }
 

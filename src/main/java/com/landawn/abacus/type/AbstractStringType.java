@@ -15,7 +15,6 @@
 package com.landawn.abacus.type;
 
 import java.io.IOException;
-import java.io.Writer;
 import java.sql.CallableStatement;
 import java.sql.Clob;
 import java.sql.PreparedStatement;
@@ -186,11 +185,11 @@ public abstract class AbstractStringType extends AbstractCharSequenceType<String
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void write(Writer writer, String x) throws IOException {
+    public void appendTo(Appendable appendable, String x) throws IOException {
         if (x == null) {
-            writer.write(NULL_CHAR_ARRAY);
+            appendable.append(NULL_STRING);
         } else {
-            writer.write(x);
+            appendable.append(x);
         }
     }
 

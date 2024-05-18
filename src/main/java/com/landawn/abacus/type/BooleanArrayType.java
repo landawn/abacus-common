@@ -15,7 +15,6 @@
 package com.landawn.abacus.type;
 
 import java.io.IOException;
-import java.io.Writer;
 
 import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
@@ -104,30 +103,30 @@ public final class BooleanArrayType extends ObjectArrayType<Boolean> {
 
     /**
      *
-     * @param writer
+     * @param appendable
      * @param x
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void write(Writer writer, Boolean[] x) throws IOException {
+    public void appendTo(Appendable appendable, Boolean[] x) throws IOException {
         if (x == null) {
-            writer.write(NULL_CHAR_ARRAY);
+            appendable.append(NULL_STRING);
         } else {
-            writer.write(WD._BRACKET_L);
+            appendable.append(WD._BRACKET_L);
 
             for (int i = 0, len = x.length; i < len; i++) {
                 if (i > 0) {
-                    writer.write(ELEMENT_SEPARATOR);
+                    appendable.append(ELEMENT_SEPARATOR);
                 }
 
                 if (x[i] == null) {
-                    writer.write(NULL_CHAR_ARRAY);
+                    appendable.append(NULL_STRING);
                 } else {
-                    writer.write(x[i] ? TRUE_CHAR_ARRAY : FALSE_CHAR_ARRAY); //NOSONAR
+                    appendable.append(x[i] ? TRUE_STRING : FALSE_STRING); //NOSONAR
                 }
             }
 
-            writer.write(WD._BRACKET_R);
+            appendable.append(WD._BRACKET_R);
         }
     }
 

@@ -81,9 +81,9 @@ public class ReaderType extends AbstractType<Reader> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public Class<Reader> clazz() {
@@ -229,16 +229,21 @@ public class ReaderType extends AbstractType<Reader> {
 
     /**
      *
-     * @param writer
+     * @param appendable
      * @param x
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void write(Writer writer, Reader x) throws IOException {
+    public void appendTo(Appendable appendable, Reader x) throws IOException {
         if (x == null) {
-            writer.write(NULL_CHAR_ARRAY);
+            appendable.append(NULL_STRING);
         } else {
-            IOUtil.write(writer, x);
+            if (appendable instanceof Writer) {
+                final Writer writer = (Writer) appendable;
+                IOUtil.write(writer, x);
+            } else {
+                appendable.append(IOUtil.readAllToString(x));
+            }
         }
     }
 

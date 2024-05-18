@@ -15,7 +15,6 @@
 package com.landawn.abacus.type;
 
 import java.io.IOException;
-import java.io.Writer;
 import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -24,7 +23,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
-import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.Strings;
 
 /**
@@ -41,9 +39,9 @@ public class AtomicIntegerType extends AbstractAtomicType<AtomicInteger> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public Class<AtomicInteger> clazz() {
@@ -120,16 +118,16 @@ public class AtomicIntegerType extends AbstractAtomicType<AtomicInteger> {
 
     /**
      *
-     * @param writer
+     * @param appendable
      * @param x
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void write(Writer writer, AtomicInteger x) throws IOException {
+    public void appendTo(Appendable appendable, AtomicInteger x) throws IOException {
         if (x == null) {
-            writer.write(NULL_CHAR_ARRAY);
+            appendable.append(NULL_STRING);
         } else {
-            IOUtil.write(writer, x.get());
+            appendable.append(x.toString());
         }
     }
 

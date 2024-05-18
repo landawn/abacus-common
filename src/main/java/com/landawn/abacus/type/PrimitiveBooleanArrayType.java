@@ -15,7 +15,6 @@
 package com.landawn.abacus.type;
 
 import java.io.IOException;
-import java.io.Writer;
 import java.util.Collection;
 
 import com.landawn.abacus.annotation.MayReturnNull;
@@ -44,9 +43,9 @@ public final class PrimitiveBooleanArrayType extends AbstractPrimitiveArrayType<
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public Class<boolean[]> clazz() {
@@ -127,26 +126,26 @@ public final class PrimitiveBooleanArrayType extends AbstractPrimitiveArrayType<
 
     /**
      *
-     * @param writer
+     * @param appendable
      * @param x
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void write(Writer writer, boolean[] x) throws IOException {
+    public void appendTo(Appendable appendable, boolean[] x) throws IOException {
         if (x == null) {
-            writer.write(NULL_CHAR_ARRAY);
+            appendable.append(NULL_STRING);
         } else {
-            writer.write(WD._BRACKET_L);
+            appendable.append(WD._BRACKET_L);
 
             for (int i = 0, len = x.length; i < len; i++) {
                 if (i > 0) {
-                    writer.write(ELEMENT_SEPARATOR);
+                    appendable.append(ELEMENT_SEPARATOR);
                 }
 
-                writer.write(x[i] ? TRUE_CHAR_ARRAY : FALSE_CHAR_ARRAY);
+                appendable.append(x[i] ? TRUE_STRING : FALSE_STRING);
             }
 
-            writer.write(WD._BRACKET_R);
+            appendable.append(WD._BRACKET_R);
         }
     }
 

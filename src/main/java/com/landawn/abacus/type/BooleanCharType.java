@@ -15,7 +15,6 @@
 package com.landawn.abacus.type;
 
 import java.io.IOException;
-import java.io.Writer;
 
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
@@ -35,9 +34,9 @@ public class BooleanCharType extends AbstractType<Boolean> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public Class<Boolean> clazz() {
@@ -75,9 +74,9 @@ public class BooleanCharType extends AbstractType<Boolean> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public Boolean defaultValue() {
@@ -98,13 +97,13 @@ public class BooleanCharType extends AbstractType<Boolean> {
 
     /**
      *
-     * @param writer
+     * @param appendable
      * @param x
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void write(Writer writer, Boolean x) throws IOException {
-        writer.write(stringOf(x));
+    public void appendTo(Appendable appendable, Boolean x) throws IOException {
+        appendable.append(stringOf(x));
     }
 
     /**

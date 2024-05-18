@@ -15,7 +15,6 @@
 package com.landawn.abacus.type;
 
 import java.io.IOException;
-import java.io.Writer;
 import java.sql.Clob;
 import java.sql.SQLException;
 import java.util.Collection;
@@ -174,26 +173,26 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
 
     /**
      *
-     * @param writer
+     * @param appendable
      * @param x
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void write(Writer writer, char[] x) throws IOException {
+    public void appendTo(Appendable appendable, char[] x) throws IOException {
         if (x == null) {
-            writer.write(NULL_CHAR_ARRAY);
+            appendable.append(NULL_STRING);
         } else {
-            writer.write(WD._BRACKET_L);
+            appendable.append(WD._BRACKET_L);
 
             for (int i = 0, len = x.length; i < len; i++) {
                 if (i > 0) {
-                    writer.write(ELEMENT_SEPARATOR);
+                    appendable.append(ELEMENT_SEPARATOR);
                 }
 
-                writer.write(x[i]);
+                appendable.append(x[i]);
             }
 
-            writer.write(WD._BRACKET_R);
+            appendable.append(WD._BRACKET_R);
         }
     }
 

@@ -1,3 +1,8 @@
+### 3.11.0
+
+* Refactoring: `DateUtil.format(Writer...)` to `DateUtil.formatTo(Appendable...)`.
+* Refactoring: `Type.write(Writer...)` to `DateUtil.appendTo(Appendable...)`.
+
 ### 3.10.23
 
 * Improvements JavaDoc.

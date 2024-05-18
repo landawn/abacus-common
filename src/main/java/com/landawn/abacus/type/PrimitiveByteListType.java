@@ -15,7 +15,6 @@
 package com.landawn.abacus.type;
 
 import java.io.IOException;
-import java.io.Writer;
 import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -163,16 +162,16 @@ public final class PrimitiveByteListType extends AbstractPrimitiveListType<ByteL
 
     /**
      *
-     * @param writer
+     * @param appendable
      * @param x
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void write(Writer writer, ByteList x) throws IOException {
+    public void appendTo(Appendable appendable, ByteList x) throws IOException {
         if (x == null) {
-            writer.write(NULL_CHAR_ARRAY);
+            appendable.append(NULL_STRING);
         } else {
-            arrayType.write(writer, x.trimToSize().array());
+            arrayType.appendTo(appendable, x.trimToSize().array());
         }
     }
 

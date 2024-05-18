@@ -15,7 +15,6 @@
 package com.landawn.abacus.type;
 
 import java.io.IOException;
-import java.io.Writer;
 import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -40,9 +39,9 @@ public class AtomicBooleanType extends AbstractAtomicType<AtomicBoolean> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public Class<AtomicBoolean> clazz() {
@@ -56,7 +55,7 @@ public class AtomicBooleanType extends AbstractAtomicType<AtomicBoolean> {
      */
     @Override
     public String stringOf(AtomicBoolean x) {
-        return (x == null) ? null : (x.get() ? TRUE : FALSE);
+        return (x == null) ? null : (x.get() ? TRUE_STRING : FALSE_STRING);
     }
 
     /**
@@ -119,13 +118,13 @@ public class AtomicBooleanType extends AbstractAtomicType<AtomicBoolean> {
 
     /**
      *
-     * @param writer
+     * @param appendable
      * @param x
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void write(Writer writer, AtomicBoolean x) throws IOException {
-        writer.write((x == null) ? NULL_CHAR_ARRAY : (x.get() ? TRUE_CHAR_ARRAY : FALSE_CHAR_ARRAY));
+    public void appendTo(Appendable appendable, AtomicBoolean x) throws IOException {
+        appendable.append((x == null) ? NULL_STRING : (x.get() ? TRUE_STRING : FALSE_STRING));
     }
 
     /**
@@ -137,6 +136,6 @@ public class AtomicBooleanType extends AbstractAtomicType<AtomicBoolean> {
      */
     @Override
     public void writeCharacter(CharacterWriter writer, AtomicBoolean x, JSONXMLSerializationConfig<?> config) throws IOException {
-        write(writer, x);
+        appendTo(writer, x);
     }
 }

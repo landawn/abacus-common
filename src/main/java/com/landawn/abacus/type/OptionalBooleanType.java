@@ -5,7 +5,6 @@
 package com.landawn.abacus.type;
 
 import java.io.IOException;
-import java.io.Writer;
 import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -31,9 +30,9 @@ public class OptionalBooleanType extends AbstractOptionalType<OptionalBoolean> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public Class<OptionalBoolean> clazz() {
@@ -132,13 +131,13 @@ public class OptionalBooleanType extends AbstractOptionalType<OptionalBoolean> {
 
     /**
      *
-     * @param writer
+     * @param appendable
      * @param x
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void write(Writer writer, OptionalBoolean x) throws IOException {
-        writer.write((x == null || x.isEmpty()) ? NULL_CHAR_ARRAY : (x.get() ? TRUE_CHAR_ARRAY : FALSE_CHAR_ARRAY));
+    public void appendTo(Appendable appendable, OptionalBoolean x) throws IOException {
+        appendable.append((x == null || x.isEmpty()) ? NULL_STRING : (x.get() ? TRUE_STRING : FALSE_STRING));
     }
 
     /**

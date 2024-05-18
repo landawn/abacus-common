@@ -15,7 +15,6 @@
 package com.landawn.abacus.type;
 
 import java.io.IOException;
-import java.io.Writer;
 import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -149,16 +148,16 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
 
     /**
      *
-     * @param writer
+     * @param appendable
      * @param x
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void write(Writer writer, XMLGregorianCalendar x) throws IOException {
+    public void appendTo(Appendable appendable, XMLGregorianCalendar x) throws IOException {
         if (x == null) {
-            writer.write(NULL_CHAR_ARRAY);
+            appendable.append(NULL_STRING);
         } else {
-            DateUtil.format(writer, x, null, null);
+            DateUtil.formatTo(appendable, x, null, null);
         }
     }
 
@@ -182,7 +181,7 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
             }
 
             if ((config == null) || (config.getDateTimeFormat() == null)) {
-                DateUtil.format(writer, x, null, null);
+                DateUtil.formatTo(writer, x, null, null);
             } else {
                 switch (config.getDateTimeFormat()) {
                     case LONG:
@@ -191,12 +190,12 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
                         break;
 
                     case ISO_8601_DATETIME:
-                        DateUtil.format(writer, x, DateUtil.ISO_8601_DATETIME_FORMAT, null);
+                        DateUtil.formatTo(writer, x, DateUtil.ISO_8601_DATETIME_FORMAT, null);
 
                         break;
 
                     case ISO_8601_TIMESTAMP:
-                        DateUtil.format(writer, x, DateUtil.ISO_8601_TIMESTAMP_FORMAT, null);
+                        DateUtil.formatTo(writer, x, DateUtil.ISO_8601_TIMESTAMP_FORMAT, null);
 
                         break;
 

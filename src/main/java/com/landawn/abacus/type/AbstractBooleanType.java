@@ -15,7 +15,6 @@
 package com.landawn.abacus.type;
 
 import java.io.IOException;
-import java.io.Writer;
 import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -139,21 +138,21 @@ public abstract class AbstractBooleanType extends AbstractPrimaryType<Boolean> {
 
     /**
      *
-     * @param writer
-     * @param t
+     * @param appendable
+     * @param x
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void write(Writer writer, Boolean t) throws IOException {
-        writer.write((t == null) ? NULL_CHAR_ARRAY : (t ? TRUE_CHAR_ARRAY : FALSE_CHAR_ARRAY));
+    public void appendTo(Appendable appendable, Boolean x) throws IOException {
+        appendable.append((x == null) ? NULL_STRING : (x ? TRUE_STRING : FALSE_STRING));
     }
 
     /**
-     * 
      *
-     * @param writer 
-     * @param x 
-     * @param config 
+     *
+     * @param writer
+     * @param x
+     * @param config
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override

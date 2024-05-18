@@ -15,7 +15,6 @@
 package com.landawn.abacus.type;
 
 import java.io.IOException;
-import java.io.Writer;
 
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.BooleanList;
@@ -83,16 +82,16 @@ public final class PrimitiveBooleanListType extends AbstractPrimitiveListType<Bo
 
     /**
      *
-     * @param writer
+     * @param appendable
      * @param x
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void write(Writer writer, BooleanList x) throws IOException {
+    public void appendTo(Appendable appendable, BooleanList x) throws IOException {
         if (x == null) {
-            writer.write(NULL_CHAR_ARRAY);
+            appendable.append(NULL_STRING);
         } else {
-            arrayType.write(writer, x.trimToSize().array());
+            arrayType.appendTo(appendable, x.trimToSize().array());
         }
     }
 

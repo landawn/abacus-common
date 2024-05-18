@@ -118,16 +118,20 @@ public class AsciiStreamType extends InputStreamType {
 
     /**
      *
-     * @param writer
-     * @param t
+     * @param appendable
+     * @param x
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void write(Writer writer, InputStream t) throws IOException {
-        if (t == null) {
-            writer.write(NULL_CHAR_ARRAY);
+    public void appendTo(Appendable appendable, InputStream x) throws IOException {
+        if (x == null) {
+            appendable.append(NULL_STRING);
         } else {
-            IOUtil.write(writer, IOUtil.newInputStreamReader(t)); // NOSONAR
+            if (appendable instanceof Writer) {
+                IOUtil.write((Writer) appendable, IOUtil.newInputStreamReader(x)); // NOSONAR
+            } else {
+                appendable.append(IOUtil.readAllToString(x));
+            }
         }
     }
 

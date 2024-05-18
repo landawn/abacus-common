@@ -15,7 +15,6 @@
 package com.landawn.abacus.type;
 
 import java.io.IOException;
-import java.io.Writer;
 import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -806,11 +805,11 @@ public interface Type<T> {
 
     /**
      *
-     * @param writer
+     * @param appendable
      * @param x
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    void write(Writer writer, T x) throws IOException;
+    void appendTo(Appendable appendable, T x) throws IOException;
 
     /**
      *

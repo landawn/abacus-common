@@ -15,7 +15,6 @@
 package com.landawn.abacus.type;
 
 import java.io.IOException;
-import java.io.Writer;
 import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -24,7 +23,6 @@ import java.sql.SQLException;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.Duration;
-import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.Numbers;
 import com.landawn.abacus.util.Strings;
 
@@ -42,9 +40,9 @@ public class DurationType extends AbstractType<Duration> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public Class<Duration> clazz() {
@@ -121,16 +119,16 @@ public class DurationType extends AbstractType<Duration> {
 
     /**
      *
-     * @param writer
+     * @param appendable
      * @param x
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void write(Writer writer, Duration x) throws IOException {
+    public void appendTo(Appendable appendable, Duration x) throws IOException {
         if (x == null) {
-            writer.write(NULL_CHAR_ARRAY);
+            appendable.append(NULL_STRING);
         } else {
-            IOUtil.write(writer, x.toMillis());
+            appendable.append(String.valueOf(x.toMillis()));
         }
     }
 

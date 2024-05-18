@@ -65,9 +65,9 @@ public class MapEntryType<K, V> extends AbstractType<Map.Entry<K, V>> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public String declaringName() {
@@ -75,9 +75,9 @@ public class MapEntryType<K, V> extends AbstractType<Map.Entry<K, V>> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public Class<Map.Entry<K, V>> clazz() {
@@ -132,36 +132,47 @@ public class MapEntryType<K, V> extends AbstractType<Map.Entry<K, V>> {
 
     /**
      *
-     * @param writer
+     * @param appendable
      * @param x
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void write(Writer writer, Map.Entry<K, V> x) throws IOException {
+    public void appendTo(Appendable appendable, Map.Entry<K, V> x) throws IOException {
         if (x == null) {
-            writer.write(NULL_CHAR_ARRAY);
+            appendable.append(NULL_STRING);
         } else {
-            boolean isBufferedWriter = writer instanceof BufferedWriter || writer instanceof java.io.BufferedWriter;
-            final Writer bw = isBufferedWriter ? writer : Objectory.createBufferedWriter(writer);
+            if (appendable instanceof Writer) {
+                final Writer writer = (Writer) appendable;
+                boolean isBufferedWriter = writer instanceof BufferedWriter || writer instanceof java.io.BufferedWriter;
+                final Writer bw = isBufferedWriter ? writer : Objectory.createBufferedWriter(writer);
 
-            try {
-                bw.write(WD._BRACE_L);
+                try {
+                    bw.write(WD._BRACE_L);
 
-                keyType.write(bw, x.getKey());
-                writer.write(WD._COLON);
-                valueType.write(bw, x.getValue());
+                    keyType.appendTo(bw, x.getKey());
+                    writer.append(WD._COLON);
+                    valueType.appendTo(bw, x.getValue());
 
-                bw.write(WD._BRACE_R);
+                    bw.write(WD._BRACE_R);
 
-                if (!isBufferedWriter) {
-                    bw.flush();
+                    if (!isBufferedWriter) {
+                        bw.flush();
+                    }
+                } catch (IOException e) {
+                    throw new UncheckedIOException(e);
+                } finally {
+                    if (!isBufferedWriter) {
+                        Objectory.recycle((BufferedWriter) bw);
+                    }
                 }
-            } catch (IOException e) {
-                throw new UncheckedIOException(e);
-            } finally {
-                if (!isBufferedWriter) {
-                    Objectory.recycle((BufferedWriter) bw);
-                }
+            } else {
+                appendable.append(WD._BRACE_L);
+
+                keyType.appendTo(appendable, x.getKey());
+                appendable.append(WD._COLON);
+                valueType.appendTo(appendable, x.getValue());
+
+                appendable.append(WD._BRACE_R);
             }
         }
     }

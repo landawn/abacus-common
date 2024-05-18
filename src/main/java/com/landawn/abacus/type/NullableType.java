@@ -5,7 +5,6 @@
 package com.landawn.abacus.type;
 
 import java.io.IOException;
-import java.io.Writer;
 import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -43,9 +42,9 @@ public class NullableType<T> extends AbstractOptionalType<Nullable<T>> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public String declaringName() {
@@ -53,9 +52,9 @@ public class NullableType<T> extends AbstractOptionalType<Nullable<T>> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @SuppressWarnings("rawtypes")
     @Override
@@ -169,17 +168,17 @@ public class NullableType<T> extends AbstractOptionalType<Nullable<T>> {
 
     /**
      *
-     * @param writer
+     * @param appendable
      * @param x
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void write(Writer writer, Nullable<T> x) throws IOException {
+    public void appendTo(Appendable appendable, Nullable<T> x) throws IOException {
         if (x == null || x.isNull()) {
-            writer.write(NULL_CHAR_ARRAY);
+            appendable.append(NULL_STRING);
         } else {
             // elementType.write(writer, x.get());
-            N.typeOf(x.get().getClass()).write(writer, x.get());
+            N.typeOf(x.get().getClass()).appendTo(appendable, x.get());
         }
     }
 

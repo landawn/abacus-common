@@ -15,7 +15,6 @@
 package com.landawn.abacus.type;
 
 import java.io.IOException;
-import java.io.Writer;
 import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -49,13 +48,13 @@ public abstract class AbstractType<T> implements Type<T> {
 
     static final char[] NULL_CHAR_ARRAY = NULL_STRING.toCharArray();
 
-    static final String TRUE = Boolean.TRUE.toString().intern();
+    static final String TRUE_STRING = Boolean.TRUE.toString().intern();
 
-    static final char[] TRUE_CHAR_ARRAY = TRUE.toCharArray();
+    static final char[] TRUE_CHAR_ARRAY = TRUE_STRING.toCharArray();
 
-    static final String FALSE = Boolean.FALSE.toString().intern();
+    static final String FALSE_STRING = Boolean.FALSE.toString().intern();
 
-    static final char[] FALSE_CHAR_ARRAY = FALSE.toCharArray();
+    static final char[] FALSE_CHAR_ARRAY = FALSE_STRING.toCharArray();
 
     @SuppressWarnings("rawtypes")
     protected static final Type[] EMPTY_TYPE_ARRAY = {};
@@ -630,16 +629,16 @@ public abstract class AbstractType<T> implements Type<T> {
 
     /**
      *
-     * @param writer
+     * @param appendable
      * @param x
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void write(Writer writer, T x) throws IOException {
+    public void appendTo(Appendable appendable, T x) throws IOException {
         if (x == null) {
-            writer.write(NULL_CHAR_ARRAY);
+            appendable.append(NULL_STRING);
         } else {
-            writer.write(stringOf(x));
+            appendable.append(stringOf(x));
         }
     }
 

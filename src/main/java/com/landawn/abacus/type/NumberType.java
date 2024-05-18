@@ -15,7 +15,6 @@
 package com.landawn.abacus.type;
 
 import java.io.IOException;
-import java.io.Writer;
 
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
@@ -54,16 +53,16 @@ public abstract class NumberType<T extends Number> extends AbstractPrimaryType<T
 
     /**
      *
-     * @param writer
+     * @param appendable
      * @param x
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void write(Writer writer, T x) throws IOException {
+    public void appendTo(Appendable appendable, T x) throws IOException {
         if (x == null) {
-            writer.write(NULL_CHAR_ARRAY);
+            appendable.append(NULL_STRING);
         } else {
-            writer.write(x.toString());
+            appendable.append(x.toString());
         }
     }
 
@@ -76,6 +75,6 @@ public abstract class NumberType<T extends Number> extends AbstractPrimaryType<T
      */
     @Override
     public void writeCharacter(CharacterWriter writer, T x, JSONXMLSerializationConfig<?> config) throws IOException {
-        write(writer, x);
+        appendTo(writer, x);
     }
 }
