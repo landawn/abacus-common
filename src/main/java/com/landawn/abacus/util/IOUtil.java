@@ -945,7 +945,11 @@ public final class IOUtil {
      * @throws UncheckedIOException the unchecked IO exception
      */
     public static String readAllToString(final File file) throws UncheckedIOException {
-        return readToString(file, 0, Integer.MAX_VALUE);
+        try {
+            return readToString(file, 0, Integer.MAX_VALUE);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 
     /**
@@ -959,7 +963,11 @@ public final class IOUtil {
      * @throws UncheckedIOException the unchecked IO exception
      */
     public static String readAllToString(final File file, final Charset encoding) throws UncheckedIOException {
-        return readToString(file, 0, Integer.MAX_VALUE, encoding);
+        try {
+            return readToString(file, 0, Integer.MAX_VALUE, encoding);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 
     /**
@@ -972,7 +980,11 @@ public final class IOUtil {
      * @throws UncheckedIOException the unchecked IO exception
      */
     public static String readAllToString(final InputStream is) throws UncheckedIOException {
-        return readToString(is, 0, Integer.MAX_VALUE);
+        try {
+            return readToString(is, 0, Integer.MAX_VALUE);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 
     /**
@@ -986,7 +998,11 @@ public final class IOUtil {
      * @throws UncheckedIOException the unchecked IO exception
      */
     public static String readAllToString(final InputStream is, final Charset encoding) throws UncheckedIOException {
-        return readToString(is, 0, Integer.MAX_VALUE, encoding);
+        try {
+            return readToString(is, 0, Integer.MAX_VALUE, encoding);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 
     /**
@@ -999,7 +1015,11 @@ public final class IOUtil {
      * @throws UncheckedIOException the unchecked IO exception
      */
     public static String readAllToString(final Reader reader) throws UncheckedIOException {
-        return readToString(reader, 0, Integer.MAX_VALUE);
+        try {
+            return readToString(reader, 0, Integer.MAX_VALUE);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 
     /**
@@ -1008,9 +1028,9 @@ public final class IOUtil {
      * @param offset
      * @param maxLen
      * @return
-     * @throws UncheckedIOException the unchecked IO exception
+     * @throws IOException
      */
-    public static String readToString(final File file, final long offset, final int maxLen) throws UncheckedIOException {
+    public static String readToString(final File file, final long offset, final int maxLen) throws IOException {
         return readToString(file, offset, maxLen, DEFAULT_CHARSET);
     }
 
@@ -1021,18 +1041,13 @@ public final class IOUtil {
      * @param maxLen
      * @param encoding
      * @return
-     * @throws UncheckedIOException the unchecked IO exception
+     * @throws IOException
      */
     @SuppressWarnings("deprecation")
-    public static String readToString(final File file, final long offset, final int maxLen, final Charset encoding) throws UncheckedIOException {
+    public static String readToString(final File file, final long offset, final int maxLen, final Charset encoding) throws IOException {
+        final char[] chs = readChars(file, offset, maxLen, encoding);
 
-        try {
-            final char[] chs = readChars(file, offset, maxLen, encoding);
-
-            return N.isEmpty(chs) ? Strings.EMPTY_STRING : InternalUtil.newString(chs, true);
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
+        return N.isEmpty(chs) ? Strings.EMPTY_STRING : InternalUtil.newString(chs, true);
     }
 
     /**
@@ -1041,9 +1056,9 @@ public final class IOUtil {
      * @param offset
      * @param maxLen
      * @return
-     * @throws UncheckedIOException the unchecked IO exception
+     * @throws IOException
      */
-    public static String readToString(final InputStream is, final long offset, final int maxLen) throws UncheckedIOException {
+    public static String readToString(final InputStream is, final long offset, final int maxLen) throws IOException {
         return readToString(is, offset, maxLen, DEFAULT_CHARSET);
     }
 
@@ -1054,17 +1069,13 @@ public final class IOUtil {
      * @param maxLen
      * @param encoding
      * @return
-     * @throws UncheckedIOException the unchecked IO exception
+     * @throws IOException
      */
     @SuppressWarnings("deprecation")
-    public static String readToString(final InputStream is, final long offset, final int maxLen, final Charset encoding) throws UncheckedIOException {
-        try {
-            final char[] chs = readChars(is, offset, maxLen, encoding);
+    public static String readToString(final InputStream is, final long offset, final int maxLen, final Charset encoding) throws IOException {
+        final char[] chs = readChars(is, offset, maxLen, encoding);
 
-            return N.isEmpty(chs) ? Strings.EMPTY_STRING : InternalUtil.newString(chs, true);
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
+        return N.isEmpty(chs) ? Strings.EMPTY_STRING : InternalUtil.newString(chs, true);
     }
 
     /**
@@ -1073,17 +1084,13 @@ public final class IOUtil {
      * @param offset
      * @param maxLen
      * @return
-     * @throws UncheckedIOException the unchecked IO exception
+     * @throws IOException
      */
     @SuppressWarnings("deprecation")
-    public static String readToString(final Reader reader, final long offset, final int maxLen) throws UncheckedIOException {
-        try {
-            final char[] chs = readChars(reader, offset, maxLen);
+    public static String readToString(final Reader reader, final long offset, final int maxLen) throws IOException {
+        final char[] chs = readChars(reader, offset, maxLen);
 
-            return N.isEmpty(chs) ? Strings.EMPTY_STRING : InternalUtil.newString(chs, true);
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
+        return N.isEmpty(chs) ? Strings.EMPTY_STRING : InternalUtil.newString(chs, true);
     }
 
     /**
@@ -3898,6 +3905,15 @@ public final class IOUtil {
         String fileName = new File(file).getName();
         int dotIndex = fileName.lastIndexOf('.');
         return (dotIndex == -1) ? fileName : fileName.substring(0, dotIndex);
+    }
+
+    /**
+     *
+     * @param appendable
+     * @return
+     */
+    public static AppendableWriter newAppendableWriter(final Appendable appendable) {
+        return new AppendableWriter(appendable);
     }
 
     /**

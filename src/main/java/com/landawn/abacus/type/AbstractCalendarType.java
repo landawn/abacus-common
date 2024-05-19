@@ -102,7 +102,7 @@ public abstract class AbstractCalendarType<T extends Calendar> extends AbstractT
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
-            DateUtil.formatTo(appendable, x, null, null);
+            DateUtil.formatTo(appendable, x);
         }
     }
 

@@ -16,6 +16,7 @@ package com.landawn.abacus.util;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.nio.CharBuffer;
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
@@ -1258,7 +1259,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
      * @see DateTimeFormatter#formatTo(java.time.temporal.TemporalAccessor, Appendable)
      */
     public static void formatTo(final Appendable appendable, final java.util.Date date, final String format) {
-        formatDate(appendable, date, format, null);
+        formatTo(appendable, date, format, null);
     }
 
     /**
@@ -1491,7 +1492,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
                     if (appendable instanceof Writer) {
                         ((Writer) appendable).write(utcTimestamp, 0, 20);
                     } else {
-                        appendable.append(String.valueOf(utcTimestamp, 0, 20));
+                        appendable.append(CharBuffer.wrap(utcTimestamp), 0, 20);
                     }
                 } else {
                     sb.append(utcTimestamp, 0, 20);

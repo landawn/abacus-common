@@ -75,7 +75,7 @@ public abstract class AbstractDateType<T extends Date> extends AbstractType<T> {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
-            DateUtil.formatTo(appendable, x, null, null);
+            DateUtil.formatTo(appendable, x);
         }
     }
 

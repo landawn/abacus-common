@@ -1295,6 +1295,34 @@ sealed class CommonUtil permits N {
     /**
      *
      * @param <T>
+     * @param bean
+     * @param propName
+     * @return
+     * @see ClassUtil#getPropValue(Object, String)
+     * @see BeanInfo#setPropValue(Object, String, Object)
+     */
+    public static <T> T getPropValue(final Object bean, final String propName) {
+        return ClassUtil.getPropValue(bean, propName);
+    }
+
+    /**
+     * Refer to setPropValue(Method, Object, Object).
+     *
+     * @param bean
+     * @param propName is case insensitive
+     * @param propValue
+     * @see ClassUtil#setPropValue(Object, String, Object)
+     * @see BeanInfo#setPropValue(Object, String, Object)
+     * @deprecated replaced by {@link BeanInfo#setPropValue(Object, String, Object)}
+     */
+    @Deprecated
+    public static void setPropValue(final Object bean, final String propName, final Object propValue) {
+        ClassUtil.setPropValue(bean, propName, propValue, false);
+    }
+
+    /**
+     *
+     * @param <T>
      * @param obj a Java object which must be serializable and deserializable through {@code Kryo} or {@code JSON}.
      * @return {@code null} if {@code bean} is {@code null}
      */
