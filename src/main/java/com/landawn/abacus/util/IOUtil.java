@@ -3918,6 +3918,49 @@ public final class IOUtil {
 
     /**
      *
+     * @return
+     */
+    public static StringWriter newStringWriter() {
+        return new StringWriter();
+    }
+
+    /**
+     *
+     * @param initialSize
+     * @return
+     */
+    public static StringWriter newStringWriter(final int initialSize) {
+        return new StringWriter(initialSize);
+    }
+
+    /**
+     *
+     * @param sb
+     * @return
+     */
+    public static StringWriter newStringWriter(final StringBuilder sb) {
+        return new StringWriter(sb);
+    }
+
+    /**
+     *
+     * @return
+     */
+    public static ByteArrayOutputStream newByteArrayOutputStream() {
+        return new ByteArrayOutputStream();
+    }
+
+    /**
+     *
+     * @param initCapacity
+     * @return
+     */
+    public static ByteArrayOutputStream newByteArrayOutputStream(final int initCapacity) {
+        return new ByteArrayOutputStream(initCapacity);
+    }
+
+    /**
+     *
      *
      * @param file
      * @return

@@ -18,7 +18,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.nio.CharBuffer;
 
-public final class AppendableWriter extends Writer {
+public sealed class AppendableWriter extends Writer permits StringWriter {
 
     private final Appendable appendable;
     private final boolean flushable;
@@ -126,5 +126,15 @@ public final class AppendableWriter extends Writer {
         if (closed) {
             throw new IOException("This Writer has been closed");
         }
+    }
+
+    /**
+     * Return the buffer's current value as a string.
+     *
+     * @return
+     */
+    @Override
+    public String toString() {
+        return appendable.toString();
     }
 }

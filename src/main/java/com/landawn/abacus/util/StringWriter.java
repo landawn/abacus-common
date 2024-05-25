@@ -15,7 +15,6 @@
 package com.landawn.abacus.util;
 
 import java.io.IOException;
-import java.io.Writer;
 
 /**
  * Built on <code>StringBuilder</code>. Not like <code/>java.io.StringWriter</code>. it's not multi-thread safety.
@@ -23,43 +22,84 @@ import java.io.Writer;
  * @author Haiyang Li
  * @since 0.8
  */
-public final class StringWriter extends Writer {
+public final class StringWriter extends AppendableWriter {
 
     private final StringBuilder buf;
 
     /**
-     * 
+     *
      */
     public StringWriter() {
         this(new StringBuilder());
     }
 
     /**
-     * 
      *
-     * @param initialSize 
+     *
+     * @param initialSize
      */
     public StringWriter(int initialSize) {
         this(new StringBuilder(initialSize));
     }
 
     /**
-     * 
      *
-     * @param sb 
+     *
+     * @param sb
      */
     public StringWriter(StringBuilder sb) {
+        super(sb);
         this.buf = sb;
         lock = buf;
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public StringBuilder stringBuilder() {
         return buf;
+    }
+
+    /**
+     *
+     * @param c
+     * @return
+     */
+    @Override
+    public StringWriter append(char c) {
+        buf.append(c);
+
+        return this;
+    }
+
+    /**
+     *
+     * @param csq
+     * @return
+     * @throws IOException Signals that an I/O exception has occurred.
+     */
+    @Override
+    public StringWriter append(CharSequence csq) throws IOException {
+        buf.append(csq);
+
+        return this;
+    }
+
+    /**
+     *
+     * @param csq
+     * @param start
+     * @param end
+     * @return
+     * @throws IOException Signals that an I/O exception has occurred.
+     */
+    @Override
+    public StringWriter append(CharSequence csq, int start, int end) throws IOException {
+        buf.append(csq, start, end);
+
+        return this;
     }
 
     /**
@@ -69,6 +109,11 @@ public final class StringWriter extends Writer {
     @Override
     public void write(int c) {
         buf.append((char) c);
+    }
+
+    @Override
+    public void write(final char[] cbuf) throws IOException {
+        buf.append(cbuf);
     }
 
     /**
@@ -103,56 +148,6 @@ public final class StringWriter extends Writer {
     }
 
     /**
-     *
-     * @param csq
-     * @return
-     * @throws IOException Signals that an I/O exception has occurred.
-     */
-    @Override
-    public StringWriter append(CharSequence csq) throws IOException {
-        buf.append(csq);
-
-        return this;
-    }
-
-    /**
-     *
-     * @param csq
-     * @param start
-     * @param end
-     * @return
-     * @throws IOException Signals that an I/O exception has occurred.
-     */
-    @Override
-    public StringWriter append(CharSequence csq, int start, int end) throws IOException {
-        buf.append(csq, start, end);
-
-        return this;
-    }
-
-    /**
-     *
-     * @param c
-     * @return
-     */
-    @Override
-    public StringWriter append(char c) {
-        buf.append(c);
-
-        return this;
-    }
-
-    /**
-     * Return the buffer's current value as a string.
-     *
-     * @return
-     */
-    @Override
-    public String toString() {
-        return buf.toString();
-    }
-
-    /**
      * Flush.
      */
     @Override
@@ -167,5 +162,15 @@ public final class StringWriter extends Writer {
     @Override
     public void close() throws IOException { //NOSONAR
         // Do nothing
+    }
+
+    /**
+     * Return the buffer's current value as a string.
+     *
+     * @return
+     */
+    @Override
+    public String toString() {
+        return buf.toString();
     }
 }

@@ -1,3 +1,7 @@
+### 3.11.2
+
+* Improvements JavaDoc.
+
 ### 3.11.1
 
 * Improvements JavaDoc.

@@ -26,9 +26,11 @@ import java.util.Collection;
 import java.util.ConcurrentModificationException;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -727,15 +729,15 @@ public final class Maps {
     }
 
     /**
-     * 
      *
-     * @param <K> 
-     * @param <V> 
-     * @param keys 
-     * @param values 
-     * @param defaultForKey 
-     * @param defaultForValue 
-     * @return 
+     *
+     * @param <K>
+     * @param <V>
+     * @param keys
+     * @param values
+     * @param defaultForKey
+     * @param defaultForValue
+     * @return
      */
     public static <K, V> Map<K, V> zip(final Iterable<? extends K> keys, final Iterable<? extends V> values, final K defaultForKey, final V defaultForValue) {
         return zip(keys, values, defaultForKey, defaultForValue, Fn.selectFirst(), Factory.ofMap());
@@ -1470,7 +1472,7 @@ public final class Maps {
         Set<E> v = map.get(key);
 
         if (v == null) {
-            v = N.newHashSet();
+            v = new HashSet<>();
             v = map.put(key, v);
         }
 
@@ -1490,7 +1492,7 @@ public final class Maps {
         Set<E> v = map.get(key);
 
         if (v == null) {
-            v = N.newLinkedHashSet();
+            v = new LinkedHashSet<>();
             v = map.put(key, v);
         }
 
@@ -1619,25 +1621,25 @@ public final class Maps {
      * <code>
         Map map = N.asMap("key1", "val1");
         assertEquals("val1", Maps.getByPath(map, "key1"));
-    
+
         map = N.asMap("key1", N.asList("val1"));
         assertEquals("val1", Maps.getByPath(map, "key1[0]"));
-    
+
         map = N.asMap("key1", N.asSet("val1"));
         assertEquals("val1", Maps.getByPath(map, "key1[0]"));
-    
+
         map = N.asMap("key1", N.asList(N.asLinkedHashSet("val1", "val2")));
         assertEquals("val2", Maps.getByPath(map, "key1[0][1]"));
-    
+
         map = N.asMap("key1", N.asSet(N.asList(N.asSet("val1"))));
         assertEquals("val1", Maps.getByPath(map, "key1[0][0][0]"));
-    
+
         map = N.asMap("key1", N.asList(N.asLinkedHashSet("val1", N.asMap("key2", "val22"))));
         assertEquals("val22", Maps.getByPath(map, "key1[0][1].key2"));
-    
+
         map = N.asMap("key1", N.asList(N.asLinkedHashSet("val1", N.asMap("key2", N.asList("val22", N.asMap("key3", "val33"))))));
         assertEquals("val33", Maps.getByPath(map, "key1[0][1].key2[1].key3"));
-    
+
         map = N.asMap("key1", N.asList(N.asLinkedHashSet("val1", N.asMap("key2", N.asList("val22", N.asMap("key3", "val33"))))));
         assertNull(Maps.getByPath(map, "key1[0][2].key2[1].key3"));
      * </code>

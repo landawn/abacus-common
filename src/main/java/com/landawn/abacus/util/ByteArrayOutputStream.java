@@ -16,6 +16,7 @@ package com.landawn.abacus.util;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 
@@ -40,14 +41,14 @@ public final class ByteArrayOutputStream extends OutputStream {
     /**
      *
      *
-     * @param size
+     * @param initCapacity
      */
-    public ByteArrayOutputStream(int size) {
-        if (size < 0) {
-            throw new IllegalArgumentException("Negative initial size: " + size);
+    public ByteArrayOutputStream(int initCapacity) {
+        if (initCapacity < 0) {
+            throw new IllegalArgumentException("Negative initial size: " + initCapacity);
         }
 
-        buf = new byte[size];
+        buf = new byte[initCapacity];
     }
 
     /**
@@ -148,6 +149,16 @@ public final class ByteArrayOutputStream extends OutputStream {
     @Override
     public String toString() {
         return new String(buf, 0, count); // NOSONAR
+    }
+
+    /**
+     *
+     * @param charset
+     * @return
+     * @throws UnsupportedEncodingException If the named charset is not supported
+     */
+    public String toString(String charsetName) throws UnsupportedEncodingException {
+        return new String(buf, 0, count, charsetName);
     }
 
     /**

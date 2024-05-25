@@ -98,6 +98,7 @@ import com.landawn.abacus.parser.ParserUtil.BeanInfo;
 import com.landawn.abacus.parser.ParserUtil.PropInfo;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.type.TypeFactory;
+import com.landawn.abacus.util.Fn.BiPredicates;
 import com.landawn.abacus.util.Fn.IntFunctions;
 import com.landawn.abacus.util.Fn.Suppliers;
 import com.landawn.abacus.util.u.Nullable;
@@ -1290,7 +1291,7 @@ sealed class CommonUtil permits N {
     //        return ClassUtil.isBeanClass(cls);
     //    }
 
-    private static final Set<Class<?>> notKryoCompatible = newHashSet();
+    private static final Set<Class<?>> notKryoCompatible = newConcurrentHashSet();
 
     /**
      *
@@ -1299,10 +1300,26 @@ sealed class CommonUtil permits N {
      * @param propName
      * @return
      * @see ClassUtil#getPropValue(Object, String)
-     * @see BeanInfo#setPropValue(Object, String, Object)
+     * @see BeanInfo#getPropValue(Object, String)
      */
     public static <T> T getPropValue(final Object bean, final String propName) {
         return ClassUtil.getPropValue(bean, propName);
+    }
+
+    /**
+     * Gets the prop value.
+     *
+     * @param <T>
+     * @param bean
+     * @param propName
+     * @param ignoreUnmatchedProperty
+     * @return
+     * @throws IllegalArgumentException if the specified property can't be gotten and ignoreUnmatchedProperty is false.
+     * @see ClassUtil#getPropValue(Object, String, boolean)
+     * @see BeanInfo#getPropValue(Object, String)
+     */
+    public static <T> T getPropValue(final Object bean, final String propName, final boolean ignoreUnmatchedProperty) {
+        return ClassUtil.getPropValue(bean, propName, ignoreUnmatchedProperty);
     }
 
     /**
@@ -1383,47 +1400,63 @@ sealed class CommonUtil permits N {
      * properties retrieved by 'getXXX' method in the specified {@code bean}.
      *
      * @param <T>
-     * @param bean a Java Object what allows access to properties using getter
+     * @param sourceBean a Java Object what allows access to properties using getter
      *            and setter methods.
      * @return {@code null} if {@code bean} is {@code null}
      */
     @MayReturnNull
     @SuppressWarnings("unchecked")
-    public static <T> T copy(final T bean) {
-        if (bean == null) {
+    public static <T> T copy(final T sourceBean) {
+        if (sourceBean == null) {
             return null; // NOSONAR
         }
 
-        return copy(bean, (Class<T>) bean.getClass());
+        return copy(sourceBean, (Class<T>) sourceBean.getClass());
     }
 
     /**
      *
      * @param <T>
-     * @param bean
+     * @param sourceBean
      * @param selectPropNames
      * @return {@code null} if {@code bean} is {@code null}
      */
     @MayReturnNull
-    public static <T> T copy(final T bean, final Collection<String> selectPropNames) {
-        if (bean == null) {
+    public static <T> T copy(final T sourceBean, final Collection<String> selectPropNames) {
+        if (sourceBean == null) {
             return null; // NOSONAR
         }
 
-        return copy(bean, selectPropNames, (Class<T>) bean.getClass());
+        return copy(sourceBean, selectPropNames, (Class<T>) sourceBean.getClass());
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param sourceBean
+     * @param propFilter
+     * @return {@code null} if {@code bean} is {@code null}
+     */
+    @MayReturnNull
+    public static <T> T copy(final T sourceBean, final BiPredicate<String, ?> propFilter) {
+        if (sourceBean == null) {
+            return null; // NOSONAR
+        }
+
+        return copy(sourceBean, propFilter, (Class<T>) sourceBean.getClass());
     }
 
     /**
      *
      *
      * @param <T>
-     * @param bean
+     * @param sourceBean
      * @param targetClass
      * @return a new instance of {@code targetClass} even if {@code bean} is {@code null}.
      * @throws IllegalArgumentException if {@code targetClass} is {@code null}.
      */
-    public static <T> T copy(final Object bean, final Class<? extends T> targetClass) throws IllegalArgumentException {
-        return copy(bean, null, targetClass);
+    public static <T> T copy(final Object sourceBean, final Class<? extends T> targetClass) throws IllegalArgumentException {
+        return copy(sourceBean, (Collection<String>) null, targetClass);
     }
 
     /**
@@ -1432,7 +1465,7 @@ sealed class CommonUtil permits N {
      * {@code bean}.
      *
      * @param <T>
-     * @param bean a Java Object what allows access to properties using getter
+     * @param sourceBean a Java Object what allows access to properties using getter
      *            and setter methods.
      * @param selectPropNames
      * @param targetClass a Java Object what allows access to properties using getter
@@ -1441,16 +1474,16 @@ sealed class CommonUtil permits N {
      * @throws IllegalArgumentException if {@code targetClass} is {@code null}.
      */
     @SuppressWarnings({ "unchecked" })
-    public static <T> T copy(final Object bean, final Collection<String> selectPropNames, final Class<? extends T> targetClass)
+    public static <T> T copy(final Object sourceBean, final Collection<String> selectPropNames, final Class<? extends T> targetClass)
             throws IllegalArgumentException {
         N.checkArgNotNull(targetClass, "targetClass");
 
-        if (bean != null) {
-            final Class<?> srcCls = bean.getClass();
+        if (sourceBean != null) {
+            final Class<?> srcCls = sourceBean.getClass();
 
             if (selectPropNames == null && Utils.kryoParser != null && targetClass.equals(srcCls) && !notKryoCompatible.contains(srcCls)) {
                 try {
-                    final T copy = (T) Utils.kryoParser.copy(bean);
+                    final T copy = (T) Utils.kryoParser.copy(sourceBean);
 
                     if (copy != null) {
                         return copy;
@@ -1466,8 +1499,8 @@ sealed class CommonUtil permits N {
         final BeanInfo targetBeanInfo = ParserUtil.getBeanInfo(targetClass);
         Object result = targetBeanInfo.createBeanResult();
 
-        if (bean != null) {
-            merge(bean, result, selectPropNames, targetBeanInfo);
+        if (sourceBean != null) {
+            merge(sourceBean, result, selectPropNames, targetBeanInfo);
         }
 
         result = targetBeanInfo.finishBeanResult(result);
@@ -1479,7 +1512,7 @@ sealed class CommonUtil permits N {
      *
      *
      * @param <T>
-     * @param bean
+     * @param sourceBean
      * @param ignoreUnmatchedProperty
      * @param ignoredPropNames
      * @param targetClass
@@ -1487,16 +1520,16 @@ sealed class CommonUtil permits N {
      * @throws IllegalArgumentException if {@code targetClass} is {@code null}.
      */
     @SuppressWarnings({ "unchecked" })
-    public static <T> T copy(final Object bean, final boolean ignoreUnmatchedProperty, final Set<String> ignoredPropNames, final Class<? extends T> targetClass)
-            throws IllegalArgumentException {
+    public static <T> T copy(final Object sourceBean, final boolean ignoreUnmatchedProperty, final Set<String> ignoredPropNames,
+            final Class<? extends T> targetClass) throws IllegalArgumentException {
         N.checkArgNotNull(targetClass, "targetClass");
 
-        if (bean != null) {
-            final Class<?> srcCls = bean.getClass();
+        if (sourceBean != null) {
+            final Class<?> srcCls = sourceBean.getClass();
 
             if (ignoredPropNames == null && Utils.kryoParser != null && targetClass.equals(srcCls) && !notKryoCompatible.contains(srcCls)) {
                 try {
-                    final T copy = (T) Utils.kryoParser.copy(bean);
+                    final T copy = (T) Utils.kryoParser.copy(sourceBean);
 
                     if (copy != null) {
                         return copy;
@@ -1512,8 +1545,125 @@ sealed class CommonUtil permits N {
         final BeanInfo targetBeanInfo = ParserUtil.getBeanInfo(targetClass);
         Object result = targetBeanInfo.createBeanResult();
 
-        if (bean != null) {
-            merge(bean, result, ignoreUnmatchedProperty, ignoredPropNames, targetBeanInfo);
+        if (sourceBean != null) {
+            merge(sourceBean, result, ignoreUnmatchedProperty, ignoredPropNames, targetBeanInfo);
+        }
+
+        result = targetBeanInfo.finishBeanResult(result);
+
+        return (T) result;
+    }
+
+    /**
+     * Set all the signed properties(including all primitive type properties) in
+     * the specified {@code sourceBean} to the specified {@code targetBean}.
+     *
+     * @param <T>
+     * @param sourceBean a Java Object what allows access to properties using getter
+     *            and setter methods.
+     * @param propFilter
+     * @param targetClass
+     * @return {@code targetBean}
+     * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
+     */
+    public static <T> T copy(final Object sourceBean, final BiPredicate<String, ?> propFilter, final Class<? extends T> targetClass)
+            throws IllegalArgumentException {
+        return copy(sourceBean, propFilter, Fn.selectFirst(), targetClass);
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param sourceBean
+     * @param mergeFunc the first parameter is source property value, the second parameter is target property value.
+     * @param targetClass
+     * @return {@code targetBean}
+     * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
+     */
+    public static <T> T copy(final Object sourceBean, final BinaryOperator<?> mergeFunc, final Class<? extends T> targetClass) throws IllegalArgumentException {
+        return copy(sourceBean, BiPredicates.alwaysTrue(), mergeFunc, targetClass);
+    }
+
+    /**
+     * Set all the signed properties(including all primitive type properties) in
+     * the specified {@code sourceBean} to the specified {@code targetBean}.
+     *
+     * @param <T>
+     * @param sourceBean a Java Object what allows access to properties using getter
+     *            and setter methods.
+     * @param selectPropNames
+     * @param mergeFunc the first parameter is source property value, the second parameter is target property value.
+     * @param targetClass
+     * @return {@code targetBean}
+     * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
+     */
+    public static <T> T copy(final Object sourceBean, final Collection<String> selectPropNames, final BinaryOperator<?> mergeFunc,
+            final Class<? extends T> targetClass) throws IllegalArgumentException {
+        N.checkArgNotNull(targetClass, "targetClass");
+
+        final BeanInfo targetBeanInfo = ParserUtil.getBeanInfo(targetClass);
+        Object result = targetBeanInfo.createBeanResult();
+
+        if (sourceBean != null) {
+            merge(sourceBean, result, selectPropNames, mergeFunc);
+        }
+
+        result = targetBeanInfo.finishBeanResult(result);
+
+        return (T) result;
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param sourceBean
+     * @param ignoreUnmatchedProperty
+     * @param ignoredPropNames
+     * @param mergeFunc the first parameter is source property value, the second parameter is target property value.
+     * @param targetClass
+     * @return {@code targetBean}
+     * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
+     */
+    public static <T> T copy(final Object sourceBean, final boolean ignoreUnmatchedProperty, final Set<String> ignoredPropNames,
+            final BinaryOperator<?> mergeFunc, final Class<? extends T> targetClass) throws IllegalArgumentException {
+        N.checkArgNotNull(targetClass, "targetClass");
+
+        final BeanInfo targetBeanInfo = ParserUtil.getBeanInfo(targetClass);
+        Object result = targetBeanInfo.createBeanResult();
+
+        if (sourceBean != null) {
+            merge(sourceBean, result, ignoreUnmatchedProperty, ignoredPropNames, mergeFunc);
+        }
+
+        result = targetBeanInfo.finishBeanResult(result);
+
+        return (T) result;
+    }
+
+    /**
+     * Set all the signed properties(including all primitive type properties) in
+     * the specified {@code sourceBean} to the specified {@code targetBean}.
+     *
+     * @param <T>
+     * @param sourceBean a Java Object what allows access to properties using getter
+     *            and setter methods.
+     * @param propFilter
+     * @param mergeFunc the first parameter is source property value, the second parameter is target property value.
+     * @param targetClass
+     * @return {@code targetBean}
+     * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
+     */
+    public static <T> T copy(final Object sourceBean, final BiPredicate<String, ?> propFilter, final BinaryOperator<?> mergeFunc,
+            final Class<? extends T> targetClass) throws IllegalArgumentException {
+        N.checkArgNotNull(targetClass, "targetClass");
+
+        final BeanInfo targetBeanInfo = ParserUtil.getBeanInfo(targetClass);
+        Object result = targetBeanInfo.createBeanResult();
+
+        if (sourceBean != null) {
+            merge(sourceBean, result, propFilter, mergeFunc);
         }
 
         result = targetBeanInfo.finishBeanResult(result);
@@ -1591,43 +1741,6 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Set all the signed properties(including all primitive type properties) in
-     * the specified {@code sourceBean} to the specified {@code targetBean}.
-     *
-     * @param <T>
-     * @param sourceBean a Java Object what allows access to properties using getter
-     *            and setter methods.
-     * @param targetBean a Java Object what allows access to properties using getter
-     *            and setter methods.
-     * @param propFilter
-     * @return {@code targetBean}
-     * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
-     */
-    public static <T> T merge(final Object sourceBean, final T targetBean, final BiPredicate<String, ?> propFilter) throws IllegalArgumentException {
-        N.checkArgNotNull(targetBean, "targetBean");
-
-        if (sourceBean == null) {
-            return targetBean;
-        }
-
-        final BeanInfo srcBeanInfo = ParserUtil.getBeanInfo(sourceBean.getClass());
-        final BeanInfo targetBeanInfo = ParserUtil.getBeanInfo(targetBean.getClass());
-        final BiPredicate<String, Object> objFilter = (BiPredicate<String, Object>) propFilter;
-
-        Object propValue = null;
-
-        for (PropInfo propInfo : srcBeanInfo.propInfoList) {
-            propValue = propInfo.getPropValue(sourceBean);
-
-            if (objFilter.test(propInfo.name, propValue)) {
-                targetBeanInfo.setPropValue(targetBean, propInfo, propValue, false);
-            }
-        }
-
-        return targetBean;
-    }
-
-    /**
      *
      *
      * @param <T>
@@ -1676,6 +1789,23 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Set all the signed properties(including all primitive type properties) in
+     * the specified {@code sourceBean} to the specified {@code targetBean}.
+     *
+     * @param <T>
+     * @param sourceBean a Java Object what allows access to properties using getter
+     *            and setter methods.
+     * @param targetBean a Java Object what allows access to properties using getter
+     *            and setter methods.
+     * @param propFilter
+     * @return {@code targetBean}
+     * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
+     */
+    public static <T> T merge(final Object sourceBean, final T targetBean, final BiPredicate<String, ?> propFilter) throws IllegalArgumentException {
+        return merge(sourceBean, targetBean, propFilter, Fn.selectFirst());
+    }
+
+    /**
      *
      *
      * @param <T>
@@ -1686,7 +1816,7 @@ sealed class CommonUtil permits N {
      * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
      */
     public static <T> T merge(final Object sourceBean, final T targetBean, final BinaryOperator<?> mergeFunc) throws IllegalArgumentException {
-        return merge(sourceBean, targetBean, (Collection<String>) null, mergeFunc);
+        return merge(sourceBean, targetBean, BiPredicates.alwaysTrue(), mergeFunc);
     }
 
     /**
@@ -1757,6 +1887,51 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     *
+     *
+     * @param <T>
+     * @param sourceBean
+     * @param targetBean
+     * @param ignoreUnmatchedProperty
+     * @param ignoredPropNames
+     * @param mergeFunc the first parameter is source property value, the second parameter is target property value.
+     * @return {@code targetBean}
+     * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
+     */
+    public static <T> T merge(final Object sourceBean, final T targetBean, final boolean ignoreUnmatchedProperty, final Set<String> ignoredPropNames,
+            final BinaryOperator<?> mergeFunc) throws IllegalArgumentException {
+        N.checkArgNotNull(targetBean, "targetBean");
+
+        if (sourceBean == null) {
+            return targetBean;
+        }
+
+        final BeanInfo srcBeanInfo = ParserUtil.getBeanInfo(sourceBean.getClass());
+        final BeanInfo targetBeanInfo = ParserUtil.getBeanInfo(targetBean.getClass());
+        final BinaryOperator<Object> objMergeFunc = (BinaryOperator<Object>) mergeFunc;
+
+        PropInfo targetPropInfo = null;
+        Object propValue = null;
+
+        for (PropInfo propInfo : srcBeanInfo.propInfoList) {
+            if (ignoredPropNames == null || !ignoredPropNames.contains(propInfo.name)) {
+                targetPropInfo = targetBeanInfo.getPropInfo(propInfo);
+
+                if (targetPropInfo == null) {
+                    if (!ignoreUnmatchedProperty) {
+                        throw new IllegalArgumentException("No property found by name: " + propInfo.name + " in target bean class: " + targetBean.getClass());
+                    }
+                } else {
+                    propValue = propInfo.getPropValue(sourceBean);
+                    targetPropInfo.setPropValue(targetBean, objMergeFunc.apply(propValue, targetPropInfo.getPropValue(targetBean)));
+                }
+            }
+        }
+
+        return targetBean;
+    }
+
+    /**
      * Set all the signed properties(including all primitive type properties) in
      * the specified {@code sourceBean} to the specified {@code targetBean}.
      *
@@ -1797,51 +1972,6 @@ sealed class CommonUtil permits N {
                 }
 
                 targetPropInfo.setPropValue(targetBean, objMergeFunc.apply(propValue, targetPropInfo.getPropValue(targetBean)));
-            }
-        }
-
-        return targetBean;
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param sourceBean
-     * @param targetBean
-     * @param ignoreUnmatchedProperty
-     * @param ignoredPropNames
-     * @param mergeFunc the first parameter is source property value, the second parameter is target property value.
-     * @return {@code targetBean}
-     * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
-     */
-    public static <T> T merge(final Object sourceBean, final T targetBean, final boolean ignoreUnmatchedProperty, final Set<String> ignoredPropNames,
-            final BinaryOperator<?> mergeFunc) throws IllegalArgumentException {
-        N.checkArgNotNull(targetBean, "targetBean");
-
-        if (sourceBean == null) {
-            return targetBean;
-        }
-
-        final BeanInfo srcBeanInfo = ParserUtil.getBeanInfo(sourceBean.getClass());
-        final BeanInfo targetBeanInfo = ParserUtil.getBeanInfo(targetBean.getClass());
-        final BinaryOperator<Object> objMergeFunc = (BinaryOperator<Object>) mergeFunc;
-
-        PropInfo targetPropInfo = null;
-        Object propValue = null;
-
-        for (PropInfo propInfo : srcBeanInfo.propInfoList) {
-            if (ignoredPropNames == null || !ignoredPropNames.contains(propInfo.name)) {
-                targetPropInfo = targetBeanInfo.getPropInfo(propInfo);
-
-                if (targetPropInfo == null) {
-                    if (!ignoreUnmatchedProperty) {
-                        throw new IllegalArgumentException("No property found by name: " + propInfo.name + " in target bean class: " + targetBean.getClass());
-                    }
-                } else {
-                    propValue = propInfo.getPropValue(sourceBean);
-                    targetPropInfo.setPropValue(targetBean, objMergeFunc.apply(propValue, targetPropInfo.getPropValue(targetBean)));
-                }
             }
         }
 
@@ -2381,6 +2511,38 @@ sealed class CommonUtil permits N {
      */
     public static <T> TreeSet<T> newTreeSet(SortedSet<T> c) { //NOSONAR
         return isEmpty(c) ? new TreeSet<>() : new TreeSet<>(c);
+    }
+
+    /**
+     * New hash set.
+     *
+     * @param <T>
+     * @return
+     */
+    public static <T> ConcurrentHashSet<T> newConcurrentHashSet() {
+        return new ConcurrentHashSet<>();
+    }
+
+    /**
+     * New hash set.
+     *
+     * @param <T>
+     * @param initialCapacity
+     * @return
+     */
+    public static <T> ConcurrentHashSet<T> newConcurrentHashSet(int initialCapacity) {
+        return new ConcurrentHashSet<>(initHashCapacity(initialCapacity));
+    }
+
+    /**
+     * New hash set.
+     *
+     * @param <T>
+     * @param c
+     * @return
+     */
+    public static <T> ConcurrentHashSet<T> newConcurrentHashSet(Collection<? extends T> c) {
+        return isEmpty(c) ? new ConcurrentHashSet<>() : new ConcurrentHashSet<>(c);
     }
 
     /**
