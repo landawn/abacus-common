@@ -19,7 +19,13 @@ import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.sql.Types;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
+import java.util.Calendar;
+import java.util.Date;
 
 import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
@@ -52,6 +58,32 @@ public abstract class AbstractLongType extends NumberType<Number> {
         }
 
         return N.stringOf(x.longValue());
+    }
+
+    /**
+     *
+     * @param obj
+     * @return
+     */
+    @Override
+    public Long valueOf(final Object obj) {
+        if (obj == null) {
+            return (Long) defaultValue();
+        }
+
+        if (obj instanceof Date) {
+            return ((Date) obj).getTime();
+        } else if (obj instanceof Calendar) {
+            return ((Calendar) obj).getTimeInMillis();
+        } else if (obj instanceof Instant) {
+            return ((Instant) obj).toEpochMilli();
+        } else if (obj instanceof ZonedDateTime) {
+            return ((ZonedDateTime) obj).toInstant().toEpochMilli();
+        } else if (obj instanceof LocalDateTime) {
+            return Timestamp.valueOf((LocalDateTime) obj).getTime();
+        }
+
+        return valueOf(N.typeOf(obj.getClass()).stringOf(obj));
     }
 
     /**

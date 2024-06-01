@@ -1,10 +1,14 @@
+### 3.11.3
+
+* Improvements and bug fixes.
+
 ### 3.11.2
 
-* Improvements JavaDoc.
+* Improvements and bug fixes.
 
 ### 3.11.1
 
-* Improvements JavaDoc.
+* Improvements and bug fixes.
 
 ### 3.11.0
 
@@ -13,35 +17,35 @@
 
 ### 3.10.23
 
-* Improvements JavaDoc.
+* Improvements and bug fixes.
 
 ### 3.10.22
 
-* Improvements JavaDoc.
+* Improvements and bug fixes.
 
 ### 3.10.21
 
-* Improvements JavaDoc.
+* Improvements and bug fixes.
 
 ### 3.10.20
 
-* Improvements JavaDoc.
+* Improvements and bug fixes.
 
 ### 3.10.19
 
-* Improvements JavaDoc.
+* Improvements and bug fixes.
 
 ### 3.10.18
 
-* Improvements JavaDoc.
+* Improvements and bug fixes.
 
 ### 3.10.17
 
-* Improvements JavaDoc.
+* Improvements and bug fixes.
 
 ### 3.10.16
 
-* Improvements JavaDoc.
+* Improvements and bug fixes.
 
 ### 3.10.15
 
@@ -359,7 +363,7 @@
 
 ### 3.6.12
 
-* Improvements JavaDoc.
+* Improvements and bug fixes.
 * Improvements and bug fix.
 
 

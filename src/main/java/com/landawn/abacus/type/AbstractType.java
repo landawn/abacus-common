@@ -80,7 +80,7 @@ public abstract class AbstractType<T> implements Type<T> {
     protected AbstractType(String typeName) {
         String simpleName = typeName;
 
-        if (typeName.indexOf('.') > 0) { //NOSONAR
+        if (typeName.indexOf('.') > 0 && Strings.startsWithAny(typeName, "java.lang.", "java.util.", "java.time.", "com.landawn.abacus.")) { //NOSONAR
             // generic type.
 
             int index = typeName.indexOf('<');
@@ -88,6 +88,7 @@ public abstract class AbstractType<T> implements Type<T> {
 
             try {
                 Class<?> cls = ClassUtil.forClass(tmpTypeName);
+
                 if (cls != null) {
                     cls = ClassUtil.forClass(ClassUtil.getSimpleClassName(cls));
                     if (cls != null) {

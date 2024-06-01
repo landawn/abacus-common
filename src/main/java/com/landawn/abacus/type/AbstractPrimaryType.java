@@ -14,6 +14,8 @@
 
 package com.landawn.abacus.type;
 
+import com.landawn.abacus.util.N;
+
 /**
  *
  * @author Haiyang Li
@@ -44,5 +46,19 @@ public abstract class AbstractPrimaryType<T> extends AbstractType<T> {
     @Override
     public boolean isComparable() {
         return true;
+    }
+
+    /**
+     *
+     * @param obj
+     * @return
+     */
+    @Override
+    public T valueOf(final Object obj) {
+        if (obj == null) {
+            return defaultValue();
+        }
+
+        return valueOf(N.typeOf(obj.getClass()).stringOf(obj));
     }
 }
