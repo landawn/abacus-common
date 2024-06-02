@@ -412,12 +412,12 @@ public final class WD {
     /**
      * Field NOT_EQUAL.
      */
-    public static final String NOT_EQUAL = "<>";
+    public static final String NOT_EQUAL = "!=";
 
     /**
      * Field NOT_EQUAL2.
      */
-    public static final String NOT_EQUAL2 = "!=";
+    public static final String NOT_EQUAL2 = "<>";
 
     /**
      * Field GREATER_EQUAL.

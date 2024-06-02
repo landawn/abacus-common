@@ -273,6 +273,18 @@ public final class TypeFactory {
             classes.add(com.landawn.abacus.type.BooleanCharType.class);
         }
 
+        try {
+            if (Class.forName("java.time.ZonedDateTime") != null) {
+                classes.add(com.landawn.abacus.type.InstantType.class);
+                classes.add(com.landawn.abacus.type.ZonedDateTimeType.class);
+                classes.add(com.landawn.abacus.type.LocalDateType.class);
+                classes.add(com.landawn.abacus.type.LocalTimeType.class);
+                classes.add(com.landawn.abacus.type.LocalDateTimeType.class);
+            }
+        } catch (Throwable e) {
+            // ignore.
+        }
+
         // initialize external types
         {
             try {
@@ -288,18 +300,6 @@ public final class TypeFactory {
                     classes.add(com.landawn.abacus.type.JodaInstantType.class);
                     classes.add(com.landawn.abacus.type.JodaDateTimeType.class);
                     classes.add(com.landawn.abacus.type.JodaMutableDateTimeType.class);
-                }
-            } catch (Throwable e) {
-                // ignore.
-            }
-
-            try {
-                if (Class.forName("java.time.ZonedDateTime") != null) {
-                    classes.add(com.landawn.abacus.type.InstantType.class);
-                    classes.add(com.landawn.abacus.type.ZonedDateTimeType.class);
-                    classes.add(com.landawn.abacus.type.LocalDateType.class);
-                    classes.add(com.landawn.abacus.type.LocalTimeType.class);
-                    classes.add(com.landawn.abacus.type.LocalDateTimeType.class);
                 }
             } catch (Throwable e) {
                 // ignore.

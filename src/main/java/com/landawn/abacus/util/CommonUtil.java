@@ -1137,8 +1137,8 @@ sealed class CommonUtil permits N {
             return (T) (Integer.valueOf(((Character) obj).charValue())); //NOSONAR
         } else if ((targetType.clazz().equals(char.class) || targetType.clazz().equals(Character.class)) && srcType.clazz().equals(Integer.class)) {
             return (T) (Character.valueOf((char) ((Integer) obj).intValue()));
-        } else if (targetType.clazz().equals(long.class) || targetType.clazz().equals(Long.class)) {
-            return (T) Numbers.convert((Number) obj, (Type) targetType);
+        } else if ((targetType.clazz().equals(long.class) || targetType.clazz().equals(Long.class)) && java.util.Date.class.isAssignableFrom(srcType.clazz())) {
+            return (T) (Long) ((java.util.Date) obj).getTime();
         } else if (targetType.clazz().equals(byte[].class)) {
             if (srcType.clazz().equals(Blob.class)) {
                 final Blob blob = (Blob) obj;
