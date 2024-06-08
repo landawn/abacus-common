@@ -3882,7 +3882,7 @@ public final class Maps {
          * @param key
          * @return
          */
-        public Boolean getBoolean(Object key) {
+        public Boolean getBoolean(K key) {
             Object value = map.get(key);
 
             if (value == null && defaultForPrimitive) {
@@ -3900,7 +3900,7 @@ public final class Maps {
          * @param key
          * @return
          */
-        public Character getChar(Object key) {
+        public Character getChar(K key) {
             Object value = map.get(key);
 
             if (value == null && defaultForPrimitive) {
@@ -3918,7 +3918,7 @@ public final class Maps {
          * @param key
          * @return
          */
-        public Byte getByte(Object key) {
+        public Byte getByte(K key) {
             Object value = map.get(key);
 
             if (value == null && defaultForPrimitive) {
@@ -3936,7 +3936,7 @@ public final class Maps {
          * @param key
          * @return
          */
-        public Short getShort(Object key) {
+        public Short getShort(K key) {
             Object value = map.get(key);
 
             if (value == null && defaultForPrimitive) {
@@ -3954,7 +3954,7 @@ public final class Maps {
          * @param key
          * @return
          */
-        public Integer getInt(Object key) {
+        public Integer getInt(K key) {
             Object value = map.get(key);
 
             if (value == null && defaultForPrimitive) {
@@ -3972,7 +3972,7 @@ public final class Maps {
          * @param key
          * @return
          */
-        public Long getLong(Object key) {
+        public Long getLong(K key) {
             Object value = map.get(key);
 
             if (value == null && defaultForPrimitive) {
@@ -3990,7 +3990,7 @@ public final class Maps {
          * @param key
          * @return
          */
-        public Float getFloat(Object key) {
+        public Float getFloat(K key) {
             Object value = map.get(key);
 
             if (value == null && defaultForPrimitive) {
@@ -4008,7 +4008,7 @@ public final class Maps {
          * @param key
          * @return
          */
-        public Double getDouble(Object key) {
+        public Double getDouble(K key) {
             Object value = map.get(key);
 
             if (value == null && defaultForPrimitive) {
@@ -4026,7 +4026,7 @@ public final class Maps {
          * @param key
          * @return
          */
-        public BigInteger getBigInteger(Object key) {
+        public BigInteger getBigInteger(K key) {
             Object value = map.get(key);
 
             if (value == null || value instanceof BigInteger) {
@@ -4042,7 +4042,7 @@ public final class Maps {
          * @param key
          * @return
          */
-        public BigDecimal getBigDecimal(Object key) {
+        public BigDecimal getBigDecimal(K key) {
             Object value = map.get(key);
 
             if (value == null || value instanceof BigDecimal) {
@@ -4058,7 +4058,7 @@ public final class Maps {
          * @param key
          * @return
          */
-        public String getString(Object key) {
+        public String getString(K key) {
             Object value = map.get(key);
 
             if (value == null || value instanceof String) {
@@ -4074,7 +4074,7 @@ public final class Maps {
          * @param key
          * @return
          */
-        public Calendar getCalendar(Object key) {
+        public Calendar getCalendar(K key) {
             Object value = map.get(key);
 
             if (value == null || value instanceof Calendar) {
@@ -4090,7 +4090,7 @@ public final class Maps {
          * @param key
          * @return
          */
-        public Date getJUDate(Object key) {
+        public Date getJUDate(K key) {
             Object value = map.get(key);
 
             if (value == null || value instanceof Date) {
@@ -4106,7 +4106,7 @@ public final class Maps {
          * @param key
          * @return
          */
-        public java.sql.Date getDate(Object key) {
+        public java.sql.Date getDate(K key) {
             Object value = map.get(key);
 
             if (value == null || value instanceof java.sql.Date) {
@@ -4122,7 +4122,7 @@ public final class Maps {
          * @param key
          * @return
          */
-        public java.sql.Time getTime(Object key) {
+        public java.sql.Time getTime(K key) {
             Object value = map.get(key);
 
             if (value == null || value instanceof java.sql.Time) {
@@ -4138,7 +4138,7 @@ public final class Maps {
          * @param key
          * @return
          */
-        public java.sql.Timestamp getTimestamp(Object key) {
+        public java.sql.Timestamp getTimestamp(K key) {
             Object value = map.get(key);
 
             if (value == null || value instanceof java.sql.Timestamp) {
@@ -4154,7 +4154,7 @@ public final class Maps {
          * @param key
          * @return
          */
-        public LocalDate getLocalDate(Object key) {
+        public LocalDate getLocalDate(K key) {
             Object value = map.get(key);
 
             if (value == null || value instanceof LocalDate) {
@@ -4170,7 +4170,7 @@ public final class Maps {
          * @param key
          * @return
          */
-        public LocalTime getLocalTime(Object key) {
+        public LocalTime getLocalTime(K key) {
             Object value = map.get(key);
 
             if (value == null || value instanceof LocalTime) {
@@ -4186,7 +4186,7 @@ public final class Maps {
          * @param key
          * @return
          */
-        public LocalDateTime getLocalDateTime(Object key) {
+        public LocalDateTime getLocalDateTime(K key) {
             Object value = map.get(key);
 
             if (value == null || value instanceof LocalDateTime) {
@@ -4202,7 +4202,7 @@ public final class Maps {
          * @param key
          * @return
          */
-        public ZonedDateTime getZonedDateTime(Object key) {
+        public ZonedDateTime getZonedDateTime(K key) {
             Object value = map.get(key);
 
             if (value == null || value instanceof ZonedDateTime) {
@@ -4218,7 +4218,7 @@ public final class Maps {
          * @param key
          * @return
          */
-        public V getObject(Object key) {
+        public V getObject(K key) {
             return map.get(key);
         }
 

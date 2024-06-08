@@ -329,7 +329,7 @@ public final class Comparators {
 
         // return Comparators.<u.Optional<T>, T> comparingBy(o -> o.orElse(null), Comparator.nullsFirst(cmp));
 
-        return (a, b) -> a.isEmpty() ? (b.isEmpty() ? 0 : -1) : (b.isEmpty() ? 1 : cmp.compare(a.get(), b.get()));
+        return (a, b) -> a == null || a.isEmpty() ? (b == null || b.isEmpty() ? 0 : -1) : (b == null || b.isEmpty() ? 1 : cmp.compare(a.get(), b.get()));
     }
 
     /**
@@ -343,7 +343,7 @@ public final class Comparators {
 
         // return Comparators.<u.Optional<T>, T> comparingBy(o -> o.orElse(null), Comparator.nullsLast(cmp));
 
-        return (a, b) -> a.isEmpty() ? (b.isEmpty() ? 0 : 1) : (b.isEmpty() ? -1 : cmp.compare(a.get(), b.get()));
+        return (a, b) -> a == null || a.isEmpty() ? (b == null || b.isEmpty() ? 0 : 1) : (b == null || b.isEmpty() ? -1 : cmp.compare(a.get(), b.get()));
     }
 
     /**
@@ -754,11 +754,11 @@ public final class Comparators {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <C> 
-     * @return 
+     *
+     * @param <T>
+     * @param <C>
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <T extends Comparable, C extends Collection<T>> Comparator<C> comparingCollection() {
@@ -803,11 +803,11 @@ public final class Comparators {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <C> 
-     * @return 
+     *
+     * @param <T>
+     * @param <C>
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <T extends Comparable, C extends Iterable<T>> Comparator<C> comparingIterable() {
@@ -849,11 +849,11 @@ public final class Comparators {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <C> 
-     * @return 
+     *
+     * @param <T>
+     * @param <C>
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <T extends Comparable, C extends Iterator<T>> Comparator<C> comparingIterator() {

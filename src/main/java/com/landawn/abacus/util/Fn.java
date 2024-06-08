@@ -454,9 +454,9 @@ public final class Fn {
         return new Supplier<>() {
             private final java.util.function.Supplier<T> delegate = supplier;
             private final long durationNanos = unit.toNanos(duration);
-            private transient volatile T value;
+            private volatile T value;
             // The special value 0 means "not yet initialized".
-            private transient volatile long expirationNanos = 0;
+            private volatile long expirationNanos = 0;
 
             @Override
             public T get() {
@@ -2484,6 +2484,126 @@ public final class Fn {
     }
 
     /**
+     * Apply by key.
+     *
+     * @param <K> the key type
+     * @param <V> the value type
+     * @param <R>
+     * @param func
+     * @return
+     */
+    public static <K, V, R> Function<Map.Entry<K, V>, R> applyByKey(final java.util.function.Function<? super K, ? extends R> func) {
+        N.checkArgNotNull(func);
+
+        return entry -> func.apply(entry.getKey());
+    }
+
+    /**
+     * Apply by value.
+     *
+     * @param <K> the key type
+     * @param <V> the value type
+     * @param <R>
+     * @param func
+     * @return
+     */
+    public static <K, V, R> Function<Map.Entry<K, V>, R> applyByValue(final java.util.function.Function<? super V, ? extends R> func) {
+        N.checkArgNotNull(func);
+
+        return entry -> func.apply(entry.getValue());
+    }
+
+    /**
+     *
+     * @param <K> the key type
+     * @param <V> the value type
+     * @param <KK>
+     * @param func
+     * @return
+     */
+    public static <K, V, KK> Function<Map.Entry<K, V>, Map.Entry<KK, V>> mapKey(final java.util.function.Function<? super K, ? extends KK> func) {
+        N.checkArgNotNull(func);
+
+        return entry -> new ImmutableEntry<>(func.apply(entry.getKey()), entry.getValue());
+    }
+
+    /**
+     *
+     * @param <K> the key type
+     * @param <V> the value type
+     * @param <VV>
+     * @param func
+     * @return
+     */
+    public static <K, V, VV> Function<Map.Entry<K, V>, Map.Entry<K, VV>> mapValue(final java.util.function.Function<? super V, ? extends VV> func) {
+        N.checkArgNotNull(func);
+
+        return entry -> new ImmutableEntry<>(entry.getKey(), func.apply(entry.getValue()));
+    }
+
+    /**
+     * Test key val.
+     *
+     * @param <K> the key type
+     * @param <V> the value type
+     * @param predicate
+     * @return
+     */
+    public static <K, V> Predicate<Map.Entry<K, V>> testKeyVal(final java.util.function.BiPredicate<? super K, ? super V> predicate) {
+        N.checkArgNotNull(predicate);
+
+        return entry -> predicate.test(entry.getKey(), entry.getValue());
+    }
+
+    /**
+     * Accept key val.
+     *
+     * @param <K> the key type
+     * @param <V> the value type
+     * @param consumer
+     * @return
+     */
+    public static <K, V> Consumer<Map.Entry<K, V>> acceptKeyVal(final java.util.function.BiConsumer<? super K, ? super V> consumer) {
+        N.checkArgNotNull(consumer);
+
+        return entry -> consumer.accept(entry.getKey(), entry.getValue());
+    }
+
+    /**
+     * Apply key val.
+     *
+     * @param <K> the key type
+     * @param <V> the value type
+     * @param <R>
+     * @param func
+     * @return
+     */
+    public static <K, V, R> Function<Map.Entry<K, V>, R> applyKeyVal(final java.util.function.BiFunction<? super K, ? super V, ? extends R> func) {
+        N.checkArgNotNull(func);
+
+        return entry -> func.apply(entry.getKey(), entry.getValue());
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param predicate
+     * @param consumer
+     * @return
+     */
+    @Beta
+    public static <T> Consumer<T> acceptIfNotNull(final java.util.function.Consumer<? super T> consumer) {
+        N.checkArgNotNull(consumer);
+
+        return t -> {
+            if (t != null) {
+                consumer.accept(t);
+            }
+        };
+    }
+
+    /**
      *
      *
      * @param <T>
@@ -2529,84 +2649,15 @@ public final class Fn {
     }
 
     /**
-     * Apply by key.
-     *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param <R>
-     * @param func
-     * @return
-     */
-    public static <K, V, R> Function<Map.Entry<K, V>, R> applyByKey(final java.util.function.Function<? super K, ? extends R> func) {
-        N.checkArgNotNull(func);
-
-        return entry -> func.apply(entry.getKey());
-    }
-
-    /**
-     * Apply by value.
-     *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param <R>
-     * @param func
-     * @return
-     */
-    public static <K, V, R> Function<Map.Entry<K, V>, R> applyByValue(final java.util.function.Function<? super V, ? extends R> func) {
-        N.checkArgNotNull(func);
-
-        return entry -> func.apply(entry.getValue());
-    }
-
-    /**
-     *
      *
      * @param <T>
      * @param <R>
-     * @param predicate
-     * @param func
-     * @param defaultValue
+     * @param mapper
      * @return
      */
     @Beta
-    public static <T, R> Function<T, R> applyIfOrElseDefault(final java.util.function.Predicate<? super T> predicate,
-            final java.util.function.Function<? super T, ? extends R> func, final R defaultValue) {
-        N.checkArgNotNull(predicate);
-        N.checkArgNotNull(func);
-
-        return t -> {
-            if (predicate.test(t)) {
-                return func.apply(t);
-            } else {
-                return defaultValue;
-            }
-        };
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param <R>
-     * @param predicate
-     * @param func
-     * @param supplier
-     * @return
-     */
-    @Beta
-    public static <T, R> Function<T, R> applyIfOrElseGet(final java.util.function.Predicate<? super T> predicate,
-            final java.util.function.Function<? super T, ? extends R> func, final java.util.function.Supplier<? extends R> supplier) {
-        N.checkArgNotNull(predicate);
-        N.checkArgNotNull(func);
-        N.checkArgNotNull(supplier);
-
-        return t -> {
-            if (predicate.test(t)) {
-                return func.apply(t);
-            } else {
-                return supplier.get();
-            }
-        };
+    public static <T, R> Function<T, Collection<R>> applyIfNotNullOrEmpty(final java.util.function.Function<T, Collection<R>> mapper) {
+        return t -> t == null ? N.<R> emptyList() : mapper.apply(t);
     }
 
     /**
@@ -2854,73 +2905,53 @@ public final class Fn {
 
     /**
      *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param <KK>
-     * @param func
-     * @return
-     */
-    public static <K, V, KK> Function<Map.Entry<K, V>, Map.Entry<KK, V>> mapKey(final java.util.function.Function<? super K, ? extends KK> func) {
-        N.checkArgNotNull(func);
-
-        return entry -> new ImmutableEntry<>(func.apply(entry.getKey()), entry.getValue());
-    }
-
-    /**
      *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param <VV>
-     * @param func
-     * @return
-     */
-    public static <K, V, VV> Function<Map.Entry<K, V>, Map.Entry<K, VV>> mapValue(final java.util.function.Function<? super V, ? extends VV> func) {
-        N.checkArgNotNull(func);
-
-        return entry -> new ImmutableEntry<>(entry.getKey(), func.apply(entry.getValue()));
-    }
-
-    /**
-     * Test key val.
-     *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param predicate
-     * @return
-     */
-    public static <K, V> Predicate<Map.Entry<K, V>> testKeyVal(final java.util.function.BiPredicate<? super K, ? super V> predicate) {
-        N.checkArgNotNull(predicate);
-
-        return entry -> predicate.test(entry.getKey(), entry.getValue());
-    }
-
-    /**
-     * Accept key val.
-     *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param consumer
-     * @return
-     */
-    public static <K, V> Consumer<Map.Entry<K, V>> acceptKeyVal(final java.util.function.BiConsumer<? super K, ? super V> consumer) {
-        N.checkArgNotNull(consumer);
-
-        return entry -> consumer.accept(entry.getKey(), entry.getValue());
-    }
-
-    /**
-     * Apply key val.
-     *
-     * @param <K> the key type
-     * @param <V> the value type
+     * @param <T>
      * @param <R>
+     * @param predicate
      * @param func
+     * @param defaultValue
      * @return
      */
-    public static <K, V, R> Function<Map.Entry<K, V>, R> applyKeyVal(final java.util.function.BiFunction<? super K, ? super V, ? extends R> func) {
+    @Beta
+    public static <T, R> Function<T, R> applyIfOrElseDefault(final java.util.function.Predicate<? super T> predicate,
+            final java.util.function.Function<? super T, ? extends R> func, final R defaultValue) {
+        N.checkArgNotNull(predicate);
         N.checkArgNotNull(func);
 
-        return entry -> func.apply(entry.getKey(), entry.getValue());
+        return t -> {
+            if (predicate.test(t)) {
+                return func.apply(t);
+            } else {
+                return defaultValue;
+            }
+        };
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param <R>
+     * @param predicate
+     * @param func
+     * @param supplier
+     * @return
+     */
+    @Beta
+    public static <T, R> Function<T, R> applyIfOrElseGet(final java.util.function.Predicate<? super T> predicate,
+            final java.util.function.Function<? super T, ? extends R> func, final java.util.function.Supplier<? extends R> supplier) {
+        N.checkArgNotNull(predicate);
+        N.checkArgNotNull(func);
+        N.checkArgNotNull(supplier);
+
+        return t -> {
+            if (predicate.test(t)) {
+                return func.apply(t);
+            } else {
+                return supplier.get();
+            }
+        };
     }
 
     private static final Function<Map<Object, Collection<Object>>, List<Map<Object, Object>>> FLAT_TO_MAP_FUNC = Maps::flatToMap;
@@ -10034,9 +10065,9 @@ public final class Fn {
             return new Throwables.Supplier<>() {
                 private final Throwables.Supplier<T, E> delegate = supplier;
                 private final long durationNanos = unit.toNanos(duration);
-                private transient volatile T value;
+                private volatile T value;
                 // The special value 0 means "not yet initialized".
-                private transient volatile long expirationNanos = 0;
+                private volatile long expirationNanos = 0;
 
                 @Override
                 public T get() throws E {

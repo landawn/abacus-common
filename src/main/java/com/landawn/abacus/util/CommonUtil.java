@@ -17179,7 +17179,7 @@ sealed class CommonUtil permits N {
      *
      * <pre>
      * <code>
-     * repeatEachToSize(N.asList(1, 2, 3), 5) => [1, 1, 2, 2, 3]
+     * repeatElementsToSize(N.asList(1, 2, 3), 5) => [1, 1, 2, 2, 3]
      * </code>
      * </pre>
      *

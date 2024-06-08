@@ -22,10 +22,10 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public final class ConcurrentHashSet<E> extends AbstractSet<E> {
 
-    private transient ConcurrentHashMap<E, Object> map;
-
     // Dummy value to associate with an Object in the backing Map
     private static final Object PRESENT = N.NULL_MASK;
+
+    private final ConcurrentHashMap<E, Object> map;
 
     public ConcurrentHashSet() {
         map = new ConcurrentHashMap<>();
@@ -77,5 +77,24 @@ public final class ConcurrentHashSet<E> extends AbstractSet<E> {
     @Override
     public int size() {
         return map.size();
+    }
+
+    @Override
+    public int hashCode() {
+        return map.keySet().hashCode();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == this) {
+            return true;
+        }
+
+        return (o instanceof ConcurrentHashSet) && ((ConcurrentHashSet<E>) o).map.keySet().equals(map.keySet());
+    }
+
+    @Override
+    public String toString() {
+        return map.keySet().toString();
     }
 }
