@@ -18,11 +18,8 @@ import java.util.AbstractMap;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.IdentityHashMap;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.SortedMap;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
@@ -38,12 +35,16 @@ import java.util.function.Function;
 public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
 
     @SuppressWarnings("rawtypes")
-    private static final ImmutableMap EMPTY = new ImmutableMap(Collections.emptyMap());
+    private static final ImmutableMap EMPTY = new ImmutableMap(Map.of(), true);
 
     private final Map<K, V> map;
 
     ImmutableMap(final Map<? extends K, ? extends V> map) {
-        this.map = Collections.unmodifiableMap(map);
+        this(map, false);
+    }
+
+    ImmutableMap(final Map<? extends K, ? extends V> map, final boolean isUnmodifiable) {
+        this.map = isUnmodifiable ? (Map<K, V>) map : Collections.unmodifiableMap(map);
     }
 
     /**
@@ -66,7 +67,7 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      * @return
      */
     public static <K, V> ImmutableMap<K, V> of(final K k1, final V v1) {
-        return new ImmutableMap<>(Collections.singletonMap(k1, v1));
+        return new ImmutableMap<>(Map.of(k1, v1), true);
     }
 
     /**
@@ -81,8 +82,7 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      * @return
      */
     public static <K, V> ImmutableMap<K, V> of(final K k1, final V v1, final K k2, final V v2) {
-        final Map<K, V> map = N.asLinkedHashMap(k1, v1, k2, v2);
-        return new ImmutableMap<>(map);
+        return new ImmutableMap<>(Map.of(k1, v1, k2, v2), true);
     }
 
     /**
@@ -99,8 +99,7 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      * @return
      */
     public static <K, V> ImmutableMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3) {
-        final Map<K, V> map = N.asLinkedHashMap(k1, v1, k2, v2, k3, v3);
-        return new ImmutableMap<>(map);
+        return new ImmutableMap<>(Map.of(k1, v1, k2, v2, k3, v3), true);
     }
 
     /**
@@ -119,8 +118,7 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      * @return
      */
     public static <K, V> ImmutableMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4) {
-        final Map<K, V> map = N.asLinkedHashMap(k1, v1, k2, v2, k3, v3, k4, v4);
-        return new ImmutableMap<>(map);
+        return new ImmutableMap<>(Map.of(k1, v1, k2, v2, k3, v3, k4, v4), true);
     }
 
     /**
@@ -142,8 +140,7 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      */
     public static <K, V> ImmutableMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5,
             final V v5) {
-        final Map<K, V> map = N.asLinkedHashMap(k1, v1, k2, v2, k3, v3, k4, v4, k5, v5);
-        return new ImmutableMap<>(map);
+        return new ImmutableMap<>(Map.of(k1, v1, k2, v2, k3, v3, k4, v4, k5, v5), true);
     }
 
     /**
@@ -167,8 +164,7 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      */
     public static <K, V> ImmutableMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5,
             final V v5, final K k6, final V v6) {
-        final Map<K, V> map = N.asLinkedHashMap(k1, v1, k2, v2, k3, v3, k4, v4, k5, v5, k6, v6);
-        return new ImmutableMap<>(map);
+        return new ImmutableMap<>(Map.of(k1, v1, k2, v2, k3, v3, k4, v4, k5, v5, k6, v6), true);
     }
 
     /**
@@ -194,8 +190,22 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      */
     public static <K, V> ImmutableMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5,
             final V v5, final K k6, final V v6, final K k7, final V v7) {
-        final Map<K, V> map = N.asLinkedHashMap(k1, v1, k2, v2, k3, v3, k4, v4, k5, v5, k6, v6, k7, v7);
-        return new ImmutableMap<>(map);
+        return new ImmutableMap<>(Map.of(k1, v1, k2, v2, k3, v3, k4, v4, k5, v5, k6, v6, k7, v7), true);
+    }
+
+    public static <K, V> ImmutableMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5,
+            final V v5, final K k6, final V v6, final K k7, final V v7, final K k8, final V v8) {
+        return new ImmutableMap<>(Map.of(k1, v1, k2, v2, k3, v3, k4, v4, k5, v5, k6, v6, k7, v7, k8, v8), true);
+    }
+
+    public static <K, V> ImmutableMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5,
+            final V v5, final K k6, final V v6, final K k7, final V v7, final K k8, final V v8, final K k9, final V v9) {
+        return new ImmutableMap<>(Map.of(k1, v1, k2, v2, k3, v3, k4, v4, k5, v5, k6, v6, k7, v7, k8, v8, k9, v9), true);
+    }
+
+    public static <K, V> ImmutableMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5,
+            final V v5, final K k6, final V v6, final K k7, final V v7, final K k8, final V v8, final K k9, final V v9, final K k10, final V v10) {
+        return new ImmutableMap<>(Map.of(k1, v1, k2, v2, k3, v3, k4, v4, k5, v5, k6, v6, k7, v7, k8, v8, k9, v9, k10, v10), true);
     }
 
     /**
@@ -206,14 +216,13 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      * @return
      */
     public static <K, V> ImmutableMap<K, V> copyOf(final Map<? extends K, ? extends V> map) {
-        if (N.isEmpty(map)) {
+        if (map instanceof ImmutableMap) {
+            return (ImmutableMap<K, V>) map;
+        } else if (N.isEmpty(map)) {
             return empty();
+        } else {
+            return new ImmutableMap<>(Map.copyOf(map), true);
         }
-
-        final Map<K, V> tmp = map instanceof IdentityHashMap ? new IdentityHashMap<>(map)
-                : ((map instanceof LinkedHashMap || map instanceof SortedMap) ? new LinkedHashMap<>(map) : new HashMap<>(map));
-
-        return new ImmutableMap<>(tmp);
     }
 
     /**
@@ -224,13 +233,13 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      * @return an {@code ImmutableMap} backed by the specified {@code map}
      */
     public static <K, V> ImmutableMap<K, V> wrap(final Map<? extends K, ? extends V> map) {
-        if (map == null) {
-            return empty();
-        } else if (map instanceof ImmutableMap) {
+        if (map instanceof ImmutableMap) {
             return (ImmutableMap<K, V>) map;
+        } else if (map == null) {
+            return empty();
+        } else {
+            return new ImmutableMap<>(map);
         }
-
-        return new ImmutableMap<>(map);
     }
 
     /**

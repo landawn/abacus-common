@@ -33,12 +33,16 @@ import java.util.function.UnaryOperator;
 public final class ImmutableList<E> extends ImmutableCollection<E> implements List<E> {
 
     @SuppressWarnings("rawtypes")
-    private static final ImmutableList EMPTY = new ImmutableList(Collections.emptyList());
+    private static final ImmutableList EMPTY = new ImmutableList(List.of(), true);
 
     private final List<E> list;
 
-    ImmutableList(List<? extends E> list) {
-        super(Collections.unmodifiableList(list));
+    ImmutableList(final List<? extends E> list) {
+        this(list, false);
+    }
+
+    ImmutableList(final List<? extends E> list, final boolean isUnmodifiable) {
+        super(isUnmodifiable ? list : Collections.unmodifiableList(list));
         this.list = (List<E>) coll;
     }
 
@@ -53,68 +57,68 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
 
     /**
      *
-     * @param <T>
+     * @param <E>
      * @param e
      * @return
      */
-    public static <T> ImmutableList<T> just(T e) {
-        return new ImmutableList<>(Collections.singletonList(e));
+    public static <E> ImmutableList<E> just(E e) {
+        return new ImmutableList<>(List.of(e), true);
     }
 
     /**
      *
      *
-     * @param <T>
+     * @param <E>
      * @param e1
      * @return
      */
-    public static <T> ImmutableList<T> of(final T e1) {
-        return new ImmutableList<>(N.asList(e1));
+    public static <E> ImmutableList<E> of(final E e1) {
+        return new ImmutableList<>(List.of(e1), true);
     }
 
     /**
      *
      *
-     * @param <T>
+     * @param <E>
      * @param e1
      * @param e2
      * @return
      */
-    public static <T> ImmutableList<T> of(final T e1, final T e2) {
-        return new ImmutableList<>(N.asList(e1, e2));
+    public static <E> ImmutableList<E> of(final E e1, final E e2) {
+        return new ImmutableList<>(List.of(e1, e2), true);
     }
 
     /**
      *
      *
-     * @param <T>
+     * @param <E>
      * @param e1
      * @param e2
      * @param e3
      * @return
      */
-    public static <T> ImmutableList<T> of(final T e1, final T e2, final T e3) {
-        return new ImmutableList<>(N.asList(e1, e2, e3));
+    public static <E> ImmutableList<E> of(final E e1, final E e2, final E e3) {
+        return new ImmutableList<>(List.of(e1, e2, e3), true);
     }
 
     /**
      *
      *
-     * @param <T>
+     * @param <E>
      * @param e1
      * @param e2
      * @param e3
      * @param e4
      * @return
      */
-    public static <T> ImmutableList<T> of(final T e1, final T e2, final T e3, final T e4) {
-        return new ImmutableList<>(N.asList(e1, e2, e3, e4));
+    public static <E> ImmutableList<E> of(final E e1, final E e2, final E e3, final E e4) {
+        return new ImmutableList<>(List.of(e1, e2, e3, e4), true);
     }
 
     /**
      *
      *
-     * @param <T>
+     * @param <E>
      * @param e1
      * @param e2
      * @param e3
@@ -122,14 +126,14 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
      * @param e5
      * @return
      */
-    public static <T> ImmutableList<T> of(final T e1, final T e2, final T e3, final T e4, final T e5) {
-        return new ImmutableList<>(N.asList(e1, e2, e3, e4, e5));
+    public static <E> ImmutableList<E> of(final E e1, final E e2, final E e3, final E e4, final E e5) {
+        return new ImmutableList<>(List.of(e1, e2, e3, e4, e5), true);
     }
 
     /**
      *
      *
-     * @param <T>
+     * @param <E>
      * @param e1
      * @param e2
      * @param e3
@@ -138,14 +142,14 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
      * @param e6
      * @return
      */
-    public static <T> ImmutableList<T> of(final T e1, final T e2, final T e3, final T e4, final T e5, final T e6) {
-        return new ImmutableList<>(N.asList(e1, e2, e3, e4, e5, e6));
+    public static <E> ImmutableList<E> of(final E e1, final E e2, final E e3, final E e4, final E e5, final E e6) {
+        return new ImmutableList<>(List.of(e1, e2, e3, e4, e5, e6), true);
     }
 
     /**
      *
      *
-     * @param <T>
+     * @param <E>
      * @param e1
      * @param e2
      * @param e3
@@ -155,8 +159,21 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
      * @param e7
      * @return
      */
-    public static <T> ImmutableList<T> of(final T e1, final T e2, final T e3, final T e4, final T e5, final T e6, final T e7) {
-        return new ImmutableList<>(N.asList(e1, e2, e3, e4, e5, e6, e7));
+    public static <E> ImmutableList<E> of(final E e1, final E e2, final E e3, final E e4, final E e5, final E e6, final E e7) {
+        return new ImmutableList<>(List.of(e1, e2, e3, e4, e5, e6, e7), true);
+    }
+
+    public static <E> ImmutableList<E> of(final E e1, final E e2, final E e3, final E e4, final E e5, final E e6, final E e7, final E e8) {
+        return new ImmutableList<>(List.of(e1, e2, e3, e4, e5, e6, e7, e8), true);
+    }
+
+    public static <E> ImmutableList<E> of(final E e1, final E e2, final E e3, final E e4, final E e5, final E e6, final E e7, final E e8, final E e9) {
+        return new ImmutableList<>(List.of(e1, e2, e3, e4, e5, e6, e7, e8, e9), true);
+    }
+
+    public static <E> ImmutableList<E> of(final E e1, final E e2, final E e3, final E e4, final E e5, final E e6, final E e7, final E e8, final E e9,
+            final E e10) {
+        return new ImmutableList<>(List.of(e1, e2, e3, e4, e5, e6, e7, e8, e9, e10), true);
     }
 
     /**
@@ -169,10 +186,8 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
     public static <E> ImmutableList<E> of(final E... a) {
         if (N.isEmpty(a)) {
             return empty();
-        } else if (a.length == 1) {
-            return new ImmutableList<>(Collections.singletonList(a[0]));
         } else {
-            return new ImmutableList<>(N.asList(N.clone(a)));
+            return new ImmutableList<>(List.of(a), true);
         }
     }
 
@@ -183,12 +198,12 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
      * @return
      */
     public static <E> ImmutableList<E> copyOf(final Collection<? extends E> c) {
-        if (N.isEmpty(c)) {
+        if (c instanceof ImmutableList) {
+            return (ImmutableList<E>) c;
+        } else if (N.isEmpty(c)) {
             return empty();
-        } else if (c.size() == 1) {
-            return new ImmutableList<>(Collections.singletonList(N.firstOrNullIfEmpty(c)));
         } else {
-            return new ImmutableList<>(new ArrayList<>(c));
+            return new ImmutableList<>(List.copyOf(c), true);
         }
     }
 
@@ -199,13 +214,13 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
      * @return an {@code ImmutableList} backed by the specified {@code list}
      */
     public static <E> ImmutableList<E> wrap(final List<? extends E> list) {
-        if (list == null) {
-            return empty();
-        } else if (list instanceof ImmutableList) {
+        if (list instanceof ImmutableList) {
             return (ImmutableList<E>) list;
+        } else if (list == null) {
+            return empty();
+        } else {
+            return new ImmutableList<>(list);
         }
-
-        return new ImmutableList<>(list);
     }
 
     /**

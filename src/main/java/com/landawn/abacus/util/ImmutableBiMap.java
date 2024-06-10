@@ -49,13 +49,13 @@ public final class ImmutableBiMap<K, V> extends ImmutableMap<K, V> {
     }
 
     /**
-     * 
+     *
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param k1 
-     * @param v1 
-     * @return 
+     * @param k1
+     * @param v1
+     * @return
      */
     public static <K, V> ImmutableBiMap<K, V> of(final K k1, final V v1) {
         final BiMap<K, V> biMap = BiMap.of(k1, v1);
@@ -63,15 +63,15 @@ public final class ImmutableBiMap<K, V> extends ImmutableMap<K, V> {
     }
 
     /**
-     * 
+     *
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param k1 
-     * @param v1 
-     * @param k2 
-     * @param v2 
-     * @return 
+     * @param k1
+     * @param v1
+     * @param k2
+     * @param v2
+     * @return
      */
     public static <K, V> ImmutableBiMap<K, V> of(final K k1, final V v1, final K k2, final V v2) {
         final BiMap<K, V> biMap = BiMap.of(k1, v1, k2, v2);
@@ -79,17 +79,17 @@ public final class ImmutableBiMap<K, V> extends ImmutableMap<K, V> {
     }
 
     /**
-     * 
+     *
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param k1 
-     * @param v1 
-     * @param k2 
-     * @param v2 
-     * @param k3 
-     * @param v3 
-     * @return 
+     * @param k1
+     * @param v1
+     * @param k2
+     * @param v2
+     * @param k3
+     * @param v3
+     * @return
      */
     public static <K, V> ImmutableBiMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3) {
         final BiMap<K, V> biMap = BiMap.of(k1, v1, k2, v2, k3, v3);
@@ -97,19 +97,19 @@ public final class ImmutableBiMap<K, V> extends ImmutableMap<K, V> {
     }
 
     /**
-     * 
+     *
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param k1 
-     * @param v1 
-     * @param k2 
-     * @param v2 
-     * @param k3 
-     * @param v3 
-     * @param k4 
-     * @param v4 
-     * @return 
+     * @param k1
+     * @param v1
+     * @param k2
+     * @param v2
+     * @param k3
+     * @param v3
+     * @param k4
+     * @param v4
+     * @return
      */
     public static <K, V> ImmutableBiMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4) {
         final BiMap<K, V> biMap = BiMap.of(k1, v1, k2, v2, k3, v3, k4, v4);
@@ -117,21 +117,21 @@ public final class ImmutableBiMap<K, V> extends ImmutableMap<K, V> {
     }
 
     /**
-     * 
+     *
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param k1 
-     * @param v1 
-     * @param k2 
-     * @param v2 
-     * @param k3 
-     * @param v3 
-     * @param k4 
-     * @param v4 
-     * @param k5 
-     * @param v5 
-     * @return 
+     * @param k1
+     * @param v1
+     * @param k2
+     * @param v2
+     * @param k3
+     * @param v3
+     * @param k4
+     * @param v4
+     * @param k5
+     * @param v5
+     * @return
      */
     public static <K, V> ImmutableBiMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5,
             final V v5) {
@@ -140,23 +140,23 @@ public final class ImmutableBiMap<K, V> extends ImmutableMap<K, V> {
     }
 
     /**
-     * 
+     *
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param k1 
-     * @param v1 
-     * @param k2 
-     * @param v2 
-     * @param k3 
-     * @param v3 
-     * @param k4 
-     * @param v4 
-     * @param k5 
-     * @param v5 
-     * @param k6 
-     * @param v6 
-     * @return 
+     * @param k1
+     * @param v1
+     * @param k2
+     * @param v2
+     * @param k3
+     * @param v3
+     * @param k4
+     * @param v4
+     * @param k5
+     * @param v5
+     * @param k6
+     * @param v6
+     * @return
      */
     public static <K, V> ImmutableBiMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5,
             final V v5, final K k6, final V v6) {
@@ -165,29 +165,47 @@ public final class ImmutableBiMap<K, V> extends ImmutableMap<K, V> {
     }
 
     /**
-     * 
+     *
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param k1 
-     * @param v1 
-     * @param k2 
-     * @param v2 
-     * @param k3 
-     * @param v3 
-     * @param k4 
-     * @param v4 
-     * @param k5 
-     * @param v5 
-     * @param k6 
-     * @param v6 
-     * @param k7 
-     * @param v7 
-     * @return 
+     * @param k1
+     * @param v1
+     * @param k2
+     * @param v2
+     * @param k3
+     * @param v3
+     * @param k4
+     * @param v4
+     * @param k5
+     * @param v5
+     * @param k6
+     * @param v6
+     * @param k7
+     * @param v7
+     * @return
      */
     public static <K, V> ImmutableBiMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5,
             final V v5, final K k6, final V v6, final K k7, final V v7) {
         final BiMap<K, V> biMap = BiMap.of(k1, v1, k2, v2, k3, v3, k4, v4, k5, v5, k6, v6, k7, v7);
+        return new ImmutableBiMap<>(biMap);
+    }
+
+    public static <K, V> ImmutableBiMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5,
+            final V v5, final K k6, final V v6, final K k7, final V v7, final K k8, final V v8) {
+        final BiMap<K, V> biMap = BiMap.of(k1, v1, k2, v2, k3, v3, k4, v4, k5, v5, k6, v6, k7, v7, k8, v8);
+        return new ImmutableBiMap<>(biMap);
+    }
+
+    public static <K, V> ImmutableMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5,
+            final V v5, final K k6, final V v6, final K k7, final V v7, final K k8, final V v8, final K k9, final V v9) {
+        final BiMap<K, V> biMap = BiMap.of(k1, v1, k2, v2, k3, v3, k4, v4, k5, v5, k6, v6, k7, v7, k8, v8, k9, v9);
+        return new ImmutableBiMap<>(biMap);
+    }
+
+    public static <K, V> ImmutableMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5,
+            final V v5, final K k6, final V v6, final K k7, final V v7, final K k8, final V v8, final K k9, final V v9, final K k10, final V v10) {
+        final BiMap<K, V> biMap = BiMap.of(k1, v1, k2, v2, k3, v3, k4, v4, k5, v5, k6, v6, k7, v7, k8, v8, k9, v9, k10, v10);
         return new ImmutableBiMap<>(biMap);
     }
 
@@ -207,13 +225,13 @@ public final class ImmutableBiMap<K, V> extends ImmutableMap<K, V> {
     }
 
     /**
-     * 
+     *
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param map 
-     * @return 
-     * @throws UnsupportedOperationException 
+     * @param map
+     * @return
+     * @throws UnsupportedOperationException
      * @deprecated throws {@code UnsupportedOperationException}
      */
     @Deprecated
@@ -237,13 +255,13 @@ public final class ImmutableBiMap<K, V> extends ImmutableMap<K, V> {
     }
 
     /**
-     * 
+     *
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param map 
-     * @return 
-     * @throws UnsupportedOperationException 
+     * @param map
+     * @return
+     * @throws UnsupportedOperationException
      * @deprecated throws {@code UnsupportedOperationException}
      */
     @Deprecated
