@@ -95,6 +95,8 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.DelayQueue;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.function.BiPredicate;
+import java.util.function.Predicate;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
@@ -1209,17 +1211,15 @@ public final class ClassUtil {
     /**
      * Gets the classes by package.
      *
-     * @param <E>
      * @param pkgName
      * @param isRecursive
      * @param skipClassLoaddingException
      * @param predicate
      * @return
      * @throws UncheckedIOException the unchecked IO exception
-     * @throws E the e
      */
-    public static <E extends Exception> List<Class<?>> getClassesByPackage(String pkgName, boolean isRecursive, boolean skipClassLoaddingException,
-            Throwables.Predicate<? super Class<?>, E> predicate) throws UncheckedIOException, E {
+    public static List<Class<?>> getClassesByPackage(final String pkgName, final boolean isRecursive, final boolean skipClassLoaddingException,
+            final Predicate<? super Class<?>> predicate) throws UncheckedIOException {
         if (logger.isInfoEnabled()) {
             logger.info("Looking for classes in package: " + pkgName);
         }
@@ -1782,21 +1782,41 @@ public final class ClassUtil {
     }
 
     /**
+     * Gets the prop name list exclusively.
      *
-     * @param <E>
-     * @param bean
-     * @param propValueFilter first parameter is property value, second parameter is property type.
+     * @param cls
+     * @param propNameToExclude
      * @return
-     * @throws E
      */
-    public static <E extends Exception> List<String> getPropNames(final Object bean, Throwables.BiPredicate<Object, Type<Object>, E> propValueFilter) throws E {
-        final BeanInfo beanInfo = ParserUtil.getBeanInfo(bean.getClass());
-        final int size = beanInfo.propInfoList.size();
-        final List<String> result = new ArrayList<>(size < 10 ? size : size / 2);
+    @SuppressWarnings("rawtypes")
+    public static List<String> getPropNames(final Class<?> cls, final Collection<String> propNameToExclude) {
+        if (N.isEmpty(propNameToExclude)) {
+            return new ArrayList<>(getPropNameList(cls));
+        }
+        if (propNameToExclude instanceof Set) {
+            return getPropNames(cls, (Set) propNameToExclude);
+        }
+        return getPropNames(cls, N.newHashSet(propNameToExclude));
+    }
 
-        for (PropInfo propInfo : beanInfo.propInfoList) {
-            if (propValueFilter.test(propInfo.getPropValue(result), propInfo.type)) {
-                result.add(propInfo.name);
+    /**
+     * Gets the prop name list exclusively.
+     *
+     * @param cls
+     * @param propNameToExclude
+     * @return
+     */
+    public static List<String> getPropNames(final Class<?> cls, final Set<String> propNameToExclude) {
+        final ImmutableList<String> propNameList = getPropNameList(cls);
+
+        if (N.isEmpty(propNameToExclude)) {
+            return new ArrayList<>(propNameList);
+        }
+        final List<String> result = new ArrayList<>(propNameList.size() - propNameToExclude.size());
+
+        for (String propName : propNameList) {
+            if (!propNameToExclude.contains(propName)) {
+                result.add(propName);
             }
         }
 
@@ -1809,9 +1829,8 @@ public final class ClassUtil {
      * @param bean
      * @param propValueFilter
      * @return
-     * @throws E
      */
-    public static <E extends Exception> List<String> getPropNames(final Object bean, Throwables.Predicate<Object, E> propValueFilter) throws E {
+    public static List<String> getPropNames(final Object bean, final Predicate<Object> propValueFilter) {
         final BeanInfo beanInfo = ParserUtil.getBeanInfo(bean.getClass());
         final int size = beanInfo.propInfoList.size();
         final List<String> result = new ArrayList<>(size < 10 ? size : size / 2);
@@ -1826,41 +1845,19 @@ public final class ClassUtil {
     }
 
     /**
-     * Gets the prop name list exclusively.
      *
-     * @param cls
-     * @param propNameToExcluded
+     * @param bean
+     * @param propValueFilter first parameter is property value, second parameter is property type.
      * @return
      */
-    @SuppressWarnings("rawtypes")
-    public static List<String> getPropNamesExclusively(final Class<?> cls, final Collection<String> propNameToExcluded) {
-        if (N.isEmpty(propNameToExcluded)) {
-            return new ArrayList<>(getPropNameList(cls));
-        }
-        if (propNameToExcluded instanceof Set) {
-            return getPropNamesExclusively(cls, (Set) propNameToExcluded);
-        }
-        return getPropNamesExclusively(cls, N.newHashSet(propNameToExcluded));
-    }
+    public static List<String> getPropNames(final Object bean, final BiPredicate<Object, Type<Object>> propValueFilter) {
+        final BeanInfo beanInfo = ParserUtil.getBeanInfo(bean.getClass());
+        final int size = beanInfo.propInfoList.size();
+        final List<String> result = new ArrayList<>(size < 10 ? size : size / 2);
 
-    /**
-     * Gets the prop name list exclusively.
-     *
-     * @param cls
-     * @param propNameToExcluded
-     * @return
-     */
-    public static List<String> getPropNamesExclusively(final Class<?> cls, final Set<String> propNameToExcluded) {
-        final List<String> propNameList = getPropNameList(cls);
-
-        if (N.isEmpty(propNameToExcluded)) {
-            return new ArrayList<>(propNameList);
-        }
-        final List<String> result = new ArrayList<>(propNameList.size() - propNameToExcluded.size());
-
-        for (String propName : propNameList) {
-            if (!propNameToExcluded.contains(propName)) {
-                result.add(propName);
+        for (PropInfo propInfo : beanInfo.propInfoList) {
+            if (propValueFilter.test(propInfo.getPropValue(result), propInfo.type)) {
+                result.add(propInfo.name);
             }
         }
 

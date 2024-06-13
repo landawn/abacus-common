@@ -1621,25 +1621,25 @@ public final class Maps {
      * <code>
         Map map = N.asMap("key1", "val1");
         assertEquals("val1", Maps.getByPath(map, "key1"));
-
+    
         map = N.asMap("key1", N.asList("val1"));
         assertEquals("val1", Maps.getByPath(map, "key1[0]"));
-
+    
         map = N.asMap("key1", N.asSet("val1"));
         assertEquals("val1", Maps.getByPath(map, "key1[0]"));
-
+    
         map = N.asMap("key1", N.asList(N.asLinkedHashSet("val1", "val2")));
         assertEquals("val2", Maps.getByPath(map, "key1[0][1]"));
-
+    
         map = N.asMap("key1", N.asSet(N.asList(N.asSet("val1"))));
         assertEquals("val1", Maps.getByPath(map, "key1[0][0][0]"));
-
+    
         map = N.asMap("key1", N.asList(N.asLinkedHashSet("val1", N.asMap("key2", "val22"))));
         assertEquals("val22", Maps.getByPath(map, "key1[0][1].key2"));
-
+    
         map = N.asMap("key1", N.asList(N.asLinkedHashSet("val1", N.asMap("key2", N.asList("val22", N.asMap("key3", "val33"))))));
         assertEquals("val33", Maps.getByPath(map, "key1[0][1].key2[1].key3"));
-
+    
         map = N.asMap("key1", N.asList(N.asLinkedHashSet("val1", N.asMap("key2", N.asList("val22", N.asMap("key3", "val33"))))));
         assertNull(Maps.getByPath(map, "key1[0][2].key2[1].key3"));
      * </code>
@@ -2914,7 +2914,7 @@ public final class Maps {
      * @param <M>
      * @param resultMap
      * @param bean
-     * @return
+     * @return the specified output parameter: {@code resultMap}.
      */
     public static <M extends Map<String, Object>> M bean2Map(final M resultMap, final Object bean) {
         return bean2Map(resultMap, bean, null);
@@ -2927,7 +2927,7 @@ public final class Maps {
      * @param resultMap
      * @param bean
      * @param selectPropNames
-     * @return
+     * @return the specified output parameter: {@code resultMap}.
      */
     public static <M extends Map<String, Object>> M bean2Map(final M resultMap, final Object bean, final Collection<String> selectPropNames) {
         return bean2Map(resultMap, bean, selectPropNames, NamingPolicy.LOWER_CAMEL_CASE);
@@ -2941,7 +2941,7 @@ public final class Maps {
      * @param bean
      * @param selectPropNames
      * @param keyNamingPolicy
-     * @return
+     * @return the specified output parameter: {@code resultMap}.
      */
     public static <M extends Map<String, Object>> M bean2Map(final M resultMap, final Object bean, final Collection<String> selectPropNames,
             NamingPolicy keyNamingPolicy) {
@@ -3062,7 +3062,7 @@ public final class Maps {
      * @param resultMap
      * @param bean
      * @param ignoreNullProperty
-     * @return
+     * @return the specified output parameter: {@code resultMap}.
      */
     public static <M extends Map<String, Object>> M bean2Map(final M resultMap, final Object bean, final boolean ignoreNullProperty) {
         return bean2Map(resultMap, bean, ignoreNullProperty, null);
@@ -3076,7 +3076,7 @@ public final class Maps {
      * @param bean
      * @param ignoreNullProperty
      * @param ignoredPropNames
-     * @return
+     * @return the specified output parameter: {@code resultMap}.
      */
     public static <M extends Map<String, Object>> M bean2Map(final M resultMap, final Object bean, final boolean ignoreNullProperty,
             final Set<String> ignoredPropNames) {
@@ -3092,7 +3092,7 @@ public final class Maps {
      * @param ignoreNullProperty
      * @param ignoredPropNames
      * @param keyNamingPolicy
-     * @return
+     * @return the specified output parameter: {@code resultMap}.
      */
     public static <M extends Map<String, Object>> M bean2Map(final M resultMap, final Object bean, final boolean ignoreNullProperty,
             final Set<String> ignoredPropNames, NamingPolicy keyNamingPolicy) {
@@ -3200,7 +3200,7 @@ public final class Maps {
      * @param <M>
      * @param resultMap
      * @param bean
-     * @return
+     * @return the specified output parameter: {@code resultMap}.
      */
     public static <M extends Map<String, Object>> M deepBean2Map(final M resultMap, final Object bean) {
         return deepBean2Map(resultMap, bean, null);
@@ -3213,7 +3213,7 @@ public final class Maps {
      * @param resultMap
      * @param bean
      * @param selectPropNames
-     * @return
+     * @return the specified output parameter: {@code resultMap}.
      */
     public static <M extends Map<String, Object>> M deepBean2Map(final M resultMap, final Object bean, final Collection<String> selectPropNames) {
         return deepBean2Map(resultMap, bean, selectPropNames, NamingPolicy.LOWER_CAMEL_CASE);
@@ -3227,7 +3227,7 @@ public final class Maps {
      * @param bean
      * @param selectPropNames
      * @param keyNamingPolicy
-     * @return
+     * @return the specified output parameter: {@code resultMap}.
      */
     public static <M extends Map<String, Object>> M deepBean2Map(final M resultMap, final Object bean, final Collection<String> selectPropNames,
             final NamingPolicy keyNamingPolicy) {
@@ -3357,7 +3357,7 @@ public final class Maps {
      * @param resultMap
      * @param bean
      * @param ignoreNullProperty
-     * @return
+     * @return the specified output parameter: {@code resultMap}.
      */
     public static <M extends Map<String, Object>> M deepBean2Map(final M resultMap, final Object bean, final boolean ignoreNullProperty) {
         return deepBean2Map(resultMap, bean, ignoreNullProperty, null);
@@ -3371,7 +3371,7 @@ public final class Maps {
      * @param bean
      * @param ignoreNullProperty
      * @param ignoredPropNames
-     * @return
+     * @return the specified output parameter: {@code resultMap}.
      */
     public static <M extends Map<String, Object>> M deepBean2Map(final M resultMap, final Object bean, final boolean ignoreNullProperty,
             final Set<String> ignoredPropNames) {
@@ -3387,7 +3387,7 @@ public final class Maps {
      * @param ignoreNullProperty
      * @param ignoredPropNames
      * @param keyNamingPolicy
-     * @return
+     * @return the specified output parameter: {@code resultMap}.
      */
     public static <M extends Map<String, Object>> M deepBean2Map(final M resultMap, final Object bean, final boolean ignoreNullProperty,
             final Set<String> ignoredPropNames, final NamingPolicy keyNamingPolicy) {
@@ -3504,7 +3504,7 @@ public final class Maps {
      * @param <M>
      * @param resultMap
      * @param bean
-     * @return
+     * @return the specified output parameter: {@code resultMap}.
      */
     public static <M extends Map<String, Object>> M bean2FlatMap(final M resultMap, final Object bean) {
         return bean2FlatMap(resultMap, bean, null);
@@ -3517,7 +3517,7 @@ public final class Maps {
      * @param resultMap
      * @param bean
      * @param selectPropNames
-     * @return
+     * @return the specified output parameter: {@code resultMap}.
      */
     public static <M extends Map<String, Object>> M bean2FlatMap(final M resultMap, final Object bean, final Collection<String> selectPropNames) {
         return bean2FlatMap(resultMap, bean, selectPropNames, NamingPolicy.LOWER_CAMEL_CASE);
@@ -3531,7 +3531,7 @@ public final class Maps {
      * @param bean
      * @param selectPropNames
      * @param keyNamingPolicy
-     * @return
+     * @return the specified output parameter: {@code resultMap}.
      */
     public static <M extends Map<String, Object>> M bean2FlatMap(final M resultMap, final Object bean, final Collection<String> selectPropNames,
             NamingPolicy keyNamingPolicy) {
@@ -3656,7 +3656,7 @@ public final class Maps {
      * @param resultMap
      * @param bean
      * @param ignoreNullProperty
-     * @return
+     * @return the specified output parameter: {@code resultMap}.
      */
     public static <M extends Map<String, Object>> M bean2FlatMap(final M resultMap, final Object bean, final boolean ignoreNullProperty) {
         return bean2FlatMap(resultMap, bean, ignoreNullProperty, null);
@@ -3670,7 +3670,7 @@ public final class Maps {
      * @param bean
      * @param ignoreNullProperty
      * @param ignoredPropNames
-     * @return
+     * @return the specified output parameter: {@code resultMap}.
      */
     public static <M extends Map<String, Object>> M bean2FlatMap(final M resultMap, final Object bean, final boolean ignoreNullProperty,
             final Set<String> ignoredPropNames) {
@@ -3686,7 +3686,7 @@ public final class Maps {
      * @param ignoreNullProperty
      * @param ignoredPropNames
      * @param keyNamingPolicy
-     * @return
+     * @return the specified output parameter: {@code resultMap}.
      */
     public static <M extends Map<String, Object>> M bean2FlatMap(final M resultMap, final Object bean, final boolean ignoreNullProperty,
             final Set<String> ignoredPropNames, final NamingPolicy keyNamingPolicy) {

@@ -10524,8 +10524,6 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * @param <K>
      * @param <V>
-     * @param <E>
-     * @param <E2>
      * @param m
      * @param entryDelimiter
      * @param keyValueDelimiter
@@ -10535,12 +10533,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param keyMapper
      * @param valueMapper
      * @return
-     * @throws E
-     * @throws E2
      */
-    public static <K, V, E extends Exception, E2 extends Exception> String joinEntries(final Map<K, V> m, final String entryDelimiter,
-            final String keyValueDelimiter, final String prefix, final String suffix, final boolean trim, final Throwables.Function<? super K, ?, E> keyMapper,
-            final Throwables.Function<? super V, ?, E2> valueMapper) throws E, E2 {
+    public static <K, V> String joinEntries(final Map<K, V> m, final String entryDelimiter, final String keyValueDelimiter, final String prefix,
+            final String suffix, final boolean trim, final Function<? super K, ?> keyMapper, final Function<? super V, ?> valueMapper) {
         N.checkArgNotNull(keyMapper, "keyMapper");
         N.checkArgNotNull(valueMapper, "valueMapper");
 

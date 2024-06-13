@@ -1933,6 +1933,7 @@ public final class Joiner implements Closeable {
         } else {
             buffer = (useCachedBuffer ? Objectory.createStringBuilder() : new StringBuilder()).append(prefix);
         }
+
         return buffer;
     }
 

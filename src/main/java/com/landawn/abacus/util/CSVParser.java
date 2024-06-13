@@ -290,11 +290,11 @@ public class CSVParser {
     }
 
     /**
-     * 
      *
-     * @param nextLine 
-     * @return 
-     * @throws ParseException 
+     *
+     * @param nextLine
+     * @return
+     * @throws ParseException
      */
     public String[] parseLineToArray(String nextLine) throws ParseException {
         final List<String> ret = parseLine(nextLine);
@@ -303,11 +303,11 @@ public class CSVParser {
     }
 
     /**
-     * 
      *
-     * @param nextLine 
-     * @return 
-     * @throws ParseException 
+     *
+     * @param nextLine
+     * @return
+     * @throws ParseException
      */
     public String[] parseLineMultiToArray(String nextLine) throws ParseException {
         final List<String> ret = parseLineMulti(nextLine);
@@ -316,12 +316,13 @@ public class CSVParser {
     }
 
     /**
-     * 
      *
-     * @param output 
-     * @param nextLine 
-     * @return 
-     * @throws ParseException 
+     *
+     * @param output
+     * @param nextLine
+     * @return
+     * @throws ParseException
+     * @return the specified output parameter: {@code output}.
      */
     public String[] parseLineToArray(final String[] output, String nextLine) throws ParseException {
         final List<String> ret = parseLine(nextLine);
@@ -330,12 +331,13 @@ public class CSVParser {
     }
 
     /**
-     * 
      *
-     * @param output 
-     * @param nextLine 
-     * @return 
-     * @throws ParseException 
+     *
+     * @param output
+     * @param nextLine
+     * @return
+     * @throws ParseException
+     * @return the specified output parameter: {@code output}.
      */
     public String[] parseLineMultiToArray(final String[] output, String nextLine) throws ParseException {
         final List<String> ret = parseLineMulti(nextLine);

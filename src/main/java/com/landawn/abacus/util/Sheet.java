@@ -138,10 +138,10 @@ public final class Sheet<R, C, V> implements Cloneable {
     /**
      * Returns an empty immutable {@code Sheet}.
      *
-     * @param <R> 
-     * @param <C> 
-     * @param <V> 
-     * @return 
+     * @param <R>
+     * @param <C>
+     * @param <V>
+     * @return
      */
     public static <R, C, V> Sheet<R, C, V> empty() {
         return EMPTY_SHEET;
@@ -1388,16 +1388,16 @@ public final class Sheet<R, C, V> implements Cloneable {
     }
 
     /**
-     * 
+     *
      */
     public void sortByRow() {
         sortByRow((Comparator<R>) Comparator.naturalOrder());
     }
 
     /**
-     * 
      *
-     * @param cmp 
+     *
+     * @param cmp
      */
     public void sortByRow(final Comparator<? super R> cmp) {
         checkFrozen();
@@ -1463,16 +1463,16 @@ public final class Sheet<R, C, V> implements Cloneable {
     }
 
     /**
-     * 
+     *
      */
     public void sortByColumn() {
         sortByColumn((Comparator<C>) Comparator.naturalOrder());
     }
 
     /**
-     * 
      *
-     * @param cmp 
+     *
+     * @param cmp
      */
     public void sortByColumn(final Comparator<? super C> cmp) {
         checkFrozen();
@@ -2940,11 +2940,10 @@ public final class Sheet<R, C, V> implements Cloneable {
      *
      * @param <W>
      * @param outputWriter
-     * @return
      * @throws UncheckedIOException the unchecked IO exception
      */
-    public <W extends Writer> W println(final W outputWriter) throws UncheckedIOException {
-        return println(outputWriter, this._rowKeySet, this._columnKeySet);
+    public void println(final Writer outputWriter) throws UncheckedIOException {
+        println(outputWriter, this._rowKeySet, this._columnKeySet);
     }
 
     /**
@@ -2953,10 +2952,9 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @param outputWriter
      * @param rowKeySet
      * @param columnKeySet
-     * @return
      * @throws UncheckedIOException the unchecked IO exception
      */
-    public <W extends Writer> W println(final W outputWriter, final Collection<R> rowKeySet, final Collection<C> columnKeySet) throws UncheckedIOException {
+    public void println(final Writer outputWriter, final Collection<R> rowKeySet, final Collection<C> columnKeySet) throws UncheckedIOException {
         if (N.notEmpty(rowKeySet) && !this._rowKeySet.containsAll(rowKeySet)) {
             throw new IllegalArgumentException(
                     "Row keys: " + N.difference(rowKeySet, this._rowKeySet) + " are not included in this sheet row keys: " + this._rowKeySet);
@@ -3139,8 +3137,6 @@ public final class Sheet<R, C, V> implements Cloneable {
                 Objectory.recycle((BufferedWriter) bw);
             }
         }
-
-        return outputWriter;
     }
 
     /**

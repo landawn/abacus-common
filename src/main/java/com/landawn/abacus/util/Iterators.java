@@ -37,7 +37,9 @@ import java.util.function.Predicate;
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
+import com.landawn.abacus.util.Fn.Fnn;
 import com.landawn.abacus.util.u.Nullable;
+import com.landawn.abacus.util.function.TriConsumer;
 import com.landawn.abacus.util.function.TriFunction;
 import com.landawn.abacus.util.stream.Stream;
 
@@ -1142,7 +1144,7 @@ public final class Iterators {
             }
 
             @Override
-            protected <E extends Exception> void next(Throwables.BiConsumer<? super A, ? super B, E> action) throws NoSuchElementException, E {
+            protected <E extends Exception> void next(final Throwables.BiConsumer<? super A, ? super B, E> action) throws NoSuchElementException, E {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -1151,9 +1153,18 @@ public final class Iterators {
             }
 
             @Override
-            public <E extends Exception> void forEachRemaining(final Throwables.BiConsumer<? super A, ? super B, E> action) throws E {
+            public void forEachRemaining(final BiConsumer<? super A, ? super B> action) {
+                final Throwables.BiConsumer<? super A, ? super B, RuntimeException> actionE = Fnn.from(action);
+
                 while (hasNext()) {
-                    cur.forEachRemaining(action);
+                    cur.foreachRemaining(actionE);
+                }
+            }
+
+            @Override
+            public <E extends Exception> void foreachRemaining(final Throwables.BiConsumer<? super A, ? super B, E> action) throws E {
+                while (hasNext()) {
+                    cur.foreachRemaining(action);
                 }
             }
 
@@ -1239,9 +1250,16 @@ public final class Iterators {
             }
 
             @Override
-            public <E extends Exception> void forEachRemaining(final Throwables.TriConsumer<? super A, ? super B, ? super C, E> action) throws E {
+            public void forEachRemaining(TriConsumer<? super A, ? super B, ? super C> action) {
                 while (hasNext()) {
-                    cur.forEachRemaining(action);
+                    cur.foreachRemaining(action);
+                }
+            }
+
+            @Override
+            public <E extends Exception> void foreachRemaining(final Throwables.TriConsumer<? super A, ? super B, ? super C, E> action) throws E {
+                while (hasNext()) {
+                    cur.foreachRemaining(action);
                 }
             }
 

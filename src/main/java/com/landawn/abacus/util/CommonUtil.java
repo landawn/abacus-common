@@ -996,9 +996,10 @@ sealed class CommonUtil permits N {
      * @param srcClass
      * @param converter
      * @return {@code true} if there is no {@code converter} registered with specified {@code srcClass} yet before this call.
+     * @throws IllegalArgumentException
      */
     @SuppressWarnings("rawtypes")
-    public static boolean registerConverter(final Class<?> srcClass, final BiFunction<?, Class<?>, ?> converter) {
+    public static boolean registerConverter(final Class<?> srcClass, final BiFunction<?, Class<?>, ?> converter) throws IllegalArgumentException {
         N.checkArgNotNull(srcClass, "srcClass");
         N.checkArgNotNull(converter, "converter");
 
@@ -1038,7 +1039,7 @@ sealed class CommonUtil permits N {
 
         final String pkgName = pkg.getName();
 
-        return Strings.isNotEmpty(pkgName) && (pkgName.startsWith("java.") || pkgName.startsWith("javax.") || pkgName.startsWith("com.landawn.abaus."));
+        return Strings.isNotEmpty(pkgName) && (pkgName.startsWith("java.") || pkgName.startsWith("javax.") || pkgName.startsWith("com.landawn.abacus."));
     }
 
     /**
@@ -1294,6 +1295,40 @@ sealed class CommonUtil permits N {
     //    }
 
     private static final Set<Class<?>> notKryoCompatible = newConcurrentHashSet();
+
+    /**
+     *
+     * @param beanClass
+     * @return
+     * @see ClassUtil#getPropNameList(Class)
+     */
+    public static ImmutableList<String> getPropNames(final Class<?> beanClass) {
+        return ClassUtil.getPropNameList(beanClass);
+    }
+
+    /**
+     *
+     * @param beanClass
+     * @param propNameToExclude
+     * @return
+     * @see ClassUtil#getPropNames(Class, Set)
+     * @see ClassUtil#getPropNames(Class, Collection)
+     */
+    public static List<String> getPropNames(final Class<?> beanClass, final Set<String> propNameToExclude) {
+        return ClassUtil.getPropNames(beanClass, propNameToExclude);
+    }
+
+    /**
+     *
+     * @param bean
+     * @return
+     * @see ClassUtil#getNonNullPropNames(Object)
+     * @see ClassUtil#getPropNames(Object, java.util.function.Predicate)
+     * @see ClassUtil#getPropNames(Object, java.util.function.BiPredicate)
+     */
+    public static List<String> getNonNullPropNames(final Object bean) {
+        return ClassUtil.getNonNullPropNames(bean);
+    }
 
     /**
      *

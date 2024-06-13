@@ -10178,6 +10178,15 @@ public final class Fn {
 
         /**
          *
+         * @param <T>
+         * @return
+         */
+        public static <T, E extends Exception> Throwables.Function<T, String, E> toStr() {
+            return TO_STRING;
+        }
+
+        /**
+         *
          *
          * @param <K>
          * @param <V>

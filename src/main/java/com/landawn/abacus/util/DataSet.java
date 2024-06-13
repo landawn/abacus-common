@@ -4795,10 +4795,9 @@ public interface DataSet {
      *
      * @param <W>
      * @param outputWriter
-     * @return
      * @throws UncheckedIOException the unchecked IO exception
      */
-    <W extends Writer> W println(W outputWriter) throws UncheckedIOException;
+    void println(Writer outputWriter) throws UncheckedIOException;
 
     /**
      *
@@ -4807,8 +4806,7 @@ public interface DataSet {
      * @param fromRowIndex
      * @param toRowIndex
      * @param columnNames
-     * @return
      * @throws UncheckedIOException the unchecked IO exception
      */
-    <W extends Writer> W println(W outputWriter, int fromRowIndex, int toRowIndex, Collection<String> columnNames) throws UncheckedIOException;
+    void println(Writer outputWriter, int fromRowIndex, int toRowIndex, Collection<String> columnNames) throws UncheckedIOException;
 }

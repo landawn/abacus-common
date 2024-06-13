@@ -25,6 +25,7 @@ import java.util.function.Consumer;
 import com.landawn.abacus.util.Fn.Suppliers;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.function.IntObjConsumer;
+import com.landawn.abacus.util.function.TriConsumer;
 import com.landawn.abacus.util.function.TriFunction;
 import com.landawn.abacus.util.function.TriPredicate;
 import com.landawn.abacus.util.stream.Stream;
@@ -58,7 +59,12 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
         }
 
         @Override
-        public void forEachRemaining(Throwables.TriConsumer action) throws Exception {
+        public void forEachRemaining(TriConsumer action) {
+            N.checkArgNotNull(action);
+        }
+
+        @Override
+        public void foreachRemaining(Throwables.TriConsumer action) throws Exception {
             N.checkArgNotNull(action);
         }
 
@@ -141,7 +147,18 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
             }
 
             @Override
-            public <E extends Exception> void forEachRemaining(final Throwables.TriConsumer<? super A, ? super B, ? super C, E> action) throws E {
+            public void forEachRemaining(TriConsumer<? super A, ? super B, ? super C> action) {
+                N.checkArgNotNull(action);
+
+                while (hasNext.getAsBoolean()) {
+                    output.accept(tmp);
+
+                    action.accept(tmp.left, tmp.middle, tmp.right);
+                }
+            }
+
+            @Override
+            public <E extends Exception> void foreachRemaining(final Throwables.TriConsumer<? super A, ? super B, ? super C, E> action) throws E {
                 N.checkArgNotNull(action);
 
                 while (hasNext.getAsBoolean()) {
@@ -225,7 +242,18 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
             }
 
             @Override
-            public <E extends Exception> void forEachRemaining(final Throwables.TriConsumer<? super A, ? super B, ? super C, E> action) throws E {
+            public void forEachRemaining(TriConsumer<? super A, ? super B, ? super C> action) {
+                N.checkArgNotNull(action);
+
+                while (cursor.value() < toIndex) {
+                    output.accept(cursor.getAndIncrement(), tmp);
+
+                    action.accept(tmp.left, tmp.middle, tmp.right);
+                }
+            }
+
+            @Override
+            public <E extends Exception> void foreachRemaining(final Throwables.TriConsumer<? super A, ? super B, ? super C, E> action) throws E {
                 N.checkArgNotNull(action);
 
                 while (cursor.value() < toIndex) {
@@ -364,7 +392,16 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
             }
 
             @Override
-            public <E extends Exception> void forEachRemaining(final Throwables.TriConsumer<? super A, ? super B, ? super C, E> action) throws E {
+            public void forEachRemaining(TriConsumer<? super A, ? super B, ? super C> action) {
+                N.checkArgNotNull(action);
+
+                while (iterA.hasNext() && iterB.hasNext() && iterC.hasNext()) {
+                    action.accept(iterA.next(), iterB.next(), iterC.next());
+                }
+            }
+
+            @Override
+            public <E extends Exception> void foreachRemaining(final Throwables.TriConsumer<? super A, ? super B, ? super C, E> action) throws E {
                 N.checkArgNotNull(action);
 
                 while (iterA.hasNext() && iterB.hasNext() && iterC.hasNext()) {
@@ -444,7 +481,17 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
             }
 
             @Override
-            public <E extends Exception> void forEachRemaining(final Throwables.TriConsumer<? super A, ? super B, ? super C, E> action) throws E {
+            public void forEachRemaining(TriConsumer<? super A, ? super B, ? super C> action) {
+                N.checkArgNotNull(action);
+
+                while (iter1.hasNext() || iter2.hasNext() || iter3.hasNext()) {
+                    action.accept(iter1.hasNext() ? iter1.next() : valueForNoneA, iter2.hasNext() ? iter2.next() : valueForNoneB,
+                            iter3.hasNext() ? iter3.next() : valueForNoneC);
+                }
+            }
+
+            @Override
+            public <E extends Exception> void foreachRemaining(final Throwables.TriConsumer<? super A, ? super B, ? super C, E> action) throws E {
                 N.checkArgNotNull(action);
 
                 while (iter1.hasNext() || iter2.hasNext() || iter3.hasNext()) {
@@ -528,15 +575,6 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
             throws NoSuchElementException, E;
 
     /**
-     * For each remaining.
-     *
-     * @param <E>
-     * @param action
-     * @throws E the e
-     */
-    public abstract <E extends Exception> void forEachRemaining(final Throwables.TriConsumer<? super A, ? super B, ? super C, E> action) throws E;
-
-    /**
      * It's preferred to call <code>forEachRemaining(Try.TriConsumer)</code> to avoid the create the unnecessary <code>Triple</code> Objects.
      *
      * @param action
@@ -547,6 +585,22 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
     public void forEachRemaining(Consumer<? super Triple<A, B, C>> action) {
         super.forEachRemaining(action);
     }
+
+    /**
+     * For each remaining.
+     *
+     * @param action
+     */
+    public abstract void forEachRemaining(final TriConsumer<? super A, ? super B, ? super C> action);
+
+    /**
+     * For each remaining.
+     *
+     * @param <E>
+     * @param action
+     * @throws E the e
+     */
+    public abstract <E extends Exception> void foreachRemaining(final Throwables.TriConsumer<? super A, ? super B, ? super C, E> action) throws E;
 
     @SuppressWarnings("rawtypes")
     private static final Throwables.TriConsumer DO_NOTHING = (a, b, c) -> {
@@ -600,12 +654,21 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
             }
 
             @Override
-            public <E extends Exception> void forEachRemaining(final Throwables.TriConsumer<? super A, ? super B, ? super C, E> action) throws E {
+            public void forEachRemaining(TriConsumer<? super A, ? super B, ? super C> action) {
                 if (!skipped) {
                     skip();
                 }
 
                 iter.forEachRemaining(action);
+            }
+
+            @Override
+            public <E extends Exception> void foreachRemaining(final Throwables.TriConsumer<? super A, ? super B, ? super C, E> action) throws E {
+                if (!skipped) {
+                    skip();
+                }
+
+                iter.foreachRemaining(action);
             }
 
             @Override
@@ -676,7 +739,15 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
             }
 
             @Override
-            public <E extends Exception> void forEachRemaining(final Throwables.TriConsumer<? super A, ? super B, ? super C, E> action) throws E {
+            public void forEachRemaining(TriConsumer<? super A, ? super B, ? super C> action) {
+                while (hasNext()) {
+                    cnt--;
+                    iter.next(action);
+                }
+            }
+
+            @Override
+            public <E extends Exception> void foreachRemaining(final Throwables.TriConsumer<? super A, ? super B, ? super C, E> action) throws E {
                 while (hasNext()) {
                     cnt--;
                     iter.next(action);
@@ -751,7 +822,16 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
             }
 
             @Override
-            public <E extends Exception> void forEachRemaining(final Throwables.TriConsumer<? super A, ? super B, ? super C, E> action) throws E {
+            public void forEachRemaining(TriConsumer<? super A, ? super B, ? super C> action) {
+                while (hasNext()) {
+                    hasNext = false;
+
+                    action.accept(next.left, next.middle, next.right);
+                }
+            }
+
+            @Override
+            public <E extends Exception> void foreachRemaining(final Throwables.TriConsumer<? super A, ? super B, ? super C, E> action) throws E {
                 while (hasNext()) {
                     hasNext = false;
 
@@ -824,7 +904,7 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
             final Triple<A, B, C> next = new Triple<>();
             final Throwables.TriConsumer<A, B, C, RuntimeException> setNext = next::set;
 
-            forEachRemaining(setNext);
+            foreachRemaining(setNext);
 
             return Optional.of(next);
         } else {

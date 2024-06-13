@@ -10347,6 +10347,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @throws E
      * @see {@link N#newDataSet(Collection)}
      */
+    @Beta
     @TerminalOp
     public DataSet toDataSet() throws E {
         return N.newDataSet(toList());
@@ -11783,84 +11784,6 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
         }
     }
 
-    /**
-     * Each line in the output file/Writer is an array of JSON String without root bracket.
-     *
-     * @param output
-     * @return
-     * @throws E
-     * @throws IOException
-     */
-    @TerminalOp
-    public long persistToCSV(File output) throws E, IOException {
-        final Writer writer = IOUtil.newFileWriter(output);
-
-        try {
-            return persistToCSV(writer);
-        } finally {
-            IOUtil.close(writer);
-        }
-    }
-
-    /**
-     * Each line in the output file/Writer is an array of JSON String without root bracket.
-     * @param output
-     * @param csvHeaders
-     *
-     * @return
-     * @throws E
-     * @throws IOException
-     */
-    @TerminalOp
-    public long persistToCSV(File output, Collection<String> csvHeaders) throws E, IOException {
-        final Writer writer = IOUtil.newFileWriter(output);
-
-        try {
-            return persistToCSV(writer, csvHeaders);
-        } finally {
-            IOUtil.close(writer);
-        }
-    }
-
-    /**
-     * Each line in the output file/Writer is an array of JSON String without root bracket.
-     *
-     * @param output
-     * @return
-     * @throws E
-     * @throws IOException
-     */
-    @TerminalOp
-    public long persistToCSV(OutputStream output) throws E, IOException {
-        final BufferedWriter bw = Objectory.createBufferedWriter(output);
-
-        try {
-            return persistToCSV(bw);
-        } finally {
-            IOUtil.close(bw);
-        }
-    }
-
-    /**
-     * Each line in the output file/Writer is an array of JSON String without root bracket.
-     * @param output
-     * @param csvHeaders
-     *
-     * @return
-     * @throws E
-     * @throws IOException
-     */
-    @TerminalOp
-    public long persistToCSV(OutputStream output, Collection<String> csvHeaders) throws E, IOException {
-        final BufferedWriter bw = Objectory.createBufferedWriter(output);
-
-        try {
-            return persistToCSV(bw, csvHeaders);
-        } finally {
-            IOUtil.close(bw);
-        }
-    }
-
     private static final Throwables.TriConsumer<Type<Object>, Object, BufferedJSONWriter, IOException> WRITE_CSV_ELEMENT_WITH_TYPE;
     private static final Throwables.BiConsumer<Object, BufferedJSONWriter, IOException> WRITE_CSV_ELEMENT;
     private static final Throwables.BiConsumer<String, BufferedJSONWriter, IOException> WRITE_CSV_STRING;
@@ -11897,6 +11820,9 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     }
 
     /**
+     * The first row will be used as field names if its type is array or list,
+     * or obtain the column names from first row if its type is bean or map.
+     * <br />
      * Each line in the output file/Writer is an array of JSON String without root bracket.
      *
      * @param output
@@ -11904,6 +11830,93 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @throws E
      * @throws IOException
      */
+    @Beta
+    @TerminalOp
+    public long persistToCSV(File output) throws E, IOException {
+        final Writer writer = IOUtil.newFileWriter(output);
+
+        try {
+            return persistToCSV(writer);
+        } finally {
+            IOUtil.close(writer);
+        }
+    }
+
+    /**
+     * Each line in the output file/Writer is an array of JSON String without root bracket.
+     * @param output
+     * @param csvHeaders
+     *
+     * @return
+     * @throws E
+     * @throws IOException
+     */
+    @TerminalOp
+    public long persistToCSV(File output, Collection<String> csvHeaders) throws E, IOException {
+        final Writer writer = IOUtil.newFileWriter(output);
+
+        try {
+            return persistToCSV(writer, csvHeaders);
+        } finally {
+            IOUtil.close(writer);
+        }
+    }
+
+    /**
+     * The first row will be used as field names if its type is array or list,
+     * or obtain the column names from first row if its type is bean or map.
+     * <br />
+     * Each line in the output file/Writer is an array of JSON String without root bracket.
+     *
+     * @param output
+     * @return
+     * @throws E
+     * @throws IOException
+     */
+    @Beta
+    @TerminalOp
+    public long persistToCSV(OutputStream output) throws E, IOException {
+        final BufferedWriter bw = Objectory.createBufferedWriter(output);
+
+        try {
+            return persistToCSV(bw);
+        } finally {
+            IOUtil.close(bw);
+        }
+    }
+
+    /**
+     * Each line in the output file/Writer is an array of JSON String without root bracket.
+     * @param output
+     * @param csvHeaders
+     *
+     * @return
+     * @throws E
+     * @throws IOException
+     */
+    @TerminalOp
+    public long persistToCSV(OutputStream output, Collection<String> csvHeaders) throws E, IOException {
+        final BufferedWriter bw = Objectory.createBufferedWriter(output);
+
+        try {
+            return persistToCSV(bw, csvHeaders);
+        } finally {
+            IOUtil.close(bw);
+        }
+    }
+
+    /**
+     * The first row will be used as field names if its type is array or list,
+     * or obtain the column names from first row if its type is bean or map.
+     * <br />
+     * Each line in the output file/Writer is an array of JSON String without root bracket.
+     *
+     * @param output
+     * @return
+     * @throws E
+     * @throws IOException
+     */
+    @Beta
     @TerminalOp
     public long persistToCSV(Writer output) throws E, IOException {
         assertNotClosed();

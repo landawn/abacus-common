@@ -534,7 +534,7 @@ public final class Splitter {
      * @param <C>
      * @param output
      * @param source
-     * @return
+     * @return the specified output parameter: {@code output}
      */
     public <C extends Collection<String>> C split(final C output, final CharSequence source) {
         N.checkArgNotNull(output, "output");
@@ -555,7 +555,7 @@ public final class Splitter {
      * @param output
      * @param source
      * @param targetType
-     * @return
+     * @return the specified output parameter: {@code output}
      */
     public <T, C extends Collection<T>> C split(final C output, final CharSequence source, final Class<? extends T> targetType) {
         N.checkArgNotNull(output, "output");
@@ -573,7 +573,7 @@ public final class Splitter {
      * @param output
      * @param source
      * @param targetType
-     * @return
+     * @return the specified output parameter: {@code output}
      */
     public <T, C extends Collection<T>> C split(final C output, final CharSequence source, final Type<? extends T> targetType) {
         N.checkArgNotNull(output, "output");
@@ -679,7 +679,7 @@ public final class Splitter {
      *
      * @param output
      * @param source
-     * @return
+     * @return the specified output parameter: {@code output}
      */
     public String[] splitToArray(final String[] output, final CharSequence source) {
         N.checkArgNotEmpty(output, "output");
@@ -705,23 +705,23 @@ public final class Splitter {
 
     /**
      *
-     * @param <T>
+     * @param <R>
      * @param <E>
      * @param source
      * @param converter
      * @return
      * @throws E the e
      */
-    public <T, E extends Exception> T splitThenApply(final CharSequence source, final Throwables.Function<? super List<String>, T, E> converter) throws E {
+    public <R, E extends Exception> R splitThenApply(final CharSequence source, final Throwables.Function<? super List<String>, R, E> converter) throws E {
         return converter.apply(split(source));
     }
 
     /**
-     * 
      *
-     * @param <E> 
-     * @param source 
-     * @param consumer 
+     *
+     * @param <E>
+     * @param source
+     * @param consumer
      * @throws E the e
      */
     public <E extends Exception> void splitThenAccept(final CharSequence source, final Throwables.Consumer<? super List<String>, E> consumer) throws E {
@@ -1209,11 +1209,11 @@ public final class Splitter {
         }
 
         /**
-         * 
          *
-         * @param <E> 
-         * @param source 
-         * @param consumer 
+         *
+         * @param <E>
+         * @param source
+         * @param consumer
          * @throws E the e
          */
         public <E extends Exception> void splitThenAccept(final CharSequence source, final Throwables.Consumer<? super Map<String, String>, E> consumer)
