@@ -5925,70 +5925,70 @@ public final class Fn {
          *
          *
          * @param <T>
-         * @param targetClass
+         * @param targetType
          * @return
          */
         @SuppressWarnings("rawtypes")
-        public static <T> java.util.function.Supplier<? extends Collection<T>> ofCollection(final Class<? extends Collection> targetClass) {
-            Supplier ret = collectionSupplierPool.get(targetClass);
+        public static <T> java.util.function.Supplier<? extends Collection<T>> ofCollection(final Class<? extends Collection> targetType) {
+            Supplier ret = collectionSupplierPool.get(targetType);
 
             if (ret == null) {
-                N.checkArgument(Collection.class.isAssignableFrom(targetClass), "'targetClass': {} is not a Collection class", targetClass);
+                N.checkArgument(Collection.class.isAssignableFrom(targetType), "'targetType': {} is not a Collection class", targetType);
 
-                if (Collection.class.equals(targetClass) || AbstractCollection.class.equals(targetClass) || List.class.equals(targetClass)
-                        || AbstractList.class.equals(targetClass) || ArrayList.class.equals(targetClass)) {
+                if (Collection.class.equals(targetType) || AbstractCollection.class.equals(targetType) || List.class.equals(targetType)
+                        || AbstractList.class.equals(targetType) || ArrayList.class.equals(targetType)) {
                     ret = ofList();
-                } else if (LinkedList.class.equals(targetClass)) {
+                } else if (LinkedList.class.equals(targetType)) {
                     ret = ofLinkedList();
-                } else if (Set.class.equals(targetClass) || AbstractSet.class.equals(targetClass) || HashSet.class.equals(targetClass)) {
+                } else if (Set.class.equals(targetType) || AbstractSet.class.equals(targetType) || HashSet.class.equals(targetType)) {
                     ret = ofSet();
-                } else if (LinkedHashSet.class.equals(targetClass)) {
+                } else if (LinkedHashSet.class.equals(targetType)) {
                     ret = ofLinkedHashSet();
-                } else if (SortedSet.class.isAssignableFrom(targetClass)) {
+                } else if (SortedSet.class.isAssignableFrom(targetType)) {
                     ret = ofSortedSet();
-                } else if (Queue.class.equals(targetClass) || AbstractQueue.class.equals(targetClass) || Deque.class.equals(targetClass)) {
+                } else if (Queue.class.equals(targetType) || AbstractQueue.class.equals(targetType) || Deque.class.equals(targetType)) {
                     return ofDeque();
-                } else if (BlockingQueue.class.equals(targetClass) || LinkedBlockingQueue.class.equals(targetClass)) {
+                } else if (BlockingQueue.class.equals(targetType) || LinkedBlockingQueue.class.equals(targetType)) {
                     return ofLinkedBlockingQueue();
-                } else if (ArrayBlockingQueue.class.equals(targetClass)) {
+                } else if (ArrayBlockingQueue.class.equals(targetType)) {
                     return ofArrayBlockingQueue();
-                } else if (BlockingDeque.class.equals(targetClass) || LinkedBlockingDeque.class.equals(targetClass)) {
+                } else if (BlockingDeque.class.equals(targetType) || LinkedBlockingDeque.class.equals(targetType)) {
                     return ofLinkedBlockingDeque();
-                } else if (ConcurrentLinkedQueue.class.equals(targetClass)) {
+                } else if (ConcurrentLinkedQueue.class.equals(targetType)) {
                     return ofConcurrentLinkedQueue();
-                } else if (PriorityQueue.class.equals(targetClass)) {
+                } else if (PriorityQueue.class.equals(targetType)) {
                     return ofPriorityQueue();
-                } else if (ImmutableList.class.isAssignableFrom(targetClass)) {
+                } else if (ImmutableList.class.isAssignableFrom(targetType)) {
                     ret = ofList();
-                } else if (ImmutableSet.class.isAssignableFrom(targetClass)) {
+                } else if (ImmutableSet.class.isAssignableFrom(targetType)) {
                     ret = ofSet();
-                } else if (Modifier.isAbstract(targetClass.getModifiers())) {
-                    throw new IllegalArgumentException("Can't create instance for abstract class: " + targetClass);
+                } else if (Modifier.isAbstract(targetType.getModifiers())) {
+                    throw new IllegalArgumentException("Can't create instance for abstract class: " + targetType);
                 } else {
                     try {
-                        if (N.newInstance(targetClass) != null) {
-                            ret = () -> N.newInstance(targetClass);
+                        if (N.newInstance(targetType) != null) {
+                            ret = () -> N.newInstance(targetType);
                         }
                     } catch (Throwable e) {
                         // ignore
                     }
 
                     if (ret == null) {
-                        if (targetClass.isAssignableFrom(LinkedHashSet.class)) {
+                        if (targetType.isAssignableFrom(LinkedHashSet.class)) {
                             ret = ofLinkedHashSet();
-                        } else if (targetClass.isAssignableFrom(HashSet.class)) {
+                        } else if (targetType.isAssignableFrom(HashSet.class)) {
                             ret = ofSet();
-                        } else if (targetClass.isAssignableFrom(LinkedList.class)) {
+                        } else if (targetType.isAssignableFrom(LinkedList.class)) {
                             ret = ofLinkedList();
-                        } else if (targetClass.isAssignableFrom(ArrayList.class)) {
+                        } else if (targetType.isAssignableFrom(ArrayList.class)) {
                             ret = ofList();
                         } else {
-                            throw new IllegalArgumentException("Not able to create instance for collection: " + ClassUtil.getCanonicalClassName(targetClass));
+                            throw new IllegalArgumentException("Not able to create instance for collection: " + ClassUtil.getCanonicalClassName(targetType));
                         }
                     }
                 }
 
-                collectionSupplierPool.put(targetClass, ret);
+                collectionSupplierPool.put(targetType, ret);
             }
 
             return ret;
@@ -6002,56 +6002,56 @@ public final class Fn {
          *
          * @param <K>
          * @param <V>
-         * @param targetClass
+         * @param targetType
          * @return
          */
         @SuppressWarnings("rawtypes")
-        public static <K, V> Supplier<? extends Map<K, V>> ofMap(final Class<? extends Map> targetClass) {
-            Supplier ret = mapSupplierPool.get(targetClass);
+        public static <K, V> Supplier<? extends Map<K, V>> ofMap(final Class<? extends Map> targetType) {
+            Supplier ret = mapSupplierPool.get(targetType);
 
             if (ret == null) {
-                N.checkArgument(Map.class.isAssignableFrom(targetClass), "'targetClass': {} is not a Map class", targetClass);
+                N.checkArgument(Map.class.isAssignableFrom(targetType), "'targetType': {} is not a Map class", targetType);
 
-                if (Map.class.equals(targetClass) || AbstractMap.class.equals(targetClass) || HashMap.class.equals(targetClass)
-                        || EnumMap.class.equals(targetClass)) {
+                if (Map.class.equals(targetType) || AbstractMap.class.equals(targetType) || HashMap.class.equals(targetType)
+                        || EnumMap.class.equals(targetType)) {
                     ret = ofMap();
-                } else if (LinkedHashMap.class.equals(targetClass)) {
+                } else if (LinkedHashMap.class.equals(targetType)) {
                     ret = ofLinkedHashMap();
-                } else if (SortedMap.class.isAssignableFrom(targetClass)) {
+                } else if (SortedMap.class.isAssignableFrom(targetType)) {
                     ret = ofSortedMap();
-                } else if (IdentityHashMap.class.isAssignableFrom(targetClass)) {
+                } else if (IdentityHashMap.class.isAssignableFrom(targetType)) {
                     ret = ofIdentityHashMap();
-                } else if (ConcurrentHashMap.class.isAssignableFrom(targetClass)) {
+                } else if (ConcurrentHashMap.class.isAssignableFrom(targetType)) {
                     ret = ofConcurrentHashMap();
-                } else if (BiMap.class.isAssignableFrom(targetClass)) {
+                } else if (BiMap.class.isAssignableFrom(targetType)) {
                     ret = ofBiMap();
-                } else if (ImmutableMap.class.isAssignableFrom(targetClass)) {
+                } else if (ImmutableMap.class.isAssignableFrom(targetType)) {
                     ret = ofMap();
-                } else if (Modifier.isAbstract(targetClass.getModifiers())) {
-                    throw new IllegalArgumentException("Not able to create instance for abstract Map: " + targetClass);
+                } else if (Modifier.isAbstract(targetType.getModifiers())) {
+                    throw new IllegalArgumentException("Not able to create instance for abstract Map: " + targetType);
                 } else {
                     try {
-                        if (N.newInstance(targetClass) != null) {
-                            ret = () -> N.newInstance(targetClass);
+                        if (N.newInstance(targetType) != null) {
+                            ret = () -> N.newInstance(targetType);
                         }
                     } catch (Throwable e) {
                         // ignore
                     }
 
                     if (ret == null) {
-                        if (targetClass.isAssignableFrom(TreeMap.class)) {
+                        if (targetType.isAssignableFrom(TreeMap.class)) {
                             ret = ofTreeMap();
-                        } else if (targetClass.isAssignableFrom(LinkedHashMap.class)) {
+                        } else if (targetType.isAssignableFrom(LinkedHashMap.class)) {
                             ret = ofLinkedHashMap();
-                        } else if (targetClass.isAssignableFrom(HashMap.class)) {
+                        } else if (targetType.isAssignableFrom(HashMap.class)) {
                             ret = ofMap();
                         } else {
-                            throw new IllegalArgumentException("Not able to create instance for Map: " + targetClass);
+                            throw new IllegalArgumentException("Not able to create instance for Map: " + targetType);
                         }
                     }
                 }
 
-                mapSupplierPool.put(targetClass, ret);
+                mapSupplierPool.put(targetType, ret);
             }
 
             return ret;
@@ -6888,55 +6888,55 @@ public final class Fn {
          *
          *
          * @param <T>
-         * @param targetClass
+         * @param targetType
          * @return
          */
         @SuppressWarnings("rawtypes")
-        public static <T> IntFunction<? extends Collection<T>> ofCollection(final Class<? extends Collection> targetClass) {
-            IntFunction ret = collectionCreatorPool.get(targetClass);
+        public static <T> IntFunction<? extends Collection<T>> ofCollection(final Class<? extends Collection> targetType) {
+            IntFunction ret = collectionCreatorPool.get(targetType);
 
             if (ret == null) {
-                N.checkArgument(Collection.class.isAssignableFrom(targetClass), "'targetClass': {} is not a Collection class", targetClass);
+                N.checkArgument(Collection.class.isAssignableFrom(targetType), "'targetType': {} is not a Collection class", targetType);
 
-                if (Collection.class.equals(targetClass) || AbstractCollection.class.equals(targetClass) || List.class.equals(targetClass)
-                        || AbstractList.class.equals(targetClass) || ArrayList.class.equals(targetClass)) {
+                if (Collection.class.equals(targetType) || AbstractCollection.class.equals(targetType) || List.class.equals(targetType)
+                        || AbstractList.class.equals(targetType) || ArrayList.class.equals(targetType)) {
                     ret = ofList();
-                } else if (LinkedList.class.equals(targetClass)) {
+                } else if (LinkedList.class.equals(targetType)) {
                     ret = ofLinkedList();
-                } else if (Set.class.equals(targetClass) || AbstractSet.class.equals(targetClass) || HashSet.class.equals(targetClass)) {
+                } else if (Set.class.equals(targetType) || AbstractSet.class.equals(targetType) || HashSet.class.equals(targetType)) {
                     ret = ofSet();
-                } else if (LinkedHashSet.class.equals(targetClass)) {
+                } else if (LinkedHashSet.class.equals(targetType)) {
                     ret = ofLinkedHashSet();
-                } else if (SortedSet.class.isAssignableFrom(targetClass)) {
+                } else if (SortedSet.class.isAssignableFrom(targetType)) {
                     ret = ofSortedSet();
-                } else if (Queue.class.equals(targetClass) || AbstractQueue.class.equals(targetClass) || Deque.class.equals(targetClass)) {
+                } else if (Queue.class.equals(targetType) || AbstractQueue.class.equals(targetType) || Deque.class.equals(targetType)) {
                     return ofDeque();
-                } else if (BlockingQueue.class.equals(targetClass) || LinkedBlockingQueue.class.equals(targetClass)) {
+                } else if (BlockingQueue.class.equals(targetType) || LinkedBlockingQueue.class.equals(targetType)) {
                     return ofLinkedBlockingQueue();
-                } else if (ArrayBlockingQueue.class.equals(targetClass)) {
+                } else if (ArrayBlockingQueue.class.equals(targetType)) {
                     return ofArrayBlockingQueue();
-                } else if (BlockingDeque.class.equals(targetClass) || LinkedBlockingDeque.class.equals(targetClass)) {
+                } else if (BlockingDeque.class.equals(targetType) || LinkedBlockingDeque.class.equals(targetType)) {
                     return ofLinkedBlockingDeque();
-                } else if (ConcurrentLinkedQueue.class.equals(targetClass)) {
+                } else if (ConcurrentLinkedQueue.class.equals(targetType)) {
                     return ofConcurrentLinkedQueue();
-                } else if (PriorityQueue.class.equals(targetClass)) {
+                } else if (PriorityQueue.class.equals(targetType)) {
                     return ofPriorityQueue();
-                } else if (ImmutableList.class.isAssignableFrom(targetClass)) {
+                } else if (ImmutableList.class.isAssignableFrom(targetType)) {
                     ret = ofList();
-                } else if (ImmutableSet.class.isAssignableFrom(targetClass)) {
+                } else if (ImmutableSet.class.isAssignableFrom(targetType)) {
                     ret = ofSet();
-                } else if (Modifier.isAbstract(targetClass.getModifiers())) {
-                    throw new IllegalArgumentException("Not able to create instance for collection: " + targetClass);
+                } else if (Modifier.isAbstract(targetType.getModifiers())) {
+                    throw new IllegalArgumentException("Not able to create instance for collection: " + targetType);
                 } else {
                     try {
-                        final Constructor<?> constructor = ClassUtil.getDeclaredConstructor(targetClass, int.class);
+                        final Constructor<?> constructor = ClassUtil.getDeclaredConstructor(targetType, int.class);
 
                         if (constructor != null && N.invoke(constructor, 9) != null) { // magic number?
                             ret = size -> {
                                 try {
                                     return (Collection<T>) N.invoke(constructor, size);
                                 } catch (Throwable e) {
-                                    throw new IllegalArgumentException("Not able to create instance for collection: " + targetClass, e);
+                                    throw new IllegalArgumentException("Not able to create instance for collection: " + targetType, e);
                                 }
                             };
                         }
@@ -6945,12 +6945,12 @@ public final class Fn {
                     }
 
                     try {
-                        if (ret == null && N.newInstance(targetClass) != null) {
+                        if (ret == null && N.newInstance(targetType) != null) {
                             ret = size -> {
                                 try {
-                                    return (Collection<T>) N.newInstance(targetClass);
+                                    return (Collection<T>) N.newInstance(targetType);
                                 } catch (Exception e) {
-                                    throw new IllegalArgumentException("Not able to create instance for collection: " + targetClass, e);
+                                    throw new IllegalArgumentException("Not able to create instance for collection: " + targetType, e);
                                 }
                             };
                         }
@@ -6959,21 +6959,21 @@ public final class Fn {
                     }
 
                     if (ret == null) {
-                        if (targetClass.isAssignableFrom(LinkedHashSet.class)) {
+                        if (targetType.isAssignableFrom(LinkedHashSet.class)) {
                             ret = ofLinkedHashSet();
-                        } else if (targetClass.isAssignableFrom(HashSet.class)) {
+                        } else if (targetType.isAssignableFrom(HashSet.class)) {
                             ret = ofSet();
-                        } else if (targetClass.isAssignableFrom(LinkedList.class)) {
+                        } else if (targetType.isAssignableFrom(LinkedList.class)) {
                             ret = ofLinkedList();
-                        } else if (targetClass.isAssignableFrom(ArrayList.class)) {
+                        } else if (targetType.isAssignableFrom(ArrayList.class)) {
                             ret = ofList();
                         } else {
-                            throw new IllegalArgumentException("Not able to create instance for collection: " + targetClass);
+                            throw new IllegalArgumentException("Not able to create instance for collection: " + targetType);
                         }
                     }
                 }
 
-                collectionCreatorPool.put(targetClass, ret);
+                collectionCreatorPool.put(targetType, ret);
             }
 
             return ret;
@@ -6987,43 +6987,43 @@ public final class Fn {
          *
          * @param <K>
          * @param <V>
-         * @param targetClass
+         * @param targetType
          * @return
          */
         @SuppressWarnings("rawtypes")
-        public static <K, V> IntFunction<? extends Map<K, V>> ofMap(final Class<? extends Map> targetClass) {
-            IntFunction ret = mapCreatorPool.get(targetClass);
+        public static <K, V> IntFunction<? extends Map<K, V>> ofMap(final Class<? extends Map> targetType) {
+            IntFunction ret = mapCreatorPool.get(targetType);
 
             if (ret == null) {
-                N.checkArgument(Map.class.isAssignableFrom(targetClass), "'targetClass': {} is not a Map class", targetClass);
+                N.checkArgument(Map.class.isAssignableFrom(targetType), "'targetType': {} is not a Map class", targetType);
 
-                if (Map.class.equals(targetClass) || AbstractMap.class.equals(targetClass) || HashMap.class.equals(targetClass)
-                        || EnumMap.class.equals(targetClass)) {
+                if (Map.class.equals(targetType) || AbstractMap.class.equals(targetType) || HashMap.class.equals(targetType)
+                        || EnumMap.class.equals(targetType)) {
                     ret = ofMap();
-                } else if (LinkedHashMap.class.equals(targetClass)) {
+                } else if (LinkedHashMap.class.equals(targetType)) {
                     ret = ofLinkedHashMap();
-                } else if (SortedMap.class.isAssignableFrom(targetClass)) {
+                } else if (SortedMap.class.isAssignableFrom(targetType)) {
                     ret = ofSortedMap();
-                } else if (IdentityHashMap.class.isAssignableFrom(targetClass)) {
+                } else if (IdentityHashMap.class.isAssignableFrom(targetType)) {
                     ret = ofIdentityHashMap();
-                } else if (ConcurrentHashMap.class.isAssignableFrom(targetClass)) {
+                } else if (ConcurrentHashMap.class.isAssignableFrom(targetType)) {
                     ret = ofConcurrentHashMap();
-                } else if (BiMap.class.isAssignableFrom(targetClass)) {
+                } else if (BiMap.class.isAssignableFrom(targetType)) {
                     ret = ofBiMap();
-                } else if (ImmutableMap.class.isAssignableFrom(targetClass)) {
+                } else if (ImmutableMap.class.isAssignableFrom(targetType)) {
                     ret = ofMap();
-                } else if (Modifier.isAbstract(targetClass.getModifiers())) {
-                    throw new IllegalArgumentException("Not able to create instance for abstract Map: " + targetClass);
+                } else if (Modifier.isAbstract(targetType.getModifiers())) {
+                    throw new IllegalArgumentException("Not able to create instance for abstract Map: " + targetType);
                 } else {
                     try {
-                        final Constructor<?> constructor = ClassUtil.getDeclaredConstructor(targetClass, int.class);
+                        final Constructor<?> constructor = ClassUtil.getDeclaredConstructor(targetType, int.class);
 
                         if (constructor != null && N.invoke(constructor, 9) != null) { // magic number?
                             ret = size -> {
                                 try {
                                     return (Map<K, V>) N.invoke(constructor, size);
                                 } catch (Throwable e) {
-                                    throw new IllegalArgumentException("Not able to create instance for Map: " + targetClass, e);
+                                    throw new IllegalArgumentException("Not able to create instance for Map: " + targetType, e);
                                 }
                             };
                         }
@@ -7032,12 +7032,12 @@ public final class Fn {
                     }
 
                     try {
-                        if (ret == null && N.newInstance(targetClass) != null) {
+                        if (ret == null && N.newInstance(targetType) != null) {
                             ret = size -> {
                                 try {
-                                    return (Map<K, V>) N.newInstance(targetClass);
+                                    return (Map<K, V>) N.newInstance(targetType);
                                 } catch (Exception e) {
-                                    throw new IllegalArgumentException("Not able to create instance for Map: " + targetClass, e);
+                                    throw new IllegalArgumentException("Not able to create instance for Map: " + targetType, e);
                                 }
                             };
                         }
@@ -7046,19 +7046,19 @@ public final class Fn {
                     }
 
                     if (ret == null) {
-                        if (targetClass.isAssignableFrom(TreeMap.class)) {
+                        if (targetType.isAssignableFrom(TreeMap.class)) {
                             ret = ofTreeMap();
-                        } else if (targetClass.isAssignableFrom(LinkedHashMap.class)) {
+                        } else if (targetType.isAssignableFrom(LinkedHashMap.class)) {
                             ret = ofLinkedHashMap();
-                        } else if (targetClass.isAssignableFrom(HashMap.class)) {
+                        } else if (targetType.isAssignableFrom(HashMap.class)) {
                             ret = ofMap();
                         } else {
-                            throw new IllegalArgumentException("Not able to create instance for Map: " + ClassUtil.getCanonicalClassName(targetClass));
+                            throw new IllegalArgumentException("Not able to create instance for Map: " + ClassUtil.getCanonicalClassName(targetType));
                         }
                     }
                 }
 
-                mapCreatorPool.put(targetClass, ret);
+                mapCreatorPool.put(targetType, ret);
             }
 
             return ret;

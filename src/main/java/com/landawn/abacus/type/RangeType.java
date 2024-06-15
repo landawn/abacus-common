@@ -158,7 +158,7 @@ public class RangeType<T extends Comparable<? super T>> extends AbstractType<Ran
         final String prefix = str.substring(0, 1);
         final String postfix = str.substring(str.length() - 1);
 
-        final T[] tmp = (T[]) Utils.jsonParser.deserialize(Array.newInstance(elementType.clazz(), 0).getClass(), str, 1, str.length() - 1, Utils.jdc);
+        final T[] tmp = (T[]) Utils.jsonParser.deserialize(str, 1, str.length() - 1, Utils.jdc, Array.newInstance(elementType.clazz(), 0).getClass());
 
         if ("(".equals(prefix)) {
             return ")".equals(postfix) ? Range.open(tmp[0], tmp[1]) : Range.openClosed(tmp[0], tmp[1]);

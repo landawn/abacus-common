@@ -180,7 +180,7 @@ public class SheetType<R, C, E> extends AbstractType<Sheet<R, C, E>> {
             return null; // NOSONAR
         }
 
-        final Map<String, Object> m = Utils.jsonParser.deserialize(Map.class, str, jdc);
+        final Map<String, Object> m = Utils.jsonParser.deserialize(str, jdc, Map.class);
         final List<R> rowKeySet = (List<R>) m.get(ROW_KEY_SET);
         final List<C> columnKeySet = (List<C>) m.get(COLUMN_KEY_SET);
         final List<List<E>> rowList = (List<List<E>>) m.get(ROW_LIST);

@@ -85,181 +85,181 @@ abstract class AbstractJSONParser extends AbstractParser<JSONSerializationConfig
 
     /**
      *
-     * @param <T>
+     * @param source
      * @param targetClass
-     * @param str
+     * @param <T>
      * @return
      */
     @Override
-    public <T> T readString(Class<? extends T> targetClass, String str) {
-        return readString(targetClass, str, null);
+    public <T> T readString(String source, Class<? extends T> targetClass) {
+        return readString(source, null, targetClass);
     }
 
     /**
      *
      *
-     * @param <T>
-     * @param targetClass
-     * @param str
+     * @param source
      * @param config
+     * @param targetClass
+     * @param <T>
      * @return
      * @throws UnsupportedOperationException
      */
     @Override
-    public <T> T readString(Class<? extends T> targetClass, String str, JSONDeserializationConfig config) throws UnsupportedOperationException {
+    public <T> T readString(String source, JSONDeserializationConfig config, Class<? extends T> targetClass) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
     /**
      *
-     * @param outResult
-     * @param str
+     * @param source
+     * @param output
      */
     @Override
-    public void readString(Object[] outResult, String str) {
-        readString(outResult, str, null);
+    public void readString(String source, Object[] output) {
+        readString(source, null, output);
     }
 
     /**
      *
      *
-     * @param outResult
-     * @param str
+     * @param source
      * @param config
+     * @param output
      * @throws UnsupportedOperationException
      */
     @Override
-    public void readString(Object[] outResult, String str, JSONDeserializationConfig config) throws UnsupportedOperationException {
+    public void readString(String source, JSONDeserializationConfig config, Object[] output) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
     /**
      *
-     * @param outResult
-     * @param str
+     * @param source
+     * @param output
      */
     @Override
-    public void readString(Collection<?> outResult, String str) {
-        readString(outResult, str, null);
+    public void readString(String source, Collection<?> output) {
+        readString(source, null, output);
     }
 
     /**
      *
      *
-     * @param outResult
-     * @param str
+     * @param source
      * @param config
+     * @param output
      * @throws UnsupportedOperationException
      */
     @Override
-    public void readString(Collection<?> outResult, String str, JSONDeserializationConfig config) throws UnsupportedOperationException {
+    public void readString(String source, JSONDeserializationConfig config, Collection<?> output) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
     /**
      *
-     * @param outResult
-     * @param str
+     * @param source
+     * @param output
      */
     @Override
-    public void readString(Map<?, ?> outResult, String str) {
-        readString(outResult, str, null);
+    public void readString(String source, Map<?, ?> output) {
+        readString(source, null, output);
     }
 
     /**
      *
      *
-     * @param outResult
-     * @param str
      * @param config
+     * @param output
+     * @param source
      * @throws UnsupportedOperationException
      */
     @Override
-    public void readString(Map<?, ?> outResult, String str, JSONDeserializationConfig config) throws UnsupportedOperationException {
+    public void readString(String source, JSONDeserializationConfig config, Map<?, ?> output) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
     /**
      *
-     * @param <T>
-     * @param targetClass
-     * @param str
+     * @param source
      * @param fromIndex
      * @param toIndex
+     * @param targetClass
+     * @param <T>
      * @return
      */
     @Override
-    public <T> T deserialize(Class<? extends T> targetClass, String str, int fromIndex, int toIndex) {
-        return deserialize(targetClass, str, fromIndex, toIndex, null);
+    public <T> T deserialize(String source, int fromIndex, int toIndex, Class<? extends T> targetClass) {
+        return deserialize(source, fromIndex, toIndex, null, targetClass);
     }
 
     /**
      *
-     * @param <T>
-     * @param targetClass
-     * @param str
+     * @param source
      * @param fromIndex
      * @param toIndex
      * @param config
+     * @param targetClass
+     * @param <T>
      * @return
      */
     @Override
-    public <T> T deserialize(Class<? extends T> targetClass, String str, int fromIndex, int toIndex, JSONDeserializationConfig config) {
-        return deserialize(targetClass, str.substring(fromIndex, toIndex), config);
+    public <T> T deserialize(String source, int fromIndex, int toIndex, JSONDeserializationConfig config, Class<? extends T> targetClass) {
+        return deserialize(source.substring(fromIndex, toIndex), config, targetClass);
     }
 
     /**
      *
      *
-     * @param <T>
      * @param elementClass
-     * @param json
+     * @param source
+     * @param <T>
      * @return
      */
     @Override
-    public <T> CheckedStream<T, IOException> stream(Class<? extends T> elementClass, String json) {
-        return stream(elementClass, json, null);
+    public <T> CheckedStream<T, IOException> stream(String source, Class<? extends T> elementClass) {
+        return stream(source, null, elementClass);
     }
 
     /**
      *
      *
-     * @param <T>
      * @param elementClass
-     * @param file
+     * @param source
+     * @param <T>
      * @return
      */
     @Override
-    public <T> CheckedStream<T, IOException> stream(Class<? extends T> elementClass, File file) {
-        return stream(elementClass, file, null);
+    public <T> CheckedStream<T, IOException> stream(File source, Class<? extends T> elementClass) {
+        return stream(source, null, elementClass);
     }
 
     /**
      *
      *
-     * @param <T>
-     * @param elementClass
-     * @param is
      * @param closeInputStreamWhenStreamIsClosed
+     * @param elementClass
+     * @param source
+     * @param <T>
      * @return
      */
     @Override
-    public <T> CheckedStream<T, IOException> stream(Class<? extends T> elementClass, InputStream is, boolean closeInputStreamWhenStreamIsClosed) {
-        return stream(elementClass, is, closeInputStreamWhenStreamIsClosed, null);
+    public <T> CheckedStream<T, IOException> stream(InputStream source, boolean closeInputStreamWhenStreamIsClosed, Class<? extends T> elementClass) {
+        return stream(source, null, closeInputStreamWhenStreamIsClosed, elementClass);
     }
 
     /**
      *
      *
-     * @param <T>
+     * @param closeReaderWhenStreamIsClosed
      * @param elementClass
      * @param reader
-     * @param closeReaderWhenStreamIsClosed
+     * @param <T>
      * @return
      */
     @Override
-    public <T> CheckedStream<T, IOException> stream(Class<? extends T> elementClass, Reader reader, boolean closeReaderWhenStreamIsClosed) {
-        return stream(elementClass, reader, closeReaderWhenStreamIsClosed, null);
+    public <T> CheckedStream<T, IOException> stream(Reader reader, boolean closeReaderWhenStreamIsClosed, Class<? extends T> elementClass) {
+        return stream(reader, null, closeReaderWhenStreamIsClosed, elementClass);
     }
 
     /**

@@ -258,7 +258,7 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
         } else if (str.length() == 0 || "[]".equals(str)) {
             return (T) N.newCollection(typeClass);
         } else {
-            return Utils.jsonParser.deserialize(typeClass, str, jdc);
+            return Utils.jsonParser.deserialize(str, jdc, typeClass);
         }
     }
 

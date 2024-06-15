@@ -164,7 +164,7 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
         } else if (str.length() == 0 || "[]".equals(str)) {
             return (T[]) Array.newInstance(elementType.clazz(), 0);
         } else {
-            return Utils.jsonParser.deserialize(typeClass, str, jdc);
+            return Utils.jsonParser.deserialize(str, jdc, typeClass);
         }
     }
 
@@ -294,22 +294,22 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
     /**
      * Array 2 collection.
      *
-     * @param <E2>
-     * @param resultCollection
+     * @param <E>
+     * @param output
      * @param x
      * @return
      */
     @Override
-    public <E2> Collection<E2> array2Collection(Collection<E2> resultCollection, T[] x) {
+    public <E> Collection<E> array2Collection(final T[] x, final Collection<E> output) {
         if (N.isEmpty(x)) {
-            return resultCollection;
+            return output;
         }
 
-        Collection<Object> c = (Collection<Object>) resultCollection;
+        Collection<Object> c = (Collection<Object>) output;
 
         Collections.addAll(c, x);
 
-        return resultCollection;
+        return output;
     }
 
     /**

@@ -66,12 +66,12 @@ final class JacksonMapper extends AbstractObjectMapper<JacksonMapperConfig> {
 
     /**
      *
-     * @param output
      * @param obj
      * @param config
+     * @param output
      */
     @Override
-    public void write(File output, Object obj, JacksonMapperConfig config) {
+    public void write(Object obj, JacksonMapperConfig config, File output) {
         final ObjectMapper mapper = create(config);
 
         try {
@@ -85,12 +85,12 @@ final class JacksonMapper extends AbstractObjectMapper<JacksonMapperConfig> {
 
     /**
      *
-     * @param output
      * @param obj
      * @param config
+     * @param output
      */
     @Override
-    public void write(OutputStream output, Object obj, JacksonMapperConfig config) {
+    public void write(Object obj, JacksonMapperConfig config, OutputStream output) {
         final ObjectMapper mapper = create(config);
 
         try {
@@ -105,12 +105,12 @@ final class JacksonMapper extends AbstractObjectMapper<JacksonMapperConfig> {
 
     /**
      *
-     * @param output
      * @param obj
      * @param config
+     * @param output
      */
     @Override
-    public void write(Writer output, Object obj, JacksonMapperConfig config) {
+    public void write(Object obj, JacksonMapperConfig config, Writer output) {
         final ObjectMapper mapper = create(config);
 
         try {
@@ -124,18 +124,18 @@ final class JacksonMapper extends AbstractObjectMapper<JacksonMapperConfig> {
 
     /**
      *
-     * @param <T>
-     * @param cls
-     * @param from
+     * @param source
      * @param config
+     * @param targetType
+     * @param <T>
      * @return
      */
     @Override
-    public <T> T read(Class<? extends T> cls, String from, JacksonMapperConfig config) {
+    public <T> T read(String source, JacksonMapperConfig config, Class<? extends T> targetType) {
         final ObjectMapper mapper = create(config);
 
         try {
-            return mapper.readValue(from, cls);
+            return mapper.readValue(source, targetType);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         } finally {
@@ -145,18 +145,18 @@ final class JacksonMapper extends AbstractObjectMapper<JacksonMapperConfig> {
 
     /**
      *
-     * @param <T>
-     * @param cls
-     * @param from
+     * @param source
      * @param config
+     * @param targetType
+     * @param <T>
      * @return
      */
     @Override
-    public <T> T read(Class<? extends T> cls, File from, JacksonMapperConfig config) {
+    public <T> T read(File source, JacksonMapperConfig config, Class<? extends T> targetType) {
         final ObjectMapper mapper = create(config);
 
         try {
-            return mapper.readValue(from, cls);
+            return mapper.readValue(source, targetType);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         } finally {
@@ -166,18 +166,18 @@ final class JacksonMapper extends AbstractObjectMapper<JacksonMapperConfig> {
 
     /**
      *
-     * @param <T>
-     * @param cls
-     * @param from
+     * @param source
      * @param config
+     * @param targetType
+     * @param <T>
      * @return
      */
     @Override
-    public <T> T read(Class<? extends T> cls, InputStream from, JacksonMapperConfig config) {
+    public <T> T read(InputStream source, JacksonMapperConfig config, Class<? extends T> targetType) {
         final ObjectMapper mapper = create(config);
 
         try {
-            return mapper.readValue(from, cls);
+            return mapper.readValue(source, targetType);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
@@ -185,18 +185,18 @@ final class JacksonMapper extends AbstractObjectMapper<JacksonMapperConfig> {
 
     /**
      *
-     * @param <T>
-     * @param cls
-     * @param from
+     * @param source
      * @param config
+     * @param targetType
+     * @param <T>
      * @return
      */
     @Override
-    public <T> T read(Class<? extends T> cls, Reader from, JacksonMapperConfig config) {
+    public <T> T read(Reader source, JacksonMapperConfig config, Class<? extends T> targetType) {
         final ObjectMapper mapper = create(config);
 
         try {
-            return mapper.readValue(from, cls);
+            return mapper.readValue(source, targetType);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         } finally {

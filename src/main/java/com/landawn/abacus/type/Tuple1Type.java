@@ -121,7 +121,7 @@ public class Tuple1Type<T1> extends AbstractType<Tuple1<T1>> {
             return null; // NOSONAR
         }
 
-        final Object[] a = Utils.jsonParser.deserialize(Object[].class, str, Utils.jdc);
+        final Object[] a = Utils.jsonParser.deserialize(str, Utils.jdc, Object[].class);
 
         final T1 t1 = a[0] == null ? null : ((T1) (type1.clazz().isAssignableFrom(a[0].getClass()) ? a[0] : N.convert(a[0], type1)));
 

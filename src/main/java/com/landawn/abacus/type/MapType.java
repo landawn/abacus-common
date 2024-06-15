@@ -156,7 +156,7 @@ public class MapType<K, V, T extends Map<K, V>> extends AbstractType<T> {
         } else if (str.length() == 0 || "{}".equals(str)) {
             return (T) N.newMap(typeClass);
         } else {
-            return Utils.jsonParser.deserialize(typeClass, str, jdc);
+            return Utils.jsonParser.deserialize(str, jdc, typeClass);
         }
     }
 
@@ -175,7 +175,7 @@ public class MapType<K, V, T extends Map<K, V>> extends AbstractType<T> {
 
             if (appendable instanceof Writer) {
                 final Writer writer = (Writer) appendable;
-                Utils.jsonParser.serialize(writer, x, Utils.jsc);
+                Utils.jsonParser.serialize(x, Utils.jsc, writer);
             } else {
                 appendable.append(Utils.jsonParser.serialize(x, Utils.jsc));
             }

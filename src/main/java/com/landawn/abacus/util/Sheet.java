@@ -2933,28 +2933,28 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @throws UncheckedIOException the unchecked IO exception
      */
     public void println(final Collection<R> rowKeySet, final Collection<C> columnKeySet) throws UncheckedIOException {
-        println(IOUtil.newOutputStreamWriter(System.out), rowKeySet, columnKeySet); // NOSONAR
+        println(rowKeySet, columnKeySet, IOUtil.newOutputStreamWriter(System.out)); // NOSONAR
     }
 
     /**
      *
      * @param <W>
-     * @param outputWriter
+     * @param output
      * @throws UncheckedIOException the unchecked IO exception
      */
-    public void println(final Writer outputWriter) throws UncheckedIOException {
-        println(outputWriter, this._rowKeySet, this._columnKeySet);
+    public void println(final Writer output) throws UncheckedIOException {
+        println(this._rowKeySet, this._columnKeySet, output);
     }
 
     /**
      *
-     * @param <W>
-     * @param outputWriter
      * @param rowKeySet
      * @param columnKeySet
+     * @param output
+     * @param <W>
      * @throws UncheckedIOException the unchecked IO exception
      */
-    public void println(final Writer outputWriter, final Collection<R> rowKeySet, final Collection<C> columnKeySet) throws UncheckedIOException {
+    public void println(final Collection<R> rowKeySet, final Collection<C> columnKeySet, final Writer output) throws UncheckedIOException {
         if (N.notEmpty(rowKeySet) && !this._rowKeySet.containsAll(rowKeySet)) {
             throw new IllegalArgumentException(
                     "Row keys: " + N.difference(rowKeySet, this._rowKeySet) + " are not included in this sheet row keys: " + this._rowKeySet);
@@ -2965,10 +2965,10 @@ public final class Sheet<R, C, V> implements Cloneable {
                     "Column keys: " + N.difference(columnKeySet, this._columnKeySet) + " are not included in this sheet Column keys: " + this._columnKeySet);
         }
 
-        N.checkArgNotNull(outputWriter, "outputWriter");
+        N.checkArgNotNull(output, "outputWriter");
 
-        boolean isBufferedWriter = outputWriter instanceof BufferedWriter || outputWriter instanceof java.io.BufferedWriter;
-        final Writer bw = isBufferedWriter ? outputWriter : Objectory.createBufferedWriter(outputWriter);
+        boolean isBufferedWriter = output instanceof BufferedWriter || output instanceof java.io.BufferedWriter;
+        final Writer bw = isBufferedWriter ? output : Objectory.createBufferedWriter(output);
 
         try {
             if (N.isEmpty(rowKeySet) && N.isEmpty(columnKeySet)) {

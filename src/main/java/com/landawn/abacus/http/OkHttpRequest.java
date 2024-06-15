@@ -765,14 +765,14 @@ public final class OkHttpRequest {
                     return (T) IOUtil.readAllBytes(is);
                 } else {
                     if (respContentFormat == ContentFormat.KRYO && kryoParser != null) {
-                        return kryoParser.deserialize(resultClass, is);
+                        return kryoParser.deserialize(is, resultClass);
                     } else if (respContentFormat == ContentFormat.FormUrlEncoded) {
                         return URLEncodedUtil.decode(IOUtil.readAllToString(is, respCharset), resultClass);
                     } else {
                         final BufferedReader br = Objectory.createBufferedReader(IOUtil.newInputStreamReader(is, respCharset));
 
                         try {
-                            return HttpUtil.getParser(respContentFormat).deserialize(resultClass, br);
+                            return HttpUtil.getParser(respContentFormat).deserialize(br, resultClass);
                         } finally {
                             Objectory.recycle(br);
                         }
@@ -851,9 +851,9 @@ public final class OkHttpRequest {
     /**
      *
      *
-     * @param <T>
      * @param resultClass
      * @param executor
+     * @param <T>
      * @return
      */
     public <T> ContinuableFuture<T> asyncGet(final Class<T> resultClass, final Executor executor) {
@@ -893,9 +893,9 @@ public final class OkHttpRequest {
     /**
      *
      *
-     * @param <T>
      * @param resultClass
      * @param executor
+     * @param <T>
      * @return
      */
     public <T> ContinuableFuture<T> asyncPost(final Class<T> resultClass, final Executor executor) {
@@ -935,9 +935,9 @@ public final class OkHttpRequest {
     /**
      *
      *
-     * @param <T>
      * @param resultClass
      * @param executor
+     * @param <T>
      * @return
      */
     public <T> ContinuableFuture<T> asyncPut(final Class<T> resultClass, final Executor executor) {
@@ -977,9 +977,9 @@ public final class OkHttpRequest {
     /**
      *
      *
-     * @param <T>
      * @param resultClass
      * @param executor
+     * @param <T>
      * @return
      */
     public <T> ContinuableFuture<T> asyncPatch(final Class<T> resultClass, final Executor executor) {
@@ -1019,9 +1019,9 @@ public final class OkHttpRequest {
     /**
      *
      *
-     * @param <T>
      * @param resultClass
      * @param executor
+     * @param <T>
      * @return
      */
     public <T> ContinuableFuture<T> asyncDelete(final Class<T> resultClass, final Executor executor) {

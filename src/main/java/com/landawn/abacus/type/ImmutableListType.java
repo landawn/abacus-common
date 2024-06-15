@@ -176,8 +176,8 @@ public class ImmutableListType<E> extends AbstractType<ImmutableList<E>> {
 
     /**
      *
-     * @param writer
      * @param x
+     * @param writer
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override

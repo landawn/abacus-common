@@ -428,12 +428,12 @@ public final class XMLUtil {
     /**
      * {@link XMLInputFactory#createXMLStreamReader(Reader)} is called.
      *
-     * @param reader
+     * @param source
      * @return
      */
-    public static XMLStreamReader createXMLStreamReader(Reader reader) {
+    public static XMLStreamReader createXMLStreamReader(Reader source) {
         try {
-            return xmlInputFactory.createXMLStreamReader(reader);
+            return xmlInputFactory.createXMLStreamReader(source);
         } catch (XMLStreamException e) {
             throw ExceptionUtil.toRuntimeException(e);
         }
@@ -442,12 +442,12 @@ public final class XMLUtil {
     /**
      * {@link XMLInputFactory#createXMLStreamReader(InputStream)} is called.
      *
-     * @param stream
+     * @param source
      * @return
      */
-    public static XMLStreamReader createXMLStreamReader(InputStream stream) {
+    public static XMLStreamReader createXMLStreamReader(InputStream source) {
         try {
-            return xmlInputFactory.createXMLStreamReader(stream);
+            return xmlInputFactory.createXMLStreamReader(source);
         } catch (XMLStreamException e) {
             throw ExceptionUtil.toRuntimeException(e);
         }
@@ -456,13 +456,13 @@ public final class XMLUtil {
     /**
      * {@link XMLInputFactory#createXMLStreamReader(InputStream, String)} is called.
      *
-     * @param stream
+     * @param source
      * @param encoding
      * @return
      */
-    public static XMLStreamReader createXMLStreamReader(InputStream stream, String encoding) {
+    public static XMLStreamReader createXMLStreamReader(InputStream source, String encoding) {
         try {
-            return xmlInputFactory.createXMLStreamReader(stream, encoding);
+            return xmlInputFactory.createXMLStreamReader(source, encoding);
         } catch (XMLStreamException e) {
             throw ExceptionUtil.toRuntimeException(e);
         }
@@ -471,13 +471,13 @@ public final class XMLUtil {
     /**
      * Creates the filtered stream reader.
      *
-     * @param reader
+     * @param source
      * @param filter
      * @return
      */
-    public static XMLStreamReader createFilteredStreamReader(XMLStreamReader reader, StreamFilter filter) {
+    public static XMLStreamReader createFilteredStreamReader(XMLStreamReader source, StreamFilter filter) {
         try {
-            return xmlInputFactory.createFilteredReader(reader, filter);
+            return xmlInputFactory.createFilteredReader(source, filter);
         } catch (XMLStreamException e) {
             throw ExceptionUtil.toRuntimeException(e);
         }
@@ -486,12 +486,12 @@ public final class XMLUtil {
     /**
      * {@link XMLOutputFactory#createXMLStreamWriter(Writer)} is called.
      *
-     * @param writer
+     * @param output
      * @return
      */
-    public static XMLStreamWriter createXMLStreamWriter(Writer writer) {
+    public static XMLStreamWriter createXMLStreamWriter(Writer output) {
         try {
-            return xmlOutputFactory.createXMLStreamWriter(writer);
+            return xmlOutputFactory.createXMLStreamWriter(output);
         } catch (XMLStreamException e) {
             throw ExceptionUtil.toRuntimeException(e);
         }
@@ -500,12 +500,12 @@ public final class XMLUtil {
     /**
      * {@link XMLOutputFactory#createXMLStreamWriter(OutputStream)} is called.
      *
-     * @param stream
+     * @param output
      * @return
      */
-    public static XMLStreamWriter createXMLStreamWriter(OutputStream stream) {
+    public static XMLStreamWriter createXMLStreamWriter(OutputStream output) {
         try {
-            return xmlOutputFactory.createXMLStreamWriter(stream);
+            return xmlOutputFactory.createXMLStreamWriter(output);
         } catch (XMLStreamException e) {
             throw ExceptionUtil.toRuntimeException(e);
         }
@@ -514,13 +514,13 @@ public final class XMLUtil {
     /**
      * {@link XMLOutputFactory#createXMLStreamWriter(OutputStream, String)} is called.
      *
-     * @param stream
+     * @param output
      * @param encoding
      * @return
      */
-    public static XMLStreamWriter createXMLStreamWriter(OutputStream stream, String encoding) {
+    public static XMLStreamWriter createXMLStreamWriter(OutputStream output, String encoding) {
         try {
-            return xmlOutputFactory.createXMLStreamWriter(stream, encoding);
+            return xmlOutputFactory.createXMLStreamWriter(output, encoding);
         } catch (XMLStreamException e) {
             throw ExceptionUtil.toRuntimeException(e);
         }
@@ -541,20 +541,20 @@ public final class XMLUtil {
 
     /**
      *
-     * @param doc
-     * @param xmlFile
+     * @param source
+     * @param output
      */
-    public static void transform(Document doc, File xmlFile) {
-        xmlFile = Configuration.formatPath(xmlFile);
+    public static void transform(Document source, File output) {
+        output = Configuration.formatPath(output);
 
         OutputStream os = null;
 
         try {
-            IOUtil.createNewFileIfNotExists(xmlFile);
+            IOUtil.createNewFileIfNotExists(output);
 
-            os = IOUtil.newFileOutputStream(xmlFile);
+            os = IOUtil.newFileOutputStream(output);
 
-            transform(doc, os);
+            transform(source, os);
 
             os.flush();
         } catch (IOException e) {
@@ -566,17 +566,17 @@ public final class XMLUtil {
 
     /**
      *
-     * @param doc
-     * @param ou
+     * @param source
+     * @param output
      */
-    public static void transform(Document doc, OutputStream ou) {
+    public static void transform(Document source, OutputStream output) {
         // Prepare the DOM document for writing
-        Source source = new DOMSource(doc);
+        Source domSource = new DOMSource(source);
 
-        Result result = new StreamResult(ou);
+        Result result = new StreamResult(output);
 
         try {
-            createXMLTransformer().transform(source, result);
+            createXMLTransformer().transform(domSource, result);
         } catch (TransformerException e) {
             throw ExceptionUtil.toRuntimeException(e);
         }
@@ -841,69 +841,69 @@ public final class XMLUtil {
 
     /**
      *
-     * @param sb
      * @param cbuf
+     * @param output
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    public static void writeCharacters(StringBuilder sb, char[] cbuf) throws IOException {
-        writeCharacters(sb, cbuf, 0, cbuf.length);
+    public static void writeCharacters(char[] cbuf, StringBuilder output) throws IOException {
+        writeCharacters(cbuf, 0, cbuf.length, output);
     }
 
     /**
      *
-     * @param sb
      * @param cbuf
      * @param off
      * @param len
+     * @param output
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    public static void writeCharacters(StringBuilder sb, char[] cbuf, int off, int len) throws IOException {
-        writeCharacters(IOUtil.stringBuilder2Writer(sb), cbuf, off, len);
+    public static void writeCharacters(char[] cbuf, int off, int len, StringBuilder output) throws IOException {
+        writeCharacters(cbuf, off, len, IOUtil.stringBuilder2Writer(output));
     }
 
     /**
      *
-     * @param sb
      * @param str
+     * @param output
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    public static void writeCharacters(StringBuilder sb, String str) throws IOException {
+    public static void writeCharacters(String str, StringBuilder output) throws IOException {
         str = (str == null) ? Strings.NULL_STRING : str;
-        writeCharacters(sb, str, 0, str.length());
+        writeCharacters(str, 0, str.length(), output);
     }
 
     /**
      *
-     * @param sb
      * @param str
      * @param off
      * @param len
+     * @param output
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    public static void writeCharacters(StringBuilder sb, String str, int off, int len) throws IOException {
-        writeCharacters(IOUtil.stringBuilder2Writer(sb), str, off, len);
+    public static void writeCharacters(String str, int off, int len, StringBuilder output) throws IOException {
+        writeCharacters(str, off, len, IOUtil.stringBuilder2Writer(output));
     }
 
     /**
      *
-     * @param os
      * @param cbuf
+     * @param output
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    public static void writeCharacters(OutputStream os, char[] cbuf) throws IOException {
-        writeCharacters(os, cbuf, 0, cbuf.length);
+    public static void writeCharacters(char[] cbuf, OutputStream output) throws IOException {
+        writeCharacters(cbuf, 0, cbuf.length, output);
     }
 
     /**
      *
-     * @param os
      * @param cbuf
      * @param off
      * @param len
+     * @param output
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    public static void writeCharacters(OutputStream os, char[] cbuf, int off, int len) throws IOException {
-        final BufferedXMLWriter bufWriter = Objectory.createBufferedXMLWriter(os); //NOSONAR
+    public static void writeCharacters(char[] cbuf, int off, int len, OutputStream output) throws IOException {
+        final BufferedXMLWriter bufWriter = Objectory.createBufferedXMLWriter(output); //NOSONAR
 
         try {
             bufWriter.writeCharacter(cbuf, off, len);
@@ -915,25 +915,25 @@ public final class XMLUtil {
 
     /**
      *
-     * @param os
      * @param str
+     * @param output
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    public static void writeCharacters(OutputStream os, String str) throws IOException {
+    public static void writeCharacters(String str, OutputStream output) throws IOException {
         str = (str == null) ? Strings.NULL_STRING : str;
-        writeCharacters(os, str, 0, str.length());
+        writeCharacters(str, 0, str.length(), output);
     }
 
     /**
      *
-     * @param os
      * @param str
      * @param off
      * @param len
+     * @param output
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    public static void writeCharacters(OutputStream os, String str, int off, int len) throws IOException {
-        final BufferedXMLWriter bufWriter = Objectory.createBufferedXMLWriter(os); //NOSONAR
+    public static void writeCharacters(String str, int off, int len, OutputStream output) throws IOException {
+        final BufferedXMLWriter bufWriter = Objectory.createBufferedXMLWriter(output); //NOSONAR
 
         try {
             bufWriter.writeCharacter(str, off, len);
@@ -945,25 +945,25 @@ public final class XMLUtil {
 
     /**
      *
-     * @param writer
      * @param cbuf
+     * @param output
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    public static void writeCharacters(Writer writer, char[] cbuf) throws IOException {
-        writeCharacters(writer, cbuf, 0, cbuf.length);
+    public static void writeCharacters(char[] cbuf, Writer output) throws IOException {
+        writeCharacters(cbuf, 0, cbuf.length, output);
     }
 
     /**
      *
-     * @param writer
      * @param cbuf
      * @param off
      * @param len
+     * @param output
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    public static void writeCharacters(Writer writer, char[] cbuf, int off, int len) throws IOException {
-        boolean isBufferedWriter = writer instanceof BufferedXMLWriter;
-        final BufferedXMLWriter bw = isBufferedWriter ? (BufferedXMLWriter) writer : Objectory.createBufferedXMLWriter(writer); //NOSONAR
+    public static void writeCharacters(char[] cbuf, int off, int len, Writer output) throws IOException {
+        boolean isBufferedWriter = output instanceof BufferedXMLWriter;
+        final BufferedXMLWriter bw = isBufferedWriter ? (BufferedXMLWriter) output : Objectory.createBufferedXMLWriter(output); //NOSONAR
 
         try {
             bw.writeCharacter(cbuf, off, len);
@@ -978,26 +978,26 @@ public final class XMLUtil {
 
     /**
      *
-     * @param writer
      * @param str
+     * @param output
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    public static void writeCharacters(Writer writer, String str) throws IOException {
+    public static void writeCharacters(String str, Writer output) throws IOException {
         str = (str == null) ? Strings.NULL_STRING : str;
-        writeCharacters(writer, str, 0, str.length());
+        writeCharacters(str, 0, str.length(), output);
     }
 
     /**
      *
-     * @param writer
      * @param str
      * @param off
      * @param len
+     * @param output
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    public static void writeCharacters(Writer writer, String str, int off, int len) throws IOException {
-        boolean isBufferedWriter = writer instanceof BufferedXMLWriter;
-        final BufferedXMLWriter bw = isBufferedWriter ? (BufferedXMLWriter) writer : Objectory.createBufferedXMLWriter(writer); //NOSONAR
+    public static void writeCharacters(String str, int off, int len, Writer output) throws IOException {
+        boolean isBufferedWriter = output instanceof BufferedXMLWriter;
+        final BufferedXMLWriter bw = isBufferedWriter ? (BufferedXMLWriter) output : Objectory.createBufferedXMLWriter(output); //NOSONAR
 
         try {
             bw.writeCharacter(str, off, len);

@@ -25702,19 +25702,19 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     * @param a
+     * @param b
+     * @param zipFunction
+     * @param targetElementType
      * @param <A>
      * @param <B>
      * @param <R>
      * @param <E>
-     * @param targetElementType
-     * @param a
-     * @param b
-     * @param zipFunction
      * @return
      * @throws E the e
      */
-    public static <A, B, R, E extends Exception> R[] zip(final Class<R> targetElementType, final A[] a, final B[] b,
-            final Throwables.BiFunction<? super A, ? super B, ? extends R, E> zipFunction) throws E {
+    public static <A, B, R, E extends Exception> R[] zip(final A[] a, final B[] b,
+            final Throwables.BiFunction<? super A, ? super B, ? extends R, E> zipFunction, final Class<R> targetElementType) throws E {
         checkArgNotNull(zipFunction);
 
         final int lenA = len(a);
@@ -25732,21 +25732,21 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
-     * @param <A>
-     * @param <B>
-     * @param <R>
-     * @param <E>
-     * @param targetElementType
      * @param a
      * @param b
      * @param valueForNoneA
      * @param valueForNoneB
      * @param zipFunction
+     * @param targetElementType
+     * @param <A>
+     * @param <B>
+     * @param <R>
+     * @param <E>
      * @return
      * @throws E the e
      */
-    public static <A, B, R, E extends Exception> R[] zip(final Class<R> targetElementType, final A[] a, final B[] b, final A valueForNoneA,
-            final B valueForNoneB, final Throwables.BiFunction<? super A, ? super B, ? extends R, E> zipFunction) throws E {
+    public static <A, B, R, E extends Exception> R[] zip(final A[] a, final B[] b, final A valueForNoneA, final B valueForNoneB,
+            final Throwables.BiFunction<? super A, ? super B, ? extends R, E> zipFunction, final Class<R> targetElementType) throws E {
         checkArgNotNull(zipFunction);
 
         final int lenA = len(a);
@@ -25775,21 +25775,21 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     * @param a
+     * @param b
+     * @param c
+     * @param zipFunction
+     * @param targetElementType
      * @param <A>
      * @param <B>
      * @param <C>
      * @param <R>
      * @param <E>
-     * @param targetElementType
-     * @param a
-     * @param b
-     * @param c
-     * @param zipFunction
      * @return
      * @throws E the e
      */
-    public static <A, B, C, R, E extends Exception> R[] zip(final Class<R> targetElementType, final A[] a, final B[] b, final C[] c,
-            final Throwables.TriFunction<? super A, ? super B, ? super C, ? extends R, E> zipFunction) throws E {
+    public static <A, B, C, R, E extends Exception> R[] zip(final A[] a, final B[] b, final C[] c,
+            final Throwables.TriFunction<? super A, ? super B, ? super C, ? extends R, E> zipFunction, final Class<R> targetElementType) throws E {
         checkArgNotNull(zipFunction);
 
         final int lenA = len(a);
@@ -25808,12 +25808,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
-     * @param <A>
-     * @param <B>
-     * @param <C>
-     * @param <R>
-     * @param <E>
-     * @param targetElementType
      * @param a
      * @param b
      * @param c
@@ -25821,11 +25815,18 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param valueForNoneB
      * @param valueForNoneC
      * @param zipFunction
+     * @param targetElementType
+     * @param <A>
+     * @param <B>
+     * @param <C>
+     * @param <R>
+     * @param <E>
      * @return
      * @throws E the e
      */
-    public static <A, B, C, R, E extends Exception> R[] zip(final Class<R> targetElementType, final A[] a, final B[] b, final C[] c, final A valueForNoneA,
-            final B valueForNoneB, final C valueForNoneC, final Throwables.TriFunction<? super A, ? super B, ? super C, ? extends R, E> zipFunction) throws E {
+    public static <A, B, C, R, E extends Exception> R[] zip(final A[] a, final B[] b, final C[] c, final A valueForNoneA, final B valueForNoneB,
+            final C valueForNoneC, final Throwables.TriFunction<? super A, ? super B, ? super C, ? extends R, E> zipFunction, final Class<R> targetElementType)
+            throws E {
         checkArgNotNull(zipFunction);
 
         final int lenA = len(a);
@@ -26755,492 +26756,491 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
-     * @param file
      * @param obj
+     * @param output
      */
-    public static void toJSON(final File file, final Object obj) {
-        Utils.jsonParser.serialize(file, obj);
+    public static void toJSON(final Object obj, final File output) {
+        Utils.jsonParser.serialize(obj, output);
     }
 
     /**
      *
-     * @param file
-     * @param obj
-     * @param config
-     */
-    public static void toJSON(final File file, final Object obj, final JSONSerializationConfig config) {
-        Utils.jsonParser.serialize(file, obj, config);
-    }
-
-    /**
-     *
-     * @param os
-     * @param obj
-     */
-    public static void toJSON(final OutputStream os, final Object obj) {
-        Utils.jsonParser.serialize(os, obj);
-    }
-
-    /**
-     *
-     * @param os
      * @param obj
      * @param config
+     * @param output
      */
-    public static void toJSON(final OutputStream os, final Object obj, final JSONSerializationConfig config) {
-        Utils.jsonParser.serialize(os, obj, config);
+    public static void toJSON(final Object obj, final JSONSerializationConfig config, final File output) {
+        Utils.jsonParser.serialize(obj, config, output);
     }
 
     /**
      *
-     * @param writer
      * @param obj
+     * @param output
      */
-    public static void toJSON(final Writer writer, final Object obj) {
-        Utils.jsonParser.serialize(writer, obj);
+    public static void toJSON(final Object obj, final OutputStream output) {
+        Utils.jsonParser.serialize(obj, output);
     }
 
     /**
      *
-     * @param writer
      * @param obj
      * @param config
+     * @param output
      */
-    public static void toJSON(final Writer writer, final Object obj, final JSONSerializationConfig config) {
-        Utils.jsonParser.serialize(writer, obj, config);
+    public static void toJSON(final Object obj, final JSONSerializationConfig config, final OutputStream output) {
+        Utils.jsonParser.serialize(obj, config, output);
     }
 
     /**
      *
-     * @param <T>
-     * @param targetClass
-     * @param json
-     * @return
-     * @see com.landawn.abacus.util.TypeReference
-     * @see com.landawn.abacus.util.TypeReference.TypeToken
+     * @param obj
+     * @param output
      */
-    public static <T> T fromJSON(final Class<? extends T> targetClass, final String json) {
-        return Utils.jsonParser.deserialize(targetClass, json);
+    public static void toJSON(final Object obj, final Writer output) {
+        Utils.jsonParser.serialize(obj, output);
     }
 
     /**
      *
-     * @param <T>
-     * @param targetClass
-     * @param json
-     * @param defaultIfNull
-     * @return
-     * @see com.landawn.abacus.util.TypeReference
-     * @see com.landawn.abacus.util.TypeReference.TypeToken
-     */
-    public static <T> T fromJSON(final Class<? extends T> targetClass, final String json, final T defaultIfNull) {
-        final T ret = fromJSON(targetClass, json);
-
-        return ret == null ? defaultIfNull : ret;
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param targetClass
-     * @param json
+     * @param obj
      * @param config
-     * @return
-     * @see com.landawn.abacus.util.TypeReference
-     * @see com.landawn.abacus.util.TypeReference.TypeToken
+     * @param output
      */
-    public static <T> T fromJSON(final Class<? extends T> targetClass, final String json, final JSONDeserializationConfig config) {
-        return Utils.jsonParser.deserialize(targetClass, json, config);
+    public static void toJSON(final Object obj, final JSONSerializationConfig config, final Writer output) {
+        Utils.jsonParser.serialize(obj, config, output);
     }
 
     /**
      *
-     * @param <T>
-     * @param targetClass
      * @param json
-     * @return
-     * @see com.landawn.abacus.util.TypeReference
-     * @see com.landawn.abacus.util.TypeReference.TypeToken
-     */
-    public static <T> T fromJSON(final Class<? extends T> targetClass, final File json) {
-        return Utils.jsonParser.deserialize(targetClass, json);
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param targetClass
-     * @param json
-     * @param config
-     * @return
-     * @see com.landawn.abacus.util.TypeReference
-     * @see com.landawn.abacus.util.TypeReference.TypeToken
-     */
-    public static <T> T fromJSON(final Class<? extends T> targetClass, final File json, final JSONDeserializationConfig config) {
-        return Utils.jsonParser.deserialize(targetClass, json, config);
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param targetClass
-     * @param json
-     * @return
-     * @see com.landawn.abacus.util.TypeReference
-     * @see com.landawn.abacus.util.TypeReference.TypeToken
-     */
-    public static <T> T fromJSON(final Class<? extends T> targetClass, final InputStream json) {
-        return Utils.jsonParser.deserialize(targetClass, json);
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param targetClass
-     * @param json
-     * @param config
-     * @return
-     * @see com.landawn.abacus.util.TypeReference
-     * @see com.landawn.abacus.util.TypeReference.TypeToken
-     */
-    public static <T> T fromJSON(final Class<? extends T> targetClass, final InputStream json, final JSONDeserializationConfig config) {
-        return Utils.jsonParser.deserialize(targetClass, json, config);
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param targetClass
-     * @param json
-     * @return
-     * @see com.landawn.abacus.util.TypeReference
-     * @see com.landawn.abacus.util.TypeReference.TypeToken
-     */
-    public static <T> T fromJSON(final Class<? extends T> targetClass, final Reader json) {
-        return Utils.jsonParser.deserialize(targetClass, json);
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param targetClass
-     * @param json
-     * @param config
-     * @return
-     * @see com.landawn.abacus.util.TypeReference
-     * @see com.landawn.abacus.util.TypeReference.TypeToken
-     */
-    public static <T> T fromJSON(final Class<? extends T> targetClass, final Reader json, final JSONDeserializationConfig config) {
-        return Utils.jsonParser.deserialize(targetClass, json, config);
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param targetClass
-     * @param json
-     * @param fromIndex
-     * @param toIndex
-     * @return
-     * @see com.landawn.abacus.util.TypeReference
-     * @see com.landawn.abacus.util.TypeReference.TypeToken
-     */
-    public static <T> T fromJSON(final Class<? extends T> targetClass, final String json, final int fromIndex, final int toIndex) {
-        return Utils.jsonParser.deserialize(targetClass, json, fromIndex, toIndex);
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param targetClass
-     * @param json
-     * @param fromIndex
-     * @param toIndex
-     * @param config
-     * @return
-     * @see com.landawn.abacus.util.TypeReference
-     * @see com.landawn.abacus.util.TypeReference.TypeToken
-     */
-    public static <T> T fromJSON(final Class<? extends T> targetClass, final String json, final int fromIndex, final int toIndex,
-            final JSONDeserializationConfig config) {
-        return Utils.jsonParser.deserialize(targetClass, json, fromIndex, toIndex, config);
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param targetType can be the {@code Type} of {@code Bean/Array/Collection/Map}.
-     * @param json
-     * @return
-     * @see com.landawn.abacus.util.TypeReference
-     * @see com.landawn.abacus.util.TypeReference.TypeToken
-     */
-    public static <T> T fromJSON(final Type<? extends T> targetType, final String json) {
-        return fromJSON(targetType, json, null);
-    }
-
-    /**
-     *
-     * @param <T>
      * @param targetType
-     * @param json
-     * @param defaultIfNull
+     * @param <T>
      * @return
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
-    public static <T> T fromJSON(final Type<? extends T> targetType, final String json, final T defaultIfNull) {
-        final T ret = fromJSON(targetType, json);
+    public static <T> T fromJSON(final String json, final Class<? extends T> targetType) {
+        return Utils.jsonParser.deserialize(json, targetType);
+    }
+
+    /**
+     *
+     * @param json
+     * @param defaultIfNull
+     * @param targetType
+     * @param <T>
+     * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
+     */
+    public static <T> T fromJSON(final String json, final T defaultIfNull, final Class<? extends T> targetType) {
+        final T ret = fromJSON(json, targetType);
 
         return ret == null ? defaultIfNull : ret;
     }
 
     /**
      *
-     * @param <T>
-     * @param targetType can be the {@code Type} of {@code Bean/Array/Collection/Map}.
      * @param json
      * @param config
+     * @param targetType
+     * @param <T>
      * @return
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
-    public static <T> T fromJSON(final Type<? extends T> targetType, final String json, final JSONDeserializationConfig config) {
-        return Utils.jsonParser.deserialize(targetType.clazz(), json, setConfig(targetType, config, true));
+    public static <T> T fromJSON(final String json, final JSONDeserializationConfig config, final Class<? extends T> targetType) {
+        return Utils.jsonParser.deserialize(json, config, targetType);
     }
 
     /**
      *
-     * @param <T>
-     * @param targetType can be the {@code Type} of {@code Bean/Array/Collection/Map}.
      * @param json
+     * @param targetType
+     * @param <T>
      * @return
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
-    public static <T> T fromJSON(final Type<? extends T> targetType, final File json) {
-        return fromJSON(targetType, json, null);
+    public static <T> T fromJSON(final File json, final Class<? extends T> targetType) {
+        return Utils.jsonParser.deserialize(json, targetType);
     }
 
     /**
      *
-     * @param <T>
-     * @param targetType can be the {@code Type} of {@code Bean/Array/Collection/Map}.
-     * @param json
-     * @param config
-     * @return
-     * @see com.landawn.abacus.util.TypeReference
-     * @see com.landawn.abacus.util.TypeReference.TypeToken
-     */
-    public static <T> T fromJSON(final Type<? extends T> targetType, final File json, final JSONDeserializationConfig config) {
-        return Utils.jsonParser.deserialize(targetType.clazz(), json, setConfig(targetType, config, true));
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param targetType can be the {@code Type} of {@code Bean/Array/Collection/Map}.
-     * @param json
-     * @return
-     * @see com.landawn.abacus.util.TypeReference
-     * @see com.landawn.abacus.util.TypeReference.TypeToken
-     */
-    public static <T> T fromJSON(final Type<? extends T> targetType, final InputStream json) {
-        return fromJSON(targetType, json, null);
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param targetType can be the {@code Type} of {@code Bean/Array/Collection/Map}.
      * @param json
      * @param config
+     * @param targetType
+     * @param <T>
      * @return
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
-    public static <T> T fromJSON(final Type<? extends T> targetType, final InputStream json, final JSONDeserializationConfig config) {
-        return Utils.jsonParser.deserialize(targetType.clazz(), json, setConfig(targetType, config, true));
+    public static <T> T fromJSON(final File json, final JSONDeserializationConfig config, final Class<? extends T> targetType) {
+        return Utils.jsonParser.deserialize(json, config, targetType);
     }
 
     /**
      *
-     * @param <T>
-     * @param targetType can be the {@code Type} of {@code Bean/Array/Collection/Map}.
      * @param json
+     * @param targetType
+     * @param <T>
      * @return
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
-    public static <T> T fromJSON(final Type<? extends T> targetType, final Reader json) {
-        return fromJSON(targetType, json, null);
+    public static <T> T fromJSON(final InputStream json, final Class<? extends T> targetType) {
+        return Utils.jsonParser.deserialize(json, targetType);
     }
 
     /**
      *
-     * @param <T>
-     * @param targetType can be the {@code Type} of {@code Bean/Array/Collection/Map}.
      * @param json
      * @param config
+     * @param targetType
+     * @param <T>
      * @return
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
-    public static <T> T fromJSON(final Type<? extends T> targetType, final Reader json, final JSONDeserializationConfig config) {
-        return Utils.jsonParser.deserialize(targetType.clazz(), json, setConfig(targetType, config, true));
+    public static <T> T fromJSON(final InputStream json, final JSONDeserializationConfig config, final Class<? extends T> targetType) {
+        return Utils.jsonParser.deserialize(json, config, targetType);
     }
 
     /**
      *
+     * @param json
+     * @param targetType
      * @param <T>
-     * @param targetType can be the {@code Type} of {@code Bean/Array/Collection/Map}.
+     * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
+     */
+    public static <T> T fromJSON(final Reader json, final Class<? extends T> targetType) {
+        return Utils.jsonParser.deserialize(json, targetType);
+    }
+
+    /**
+     *
+     * @param json
+     * @param config
+     * @param targetType
+     * @param <T>
+     * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
+     */
+    public static <T> T fromJSON(final Reader json, final JSONDeserializationConfig config, final Class<? extends T> targetType) {
+        return Utils.jsonParser.deserialize(json, config, targetType);
+    }
+
+    /**
+     *
      * @param json
      * @param fromIndex
      * @param toIndex
+     * @param targetType
+     * @param <T>
      * @return
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
-    public static <T> T fromJSON(final Type<? extends T> targetType, final String json, final int fromIndex, final int toIndex) {
-        return fromJSON(targetType, json, fromIndex, toIndex, null);
+    public static <T> T fromJSON(final String json, final int fromIndex, final int toIndex, final Class<? extends T> targetType) {
+        return Utils.jsonParser.deserialize(json, fromIndex, toIndex, targetType);
     }
 
     /**
      *
-     * @param <T>
-     * @param targetType can be the {@code Type} of {@code Bean/Array/Collection/Map}.
      * @param json
      * @param fromIndex
      * @param toIndex
      * @param config
+     * @param targetType
+     * @param <T>
      * @return
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
-    public static <T> T fromJSON(final Type<? extends T> targetType, final String json, final int fromIndex, final int toIndex,
-            final JSONDeserializationConfig config) {
-        return Utils.jsonParser.deserialize(targetType.clazz(), json, fromIndex, toIndex, setConfig(targetType, config, true));
+    public static <T> T fromJSON(final String json, final int fromIndex, final int toIndex, final JSONDeserializationConfig config,
+            final Class<? extends T> targetType) {
+        return Utils.jsonParser.deserialize(json, fromIndex, toIndex, config, targetType);
     }
 
     /**
      *
+     * @param json
+     * @param targetType can be the {@code Type} of {@code Bean/Array/Collection/Map}.
      * @param <T>
-     * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
-     * @param source
      * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
-    public static <T> CheckedStream<T, IOException> streamJSON(Class<? extends T> elementClass, String source) {
-        return Utils.jsonParser.stream(elementClass, source);
+    public static <T> T fromJSON(final String json, final Type<? extends T> targetType) {
+        return fromJSON(json, null, targetType);
     }
 
     /**
      *
+     * @param json
+     * @param defaultIfNull
+     * @param targetType
      * @param <T>
-     * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
-     * @param source
+     * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
+     */
+    public static <T> T fromJSON(final String json, final T defaultIfNull, final Type<? extends T> targetType) {
+        final T ret = fromJSON(json, targetType);
+
+        return ret == null ? defaultIfNull : ret;
+    }
+
+    /**
+     *
+     * @param json
      * @param config
+     * @param targetType can be the {@code Type} of {@code Bean/Array/Collection/Map}.
+     * @param <T>
      * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
-    public static <T> CheckedStream<T, IOException> streamJSON(Class<? extends T> elementClass, String source, JSONDeserializationConfig config) {
-        return Utils.jsonParser.stream(elementClass, source, config);
+    public static <T> T fromJSON(final String json, final JSONDeserializationConfig config, final Type<? extends T> targetType) {
+        return Utils.jsonParser.deserialize(json, setConfig(targetType, config, true), targetType.clazz());
     }
 
     /**
      *
+     * @param json
+     * @param targetType can be the {@code Type} of {@code Bean/Array/Collection/Map}.
      * @param <T>
-     * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
-     * @param source
      * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
-    public static <T> CheckedStream<T, IOException> streamJSON(Class<? extends T> elementClass, File source) {
-        return Utils.jsonParser.stream(elementClass, source);
+    public static <T> T fromJSON(final File json, final Type<? extends T> targetType) {
+        return fromJSON(json, null, targetType);
     }
 
     /**
      *
-     * @param <T>
-     * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
-     * @param source
+     * @param json
      * @param config
+     * @param targetType can be the {@code Type} of {@code Bean/Array/Collection/Map}.
+     * @param <T>
      * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
-    public static <T> CheckedStream<T, IOException> streamJSON(Class<? extends T> elementClass, File source, JSONDeserializationConfig config) {
-        return Utils.jsonParser.stream(elementClass, source, config);
+    public static <T> T fromJSON(final File json, final JSONDeserializationConfig config, final Type<? extends T> targetType) {
+        return Utils.jsonParser.deserialize(json, setConfig(targetType, config, true), targetType.clazz());
     }
 
     /**
      *
+     * @param json
+     * @param targetType can be the {@code Type} of {@code Bean/Array/Collection/Map}.
      * @param <T>
-     * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
-     * @param source
      * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
-    public static <T> CheckedStream<T, IOException> streamJSON(Class<? extends T> elementClass, InputStream source) {
-        return streamJSON(elementClass, source, false);
+    public static <T> T fromJSON(final InputStream json, final Type<? extends T> targetType) {
+        return fromJSON(json, null, targetType);
     }
 
     /**
      *
+     * @param json
+     * @param config
+     * @param targetType can be the {@code Type} of {@code Bean/Array/Collection/Map}.
      * @param <T>
+     * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
+     */
+    public static <T> T fromJSON(final InputStream json, final JSONDeserializationConfig config, final Type<? extends T> targetType) {
+        return Utils.jsonParser.deserialize(json, setConfig(targetType, config, true), targetType.clazz());
+    }
+
+    /**
+     *
+     * @param json
+     * @param targetType can be the {@code Type} of {@code Bean/Array/Collection/Map}.
+     * @param <T>
+     * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
+     */
+    public static <T> T fromJSON(final Reader json, final Type<? extends T> targetType) {
+        return fromJSON(json, null, targetType);
+    }
+
+    /**
+     *
+     * @param json
+     * @param config
+     * @param targetType can be the {@code Type} of {@code Bean/Array/Collection/Map}.
+     * @param <T>
+     * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
+     */
+    public static <T> T fromJSON(final Reader json, final JSONDeserializationConfig config, final Type<? extends T> targetType) {
+        return Utils.jsonParser.deserialize(json, setConfig(targetType, config, true), targetType.clazz());
+    }
+
+    /**
+     *
+     * @param json
+     * @param fromIndex
+     * @param toIndex
+     * @param targetType can be the {@code Type} of {@code Bean/Array/Collection/Map}.
+     * @param <T>
+     * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
+     */
+    public static <T> T fromJSON(final String json, final int fromIndex, final int toIndex, final Type<? extends T> targetType) {
+        return fromJSON(json, fromIndex, toIndex, null, targetType);
+    }
+
+    /**
+     *
+     * @param json
+     * @param fromIndex
+     * @param toIndex
+     * @param config
+     * @param targetType can be the {@code Type} of {@code Bean/Array/Collection/Map}.
+     * @param <T>
+     * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
+     */
+    public static <T> T fromJSON(final String json, final int fromIndex, final int toIndex, final JSONDeserializationConfig config,
+            final Type<? extends T> targetType) {
+        return Utils.jsonParser.deserialize(json, fromIndex, toIndex, setConfig(targetType, config, true), targetType.clazz());
+    }
+
+    /**
+     *
+     * @param json
      * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
-     * @param source
+     * @param <T>
+     * @return
+     */
+    public static <T> CheckedStream<T, IOException> streamJSON(String json, Class<? extends T> elementClass) {
+        return Utils.jsonParser.stream(json, elementClass);
+    }
+
+    /**
+     *
+     * @param json
+     * @param config
+     * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
+     * @param <T>
+     * @return
+     */
+    public static <T> CheckedStream<T, IOException> streamJSON(String json, JSONDeserializationConfig config, Class<? extends T> elementClass) {
+        return Utils.jsonParser.stream(json, config, elementClass);
+    }
+
+    /**
+     *
+     * @param json
+     * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
+     * @param <T>
+     * @return
+     */
+    public static <T> CheckedStream<T, IOException> streamJSON(File json, Class<? extends T> elementClass) {
+        return Utils.jsonParser.stream(json, elementClass);
+    }
+
+    /**
+     *
+     * @param json
+     * @param config
+     * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
+     * @param <T>
+     * @return
+     */
+    public static <T> CheckedStream<T, IOException> streamJSON(File json, JSONDeserializationConfig config, Class<? extends T> elementClass) {
+        return Utils.jsonParser.stream(json, config, elementClass);
+    }
+
+    /**
+     *
+     * @param json
+     * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
+     * @param <T>
+     * @return
+     */
+    public static <T> CheckedStream<T, IOException> streamJSON(InputStream json, Class<? extends T> elementClass) {
+        return streamJSON(json, false, elementClass);
+    }
+
+    /**
+     *
+     * @param json
      * @param closeInputStreamWhenStreamIsClosed
+     * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
+     * @param <T>
      * @return
      */
-    public static <T> CheckedStream<T, IOException> streamJSON(Class<? extends T> elementClass, InputStream source,
-            boolean closeInputStreamWhenStreamIsClosed) {
-        return Utils.jsonParser.stream(elementClass, source, closeInputStreamWhenStreamIsClosed);
+    public static <T> CheckedStream<T, IOException> streamJSON(InputStream json, boolean closeInputStreamWhenStreamIsClosed, Class<? extends T> elementClass) {
+        return Utils.jsonParser.stream(json, closeInputStreamWhenStreamIsClosed, elementClass);
     }
 
     /**
      *
-     * @param <T>
-     * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
-     * @param source
+     * @param json
+     * @param config
      * @param closeInputStreamWhenStreamIsClosed
-     * @param config
+     * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
+     * @param <T>
      * @return
      */
-    public static <T> CheckedStream<T, IOException> streamJSON(Class<? extends T> elementClass, InputStream source, boolean closeInputStreamWhenStreamIsClosed,
-            JSONDeserializationConfig config) {
-        return Utils.jsonParser.stream(elementClass, source, closeInputStreamWhenStreamIsClosed, config);
+    public static <T> CheckedStream<T, IOException> streamJSON(InputStream json, JSONDeserializationConfig config, boolean closeInputStreamWhenStreamIsClosed,
+            Class<? extends T> elementClass) {
+        return Utils.jsonParser.stream(json, config, closeInputStreamWhenStreamIsClosed, elementClass);
     }
 
     /**
      *
-     * @param <T>
+     * @param json
      * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
-     * @param source
+     * @param <T>
      * @return
      */
-    public static <T> CheckedStream<T, IOException> streamJSON(Class<? extends T> elementClass, Reader source) {
-        return streamJSON(elementClass, source, false);
+    public static <T> CheckedStream<T, IOException> streamJSON(Reader json, Class<? extends T> elementClass) {
+        return streamJSON(json, false, elementClass);
     }
 
     /**
      *
-     * @param <T>
-     * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
-     * @param source
+     * @param json
      * @param closeReaderWhenStreamIsClosed
+     * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
+     * @param <T>
      * @return
      */
-    public static <T> CheckedStream<T, IOException> streamJSON(Class<? extends T> elementClass, Reader source, boolean closeReaderWhenStreamIsClosed) {
-        return Utils.jsonParser.stream(elementClass, source, closeReaderWhenStreamIsClosed);
+    public static <T> CheckedStream<T, IOException> streamJSON(Reader json, boolean closeReaderWhenStreamIsClosed, Class<? extends T> elementClass) {
+        return Utils.jsonParser.stream(json, closeReaderWhenStreamIsClosed, elementClass);
     }
 
     /**
      *
-     * @param <T>
-     * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
-     * @param source
-     * @param closeReaderWhenStreamIsClosed
+     * @param json
      * @param config
+     * @param closeReaderWhenStreamIsClosed
+     * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
+     * @param <T>
      * @return
      */
-    public static <T> CheckedStream<T, IOException> streamJSON(Class<? extends T> elementClass, Reader source, boolean closeReaderWhenStreamIsClosed,
-            JSONDeserializationConfig config) {
-        return Utils.jsonParser.stream(elementClass, source, closeReaderWhenStreamIsClosed, config);
+    public static <T> CheckedStream<T, IOException> streamJSON(Reader json, JSONDeserializationConfig config, boolean closeReaderWhenStreamIsClosed,
+            Class<? extends T> elementClass) {
+        return Utils.jsonParser.stream(json, config, closeReaderWhenStreamIsClosed, elementClass);
     }
 
     /**
@@ -27251,7 +27251,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
     public static String formatJSON(final String json) {
-        return formatJSON(Object.class, json, Utils.jscPrettyFormat);
+        return formatJSON(json, Utils.jscPrettyFormat, Object.class);
     }
 
     /**
@@ -27263,63 +27263,63 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
     public static String formatJSON(final String json, final JSONSerializationConfig config) {
-        return formatJSON(Object.class, json, config);
+        return formatJSON(json, config, Object.class);
     }
 
     /**
      *
-     * @param type
      * @param json
+     * @param transferType
      * @return
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
-    public static String formatJSON(final Class<?> type, final String json) {
-        return toJSON(fromJSON(type, json), Utils.jscPrettyFormat);
+    public static String formatJSON(final String json, final Class<?> transferType) {
+        return toJSON(fromJSON(json, transferType), Utils.jscPrettyFormat);
     }
 
     /**
      *
-     * @param type
      * @param json
      * @param config
+     * @param transferType
      * @return
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
-    public static String formatJSON(final Class<?> type, final String json, final JSONSerializationConfig config) {
+    public static String formatJSON(final String json, final JSONSerializationConfig config, final Class<?> transferType) {
         final JSONSerializationConfig configToUse = config == null ? Utils.jscPrettyFormat
                 : (config.prettyFormat() == false ? config.copy().prettyFormat(true) : config);
 
-        return toJSON(fromJSON(type, json), configToUse);
+        return toJSON(fromJSON(json, transferType), configToUse);
     }
 
     /**
      *
-     * @param type
      * @param json
+     * @param transferType
      * @return
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
-    public static String formatJSON(final Type<?> type, final String json) {
-        return toJSON(fromJSON(type, json), Utils.jscPrettyFormat);
+    public static String formatJSON(final String json, final Type<?> transferType) {
+        return toJSON(fromJSON(json, transferType), Utils.jscPrettyFormat);
     }
 
     /**
      *
-     * @param type
      * @param json
      * @param config
+     * @param transferType
      * @return
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
-    public static String formatJSON(final Type<?> type, final String json, final JSONSerializationConfig config) {
+    public static String formatJSON(final String json, final JSONSerializationConfig config, final Type<?> transferType) {
         final JSONSerializationConfig configToUse = config == null ? Utils.jscPrettyFormat
                 : (config.prettyFormat() == false ? config.copy().prettyFormat(true) : config);
 
-        return toJSON(fromJSON(type, json), configToUse);
+        return toJSON(fromJSON(json, transferType), configToUse);
     }
 
     /**
@@ -27353,275 +27353,275 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
-     * @param file
      * @param obj
+     * @param output
      */
-    public static void toXML(final File file, final Object obj) {
-        Utils.xmlParser.serialize(file, obj);
+    public static void toXML(final Object obj, final File output) {
+        Utils.xmlParser.serialize(obj, output);
     }
 
     /**
      *
-     * @param file
-     * @param obj
-     * @param config
-     */
-    public static void toXML(final File file, final Object obj, final XMLSerializationConfig config) {
-        Utils.xmlParser.serialize(file, obj, config);
-    }
-
-    /**
-     *
-     * @param os
-     * @param obj
-     */
-    public static void toXML(final OutputStream os, final Object obj) {
-        Utils.xmlParser.serialize(os, obj);
-    }
-
-    /**
-     *
-     * @param os
      * @param obj
      * @param config
+     * @param output
      */
-    public static void toXML(final OutputStream os, final Object obj, final XMLSerializationConfig config) {
-        Utils.xmlParser.serialize(os, obj, config);
+    public static void toXML(final Object obj, final XMLSerializationConfig config, final File output) {
+        Utils.xmlParser.serialize(obj, config, output);
     }
 
     /**
      *
-     * @param writer
      * @param obj
+     * @param output
      */
-    public static void toXML(final Writer writer, final Object obj) {
-        Utils.xmlParser.serialize(writer, obj);
+    public static void toXML(final Object obj, final OutputStream output) {
+        Utils.xmlParser.serialize(obj, output);
     }
 
     /**
      *
-     * @param writer
      * @param obj
      * @param config
+     * @param output
      */
-    public static void toXML(final Writer writer, final Object obj, final XMLSerializationConfig config) {
-        Utils.xmlParser.serialize(writer, obj, config);
+    public static void toXML(final Object obj, final XMLSerializationConfig config, final OutputStream output) {
+        Utils.xmlParser.serialize(obj, config, output);
     }
 
     /**
      *
-     * @param <T>
-     * @param targetClass
+     * @param obj
+     * @param output
+     */
+    public static void toXML(final Object obj, final Writer output) {
+        Utils.xmlParser.serialize(obj, output);
+    }
+
+    /**
+     *
+     * @param obj
+     * @param config
+     * @param output
+     */
+    public static void toXML(final Object obj, final XMLSerializationConfig config, final Writer output) {
+        Utils.xmlParser.serialize(obj, config, output);
+    }
+
+    /**
+     *
      * @param xml
+     * @param targetType
+     * @param <T>
      * @return
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
-    public static <T> T fromXML(final Class<? extends T> targetClass, final String xml) {
-        return Utils.xmlParser.deserialize(targetClass, xml);
+    public static <T> T fromXML(final String xml, final Class<? extends T> targetType) {
+        return Utils.xmlParser.deserialize(xml, targetType);
     }
 
     /**
      *
-     * @param <T>
-     * @param targetClass
      * @param xml
      * @param config
+     * @param targetType
+     * @param <T>
      * @return
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
-    public static <T> T fromXML(final Class<? extends T> targetClass, final String xml, final XMLDeserializationConfig config) {
-        return Utils.xmlParser.deserialize(targetClass, xml, config);
+    public static <T> T fromXML(final String xml, final XMLDeserializationConfig config, final Class<? extends T> targetType) {
+        return Utils.xmlParser.deserialize(xml, config, targetType);
     }
 
     /**
      *
-     * @param <T>
-     * @param targetClass
      * @param xml
+     * @param targetType
+     * @param <T>
      * @return
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
-    public static <T> T fromXML(final Class<? extends T> targetClass, final File xml) {
-        return Utils.xmlParser.deserialize(targetClass, xml);
+    public static <T> T fromXML(final File xml, final Class<? extends T> targetType) {
+        return Utils.xmlParser.deserialize(xml, targetType);
     }
 
     /**
      *
-     * @param <T>
-     * @param targetClass
-     * @param xml
-     * @param config
-     * @return
-     * @see com.landawn.abacus.util.TypeReference
-     * @see com.landawn.abacus.util.TypeReference.TypeToken
-     */
-    public static <T> T fromXML(final Class<? extends T> targetClass, final File xml, final XMLDeserializationConfig config) {
-        return Utils.xmlParser.deserialize(targetClass, xml, config);
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param targetClass
-     * @param xml
-     * @return
-     * @see com.landawn.abacus.util.TypeReference
-     * @see com.landawn.abacus.util.TypeReference.TypeToken
-     */
-    public static <T> T fromXML(final Class<? extends T> targetClass, final InputStream xml) {
-        return Utils.xmlParser.deserialize(targetClass, xml);
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param targetClass
      * @param xml
      * @param config
+     * @param targetType
+     * @param <T>
      * @return
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
-    public static <T> T fromXML(final Class<? extends T> targetClass, final InputStream xml, final XMLDeserializationConfig config) {
-        return Utils.xmlParser.deserialize(targetClass, xml, config);
+    public static <T> T fromXML(final File xml, final XMLDeserializationConfig config, final Class<? extends T> targetType) {
+        return Utils.xmlParser.deserialize(xml, config, targetType);
     }
 
     /**
      *
-     * @param <T>
-     * @param targetClass
      * @param xml
+     * @param targetType
+     * @param <T>
      * @return
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
-    public static <T> T fromXML(final Class<? extends T> targetClass, final Reader xml) {
-        return Utils.xmlParser.deserialize(targetClass, xml);
+    public static <T> T fromXML(final InputStream xml, final Class<? extends T> targetType) {
+        return Utils.xmlParser.deserialize(xml, targetType);
     }
 
     /**
      *
-     * @param <T>
-     * @param targetClass
-     * @param xml
-     * @param config
-     * @return
-     * @see com.landawn.abacus.util.TypeReference
-     * @see com.landawn.abacus.util.TypeReference.TypeToken
-     */
-    public static <T> T fromXML(final Class<? extends T> targetClass, final Reader xml, final XMLDeserializationConfig config) {
-        return Utils.xmlParser.deserialize(targetClass, xml, config);
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param targetType can be the {@code Type} of {@code Bean/Array/Collection/Map}.
-     * @param xml
-     * @return
-     * @see com.landawn.abacus.util.TypeReference
-     * @see com.landawn.abacus.util.TypeReference.TypeToken
-     */
-    public static <T> T fromXML(final Type<? extends T> targetType, final String xml) {
-        return fromJSON(targetType, xml, null);
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param targetType can be the {@code Type} of {@code Bean/Array/Collection/Map}.
      * @param xml
      * @param config
+     * @param targetType
+     * @param <T>
      * @return
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
-    public static <T> T fromXML(final Type<? extends T> targetType, final String xml, final XMLDeserializationConfig config) {
-        return Utils.xmlParser.deserialize(targetType.clazz(), xml, setConfig(targetType, config, false));
+    public static <T> T fromXML(final InputStream xml, final XMLDeserializationConfig config, final Class<? extends T> targetType) {
+        return Utils.xmlParser.deserialize(xml, config, targetType);
     }
 
     /**
      *
-     * @param <T>
-     * @param targetType can be the {@code Type} of {@code Bean/Array/Collection/Map}.
      * @param xml
+     * @param targetType
+     * @param <T>
      * @return
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
-    public static <T> T fromXML(final Type<? extends T> targetType, final File xml) {
-        return fromJSON(targetType, xml, null);
+    public static <T> T fromXML(final Reader xml, final Class<? extends T> targetType) {
+        return Utils.xmlParser.deserialize(xml, targetType);
     }
 
     /**
      *
-     * @param <T>
-     * @param targetType can be the {@code Type} of {@code Bean/Array/Collection/Map}.
-     * @param xml
-     * @param config
-     * @return
-     * @see com.landawn.abacus.util.TypeReference
-     * @see com.landawn.abacus.util.TypeReference.TypeToken
-     */
-    public static <T> T fromXML(final Type<? extends T> targetType, final File xml, final XMLDeserializationConfig config) {
-        return Utils.xmlParser.deserialize(targetType.clazz(), xml, setConfig(targetType, config, false));
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param targetType can be the {@code Type} of {@code Bean/Array/Collection/Map}.
-     * @param xml
-     * @return
-     * @see com.landawn.abacus.util.TypeReference
-     * @see com.landawn.abacus.util.TypeReference.TypeToken
-     */
-    public static <T> T fromXML(final Type<? extends T> targetType, final InputStream xml) {
-        return fromJSON(targetType, xml, null);
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param targetType can be the {@code Type} of {@code Bean/Array/Collection/Map}.
      * @param xml
      * @param config
+     * @param targetType
+     * @param <T>
      * @return
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
-    public static <T> T fromXML(final Type<? extends T> targetType, final InputStream xml, final XMLDeserializationConfig config) {
-        return Utils.xmlParser.deserialize(targetType.clazz(), xml, setConfig(targetType, config, false));
+    public static <T> T fromXML(final Reader xml, final XMLDeserializationConfig config, final Class<? extends T> targetType) {
+        return Utils.xmlParser.deserialize(xml, config, targetType);
     }
 
     /**
      *
-     * @param <T>
-     * @param targetType can be the {@code Type} of {@code Bean/Array/Collection/Map}.
      * @param xml
+     * @param targetType can be the {@code Type} of {@code Bean/Array/Collection/Map}.
+     * @param <T>
      * @return
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
-    public static <T> T fromXML(final Type<? extends T> targetType, final Reader xml) {
-        return fromJSON(targetType, xml, null);
+    public static <T> T fromXML(final String xml, final Type<? extends T> targetType) {
+        return fromJSON(xml, null, targetType);
     }
 
     /**
      *
-     * @param <T>
-     * @param targetType can be the {@code Type} of {@code Bean/Array/Collection/Map}.
      * @param xml
      * @param config
+     * @param targetType can be the {@code Type} of {@code Bean/Array/Collection/Map}.
+     * @param <T>
      * @return
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
-    public static <T> T fromXML(final Type<? extends T> targetType, final Reader xml, final XMLDeserializationConfig config) {
-        return Utils.xmlParser.deserialize(targetType.clazz(), xml, setConfig(targetType, config, false));
+    public static <T> T fromXML(final String xml, final XMLDeserializationConfig config, final Type<? extends T> targetType) {
+        return Utils.xmlParser.deserialize(xml, setConfig(targetType, config, false), targetType.clazz());
+    }
+
+    /**
+     *
+     * @param xml
+     * @param targetType can be the {@code Type} of {@code Bean/Array/Collection/Map}.
+     * @param <T>
+     * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
+     */
+    public static <T> T fromXML(final File xml, final Type<? extends T> targetType) {
+        return fromJSON(xml, null, targetType);
+    }
+
+    /**
+     *
+     * @param xml
+     * @param config
+     * @param targetType can be the {@code Type} of {@code Bean/Array/Collection/Map}.
+     * @param <T>
+     * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
+     */
+    public static <T> T fromXML(final File xml, final XMLDeserializationConfig config, final Type<? extends T> targetType) {
+        return Utils.xmlParser.deserialize(xml, setConfig(targetType, config, false), targetType.clazz());
+    }
+
+    /**
+     *
+     * @param xml
+     * @param targetType can be the {@code Type} of {@code Bean/Array/Collection/Map}.
+     * @param <T>
+     * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
+     */
+    public static <T> T fromXML(final InputStream xml, final Type<? extends T> targetType) {
+        return fromJSON(xml, null, targetType);
+    }
+
+    /**
+     *
+     * @param xml
+     * @param config
+     * @param targetType can be the {@code Type} of {@code Bean/Array/Collection/Map}.
+     * @param <T>
+     * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
+     */
+    public static <T> T fromXML(final InputStream xml, final XMLDeserializationConfig config, final Type<? extends T> targetType) {
+        return Utils.xmlParser.deserialize(xml, setConfig(targetType, config, false), targetType.clazz());
+    }
+
+    /**
+     *
+     * @param xml
+     * @param targetType can be the {@code Type} of {@code Bean/Array/Collection/Map}.
+     * @param <T>
+     * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
+     */
+    public static <T> T fromXML(final Reader xml, final Type<? extends T> targetType) {
+        return fromJSON(xml, null, targetType);
+    }
+
+    /**
+     *
+     * @param xml
+     * @param config
+     * @param targetType can be the {@code Type} of {@code Bean/Array/Collection/Map}.
+     * @param <T>
+     * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
+     */
+    public static <T> T fromXML(final Reader xml, final XMLDeserializationConfig config, final Type<? extends T> targetType) {
+        return Utils.xmlParser.deserialize(xml, setConfig(targetType, config, false), targetType.clazz());
     }
 
     /**
@@ -27665,7 +27665,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
     public static String formatXML(final String xml) {
-        return formatXML(MapEntity.class, xml);
+        return formatXML(xml, MapEntity.class);
     }
 
     /**
@@ -27677,63 +27677,63 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
     public static String formatXML(final String xml, final XMLSerializationConfig config) {
-        return formatXML(MapEntity.class, xml, config);
+        return formatXML(xml, config, MapEntity.class);
     }
 
     /**
      *
-     * @param type
      * @param xml
+     * @param transferType
      * @return
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
-    public static String formatXML(final Class<?> type, final String xml) {
-        return toXML(fromXML(type, xml), Utils.xscPrettyFormat);
+    public static String formatXML(final String xml, final Class<?> transferType) {
+        return toXML(fromXML(xml, transferType), Utils.xscPrettyFormat);
     }
 
     /**
      *
-     * @param type
      * @param xml
      * @param config
+     * @param transferType
      * @return
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
-    public static String formatXML(final Class<?> type, final String xml, final XMLSerializationConfig config) {
+    public static String formatXML(final String xml, final XMLSerializationConfig config, final Class<?> transferType) {
         final XMLSerializationConfig configToUse = config == null ? Utils.xscPrettyFormat
                 : (config.prettyFormat() == false ? config.copy().prettyFormat(true) : config);
 
-        return toXML(fromXML(type, xml), configToUse);
+        return toXML(fromXML(xml, transferType), configToUse);
     }
 
     /**
      *
-     * @param type
      * @param xml
+     * @param transferType
      * @return
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
-    public static String formatXML(final Type<?> type, final String xml) {
-        return toXML(fromXML(type, xml), Utils.xscPrettyFormat);
+    public static String formatXML(final String xml, final Type<?> transferType) {
+        return toXML(fromXML(xml, transferType), Utils.xscPrettyFormat);
     }
 
     /**
      *
-     * @param type
      * @param xml
      * @param config
+     * @param transferType
      * @return
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
-    public static String formatXML(final Type<?> type, final String xml, final XMLSerializationConfig config) {
+    public static String formatXML(final String xml, final XMLSerializationConfig config, final Type<?> transferType) {
         final XMLSerializationConfig configToUse = config == null ? Utils.xscPrettyFormat
                 : (config.prettyFormat() == false ? config.copy().prettyFormat(true) : config);
 
-        return toXML(fromXML(type, xml), configToUse);
+        return toXML(fromXML(xml, transferType), configToUse);
     }
 
     /**
@@ -27745,20 +27745,20 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
     public static String xml2JSON(final String xml) {
-        return xml2JSON(Map.class, xml);
+        return xml2JSON(xml, Map.class);
     }
 
     /**
      * Xml 2 JSO.
-     *
-     * @param cls
      * @param xml
+     * @param transferType
+     *
      * @return
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
-    public static String xml2JSON(final Class<?> cls, final String xml) {
-        return Utils.jsonParser.serialize(Utils.xmlParser.deserialize(cls, xml), Utils.jsc);
+    public static String xml2JSON(final String xml, final Class<?> transferType) {
+        return Utils.jsonParser.serialize(Utils.xmlParser.deserialize(xml, transferType), Utils.jsc);
     }
 
     /**
@@ -27770,20 +27770,20 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
     public static String json2XML(final String json) {
-        return json2XML(Map.class, json);
+        return json2XML(json, Map.class);
     }
 
     /**
      * Json 2 XML.
-     *
-     * @param cls
      * @param json
+     * @param transferType
+     *
      * @return
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
-    public static String json2XML(final Class<?> cls, final String json) {
-        return Utils.xmlParser.serialize(Utils.jsonParser.deserialize(cls, json));
+    public static String json2XML(final String json, final Class<?> transferType) {
+        return Utils.xmlParser.serialize(Utils.jsonParser.deserialize(json, transferType));
     }
 
     /**

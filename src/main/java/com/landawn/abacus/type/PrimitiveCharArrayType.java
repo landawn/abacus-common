@@ -47,9 +47,9 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public Class<char[]> clazz() {
@@ -143,9 +143,9 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
     }
 
     /**
-     * 
      *
-     * @param obj 
+     *
+     * @param obj
      * @return {@code null} if {@code (obj == null)}. (auto-generated java doc for return)
      */
     @MayReturnNull
@@ -267,25 +267,25 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
 
     /**
      * Array 2 collection.
+     * @param x
+     * @param output
      *
      * @param <E>
-     * @param resultCollection
-     * @param x
      * @return
      */
     @Override
-    public <E> Collection<E> array2Collection(Collection<E> resultCollection, char[] x) {
+    public <E> Collection<E> array2Collection(final char[] x, final Collection<E> output) {
         if (N.isEmpty(x)) {
-            return resultCollection;
+            return output;
         }
 
-        Collection<Object> c = (Collection<Object>) resultCollection;
+        Collection<Object> c = (Collection<Object>) output;
 
         for (char element : x) {
             c.add(element);
         }
 
-        return resultCollection;
+        return output;
     }
 
     /**

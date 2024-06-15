@@ -1545,33 +1545,33 @@ public final class Profiler {
 
         /**
          *
-         * @param os
+         * @param output
          */
-        public void writeResult(final OutputStream os) {
-            writeResult(new PrintWriter(os));
+        public void writeResult(final OutputStream output) {
+            writeResult(new PrintWriter(output));
         }
 
         /**
          *
-         * @param writer
+         * @param output
          */
-        public void writeResult(final Writer writer) {
-            writeResult(new PrintWriter(writer));
+        public void writeResult(final Writer output) {
+            writeResult(new PrintWriter(output));
         }
 
         /**
          *
-         * @param writer
+         * @param output
          */
-        private void writeResult(final PrintWriter writer) {
-            writer.println();
-            writer.println(SEPARATOR_LINE);
-            writer.println("(unit: milliseconds)");
-            writer.println("threadNum=" + threadNum + "; loops=" + (loopStatisticsList.size() / threadNum));
-            writer.println("startTime: " + time2String(getStartTimeInMillis()));
-            writer.println("endTime:   " + time2String(getEndTimeInMillis()));
-            writer.println("totalElapsedTime: " + elapsedTimeFormat.format(getElapsedTimeInMillis()));
-            writer.println();
+        private void writeResult(final PrintWriter output) {
+            output.println();
+            output.println(SEPARATOR_LINE);
+            output.println("(unit: milliseconds)");
+            output.println("threadNum=" + threadNum + "; loops=" + (loopStatisticsList.size() / threadNum));
+            output.println("startTime: " + time2String(getStartTimeInMillis()));
+            output.println("endTime:   " + time2String(getEndTimeInMillis()));
+            output.println("totalElapsedTime: " + elapsedTimeFormat.format(getElapsedTimeInMillis()));
+            output.println();
             //            MethodStatistics methodStatistics = getMaxElapsedTimeInMillisMethod();
             //
             //            if (methodStatistics != null) {
@@ -1593,9 +1593,9 @@ public final class Profiler {
                     }
                 }
             }
-            writer.println();
+            output.println();
             maxMethodNameLength += 3;
-            writer.println(Strings.padEnd(methodNameTitil + ",  ", maxMethodNameLength)
+            output.println(Strings.padEnd(methodNameTitil + ",  ", maxMethodNameLength)
                     + "|avg time|, |min time|, |max time|, |0.01% >=|, |0.1% >=|,  |1% >=|,    |10% >=|,   |20% >=|,   |50% >=|,   |80% >=|,   |90% >=|,   |99% >=|,   |99.9% >=|, |99.99% >=|");
             for (String methodName : methodNameList) {
                 List<MethodStatistics> methodStatisticsList = getMethodStatisticsList(methodName);
@@ -1606,7 +1606,7 @@ public final class Profiler {
                 double maxTime = methodStatisticsList.get(0).getElapsedTimeInMillis();
                 double minTime = methodStatisticsList.get(size - 1).getElapsedTimeInMillis();
                 final int minLen = 12;
-                writer.println(Strings.padEnd(methodName + ",  ", maxMethodNameLength) + Strings.padEnd(elapsedTimeFormat.format(avgTime) + ",  ", minLen)
+                output.println(Strings.padEnd(methodName + ",  ", maxMethodNameLength) + Strings.padEnd(elapsedTimeFormat.format(avgTime) + ",  ", minLen)
                         + Strings.padEnd(elapsedTimeFormat.format(minTime) + ",  ", minLen) + Strings.padEnd(elapsedTimeFormat.format(maxTime) + ",  ", minLen)
                         + Strings.padEnd(elapsedTimeFormat.format(methodStatisticsList.get((int) (size * 0.0001)).getElapsedTimeInMillis()) + ",  ", minLen)
                         + Strings.padEnd(elapsedTimeFormat.format(methodStatisticsList.get((int) (size * 0.001)).getElapsedTimeInMillis()) + ",  ", minLen)
@@ -1620,26 +1620,26 @@ public final class Profiler {
                         + Strings.padEnd(elapsedTimeFormat.format(methodStatisticsList.get((int) (size * 0.999)).getElapsedTimeInMillis()) + ",  ", minLen)
                         + Strings.padEnd(elapsedTimeFormat.format(methodStatisticsList.get((int) (size * 0.9999)).getElapsedTimeInMillis()) + ",  ", minLen));
             }
-            writer.println();
-            writeError(writer);
-            writer.println(SEPARATOR_LINE);
-            writer.flush();
+            output.println();
+            writeError(output);
+            output.println(SEPARATOR_LINE);
+            output.flush();
         }
 
         /**
          *
-         * @param writer
+         * @param output
          */
-        private void writeError(final PrintWriter writer) {
+        private void writeError(final PrintWriter output) {
             MethodStatistics methodStatistics;
             List<?> failedMethodList = getAllFailedMethodStatisticsList();
             if (failedMethodList.size() > 0) {
-                writer.println();
-                writer.println("Errors:" + failedMethodList.size() + " (" + (failedMethodList.size() * 100D) / getTotalCall() + "%)"); //NOSONAR
+                output.println();
+                output.println("Errors:" + failedMethodList.size() + " (" + (failedMethodList.size() * 100D) / getTotalCall() + "%)"); //NOSONAR
                 for (Object element : failedMethodList) {
-                    writer.println("--------------------------------------------------------------------------------");
+                    output.println("--------------------------------------------------------------------------------");
                     methodStatistics = (MethodStatistics) element;
-                    writer.println(methodStatistics.toString());
+                    output.println(methodStatistics.toString());
                 }
             }
         }
@@ -1647,34 +1647,34 @@ public final class Profiler {
         /**
          * Write html result.
          *
-         * @param os
+         * @param output
          */
-        public void writeHtmlResult(final OutputStream os) {
-            writeHtmlResult(new PrintWriter(os));
+        public void writeHtmlResult(final OutputStream output) {
+            writeHtmlResult(new PrintWriter(output));
         }
 
         /**
          * Write html result.
          *
-         * @param writer
+         * @param output
          */
-        public void writeHtmlResult(final Writer writer) {
-            writeHtmlResult(new PrintWriter(writer));
+        public void writeHtmlResult(final Writer output) {
+            writeHtmlResult(new PrintWriter(output));
         }
 
         /**
          * Write html result.
          *
-         * @param writer
+         * @param output
          */
-        private void writeHtmlResult(final PrintWriter writer) {
-            writer.println(SEPARATOR_LINE);
-            writer.println("<br/>" + "(unit: milliseconds)"); //NOSONAR
-            writer.println("<br/>" + "threadNum=" + threadNum + "; loops=" + (loopStatisticsList.size() / threadNum) + "");
-            writer.println("<br/>" + "startTime: " + time2String(getStartTimeInMillis()) + "");
-            writer.println("<br/>" + "endTime:   " + time2String(getEndTimeInMillis()) + "");
-            writer.println("<br/>" + "totalElapsedTime: " + elapsedTimeFormat.format(getElapsedTimeInMillis()) + "");
-            writer.println("<br/>");
+        private void writeHtmlResult(final PrintWriter output) {
+            output.println(SEPARATOR_LINE);
+            output.println("<br/>" + "(unit: milliseconds)"); //NOSONAR
+            output.println("<br/>" + "threadNum=" + threadNum + "; loops=" + (loopStatisticsList.size() / threadNum) + "");
+            output.println("<br/>" + "startTime: " + time2String(getStartTimeInMillis()) + "");
+            output.println("<br/>" + "endTime:   " + time2String(getEndTimeInMillis()) + "");
+            output.println("<br/>" + "totalElapsedTime: " + elapsedTimeFormat.format(getElapsedTimeInMillis()) + "");
+            output.println("<br/>");
             //            MethodStatistics methodStatistics = getMaxElapsedTimeInMillisMethod();
             //
             //            if (methodStatistics != null) {
@@ -1688,25 +1688,25 @@ public final class Profiler {
             //                writer.println(
             //                        "<br/>" + "minMethodTime(" + methodStatistics.getMethodName() + "): " + elapsedTimeInMillisFormat.format(methodStatistics.getElapsedTimeInMillis()));
             //            }
-            writer.println("<br/>");
-            writer.println("<table width=\"1200\" border=\"1\">");
-            writer.println("<tr>");
-            writer.println("<th>method name</th>");
-            writer.println("<th>avg time</th>");
-            writer.println("<th>min time</th>");
-            writer.println("<th>max time</th>");
-            writer.println("<th>0.01% &gt;=</th>");
-            writer.println("<th>0.1% &gt;=</th>");
-            writer.println("<th>1% &gt;=</th>");
-            writer.println("<th>10% &gt;=</th>");
-            writer.println("<th>20% &gt;=</th>");
-            writer.println("<th>50% &gt;=</th>");
-            writer.println("<th>80% &gt;=</th>");
-            writer.println("<th>90% &gt;=</th>");
-            writer.println("<th>99% &gt;=</th>");
-            writer.println("<th>99.9% &gt;=</th>");
-            writer.println("<th>99.99% &gt;=</th>");
-            writer.println("</tr>");
+            output.println("<br/>");
+            output.println("<table width=\"1200\" border=\"1\">");
+            output.println("<tr>");
+            output.println("<th>method name</th>");
+            output.println("<th>avg time</th>");
+            output.println("<th>min time</th>");
+            output.println("<th>max time</th>");
+            output.println("<th>0.01% &gt;=</th>");
+            output.println("<th>0.1% &gt;=</th>");
+            output.println("<th>1% &gt;=</th>");
+            output.println("<th>10% &gt;=</th>");
+            output.println("<th>20% &gt;=</th>");
+            output.println("<th>50% &gt;=</th>");
+            output.println("<th>80% &gt;=</th>");
+            output.println("<th>90% &gt;=</th>");
+            output.println("<th>99% &gt;=</th>");
+            output.println("<th>99.9% &gt;=</th>");
+            output.println("<th>99.99% &gt;=</th>");
+            output.println("</tr>");
             List<String> methodNameList = getMethodNameList();
             for (String methodName : methodNameList) {
                 List<MethodStatistics> methodStatisticsList = getMethodStatisticsList(methodName);
@@ -1716,44 +1716,44 @@ public final class Profiler {
                 double avgTime = getMethodAverageElapsedTimeInMillis(methodName);
                 double minTime = methodStatisticsList.get(size - 1).getElapsedTimeInMillis();
                 double maxTime = methodStatisticsList.get(0).getElapsedTimeInMillis();
-                writer.println("<tr>");
-                writer.println("<td>" + methodName + "</td>"); //NOSONAR
-                writer.println("<td>" + elapsedTimeFormat.format(avgTime) + "</td>");
-                writer.println("<td>" + elapsedTimeFormat.format(minTime) + "</td>");
-                writer.println("<td>" + elapsedTimeFormat.format(maxTime) + "</td>");
-                writer.println("<td>" + elapsedTimeFormat.format(methodStatisticsList.get((int) (size * 0.0001)).getElapsedTimeInMillis()) + "</td>");
-                writer.println("<td>" + elapsedTimeFormat.format(methodStatisticsList.get((int) (size * 0.001)).getElapsedTimeInMillis()) + "</td>");
-                writer.println("<td>" + elapsedTimeFormat.format(methodStatisticsList.get((int) (size * 0.01)).getElapsedTimeInMillis()) + "</td>");
-                writer.println("<td>" + elapsedTimeFormat.format(methodStatisticsList.get((int) (size * 0.1)).getElapsedTimeInMillis()) + "</td>");
-                writer.println("<td>" + elapsedTimeFormat.format(methodStatisticsList.get((int) (size * 0.2)).getElapsedTimeInMillis()) + "</td>");
-                writer.println("<td>" + elapsedTimeFormat.format(methodStatisticsList.get((int) (size * 0.5)).getElapsedTimeInMillis()) + "</td>");
-                writer.println("<td>" + elapsedTimeFormat.format(methodStatisticsList.get((int) (size * 0.8)).getElapsedTimeInMillis()) + "</td>");
-                writer.println("<td>" + elapsedTimeFormat.format(methodStatisticsList.get((int) (size * 0.9)).getElapsedTimeInMillis()) + "</td>");
-                writer.println("<td>" + elapsedTimeFormat.format(methodStatisticsList.get((int) (size * 0.99)).getElapsedTimeInMillis()) + "</td>");
-                writer.println("<td>" + elapsedTimeFormat.format(methodStatisticsList.get((int) (size * 0.999)).getElapsedTimeInMillis()) + "</td>");
-                writer.println("<td>" + elapsedTimeFormat.format(methodStatisticsList.get((int) (size * 0.9999)).getElapsedTimeInMillis()) + "</td>");
-                writer.println("</tr>");
+                output.println("<tr>");
+                output.println("<td>" + methodName + "</td>"); //NOSONAR
+                output.println("<td>" + elapsedTimeFormat.format(avgTime) + "</td>");
+                output.println("<td>" + elapsedTimeFormat.format(minTime) + "</td>");
+                output.println("<td>" + elapsedTimeFormat.format(maxTime) + "</td>");
+                output.println("<td>" + elapsedTimeFormat.format(methodStatisticsList.get((int) (size * 0.0001)).getElapsedTimeInMillis()) + "</td>");
+                output.println("<td>" + elapsedTimeFormat.format(methodStatisticsList.get((int) (size * 0.001)).getElapsedTimeInMillis()) + "</td>");
+                output.println("<td>" + elapsedTimeFormat.format(methodStatisticsList.get((int) (size * 0.01)).getElapsedTimeInMillis()) + "</td>");
+                output.println("<td>" + elapsedTimeFormat.format(methodStatisticsList.get((int) (size * 0.1)).getElapsedTimeInMillis()) + "</td>");
+                output.println("<td>" + elapsedTimeFormat.format(methodStatisticsList.get((int) (size * 0.2)).getElapsedTimeInMillis()) + "</td>");
+                output.println("<td>" + elapsedTimeFormat.format(methodStatisticsList.get((int) (size * 0.5)).getElapsedTimeInMillis()) + "</td>");
+                output.println("<td>" + elapsedTimeFormat.format(methodStatisticsList.get((int) (size * 0.8)).getElapsedTimeInMillis()) + "</td>");
+                output.println("<td>" + elapsedTimeFormat.format(methodStatisticsList.get((int) (size * 0.9)).getElapsedTimeInMillis()) + "</td>");
+                output.println("<td>" + elapsedTimeFormat.format(methodStatisticsList.get((int) (size * 0.99)).getElapsedTimeInMillis()) + "</td>");
+                output.println("<td>" + elapsedTimeFormat.format(methodStatisticsList.get((int) (size * 0.999)).getElapsedTimeInMillis()) + "</td>");
+                output.println("<td>" + elapsedTimeFormat.format(methodStatisticsList.get((int) (size * 0.9999)).getElapsedTimeInMillis()) + "</td>");
+                output.println("</tr>");
             }
-            writer.println("</table>");
-            writeHtmlError(writer);
-            writer.println(SEPARATOR_LINE);
-            writer.flush();
+            output.println("</table>");
+            writeHtmlError(output);
+            output.println(SEPARATOR_LINE);
+            output.flush();
         }
 
         /**
          * Write html error.
          *
-         * @param writer
+         * @param output
          */
-        private void writeHtmlError(final PrintWriter writer) {
+        private void writeHtmlError(final PrintWriter output) {
             MethodStatistics methodStatistics;
             List<?> failedMethodList = getAllFailedMethodStatisticsList();
             if (failedMethodList.size() > 0) {
-                writer.println("<h4>Errors:" + failedMethodList.size() + " (" + (failedMethodList.size() * 100D) / getTotalCall() + "%)</h4>"); //NOSONAR
+                output.println("<h4>Errors:" + failedMethodList.size() + " (" + (failedMethodList.size() * 100D) / getTotalCall() + "%)</h4>"); //NOSONAR
                 for (Object element : failedMethodList) {
-                    writer.println("<br/>" + "--------------------------------------------------------------------------------");
+                    output.println("<br/>" + "--------------------------------------------------------------------------------");
                     methodStatistics = (MethodStatistics) element;
-                    writer.println("<br/>" + methodStatistics.toString());
+                    output.println("<br/>" + methodStatistics.toString());
                 }
             }
         }
@@ -1761,35 +1761,35 @@ public final class Profiler {
         /**
          * Write xml result.
          *
-         * @param os
+         * @param output
          */
-        public void writeXmlResult(final OutputStream os) {
-            writeXmlResult(new PrintWriter(os));
+        public void writeXmlResult(final OutputStream output) {
+            writeXmlResult(new PrintWriter(output));
         }
 
         /**
          * Write xml result.
          *
-         * @param writer
+         * @param output
          */
-        public void writeXmlResult(final Writer writer) {
-            writeXmlResult(new PrintWriter(writer));
+        public void writeXmlResult(final Writer output) {
+            writeXmlResult(new PrintWriter(output));
         }
 
         /**
          * Write xml result.
          *
-         * @param writer
+         * @param output
          */
-        private void writeXmlResult(final PrintWriter writer) {
-            writer.println("<result>");
-            writer.println("<unit>milliseconds</unit>");
-            writer.println("<threadNum>" + threadNum + "</threadNum>");
-            writer.println("<loops>" + (loopStatisticsList.size() / threadNum) + "</loops>");
-            writer.println("<startTime>" + time2String(getStartTimeInMillis()) + "</startTime>");
-            writer.println("<endTime>" + time2String(getEndTimeInMillis()) + "</endTime>");
-            writer.println("<totalElapsedTime>" + elapsedTimeFormat.format(getElapsedTimeInMillis()) + "</totalElapsedTime>");
-            writer.println();
+        private void writeXmlResult(final PrintWriter output) {
+            output.println("<result>");
+            output.println("<unit>milliseconds</unit>");
+            output.println("<threadNum>" + threadNum + "</threadNum>");
+            output.println("<loops>" + (loopStatisticsList.size() / threadNum) + "</loops>");
+            output.println("<startTime>" + time2String(getStartTimeInMillis()) + "</startTime>");
+            output.println("<endTime>" + time2String(getEndTimeInMillis()) + "</endTime>");
+            output.println("<totalElapsedTime>" + elapsedTimeFormat.format(getElapsedTimeInMillis()) + "</totalElapsedTime>");
+            output.println();
             //            MethodStatistics methodStatistics = getMinElapsedTimeInMillisMethod();
             //
             //            if (methodStatistics != null) {
@@ -1810,31 +1810,31 @@ public final class Profiler {
                 double avgTime = getMethodAverageElapsedTimeInMillis(methodName);
                 double minTime = methodStatisticsList.get(size - 1).getElapsedTimeInMillis();
                 double maxTime = methodStatisticsList.get(0).getElapsedTimeInMillis();
-                writer.println("<method name=\"" + methodName + "\">");
-                writer.println("<avgTime>" + elapsedTimeFormat.format(avgTime) + "</avgTime>");
-                writer.println("<minTime>" + elapsedTimeFormat.format(minTime) + "</minTime>");
-                writer.println("<maxTime>" + elapsedTimeFormat.format(maxTime) + "</maxTime>");
-                writer.println("<_0.0001>" + elapsedTimeFormat.format(methodStatisticsList.get((int) (size * 0.0001)).getElapsedTimeInMillis()) + "</_0.0001>");
-                writer.println("<_0.001>" + elapsedTimeFormat.format(methodStatisticsList.get((int) (size * 0.001)).getElapsedTimeInMillis()) + "</_0.001>");
-                writer.println("<_0.01>" + elapsedTimeFormat.format(methodStatisticsList.get((int) (size * 0.01)).getElapsedTimeInMillis()) + "</_0.01>");
-                writer.println("<_0.2>" + elapsedTimeFormat.format(methodStatisticsList.get((int) (size * 0.2)).getElapsedTimeInMillis()) + "</_0.2>");
-                writer.println("<_0.5>" + elapsedTimeFormat.format(methodStatisticsList.get((int) (size * 0.5)).getElapsedTimeInMillis()) + "</_0.5>");
-                writer.println("<_0.8>" + elapsedTimeFormat.format(methodStatisticsList.get((int) (size * 0.8)).getElapsedTimeInMillis()) + "</_0.8>");
-                writer.println("<_0.9>" + elapsedTimeFormat.format(methodStatisticsList.get((int) (size * 0.9)).getElapsedTimeInMillis()) + "</_0.9>");
-                writer.println("<_0.99>" + elapsedTimeFormat.format(methodStatisticsList.get((int) (size * 0.99)).getElapsedTimeInMillis()) + "</_0.99>");
-                writer.println("<_0.999>" + elapsedTimeFormat.format(methodStatisticsList.get((int) (size * 0.999)).getElapsedTimeInMillis()) + "</_0.999>");
-                writer.println("<_0.9999>" + elapsedTimeFormat.format(methodStatisticsList.get((int) (size * 0.9999)).getElapsedTimeInMillis()) + "</_0.9999>");
-                writer.println("</method>");
+                output.println("<method name=\"" + methodName + "\">");
+                output.println("<avgTime>" + elapsedTimeFormat.format(avgTime) + "</avgTime>");
+                output.println("<minTime>" + elapsedTimeFormat.format(minTime) + "</minTime>");
+                output.println("<maxTime>" + elapsedTimeFormat.format(maxTime) + "</maxTime>");
+                output.println("<_0.0001>" + elapsedTimeFormat.format(methodStatisticsList.get((int) (size * 0.0001)).getElapsedTimeInMillis()) + "</_0.0001>");
+                output.println("<_0.001>" + elapsedTimeFormat.format(methodStatisticsList.get((int) (size * 0.001)).getElapsedTimeInMillis()) + "</_0.001>");
+                output.println("<_0.01>" + elapsedTimeFormat.format(methodStatisticsList.get((int) (size * 0.01)).getElapsedTimeInMillis()) + "</_0.01>");
+                output.println("<_0.2>" + elapsedTimeFormat.format(methodStatisticsList.get((int) (size * 0.2)).getElapsedTimeInMillis()) + "</_0.2>");
+                output.println("<_0.5>" + elapsedTimeFormat.format(methodStatisticsList.get((int) (size * 0.5)).getElapsedTimeInMillis()) + "</_0.5>");
+                output.println("<_0.8>" + elapsedTimeFormat.format(methodStatisticsList.get((int) (size * 0.8)).getElapsedTimeInMillis()) + "</_0.8>");
+                output.println("<_0.9>" + elapsedTimeFormat.format(methodStatisticsList.get((int) (size * 0.9)).getElapsedTimeInMillis()) + "</_0.9>");
+                output.println("<_0.99>" + elapsedTimeFormat.format(methodStatisticsList.get((int) (size * 0.99)).getElapsedTimeInMillis()) + "</_0.99>");
+                output.println("<_0.999>" + elapsedTimeFormat.format(methodStatisticsList.get((int) (size * 0.999)).getElapsedTimeInMillis()) + "</_0.999>");
+                output.println("<_0.9999>" + elapsedTimeFormat.format(methodStatisticsList.get((int) (size * 0.9999)).getElapsedTimeInMillis()) + "</_0.9999>");
+                output.println("</method>");
             }
             List<MethodStatistics> failedMethodList = getAllFailedMethodStatisticsList();
             if (failedMethodList.size() > 0) {
-                writer.println("<errors>" + failedMethodList.size() + " (" + (failedMethodList.size() * 100D) / getTotalCall() + "%)</errors>"); //NOSONAR
+                output.println("<errors>" + failedMethodList.size() + " (" + (failedMethodList.size() * 100D) / getTotalCall() + "%)</errors>"); //NOSONAR
                 for (MethodStatistics methodStatistics : failedMethodList) {
-                    writer.println("<error>" + methodStatistics.toString() + "</error>");
+                    output.println("<error>" + methodStatistics.toString() + "</error>");
                 }
             }
-            writer.println("</result>");
-            writer.flush();
+            output.println("</result>");
+            output.flush();
         }
     }
 }

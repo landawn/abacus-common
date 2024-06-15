@@ -202,25 +202,25 @@ public final class PrimitiveLongArrayType extends AbstractPrimitiveArrayType<lon
 
     /**
      * Array 2 collection.
+     * @param x
+     * @param output
      *
      * @param <E>
-     * @param resultCollection
-     * @param x
      * @return
      */
     @Override
-    public <E> Collection<E> array2Collection(Collection<E> resultCollection, long[] x) {
+    public <E> Collection<E> array2Collection(final long[] x, final Collection<E> output) {
         if (N.isEmpty(x)) {
-            return resultCollection;
+            return output;
         }
 
-        Collection<Object> c = (Collection<Object>) resultCollection;
+        Collection<Object> c = (Collection<Object>) output;
 
         for (long element : x) {
             c.add(element);
         }
 
-        return resultCollection;
+        return output;
     }
 
     /**

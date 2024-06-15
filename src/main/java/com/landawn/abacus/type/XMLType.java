@@ -101,6 +101,6 @@ public class XMLType<T> extends AbstractType<T> {
      */
     @Override
     public T valueOf(String str) {
-        return Strings.isEmpty(str) ? null : Utils.xmlParser.deserialize(typeClass, str);
+        return Strings.isEmpty(str) ? null : Utils.xmlParser.deserialize(str, typeClass);
     }
 }

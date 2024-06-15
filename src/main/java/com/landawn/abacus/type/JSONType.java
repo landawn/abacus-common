@@ -101,6 +101,6 @@ public class JSONType<T> extends AbstractType<T> {
      */
     @Override
     public T valueOf(String str) {
-        return Strings.isEmpty(str) ? null : Utils.jsonParser.deserialize(typeClass, str);
+        return Strings.isEmpty(str) ? null : Utils.jsonParser.deserialize(str, typeClass);
     }
 }

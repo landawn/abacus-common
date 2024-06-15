@@ -35,7 +35,7 @@ public class Maven {
 
         StreamEx.listFiles(targetDir) //
                 .filter(file -> file.getName().startsWith("settings"))
-                .forEach(file -> IOUtil.deleteIfExists(file));
+                .forEach(IOUtil::deleteIfExists);
 
         StreamEx.listFiles(new File("./target/"))
                 .filter(f -> f.getName().startsWith("abacus-common") && f.getName().endsWith(".jar"))
@@ -53,7 +53,7 @@ public class Maven {
                     for (String line : lines) {
                         newLines.add(line.replaceAll(sourceVersion, targetVersion));
                     }
-                    IOUtil.writeLines(file, newLines);
+                    IOUtil.writeLines(newLines, file);
                 });
 
         System.exit(0);

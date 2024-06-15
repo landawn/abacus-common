@@ -74,14 +74,14 @@ abstract class AbstractXMLParser extends AbstractParser<XMLSerializationConfig, 
 
     /**
      *
-     * @param <T>
+     * @param source
      * @param targetClass
-     * @param node
+     * @param <T>
      * @return
      */
     @Override
-    public <T> T deserialize(Class<? extends T> targetClass, Node node) {
-        return deserialize(targetClass, node, null);
+    public <T> T deserialize(Node source, Class<? extends T> targetClass) {
+        return deserialize(source, null, targetClass);
     }
 
     /**

@@ -981,12 +981,12 @@ sealed class CommonUtil permits N {
      *
      * @param <T>
      * @param str
-     * @param targetClass
+     * @param targetType
      * @return
      */
     @SuppressWarnings("unchecked")
-    public static <T> T valueOf(final String str, final Class<? extends T> targetClass) {
-        return (str == null) ? defaultValueOf(targetClass) : (T) typeOf(targetClass).valueOf(str);
+    public static <T> T valueOf(final String str, final Class<? extends T> targetType) {
+        return (str == null) ? defaultValueOf(targetType) : (T) typeOf(targetType).valueOf(str);
     }
 
     private static final Map<Class<?>, BiFunction<Object, Class<?>, Object>> converterMap = new ConcurrentHashMap<>();
@@ -1044,28 +1044,28 @@ sealed class CommonUtil permits N {
 
     /**
      * Try to convert the specified {@code obj} to the specified
-     * {@code targetClass}. Default value of {@code targetClass} is returned if
-     * {@code sourceObject} is null. An instance of {@code targetClass} is returned if
+     * {@code targetType}. Default value of {@code targetType} is returned if
+     * {@code sourceObject} is null. An instance of {@code targetType} is returned if
      * convert successfully
      *
      * @param <T>
      * @param obj
-     * @param targetClass
+     * @param targetType
      * @return
      */
-    public static <T> T convert(final Object obj, final Class<? extends T> targetClass) {
+    public static <T> T convert(final Object obj, final Class<? extends T> targetType) {
         if (obj == null) {
-            return defaultValueOf(targetClass);
+            return defaultValueOf(targetType);
         }
 
         final Class<?> srcClass = obj.getClass();
         BiFunction<Object, Class<?>, Object> converterFunc = null;
 
         if ((converterFunc = converterMap.get(srcClass)) != null) {
-            return (T) converterFunc.apply(obj, targetClass);
+            return (T) converterFunc.apply(obj, targetType);
         }
 
-        final Type<T> type = typeOf(targetClass);
+        final Type<T> type = typeOf(targetType);
 
         return convert(obj, srcClass, type);
     }
@@ -1114,7 +1114,7 @@ sealed class CommonUtil permits N {
             if (srcType.isBean() && targetType.getParameterTypes()[0].clazz().isAssignableFrom(String.class)
                     && Object.class.equals(targetType.getParameterTypes()[1].clazz())) {
                 try {
-                    return (T) Maps.bean2Map(N.<String, Object> newMap((Class<Map>) targetType.clazz()), obj);
+                    return (T) Maps.bean2Map(obj, N.<String, Object> newMap((Class<Map>) targetType.clazz()));
                 } catch (Exception e) {
                     // ignore.
                 }
@@ -1395,26 +1395,26 @@ sealed class CommonUtil permits N {
      *
      * @param <T>
      * @param obj a Java object which must be serializable and deserialiable through {@code Kryo} or {@code JSON}.
-     * @param targetClass
-     * @return a new instance of {@code targetClass} even if {@code bean} is {@code null}.
-     * @throws IllegalArgumentException if {@code targetClass} is {@code null}.
+     * @param targetType
+     * @return a new instance of {@code targetType} even if {@code bean} is {@code null}.
+     * @throws IllegalArgumentException if {@code targetType} is {@code null}.
      */
     @SuppressWarnings("unchecked")
-    public static <T> T clone(final Object obj, final Class<? extends T> targetClass) throws IllegalArgumentException {
-        N.checkArgNotNull(targetClass, "targetClass");
+    public static <T> T clone(final Object obj, final Class<? extends T> targetType) throws IllegalArgumentException {
+        N.checkArgNotNull(targetType, "targetType");
 
         if (obj == null) {
-            if (ClassUtil.isBeanClass(targetClass)) {
-                return copy(obj, targetClass);
+            if (ClassUtil.isBeanClass(targetType)) {
+                return copy(obj, targetType);
             } else {
-                return newInstance(targetClass);
+                return newInstance(targetType);
             }
         }
 
         final Class<?> srcCls = obj.getClass();
         Object copy = null;
 
-        if (Utils.kryoParser != null && targetClass.equals(obj.getClass()) && !notKryoCompatible.contains(srcCls)) {
+        if (Utils.kryoParser != null && targetType.equals(obj.getClass()) && !notKryoCompatible.contains(srcCls)) {
             try {
                 copy = Utils.kryoParser.clone(obj);
             } catch (Exception e) {
@@ -1426,7 +1426,7 @@ sealed class CommonUtil permits N {
 
         if (copy == null) {
             String xml = Utils.abacusXMLParser.serialize(obj, Utils.xscForClone);
-            copy = Utils.abacusXMLParser.deserialize(targetClass, xml);
+            copy = Utils.abacusXMLParser.deserialize(xml, targetType);
         }
 
         return (T) copy;
@@ -1488,12 +1488,12 @@ sealed class CommonUtil permits N {
      *
      * @param <T>
      * @param sourceBean
-     * @param targetClass
-     * @return a new instance of {@code targetClass} even if {@code bean} is {@code null}.
-     * @throws IllegalArgumentException if {@code targetClass} is {@code null}.
+     * @param targetType
+     * @return a new instance of {@code targetType} even if {@code bean} is {@code null}.
+     * @throws IllegalArgumentException if {@code targetType} is {@code null}.
      */
-    public static <T> T copy(final Object sourceBean, final Class<? extends T> targetClass) throws IllegalArgumentException {
-        return copy(sourceBean, (Collection<String>) null, targetClass);
+    public static <T> T copy(final Object sourceBean, final Class<? extends T> targetType) throws IllegalArgumentException {
+        return copy(sourceBean, (Collection<String>) null, targetType);
     }
 
     /**
@@ -1505,20 +1505,20 @@ sealed class CommonUtil permits N {
      * @param sourceBean a Java Object what allows access to properties using getter
      *            and setter methods.
      * @param selectPropNames
-     * @param targetClass a Java Object what allows access to properties using getter
+     * @param targetType a Java Object what allows access to properties using getter
      *            and setter methods.
-     * @return a new instance of {@code targetClass} even if {@code bean} is {@code null}.
-     * @throws IllegalArgumentException if {@code targetClass} is {@code null}.
+     * @return a new instance of {@code targetType} even if {@code bean} is {@code null}.
+     * @throws IllegalArgumentException if {@code targetType} is {@code null}.
      */
     @SuppressWarnings({ "unchecked" })
-    public static <T> T copy(final Object sourceBean, final Collection<String> selectPropNames, final Class<? extends T> targetClass)
+    public static <T> T copy(final Object sourceBean, final Collection<String> selectPropNames, final Class<? extends T> targetType)
             throws IllegalArgumentException {
-        N.checkArgNotNull(targetClass, "targetClass");
+        N.checkArgNotNull(targetType, "targetType");
 
         if (sourceBean != null) {
             final Class<?> srcCls = sourceBean.getClass();
 
-            if (selectPropNames == null && Utils.kryoParser != null && targetClass.equals(srcCls) && !notKryoCompatible.contains(srcCls)) {
+            if (selectPropNames == null && Utils.kryoParser != null && targetType.equals(srcCls) && !notKryoCompatible.contains(srcCls)) {
                 try {
                     final T copy = (T) Utils.kryoParser.copy(sourceBean);
 
@@ -1533,7 +1533,7 @@ sealed class CommonUtil permits N {
             }
         }
 
-        final BeanInfo targetBeanInfo = ParserUtil.getBeanInfo(targetClass);
+        final BeanInfo targetBeanInfo = ParserUtil.getBeanInfo(targetType);
         Object result = targetBeanInfo.createBeanResult();
 
         if (sourceBean != null) {
@@ -1552,19 +1552,19 @@ sealed class CommonUtil permits N {
      * @param sourceBean
      * @param ignoreUnmatchedProperty
      * @param ignoredPropNames
-     * @param targetClass
-     * @return a new instance of {@code targetClass} even if {@code bean} is {@code null}.
-     * @throws IllegalArgumentException if {@code targetClass} is {@code null}.
+     * @param targetType
+     * @return a new instance of {@code targetType} even if {@code bean} is {@code null}.
+     * @throws IllegalArgumentException if {@code targetType} is {@code null}.
      */
     @SuppressWarnings({ "unchecked" })
     public static <T> T copy(final Object sourceBean, final boolean ignoreUnmatchedProperty, final Set<String> ignoredPropNames,
-            final Class<? extends T> targetClass) throws IllegalArgumentException {
-        N.checkArgNotNull(targetClass, "targetClass");
+            final Class<? extends T> targetType) throws IllegalArgumentException {
+        N.checkArgNotNull(targetType, "targetType");
 
         if (sourceBean != null) {
             final Class<?> srcCls = sourceBean.getClass();
 
-            if (ignoredPropNames == null && Utils.kryoParser != null && targetClass.equals(srcCls) && !notKryoCompatible.contains(srcCls)) {
+            if (ignoredPropNames == null && Utils.kryoParser != null && targetType.equals(srcCls) && !notKryoCompatible.contains(srcCls)) {
                 try {
                     final T copy = (T) Utils.kryoParser.copy(sourceBean);
 
@@ -1579,7 +1579,7 @@ sealed class CommonUtil permits N {
             }
         }
 
-        final BeanInfo targetBeanInfo = ParserUtil.getBeanInfo(targetClass);
+        final BeanInfo targetBeanInfo = ParserUtil.getBeanInfo(targetType);
         Object result = targetBeanInfo.createBeanResult();
 
         if (sourceBean != null) {
@@ -1599,13 +1599,13 @@ sealed class CommonUtil permits N {
      * @param sourceBean a Java Object what allows access to properties using getter
      *            and setter methods.
      * @param propFilter
-     * @param targetClass
+     * @param targetType
      * @return {@code targetBean}
      * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
      */
-    public static <T> T copy(final Object sourceBean, final BiPredicate<String, ?> propFilter, final Class<? extends T> targetClass)
+    public static <T> T copy(final Object sourceBean, final BiPredicate<String, ?> propFilter, final Class<? extends T> targetType)
             throws IllegalArgumentException {
-        return copy(sourceBean, propFilter, Fn.selectFirst(), targetClass);
+        return copy(sourceBean, propFilter, Fn.selectFirst(), targetType);
     }
 
     /**
@@ -1614,12 +1614,12 @@ sealed class CommonUtil permits N {
      * @param <T>
      * @param sourceBean
      * @param mergeFunc the first parameter is source property value, the second parameter is target property value.
-     * @param targetClass
+     * @param targetType
      * @return {@code targetBean}
      * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
      */
-    public static <T> T copy(final Object sourceBean, final BinaryOperator<?> mergeFunc, final Class<? extends T> targetClass) throws IllegalArgumentException {
-        return copy(sourceBean, BiPredicates.alwaysTrue(), mergeFunc, targetClass);
+    public static <T> T copy(final Object sourceBean, final BinaryOperator<?> mergeFunc, final Class<? extends T> targetType) throws IllegalArgumentException {
+        return copy(sourceBean, BiPredicates.alwaysTrue(), mergeFunc, targetType);
     }
 
     /**
@@ -1631,15 +1631,15 @@ sealed class CommonUtil permits N {
      *            and setter methods.
      * @param selectPropNames
      * @param mergeFunc the first parameter is source property value, the second parameter is target property value.
-     * @param targetClass
+     * @param targetType
      * @return {@code targetBean}
      * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
      */
     public static <T> T copy(final Object sourceBean, final Collection<String> selectPropNames, final BinaryOperator<?> mergeFunc,
-            final Class<? extends T> targetClass) throws IllegalArgumentException {
-        N.checkArgNotNull(targetClass, "targetClass");
+            final Class<? extends T> targetType) throws IllegalArgumentException {
+        N.checkArgNotNull(targetType, "targetType");
 
-        final BeanInfo targetBeanInfo = ParserUtil.getBeanInfo(targetClass);
+        final BeanInfo targetBeanInfo = ParserUtil.getBeanInfo(targetType);
         Object result = targetBeanInfo.createBeanResult();
 
         if (sourceBean != null) {
@@ -1659,15 +1659,15 @@ sealed class CommonUtil permits N {
      * @param ignoreUnmatchedProperty
      * @param ignoredPropNames
      * @param mergeFunc the first parameter is source property value, the second parameter is target property value.
-     * @param targetClass
+     * @param targetType
      * @return {@code targetBean}
      * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
      */
     public static <T> T copy(final Object sourceBean, final boolean ignoreUnmatchedProperty, final Set<String> ignoredPropNames,
-            final BinaryOperator<?> mergeFunc, final Class<? extends T> targetClass) throws IllegalArgumentException {
-        N.checkArgNotNull(targetClass, "targetClass");
+            final BinaryOperator<?> mergeFunc, final Class<? extends T> targetType) throws IllegalArgumentException {
+        N.checkArgNotNull(targetType, "targetType");
 
-        final BeanInfo targetBeanInfo = ParserUtil.getBeanInfo(targetClass);
+        final BeanInfo targetBeanInfo = ParserUtil.getBeanInfo(targetType);
         Object result = targetBeanInfo.createBeanResult();
 
         if (sourceBean != null) {
@@ -1688,15 +1688,15 @@ sealed class CommonUtil permits N {
      *            and setter methods.
      * @param propFilter
      * @param mergeFunc the first parameter is source property value, the second parameter is target property value.
-     * @param targetClass
+     * @param targetType
      * @return {@code targetBean}
      * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
      */
     public static <T> T copy(final Object sourceBean, final BiPredicate<String, ?> propFilter, final BinaryOperator<?> mergeFunc,
-            final Class<? extends T> targetClass) throws IllegalArgumentException {
-        N.checkArgNotNull(targetClass, "targetClass");
+            final Class<? extends T> targetType) throws IllegalArgumentException {
+        N.checkArgNotNull(targetType, "targetType");
 
-        final BeanInfo targetBeanInfo = ParserUtil.getBeanInfo(targetClass);
+        final BeanInfo targetBeanInfo = ParserUtil.getBeanInfo(targetType);
         Object result = targetBeanInfo.createBeanResult();
 
         if (sourceBean != null) {
@@ -2249,57 +2249,57 @@ sealed class CommonUtil permits N {
     /**
      *
      * @param <T>
-     * @param targetClass
+     * @param targetType
      * @return
      * @see Suppliers#ofCollection(Class)
      * @see Suppliers#registerForCollection(Class, java.util.function.Supplier)
      */
     @SuppressWarnings("rawtypes")
-    public static <T> Collection<T> newCollection(final Class<? extends Collection> targetClass) {
-        return Suppliers.<T> ofCollection(targetClass).get();
+    public static <T> Collection<T> newCollection(final Class<? extends Collection> targetType) {
+        return Suppliers.<T> ofCollection(targetType).get();
     }
 
     /**
      *
      * @param <T>
-     * @param targetClass
+     * @param targetType
      * @param size
      * @return
      * @see IntFunctions#ofCollection(Class)
      * @see IntFunctions#registerForCollection(Class, java.util.function.IntFunction)
      */
     @SuppressWarnings("rawtypes")
-    public static <T> Collection<T> newCollection(final Class<? extends Collection> targetClass, final int size) {
-        return IntFunctions.<T> ofCollection(targetClass).apply(size);
+    public static <T> Collection<T> newCollection(final Class<? extends Collection> targetType, final int size) {
+        return IntFunctions.<T> ofCollection(targetType).apply(size);
     }
 
     /**
      *
      * @param <K>
      * @param <V>
-     * @param targetClass
+     * @param targetType
      * @return
      * @see Suppliers#ofMap(Class)
      * @see Suppliers#registerForMap(Class, java.util.function.Supplier)
      */
     @SuppressWarnings("rawtypes")
-    public static <K, V> Map<K, V> newMap(final Class<? extends Map> targetClass) {
-        return Suppliers.<K, V> ofMap(targetClass).get();
+    public static <K, V> Map<K, V> newMap(final Class<? extends Map> targetType) {
+        return Suppliers.<K, V> ofMap(targetType).get();
     }
 
     /**
      *
      * @param <K>
      * @param <V>
-     * @param targetClass
+     * @param targetType
      * @param size
      * @return
      * @see IntFunctions#ofMap(Class)
      * @see IntFunctions#registerForMap(Class, java.util.function.IntFunction)
      */
     @SuppressWarnings("rawtypes")
-    public static <K, V> Map<K, V> newMap(final Class<? extends Map> targetClass, final int size) {
-        return IntFunctions.<K, V> ofMap(targetClass).apply(size);
+    public static <K, V> Map<K, V> newMap(final Class<? extends Map> targetType, final int size) {
+        return IntFunctions.<K, V> ofMap(targetType).apply(size);
     }
 
     /**
@@ -2333,27 +2333,27 @@ sealed class CommonUtil permits N {
     /**
      *
      * @param <T>
-     * @param cls
+     * @param targetType
      * @return
      */
     @SuppressWarnings("unchecked")
-    public static <T> T newBean(final Class<T> cls) {
-        return newBean(cls, null);
+    public static <T> T newBean(final Class<T> targetType) {
+        return newBean(targetType, null);
     }
 
     /**
      *
      * @param <T>
-     * @param cls
+     * @param targetType
      * @param beanName
      * @return
      */
-    public static <T> T newBean(final Class<T> cls, final String beanName) {
-        if (MapEntity.class.isAssignableFrom(cls)) {
+    public static <T> T newBean(final Class<T> targetType, final String beanName) {
+        if (MapEntity.class.isAssignableFrom(targetType)) {
             return (T) new MapEntity(beanName);
         }
 
-        return newInstance(cls);
+        return newInstance(targetType);
     }
 
     /**
@@ -3955,18 +3955,18 @@ sealed class CommonUtil permits N {
      * @param <A>
      * @param <T>
      * @param c
-     * @param targetClass
+     * @param targetType
      * @return
      * @throws IllegalArgumentException if the specified {@code Class} is <code>null</code>.
      */
-    public static <A, T extends A> A[] toArray(final Collection<? extends T> c, final Class<A[]> targetClass) throws IllegalArgumentException {
-        checkArgNotNull(targetClass);
+    public static <A, T extends A> A[] toArray(final Collection<? extends T> c, final Class<A[]> targetType) throws IllegalArgumentException {
+        checkArgNotNull(targetType);
 
         if (isEmpty(c)) {
-            return newArray(targetClass.getComponentType(), 0);
+            return newArray(targetType.getComponentType(), 0);
         }
 
-        return c.toArray((A[]) newArray(targetClass.getComponentType(), c.size()));
+        return c.toArray((A[]) newArray(targetType.getComponentType(), c.size()));
     }
 
     /**
@@ -3977,16 +3977,16 @@ sealed class CommonUtil permits N {
      * @param c
      * @param fromIndex
      * @param toIndex
-     * @param targetClass
+     * @param targetType
      * @return
      * @throws IllegalArgumentException if the specified {@code Class} is <code>null</code>.
      */
-    public static <A, T extends A> A[] toArray(final Collection<? extends T> c, final int fromIndex, final int toIndex, final Class<A[]> targetClass)
+    public static <A, T extends A> A[] toArray(final Collection<? extends T> c, final int fromIndex, final int toIndex, final Class<A[]> targetType)
             throws IllegalArgumentException {
-        checkArgNotNull(targetClass);
+        checkArgNotNull(targetType);
         checkFromToIndex(fromIndex, toIndex, size(c));
 
-        final A[] res = newArray(targetClass.getComponentType(), toIndex - fromIndex);
+        final A[] res = newArray(targetType.getComponentType(), toIndex - fromIndex);
 
         if (isEmpty(c)) {
             return res;
@@ -6105,7 +6105,7 @@ sealed class CommonUtil permits N {
             if (a[0] instanceof Map) {
                 m.putAll((Map<K, V>) a[0]);
             } else if (ClassUtil.isBeanClass(a[0].getClass())) {
-                Maps.bean2Map((Map<String, Object>) m, a[0]);
+                Maps.bean2Map(a[0], (Map<String, Object>) m);
             } else {
                 throw new IllegalArgumentException(
                         "The parameters must be the pairs of property name and value, or Map, or a bean class with getter/setter methods.");
@@ -9328,20 +9328,6 @@ sealed class CommonUtil permits N {
     public static Object[] nullToEmpty(final Object[] a) {
         return a == null ? EMPTY_OBJECT_ARRAY : a;
     }
-
-    //    /**
-    //     * Null to empty.
-    //     *
-    //     * @param <T>
-    //     * @param arrayType
-    //     * @param a
-    //     * @return
-    //     * @deprecated replaced by {@link nullToEmpty(Object[], Class)}
-    //     */
-    //    @Deprecated
-    //    public static <T> T[] nullToEmpty(final Class<T[]> arrayType, final T[] a) {
-    //        return a == null ? (T[]) newArray(arrayType.getComponentType(), 0) : a;
-    //    }
 
     /**
      * Null to empty.
@@ -19042,11 +19028,11 @@ sealed class CommonUtil permits N {
     //    /**
     //     *
     //     * @param <T>
-    //     * @param newType
     //     * @param a
+    //     * @param newType
     //     * @return
     //     */
-    //    public static <T> T[] copy(Class<T[]> newType, Object[] a) {
+    //    public static <T> T[] copy(Object[] a, Class<T[]> newType) {
     //        if (isEmpty(a)) {
     //            return newArray(newType.getComponentType(), 0);
     //        }
@@ -19057,11 +19043,11 @@ sealed class CommonUtil permits N {
     //    /**
     //     *
     //     * @param <T>
-    //     * @param newType
     //     * @param a
+    //     * @param newType
     //     * @return
     //     */
-    //    public static <T> T[][] copy(Class<T[][]> newType, Object[][] a) {
+    //    public static <T> T[][] copy(Object[][] a, Class<T[][]> newType) {
     //        final Class<T[]> componentType = (Class<T[]>) newType.getComponentType();
     //
     //        if (isEmpty(a)) {
@@ -19081,11 +19067,11 @@ sealed class CommonUtil permits N {
     //    /**
     //     *
     //     * @param <T>
-    //     * @param newType
     //     * @param a
+    //     * @param newType
     //     * @return
     //     */
-    //    public static <T> T[][][] copy(Class<T[][][]> newType, Object[][][] a) {
+    //    public static <T> T[][][] copy(Object[][][] a, Class<T[][][]> newType) {
     //        final Class<T[][]> componentType = (Class<T[][]>) newType.getComponentType();
     //
     //        if (isEmpty(a)) {

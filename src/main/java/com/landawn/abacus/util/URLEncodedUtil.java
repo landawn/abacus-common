@@ -282,11 +282,11 @@ public final class URLEncodedUtil {
      *
      * @param <T>
      * @param urlQuery
-     * @param targetClass
+     * @param targetType
      * @return
      */
-    public static <T> T decode(final String urlQuery, final Class<? extends T> targetClass) {
-        return decode(urlQuery, IOUtil.DEFAULT_CHARSET, targetClass);
+    public static <T> T decode(final String urlQuery, final Class<? extends T> targetType) {
+        return decode(urlQuery, IOUtil.DEFAULT_CHARSET, targetType);
     }
 
     /**
@@ -295,11 +295,11 @@ public final class URLEncodedUtil {
      * @param <T>
      * @param urlQuery
      * @param charset
-     * @param targetClass
+     * @param targetType
      * @return
      */
-    public static <T> T decode(final String urlQuery, final Charset charset, final Class<? extends T> targetClass) {
-        final BeanInfo beanInfo = ParserUtil.getBeanInfo(targetClass);
+    public static <T> T decode(final String urlQuery, final Charset charset, final Class<? extends T> targetType) {
+        final BeanInfo beanInfo = ParserUtil.getBeanInfo(targetType);
         final Object result = beanInfo.createBeanResult();
 
         if (Strings.isEmpty(urlQuery)) {
@@ -346,11 +346,11 @@ public final class URLEncodedUtil {
      *
      * @param <T>
      * @param parameters
-     * @param targetClass
+     * @param targetType
      * @return
      */
-    public static <T> T parameters2Bean(final Map<String, String[]> parameters, final Class<? extends T> targetClass) {
-        final BeanInfo beanInfo = ParserUtil.getBeanInfo(targetClass);
+    public static <T> T parameters2Bean(final Map<String, String[]> parameters, final Class<? extends T> targetType) {
+        final BeanInfo beanInfo = ParserUtil.getBeanInfo(targetType);
         final Object result = beanInfo.createBeanResult();
 
         if (N.isEmpty(parameters)) {
@@ -411,7 +411,7 @@ public final class URLEncodedUtil {
         final StringBuilder sb = Objectory.createStringBuilder();
 
         try {
-            encode(sb, parameters, charset, namingPolicy);
+            encode(parameters, charset, namingPolicy, sb);
 
             return sb.toString();
         } finally {
@@ -459,7 +459,7 @@ public final class URLEncodedUtil {
         try {
             sb.append(url);
             sb.append(WD._QUESTION_MARK);
-            encode(sb, parameters, charset, namingPolicy);
+            encode(parameters, charset, namingPolicy, sb);
 
             return sb.toString();
         } finally {
@@ -469,33 +469,33 @@ public final class URLEncodedUtil {
 
     /**
      *
-     * @param output
      * @param parameters
+     * @param output
      */
-    public static void encode(final StringBuilder output, final Object parameters) {
-        encode(output, parameters, IOUtil.DEFAULT_CHARSET);
+    public static void encode(final Object parameters, final StringBuilder output) {
+        encode(parameters, IOUtil.DEFAULT_CHARSET, output);
     }
 
     /**
      *
-     * @param output
      * @param parameters
      * @param charset
+     * @param output
      */
-    public static void encode(final StringBuilder output, final Object parameters, final Charset charset) {
-        encode(output, parameters, charset, NamingPolicy.LOWER_CAMEL_CASE);
+    public static void encode(final Object parameters, final Charset charset, final StringBuilder output) {
+        encode(parameters, charset, NamingPolicy.LOWER_CAMEL_CASE, output);
     }
 
     /**
      *
      *
-     * @param output
      * @param parameters
      * @param charset
      * @param namingPolicy
+     * @param output
      */
     @SuppressWarnings("rawtypes")
-    public static void encode(final StringBuilder output, final Object parameters, final Charset charset, final NamingPolicy namingPolicy) {
+    public static void encode(final Object parameters, final Charset charset, final NamingPolicy namingPolicy, final StringBuilder output) {
         if (parameters == null || (parameters instanceof Map && ((Map) parameters).isEmpty())) {
             return;
         }
@@ -511,17 +511,17 @@ public final class URLEncodedUtil {
                 }
 
                 if (isNoChange) {
-                    encodeFormFields(output, entry.getKey(), charset);
+                    encodeFormFields(entry.getKey(), charset, output);
                 } else {
-                    encodeFormFields(output, namingPolicy.convert(entry.getKey()), charset);
+                    encodeFormFields(namingPolicy.convert(entry.getKey()), charset, output);
                 }
 
                 output.append(NAME_VALUE_SEPARATOR);
 
-                encodeFormFields(output, N.stringOf(entry.getValue()), charset);
+                encodeFormFields(N.stringOf(entry.getValue()), charset, output);
             }
         } else if (ClassUtil.isBeanClass(parameters.getClass())) {
-            encode(output, Maps.bean2Map(parameters, true, null, namingPolicy), charset, NamingPolicy.NO_CHANGE);
+            encode(Maps.bean2Map(parameters, true, null, namingPolicy), charset, NamingPolicy.NO_CHANGE, output);
         } else if (parameters instanceof Object[]) {
             final Object[] a = (Object[]) parameters;
 
@@ -536,17 +536,17 @@ public final class URLEncodedUtil {
                 }
 
                 if (isNoChange) {
-                    encodeFormFields(output, (String) a[i], charset);
+                    encodeFormFields((String) a[i], charset, output);
                 } else {
-                    encodeFormFields(output, namingPolicy.convert((String) a[i]), charset);
+                    encodeFormFields(namingPolicy.convert((String) a[i]), charset, output);
                 }
 
                 output.append(NAME_VALUE_SEPARATOR);
 
-                encodeFormFields(output, N.stringOf(a[++i]), charset);
+                encodeFormFields(N.stringOf(a[++i]), charset, output);
             }
         } else {
-            encodeFormFields(output, N.stringOf(parameters), charset);
+            encodeFormFields(N.stringOf(parameters), charset, output);
         }
     }
 
@@ -620,27 +620,27 @@ public final class URLEncodedUtil {
      * <p>
      * Uses the {@link #URLENCODER} set of characters, rather than the {@link #UNRSERVED} set; this is for compatibilty
      * with previous releases, URLEncoder.encode() and most browsers.
-     *
-     * @param sb
      * @param content the content to encode, will convert space to '+'
      * @param charset the charset to use
+     * @param output
+     *
      * @return encoded string
      */
-    private static void encodeFormFields(final StringBuilder sb, final String content, final Charset charset) {
-        urlEncode(sb, content, (charset != null) ? charset : IOUtil.DEFAULT_CHARSET, URLENCODER, true);
+    private static void encodeFormFields(final String content, final Charset charset, final StringBuilder output) {
+        urlEncode(content, (charset != null) ? charset : IOUtil.DEFAULT_CHARSET, URLENCODER, true, output);
     }
 
     /**
      *
-     * @param sb
      * @param content
      * @param charset
      * @param safechars
      * @param blankAsPlus
+     * @param output
      */
-    private static void urlEncode(final StringBuilder sb, final String content, final Charset charset, final BitSet safechars, final boolean blankAsPlus) {
+    private static void urlEncode(final String content, final Charset charset, final BitSet safechars, final boolean blankAsPlus, final StringBuilder output) {
         if (content == null) {
-            sb.append(Strings.NULL_STRING);
+            output.append(Strings.NULL_STRING);
 
             return;
         }
@@ -651,16 +651,16 @@ public final class URLEncodedUtil {
             final int b = bb.get() & 0xff;
 
             if (safechars.get(b)) {
-                sb.append((char) b);
+                output.append((char) b);
             } else if (blankAsPlus && (b == ' ')) {
-                sb.append('+');
+                output.append('+');
             } else {
-                sb.append('%');
+                output.append('%');
 
                 final char hex1 = Character.toUpperCase(Character.forDigit((b >> 4) & 0xF, RADIX));
                 final char hex2 = Character.toUpperCase(Character.forDigit(b & 0xF, RADIX));
-                sb.append(hex1);
-                sb.append(hex2);
+                output.append(hex1);
+                output.append(hex2);
             }
         }
     }
@@ -669,41 +669,41 @@ public final class URLEncodedUtil {
      * Encode a String using the {@link #USERINFO} set of characters.
      * <p>
      * Used by URIBuilder to encode the userinfo segment.
-     *
-     * @param sb
      * @param content the string to encode, does not convert space to '+'
      * @param charset the charset to use
+     * @param output
+     *
      * @return
      */
-    static void encUserInfo(final StringBuilder sb, final String content, final Charset charset) {
-        urlEncode(sb, content, charset, USERINFO, false);
+    static void encUserInfo(final String content, final Charset charset, final StringBuilder output) {
+        urlEncode(content, charset, USERINFO, false, output);
     }
 
     /**
      * Encode a String using the {@link #URIC} set of characters.
      * <p>
      * Used by URIBuilder to encode the urlQuery and fragment segments.
-     *
-     * @param sb
      * @param content the string to encode, does not convert space to '+'
      * @param charset the charset to use
+     * @param output
+     *
      * @return
      */
-    static void encUric(final StringBuilder sb, final String content, final Charset charset) {
-        urlEncode(sb, content, charset, URIC, false);
+    static void encUric(final String content, final Charset charset, final StringBuilder output) {
+        urlEncode(content, charset, URIC, false, output);
     }
 
     /**
      * Encode a String using the {@link #PATHSAFE} set of characters.
      * <p>
      * Used by URIBuilder to encode path segments.
-     *
-     * @param sb
      * @param content the string to encode, does not convert space to '+'
      * @param charset the charset to use
+     * @param output
+     *
      * @return
      */
-    static void encPath(final StringBuilder sb, final String content, final Charset charset) {
-        urlEncode(sb, content, charset, PATHSAFE, false);
+    static void encPath(final String content, final Charset charset, final StringBuilder output) {
+        urlEncode(content, charset, PATHSAFE, false, output);
     }
 }

@@ -128,7 +128,7 @@ public class AsciiStreamType extends InputStreamType {
             appendable.append(NULL_STRING);
         } else {
             if (appendable instanceof Writer) {
-                IOUtil.write((Writer) appendable, IOUtil.newInputStreamReader(x)); // NOSONAR
+                IOUtil.write(IOUtil.newInputStreamReader(x), (Writer) appendable); // NOSONAR
             } else {
                 appendable.append(IOUtil.readAllToString(x));
             }

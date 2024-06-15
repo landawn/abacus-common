@@ -1792,7 +1792,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
         c.setTime(date);
         c.set(calendarField, amount);
 
-        return createDate(date.getClass(), c.getTimeInMillis());
+        return createDate(c.getTimeInMillis(), date.getClass());
     }
 
     /**
@@ -1813,7 +1813,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
     public static <T extends java.util.Date> T roll(final T date, final long amount, final TimeUnit unit) {
         N.checkArgNotNull(date, DATE_STR);
 
-        return createDate(date.getClass(), date.getTime() + unit.toMillis(amount));
+        return createDate(date.getTime() + unit.toMillis(amount), date.getClass());
     }
 
     /**
@@ -1842,9 +1842,9 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
             final Calendar c = createCalendar(date);
             c.add(unit.value(), (int) amount);
 
-            return createDate(date.getClass(), c.getTimeInMillis());
+            return createDate(c.getTimeInMillis(), date.getClass());
         } else {
-            return createDate(date.getClass(), date.getTime() + toMillis(unit, amount));
+            return createDate(date.getTime() + toMillis(unit, amount), date.getClass());
         }
     }
 
@@ -2207,7 +2207,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
         gval.setTime(date);
         modify(gval, field, ModifyType.ROUND);
 
-        return createDate(date.getClass(), gval.getTimeInMillis());
+        return createDate(gval.getTimeInMillis(), date.getClass());
     }
 
     /**
@@ -2305,7 +2305,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
         gval.setTime(date);
         modify(gval, field, ModifyType.TRUNCATE);
 
-        return createDate(date.getClass(), gval.getTimeInMillis());
+        return createDate(gval.getTimeInMillis(), date.getClass());
     }
 
     /**
@@ -2390,7 +2390,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
         gval.setTime(date);
         modify(gval, field, ModifyType.CEILING);
 
-        return createDate(date.getClass(), gval.getTimeInMillis());
+        return createDate(gval.getTimeInMillis(), date.getClass());
     }
 
     /**
@@ -3668,13 +3668,13 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
 
     /**
      * Creates the date.
+     * @param millis
+     * @param cls
      *
      * @param <T>
-     * @param cls
-     * @param millis
      * @return
      */
-    private static <T extends java.util.Date> T createDate(final Class<? extends java.util.Date> cls, final long millis) {
+    private static <T extends java.util.Date> T createDate(final long millis, final Class<? extends java.util.Date> cls) {
         java.util.Date result = null;
 
         if (cls.equals(java.util.Date.class)) {

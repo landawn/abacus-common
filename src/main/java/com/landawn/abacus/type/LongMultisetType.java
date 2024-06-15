@@ -137,7 +137,7 @@ public class LongMultisetType<E> extends AbstractType<LongMultiset<E>> {
             return null; // NOSONAR
         }
 
-        final Map<E, Long> map = Utils.jsonParser.deserialize(Map.class, str, jdc);
+        final Map<E, Long> map = Utils.jsonParser.deserialize(str, jdc, Map.class);
 
         LongMultiset<E> multiSet = N.newLongMultiset(map.size());
 

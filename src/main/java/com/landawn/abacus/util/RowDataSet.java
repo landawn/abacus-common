@@ -1413,13 +1413,13 @@ public class RowDataSet implements DataSet, Cloneable {
      *
      * @param columnNames
      * @param newColumnName
-     * @param newColumnClass
+     * @param newColumnType
      */
     @Override
-    public void combineColumns(final Collection<String> columnNames, final String newColumnName, final Class<?> newColumnClass) {
+    public void combineColumns(final Collection<String> columnNames, final String newColumnName, final Class<?> newColumnType) {
         checkFrozen();
 
-        final List<Object> newColumn = toList(newColumnClass, 0, size(), columnNames);
+        final List<Object> newColumn = toList(0, size(), columnNames, newColumnType);
 
         removeColumns(columnNames);
 
@@ -1447,13 +1447,13 @@ public class RowDataSet implements DataSet, Cloneable {
      * @param <E>
      * @param columnNameFilter
      * @param newColumnName
-     * @param newColumnClass
+     * @param newColumnType
      * @throws E the e
      */
     @Override
-    public <E extends Exception> void combineColumns(Throwables.Predicate<String, E> columnNameFilter, final String newColumnName, Class<?> newColumnClass)
+    public <E extends Exception> void combineColumns(Throwables.Predicate<String, E> columnNameFilter, final String newColumnName, Class<?> newColumnType)
             throws E {
-        combineColumns(N.filter(_columnNameList, columnNameFilter), newColumnName, newColumnClass);
+        combineColumns(N.filter(_columnNameList, columnNameFilter), newColumnName, newColumnType);
     }
 
     /**
@@ -2056,35 +2056,35 @@ public class RowDataSet implements DataSet, Cloneable {
     @SuppressWarnings("unchecked")
     @Override
     public Object[] getRow(final int rowIndex) {
-        return getRow(Object[].class, rowIndex);
+        return getRow(rowIndex, Object[].class);
     }
 
     /**
      * Gets the row.
+     * @param rowIndex
+     * @param rowType
      *
      * @param <T>
-     * @param rowClass
-     * @param rowIndex
      * @return
      */
     @Override
-    public <T> T getRow(final Class<? extends T> rowClass, final int rowIndex) {
-        return getRow(rowClass, rowIndex, _columnNameList);
+    public <T> T getRow(final int rowIndex, final Class<? extends T> rowType) {
+        return getRow(rowIndex, _columnNameList, rowType);
     }
 
     /**
      * Gets the row.
-     *
-     * @param <T>
-     * @param rowClass
      * @param rowIndex
      * @param columnNames
+     * @param rowType
+     *
+     * @param <T>
      * @return
      */
     @SuppressWarnings("unchecked")
     @Override
-    public <T> T getRow(final Class<? extends T> rowClass, final int rowIndex, final Collection<String> columnNames) {
-        return getRow(rowClass, rowIndex, columnNames, null);
+    public <T> T getRow(final int rowIndex, final Collection<String> columnNames, final Class<? extends T> rowType) {
+        return getRow(rowIndex, columnNames, rowType, null);
     }
 
     /**
@@ -2111,10 +2111,10 @@ public class RowDataSet implements DataSet, Cloneable {
      */
     @Override
     public <T> T getRow(int rowIndex, Collection<String> columnNames, IntFunction<? extends T> rowSupplier) {
-        return getRow(null, rowIndex, columnNames, rowSupplier);
+        return getRow(rowIndex, columnNames, null, rowSupplier);
     }
 
-    private <T> T getRow(Class<? extends T> rowClass, int rowIndex, Collection<String> columnNames, IntFunction<? extends T> rowSupplier) {
+    private <T> T getRow(int rowIndex, Collection<String> columnNames, Class<? extends T> rowClass, IntFunction<? extends T> rowSupplier) {
         checkRowNum(rowIndex);
 
         columnNames = N.isEmpty(columnNames) ? this._columnNameList : columnNames;
@@ -2125,13 +2125,13 @@ public class RowDataSet implements DataSet, Cloneable {
         final Type<T> rowType = N.typeOf(rowClass);
         final BeanInfo beanInfo = rowType.isBean() ? ParserUtil.getBeanInfo(rowClass) : null;
 
-        rowSupplier = rowSupplier == null && !rowType.isBean() ? this.createRowSupplier(rowType, rowClass) : rowSupplier;
+        rowSupplier = rowSupplier == null && !rowType.isBean() ? this.createRowSupplier(rowClass, rowType) : rowSupplier;
 
-        return getRow(rowType, rowClass, beanInfo, rowIndex, columnNames, columnIndexes, columnCount, null, rowSupplier);
+        return getRow(beanInfo, rowIndex, columnNames, columnIndexes, columnCount, null, rowClass, rowType, rowSupplier);
     }
 
-    private <T> T getRow(final Type<T> rowType, final Class<? extends T> rowClass, final BeanInfo beanInfo, final int rowIndex,
-            final Collection<String> columnNames, final int[] columnIndexes, final int columnCount, final Map<String, String> prefixAndFieldNameMap,
+    private <T> T getRow(final BeanInfo beanInfo, final int rowIndex, final Collection<String> columnNames, final int[] columnIndexes, final int columnCount,
+            final Map<String, String> prefixAndFieldNameMap, final Class<? extends T> rowClass, final Type<T> rowType,
             final IntFunction<? extends T> rowSupplier) {
 
         if (rowType.isObjectArray()) {
@@ -2235,8 +2235,8 @@ public class RowDataSet implements DataSet, Cloneable {
 
                     final RowDataSet tmp = new RowDataSet(newTmpColumnNameList, newTmpColumnList);
 
-                    final Object propValue = tmp.getRow(propBeanType, propBeanClass, propBeanInfo, rowIndex, newTmpColumnNameList,
-                            tmp.checkColumnName(newTmpColumnNameList), newTmpColumnNameList.size(), prefixAndFieldNameMap, null);
+                    final Object propValue = tmp.getRow(propBeanInfo, rowIndex, newTmpColumnNameList, tmp.checkColumnName(newTmpColumnNameList),
+                            newTmpColumnNameList.size(), prefixAndFieldNameMap, propBeanClass, propBeanType, null);
 
                     if (propInfo.type.isCollection()) {
                         @SuppressWarnings("rawtypes")
@@ -2273,24 +2273,24 @@ public class RowDataSet implements DataSet, Cloneable {
     /**
      *
      * @param <T>
-     * @param rowClass
+     * @param rowType
      * @return
      */
     @Override
-    public <T> Optional<T> firstRow(final Class<? extends T> rowClass) {
-        return firstRow(rowClass, _columnNameList);
+    public <T> Optional<T> firstRow(final Class<? extends T> rowType) {
+        return firstRow(_columnNameList, rowType);
     }
 
     /**
      *
-     * @param <T>
-     * @param rowClass
      * @param columnNames
+     * @param rowType
+     * @param <T>
      * @return
      */
     @Override
-    public <T> Optional<T> firstRow(final Class<? extends T> rowClass, final Collection<String> columnNames) {
-        return size() == 0 ? (Optional<T>) Optional.empty() : Optional.of(getRow(rowClass, 0, columnNames));
+    public <T> Optional<T> firstRow(final Collection<String> columnNames, final Class<? extends T> rowType) {
+        return size() == 0 ? (Optional<T>) Optional.empty() : Optional.of(getRow(0, columnNames, rowType));
     }
 
     /**
@@ -2336,24 +2336,24 @@ public class RowDataSet implements DataSet, Cloneable {
     /**
      *
      * @param <T>
-     * @param rowClass
+     * @param rowType
      * @return
      */
     @Override
-    public <T> Optional<T> lastRow(final Class<? extends T> rowClass) {
-        return lastRow(rowClass, _columnNameList);
+    public <T> Optional<T> lastRow(final Class<? extends T> rowType) {
+        return lastRow(_columnNameList, rowType);
     }
 
     /**
      *
-     * @param <T>
-     * @param rowClass
      * @param columnNames
+     * @param rowType
+     * @param <T>
      * @return
      */
     @Override
-    public <T> Optional<T> lastRow(final Class<? extends T> rowClass, final Collection<String> columnNames) {
-        return size() == 0 ? (Optional<T>) Optional.empty() : Optional.of(getRow(rowClass, size() - 1, columnNames));
+    public <T> Optional<T> lastRow(final Collection<String> columnNames, final Class<? extends T> rowType) {
+        return size() == 0 ? (Optional<T>) Optional.empty() : Optional.of(getRow(size() - 1, columnNames, rowType));
     }
 
     /**
@@ -2684,58 +2684,58 @@ public class RowDataSet implements DataSet, Cloneable {
     @SuppressWarnings("unchecked")
     @Override
     public List<Object[]> toList(final int fromRowIndex, final int toRowIndex) {
-        return toList(Object[].class, fromRowIndex, toRowIndex);
+        return toList(fromRowIndex, toRowIndex, Object[].class);
     }
 
     /**
      *
      * @param <T>
-     * @param rowClass
+     * @param rowType
      * @return
      */
     @Override
-    public <T> List<T> toList(final Class<? extends T> rowClass) {
-        return toList(rowClass, 0, size());
+    public <T> List<T> toList(final Class<? extends T> rowType) {
+        return toList(0, size(), rowType);
     }
 
     /**
      *
-     * @param <T>
-     * @param rowClass
      * @param fromRowIndex
      * @param toRowIndex
+     * @param rowType
+     * @param <T>
      * @return
      */
     @Override
-    public <T> List<T> toList(final Class<? extends T> rowClass, final int fromRowIndex, final int toRowIndex) {
-        return toList(rowClass, fromRowIndex, toRowIndex, this._columnNameList);
+    public <T> List<T> toList(final int fromRowIndex, final int toRowIndex, final Class<? extends T> rowType) {
+        return toList(fromRowIndex, toRowIndex, this._columnNameList, rowType);
     }
 
     /**
      *
-     * @param <T>
-     * @param rowClass
      * @param columnNames
+     * @param rowType
+     * @param <T>
      * @return
      */
     @SuppressWarnings("unchecked")
     @Override
-    public <T> List<T> toList(final Class<? extends T> rowClass, final Collection<String> columnNames) {
-        return toList(rowClass, 0, size(), columnNames);
+    public <T> List<T> toList(final Collection<String> columnNames, final Class<? extends T> rowType) {
+        return toList(0, size(), columnNames, rowType);
     }
 
     /**
      *
-     * @param <T>
-     * @param rowClass
      * @param fromRowIndex
      * @param toRowIndex
      * @param columnNames
+     * @param rowType
+     * @param <T>
      * @return
      */
     @Override
-    public <T> List<T> toList(final Class<? extends T> rowClass, final int fromRowIndex, final int toRowIndex, Collection<String> columnNames) {
-        return toList(rowClass, fromRowIndex, toRowIndex, columnNames, null, null);
+    public <T> List<T> toList(final int fromRowIndex, final int toRowIndex, Collection<String> columnNames, final Class<? extends T> rowType) {
+        return toList(fromRowIndex, toRowIndex, columnNames, null, rowType, null);
     }
 
     /**
@@ -2788,11 +2788,11 @@ public class RowDataSet implements DataSet, Cloneable {
      */
     @Override
     public <T> List<T> toList(int fromRowIndex, int toRowIndex, Collection<String> columnNames, IntFunction<? extends T> rowSupplier) {
-        return toList(null, fromRowIndex, toRowIndex, columnNames, null, rowSupplier);
+        return toList(fromRowIndex, toRowIndex, columnNames, null, null, rowSupplier);
     }
 
-    private <T> List<T> toList(Class<? extends T> rowClass, int fromRowIndex, int toRowIndex, Collection<String> columnNames,
-            final Map<String, String> prefixAndFieldNameMap, IntFunction<? extends T> rowSupplier) {
+    private <T> List<T> toList(int fromRowIndex, int toRowIndex, Collection<String> columnNames, final Map<String, String> prefixAndFieldNameMap,
+            Class<? extends T> rowClass, IntFunction<? extends T> rowSupplier) {
         checkRowIndex(fromRowIndex, toRowIndex);
         columnNames = N.isEmpty(columnNames) ? this._columnNameList : columnNames;
 
@@ -2800,11 +2800,11 @@ public class RowDataSet implements DataSet, Cloneable {
         final Type<?> rowType = N.typeOf(rowClass);
 
         if (rowType.isBean()) {
-            return toEntities(rowClass, ParserUtil.getBeanInfo(rowClass), fromRowIndex, toRowIndex, null, columnNames, prefixAndFieldNameMap, rowSupplier,
-                    false, true);
+            return toEntities(ParserUtil.getBeanInfo(rowClass), fromRowIndex, toRowIndex, null, columnNames, prefixAndFieldNameMap, false, true, rowClass,
+                    rowSupplier);
         }
 
-        rowSupplier = rowSupplier == null && !rowType.isBean() ? this.createRowSupplier(rowType, rowClass) : rowSupplier;
+        rowSupplier = rowSupplier == null && !rowType.isBean() ? this.createRowSupplier(rowClass, rowType) : rowSupplier;
 
         final int[] columnIndexes = checkColumnName(columnNames);
         final int columnCount = columnIndexes.length;
@@ -2863,7 +2863,7 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     @SuppressWarnings("rawtypes")
-    private <T> IntFunction<? extends T> createRowSupplier(final Type<?> rowType, final Class<? extends T> rowClass) {
+    private <T> IntFunction<? extends T> createRowSupplier(final Class<? extends T> rowClass, final Type<?> rowType) {
         if (rowType.isObjectArray()) {
             final Class<?> componentType = rowClass.getComponentType();
             return cc -> N.newArray(componentType, cc);
@@ -2881,47 +2881,46 @@ public class RowDataSet implements DataSet, Cloneable {
     /**
      *
      *
+     * @param columnNameFilter
+     * @param columnNameConverter
+     * @param rowType
      * @param <T>
      * @param <E>
      * @param <E2>
-     * @param rowClass
-     * @param columnNameFilter
-     * @param columnNameConverter
      * @return
      * @throws E
      * @throws E2
      */
     @Override
-    public <T, E extends Exception, E2 extends Exception> List<T> toList(final Class<? extends T> rowClass,
-            final Throwables.Predicate<? super String, E> columnNameFilter, final Throwables.Function<? super String, String, E2> columnNameConverter)
-            throws E, E2 {
-        return toList(rowClass, 0, size(), columnNameFilter, columnNameConverter);
+    public <T, E extends Exception, E2 extends Exception> List<T> toList(final Throwables.Predicate<? super String, E> columnNameFilter,
+            final Throwables.Function<? super String, String, E2> columnNameConverter, final Class<? extends T> rowType) throws E, E2 {
+        return toList(0, size(), columnNameFilter, columnNameConverter, rowType);
     }
 
     /**
      *
      *
-     * @param <T>
-     * @param <E>
-     * @param <E2>
-     * @param rowClass
      * @param fromRowIndex
      * @param toRowIndex
      * @param columnNameFilter
      * @param columnNameConverter
+     * @param rowType
+     * @param <T>
+     * @param <E>
+     * @param <E2>
      * @return
      * @throws E
      * @throws E2
      */
     @Override
-    public <T, E extends Exception, E2 extends Exception> List<T> toList(final Class<? extends T> rowClass, final int fromRowIndex, final int toRowIndex,
-            final Throwables.Predicate<? super String, E> columnNameFilter, final Throwables.Function<? super String, String, E2> columnNameConverter)
-            throws E, E2 {
+    public <T, E extends Exception, E2 extends Exception> List<T> toList(final int fromRowIndex, final int toRowIndex,
+            final Throwables.Predicate<? super String, E> columnNameFilter, final Throwables.Function<? super String, String, E2> columnNameConverter,
+            final Class<? extends T> rowType) throws E, E2 {
         checkRowIndex(fromRowIndex, toRowIndex);
 
         if ((columnNameFilter == null || Objects.equals(columnNameFilter, Fnn.alwaysTrue()))
                 && (columnNameConverter == null && Objects.equals(columnNameConverter, Fnn.identity()))) {
-            return toList(rowClass, fromRowIndex, toRowIndex, this._columnNameList);
+            return toList(fromRowIndex, toRowIndex, this._columnNameList, rowType);
         }
 
         @SuppressWarnings("rawtypes")
@@ -2946,7 +2945,7 @@ public class RowDataSet implements DataSet, Cloneable {
 
         final RowDataSet tmp = new RowDataSet(newColumnNameList, newColumnList);
 
-        return tmp.toList(rowClass, fromRowIndex, toRowIndex);
+        return tmp.toList(fromRowIndex, toRowIndex, rowType);
     }
 
     /**
@@ -3022,146 +3021,146 @@ public class RowDataSet implements DataSet, Cloneable {
     /**
      *
      *
-     * @param <T>
-     * @param beanClass
      * @param prefixAndFieldNameMap
+     * @param rowType
+     * @param <T>
      * @return
      */
     @Override
-    public <T> List<T> toEntities(Class<? extends T> beanClass, Map<String, String> prefixAndFieldNameMap) {
-        return toEntities(beanClass, 0, size(), this._columnNameList, prefixAndFieldNameMap);
+    public <T> List<T> toEntities(Map<String, String> prefixAndFieldNameMap, Class<? extends T> rowType) {
+        return toEntities(0, size(), this._columnNameList, prefixAndFieldNameMap, rowType);
     }
 
     /**
      *
      *
-     * @param <T>
-     * @param beanClass
      * @param fromRowIndex
      * @param toRowIndex
      * @param prefixAndFieldNameMap
+     * @param rowType
+     * @param <T>
      * @return
      */
     @Override
-    public <T> List<T> toEntities(Class<? extends T> beanClass, int fromRowIndex, int toRowIndex, Map<String, String> prefixAndFieldNameMap) {
-        return toEntities(beanClass, fromRowIndex, toRowIndex, this._columnNameList, prefixAndFieldNameMap);
+    public <T> List<T> toEntities(int fromRowIndex, int toRowIndex, Map<String, String> prefixAndFieldNameMap, Class<? extends T> rowType) {
+        return toEntities(fromRowIndex, toRowIndex, this._columnNameList, prefixAndFieldNameMap, rowType);
     }
 
     /**
      *
      *
-     * @param <T>
-     * @param beanClass
      * @param columnNames
      * @param prefixAndFieldNameMap
+     * @param rowType
+     * @param <T>
      * @return
      */
     @Override
-    public <T> List<T> toEntities(Class<? extends T> beanClass, Collection<String> columnNames, Map<String, String> prefixAndFieldNameMap) {
-        return toEntities(beanClass, 0, size(), columnNames, prefixAndFieldNameMap);
+    public <T> List<T> toEntities(Collection<String> columnNames, Map<String, String> prefixAndFieldNameMap, Class<? extends T> rowType) {
+        return toEntities(0, size(), columnNames, prefixAndFieldNameMap, rowType);
     }
 
     /**
      *
      *
-     * @param <T>
-     * @param beanClass
      * @param fromRowIndex
      * @param toRowIndex
      * @param columnNames
      * @param prefixAndFieldNameMap
+     * @param rowType
+     * @param <T>
      * @return
      */
     @Override
-    public <T> List<T> toEntities(Class<? extends T> beanClass, int fromRowIndex, int toRowIndex, Collection<String> columnNames,
-            Map<String, String> prefixAndFieldNameMap) {
-        N.checkArgument(ClassUtil.isBeanClass(beanClass), "{} is not a bean class", beanClass);
+    public <T> List<T> toEntities(int fromRowIndex, int toRowIndex, Collection<String> columnNames, Map<String, String> prefixAndFieldNameMap,
+            Class<? extends T> rowType) {
+        N.checkArgument(ClassUtil.isBeanClass(rowType), "{} is not a bean class", rowType);
 
-        return toList(beanClass, fromRowIndex, toRowIndex, columnNames, prefixAndFieldNameMap, null);
+        return toList(fromRowIndex, toRowIndex, columnNames, prefixAndFieldNameMap, rowType, null);
     }
 
     /**
      *
      *
      * @param <T>
-     * @param beanClass
+     * @param rowType
      * @return
      */
     @Override
-    public <T> List<T> toMergedEntities(final Class<? extends T> beanClass) {
-        return toMergedEntities(beanClass, this._columnNameList);
+    public <T> List<T> toMergedEntities(final Class<? extends T> rowType) {
+        return toMergedEntities(this._columnNameList, rowType);
     }
 
     /**
      *
      *
-     * @param <T>
-     * @param beanClass
      * @param selectPropNames
+     * @param rowType
+     * @param <T>
      * @return
      */
     @Override
-    public <T> List<T> toMergedEntities(final Class<? extends T> beanClass, final Collection<String> selectPropNames) {
-        return toMergedEntities(beanClass, (Collection<String>) null, selectPropNames);
+    public <T> List<T> toMergedEntities(final Collection<String> selectPropNames, final Class<? extends T> rowType) {
+        return toMergedEntities((Collection<String>) null, selectPropNames, rowType);
     }
 
     /**
      *
      *
-     * @param <T>
-     * @param beanClass
      * @param idPropName
+     * @param rowType
+     * @param <T>
      * @return
      */
     @Override
-    public <T> List<T> toMergedEntities(final Class<? extends T> beanClass, final String idPropName) {
-        return toMergedEntities(beanClass, idPropName, this._columnNameList);
+    public <T> List<T> toMergedEntities(final String idPropName, final Class<? extends T> rowType) {
+        return toMergedEntities(idPropName, this._columnNameList, rowType);
     }
 
     /**
      *
      *
-     * @param <T>
-     * @param beanClass
      * @param idPropName
      * @param selectPropNames
+     * @param rowType
+     * @param <T>
      * @return
      */
     @Override
-    public <T> List<T> toMergedEntities(final Class<? extends T> beanClass, final String idPropName, final Collection<String> selectPropNames) {
-        return toMergedEntities(beanClass, N.asList(idPropName), selectPropNames);
+    public <T> List<T> toMergedEntities(final String idPropName, final Collection<String> selectPropNames, final Class<? extends T> rowType) {
+        return toMergedEntities(N.asList(idPropName), selectPropNames, rowType);
     }
 
     /**
      *
      *
-     * @param <T>
-     * @param beanClass
      * @param idPropNames
      * @param selectPropNames
+     * @param rowType
+     * @param <T>
      * @return
      */
     @Override
-    public <T> List<T> toMergedEntities(final Class<? extends T> beanClass, final Collection<String> idPropNames, final Collection<String> selectPropNames) {
-        return toMergedEntities(beanClass, idPropNames, selectPropNames, null);
+    public <T> List<T> toMergedEntities(final Collection<String> idPropNames, final Collection<String> selectPropNames, final Class<? extends T> rowType) {
+        return toMergedEntities(idPropNames, selectPropNames, null, rowType);
     }
 
     /**
      *
      *
-     * @param <T>
-     * @param beanClass
      * @param idPropNames
      * @param selectPropNames
      * @param prefixAndFieldNameMap
+     * @param rowType
+     * @param <T>
      * @return
      */
     @Override
-    public <T> List<T> toMergedEntities(final Class<? extends T> beanClass, final Collection<String> idPropNames, Collection<String> selectPropNames,
-            final Map<String, String> prefixAndFieldNameMap) {
-        N.checkArgument(ClassUtil.isBeanClass(beanClass), "{} is not a bean class", beanClass);
+    public <T> List<T> toMergedEntities(final Collection<String> idPropNames, Collection<String> selectPropNames,
+            final Map<String, String> prefixAndFieldNameMap, final Class<? extends T> rowType) {
+        N.checkArgument(ClassUtil.isBeanClass(rowType), "{} is not a bean class", rowType);
 
-        final BeanInfo beanInfo = ParserUtil.getBeanInfo(beanClass);
+        final BeanInfo beanInfo = ParserUtil.getBeanInfo(rowType);
 
         Collection<String> idPropNamesToUse = idPropNames;
 
@@ -3169,7 +3168,7 @@ public class RowDataSet implements DataSet, Cloneable {
             idPropNamesToUse = beanInfo.idPropNameList;
 
             if (N.isEmpty(idPropNamesToUse)) {
-                throw new IllegalArgumentException("No id property defined in class: " + beanClass);
+                throw new IllegalArgumentException("No id property defined in class: " + rowType);
             }
         }
 
@@ -3218,22 +3217,22 @@ public class RowDataSet implements DataSet, Cloneable {
         }
 
         N.checkArgument(this._columnNameList.containsAll(idPropNamesToUse), "Some id properties {} are not found in DataSet: {} for bean {}", idPropNamesToUse,
-                this._columnNameList, ClassUtil.getSimpleClassName(beanClass));
+                this._columnNameList, ClassUtil.getSimpleClassName(rowType));
 
         selectPropNames = N.isEmpty(selectPropNames) ? this._columnNameList : selectPropNames;
 
         N.checkArgument(N.isEmpty(selectPropNames) || selectPropNames == this._columnNameList || this._columnNameList.containsAll(selectPropNames),
                 "Some select properties {} are not found in DataSet: {} for bean {}", selectPropNames, this._columnNameList,
-                ClassUtil.getSimpleClassName(beanClass));
+                ClassUtil.getSimpleClassName(rowType));
 
-        return toEntities(beanClass, beanInfo, 0, size(), idPropNamesToUse, selectPropNames, prefixAndFieldNameMap, null, true, false);
+        return toEntities(beanInfo, 0, size(), idPropNamesToUse, selectPropNames, prefixAndFieldNameMap, true, false, rowType, null);
     }
 
     @SuppressWarnings("rawtypes")
-    private <T> List<T> toEntities(final Class<? extends T> beanClass, final BeanInfo beanInfo, final int fromRowIndex, final int toRowIndex,
-            final Collection<String> idPropNames, final Collection<String> columnNames, final Map<String, String> prefixAndFieldNameMap,
-            final IntFunction<? extends T> rowSupplier, boolean mergeResult, final boolean returnAllList) {
-        N.checkArgNotNull(beanClass, "beanClass");
+    private <T> List<T> toEntities(final BeanInfo beanInfo, final int fromRowIndex, final int toRowIndex, final Collection<String> idPropNames,
+            final Collection<String> columnNames, final Map<String, String> prefixAndFieldNameMap, boolean mergeResult, final boolean returnAllList,
+            final Class<? extends T> rowType, final IntFunction<? extends T> rowSupplier) {
+        N.checkArgNotNull(rowType, "rowType");
         checkRowIndex(fromRowIndex, toRowIndex);
 
         if (mergeResult && N.isEmpty(idPropNames)) {
@@ -3376,7 +3375,7 @@ public class RowDataSet implements DataSet, Cloneable {
                             continue;
                         }
 
-                        throw new IllegalArgumentException("Property " + propName + " is not found in class: " + beanClass);
+                        throw new IllegalArgumentException("Property " + propName + " is not found in class: " + rowType);
                     }
 
                     final String prefix = propName.substring(0, idx);
@@ -3386,14 +3385,14 @@ public class RowDataSet implements DataSet, Cloneable {
                         if (ignoreUnmatchedProperty) {
                             continue;
                         } else {
-                            throw new IllegalArgumentException("Property " + propName + " is not found in class: " + beanClass);
+                            throw new IllegalArgumentException("Property " + propName + " is not found in class: " + rowType);
                         }
                     }
 
                     final Type<?> propBeanType = propInfo.type.isCollection() ? propInfo.type.getElementType() : propInfo.type;
 
                     if (!propBeanType.isBean()) {
-                        throw new UnsupportedOperationException("Property: " + propInfo.name + " in class: " + beanClass + " is not a bean type");
+                        throw new UnsupportedOperationException("Property: " + propInfo.name + " in class: " + rowType + " is not a bean type");
                     }
 
                     final Class<?> propBeanClass = propBeanType.clazz();
@@ -3430,8 +3429,8 @@ public class RowDataSet implements DataSet, Cloneable {
 
                     final boolean isToMerge = mergeResult && N.notEmpty(newPropEntityIdNames) && tmp._columnNameList.containsAll(newPropEntityIdNames);
 
-                    final List<?> propValueList = tmp.toEntities(propBeanClass, propBeanInfo, fromRowIndex, toRowIndex, isToMerge ? newPropEntityIdNames : null,
-                            tmp._columnNameList, prefixAndFieldNameMap, null, isToMerge, true);
+                    final List<?> propValueList = tmp.toEntities(propBeanInfo, fromRowIndex, toRowIndex, isToMerge ? newPropEntityIdNames : null,
+                            tmp._columnNameList, prefixAndFieldNameMap, isToMerge, true, propBeanClass, null);
 
                     if (propInfo.type.isCollection()) {
                         Collection<Object> c = null;
@@ -3603,75 +3602,75 @@ public class RowDataSet implements DataSet, Cloneable {
 
     /**
      *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param rowClass
      * @param keyColumnName
      * @param valueColumnNames
+     * @param rowType
+     * @param <K> the key type
+     * @param <V> the value type
      * @return
      */
     @Override
-    public <K, V> Map<K, V> toMap(final Class<? extends V> rowClass, final String keyColumnName, final Collection<String> valueColumnNames) {
-        return toMap(rowClass, 0, size(), keyColumnName, valueColumnNames);
+    public <K, V> Map<K, V> toMap(final String keyColumnName, final Collection<String> valueColumnNames, final Class<? extends V> rowType) {
+        return toMap(0, size(), keyColumnName, valueColumnNames, rowType);
     }
 
     /**
      *
      *
+     * @param keyColumnName
+     * @param valueColumnNames
+     * @param rowType
+     * @param supplier
      * @param <K>
      * @param <V>
      * @param <M>
-     * @param rowClass
-     * @param keyColumnName
-     * @param valueColumnNames
-     * @param supplier
      * @return
      */
     @Override
-    public <K, V, M extends Map<K, V>> M toMap(Class<? extends V> rowClass, String keyColumnName, Collection<String> valueColumnNames,
+    public <K, V, M extends Map<K, V>> M toMap(String keyColumnName, Collection<String> valueColumnNames, Class<? extends V> rowType,
             IntFunction<? extends M> supplier) {
-        return toMap(rowClass, 0, size(), keyColumnName, valueColumnNames, supplier);
+        return toMap(0, size(), keyColumnName, valueColumnNames, rowType, supplier);
     }
 
     /**
      *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param rowClass
      * @param fromRowIndex
      * @param toRowIndex
      * @param keyColumnName
      * @param valueColumnNames
+     * @param rowType
+     * @param <K> the key type
+     * @param <V> the value type
      * @return
      */
     @Override
-    public <K, V> Map<K, V> toMap(final Class<? extends V> rowClass, final int fromRowIndex, final int toRowIndex, final String keyColumnName,
-            final Collection<String> valueColumnNames) {
-        return toMap(rowClass, fromRowIndex, toRowIndex, keyColumnName, valueColumnNames, (IntFunction<Map<K, V>>) N::newLinkedHashMap);
+    public <K, V> Map<K, V> toMap(final int fromRowIndex, final int toRowIndex, final String keyColumnName, final Collection<String> valueColumnNames,
+            final Class<? extends V> rowType) {
+        return toMap(fromRowIndex, toRowIndex, keyColumnName, valueColumnNames, rowType, (IntFunction<Map<K, V>>) N::newLinkedHashMap);
     }
 
     /**
      *
+     * @param fromRowIndex
+     * @param toRowIndex
+     * @param keyColumnName
+     * @param valueColumnNames
+     * @param rowType
+     * @param supplier
      * @param <K> the key type
      * @param <V> the value type
      * @param <M>
-     * @param rowClass
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param keyColumnName
-     * @param valueColumnNames
-     * @param supplier
      * @return
      */
     @Override
-    public <K, V, M extends Map<K, V>> M toMap(Class<? extends V> rowClass, int fromRowIndex, int toRowIndex, String keyColumnName,
-            Collection<String> valueColumnNames, IntFunction<? extends M> supplier) {
+    public <K, V, M extends Map<K, V>> M toMap(int fromRowIndex, int toRowIndex, String keyColumnName, Collection<String> valueColumnNames,
+            Class<? extends V> rowType, IntFunction<? extends M> supplier) {
         checkRowIndex(fromRowIndex, toRowIndex);
 
         final int keyColumnIndex = checkColumnName(keyColumnName);
         final int[] valueColumnIndexes = checkColumnName(valueColumnNames);
 
-        final Type<?> valueType = N.typeOf(rowClass);
+        final Type<?> valueType = N.typeOf(rowType);
         final int valueColumnCount = valueColumnIndexes.length;
         final Map<Object, Object> resultMap = (Map<Object, Object>) supplier.apply(toRowIndex - fromRowIndex);
 
@@ -3679,7 +3678,7 @@ public class RowDataSet implements DataSet, Cloneable {
             Object[] value = null;
 
             for (int rowIndex = fromRowIndex; rowIndex < toRowIndex; rowIndex++) {
-                value = N.newArray(rowClass.getComponentType(), valueColumnCount);
+                value = N.newArray(rowType.getComponentType(), valueColumnCount);
 
                 for (int i = 0; i < valueColumnCount; i++) {
                     value[i] = _columnList.get(valueColumnIndexes[i]).get(rowIndex);
@@ -3688,9 +3687,9 @@ public class RowDataSet implements DataSet, Cloneable {
                 resultMap.put(_columnList.get(keyColumnIndex).get(rowIndex), value);
             }
         } else if (valueType.isList() || valueType.isSet()) {
-            final boolean isAbstractRowClass = Modifier.isAbstract(rowClass.getModifiers());
-            final Constructor<?> intConstructor = isAbstractRowClass ? null : ClassUtil.getDeclaredConstructor(rowClass, int.class);
-            final Constructor<?> constructor = isAbstractRowClass ? null : ClassUtil.getDeclaredConstructor(rowClass);
+            final boolean isAbstractRowClass = Modifier.isAbstract(rowType.getModifiers());
+            final Constructor<?> intConstructor = isAbstractRowClass ? null : ClassUtil.getDeclaredConstructor(rowType, int.class);
+            final Constructor<?> constructor = isAbstractRowClass ? null : ClassUtil.getDeclaredConstructor(rowType);
             Collection<Object> value = null;
 
             for (int rowIndex = fromRowIndex; rowIndex < toRowIndex; rowIndex++) {
@@ -3705,9 +3704,9 @@ public class RowDataSet implements DataSet, Cloneable {
                 resultMap.put(_columnList.get(keyColumnIndex).get(rowIndex), value);
             }
         } else if (valueType.isMap()) {
-            final boolean isAbstractRowClass = Modifier.isAbstract(rowClass.getModifiers());
-            final Constructor<?> intConstructor = isAbstractRowClass ? null : ClassUtil.getDeclaredConstructor(rowClass, int.class);
-            final Constructor<?> constructor = isAbstractRowClass ? null : ClassUtil.getDeclaredConstructor(rowClass);
+            final boolean isAbstractRowClass = Modifier.isAbstract(rowType.getModifiers());
+            final Constructor<?> intConstructor = isAbstractRowClass ? null : ClassUtil.getDeclaredConstructor(rowType, int.class);
+            final Constructor<?> constructor = isAbstractRowClass ? null : ClassUtil.getDeclaredConstructor(rowType);
             Map<String, Object> value = null;
 
             for (int rowIndex = fromRowIndex; rowIndex < toRowIndex; rowIndex++) {
@@ -3721,7 +3720,7 @@ public class RowDataSet implements DataSet, Cloneable {
                 resultMap.put(_columnList.get(keyColumnIndex).get(rowIndex), value);
             }
         } else if (valueType.isBean()) {
-            final BeanInfo beanInfo = ParserUtil.getBeanInfo(rowClass);
+            final BeanInfo beanInfo = ParserUtil.getBeanInfo(rowType);
             final boolean ignoreUnmatchedProperty = valueColumnNames == _columnNameList;
             Object value = null;
             String propName = null;
@@ -3740,7 +3739,7 @@ public class RowDataSet implements DataSet, Cloneable {
             }
         } else {
             throw new IllegalArgumentException(
-                    "Unsupported row type: " + rowClass.getCanonicalName() + ". Only Array, List/Set, Map and bean class are supported");
+                    "Unsupported row type: " + rowType.getCanonicalName() + ". Only Array, List/Set, Map and bean class are supported");
         }
 
         return (M) resultMap;
@@ -3964,78 +3963,78 @@ public class RowDataSet implements DataSet, Cloneable {
 
     /**
      *
-     * @param <K> the key type
-     * @param <E>
-     * @param rowClass
      * @param keyColumnName
      * @param valueColumnNames
+     * @param rowType
+     * @param <K> the key type
+     * @param <E>
      * @return
      */
     @Override
-    public <K, E> ListMultimap<K, E> toMultimap(final Class<? extends E> rowClass, final String keyColumnName, final Collection<String> valueColumnNames) {
-        return toMultimap(rowClass, 0, size(), keyColumnName, valueColumnNames);
+    public <K, E> ListMultimap<K, E> toMultimap(final String keyColumnName, final Collection<String> valueColumnNames, final Class<? extends E> rowType) {
+        return toMultimap(0, size(), keyColumnName, valueColumnNames, rowType);
     }
 
     /**
      *
      *
+     * @param keyColumnName
+     * @param valueColumnNames
+     * @param supplier
+     * @param rowType
      * @param <K>
      * @param <E>
      * @param <V>
      * @param <M>
-     * @param rowClass
-     * @param keyColumnName
-     * @param valueColumnNames
-     * @param supplier
      * @return
      */
     @Override
-    public <K, E, V extends Collection<E>, M extends Multimap<K, E, V>> M toMultimap(Class<? extends E> rowClass, String keyColumnName,
-            Collection<String> valueColumnNames, IntFunction<? extends M> supplier) {
-        return toMultimap(rowClass, 0, size(), keyColumnName, valueColumnNames, supplier);
+    public <K, E, V extends Collection<E>, M extends Multimap<K, E, V>> M toMultimap(String keyColumnName, Collection<String> valueColumnNames,
+            Class<? extends E> rowType, IntFunction<? extends M> supplier) {
+        return toMultimap(0, size(), keyColumnName, valueColumnNames, rowType, supplier);
     }
 
     /**
      *
-     * @param <K> the key type
-     * @param <E>
-     * @param rowClass
      * @param fromRowIndex
      * @param toRowIndex
      * @param keyColumnName
      * @param valueColumnNames
+     * @param rowType
+     * @param <K> the key type
+     * @param <E>
      * @return
      */
     @Override
-    public <K, E> ListMultimap<K, E> toMultimap(final Class<? extends E> rowClass, final int fromRowIndex, final int toRowIndex, final String keyColumnName,
-            final Collection<String> valueColumnNames) {
-        return toMultimap(rowClass, fromRowIndex, toRowIndex, keyColumnName, valueColumnNames,
+    public <K, E> ListMultimap<K, E> toMultimap(final int fromRowIndex, final int toRowIndex, final String keyColumnName,
+            final Collection<String> valueColumnNames, final Class<? extends E> rowType) {
+        return toMultimap(fromRowIndex, toRowIndex, keyColumnName, valueColumnNames, rowType,
                 (IntFunction<ListMultimap<K, E>>) len -> N.newLinkedListMultimap());
     }
 
     /**
      *
-     * @param <K> the key type
-     * @param <E>
-     * @param <V> the value type
-     * @param <M>
-     * @param rowClass
      * @param fromRowIndex
      * @param toRowIndex
      * @param keyColumnName
      * @param valueColumnNames
      * @param supplier
+     * @param rowType
+     * @param <K> the key type
+     * @param <E>
+     * @param <V> the value type
+     * @param <M>
      * @return
      */
     @Override
-    public <K, E, V extends Collection<E>, M extends Multimap<K, E, V>> M toMultimap(Class<? extends E> rowClass, int fromRowIndex, int toRowIndex,
-            String keyColumnName, Collection<String> valueColumnNames, IntFunction<? extends M> supplier) {
+    public <K, E, V extends Collection<E>, M extends Multimap<K, E, V>> M toMultimap(int fromRowIndex, int toRowIndex, String keyColumnName,
+            Collection<String> valueColumnNames, Class<? extends E> rowType, IntFunction<? extends M> supplier) {
         checkRowIndex(fromRowIndex, toRowIndex);
 
         final int keyColumnIndex = checkColumnName(keyColumnName);
         final int[] valueColumnIndexes = checkColumnName(valueColumnNames);
 
-        final Type<?> elementType = N.typeOf(rowClass);
+        final Type<?> elementType = N.typeOf(rowType);
         final int valueColumnCount = valueColumnIndexes.length;
 
         final M resultMap = supplier.apply(toRowIndex - fromRowIndex);
@@ -4044,7 +4043,7 @@ public class RowDataSet implements DataSet, Cloneable {
             Object[] value = null;
 
             for (int rowIndex = fromRowIndex; rowIndex < toRowIndex; rowIndex++) {
-                value = N.newArray(rowClass.getComponentType(), valueColumnCount);
+                value = N.newArray(rowType.getComponentType(), valueColumnCount);
 
                 for (int i = 0; i < valueColumnCount; i++) {
                     value[i] = _columnList.get(valueColumnIndexes[i]).get(rowIndex);
@@ -4053,9 +4052,9 @@ public class RowDataSet implements DataSet, Cloneable {
                 resultMap.put((K) _columnList.get(keyColumnIndex).get(rowIndex), (E) value);
             }
         } else if (elementType.isList() || elementType.isSet()) {
-            final boolean isAbstractRowClass = Modifier.isAbstract(rowClass.getModifiers());
-            final Constructor<?> intConstructor = isAbstractRowClass ? null : ClassUtil.getDeclaredConstructor(rowClass, int.class);
-            final Constructor<?> constructor = isAbstractRowClass ? null : ClassUtil.getDeclaredConstructor(rowClass);
+            final boolean isAbstractRowClass = Modifier.isAbstract(rowType.getModifiers());
+            final Constructor<?> intConstructor = isAbstractRowClass ? null : ClassUtil.getDeclaredConstructor(rowType, int.class);
+            final Constructor<?> constructor = isAbstractRowClass ? null : ClassUtil.getDeclaredConstructor(rowType);
             Collection<Object> value = null;
 
             for (int rowIndex = fromRowIndex; rowIndex < toRowIndex; rowIndex++) {
@@ -4070,9 +4069,9 @@ public class RowDataSet implements DataSet, Cloneable {
                 resultMap.put((K) _columnList.get(keyColumnIndex).get(rowIndex), (E) value);
             }
         } else if (elementType.isMap()) {
-            final boolean isAbstractRowClass = Modifier.isAbstract(rowClass.getModifiers());
-            final Constructor<?> intConstructor = isAbstractRowClass ? null : ClassUtil.getDeclaredConstructor(rowClass, int.class);
-            final Constructor<?> constructor = isAbstractRowClass ? null : ClassUtil.getDeclaredConstructor(rowClass);
+            final boolean isAbstractRowClass = Modifier.isAbstract(rowType.getModifiers());
+            final Constructor<?> intConstructor = isAbstractRowClass ? null : ClassUtil.getDeclaredConstructor(rowType, int.class);
+            final Constructor<?> constructor = isAbstractRowClass ? null : ClassUtil.getDeclaredConstructor(rowType);
             Map<String, Object> value = null;
 
             for (int rowIndex = fromRowIndex; rowIndex < toRowIndex; rowIndex++) {
@@ -4086,7 +4085,7 @@ public class RowDataSet implements DataSet, Cloneable {
                 resultMap.put((K) _columnList.get(keyColumnIndex).get(rowIndex), (E) value);
             }
         } else if (elementType.isBean()) {
-            final BeanInfo beanInfo = ParserUtil.getBeanInfo(rowClass);
+            final BeanInfo beanInfo = ParserUtil.getBeanInfo(rowType);
             final boolean ignoreUnmatchedProperty = valueColumnNames == _columnNameList;
             Object value = null;
             String propName = null;
@@ -4105,7 +4104,7 @@ public class RowDataSet implements DataSet, Cloneable {
             }
         } else {
             throw new IllegalArgumentException(
-                    "Unsupported row type: " + rowClass.getCanonicalName() + ". Only Array, List/Set, Map and bean class are supported");
+                    "Unsupported row type: " + rowType.getCanonicalName() + ". Only Array, List/Set, Map and bean class are supported");
         }
 
         return resultMap;
@@ -4286,7 +4285,7 @@ public class RowDataSet implements DataSet, Cloneable {
         final BufferedJSONWriter writer = Objectory.createBufferedJSONWriter();
 
         try {
-            toJSON(writer, fromRowIndex, toRowIndex, columnNames);
+            toJSON(fromRowIndex, toRowIndex, columnNames, writer);
 
             return writer.toString();
         } finally {
@@ -4300,30 +4299,30 @@ public class RowDataSet implements DataSet, Cloneable {
      */
     @Override
     public void toJSON(final File output) {
-        toJSON(output, 0, size());
+        toJSON(0, size(), output);
     }
 
     /**
      *
-     * @param output
      * @param fromRowIndex
      * @param toRowIndex
+     * @param output
      */
     @Override
-    public void toJSON(final File output, final int fromRowIndex, final int toRowIndex) {
-        toJSON(output, fromRowIndex, toRowIndex, this._columnNameList);
+    public void toJSON(final int fromRowIndex, final int toRowIndex, final File output) {
+        toJSON(fromRowIndex, toRowIndex, this._columnNameList, output);
     }
 
     /**
      *
-     * @param output
      * @param fromRowIndex
      * @param toRowIndex
      * @param columnNames
+     * @param output
      * @throws UncheckedIOException the unchecked IO exception
      */
     @Override
-    public void toJSON(final File output, final int fromRowIndex, final int toRowIndex, final Collection<String> columnNames) throws UncheckedIOException {
+    public void toJSON(final int fromRowIndex, final int toRowIndex, final Collection<String> columnNames, final File output) throws UncheckedIOException {
         OutputStream os = null;
 
         try {
@@ -4331,7 +4330,7 @@ public class RowDataSet implements DataSet, Cloneable {
 
             os = IOUtil.newFileOutputStream(output);
 
-            toJSON(os, fromRowIndex, toRowIndex, columnNames);
+            toJSON(fromRowIndex, toRowIndex, columnNames, os);
 
             os.flush();
         } catch (IOException e) {
@@ -4347,35 +4346,35 @@ public class RowDataSet implements DataSet, Cloneable {
      */
     @Override
     public void toJSON(final OutputStream output) {
-        toJSON(output, 0, size());
+        toJSON(0, size(), output);
     }
 
     /**
      *
-     * @param output
      * @param fromRowIndex
      * @param toRowIndex
+     * @param output
      */
     @Override
-    public void toJSON(final OutputStream output, final int fromRowIndex, final int toRowIndex) {
-        toJSON(output, fromRowIndex, toRowIndex, this._columnNameList);
+    public void toJSON(final int fromRowIndex, final int toRowIndex, final OutputStream output) {
+        toJSON(fromRowIndex, toRowIndex, this._columnNameList, output);
     }
 
     /**
      *
-     * @param output
      * @param fromRowIndex
      * @param toRowIndex
      * @param columnNames
+     * @param output
      * @throws UncheckedIOException the unchecked IO exception
      */
     @Override
-    public void toJSON(final OutputStream output, final int fromRowIndex, final int toRowIndex, final Collection<String> columnNames)
+    public void toJSON(final int fromRowIndex, final int toRowIndex, final Collection<String> columnNames, final OutputStream output)
             throws UncheckedIOException {
         final BufferedJSONWriter writer = Objectory.createBufferedJSONWriter(output);
 
         try {
-            toJSON(writer, fromRowIndex, toRowIndex, columnNames);
+            toJSON(fromRowIndex, toRowIndex, columnNames, writer);
 
             writer.flush();
         } catch (IOException e) {
@@ -4391,35 +4390,35 @@ public class RowDataSet implements DataSet, Cloneable {
      */
     @Override
     public void toJSON(final Writer output) {
-        toJSON(output, 0, size());
+        toJSON(0, size(), output);
     }
 
     /**
      *
-     * @param output
      * @param fromRowIndex
      * @param toRowIndex
+     * @param output
      */
     @Override
-    public void toJSON(final Writer output, final int fromRowIndex, final int toRowIndex) {
-        toJSON(output, fromRowIndex, toRowIndex, this._columnNameList);
+    public void toJSON(final int fromRowIndex, final int toRowIndex, final Writer output) {
+        toJSON(fromRowIndex, toRowIndex, this._columnNameList, output);
     }
 
     /**
      *
-     * @param output
      * @param fromRowIndex
      * @param toRowIndex
      * @param columnNames
+     * @param output
      * @throws UncheckedIOException the unchecked IO exception
      */
     @Override
-    public void toJSON(final Writer output, final int fromRowIndex, final int toRowIndex, final Collection<String> columnNames) throws UncheckedIOException {
+    public void toJSON(final int fromRowIndex, final int toRowIndex, final Collection<String> columnNames, final Writer output) throws UncheckedIOException {
         checkRowIndex(fromRowIndex, toRowIndex);
 
         if (N.isEmpty(columnNames)) {
             try {
-                IOUtil.write(output, "[]");
+                IOUtil.write("[]", output);
             } catch (IOException e) {
                 throw new UncheckedIOException(e);
             }
@@ -4472,7 +4471,7 @@ public class RowDataSet implements DataSet, Cloneable {
                         // jsonParser.serialize(bw, element, jsc);
 
                         try { //NOSONAR
-                            jsonParser.serialize(bw, element, jsc);
+                            jsonParser.serialize(element, jsc, bw);
                         } catch (Exception e) {
                             // ignore.
 
@@ -4564,7 +4563,7 @@ public class RowDataSet implements DataSet, Cloneable {
         final BufferedXMLWriter writer = Objectory.createBufferedXMLWriter();
 
         try {
-            toXML(writer, fromRowIndex, toRowIndex, columnNames, rowElementName);
+            toXML(fromRowIndex, toRowIndex, columnNames, rowElementName, writer);
 
             return writer.toString();
         } finally {
@@ -4578,65 +4577,65 @@ public class RowDataSet implements DataSet, Cloneable {
      */
     @Override
     public void toXML(final File output) {
-        toXML(output, 0, size());
+        toXML(0, size(), output);
     }
 
     /**
      *
-     * @param output
      * @param rowElementName
+     * @param output
      */
     @Override
-    public void toXML(final File output, final String rowElementName) {
-        toXML(output, 0, size(), rowElementName);
+    public void toXML(final String rowElementName, final File output) {
+        toXML(0, size(), rowElementName, output);
     }
 
     /**
      *
-     * @param output
      * @param fromRowIndex
      * @param toRowIndex
+     * @param output
      */
     @Override
-    public void toXML(final File output, final int fromRowIndex, final int toRowIndex) {
-        toXML(output, fromRowIndex, toRowIndex, ROW);
+    public void toXML(final int fromRowIndex, final int toRowIndex, final File output) {
+        toXML(fromRowIndex, toRowIndex, ROW, output);
     }
 
     /**
      *
-     * @param output
      * @param fromRowIndex
      * @param toRowIndex
      * @param rowElementName
+     * @param output
      */
     @Override
-    public void toXML(final File output, final int fromRowIndex, final int toRowIndex, final String rowElementName) {
-        toXML(output, fromRowIndex, toRowIndex, this._columnNameList, rowElementName);
+    public void toXML(final int fromRowIndex, final int toRowIndex, final String rowElementName, final File output) {
+        toXML(fromRowIndex, toRowIndex, this._columnNameList, rowElementName, output);
     }
 
     /**
      *
-     * @param output
      * @param fromRowIndex
      * @param toRowIndex
      * @param columnNames
+     * @param output
      */
     @Override
-    public void toXML(final File output, final int fromRowIndex, final int toRowIndex, final Collection<String> columnNames) {
-        toXML(output, fromRowIndex, toRowIndex, columnNames, ROW);
+    public void toXML(final int fromRowIndex, final int toRowIndex, final Collection<String> columnNames, final File output) {
+        toXML(fromRowIndex, toRowIndex, columnNames, ROW, output);
     }
 
     /**
      *
-     * @param output
      * @param fromRowIndex
      * @param toRowIndex
      * @param columnNames
      * @param rowElementName
+     * @param output
      * @throws UncheckedIOException the unchecked IO exception
      */
     @Override
-    public void toXML(final File output, final int fromRowIndex, final int toRowIndex, final Collection<String> columnNames, final String rowElementName)
+    public void toXML(final int fromRowIndex, final int toRowIndex, final Collection<String> columnNames, final String rowElementName, final File output)
             throws UncheckedIOException {
         OutputStream os = null;
 
@@ -4645,7 +4644,7 @@ public class RowDataSet implements DataSet, Cloneable {
 
             os = IOUtil.newFileOutputStream(output);
 
-            toXML(os, fromRowIndex, toRowIndex, columnNames, rowElementName);
+            toXML(fromRowIndex, toRowIndex, columnNames, rowElementName, os);
 
             os.flush();
         } catch (IOException e) {
@@ -4661,70 +4660,70 @@ public class RowDataSet implements DataSet, Cloneable {
      */
     @Override
     public void toXML(final OutputStream output) {
-        toXML(output, 0, size());
+        toXML(0, size(), output);
     }
 
     /**
      *
-     * @param output
      * @param rowElementName
+     * @param output
      */
     @Override
-    public void toXML(final OutputStream output, final String rowElementName) {
-        toXML(output, 0, size(), rowElementName);
+    public void toXML(final String rowElementName, final OutputStream output) {
+        toXML(0, size(), rowElementName, output);
     }
 
     /**
      *
-     * @param output
      * @param fromRowIndex
      * @param toRowIndex
+     * @param output
      */
     @Override
-    public void toXML(final OutputStream output, final int fromRowIndex, final int toRowIndex) {
-        toXML(output, fromRowIndex, toRowIndex, ROW);
+    public void toXML(final int fromRowIndex, final int toRowIndex, final OutputStream output) {
+        toXML(fromRowIndex, toRowIndex, ROW, output);
     }
 
     /**
      *
-     * @param output
      * @param fromRowIndex
      * @param toRowIndex
      * @param rowElementName
+     * @param output
      */
     @Override
-    public void toXML(final OutputStream output, final int fromRowIndex, final int toRowIndex, final String rowElementName) {
-        toXML(output, fromRowIndex, toRowIndex, this._columnNameList, rowElementName);
+    public void toXML(final int fromRowIndex, final int toRowIndex, final String rowElementName, final OutputStream output) {
+        toXML(fromRowIndex, toRowIndex, this._columnNameList, rowElementName, output);
     }
 
     /**
      *
-     * @param output
      * @param fromRowIndex
      * @param toRowIndex
      * @param columnNames
+     * @param output
      */
     @Override
-    public void toXML(final OutputStream output, final int fromRowIndex, final int toRowIndex, final Collection<String> columnNames) {
-        toXML(output, fromRowIndex, toRowIndex, columnNames, ROW);
+    public void toXML(final int fromRowIndex, final int toRowIndex, final Collection<String> columnNames, final OutputStream output) {
+        toXML(fromRowIndex, toRowIndex, columnNames, ROW, output);
     }
 
     /**
      *
-     * @param output
      * @param fromRowIndex
      * @param toRowIndex
      * @param columnNames
      * @param rowElementName
+     * @param output
      * @throws UncheckedIOException the unchecked IO exception
      */
     @Override
-    public void toXML(final OutputStream output, final int fromRowIndex, final int toRowIndex, final Collection<String> columnNames,
-            final String rowElementName) throws UncheckedIOException {
+    public void toXML(final int fromRowIndex, final int toRowIndex, final Collection<String> columnNames, final String rowElementName,
+            final OutputStream output) throws UncheckedIOException {
         final BufferedXMLWriter writer = Objectory.createBufferedXMLWriter(output);
 
         try {
-            toXML(writer, fromRowIndex, toRowIndex, columnNames, rowElementName);
+            toXML(fromRowIndex, toRowIndex, columnNames, rowElementName, writer);
 
             writer.flush();
         } catch (IOException e) {
@@ -4740,72 +4739,72 @@ public class RowDataSet implements DataSet, Cloneable {
      */
     @Override
     public void toXML(final Writer output) {
-        toXML(output, 0, size());
+        toXML(0, size(), output);
     }
 
     /**
      *
-     * @param output
      * @param rowElementName
+     * @param output
      */
     @Override
-    public void toXML(final Writer output, final String rowElementName) {
-        toXML(output, 0, size(), rowElementName);
+    public void toXML(final String rowElementName, final Writer output) {
+        toXML(0, size(), rowElementName, output);
     }
 
     /**
      *
-     * @param output
      * @param fromRowIndex
      * @param toRowIndex
+     * @param output
      */
     @Override
-    public void toXML(final Writer output, final int fromRowIndex, final int toRowIndex) {
-        toXML(output, fromRowIndex, toRowIndex, ROW);
+    public void toXML(final int fromRowIndex, final int toRowIndex, final Writer output) {
+        toXML(fromRowIndex, toRowIndex, ROW, output);
     }
 
     /**
      *
-     * @param output
      * @param fromRowIndex
      * @param toRowIndex
      * @param rowElementName
+     * @param output
      */
     @Override
-    public void toXML(final Writer output, final int fromRowIndex, final int toRowIndex, final String rowElementName) {
-        toXML(output, fromRowIndex, toRowIndex, this._columnNameList, rowElementName);
+    public void toXML(final int fromRowIndex, final int toRowIndex, final String rowElementName, final Writer output) {
+        toXML(fromRowIndex, toRowIndex, this._columnNameList, rowElementName, output);
     }
 
     /**
      *
-     * @param output
      * @param fromRowIndex
      * @param toRowIndex
      * @param columnNames
+     * @param output
      */
     @Override
-    public void toXML(final Writer output, final int fromRowIndex, final int toRowIndex, final Collection<String> columnNames) {
-        toXML(output, fromRowIndex, toRowIndex, columnNames, ROW);
+    public void toXML(final int fromRowIndex, final int toRowIndex, final Collection<String> columnNames, final Writer output) {
+        toXML(fromRowIndex, toRowIndex, columnNames, ROW, output);
     }
 
     /**
      *
-     * @param output
      * @param fromRowIndex
      * @param toRowIndex
      * @param columnNames
      * @param rowElementName
+     * @param output
      * @throws UncheckedIOException the unchecked IO exception
      */
     @Override
-    public void toXML(final Writer output, final int fromRowIndex, final int toRowIndex, final Collection<String> columnNames, final String rowElementName)
+    public void toXML(final int fromRowIndex, final int toRowIndex, final Collection<String> columnNames, final String rowElementName, final Writer output)
             throws UncheckedIOException {
         checkRowIndex(fromRowIndex, toRowIndex);
 
         if (N.isEmpty(columnNames)) {
             try {
-                IOUtil.write(output, XMLConstants.DATA_SET_ELE_START);
-                IOUtil.write(output, XMLConstants.DATA_SET_ELE_END);
+                IOUtil.write(XMLConstants.DATA_SET_ELE_START, output);
+                IOUtil.write(XMLConstants.DATA_SET_ELE_END, output);
             } catch (IOException e) {
                 throw new UncheckedIOException(e);
             }
@@ -4855,7 +4854,7 @@ public class RowDataSet implements DataSet, Cloneable {
                         // xmlParser.serialize(bw, element, xsc);
 
                         try { //NOSONAR
-                            xmlParser.serialize(bw, element, xsc);
+                            xmlParser.serialize(element, xsc, bw);
                         } catch (Exception e) {
                             // ignore.
 
@@ -4931,7 +4930,7 @@ public class RowDataSet implements DataSet, Cloneable {
         final BufferedWriter bw = Objectory.createBufferedWriter();
 
         try {
-            toCSV(bw, fromRowIndex, toRowIndex, columnNames, writeTitle, quoted);
+            toCSV(fromRowIndex, toRowIndex, columnNames, writeTitle, quoted, bw);
 
             return bw.toString();
         } finally {
@@ -4945,44 +4944,44 @@ public class RowDataSet implements DataSet, Cloneable {
      */
     @Override
     public void toCSV(final File output) {
-        toCSV(output, 0, size(), _columnNameList);
+        toCSV(0, size(), _columnNameList, output);
     }
 
     /**
      *
-     * @param output
      * @param fromRowIndex
      * @param toRowIndex
      * @param columnNames
+     * @param output
      */
     @Override
-    public void toCSV(final File output, final int fromRowIndex, final int toRowIndex, final Collection<String> columnNames) {
-        toCSV(output, fromRowIndex, toRowIndex, columnNames, true, true);
+    public void toCSV(final int fromRowIndex, final int toRowIndex, final Collection<String> columnNames, final File output) {
+        toCSV(fromRowIndex, toRowIndex, columnNames, true, true, output);
     }
 
     /**
      *
-     * @param output
      * @param writeTitle
+     * @param output
      * @param quoted
      */
     @Override
-    public void toCSV(final File output, final boolean writeTitle, final boolean quoted) {
-        toCSV(output, 0, size(), _columnNameList, writeTitle, quoted);
+    public void toCSV(final boolean writeTitle, final boolean quoted, final File output) {
+        toCSV(0, size(), _columnNameList, writeTitle, quoted, output);
     }
 
     /**
      *
-     * @param output
      * @param fromRowIndex
      * @param toRowIndex
      * @param columnNames
      * @param writeTitle
+     * @param output
      * @param quoted
      */
     @Override
-    public void toCSV(final File output, final int fromRowIndex, final int toRowIndex, final Collection<String> columnNames, final boolean writeTitle,
-            final boolean quoted) {
+    public void toCSV(final int fromRowIndex, final int toRowIndex, final Collection<String> columnNames, final boolean writeTitle, final boolean quoted,
+            final File output) {
         OutputStream os = null;
 
         try {
@@ -4990,7 +4989,7 @@ public class RowDataSet implements DataSet, Cloneable {
 
             os = IOUtil.newFileOutputStream(output);
 
-            toCSV(os, fromRowIndex, toRowIndex, columnNames, writeTitle, quoted);
+            toCSV(fromRowIndex, toRowIndex, columnNames, writeTitle, quoted, os);
 
             os.flush();
         } catch (IOException e) {
@@ -5006,51 +5005,51 @@ public class RowDataSet implements DataSet, Cloneable {
      */
     @Override
     public void toCSV(final OutputStream output) {
-        toCSV(output, 0, size(), _columnNameList);
+        toCSV(0, size(), _columnNameList, output);
     }
 
     /**
      *
-     * @param output
      * @param fromRowIndex
      * @param toRowIndex
      * @param columnNames
+     * @param output
      */
     @Override
-    public void toCSV(final OutputStream output, final int fromRowIndex, final int toRowIndex, final Collection<String> columnNames) {
-        toCSV(output, fromRowIndex, toRowIndex, columnNames, true, true);
+    public void toCSV(final int fromRowIndex, final int toRowIndex, final Collection<String> columnNames, final OutputStream output) {
+        toCSV(fromRowIndex, toRowIndex, columnNames, true, true, output);
     }
 
     /**
      *
-     * @param output
      * @param writeTitle
+     * @param output
      * @param quoted
      */
     @Override
-    public void toCSV(final OutputStream output, final boolean writeTitle, final boolean quoted) {
-        toCSV(output, 0, size(), _columnNameList, writeTitle, quoted);
+    public void toCSV(final boolean writeTitle, final boolean quoted, final OutputStream output) {
+        toCSV(0, size(), _columnNameList, writeTitle, quoted, output);
     }
 
     /**
      *
-     * @param output
      * @param fromRowIndex
      * @param toRowIndex
      * @param columnNames
      * @param writeTitle
+     * @param output
      * @param quoted
      * @throws UncheckedIOException the unchecked IO exception
      */
     @Override
-    public void toCSV(final OutputStream output, final int fromRowIndex, final int toRowIndex, final Collection<String> columnNames, final boolean writeTitle,
-            final boolean quoted) throws UncheckedIOException {
+    public void toCSV(final int fromRowIndex, final int toRowIndex, final Collection<String> columnNames, final boolean writeTitle, final boolean quoted,
+            final OutputStream output) throws UncheckedIOException {
         Writer writer = null;
 
         try {
             writer = IOUtil.newOutputStreamWriter(output); // NOSONAR
 
-            toCSV(writer, fromRowIndex, toRowIndex, columnNames, writeTitle, quoted);
+            toCSV(fromRowIndex, toRowIndex, columnNames, writeTitle, quoted, writer);
 
             writer.flush();
         } catch (IOException e) {
@@ -5064,46 +5063,46 @@ public class RowDataSet implements DataSet, Cloneable {
      */
     @Override
     public void toCSV(final Writer output) {
-        toCSV(output, 0, size(), _columnNameList);
+        toCSV(0, size(), _columnNameList, output);
     }
 
     /**
      *
-     * @param output
      * @param fromRowIndex
      * @param toRowIndex
      * @param columnNames
+     * @param output
      */
     @Override
-    public void toCSV(final Writer output, final int fromRowIndex, final int toRowIndex, final Collection<String> columnNames) {
-        toCSV(output, fromRowIndex, toRowIndex, columnNames, true, true);
+    public void toCSV(final int fromRowIndex, final int toRowIndex, final Collection<String> columnNames, final Writer output) {
+        toCSV(fromRowIndex, toRowIndex, columnNames, true, true, output);
     }
 
     /**
      *
-     * @param output
      * @param writeTitle
+     * @param output
      * @param quoted
      */
     @Override
-    public void toCSV(final Writer output, final boolean writeTitle, final boolean quoted) {
-        toCSV(output, 0, size(), _columnNameList, writeTitle, quoted);
+    public void toCSV(final boolean writeTitle, final boolean quoted, final Writer output) {
+        toCSV(0, size(), _columnNameList, writeTitle, quoted, output);
     }
 
     /**
      *
-     * @param output
      * @param fromRowIndex
      * @param toRowIndex
      * @param columnNames
      * @param writeTitle
+     * @param output
      * @param quoted
      * @throws UncheckedIOException the unchecked IO exception
      */
     @SuppressWarnings("deprecation")
     @Override
-    public void toCSV(final Writer output, final int fromRowIndex, final int toRowIndex, final Collection<String> columnNames, final boolean writeTitle,
-            final boolean quoted) throws UncheckedIOException {
+    public void toCSV(final int fromRowIndex, final int toRowIndex, final Collection<String> columnNames, final boolean writeTitle, final boolean quoted,
+            final Writer output) throws UncheckedIOException {
         checkRowIndex(fromRowIndex, toRowIndex);
 
         if (N.isEmpty(columnNames)) {
@@ -5212,13 +5211,13 @@ public class RowDataSet implements DataSet, Cloneable {
      * @param keyColumnName
      * @param aggregateResultColumnName
      * @param aggregateOnColumnNames
-     * @param rowClass
+     * @param rowType
      * @return
      */
     @Override
-    public DataSet groupBy(String keyColumnName, String aggregateResultColumnName, Collection<String> aggregateOnColumnNames, Class<?> rowClass) {
+    public DataSet groupBy(String keyColumnName, String aggregateResultColumnName, Collection<String> aggregateOnColumnNames, Class<?> rowType) {
         final List<Object> keyColumn = getColumn(keyColumnName);
-        final List<Object> valueColumn = toList(rowClass, aggregateOnColumnNames);
+        final List<Object> valueColumn = toList(aggregateOnColumnNames, rowType);
 
         final Map<Object, List<Object>> map = N.newLinkedHashMap(N.min(9, size()));
         final List<Object> keyList = new ArrayList<>(N.min(9, size()));
@@ -5447,17 +5446,17 @@ public class RowDataSet implements DataSet, Cloneable {
      * @param keyMapper
      * @param aggregateResultColumnName
      * @param aggregateOnColumnNames
-     * @param rowClass
+     * @param rowType
      * @return
      * @throws E
      */
     @Override
     public <E extends Exception> DataSet groupBy(String keyColumnName, Throwables.Function<?, ?, E> keyMapper, String aggregateResultColumnName,
-            Collection<String> aggregateOnColumnNames, Class<?> rowClass) throws E {
+            Collection<String> aggregateOnColumnNames, Class<?> rowType) throws E {
         final Throwables.Function<Object, ?, E> keyMapper2 = (Throwables.Function<Object, ?, E>) (keyMapper == null ? Fn.identity() : keyMapper);
 
         final List<Object> keyColumn = getColumn(keyColumnName);
-        final List<Object> valueColumn = toList(rowClass, aggregateOnColumnNames);
+        final List<Object> valueColumn = toList(aggregateOnColumnNames, rowType);
 
         final Map<Object, List<Object>> map = N.newLinkedHashMap(N.min(9, size()));
         final List<Object> keyList = new ArrayList<>(N.min(9, size()));
@@ -5641,16 +5640,16 @@ public class RowDataSet implements DataSet, Cloneable {
      * @param keyColumnNames
      * @param aggregateResultColumnName
      * @param aggregateOnColumnNames
-     * @param rowClass
+     * @param rowType
      * @return
      */
     @Override
-    public DataSet groupBy(Collection<String> keyColumnNames, String aggregateResultColumnName, Collection<String> aggregateOnColumnNames, Class<?> rowClass) {
+    public DataSet groupBy(Collection<String> keyColumnNames, String aggregateResultColumnName, Collection<String> aggregateOnColumnNames, Class<?> rowType) {
         N.checkArgNotEmpty(keyColumnNames, "columnNames");
         N.checkArgNotEmpty(aggregateOnColumnNames, "aggregateOnColumnNames");
 
         if (keyColumnNames.size() == 1) {
-            return groupBy(keyColumnNames.iterator().next(), aggregateResultColumnName, aggregateOnColumnNames, rowClass);
+            return groupBy(keyColumnNames.iterator().next(), aggregateResultColumnName, aggregateOnColumnNames, rowType);
         }
 
         final int size = size();
@@ -5673,7 +5672,7 @@ public class RowDataSet implements DataSet, Cloneable {
             return new RowDataSet(newColumnNameList, newColumnList);
         }
 
-        final List<Object> valueColumnList = toList(rowClass, aggregateOnColumnNames);
+        final List<Object> valueColumnList = toList(aggregateOnColumnNames, rowType);
 
         final Map<Wrapper<Object[]>, List<Object>> keyRowMap = N.newLinkedHashMap(N.min(9, size()));
 
@@ -5962,13 +5961,13 @@ public class RowDataSet implements DataSet, Cloneable {
      * @param keyMapper
      * @param aggregateResultColumnName
      * @param aggregateOnColumnNames
-     * @param rowClass
+     * @param rowType
      * @return
      * @throws E
      */
     @Override
     public <E extends Exception> DataSet groupBy(Collection<String> keyColumnNames, Throwables.Function<? super DisposableObjArray, ?, E> keyMapper,
-            String aggregateResultColumnName, Collection<String> aggregateOnColumnNames, Class<?> rowClass) throws E {
+            String aggregateResultColumnName, Collection<String> aggregateOnColumnNames, Class<?> rowType) throws E {
         N.checkArgNotEmpty(keyColumnNames, "columnNames");
         N.checkArgNotEmpty(aggregateOnColumnNames, "aggregateOnColumnNames");
 
@@ -5976,10 +5975,10 @@ public class RowDataSet implements DataSet, Cloneable {
 
         if (isNullOrIdentityKeyMapper) {
             if (keyColumnNames.size() == 1) {
-                return groupBy(keyColumnNames.iterator().next(), aggregateResultColumnName, aggregateOnColumnNames, rowClass);
+                return groupBy(keyColumnNames.iterator().next(), aggregateResultColumnName, aggregateOnColumnNames, rowType);
             }
 
-            return groupBy(keyColumnNames, aggregateResultColumnName, aggregateOnColumnNames, rowClass);
+            return groupBy(keyColumnNames, aggregateResultColumnName, aggregateOnColumnNames, rowType);
         }
 
         final int size = size();
@@ -6002,7 +6001,7 @@ public class RowDataSet implements DataSet, Cloneable {
             return new RowDataSet(newColumnNameList, newColumnList);
         }
 
-        final List<Object> valueColumnList = toList(rowClass, aggregateOnColumnNames);
+        final List<Object> valueColumnList = toList(aggregateOnColumnNames, rowType);
 
         final Map<Object, List<Object>> keyRowMap = N.newLinkedHashMap();
         final Object[] keyRow = Objectory.createObjectArray(keyColumnCount);
@@ -6331,16 +6330,16 @@ public class RowDataSet implements DataSet, Cloneable {
      * @param columnNames
      * @param aggregateResultColumnName
      * @param aggregateOnColumnNames
-     * @param rowClass
+     * @param rowType
      * @return
      */
     @Override
     public Stream<DataSet> rollup(Collection<String> columnNames, String aggregateResultColumnName, Collection<String> aggregateOnColumnNames,
-            Class<?> rowClass) {
+            Class<?> rowType) {
         return Stream.of(Iterables.rollup(columnNames))
                 .reversed()
                 .filter(Fn.notEmptyC())
-                .map(columnNames1 -> Try.call((Callable<DataSet>) () -> groupBy(columnNames1, aggregateResultColumnName, aggregateOnColumnNames, rowClass)));
+                .map(columnNames1 -> Try.call((Callable<DataSet>) () -> groupBy(columnNames1, aggregateResultColumnName, aggregateOnColumnNames, rowType)));
     }
 
     /**
@@ -6441,17 +6440,17 @@ public class RowDataSet implements DataSet, Cloneable {
      * @param keyMapper
      * @param aggregateResultColumnName
      * @param aggregateOnColumnNames
-     * @param rowClass
+     * @param rowType
      * @return
      */
     @Override
     public Stream<DataSet> rollup(Collection<String> columnNames, Throwables.Function<? super DisposableObjArray, ?, ? extends Exception> keyMapper,
-            String aggregateResultColumnName, Collection<String> aggregateOnColumnNames, Class<?> rowClass) {
+            String aggregateResultColumnName, Collection<String> aggregateOnColumnNames, Class<?> rowType) {
         return Stream.of(Iterables.rollup(columnNames))
                 .reversed()
                 .filter(Fn.notEmptyC())
                 .map(columnNames1 -> Try
-                        .call((Callable<DataSet>) () -> groupBy(columnNames1, keyMapper, aggregateResultColumnName, aggregateOnColumnNames, rowClass)));
+                        .call((Callable<DataSet>) () -> groupBy(columnNames1, keyMapper, aggregateResultColumnName, aggregateOnColumnNames, rowType)));
     }
 
     /**
@@ -6538,14 +6537,13 @@ public class RowDataSet implements DataSet, Cloneable {
      * @param columnNames
      * @param aggregateResultColumnName
      * @param aggregateOnColumnNames
-     * @param rowClass
+     * @param rowType
      * @return
      */
     @Override
-    public Stream<DataSet> cube(Collection<String> columnNames, String aggregateResultColumnName, Collection<String> aggregateOnColumnNames,
-            Class<?> rowClass) {
+    public Stream<DataSet> cube(Collection<String> columnNames, String aggregateResultColumnName, Collection<String> aggregateOnColumnNames, Class<?> rowType) {
         return cubeSet(columnNames).filter(Fn.notEmptyC())
-                .map(columnNames1 -> Try.call((Callable<DataSet>) () -> groupBy(columnNames1, aggregateResultColumnName, aggregateOnColumnNames, rowClass)));
+                .map(columnNames1 -> Try.call((Callable<DataSet>) () -> groupBy(columnNames1, aggregateResultColumnName, aggregateOnColumnNames, rowType)));
     }
 
     /**
@@ -6635,15 +6633,15 @@ public class RowDataSet implements DataSet, Cloneable {
      * @param keyMapper
      * @param aggregateResultColumnName
      * @param aggregateOnColumnNames
-     * @param rowClass
+     * @param rowType
      * @return
      */
     @Override
     public Stream<DataSet> cube(Collection<String> columnNames, Throwables.Function<? super DisposableObjArray, ?, ? extends Exception> keyMapper,
-            String aggregateResultColumnName, Collection<String> aggregateOnColumnNames, Class<?> rowClass) {
+            String aggregateResultColumnName, Collection<String> aggregateOnColumnNames, Class<?> rowType) {
         return cubeSet(columnNames).filter(Fn.notEmptyC())
                 .map(columnNames1 -> Try
-                        .call((Callable<DataSet>) () -> groupBy(columnNames1, keyMapper, aggregateResultColumnName, aggregateOnColumnNames, rowClass)));
+                        .call((Callable<DataSet>) () -> groupBy(columnNames1, keyMapper, aggregateResultColumnName, aggregateOnColumnNames, rowType)));
     }
 
     /**
@@ -8396,7 +8394,7 @@ public class RowDataSet implements DataSet, Cloneable {
         if (kryoParser != null) {
             dataSet = kryoParser.clone(this);
         } else {
-            dataSet = jsonParser.deserialize(RowDataSet.class, jsonParser.serialize(this));
+            dataSet = jsonParser.deserialize(jsonParser.serialize(this), RowDataSet.class);
         }
 
         dataSet._isFrozen = freeze;
@@ -8433,12 +8431,12 @@ public class RowDataSet implements DataSet, Cloneable {
      * @param right
      * @param onColumnNames
      * @param newColumnName
-     * @param newColumnClass
+     * @param newColumnType
      * @return
      */
     @Override
-    public DataSet innerJoin(final DataSet right, final Map<String, String> onColumnNames, final String newColumnName, final Class<?> newColumnClass) {
-        return join(right, onColumnNames, newColumnName, newColumnClass, false);
+    public DataSet innerJoin(final DataSet right, final Map<String, String> onColumnNames, final String newColumnName, final Class<?> newColumnType) {
+        return join(right, onColumnNames, newColumnName, newColumnType, false);
     }
 
     /**
@@ -8446,15 +8444,15 @@ public class RowDataSet implements DataSet, Cloneable {
      * @param right
      * @param onColumnNames
      * @param newColumnName
-     * @param newColumnClass
+     * @param newColumnType
      * @param collSupplier
      * @return
      */
     @SuppressWarnings("rawtypes")
     @Override
-    public DataSet innerJoin(final DataSet right, final Map<String, String> onColumnNames, final String newColumnName, final Class<?> newColumnClass,
+    public DataSet innerJoin(final DataSet right, final Map<String, String> onColumnNames, final String newColumnName, final Class<?> newColumnType,
             final IntFunction<? extends Collection> collSupplier) {
-        return join(right, onColumnNames, newColumnName, newColumnClass, collSupplier, false);
+        return join(right, onColumnNames, newColumnName, newColumnType, collSupplier, false);
     }
 
     /**
@@ -8640,11 +8638,11 @@ public class RowDataSet implements DataSet, Cloneable {
      * @param right
      * @param onColumnNames
      * @param newColumnName
-     * @param newColumnClass
+     * @param newColumnType
      * @param isLeftJoin
      * @return
      */
-    private DataSet join(final DataSet right, final Map<String, String> onColumnNames, final String newColumnName, final Class<?> newColumnClass,
+    private DataSet join(final DataSet right, final Map<String, String> onColumnNames, final String newColumnName, final Class<?> newColumnType,
             final boolean isLeftJoin) {
         checkJoinOnColumnNames(onColumnNames);
         checkNewColumnName(newColumnName);
@@ -8679,7 +8677,7 @@ public class RowDataSet implements DataSet, Cloneable {
                 hashKey = hashKey(leftJoinColumn.get(leftRowIndex));
                 rightRowIndexList = joinColumnRightRowIndexMap.get(hashKey);
 
-                join(newColumnList, right, isLeftJoin, newColumnClass, newColumnIndex, leftRowIndex, rightRowIndexList);
+                join(newColumnList, right, isLeftJoin, newColumnType, newColumnIndex, leftRowIndex, rightRowIndexList);
             }
 
             return new RowDataSet(newColumnNameList, newColumnList);
@@ -8727,7 +8725,7 @@ public class RowDataSet implements DataSet, Cloneable {
 
                 rightRowIndexList = joinColumnRightRowIndexMap.get(row);
 
-                join(newColumnList, right, isLeftJoin, newColumnClass, newColumnIndex, leftRowIndex, rightRowIndexList);
+                join(newColumnList, right, isLeftJoin, newColumnType, newColumnIndex, leftRowIndex, rightRowIndexList);
             }
 
             if (row != null) {
@@ -8748,12 +8746,12 @@ public class RowDataSet implements DataSet, Cloneable {
      * @param newColumnList
      * @param right
      * @param isLeftJoin
-     * @param newColumnClass
+     * @param newColumnType
      * @param newColumnIndex
      * @param leftRowIndex
      * @param rightRowIndexList
      */
-    private void join(final List<List<Object>> newColumnList, final DataSet right, final boolean isLeftJoin, final Class<?> newColumnClass,
+    private void join(final List<List<Object>> newColumnList, final DataSet right, final boolean isLeftJoin, final Class<?> newColumnType,
             final int newColumnIndex, int leftRowIndex, List<Integer> rightRowIndexList) {
         if (N.notEmpty(rightRowIndexList)) {
             for (int rightRowIndex : rightRowIndexList) {
@@ -8761,7 +8759,7 @@ public class RowDataSet implements DataSet, Cloneable {
                     newColumnList.get(i).add(_columnList.get(i).get(leftRowIndex));
                 }
 
-                newColumnList.get(newColumnIndex).add(right.getRow(newColumnClass, rightRowIndex));
+                newColumnList.get(newColumnIndex).add(right.getRow(rightRowIndex, newColumnType));
             }
         } else if (isLeftJoin) {
             for (int i = 0, leftColumnLength = columnCount(); i < leftColumnLength; i++) {
@@ -8975,12 +8973,12 @@ public class RowDataSet implements DataSet, Cloneable {
      * @param right
      * @param onColumnNames
      * @param newColumnName
-     * @param newColumnClass
+     * @param newColumnType
      * @return
      */
     @Override
-    public DataSet leftJoin(final DataSet right, final Map<String, String> onColumnNames, final String newColumnName, final Class<?> newColumnClass) {
-        return join(right, onColumnNames, newColumnName, newColumnClass, true);
+    public DataSet leftJoin(final DataSet right, final Map<String, String> onColumnNames, final String newColumnName, final Class<?> newColumnType) {
+        return join(right, onColumnNames, newColumnName, newColumnType, true);
     }
 
     /**
@@ -8988,15 +8986,15 @@ public class RowDataSet implements DataSet, Cloneable {
      * @param right
      * @param onColumnNames
      * @param newColumnName
-     * @param newColumnClass
+     * @param newColumnType
      * @param collSupplier
      * @return
      */
     @SuppressWarnings("rawtypes")
     @Override
-    public DataSet leftJoin(final DataSet right, final Map<String, String> onColumnNames, final String newColumnName, final Class<?> newColumnClass,
+    public DataSet leftJoin(final DataSet right, final Map<String, String> onColumnNames, final String newColumnName, final Class<?> newColumnType,
             final IntFunction<? extends Collection> collSupplier) {
-        return join(right, onColumnNames, newColumnName, newColumnClass, collSupplier, true);
+        return join(right, onColumnNames, newColumnName, newColumnType, collSupplier, true);
     }
 
     /**
@@ -9004,13 +9002,13 @@ public class RowDataSet implements DataSet, Cloneable {
      * @param right
      * @param onColumnNames
      * @param newColumnName
-     * @param newColumnClass
+     * @param newColumnType
      * @param collSupplier
      * @param isLeftJoin
      * @return
      */
     @SuppressWarnings("rawtypes")
-    private DataSet join(final DataSet right, final Map<String, String> onColumnNames, final String newColumnName, final Class<?> newColumnClass,
+    private DataSet join(final DataSet right, final Map<String, String> onColumnNames, final String newColumnName, final Class<?> newColumnType,
             final IntFunction<? extends Collection> collSupplier, final boolean isLeftJoin) {
         checkJoinOnColumnNames(onColumnNames);
         checkNewColumnName(newColumnName);
@@ -9047,7 +9045,7 @@ public class RowDataSet implements DataSet, Cloneable {
                 hashKey = hashKey(leftJoinColumn.get(leftRowIndex));
                 rightRowIndexList = joinColumnRightRowIndexMap.get(hashKey);
 
-                join(newColumnList, right, isLeftJoin, newColumnClass, collSupplier, newColumnIndex, leftRowIndex, rightRowIndexList);
+                join(newColumnList, right, isLeftJoin, newColumnType, collSupplier, newColumnIndex, leftRowIndex, rightRowIndexList);
             }
 
             return new RowDataSet(newColumnNameList, newColumnList);
@@ -9095,7 +9093,7 @@ public class RowDataSet implements DataSet, Cloneable {
 
                 rightRowIndexList = joinColumnRightRowIndexMap.get(row);
 
-                join(newColumnList, right, isLeftJoin, newColumnClass, collSupplier, newColumnIndex, leftRowIndex, rightRowIndexList);
+                join(newColumnList, right, isLeftJoin, newColumnType, collSupplier, newColumnIndex, leftRowIndex, rightRowIndexList);
             }
 
             if (row != null) {
@@ -9116,14 +9114,14 @@ public class RowDataSet implements DataSet, Cloneable {
      * @param newColumnList
      * @param right
      * @param isLeftJoin
-     * @param newColumnClass
+     * @param newColumnType
      * @param collSupplier
      * @param newColumnIndex
      * @param leftRowIndex
      * @param rightRowIndexList
      */
     @SuppressWarnings("rawtypes")
-    private void join(final List<List<Object>> newColumnList, final DataSet right, final boolean isLeftJoin, final Class<?> newColumnClass,
+    private void join(final List<List<Object>> newColumnList, final DataSet right, final boolean isLeftJoin, final Class<?> newColumnType,
             final IntFunction<? extends Collection> collSupplier, final int newColumnIndex, int leftRowIndex, List<Integer> rightRowIndexList) {
         if (N.notEmpty(rightRowIndexList)) {
             for (int i = 0, leftColumnLength = columnCount(); i < leftColumnLength; i++) {
@@ -9133,7 +9131,7 @@ public class RowDataSet implements DataSet, Cloneable {
             final Collection<Object> coll = collSupplier.apply(rightRowIndexList.size());
 
             for (int rightRowIndex : rightRowIndexList) {
-                coll.add(right.getRow(newColumnClass, rightRowIndex));
+                coll.add(right.getRow(rightRowIndex, newColumnType));
             }
 
             newColumnList.get(newColumnIndex).add(coll);
@@ -9381,11 +9379,11 @@ public class RowDataSet implements DataSet, Cloneable {
      * @param right
      * @param onColumnNames
      * @param newColumnName
-     * @param newColumnClass
+     * @param newColumnType
      * @return
      */
     @Override
-    public DataSet rightJoin(final DataSet right, final Map<String, String> onColumnNames, final String newColumnName, final Class<?> newColumnClass) {
+    public DataSet rightJoin(final DataSet right, final Map<String, String> onColumnNames, final String newColumnName, final Class<?> newColumnType) {
         checkJoinOnColumnNames(onColumnNames);
         checkNewColumnName(newColumnName);
 
@@ -9422,7 +9420,7 @@ public class RowDataSet implements DataSet, Cloneable {
                 hashKey = hashKey(rightJoinColumn.get(rightRowIndex));
                 leftRowIndexList = joinColumnLeftRowIndexMap.get(hashKey);
 
-                rightJoin(newColumnList, right, newColumnClass, newColumnIndex, rightRowIndex, leftRowIndexList, leftColumnIndexes);
+                rightJoin(newColumnList, right, newColumnType, newColumnIndex, rightRowIndex, leftRowIndexList, leftColumnIndexes);
             }
 
             return new RowDataSet(newColumnNameList, newColumnList);
@@ -9472,7 +9470,7 @@ public class RowDataSet implements DataSet, Cloneable {
 
                 leftRowIndexList = joinColumnLeftRowIndexMap.get(row);
 
-                rightJoin(newColumnList, right, newColumnClass, newColumnIndex, rightRowIndex, leftRowIndexList, leftColumnIndexes);
+                rightJoin(newColumnList, right, newColumnType, newColumnIndex, rightRowIndex, leftRowIndexList, leftColumnIndexes);
             }
 
             if (row != null) {
@@ -9492,13 +9490,13 @@ public class RowDataSet implements DataSet, Cloneable {
      *
      * @param newColumnList
      * @param right
-     * @param newColumnClass
+     * @param newColumnType
      * @param newColumnIndex
      * @param rightRowIndex
      * @param leftRowIndexList
      * @param leftColumnIndexes
      */
-    private void rightJoin(final List<List<Object>> newColumnList, final DataSet right, final Class<?> newColumnClass, final int newColumnIndex,
+    private void rightJoin(final List<List<Object>> newColumnList, final DataSet right, final Class<?> newColumnType, final int newColumnIndex,
             int rightRowIndex, List<Integer> leftRowIndexList, final int[] leftColumnIndexes) {
         if (N.notEmpty(leftRowIndexList)) {
             for (int leftRowIndex : leftRowIndexList) {
@@ -9506,14 +9504,14 @@ public class RowDataSet implements DataSet, Cloneable {
                     newColumnList.get(i).add(this.get(leftRowIndex, leftColumnIndexes[i]));
                 }
 
-                newColumnList.get(newColumnIndex).add(right.getRow(newColumnClass, rightRowIndex));
+                newColumnList.get(newColumnIndex).add(right.getRow(rightRowIndex, newColumnType));
             }
         } else {
             for (int i = 0, leftColumnLength = leftColumnIndexes.length; i < leftColumnLength; i++) {
                 newColumnList.get(i).add(null);
             }
 
-            newColumnList.get(newColumnIndex).add(right.getRow(newColumnClass, rightRowIndex));
+            newColumnList.get(newColumnIndex).add(right.getRow(rightRowIndex, newColumnType));
         }
     }
 
@@ -9541,13 +9539,13 @@ public class RowDataSet implements DataSet, Cloneable {
      * @param right
      * @param onColumnNames
      * @param newColumnName
-     * @param newColumnClass
+     * @param newColumnType
      * @param collSupplier
      * @return
      */
     @SuppressWarnings("rawtypes")
     @Override
-    public DataSet rightJoin(final DataSet right, final Map<String, String> onColumnNames, final String newColumnName, final Class<?> newColumnClass,
+    public DataSet rightJoin(final DataSet right, final Map<String, String> onColumnNames, final String newColumnName, final Class<?> newColumnType,
             final IntFunction<? extends Collection> collSupplier) {
         checkJoinOnColumnNames(onColumnNames);
         checkNewColumnName(newColumnName);
@@ -9594,7 +9592,7 @@ public class RowDataSet implements DataSet, Cloneable {
                 leftRowIndexList = joinColumnLeftRowIndexMap.get(rightRowIndexEntry.getKey());
                 rightRowIndexList = rightRowIndexEntry.getValue();
 
-                rightJoin(newColumnList, right, newColumnClass, collSupplier, newColumnIndex, leftColumnIndexes, leftRowIndexList, rightRowIndexList);
+                rightJoin(newColumnList, right, newColumnType, collSupplier, newColumnIndex, leftColumnIndexes, leftRowIndexList, rightRowIndexList);
             }
 
             return new RowDataSet(newColumnNameList, newColumnList);
@@ -9658,7 +9656,7 @@ public class RowDataSet implements DataSet, Cloneable {
                 leftRowIndexList = joinColumnLeftRowIndexMap.get(rightRowIndexEntry.getKey());
                 rightRowIndexList = rightRowIndexEntry.getValue();
 
-                rightJoin(newColumnList, right, newColumnClass, collSupplier, newColumnIndex, leftColumnIndexes, leftRowIndexList, rightRowIndexList);
+                rightJoin(newColumnList, right, newColumnType, collSupplier, newColumnIndex, leftColumnIndexes, leftRowIndexList, rightRowIndexList);
             }
 
             for (Object[] a : joinColumnLeftRowIndexMap.keySet()) {
@@ -9677,7 +9675,7 @@ public class RowDataSet implements DataSet, Cloneable {
      *
      * @param newColumnList
      * @param right
-     * @param newColumnClass
+     * @param newColumnType
      * @param collSupplier
      * @param newColumnIndex
      * @param leftColumnIndexes
@@ -9685,7 +9683,7 @@ public class RowDataSet implements DataSet, Cloneable {
      * @param rightRowIndexList
      */
     @SuppressWarnings("rawtypes")
-    private void rightJoin(final List<List<Object>> newColumnList, final DataSet right, final Class<?> newColumnClass,
+    private void rightJoin(final List<List<Object>> newColumnList, final DataSet right, final Class<?> newColumnType,
             final IntFunction<? extends Collection> collSupplier, final int newColumnIndex, final int[] leftColumnIndexes, List<Integer> leftRowIndexList,
             List<Integer> rightRowIndexList) {
         if (N.notEmpty(leftRowIndexList)) {
@@ -9697,7 +9695,7 @@ public class RowDataSet implements DataSet, Cloneable {
                 final Collection<Object> coll = collSupplier.apply(rightRowIndexList.size());
 
                 for (int righRowIndex : rightRowIndexList) {
-                    coll.add(right.getRow(newColumnClass, righRowIndex));
+                    coll.add(right.getRow(righRowIndex, newColumnType));
                 }
 
                 newColumnList.get(newColumnIndex).add(coll);
@@ -9710,7 +9708,7 @@ public class RowDataSet implements DataSet, Cloneable {
             final Collection<Object> coll = collSupplier.apply(rightRowIndexList.size());
 
             for (int righRowIndex : rightRowIndexList) {
-                coll.add(right.getRow(newColumnClass, righRowIndex));
+                coll.add(right.getRow(righRowIndex, newColumnType));
             }
 
             newColumnList.get(newColumnIndex).add(coll);
@@ -9911,11 +9909,11 @@ public class RowDataSet implements DataSet, Cloneable {
      * @param right
      * @param onColumnNames
      * @param newColumnName
-     * @param newColumnClass
+     * @param newColumnType
      * @return
      */
     @Override
-    public DataSet fullJoin(final DataSet right, final Map<String, String> onColumnNames, final String newColumnName, final Class<?> newColumnClass) {
+    public DataSet fullJoin(final DataSet right, final Map<String, String> onColumnNames, final String newColumnName, final Class<?> newColumnType) {
         checkJoinOnColumnNames(onColumnNames);
         checkNewColumnName(newColumnName);
 
@@ -9947,14 +9945,14 @@ public class RowDataSet implements DataSet, Cloneable {
                 hashKey = hashKey(leftJoinColumn.get(leftRowIndex));
                 rightRowIndexList = joinColumnRightRowIndexMap.get(hashKey);
 
-                fullJoin(newColumnList, right, newColumnClass, newColumnIndex, leftRowIndex, rightRowIndexList);
+                fullJoin(newColumnList, right, newColumnType, newColumnIndex, leftRowIndex, rightRowIndexList);
 
                 joinColumnLeftRowIndexSet.add(hashKey);
             }
 
             for (Map.Entry<Object, List<Integer>> rightRowIndexEntry : joinColumnRightRowIndexMap.entrySet()) {
                 if (!joinColumnLeftRowIndexSet.contains(rightRowIndexEntry.getKey())) {
-                    fullJoin(newColumnList, right, newColumnClass, newColumnIndex, rightRowIndexEntry.getValue());
+                    fullJoin(newColumnList, right, newColumnType, newColumnIndex, rightRowIndexEntry.getValue());
                 }
             }
 
@@ -10001,7 +9999,7 @@ public class RowDataSet implements DataSet, Cloneable {
 
                 rightRowIndexList = joinColumnRightRowIndexMap.get(row);
 
-                fullJoin(newColumnList, right, newColumnClass, newColumnIndex, leftRowIndex, rightRowIndexList);
+                fullJoin(newColumnList, right, newColumnType, newColumnIndex, leftRowIndex, rightRowIndexList);
 
                 if (!joinColumnLeftRowIndexMap.containsKey(row)) {
                     joinColumnLeftRowIndexMap.put(row, leftRowIndex);
@@ -10016,7 +10014,7 @@ public class RowDataSet implements DataSet, Cloneable {
 
             for (Map.Entry<Object[], List<Integer>> rightRowIndexEntry : joinColumnRightRowIndexMap.entrySet()) {
                 if (!joinColumnLeftRowIndexMap.containsKey(rightRowIndexEntry.getKey())) {
-                    fullJoin(newColumnList, right, newColumnClass, newColumnIndex, rightRowIndexEntry.getValue());
+                    fullJoin(newColumnList, right, newColumnType, newColumnIndex, rightRowIndexEntry.getValue());
                 }
             }
 
@@ -10036,18 +10034,18 @@ public class RowDataSet implements DataSet, Cloneable {
      *
      * @param newColumnList
      * @param right
-     * @param newColumnClass
+     * @param newColumnType
      * @param newColumnIndex
      * @param rightRowIndexList
      */
-    private void fullJoin(final List<List<Object>> newColumnList, final DataSet right, final Class<?> newColumnClass, final int newColumnIndex,
+    private void fullJoin(final List<List<Object>> newColumnList, final DataSet right, final Class<?> newColumnType, final int newColumnIndex,
             List<Integer> rightRowIndexList) {
         for (int rightRowIndex : rightRowIndexList) {
             for (int i = 0, leftColumnLength = columnCount(); i < leftColumnLength; i++) {
                 newColumnList.get(i).add(null);
             }
 
-            newColumnList.get(newColumnIndex).add(right.getRow(newColumnClass, rightRowIndex));
+            newColumnList.get(newColumnIndex).add(right.getRow(rightRowIndex, newColumnType));
         }
     }
 
@@ -10055,20 +10053,20 @@ public class RowDataSet implements DataSet, Cloneable {
      *
      * @param newColumnList
      * @param right
-     * @param newColumnClass
+     * @param newColumnType
      * @param newColumnIndex
      * @param leftRowIndex
      * @param rightRowIndexList
      */
-    private void fullJoin(final List<List<Object>> newColumnList, final DataSet right, final Class<?> newColumnClass, final int newColumnIndex,
-            int leftRowIndex, List<Integer> rightRowIndexList) {
+    private void fullJoin(final List<List<Object>> newColumnList, final DataSet right, final Class<?> newColumnType, final int newColumnIndex, int leftRowIndex,
+            List<Integer> rightRowIndexList) {
         if (N.notEmpty(rightRowIndexList)) {
             for (int rightRowIndex : rightRowIndexList) {
                 for (int i = 0, leftColumnLength = columnCount(); i < leftColumnLength; i++) {
                     newColumnList.get(i).add(_columnList.get(i).get(leftRowIndex));
                 }
 
-                newColumnList.get(newColumnIndex).add(right.getRow(newColumnClass, rightRowIndex));
+                newColumnList.get(newColumnIndex).add(right.getRow(rightRowIndex, newColumnType));
             }
         } else {
             for (int i = 0, leftColumnLength = columnCount(); i < leftColumnLength; i++) {
@@ -10084,13 +10082,13 @@ public class RowDataSet implements DataSet, Cloneable {
      * @param right
      * @param onColumnNames
      * @param newColumnName
-     * @param newColumnClass
+     * @param newColumnType
      * @param collSupplier
      * @return
      */
     @SuppressWarnings("rawtypes")
     @Override
-    public DataSet fullJoin(final DataSet right, final Map<String, String> onColumnNames, final String newColumnName, final Class<?> newColumnClass,
+    public DataSet fullJoin(final DataSet right, final Map<String, String> onColumnNames, final String newColumnName, final Class<?> newColumnType,
             final IntFunction<? extends Collection> collSupplier) {
         checkJoinOnColumnNames(onColumnNames);
         checkNewColumnName(newColumnName);
@@ -10124,14 +10122,14 @@ public class RowDataSet implements DataSet, Cloneable {
                 hashKey = hashKey(leftJoinColumn.get(leftRowIndex));
                 rightRowIndexList = joinColumnRightRowIndexMap.get(hashKey);
 
-                fullJoin(newColumnList, right, newColumnClass, collSupplier, newColumnIndex, leftRowIndex, rightRowIndexList);
+                fullJoin(newColumnList, right, newColumnType, collSupplier, newColumnIndex, leftRowIndex, rightRowIndexList);
 
                 joinColumnLeftRowIndexSet.add(hashKey);
             }
 
             for (Map.Entry<Object, List<Integer>> rightRowIndexEntry : joinColumnRightRowIndexMap.entrySet()) {
                 if (!joinColumnLeftRowIndexSet.contains(rightRowIndexEntry.getKey())) {
-                    fullJoin(newColumnList, right, newColumnClass, collSupplier, newColumnIndex, rightRowIndexEntry.getValue());
+                    fullJoin(newColumnList, right, newColumnType, collSupplier, newColumnIndex, rightRowIndexEntry.getValue());
                 }
             }
 
@@ -10177,7 +10175,7 @@ public class RowDataSet implements DataSet, Cloneable {
 
                 rightRowIndexList = joinColumnRightRowIndexMap.get(row);
 
-                fullJoin(newColumnList, right, newColumnClass, collSupplier, newColumnIndex, leftRowIndex, rightRowIndexList);
+                fullJoin(newColumnList, right, newColumnType, collSupplier, newColumnIndex, leftRowIndex, rightRowIndexList);
 
                 if (!joinColumnLeftRowIndexMap.containsKey(row)) {
                     joinColumnLeftRowIndexMap.put(row, leftRowIndex);
@@ -10192,7 +10190,7 @@ public class RowDataSet implements DataSet, Cloneable {
 
             for (Map.Entry<Object[], List<Integer>> rightRowIndexEntry : joinColumnRightRowIndexMap.entrySet()) {
                 if (!joinColumnLeftRowIndexMap.containsKey(rightRowIndexEntry.getKey())) {
-                    fullJoin(newColumnList, right, newColumnClass, collSupplier, newColumnIndex, rightRowIndexEntry.getValue());
+                    fullJoin(newColumnList, right, newColumnType, collSupplier, newColumnIndex, rightRowIndexEntry.getValue());
                 }
             }
 
@@ -10212,13 +10210,13 @@ public class RowDataSet implements DataSet, Cloneable {
      *
      * @param newColumnList
      * @param right
-     * @param newColumnClass
+     * @param newColumnType
      * @param collSupplier
      * @param newColumnIndex
      * @param rightRowIndexList
      */
     @SuppressWarnings("rawtypes")
-    private void fullJoin(final List<List<Object>> newColumnList, final DataSet right, final Class<?> newColumnClass,
+    private void fullJoin(final List<List<Object>> newColumnList, final DataSet right, final Class<?> newColumnType,
             final IntFunction<? extends Collection> collSupplier, final int newColumnIndex, final List<Integer> rightRowIndexList) {
         for (int i = 0, leftColumnLength = columnCount(); i < leftColumnLength; i++) {
             newColumnList.get(i).add(null);
@@ -10227,7 +10225,7 @@ public class RowDataSet implements DataSet, Cloneable {
         final Collection<Object> coll = collSupplier.apply(rightRowIndexList.size());
 
         for (int rightRowIndex : rightRowIndexList) {
-            coll.add(right.getRow(newColumnClass, rightRowIndex));
+            coll.add(right.getRow(rightRowIndex, newColumnType));
         }
 
         newColumnList.get(newColumnIndex).add(coll);
@@ -10237,14 +10235,14 @@ public class RowDataSet implements DataSet, Cloneable {
      *
      * @param newColumnList
      * @param right
-     * @param newColumnClass
+     * @param newColumnType
      * @param collSupplier
      * @param newColumnIndex
      * @param leftRowIndex
      * @param rightRowIndexList
      */
     @SuppressWarnings("rawtypes")
-    private void fullJoin(final List<List<Object>> newColumnList, final DataSet right, final Class<?> newColumnClass,
+    private void fullJoin(final List<List<Object>> newColumnList, final DataSet right, final Class<?> newColumnType,
             final IntFunction<? extends Collection> collSupplier, final int newColumnIndex, int leftRowIndex, List<Integer> rightRowIndexList) {
         if (N.notEmpty(rightRowIndexList)) {
             for (int i = 0, leftColumnLength = columnCount(); i < leftColumnLength; i++) {
@@ -10254,7 +10252,7 @@ public class RowDataSet implements DataSet, Cloneable {
             final Collection<Object> coll = collSupplier.apply(rightRowIndexList.size());
 
             for (int rightRowIndex : rightRowIndexList) {
-                coll.add(right.getRow(newColumnClass, rightRowIndex));
+                coll.add(right.getRow(rightRowIndex, newColumnType));
             }
 
             newColumnList.get(newColumnIndex).add(coll);
@@ -11341,17 +11339,17 @@ public class RowDataSet implements DataSet, Cloneable {
      */
     @Override
     public Stream<DataSet> split(final int chunkSize) {
-        return split(_columnNameList, chunkSize);
+        return split(chunkSize, _columnNameList);
     }
 
     /**
      *
-     * @param columnNames
      * @param chunkSize
+     * @param columnNames
      * @return
      */
     @Override
-    public Stream<DataSet> split(final Collection<String> columnNames, final int chunkSize) {
+    public Stream<DataSet> split(final int chunkSize, final Collection<String> columnNames) {
         final int[] columnIndexes = checkColumnName(columnNames);
         N.checkArgPositive(chunkSize, "chunkSize");
 
@@ -11374,17 +11372,17 @@ public class RowDataSet implements DataSet, Cloneable {
      */
     @Override
     public List<DataSet> splitToList(final int chunkSize) {
-        return splitToList(_columnNameList, chunkSize);
+        return splitToList(chunkSize, _columnNameList);
     }
 
     /**
      *
-     * @param columnNames
      * @param chunkSize
+     * @param columnNames
      * @return
      */
     @Override
-    public List<DataSet> splitToList(final Collection<String> columnNames, final int chunkSize) {
+    public List<DataSet> splitToList(final int chunkSize, final Collection<String> columnNames) {
         final int[] columnIndexes = checkColumnName(columnNames);
         N.checkArgPositive(chunkSize, "chunkSize");
 
@@ -11423,50 +11421,50 @@ public class RowDataSet implements DataSet, Cloneable {
     //    }
 
     //    @Override
-    //    public <T> List<List<T>> split(final Class<? extends T> rowClass, final int size) {
-    //        return split(rowClass, _columnNameList, size);
+    //    public <T> List<List<T>> split(final int size, final Class<? extends T> rowType) {
+    //        return split(_columnNameList, size, rowType);
     //    }
     //
     //    @Override
-    //    public <T> List<List<T>> split(final Class<? extends T> rowClass, final Collection<String> columnNames, final int size) {
-    //        return split(rowClass, columnNames, 0, size(), size);
+    //    public <T> List<List<T>> split(final Collection<String> columnNames, final int size, final Class<? extends T> rowType) {
+    //        return split(columnNames, 0, size(), size, rowType);
     //    }
     //
     //    @Override
-    //    public <T> List<List<T>> split(final Class<? extends T> rowClass, final int fromRowIndex, final int toRowIndex, final int size) {
-    //        return split(rowClass, _columnNameList, fromRowIndex, toRowIndex, size);
+    //    public <T> List<List<T>> split(final int fromRowIndex, final int toRowIndex, final int size, final Class<? extends T> rowType) {
+    //        return split(_columnNameList, fromRowIndex, toRowIndex, size, rowType);
     //    }
     //
     //    @Override
-    //    public <T> List<List<T>> split(final Class<? extends T> rowClass, final Collection<String> columnNames, final int fromRowIndex, final int toRowIndex,
-    //            final int size) {
+    //    public <T> List<List<T>> split(final Collection<String> columnNames, final int fromRowIndex, final int toRowIndex,
+    //            final int size, final Class<? extends T> rowType) {
     //        checkRowIndex(fromRowIndex, toRowIndex);
     //
-    //        final List<T> list = this.toList(rowClass, columnNames, fromRowIndex, toRowIndex);
+    //        final List<T> list = this.toList(columnNames, fromRowIndex, toRowIndex, rowType);
     //
     //        return N.split(list, size);
     //    }
     //
     //    @Override
-    //    public <T> List<List<T>> split(IntFunction<? extends T> rowSupplier, int size) {
-    //        return split(rowSupplier, _columnNameList, size);
+    //    public <T> List<List<T>> split(int size, IntFunction<? extends T> rowSupplier) {
+    //        return split(_columnNameList, size, rowSupplier);
     //    }
     //
     //    @Override
-    //    public <T> List<List<T>> split(IntFunction<? extends T> rowSupplier, Collection<String> columnNames, int size) {
-    //        return split(rowSupplier, columnNames, 0, size(), size);
+    //    public <T> List<List<T>> split(Collection<String> columnNames, int size, IntFunction<? extends T> rowSupplier) {
+    //        return split(columnNames, 0, size(), size, rowSupplier);
     //    }
     //
     //    @Override
-    //    public <T> List<List<T>> split(IntFunction<? extends T> rowSupplier, int fromRowIndex, int toRowIndex, int size) {
-    //        return split(rowSupplier, _columnNameList, fromRowIndex, toRowIndex, size);
+    //    public <T> List<List<T>> split(int fromRowIndex, int toRowIndex, int size, IntFunction<? extends T> rowSupplier) {
+    //        return split(_columnNameList, fromRowIndex, toRowIndex, size, rowSupplier);
     //    }
     //
     //    @Override
-    //    public <T> List<List<T>> split(IntFunction<? extends T> rowSupplier, Collection<String> columnNames, int fromRowIndex, int toRowIndex, int size) {
+    //    public <T> List<List<T>> split(Collection<String> columnNames, int fromRowIndex, int toRowIndex, int size, IntFunction<? extends T> rowSupplier) {
     //        checkRowIndex(fromRowIndex, toRowIndex);
     //
-    //        final List<T> list = this.toList(rowSupplier, columnNames, fromRowIndex, toRowIndex);
+    //        final List<T> list = this.toList(columnNames, fromRowIndex, toRowIndex, rowSupplier);
     //
     //        return N.split(list, size);
     //    }
@@ -11754,51 +11752,51 @@ public class RowDataSet implements DataSet, Cloneable {
     /**
      *
      * @param <T>
-     * @param rowClass
+     * @param rowType
      * @return
      */
     @Override
-    public <T> Stream<T> stream(Class<? extends T> rowClass) {
-        return stream(rowClass, 0, size());
+    public <T> Stream<T> stream(Class<? extends T> rowType) {
+        return stream(0, size(), rowType);
     }
 
     /**
      *
-     * @param <T>
-     * @param rowClass
      * @param fromRowIndex
      * @param toRowIndex
+     * @param rowType
+     * @param <T>
      * @return
      */
     @Override
-    public <T> Stream<T> stream(Class<? extends T> rowClass, int fromRowIndex, int toRowIndex) {
-        return stream(rowClass, fromRowIndex, toRowIndex, _columnNameList);
+    public <T> Stream<T> stream(int fromRowIndex, int toRowIndex, Class<? extends T> rowType) {
+        return stream(fromRowIndex, toRowIndex, _columnNameList, rowType);
     }
 
     /**
      *
-     * @param <T>
-     * @param rowClass
      * @param columnNames
+     * @param rowType
+     * @param <T>
      * @return
      */
     @Override
-    public <T> Stream<T> stream(Class<? extends T> rowClass, Collection<String> columnNames) {
-        return stream(rowClass, 0, size(), columnNames);
+    public <T> Stream<T> stream(Collection<String> columnNames, Class<? extends T> rowType) {
+        return stream(0, size(), columnNames, rowType);
     }
 
     /**
      *
-     * @param <T>
-     * @param rowClass
      * @param fromRowIndex
      * @param toRowIndex
      * @param columnNames
+     * @param rowType
+     * @param <T>
      * @return
      */
     @Override
-    public <T> Stream<T> stream(final Class<? extends T> rowClass, final int fromRowIndex, final int toRowIndex, final Collection<String> columnNames) {
-        return stream(rowClass, fromRowIndex, toRowIndex, columnNames, null, null);
+    public <T> Stream<T> stream(final int fromRowIndex, final int toRowIndex, final Collection<String> columnNames, final Class<? extends T> rowType) {
+        return stream(fromRowIndex, toRowIndex, columnNames, null, rowType, null);
     }
 
     /**
@@ -11852,72 +11850,72 @@ public class RowDataSet implements DataSet, Cloneable {
     @Override
     public <T> Stream<T> stream(final int fromRowIndex, final int toRowIndex, final Collection<String> columnNames,
             final IntFunction<? extends T> rowSupplier) {
-        return stream(null, fromRowIndex, toRowIndex, columnNames, null, rowSupplier);
+        return stream(fromRowIndex, toRowIndex, columnNames, null, null, rowSupplier);
     }
 
     /**
      *
      *
-     * @param <T>
-     * @param beanClass
      * @param prefixAndFieldNameMap
+     * @param rowType
+     * @param <T>
      * @return
      */
     @Override
-    public <T> Stream<T> stream(Class<? extends T> beanClass, Map<String, String> prefixAndFieldNameMap) {
-        return stream(beanClass, 0, size(), this._columnNameList, prefixAndFieldNameMap);
+    public <T> Stream<T> stream(Map<String, String> prefixAndFieldNameMap, Class<? extends T> rowType) {
+        return stream(0, size(), this._columnNameList, prefixAndFieldNameMap, rowType);
     }
 
     /**
      *
      *
-     * @param <T>
-     * @param beanClass
      * @param fromRowIndex
      * @param toRowIndex
      * @param prefixAndFieldNameMap
+     * @param rowType
+     * @param <T>
      * @return
      */
     @Override
-    public <T> Stream<T> stream(Class<? extends T> beanClass, int fromRowIndex, int toRowIndex, Map<String, String> prefixAndFieldNameMap) {
-        return stream(beanClass, fromRowIndex, toRowIndex, this._columnNameList, prefixAndFieldNameMap);
+    public <T> Stream<T> stream(int fromRowIndex, int toRowIndex, Map<String, String> prefixAndFieldNameMap, Class<? extends T> rowType) {
+        return stream(fromRowIndex, toRowIndex, this._columnNameList, prefixAndFieldNameMap, rowType);
     }
 
     /**
      *
      *
-     * @param <T>
-     * @param beanClass
      * @param columnNames
      * @param prefixAndFieldNameMap
+     * @param rowType
+     * @param <T>
      * @return
      */
     @Override
-    public <T> Stream<T> stream(Class<? extends T> beanClass, Collection<String> columnNames, Map<String, String> prefixAndFieldNameMap) {
-        return stream(beanClass, 0, size(), columnNames, prefixAndFieldNameMap);
+    public <T> Stream<T> stream(Collection<String> columnNames, Map<String, String> prefixAndFieldNameMap, Class<? extends T> rowType) {
+        return stream(0, size(), columnNames, prefixAndFieldNameMap, rowType);
     }
 
     /**
      *
      *
-     * @param <T>
-     * @param beanClass
      * @param fromRowIndex
      * @param toRowIndex
      * @param columnNames
      * @param prefixAndFieldNameMap
+     * @param rowType
+     * @param <T>
      * @return
      */
     @Override
-    public <T> Stream<T> stream(Class<? extends T> beanClass, int fromRowIndex, int toRowIndex, Collection<String> columnNames,
-            final Map<String, String> prefixAndFieldNameMap) {
-        N.checkArgument(ClassUtil.isBeanClass(beanClass), "{} is not a bean class", beanClass);
+    public <T> Stream<T> stream(int fromRowIndex, int toRowIndex, Collection<String> columnNames, final Map<String, String> prefixAndFieldNameMap,
+            Class<? extends T> rowType) {
+        N.checkArgument(ClassUtil.isBeanClass(rowType), "{} is not a bean class", rowType);
 
-        return stream(beanClass, fromRowIndex, toRowIndex, columnNames, prefixAndFieldNameMap, null);
+        return stream(fromRowIndex, toRowIndex, columnNames, prefixAndFieldNameMap, rowType, null);
     }
 
-    private <T> Stream<T> stream(final Class<? extends T> inputRowClass, final int fromRowIndex, final int toRowIndex,
-            final Collection<String> inputColumnNames, final Map<String, String> prefixAndFieldNameMap, final IntFunction<? extends T> inputRowSupplier) {
+    private <T> Stream<T> stream(final int fromRowIndex, final int toRowIndex, final Collection<String> inputColumnNames,
+            final Map<String, String> prefixAndFieldNameMap, final Class<? extends T> inputRowClass, final IntFunction<? extends T> inputRowSupplier) {
         checkRowIndex(fromRowIndex, toRowIndex);
 
         final Collection<String> columnNames = N.isEmpty(inputColumnNames) ? this._columnNameList : inputColumnNames;
@@ -11932,7 +11930,7 @@ public class RowDataSet implements DataSet, Cloneable {
         final Type<T> rowType = N.typeOf(rowClass);
         final BeanInfo beanInfo = rowType.isBean() ? ParserUtil.getBeanInfo(rowClass) : null;
 
-        final IntFunction<? extends T> rowSupplier = inputRowSupplier == null && !rowType.isBean() ? this.createRowSupplier(rowType, rowClass)
+        final IntFunction<? extends T> rowSupplier = inputRowSupplier == null && !rowType.isBean() ? this.createRowSupplier(rowClass, rowType)
                 : inputRowSupplier;
 
         return Stream.of(new ObjIteratorEx<T>() {
@@ -11954,7 +11952,7 @@ public class RowDataSet implements DataSet, Cloneable {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
-                return getRow(rowType, rowClass, beanInfo, cursor++, columnNames, columnIndexes, columnCount, prefixAndFieldNameMap, rowSupplier);
+                return getRow(beanInfo, cursor++, columnNames, columnIndexes, columnCount, prefixAndFieldNameMap, rowClass, rowType, rowSupplier);
             }
 
             @Override
@@ -11977,7 +11975,7 @@ public class RowDataSet implements DataSet, Cloneable {
             public <A> A[] toArray(A[] a) {
                 checkConcurrentModification();
 
-                final List<T> rows = RowDataSet.this.toList(rowClass, cursor, toRowIndex, columnNames, prefixAndFieldNameMap, rowSupplier);
+                final List<T> rows = RowDataSet.this.toList(cursor, toRowIndex, columnNames, prefixAndFieldNameMap, rowClass, rowSupplier);
 
                 a = a.length >= rows.size() ? a : (A[]) N.newArray(a.getClass().getComponentType(), rows.size());
 
@@ -12518,7 +12516,7 @@ public class RowDataSet implements DataSet, Cloneable {
      */
     @Override
     public void println(int fromRowIndex, int toRowIndex, Collection<String> columnNames) {
-        println(IOUtil.newOutputStreamWriter(System.out), fromRowIndex, toRowIndex, columnNames); // NOSONAR
+        println(fromRowIndex, toRowIndex, columnNames, IOUtil.newOutputStreamWriter(System.out)); // NOSONAR
     }
 
     /**
@@ -12529,20 +12527,20 @@ public class RowDataSet implements DataSet, Cloneable {
      */
     @Override
     public void println(final Writer outputWriter) throws UncheckedIOException {
-        println(outputWriter, 0, size(), _columnNameList);
+        println(0, size(), _columnNameList, outputWriter);
     }
 
     /**
      *
-     * @param <W>
-     * @param outputWriter
      * @param fromRowIndex
      * @param toRowIndex
      * @param columnNames
+     * @param outputWriter
+     * @param <W>
      * @throws UncheckedIOException the unchecked IO exception
      */
     @Override
-    public void println(final Writer outputWriter, int fromRowIndex, int toRowIndex, Collection<String> columnNames) throws UncheckedIOException {
+    public void println(int fromRowIndex, int toRowIndex, Collection<String> columnNames, final Writer outputWriter) throws UncheckedIOException {
         final int[] columnIndexes = N.isEmpty(columnNames) ? N.EMPTY_INT_ARRAY : checkColumnName(columnNames);
         checkRowIndex(fromRowIndex, toRowIndex);
         N.checkArgNotNull(outputWriter, "outputWriter");
@@ -12713,7 +12711,7 @@ public class RowDataSet implements DataSet, Cloneable {
         final BufferedWriter bw = Objectory.createBufferedWriter();
 
         try {
-            toCSV(bw, true, false);
+            toCSV(true, false, bw);
 
             return bw.toString();
         } finally {

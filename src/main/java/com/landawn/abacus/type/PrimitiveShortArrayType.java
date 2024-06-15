@@ -202,25 +202,25 @@ public final class PrimitiveShortArrayType extends AbstractPrimitiveArrayType<sh
 
     /**
      * Array 2 collection.
+     * @param x
+     * @param output
      *
      * @param <E>
-     * @param resultCollection
-     * @param x
      * @return
      */
     @Override
-    public <E> Collection<E> array2Collection(Collection<E> resultCollection, short[] x) {
+    public <E> Collection<E> array2Collection(final short[] x, final Collection<E> output) {
         if (N.isEmpty(x)) {
-            return resultCollection;
+            return output;
         }
 
-        Collection<Object> c = (Collection<Object>) resultCollection;
+        Collection<Object> c = (Collection<Object>) output;
 
         for (short element : x) {
             c.add(element);
         }
 
-        return resultCollection;
+        return output;
     }
 
     /**

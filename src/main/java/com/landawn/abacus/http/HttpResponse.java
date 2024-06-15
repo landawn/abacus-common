@@ -159,11 +159,11 @@ public class HttpResponse {
             return (T) body;
         } else {
             if (bodyFormat == ContentFormat.KRYO && HttpUtil.kryoParser != null) {
-                return HttpUtil.kryoParser.deserialize(resultClass, new ByteArrayInputStream(body));
+                return HttpUtil.kryoParser.deserialize(new ByteArrayInputStream(body), resultClass);
             } else if (bodyFormat == ContentFormat.FormUrlEncoded) {
                 return URLEncodedUtil.decode(new String(body, respCharset), resultClass);
             } else {
-                return HttpUtil.getParser(bodyFormat).deserialize(resultClass, new String(body, respCharset));
+                return HttpUtil.getParser(bodyFormat).deserialize(new String(body, respCharset), resultClass);
             }
         }
     }
@@ -183,15 +183,15 @@ public class HttpResponse {
             return (T) body;
         } else {
             if (bodyFormat == ContentFormat.KRYO && HttpUtil.kryoParser != null) {
-                return HttpUtil.kryoParser.deserialize(resultType.clazz(), new ByteArrayInputStream(body));
+                return HttpUtil.kryoParser.deserialize(new ByteArrayInputStream(body), resultType.clazz());
             } else if (bodyFormat == ContentFormat.FormUrlEncoded) {
                 return URLEncodedUtil.decode(new String(body, respCharset), resultType.clazz());
             } else if (bodyFormat != null && bodyFormat.name().contains("JSON")) {
-                return N.fromJSON(resultType, new String(body, respCharset));
+                return N.fromJSON(new String(body, respCharset), resultType);
             } else if (bodyFormat != null && bodyFormat.name().contains("XML")) {
-                return N.fromXML(resultType, new String(body, respCharset));
+                return N.fromXML(new String(body, respCharset), resultType);
             } else {
-                return HttpUtil.getParser(bodyFormat).deserialize(resultType.clazz(), new String(body, respCharset));
+                return HttpUtil.getParser(bodyFormat).deserialize(new String(body, respCharset), resultType.clazz());
             }
         }
     }

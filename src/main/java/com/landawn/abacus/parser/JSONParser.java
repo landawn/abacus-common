@@ -32,170 +32,170 @@ public interface JSONParser extends Parser<JSONSerializationConfig, JSONDeserial
 
     /**
      *
-     * @param <T>
+     * @param source
      * @param targetClass
-     * @param str
+     * @param <T>
      * @return
      */
-    <T> T readString(Class<? extends T> targetClass, String str);
+    <T> T readString(String source, Class<? extends T> targetClass);
 
     /**
      *
-     * @param <T>
-     * @param targetClass
-     * @param str
+     * @param source
      * @param config
+     * @param targetClass
+     * @param <T>
      * @return
      */
-    <T> T readString(Class<? extends T> targetClass, String str, JSONDeserializationConfig config);
+    <T> T readString(String source, JSONDeserializationConfig config, Class<? extends T> targetClass);
 
     /**
      *
-     * @param outResult
-     * @param str
+     * @param source
+     * @param output
      */
-    void readString(Object[] outResult, String str);
+    void readString(String source, Object[] output);
 
     /**
      *
-     * @param outResult
-     * @param str
+     * @param source
      * @param config
+     * @param output
      */
-    void readString(Object[] outResult, String str, JSONDeserializationConfig config);
+    void readString(String source, JSONDeserializationConfig config, Object[] output);
 
     /**
      *
-     * @param outResult
-     * @param str
+     * @param source
+     * @param output
      */
-    void readString(Collection<?> outResult, String str);
+    void readString(String source, Collection<?> output);
 
     /**
      *
-     * @param outResult
-     * @param str
+     * @param source
      * @param config
+     * @param output
      */
-    void readString(Collection<?> outResult, String str, JSONDeserializationConfig config);
+    void readString(String source, JSONDeserializationConfig config, Collection<?> output);
 
     /**
      *
-     * @param outResult
-     * @param str
+     * @param source
+     * @param output
      */
-    void readString(Map<?, ?> outResult, String str);
+    void readString(String source, Map<?, ?> output);
 
     /**
      *
-     * @param outResult
-     * @param str
+     * @param source
      * @param config
+     * @param output
      */
-    void readString(Map<?, ?> outResult, String str, JSONDeserializationConfig config);
+    void readString(String source, JSONDeserializationConfig config, Map<?, ?> output);
 
     /**
      *
-     * @param <T>
-     * @param targetClass
-     * @param str
+     * @param source
      * @param fromIndex
      * @param toIndex
+     * @param targetClass
+     * @param <T>
      * @return
      */
-    <T> T deserialize(Class<? extends T> targetClass, String str, int fromIndex, int toIndex);
+    <T> T deserialize(String source, int fromIndex, int toIndex, Class<? extends T> targetClass);
 
     /**
      *
-     * @param <T>
-     * @param targetClass
-     * @param str
+     * @param source
      * @param fromIndex
      * @param toIndex
      * @param config
+     * @param targetClass
+     * @param <T>
      * @return
      */
-    <T> T deserialize(Class<? extends T> targetClass, String str, int fromIndex, int toIndex, JSONDeserializationConfig config);
+    <T> T deserialize(String source, int fromIndex, int toIndex, JSONDeserializationConfig config, Class<? extends T> targetClass);
 
     /**
      *
-     * @param <T>
-     * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
      * @param source
+     * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
+     * @param <T>
      * @return
      */
-    <T> CheckedStream<T, IOException> stream(Class<? extends T> elementClass, String source);
+    <T> CheckedStream<T, IOException> stream(String source, Class<? extends T> elementClass);
 
     /**
      *
-     * @param <T>
-     * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
-     * @param source
-     * @param config
-     * @return
-     */
-    <T> CheckedStream<T, IOException> stream(Class<? extends T> elementClass, String source, JSONDeserializationConfig config);
-
-    /**
-     *
-     * @param <T>
-     * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
-     * @param source
-     * @return
-     */
-    <T> CheckedStream<T, IOException> stream(Class<? extends T> elementClass, File source);
-
-    /**
-     *
-     * @param <T>
-     * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
      * @param source
      * @param config
+     * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
+     * @param <T>
      * @return
      */
-    <T> CheckedStream<T, IOException> stream(Class<? extends T> elementClass, File source, JSONDeserializationConfig config);
+    <T> CheckedStream<T, IOException> stream(String source, JSONDeserializationConfig config, Class<? extends T> elementClass);
 
     /**
      *
-     * @param <T>
+     * @param source
      * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
+     * @param <T>
+     * @return
+     */
+    <T> CheckedStream<T, IOException> stream(File source, Class<? extends T> elementClass);
+
+    /**
+     *
+     * @param source
+     * @param config
+     * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
+     * @param <T>
+     * @return
+     */
+    <T> CheckedStream<T, IOException> stream(File source, JSONDeserializationConfig config, Class<? extends T> elementClass);
+
+    /**
+     *
      * @param source
      * @param closeInputStreamWhenStreamIsClosed
+     * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
+     * @param <T>
      * @return
      */
-    <T> CheckedStream<T, IOException> stream(Class<? extends T> elementClass, InputStream source, boolean closeInputStreamWhenStreamIsClosed);
+    <T> CheckedStream<T, IOException> stream(InputStream source, boolean closeInputStreamWhenStreamIsClosed, Class<? extends T> elementClass);
 
     /**
      *
-     * @param <T>
-     * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
      * @param source
+     * @param config
      * @param closeInputStreamWhenStreamIsClosed
-     * @param config
+     * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
+     * @param <T>
      * @return
      */
-    <T> CheckedStream<T, IOException> stream(Class<? extends T> elementClass, InputStream source, boolean closeInputStreamWhenStreamIsClosed,
-            JSONDeserializationConfig config);
+    <T> CheckedStream<T, IOException> stream(InputStream source, JSONDeserializationConfig config, boolean closeInputStreamWhenStreamIsClosed,
+            Class<? extends T> elementClass);
 
     /**
      *
-     * @param <T>
-     * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
      * @param source
      * @param closeReaderWhenStreamIsClosed
+     * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
+     * @param <T>
      * @return
      */
-    <T> CheckedStream<T, IOException> stream(Class<? extends T> elementClass, Reader source, boolean closeReaderWhenStreamIsClosed);
+    <T> CheckedStream<T, IOException> stream(Reader source, boolean closeReaderWhenStreamIsClosed, Class<? extends T> elementClass);
 
     /**
      *
-     * @param <T>
-     * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
      * @param source
-     * @param closeReaderWhenStreamIsClosed
      * @param config
+     * @param closeReaderWhenStreamIsClosed
+     * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
+     * @param <T>
      * @return
      */
-    <T> CheckedStream<T, IOException> stream(Class<? extends T> elementClass, Reader source, boolean closeReaderWhenStreamIsClosed,
-            JSONDeserializationConfig config);
+    <T> CheckedStream<T, IOException> stream(Reader source, JSONDeserializationConfig config, boolean closeReaderWhenStreamIsClosed,
+            Class<? extends T> elementClass);
 }

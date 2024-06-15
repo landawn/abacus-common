@@ -127,7 +127,7 @@ public class TripleType<L, M, R> extends AbstractType<Triple<L, M, R>> {
             return null; // NOSONAR
         }
 
-        final Object[] a = Utils.jsonParser.deserialize(Object[].class, str, Utils.jdc);
+        final Object[] a = Utils.jsonParser.deserialize(str, Utils.jdc, Object[].class);
 
         final L left = a[0] == null ? null : ((L) (leftType.clazz().isAssignableFrom(a[0].getClass()) ? a[0] : N.convert(a[0], leftType)));
         final M middle = a[1] == null ? null : ((M) (middleType.clazz().isAssignableFrom(a[1].getClass()) ? a[1] : N.convert(a[1], middleType)));

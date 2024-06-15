@@ -200,23 +200,23 @@ public class EventBus {
      * @return
      */
     public List<Object> getSubscribers(final Class<?> eventType) {
-        return getSubscribers(eventType, null);
+        return getSubscribers(null, eventType);
     }
 
     /**
      * Returns the subscriber which is registered with specified <code>eventType</code>(or its sub types) and <code>eventId</code>.
-     *
-     * @param eventType
      * @param eventId
+     * @param eventType
+     *
      * @return
      */
-    public List<Object> getSubscribers(final Class<?> eventType, final String eventId) {
+    public List<Object> getSubscribers(final String eventId, final Class<?> eventType) {
         final List<Object> eventSubs = new ArrayList<>();
 
         synchronized (registeredSubMap) {
             for (Map.Entry<Object, List<SubIdentifier>> entry : registeredSubMap.entrySet()) {
                 for (SubIdentifier sub : entry.getValue()) {
-                    if (sub.isMyEvent(eventType, eventId)) {
+                    if (sub.isMyEvent(eventId, eventType)) {
                         eventSubs.add(entry.getKey());
 
                         break;
@@ -353,7 +353,7 @@ public class EventBus {
                 }
 
                 for (Map.Entry<Object, String> entry : localMapOfStickyEvent.entrySet()) {
-                    if (sub.isMyEvent(entry.getKey().getClass(), entry.getValue())) {
+                    if (sub.isMyEvent(entry.getValue(), entry.getKey().getClass())) {
                         try {
                             dispatch(sub, entry.getKey());
                         } catch (Exception e) {
@@ -552,7 +552,7 @@ public class EventBus {
 
         for (List<SubIdentifier> subs : listOfSubs) {
             for (SubIdentifier sub : subs) {
-                if (sub.isMyEvent(cls, eventId)) {
+                if (sub.isMyEvent(eventId, cls)) {
                     try {
                         dispatch(sub, event);
                     } catch (Exception e) {
@@ -631,17 +631,17 @@ public class EventBus {
      * @return true if one or one more than sticky events are removed, otherwise, <code>false</code>.
      */
     public boolean removeStickyEvents(final Class<?> eventType) {
-        return removeStickyEvents(eventType, null);
+        return removeStickyEvents(null, eventType);
     }
 
     /**
      * Remove the sticky events which can be assigned to specified <code>eventType</code> and posted with the specified <code>eventId</code>.
-     *
-     * @param eventType
      * @param eventId
+     * @param eventType
+     *
      * @return true if one or one more than sticky events are removed, otherwise, <code>false</code>.
      */
-    public boolean removeStickyEvents(final Class<?> eventType, final String eventId) {
+    public boolean removeStickyEvents(final String eventId, final Class<?> eventType) {
         final List<Object> keyToRemove = new ArrayList<>();
 
         synchronized (stickyEventMap) {
@@ -685,17 +685,17 @@ public class EventBus {
      * @return
      */
     public List<Object> getStickyEvents(Class<?> eventType) {
-        return getStickyEvents(eventType, null);
+        return getStickyEvents(null, eventType);
     }
 
     /**
      * Returns the sticky events which can be assigned to specified <code>eventType</code> and posted with the specified <code>eventId</code>.
-     *
-     * @param eventType
      * @param eventId
+     * @param eventType
+     *
      * @return
      */
-    public List<Object> getStickyEvents(Class<?> eventType, String eventId) {
+    public List<Object> getStickyEvents(String eventId, Class<?> eventType) {
         final List<Object> result = new ArrayList<>();
 
         synchronized (stickyEventMap) {
@@ -879,12 +879,12 @@ public class EventBus {
 
         /**
          * Checks if is my event.
-         *
-         * @param eventType
          * @param eventId
+         * @param eventType
+         *
          * @return true, if is my event
          */
-        boolean isMyEvent(final Class<?> eventType, final String eventId) {
+        boolean isMyEvent(final String eventId, final Class<?> eventType) {
             if (!N.equals(this.eventId, eventId)) {
                 return false;
             }

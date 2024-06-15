@@ -240,7 +240,7 @@ public class ReaderType extends AbstractType<Reader> {
         } else {
             if (appendable instanceof Writer) {
                 final Writer writer = (Writer) appendable;
-                IOUtil.write(writer, x);
+                IOUtil.write(x, writer);
             } else {
                 appendable.append(IOUtil.readAllToString(x));
             }

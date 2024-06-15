@@ -130,7 +130,7 @@ public class SetMultimapType<K, E> extends AbstractType<SetMultimap<K, E>> {
             return null; // NOSONAR
         }
 
-        final Map<K, Collection<E>> map = Utils.jsonParser.deserialize(Map.class, st, jdc);
+        final Map<K, Collection<E>> map = Utils.jsonParser.deserialize(st, jdc, Map.class);
         final SetMultimap<K, E> multiMap = N.newLinkedSetMultimap(map.size());
 
         for (Map.Entry<K, Collection<E>> entry : map.entrySet()) {

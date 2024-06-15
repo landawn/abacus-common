@@ -37,85 +37,85 @@ abstract class AbstractObjectMapper<C extends MapperConfig> implements ObjectMap
      */
     @Override
     public String write(Object obj) {
-        return write(obj, null);
+        return write(obj, (C) null);
     }
 
     /**
      *
-     * @param output
      * @param obj
-     */
-    @Override
-    public void write(File output, Object obj) {
-        write(output, obj, null);
-    }
-
-    /**
-     *
      * @param output
-     * @param obj
      */
     @Override
-    public void write(OutputStream output, Object obj) {
-        write(output, obj, null);
+    public void write(Object obj, File output) {
+        write(obj, null, output);
     }
 
     /**
      *
+     * @param obj
      * @param output
+     */
+    @Override
+    public void write(Object obj, OutputStream output) {
+        write(obj, null, output);
+    }
+
+    /**
+     *
      * @param obj
+     * @param output
      */
     @Override
-    public void write(Writer output, Object obj) {
-        write(output, obj, null);
+    public void write(Object obj, Writer output) {
+        write(obj, null, output);
     }
 
     /**
      *
+     * @param source
+     * @param targetType
      * @param <T>
-     * @param cls
-     * @param from
      * @return
      */
     @Override
-    public <T> T read(Class<? extends T> cls, String from) {
-        return read(cls, from, null);
+    public <T> T read(String source, Class<? extends T> targetType) {
+        return read(source, null, targetType);
     }
 
     /**
      *
-     * @param <T>
+     * @param source
      * @param cls
-     * @param from
+     * @param <T>
      * @return
      */
     @Override
-    public <T> T read(Class<? extends T> cls, File from) {
-        return read(cls, from, null);
+    public <T> T read(File source, Class<? extends T> cls) {
+        return read(source, null, cls);
     }
 
     /**
      *
-     * @param <T>
+     * @param source
      * @param cls
-     * @param from
+     * @param <T>
      * @return
      */
     @Override
-    public <T> T read(Class<? extends T> cls, InputStream from) {
-        return read(cls, from, null);
+    public <T> T read(InputStream source, Class<? extends T> cls) {
+        return read(source, null, cls);
     }
 
     /**
      *
-     * @param <T>
+     * @param source
      * @param cls
-     * @param from
+     * @param <T>
      * @return
      */
     @Override
-    public <T> T read(Class<? extends T> cls, Reader from) {
-        return read(cls, from, null);
+    public <T> T read(Reader source, Class<? extends T> cls) {
+        return read(source, null, cls);
     }
 
 }

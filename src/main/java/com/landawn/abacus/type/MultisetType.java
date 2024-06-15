@@ -137,7 +137,7 @@ public class MultisetType<E> extends AbstractType<Multiset<E>> {
             return null; // NOSONAR
         }
 
-        final Map<E, Integer> map = Utils.jsonParser.deserialize(Map.class, str, jdc);
+        final Map<E, Integer> map = Utils.jsonParser.deserialize(str, jdc, Map.class);
 
         Multiset<E> multiSet = N.newMultiset(map.size());
 

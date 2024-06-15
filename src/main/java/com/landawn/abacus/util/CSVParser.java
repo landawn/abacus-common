@@ -318,13 +318,13 @@ public class CSVParser {
     /**
      *
      *
-     * @param output
      * @param nextLine
+     * @param output
      * @return
      * @throws ParseException
      * @return the specified output parameter: {@code output}.
      */
-    public String[] parseLineToArray(final String[] output, String nextLine) throws ParseException {
+    public String[] parseLineToArray(String nextLine, final String[] output) throws ParseException {
         final List<String> ret = parseLine(nextLine);
 
         return ret.toArray(output);
@@ -333,13 +333,13 @@ public class CSVParser {
     /**
      *
      *
-     * @param output
      * @param nextLine
+     * @param output
      * @return
      * @throws ParseException
      * @return the specified output parameter: {@code output}.
      */
-    public String[] parseLineMultiToArray(final String[] output, String nextLine) throws ParseException {
+    public String[] parseLineMultiToArray(String nextLine, final String[] output) throws ParseException {
         final List<String> ret = parseLineMulti(nextLine);
 
         return ret.toArray(output);

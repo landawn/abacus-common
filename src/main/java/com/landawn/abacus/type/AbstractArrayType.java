@@ -55,23 +55,23 @@ public abstract class AbstractArrayType<T> extends AbstractType<T> {
 
     /**
      * Array 2 collection.
+     * @param array
+     * @param collClass
      *
      * @param <E>
-     * @param collClass
-     * @param x
      * @return {@code null} if {@code (x == null)}. (auto-generated java doc for return)
      */
     @MayReturnNull
     @Override
-    public <E> Collection<E> array2Collection(Class<?> collClass, T x) {
-        if (x == null) {
+    public <E> Collection<E> array2Collection(T array, Class<?> collClass) {
+        if (array == null) {
             return null; // NOSONAR
         }
 
         @SuppressWarnings("rawtypes")
-        final Collection<E> c = N.newCollection((Class<Collection>) collClass, Array.getLength(x));
+        final Collection<E> c = N.newCollection((Class<Collection>) collClass, Array.getLength(array));
 
-        return array2Collection(c, x);
+        return array2Collection(array, c);
     }
 
     /**

@@ -2682,11 +2682,11 @@ public final class Maps {
      *
      * @param <T>
      * @param m
-     * @param targetClass
+     * @param targetType
      * @return
      */
-    public static <T> T map2Bean(final Map<String, Object> m, final Class<? extends T> targetClass) {
-        return map2Bean(m, false, true, targetClass);
+    public static <T> T map2Bean(final Map<String, Object> m, final Class<? extends T> targetType) {
+        return map2Bean(m, false, true, targetType);
     }
 
     /**
@@ -2696,20 +2696,20 @@ public final class Maps {
      * @param m
      * @param ignoreNullProperty
      * @param ignoreUnmatchedProperty
-     * @param targetClass
+     * @param targetType
      * @return {@code null} if {@code (m == null)}. (auto-generated java doc for return)
      */
     @MayReturnNull
     @SuppressWarnings("unchecked")
     public static <T> T map2Bean(final Map<String, Object> m, final boolean ignoreNullProperty, final boolean ignoreUnmatchedProperty,
-            final Class<? extends T> targetClass) {
-        checkBeanClass(targetClass);
+            final Class<? extends T> targetType) {
+        checkBeanClass(targetType);
 
         if (m == null) {
             return null;
         }
 
-        final BeanInfo beanInfo = ParserUtil.getBeanInfo(targetClass);
+        final BeanInfo beanInfo = ParserUtil.getBeanInfo(targetType);
         final Object result = beanInfo.createBeanResult();
         PropInfo propInfo = null;
 
@@ -2746,18 +2746,18 @@ public final class Maps {
      * @param <T>
      * @param m
      * @param selectPropNames
-     * @param targetClass
+     * @param targetType
      * @return {@code null} if {@code (m == null)}. (auto-generated java doc for return)
      */
     @MayReturnNull
-    public static <T> T map2Bean(final Map<String, Object> m, final Collection<String> selectPropNames, final Class<? extends T> targetClass) {
-        checkBeanClass(targetClass);
+    public static <T> T map2Bean(final Map<String, Object> m, final Collection<String> selectPropNames, final Class<? extends T> targetType) {
+        checkBeanClass(targetType);
 
         if (m == null) {
             return null;
         }
 
-        final BeanInfo beanInfo = ParserUtil.getBeanInfo(targetClass);
+        final BeanInfo beanInfo = ParserUtil.getBeanInfo(targetType);
         final Object result = beanInfo.createBeanResult();
         PropInfo propInfo = null;
         Object propValue = null;
@@ -2790,11 +2790,11 @@ public final class Maps {
      *
      * @param <T>
      * @param mList
-     * @param targetClass
+     * @param targetType
      * @return
      */
-    public static <T> List<T> map2Bean(final Collection<Map<String, Object>> mList, final Class<? extends T> targetClass) {
-        return map2Bean(mList, false, true, targetClass);
+    public static <T> List<T> map2Bean(final Collection<Map<String, Object>> mList, final Class<? extends T> targetType) {
+        return map2Bean(mList, false, true, targetType);
     }
 
     /**
@@ -2804,17 +2804,17 @@ public final class Maps {
      * @param mList
      * @param igoreNullProperty
      * @param ignoreUnmatchedProperty
-     * @param targetClass
+     * @param targetType
      * @return
      */
     public static <T> List<T> map2Bean(final Collection<Map<String, Object>> mList, final boolean igoreNullProperty, final boolean ignoreUnmatchedProperty,
-            final Class<? extends T> targetClass) {
-        checkBeanClass(targetClass);
+            final Class<? extends T> targetType) {
+        checkBeanClass(targetType);
 
         final List<T> beanList = new ArrayList<>(mList.size());
 
         for (Map<String, Object> m : mList) {
-            beanList.add(map2Bean(m, igoreNullProperty, ignoreUnmatchedProperty, targetClass));
+            beanList.add(map2Bean(m, igoreNullProperty, ignoreUnmatchedProperty, targetType));
         }
 
         return beanList;
@@ -2826,17 +2826,17 @@ public final class Maps {
      * @param <T>
      * @param mList
      * @param selectPropNames
-     * @param targetClass
+     * @param targetType
      * @return
      */
     public static <T> List<T> map2Bean(final Collection<Map<String, Object>> mList, final Collection<String> selectPropNames,
-            final Class<? extends T> targetClass) {
-        checkBeanClass(targetClass);
+            final Class<? extends T> targetType) {
+        checkBeanClass(targetType);
 
         final List<T> beanList = new ArrayList<>(mList.size());
 
         for (Map<String, Object> m : mList) {
-            beanList.add(map2Bean(m, selectPropNames, targetClass));
+            beanList.add(map2Bean(m, selectPropNames, targetType));
         }
 
         return beanList;
@@ -2901,57 +2901,57 @@ public final class Maps {
      */
     public static <M extends Map<String, Object>> M bean2Map(final Object bean, final Collection<String> selectPropNames, final NamingPolicy keyNamingPolicy,
             final IntFunction<? extends M> mapSupplier) {
-        final M resultMap = mapSupplier.apply(N.isEmpty(selectPropNames) ? ClassUtil.getPropNameList(bean.getClass()).size() : selectPropNames.size());
+        final M output = mapSupplier.apply(N.isEmpty(selectPropNames) ? ClassUtil.getPropNameList(bean.getClass()).size() : selectPropNames.size());
 
-        bean2Map(resultMap, bean, selectPropNames, keyNamingPolicy);
+        bean2Map(bean, selectPropNames, keyNamingPolicy, output);
 
-        return resultMap;
+        return output;
     }
 
     /**
      * Bean to map.
-     *
-     * @param <M>
-     * @param resultMap
      * @param bean
-     * @return the specified output parameter: {@code resultMap}.
+     * @param output
+     *
+     * @param <M>
+     * @return the specified output parameter: {@code output}.
      */
-    public static <M extends Map<String, Object>> M bean2Map(final M resultMap, final Object bean) {
-        return bean2Map(resultMap, bean, null);
+    public static <M extends Map<String, Object>> M bean2Map(final Object bean, final M output) {
+        return bean2Map(bean, null, output);
     }
 
     /**
      * Bean to map.
-     *
-     * @param <M>
-     * @param resultMap
      * @param bean
      * @param selectPropNames
-     * @return the specified output parameter: {@code resultMap}.
+     * @param output
+     *
+     * @param <M>
+     * @return the specified output parameter: {@code output}.
      */
-    public static <M extends Map<String, Object>> M bean2Map(final M resultMap, final Object bean, final Collection<String> selectPropNames) {
-        return bean2Map(resultMap, bean, selectPropNames, NamingPolicy.LOWER_CAMEL_CASE);
+    public static <M extends Map<String, Object>> M bean2Map(final Object bean, final Collection<String> selectPropNames, final M output) {
+        return bean2Map(bean, selectPropNames, NamingPolicy.LOWER_CAMEL_CASE, output);
     }
 
     /**
      * Bean to map.
-     *
-     * @param <M>
-     * @param resultMap
      * @param bean
      * @param selectPropNames
      * @param keyNamingPolicy
-     * @return the specified output parameter: {@code resultMap}.
+     * @param output
+     *
+     * @param <M>
+     * @return the specified output parameter: {@code output}.
      */
-    public static <M extends Map<String, Object>> M bean2Map(final M resultMap, final Object bean, final Collection<String> selectPropNames,
-            NamingPolicy keyNamingPolicy) {
+    public static <M extends Map<String, Object>> M bean2Map(final Object bean, final Collection<String> selectPropNames, NamingPolicy keyNamingPolicy,
+            final M output) {
         keyNamingPolicy = keyNamingPolicy == null ? NamingPolicy.LOWER_CAMEL_CASE : keyNamingPolicy;
         final boolean isLowerCamelCaseOrNoChange = NamingPolicy.LOWER_CAMEL_CASE == keyNamingPolicy || NamingPolicy.NO_CHANGE == keyNamingPolicy;
         final Class<?> beanClass = bean.getClass();
         final BeanInfo beanInfo = ParserUtil.getBeanInfo(beanClass);
 
         if (N.isEmpty(selectPropNames)) {
-            bean2Map(resultMap, bean, true, null, keyNamingPolicy);
+            bean2Map(bean, true, null, keyNamingPolicy, output);
         } else {
             PropInfo propInfo = null;
             Object propValue = null;
@@ -2966,14 +2966,14 @@ public final class Maps {
                 propValue = propInfo.getPropValue(bean);
 
                 if (isLowerCamelCaseOrNoChange) {
-                    resultMap.put(propName, propValue);
+                    output.put(propName, propValue);
                 } else {
-                    resultMap.put(keyNamingPolicy.convert(propName), propValue);
+                    output.put(keyNamingPolicy.convert(propName), propValue);
                 }
             }
         }
 
-        return resultMap;
+        return output;
     }
 
     /**
@@ -2984,7 +2984,7 @@ public final class Maps {
      * @return
      */
     public static Map<String, Object> bean2Map(final Object bean, final boolean ignoreNullProperty) {
-        return bean2Map(bean, ignoreNullProperty, null);
+        return bean2Map(bean, ignoreNullProperty, (Set<String>) null);
     }
 
     /**
@@ -3048,54 +3048,54 @@ public final class Maps {
         final int beanPropNameSize = ClassUtil.getPropNameList(bean.getClass()).size();
         final int initCapacity = beanPropNameSize - N.size(ignoredPropNames);
 
-        final M resultMap = mapSupplier.apply(initCapacity);
+        final M output = mapSupplier.apply(initCapacity);
 
-        bean2Map(resultMap, bean, ignoreNullProperty, ignoredPropNames, keyNamingPolicy);
+        bean2Map(bean, ignoreNullProperty, ignoredPropNames, keyNamingPolicy, output);
 
-        return resultMap;
+        return output;
     }
 
     /**
      * Bean to map.
-     *
-     * @param <M>
-     * @param resultMap
      * @param bean
      * @param ignoreNullProperty
-     * @return the specified output parameter: {@code resultMap}.
+     * @param output
+     *
+     * @param <M>
+     * @return the specified output parameter: {@code output}.
      */
-    public static <M extends Map<String, Object>> M bean2Map(final M resultMap, final Object bean, final boolean ignoreNullProperty) {
-        return bean2Map(resultMap, bean, ignoreNullProperty, null);
+    public static <M extends Map<String, Object>> M bean2Map(final Object bean, final boolean ignoreNullProperty, final M output) {
+        return bean2Map(bean, ignoreNullProperty, null, output);
     }
 
     /**
      * Bean to map.
-     *
-     * @param <M>
-     * @param resultMap
      * @param bean
      * @param ignoreNullProperty
      * @param ignoredPropNames
-     * @return the specified output parameter: {@code resultMap}.
+     * @param output
+     *
+     * @param <M>
+     * @return the specified output parameter: {@code output}.
      */
-    public static <M extends Map<String, Object>> M bean2Map(final M resultMap, final Object bean, final boolean ignoreNullProperty,
-            final Set<String> ignoredPropNames) {
-        return bean2Map(resultMap, bean, ignoreNullProperty, ignoredPropNames, NamingPolicy.LOWER_CAMEL_CASE);
+    public static <M extends Map<String, Object>> M bean2Map(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
+            final M output) {
+        return bean2Map(bean, ignoreNullProperty, ignoredPropNames, NamingPolicy.LOWER_CAMEL_CASE, output);
     }
 
     /**
      * Bean to map.
-     *
-     * @param <M>
-     * @param resultMap
      * @param bean
      * @param ignoreNullProperty
      * @param ignoredPropNames
      * @param keyNamingPolicy
-     * @return the specified output parameter: {@code resultMap}.
+     * @param output
+     *
+     * @param <M>
+     * @return the specified output parameter: {@code output}.
      */
-    public static <M extends Map<String, Object>> M bean2Map(final M resultMap, final Object bean, final boolean ignoreNullProperty,
-            final Set<String> ignoredPropNames, NamingPolicy keyNamingPolicy) {
+    public static <M extends Map<String, Object>> M bean2Map(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
+            NamingPolicy keyNamingPolicy, final M output) {
         keyNamingPolicy = keyNamingPolicy == null ? NamingPolicy.LOWER_CAMEL_CASE : keyNamingPolicy;
         final boolean isLowerCamelCaseOrNoChange = NamingPolicy.LOWER_CAMEL_CASE == keyNamingPolicy || NamingPolicy.NO_CHANGE == keyNamingPolicy;
         final boolean hasIgnoredPropNames = N.notEmpty(ignoredPropNames);
@@ -3119,13 +3119,13 @@ public final class Maps {
             }
 
             if (isLowerCamelCaseOrNoChange) {
-                resultMap.put(propName, propValue);
+                output.put(propName, propValue);
             } else {
-                resultMap.put(keyNamingPolicy.convert(propName), propValue);
+                output.put(keyNamingPolicy.convert(propName), propValue);
             }
         }
 
-        return resultMap;
+        return output;
     }
 
     /**
@@ -3187,50 +3187,50 @@ public final class Maps {
      */
     public static <M extends Map<String, Object>> M deepBean2Map(final Object bean, final Collection<String> selectPropNames,
             final NamingPolicy keyNamingPolicy, final IntFunction<? extends M> mapSupplier) {
-        final M resultMap = mapSupplier.apply(N.isEmpty(selectPropNames) ? ClassUtil.getPropNameList(bean.getClass()).size() : selectPropNames.size());
+        final M output = mapSupplier.apply(N.isEmpty(selectPropNames) ? ClassUtil.getPropNameList(bean.getClass()).size() : selectPropNames.size());
 
-        deepBean2Map(resultMap, bean, selectPropNames, keyNamingPolicy);
+        deepBean2Map(bean, selectPropNames, keyNamingPolicy, output);
 
-        return resultMap;
+        return output;
     }
 
     /**
      * Bean to map.
-     *
-     * @param <M>
-     * @param resultMap
      * @param bean
-     * @return the specified output parameter: {@code resultMap}.
+     * @param output
+     *
+     * @param <M>
+     * @return the specified output parameter: {@code output}.
      */
-    public static <M extends Map<String, Object>> M deepBean2Map(final M resultMap, final Object bean) {
-        return deepBean2Map(resultMap, bean, null);
+    public static <M extends Map<String, Object>> M deepBean2Map(final Object bean, final M output) {
+        return deepBean2Map(bean, null, output);
     }
 
     /**
      * Bean to map.
-     *
-     * @param <M>
-     * @param resultMap
      * @param bean
      * @param selectPropNames
-     * @return the specified output parameter: {@code resultMap}.
+     * @param output
+     *
+     * @param <M>
+     * @return the specified output parameter: {@code output}.
      */
-    public static <M extends Map<String, Object>> M deepBean2Map(final M resultMap, final Object bean, final Collection<String> selectPropNames) {
-        return deepBean2Map(resultMap, bean, selectPropNames, NamingPolicy.LOWER_CAMEL_CASE);
+    public static <M extends Map<String, Object>> M deepBean2Map(final Object bean, final Collection<String> selectPropNames, final M output) {
+        return deepBean2Map(bean, selectPropNames, NamingPolicy.LOWER_CAMEL_CASE, output);
     }
 
     /**
      * Bean to map.
-     *
-     * @param <M>
-     * @param resultMap
      * @param bean
      * @param selectPropNames
      * @param keyNamingPolicy
-     * @return the specified output parameter: {@code resultMap}.
+     * @param output
+     *
+     * @param <M>
+     * @return the specified output parameter: {@code output}.
      */
-    public static <M extends Map<String, Object>> M deepBean2Map(final M resultMap, final Object bean, final Collection<String> selectPropNames,
-            final NamingPolicy keyNamingPolicy) {
+    public static <M extends Map<String, Object>> M deepBean2Map(final Object bean, final Collection<String> selectPropNames,
+            final NamingPolicy keyNamingPolicy, final M output) {
         final boolean isLowerCamelCaseOrNoChange = keyNamingPolicy == null || NamingPolicy.LOWER_CAMEL_CASE == keyNamingPolicy
                 || NamingPolicy.NO_CHANGE == keyNamingPolicy;
 
@@ -3238,7 +3238,7 @@ public final class Maps {
         final BeanInfo beanInfo = ParserUtil.getBeanInfo(beanClass);
 
         if (N.isEmpty(selectPropNames)) {
-            deepBean2Map(resultMap, bean, true, null, keyNamingPolicy);
+            deepBean2Map(bean, true, null, keyNamingPolicy, output);
         } else {
             PropInfo propInfo = null;
             Object propValue = null;
@@ -3254,21 +3254,21 @@ public final class Maps {
 
                 if ((propValue == null) || !propInfo.jsonXmlType.isBean()) {
                     if (isLowerCamelCaseOrNoChange) {
-                        resultMap.put(propName, propValue);
+                        output.put(propName, propValue);
                     } else {
-                        resultMap.put(keyNamingPolicy.convert(propName), propValue);
+                        output.put(keyNamingPolicy.convert(propName), propValue);
                     }
                 } else {
                     if (isLowerCamelCaseOrNoChange) {
-                        resultMap.put(propName, deepBean2Map(propValue, true, null, keyNamingPolicy));
+                        output.put(propName, deepBean2Map(propValue, true, null, keyNamingPolicy));
                     } else {
-                        resultMap.put(keyNamingPolicy.convert(propName), deepBean2Map(propValue, true, null, keyNamingPolicy));
+                        output.put(keyNamingPolicy.convert(propName), deepBean2Map(propValue, true, null, keyNamingPolicy));
                     }
                 }
             }
         }
 
-        return resultMap;
+        return output;
     }
 
     /**
@@ -3279,7 +3279,7 @@ public final class Maps {
      * @return
      */
     public static Map<String, Object> deepBean2Map(final Object bean, final boolean ignoreNullProperty) {
-        return deepBean2Map(bean, ignoreNullProperty, null);
+        return deepBean2Map(bean, ignoreNullProperty, (Set<String>) null);
     }
 
     /**
@@ -3343,54 +3343,54 @@ public final class Maps {
         final int beanPropNameSize = ClassUtil.getPropNameList(bean.getClass()).size();
         final int initCapacity = beanPropNameSize - N.size(ignoredPropNames);
 
-        final M resultMap = mapSupplier.apply(initCapacity);
+        final M output = mapSupplier.apply(initCapacity);
 
-        deepBean2Map(resultMap, bean, ignoreNullProperty, ignoredPropNames, keyNamingPolicy);
+        deepBean2Map(bean, ignoreNullProperty, ignoredPropNames, keyNamingPolicy, output);
 
-        return resultMap;
+        return output;
     }
 
     /**
      * Bean to map.
-     *
-     * @param <M>
-     * @param resultMap
      * @param bean
      * @param ignoreNullProperty
-     * @return the specified output parameter: {@code resultMap}.
+     * @param output
+     *
+     * @param <M>
+     * @return the specified output parameter: {@code output}.
      */
-    public static <M extends Map<String, Object>> M deepBean2Map(final M resultMap, final Object bean, final boolean ignoreNullProperty) {
-        return deepBean2Map(resultMap, bean, ignoreNullProperty, null);
+    public static <M extends Map<String, Object>> M deepBean2Map(final Object bean, final boolean ignoreNullProperty, final M output) {
+        return deepBean2Map(bean, ignoreNullProperty, null, output);
     }
 
     /**
      * Bean to map.
-     *
-     * @param <M>
-     * @param resultMap
      * @param bean
      * @param ignoreNullProperty
      * @param ignoredPropNames
-     * @return the specified output parameter: {@code resultMap}.
+     * @param output
+     *
+     * @param <M>
+     * @return the specified output parameter: {@code output}.
      */
-    public static <M extends Map<String, Object>> M deepBean2Map(final M resultMap, final Object bean, final boolean ignoreNullProperty,
-            final Set<String> ignoredPropNames) {
-        return deepBean2Map(resultMap, bean, ignoreNullProperty, ignoredPropNames, NamingPolicy.LOWER_CAMEL_CASE);
+    public static <M extends Map<String, Object>> M deepBean2Map(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
+            final M output) {
+        return deepBean2Map(bean, ignoreNullProperty, ignoredPropNames, NamingPolicy.LOWER_CAMEL_CASE, output);
     }
 
     /**
      * Bean to map.
-     *
-     * @param <M>
-     * @param resultMap
      * @param bean
      * @param ignoreNullProperty
      * @param ignoredPropNames
      * @param keyNamingPolicy
-     * @return the specified output parameter: {@code resultMap}.
+     * @param output
+     *
+     * @param <M>
+     * @return the specified output parameter: {@code output}.
      */
-    public static <M extends Map<String, Object>> M deepBean2Map(final M resultMap, final Object bean, final boolean ignoreNullProperty,
-            final Set<String> ignoredPropNames, final NamingPolicy keyNamingPolicy) {
+    public static <M extends Map<String, Object>> M deepBean2Map(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
+            final NamingPolicy keyNamingPolicy, final M output) {
         final boolean isLowerCamelCaseOrNoChange = keyNamingPolicy == null || NamingPolicy.LOWER_CAMEL_CASE == keyNamingPolicy
                 || NamingPolicy.NO_CHANGE == keyNamingPolicy;
 
@@ -3416,20 +3416,20 @@ public final class Maps {
 
             if ((propValue == null) || !propInfo.jsonXmlType.isBean()) {
                 if (isLowerCamelCaseOrNoChange) {
-                    resultMap.put(propName, propValue);
+                    output.put(propName, propValue);
                 } else {
-                    resultMap.put(keyNamingPolicy.convert(propName), propValue);
+                    output.put(keyNamingPolicy.convert(propName), propValue);
                 }
             } else {
                 if (isLowerCamelCaseOrNoChange) {
-                    resultMap.put(propName, deepBean2Map(propValue, ignoreNullProperty, null, keyNamingPolicy));
+                    output.put(propName, deepBean2Map(propValue, ignoreNullProperty, null, keyNamingPolicy));
                 } else {
-                    resultMap.put(keyNamingPolicy.convert(propName), deepBean2Map(propValue, ignoreNullProperty, null, keyNamingPolicy));
+                    output.put(keyNamingPolicy.convert(propName), deepBean2Map(propValue, ignoreNullProperty, null, keyNamingPolicy));
                 }
             }
         }
 
-        return resultMap;
+        return output;
     }
 
     /**
@@ -3491,57 +3491,57 @@ public final class Maps {
      */
     public static <M extends Map<String, Object>> M bean2FlatMap(final Object bean, final Collection<String> selectPropNames,
             final NamingPolicy keyNamingPolicy, final IntFunction<? extends M> mapSupplier) {
-        final M resultMap = mapSupplier.apply(N.isEmpty(selectPropNames) ? ClassUtil.getPropNameList(bean.getClass()).size() : selectPropNames.size());
+        final M output = mapSupplier.apply(N.isEmpty(selectPropNames) ? ClassUtil.getPropNameList(bean.getClass()).size() : selectPropNames.size());
 
-        bean2FlatMap(resultMap, bean, selectPropNames, keyNamingPolicy);
+        bean2FlatMap(bean, selectPropNames, keyNamingPolicy, output);
 
-        return resultMap;
+        return output;
     }
 
     /**
      * Bean to map.
-     *
-     * @param <M>
-     * @param resultMap
      * @param bean
-     * @return the specified output parameter: {@code resultMap}.
+     * @param output
+     *
+     * @param <M>
+     * @return the specified output parameter: {@code output}.
      */
-    public static <M extends Map<String, Object>> M bean2FlatMap(final M resultMap, final Object bean) {
-        return bean2FlatMap(resultMap, bean, null);
+    public static <M extends Map<String, Object>> M bean2FlatMap(final Object bean, final M output) {
+        return bean2FlatMap(bean, null, output);
     }
 
     /**
      * Bean to map.
-     *
-     * @param <M>
-     * @param resultMap
      * @param bean
      * @param selectPropNames
-     * @return the specified output parameter: {@code resultMap}.
+     * @param output
+     *
+     * @param <M>
+     * @return the specified output parameter: {@code output}.
      */
-    public static <M extends Map<String, Object>> M bean2FlatMap(final M resultMap, final Object bean, final Collection<String> selectPropNames) {
-        return bean2FlatMap(resultMap, bean, selectPropNames, NamingPolicy.LOWER_CAMEL_CASE);
+    public static <M extends Map<String, Object>> M bean2FlatMap(final Object bean, final Collection<String> selectPropNames, final M output) {
+        return bean2FlatMap(bean, selectPropNames, NamingPolicy.LOWER_CAMEL_CASE, output);
     }
 
     /**
      * Bean to map.
-     *
-     * @param <M>
-     * @param resultMap
      * @param bean
      * @param selectPropNames
      * @param keyNamingPolicy
-     * @return the specified output parameter: {@code resultMap}.
+     * @param output
+     *
+     * @param <M>
+     * @return the specified output parameter: {@code output}.
      */
-    public static <M extends Map<String, Object>> M bean2FlatMap(final M resultMap, final Object bean, final Collection<String> selectPropNames,
-            NamingPolicy keyNamingPolicy) {
+    public static <M extends Map<String, Object>> M bean2FlatMap(final Object bean, final Collection<String> selectPropNames, NamingPolicy keyNamingPolicy,
+            final M output) {
         keyNamingPolicy = keyNamingPolicy == null ? NamingPolicy.LOWER_CAMEL_CASE : keyNamingPolicy;
         final boolean isLowerCamelCaseOrNoChange = NamingPolicy.LOWER_CAMEL_CASE == keyNamingPolicy || NamingPolicy.NO_CHANGE == keyNamingPolicy;
         final Class<?> beanClass = bean.getClass();
         final BeanInfo beanInfo = ParserUtil.getBeanInfo(beanClass);
 
         if (N.isEmpty(selectPropNames)) {
-            bean2FlatMap(resultMap, bean, true, null, keyNamingPolicy);
+            bean2FlatMap(bean, true, null, keyNamingPolicy, output);
         } else {
             PropInfo propInfo = null;
             Object propValue = null;
@@ -3557,17 +3557,17 @@ public final class Maps {
 
                 if ((propValue == null) || !propInfo.jsonXmlType.isBean()) {
                     if (isLowerCamelCaseOrNoChange) {
-                        resultMap.put(propName, propValue);
+                        output.put(propName, propValue);
                     } else {
-                        resultMap.put(keyNamingPolicy.convert(propName), propValue);
+                        output.put(keyNamingPolicy.convert(propName), propValue);
                     }
                 } else {
-                    bean2FlatMap(resultMap, propValue, true, null, keyNamingPolicy, isLowerCamelCaseOrNoChange ? propName : keyNamingPolicy.convert(propName));
+                    bean2FlatMap(propValue, true, null, keyNamingPolicy, isLowerCamelCaseOrNoChange ? propName : keyNamingPolicy.convert(propName), output);
                 }
             }
         }
 
-        return resultMap;
+        return output;
     }
 
     /**
@@ -3578,7 +3578,7 @@ public final class Maps {
      * @return
      */
     public static Map<String, Object> bean2FlatMap(final Object bean, final boolean ignoreNullProperty) {
-        return bean2FlatMap(bean, ignoreNullProperty, null);
+        return bean2FlatMap(bean, ignoreNullProperty, (Set<String>) null);
     }
 
     /**
@@ -3642,59 +3642,59 @@ public final class Maps {
         final int beanPropNameSize = ClassUtil.getPropNameList(bean.getClass()).size();
         final int initCapacity = beanPropNameSize - N.size(ignoredPropNames);
 
-        final M resultMap = mapSupplier.apply(initCapacity);
+        final M output = mapSupplier.apply(initCapacity);
 
-        bean2FlatMap(resultMap, bean, ignoreNullProperty, ignoredPropNames, keyNamingPolicy);
+        bean2FlatMap(bean, ignoreNullProperty, ignoredPropNames, keyNamingPolicy, output);
 
-        return resultMap;
+        return output;
     }
 
     /**
      * Bean to map.
-     *
-     * @param <M>
-     * @param resultMap
      * @param bean
      * @param ignoreNullProperty
-     * @return the specified output parameter: {@code resultMap}.
+     * @param output
+     *
+     * @param <M>
+     * @return the specified output parameter: {@code output}.
      */
-    public static <M extends Map<String, Object>> M bean2FlatMap(final M resultMap, final Object bean, final boolean ignoreNullProperty) {
-        return bean2FlatMap(resultMap, bean, ignoreNullProperty, null);
+    public static <M extends Map<String, Object>> M bean2FlatMap(final Object bean, final boolean ignoreNullProperty, final M output) {
+        return bean2FlatMap(bean, ignoreNullProperty, null, output);
     }
 
     /**
      * Bean to map.
-     *
-     * @param <M>
-     * @param resultMap
      * @param bean
      * @param ignoreNullProperty
      * @param ignoredPropNames
-     * @return the specified output parameter: {@code resultMap}.
+     * @param output
+     *
+     * @param <M>
+     * @return the specified output parameter: {@code output}.
      */
-    public static <M extends Map<String, Object>> M bean2FlatMap(final M resultMap, final Object bean, final boolean ignoreNullProperty,
-            final Set<String> ignoredPropNames) {
-        return bean2FlatMap(resultMap, bean, ignoreNullProperty, ignoredPropNames, NamingPolicy.LOWER_CAMEL_CASE);
+    public static <M extends Map<String, Object>> M bean2FlatMap(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
+            final M output) {
+        return bean2FlatMap(bean, ignoreNullProperty, ignoredPropNames, NamingPolicy.LOWER_CAMEL_CASE, output);
     }
 
     /**
      * Bean to map.
-     *
-     * @param <M>
-     * @param resultMap
      * @param bean
      * @param ignoreNullProperty
      * @param ignoredPropNames
      * @param keyNamingPolicy
-     * @return the specified output parameter: {@code resultMap}.
+     * @param output
+     *
+     * @param <M>
+     * @return the specified output parameter: {@code output}.
      */
-    public static <M extends Map<String, Object>> M bean2FlatMap(final M resultMap, final Object bean, final boolean ignoreNullProperty,
-            final Set<String> ignoredPropNames, final NamingPolicy keyNamingPolicy) {
-        return bean2FlatMap(resultMap, bean, ignoreNullProperty, ignoredPropNames, keyNamingPolicy, null);
+    public static <M extends Map<String, Object>> M bean2FlatMap(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
+            final NamingPolicy keyNamingPolicy, final M output) {
+        return bean2FlatMap(bean, ignoreNullProperty, ignoredPropNames, keyNamingPolicy, null, output);
     }
 
-    static <T extends Map<String, Object>> T bean2FlatMap(final T resultMap, final Object bean, final boolean ignoreNullProperty,
-            final Collection<String> ignoredPropNames, final NamingPolicy keyNamingPolicy, final String parentPropName) {
+    static <T extends Map<String, Object>> T bean2FlatMap(final Object bean, final boolean ignoreNullProperty, final Collection<String> ignoredPropNames,
+            final NamingPolicy keyNamingPolicy, final String parentPropName, final T output) {
         final boolean isLowerCamelCaseOrNoChange = keyNamingPolicy == null || NamingPolicy.LOWER_CAMEL_CASE == keyNamingPolicy
                 || NamingPolicy.NO_CHANGE == keyNamingPolicy;
 
@@ -3721,29 +3721,29 @@ public final class Maps {
             if ((propValue == null) || !propInfo.jsonXmlType.isBean()) {
                 if (isNullParentPropName) {
                     if (isLowerCamelCaseOrNoChange) {
-                        resultMap.put(propName, propValue);
+                        output.put(propName, propValue);
                     } else {
-                        resultMap.put(keyNamingPolicy.convert(propName), propValue);
+                        output.put(keyNamingPolicy.convert(propName), propValue);
                     }
                 } else {
                     if (isLowerCamelCaseOrNoChange) {
-                        resultMap.put(parentPropName + WD.PERIOD + propName, propValue);
+                        output.put(parentPropName + WD.PERIOD + propName, propValue);
                     } else {
-                        resultMap.put(parentPropName + WD.PERIOD + keyNamingPolicy.convert(propName), propValue);
+                        output.put(parentPropName + WD.PERIOD + keyNamingPolicy.convert(propName), propValue);
                     }
                 }
             } else {
                 if (isNullParentPropName) {
-                    bean2FlatMap(resultMap, propValue, ignoreNullProperty, null, keyNamingPolicy,
-                            isLowerCamelCaseOrNoChange ? propName : keyNamingPolicy.convert(propName));
+                    bean2FlatMap(propValue, ignoreNullProperty, null, keyNamingPolicy,
+                            isLowerCamelCaseOrNoChange ? propName : keyNamingPolicy.convert(propName), output);
                 } else {
-                    bean2FlatMap(resultMap, propValue, ignoreNullProperty, null, keyNamingPolicy,
-                            parentPropName + WD.PERIOD + (isLowerCamelCaseOrNoChange ? propName : keyNamingPolicy.convert(propName)));
+                    bean2FlatMap(propValue, ignoreNullProperty, null, keyNamingPolicy,
+                            parentPropName + WD.PERIOD + (isLowerCamelCaseOrNoChange ? propName : keyNamingPolicy.convert(propName)), output);
                 }
             }
         }
 
-        return resultMap;
+        return output;
     }
 
     /**
@@ -3792,9 +3792,9 @@ public final class Maps {
     //    }
     //
     //    @Beta
-    //    static <M extends Map<String, Object>> M record2Map(final M resultMap, final Object record) {
+    //    static <M extends Map<String, Object>> M record2Map(final Object record, final M output) {
     //        if (record == null) {
-    //            return resultMap;
+    //            return output;
     //        }
     //
     //        final Class<?> recordClass = record.getClass();
@@ -3804,14 +3804,14 @@ public final class Maps {
     //
     //        try {
     //            for (Tuple5<String, Field, Method, Type<Object>, Integer> tp : recordInfo.fieldMap().values()) {
-    //                resultMap.put(tp._1, tp._3.invoke(record));
+    //                output.put(tp._1, tp._3.invoke(record));
     //            }
     //        } catch (IllegalAccessException | InvocationTargetException e) {
     //            // Should never happen.
     //            throw ExceptionUtil.toRuntimeException(e);
     //        }
     //
-    //        return resultMap;
+    //        return output;
     //    }
     //
     //    @Beta

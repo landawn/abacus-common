@@ -723,7 +723,7 @@ public abstract class Configuration {
      * @return
      */
     protected Set<String> string2Set(String st) {
-        return Splitter.with(WD.COMMA).trimResults().split(N.newHashSet(), st);
+        return Splitter.with(WD.COMMA).trimResults().split(st, N.newHashSet());
     }
 
     /**

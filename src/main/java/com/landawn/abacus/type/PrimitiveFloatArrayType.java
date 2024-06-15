@@ -201,25 +201,25 @@ public final class PrimitiveFloatArrayType extends AbstractPrimitiveArrayType<fl
 
     /**
      * Array 2 collection.
+     * @param x
+     * @param output
      *
      * @param <E>
-     * @param resultCollection
-     * @param x
      * @return
      */
     @Override
-    public <E> Collection<E> array2Collection(Collection<E> resultCollection, float[] x) {
+    public <E> Collection<E> array2Collection(final float[] x, final Collection<E> output) {
         if (N.isEmpty(x)) {
-            return resultCollection;
+            return output;
         }
 
-        Collection<Object> c = (Collection<Object>) resultCollection;
+        Collection<Object> c = (Collection<Object>) output;
 
         for (float element : x) {
             c.add(element);
         }
 
-        return resultCollection;
+        return output;
     }
 
     /**

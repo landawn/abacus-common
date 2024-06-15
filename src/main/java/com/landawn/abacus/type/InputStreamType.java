@@ -242,7 +242,7 @@ public class InputStreamType extends AbstractType<InputStream> {
             if (appendable instanceof Writer) {
                 final Writer writer = (Writer) appendable;
 
-                IOUtil.write(writer, new InputStreamReader(x));
+                IOUtil.write(new InputStreamReader(x), writer);
             } else {
                 appendable.append(IOUtil.readAllToString(x));
             }

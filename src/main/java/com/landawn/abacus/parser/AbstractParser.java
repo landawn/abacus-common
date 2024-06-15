@@ -103,85 +103,85 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
      */
     @Override
     public String serialize(Object obj) {
-        return serialize(obj, null);
+        return serialize(obj, (SC) null);
     }
 
     /**
      *
-     * @param file
      * @param obj
+     * @param output
      */
     @Override
-    public void serialize(File file, Object obj) {
-        serialize(file, obj, null);
+    public void serialize(Object obj, File output) {
+        serialize(obj, null, output);
     }
 
     /**
      *
-     * @param os
      * @param obj
+     * @param output
      */
     @Override
-    public void serialize(OutputStream os, Object obj) {
-        serialize(os, obj, null);
+    public void serialize(Object obj, OutputStream output) {
+        serialize(obj, null, output);
     }
 
     /**
      *
-     * @param writer
      * @param obj
+     * @param output
      */
     @Override
-    public void serialize(Writer writer, Object obj) {
-        serialize(writer, obj, null);
+    public void serialize(Object obj, Writer output) {
+        serialize(obj, null, output);
     }
 
     /**
      *
-     * @param <T>
      * @param targetClass
-     * @param st
+     * @param source
+     * @param <T>
      * @return
      */
     @Override
-    public <T> T deserialize(Class<? extends T> targetClass, String st) {
-        return deserialize(targetClass, st, null);
+    public <T> T deserialize(String source, Class<? extends T> targetClass) {
+        return deserialize(source, null, targetClass);
     }
 
     /**
      *
-     * @param <T>
      * @param targetClass
-     * @param file
+     * @param source
+     * @param <T>
      * @return
      */
     @Override
-    public <T> T deserialize(Class<? extends T> targetClass, File file) {
-        return deserialize(targetClass, file, null);
+    public <T> T deserialize(File source, Class<? extends T> targetClass) {
+        return deserialize(source, null, targetClass);
     }
 
     /**
      *
-     * @param <T>
      * @param targetClass
-     * @param is
+     * @param source
+     * @param <T>
      * @return
      */
     @Override
-    public <T> T deserialize(Class<? extends T> targetClass, InputStream is) {
-        return deserialize(targetClass, is, null);
+    public <T> T deserialize(InputStream source, Class<? extends T> targetClass) {
+        return deserialize(source, null, targetClass);
     }
 
     /**
      *
-     * @param <T>
      * @param targetClass
-     * @param reader
+     * @param source
+     * @param <T>
      * @return
      */
     @Override
-    public <T> T deserialize(Class<? extends T> targetClass, Reader reader) {
-        return deserialize(targetClass, reader, null);
+    public <T> T deserialize(Reader source, Class<? extends T> targetClass) {
+        return deserialize(source, null, targetClass);
     }
 
     static final Map<Class<?>, Tuple2<Function<Class<?>, Object>, Function<Object, Object>>> mapOfCreatorAndConvertorForTargetType = new HashMap<>();
@@ -325,13 +325,13 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
 
     /**
      * Collection 2 array.
+     * @param c
+     * @param targetClass
      *
      * @param <T>
-     * @param targetClass
-     * @param c
      * @return
      */
-    protected static <T> T collection2Array(Class<?> targetClass, final Collection<?> c) {
+    protected static <T> T collection2Array(final Collection<?> c, Class<?> targetClass) {
         if (c == null) {
             return null;
         }

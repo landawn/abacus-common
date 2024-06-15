@@ -544,12 +544,12 @@ public final class HttpRequest {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param httpMethod 
-     * @param resultClass 
-     * @return 
+     *
+     * @param <T>
+     * @param httpMethod
+     * @param resultClass
+     * @return
      * @throws UncheckedIOException the unchecked IO exception
      */
     @Beta
@@ -557,7 +557,7 @@ public final class HttpRequest {
         N.checkArgNotNull(httpMethod, HTTP_METHOD_STR);
 
         try {
-            return httpClient.execute(httpMethod, resultClass, this.request, checkSettings());
+            return httpClient.execute(httpMethod, this.request, checkSettings(), resultClass);
         } finally {
             doAfterExecution();
         }
@@ -575,7 +575,7 @@ public final class HttpRequest {
         N.checkArgNotNull(httpMethod, HTTP_METHOD_STR);
 
         try {
-            httpClient.execute(httpMethod, output, this.request, checkSettings());
+            httpClient.execute(httpMethod, this.request, checkSettings(), output);
         } finally {
             doAfterExecution();
         }
@@ -593,7 +593,7 @@ public final class HttpRequest {
         N.checkArgNotNull(httpMethod, HTTP_METHOD_STR);
 
         try {
-            httpClient.execute(httpMethod, output, this.request, checkSettings());
+            httpClient.execute(httpMethod, this.request, checkSettings(), output);
         } finally {
             doAfterExecution();
         }
@@ -611,7 +611,7 @@ public final class HttpRequest {
         N.checkArgNotNull(httpMethod, HTTP_METHOD_STR);
 
         try {
-            httpClient.execute(httpMethod, output, this.request, checkSettings());
+            httpClient.execute(httpMethod, this.request, checkSettings(), output);
         } finally {
             doAfterExecution();
         }
@@ -654,9 +654,9 @@ public final class HttpRequest {
 
     /**
      *
-     * @param <T>
      * @param resultClass
      * @param executor
+     * @param <T>
      * @return
      */
     public <T> ContinuableFuture<T> asyncGet(final Class<T> resultClass, final Executor executor) {
@@ -692,9 +692,9 @@ public final class HttpRequest {
 
     /**
      *
-     * @param <T>
      * @param resultClass
      * @param executor
+     * @param <T>
      * @return
      */
     public <T> ContinuableFuture<T> asyncPost(final Class<T> resultClass, final Executor executor) {
@@ -730,9 +730,9 @@ public final class HttpRequest {
 
     /**
      *
-     * @param <T>
      * @param resultClass
      * @param executor
+     * @param <T>
      * @return
      */
     public <T> ContinuableFuture<T> asyncPut(final Class<T> resultClass, final Executor executor) {
@@ -770,12 +770,12 @@ public final class HttpRequest {
     //    /**
     //     *
     //     * @param <T>
-    //     * @param resultClass
     //     * @param executor
+    //     * @param resultClass
     //     * @return
     //     */
-    //    public <T> ContinuableFuture<T> asyncPatch(final Class<T> resultClass, final Executor executor) {
-    //        return asyncExecute(HttpMethod.PATCH, resultClass, executor);
+    //    public <T> ContinuableFuture<T> asyncPatch(final Executor executor, final Class<T> resultClass) {
+    //        return asyncExecute(HttpMethod.PATCH, executor, resultClass);
     //    }
 
     /**
@@ -809,9 +809,9 @@ public final class HttpRequest {
 
     /**
      *
-     * @param <T>
      * @param resultClass
      * @param executor
+     * @param <T>
      * @return
      */
     public <T> ContinuableFuture<T> asyncDelete(final Class<T> resultClass, final Executor executor) {
@@ -832,7 +832,7 @@ public final class HttpRequest {
      * @return
      */
     public ContinuableFuture<HttpResponse> asyncHead(final Executor executor) {
-        return asyncHead(HttpResponse.class, executor);
+        return asyncHead(executor, HttpResponse.class);
     }
 
     /**
@@ -847,12 +847,12 @@ public final class HttpRequest {
 
     /**
      *
-     * @param <T>
-     * @param resultClass
      * @param executor
+     * @param resultClass
+     * @param <T>
      * @return
      */
-    <T> ContinuableFuture<T> asyncHead(final Class<T> resultClass, final Executor executor) {
+    <T> ContinuableFuture<T> asyncHead(final Executor executor, final Class<T> resultClass) {
         return asyncExecute(HttpMethod.HEAD, resultClass, executor);
     }
 
@@ -880,12 +880,12 @@ public final class HttpRequest {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param httpMethod 
-     * @param resultClass 
-     * @return 
+     *
+     * @param <T>
+     * @param httpMethod
+     * @param resultClass
+     * @return
      */
     @Beta
     public <T> ContinuableFuture<T> asyncExecute(final HttpMethod httpMethod, final Class<T> resultClass) {
@@ -897,13 +897,13 @@ public final class HttpRequest {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param httpMethod 
-     * @param resultClass 
-     * @param executor 
-     * @return 
+     *
+     * @param <T>
+     * @param httpMethod
+     * @param resultClass
+     * @param executor
+     * @return
      */
     @Beta
     public <T> ContinuableFuture<T> asyncExecute(final HttpMethod httpMethod, final Class<T> resultClass, final Executor executor) {

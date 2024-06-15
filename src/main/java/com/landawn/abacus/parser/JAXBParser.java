@@ -67,7 +67,7 @@ final class JAXBParser extends AbstractXMLParser {
         final BufferedWriter bw = Objectory.createBufferedWriter();
 
         try {
-            write(bw, obj, config);
+            write(obj, config, bw);
 
             return bw.toString();
         } finally {
@@ -77,20 +77,20 @@ final class JAXBParser extends AbstractXMLParser {
 
     /**
      *
-     * @param file
      * @param obj
      * @param config
+     * @param output
      */
     @Override
-    public void serialize(File file, Object obj, XMLSerializationConfig config) {
+    public void serialize(Object obj, XMLSerializationConfig config, File output) {
         OutputStream os = null;
 
         try {
-            createNewFileIfNotExists(file);
+            createNewFileIfNotExists(output);
 
-            os = IOUtil.newFileOutputStream(file);
+            os = IOUtil.newFileOutputStream(output);
 
-            serialize(os, obj, config);
+            serialize(obj, config, os);
 
             os.flush();
         } catch (IOException e) {
@@ -102,16 +102,16 @@ final class JAXBParser extends AbstractXMLParser {
 
     /**
      *
-     * @param os
      * @param obj
      * @param config
+     * @param output
      */
     @Override
-    public void serialize(OutputStream os, Object obj, XMLSerializationConfig config) {
-        final BufferedWriter bw = Objectory.createBufferedWriter(os);
+    public void serialize(Object obj, XMLSerializationConfig config, OutputStream output) {
+        final BufferedWriter bw = Objectory.createBufferedWriter(output);
 
         try {
-            write(bw, obj, config);
+            write(obj, config, bw);
 
             bw.flush();
         } catch (IOException e) {
@@ -123,17 +123,17 @@ final class JAXBParser extends AbstractXMLParser {
 
     /**
      *
-     * @param writer
      * @param obj
      * @param config
+     * @param output
      */
     @Override
-    public void serialize(Writer writer, Object obj, XMLSerializationConfig config) {
-        boolean isBufferedWriter = writer instanceof BufferedWriter || writer instanceof java.io.BufferedWriter;
-        final Writer bw = isBufferedWriter ? writer : Objectory.createBufferedWriter(writer);
+    public void serialize(Object obj, XMLSerializationConfig config, Writer output) {
+        boolean isBufferedWriter = output instanceof BufferedWriter || output instanceof java.io.BufferedWriter;
+        final Writer bw = isBufferedWriter ? output : Objectory.createBufferedWriter(output);
 
         try {
-            write(bw, obj, config);
+            write(obj, config, bw);
 
             bw.flush();
         } catch (IOException e) {
@@ -147,18 +147,18 @@ final class JAXBParser extends AbstractXMLParser {
 
     /**
      *
-     * @param writer
      * @param obj
      * @param config
+     * @param output
      */
-    protected void write(Writer writer, Object obj, XMLSerializationConfig config) {
+    protected void write(Object obj, XMLSerializationConfig config, Writer output) {
         if (config != null && N.notEmpty(config.getIgnoredPropNames())) {
             throw new ParseException("'ignoredPropNames' is not supported");
         }
 
         if (obj == null) {
             try {
-                IOUtil.write(writer, Strings.EMPTY_STRING);
+                IOUtil.write(Strings.EMPTY_STRING, output);
             } catch (IOException e) {
                 throw new UncheckedIOException(e);
             }
@@ -169,9 +169,9 @@ final class JAXBParser extends AbstractXMLParser {
         final Marshaller marshaller = XMLUtil.createMarshaller(obj.getClass());
 
         try {
-            marshaller.marshal(obj, writer);
+            marshaller.marshal(obj, output);
 
-            writer.flush();
+            output.flush();
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         } catch (JAXBException e) {
@@ -181,22 +181,22 @@ final class JAXBParser extends AbstractXMLParser {
 
     /**
      *
-     * @param <T>
-     * @param targetClass
-     * @param st
+     * @param source
      * @param config
+     * @param targetClass
+     * @param <T>
      * @return
      */
     @Override
-    public <T> T deserialize(Class<? extends T> targetClass, String st, XMLDeserializationConfig config) {
-        if (Strings.isEmpty(st)) {
+    public <T> T deserialize(String source, XMLDeserializationConfig config, Class<? extends T> targetClass) {
+        if (Strings.isEmpty(source)) {
             return N.defaultValueOf(targetClass);
         }
 
-        final BufferedReader br = Objectory.createBufferedReader(st);
+        final BufferedReader br = Objectory.createBufferedReader(source);
 
         try {
-            return read(targetClass, br, config);
+            return read(br, config, targetClass);
         } finally {
             Objectory.recycle(br);
         }
@@ -204,20 +204,20 @@ final class JAXBParser extends AbstractXMLParser {
 
     /**
      *
-     * @param <T>
-     * @param targetClass
-     * @param file
+     * @param source
      * @param config
+     * @param targetClass
+     * @param <T>
      * @return
      */
     @Override
-    public <T> T deserialize(Class<? extends T> targetClass, File file, XMLDeserializationConfig config) {
+    public <T> T deserialize(File source, XMLDeserializationConfig config, Class<? extends T> targetClass) {
         InputStream is = null;
 
         try {
-            is = IOUtil.newFileInputStream(file);
+            is = IOUtil.newFileInputStream(source);
 
-            return deserialize(targetClass, is, config);
+            return deserialize(is, config, targetClass);
         } finally {
             IOUtil.close(is);
         }
@@ -225,18 +225,18 @@ final class JAXBParser extends AbstractXMLParser {
 
     /**
      *
-     * @param <T>
-     * @param targetClass
-     * @param is
+     * @param source
      * @param config
+     * @param targetClass
+     * @param <T>
      * @return
      */
     @Override
-    public <T> T deserialize(Class<? extends T> targetClass, InputStream is, XMLDeserializationConfig config) {
-        final BufferedReader br = Objectory.createBufferedReader(is);
+    public <T> T deserialize(InputStream source, XMLDeserializationConfig config, Class<? extends T> targetClass) {
+        final BufferedReader br = Objectory.createBufferedReader(source);
 
         try {
-            return read(targetClass, br, config);
+            return read(br, config, targetClass);
         } finally {
             Objectory.recycle(br);
         }
@@ -244,14 +244,14 @@ final class JAXBParser extends AbstractXMLParser {
 
     /**
      *
-     * @param <T>
-     * @param targetClass
-     * @param reader
+     * @param source
      * @param config
+     * @param targetClass
+     * @param <T>
      * @return
      */
     @Override
-    public <T> T deserialize(Class<? extends T> targetClass, Reader reader, XMLDeserializationConfig config) {
+    public <T> T deserialize(Reader source, XMLDeserializationConfig config, Class<? extends T> targetClass) {
         //
         // BufferedReader br = ObjectFactory.createBufferedReader(reader);
         //
@@ -261,79 +261,79 @@ final class JAXBParser extends AbstractXMLParser {
         // ObjectFactory.recycle(br);
         // }
         //
-        return read(targetClass, reader, config);
-    }
-
-    /**
-     * 
-     *
-     * @param <T> 
-     * @param targetClass 
-     * @param node 
-     * @param config 
-     * @return 
-     * @throws UnsupportedOperationException 
-     */
-    @Override
-    public <T> T deserialize(Class<? extends T> targetClass, Node node, XMLDeserializationConfig config) throws UnsupportedOperationException {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * 
-     *
-     * @param <T> 
-     * @param nodeClasses 
-     * @param is 
-     * @param config 
-     * @return 
-     * @throws UnsupportedOperationException 
-     */
-    @Override
-    public <T> T deserialize(Map<String, Class<?>> nodeClasses, InputStream is, XMLDeserializationConfig config) throws UnsupportedOperationException {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * 
-     *
-     * @param <T> 
-     * @param nodeClasses 
-     * @param reader 
-     * @param config 
-     * @return 
-     * @throws UnsupportedOperationException 
-     */
-    @Override
-    public <T> T deserialize(Map<String, Class<?>> nodeClasses, Reader reader, XMLDeserializationConfig config) throws UnsupportedOperationException {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * 
-     *
-     * @param <T> 
-     * @param nodeClasses 
-     * @param node 
-     * @param config 
-     * @return 
-     * @throws UnsupportedOperationException 
-     */
-    @Override
-    public <T> T deserialize(Map<String, Class<?>> nodeClasses, Node node, XMLDeserializationConfig config) throws UnsupportedOperationException {
-        throw new UnsupportedOperationException();
+        return read(source, config, targetClass);
     }
 
     /**
      *
-     * @param <T>
-     * @param targetClass
-     * @param reader
+     *
+     * @param source
      * @param config
+     * @param targetClass
+     * @param <T>
+     * @return
+     * @throws UnsupportedOperationException
+     */
+    @Override
+    public <T> T deserialize(Node source, XMLDeserializationConfig config, Class<? extends T> targetClass) throws UnsupportedOperationException {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     *
+     *
+     * @param config
+     * @param nodeClasses
+     * @param source
+     * @param <T>
+     * @return
+     * @throws UnsupportedOperationException
+     */
+    @Override
+    public <T> T deserialize(InputStream source, XMLDeserializationConfig config, Map<String, Class<?>> nodeClasses) throws UnsupportedOperationException {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     *
+     *
+     * @param config
+     * @param nodeClasses
+     * @param source
+     * @param <T>
+     * @return
+     * @throws UnsupportedOperationException
+     */
+    @Override
+    public <T> T deserialize(Reader source, XMLDeserializationConfig config, Map<String, Class<?>> nodeClasses) throws UnsupportedOperationException {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     *
+     *
+     * @param source
+     * @param config
+     * @param nodeClasses
+     * @param <T>
+     * @return
+     * @throws UnsupportedOperationException
+     */
+    @Override
+    public <T> T deserialize(Node source, XMLDeserializationConfig config, Map<String, Class<?>> nodeClasses) throws UnsupportedOperationException {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     *
+     * @param source
+     * @param config
+     * @param targetClass
+     * @param <T>
      * @return
      */
     @SuppressWarnings("unchecked")
-    protected <T> T read(Class<? extends T> targetClass, Reader reader, XMLDeserializationConfig config) {
+    protected <T> T read(Reader source, XMLDeserializationConfig config, Class<? extends T> targetClass) {
         if (config != null && N.notEmpty(config.getIgnoredPropNames())) {
             throw new ParseException("'ignoredPropNames' is not supported");
         }
@@ -341,7 +341,7 @@ final class JAXBParser extends AbstractXMLParser {
         Unmarshaller unmarshaller = XMLUtil.createUnmarshaller(targetClass);
 
         try {
-            return (T) unmarshaller.unmarshal(reader);
+            return (T) unmarshaller.unmarshal(source);
         } catch (JAXBException e) {
             throw new ParseException(e);
         }

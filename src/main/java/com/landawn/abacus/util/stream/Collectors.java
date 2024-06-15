@@ -5138,20 +5138,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors {
         return new CollectorImpl<>(mapFactory, accumulator, combiner, CH_UNORDERED_ID);
     }
 
-    //    public static <T> Collector<T, ?, DataSet> toDataSet(final String beanName, final Class<?> beanClass, final List<String> columnNames) {
-    //        @SuppressWarnings("rawtypes")
-    //        final Collector<T, List<T>, List<T>> collector = (Collector) toList();
-    //
-    //        final Function<List<T>, DataSet> finisher = new Function<List<T>, DataSet>() {
-    //            @Override
-    //            public DataSet apply(List<T> t) {
-    //                return N.newDataSet(beanName, beanClass, columnNames, t);
-    //            }
-    //        };
-    //
-    //        return new CollectorImpl<T, List<T>, DataSet>(collector.supplier(), collector.accumulator(), collector.combiner(), finisher);
-    //    }
-
     static <K, V> void replaceAll(Map<K, V> map, BiFunction<? super K, ? super V, ? extends V> function) {
         N.checkArgNotNull(function);
 

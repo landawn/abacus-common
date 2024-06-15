@@ -92,6 +92,6 @@ public class EntityIdType extends AbstractType<EntityId> {
      */
     @Override
     public EntityId valueOf(String str) {
-        return (Strings.isEmpty(str)) ? null : (EntityId) Utils.jsonParser.deserialize(typeClass, str);
+        return (Strings.isEmpty(str)) ? null : (EntityId) Utils.jsonParser.deserialize(str, typeClass);
     }
 }

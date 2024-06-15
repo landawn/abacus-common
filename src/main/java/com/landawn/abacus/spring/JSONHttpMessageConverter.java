@@ -34,11 +34,11 @@ public class JSONHttpMessageConverter extends AbstractJsonHttpMessageConverter {
 
     @Override
     protected Object readInternal(final Type resolvedType, final Reader reader) throws Exception {
-        return N.fromJSON(TypeFactory.getType(resolvedType), reader);
+        return N.fromJSON(reader, TypeFactory.getType(resolvedType));
     }
 
     @Override
     protected void writeInternal(final Object obj, final @Nullable Type type, final Writer writer) throws Exception {
-        N.toJSON(writer, obj);
+        N.toJSON(obj, writer);
     }
 }

@@ -29,50 +29,50 @@ public interface XMLParser extends Parser<XMLSerializationConfig, XMLDeserializa
 
     /**
      *
-     * @param <T>
+     * @param source
      * @param targetClass
-     * @param node
+     * @param <T>
      * @return
      */
-    <T> T deserialize(Class<? extends T> targetClass, Node node);
+    <T> T deserialize(Node source, Class<? extends T> targetClass);
 
     /**
      *
-     * @param <T>
-     * @param targetClass
-     * @param node
-     * @param config
-     * @return
-     */
-    <T> T deserialize(Class<? extends T> targetClass, Node node, XMLDeserializationConfig config);
-
-    /**
-     *
-     * @param <T>
-     * @param nodeClasses
      * @param source
      * @param config
+     * @param targetClass
+     * @param <T>
      * @return
      */
-    <T> T deserialize(Map<String, Class<?>> nodeClasses, InputStream source, XMLDeserializationConfig config);
+    <T> T deserialize(Node source, XMLDeserializationConfig config, Class<? extends T> targetClass);
 
     /**
      *
-     * @param <T>
-     * @param nodeClasses
      * @param source
      * @param config
+     * @param nodeClasses
+     * @param <T>
      * @return
      */
-    <T> T deserialize(Map<String, Class<?>> nodeClasses, Reader source, XMLDeserializationConfig config);
+    <T> T deserialize(InputStream source, XMLDeserializationConfig config, Map<String, Class<?>> nodeClasses);
 
     /**
      *
-     * @param <T>
-     * @param nodeClasses
-     * @param node
+     * @param source
      * @param config
+     * @param nodeClasses
+     * @param <T>
      * @return
      */
-    <T> T deserialize(Map<String, Class<?>> nodeClasses, Node node, XMLDeserializationConfig config);
+    <T> T deserialize(Reader source, XMLDeserializationConfig config, Map<String, Class<?>> nodeClasses);
+
+    /**
+     *
+     * @param source
+     * @param config
+     * @param nodeClasses
+     * @param <T>
+     * @return
+     */
+    <T> T deserialize(Node source, XMLDeserializationConfig config, Map<String, Class<?>> nodeClasses);
 }

@@ -10899,20 +10899,20 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     @Beta
     @IntermediateOp
     public CheckedStream<T, E> saveEach(final File output) {
-        return saveEach(output, N::stringOf);
+        return saveEach(N::stringOf, output);
     }
 
     /**
      *
-     * @param output
      * @param toLine
+     * @param output
      * @return
      * @see #onEach(com.landawn.abacus.util.Throwables.Consumer)
      * @see #onEachE(com.landawn.abacus.util.Throwables.Consumer)
      */
     @Beta
     @IntermediateOp
-    public CheckedStream<T, E> saveEach(final File output, final Throwables.Function<? super T, String, E> toLine) {
+    public CheckedStream<T, E> saveEach(final Throwables.Function<? super T, String, E> toLine, final File output) {
         assertNotClosed();
 
         final CheckedIterator<T, E> iter = new CheckedIterator<>() {
@@ -10968,15 +10968,15 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
     /**
      *
-     * @param output
      * @param toLine
+     * @param output
      * @return
      * @see #onEach(com.landawn.abacus.util.Throwables.Consumer)
      * @see #onEachE(com.landawn.abacus.util.Throwables.Consumer)
      */
     @Beta
     @IntermediateOp
-    public CheckedStream<T, E> saveEach(final OutputStream output, final Throwables.Function<? super T, String, E> toLine) {
+    public CheckedStream<T, E> saveEach(final Throwables.Function<? super T, String, E> toLine, final OutputStream output) {
         assertNotClosed();
 
         final CheckedIterator<T, E> iter = new CheckedIterator<>() {
@@ -11024,15 +11024,15 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
     /**
      *
-     * @param output
      * @param toLine
+     * @param output
      * @return
      * @see #onEach(com.landawn.abacus.util.Throwables.Consumer)
      * @see #onEachE(com.landawn.abacus.util.Throwables.Consumer)
      */
     @Beta
     @IntermediateOp
-    public CheckedStream<T, E> saveEach(Writer output, final Throwables.Function<? super T, String, E> toLine) {
+    public CheckedStream<T, E> saveEach(final Throwables.Function<? super T, String, E> toLine, Writer output) {
         assertNotClosed();
 
         final CheckedIterator<T, E> iter = new CheckedIterator<>() {
@@ -11084,15 +11084,15 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
     /**
      *
-     * @param output
      * @param writeLine
+     * @param output
      * @return
      * @see #onEach(com.landawn.abacus.util.Throwables.Consumer)
      * @see #onEachE(com.landawn.abacus.util.Throwables.Consumer)
      */
     @Beta
     @IntermediateOp
-    public CheckedStream<T, E> saveEach(final File output, final Throwables.BiConsumer<? super T, Writer, IOException> writeLine) {
+    public CheckedStream<T, E> saveEach(final Throwables.BiConsumer<? super T, Writer, IOException> writeLine, final File output) {
         assertNotClosed();
 
         final CheckedIterator<T, E> iter = new CheckedIterator<>() {
@@ -11148,15 +11148,15 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
     /**
      *
-     * @param output
      * @param writeLine
+     * @param output
      * @return
      * @see #onEach(com.landawn.abacus.util.Throwables.Consumer)
      * @see #onEachE(com.landawn.abacus.util.Throwables.Consumer)
      */
     @Beta
     @IntermediateOp
-    public CheckedStream<T, E> saveEach(final Writer output, final Throwables.BiConsumer<? super T, Writer, IOException> writeLine) {
+    public CheckedStream<T, E> saveEach(final Throwables.BiConsumer<? super T, Writer, IOException> writeLine, final Writer output) {
         assertNotClosed();
 
         final CheckedIterator<T, E> iter = new CheckedIterator<>() {
@@ -11404,55 +11404,55 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      */
     @TerminalOp
     public long persist(final File output) throws E, IOException {
-        return persist(output, N::stringOf);
+        return persist(N::stringOf, output);
     }
 
     /**
      *
      *
-     * @param output
      * @param header
      * @param tail
+     * @param output
      * @return
      * @throws E
      * @throws IOException
      */
     @TerminalOp
-    public long persist(final File output, final String header, final String tail) throws E, IOException {
-        return persist(output, header, tail, N::stringOf);
+    public long persist(final String header, final String tail, final File output) throws E, IOException {
+        return persist(header, tail, N::stringOf, output);
     }
 
     /**
      *
-     * @param output
      * @param toLine
+     * @param output
      * @return
      * @throws E
      * @throws IOException
      */
     @TerminalOp
-    public long persist(final File output, Throwables.Function<? super T, String, E> toLine) throws E, IOException {
-        return persist(output, null, null, toLine);
+    public long persist(Throwables.Function<? super T, String, E> toLine, final File output) throws E, IOException {
+        return persist(null, null, toLine, output);
     }
 
     /**
      *
-     * @param output
      * @param header
      * @param tail
      * @param toLine
+     * @param output
      * @return
      * @throws E
      * @throws IOException
      */
     @TerminalOp
-    public long persist(final File output, final String header, final String tail, Throwables.Function<? super T, String, E> toLine) throws E, IOException {
+    public long persist(final String header, final String tail, Throwables.Function<? super T, String, E> toLine, final File output) throws E, IOException {
         assertNotClosed();
 
         final Writer writer = IOUtil.newFileWriter(output);
 
         try {
-            return persist(writer, header, tail, toLine);
+            return persist(header, tail, toLine, writer);
         } finally {
             IOUtil.close(writer);
         }
@@ -11461,20 +11461,20 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     /**
      *
      *
-     * @param output
      * @param toLine
+     * @param output
      * @return
      * @throws E
      * @throws IOException
      */
     @TerminalOp
-    public long persist(final OutputStream output, Throwables.Function<? super T, String, E> toLine) throws E, IOException {
+    public long persist(Throwables.Function<? super T, String, E> toLine, final OutputStream output) throws E, IOException {
         assertNotClosed();
 
         final BufferedWriter bw = Objectory.createBufferedWriter(output);
 
         try {
-            return persist(bw, toLine);
+            return persist(toLine, bw);
         } finally {
             Objectory.recycle(bw);
         }
@@ -11482,22 +11482,22 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
     /**
      *
-     * @param output
      * @param header
      * @param tail
      * @param toLine
+     * @param output
      * @return
      * @throws E
      * @throws IOException
      */
     @TerminalOp
-    public long persist(OutputStream output, String header, String tail, Throwables.Function<? super T, String, E> toLine) throws E, IOException {
+    public long persist(String header, String tail, Throwables.Function<? super T, String, E> toLine, OutputStream output) throws E, IOException {
         assertNotClosed();
 
         final BufferedWriter bw = Objectory.createBufferedWriter(output);
 
         try {
-            return persist(bw, header, tail, toLine);
+            return persist(header, tail, toLine, bw);
         } finally {
             Objectory.recycle(bw);
         }
@@ -11505,31 +11505,31 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
     /**
      *
-     * @param output
      * @param toLine
+     * @param output
      * @return
      * @throws E
      * @throws IOException
      */
     @TerminalOp
-    public long persist(Writer output, Throwables.Function<? super T, String, E> toLine) throws E, IOException {
+    public long persist(Throwables.Function<? super T, String, E> toLine, Writer output) throws E, IOException {
         assertNotClosed();
 
-        return persist(output, null, null, toLine);
+        return persist(null, null, toLine, output);
     }
 
     /**
      *
-     * @param output
      * @param header
      * @param tail
      * @param toLine
+     * @param output
      * @return
      * @throws E
      * @throws IOException
      */
     @TerminalOp
-    public long persist(Writer output, String header, String tail, Throwables.Function<? super T, String, E> toLine) throws E, IOException {
+    public long persist(String header, String tail, Throwables.Function<? super T, String, E> toLine, Writer output) throws E, IOException {
         assertNotClosed();
 
         try {
@@ -11571,39 +11571,39 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     /**
      *
      *
-     * @param output
      * @param writeLine
+     * @param output
      * @return
      * @throws E
      * @throws IOException
      */
     @TerminalOp
-    public long persist(final File output, final Throwables.BiConsumer<? super T, Writer, IOException> writeLine) throws E, IOException {
+    public long persist(final Throwables.BiConsumer<? super T, Writer, IOException> writeLine, final File output) throws E, IOException {
         assertNotClosed();
 
-        return persist(output, null, null, writeLine);
+        return persist(null, null, writeLine, output);
     }
 
     /**
      *
      *
-     * @param output
      * @param header
      * @param tail
      * @param writeLine
+     * @param output
      * @return
      * @throws E
      * @throws IOException
      */
     @TerminalOp
-    public long persist(final File output, final String header, final String tail, final Throwables.BiConsumer<? super T, Writer, IOException> writeLine)
+    public long persist(final String header, final String tail, final Throwables.BiConsumer<? super T, Writer, IOException> writeLine, final File output)
             throws E, IOException {
         assertNotClosed();
 
         final Writer writer = IOUtil.newFileWriter(output);
 
         try {
-            return persist(writer, header, tail, writeLine);
+            return persist(header, tail, writeLine, writer);
         } finally {
             IOUtil.close(writer);
         }
@@ -11612,32 +11612,32 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     /**
      *
      *
-     * @param output
      * @param writeLine
+     * @param output
      * @return
      * @throws E
      * @throws IOException
      */
     @TerminalOp
-    public long persist(final Writer output, final Throwables.BiConsumer<? super T, Writer, IOException> writeLine) throws E, IOException {
+    public long persist(final Throwables.BiConsumer<? super T, Writer, IOException> writeLine, final Writer output) throws E, IOException {
         assertNotClosed();
 
-        return persist(output, null, null, writeLine);
+        return persist(null, null, writeLine, output);
     }
 
     /**
      *
      *
-     * @param output
      * @param header
      * @param tail
      * @param writeLine
+     * @param output
      * @return
      * @throws E
      * @throws IOException
      */
     @TerminalOp
-    public long persist(final Writer output, final String header, final String tail, final Throwables.BiConsumer<? super T, Writer, IOException> writeLine)
+    public long persist(final String header, final String tail, final Throwables.BiConsumer<? super T, Writer, IOException> writeLine, final Writer output)
             throws E, IOException {
         assertNotClosed();
 
@@ -11844,19 +11844,18 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
     /**
      * Each line in the output file/Writer is an array of JSON String without root bracket.
-     * @param output
      * @param csvHeaders
-     *
+     * @param output
      * @return
      * @throws E
      * @throws IOException
      */
     @TerminalOp
-    public long persistToCSV(File output, Collection<String> csvHeaders) throws E, IOException {
+    public long persistToCSV(Collection<String> csvHeaders, File output) throws E, IOException {
         final Writer writer = IOUtil.newFileWriter(output);
 
         try {
-            return persistToCSV(writer, csvHeaders);
+            return persistToCSV(csvHeaders, writer);
         } finally {
             IOUtil.close(writer);
         }
@@ -11887,19 +11886,18 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
     /**
      * Each line in the output file/Writer is an array of JSON String without root bracket.
-     * @param output
      * @param csvHeaders
-     *
+     * @param output
      * @return
      * @throws E
      * @throws IOException
      */
     @TerminalOp
-    public long persistToCSV(OutputStream output, Collection<String> csvHeaders) throws E, IOException {
+    public long persistToCSV(Collection<String> csvHeaders, OutputStream output) throws E, IOException {
         final BufferedWriter bw = Objectory.createBufferedWriter(output);
 
         try {
-            return persistToCSV(bw, csvHeaders);
+            return persistToCSV(csvHeaders, bw);
         } finally {
             IOUtil.close(bw);
         }
@@ -12034,15 +12032,14 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
     /**
      * Each line in the output file/Writer is an array of JSON String without root bracket.
-     * @param output
      * @param csvHeaders
-     *
+     * @param output
      * @return
      * @throws E
      * @throws IOException
      */
     @TerminalOp
-    public long persistToCSV(Writer output, Collection<String> csvHeaders) throws E, IOException {
+    public long persistToCSV(Collection<String> csvHeaders, Writer output) throws E, IOException {
         checkArgNotEmpty(csvHeaders, "csvHeaders");
         assertNotClosed();
 
@@ -12296,7 +12293,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                 bw.write(IOUtil.LINE_SEPARATOR);
 
                 while (iter.hasNext()) {
-                    N.toJSON(bw, iter.next());
+                    N.toJSON(iter.next(), bw);
                     cnt++;
                 }
 

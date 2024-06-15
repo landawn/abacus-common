@@ -11800,15 +11800,15 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * @param <T>
      * @param urlQuery
-     * @param targetClass
+     * @param targetType
      * @return
      */
-    public static <T> T urlDecode(final String urlQuery, final Class<? extends T> targetClass) {
+    public static <T> T urlDecode(final String urlQuery, final Class<? extends T> targetType) {
         if (Strings.isEmpty(urlQuery)) {
-            return N.newInstance(targetClass);
+            return N.newInstance(targetType);
         }
 
-        return URLEncodedUtil.decode(urlQuery, targetClass);
+        return URLEncodedUtil.decode(urlQuery, targetType);
     }
 
     /**
@@ -11817,15 +11817,15 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param <T>
      * @param urlQuery
      * @param charset
-     * @param targetClass
+     * @param targetType
      * @return
      */
-    public static <T> T urlDecode(final String urlQuery, final Charset charset, final Class<? extends T> targetClass) {
+    public static <T> T urlDecode(final String urlQuery, final Charset charset, final Class<? extends T> targetType) {
         if (Strings.isEmpty(urlQuery)) {
-            return N.newInstance(targetClass);
+            return N.newInstance(targetType);
         }
 
-        return URLEncodedUtil.decode(urlQuery, charset, targetClass);
+        return URLEncodedUtil.decode(urlQuery, charset, targetType);
     }
 
     /**

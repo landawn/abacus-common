@@ -169,41 +169,41 @@ public final class JSONUtil {
      * @throws JSONException the JSON exception
      */
     public static Map<String, Object> unwrap(final JSONObject jsonObject) throws JSONException {
-        return unwrap(Map.class, jsonObject);
+        return unwrap(jsonObject, Map.class);
     }
 
     /**
      *
-     * @param <T>
-     * @param cls
      * @param jsonObject
+     * @param targetType
+     * @param <T>
      * @return
      * @throws JSONException the JSON exception
      */
-    public static <T> T unwrap(final Class<? extends T> cls, final JSONObject jsonObject) throws JSONException {
-        return unwrap(N.<T> typeOf(cls), jsonObject);
+    public static <T> T unwrap(final JSONObject jsonObject, final Class<? extends T> targetType) throws JSONException {
+        return unwrap(jsonObject, N.<T> typeOf(targetType));
     }
 
     /**
      *
-     * @param <T>
-     * @param type
      * @param jsonObject
+     * @param targetType
+     * @param <T>
      * @return
      * @throws JSONException the JSON exception
      */
     @SuppressWarnings("unchecked")
-    public static <T> T unwrap(Type<? extends T> type, final JSONObject jsonObject) throws JSONException {
-        type = type.isObjectType() ? N.<T> typeOf("Map<String, Object>") : type;
-        final Class<?> cls = type.clazz();
+    public static <T> T unwrap(final JSONObject jsonObject, Type<? extends T> targetType) throws JSONException {
+        targetType = targetType.isObjectType() ? N.<T> typeOf("Map<String, Object>") : targetType;
+        final Class<?> cls = targetType.clazz();
 
-        if (type.clazz().isAssignableFrom(JSONObject.class)) {
+        if (targetType.clazz().isAssignableFrom(JSONObject.class)) {
             return (T) jsonObject;
-        } else if (type.isMap()) {
+        } else if (targetType.isMap()) {
             @SuppressWarnings("rawtypes")
             final Map<String, Object> map = N.newMap((Class<Map>) cls, jsonObject.keySet().size());
             final Iterator<String> iter = jsonObject.keys();
-            final Type<?> valueType = type.getParameterTypes()[1];
+            final Type<?> valueType = targetType.getParameterTypes()[1];
             String key = null;
             Object value = null;
 
@@ -215,9 +215,9 @@ public final class JSONUtil {
                     value = null;
                 } else if (value != null) {
                     if (value instanceof JSONObject) {
-                        value = unwrap(valueType, (JSONObject) value);
+                        value = unwrap((JSONObject) value, valueType);
                     } else if (value instanceof JSONArray) {
-                        value = unwrap(valueType, (JSONArray) value);
+                        value = unwrap((JSONArray) value, valueType);
                     }
                 }
 
@@ -225,7 +225,7 @@ public final class JSONUtil {
             }
 
             return (T) map;
-        } else if (type.isBean()) {
+        } else if (targetType.isBean()) {
             final BeanInfo beanInfo = ParserUtil.getBeanInfo(cls);
             final Object result = beanInfo.createBeanResult();
             final Iterator<String> iter = jsonObject.keys();
@@ -243,9 +243,9 @@ public final class JSONUtil {
                     value = null;
                 } else if (value != null) {
                     if (value instanceof JSONObject) {
-                        value = unwrap(propInfo.jsonXmlType, (JSONObject) value);
+                        value = unwrap((JSONObject) value, propInfo.jsonXmlType);
                     } else if (value instanceof JSONArray) {
-                        value = unwrap(propInfo.jsonXmlType, (JSONArray) value);
+                        value = unwrap((JSONArray) value, propInfo.jsonXmlType);
                     }
                 }
 
@@ -254,7 +254,7 @@ public final class JSONUtil {
 
             return (T) beanInfo.finishBeanResult(result);
         } else {
-            throw new IllegalArgumentException(type.name() + " is not a map or bean type");
+            throw new IllegalArgumentException(targetType.name() + " is not a map or bean type");
         }
     }
 
@@ -266,30 +266,126 @@ public final class JSONUtil {
      * @throws JSONException the JSON exception
      */
     public static <T> List<T> unwrap(final JSONArray jsonArray) throws JSONException {
-        return (List<T>) unwrap(jsonArray, Object.class);
+        return (List<T>) toList(jsonArray, Object.class);
     }
 
     /**
      *
+     * @param jsonArray
+     * @param targetType array or collection class
      * @param <T>
+     * @return
+     * @throws JSONException the JSON exception
+     */
+    public static <T> T unwrap(final JSONArray jsonArray, final Class<? extends T> targetType) throws JSONException {
+        return unwrap(jsonArray, N.<T> typeOf(targetType));
+    }
+
+    /**
+     *
+     * @param jsonArray
+     * @param targetType
+     * @param <T>
+     * @return
+     * @throws JSONException the JSON exception
+     */
+    @SuppressWarnings("unchecked")
+    public static <T> T unwrap(final JSONArray jsonArray, Type<? extends T> targetType) throws JSONException {
+        targetType = targetType.isObjectType() ? N.<T> typeOf("List<Object>") : targetType;
+        final int len = jsonArray.length();
+
+        if (targetType.clazz().isAssignableFrom(JSONArray.class)) {
+            return (T) jsonArray;
+        } else if (targetType.isCollection()) {
+            @SuppressWarnings("rawtypes")
+            final Collection<Object> coll = N.newCollection((Class<Collection>) targetType.clazz(), len);
+            final Type<?> elementType = targetType.getElementType();
+            Object element = null;
+
+            for (int i = 0; i < len; i++) {
+                element = jsonArray.get(i);
+
+                if (element == JSONObject.NULL) {
+                    element = null;
+                } else if (element != null) {
+                    if (element instanceof JSONObject) {
+                        element = unwrap((JSONObject) element, elementType);
+                    } else if (element instanceof JSONArray) {
+                        element = unwrap((JSONArray) element, elementType);
+                    }
+                }
+
+                coll.add(element);
+            }
+
+            return (T) coll;
+        } else if (targetType.isPrimitiveArray()) {
+            final Object array = N.newArray(targetType.getElementType().clazz(), jsonArray.length());
+            Object element = null;
+
+            for (int i = 0; i < len; i++) {
+                element = jsonArray.get(i);
+
+                if (element == JSONObject.NULL) {
+                    element = null;
+                }
+
+                if (element == null) {
+                    element = targetType.getElementType().defaultValue();
+                }
+
+                Array.set(array, i, element);
+            }
+
+            return (T) array;
+        } else if (targetType.isArray()) {
+            final Object[] array = N.newArray(targetType.getElementType().clazz(), jsonArray.length());
+            final Type<?> elementType = targetType.getElementType();
+            Object element = null;
+
+            for (int i = 0; i < len; i++) {
+                element = jsonArray.get(i);
+
+                if (element == JSONObject.NULL) {
+                    element = null;
+                } else if (element != null) {
+                    if (element instanceof JSONObject) {
+                        element = unwrap((JSONObject) element, elementType);
+                    } else if (element instanceof JSONArray) {
+                        element = unwrap((JSONArray) element, elementType);
+                    }
+                }
+
+                array[i] = element;
+            }
+
+            return (T) array;
+        } else {
+            throw new IllegalArgumentException(targetType.name() + " is not a array or collection type");
+        }
+    }
+
+    /**
+     *
      * @param jsonArray
      * @param elementClass
+     * @param <T>
      * @return
      * @throws JSONException the JSON exception
      */
-    public static <T> List<T> unwrap(final JSONArray jsonArray, Class<? extends T> elementClass) throws JSONException {
-        return unwrap(jsonArray, Type.of(elementClass));
+    public static <T> List<T> toList(final JSONArray jsonArray, Class<? extends T> elementClass) throws JSONException {
+        return toList(jsonArray, Type.of(elementClass));
     }
 
     /**
      *
-     * @param <T>
      * @param jsonArray
      * @param elementType
+     * @param <T>
      * @return
      * @throws JSONException the JSON exception
      */
-    public static <T> List<T> unwrap(final JSONArray jsonArray, Type<T> elementType) throws JSONException {
+    public static <T> List<T> toList(final JSONArray jsonArray, Type<T> elementType) throws JSONException {
         final int len = jsonArray.length();
         final List<Object> coll = new ArrayList<>(len);
 
@@ -302,9 +398,9 @@ public final class JSONUtil {
                 element = null;
             } else if (element != null) {
                 if (element instanceof JSONObject) {
-                    element = unwrap(elementType, (JSONObject) element);
+                    element = unwrap((JSONObject) element, elementType);
                 } else if (element instanceof JSONArray) {
-                    element = unwrap(elementType, (JSONArray) element);
+                    element = unwrap((JSONArray) element, elementType);
                 }
             }
 
@@ -312,101 +408,5 @@ public final class JSONUtil {
         }
 
         return (List<T>) coll;
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param cls array or collection class
-     * @param jsonArray
-     * @return
-     * @throws JSONException the JSON exception
-     */
-    public static <T> T unwrap(final Class<? extends T> cls, final JSONArray jsonArray) throws JSONException {
-        return unwrap(N.<T> typeOf(cls), jsonArray);
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param type
-     * @param jsonArray
-     * @return
-     * @throws JSONException the JSON exception
-     */
-    @SuppressWarnings("unchecked")
-    public static <T> T unwrap(Type<? extends T> type, final JSONArray jsonArray) throws JSONException {
-        type = type.isObjectType() ? N.<T> typeOf("List<Object>") : type;
-        final int len = jsonArray.length();
-
-        if (type.clazz().isAssignableFrom(JSONArray.class)) {
-            return (T) jsonArray;
-        } else if (type.isCollection()) {
-            @SuppressWarnings("rawtypes")
-            final Collection<Object> coll = N.newCollection((Class<Collection>) type.clazz(), len);
-            final Type<?> elementType = type.getElementType();
-            Object element = null;
-
-            for (int i = 0; i < len; i++) {
-                element = jsonArray.get(i);
-
-                if (element == JSONObject.NULL) {
-                    element = null;
-                } else if (element != null) {
-                    if (element instanceof JSONObject) {
-                        element = unwrap(elementType, (JSONObject) element);
-                    } else if (element instanceof JSONArray) {
-                        element = unwrap(elementType, (JSONArray) element);
-                    }
-                }
-
-                coll.add(element);
-            }
-
-            return (T) coll;
-        } else if (type.isPrimitiveArray()) {
-            final Object array = N.newArray(type.getElementType().clazz(), jsonArray.length());
-            Object element = null;
-
-            for (int i = 0; i < len; i++) {
-                element = jsonArray.get(i);
-
-                if (element == JSONObject.NULL) {
-                    element = null;
-                }
-
-                if (element == null) {
-                    element = type.getElementType().defaultValue();
-                }
-
-                Array.set(array, i, element);
-            }
-
-            return (T) array;
-        } else if (type.isArray()) {
-            final Object[] array = N.newArray(type.getElementType().clazz(), jsonArray.length());
-            final Type<?> elementType = type.getElementType();
-            Object element = null;
-
-            for (int i = 0; i < len; i++) {
-                element = jsonArray.get(i);
-
-                if (element == JSONObject.NULL) {
-                    element = null;
-                } else if (element != null) {
-                    if (element instanceof JSONObject) {
-                        element = unwrap(elementType, (JSONObject) element);
-                    } else if (element instanceof JSONArray) {
-                        element = unwrap(elementType, (JSONArray) element);
-                    }
-                }
-
-                array[i] = element;
-            }
-
-            return (T) array;
-        } else {
-            throw new IllegalArgumentException(type.name() + " is not a array or collection type");
-        }
     }
 }

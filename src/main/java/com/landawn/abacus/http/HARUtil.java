@@ -136,7 +136,7 @@ public final class HARUtil {
      */
     @SuppressWarnings("rawtypes")
     public static String sendRequstByHAR(final String har, final Predicate<String> filterForTargetUrl) {
-        Map map = N.fromJSON(Map.class, har);
+        Map map = N.fromJSON(har, Map.class);
         List<Map> entries = Maps.getByPath(map, "log.entries"); //NOSONAR
 
         return Stream.of(entries) //
@@ -173,7 +173,7 @@ public final class HARUtil {
      */
     @SuppressWarnings("rawtypes")
     public static List<String> sendMultiRequstsByHAR(final String har, final Predicate<String> filterForTargetUrl) {
-        Map map = N.fromJSON(Map.class, har);
+        Map map = N.fromJSON(har, Map.class);
         List<Map> entries = Maps.getByPath(map, "log.entries");
 
         return Stream.of(entries) //
@@ -209,7 +209,7 @@ public final class HARUtil {
      */
     @SuppressWarnings("rawtypes")
     public static Stream<Tuple2<Map<String, Object>, HttpResponse>> streamMultiRequstsByHAR(final String har, final Predicate<String> filterForTargetUrl) {
-        Map map = N.fromJSON(Map.class, har);
+        Map map = N.fromJSON(har, Map.class);
         List<Map> entries = Maps.getByPath(map, "log.entries");
 
         return Stream.of(entries) //
@@ -270,7 +270,7 @@ public final class HARUtil {
      */
     @SuppressWarnings("rawtypes")
     public static Optional<Map<String, Object>> getRequestEntryByUrlFromHAR(final String har, final Predicate<String> filterForTargetUrl) {
-        Map map = N.fromJSON(Map.class, har);
+        Map map = N.fromJSON(har, Map.class);
         List<Map> entries = Maps.getByPath(map, "log.entries");
 
         return Stream.of(entries) //

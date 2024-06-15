@@ -161,7 +161,7 @@ public abstract class AbstractFloatType extends NumberType<Number> {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
-            IOUtil.write(writer, Numbers.toFloat(x));
+            IOUtil.write(Numbers.toFloat(x), writer);
         }
     }
 }

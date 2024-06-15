@@ -128,7 +128,7 @@ public class ImmutableMapEntryType<K, V> extends AbstractType<AbstractMap.Simple
             return null; // NOSONAR
         }
 
-        return ImmutableEntry.copyOf(Utils.jsonParser.deserialize(Clazz.<K, V> ofMap(), str, jdc).entrySet().iterator().next());
+        return ImmutableEntry.copyOf(Utils.jsonParser.deserialize(str, jdc, Clazz.<K, V> ofMap()).entrySet().iterator().next());
     }
 
     /**

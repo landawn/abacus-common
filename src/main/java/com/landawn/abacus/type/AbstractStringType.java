@@ -180,8 +180,8 @@ public abstract class AbstractStringType extends AbstractCharSequenceType<String
 
     /**
      *
-     * @param writer
      * @param x
+     * @param writer
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override

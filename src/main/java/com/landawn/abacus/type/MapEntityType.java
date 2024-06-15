@@ -92,6 +92,6 @@ public class MapEntityType extends AbstractType<MapEntity> {
      */
     @Override
     public MapEntity valueOf(String str) {
-        return Strings.isEmpty(str) ? null : (MapEntity) Utils.jsonParser.deserialize(MapEntity.class, str, Utils.jdc);
+        return Strings.isEmpty(str) ? null : (MapEntity) Utils.jsonParser.deserialize(str, Utils.jdc, MapEntity.class);
     }
 }

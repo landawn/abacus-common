@@ -194,7 +194,7 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
         final ByteArrayOutputStream os = Objectory.createByteArrayOutputStream();
 
         try {
-            write(os, obj, config);
+            write(obj, config, os);
 
             return Strings.base64Encode(os.toByteArray());
         } finally {
@@ -204,20 +204,20 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
 
     /**
      *
-     * @param file content is NOT encoded with base64
      * @param obj
      * @param config
+     * @param output content is NOT encoded with base64
      */
     @Override
-    public void serialize(File file, Object obj, KryoSerializationConfig config) {
+    public void serialize(Object obj, KryoSerializationConfig config, File output) {
         OutputStream os = null;
 
         try {
-            createNewFileIfNotExists(file);
+            createNewFileIfNotExists(output);
 
-            os = IOUtil.newFileOutputStream(file);
+            os = IOUtil.newFileOutputStream(output);
 
-            write(os, obj, config);
+            write(obj, config, os);
 
             os.flush();
         } catch (IOException e) {
@@ -229,31 +229,31 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
 
     /**
      *
-     * @param os content is NOT encoded with base64
      * @param obj
      * @param config
+     * @param output content is NOT encoded with base64
      */
     @Override
-    public void serialize(OutputStream os, Object obj, KryoSerializationConfig config) {
-        write(os, obj, config);
+    public void serialize(Object obj, KryoSerializationConfig config, OutputStream output) {
+        write(obj, config, output);
     }
 
     /**
      *
-     * @param writer content is encoded with base64
      * @param obj
      * @param config
+     * @param output content is encoded with base64
      */
     @Override
-    public void serialize(Writer writer, Object obj, KryoSerializationConfig config) {
+    public void serialize(Object obj, KryoSerializationConfig config, Writer output) {
         final ByteArrayOutputStream os = Objectory.createByteArrayOutputStream();
 
         try {
-            write(os, obj, config);
+            write(obj, config, os);
 
-            writer.write(Strings.base64Encode(os.toByteArray()));
+            output.write(Strings.base64Encode(os.toByteArray()));
 
-            writer.flush();
+            output.flush();
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         } finally {
@@ -263,29 +263,29 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
 
     /**
      *
-     * @param os
      * @param obj
      * @param config
+     * @param output
      */
-    protected void write(OutputStream os, Object obj, KryoSerializationConfig config) {
-        Output output = createOutput();
+    protected void write(Object obj, KryoSerializationConfig config, OutputStream output) {
+        Output kryoOutput = createOutput();
 
         try {
-            output.setOutputStream(os);
+            kryoOutput.setOutputStream(output);
 
-            write(output, obj, config);
+            write(obj, config, kryoOutput);
         } finally {
-            recycle(output);
+            recycle(kryoOutput);
         }
     }
 
     /**
      *
-     * @param output
      * @param obj
      * @param config
+     * @param output
      */
-    protected void write(Output output, Object obj, KryoSerializationConfig config) {
+    protected void write(Object obj, KryoSerializationConfig config, Output output) {
         check(config);
 
         Kryo kryo = createKryo();
@@ -305,20 +305,20 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
 
     /**
      *
-     * @param <T>
-     * @param targetClass
-     * @param st A Base64 encoded String
+     * @param source A Base64 encoded String
      * @param config
+     * @param targetClass
+     * @param <T>
      * @return
      */
     @Override
-    public <T> T deserialize(Class<? extends T> targetClass, String st, KryoDeserializationConfig config) {
+    public <T> T deserialize(String source, KryoDeserializationConfig config, Class<? extends T> targetClass) {
         Input input = createInput();
 
         try {
-            input.setBuffer(Strings.base64Decode(st));
+            input.setBuffer(Strings.base64Decode(source));
 
-            return read(targetClass, input, config);
+            return read(input, config, targetClass);
         } finally {
             recycle(input);
         }
@@ -326,20 +326,20 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
 
     /**
      *
-     * @param <T>
-     * @param targetClass
-     * @param file
+     * @param source
      * @param config
+     * @param targetClass
+     * @param <T>
      * @return
      */
     @Override
-    public <T> T deserialize(Class<? extends T> targetClass, File file, KryoDeserializationConfig config) {
+    public <T> T deserialize(File source, KryoDeserializationConfig config, Class<? extends T> targetClass) {
         InputStream is = null;
 
         try {
-            is = IOUtil.newFileInputStream(file);
+            is = IOUtil.newFileInputStream(source);
 
-            return read(targetClass, is, config);
+            return read(is, config, targetClass);
         } finally {
             IOUtil.close(is);
         }
@@ -347,45 +347,45 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
 
     /**
      *
-     * @param <T>
-     * @param targetClass
-     * @param is
+     * @param source
      * @param config
+     * @param targetClass
+     * @param <T>
      * @return
      */
     @Override
-    public <T> T deserialize(Class<? extends T> targetClass, InputStream is, KryoDeserializationConfig config) {
-        return read(targetClass, is, config);
+    public <T> T deserialize(InputStream source, KryoDeserializationConfig config, Class<? extends T> targetClass) {
+        return read(source, config, targetClass);
     }
 
     /**
      *
-     * @param <T>
-     * @param targetClass
-     * @param reader content is encoded with base64
+     * @param source content is encoded with base64
      * @param config
+     * @param targetClass
+     * @param <T>
      * @return
      */
     @Override
-    public <T> T deserialize(Class<? extends T> targetClass, Reader reader, KryoDeserializationConfig config) {
-        return deserialize(targetClass, IOUtil.readAllToString(reader), config);
+    public <T> T deserialize(Reader source, KryoDeserializationConfig config, Class<? extends T> targetClass) {
+        return deserialize(IOUtil.readAllToString(source), config, targetClass);
     }
 
     /**
      *
-     * @param <T>
-     * @param targetClass
-     * @param is
+     * @param source
      * @param config
+     * @param targetClass
+     * @param <T>
      * @return
      */
-    protected <T> T read(Class<? extends T> targetClass, InputStream is, KryoDeserializationConfig config) {
+    protected <T> T read(InputStream source, KryoDeserializationConfig config, Class<? extends T> targetClass) {
         Input input = createInput();
 
         try {
-            input.setInputStream(is);
+            input.setInputStream(source);
 
-            return read(targetClass, input, config);
+            return read(input, config, targetClass);
         } finally {
             recycle(input);
         }
@@ -393,20 +393,20 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
 
     /**
      *
-     * @param <T>
-     * @param targetClass
-     * @param input
+     * @param source
      * @param config
+     * @param targetClass
+     * @param <T>
      * @return
      */
     @SuppressWarnings("unchecked")
-    protected <T> T read(Class<? extends T> targetClass, Input input, KryoDeserializationConfig config) {
+    protected <T> T read(Input source, KryoDeserializationConfig config, Class<? extends T> targetClass) {
         check(config);
 
         Kryo kryo = createKryo();
 
         try {
-            return (T) ((targetClass == null) ? kryo.readClassAndObject(input) : kryo.readObject(input, targetClass));
+            return (T) ((targetClass == null) ? kryo.readClassAndObject(source) : kryo.readObject(source, targetClass));
         } finally {
             recycle(kryo);
         }
@@ -446,14 +446,14 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
      * Copy the property values shallowly.
      *
      * @param <T>
-     * @param obj
+     * @param source
      * @return
      */
-    public <T> T copy(T obj) {
+    public <T> T copy(T source) {
         Kryo kryo = createKryo();
 
         try {
-            return kryo.copyShallow(obj);
+            return kryo.copyShallow(source);
         } finally {
             recycle(kryo);
         }
@@ -463,14 +463,14 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
      * Copy the property values deeply.
      *
      * @param <T>
-     * @param obj
+     * @param source
      * @return
      */
-    public <T> T clone(T obj) {
+    public <T> T clone(T source) {
         Kryo kryo = createKryo();
 
         try {
-            return kryo.copy(obj);
+            return kryo.copy(source);
         } finally {
             recycle(kryo);
         }
@@ -478,17 +478,17 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
 
     /**
      *
-     * @param obj
+     * @param source
      * @return
      */
-    public byte[] encode(Object obj) {
+    public byte[] encode(Object source) {
         final ByteArrayOutputStream os = Objectory.createByteArrayOutputStream();
         Output output = createOutput();
         Kryo kryo = createKryo();
 
         try {
             output.setOutputStream(os);
-            kryo.writeClassAndObject(output, obj);
+            kryo.writeClassAndObject(output, source);
 
             output.flush();
 
@@ -503,16 +503,16 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
     /**
      *
      * @param <T>
-     * @param bytes
+     * @param source
      * @return
      */
     @SuppressWarnings("unchecked")
-    public <T> T decode(byte[] bytes) {
+    public <T> T decode(byte[] source) {
         Input input = createInput();
         Kryo kryo = createKryo();
 
         try {
-            input.setBuffer(bytes);
+            input.setBuffer(source);
 
             return (T) kryo.readClassAndObject(input);
         } finally {

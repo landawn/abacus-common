@@ -680,27 +680,27 @@ public abstract class AbstractType<T> implements Type<T> {
 
     /**
      * Array 2 collection.
+     * @param array
+     * @param collClass
      *
      * @param <E>
-     * @param collClass
-     * @param x
      * @return
      */
     @Override
-    public <E> Collection<E> array2Collection(Class<?> collClass, T x) {
+    public <E> Collection<E> array2Collection(T array, Class<?> collClass) {
         throw new UnsupportedOperationException(name() + " doesn't support array2Collection Operation");
     }
 
     /**
      * Array 2 collection.
+     * @param array
+     * @param output
      *
      * @param <E>
-     * @param resultCollection
-     * @param x
      * @return
      */
     @Override
-    public <E> Collection<E> array2Collection(Collection<E> resultCollection, T x) {
+    public <E> Collection<E> array2Collection(T array, Collection<E> output) {
         throw new UnsupportedOperationException(name() + " doesn't support array2Collection Operation");
     }
 
@@ -952,29 +952,29 @@ public abstract class AbstractType<T> implements Type<T> {
 
     /**
      * Gets the column value.
-     *
-     * @param <T>
-     * @param targetClass
      * @param rs
      * @param columnIndex
+     * @param targetClass
+     *
+     * @param <T>
      * @return
      * @throws SQLException the SQL exception
      */
-    static <T> T getColumnValue(final Class<? extends T> targetClass, final ResultSet rs, final int columnIndex) throws SQLException {
+    static <T> T getColumnValue(final ResultSet rs, final int columnIndex, final Class<? extends T> targetClass) throws SQLException {
         return N.<T> typeOf(targetClass).get(rs, columnIndex);
     }
 
     /**
      * Gets the column value.
-     *
-     * @param <T>
-     * @param targetClass
      * @param rs
      * @param columnLabel
+     * @param targetClass
+     *
+     * @param <T>
      * @return
      * @throws SQLException the SQL exception
      */
-    static <T> T getColumnValue(final Class<? extends T> targetClass, final ResultSet rs, final String columnLabel) throws SQLException {
+    static <T> T getColumnValue(final ResultSet rs, final String columnLabel, final Class<? extends T> targetClass) throws SQLException {
         return N.<T> typeOf(targetClass).get(rs, columnLabel);
     }
 }

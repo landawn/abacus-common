@@ -136,7 +136,7 @@ public class MultimapType<K, E, V extends Collection<E>> extends AbstractType<Mu
             return null; // NOSONAR
         }
 
-        final Map<K, Collection<E>> map = Utils.jsonParser.deserialize(Map.class, st, jdc);
+        final Map<K, Collection<E>> map = Utils.jsonParser.deserialize(st, jdc, Map.class);
 
         if (Set.class.isAssignableFrom(parameterTypes[1].clazz())) {
             final Multimap<K, E, V> multiMap = (Multimap<K, E, V>) N.newLinkedSetMultimap(map.size());

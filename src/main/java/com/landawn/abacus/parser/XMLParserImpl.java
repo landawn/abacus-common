@@ -92,7 +92,7 @@ final class XMLParserImpl extends AbstractXMLParser {
         final IdentityHashSet<Object> serializedObjects = config != null && config.supportCircularReference() ? new IdentityHashSet<>() : null;
 
         try {
-            write(bw, obj, config, false, null, serializedObjects);
+            write(obj, config, null, serializedObjects, bw, false);
 
             return bw.toString();
         } catch (IOException e) {
@@ -104,20 +104,20 @@ final class XMLParserImpl extends AbstractXMLParser {
 
     /**
      *
-     * @param file
      * @param obj
      * @param config
+     * @param output
      */
     @Override
-    public void serialize(final File file, final Object obj, final XMLSerializationConfig config) {
+    public void serialize(final Object obj, final XMLSerializationConfig config, final File output) {
         OutputStream os = null;
 
         try {
-            createNewFileIfNotExists(file);
+            createNewFileIfNotExists(output);
 
-            os = IOUtil.newFileOutputStream(file);
+            os = IOUtil.newFileOutputStream(output);
 
-            serialize(os, obj, config);
+            serialize(obj, config, os);
 
             os.flush();
         } catch (IOException e) {
@@ -129,17 +129,17 @@ final class XMLParserImpl extends AbstractXMLParser {
 
     /**
      *
-     * @param os
      * @param obj
      * @param config
+     * @param output
      */
     @Override
-    public void serialize(final OutputStream os, final Object obj, final XMLSerializationConfig config) {
-        final BufferedXMLWriter bw = Objectory.createBufferedXMLWriter(os);
+    public void serialize(final Object obj, final XMLSerializationConfig config, final OutputStream output) {
+        final BufferedXMLWriter bw = Objectory.createBufferedXMLWriter(output);
         final IdentityHashSet<Object> serializedObjects = config != null && config.supportCircularReference() ? new IdentityHashSet<>() : null;
 
         try {
-            write(bw, obj, config, true, null, serializedObjects);
+            write(obj, config, null, serializedObjects, bw, true);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         } finally {
@@ -149,18 +149,18 @@ final class XMLParserImpl extends AbstractXMLParser {
 
     /**
      *
-     * @param writer
      * @param obj
      * @param config
+     * @param output
      */
     @Override
-    public void serialize(final Writer writer, final Object obj, final XMLSerializationConfig config) {
-        final boolean isBufferedWriter = writer instanceof BufferedXMLWriter;
-        final BufferedXMLWriter bw = isBufferedWriter ? (BufferedXMLWriter) writer : Objectory.createBufferedXMLWriter(writer);
+    public void serialize(final Object obj, final XMLSerializationConfig config, final Writer output) {
+        final boolean isBufferedWriter = output instanceof BufferedXMLWriter;
+        final BufferedXMLWriter bw = isBufferedWriter ? (BufferedXMLWriter) output : Objectory.createBufferedXMLWriter(output);
         final IdentityHashSet<Object> serializedObjects = config != null && config.supportCircularReference() ? new IdentityHashSet<>() : null;
 
         try {
-            write(bw, obj, config, true, null, serializedObjects);
+            write(obj, config, null, serializedObjects, bw, true);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         } finally {
@@ -172,20 +172,20 @@ final class XMLParserImpl extends AbstractXMLParser {
 
     /**
      *
-     * @param bw
      * @param obj
      * @param config
-     * @param flush
      * @param indentation
      * @param serializedObjects
+     * @param bw
+     * @param flush
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    protected void write(final BufferedXMLWriter bw, final Object obj, final XMLSerializationConfig config, final boolean flush, final String indentation,
-            final IdentityHashSet<Object> serializedObjects) throws IOException {
+    protected void write(final Object obj, final XMLSerializationConfig config, final String indentation, final IdentityHashSet<Object> serializedObjects,
+            final BufferedXMLWriter bw, final boolean flush) throws IOException {
         final XMLSerializationConfig configToUse = check(config);
 
         if (obj == null) {
-            IOUtil.write(bw, Strings.EMPTY_STRING);
+            IOUtil.write(Strings.EMPTY_STRING, bw);
             return;
         }
 
@@ -195,9 +195,9 @@ final class XMLParserImpl extends AbstractXMLParser {
         switch (type.getSerializationType()) {
             case SERIALIZABLE:
                 if (type.isObjectArray()) {
-                    writeArray(bw, type, obj, configToUse, indentation, serializedObjects);
+                    writeArray(obj, configToUse, indentation, serializedObjects, type, bw);
                 } else if (type.isCollection()) {
-                    writeCollection(bw, type, (Collection<?>) obj, configToUse, indentation, serializedObjects);
+                    writeCollection((Collection<?>) obj, configToUse, indentation, serializedObjects, type, bw);
                 } else {
                     type.writeCharacter(bw, obj, configToUse);
                 }
@@ -205,27 +205,27 @@ final class XMLParserImpl extends AbstractXMLParser {
                 break;
 
             case ENTITY:
-                writeBean(bw, type, obj, configToUse, indentation, serializedObjects);
+                writeBean(obj, configToUse, indentation, serializedObjects, type, bw);
 
                 break;
 
             case MAP:
-                writeMap(bw, type, (Map<?, ?>) obj, configToUse, indentation, serializedObjects);
+                writeMap((Map<?, ?>) obj, configToUse, indentation, serializedObjects, type, bw);
 
                 break;
 
             case MAP_ENTITY:
-                writeMapEntity(bw, type, (MapEntity) obj, configToUse, indentation, serializedObjects);
+                writeMapEntity((MapEntity) obj, configToUse, indentation, serializedObjects, type, bw);
 
                 break;
 
             case ARRAY:
-                writeArray(bw, type, obj, configToUse, indentation, serializedObjects);
+                writeArray(obj, configToUse, indentation, serializedObjects, type, bw);
 
                 break;
 
             case COLLECTION:
-                writeCollection(bw, type, (Collection<?>) obj, configToUse, indentation, serializedObjects);
+                writeCollection((Collection<?>) obj, configToUse, indentation, serializedObjects, type, bw);
 
                 break;
 
@@ -241,17 +241,17 @@ final class XMLParserImpl extends AbstractXMLParser {
 
     /**
      *
-     * @param bw
-     * @param type TODO
      * @param obj
      * @param config
      * @param indentation
      * @param serializedObjects
+     * @param type TODO
+     * @param bw
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    protected void writeBean(final BufferedXMLWriter bw, final Type<Object> type, final Object obj, final XMLSerializationConfig config,
-            final String indentation, final IdentityHashSet<Object> serializedObjects) throws IOException {
-        if (hasCircularReference(bw, obj, serializedObjects)) {
+    protected void writeBean(final Object obj, final XMLSerializationConfig config, final String indentation, final IdentityHashSet<Object> serializedObjects,
+            final Type<Object> type, final BufferedXMLWriter bw) throws IOException {
+        if (hasCircularReference(obj, serializedObjects, bw)) {
             return;
         }
 
@@ -289,7 +289,7 @@ final class XMLParserImpl extends AbstractXMLParser {
 
         final String propIndentation = isPrettyFormat ? ((indentation == null ? Strings.EMPTY_STRING : indentation) + config.getIndentation()) : null;
 
-        writeProperties(bw, type, obj, config, propIndentation, serializedObjects);
+        writeProperties(obj, config, propIndentation, serializedObjects, type, bw);
 
         if (isPrettyFormat) {
             bw.write(IOUtil.LINE_SEPARATOR);
@@ -308,17 +308,17 @@ final class XMLParserImpl extends AbstractXMLParser {
 
     /**
      *
-     * @param bw
-     * @param type TODO
      * @param obj
      * @param config
      * @param propIndentation
      * @param serializedObjects
+     * @param type TODO
+     * @param bw
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    protected void writeProperties(final BufferedXMLWriter bw, final Type<Object> type, final Object obj, final XMLSerializationConfig config,
-            final String propIndentation, final IdentityHashSet<Object> serializedObjects) throws IOException {
-        if (hasCircularReference(bw, obj, serializedObjects)) {
+    protected void writeProperties(final Object obj, final XMLSerializationConfig config, final String propIndentation,
+            final IdentityHashSet<Object> serializedObjects, final Type<Object> type, final BufferedXMLWriter bw) throws IOException {
+        if (hasCircularReference(obj, serializedObjects, bw)) {
             return;
         }
 
@@ -396,7 +396,7 @@ final class XMLParserImpl extends AbstractXMLParser {
                 if (propInfo.hasFormat) {
                     propInfo.writePropValue(bw, propValue, config);
                 } else {
-                    writeValue(bw, propInfo.jsonXmlType, propInfo, propValue, config, isPrettyFormat, propIndentation, nextIndentation, serializedObjects);
+                    writeValue(propValue, config, isPrettyFormat, propIndentation, nextIndentation, serializedObjects, propInfo, propInfo.jsonXmlType, bw);
                 }
 
                 if (tagByPropertyName) {
@@ -410,17 +410,17 @@ final class XMLParserImpl extends AbstractXMLParser {
 
     /**
      *
-     * @param bw
-     * @param type TODO
      * @param m
      * @param config
      * @param indentation
      * @param serializedObjects
+     * @param type TODO
+     * @param bw
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    protected void writeMap(final BufferedXMLWriter bw, final Type<Object> type, final Map<?, ?> m, final XMLSerializationConfig config,
-            final String indentation, final IdentityHashSet<Object> serializedObjects) throws IOException {
-        if (hasCircularReference(bw, m, serializedObjects)) {
+    protected void writeMap(final Map<?, ?> m, final XMLSerializationConfig config, final String indentation, final IdentityHashSet<Object> serializedObjects,
+            final Type<Object> type, final BufferedXMLWriter bw) throws IOException {
+        if (hasCircularReference(m, serializedObjects, bw)) {
             return;
         }
 
@@ -489,7 +489,7 @@ final class XMLParserImpl extends AbstractXMLParser {
                     bw.write(XMLConstants.CLOSE_ATTR_AND_ELE);
                 }
 
-                writeValue(bw, valueType, null, value, config, isPrettyFormat, propIndentation, nextIndentation, serializedObjects);
+                writeValue(value, config, isPrettyFormat, propIndentation, nextIndentation, serializedObjects, null, valueType, bw);
 
                 bw.write(WD._LESS_THAN);
                 bw.write(WD._SLASH);
@@ -511,18 +511,17 @@ final class XMLParserImpl extends AbstractXMLParser {
 
     /**
      * Write map bean.
-     *
-     * @param bw
-     * @param type TODO
      * @param mapEntity
      * @param config
      * @param indentation
      * @param serializedObjects
+     * @param type TODO
+     * @param bw
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    protected void writeMapEntity(final BufferedXMLWriter bw, final Type<Object> type, final MapEntity mapEntity, final XMLSerializationConfig config,
-            final String indentation, final IdentityHashSet<Object> serializedObjects) throws IOException {
-        if (hasCircularReference(bw, mapEntity, serializedObjects)) {
+    protected void writeMapEntity(final MapEntity mapEntity, final XMLSerializationConfig config, final String indentation,
+            final IdentityHashSet<Object> serializedObjects, final Type<Object> type, final BufferedXMLWriter bw) throws IOException {
+        if (hasCircularReference(mapEntity, serializedObjects, bw)) {
             return;
         }
 
@@ -592,7 +591,7 @@ final class XMLParserImpl extends AbstractXMLParser {
                     bw.write(XMLConstants.CLOSE_ATTR_AND_ELE);
                 }
 
-                writeValue(bw, valueType, null, value, config, isPrettyFormat, propIndentation, nextIndentation, serializedObjects);
+                writeValue(value, config, isPrettyFormat, propIndentation, nextIndentation, serializedObjects, null, valueType, bw);
 
                 bw.write(WD._LESS_THAN);
                 bw.write(WD._SLASH);
@@ -617,17 +616,17 @@ final class XMLParserImpl extends AbstractXMLParser {
 
     /**
      *
-     * @param bw
-     * @param type TODO
      * @param obj
      * @param config
      * @param indentation
      * @param serializedObjects
+     * @param type TODO
+     * @param bw
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    protected void writeArray(final BufferedXMLWriter bw, final Type<Object> type, final Object obj, final XMLSerializationConfig config,
-            final String indentation, final IdentityHashSet<Object> serializedObjects) throws IOException {
-        if (hasCircularReference(bw, obj, serializedObjects)) {
+    protected void writeArray(final Object obj, final XMLSerializationConfig config, final String indentation, final IdentityHashSet<Object> serializedObjects,
+            final Type<Object> type, final BufferedXMLWriter bw) throws IOException {
+        if (hasCircularReference(obj, serializedObjects, bw)) {
             return;
         }
 
@@ -661,7 +660,7 @@ final class XMLParserImpl extends AbstractXMLParser {
                 if (e == null) {
                     bw.write(XMLConstants.NULL_NULL_ELE);
                 } else {
-                    write(bw, e, config, false, nextIndentation, serializedObjects);
+                    write(e, config, nextIndentation, serializedObjects, bw, false);
                 }
             }
         }
@@ -679,17 +678,17 @@ final class XMLParserImpl extends AbstractXMLParser {
 
     /**
      *
-     * @param bw
-     * @param type TODO
      * @param c
      * @param config
      * @param indentation
      * @param serializedObjects
+     * @param type TODO
+     * @param bw
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    protected void writeCollection(final BufferedXMLWriter bw, final Type<Object> type, final Collection<?> c, final XMLSerializationConfig config,
-            final String indentation, final IdentityHashSet<Object> serializedObjects) throws IOException {
-        if (hasCircularReference(bw, c, serializedObjects)) {
+    protected void writeCollection(final Collection<?> c, final XMLSerializationConfig config, final String indentation,
+            final IdentityHashSet<Object> serializedObjects, final Type<Object> type, final BufferedXMLWriter bw) throws IOException {
+        if (hasCircularReference(c, serializedObjects, bw)) {
             return;
         }
 
@@ -740,7 +739,7 @@ final class XMLParserImpl extends AbstractXMLParser {
                 if (e == null) {
                     bw.write(XMLConstants.NULL_NULL_ELE);
                 } else {
-                    write(bw, e, config, false, nextIndentation, serializedObjects);
+                    write(e, config, nextIndentation, serializedObjects, bw, false);
                 }
             }
         }
@@ -764,20 +763,20 @@ final class XMLParserImpl extends AbstractXMLParser {
 
     /**
      *
-     * @param bw
-     * @param valueType
-     * @param propInfo
      * @param value
      * @param config
      * @param isPrettyFormat
      * @param propIndentation
      * @param nextIndentation
      * @param serializedObjects
+     * @param propInfo
+     * @param valueType
+     * @param bw
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    protected void writeValue(final BufferedXMLWriter bw, final Type<Object> valueType, final PropInfo propInfo, final Object value,
-            final XMLSerializationConfig config, final boolean isPrettyFormat, final String propIndentation, final String nextIndentation,
-            final IdentityHashSet<Object> serializedObjects) throws IOException {
+    protected void writeValue(final Object value, final XMLSerializationConfig config, final boolean isPrettyFormat, final String propIndentation,
+            final String nextIndentation, final IdentityHashSet<Object> serializedObjects, final PropInfo propInfo, final Type<Object> valueType,
+            final BufferedXMLWriter bw) throws IOException {
         //    if (hasCircularReference(value, serializedObjects)) {
         //        return;
         //    }
@@ -812,7 +811,7 @@ final class XMLParserImpl extends AbstractXMLParser {
 
                         bw.write(XMLConstants.NULL_NULL_ELE);
                     } else {
-                        write(bw, e, config, false, nextIndentation, serializedObjects);
+                        write(e, config, nextIndentation, serializedObjects, bw, false);
                     }
                 }
 
@@ -840,7 +839,7 @@ final class XMLParserImpl extends AbstractXMLParser {
 
                         bw.write(XMLConstants.NULL_NULL_ELE);
                     } else {
-                        write(bw, e, config, false, nextIndentation, serializedObjects);
+                        write(e, config, nextIndentation, serializedObjects, bw, false);
                     }
                 }
 
@@ -851,7 +850,7 @@ final class XMLParserImpl extends AbstractXMLParser {
             }
 
         } else {
-            write(bw, value, config, false, nextIndentation, serializedObjects);
+            write(value, config, nextIndentation, serializedObjects, bw, false);
 
             if (isPrettyFormat) {
                 bw.write(IOUtil.LINE_SEPARATOR);
@@ -862,14 +861,14 @@ final class XMLParserImpl extends AbstractXMLParser {
 
     /**
      * Checks for circular reference.
-     *
-     * @param bw
      * @param obj
      * @param serializedObjects
+     * @param bw
+     *
      * @return true, if successful
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    private boolean hasCircularReference(final BufferedXMLWriter bw, final Object obj, final IdentityHashSet<Object> serializedObjects) throws IOException {
+    private boolean hasCircularReference(final Object obj, final IdentityHashSet<Object> serializedObjects, final BufferedXMLWriter bw) throws IOException {
         if (obj != null && serializedObjects != null) {
             if (serializedObjects.contains(obj)) {
                 bw.write("null");
@@ -919,22 +918,22 @@ final class XMLParserImpl extends AbstractXMLParser {
 
     /**
      *
-     * @param <T>
-     * @param targetClass
-     * @param st
+     * @param source
      * @param config
+     * @param targetClass
+     * @param <T>
      * @return
      */
     @Override
-    public <T> T deserialize(Class<? extends T> targetClass, String st, final XMLDeserializationConfig config) {
-        if (Strings.isEmpty(st)) {
+    public <T> T deserialize(String source, final XMLDeserializationConfig config, Class<? extends T> targetClass) {
+        if (Strings.isEmpty(source)) {
             return N.defaultValueOf(targetClass);
         }
 
-        final BufferedReader br = Objectory.createBufferedReader(st);
+        final BufferedReader br = Objectory.createBufferedReader(source);
 
         try {
-            return read(null, targetClass, br, config);
+            return read(br, config, null, targetClass);
         } finally {
             Objectory.recycle(br);
         }
@@ -942,20 +941,20 @@ final class XMLParserImpl extends AbstractXMLParser {
 
     /**
      *
-     * @param <T>
-     * @param targetClass
-     * @param file
+     * @param source
      * @param config
+     * @param targetClass
+     * @param <T>
      * @return
      */
     @Override
-    public <T> T deserialize(Class<? extends T> targetClass, File file, final XMLDeserializationConfig config) {
+    public <T> T deserialize(File source, final XMLDeserializationConfig config, Class<? extends T> targetClass) {
         InputStream is = null;
 
         try {
-            is = IOUtil.newFileInputStream(file);
+            is = IOUtil.newFileInputStream(source);
 
-            return deserialize(targetClass, is, config);
+            return deserialize(is, config, targetClass);
         } finally {
             IOUtil.closeQuietly(is);
         }
@@ -963,18 +962,18 @@ final class XMLParserImpl extends AbstractXMLParser {
 
     /**
      *
-     * @param <T>
-     * @param targetClass
-     * @param is
+     * @param source
      * @param config
+     * @param targetClass
+     * @param <T>
      * @return
      */
     @Override
-    public <T> T deserialize(Class<? extends T> targetClass, InputStream is, final XMLDeserializationConfig config) {
-        final BufferedReader br = Objectory.createBufferedReader(is);
+    public <T> T deserialize(InputStream source, final XMLDeserializationConfig config, Class<? extends T> targetClass) {
+        final BufferedReader br = Objectory.createBufferedReader(source);
 
         try {
-            return read(null, targetClass, br, config);
+            return read(br, config, null, targetClass);
         } finally {
             Objectory.recycle(br);
         }
@@ -982,46 +981,46 @@ final class XMLParserImpl extends AbstractXMLParser {
 
     /**
      *
-     * @param <T>
-     * @param targetClass
-     * @param reader
+     * @param source
      * @param config
+     * @param targetClass
+     * @param <T>
      * @return
      */
     @Override
-    public <T> T deserialize(Class<? extends T> targetClass, Reader reader, final XMLDeserializationConfig config) {
+    public <T> T deserialize(Reader source, final XMLDeserializationConfig config, Class<? extends T> targetClass) {
         // BufferedReader? will the target parser create the BufferedReader
         // internally.
-        return read(null, targetClass, reader, config);
+        return read(source, config, null, targetClass);
     }
 
     /**
      *
-     * @param <T>
+     * @param source
+     * @param config
      * @param targetClass
-     * @param node
-     * @param config
+     * @param <T>
      * @return
      */
     @Override
-    public <T> T deserialize(Class<? extends T> targetClass, Node node, final XMLDeserializationConfig config) {
-        return readByDOMParser(targetClass, node, config);
+    public <T> T deserialize(Node source, final XMLDeserializationConfig config, Class<? extends T> targetClass) {
+        return readByDOMParser(source, config, targetClass);
     }
 
     /**
      *
-     * @param <T>
-     * @param nodeClasses
-     * @param is
      * @param config
+     * @param nodeClasses
+     * @param source
+     * @param <T>
      * @return
      */
     @Override
-    public <T> T deserialize(Map<String, Class<?>> nodeClasses, InputStream is, final XMLDeserializationConfig config) {
-        final BufferedReader br = Objectory.createBufferedReader(is);
+    public <T> T deserialize(InputStream source, final XMLDeserializationConfig config, Map<String, Class<?>> nodeClasses) {
+        final BufferedReader br = Objectory.createBufferedReader(source);
 
         try {
-            return read(nodeClasses, null, br, config);
+            return read(br, config, nodeClasses, null);
         } finally {
             Objectory.recycle(br);
         }
@@ -1029,35 +1028,35 @@ final class XMLParserImpl extends AbstractXMLParser {
 
     /**
      *
-     * @param <T>
-     * @param nodeClasses
-     * @param reader
      * @param config
+     * @param nodeClasses
+     * @param source
+     * @param <T>
      * @return
      */
     @Override
-    public <T> T deserialize(Map<String, Class<?>> nodeClasses, Reader reader, final XMLDeserializationConfig config) {
-        return read(nodeClasses, null, reader, config);
+    public <T> T deserialize(Reader source, final XMLDeserializationConfig config, Map<String, Class<?>> nodeClasses) {
+        return read(source, config, nodeClasses, null);
     }
 
     /**
      *
-     * @param <T>
-     * @param nodeClasses
-     * @param node
+     * @param source
      * @param config
+     * @param nodeClasses
+     * @param <T>
      * @return
      */
     @Override
     @SuppressWarnings("unchecked")
-    public <T> T deserialize(Map<String, Class<?>> nodeClasses, Node node, final XMLDeserializationConfig config) {
+    public <T> T deserialize(Node source, final XMLDeserializationConfig config, Map<String, Class<?>> nodeClasses) {
         Class<? extends T> targetClass = null;
 
         if (N.notEmpty(nodeClasses)) {
-            String nodeName = XMLUtil.getAttribute(node, XMLConstants.NAME);
+            String nodeName = XMLUtil.getAttribute(source, XMLConstants.NAME);
 
             if (Strings.isEmpty(nodeName)) {
-                nodeName = node.getNodeName();
+                nodeName = source.getNodeName();
             }
 
             targetClass = (Class<T>) nodeClasses.get(nodeName);
@@ -1067,26 +1066,26 @@ final class XMLParserImpl extends AbstractXMLParser {
             throw new ParseException("No target class is specified"); //NOSONAR
         }
 
-        return readByDOMParser(targetClass, node, config);
+        return readByDOMParser(source, config, targetClass);
     }
 
     /**
      *
-     * @param <T>
+     * @param source
+     * @param config
      * @param nodeClasses
      * @param targetClass
-     * @param br
-     * @param config
+     * @param <T>
      * @return
      */
     @SuppressWarnings("unchecked")
-    protected <T> T read(Map<String, Class<?>> nodeClasses, Class<? extends T> targetClass, Reader br, final XMLDeserializationConfig config) {
+    protected <T> T read(Reader source, final XMLDeserializationConfig config, Map<String, Class<?>> nodeClasses, Class<? extends T> targetClass) {
         final XMLDeserializationConfig configToUse = check(config);
 
         switch (parserType) {
             case StAX:
                 try {
-                    XMLStreamReader xmlReader = createXMLStreamReader(br);
+                    XMLStreamReader xmlReader = createXMLStreamReader(source);
 
                     for (int event = xmlReader.next(); event != XMLStreamConstants.START_ELEMENT && xmlReader.hasNext(); event = xmlReader.next()) {
                         // do nothing.
@@ -1110,7 +1109,7 @@ final class XMLParserImpl extends AbstractXMLParser {
                         throw new ParseException("No target class is specified");
                     }
 
-                    return readByStreamParser(targetClass, xmlReader, configToUse);
+                    return readByStreamParser(xmlReader, configToUse, targetClass);
                 } catch (XMLStreamException e) {
                     throw new ParseException(e);
                 }
@@ -1119,7 +1118,7 @@ final class XMLParserImpl extends AbstractXMLParser {
                 DocumentBuilder docBuilder = XMLUtil.createContentParser();
 
                 try {
-                    Document doc = docBuilder.parse(new InputSource(br));
+                    Document doc = docBuilder.parse(new InputSource(source));
                     Node node = doc.getFirstChild();
 
                     if (targetClass == null && N.notEmpty(nodeClasses)) {
@@ -1136,7 +1135,7 @@ final class XMLParserImpl extends AbstractXMLParser {
                         throw new ParseException("No target class is specified");
                     }
 
-                    return readByDOMParser(targetClass, node, configToUse);
+                    return readByDOMParser(node, configToUse, targetClass);
                 } catch (SAXException e) {
                     throw new ParseException(e);
                 } catch (IOException e) {
@@ -1152,34 +1151,33 @@ final class XMLParserImpl extends AbstractXMLParser {
 
     /**
      * Read by stream parser.
-     *
-     * @param <T>
-     * @param targetClass
      * @param xmlReader
      * @param config
+     * @param targetClass
+     *
+     * @param <T>
      * @return
      * @throws XMLStreamException the XML stream exception
      */
-    protected <T> T readByStreamParser(Class<? extends T> targetClass, XMLStreamReader xmlReader, final XMLDeserializationConfig config)
+    protected <T> T readByStreamParser(XMLStreamReader xmlReader, final XMLDeserializationConfig config, Class<? extends T> targetClass)
             throws XMLStreamException {
-        return readByStreamParser(targetClass, xmlReader, config, null, null);
+        return readByStreamParser(xmlReader, config, null, null, targetClass);
     }
 
     /**
      * Read by stream parser.
-     *
-     * @param <T>
-     * @param targetClass
      * @param xmlReader
      * @param config
-     * @param propType
      * @param propInfo
+     * @param propType
+     * @param targetClass
+     * @param <T>
      * @return
      * @throws XMLStreamException the XML stream exception
      */
     @SuppressWarnings({ "null", "fallthrough" })
-    protected <T> T readByStreamParser(Class<?> targetClass, final XMLStreamReader xmlReader, final XMLDeserializationConfig config, Type<?> propType,
-            PropInfo propInfo) throws XMLStreamException {
+    protected <T> T readByStreamParser(final XMLStreamReader xmlReader, final XMLDeserializationConfig config, PropInfo propInfo, Type<?> propType,
+            Class<?> targetClass) throws XMLStreamException {
 
         if (targetClass.equals(Object.class)) {
             targetClass = MapEntity.class;
@@ -1267,8 +1265,8 @@ final class XMLParserImpl extends AbstractXMLParser {
                                     }
                                 } else {
                                     if (propType.isMap() || propType.isBean() || propType.isMapEntity() || propType.isObjectType()) {
-                                        propValue = readByStreamParser(propType.isObjectType() ? Map.class : propType.clazz(), xmlReader, configToUse, propType,
-                                                propInfo);
+                                        propValue = readByStreamParser(xmlReader, configToUse, propInfo, propType,
+                                                propType.isObjectType() ? Map.class : propType.clazz());
 
                                         for (int startCount = 0, e = xmlReader.next();; e = xmlReader.next()) {
                                             startCount += (e == XMLStreamConstants.START_ELEMENT) ? 1 : (e == XMLStreamConstants.END_ELEMENT ? -1 : 0);
@@ -1292,11 +1290,11 @@ final class XMLParserImpl extends AbstractXMLParser {
 
                                                 xmlReader.next();
                                             } else {
-                                                c.add(readByStreamParser(propEleType.clazz(), xmlReader, configToUse, propType, null));
+                                                c.add(readByStreamParser(xmlReader, configToUse, null, propType, propEleType.clazz()));
                                             }
                                         } while (xmlReader.hasNext() && xmlReader.next() == XMLStreamConstants.START_ELEMENT);
 
-                                        propValue = propType.clazz().isArray() ? collection2Array(propType.clazz(), c) : c;
+                                        propValue = propType.clazz().isArray() ? collection2Array(c, propType.clazz()) : c;
                                     }
                                 }
 
@@ -1461,8 +1459,8 @@ final class XMLParserImpl extends AbstractXMLParser {
                                     }
                                 } else {
                                     if (propType.isMap() || propType.isBean() || propType.isMapEntity() || propType.isObjectType()) {
-                                        propValue = readByStreamParser(propType.isObjectType() ? Map.class : propType.clazz(), xmlReader, configToUse, propType,
-                                                null);
+                                        propValue = readByStreamParser(xmlReader, configToUse, null, propType,
+                                                propType.isObjectType() ? Map.class : propType.clazz());
 
                                         for (int startCount = 0, e = xmlReader.next();; e = xmlReader.next()) {
                                             startCount += (e == XMLStreamConstants.START_ELEMENT) ? 1 : (e == XMLStreamConstants.END_ELEMENT ? -1 : 0);
@@ -1486,11 +1484,11 @@ final class XMLParserImpl extends AbstractXMLParser {
 
                                                 xmlReader.next();
                                             } else {
-                                                c.add(readByStreamParser(propEleType.clazz(), xmlReader, configToUse, propType, null));
+                                                c.add(readByStreamParser(xmlReader, configToUse, null, propType, propEleType.clazz()));
                                             }
                                         } while (xmlReader.hasNext() && xmlReader.next() == XMLStreamConstants.START_ELEMENT);
 
-                                        propValue = propType.clazz().isArray() ? collection2Array(propType.clazz(), c) : c;
+                                        propValue = propType.clazz().isArray() ? collection2Array(c, propType.clazz()) : c;
                                     }
                                 }
 
@@ -1633,8 +1631,8 @@ final class XMLParserImpl extends AbstractXMLParser {
                                     }
                                 } else {
                                     if (propType.isMap() || propType.isBean() || propType.isMapEntity() || propType.isObjectType()) {
-                                        propValue = readByStreamParser(propType.isObjectType() ? MapEntity.class : propType.clazz(), xmlReader, configToUse,
-                                                propType, null);
+                                        propValue = readByStreamParser(xmlReader, configToUse, null, propType,
+                                                propType.isObjectType() ? MapEntity.class : propType.clazz());
 
                                         for (int startCount = 0, e = xmlReader.next();; e = xmlReader.next()) {
                                             startCount += (e == XMLStreamConstants.START_ELEMENT) ? 1 : (e == XMLStreamConstants.END_ELEMENT ? -1 : 0);
@@ -1658,11 +1656,11 @@ final class XMLParserImpl extends AbstractXMLParser {
 
                                                 xmlReader.next();
                                             } else {
-                                                c.add(readByStreamParser(propEleType.clazz(), xmlReader, defaultXMLDeserializationConfig, propType, null));
+                                                c.add(readByStreamParser(xmlReader, defaultXMLDeserializationConfig, null, propType, propEleType.clazz()));
                                             }
                                         } while (xmlReader.hasNext() && xmlReader.next() == XMLStreamConstants.START_ELEMENT);
 
-                                        propValue = propType.clazz().isArray() ? collection2Array(propType.clazz(), c) : c;
+                                        propValue = propType.clazz().isArray() ? collection2Array(c, propType.clazz()) : c;
                                     }
                                 }
 
@@ -1773,9 +1771,9 @@ final class XMLParserImpl extends AbstractXMLParser {
                                 if (xmlReader.getAttributeCount() > 0 && TRUE.equals(xmlReader.getAttributeValue(null, XMLConstants.IS_NULL))) {
                                     list.add(null);
                                 } else if (String.class == eleType.clazz() || Object.class == eleType.clazz()) {
-                                    list.add(readByStreamParser(Map.class, xmlReader, configToUse, eleType, null));
+                                    list.add(readByStreamParser(xmlReader, configToUse, null, eleType, Map.class));
                                 } else {
-                                    list.add(readByStreamParser(eleType.clazz(), xmlReader, configToUse, eleType, null));
+                                    list.add(readByStreamParser(xmlReader, configToUse, null, eleType, eleType.clazz()));
                                 }
 
                                 break;
@@ -1807,14 +1805,14 @@ final class XMLParserImpl extends AbstractXMLParser {
                                 if (eleType.clazz() == String.class || eleType.clazz() == Object.class) {
                                     propValue = N.typeOf(targetClass).valueOf(text);
                                 } else {
-                                    propValue = jsonParser.deserialize(targetClass, text, JDC.create().setElementType(eleType.clazz()));
+                                    propValue = jsonParser.deserialize(text, JDC.create().setElementType(eleType.clazz()), targetClass);
                                 }
 
                                 if (event == XMLStreamConstants.END_ELEMENT) {
                                     if (propValue != null) {
                                         return (T) propValue;
                                     } else {
-                                        return collection2Array(targetClass, list);
+                                        return collection2Array(list, targetClass);
                                     }
                                 }
                             }
@@ -1823,7 +1821,7 @@ final class XMLParserImpl extends AbstractXMLParser {
                                 if (propValue != null) {
                                     return (T) propValue;
                                 } else {
-                                    return collection2Array(targetClass, list);
+                                    return collection2Array(list, targetClass);
                                 }
                             }
 
@@ -1862,9 +1860,9 @@ final class XMLParserImpl extends AbstractXMLParser {
                             if (xmlReader.getAttributeCount() > 0 && TRUE.equals(xmlReader.getAttributeValue(null, XMLConstants.IS_NULL))) {
                                 result.add(null);
                             } else if (String.class == eleType.clazz() || Object.class == eleType.clazz()) {
-                                result.add(readByStreamParser(Map.class, xmlReader, configToUse, eleType, null));
+                                result.add(readByStreamParser(xmlReader, configToUse, null, eleType, Map.class));
                             } else {
-                                result.add(readByStreamParser(eleType.clazz(), xmlReader, configToUse, eleType, null));
+                                result.add(readByStreamParser(xmlReader, configToUse, null, eleType, eleType.clazz()));
                             }
 
                             break;
@@ -1895,7 +1893,7 @@ final class XMLParserImpl extends AbstractXMLParser {
                             if (eleType.clazz() == String.class || eleType.clazz() == Object.class) {
                                 propValue = N.typeOf(targetClass).valueOf(text);
                             } else {
-                                propValue = jsonParser.deserialize(targetClass, text, JDC.create().setElementType(eleType.clazz()));
+                                propValue = jsonParser.deserialize(text, JDC.create().setElementType(eleType.clazz()), targetClass);
                             }
 
                             if (event == XMLStreamConstants.END_ELEMENT) {
@@ -1931,37 +1929,37 @@ final class XMLParserImpl extends AbstractXMLParser {
 
     /**
      * Read by DOM parser.
-     *
-     * @param <T>
-     * @param targetClass
      * @param node
      * @param config
+     * @param targetClass
+     *
+     * @param <T>
      * @return
      */
-    protected <T> T readByDOMParser(Class<? extends T> targetClass, Node node, final XMLDeserializationConfig config) {
+    protected <T> T readByDOMParser(Node node, final XMLDeserializationConfig config, Class<? extends T> targetClass) {
         final XMLDeserializationConfig configToUse = check(config);
 
-        return readByDOMParser(targetClass, node, configToUse, null, configToUse.getElementType(), false, false, false, true);
+        return readByDOMParser(node, configToUse, null, configToUse.getElementType(), false, false, false, true, targetClass);
     }
 
     /**
      * Read by DOM parser.
-     *
-     * @param <T>
-     * @param inputClass
      * @param node
-     * @param configToUse
      * @param propName
      * @param propType
      * @param checkedAttr
      * @param isTagByPropertyName
      * @param ignoreTypeInfo
      * @param isFirstCall
+     * @param inputClass
+     * @param configToUse
+     *
+     * @param <T>
      * @return
      */
     @SuppressWarnings({ "unchecked", "null" })
-    protected <T> T readByDOMParser(Class<T> inputClass, final Node node, final XMLDeserializationConfig config, String propName, Type<?> propType,
-            boolean checkedAttr, boolean isTagByPropertyName, boolean ignoreTypeInfo, boolean isFirstCall) {
+    protected <T> T readByDOMParser(final Node node, final XMLDeserializationConfig config, String propName, Type<?> propType, boolean checkedAttr,
+            boolean isTagByPropertyName, boolean ignoreTypeInfo, boolean isFirstCall, Class<T> inputClass) {
         if (node.getNodeType() == Document.TEXT_NODE) {
             return null;
         }
@@ -2058,8 +2056,8 @@ final class XMLParserImpl extends AbstractXMLParser {
                         }
                     }
 
-                    propValue = getPropValue(inputClass, propNode, configToUse, propName, propType, propInfo, checkedAttr, isTagByPropertyName, ignoreTypeInfo,
-                            true);
+                    propValue = getPropValue(propNode, configToUse, propName, propType, propInfo, checkedAttr, isTagByPropertyName, ignoreTypeInfo, true,
+                            inputClass);
 
                     if (propInfo.jsonXmlExpose != JsonXmlField.Expose.SERIALIZE_ONLY) {
                         propInfo.setPropValue(result, propValue);
@@ -2130,8 +2128,8 @@ final class XMLParserImpl extends AbstractXMLParser {
                         propType = defaultValueType;
                     }
 
-                    propValue = getPropValue(inputClass, propNode, configToUse, propName, propType, propInfo, checkedAttr, isTagByPropertyName, ignoreTypeInfo,
-                            true);
+                    propValue = getPropValue(propNode, configToUse, propName, propType, propInfo, checkedAttr, isTagByPropertyName, ignoreTypeInfo, true,
+                            inputClass);
 
                     mResult.put(isStringKey ? propName : keyType.valueOf(propName), propValue);
                 }
@@ -2190,8 +2188,8 @@ final class XMLParserImpl extends AbstractXMLParser {
                         propType = defaultValueType;
                     }
 
-                    propValue = getPropValue(inputClass, propNode, configToUse, propName, propType, propInfo, checkedAttr, isTagByPropertyName, ignoreTypeInfo,
-                            true);
+                    propValue = getPropValue(propNode, configToUse, propName, propType, propInfo, checkedAttr, isTagByPropertyName, ignoreTypeInfo, true,
+                            inputClass);
 
                     mResult.set(propName, propValue);
                 }
@@ -2217,7 +2215,7 @@ final class XMLParserImpl extends AbstractXMLParser {
                     if (eleType.clazz() == String.class || eleType.clazz() == Object.class) {
                         return (T) N.typeOf(typeClass).valueOf(XMLUtil.getTextContent(node));
                     } else {
-                        return (T) jsonParser.deserialize(typeClass, XMLUtil.getTextContent(node), JDC.create().setElementType(eleType.clazz()));
+                        return (T) jsonParser.deserialize(XMLUtil.getTextContent(node), JDC.create().setElementType(eleType.clazz()), typeClass);
                     }
                 }
 
@@ -2252,13 +2250,13 @@ final class XMLParserImpl extends AbstractXMLParser {
                             propType = defaultValueType;
                         }
 
-                        propValue = getPropValue(inputClass, eleNode, configToUse, propName, propType, propInfo, checkedAttr, isTagByPropertyName,
-                                ignoreTypeInfo, false);
+                        propValue = getPropValue(eleNode, configToUse, propName, propType, propInfo, checkedAttr, isTagByPropertyName, ignoreTypeInfo, false,
+                                inputClass);
 
                         c.add(propValue);
                     }
 
-                    return collection2Array(typeClass, c);
+                    return collection2Array(c, typeClass);
                 } finally {
                     Objectory.recycle(c);
                 }
@@ -2281,7 +2279,7 @@ final class XMLParserImpl extends AbstractXMLParser {
                     if (eleType.clazz() == String.class || eleType.clazz() == Object.class) {
                         return (T) N.typeOf(typeClass).valueOf(XMLUtil.getTextContent(node));
                     } else {
-                        return (T) jsonParser.deserialize(typeClass, XMLUtil.getTextContent(node), JDC.create().setElementType(eleType.clazz()));
+                        return (T) jsonParser.deserialize(XMLUtil.getTextContent(node), JDC.create().setElementType(eleType.clazz()), typeClass);
                     }
                 }
 
@@ -2315,8 +2313,8 @@ final class XMLParserImpl extends AbstractXMLParser {
                         propType = defaultValueType;
                     }
 
-                    propValue = getPropValue(inputClass, eleNode, configToUse, propName, propType, propInfo, checkedAttr, isTagByPropertyName, ignoreTypeInfo,
-                            false);
+                    propValue = getPropValue(eleNode, configToUse, propName, propType, propInfo, checkedAttr, isTagByPropertyName, ignoreTypeInfo, false,
+                            inputClass);
 
                     result.add(propValue);
                 }
@@ -2354,9 +2352,6 @@ final class XMLParserImpl extends AbstractXMLParser {
 
     /**
      * Gets the prop value.
-     *
-     * @param <T>
-     * @param inputClass
      * @param propNode
      * @param config
      * @param propName
@@ -2366,10 +2361,13 @@ final class XMLParserImpl extends AbstractXMLParser {
      * @param isTagByPropertyName
      * @param ignoreTypeInfo
      * @param isProp
+     * @param inputClass
+     *
+     * @param <T>
      * @return
      */
-    private <T> Object getPropValue(Class<T> inputClass, Node propNode, final XMLDeserializationConfig config, String propName, Type<?> propType,
-            PropInfo propInfo, boolean checkedAttr, boolean isTagByPropertyName, boolean ignoreTypeInfo, boolean isProp) {
+    private <T> Object getPropValue(Node propNode, final XMLDeserializationConfig config, String propName, Type<?> propType, PropInfo propInfo,
+            boolean checkedAttr, boolean isTagByPropertyName, boolean ignoreTypeInfo, boolean isProp, Class<T> inputClass) {
         Object propValue = null;
 
         if (XMLUtil.isTextElement(propNode)) {
@@ -2382,7 +2380,7 @@ final class XMLParserImpl extends AbstractXMLParser {
 
                 propType = propType.isObjectType() ? (MapEntity.class.equals(inputClass) ? N.typeOf(MapEntity.class) : N.typeOf(Map.class)) : propType;
 
-                propValue = readByDOMParser(inputClass, propNode, config, propName, propType, checkedAttr, isTagByPropertyName, ignoreTypeInfo, false);
+                propValue = readByDOMParser(propNode, config, propName, propType, checkedAttr, isTagByPropertyName, ignoreTypeInfo, false, inputClass);
             } else {
                 @SuppressWarnings("rawtypes")
                 Collection<Object> coll = Collection.class.isAssignableFrom(propType.clazz())
@@ -2400,10 +2398,10 @@ final class XMLParserImpl extends AbstractXMLParser {
                         continue;
                     }
 
-                    coll.add(readByDOMParser(inputClass, subPropNode, config, propName, propEleType, checkedAttr, isTagByPropertyName, ignoreTypeInfo, false));
+                    coll.add(readByDOMParser(subPropNode, config, propName, propEleType, checkedAttr, isTagByPropertyName, ignoreTypeInfo, false, inputClass));
                 }
 
-                propValue = propType.clazz().isArray() ? collection2Array(propType.clazz(), coll) : coll;
+                propValue = propType.clazz().isArray() ? collection2Array(coll, propType.clazz()) : coll;
             }
         }
 
