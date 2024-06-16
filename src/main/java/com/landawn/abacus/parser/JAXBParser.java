@@ -129,7 +129,7 @@ final class JAXBParser extends AbstractXMLParser {
      */
     @Override
     public void serialize(Object obj, XMLSerializationConfig config, Writer output) {
-        boolean isBufferedWriter = output instanceof BufferedWriter || output instanceof java.io.BufferedWriter;
+        boolean isBufferedWriter = IOUtil.isBufferedWriter(output);
         final Writer bw = isBufferedWriter ? output : Objectory.createBufferedWriter(output);
 
         try {

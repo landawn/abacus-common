@@ -1,3 +1,7 @@
+### 3.12.1
+
+* Improvements and bug fixes.
+
 ### 3.12.0
 
 * Change the position of parameter `targetType`, `targetClass` and `output`.

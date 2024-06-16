@@ -385,7 +385,7 @@ public abstract class Tuple<TP> implements Immutable {
                 break;
 
             default:
-                throw new RuntimeException("Too many elements(" + a.length + ") to fill in Tuple.");
+                throw new IllegalArgumentException("Too many elements((" + a.length + ") to fill in Tuple.");
         }
 
         return (TP) result;
@@ -447,7 +447,7 @@ public abstract class Tuple<TP> implements Immutable {
                 break;
 
             default:
-                throw new RuntimeException("Too many elements(" + c.size() + ") to fill in Tuple.");
+                throw new IllegalArgumentException("Too many elements((" + c.size() + ") to fill in Tuple.");
         }
 
         return (TP) result;

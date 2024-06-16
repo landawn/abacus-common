@@ -26,6 +26,7 @@ import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.BufferedWriter;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.Clazz;
+import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.ImmutableEntry;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Objectory;
@@ -144,7 +145,7 @@ public class ImmutableMapEntryType<K, V> extends AbstractType<AbstractMap.Simple
         } else {
             if (appendable instanceof Writer) {
                 final Writer writer = (Writer) appendable;
-                boolean isBufferedWriter = writer instanceof BufferedWriter || writer instanceof java.io.BufferedWriter;
+                boolean isBufferedWriter = IOUtil.isBufferedWriter(writer);
                 final Writer bw = isBufferedWriter ? writer : Objectory.createBufferedWriter(writer);
 
                 try {

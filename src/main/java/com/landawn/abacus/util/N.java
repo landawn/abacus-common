@@ -29759,7 +29759,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see {@link N#map(Iterable, com.landawn.abacus.util.Throwables.Function)}
      */
     @MayReturnNull
-    public static <T, E extends Exception> T[] copyThenApply(final T[] a, final Throwables.Function<? super T, ? extends T, E> converter) throws E {
+    public static <T, E extends Exception> T[] copyThenApplyToEach(final T[] a, final Throwables.Function<? super T, ? extends T, E> converter) throws E {
         checkArgNotNull(converter);
 
         if (a == null) {

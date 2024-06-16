@@ -14660,19 +14660,12 @@ sealed class CommonUtil permits N {
 
     /**
      *
-     * @param obj
-     * @return int
+     * @param a
+     * @param defaultIfNull
+     * @return
      */
-    public static String deepToString(final Object obj) {
-        if (obj == null) {
-            return Strings.NULL_STRING;
-        }
-
-        if (obj.getClass().isArray()) {
-            return typeOf(obj.getClass()).deepToString(obj);
-        }
-
-        return obj.toString();
+    public static String toString(final Object a, final String defaultIfNull) {
+        return a == null ? defaultIfNull : toString(a);
     }
 
     /**
@@ -15318,12 +15311,19 @@ sealed class CommonUtil permits N {
 
     /**
      *
-     * @param a
-     * @param defaultIfNull
-     * @return
+     * @param obj
+     * @return int
      */
-    public static String toString(final Object a, final String defaultIfNull) {
-        return a == null ? defaultIfNull : toString(a);
+    public static String deepToString(final Object obj) {
+        if (obj == null) {
+            return Strings.NULL_STRING;
+        }
+
+        if (obj.getClass().isArray()) {
+            return typeOf(obj.getClass()).deepToString(obj);
+        }
+
+        return obj.toString();
     }
 
     /**

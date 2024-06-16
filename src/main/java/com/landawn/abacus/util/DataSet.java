@@ -220,9 +220,6 @@ public interface DataSet {
     //     * There is NO underline auto-conversion from column value to target type: {@code T}.
     //     * So the column values must be the type which is assignable to target type.
     //     *
-    //     * <br />
-    //     * Node: To follow one of general design rules in {@code Abacus}, if there is a conversion behind when the source value is not assignable to the target type, put the {@code targetType} to last parameter of the method.
-    //     * Otherwise, put the {@code targetTpye} to the first parameter of the method.
     //     * @param rowIndex
     //     * @param columnIndex
     //     * @param targetType
@@ -285,11 +282,6 @@ public interface DataSet {
     //     * There is NO underline auto-conversion from column value to target type: {@code T}.
     //     * So the column values must be the type which is assignable to target type.
     //     *
-    //     * <br />
-    //     * Node: To follow one of general design rules in {@code Abacus}, if there is a conversion behind when the source value is not assignable to the target type, put the {@code targetType} to last parameter of the method.
-    //     * Otherwise, put the {@code targetTpye} to the first parameter of the method.
-    //     * @param columnIndex
-    //     * @param targetType
     //     *
     //     * @param <T>
     //     * @return
@@ -307,9 +299,6 @@ public interface DataSet {
     //     * There is NO underline auto-conversion from column value to target type: {@code T}.
     //     * So the column values must be the type which is assignable to target type.
     //     *
-    //     * <br />
-    //     * Node: To follow one of general design rules in {@code Abacus}, if there is a conversion behind when the source value is not assignable to the target type, put the {@code targetType} to last parameter of the method.
-    //     * Otherwise, put the {@code targetTpye} to the first parameter of the method.
     //     * @param columnName
     //     * @param targetType
     //     *

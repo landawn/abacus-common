@@ -54,7 +54,7 @@ import com.landawn.abacus.exception.UncheckedIOException;
 public final class LineIterator extends ObjIterator<String> implements Closeable {
     // N.B. This class deliberately does not implement Iterable, see https://issues.apache.org/jira/browse/IO-181
 
-    private final BufferedReader bufferedReader;
+    private final BufferedReader br;
     private String cachedLine;
     /** A flag indicating if the iterator has been fully read. */
     private boolean finished = false;
@@ -72,9 +72,9 @@ public final class LineIterator extends ObjIterator<String> implements Closeable
             throw new IllegalArgumentException("Reader must not be null");
         }
         if (reader instanceof BufferedReader) {
-            bufferedReader = (BufferedReader) reader;
+            br = (BufferedReader) reader;
         } else {
-            bufferedReader = new BufferedReader(reader);
+            br = new BufferedReader(reader);
         }
     }
 
@@ -258,7 +258,7 @@ public final class LineIterator extends ObjIterator<String> implements Closeable
             return false;
         } else {
             try {
-                cachedLine = bufferedReader.readLine();
+                cachedLine = br.readLine();
 
                 if (cachedLine == null) {
                     finished = true;
@@ -337,6 +337,6 @@ public final class LineIterator extends ObjIterator<String> implements Closeable
         isClosed = true;
         finished = true;
         cachedLine = null;
-        IOUtil.closeQuietly(bufferedReader);
+        IOUtil.closeQuietly(br);
     }
 }

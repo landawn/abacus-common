@@ -408,6 +408,10 @@ public final class URLEncodedUtil {
      * @return
      */
     public static String encode(final Object parameters, final Charset charset, final NamingPolicy namingPolicy) {
+        if (parameters == null) {
+            return Strings.EMPTY_STRING;
+        }
+
         final StringBuilder sb = Objectory.createStringBuilder();
 
         try {

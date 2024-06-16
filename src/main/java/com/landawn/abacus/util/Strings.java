@@ -67,6 +67,9 @@ import com.landawn.abacus.util.stream.Stream;
  * @see com.landawn.abacus.util.Iterables
  * @see com.landawn.abacus.util.Iterators
  * @see com.landawn.abacus.util.Maps
+ * @see com.landawn.abacus.util.URLEncodedUtil
+ * @see com.landawn.abacus.util.AppendableWriter
+ * @see com.landawn.abacus.util.StringWriter
  */
 @SuppressWarnings({ "java:S1694" })
 public abstract sealed class Strings permits Strings.StringUtil {
@@ -442,7 +445,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @return
      * @see Strings#isAllEmpty(Collection)
      */
-    public static boolean isAllEmpty(final Collection<? extends CharSequence> css) {
+    public static boolean isAllEmpty(final Iterable<? extends CharSequence> css) {
         if (N.isEmpty(css)) {
             return true;
         }
@@ -520,7 +523,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param css
      * @return
      */
-    public static boolean isAllBlank(final Collection<? extends CharSequence> css) {
+    public static boolean isAllBlank(final Iterable<? extends CharSequence> css) {
         if (N.isEmpty(css)) {
             return true;
         }
@@ -598,7 +601,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @return
      * @see Strings#isAnyEmpty(CharSequence...)
      */
-    public static boolean isAnyEmpty(final Collection<? extends CharSequence> css) {
+    public static boolean isAnyEmpty(final Iterable<? extends CharSequence> css) {
         if (N.isEmpty(css)) {
             return false;
         }
@@ -679,7 +682,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @return
      * @see Strings#isAnyBlank(Collection)
      */
-    public static boolean isAnyBlank(final Collection<? extends CharSequence> css) {
+    public static boolean isAnyBlank(final Iterable<? extends CharSequence> css) {
         if (N.isEmpty(css)) {
             return false;
         }
@@ -765,7 +768,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @see StrUtil#firstNonEmpty(CharSequence...)
      */
     @MayReturnNull
-    public static <T extends CharSequence> T firstNonEmpty(final Collection<? extends T> css) {
+    public static <T extends CharSequence> T firstNonEmpty(final Iterable<? extends T> css) {
         if (N.isEmpty(css)) {
             return null;
         }
@@ -835,7 +838,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @see StrUtil#firstNonEmpty(CharSequence...)
      */
     @MayReturnNull
-    public static <T extends CharSequence> T firstNonBlank(final Collection<? extends T> css) {
+    public static <T extends CharSequence> T firstNonBlank(final Iterable<? extends T> css) {
         if (N.isEmpty(css)) {
             return null;
         }
@@ -1176,7 +1179,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         }
 
         if (isNotEmpty(str) && EMPTY_STRING.equals(abbrevMarker) && maxWidth > 0) {
-            return Strings.substring(str, 0, maxWidth);
+            return Strings.largestSubstring(str, 0, maxWidth);
         } else if (isAnyEmpty(str, abbrevMarker)) {
             return str;
         }
@@ -1663,6 +1666,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param string
      * @return
      */
+    @MayReturnNull
     public static byte[] getBytes(final String string) {
         return string == null ? null : string.getBytes(IOUtil.DEFAULT_CHARSET);
     }
@@ -1674,15 +1678,18 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param charset
      * @return the encoded bytes
      */
+    @MayReturnNull
     public static byte[] getBytes(final String string, final Charset charset) {
         return string == null ? null : string.getBytes(charset);
     }
 
     /**
+     * Returns the byte array returned by {@code String#getBytes(Charsets.UTF_8)}, or {@code null} if the specified String is {@code null}.
      *
      * @param string
      * @return
      */
+    @MayReturnNull
     public static byte[] getBytesUtf8(final String string) {
         return getBytes(string, Charsets.UTF_8);
     }
@@ -2826,7 +2833,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param toIndex
      * @param replacement
      * @return
-     * @see #substring(String, int, int)
+     * @see #largestSubstring(String, int, int)
      */
     public static String replace(final String str, final int fromIndex, final int toIndex, final String replacement) {
         N.checkFromToIndex(fromIndex, toIndex, N.len(str));
@@ -7199,16 +7206,38 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
-     * Returns {@code null} if {@code (str == null || inclusiveBeginIndex < 0 || inclusiveBeginIndex > str.length())},
+     * Returns {@code null} which means it doesn't exist if {@code (str == null || inclusiveBeginIndex < 0 || inclusiveBeginIndex > str.length())},
      * otherwise returns: {@code str.substring(inclusiveBeginIndex)}.
      *
      * @param str
      * @param inclusiveBeginIndex
-     * @return {@code null} if {@code (str == null || inclusiveBeginIndex < 0 || inclusiveBeginIndex > str.length())}. (auto-generated java doc for return)
+     * @return
+     * @see StrUtil#substring(String, int)
+     * @see #substringAfter(String, int)
      * @see #substring(String, int, int)
+     * @see #largestSubstring(String, int, int)
+     * @deprecated Use {@link #substringAfter(String,int)} instead
      */
+    @Deprecated
     @MayReturnNull
     public static String substring(String str, int inclusiveBeginIndex) {
+        return substringAfter(str, inclusiveBeginIndex);
+    }
+
+    /**
+     * Returns {@code null} which means it doesn't exist if {@code (str == null || inclusiveBeginIndex < 0 || inclusiveBeginIndex > str.length())},
+     * otherwise returns: {@code str.substring(inclusiveBeginIndex)}.
+     *
+     * @param str
+     * @param inclusiveBeginIndex
+     * @return
+     * @see #substring(String, int)
+     * @see StrUtil#substring(String, int)
+     * @see #substring(String, int, int)
+     * @see #largestSubstring(String, int, int)
+     */
+    @MayReturnNull
+    public static String substringAfter(String str, int inclusiveBeginIndex) {
         if (str == null || inclusiveBeginIndex < 0 || inclusiveBeginIndex > str.length()) {
             return null;
         }
@@ -7217,16 +7246,36 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
-     * Returns {@code null} if {@code str == null || inclusiveBeginIndex < 0 || exclusiveEndIndex < 0 || inclusiveBeginIndex > exclusiveEndIndex || inclusiveBeginIndex > str.length()},
+     * Returns {@code null} which means it doesn't exist if {@code (str == null || inclusiveBeginIndex < 0 || exclusiveEndIndex < 0 || inclusiveBeginIndex > exclusiveEndIndex || inclusiveBeginIndex > str.length())},
      * otherwise returns: {@code str.substring(inclusiveBeginIndex, min(exclusiveEndIndex, str.length()))}.
      *
      * @param str
      * @param inclusiveBeginIndex
      * @param exclusiveEndIndex
-     * @return {@code null} if {@code (str == null || inclusiveBeginIndex < 0 || exclusiveEndIndex < 0 || inclusiveBeginIndex > exclusiveEndIndex || inclusiveBeginIndex > str.length())}. (auto-generated java doc for return)
+     * @return
+     * @see StrUtil#substring(String, int, int)
+     * @see #largestSubstring(String, int, int)
+     * @deprecated Use {@link #largestSubstring(String,int,int)} instead
      */
+    @Deprecated
     @MayReturnNull
     public static String substring(String str, int inclusiveBeginIndex, int exclusiveEndIndex) {
+        return largestSubstring(str, inclusiveBeginIndex, exclusiveEndIndex);
+    }
+
+    /**
+     * Returns {@code null} which means it doesn't exist if {@code (str == null || inclusiveBeginIndex < 0 || exclusiveEndIndex < 0 || inclusiveBeginIndex > exclusiveEndIndex || inclusiveBeginIndex > str.length())},
+     * otherwise returns: {@code str.substring(inclusiveBeginIndex, min(exclusiveEndIndex, str.length()))}.
+     *
+     * @param str
+     * @param inclusiveBeginIndex
+     * @param exclusiveEndIndex
+     * @return
+     * @see StrUtil#substring(String, int, int)
+     * @see #substring(String, int, int)
+     */
+    @MayReturnNull
+    public static String largestSubstring(String str, int inclusiveBeginIndex, int exclusiveEndIndex) {
         if (str == null || inclusiveBeginIndex < 0 || exclusiveEndIndex < 0 || inclusiveBeginIndex > exclusiveEndIndex || inclusiveBeginIndex > str.length()) {
             return null;
         }
@@ -7235,13 +7284,13 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
-     * Returns {@code null} if {@code (str == null || inclusiveBeginIndex < 0)}, or {@code funcOfExclusiveEndIndex.applyAsInt(inclusiveBeginIndex) < 0}.
+     * Returns {@code null} which means it doesn't exist if {@code (str == null || inclusiveBeginIndex < 0)}, or {@code funcOfExclusiveEndIndex.applyAsInt(inclusiveBeginIndex) < 0}.
      *
      * @param str
      * @param inclusiveBeginIndex
      * @param funcOfExclusiveEndIndex {@code exclusiveEndIndex <- funcOfExclusiveEndIndex.applyAsInt(inclusiveBeginIndex) if inclusiveBeginIndex >= 0}
      * @return {@code null} if {@code (str == null || inclusiveBeginIndex < 0)}. (auto-generated java doc for return)
-     * @see #substring(String, int, int)
+     * @see #largestSubstring(String, int, int)
      */
     @MayReturnNull
     public static String substring(final String str, final int inclusiveBeginIndex, final IntUnaryOperator funcOfExclusiveEndIndex) {
@@ -7249,11 +7298,11 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return null;
         }
 
-        return substring(str, inclusiveBeginIndex, funcOfExclusiveEndIndex.applyAsInt(inclusiveBeginIndex));
+        return largestSubstring(str, inclusiveBeginIndex, funcOfExclusiveEndIndex.applyAsInt(inclusiveBeginIndex));
     }
 
     //    /**
-    //     * Returns {@code null} if {@code (str == null || inclusiveBeginIndex < 0)}, or {@code funcOfExclusiveEndIndex.apply(str, inclusiveBeginIndex) < 0}.
+    //     * Returns {@code null} which means it doesn't exist if {@code (str == null || inclusiveBeginIndex < 0)}, or {@code funcOfExclusiveEndIndex.apply(str, inclusiveBeginIndex) < 0}.
     //     *
     //     * @param str
     //     * @param inclusiveBeginIndex
@@ -7272,14 +7321,14 @@ public abstract sealed class Strings permits Strings.StringUtil {
     //    }
 
     /**
-     * Returns {@code null} if {@code (str == null || exclusiveEndIndex < 0)}, or {@code funcOfInclusiveBeginIndex.applyAsInt(exclusiveEndIndex) < 0}.
+     * Returns {@code null} which means it doesn't exist if {@code (str == null || exclusiveEndIndex < 0)}, or {@code funcOfInclusiveBeginIndex.applyAsInt(exclusiveEndIndex) < 0}.
      *
      *
      * @param str
      * @param funcOfInclusiveBeginIndex {@code inclusiveBeginIndex <- funcOfInclusiveBeginIndex.applyAsInt(exclusiveEndIndex)) if exclusiveEndIndex > 0}
      * @param exclusiveEndIndex
      * @return {@code null} if {@code (str == null || exclusiveEndIndex < 0)}. (auto-generated java doc for return)
-     * @see #substring(String, int, int)
+     * @see #largestSubstring(String, int, int)
      */
     @MayReturnNull
     public static String substring(final String str, final IntUnaryOperator funcOfInclusiveBeginIndex, final int exclusiveEndIndex) {
@@ -7287,11 +7336,11 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return null;
         }
 
-        return substring(str, funcOfInclusiveBeginIndex.applyAsInt(exclusiveEndIndex), exclusiveEndIndex);
+        return largestSubstring(str, funcOfInclusiveBeginIndex.applyAsInt(exclusiveEndIndex), exclusiveEndIndex);
     }
 
     //    /**
-    //     * Returns {@code null} if {@code (str == null || exclusiveEndIndex < 0)}, or {@code funcOfInclusiveBeginIndex.apply(str, exclusiveEndIndex) < 0}.
+    //     * Returns {@code null} which means it doesn't exist if {@code (str == null || exclusiveEndIndex < 0)}, or {@code funcOfInclusiveBeginIndex.apply(str, exclusiveEndIndex) < 0}.
     //     *
     //     *
     //     * @param str
@@ -7311,13 +7360,13 @@ public abstract sealed class Strings permits Strings.StringUtil {
     //    }
 
     /**
-     * Returns {@code null} if {@code (str == null || str.length() == 0)}, or {@code str.indexOf(delimiterOfInclusiveBeginIndex) < 0},
+     * Returns {@code null} which means it doesn't exist if {@code (str == null || str.length() == 0)}, or {@code str.indexOf(delimiterOfInclusiveBeginIndex) < 0},
      * otherwise returns: {@code str.substring(str.indexOf(delimiterOfInclusiveBeginIndex))}.
      *
      * @param str
      * @param delimiterOfInclusiveBeginIndex {@code inclusiveBeginIndex <- str.indexOf(delimiterOfInclusiveBeginIndex)}
      * @return {@code null} if {@code (str == null || str.length() == 0)}. (auto-generated java doc for return)
-     * @see #substring(String, int)
+     * @see #substringAfter(String, int)
      * @deprecated
      */
     @MayReturnNull
@@ -7327,17 +7376,17 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return null;
         }
 
-        return substring(str, str.indexOf(delimiterOfInclusiveBeginIndex));
+        return substringAfter(str, str.indexOf(delimiterOfInclusiveBeginIndex));
     }
 
     /**
-     * Returns {@code null} if {@code (str == null || delimiterOfInclusiveBeginIndex == null)}, or {@code str.indexOf(delimiterOfInclusiveBeginIndex) < 0},
+     * Returns {@code null} which means it doesn't exist if {@code (str == null || delimiterOfInclusiveBeginIndex == null)}, or {@code str.indexOf(delimiterOfInclusiveBeginIndex) < 0},
      * otherwise returns: {@code str.substring(str.indexOf(delimiterOfInclusiveBeginIndex))}.
      *
      * @param str
      * @param delimiterOfInclusiveBeginIndex {@code inclusiveBeginIndex <- str.indexOf(delimiterOfInclusiveBeginIndex)}
      * @return {@code null} if {@code (str == null || delimiterOfInclusiveBeginIndex == null)}. (auto-generated java doc for return)
-     * @see #substring(String, int)
+     * @see #substringAfter(String, int)
      * @deprecated
      */
     @MayReturnNull
@@ -7351,17 +7400,17 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return str;
         }
 
-        return substring(str, str.indexOf(delimiterOfInclusiveBeginIndex));
+        return substringAfter(str, str.indexOf(delimiterOfInclusiveBeginIndex));
     }
 
     /**
-     * Returns {@code null} if {@code (str == null || str.length() == 0 || inclusiveBeginIndex < 0 || inclusiveBeginIndex > str.length())}, or {@code str.indexOf(delimiterOfExclusiveEndIndex, inclusiveBeginIndex + 1)}.
+     * Returns {@code null} which means it doesn't exist if {@code (str == null || str.length() == 0 || inclusiveBeginIndex < 0 || inclusiveBeginIndex > str.length())}, or {@code str.indexOf(delimiterOfExclusiveEndIndex, inclusiveBeginIndex + 1)}.
      *
      * @param str
      * @param inclusiveBeginIndex
      * @param delimiterOfExclusiveEndIndex {@code str.indexOf(delimiterOfExclusiveEndIndex, inclusiveBeginIndex + 1)}
      * @return {@code null} if {@code (str == null || str.length() == 0 || inclusiveBeginIndex < 0 || inclusiveBeginIndex > str.length())}. (auto-generated java doc for return)
-     * @see #substring(String, int, int)
+     * @see #largestSubstring(String, int, int)
      * @deprecated
      */
     @MayReturnNull
@@ -7378,17 +7427,17 @@ public abstract sealed class Strings permits Strings.StringUtil {
         //        return EMPTY_STRING;
         //    }
 
-        return substring(str, inclusiveBeginIndex, index);
+        return largestSubstring(str, inclusiveBeginIndex, index);
     }
 
     /**
-     * Returns {@code null} if {@code (str == null || delimiterOfExclusiveEndIndex == null || inclusiveBeginIndex < 0 || inclusiveBeginIndex > str.length())}, or {@code str.indexOf(delimiterOfExclusiveEndIndex, inclusiveBeginIndex + 1) < 0}.
+     * Returns {@code null} which means it doesn't exist if {@code (str == null || delimiterOfExclusiveEndIndex == null || inclusiveBeginIndex < 0 || inclusiveBeginIndex > str.length())}, or {@code str.indexOf(delimiterOfExclusiveEndIndex, inclusiveBeginIndex + 1) < 0}.
      *
      * @param str
      * @param inclusiveBeginIndex
      * @param delimiterOfExclusiveEndIndex {@code exclusiveEndIndex <- str.indexOf(delimiterOfExclusiveEndIndex, inclusiveBeginIndex + 1) if inclusiveBeginIndex >= 0}
      * @return {@code null} if {@code (str == null || delimiterOfExclusiveEndIndex == null || inclusiveBeginIndex < 0 || inclusiveBeginIndex > str.length())}. (auto-generated java doc for return)
-     * @see #substring(String, int, int)
+     * @see #largestSubstring(String, int, int)
      * @deprecated
      */
     @MayReturnNull
@@ -7402,17 +7451,17 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return EMPTY_STRING;
         }
 
-        return substring(str, inclusiveBeginIndex, str.indexOf(delimiterOfExclusiveEndIndex, inclusiveBeginIndex + 1));
+        return largestSubstring(str, inclusiveBeginIndex, str.indexOf(delimiterOfExclusiveEndIndex, inclusiveBeginIndex + 1));
     }
 
     /**
-     * Returns {@code null} if {@code (str == null || str.length() == 0 || exclusiveEndIndex < 0)}, or {@code str.lastIndexOf(delimiterOfInclusiveBeginIndex, exclusiveEndIndex - 1) < 0}.
+     * Returns {@code null} which means it doesn't exist if {@code (str == null || str.length() == 0 || exclusiveEndIndex < 0)}, or {@code str.lastIndexOf(delimiterOfInclusiveBeginIndex, exclusiveEndIndex - 1) < 0}.
      *
      * @param str
      * @param delimiterOfInclusiveBeginIndex {@code inclusiveBeginIndex <- str.lastIndexOf(delimiterOfInclusiveBeginIndex, exclusiveEndIndex - 1) if exclusiveEndIndex > 0}
      * @param exclusiveEndIndex
      * @return {@code null} if {@code (str == null || str.length() == 0 || exclusiveEndIndex < 0)}. (auto-generated java doc for return)
-     * @see #substring(String, int, int)
+     * @see #largestSubstring(String, int, int)
      * @deprecated
      */
     @MayReturnNull
@@ -7422,18 +7471,18 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return null;
         }
 
-        return substring(str, str.lastIndexOf(delimiterOfInclusiveBeginIndex, exclusiveEndIndex - 1), exclusiveEndIndex);
+        return largestSubstring(str, str.lastIndexOf(delimiterOfInclusiveBeginIndex, exclusiveEndIndex - 1), exclusiveEndIndex);
     }
 
     /**
-     * Returns {@code null} if {@code (str == null || delimiterOfInclusiveBeginIndex == null || exclusiveEndIndex < 0)}, or {@code str.lastIndexOf(delimiterOfInclusiveBeginIndex, exclusiveEndIndex - 1) < 0}.
+     * Returns {@code null} which means it doesn't exist if {@code (str == null || delimiterOfInclusiveBeginIndex == null || exclusiveEndIndex < 0)}, or {@code str.lastIndexOf(delimiterOfInclusiveBeginIndex, exclusiveEndIndex - 1) < 0}.
      *
      *
      * @param str
      * @param delimiterOfInclusiveBeginIndex {@code inclusiveBeginIndex <- str.lastIndexOf(delimiterOfInclusiveBeginIndex, exclusiveEndIndex - exclusiveEndIndex - delimiterOfInclusiveBeginIndex.length()) if exclusiveEndIndex > 0}
      * @param exclusiveEndIndex
      * @return {@code null} if {@code (str == null || delimiterOfInclusiveBeginIndex == null || exclusiveEndIndex < 0)}. (auto-generated java doc for return)
-     * @see #substring(String, int, int)
+     * @see #largestSubstring(String, int, int)
      * @deprecated
      */
     @MayReturnNull
@@ -7447,7 +7496,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return EMPTY_STRING;
         }
 
-        return substring(str, str.lastIndexOf(delimiterOfInclusiveBeginIndex, exclusiveEndIndex - delimiterOfInclusiveBeginIndex.length()), exclusiveEndIndex);
+        return largestSubstring(str, str.lastIndexOf(delimiterOfInclusiveBeginIndex, exclusiveEndIndex - delimiterOfInclusiveBeginIndex.length()),
+                exclusiveEndIndex);
 
     }
 
@@ -7500,7 +7550,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
-     * Returns {@code null} if {@code str == null || delimiterOfExclusiveBeginIndex == null || exclusiveEndIndex < 0}, or {@code str.indexOf(delimiterOfExclusiveBeginIndex) < 0 || str.indexOf(delimiterOfExclusiveBeginIndex) + delimiterOfExclusiveBeginIndex.length() > exclusiveEndIndex}
+     * Returns {@code null} which means it doesn't exist if {@code str == null || delimiterOfExclusiveBeginIndex == null || exclusiveEndIndex < 0}, or {@code str.indexOf(delimiterOfExclusiveBeginIndex) < 0 || str.indexOf(delimiterOfExclusiveBeginIndex) + delimiterOfExclusiveBeginIndex.length() > exclusiveEndIndex}
      * otherwise returns {@code substring(str, index + delimiterOfExclusiveBeginIndex.length(), exclusiveEndIndex)};
      *
      * @param str
@@ -7515,7 +7565,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         }
 
         if (delimiterOfExclusiveBeginIndex.length() == 0) {
-            return substring(str, 0, exclusiveEndIndex);
+            return largestSubstring(str, 0, exclusiveEndIndex);
         } else if (exclusiveEndIndex == 0) {
             return null;
         }
@@ -7526,7 +7576,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return null;
         }
 
-        return substring(str, index + delimiterOfExclusiveBeginIndex.length(), exclusiveEndIndex);
+        return largestSubstring(str, index + delimiterOfExclusiveBeginIndex.length(), exclusiveEndIndex);
     }
 
     /**
@@ -7869,7 +7919,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
-     * Returns {@code null} if {@code str == null || exclusiveBeginIndex < 0 || exclusiveEndIndex < 0 || exclusiveBeginIndex >= exclusiveEndIndex || exclusiveBeginIndex >= str.length()},
+     * Returns {@code null} which means it doesn't exist if {@code str == null || exclusiveBeginIndex < 0 || exclusiveEndIndex < 0 || exclusiveBeginIndex >= exclusiveEndIndex || exclusiveBeginIndex >= str.length()},
      * Otherwise returns: {@code str.substring(exclusiveBeginIndex + 1, min(exclusiveEndIndex, str.length()))}.
      *
      * @param str
@@ -11389,7 +11439,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             offset = 0;
         }
 
-        return Strings.substring(str, offset) + Strings.substring(str, 0, offset);
+        return Strings.substringAfter(str, offset) + Strings.largestSubstring(str, 0, offset);
     }
 
     /**
@@ -11745,12 +11795,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * @param parameters
      * @return
+     * @see URLEncodedUtil#encode(Object)
      */
     public static String urlEncode(final Object parameters) {
-        if (parameters == null) {
-            return Strings.EMPTY_STRING;
-        }
-
         return URLEncodedUtil.encode(parameters);
     }
 
@@ -11759,12 +11806,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param parameters
      * @param charset
      * @return
+     * @see URLEncodedUtil#encode(Object, Charset)
      */
     public static String urlEncode(final Object parameters, final Charset charset) {
-        if (parameters == null) {
-            return Strings.EMPTY_STRING;
-        }
-
         return URLEncodedUtil.encode(parameters, charset);
     }
 
@@ -11772,12 +11816,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * @param urlQuery
      * @return
+     * @see URLEncodedUtil#decode(String)
      */
     public static Map<String, String> urlDecode(final String urlQuery) {
-        if (Strings.isEmpty(urlQuery)) {
-            return N.newLinkedHashMap();
-        }
-
         return URLEncodedUtil.decode(urlQuery);
     }
 
@@ -11786,12 +11827,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param urlQuery
      * @param charset
      * @return
+     * @see URLEncodedUtil#decode(String, Charset)
      */
     public static Map<String, String> urlDecode(final String urlQuery, final Charset charset) {
-        if (Strings.isEmpty(urlQuery)) {
-            return N.newLinkedHashMap();
-        }
-
         return URLEncodedUtil.decode(urlQuery, charset);
     }
 
@@ -11802,12 +11840,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param urlQuery
      * @param targetType
      * @return
+     * @see URLEncodedUtil#decode(String, Class)
      */
     public static <T> T urlDecode(final String urlQuery, final Class<? extends T> targetType) {
-        if (Strings.isEmpty(urlQuery)) {
-            return N.newInstance(targetType);
-        }
-
         return URLEncodedUtil.decode(urlQuery, targetType);
     }
 
@@ -11819,12 +11854,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param charset
      * @param targetType
      * @return
+     * @see URLEncodedUtil#decode(String, Charset, Class)
      */
     public static <T> T urlDecode(final String urlQuery, final Charset charset, final Class<? extends T> targetType) {
-        if (Strings.isEmpty(urlQuery)) {
-            return N.newInstance(targetType);
-        }
-
         return URLEncodedUtil.decode(urlQuery, charset, targetType);
     }
 
@@ -11953,30 +11985,83 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
     /**
      *
-     * @param strs
-     * @return
-     * @see N#copyThenApply(Object[], Throwables.Function)
-     * @see Fn#trim()
-     * @see Fn#trimToEmpty()
-     * @see Fn#trimToNull()
+     * @param <T>
+     * @param a
+     * @param converter
+     * @see #copyThenApplyToEach(CharSequence[], Function)
+     * @see N#applyToEach(Object[], com.landawn.abacus.util.Throwables.Function)
      */
     @Beta
-    public static String[] copyThenTrim(final String[] strs) {
-        return N.copyThenApply(strs, Fn.trim());
+    public static <T extends CharSequence> void applyToEach(final T[] a, final Function<? super T, ? extends T> converter) {
+        N.checkArgNotNull(converter);
+
+        if (N.isEmpty(a)) {
+            return;
+        }
+
+        for (int i = 0, len = a.length; i < len; i++) {
+            a[i] = converter.apply(a[i]);
+        }
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param a
+     * @param converter
+     * @return
+     * @see #copyThenTrim(String[])
+     * @see #copyThenStrip(String[])
+     * @see N#copyThenApplyToEach(Object[], com.landawn.abacus.util.Throwables.Function)
+     */
+    @Beta
+    @MayReturnNull
+    public static <T extends CharSequence> T[] copyThenApplyToEach(final T[] a, final Function<? super T, ? extends T> converter) {
+        N.checkArgNotNull(converter);
+
+        if (a == null) {
+            return null; // NOSONAR
+        } else if (a.length == 0) {
+            return a.clone();
+        }
+
+        final T[] copy = a.clone();
+
+        for (int i = 0, len = a.length; i < len; i++) {
+            copy[i] = converter.apply(a[i]);
+        }
+
+        return a;
     }
 
     /**
      *
      * @param strs
      * @return
-     * @see N#copyThenApply(Object[], Throwables.Function)
+     * @see #copyThenApplyToEach(CharSequence[], Function)
+     * @see Fn#trim()
+     * @see Fn#trimToEmpty()
+     * @see Fn#trimToNull()
+     */
+    @Beta
+    @MayReturnNull
+    public static String[] copyThenTrim(final String[] strs) {
+        return copyThenApplyToEach(strs, Fn.trim());
+    }
+
+    /**
+     *
+     * @param strs
+     * @return
+     * @see #copyThenApplyToEach(CharSequence[], Function)
      * @see Fn#strip()
      * @see Fn#stripToEmpty()
      * @see Fn#stripToNull()
      */
     @Beta
+    @MayReturnNull
     public static String[] copyThenStrip(final String[] strs) {
-        return N.copyThenApply(strs, Fn.strip());
+        return copyThenApplyToEach(strs, Fn.strip());
     }
 
     @Beta
@@ -11997,10 +12082,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * @param str
          * @param inclusiveBeginIndex
          * @return
-         * @see Strings#substring(String, int)
+         * @see Strings#substringAfter(String, int)
          */
         public static Optional<String> substring(String str, int inclusiveBeginIndex) {
-            return Optional.ofNullable(Strings.substring(str, inclusiveBeginIndex));
+            return Optional.ofNullable(Strings.substringAfter(str, inclusiveBeginIndex));
         }
 
         /**
@@ -12010,10 +12095,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * @param inclusiveBeginIndex
          * @param exclusiveEndIndex
          * @return
-         * @see Strings#substring(String, int, int)
+         * @see Strings#largestSubstring(String, int, int)
          */
         public static Optional<String> substring(String str, int inclusiveBeginIndex, int exclusiveEndIndex) {
-            return Optional.ofNullable(Strings.substring(str, inclusiveBeginIndex, exclusiveEndIndex));
+            return Optional.ofNullable(Strings.largestSubstring(str, inclusiveBeginIndex, exclusiveEndIndex));
         }
 
         /**
@@ -12167,11 +12252,11 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * @param inclusiveBeginIndex
          * @param defaultStr
          * @return
-         * @see Strings#substring(String, int)
+         * @see Strings#substringAfter(String, int)
          */
         @Beta
         public static String substringOrElse(String str, int inclusiveBeginIndex, final String defaultStr) {
-            final String ret = Strings.substring(str, inclusiveBeginIndex);
+            final String ret = Strings.substringAfter(str, inclusiveBeginIndex);
 
             return ret == null ? defaultStr : ret;
         }
@@ -12184,11 +12269,11 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * @param exclusiveEndIndex
          * @param defaultStr
          * @return
-         * @see Strings#substring(String, int, int)
+         * @see Strings#largestSubstring(String, int, int)
          */
         @Beta
         public static String substringOrElse(String str, int inclusiveBeginIndex, int exclusiveEndIndex, final String defaultStr) {
-            final String ret = Strings.substring(str, inclusiveBeginIndex, exclusiveEndIndex);
+            final String ret = Strings.largestSubstring(str, inclusiveBeginIndex, exclusiveEndIndex);
 
             return ret == null ? defaultStr : ret;
         }
@@ -12344,11 +12429,11 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * @param str
          * @param inclusiveBeginIndex
          * @return
-         * @see Strings#substring(String, int)
+         * @see Strings#substringAfter(String, int)
          */
         @Beta
         public static String substringOrElseItself(String str, int inclusiveBeginIndex) {
-            final String ret = Strings.substring(str, inclusiveBeginIndex);
+            final String ret = Strings.substringAfter(str, inclusiveBeginIndex);
 
             return ret == null ? str : ret;
         }
@@ -12360,11 +12445,11 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * @param inclusiveBeginIndex
          * @param exclusiveEndIndex
          * @return
-         * @see Strings#substring(String, int, int)
+         * @see Strings#largestSubstring(String, int, int)
          */
         @Beta
         public static String substringOrElseItself(String str, int inclusiveBeginIndex, int exclusiveEndIndex) {
-            final String ret = Strings.substring(str, inclusiveBeginIndex, exclusiveEndIndex);
+            final String ret = Strings.largestSubstring(str, inclusiveBeginIndex, exclusiveEndIndex);
 
             return ret == null ? str : ret;
         }

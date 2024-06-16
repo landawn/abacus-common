@@ -13,6 +13,9 @@
  */
 package com.landawn.abacus.util;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -189,7 +192,6 @@ public final class Throwables {
 
     @SuppressWarnings({ "java:S6548" })
     public interface Iterator<T, E extends Throwable> extends Immutable {
-
         /**
          *
          *
@@ -255,6 +257,54 @@ public final class Throwables {
                 @Override
                 public T next() throws E {
                     return iter.next();
+                }
+            };
+        }
+
+        /**
+         * It's caller's responsibility to close the specified {@code reader}.
+         *
+         * @param reader
+         * @return
+         */
+        static Iterator<String, IOException> lines(final Reader reader) {
+            if (reader == null) {
+                return empty();
+            }
+
+            return new Iterator<>() {
+                private final BufferedReader br = reader instanceof BufferedReader ? (BufferedReader) reader : new BufferedReader(reader);
+                private String cachedLine;
+                /** A flag indicating if the iterator has been fully read. */
+                private boolean finished = false;
+
+                @Override
+                public boolean hasNext() throws IOException {
+                    if (cachedLine != null) {
+                        return true;
+                    } else if (finished) {
+                        return false;
+                    } else {
+                        cachedLine = br.readLine();
+
+                        if (cachedLine == null) {
+                            finished = true;
+                            return false;
+                        } else {
+                            return true;
+                        }
+                    }
+                }
+
+                @Override
+                public String next() throws IOException {
+                    if (!hasNext()) {
+                        throw new NoSuchElementException("No more lines");
+                    }
+
+                    final String res = cachedLine;
+                    cachedLine = null;
+                    return res;
                 }
             };
         }
@@ -452,7 +502,7 @@ public final class Throwables {
          * @param action
          * @throws E the e
          */
-        default void foreachRemaining(Throwables.Consumer<? super T, E> action) throws E { // NOSONAR
+        default <E2 extends Throwable> void foreachRemaining(Throwables.Consumer<? super T, E2> action) throws E, E2 { // NOSONAR
             N.checkArgNotNull(action);
 
             while (hasNext()) {
@@ -465,7 +515,7 @@ public final class Throwables {
          * @param action
          * @throws E the e
          */
-        default void foreachIndexed(Throwables.IntObjConsumer<? super T, E> action) throws E {
+        default <E2 extends Throwable> void foreachIndexed(Throwables.IntObjConsumer<? super T, E2> action) throws E, E2 {
             N.checkArgNotNull(action);
 
             int idx = 0;

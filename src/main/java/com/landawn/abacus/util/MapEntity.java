@@ -22,8 +22,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.annotation.Internal;
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 
 /**
@@ -112,9 +112,6 @@ public final class MapEntity implements Serializable {
     }
 
     /**
-     * <br />
-     * Node: To follow one of general design rules in {@code Abacus}, if there is a conversion behind when the source value is not assignable to the target type, put the {@code targetType} to last parameter of the method.
-     * Otherwise, put the {@code targetTpye} to the first parameter of the method.
      *
      * @param <T>
      * @param propName

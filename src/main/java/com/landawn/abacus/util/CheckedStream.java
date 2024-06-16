@@ -56,6 +56,8 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.IntFunction;
+import java.util.function.LongFunction;
+import java.util.function.LongSupplier;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.function.ToDoubleFunction;
@@ -84,6 +86,7 @@ import com.landawn.abacus.parser.ParserUtil.PropInfo;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.util.Fn.Factory;
 import com.landawn.abacus.util.Fn.Fnn;
+import com.landawn.abacus.util.Fn.LongSuppliers;
 import com.landawn.abacus.util.Fn.Suppliers;
 import com.landawn.abacus.util.If.OrElse;
 import com.landawn.abacus.util.Strings.StringUtil;
@@ -91,6 +94,8 @@ import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalDouble;
 import com.landawn.abacus.util.u.OptionalInt;
 import com.landawn.abacus.util.u.OptionalLong;
+import com.landawn.abacus.util.function.QuadPredicate;
+import com.landawn.abacus.util.function.ToLongTriFunction;
 import com.landawn.abacus.util.stream.Collectors;
 import com.landawn.abacus.util.stream.DoubleStream;
 import com.landawn.abacus.util.stream.IntStream;
@@ -11074,7 +11079,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             private void init() {
                 initialized = true;
 
-                isBufferedWriter = output instanceof BufferedWriter || output instanceof java.io.BufferedWriter;
+                isBufferedWriter = IOUtil.isBufferedWriter(output);
                 bw = isBufferedWriter ? output : Objectory.createBufferedWriter(output);
             }
         };
@@ -11198,7 +11203,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             private void init() {
                 initialized = true;
 
-                isBufferedWriter = output instanceof BufferedWriter || output instanceof java.io.BufferedWriter;
+                isBufferedWriter = IOUtil.isBufferedWriter(output);
                 bw = isBufferedWriter ? output : Objectory.createBufferedWriter(output);
             }
         };
@@ -11533,7 +11538,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
         assertNotClosed();
 
         try {
-            boolean isBufferedWriter = output instanceof BufferedWriter || output instanceof java.io.BufferedWriter;
+            boolean isBufferedWriter = IOUtil.isBufferedWriter(output);
             final Writer bw = isBufferedWriter ? output : Objectory.createBufferedWriter(output); //NOSONAR
             final CheckedIterator<T, E> iter = iteratorEx();
             long cnt = 0;
@@ -11642,7 +11647,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
         assertNotClosed();
 
         try {
-            boolean isBufferedWriter = output instanceof BufferedWriter || output instanceof java.io.BufferedWriter;
+            boolean isBufferedWriter = IOUtil.isBufferedWriter(output);
             final Writer bw = isBufferedWriter ? output : Objectory.createBufferedWriter(output); //NOSONAR
             final CheckedIterator<T, E> iter = iteratorEx();
             long cnt = 0;
@@ -11654,7 +11659,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                 }
 
                 while (iter.hasNext()) {
-                    writeLine.accept(iter.next(), output);
+                    writeLine.accept(iter.next(), bw);
                     bw.write(IOUtil.LINE_SEPARATOR);
                     cnt++;
                 }
@@ -13388,6 +13393,2076 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     }
 
     // #######################################9X9#######################################
+
+    /**
+     * Split this stream by the specified duration. If there is no element fetched from upstream during the specified {@code duration}, there won't be element pushed to downstream.
+     * To get at least one element for downstream in each window, use {@link #maxWait(Duration, Object)}:
+     * <pre>
+     * <code>
+     * stream.window(Duration.ofMinutes(10)).maxWait(Duration.ofMinutes(10), defaultValue)..
+     * </code>
+     * </pre>
+     *
+     *
+     * @param duration
+     * @return
+     * @see #sliding(int, int, Collector)
+     * @see #maxWait(Duration, Object)
+     * @see #maxWait(Duration, Supplier)
+     * @see #rateLimited(double)
+     * @see #rateLimited(RateLimiter)
+     * @see #delay(Duration)
+     * @see #interval(long, LongFunction)
+     */
+    @Beta
+    @SequentialOnly
+    @IntermediateOp
+    public CheckedStream<List<T>, E> window(final Duration duration) {
+        return window(duration, Suppliers.<T> ofList());
+    }
+
+    //    public CheckedStream<List<T>, E> window(final Duration duration, final LongSupplier startTime) {
+    //        assertNotClosed();
+    //
+    //        return window(duration, startTime, Suppliers.<T> ofList()).map(listToStreamMapper());
+    //    }
+    //
+    //    public CheckedStream<List<T>, E> windowToList(final Duration duration) {
+    //        assertNotClosed();
+    //
+    //        return window(duration, Suppliers.<T> ofList());
+    //    }
+    //
+    //    public CheckedStream<Set<T>, E> windowToSet(final Duration duration) {
+    //        assertNotClosed();
+    //
+    //        return window(duration, Suppliers.<T> ofSet());
+    //    }
+
+    /**
+     * Split this stream by the specified duration. If there is no element fetched from upstream during the specified {@code duration}, there won't be element pushed to downstream.
+     * To get at least one element for downstream in each window, use {@link #maxWait(Duration, Object)}:
+     * <pre>
+     * <code>
+     * stream.window(Duration.ofMinutes(10)).maxWait(Duration.ofMinutes(10), defaultValue)..
+     * </code>
+     * </pre>
+     *
+     * @param <C>
+     * @param duration
+     * @param collectionSupplier
+     * @return
+     * @see #window(Duration)
+     * @see #sliding(int, int, Collector)
+     * @see #maxWait(Duration, Object)
+     * @see #maxWait(Duration, Supplier)
+     * @see #rateLimited(double)
+     * @see #rateLimited(RateLimiter)
+     * @see #delay(Duration)
+     * @see #interval(long, LongFunction)
+    */
+    @Beta
+    @SequentialOnly
+    @IntermediateOp
+    public <C extends Collection<T>> CheckedStream<C, E> window(final Duration duration, final Supplier<? extends C> collectionSupplier) {
+        return window(duration, LongSuppliers.ofCurrentTimeMillis(), collectionSupplier);
+    }
+
+    /**
+     * Split this stream by the specified duration. If there is no element fetched from upstream during the specified {@code duration}, there won't be element pushed to downstream.
+     * To get at least one element for downstream in each window, use {@link #maxWait(Duration, Object)}:
+     * <pre>
+     * <code>
+     * stream.window(Duration.ofMinutes(10)).maxWait(Duration.ofMinutes(10), defaultValue)..
+     * </code>
+     * </pre>
+     *
+     * @param <C>
+     * @param duration
+     * @param startTime
+     * @param collectionSupplier
+     * @return
+     * @see #window(Duration)
+     * @see #sliding(int, int, Collector)
+     * @see #maxWait(Duration, Object)
+     * @see #maxWait(Duration, Supplier)
+     * @see #rateLimited(double)
+     * @see #rateLimited(RateLimiter)
+     * @see #delay(Duration)
+     * @see #interval(long, LongFunction)
+     */
+    @Beta
+    @SequentialOnly
+    @IntermediateOp
+    public <C extends Collection<T>> CheckedStream<C, E> window(final Duration duration, final LongSupplier startTime,
+            final Supplier<? extends C> collectionSupplier) {
+        return window(duration, duration, startTime, collectionSupplier);
+    }
+
+    /**
+     * Split this stream by the specified duration. If there is no element fetched from upstream during the specified {@code duration}, there won't be element pushed to downstream.
+     * To get at least one element for downstream in each window, use {@link #maxWait(Duration, Object)}:
+     * <pre>
+     * <code>
+     * stream.window(Duration.ofMinutes(10)).maxWait(Duration.ofMinutes(10), defaultValue)..
+     * </code>
+     * </pre>
+     *
+     * @param <R>
+     * @param duration
+     * @param collector
+     * @return
+     * @see #window(Duration)
+     * @see #sliding(int, int, Collector)
+     * @see #maxWait(Duration, Object)
+     * @see #maxWait(Duration, Supplier)
+     * @see #rateLimited(double)
+     * @see #rateLimited(RateLimiter)
+     * @see #delay(Duration)
+     * @see #interval(long, LongFunction)
+     */
+    @Beta
+    @SequentialOnly
+    @IntermediateOp
+    public <R> CheckedStream<R, E> window(Duration duration, Collector<? super T, ?, R> collector) {
+        return window(duration, LongSuppliers.ofCurrentTimeMillis(), collector);
+    }
+
+    /**
+     * Split this stream by the specified duration. If there is no element fetched from upstream during the specified {@code duration}, there won't be element pushed to downstream.
+     * To get at least one element for downstream in each window, use {@link #maxWait(Duration, Object)}:
+     * <pre>
+     * <code>
+     * stream.window(Duration.ofMinutes(10)).maxWait(Duration.ofMinutes(10), defaultValue)..
+     * </code>
+     * </pre>
+     *
+     * @param <R>
+     * @param duration
+     * @param startTime
+     * @param collector
+     * @return
+     * @see #window(Duration)
+     * @see #sliding(int, int, Collector)
+     * @see #maxWait(Duration, Object)
+     * @see #maxWait(Duration, Supplier)
+     * @see #rateLimited(double)
+     * @see #rateLimited(RateLimiter)
+     * @see #delay(Duration)
+     * @see #interval(long, LongFunction)
+     */
+    @Beta
+    @SequentialOnly
+    @IntermediateOp
+    public <R> CheckedStream<R, E> window(Duration duration, final LongSupplier startTime, Collector<? super T, ?, R> collector) {
+        return window(duration, duration, startTime, collector);
+    }
+
+    /**
+     * Split this stream by the specified duration. If there is no element fetched from upstream during the specified {@code duration}, there won't be element pushed to downstream.
+     * To get at least one element for downstream in each window, use {@link #maxWait(Duration, Object)}:
+     * <pre>
+     * <code>
+     * stream.window(Duration.ofMinutes(10)).maxWait(Duration.ofMinutes(10), defaultValue)..
+     * </code>
+     * </pre>
+     *
+     * @param duration
+     * @param increment
+     * @return
+     * @see #window(Duration)
+     * @see #sliding(int, int, Collector)
+     * @see #maxWait(Duration, Object)
+     * @see #maxWait(Duration, Supplier)
+     * @see #rateLimited(double)
+     * @see #rateLimited(RateLimiter)
+     * @see #delay(Duration)
+     * @see #interval(long, LongFunction)
+     */
+    @Beta
+    @SequentialOnly
+    @IntermediateOp
+    public CheckedStream<List<T>, E> window(final Duration duration, final Duration increment) {
+        return window(duration, increment, Suppliers.<T> ofList());
+    }
+
+    //    public CheckedStream<List<T>, E> window(final Duration duration, final Duration increment, final LongSupplier startTime) {
+    //        assertNotClosed();
+    //
+    //        return window(duration, incrementInMillis, startTime, Suppliers.<T> ofList()).map(listToStreamMapper());
+    //    }
+    //
+    //    public CheckedStream<List<T>, E> windowToList(final Duration duration, final Duration increment) {
+    //        assertNotClosed();
+    //
+    //        return window(duration, incrementInMillis, Suppliers.<T> ofList());
+    //    }
+    //
+    //    public CheckedStream<Set<T>, E> windowToSet(final Duration duration, final Duration increment) {
+    //        assertNotClosed();
+    //
+    //        return window(duration, incrementInMillis, Suppliers.<T> ofSet());
+    //    }
+
+    /**
+     * Split this stream by the specified duration. If there is no element fetched from upstream during the specified {@code duration}, there won't be element pushed to downstream.
+     * To get at least one element for downstream in each window, use {@link #maxWait(Duration, Object)}:
+     * <pre>
+     * <code>
+     * stream.window(Duration.ofMinutes(10)).maxWait(Duration.ofMinutes(10), defaultValue)..
+     * </code>
+     * </pre>
+     *
+     * @param <C>
+     * @param duration
+     * @param increment
+     * @param collectionSupplier
+     * @return
+     * @see #window(Duration)
+     * @see #sliding(int, int, Collector)
+     * @see #maxWait(Duration, Object)
+     * @see #maxWait(Duration, Supplier)
+     * @see #rateLimited(double)
+     * @see #rateLimited(RateLimiter)
+     * @see #delay(Duration)
+     * @see #interval(long, LongFunction)
+     */
+    @Beta
+    @SequentialOnly
+    @IntermediateOp
+    public <C extends Collection<T>> CheckedStream<C, E> window(final Duration duration, final Duration increment,
+            final Supplier<? extends C> collectionSupplier) {
+        return window(duration, increment, LongSuppliers.ofCurrentTimeMillis(), collectionSupplier);
+    }
+
+    /**
+     * Split this stream by the specified duration. If there is no element fetched from upstream during the specified {@code duration}, there won't be element pushed to downstream.
+     * To get at least one element for downstream in each window, use {@link #maxWait(Duration, Object)}:
+     * <pre>
+     * <code>
+     * stream.window(Duration.ofMinutes(10)).maxWait(Duration.ofMinutes(10), defaultValue)..
+     * </code>
+     * </pre>
+     *
+     * @param <C>
+     * @param duration
+     * @param increment
+     * @param startTime
+     * @param collectionSupplier
+     * @return
+     * @see #window(Duration)
+     * @see #sliding(int, int, Collector)
+     * @see #maxWait(Duration, Object)
+     * @see #maxWait(Duration, Supplier)
+     * @see #rateLimited(double)
+     * @see #rateLimited(RateLimiter)
+     * @see #delay(Duration)
+     * @see #interval(long, LongFunction)
+     */
+    @Beta
+    @SequentialOnly
+    @IntermediateOp
+    public <C extends Collection<T>> CheckedStream<C, E> window(final Duration duration, final Duration increment, final LongSupplier startTime,
+            final Supplier<? extends C> collectionSupplier) {
+        return window(duration, increment, startTime, collectionSupplier, true);
+    }
+
+    /**
+     * Split this stream by the specified duration. If there is no element fetched from upstream during the specified {@code duration}, there won't be element pushed to downstream.
+     * To get at least one element for downstream in each window, use {@link #maxWait(Duration, Object)}:
+     * <pre>
+     * <code>
+     * stream.window(Duration.ofMinutes(10)).maxWait(Duration.ofMinutes(10), defaultValue)..
+     * </code>
+     * </pre>
+     *
+     * @param <C>
+     * @param duration
+     * @param increment
+     * @param startTime
+     * @param collectionSupplier
+     * @param async
+     * @return
+     * @see #window(Duration)
+     * @see #sliding(int, int, Collector)
+     * @see #maxWait(Duration, Object)
+     * @see #maxWait(Duration, Supplier)
+     * @see #rateLimited(double)
+     * @see #rateLimited(RateLimiter)
+     * @see #delay(Duration)
+     * @see #interval(long, LongFunction)
+     */
+    @Beta
+    @SequentialOnly
+    @IntermediateOp
+    <C extends Collection<T>> CheckedStream<C, E> window(final Duration duration, final Duration increment, final LongSupplier startTime,
+            final Supplier<? extends C> collectionSupplier, boolean async) {
+        assertNotClosed();
+
+        checkArgNotNull(duration, "duration");
+        checkArgPositive(duration.toMillis(), "duration");
+        checkArgNotNull(increment, "increment");
+        checkArgPositive(increment.toMillis(), "increment");
+        checkArgNotNull(collectionSupplier, "collectionSupplier");
+
+        final ArrayBlockingQueue<T> queueToBuffer = async == false ? null : new ArrayBlockingQueue<>(DEFAULT_BUFFERED_SIZE_PER_ITERATOR);
+
+        return newStream(new CheckedIterator<C, E>() { //NOSONAR
+            private final long durationInMillis = duration.toMillis();
+            private final long incrementInMillis = increment.toMillis();
+            private final boolean useQueue = incrementInMillis < durationInMillis;
+
+            private final Deque<Timed<T>> queue = useQueue ? new ArrayDeque<>() : null;
+            private Iterator<Timed<T>> queueIter;
+
+            private CheckedIterator<T, E> iter;
+            private Timed<T> timedNext = null;
+            private T next = null;
+
+            private long fromTime;
+            private long endTime;
+            private long now;
+
+            private boolean initialized = false;
+
+            @Override
+            public boolean hasNext() throws E {
+                if (!initialized) {
+                    init();
+                }
+
+                if (useQueue && queue.size() > 0 && queue.getLast().timestamp() >= fromTime) {
+                    return true;
+                } else if (timedNext != null && timedNext.timestamp() >= endTime) {
+                    do {
+                        fromTime += incrementInMillis;
+                        endTime = fromTime + durationInMillis;
+                    } while (timedNext.timestamp() >= endTime);
+                }
+
+                if (timedNext == null || timedNext.timestamp() < fromTime) {
+                    while (iter.hasNext()) {
+                        next = iter.next();
+                        now = System.currentTimeMillis();
+
+                        if (now >= endTime) {
+                            do {
+                                fromTime += incrementInMillis;
+                                endTime = fromTime + durationInMillis;
+                            } while (now >= endTime);
+                        }
+
+                        if (now >= fromTime) {
+                            timedNext = Timed.of(next, now);
+
+                            break;
+                        }
+                    }
+                }
+
+                return timedNext != null && timedNext.timestamp() >= fromTime && timedNext.timestamp() < endTime;
+            }
+
+            @Override
+            public C next() throws E {
+                if (!hasNext()) {
+                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
+                }
+
+                final C result = collectionSupplier.get();
+
+                if (useQueue && queue.size() > 0) {
+                    queueIter = queue.iterator();
+                    Timed<T> e = null;
+
+                    while (queueIter.hasNext()) {
+                        e = queueIter.next();
+
+                        if (e.timestamp() < fromTime) {
+                            queueIter.remove();
+                        } else if (e.timestamp() < endTime) {
+                            result.add(e.value());
+                        } else {
+                            break;
+                        }
+                    }
+                }
+
+                final long nextStartTime = fromTime + incrementInMillis;
+
+                if (timedNext != null && timedNext.timestamp() >= fromTime && timedNext.timestamp() < endTime) {
+                    result.add(timedNext.value());
+
+                    if (useQueue && timedNext.timestamp() >= nextStartTime) {
+                        queue.add(timedNext);
+                    }
+
+                    timedNext = null; // already added to window and queue if needed.
+                }
+
+                if (System.currentTimeMillis() < endTime) {
+                    // When it's ArrayStream or async = true
+                    if (queueToBuffer == null) {
+                        while (iter.hasNext()) {
+                            next = iter.next();
+                            now = System.currentTimeMillis();
+
+                            if (now < endTime) {
+                                result.add(next);
+
+                                if (useQueue && now >= nextStartTime) {
+                                    queue.add(Timed.of(next, now));
+                                }
+                            } else {
+                                timedNext = Timed.of(next, now);
+                                break;
+                            }
+                        }
+                    } else {
+                        try {
+                            while ((now = System.currentTimeMillis()) < endTime) {
+                                next = queueToBuffer.poll(endTime - now, TimeUnit.MILLISECONDS);
+
+                                if (next == null) {
+                                    break;
+                                } else if (next == NONE) { // refer to Stream.parallelConcatIterators
+                                    next = null;
+                                }
+
+                                now = System.currentTimeMillis();
+
+                                if (now < endTime) {
+                                    result.add(next);
+
+                                    if (useQueue && now >= nextStartTime) {
+                                        queue.add(Timed.of(next, now));
+                                    }
+                                } else {
+                                    timedNext = Timed.of(next, now);
+                                    break;
+                                }
+                            }
+                        } catch (InterruptedException e) {
+                            throw toRuntimeException(e);
+                        }
+                    }
+                }
+
+                fromTime += incrementInMillis;
+                endTime = fromTime + durationInMillis;
+
+                return result;
+            }
+
+            private void init() {
+                if (!initialized) {
+                    initialized = true;
+
+                    if (queueToBuffer == null) {
+                        iter = iteratorEx();
+                    } else {
+                        iter = buffered(queueToBuffer).iteratorEx();
+                    }
+
+                    fromTime = startTime.getAsLong();
+                    endTime = fromTime + durationInMillis;
+                }
+            }
+        }, false, null, closeHandlers);
+    }
+
+    /**
+     * Split this stream by the specified duration. If there is no element fetched from upstream during the specified {@code duration}, there won't be element pushed to downstream.
+     * To get at least one element for downstream in each window, use {@link #maxWait(Duration, Object)}:
+     * <pre>
+     * <code>
+     * stream.window(Duration.ofMinutes(10)).maxWait(Duration.ofMinutes(10), defaultValue)..
+     * </code>
+     * </pre>
+     *
+     * @param <R>
+     * @param duration
+     * @param increment
+     * @param collector
+     * @return
+     * @see #window(Duration)
+     * @see #sliding(int, int, Collector)
+     * @see #maxWait(Duration, Object)
+     * @see #maxWait(Duration, Supplier)
+     * @see #rateLimited(double)
+     * @see #rateLimited(RateLimiter)
+     * @see #delay(Duration)
+     * @see #interval(long, LongFunction)
+     */
+    @Beta
+    @SequentialOnly
+    @IntermediateOp
+    public <R> CheckedStream<R, E> window(final Duration duration, final Duration increment, final Collector<? super T, ?, R> collector) {
+        return window(duration, increment, LongSuppliers.ofCurrentTimeMillis(), collector);
+    }
+
+    /**
+     * Split this stream by the specified duration. If there is no element fetched from upstream during the specified {@code duration}, there won't be element pushed to downstream.
+     * To get at least one element for downstream in each window, use {@link #maxWait(Duration, Object)}:
+     * <pre>
+     * <code>
+     * stream.window(Duration.ofMinutes(10)).maxWait(Duration.ofMinutes(10), defaultValue)..
+     * </code>
+     * </pre>
+     *
+     * @param <R>
+     * @param duration
+     * @param increment
+     * @param startTime
+     * @param collector
+     * @return
+     * @see #window(Duration)
+     * @see #sliding(int, int, Collector)
+     * @see #maxWait(Duration, Object)
+     * @see #maxWait(Duration, Supplier)
+     * @see #rateLimited(double)
+     * @see #rateLimited(RateLimiter)
+     * @see #delay(Duration)
+     * @see #interval(long, LongFunction)
+     */
+    @Beta
+    @SequentialOnly
+    @IntermediateOp
+    public <R> CheckedStream<R, E> window(final Duration duration, final Duration increment, final LongSupplier startTime,
+            final Collector<? super T, ?, R> collector) {
+        return window(duration, increment, startTime, collector, true);
+    }
+
+    /**
+     * Split this stream by the specified duration. If there is no element fetched from upstream during the specified {@code duration}, there won't be element pushed to downstream.
+     * To get at least one element for downstream in each window, use {@link #maxWait(Duration, Object)}:
+     * <pre>
+     * <code>
+     * stream.window(Duration.ofMinutes(10)).maxWait(Duration.ofMinutes(10), defaultValue)..
+     * </code>
+     * </pre>
+     *
+     * @param <R>
+     * @param duration
+     * @param increment
+     * @param startTime
+     * @param collector
+     * @param async
+     * @return
+     * @see #window(Duration)
+     * @see #sliding(int, int, Collector)
+     * @see #maxWait(Duration, Object)
+     * @see #maxWait(Duration, Supplier)
+     * @see #rateLimited(double)
+     * @see #rateLimited(RateLimiter)
+     * @see #delay(Duration)
+     * @see #interval(long, LongFunction)
+     */
+    @Beta
+    @SequentialOnly
+    @IntermediateOp
+    <R> CheckedStream<R, E> window(final Duration duration, final Duration increment, final LongSupplier startTime, final Collector<? super T, ?, R> collector,
+            boolean async) {
+        assertNotClosed();
+
+        checkArgNotNull(duration, "duration");
+        checkArgPositive(duration.toMillis(), "duration");
+        checkArgNotNull(increment, "increment");
+        checkArgPositive(increment.toMillis(), "increment");
+        checkArgNotNull(collector, "collector");
+
+        final ArrayBlockingQueue<T> queueToBuffer = async == false ? null : new ArrayBlockingQueue<>(DEFAULT_BUFFERED_SIZE_PER_ITERATOR);
+
+        return newStream(new CheckedIterator<R, E>() { //NOSONAR
+            private final long durationInMillis = duration.toMillis();
+            private final long incrementInMillis = increment.toMillis();
+            private final boolean useQueue = incrementInMillis < durationInMillis;
+
+            private final Deque<Timed<T>> queue = useQueue ? new ArrayDeque<>() : null;
+            private Iterator<Timed<T>> queueIter;
+
+            private Supplier<Object> supplier;
+            private BiConsumer<Object, ? super T> accumulator;
+            private Function<Object, R> finisher;
+
+            private CheckedIterator<T, E> iter;
+            private Timed<T> timedNext = null;
+            private T next = null;
+
+            private long fromTime;
+            private long endTime;
+            private long now;
+
+            private boolean initialized = false;
+
+            @Override
+            public boolean hasNext() throws E {
+                if (!initialized) {
+                    init();
+                }
+
+                if (useQueue && queue.size() > 0 && queue.getLast().timestamp() >= fromTime) {
+                    return true;
+                } else if (timedNext != null && timedNext.timestamp() >= endTime) {
+                    do {
+                        fromTime += incrementInMillis;
+                        endTime = fromTime + durationInMillis;
+                    } while (timedNext.timestamp() >= endTime);
+                }
+
+                if (timedNext == null || timedNext.timestamp() < fromTime) {
+                    while (iter.hasNext()) {
+                        next = iter.next();
+                        now = System.currentTimeMillis();
+
+                        if (now >= endTime) {
+                            do {
+                                fromTime += incrementInMillis;
+                                endTime = fromTime + durationInMillis;
+                            } while (now >= endTime);
+                        }
+
+                        if (now >= fromTime) {
+                            timedNext = Timed.of(next, now);
+
+                            break;
+                        }
+                    }
+                }
+
+                return timedNext != null && timedNext.timestamp() >= fromTime && timedNext.timestamp() < endTime;
+            }
+
+            @Override
+            public R next() throws E {
+                if (!hasNext()) {
+                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
+                }
+
+                final Object container = supplier.get();
+
+                if (useQueue && queue.size() > 0) {
+                    queueIter = queue.iterator();
+                    Timed<T> e = null;
+
+                    while (queueIter.hasNext()) {
+                        e = queueIter.next();
+
+                        if (e.timestamp() < fromTime) {
+                            queueIter.remove();
+                        } else if (e.timestamp() < endTime) {
+                            accumulator.accept(container, e.value());
+                        } else {
+                            break;
+                        }
+                    }
+                }
+
+                final long nextStartTime = fromTime + incrementInMillis;
+
+                if (timedNext != null && timedNext.timestamp() >= fromTime && timedNext.timestamp() < endTime) {
+                    accumulator.accept(container, timedNext.value());
+
+                    if (useQueue && timedNext.timestamp() >= nextStartTime) {
+                        queue.add(timedNext);
+                    }
+
+                    timedNext = null; // already added to window and queue if needed.
+                }
+
+                if (System.currentTimeMillis() < endTime) {
+                    // When it's ArrayStream or async = true
+                    if (queueToBuffer == null) {
+                        while (iter.hasNext()) {
+                            next = iter.next();
+                            now = System.currentTimeMillis();
+
+                            if (now < endTime) {
+                                accumulator.accept(container, next);
+
+                                if (useQueue && now >= nextStartTime) {
+                                    queue.add(Timed.of(next, now));
+                                }
+                            } else {
+                                timedNext = Timed.of(next, now);
+                                break;
+                            }
+                        }
+                    } else {
+                        try {
+                            while ((now = System.currentTimeMillis()) < endTime) {
+                                next = queueToBuffer.poll(endTime - now, TimeUnit.MILLISECONDS);
+
+                                if (next == null) {
+                                    break;
+                                } else if (next == NONE) { // refer to Stream.parallelConcatIterators
+                                    next = null;
+                                }
+
+                                now = System.currentTimeMillis();
+
+                                if (now < endTime) {
+                                    accumulator.accept(container, next);
+
+                                    if (useQueue && now >= nextStartTime) {
+                                        queue.add(Timed.of(next, now));
+                                    }
+                                } else {
+                                    timedNext = Timed.of(next, now);
+                                    break;
+                                }
+                            }
+                        } catch (InterruptedException e) {
+                            throw toRuntimeException(e);
+                        }
+                    }
+                }
+
+                fromTime += incrementInMillis;
+                endTime = fromTime + durationInMillis;
+
+                return finisher.apply(container);
+            }
+
+            private void init() {
+                if (!initialized) {
+                    initialized = true;
+
+                    supplier = (Supplier<Object>) collector.supplier();
+                    accumulator = (BiConsumer<Object, ? super T>) collector.accumulator();
+                    finisher = (Function<Object, R>) collector.finisher();
+
+                    if (queueToBuffer == null) {
+                        iter = iteratorEx();
+                    } else {
+                        iter = buffered(queueToBuffer).iteratorEx();
+                    }
+
+                    fromTime = startTime.getAsLong();
+                    endTime = fromTime + durationInMillis;
+                }
+            }
+        }, false, null, closeHandlers);
+    }
+
+    /**
+     * Split this stream by the specified {@code maxWindowSize} and {@code maxDuration}. If there is no element fetched from upstream during the specified {@code duration}, there won't be element pushed to downstream.
+     * To get at least one element for downstream in each window, use {@link #maxWait(Duration, Object)}:
+     * <pre>
+     * <code>
+     * stream.window(Duration.ofMinutes(10), 100).maxWait(Duration.ofMinutes(10), defaultValue)..
+     * </code>
+     * </pre>
+     *
+     * @param maxDuration
+     * @param maxWindowSize
+     * @return
+     * @see #window(Duration, int, LongSupplier, Supplier)
+     * @see #sliding(int, int, Collector)
+     * @see #maxWait(Duration, Object)
+     * @see #maxWait(Duration, Supplier)
+     * @see #rateLimited(double)
+     * @see #rateLimited(RateLimiter)
+     * @see #delay(Duration)
+     * @see #interval(long, LongFunction)
+     */
+    @Beta
+    @SequentialOnly
+    @IntermediateOp
+    public CheckedStream<List<T>, E> window(final Duration maxDuration, final int maxWindowSize) {
+        return window(maxDuration, maxWindowSize, Suppliers.<T> ofList());
+    }
+
+    //    @Override
+    //    public CheckedStream<List<T>, E> window(final Duration maxDuration, final int maxWindowSize, final LongSupplier startTime) {
+    //        assertNotClosed();
+    //
+    //        return window(maxDuration, maxWindowSize, startTime, Suppliers.<T> ofList()).map(listToStreamMapper());
+    //    }
+
+    /**
+     * Split this stream by the specified {@code maxWindowSize} and {@code maxDuration}. If there is no element fetched from upstream during the specified {@code duration}, there won't be element pushed to downstream.
+     * To get at least one element for downstream in each window, use {@link #maxWait(Duration, Object)}:
+     * <pre>
+     * <code>
+     * stream.window(Duration.ofMinutes(10), 100).maxWait(Duration.ofMinutes(10), defaultValue)..
+     * </code>
+     * </pre>
+     *
+     * @param <C>
+     * @param maxDuration
+     * @param maxWindowSize
+     * @param collectionSupplier
+     * @return
+     * @see #window(Duration, int, LongSupplier, Supplier)
+     * @see #sliding(int, int, Collector)
+     * @see #maxWait(Duration, Object)
+     * @see #maxWait(Duration, Supplier)
+     * @see #rateLimited(double)
+     * @see #rateLimited(RateLimiter)
+     * @see #delay(Duration)
+     * @see #interval(long, LongFunction)
+     */
+    @Beta
+    @SequentialOnly
+    @IntermediateOp
+    public <C extends Collection<T>> CheckedStream<C, E> window(final Duration maxDuration, final int maxWindowSize,
+            final Supplier<? extends C> collectionSupplier) {
+        return window(maxDuration, maxWindowSize, LongSuppliers.ofCurrentTimeMillis(), collectionSupplier);
+    }
+
+    /**
+     * Split this stream by the specified {@code maxWindowSize} and {@code maxDuration}. If there is no element fetched from upstream during the specified {@code duration}, there won't be element pushed to downstream.
+     * To get at least one element for downstream in each window, use {@link #maxWait(Duration, Object)}:
+     * <pre>
+     * <code>
+     * stream.window(Duration.ofMinutes(10), 100).maxWait(Duration.ofMinutes(10), defaultValue)..
+     * </code>
+     * </pre>
+     *
+     * @param <C>
+     * @param maxDuration
+     * @param maxWindowSize
+     * @param startTime
+     * @param collectionSupplier
+     * @return
+     * @see #window(Duration, int, LongSupplier, Supplier)
+     * @see #sliding(int, int, Collector)
+     * @see #maxWait(Duration, Object)
+     * @see #maxWait(Duration, Supplier)
+     * @see #rateLimited(double)
+     * @see #rateLimited(RateLimiter)
+     * @see #delay(Duration)
+     * @see #interval(long, LongFunction)
+     */
+    @Beta
+    @SequentialOnly
+    @IntermediateOp
+    public <C extends Collection<T>> CheckedStream<C, E> window(final Duration maxDuration, final int maxWindowSize, final LongSupplier startTime,
+            final Supplier<? extends C> collectionSupplier) {
+        return window(maxDuration, maxWindowSize, startTime, collectionSupplier, true);
+    }
+
+    /**
+     * Split this stream by the specified {@code maxWindowSize} and {@code maxDuration}. If there is no element fetched from upstream during the specified {@code duration}, there won't be element pushed to downstream.
+     * To get at least one element for downstream in each window, use {@link #maxWait(Duration, Object)}:
+     * <pre>
+     * <code>
+     * stream.window(Duration.ofMinutes(10), 100).maxWait(Duration.ofMinutes(10), defaultValue)..
+     * </code>
+     * </pre>
+     *
+     *
+     * @param <C>
+     * @param maxWindowSize
+     * @param maxDuration
+     * @param startTime
+     * @param collectionSupplier
+     * @param async
+     * @return
+     * @see #window(Duration, int, LongSupplier, Supplier)
+     * @see #sliding(int, int, Collector)
+     * @see #maxWait(Duration, Object)
+     * @see #maxWait(Duration, Supplier)
+     * @see #rateLimited(double)
+     * @see #rateLimited(RateLimiter)
+     * @see #delay(Duration)
+     * @see #interval(long, LongFunction)
+     */
+    @Beta
+    @SequentialOnly
+    @IntermediateOp
+    <C extends Collection<T>> CheckedStream<C, E> window(final Duration maxDuration, final int maxWindowSize, final LongSupplier startTime,
+            final Supplier<? extends C> collectionSupplier, boolean async) {
+        assertNotClosed();
+
+        checkArgNotNull(maxDuration, "maxDuration");
+        checkArgPositive(maxDuration.toMillis(), "maxDuration");
+        checkArgPositive(maxWindowSize, "maxWindowSize");
+        checkArgNotNull(startTime, "startTime");
+        checkArgNotNull(collectionSupplier, "collectionSupplier");
+
+        final ArrayBlockingQueue<T> queueToBuffer = async == false ? null : new ArrayBlockingQueue<>(DEFAULT_BUFFERED_SIZE_PER_ITERATOR);
+
+        return newStream(new CheckedIterator<C, E>() { //NOSONAR
+            private final long maxDurationInMillis = maxDuration.toMillis();
+            private CheckedIterator<T, E> iter;
+            private Timed<T> timedNext = null;
+            private T next = null;
+
+            private long fromTime;
+            private long endTime;
+            private long now;
+
+            private boolean initialized = false;
+
+            @Override
+            public boolean hasNext() throws E {
+                if (!initialized) {
+                    init();
+                }
+
+                if (timedNext != null && timedNext.timestamp() >= endTime) {
+                    do {
+                        fromTime = endTime;
+                        endTime = fromTime + maxDurationInMillis;
+                    } while (timedNext.timestamp() >= endTime);
+                }
+
+                if (timedNext == null || timedNext.timestamp() < fromTime) {
+                    while (iter.hasNext()) {
+                        next = iter.next();
+                        now = System.currentTimeMillis();
+
+                        if (now >= endTime) {
+                            do {
+                                fromTime = endTime;
+                                endTime = fromTime + maxDurationInMillis;
+                            } while (now >= endTime);
+                        }
+
+                        if (now >= fromTime) {
+                            timedNext = Timed.of(next, now);
+
+                            break;
+                        }
+                    }
+                }
+
+                return timedNext != null && timedNext.timestamp() >= fromTime && timedNext.timestamp() < endTime;
+            }
+
+            @Override
+            public C next() throws E {
+                if (!hasNext()) {
+                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
+                }
+
+                int cnt = 0;
+                final C result = collectionSupplier.get();
+
+                if (timedNext != null && timedNext.timestamp() >= fromTime && timedNext.timestamp() < endTime) {
+                    result.add(timedNext.value());
+                    timedNext = null; // already added to window and queue if needed.
+                    cnt++;
+                }
+
+                if (cnt < maxWindowSize && System.currentTimeMillis() < endTime) {
+                    // When it's ArrayStream or async = true
+                    if (queueToBuffer == null) {
+                        while (cnt < maxWindowSize && iter.hasNext()) {
+                            next = iter.next();
+                            now = System.currentTimeMillis();
+
+                            if (now < endTime) {
+                                result.add(next);
+                                cnt++;
+                            } else {
+                                timedNext = Timed.of(next, now);
+                                break;
+                            }
+                        }
+                    } else {
+                        try {
+                            while (cnt < maxWindowSize && (now = System.currentTimeMillis()) < endTime) {
+                                next = queueToBuffer.poll(endTime - now, TimeUnit.MILLISECONDS);
+
+                                if (next == null) {
+                                    break;
+                                } else if (next == NONE) { // refer to Stream.parallelConcatIterators
+                                    next = null;
+                                }
+
+                                now = System.currentTimeMillis();
+
+                                if (now < endTime) {
+                                    result.add(next);
+                                    cnt++;
+                                } else {
+                                    timedNext = Timed.of(next, now);
+                                    break;
+                                }
+                            }
+                        } catch (InterruptedException e) {
+                            throw toRuntimeException(e);
+                        }
+                    }
+                }
+
+                fromTime = N.min(endTime, timedNext == null ? System.currentTimeMillis() : timedNext.timestamp());
+                endTime = fromTime + maxDurationInMillis;
+
+                return result;
+            }
+
+            private void init() {
+                if (!initialized) {
+                    initialized = true;
+
+                    if (queueToBuffer == null) {
+                        iter = iteratorEx();
+                    } else {
+                        iter = buffered(queueToBuffer).iteratorEx();
+                    }
+
+                    fromTime = startTime.getAsLong();
+                    endTime = fromTime + maxDurationInMillis;
+                }
+            }
+        }, false, null, closeHandlers);
+    }
+
+    /**
+     * Split this stream by the specified {@code maxWindowSize} and {@code maxDuration}. If there is no element fetched from upstream during the specified {@code duration}, there won't be element pushed to downstream.
+     * To get at least one element for downstream in each window, use {@link #maxWait(Duration, Object)}:
+     * <pre>
+     * <code>
+     * stream.window(Duration.ofMinutes(10), 100).maxWait(Duration.ofMinutes(10), defaultValue)..
+     * </code>
+     * </pre>
+     *
+     * @param <R>
+     * @param maxDuration
+     * @param maxWindowSize
+     * @param collector
+     * @return
+     * @see #window(Duration, int, LongSupplier, Collector)
+     * @see #sliding(int, int, Collector)
+     * @see #maxWait(Duration, Object)
+     * @see #maxWait(Duration, Supplier)
+     * @see #rateLimited(double)
+     * @see #rateLimited(RateLimiter)
+     * @see #delay(Duration)
+     * @see #interval(long, LongFunction)
+     */
+    @Beta
+    @SequentialOnly
+    @IntermediateOp
+    public <R> CheckedStream<R, E> window(final Duration maxDuration, final int maxWindowSize, Collector<? super T, ?, R> collector) {
+        return window(maxDuration, maxWindowSize, LongSuppliers.ofCurrentTimeMillis(), collector);
+    }
+
+    /**
+     * Split this stream by the specified {@code maxWindowSize} and {@code maxDuration}. If there is no element fetched from upstream during the specified {@code duration}, there won't be element pushed to downstream.
+     * To get at least one element for downstream in each window, use {@link #maxWait(Duration, Object)}:
+     * <pre>
+     * <code>
+     * stream.window(Duration.ofMinutes(10), 100).maxWait(Duration.ofMinutes(10), defaultValue)..
+     * </code>
+     * </pre>
+     *
+     *
+     * @param <R>
+     * @param maxWindowSize
+     * @param maxDuration
+     * @param startTime
+     * @param collector
+     * @return
+     * @see #window(Duration, long, LongSupplier, Collector)
+     * @see #sliding(int, int, Collector)
+     * @see #maxWait(Duration, Object)
+     * @see #maxWait(Duration, Supplier)
+     * @see #rateLimited(double)
+     * @see #rateLimited(RateLimiter)
+     * @see #delay(Duration)
+     * @see #interval(long, LongFunction)
+    */
+    @Beta
+    @SequentialOnly
+    @IntermediateOp
+    <R> CheckedStream<R, E> window(final Duration maxDuration, final int maxWindowSize, final LongSupplier startTime,
+            final Collector<? super T, ?, R> collector) {
+        return window(maxDuration, maxWindowSize, startTime, collector, true);
+    }
+
+    /**
+     * Split this stream by the specified {@code maxWindowSize} and {@code maxDuration}. If there is no element fetched from upstream during the specified {@code duration}, there won't be element pushed to downstream.
+     * To get at least one element for downstream in each window, use {@link #maxWait(Duration, Object)}:
+     * <pre>
+     * <code>
+     * stream.window(Duration.ofMinutes(10), 100).maxWait(Duration.ofMinutes(10), defaultValue)..
+     * </code>
+     * </pre>
+     *
+     *
+     * @param <R>
+     * @param maxWindowSize
+     * @param maxDuration
+     * @param startTime
+     * @param collector
+     * @param async
+     * @return
+     * @see #window(Duration, long, LongSupplier, Collector)
+     * @see #sliding(int, int, Collector)
+     * @see #maxWait(Duration, Object)
+     * @see #maxWait(Duration, Supplier)
+     * @see #rateLimited(double)
+     * @see #rateLimited(RateLimiter)
+     * @see #delay(Duration)
+     * @see #interval(long, LongFunction)
+    */
+    @Beta
+    @SequentialOnly
+    @IntermediateOp
+    <R> CheckedStream<R, E> window(final Duration maxDuration, final int maxWindowSize, final LongSupplier startTime,
+            final Collector<? super T, ?, R> collector, boolean async) {
+        assertNotClosed();
+
+        checkArgNotNull(maxDuration, "maxDuration");
+        checkArgPositive(maxDuration.toMillis(), "maxDuration");
+        checkArgPositive(maxWindowSize, "maxWindowSize");
+        checkArgNotNull(startTime, "startTime");
+        checkArgNotNull(collector, "collector");
+
+        final ArrayBlockingQueue<T> queueToBuffer = async == false ? null : new ArrayBlockingQueue<>(DEFAULT_BUFFERED_SIZE_PER_ITERATOR);
+
+        return newStream(new CheckedIterator<R, E>() { //NOSONAR
+            private final long maxDurationInMillis = maxDuration.toMillis();
+
+            private Supplier<Object> supplier = null;
+            private BiConsumer<Object, ? super T> accumulator = null;
+            private Function<Object, R> finisher = null;
+
+            private CheckedIterator<T, E> iter;
+            private Timed<T> timedNext = null;
+            private T next = null;
+
+            private long fromTime;
+            private long endTime;
+            private long now;
+
+            private boolean initialized = false;
+
+            @Override
+            public boolean hasNext() throws E {
+                if (!initialized) {
+                    init();
+                }
+
+                if (timedNext != null && timedNext.timestamp() >= endTime) {
+                    do {
+                        fromTime = endTime;
+                        endTime = fromTime + maxDurationInMillis;
+                    } while (timedNext.timestamp() >= endTime);
+                }
+
+                if (timedNext == null || timedNext.timestamp() < fromTime) {
+                    while (iter.hasNext()) {
+                        next = iter.next();
+                        now = System.currentTimeMillis();
+
+                        if (now >= endTime) {
+                            do {
+                                fromTime = endTime;
+                                endTime = fromTime + maxDurationInMillis;
+                            } while (now >= endTime);
+                        }
+
+                        if (now >= fromTime) {
+                            timedNext = Timed.of(next, now);
+
+                            break;
+                        }
+                    }
+                }
+
+                return timedNext != null && timedNext.timestamp() >= fromTime && timedNext.timestamp() < endTime;
+            }
+
+            @Override
+            public R next() throws E {
+                if (!hasNext()) {
+                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
+                }
+
+                int cnt = 0;
+                final Object container = supplier.get();
+
+                if (timedNext != null && timedNext.timestamp() >= fromTime && timedNext.timestamp() < endTime) {
+                    accumulator.accept(container, timedNext.value());
+                    timedNext = null; // already added to window and queue if needed.
+                    cnt++;
+                }
+
+                if (cnt < maxWindowSize && System.currentTimeMillis() < endTime) {
+                    // When it's ArrayStream or async = true
+                    if (queueToBuffer == null) {
+                        while (cnt < maxWindowSize && iter.hasNext()) {
+                            next = iter.next();
+                            now = System.currentTimeMillis();
+
+                            if (now < endTime) {
+                                accumulator.accept(container, next);
+                                cnt++;
+                            } else {
+                                timedNext = Timed.of(next, now);
+                                break;
+                            }
+                        }
+                    } else {
+                        try {
+                            while (cnt < maxWindowSize && (now = System.currentTimeMillis()) < endTime) {
+                                next = queueToBuffer.poll(endTime - now, TimeUnit.MILLISECONDS);
+
+                                if (next == null) {
+                                    break;
+                                } else if (next == NONE) { // refer to Stream.parallelConcatIterators
+                                    next = null;
+                                }
+
+                                now = System.currentTimeMillis();
+
+                                if (now < endTime) {
+                                    accumulator.accept(container, next);
+                                    cnt++;
+                                } else {
+                                    timedNext = Timed.of(next, now);
+                                    break;
+                                }
+                            }
+                        } catch (InterruptedException e) {
+                            throw toRuntimeException(e);
+                        }
+                    }
+                }
+
+                fromTime = N.min(endTime, timedNext == null ? System.currentTimeMillis() : timedNext.timestamp());
+                endTime = fromTime + maxDurationInMillis;
+
+                return finisher.apply(container);
+            }
+
+            private void init() {
+                if (!initialized) {
+                    initialized = true;
+
+                    supplier = (Supplier<Object>) collector.supplier();
+                    accumulator = (BiConsumer<Object, ? super T>) collector.accumulator();
+                    finisher = (Function<Object, R>) collector.finisher();
+
+                    if (queueToBuffer == null) {
+                        iter = iteratorEx();
+                    } else {
+                        iter = buffered(queueToBuffer).iteratorEx();
+                    }
+
+                    fromTime = startTime.getAsLong();
+                    endTime = fromTime + maxDurationInMillis;
+                }
+            }
+        }, false, null, closeHandlers);
+    }
+
+    /**
+    *
+    * @param maxWaitForNextInMillis
+    * @param windowSplitter The 1st parameter is the first element with processing time in current window,
+    *        The 2nd parameter is the last element with processing time in current window before current element is retrieved,
+    *        The 3nd parameter is the current element just retrieved from this stream with processing time,
+    *        The 4th parameter is the total count of elements entered the current window so far.
+    *        The 1st and 2nd elements are equals if there is only one element in the current window.
+    * @return
+    * @see #sliding(int, int, Collector)
+    * @see #maxWait(Duration, Object)
+    * @see #maxWait(Duration, Supplier)
+    * @see #rateLimited(double)
+    * @see #rateLimited(RateLimiter)
+    * @see #delay(Duration)
+    * @see #interval(long, LongFunction)
+    */
+    @Beta
+    @SequentialOnly
+    @IntermediateOp
+    public CheckedStream<List<T>, E> window(final ToLongTriFunction<NoCachingNoUpdating.Timed<T>, NoCachingNoUpdating.Timed<T>, Integer> maxWaitForNextInMillis,
+            final QuadPredicate<NoCachingNoUpdating.Timed<T>, NoCachingNoUpdating.Timed<T>, NoCachingNoUpdating.Timed<T>, Integer> windowSplitter) {
+        return window(maxWaitForNextInMillis, windowSplitter, Suppliers.ofList());
+    }
+
+    /**
+    *
+    * @param <C>
+    * @param maxWaitForNextInMillis
+    * @param windowSplitter The 1st parameter is the first element with processing time in current window,
+    *        The 2nd parameter is the last element with processing time in current window before current element is retrieved,
+    *        The 3nd parameter is the current element just retrieved from this stream with processing time,
+    *        The 4th parameter is the total count of elements entered the current window so far.
+    *        The 1st and 2nd elements are equals if there is only one element in the current window.
+    * @param collectionSupplier
+    * @return
+    * @see #sliding(int, int, Collector)
+    * @see #maxWait(Duration, Object)
+    * @see #maxWait(Duration, Supplier)
+    * @see #rateLimited(double)
+    * @see #rateLimited(RateLimiter)
+    * @see #delay(Duration)
+    * @see #interval(long, LongFunction)
+    */
+    @Beta
+    @SequentialOnly
+    @IntermediateOp
+    public <C extends Collection<T>> CheckedStream<C, E> window(
+            final ToLongTriFunction<NoCachingNoUpdating.Timed<T>, NoCachingNoUpdating.Timed<T>, Integer> maxWaitForNextInMillis,
+            final QuadPredicate<NoCachingNoUpdating.Timed<T>, NoCachingNoUpdating.Timed<T>, NoCachingNoUpdating.Timed<T>, Integer> windowSplitter,
+            final Supplier<? extends C> collectionSupplier) {
+        return window(maxWaitForNextInMillis, windowSplitter, LongSuppliers.ofCurrentTimeMillis(), collectionSupplier);
+    }
+
+    /**
+    *
+    * @param <C>
+    * @param maxWaitForNextInMillis
+    * @param windowSplitter The 1st parameter is the first element with processing time in current window,
+    *        The 2nd parameter is the last element with processing time in current window before current element is retrieved,
+    *        The 3nd parameter is the current element just retrieved from this stream with processing time,
+    *        The 4th parameter is the total count of elements entered the current window so far.
+    *        The 1st and 2nd elements are equals if there is only one element in the current window.
+    * @param startTime
+    * @param collectionSupplier
+    * @return
+    * @see #sliding(int, int, Collector)
+    * @see #maxWait(Duration, Object)
+    * @see #maxWait(Duration, Supplier)
+    * @see #rateLimited(double)
+    * @see #rateLimited(RateLimiter)
+    * @see #delay(Duration)
+    * @see #interval(long, LongFunction)
+    */
+    @Beta
+    @SequentialOnly
+    @IntermediateOp
+    public <C extends Collection<T>> CheckedStream<C, E> window(
+            final ToLongTriFunction<NoCachingNoUpdating.Timed<T>, NoCachingNoUpdating.Timed<T>, Integer> maxWaitForNextInMillis,
+            final QuadPredicate<NoCachingNoUpdating.Timed<T>, NoCachingNoUpdating.Timed<T>, NoCachingNoUpdating.Timed<T>, Integer> windowSplitter,
+            final LongSupplier startTime, final Supplier<? extends C> collectionSupplier) {
+        assertNotClosed();
+
+        checkArgNotNull(maxWaitForNextInMillis, "maxWaitForNextInMillis");
+        checkArgNotNull(windowSplitter, "windowSplitter");
+        checkArgNotNull(collectionSupplier, "collectionSupplier");
+
+        return newStream(new CheckedIterator<C, E>() { //NOSONAR
+            private final ArrayBlockingQueue<T> queueToBuffer = new ArrayBlockingQueue<>(DEFAULT_BUFFERED_SIZE_PER_ITERATOR);
+            private final T none = (T) NONE;
+            private final TimedS<T> timedFirst = TimedS.of(none, 0);
+            private final TimedS<T> timedLast = TimedS.of(none, 0);
+            private final TimedS<T> timedNext = TimedS.of(none, 0);
+
+            private CheckedIterator<T, E> iter;
+
+            private long now = 0;
+            private long fromTime = 0;
+            private T next = null;
+
+            private boolean initialized = false;
+
+            @Override
+            public boolean hasNext() throws E {
+                if (!initialized) {
+                    init();
+                }
+
+                if (timedFirst.value() == none) {
+                    while (iter.hasNext()) {
+                        next = iter.next();
+
+                        if ((now = System.currentTimeMillis()) >= fromTime) {
+                            timedFirst.set(next, now);
+                            timedLast.set(next, now);
+
+                            break;
+                        }
+                    }
+                }
+
+                return timedFirst.value() != none;
+            }
+
+            @Override
+            public C next() throws E {
+                if (!hasNext()) {
+                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
+                }
+
+                final C result = collectionSupplier.get();
+                result.add(timedFirst.value());
+
+                int cnt = 1;
+                boolean isTimedFirstAssigned = false;
+
+                try {
+                    while ((next = queueToBuffer.poll(maxWaitForNextInMillis.applyAsLong(timedFirst, timedLast, cnt), TimeUnit.MILLISECONDS)) != null) {
+                        if (next == NONE) { // refer to Stream.parallelConcatIterators
+                            next = null;
+                        }
+
+                        timedNext.set(next, now = System.currentTimeMillis());
+
+                        if (windowSplitter.test(timedFirst, timedLast, timedNext, cnt)) {
+                            result.add(next);
+                            timedLast.set(next, now);
+                            cnt++;
+                        } else {
+                            timedFirst.set(next, now);
+                            timedLast.set(next, now);
+
+                            isTimedFirstAssigned = true;
+                            break;
+                        }
+                    }
+                } catch (InterruptedException e) {
+                    throw toRuntimeException(e);
+                }
+
+                if (!isTimedFirstAssigned) {
+                    // reset timedFirst and timedLast.
+
+                    timedFirst.set(none, 0);
+                    timedLast.set(none, 0);
+                }
+
+                return result;
+            }
+
+            private void init() {
+                if (!initialized) {
+                    initialized = true;
+
+                    iter = buffered(queueToBuffer).iteratorEx();
+
+                    fromTime = startTime.getAsLong();
+                }
+            }
+        }, false, null, closeHandlers);
+    }
+
+    /**
+    *
+    * @param <R>
+    * @param maxWaitForNextInMillis
+    * @param windowSplitter The 1st parameter is the first element with processing time in current window,
+    *        The 2nd parameter is the last element with processing time in current window before current element is retrieved,
+    *        The 3nd parameter is the current element just retrieved from this stream with processing time,
+    *        The 4th parameter is the total count of elements entered the current window so far.
+    *        The 1st and 2nd elements are equals if there is only one element in the current window.
+    * @param collector
+    * @return
+    */
+    @Beta
+    @SequentialOnly
+    @IntermediateOp
+    public <R> CheckedStream<R, E> window(final ToLongTriFunction<NoCachingNoUpdating.Timed<T>, NoCachingNoUpdating.Timed<T>, Integer> maxWaitForNextInMillis,
+            final QuadPredicate<NoCachingNoUpdating.Timed<T>, NoCachingNoUpdating.Timed<T>, NoCachingNoUpdating.Timed<T>, Integer> windowSplitter,
+            final Collector<? super T, ?, R> collector) {
+        return window(maxWaitForNextInMillis, windowSplitter, LongSuppliers.ofCurrentTimeMillis(), collector);
+    }
+
+    /**
+    *
+    * @param <R>
+    * @param maxWaitForNextInMillis
+    * @param windowSplitter The 1st parameter is the first element with processing time in current window,
+    *        The 2nd parameter is the last element with processing time in current window before current element is retrieved,
+    *        The 3nd parameter is the current element just retrieved from this stream with processing time,
+    *        The 4th parameter is the total count of elements entered the current window so far.
+    *        The 1st and 2nd elements are equals if there is only one element in the current window.
+    * @param startTime
+    * @param collector
+    * @return
+    */
+    @Beta
+    @SequentialOnly
+    @IntermediateOp
+    public <R> CheckedStream<R, E> window(final ToLongTriFunction<NoCachingNoUpdating.Timed<T>, NoCachingNoUpdating.Timed<T>, Integer> maxWaitForNextInMillis,
+            final QuadPredicate<NoCachingNoUpdating.Timed<T>, NoCachingNoUpdating.Timed<T>, NoCachingNoUpdating.Timed<T>, Integer> windowSplitter,
+            final LongSupplier startTime, final Collector<? super T, ?, R> collector) {
+        assertNotClosed();
+
+        checkArgNotNull(maxWaitForNextInMillis, "maxWaitForNextInMillis");
+        checkArgNotNull(windowSplitter, "windowSplitter");
+        checkArgNotNull(collector, "collector");
+
+        return newStream(new CheckedIterator<R, E>() { //NOSONAR
+            private final ArrayBlockingQueue<T> queueToBuffer = new ArrayBlockingQueue<>(DEFAULT_BUFFERED_SIZE_PER_ITERATOR);
+            private final T none = (T) NONE;
+            private final TimedS<T> timedFirst = TimedS.of(none, 0);
+            private final TimedS<T> timedLast = TimedS.of(none, 0);
+            private final TimedS<T> timedNext = TimedS.of(none, 0);
+
+            private Supplier<Object> supplier;
+            private BiConsumer<Object, ? super T> accumulator;
+            private Function<Object, R> finisher;
+
+            private CheckedIterator<T, E> iter;
+
+            private long now = 0;
+            private long fromTime = 0;
+            private T next = null;
+
+            private boolean initialized = false;
+
+            @Override
+            public boolean hasNext() throws E {
+                if (!initialized) {
+                    init();
+                }
+
+                if (timedFirst.value() == none) {
+                    while (iter.hasNext()) {
+                        next = iter.next();
+
+                        if ((now = System.currentTimeMillis()) >= fromTime) {
+                            timedFirst.set(next, now);
+                            timedLast.set(next, now);
+
+                            break;
+                        }
+                    }
+                }
+
+                return timedFirst.value() != none;
+            }
+
+            @Override
+            public R next() throws E {
+                if (!hasNext()) {
+                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
+                }
+
+                final Object container = supplier.get();
+                accumulator.accept(container, timedFirst.value());
+
+                int cnt = 1;
+                boolean isTimedFirstAssigned = false;
+
+                try {
+                    while ((next = queueToBuffer.poll(maxWaitForNextInMillis.applyAsLong(timedFirst, timedLast, cnt), TimeUnit.MILLISECONDS)) != null) {
+                        if (next == NONE) { // refer to Stream.parallelConcatIterators
+                            next = null;
+                        }
+
+                        timedNext.set(next, now = System.currentTimeMillis());
+
+                        if (windowSplitter.test(timedFirst, timedLast, timedNext, cnt)) {
+                            accumulator.accept(container, next);
+                            timedLast.set(next, now);
+                            cnt++;
+                        } else {
+                            timedFirst.set(next, now);
+                            timedLast.set(next, now);
+
+                            isTimedFirstAssigned = true;
+                            break;
+                        }
+                    }
+                } catch (InterruptedException e) {
+                    throw toRuntimeException(e);
+                }
+
+                if (!isTimedFirstAssigned) {
+                    // reset timedFirst and timedLast.
+
+                    timedFirst.set(none, 0);
+                    timedLast.set(none, 0);
+                }
+
+                return finisher.apply(container);
+            }
+
+            private void init() {
+                if (!initialized) {
+                    initialized = true;
+
+                    supplier = (Supplier<Object>) collector.supplier();
+                    accumulator = (BiConsumer<Object, ? super T>) collector.accumulator();
+                    finisher = (Function<Object, R>) collector.finisher();
+
+                    iter = buffered(queueToBuffer).iteratorEx();
+
+                    fromTime = startTime.getAsLong();
+                }
+            }
+        }, false, null, closeHandlers);
+    }
+
+    /**
+     *
+     *
+     * @param windowSplitter The 1st parameter is the first element with processing time in current window,
+     *        The 2nd parameter is the last element with processing time in current window before current element is retrieved,
+     *        The 3nd parameter is the current element just retrieved from this stream with processing time,
+     *        The 4th parameter is the total count of elements entered the current window so far.
+     *        The 1st and 2nd elements are equals if there is only one element in the current window.
+     * @return
+     * @see #sliding(int, int, Collector)
+     * @see #maxWait(Duration, Object)
+     * @see #maxWait(Duration, Supplier)
+     * @see #rateLimited(double)
+     * @see #rateLimited(RateLimiter)
+     * @see #delay(Duration)
+     * @see #interval(long, LongFunction)
+     */
+    @Beta
+    @SequentialOnly
+    @IntermediateOp
+    public CheckedStream<List<T>, E> window(
+            final QuadPredicate<NoCachingNoUpdating.Timed<T>, NoCachingNoUpdating.Timed<T>, NoCachingNoUpdating.Timed<T>, Integer> windowSplitter) {
+        return window(windowSplitter, Suppliers.ofList());
+    }
+
+    /**
+     *
+     *
+     * @param <C>
+     * @param windowSplitter The 1st parameter is the first element with processing time in current window,
+     *        The 2nd parameter is the last element with processing time in current window before current element is retrieved,
+     *        The 3nd parameter is the current element just retrieved from this stream with processing time,
+     *        The 4th parameter is the total count of elements entered the current window so far.
+     *        The 1st and 2nd elements are equals if there is only one element in the current window.
+     * @param collectionSupplier
+     * @return
+     * @see #sliding(int, int, Collector)
+     * @see #maxWait(Duration, Object)
+     * @see #maxWait(Duration, Supplier)
+     * @see #rateLimited(double)
+     * @see #rateLimited(RateLimiter)
+     * @see #delay(Duration)
+     * @see #interval(long, LongFunction)
+     */
+    @Beta
+    @SequentialOnly
+    @IntermediateOp
+    public <C extends Collection<T>> CheckedStream<C, E> window(
+            final QuadPredicate<NoCachingNoUpdating.Timed<T>, NoCachingNoUpdating.Timed<T>, NoCachingNoUpdating.Timed<T>, Integer> windowSplitter,
+            final Supplier<? extends C> collectionSupplier) {
+        return window(windowSplitter, LongSuppliers.ofCurrentTimeMillis(), collectionSupplier);
+    }
+
+    /**
+     *
+     * @param <C>
+     * @param windowSplitter The 1st parameter is the first element with processing time in current window,
+     *        The 2nd parameter is the last element with processing time in current window before current element is retrieved,
+     *        The 3nd parameter is the current element just retrieved from this stream with processing time,
+     *        The 4th parameter is the total count of elements entered the current window so far.
+     *        The 1st and 2nd elements are equals if there is only one element in the current window.
+     * @param startTime
+     * @param collectionSupplier
+     * @return
+     * @see #sliding(int, int, Collector)
+     * @see #maxWait(Duration, Object)
+     * @see #maxWait(Duration, Supplier)
+     * @see #rateLimited(double)
+     * @see #rateLimited(RateLimiter)
+     * @see #delay(Duration)
+     * @see #interval(long, LongFunction)
+    */
+    @Beta
+    @SequentialOnly
+    @IntermediateOp
+    public <C extends Collection<T>> CheckedStream<C, E> window(
+            final QuadPredicate<NoCachingNoUpdating.Timed<T>, NoCachingNoUpdating.Timed<T>, NoCachingNoUpdating.Timed<T>, Integer> windowSplitter,
+            final LongSupplier startTime, final Supplier<? extends C> collectionSupplier) {
+        assertNotClosed();
+
+        checkArgNotNull(windowSplitter, "windowSplitter");
+        checkArgNotNull(collectionSupplier, "collectionSupplier");
+
+        return newStream(new CheckedIterator<C, E>() { //NOSONAR
+            private final T none = (T) NONE;
+            private final TimedS<T> timedFirst = TimedS.of(none, 0);
+            private final TimedS<T> timedLast = TimedS.of(none, 0);
+            private final TimedS<T> timedNext = TimedS.of(none, 0);
+
+            private CheckedIterator<T, E> iter;
+
+            private long now = 0;
+            private long fromTime = 0;
+            private T next = null;
+
+            private boolean initialized = false;
+
+            @Override
+            public boolean hasNext() throws E {
+                if (!initialized) {
+                    init();
+                }
+
+                if (timedFirst.value() == none) {
+                    while (iter.hasNext()) {
+                        next = iter.next();
+
+                        if ((now = System.currentTimeMillis()) >= fromTime) {
+                            timedFirst.set(next, now);
+                            timedLast.set(next, now);
+
+                            break;
+                        }
+                    }
+                }
+
+                return timedFirst.value() != none;
+            }
+
+            @Override
+            public C next() throws E {
+                if (!hasNext()) {
+                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
+                }
+
+                final C result = collectionSupplier.get();
+                result.add(timedFirst.value());
+
+                int cnt = 1;
+                boolean isTimedFirstAssigned = false;
+
+                while (iter.hasNext()) {
+                    next = iter.next();
+
+                    timedNext.set(next, now = System.currentTimeMillis());
+
+                    if (windowSplitter.test(timedFirst, timedLast, timedNext, cnt)) {
+                        result.add(next);
+                        timedLast.set(next, now);
+                        cnt++;
+                    } else {
+                        timedFirst.set(next, now);
+                        timedLast.set(next, now);
+
+                        isTimedFirstAssigned = true;
+
+                        break;
+                    }
+                }
+
+                if (!isTimedFirstAssigned) {
+                    // reset timedFirst and timedLast.
+
+                    timedFirst.set(none, 0);
+                    timedLast.set(none, 0);
+                }
+
+                return result;
+            }
+
+            private void init() {
+                if (!initialized) {
+                    initialized = true;
+
+                    iter = iteratorEx();
+
+                    fromTime = startTime.getAsLong();
+                }
+            }
+        }, false, null, closeHandlers);
+    }
+
+    /**
+     *
+     * @param <R>
+     * @param windowSplitter The 1st parameter is the first element with processing time in current window,
+     *        The 2nd parameter is the last element with processing time in current window before current element is retrieved,
+     *        The 3nd parameter is the current element just retrieved from this stream with processing time,
+     *        The 4th parameter is the total count of elements entered the current window so far.
+     *        The 1st and 2nd elements are equals if there is only one element in the current window.
+     * @param collector
+     * @return
+     * @see #window(Duration)
+     * @see #sliding(int, int, Collector)
+     * @see #maxWait(Duration, Object)
+     * @see #maxWait(Duration, Supplier)
+     * @see #rateLimited(double)
+     * @see #rateLimited(RateLimiter)
+     * @see #delay(Duration)
+     * @see #interval(long, LongFunction)
+    */
+    @Beta
+    @SequentialOnly
+    @IntermediateOp
+    public <R> CheckedStream<R, E> window(
+            final QuadPredicate<NoCachingNoUpdating.Timed<T>, NoCachingNoUpdating.Timed<T>, NoCachingNoUpdating.Timed<T>, Integer> windowSplitter,
+            final Collector<? super T, ?, R> collector) {
+        return window(windowSplitter, LongSuppliers.ofCurrentTimeMillis(), collector);
+    }
+
+    /**
+     *
+     * @param <R>
+     * @param windowSplitter The 1st parameter is the first element with processing time in current window,
+     *        The 2nd parameter is the last element with processing time in current window before current element is retrieved,
+     *        The 3nd parameter is the current element just retrieved from this stream with processing time,
+     *        The 4th parameter is the total count of elements entered the current window so far.
+     *        The 1st and 2nd elements are equals if there is only one element in the current window.
+     * @param startTime
+     * @param collector
+     * @return
+     */
+    @Beta
+    @SequentialOnly
+    @IntermediateOp
+    public <R> CheckedStream<R, E> window(
+            final QuadPredicate<NoCachingNoUpdating.Timed<T>, NoCachingNoUpdating.Timed<T>, NoCachingNoUpdating.Timed<T>, Integer> windowSplitter,
+            final LongSupplier startTime, final Collector<? super T, ?, R> collector) {
+        assertNotClosed();
+
+        checkArgNotNull(windowSplitter, "windowSplitter");
+        checkArgNotNull(collector, "collector");
+
+        return newStream(new CheckedIterator<R, E>() { //NOSONAR
+            private final T none = (T) NONE;
+            private final TimedS<T> timedFirst = TimedS.of(none, 0);
+            private final TimedS<T> timedLast = TimedS.of(none, 0);
+            private final TimedS<T> timedNext = TimedS.of(none, 0);
+
+            private Supplier<Object> supplier;
+            private BiConsumer<Object, ? super T> accumulator;
+            private Function<Object, R> finisher;
+
+            private CheckedIterator<T, E> iter;
+
+            private long now = 0;
+            private long fromTime = 0;
+            private T next = null;
+
+            private boolean initialized = false;
+
+            @Override
+            public boolean hasNext() throws E {
+                if (!initialized) {
+                    init();
+                }
+
+                if (timedFirst.value() == none) {
+                    while (iter.hasNext()) {
+                        next = iter.next();
+
+                        if ((now = System.currentTimeMillis()) >= fromTime) {
+                            timedFirst.set(next, now);
+                            timedLast.set(next, now);
+
+                            break;
+                        }
+                    }
+                }
+
+                return timedFirst.value() != none;
+            }
+
+            @Override
+            public R next() throws E {
+                if (!hasNext()) {
+                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
+                }
+
+                final Object container = supplier.get();
+                accumulator.accept(container, timedFirst.value());
+
+                int cnt = 1;
+                boolean isTimedFirstAssigned = false;
+
+                while (iter.hasNext()) {
+                    next = iter.next();
+
+                    timedNext.set(next, now = System.currentTimeMillis());
+
+                    if (windowSplitter.test(timedFirst, timedLast, timedNext, cnt)) {
+                        accumulator.accept(container, next);
+                        timedLast.set(next, now);
+                        cnt++;
+                    } else {
+                        timedFirst.set(next, now);
+                        timedLast.set(next, now);
+
+                        isTimedFirstAssigned = true;
+
+                        break;
+                    }
+                }
+
+                if (!isTimedFirstAssigned) {
+                    // reset timedFirst and timedLast.
+
+                    timedFirst.set(none, 0);
+                    timedLast.set(none, 0);
+                }
+
+                return finisher.apply(container);
+            }
+
+            private void init() {
+                if (!initialized) {
+                    initialized = true;
+
+                    supplier = (Supplier<Object>) collector.supplier();
+                    accumulator = (BiConsumer<Object, ? super T>) collector.accumulator();
+                    finisher = (Function<Object, R>) collector.finisher();
+
+                    iter = iteratorEx();
+
+                    fromTime = startTime.getAsLong();
+                }
+            }
+        }, false, null, closeHandlers);
+    }
+
+    /**
+     * Returns at least one element in every specified {@code interval}, or {@code defaultValue} if there is no element occurred.
+     *
+     * @param duration
+     * @param defaultValue
+     * @return
+     * @see #window(Duration)
+     * @see #rateLimited(double)
+     * @see #rateLimited(RateLimiter)
+     * @see #delay(Duration)
+     * @see #interval(long, LongFunction)
+     */
+    @Beta
+    @SequentialOnly
+    @IntermediateOp
+    public CheckedStream<T, E> maxWait(final Duration duration, final T defaultValue) {
+        checkArgNotNull(duration, "duration");
+        // checkArgNotNull(defaultValue, "defaultValue");
+
+        final ArrayBlockingQueue<T> queueToBuffer = new ArrayBlockingQueue<>(DEFAULT_BUFFERED_SIZE_PER_ITERATOR);
+        final MutableBoolean hasMore = MutableBoolean.of(true);
+
+        final Supplier<CheckedIterator<T, E>> supplier = () -> buffered(iteratorEx(), queueToBuffer, hasMore);
+
+        return CheckedStream.<Supplier<CheckedIterator<T, E>>, E> just(supplier) //
+                .map(Supplier::get)
+                .flatMap(iter -> newStream(new CheckedIterator<T, E>() {
+                    private final long durationInMillis = duration.toMillis();
+                    private final T none = (T) NONE;
+                    private final T defaultVal = defaultValue == null ? none : defaultValue;
+                    private T next = null;
+
+                    @Override
+                    public boolean hasNext() throws E {
+                        if (next == null) {
+                            if (hasMore.isTrue() || queueToBuffer.size() > 0) {
+                                try {
+                                    next = queueToBuffer.poll(durationInMillis, TimeUnit.MILLISECONDS);
+                                } catch (InterruptedException e) {
+                                    throw toRuntimeException(e);
+                                }
+
+                                if (next == null) {
+                                    if (queueToBuffer.size() > 0) {
+                                        next = queueToBuffer.poll();
+                                    } else if (hasMore.isTrue()) {
+                                        next = defaultVal;
+                                    }
+                                }
+                            }
+                        }
+
+                        return next != null;
+                    }
+
+                    @Override
+                    public T next() throws E {
+                        if (!hasNext()) {
+                            throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
+                        }
+
+                        final T ret = next == NONE ? null : next;
+
+                        next = null;
+
+                        return ret;
+                    }
+                }, false, null, mergeCloseHandlers(closeHandlers, iter::close, true)));
+    }
+
+    /**
+     * Returns at least one element in every specified {@code interval}, or {@code defaultValue} if there is no element occurred.
+     *
+     * @param duration
+     * @param supplierForDefaultValue
+     * @return
+     * @see #window(Duration)
+     * @see #rateLimited(double)
+     * @see #rateLimited(RateLimiter)
+     * @see #delay(Duration)
+     * @see #interval(long, LongFunction)
+     */
+    @Beta
+    @SequentialOnly
+    @IntermediateOp
+    public CheckedStream<T, E> maxWait(final Duration duration, final Supplier<? extends T> supplierForDefaultValue) {
+        checkArgNotNull(duration, "duration");
+        checkArgNotNull(supplierForDefaultValue, "supplierForDefaultValue");
+
+        final ArrayBlockingQueue<T> queueToBuffer = new ArrayBlockingQueue<>(DEFAULT_BUFFERED_SIZE_PER_ITERATOR);
+        final MutableBoolean hasMore = MutableBoolean.of(true);
+
+        final Supplier<CheckedIterator<T, E>> supplier = () -> buffered(iteratorEx(), queueToBuffer, hasMore);
+
+        return CheckedStream.<Supplier<CheckedIterator<T, E>>, E> just(supplier) //
+                .map(Supplier::get)
+                .flatMap(iter -> newStream(new CheckedIterator<T, E>() {
+                    private final long durationInMillis = duration.toMillis();
+                    private final T none = (T) NONE;
+                    private T next = null;
+
+                    @Override
+                    public boolean hasNext() throws E {
+                        if (next == null) {
+                            if (hasMore.isTrue() || queueToBuffer.size() > 0) {
+                                try {
+                                    next = queueToBuffer.poll(durationInMillis, TimeUnit.MILLISECONDS);
+                                } catch (InterruptedException e) {
+                                    throw toRuntimeException(e);
+                                }
+
+                                if (next == null) {
+                                    if (queueToBuffer.size() > 0) {
+                                        next = queueToBuffer.poll();
+                                    } else if (hasMore.isTrue()) {
+                                        next = supplierForDefaultValue.get();
+
+                                        if (next == null) {
+                                            next = none;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        return next != null;
+                    }
+
+                    @Override
+                    public T next() throws E {
+                        if (!hasNext()) {
+                            throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
+                        }
+
+                        final T ret = next == NONE ? null : next;
+
+                        next = null;
+
+                        return ret;
+                    }
+                }, false, null, mergeCloseHandlers(closeHandlers, iter::close, true)));
+    }
+
+    static final class TimedS<T> extends NoCachingNoUpdating.Timed<T> {
+        protected TimedS(T value, long timeInMillis) {
+            super(value, timeInMillis);
+        }
+
+        public static <T> TimedS<T> of(T value, long timeInMillis) {
+            return new TimedS<>(value, timeInMillis);
+        }
+
+        @Override
+        public void set(T value, long timeInMillis) {
+            this.value = value;
+            this.timeInMillis = timeInMillis;
+        }
+    }
+
     // #######################################9X9#######################################
 
     /**
