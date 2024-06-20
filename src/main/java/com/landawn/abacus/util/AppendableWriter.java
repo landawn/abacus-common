@@ -24,6 +24,11 @@ public sealed class AppendableWriter extends Writer permits StringWriter {
     private final boolean flushable;
     private boolean closed;
 
+    /**
+     * 
+     *
+     * @param appendable 
+     */
     public AppendableWriter(final Appendable appendable) {
         N.checkArgNotNull(appendable, "appendable");
 
@@ -32,6 +37,13 @@ public sealed class AppendableWriter extends Writer permits StringWriter {
         this.closed = false;
     }
 
+    /**
+     * 
+     *
+     * @param c 
+     * @return 
+     * @throws IOException 
+     */
     @Override
     public Writer append(final char c) throws IOException {
         checkNotClosed();
@@ -41,6 +53,13 @@ public sealed class AppendableWriter extends Writer permits StringWriter {
         return this;
     }
 
+    /**
+     * 
+     *
+     * @param csq 
+     * @return 
+     * @throws IOException 
+     */
     @Override
     public Writer append(final CharSequence csq) throws IOException {
         checkNotClosed();
@@ -50,6 +69,15 @@ public sealed class AppendableWriter extends Writer permits StringWriter {
         return this;
     }
 
+    /**
+     * 
+     *
+     * @param csq 
+     * @param start 
+     * @param end 
+     * @return 
+     * @throws IOException 
+     */
     @Override
     public Writer append(final CharSequence csq, final int start, final int end) throws IOException {
         checkNotClosed();
@@ -59,6 +87,12 @@ public sealed class AppendableWriter extends Writer permits StringWriter {
         return this;
     }
 
+    /**
+     * 
+     *
+     * @param c 
+     * @throws IOException 
+     */
     @Override
     public void write(final int c) throws IOException {
         checkNotClosed();
@@ -66,6 +100,12 @@ public sealed class AppendableWriter extends Writer permits StringWriter {
         appendable.append((char) c);
     }
 
+    /**
+     * 
+     *
+     * @param cbuf 
+     * @throws IOException 
+     */
     @Override
     public void write(final char[] cbuf) throws IOException {
         checkNotClosed();
@@ -73,6 +113,14 @@ public sealed class AppendableWriter extends Writer permits StringWriter {
         appendable.append(CharBuffer.wrap(cbuf));
     }
 
+    /**
+     * 
+     *
+     * @param cbuf 
+     * @param off 
+     * @param len 
+     * @throws IOException 
+     */
     @Override
     public void write(final char[] cbuf, final int off, final int len) throws IOException {
         checkNotClosed();
@@ -80,6 +128,12 @@ public sealed class AppendableWriter extends Writer permits StringWriter {
         appendable.append(CharBuffer.wrap(cbuf), off, off + len);
     }
 
+    /**
+     * 
+     *
+     * @param str 
+     * @throws IOException 
+     */
     @Override
     public void write(final String str) throws IOException {
         checkNotClosed();
@@ -87,6 +141,14 @@ public sealed class AppendableWriter extends Writer permits StringWriter {
         appendable.append(str);
     }
 
+    /**
+     * 
+     *
+     * @param str 
+     * @param off 
+     * @param len 
+     * @throws IOException 
+     */
     @Override
     public void write(final String str, final int off, final int len) throws IOException {
         checkNotClosed();
@@ -94,6 +156,11 @@ public sealed class AppendableWriter extends Writer permits StringWriter {
         appendable.append(str, off, off + len);
     }
 
+    /**
+     * 
+     *
+     * @throws IOException 
+     */
     @Override
     public void flush() throws IOException {
         checkNotClosed();
@@ -103,6 +170,11 @@ public sealed class AppendableWriter extends Writer permits StringWriter {
         }
     }
 
+    /**
+     * 
+     *
+     * @throws IOException 
+     */
     @Override
     public void close() throws IOException {
         if (closed == false) {

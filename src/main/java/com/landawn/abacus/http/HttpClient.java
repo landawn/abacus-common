@@ -428,11 +428,12 @@ public final class HttpClient {
     }
 
     /**
+     * 
      *
-     * @param settings
-     * @param resultClass
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param settings 
+     * @param resultClass 
+     * @return 
      * @throws UncheckedIOException the unchecked IO exception
      */
     public <T> T get(final HttpSettings settings, final Class<T> resultClass) throws UncheckedIOException {
@@ -440,11 +441,12 @@ public final class HttpClient {
     }
 
     /**
+     * 
      *
-     * @param queryParameters
-     * @param resultClass
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param queryParameters 
+     * @param resultClass 
+     * @return 
      * @throws UncheckedIOException the unchecked IO exception
      */
     public <T> T get(final Object queryParameters, final Class<T> resultClass) throws UncheckedIOException {
@@ -452,12 +454,13 @@ public final class HttpClient {
     }
 
     /**
+     * 
      *
-     * @param queryParameters
-     * @param settings
-     * @param resultClass
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param queryParameters 
+     * @param settings 
+     * @param resultClass 
+     * @return 
      * @throws UncheckedIOException the unchecked IO exception
      */
     public <T> T get(final Object queryParameters, final HttpSettings settings, final Class<T> resultClass) throws UncheckedIOException {
@@ -516,11 +519,12 @@ public final class HttpClient {
     }
 
     /**
+     * 
      *
-     * @param queryParameters
-     * @param resultClass
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param queryParameters 
+     * @param resultClass 
+     * @return 
      * @throws UncheckedIOException the unchecked IO exception
      */
     public <T> T delete(final Object queryParameters, final Class<T> resultClass) throws UncheckedIOException {
@@ -528,11 +532,12 @@ public final class HttpClient {
     }
 
     /**
+     * 
      *
-     * @param settings
-     * @param resultClass
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param settings 
+     * @param resultClass 
+     * @return 
      * @throws UncheckedIOException the unchecked IO exception
      */
     public <T> T delete(final HttpSettings settings, final Class<T> resultClass) throws UncheckedIOException {
@@ -540,12 +545,13 @@ public final class HttpClient {
     }
 
     /**
+     * 
      *
-     * @param queryParameters
-     * @param settings
-     * @param resultClass
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param queryParameters 
+     * @param settings 
+     * @param resultClass 
+     * @return 
      * @throws UncheckedIOException the unchecked IO exception
      */
     public <T> T delete(final Object queryParameters, final HttpSettings settings, final Class<T> resultClass) throws UncheckedIOException {
@@ -563,11 +569,12 @@ public final class HttpClient {
     }
 
     /**
+     * 
      *
-     * @param request
-     * @param resultClass
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param request 
+     * @param resultClass 
+     * @return 
      * @throws UncheckedIOException the unchecked IO exception
      */
     public <T> T post(final Object request, final Class<T> resultClass) throws UncheckedIOException {
@@ -586,12 +593,13 @@ public final class HttpClient {
     }
 
     /**
+     * 
      *
-     * @param request
-     * @param settings
-     * @param resultClass
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param request 
+     * @param settings 
+     * @param resultClass 
+     * @return 
      * @throws UncheckedIOException the unchecked IO exception
      */
     public <T> T post(final Object request, final HttpSettings settings, final Class<T> resultClass) throws UncheckedIOException {
@@ -609,11 +617,12 @@ public final class HttpClient {
     }
 
     /**
+     * 
      *
-     * @param request
-     * @param resultClass
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param request 
+     * @param resultClass 
+     * @return 
      * @throws UncheckedIOException the unchecked IO exception
      */
     public <T> T put(final Object request, final Class<T> resultClass) throws UncheckedIOException {
@@ -632,12 +641,13 @@ public final class HttpClient {
     }
 
     /**
+     * 
      *
-     * @param request
-     * @param settings
-     * @param resultClass
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param request 
+     * @param settings 
+     * @param resultClass 
+     * @return 
      * @throws UncheckedIOException the unchecked IO exception
      */
     public <T> T put(final Object request, final HttpSettings settings, final Class<T> resultClass) throws UncheckedIOException {
@@ -1342,34 +1352,37 @@ public final class HttpClient {
     }
 
     /**
+     * 
      *
-     * @param queryParameters
-     * @param resultClass
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param queryParameters 
+     * @param resultClass 
+     * @return 
      */
     public <T> ContinuableFuture<T> asyncGet(final Object queryParameters, final Class<T> resultClass) {
         return asyncGet(queryParameters, _settings, resultClass);
     }
 
     /**
+     * 
      *
-     * @param settings
-     * @param resultClass
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param settings 
+     * @param resultClass 
+     * @return 
      */
     public <T> ContinuableFuture<T> asyncGet(final HttpSettings settings, final Class<T> resultClass) {
         return asyncGet(null, settings, resultClass);
     }
 
     /**
+     * 
      *
-     * @param queryParameters
-     * @param settings
-     * @param resultClass
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param queryParameters 
+     * @param settings 
+     * @param resultClass 
+     * @return 
      */
     public <T> ContinuableFuture<T> asyncGet(final Object queryParameters, final HttpSettings settings, final Class<T> resultClass) {
         return asyncExecute(HttpMethod.GET, queryParameters, settings, resultClass);
@@ -1423,34 +1436,37 @@ public final class HttpClient {
     }
 
     /**
+     * 
      *
-     * @param queryParameters
-     * @param resultClass
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param queryParameters 
+     * @param resultClass 
+     * @return 
      */
     public <T> ContinuableFuture<T> asyncDelete(final Object queryParameters, final Class<T> resultClass) {
         return asyncDelete(queryParameters, _settings, resultClass);
     }
 
     /**
+     * 
      *
-     * @param settings
-     * @param resultClass
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param settings 
+     * @param resultClass 
+     * @return 
      */
     public <T> ContinuableFuture<T> asyncDelete(final HttpSettings settings, final Class<T> resultClass) {
         return asyncDelete(null, settings, resultClass);
     }
 
     /**
+     * 
      *
-     * @param queryParameters
-     * @param settings
-     * @param resultClass
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param queryParameters 
+     * @param settings 
+     * @param resultClass 
+     * @return 
      */
     public <T> ContinuableFuture<T> asyncDelete(final Object queryParameters, final HttpSettings settings, final Class<T> resultClass) {
         return asyncExecute(HttpMethod.DELETE, queryParameters, settings, resultClass);
@@ -1466,11 +1482,12 @@ public final class HttpClient {
     }
 
     /**
+     * 
      *
-     * @param request
-     * @param resultClass
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param request 
+     * @param resultClass 
+     * @return 
      */
     public <T> ContinuableFuture<T> asyncPost(final Object request, final Class<T> resultClass) {
         return asyncPost(request, _settings, resultClass);
@@ -1487,12 +1504,13 @@ public final class HttpClient {
     }
 
     /**
+     * 
      *
-     * @param request
-     * @param settings
-     * @param resultClass
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param request 
+     * @param settings 
+     * @param resultClass 
+     * @return 
      */
     public <T> ContinuableFuture<T> asyncPost(final Object request, final HttpSettings settings, final Class<T> resultClass) {
         return asyncExecute(HttpMethod.POST, request, settings, resultClass);
@@ -1508,11 +1526,12 @@ public final class HttpClient {
     }
 
     /**
+     * 
      *
-     * @param request
-     * @param resultClass
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param request 
+     * @param resultClass 
+     * @return 
      */
     public <T> ContinuableFuture<T> asyncPut(final Object request, final Class<T> resultClass) {
         return asyncPut(request, _settings, resultClass);
@@ -1529,12 +1548,13 @@ public final class HttpClient {
     }
 
     /**
+     * 
      *
-     * @param request
-     * @param settings
-     * @param resultClass
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param request 
+     * @param settings 
+     * @param resultClass 
+     * @return 
      */
     public <T> ContinuableFuture<T> asyncPut(final Object request, final HttpSettings settings, final Class<T> resultClass) {
         return asyncExecute(HttpMethod.PUT, request, settings, resultClass);

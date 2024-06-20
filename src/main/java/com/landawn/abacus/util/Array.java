@@ -4031,8 +4031,10 @@ public class Array {
     }
 
     /**
+     * 
      *
-     * @param a
+     * @param <T> 
+     * @param a 
      * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
      */
     @MayReturnNull

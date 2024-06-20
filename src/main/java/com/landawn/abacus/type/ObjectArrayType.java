@@ -295,22 +295,17 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
     /**
      * Array 2 collection.
      *
-     * @param <E>
-     * @param output
-     * @param x
-     * @return
+     * @param <E> 
+     * @param x 
+     * @param output 
      */
     @Override
-    public <E> Collection<E> array2Collection(final T[] x, final Collection<E> output) {
-        if (N.isEmpty(x)) {
-            return output;
+    public <E> void array2Collection(final T[] x, final Collection<E> output) {
+        if (N.notEmpty(x)) {
+            final Collection<Object> c = (Collection<Object>) output;
+
+            Collections.addAll(c, x);
         }
-
-        Collection<Object> c = (Collection<Object>) output;
-
-        Collections.addAll(c, x);
-
-        return output;
     }
 
     /**

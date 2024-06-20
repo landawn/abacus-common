@@ -296,12 +296,13 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
     }
 
     /**
+     * 
      *
-     * @param source
-     * @param config
-     * @param targetClass
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param source 
+     * @param config 
+     * @param targetClass 
+     * @return 
      */
     @Override
     public <T> T deserialize(String source, AvroDeserializationConfig config, Class<? extends T> targetClass) {
@@ -309,12 +310,13 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
     }
 
     /**
+     * 
      *
-     * @param source
-     * @param config
-     * @param targetClass
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param source 
+     * @param config 
+     * @param targetClass 
+     * @return 
      */
     @Override
     public <T> T deserialize(File source, AvroDeserializationConfig config, Class<? extends T> targetClass) {
@@ -330,12 +332,13 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
     }
 
     /**
+     * 
      *
-     * @param source
-     * @param config
-     * @param targetClass
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param source 
+     * @param config 
+     * @param targetClass 
+     * @return 
      */
     @Override
     public <T> T deserialize(InputStream source, AvroDeserializationConfig config, Class<? extends T> targetClass) {
@@ -427,10 +430,10 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
     /**
      * 
      *
+     * @param <T> 
      * @param source 
      * @param config 
      * @param targetClass 
-     * @param <T> 
      * @return 
      * @throws UnsupportedOperationException 
      */

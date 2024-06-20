@@ -428,15 +428,15 @@ public final class CSVUtil {
 
     /**
      * Load the data from CSV.
-     * @param source
-     * @param selectColumnNames
-     * @param offset
-     * @param count
-     * @param filter
-     * @param beanClassForColumnType
      *
-     * @param <E>
-     * @return
+     * @param <E> 
+     * @param source 
+     * @param selectColumnNames 
+     * @param offset 
+     * @param count 
+     * @param filter 
+     * @param beanClassForColumnType 
+     * @return 
      * @throws UncheckedIOException the unchecked IO exception
      * @throws E the e
      */
@@ -494,15 +494,15 @@ public final class CSVUtil {
 
     /**
      * Load the data from CSV.
-     * @param source
-     * @param selectColumnNames
-     * @param offset
-     * @param count
-     * @param filter
-     * @param beanClassForColumnType
      *
-     * @param <E>
-     * @return
+     * @param <E> 
+     * @param source 
+     * @param selectColumnNames 
+     * @param offset 
+     * @param count 
+     * @param filter 
+     * @param beanClassForColumnType 
+     * @return 
      * @throws UncheckedIOException the unchecked IO exception
      * @throws E the e
      */
@@ -554,15 +554,15 @@ public final class CSVUtil {
 
     /**
      * Load the data from CSV.
-     * @param source
-     * @param selectColumnNames
-     * @param offset
-     * @param count
-     * @param filter
-     * @param beanClassForColumnType
      *
-     * @param <E>
-     * @return
+     * @param <E> 
+     * @param source 
+     * @param selectColumnNames 
+     * @param offset 
+     * @param count 
+     * @param filter 
+     * @param beanClassForColumnType 
+     * @return 
      * @throws UncheckedIOException the unchecked IO exception
      * @throws E the e
      */
@@ -867,13 +867,15 @@ public final class CSVUtil {
      * <br />
      * To skip a column in CSV, set {@code null} to position in {@code columnTypeList}.
      *
-     * @param source
-     * @param columnTypeList
-     * @return
+     * @param source 
+     * @param columnTypeList 
+     * @return 
      * @throws UncheckedIOException the unchecked IO exception
+     * @throws UncheckedIOException the unchecked IO exception
+     * @throws IllegalArgumentException if the size of {@code columnTypeList} is not equal to the size of columns in CSV.
      */
     @SuppressWarnings("rawtypes")
-    public static DataSet loadCSV(final File source, final List<? extends Type> columnTypeList) throws UncheckedIOException {
+    public static DataSet loadCSV(final File source, final List<? extends Type> columnTypeList) throws UncheckedIOException, UncheckedIOException {
         return loadCSV(source, 0, Long.MAX_VALUE, columnTypeList);
     }
 
@@ -884,16 +886,18 @@ public final class CSVUtil {
      * <br />
      * To skip a column in CSV, set {@code null} to position in {@code columnTypeList}.
      *
-     * @param source
-     * @param offset
-     * @param count
-     * @param columnTypeList
-     * @return
+     * @param source 
+     * @param offset 
+     * @param count 
+     * @param columnTypeList 
+     * @return 
      * @throws UncheckedIOException the unchecked IO exception
+     * @throws UncheckedIOException the unchecked IO exception
+     * @throws IllegalArgumentException if the size of {@code columnTypeList} is not equal to the size of columns in CSV.
      */
     @SuppressWarnings("rawtypes")
     public static DataSet loadCSV(final File source, final long offset, final long count, final List<? extends Type> columnTypeList)
-            throws UncheckedIOException {
+            throws UncheckedIOException, UncheckedIOException {
         return loadCSV(source, offset, count, Fn.<String[]> alwaysTrue(), columnTypeList);
     }
 
@@ -904,19 +908,21 @@ public final class CSVUtil {
      * <br />
      * To skip a column in CSV, set {@code null} to position in {@code columnTypeList}.
      *
-     * @param <E>
-     * @param source
-     * @param offset
-     * @param count
-     * @param filter
+     * @param <E> 
+     * @param source 
+     * @param offset 
+     * @param count 
+     * @param filter 
      * @param columnTypeList set the column type to null to skip the column in CSV.
-     * @return
+     * @return 
+     * @throws UncheckedIOException the unchecked IO exception
      * @throws UncheckedIOException the unchecked IO exception
      * @throws E the e
+     * @throws IllegalArgumentException if the size of {@code columnTypeList} is not equal to the size of columns in CSV.
      */
     @SuppressWarnings("rawtypes")
     public static <E extends Exception> DataSet loadCSV(final File source, final long offset, final long count, final Throwables.Predicate<String[], E> filter,
-            final List<? extends Type> columnTypeList) throws UncheckedIOException, E {
+            final List<? extends Type> columnTypeList) throws UncheckedIOException, UncheckedIOException, E {
         InputStream is = null;
 
         try {
@@ -935,13 +941,15 @@ public final class CSVUtil {
      * <br />
      * To skip a column in CSV, set {@code null} to position in {@code columnTypeList}.
      *
-     * @param source
-     * @param columnTypeList
-     * @return
+     * @param source 
+     * @param columnTypeList 
+     * @return 
      * @throws UncheckedIOException the unchecked IO exception
+     * @throws UncheckedIOException the unchecked IO exception
+     * @throws IllegalArgumentException if the size of {@code columnTypeList} is not equal to the size of columns in CSV.
      */
     @SuppressWarnings("rawtypes")
-    public static DataSet loadCSV(final InputStream source, final List<? extends Type> columnTypeList) throws UncheckedIOException {
+    public static DataSet loadCSV(final InputStream source, final List<? extends Type> columnTypeList) throws UncheckedIOException, UncheckedIOException {
         return loadCSV(source, 0, Long.MAX_VALUE, columnTypeList);
     }
 
@@ -952,16 +960,18 @@ public final class CSVUtil {
      * <br />
      * To skip a column in CSV, set {@code null} to position in {@code columnTypeList}.
      *
-     * @param source
-     * @param offset
-     * @param count
-     * @param columnTypeList
-     * @return
+     * @param source 
+     * @param offset 
+     * @param count 
+     * @param columnTypeList 
+     * @return 
      * @throws UncheckedIOException the unchecked IO exception
+     * @throws UncheckedIOException the unchecked IO exception
+     * @throws IllegalArgumentException if the size of {@code columnTypeList} is not equal to the size of columns in CSV.
      */
     @SuppressWarnings("rawtypes")
     public static DataSet loadCSV(final InputStream source, final long offset, final long count, final List<? extends Type> columnTypeList)
-            throws UncheckedIOException {
+            throws UncheckedIOException, UncheckedIOException {
         return loadCSV(source, offset, count, Fn.<String[]> alwaysTrue(), columnTypeList);
     }
 
@@ -972,18 +982,21 @@ public final class CSVUtil {
      * <br />
      * To skip a column in CSV, set {@code null} to position in {@code columnTypeList}.
      *
-     * @param <E>
-     * @param source
-     * @param offset
-     * @param count
-     * @param filter
+     * @param <E> 
+     * @param source 
+     * @param offset 
+     * @param count 
+     * @param filter 
      * @param columnTypeList set the column type to null to skip the column in CSV.
-     * @return
+     * @return 
+     * @throws UncheckedIOException the unchecked IO exception
+     * @throws UncheckedIOException the unchecked IO exception
      * @throws E the e
+     * @throws IllegalArgumentException if the size of {@code columnTypeList} is not equal to the size of columns in CSV.
      */
     @SuppressWarnings("rawtypes")
     public static <E extends Exception> DataSet loadCSV(final InputStream source, final long offset, final long count,
-            final Throwables.Predicate<String[], E> filter, final List<? extends Type> columnTypeList) throws E {
+            final Throwables.Predicate<String[], E> filter, final List<? extends Type> columnTypeList) throws UncheckedIOException, UncheckedIOException, E {
         final Reader reader = IOUtil.newInputStreamReader(source); // NOSONAR
 
         return loadCSV(reader, offset, count, filter, columnTypeList);
@@ -996,12 +1009,15 @@ public final class CSVUtil {
      * <br />
      * To skip a column in CSV, set {@code null} to position in {@code columnTypeList}.
      *
-     * @param source
-     * @param columnTypeList
-     * @return
+     * @param source 
+     * @param columnTypeList 
+     * @return 
+     * @throws UncheckedIOException the unchecked IO exception
+     * @throws UncheckedIOException the unchecked IO exception
+     * @throws IllegalArgumentException if the size of {@code columnTypeList} is not equal to the size of columns in CSV.
      */
     @SuppressWarnings("rawtypes")
-    public static DataSet loadCSV(final Reader source, final List<? extends Type> columnTypeList) {
+    public static DataSet loadCSV(final Reader source, final List<? extends Type> columnTypeList) throws UncheckedIOException, UncheckedIOException {
         return loadCSV(source, 0, Long.MAX_VALUE, columnTypeList);
     }
 
@@ -1012,14 +1028,18 @@ public final class CSVUtil {
      * <br />
      * To skip a column in CSV, set {@code null} to position in {@code columnTypeList}.
      *
-     * @param source
-     * @param offset
-     * @param count
-     * @param columnTypeList
-     * @return
+     * @param source 
+     * @param offset 
+     * @param count 
+     * @param columnTypeList 
+     * @return 
+     * @throws UncheckedIOException the unchecked IO exception
+     * @throws UncheckedIOException the unchecked IO exception
+     * @throws IllegalArgumentException if the size of {@code columnTypeList} is not equal to the size of columns in CSV.
      */
     @SuppressWarnings("rawtypes")
-    public static DataSet loadCSV(final Reader source, long offset, long count, final List<? extends Type> columnTypeList) {
+    public static DataSet loadCSV(final Reader source, long offset, long count, final List<? extends Type> columnTypeList)
+            throws UncheckedIOException, UncheckedIOException {
         return loadCSV(source, offset, count, Fn.<String[]> alwaysTrue(), columnTypeList);
     }
 
@@ -1030,19 +1050,21 @@ public final class CSVUtil {
      * <br />
      * To skip a column in CSV, set {@code null} to position in {@code columnTypeList}.
      *
-     * @param <E>
-     * @param source
-     * @param offset
-     * @param count
-     * @param filter
-     * @param columnTypeList
-     * @return
+     * @param <E> 
+     * @param source 
+     * @param offset 
+     * @param count 
+     * @param filter 
+     * @param columnTypeList 
+     * @return 
+     * @throws UncheckedIOException the unchecked IO exception
      * @throws UncheckedIOException the unchecked IO exception
      * @throws E the e
+     * @throws IllegalArgumentException if the size of {@code columnTypeList} is not equal to the size of columns in CSV.
      */
     @SuppressWarnings("rawtypes")
     public static <E extends Exception> DataSet loadCSV(final Reader source, long offset, long count, final Throwables.Predicate<String[], E> filter,
-            final List<? extends Type> columnTypeList) throws UncheckedIOException, E {
+            final List<? extends Type> columnTypeList) throws UncheckedIOException, UncheckedIOException, E {
         N.checkArgument(offset >= 0 && count >= 0, "'offset'=%s and 'count'=%s can't be negative", offset, count);
 
         if (N.isEmpty(columnTypeList)) {
@@ -1110,41 +1132,41 @@ public final class CSVUtil {
     }
 
     /**
+     * 
      *
-     *
-     * @param source
-     * @param targetType
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param source 
+     * @param targetType 
+     * @return 
      */
     public static <T> Stream<T> stream(final File source, final Class<? extends T> targetType) {
         return stream(source, (Collection<String>) null, targetType);
     }
 
     /**
+     * 
      *
-     *
-     * @param source
-     * @param selectColumnNames
-     * @param targetType
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param source 
+     * @param selectColumnNames 
+     * @param targetType 
+     * @return 
      */
     public static <T> Stream<T> stream(final File source, final Collection<String> selectColumnNames, final Class<? extends T> targetType) {
         return stream(source, selectColumnNames, 0, Long.MAX_VALUE, Fn.alwaysTrue(), targetType);
     }
 
     /**
+     * 
      *
-     *
-     * @param source
-     * @param selectColumnNames
-     * @param offset
-     * @param count
-     * @param filter
-     * @param targetType
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param source 
+     * @param selectColumnNames 
+     * @param offset 
+     * @param count 
+     * @param filter 
+     * @param targetType 
+     * @return 
      */
     public static <T> Stream<T> stream(final File source, final Collection<String> selectColumnNames, final long offset, final long count,
             final Predicate<String[]> filter, final Class<? extends T> targetType) {
@@ -1164,27 +1186,27 @@ public final class CSVUtil {
     }
 
     /**
+     * 
      *
-     *
-     * @param source
-     * @param closeReaderWhenStreamIsClosed
-     * @param targetType
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param source 
+     * @param closeReaderWhenStreamIsClosed 
+     * @param targetType 
+     * @return 
      */
     public static <T> Stream<T> stream(final Reader source, final boolean closeReaderWhenStreamIsClosed, final Class<? extends T> targetType) {
         return stream(source, (Collection<String>) null, closeReaderWhenStreamIsClosed, targetType);
     }
 
     /**
+     * 
      *
-     *
-     * @param source
-     * @param selectColumnNames
-     * @param closeReaderWhenStreamIsClosed
-     * @param targetType
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param source 
+     * @param selectColumnNames 
+     * @param closeReaderWhenStreamIsClosed 
+     * @param targetType 
+     * @return 
      */
     public static <T> Stream<T> stream(final Reader source, final Collection<String> selectColumnNames, final boolean closeReaderWhenStreamIsClosed,
             final Class<? extends T> targetType) {
@@ -1192,17 +1214,17 @@ public final class CSVUtil {
     }
 
     /**
+     * 
      *
-     *
-     * @param source
-     * @param selectColumnNames
-     * @param offset
-     * @param count
-     * @param filter
-     * @param closeReaderWhenStreamIsClosed
-     * @param targetType
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param source 
+     * @param selectColumnNames 
+     * @param offset 
+     * @param count 
+     * @param filter 
+     * @param closeReaderWhenStreamIsClosed 
+     * @param targetType 
+     * @return 
      */
     public static <T> Stream<T> stream(final Reader source, final Collection<String> selectColumnNames, final long offset, final long count,
             final Predicate<String[]> filter, final boolean closeReaderWhenStreamIsClosed, final Class<? extends T> targetType) {

@@ -111,6 +111,12 @@ public final class StringWriter extends AppendableWriter {
         buf.append((char) c);
     }
 
+    /**
+     * 
+     *
+     * @param cbuf 
+     * @throws IOException 
+     */
     @Override
     public void write(final char[] cbuf) throws IOException {
         buf.append(cbuf);

@@ -163,14 +163,59 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
         return new ImmutableList<>(List.of(e1, e2, e3, e4, e5, e6, e7), true);
     }
 
+    /**
+     * 
+     *
+     * @param <E> 
+     * @param e1 
+     * @param e2 
+     * @param e3 
+     * @param e4 
+     * @param e5 
+     * @param e6 
+     * @param e7 
+     * @param e8 
+     * @return 
+     */
     public static <E> ImmutableList<E> of(final E e1, final E e2, final E e3, final E e4, final E e5, final E e6, final E e7, final E e8) {
         return new ImmutableList<>(List.of(e1, e2, e3, e4, e5, e6, e7, e8), true);
     }
 
+    /**
+     * 
+     *
+     * @param <E> 
+     * @param e1 
+     * @param e2 
+     * @param e3 
+     * @param e4 
+     * @param e5 
+     * @param e6 
+     * @param e7 
+     * @param e8 
+     * @param e9 
+     * @return 
+     */
     public static <E> ImmutableList<E> of(final E e1, final E e2, final E e3, final E e4, final E e5, final E e6, final E e7, final E e8, final E e9) {
         return new ImmutableList<>(List.of(e1, e2, e3, e4, e5, e6, e7, e8, e9), true);
     }
 
+    /**
+     * 
+     *
+     * @param <E> 
+     * @param e1 
+     * @param e2 
+     * @param e3 
+     * @param e4 
+     * @param e5 
+     * @param e6 
+     * @param e7 
+     * @param e8 
+     * @param e9 
+     * @param e10 
+     * @return 
+     */
     public static <E> ImmutableList<E> of(final E e1, final E e2, final E e3, final E e4, final E e5, final E e6, final E e7, final E e8, final E e9,
             final E e10) {
         return new ImmutableList<>(List.of(e1, e2, e3, e4, e5, e6, e7, e8, e9, e10), true);

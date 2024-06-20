@@ -498,9 +498,12 @@ public final class Throwables {
         }
 
         /**
+         * 
          *
-         * @param action
+         * @param <E2> 
+         * @param action 
          * @throws E the e
+         * @throws E2 
          */
         default <E2 extends Throwable> void foreachRemaining(Throwables.Consumer<? super T, E2> action) throws E, E2 { // NOSONAR
             N.checkArgNotNull(action);
@@ -511,9 +514,12 @@ public final class Throwables {
         }
 
         /**
+         * 
          *
-         * @param action
+         * @param <E2> 
+         * @param action 
          * @throws E the e
+         * @throws E2 
          */
         default <E2 extends Throwable> void foreachIndexed(Throwables.IntObjConsumer<? super T, E2> action) throws E, E2 {
             N.checkArgNotNull(action);

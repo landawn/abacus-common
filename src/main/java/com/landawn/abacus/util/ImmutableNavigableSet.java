@@ -156,26 +156,72 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
         return new ImmutableNavigableSet<>(new TreeSet<>(Arrays.asList(e1, e2, e3, e4, e5, e6, e7)));
     }
 
+    /**
+     * 
+     *
+     * @param <E> 
+     * @param e1 
+     * @param e2 
+     * @param e3 
+     * @param e4 
+     * @param e5 
+     * @param e6 
+     * @param e7 
+     * @param e8 
+     * @return 
+     */
     public static <E extends Comparable<? super E>> ImmutableNavigableSet<E> of(final E e1, final E e2, final E e3, final E e4, final E e5, final E e6,
             final E e7, final E e8) {
         return new ImmutableNavigableSet<>(new TreeSet<>(Arrays.asList(e1, e2, e3, e4, e5, e6, e7, e8)));
     }
 
+    /**
+     * 
+     *
+     * @param <E> 
+     * @param e1 
+     * @param e2 
+     * @param e3 
+     * @param e4 
+     * @param e5 
+     * @param e6 
+     * @param e7 
+     * @param e8 
+     * @param e9 
+     * @return 
+     */
     public static <E extends Comparable<? super E>> ImmutableNavigableSet<E> of(final E e1, final E e2, final E e3, final E e4, final E e5, final E e6,
             final E e7, final E e8, final E e9) {
         return new ImmutableNavigableSet<>(new TreeSet<>(Arrays.asList(e1, e2, e3, e4, e5, e6, e7, e8, e9)));
     }
 
+    /**
+     * 
+     *
+     * @param <E> 
+     * @param e1 
+     * @param e2 
+     * @param e3 
+     * @param e4 
+     * @param e5 
+     * @param e6 
+     * @param e7 
+     * @param e8 
+     * @param e9 
+     * @param e10 
+     * @return 
+     */
     public static <E extends Comparable<? super E>> ImmutableNavigableSet<E> of(final E e1, final E e2, final E e3, final E e4, final E e5, final E e6,
             final E e7, final E e8, final E e9, final E e10) {
         return new ImmutableNavigableSet<>(new TreeSet<>(Arrays.asList(e1, e2, e3, e4, e5, e6, e7, e8, e9, e10)));
     }
 
     /**
+     * 
      *
-     * @param <E>
-     * @param sortedSet
-     * @return
+     * @param <E> 
+     * @param c 
+     * @return 
      */
     public static <E> ImmutableNavigableSet<E> copyOf(final Collection<? extends E> c) {
         if (c instanceof ImmutableNavigableSet) {

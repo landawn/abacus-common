@@ -123,12 +123,13 @@ final class JacksonMapper extends AbstractObjectMapper<JacksonMapperConfig> {
     }
 
     /**
+     * 
      *
-     * @param source
-     * @param config
-     * @param targetType
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param source 
+     * @param config 
+     * @param targetType 
+     * @return 
      */
     @Override
     public <T> T read(String source, JacksonMapperConfig config, Class<? extends T> targetType) {
@@ -144,12 +145,13 @@ final class JacksonMapper extends AbstractObjectMapper<JacksonMapperConfig> {
     }
 
     /**
+     * 
      *
-     * @param source
-     * @param config
-     * @param targetType
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param source 
+     * @param config 
+     * @param targetType 
+     * @return 
      */
     @Override
     public <T> T read(File source, JacksonMapperConfig config, Class<? extends T> targetType) {
@@ -165,12 +167,13 @@ final class JacksonMapper extends AbstractObjectMapper<JacksonMapperConfig> {
     }
 
     /**
+     * 
      *
-     * @param source
-     * @param config
-     * @param targetType
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param source 
+     * @param config 
+     * @param targetType 
+     * @return 
      */
     @Override
     public <T> T read(InputStream source, JacksonMapperConfig config, Class<? extends T> targetType) {
@@ -184,12 +187,13 @@ final class JacksonMapper extends AbstractObjectMapper<JacksonMapperConfig> {
     }
 
     /**
+     * 
      *
-     * @param source
-     * @param config
-     * @param targetType
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param source 
+     * @param config 
+     * @param targetType 
+     * @return 
      */
     @Override
     public <T> T read(Reader source, JacksonMapperConfig config, Class<? extends T> targetType) {

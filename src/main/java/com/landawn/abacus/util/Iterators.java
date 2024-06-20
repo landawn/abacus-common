@@ -1919,8 +1919,7 @@ public final class Iterators {
      * @return
      */
     public static <T> ObjIterator<T> skipAndLimit(final Iterator<? extends T> iter, final long offset, final long count) {
-        N.checkArgNotNegative(count, "offset");
-        N.checkArgNotNegative(count, "count");
+        checkOffsetCount(offset, count);
 
         if (iter == null) {
             return ObjIterator.empty();
@@ -1962,17 +1961,31 @@ public final class Iterators {
     }
 
     /**
-     * Returns a new {@code ObjIterator} with {@code null} elements removed.
      *
      * @param <T>
      * @param iter
+     * @param offset
+     * @param count
      * @return
-     * @deprecated Use {@link #skipNulls(Iterator)} instead
      */
-    @Deprecated
-    public static <T> ObjIterator<T> skipNull(final Iterator<? extends T> iter) {
-        return skipNulls(iter);
+    public static <T> ObjIterator<T> skipAndLimit(final Iterable<? extends T> iter, final long offset, final long count) {
+        checkOffsetCount(offset, count);
+
+        return iter == null ? ObjIterator.<T> empty() : skipAndLimit(iter.iterator(), offset, count);
     }
+
+    //    /**
+    //     * Returns a new {@code ObjIterator} with {@code null} elements removed.
+    //     *
+    //     * @param <T>
+    //     * @param iter
+    //     * @return
+    //     * @deprecated Use {@link #skipNulls(Iterator)} instead
+    //     */
+    //    @Deprecated
+    //    public static <T> ObjIterator<T> skipNull(final Iterator<? extends T> iter) {
+    //        return skipNulls(iter);
+    //    }
 
     /**
      * Returns a new {@code ObjIterator} with {@code null} elements removed.
@@ -2975,6 +2988,30 @@ public final class Iterators {
             if (logger.isInfoEnabled()) {
                 logger.info("### End to process");
             }
+        }
+    }
+
+    /**
+     *
+     * @param offset
+     * @param count
+     * @throws IllegalArgumentException if {@code offset} or {@code count} is negative.
+     */
+    static void checkOffsetCount(final int offset, final int count) throws IllegalArgumentException {
+        if (offset < 0 || count < 0) {
+            throw new IllegalArgumentException("offset: " + offset + " and count: " + count + " can't be negative");
+        }
+    }
+
+    /**
+     *
+     * @param offset
+     * @param count
+     * @throws IllegalArgumentException if {@code offset} or {@code count} is negative.
+     */
+    static void checkOffsetCount(final long offset, final long count) throws IllegalArgumentException {
+        if (offset < 0 || count < 0) {
+            throw new IllegalArgumentException("offset: " + offset + " and count: " + count + " can't be negative");
         }
     }
 }

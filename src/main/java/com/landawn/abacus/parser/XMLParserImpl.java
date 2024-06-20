@@ -917,12 +917,13 @@ final class XMLParserImpl extends AbstractXMLParser {
     }
 
     /**
+     * 
      *
-     * @param source
-     * @param config
-     * @param targetClass
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param source 
+     * @param config 
+     * @param targetClass 
+     * @return 
      */
     @Override
     public <T> T deserialize(String source, final XMLDeserializationConfig config, Class<? extends T> targetClass) {
@@ -940,12 +941,13 @@ final class XMLParserImpl extends AbstractXMLParser {
     }
 
     /**
+     * 
      *
-     * @param source
-     * @param config
-     * @param targetClass
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param source 
+     * @param config 
+     * @param targetClass 
+     * @return 
      */
     @Override
     public <T> T deserialize(File source, final XMLDeserializationConfig config, Class<? extends T> targetClass) {
@@ -961,12 +963,13 @@ final class XMLParserImpl extends AbstractXMLParser {
     }
 
     /**
+     * 
      *
-     * @param source
-     * @param config
-     * @param targetClass
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param source 
+     * @param config 
+     * @param targetClass 
+     * @return 
      */
     @Override
     public <T> T deserialize(InputStream source, final XMLDeserializationConfig config, Class<? extends T> targetClass) {
@@ -980,12 +983,13 @@ final class XMLParserImpl extends AbstractXMLParser {
     }
 
     /**
+     * 
      *
-     * @param source
-     * @param config
-     * @param targetClass
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param source 
+     * @param config 
+     * @param targetClass 
+     * @return 
      */
     @Override
     public <T> T deserialize(Reader source, final XMLDeserializationConfig config, Class<? extends T> targetClass) {
@@ -995,12 +999,13 @@ final class XMLParserImpl extends AbstractXMLParser {
     }
 
     /**
+     * 
      *
-     * @param source
-     * @param config
-     * @param targetClass
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param source 
+     * @param config 
+     * @param targetClass 
+     * @return 
      */
     @Override
     public <T> T deserialize(Node source, final XMLDeserializationConfig config, Class<? extends T> targetClass) {
@@ -1008,12 +1013,13 @@ final class XMLParserImpl extends AbstractXMLParser {
     }
 
     /**
+     * 
      *
-     * @param config
-     * @param nodeClasses
-     * @param source
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param source 
+     * @param config 
+     * @param nodeClasses 
+     * @return 
      */
     @Override
     public <T> T deserialize(InputStream source, final XMLDeserializationConfig config, Map<String, Class<?>> nodeClasses) {
@@ -1027,12 +1033,13 @@ final class XMLParserImpl extends AbstractXMLParser {
     }
 
     /**
+     * 
      *
-     * @param config
-     * @param nodeClasses
-     * @param source
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param source 
+     * @param config 
+     * @param nodeClasses 
+     * @return 
      */
     @Override
     public <T> T deserialize(Reader source, final XMLDeserializationConfig config, Map<String, Class<?>> nodeClasses) {
@@ -1040,12 +1047,13 @@ final class XMLParserImpl extends AbstractXMLParser {
     }
 
     /**
+     * 
      *
-     * @param source
-     * @param config
-     * @param nodeClasses
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param source 
+     * @param config 
+     * @param nodeClasses 
+     * @return 
      */
     @Override
     @SuppressWarnings("unchecked")

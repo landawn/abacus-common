@@ -67,6 +67,9 @@ import com.landawn.abacus.util.Fn.BiPredicates;
  * Note: This class includes codes copied from Apache Commons Lang, Apache Commons IO, Google Guava and other open source projects under the Apache License 2.0.
  * The methods copied from other libraries/frameworks/projects may be modified in this class.
  * </p>
+ * <br />
+ * There are only {@code offset/count/len} parameters in the methods defined in class {@codeIOUtil}, no {@code fromIndex/startIndex} and {toIndex/endIndex} parameters.
+ *
  *
  * @version $Revision: 0.8 $
  */
@@ -448,21 +451,21 @@ public final class IOUtil {
      *
      * @param chars
      * @param offset
-     * @param count
+     * @param charCount
      * @param charset
      * @return
      */
-    public static byte[] chars2Bytes(final char[] chars, final int offset, final int count, Charset charset) {
-        if (count == 0 && N.len(chars) >= offset) {
+    public static byte[] chars2Bytes(final char[] chars, final int offset, final int charCount, Charset charset) {
+        if (charCount == 0 && N.len(chars) >= offset) {
             return N.EMPTY_BYTE_ARRAY;
         }
 
         charset = checkCharset(charset);
 
         if (stringEncodeMethod == null) {
-            return new String(chars, offset, count).getBytes(charset);
+            return new String(chars, offset, charCount).getBytes(charset);
         } else {
-            return ClassUtil.invokeMethod(stringEncodeMethod, charset, chars, offset, count);
+            return ClassUtil.invokeMethod(stringEncodeMethod, charset, chars, offset, charCount);
         }
     }
 
@@ -496,21 +499,21 @@ public final class IOUtil {
      *
      * @param bytes
      * @param offset
-     * @param count
+     * @param byteCount
      * @param charset
      * @return
      */
-    public static char[] bytes2Chars(final byte[] bytes, final int offset, final int count, Charset charset) {
-        if (count == 0 && N.len(bytes) >= offset) {
+    public static char[] bytes2Chars(final byte[] bytes, final int offset, final int byteCount, Charset charset) {
+        if (byteCount == 0 && N.len(bytes) >= offset) {
             return N.EMPTY_CHAR_ARRAY;
         }
 
         charset = checkCharset(charset);
 
         if (stringDecodeMethod == null) {
-            return new String(bytes, offset, count, charset).toCharArray();
+            return new String(bytes, offset, byteCount, charset).toCharArray();
         } else {
-            return ClassUtil.invokeMethod(stringDecodeMethod, charset, bytes, offset, count);
+            return ClassUtil.invokeMethod(stringDecodeMethod, charset, bytes, offset, byteCount);
         }
     }
 
@@ -525,7 +528,6 @@ public final class IOUtil {
     }
 
     /**
-     * String 2 input stream.
      *
      * @param str
      * @param charset
@@ -1406,87 +1408,87 @@ public final class IOUtil {
         }
     }
 
-    /**
-     * <br />
-     * Note: It should not be used to read {@code File/InputStream/Reader} with size closed to {@code Integer.MAX_VALUE}.
-     *
-     * @param source
-     * @return
-     * @throws UncheckedIOException the unchecked IO exception
-     * @deprecated replaced by {@link #readAllLines(File)}
-     */
-    @Deprecated
-    public static List<String> readLines(final File source) throws UncheckedIOException {
-        return readAllLines(source);
-    }
+    //    /**
+    //     * <br />
+    //     * Note: It should not be used to read {@code File/InputStream/Reader} with size closed to {@code Integer.MAX_VALUE}.
+    //     *
+    //     * @param source
+    //     * @return
+    //     * @throws UncheckedIOException the unchecked IO exception
+    //     * @deprecated replaced by {@link #readAllLines(File)}
+    //     */
+    //    @Deprecated
+    //    public static List<String> readLines(final File source) throws UncheckedIOException {
+    //        return readAllLines(source);
+    //    }
+    //
+    //    /**
+    //     * <br />
+    //     * Note: It should not be used to read {@code File/InputStream/Reader} with size closed to {@code Integer.MAX_VALUE}.
+    //     *
+    //     * @param source
+    //     * @param encoding
+    //     * @return
+    //     * @throws UncheckedIOException the unchecked IO exception
+    //     * @deprecated replaced by {@link #readAllLines(File, Charset)}
+    //     */
+    //    @Deprecated
+    //    public static List<String> readLines(final File source, final Charset encoding) throws UncheckedIOException {
+    //        return readAllLines(source, encoding);
+    //    }
+    //
+    //    /**
+    //     * <br />
+    //     * Note: It should not be used to read {@code File/InputStream/Reader} with size closed to {@code Integer.MAX_VALUE}.
+    //     *
+    //     * @param source
+    //     * @return
+    //     * @throws UncheckedIOException the unchecked IO exception
+    //     * @deprecated replaced by {@link #readAllLines(InputStream)}
+    //     */
+    //    @Deprecated
+    //    public static List<String> readLines(final InputStream source) throws UncheckedIOException {
+    //        return readAllLines(source);
+    //    }
+    //
+    //    /**
+    //     * <br />
+    //     * Note: It should not be used to read {@code File/InputStream/Reader} with size closed to {@code Integer.MAX_VALUE}.
+    //     *
+    //     * @param source
+    //     * @param encoding
+    //     * @return
+    //     * @throws UncheckedIOException the unchecked IO exception
+    //     * @deprecated replaced by {@link #readAllLines(InputStream, Charset)}
+    //     */
+    //    @Deprecated
+    //    public static List<String> readLines(final InputStream source, final Charset encoding) throws UncheckedIOException {
+    //        return readAllLines(source, encoding);
+    //    }
+    //
+    //    /**
+    //     * <br />
+    //     * Note: It should not be used to read {@code File/InputStream/Reader} with size closed to {@code Integer.MAX_VALUE}.
+    //     *
+    //     * @param source
+    //     * @return
+    //     * @throws UncheckedIOException the unchecked IO exception
+    //     * @deprecated replaced by {@link #readAllLines(Reader)}
+    //     */
+    //    @Deprecated
+    //    public static List<String> readLines(final Reader source) throws UncheckedIOException {
+    //        try {
+    //            return readLines(source, 0, Integer.MAX_VALUE);
+    //        } catch (IOException e) {
+    //            throw new UncheckedIOException(e);
+    //        }
+    //    }
 
     /**
-     * <br />
-     * Note: It should not be used to read {@code File/InputStream/Reader} with size closed to {@code Integer.MAX_VALUE}.
      *
      * @param source
-     * @param encoding
-     * @return
-     * @throws UncheckedIOException the unchecked IO exception
-     * @deprecated replaced by {@link #readAllLines(File, Charset)}
-     */
-    @Deprecated
-    public static List<String> readLines(final File source, final Charset encoding) throws UncheckedIOException {
-        return readAllLines(source, encoding);
-    }
-
-    /**
-     * <br />
-     * Note: It should not be used to read {@code File/InputStream/Reader} with size closed to {@code Integer.MAX_VALUE}.
-     *
-     * @param source
-     * @return
-     * @throws UncheckedIOException the unchecked IO exception
-     * @deprecated replaced by {@link #readAllLines(InputStream)}
-     */
-    @Deprecated
-    public static List<String> readLines(final InputStream source) throws UncheckedIOException {
-        return readAllLines(source);
-    }
-
-    /**
-     * <br />
-     * Note: It should not be used to read {@code File/InputStream/Reader} with size closed to {@code Integer.MAX_VALUE}.
-     *
-     * @param source
-     * @param encoding
-     * @return
-     * @throws UncheckedIOException the unchecked IO exception
-     * @deprecated replaced by {@link #readAllLines(InputStream, Charset)}
-     */
-    @Deprecated
-    public static List<String> readLines(final InputStream source, final Charset encoding) throws UncheckedIOException {
-        return readAllLines(source, encoding);
-    }
-
-    /**
-     * <br />
-     * Note: It should not be used to read {@code File/InputStream/Reader} with size closed to {@code Integer.MAX_VALUE}.
-     *
-     * @param source
-     * @return
-     * @throws UncheckedIOException the unchecked IO exception
-     * @deprecated replaced by {@link #readAllLines(Reader)}
-     */
-    @Deprecated
-    public static List<String> readLines(final Reader source) throws UncheckedIOException {
-        try {
-            return readLines(source, 0, Integer.MAX_VALUE);
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
-    }
-
-    /**
-     *
-     * @param source
-     * @param offset
-     * @param count
+     * @param offset line to skip
+     * @param count maximum line count to read.
      * @return
      * @throws IOException
      */
@@ -1498,8 +1500,8 @@ public final class IOUtil {
      *
      * @param source
      * @param encoding
-     * @param offset
-     * @param count
+     * @param offset line to skip
+     * @param count maximum line count to read.
      * @return
      * @throws IOException
      */
@@ -1520,8 +1522,8 @@ public final class IOUtil {
     /**
      *
      * @param source
-     * @param offset
-     * @param count
+     * @param offset line to skip
+     * @param count maximum line count to read.
      * @return
      * @throws IOException
      */
@@ -1533,8 +1535,8 @@ public final class IOUtil {
      *
      * @param source
      * @param encoding
-     * @param offset
-     * @param count
+     * @param offset line to skip
+     * @param count maximum line count to read.
      * @return
      * @throws IOException
      */
@@ -1545,8 +1547,8 @@ public final class IOUtil {
     /**
      *
      * @param source
-     * @param offset
-     * @param count
+     * @param offset line to skip
+     * @param count maximum line count to read.
      * @return
      * @throws IOException
      */
@@ -1970,29 +1972,34 @@ public final class IOUtil {
         }
     }
 
-    /**
-     *
-     * @param lines
-     * @param offset
-     * @param count
-     * @param output
-     * @throws IOException
-     */
-    public static void writeLines(final Collection<?> lines, final int offset, final int count, final File output) throws IOException {
-        if (count == 0 && N.size(lines) >= offset) {
-            return;
-        }
-
-        Writer writer = null;
-
-        try {
-            writer = IOUtil.newFileWriter(output);
-
-            writeLines(lines, offset, count, writer, true);
-        } finally {
-            close(writer);
-        }
-    }
+    //    /**
+    //     *
+    //     * @param lines
+    //     * @param offset
+    //     * @param count
+    //     * @param output
+    //     * @throws IOException
+    //     * @see {@link List#subList(int, int)}
+    //     * @see {@link N#slice(Collection, int, int)}
+    //     * @deprecated {@code offset/count} may be misused with {@code fromIndex/toIndex}. This method will be removed later.
+    //     */
+    //    @Deprecated
+    //    @Beta
+    //    public static void writeLines(final Collection<?> lines, final int offset, final int count, final File output) throws IOException {
+    //        if (count == 0 && N.size(lines) >= offset) {
+    //            return;
+    //        }
+    //
+    //        Writer writer = null;
+    //
+    //        try {
+    //            writer = IOUtil.newFileWriter(output);
+    //
+    //            writeLines(lines, offset, count, writer, true);
+    //        } finally {
+    //            close(writer);
+    //        }
+    //    }
 
     /**
      *
@@ -2023,39 +2030,47 @@ public final class IOUtil {
         writeLines(lines, IOUtil.newOutputStreamWriter(output), flush); // NOSONAR
     }
 
-    /**
-     *
-     * @param lines
-     * @param offset
-     * @param count
-     * @param output
-     * @throws IOException
-     */
-    public static void writeLines(final Collection<?> lines, final int offset, final int count, final OutputStream output) throws IOException {
-        if (count == 0 && N.size(lines) >= offset) {
-            return;
-        }
-
-        writeLines(lines, offset, count, output, false);
-    }
-
-    /**
-     *
-     * @param lines
-     * @param offset
-     * @param count
-     * @param output
-     * @param flush
-     * @throws IOException
-     */
-    public static void writeLines(final Collection<?> lines, final int offset, final int count, final OutputStream output, final boolean flush)
-            throws IOException {
-        if (count == 0 && N.size(lines) >= offset) {
-            return;
-        }
-
-        writeLines(lines, offset, count, IOUtil.newOutputStreamWriter(output), flush); // NOSONAR
-    }
+    //    /**
+    //     *
+    //     * @param lines
+    //     * @param offset
+    //     * @param count
+    //     * @param output
+    //     * @see {@link List#subList(int, int)}
+    //     * @see {@link N#slice(Collection, int, int)}
+    //     * @deprecated {@code offset/count} may be misused with {@code fromIndex/toIndex}. This method will be removed later.
+    //     */
+    //    @Deprecated
+    //    @Beta
+    //    public static void writeLines(final Collection<?> lines, final int offset, final int count, final OutputStream output) throws IOException {
+    //        if (count == 0 && N.size(lines) >= offset) {
+    //            return;
+    //        }
+    //
+    //        writeLines(lines, offset, count, output, false);
+    //    }
+    //
+    //    /**
+    //     *
+    //     * @param lines
+    //     * @param offset
+    //     * @param count
+    //     * @param output
+    //     * @param flush
+    //     * @see {@link List#subList(int, int)}
+    //     * @see {@link N#slice(Collection, int, int)}
+    //     * @deprecated {@code offset/count} may be misused with {@code fromIndex/toIndex}. This method will be removed later.
+    //     */
+    //    @Deprecated
+    //    @Beta
+    //    public static void writeLines(final Collection<?> lines, final int offset, final int count, final OutputStream output, final boolean flush)
+    //            throws IOException {
+    //        if (count == 0 && N.size(lines) >= offset) {
+    //            return;
+    //        }
+    //
+    //        writeLines(lines, offset, count, IOUtil.newOutputStreamWriter(output), flush); // NOSONAR
+    //    }
 
     /**
      *
@@ -2107,69 +2122,77 @@ public final class IOUtil {
         }
     }
 
-    /**
-     *
-     * @param lines
-     * @param offset
-     * @param count
-     * @param output
-     * @throws IOException
-     */
-    public static void writeLines(final Collection<?> lines, final int offset, final int count, final Writer output) throws IOException {
-        if (count == 0 && N.size(lines) >= offset) {
-            return;
-        }
-
-        writeLines(lines, offset, count, output, false);
-    }
-
-    /**
-     *
-     * @param lines
-     * @param offset
-     * @param count
-     * @param output
-     * @param flush
-     * @throws IOException
-     */
-    public static void writeLines(final Collection<?> lines, final int offset, int count, final Writer output, final boolean flush) throws IOException {
-        if (count == 0 && N.size(lines) >= offset) {
-            return;
-        }
-
-        boolean isBufferedWriter = isBufferedWriter(output);
-        final Writer bw = isBufferedWriter ? output : Objectory.createBufferedWriter(output); //NOSONAR
-
-        try {
-            int lineNum = 0;
-
-            for (Object line : lines) {
-                if (lineNum++ >= offset) {
-                    if (line == null) {
-                        bw.write(Strings.NULL_CHAR_ARRAY);
-                    } else {
-                        bw.write(N.toString(line));
-                    }
-
-                    bw.write(IOUtil.LINE_SEPARATOR);
-
-                    count--;
-                }
-
-                if (count <= 0) {
-                    break;
-                }
-            }
-
-            if (flush || !isBufferedWriter) {
-                bw.flush();
-            }
-        } finally {
-            if (!isBufferedWriter) {
-                Objectory.recycle((BufferedWriter) bw);
-            }
-        }
-    }
+    //    /**
+    //     *
+    //     * @param lines
+    //     * @param offset
+    //     * @param count
+    //     * @param output
+    //     * @see {@link List#subList(int, int)}
+    //     * @see {@link N#slice(Collection, int, int)}
+    //     * @deprecated {@code offset/count} may be misused with {@code fromIndex/toIndex}. This method will be removed later.
+    //     */
+    //    @Deprecated
+    //    @Beta
+    //    public static void writeLines(final Collection<?> lines, final int offset, final int count, final Writer output) throws IOException {
+    //        if (count == 0 && N.size(lines) >= offset) {
+    //            return;
+    //        }
+    //
+    //        writeLines(lines, offset, count, output, false);
+    //    }
+    //
+    //    /**
+    //     *
+    //     * @param lines
+    //     * @param offset
+    //     * @param count
+    //     * @param output
+    //     * @param flush
+    //     * @see {@link List#subList(int, int)}
+    //     * @see {@link N#slice(Collection, int, int)}
+    //     * @deprecated {@code offset/count} may be misused with {@code fromIndex/toIndex}. This method will be removed later.
+    //     */
+    //    @Deprecated
+    //    @Beta
+    //    public static void writeLines(final Collection<?> lines, final int offset, int count, final Writer output, final boolean flush) throws IOException {
+    //        if (count == 0 && N.size(lines) >= offset) {
+    //            return;
+    //        }
+    //
+    //        boolean isBufferedWriter = isBufferedWriter(output);
+    //        final Writer bw = isBufferedWriter ? output : Objectory.createBufferedWriter(output); //NOSONAR
+    //
+    //        try {
+    //            int lineNum = 0;
+    //
+    //            for (Object line : lines) {
+    //                if (lineNum++ >= offset) {
+    //                    if (line == null) {
+    //                        bw.write(Strings.NULL_CHAR_ARRAY);
+    //                    } else {
+    //                        bw.write(N.toString(line));
+    //                    }
+    //
+    //                    bw.write(IOUtil.LINE_SEPARATOR);
+    //
+    //                    count--;
+    //                }
+    //
+    //                if (count <= 0) {
+    //                    break;
+    //                }
+    //            }
+    //
+    //            if (flush || !isBufferedWriter) {
+    //                bw.flush();
+    //            }
+    //        } finally {
+    //            if (!isBufferedWriter) {
+    //                Objectory.recycle((BufferedWriter) bw);
+    //            }
+    //        }
+    //    }
 
     /**
      *
@@ -2178,23 +2201,23 @@ public final class IOUtil {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     public static void write(final boolean b, final Writer output) throws IOException {
-        write(b, output, false);
-    }
-
-    /**
-     *
-     * @param b
-     * @param output
-     * @param flush
-     * @throws IOException Signals that an I/O exception has occurred.
-     */
-    static void write(final boolean b, final Writer output, final boolean flush) throws IOException {
         output.write(N.stringOf(b));
-
-        if (flush) {
-            output.flush();
-        }
     }
+
+    //    /**
+    //     *
+    //     * @param b
+    //     * @param output
+    //     * @param flush
+    //     * @throws IOException Signals that an I/O exception has occurred.
+    //     */
+    //    static void write(final boolean b, final Writer output, final boolean flush) throws IOException {
+    //        output.write(N.stringOf(b));
+    //
+    //        if (flush) {
+    //            output.flush();
+    //        }
+    //    }
 
     /**
      *
@@ -2203,23 +2226,23 @@ public final class IOUtil {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     public static void write(final char c, final Writer output) throws IOException {
-        write(c, output, false);
-    }
-
-    /**
-     *
-     * @param c
-     * @param output
-     * @param flush
-     * @throws IOException Signals that an I/O exception has occurred.
-     */
-    static void write(final char c, final Writer output, final boolean flush) throws IOException {
         output.write(c);
-
-        if (flush) {
-            output.flush();
-        }
     }
+
+    //    /**
+    //     *
+    //     * @param c
+    //     * @param output
+    //     * @param flush
+    //     * @throws IOException Signals that an I/O exception has occurred.
+    //     */
+    //    static void write(final char c, final Writer output, final boolean flush) throws IOException {
+    //        output.write(c);
+    //
+    //        if (flush) {
+    //            output.flush();
+    //        }
+    //    }
 
     /**
      *
@@ -2228,23 +2251,23 @@ public final class IOUtil {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     public static void write(final byte b, final Writer output) throws IOException {
-        write(b, output, false);
-    }
-
-    /**
-     *
-     * @param b
-     * @param output
-     * @param flush
-     * @throws IOException Signals that an I/O exception has occurred.
-     */
-    static void write(final byte b, final Writer output, final boolean flush) throws IOException {
         output.write(N.stringOf(b));
-
-        if (flush) {
-            output.flush();
-        }
     }
+
+    //    /**
+    //     *
+    //     * @param b
+    //     * @param output
+    //     * @param flush
+    //     * @throws IOException Signals that an I/O exception has occurred.
+    //     */
+    //    static void write(final byte b, final Writer output, final boolean flush) throws IOException {
+    //        output.write(N.stringOf(b));
+    //
+    //        if (flush) {
+    //            output.flush();
+    //        }
+    //    }
 
     /**
      *
@@ -2253,23 +2276,23 @@ public final class IOUtil {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     public static void write(final short s, final Writer output) throws IOException {
-        write(s, output, false);
-    }
-
-    /**
-     *
-     * @param s
-     * @param output
-     * @param flush
-     * @throws IOException Signals that an I/O exception has occurred.
-     */
-    static void write(final short s, final Writer output, final boolean flush) throws IOException {
         output.write(N.stringOf(s));
-
-        if (flush) {
-            output.flush();
-        }
     }
+
+    //    /**
+    //     *
+    //     * @param s
+    //     * @param output
+    //     * @param flush
+    //     * @throws IOException Signals that an I/O exception has occurred.
+    //     */
+    //    static void write(final short s, final Writer output, final boolean flush) throws IOException {
+    //        output.write(N.stringOf(s));
+    //
+    //        if (flush) {
+    //            output.flush();
+    //        }
+    //    }
 
     /**
      *
@@ -2278,23 +2301,23 @@ public final class IOUtil {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     public static void write(final int i, final Writer output) throws IOException {
-        write(i, output, false);
-    }
-
-    /**
-     *
-     * @param i
-     * @param output
-     * @param flush
-     * @throws IOException Signals that an I/O exception has occurred.
-     */
-    static void write(final int i, final Writer output, final boolean flush) throws IOException {
         output.write(N.stringOf(i));
-
-        if (flush) {
-            output.flush();
-        }
     }
+
+    //    /**
+    //     *
+    //     * @param i
+    //     * @param output
+    //     * @param flush
+    //     * @throws IOException Signals that an I/O exception has occurred.
+    //     */
+    //    static void write(final int i, final Writer output, final boolean flush) throws IOException {
+    //        output.write(N.stringOf(i));
+    //
+    //        if (flush) {
+    //            output.flush();
+    //        }
+    //    }
 
     /**
      *
@@ -2303,23 +2326,23 @@ public final class IOUtil {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     public static void write(final long lng, final Writer output) throws IOException {
-        write(lng, output, false);
-    }
-
-    /**
-     *
-     * @param lng
-     * @param output
-     * @param flush
-     * @throws IOException Signals that an I/O exception has occurred.
-     */
-    static void write(final long lng, final Writer output, final boolean flush) throws IOException {
         output.write(N.stringOf(lng));
-
-        if (flush) {
-            output.flush();
-        }
     }
+
+    //    /**
+    //     *
+    //     * @param lng
+    //     * @param output
+    //     * @param flush
+    //     * @throws IOException Signals that an I/O exception has occurred.
+    //     */
+    //    static void write(final long lng, final Writer output, final boolean flush) throws IOException {
+    //        output.write(N.stringOf(lng));
+    //
+    //        if (flush) {
+    //            output.flush();
+    //        }
+    //    }
 
     /**
      *
@@ -2328,23 +2351,23 @@ public final class IOUtil {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     public static void write(final float f, final Writer output) throws IOException {
-        write(f, output, false);
-    }
-
-    /**
-     *
-     * @param f
-     * @param output
-     * @param flush
-     * @throws IOException Signals that an I/O exception has occurred.
-     */
-    static void write(final float f, final Writer output, final boolean flush) throws IOException {
         output.write(N.stringOf(f));
-
-        if (flush) {
-            output.flush();
-        }
     }
+
+    //    /**
+    //     *
+    //     * @param f
+    //     * @param output
+    //     * @param flush
+    //     * @throws IOException Signals that an I/O exception has occurred.
+    //     */
+    //    static void write(final float f, final Writer output, final boolean flush) throws IOException {
+    //        output.write(N.stringOf(f));
+    //
+    //        if (flush) {
+    //            output.flush();
+    //        }
+    //    }
 
     /**
      *
@@ -2353,22 +2376,32 @@ public final class IOUtil {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     public static void write(final double d, final Writer output) throws IOException {
-        write(d, output, false);
+        output.write(N.stringOf(d));
     }
+
+    //    /**
+    //     *
+    //     * @param d
+    //     * @param output
+    //     * @param flush
+    //     * @throws IOException Signals that an I/O exception has occurred.
+    //     */
+    //    static void write(final double d, final Writer output, final boolean flush) throws IOException {
+    //        output.write(N.stringOf(d));
+    //
+    //        if (flush) {
+    //            output.flush();
+    //        }
+    //    }
 
     /**
      *
-     * @param d
+     * @param obj
      * @param output
-     * @param flush
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    static void write(final double d, final Writer output, final boolean flush) throws IOException {
-        output.write(N.stringOf(d));
-
-        if (flush) {
-            output.flush();
-        }
+    public static void write(final Object obj, final Writer output) throws IOException { // Note: DO NOT remove/update this method because it also protect write(boolean/char/byte/.../double, Writer) from NullPointerException.
+        output.write(N.toString(obj));
     }
 
     /**
@@ -2827,32 +2860,32 @@ public final class IOUtil {
 
     /**
      *
-     * @param input
+     * @param source
      * @param output
      * @return
      * @throws IOException
      */
-    public static long write(final File input, final File output) throws IOException {
-        return write(input, 0, Long.MAX_VALUE, output);
+    public static long write(final File source, final File output) throws IOException {
+        return write(source, 0, Long.MAX_VALUE, output);
     }
 
     /**
      *
      *
-     * @param input
+     * @param source
      * @param offset
      * @param count
      * @param output
      * @return
      * @throws IOException
      */
-    public static long write(final File input, final long offset, final long count, final File output) throws IOException {
+    public static long write(final File source, final long offset, final long count, final File output) throws IOException {
         OutputStream os = null;
         InputStream is = null;
 
         try {
             os = IOUtil.newFileOutputStream(output);
-            is = IOUtil.newFileInputStream(input);
+            is = IOUtil.newFileInputStream(source);
 
             return write(is, offset, count, os, true);
         } finally {
@@ -2863,45 +2896,45 @@ public final class IOUtil {
 
     /**
      *
-     * @param input
+     * @param source
      * @param output
      * @return
      * @throws IOException
      */
-    public static long write(final File input, final OutputStream output) throws IOException {
-        return write(input, output, false);
+    public static long write(final File source, final OutputStream output) throws IOException {
+        return write(source, output, false);
     }
 
     /**
      *
      *
-     * @param input
+     * @param source
      * @param offset
      * @param count
      * @param output
      * @return
      * @throws IOException
      */
-    public static long write(final File input, final long offset, final long count, final OutputStream output) throws IOException {
-        return write(input, offset, count, output, false);
+    public static long write(final File source, final long offset, final long count, final OutputStream output) throws IOException {
+        return write(source, offset, count, output, false);
     }
 
     /**
      *
-     * @param input
+     * @param source
      * @param output
      * @param flush
      * @return
      * @throws IOException
      */
-    public static long write(final File input, final OutputStream output, final boolean flush) throws IOException {
-        return write(input, 0, Long.MAX_VALUE, output, flush);
+    public static long write(final File source, final OutputStream output, final boolean flush) throws IOException {
+        return write(source, 0, Long.MAX_VALUE, output, flush);
     }
 
     /**
      *
      *
-     * @param input
+     * @param source
      * @param offset by byte
      * @param count
      * @param output
@@ -2909,10 +2942,10 @@ public final class IOUtil {
      * @return
      * @throws IOException
      */
-    public static long write(final File input, final long offset, final long count, final OutputStream output, final boolean flush) throws IOException {
+    public static long write(final File source, final long offset, final long count, final OutputStream output, final boolean flush) throws IOException {
         InputStream is = null;
         try {
-            is = IOUtil.newFileInputStream(input);
+            is = IOUtil.newFileInputStream(source);
 
             return write(is, offset, count, output, flush);
         } finally {
@@ -2920,87 +2953,90 @@ public final class IOUtil {
         }
     }
 
+    //    /**
+    //     *
+    //     * @param source
+    //     * @param output
+    //     * @return
+    //     * @throws IOException
+    //     */
+    //    public static long write(final File source, final Writer output) throws IOException {
+    //        return write(source, output, false);
+    //    }
+    //
+    //    /**
+    //     *
+    //     * @param source
+    //     * @param offset
+    //     * @param count
+    //     * @param output
+    //     * @return
+    //     * @throws IOException
+    //     * @deprecated inconsistent with methods: {@code write(File, long, long, File)} and {@code write(File, long, long, OutputStream)}. Unit for offset/count is char here. but it's byte in {@code write(File, long, long, File)} and {@code write(File, long, long, OutputStream)}.
+    //     */
+    //    @Deprecated
+    //    public static long write(final File source, final long offset, final long count, final Writer output) throws IOException {
+    //        return write(source, offset, count, output, false);
+    //    }
+    //
+    //    /**
+    //     *
+    //     * @param source
+    //     * @param output
+    //     * @param flush
+    //     * @return
+    //     * @throws IOException
+    //     */
+    //    public static long write(final File source, final Writer output, final boolean flush) throws IOException {
+    //        return write(source, 0, Long.MAX_VALUE, output, flush);
+    //    }
+    //
+    //    /**
+    //     *
+    //     *
+    //     * @param source
+    //     * @param offset by char
+    //     * @param count
+    //     * @param output
+    //     * @param flush
+    //     * @return
+    //     * @throws IOException
+    //     * @deprecated inconsistent with methods: {@code write(File, long, long, File)} and {@code write(File, long, long, OutputStream)}. Unit for offset/count is char here. but it's byte in {@code write(File, long, long, File)} and {@code write(File, long, long, OutputStream)}.
+    //     */
+    //    @Deprecated
+    //    public static long write(final File source, final long offset, final long count, final Writer output, final boolean flush) throws IOException {
+    //        Reader reader = null;
+    //        try {
+    //            reader = IOUtil.newBufferedReader(source);
+    //
+    //            return write(reader, offset, count, output, flush);
+    //        } finally {
+    //            closeQuietly(reader);
+    //        }
+    //    }
+
     /**
      *
-     * @param input
+     * @param source
      * @param output
      * @return
      * @throws IOException
      */
-    public static long write(final File input, final Writer output) throws IOException {
-        return write(input, output, false);
+    public static long write(final InputStream source, final File output) throws IOException {
+        return write(source, 0, Long.MAX_VALUE, output);
     }
 
     /**
      *
      *
-     * @param input
-     * @param offset
-     * @param count
-     * @param output
-     * @return
-     * @throws IOException
-     */
-    public static long write(final File input, final long offset, final long count, final Writer output) throws IOException {
-        return write(input, offset, count, output, false);
-    }
-
-    /**
-     *
-     * @param input
-     * @param output
-     * @param flush
-     * @return
-     * @throws IOException
-     */
-    public static long write(final File input, final Writer output, final boolean flush) throws IOException {
-        return write(input, 0, Long.MAX_VALUE, output, flush);
-    }
-
-    /**
-     *
-     *
-     * @param input
-     * @param offset by char
-     * @param count
-     * @param output
-     * @param flush
-     * @return
-     * @throws IOException
-     */
-    public static long write(final File input, final long offset, final long count, final Writer output, final boolean flush) throws IOException {
-        Reader reader = null;
-        try {
-            reader = IOUtil.newBufferedReader(input);
-
-            return write(reader, offset, count, output, flush);
-        } finally {
-            closeQuietly(reader);
-        }
-    }
-
-    /**
-     *
-     * @param input
-     * @param output
-     * @return
-     * @throws IOException
-     */
-    public static long write(final InputStream input, final File output) throws IOException {
-        return write(input, 0, Long.MAX_VALUE, output);
-    }
-
-    /**
-     *
-     *
-     * @param input
+     * @param source
      * @param offset by byte
      * @param count
      * @param output
      * @return
      * @throws IOException
      */
-    public static long write(final InputStream input, final long offset, final long count, final File output) throws IOException {
+    public static long write(final InputStream source, final long offset, final long count, final File output) throws IOException {
         OutputStream os = null;
 
         try {
@@ -3008,7 +3044,7 @@ public final class IOUtil {
 
             os = IOUtil.newFileOutputStream(output);
 
-            long result = write(input, offset, count, os);
+            long result = write(source, offset, count, os);
 
             os.flush();
 
@@ -3020,44 +3056,44 @@ public final class IOUtil {
 
     /**
      *
-     * @param input
+     * @param source
      * @param output
      * @return
      * @throws IOException
      */
-    public static long write(final InputStream input, final OutputStream output) throws IOException {
-        return write(input, output, false);
+    public static long write(final InputStream source, final OutputStream output) throws IOException {
+        return write(source, output, false);
     }
 
     /**
      *
      *
-     * @param input
+     * @param source
      * @param offset
      * @param count
      * @param output
      * @return
      * @throws IOException
      */
-    public static long write(final InputStream input, final long offset, final long count, final OutputStream output) throws IOException {
-        return write(input, offset, count, output, false);
+    public static long write(final InputStream source, final long offset, final long count, final OutputStream output) throws IOException {
+        return write(source, offset, count, output, false);
     }
 
     /**
      *
-     * @param input
+     * @param source
      * @param output
      * @param flush
      * @return
      * @throws IOException
      */
-    public static long write(final InputStream input, final OutputStream output, final boolean flush) throws IOException {
-        return write(input, 0, Long.MAX_VALUE, output, flush);
+    public static long write(final InputStream source, final OutputStream output, final boolean flush) throws IOException {
+        return write(source, 0, Long.MAX_VALUE, output, flush);
     }
 
     /**
      *
-     * @param input
+     * @param source
      * @param offset by byte
      * @param count by byte
      * @param output
@@ -3065,8 +3101,8 @@ public final class IOUtil {
      * @return
      * @throws IOException
      */
-    public static long write(final InputStream input, final long offset, final long count, final OutputStream output, final boolean flush) throws IOException {
-        N.checkArgNotNull(input, "input");
+    public static long write(final InputStream source, final long offset, final long count, final OutputStream output, final boolean flush) throws IOException {
+        N.checkArgNotNull(source, "source");
         N.checkArgNotNull(output, "output");
 
         N.checkArgNotNegative(offset, "offset"); // NOSONAR
@@ -3076,7 +3112,7 @@ public final class IOUtil {
 
         try {
             if (offset > 0) {
-                long skipped = skip(input, offset);
+                long skipped = skip(source, offset);
 
                 if (skipped < offset) {
                     return 0;
@@ -3091,7 +3127,7 @@ public final class IOUtil {
             long totalCount = 0;
             int cnt = 0;
 
-            while ((totalCount < count) && (EOF != (cnt = read(input, buf, 0, (int) Math.min(count - totalCount, bufLength))))) {
+            while ((totalCount < count) && (EOF != (cnt = read(source, buf, 0, (int) Math.min(count - totalCount, bufLength))))) {
                 output.write(buf, 0, cnt);
 
                 totalCount += cnt;
@@ -3109,45 +3145,45 @@ public final class IOUtil {
 
     /**
      *
-     * @param input
+     * @param source
      * @param output
      * @return
      * @throws IOException
      */
-    public static long write(final Reader input, final File output) throws IOException {
-        return write(input, DEFAULT_CHARSET, output);
+    public static long write(final Reader source, final File output) throws IOException {
+        return write(source, DEFAULT_CHARSET, output);
     }
 
     /**
      *
-     * @param input
+     * @param source
      * @param charset
      * @param output
      * @return
      * @throws IOException
      */
-    public static long write(final Reader input, final Charset charset, final File output) throws IOException {
-        return write(input, 0, Long.MAX_VALUE, charset, output);
+    public static long write(final Reader source, final Charset charset, final File output) throws IOException {
+        return write(source, 0, Long.MAX_VALUE, charset, output);
     }
 
     /**
      *
      *
-     * @param input
+     * @param source
      * @param offset
      * @param count
      * @param output
      * @return
      * @throws IOException
      */
-    public static long write(final Reader input, final long offset, final long count, final File output) throws IOException {
-        return write(input, offset, count, DEFAULT_CHARSET, output);
+    public static long write(final Reader source, final long offset, final long count, final File output) throws IOException {
+        return write(source, offset, count, DEFAULT_CHARSET, output);
     }
 
     /**
      *
      *
-     * @param input
+     * @param source
      * @param offset by char
      * @param count
      * @param charset
@@ -3155,13 +3191,13 @@ public final class IOUtil {
      * @return
      * @throws IOException
      */
-    public static long write(final Reader input, final long offset, final long count, final Charset charset, final File output) throws IOException {
+    public static long write(final Reader source, final long offset, final long count, final Charset charset, final File output) throws IOException {
         Writer writer = null;
 
         try { //NOSONAR
             writer = IOUtil.newOutputStreamWriter(IOUtil.newFileOutputStream(output), checkCharset(charset));
 
-            long result = write(input, offset, count, writer);
+            long result = write(source, offset, count, writer);
 
             writer.flush();
 
@@ -3173,44 +3209,44 @@ public final class IOUtil {
 
     /**
      *
-     * @param input
+     * @param source
      * @param output
      * @return
      * @throws IOException
      */
-    public static long write(final Reader input, final Writer output) throws IOException {
-        return write(input, output, false);
+    public static long write(final Reader source, final Writer output) throws IOException {
+        return write(source, output, false);
     }
 
     /**
      *
      *
-     * @param input
+     * @param source
      * @param offset
      * @param count
      * @param output
      * @return
      * @throws IOException
      */
-    public static long write(final Reader input, final long offset, final long count, final Writer output) throws IOException {
-        return write(input, offset, count, output, false);
+    public static long write(final Reader source, final long offset, final long count, final Writer output) throws IOException {
+        return write(source, offset, count, output, false);
     }
 
     /**
      *
-     * @param input
+     * @param source
      * @param output
      * @param flush
      * @return
      * @throws IOException
      */
-    public static long write(final Reader input, final Writer output, final boolean flush) throws IOException {
-        return write(input, 0, Long.MAX_VALUE, output, flush);
+    public static long write(final Reader source, final Writer output, final boolean flush) throws IOException {
+        return write(source, 0, Long.MAX_VALUE, output, flush);
     }
 
     /**
      *
-     * @param input
+     * @param source
      * @param offset by char
      * @param count by char
      * @param output
@@ -3218,8 +3254,8 @@ public final class IOUtil {
      * @return
      * @throws IOException
      */
-    public static long write(final Reader input, final long offset, final long count, final Writer output, final boolean flush) throws IOException {
-        N.checkArgNotNull(input, "input");
+    public static long write(final Reader source, final long offset, final long count, final Writer output, final boolean flush) throws IOException {
+        N.checkArgNotNull(source, "source");
         N.checkArgNotNull(output, "output");
 
         N.checkArgNotNegative(offset, "offset");
@@ -3229,7 +3265,7 @@ public final class IOUtil {
 
         try {
             if (offset > 0) {
-                skipFully(input, offset);
+                skipFully(source, offset);
             }
 
             if (count == 0) {
@@ -3240,7 +3276,7 @@ public final class IOUtil {
             long totalCount = 0;
             int cnt = 0;
 
-            while ((totalCount < count) && (EOF != (cnt = read(input, buf, 0, (int) Math.min(count - totalCount, bufLength))))) {
+            while ((totalCount < count) && (EOF != (cnt = read(source, buf, 0, (int) Math.min(count - totalCount, bufLength))))) {
                 output.write(buf, 0, cnt);
 
                 totalCount += cnt;
@@ -3550,10 +3586,11 @@ public final class IOUtil {
     }
 
     /**
+     * 
      *
-     * @param lines
-     * @param output
-     * @throws IOException
+     * @param lines 
+     * @param targetFile 
+     * @throws IOException 
      */
     public static void appendLines(final Iterable<?> lines, final File targetFile) throws IOException {
         if (N.isEmpty(lines)) {
@@ -3564,10 +3601,12 @@ public final class IOUtil {
     }
 
     /**
+     * 
      *
-     * @param lines
-     * @param output
-     * @throws IOException
+     * @param lines 
+     * @param charset 
+     * @param targetFile 
+     * @throws IOException 
      */
     public static void appendLines(final Iterable<?> lines, final Charset charset, final File targetFile) throws IOException {
         if (N.isEmpty(lines)) {
@@ -5043,8 +5082,14 @@ public final class IOUtil {
         return false;
     }
 
-    public static boolean isBufferedWriter(final Writer output) {
-        return output instanceof BufferedWriter || output instanceof java.io.BufferedWriter;
+    /**
+     * 
+     *
+     * @param writer 
+     * @return 
+     */
+    public static boolean isBufferedWriter(final Writer writer) {
+        return writer instanceof BufferedWriter || writer instanceof java.io.BufferedWriter;
     }
 
     /**

@@ -84,11 +84,12 @@ abstract class AbstractJSONParser extends AbstractParser<JSONSerializationConfig
     }
 
     /**
+     * 
      *
-     * @param source
-     * @param targetClass
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param source 
+     * @param targetClass 
+     * @return 
      */
     @Override
     public <T> T readString(String source, Class<? extends T> targetClass) {
@@ -96,14 +97,14 @@ abstract class AbstractJSONParser extends AbstractParser<JSONSerializationConfig
     }
 
     /**
+     * 
      *
-     *
-     * @param source
-     * @param config
-     * @param targetClass
-     * @param <T>
-     * @return
-     * @throws UnsupportedOperationException
+     * @param <T> 
+     * @param source 
+     * @param config 
+     * @param targetClass 
+     * @return 
+     * @throws UnsupportedOperationException 
      */
     @Override
     public <T> T readString(String source, JSONDeserializationConfig config, Class<? extends T> targetClass) throws UnsupportedOperationException {
@@ -167,12 +168,12 @@ abstract class AbstractJSONParser extends AbstractParser<JSONSerializationConfig
     }
 
     /**
+     * 
      *
-     *
-     * @param config
-     * @param output
-     * @param source
-     * @throws UnsupportedOperationException
+     * @param source 
+     * @param config 
+     * @param output 
+     * @throws UnsupportedOperationException 
      */
     @Override
     public void readString(String source, JSONDeserializationConfig config, Map<?, ?> output) throws UnsupportedOperationException {
@@ -180,13 +181,14 @@ abstract class AbstractJSONParser extends AbstractParser<JSONSerializationConfig
     }
 
     /**
+     * 
      *
-     * @param source
-     * @param fromIndex
-     * @param toIndex
-     * @param targetClass
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param source 
+     * @param fromIndex 
+     * @param toIndex 
+     * @param targetClass 
+     * @return 
      */
     @Override
     public <T> T deserialize(String source, int fromIndex, int toIndex, Class<? extends T> targetClass) {
@@ -194,14 +196,15 @@ abstract class AbstractJSONParser extends AbstractParser<JSONSerializationConfig
     }
 
     /**
+     * 
      *
-     * @param source
-     * @param fromIndex
-     * @param toIndex
-     * @param config
-     * @param targetClass
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param source 
+     * @param fromIndex 
+     * @param toIndex 
+     * @param config 
+     * @param targetClass 
+     * @return 
      */
     @Override
     public <T> T deserialize(String source, int fromIndex, int toIndex, JSONDeserializationConfig config, Class<? extends T> targetClass) {
@@ -209,12 +212,12 @@ abstract class AbstractJSONParser extends AbstractParser<JSONSerializationConfig
     }
 
     /**
+     * 
      *
-     *
-     * @param elementClass
-     * @param source
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param source 
+     * @param elementClass 
+     * @return 
      */
     @Override
     public <T> CheckedStream<T, IOException> stream(String source, Class<? extends T> elementClass) {
@@ -222,12 +225,12 @@ abstract class AbstractJSONParser extends AbstractParser<JSONSerializationConfig
     }
 
     /**
+     * 
      *
-     *
-     * @param elementClass
-     * @param source
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param source 
+     * @param elementClass 
+     * @return 
      */
     @Override
     public <T> CheckedStream<T, IOException> stream(File source, Class<? extends T> elementClass) {
@@ -235,13 +238,13 @@ abstract class AbstractJSONParser extends AbstractParser<JSONSerializationConfig
     }
 
     /**
+     * 
      *
-     *
-     * @param closeInputStreamWhenStreamIsClosed
-     * @param elementClass
-     * @param source
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param source 
+     * @param closeInputStreamWhenStreamIsClosed 
+     * @param elementClass 
+     * @return 
      */
     @Override
     public <T> CheckedStream<T, IOException> stream(InputStream source, boolean closeInputStreamWhenStreamIsClosed, Class<? extends T> elementClass) {
@@ -249,13 +252,13 @@ abstract class AbstractJSONParser extends AbstractParser<JSONSerializationConfig
     }
 
     /**
+     * 
      *
-     *
-     * @param closeReaderWhenStreamIsClosed
-     * @param elementClass
-     * @param reader
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param reader 
+     * @param closeReaderWhenStreamIsClosed 
+     * @param elementClass 
+     * @return 
      */
     @Override
     public <T> CheckedStream<T, IOException> stream(Reader reader, boolean closeReaderWhenStreamIsClosed, Class<? extends T> elementClass) {

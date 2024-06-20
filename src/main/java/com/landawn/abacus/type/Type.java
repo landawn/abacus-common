@@ -830,23 +830,22 @@ public interface Type<T> {
 
     /**
      * Array 2 collection.
-     * @param x
-     * @param collClass
      *
      * @param <E>
+     * @param x
+     * @param collClass
      * @return
      */
     <E> Collection<E> array2Collection(T x, Class<?> collClass);
 
     /**
      * Array 2 collection.
-     * @param x
-     * @param output
      *
      * @param <E>
-     * @return
+     * @param x
+     * @param output
      */
-    <E> Collection<E> array2Collection(T x, Collection<E> output);
+    <E> void array2Collection(T x, Collection<E> output);
 
     /**
      *

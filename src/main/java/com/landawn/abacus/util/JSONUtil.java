@@ -173,11 +173,12 @@ public final class JSONUtil {
     }
 
     /**
+     * 
      *
-     * @param jsonObject
-     * @param targetType
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param jsonObject 
+     * @param targetType 
+     * @return 
      * @throws JSONException the JSON exception
      */
     public static <T> T unwrap(final JSONObject jsonObject, final Class<? extends T> targetType) throws JSONException {
@@ -185,11 +186,12 @@ public final class JSONUtil {
     }
 
     /**
+     * 
      *
-     * @param jsonObject
-     * @param targetType
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param jsonObject 
+     * @param targetType 
+     * @return 
      * @throws JSONException the JSON exception
      */
     @SuppressWarnings("unchecked")
@@ -270,11 +272,12 @@ public final class JSONUtil {
     }
 
     /**
+     * 
      *
-     * @param jsonArray
+     * @param <T> 
+     * @param jsonArray 
      * @param targetType array or collection class
-     * @param <T>
-     * @return
+     * @return 
      * @throws JSONException the JSON exception
      */
     public static <T> T unwrap(final JSONArray jsonArray, final Class<? extends T> targetType) throws JSONException {
@@ -282,11 +285,12 @@ public final class JSONUtil {
     }
 
     /**
+     * 
      *
-     * @param jsonArray
-     * @param targetType
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param jsonArray 
+     * @param targetType 
+     * @return 
      * @throws JSONException the JSON exception
      */
     @SuppressWarnings("unchecked")
@@ -366,11 +370,12 @@ public final class JSONUtil {
     }
 
     /**
+     * 
      *
-     * @param jsonArray
-     * @param elementClass
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param jsonArray 
+     * @param elementClass 
+     * @return 
      * @throws JSONException the JSON exception
      */
     public static <T> List<T> toList(final JSONArray jsonArray, Class<? extends T> elementClass) throws JSONException {
@@ -378,11 +383,12 @@ public final class JSONUtil {
     }
 
     /**
+     * 
      *
-     * @param jsonArray
-     * @param elementType
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param jsonArray 
+     * @param elementType 
+     * @return 
      * @throws JSONException the JSON exception
      */
     public static <T> List<T> toList(final JSONArray jsonArray, Type<T> elementType) throws JSONException {

@@ -843,12 +843,13 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
     }
 
     /**
+     * 
      *
-     * @param source
-     * @param config
-     * @param targetClass
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param source 
+     * @param config 
+     * @param targetClass 
+     * @return 
      */
     @Override
     public <T> T deserialize(String source, final XMLDeserializationConfig config, Class<? extends T> targetClass) {
@@ -866,12 +867,13 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
     }
 
     /**
+     * 
      *
-     * @param source
-     * @param config
-     * @param targetClass
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param source 
+     * @param config 
+     * @param targetClass 
+     * @return 
      */
     @Override
     public <T> T deserialize(File source, final XMLDeserializationConfig config, Class<? extends T> targetClass) {
@@ -887,12 +889,13 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
     }
 
     /**
+     * 
      *
-     * @param source
-     * @param config
-     * @param targetClass
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param source 
+     * @param config 
+     * @param targetClass 
+     * @return 
      */
     @Override
     public <T> T deserialize(InputStream source, final XMLDeserializationConfig config, Class<? extends T> targetClass) {
@@ -906,12 +909,13 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
     }
 
     /**
+     * 
      *
-     * @param source
-     * @param config
-     * @param targetClass
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param source 
+     * @param config 
+     * @param targetClass 
+     * @return 
      */
     @Override
     public <T> T deserialize(Reader source, final XMLDeserializationConfig config, Class<? extends T> targetClass) {
@@ -921,12 +925,13 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
     }
 
     /**
+     * 
      *
-     * @param source
-     * @param config
-     * @param targetClass
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param source 
+     * @param config 
+     * @param targetClass 
+     * @return 
      */
     @Override
     public <T> T deserialize(Node source, final XMLDeserializationConfig config, Class<? extends T> targetClass) {
@@ -934,12 +939,13 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
     }
 
     /**
+     * 
      *
-     * @param config
-     * @param nodeClasses
-     * @param source
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param source 
+     * @param config 
+     * @param nodeClasses 
+     * @return 
      */
     @Override
     public <T> T deserialize(InputStream source, final XMLDeserializationConfig config, Map<String, Class<?>> nodeClasses) {
@@ -953,12 +959,13 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
     }
 
     /**
+     * 
      *
-     * @param config
-     * @param nodeClasses
-     * @param source
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param source 
+     * @param config 
+     * @param nodeClasses 
+     * @return 
      */
     @Override
     public <T> T deserialize(Reader source, final XMLDeserializationConfig config, Map<String, Class<?>> nodeClasses) {
@@ -966,12 +973,13 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
     }
 
     /**
+     * 
      *
-     * @param source
-     * @param config
-     * @param nodeClasses
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param source 
+     * @param config 
+     * @param nodeClasses 
+     * @return 
      */
     @Override
     @SuppressWarnings("unchecked")
@@ -3039,11 +3047,11 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
         }
 
         @Override
-        public void characters(char[] buffer, int offset, int length) throws SAXException {
+        public void characters(char[] buffer, int offset, int count) throws SAXException {
             if (inIgnorePropRefCount > 0) {
                 // ignore.
             } else {
-                sb.append(buffer, offset, length);
+                sb.append(buffer, offset, count);
             }
         }
 

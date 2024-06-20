@@ -320,25 +320,20 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
 
     /**
      * Array 2 collection.
-     * @param x
-     * @param output
      *
-     * @param <E>
-     * @return
+     * @param <E> 
+     * @param x 
+     * @param output 
      */
     @Override
-    public <E> Collection<E> array2Collection(final byte[] x, final Collection<E> output) {
-        if (N.isEmpty(x)) {
-            return output;
+    public <E> void array2Collection(final byte[] x, final Collection<E> output) {
+        if (N.notEmpty(x)) {
+            final Collection<Object> c = (Collection<Object>) output;
+
+            for (byte element : x) {
+                c.add(element);
+            }
         }
-
-        Collection<Object> c = (Collection<Object>) output;
-
-        for (byte element : x) {
-            c.add(element);
-        }
-
-        return output;
     }
 
     /**

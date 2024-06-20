@@ -5,7 +5,7 @@
 
 	<groupId>com.landawn</groupId>
 	<artifactId>abacus-common</artifactId>
-	<version>3.12.2</version>
+	<version>3.12.3</version>
 	<packaging>jar</packaging>
 
 	<name>abacus-common</name>
@@ -33,7 +33,7 @@
 		<dependency>
 			<groupId>com.landawn</groupId>
 			<artifactId>abacus-common</artifactId>
-			<version>3.12.1</version>
+			<version>3.12.2</version>
 			<scope>provided</scope>
 		</dependency>
 

@@ -180,12 +180,13 @@ final class JAXBParser extends AbstractXMLParser {
     }
 
     /**
+     * 
      *
-     * @param source
-     * @param config
-     * @param targetClass
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param source 
+     * @param config 
+     * @param targetClass 
+     * @return 
      */
     @Override
     public <T> T deserialize(String source, XMLDeserializationConfig config, Class<? extends T> targetClass) {
@@ -203,12 +204,13 @@ final class JAXBParser extends AbstractXMLParser {
     }
 
     /**
+     * 
      *
-     * @param source
-     * @param config
-     * @param targetClass
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param source 
+     * @param config 
+     * @param targetClass 
+     * @return 
      */
     @Override
     public <T> T deserialize(File source, XMLDeserializationConfig config, Class<? extends T> targetClass) {
@@ -224,12 +226,13 @@ final class JAXBParser extends AbstractXMLParser {
     }
 
     /**
+     * 
      *
-     * @param source
-     * @param config
-     * @param targetClass
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param source 
+     * @param config 
+     * @param targetClass 
+     * @return 
      */
     @Override
     public <T> T deserialize(InputStream source, XMLDeserializationConfig config, Class<? extends T> targetClass) {
@@ -243,12 +246,13 @@ final class JAXBParser extends AbstractXMLParser {
     }
 
     /**
+     * 
      *
-     * @param source
-     * @param config
-     * @param targetClass
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param source 
+     * @param config 
+     * @param targetClass 
+     * @return 
      */
     @Override
     public <T> T deserialize(Reader source, XMLDeserializationConfig config, Class<? extends T> targetClass) {
@@ -265,14 +269,14 @@ final class JAXBParser extends AbstractXMLParser {
     }
 
     /**
+     * 
      *
-     *
-     * @param source
-     * @param config
-     * @param targetClass
-     * @param <T>
-     * @return
-     * @throws UnsupportedOperationException
+     * @param <T> 
+     * @param source 
+     * @param config 
+     * @param targetClass 
+     * @return 
+     * @throws UnsupportedOperationException 
      */
     @Override
     public <T> T deserialize(Node source, XMLDeserializationConfig config, Class<? extends T> targetClass) throws UnsupportedOperationException {
@@ -280,14 +284,14 @@ final class JAXBParser extends AbstractXMLParser {
     }
 
     /**
+     * 
      *
-     *
-     * @param config
-     * @param nodeClasses
-     * @param source
-     * @param <T>
-     * @return
-     * @throws UnsupportedOperationException
+     * @param <T> 
+     * @param source 
+     * @param config 
+     * @param nodeClasses 
+     * @return 
+     * @throws UnsupportedOperationException 
      */
     @Override
     public <T> T deserialize(InputStream source, XMLDeserializationConfig config, Map<String, Class<?>> nodeClasses) throws UnsupportedOperationException {
@@ -295,14 +299,14 @@ final class JAXBParser extends AbstractXMLParser {
     }
 
     /**
+     * 
      *
-     *
-     * @param config
-     * @param nodeClasses
-     * @param source
-     * @param <T>
-     * @return
-     * @throws UnsupportedOperationException
+     * @param <T> 
+     * @param source 
+     * @param config 
+     * @param nodeClasses 
+     * @return 
+     * @throws UnsupportedOperationException 
      */
     @Override
     public <T> T deserialize(Reader source, XMLDeserializationConfig config, Map<String, Class<?>> nodeClasses) throws UnsupportedOperationException {
@@ -310,14 +314,14 @@ final class JAXBParser extends AbstractXMLParser {
     }
 
     /**
+     * 
      *
-     *
-     * @param source
-     * @param config
-     * @param nodeClasses
-     * @param <T>
-     * @return
-     * @throws UnsupportedOperationException
+     * @param <T> 
+     * @param source 
+     * @param config 
+     * @param nodeClasses 
+     * @return 
+     * @throws UnsupportedOperationException 
      */
     @Override
     public <T> T deserialize(Node source, XMLDeserializationConfig config, Map<String, Class<?>> nodeClasses) throws UnsupportedOperationException {

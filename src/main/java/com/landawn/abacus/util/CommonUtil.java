@@ -113,11 +113,15 @@ import com.landawn.abacus.util.function.ToFloatFunction;
  * </p>
  * Class <code>N</code> is a general java utility class. It provides the most daily used operations for Object/primitive types/String/Array/Collection/Map/Bean...:
  *
+ * <br />
+ * <br />
  * When to throw exception? It's designed to avoid throwing any unnecessary
  * exception if the contract defined by method is not broken. for example, if
  * user tries to reverse a null or empty String. the input String will be
  * returned. But exception will be thrown if trying to repeat/swap a null or
- * empty string or operate Array/Collection by adding/removing... <br>
+ * empty string or operate Array/Collection by adding/removing...
+ * <br />
+ * There are only {@code fromIndex/startIndex} and {toIndex/endIndex} parameters in the methods defined in class {@code CommonUtil/N}, no {@code offset/count} parameters.
  *
  * @author Haiyang Li
  *
@@ -1114,7 +1118,9 @@ sealed class CommonUtil permits N {
             if (srcType.isBean() && targetType.getParameterTypes()[0].clazz().isAssignableFrom(String.class)
                     && Object.class.equals(targetType.getParameterTypes()[1].clazz())) {
                 try {
-                    return (T) Maps.bean2Map(obj, N.<String, Object> newMap((Class<Map>) targetType.clazz()));
+                    final Map<String, Object> result = N.<String, Object> newMap((Class<Map>) targetType.clazz());
+                    Maps.bean2Map(obj, result);
+                    return (T) result;
                 } catch (Exception e) {
                     // ignore.
                 }
@@ -15907,8 +15913,11 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * 
      *
-     * @param c
+     * @param <T> 
+     * @param c 
+     * @return 
      */
     public static <T> List<T> reverseToList(final Collection<? extends T> c) {
         if (isEmpty(c)) {

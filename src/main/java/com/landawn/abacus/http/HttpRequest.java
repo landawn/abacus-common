@@ -653,11 +653,12 @@ public final class HttpRequest {
     }
 
     /**
+     * 
      *
-     * @param resultClass
-     * @param executor
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param resultClass 
+     * @param executor 
+     * @return 
      */
     public <T> ContinuableFuture<T> asyncGet(final Class<T> resultClass, final Executor executor) {
         return asyncExecute(HttpMethod.GET, resultClass, executor);
@@ -691,11 +692,12 @@ public final class HttpRequest {
     }
 
     /**
+     * 
      *
-     * @param resultClass
-     * @param executor
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param resultClass 
+     * @param executor 
+     * @return 
      */
     public <T> ContinuableFuture<T> asyncPost(final Class<T> resultClass, final Executor executor) {
         return asyncExecute(HttpMethod.POST, resultClass, executor);
@@ -729,11 +731,12 @@ public final class HttpRequest {
     }
 
     /**
+     * 
      *
-     * @param resultClass
-     * @param executor
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param resultClass 
+     * @param executor 
+     * @return 
      */
     public <T> ContinuableFuture<T> asyncPut(final Class<T> resultClass, final Executor executor) {
         return asyncExecute(HttpMethod.PUT, resultClass, executor);
@@ -808,11 +811,12 @@ public final class HttpRequest {
     }
 
     /**
+     * 
      *
-     * @param resultClass
-     * @param executor
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param resultClass 
+     * @param executor 
+     * @return 
      */
     public <T> ContinuableFuture<T> asyncDelete(final Class<T> resultClass, final Executor executor) {
         return asyncExecute(HttpMethod.DELETE, resultClass, executor);

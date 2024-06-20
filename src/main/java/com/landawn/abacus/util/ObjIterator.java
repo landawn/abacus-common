@@ -614,6 +614,18 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
     }
 
     /**
+     * Returns a new {@code ObjIterator}.
+     *
+     * @param offset
+     * @param count
+     * @return
+     * @see Iterators#skipAndLimit(Iterator, long, long)
+     */
+    public ObjIterator<T> skipAndLimit(final long offset, final long count) {
+        return Iterators.skipAndLimit(this, offset, count);
+    }
+
+    /**
      *
      *
      * @param predicate

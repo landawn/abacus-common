@@ -137,11 +137,12 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
     }
 
     /**
+     * 
      *
-     * @param targetClass
-     * @param source
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param source 
+     * @param targetClass 
+     * @return 
      */
     @Override
     public <T> T deserialize(String source, Class<? extends T> targetClass) {
@@ -149,11 +150,12 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
     }
 
     /**
+     * 
      *
-     * @param targetClass
-     * @param source
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param source 
+     * @param targetClass 
+     * @return 
      */
     @Override
     public <T> T deserialize(File source, Class<? extends T> targetClass) {
@@ -161,11 +163,12 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
     }
 
     /**
+     * 
      *
-     * @param targetClass
-     * @param source
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param source 
+     * @param targetClass 
+     * @return 
      */
     @Override
     public <T> T deserialize(InputStream source, Class<? extends T> targetClass) {
@@ -173,11 +176,12 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
     }
 
     /**
+     * 
      *
-     * @param targetClass
-     * @param source
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param source 
+     * @param targetClass 
+     * @return 
      */
     @Override
     public <T> T deserialize(Reader source, Class<? extends T> targetClass) {

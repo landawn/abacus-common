@@ -152,9 +152,10 @@ public final class ByteArrayOutputStream extends OutputStream {
     }
 
     /**
+     * 
      *
-     * @param charset
-     * @return
+     * @param charsetName 
+     * @return 
      * @throws UnsupportedEncodingException If the named charset is not supported
      */
     public String toString(String charsetName) throws UnsupportedEncodingException {

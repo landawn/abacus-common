@@ -2910,40 +2910,36 @@ public final class Maps {
 
     /**
      * Bean to map.
-     * @param bean
-     * @param output
      *
      * @param <M>
-     * @return the specified output parameter: {@code output}.
+     * @param bean
+     * @param output
      */
-    public static <M extends Map<String, Object>> M bean2Map(final Object bean, final M output) {
-        return bean2Map(bean, null, output);
+    public static <M extends Map<String, Object>> void bean2Map(final Object bean, final M output) {
+        bean2Map(bean, null, output);
     }
 
     /**
      * Bean to map.
+     *
+     * @param <M>
      * @param bean
      * @param selectPropNames
      * @param output
-     *
-     * @param <M>
-     * @return the specified output parameter: {@code output}.
      */
-    public static <M extends Map<String, Object>> M bean2Map(final Object bean, final Collection<String> selectPropNames, final M output) {
-        return bean2Map(bean, selectPropNames, NamingPolicy.LOWER_CAMEL_CASE, output);
+    public static <M extends Map<String, Object>> void bean2Map(final Object bean, final Collection<String> selectPropNames, final M output) {
+        bean2Map(bean, selectPropNames, NamingPolicy.LOWER_CAMEL_CASE, output);
     }
 
     /**
      * Bean to map.
+     * @param <M>
      * @param bean
      * @param selectPropNames
      * @param keyNamingPolicy
      * @param output
-     *
-     * @param <M>
-     * @return the specified output parameter: {@code output}.
      */
-    public static <M extends Map<String, Object>> M bean2Map(final Object bean, final Collection<String> selectPropNames, NamingPolicy keyNamingPolicy,
+    public static <M extends Map<String, Object>> void bean2Map(final Object bean, final Collection<String> selectPropNames, NamingPolicy keyNamingPolicy,
             final M output) {
         keyNamingPolicy = keyNamingPolicy == null ? NamingPolicy.LOWER_CAMEL_CASE : keyNamingPolicy;
         final boolean isLowerCamelCaseOrNoChange = NamingPolicy.LOWER_CAMEL_CASE == keyNamingPolicy || NamingPolicy.NO_CHANGE == keyNamingPolicy;
@@ -2972,8 +2968,6 @@ public final class Maps {
                 }
             }
         }
-
-        return output;
     }
 
     /**
@@ -3057,44 +3051,42 @@ public final class Maps {
 
     /**
      * Bean to map.
+     * @param <M>
      * @param bean
      * @param ignoreNullProperty
      * @param output
      *
-     * @param <M>
-     * @return the specified output parameter: {@code output}.
      */
-    public static <M extends Map<String, Object>> M bean2Map(final Object bean, final boolean ignoreNullProperty, final M output) {
-        return bean2Map(bean, ignoreNullProperty, null, output);
+    public static <M extends Map<String, Object>> void bean2Map(final Object bean, final boolean ignoreNullProperty, final M output) {
+        bean2Map(bean, ignoreNullProperty, null, output);
     }
 
     /**
      * Bean to map.
+     * @param <M>
      * @param bean
      * @param ignoreNullProperty
      * @param ignoredPropNames
      * @param output
      *
-     * @param <M>
-     * @return the specified output parameter: {@code output}.
      */
-    public static <M extends Map<String, Object>> M bean2Map(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
+    public static <M extends Map<String, Object>> void bean2Map(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
             final M output) {
-        return bean2Map(bean, ignoreNullProperty, ignoredPropNames, NamingPolicy.LOWER_CAMEL_CASE, output);
+        bean2Map(bean, ignoreNullProperty, ignoredPropNames, NamingPolicy.LOWER_CAMEL_CASE, output);
     }
 
     /**
      * Bean to map.
+     * @param <M>
      * @param bean
      * @param ignoreNullProperty
      * @param ignoredPropNames
      * @param keyNamingPolicy
      * @param output
      *
-     * @param <M>
      * @return the specified output parameter: {@code output}.
      */
-    public static <M extends Map<String, Object>> M bean2Map(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
+    public static <M extends Map<String, Object>> void bean2Map(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
             NamingPolicy keyNamingPolicy, final M output) {
         keyNamingPolicy = keyNamingPolicy == null ? NamingPolicy.LOWER_CAMEL_CASE : keyNamingPolicy;
         final boolean isLowerCamelCaseOrNoChange = NamingPolicy.LOWER_CAMEL_CASE == keyNamingPolicy || NamingPolicy.NO_CHANGE == keyNamingPolicy;
@@ -3124,8 +3116,6 @@ public final class Maps {
                 output.put(keyNamingPolicy.convert(propName), propValue);
             }
         }
-
-        return output;
     }
 
     /**
@@ -3196,40 +3186,37 @@ public final class Maps {
 
     /**
      * Bean to map.
+     * @param <M>
      * @param bean
      * @param output
      *
-     * @param <M>
-     * @return the specified output parameter: {@code output}.
      */
-    public static <M extends Map<String, Object>> M deepBean2Map(final Object bean, final M output) {
-        return deepBean2Map(bean, null, output);
+    public static <M extends Map<String, Object>> void deepBean2Map(final Object bean, final M output) {
+        deepBean2Map(bean, null, output);
     }
 
     /**
      * Bean to map.
+     * @param <M>
      * @param bean
      * @param selectPropNames
      * @param output
      *
-     * @param <M>
-     * @return the specified output parameter: {@code output}.
      */
-    public static <M extends Map<String, Object>> M deepBean2Map(final Object bean, final Collection<String> selectPropNames, final M output) {
-        return deepBean2Map(bean, selectPropNames, NamingPolicy.LOWER_CAMEL_CASE, output);
+    public static <M extends Map<String, Object>> void deepBean2Map(final Object bean, final Collection<String> selectPropNames, final M output) {
+        deepBean2Map(bean, selectPropNames, NamingPolicy.LOWER_CAMEL_CASE, output);
     }
 
     /**
      * Bean to map.
+     * @param <M>
      * @param bean
      * @param selectPropNames
      * @param keyNamingPolicy
      * @param output
      *
-     * @param <M>
-     * @return the specified output parameter: {@code output}.
      */
-    public static <M extends Map<String, Object>> M deepBean2Map(final Object bean, final Collection<String> selectPropNames,
+    public static <M extends Map<String, Object>> void deepBean2Map(final Object bean, final Collection<String> selectPropNames,
             final NamingPolicy keyNamingPolicy, final M output) {
         final boolean isLowerCamelCaseOrNoChange = keyNamingPolicy == null || NamingPolicy.LOWER_CAMEL_CASE == keyNamingPolicy
                 || NamingPolicy.NO_CHANGE == keyNamingPolicy;
@@ -3267,8 +3254,6 @@ public final class Maps {
                 }
             }
         }
-
-        return output;
     }
 
     /**
@@ -3352,44 +3337,41 @@ public final class Maps {
 
     /**
      * Bean to map.
+     * @param <M>
      * @param bean
      * @param ignoreNullProperty
      * @param output
      *
-     * @param <M>
-     * @return the specified output parameter: {@code output}.
      */
-    public static <M extends Map<String, Object>> M deepBean2Map(final Object bean, final boolean ignoreNullProperty, final M output) {
-        return deepBean2Map(bean, ignoreNullProperty, null, output);
+    public static <M extends Map<String, Object>> void deepBean2Map(final Object bean, final boolean ignoreNullProperty, final M output) {
+        deepBean2Map(bean, ignoreNullProperty, null, output);
     }
 
     /**
      * Bean to map.
+     * @param <M>
      * @param bean
      * @param ignoreNullProperty
      * @param ignoredPropNames
      * @param output
      *
-     * @param <M>
-     * @return the specified output parameter: {@code output}.
      */
-    public static <M extends Map<String, Object>> M deepBean2Map(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
+    public static <M extends Map<String, Object>> void deepBean2Map(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
             final M output) {
-        return deepBean2Map(bean, ignoreNullProperty, ignoredPropNames, NamingPolicy.LOWER_CAMEL_CASE, output);
+        deepBean2Map(bean, ignoreNullProperty, ignoredPropNames, NamingPolicy.LOWER_CAMEL_CASE, output);
     }
 
     /**
      * Bean to map.
+     * @param <M>
      * @param bean
      * @param ignoreNullProperty
      * @param ignoredPropNames
      * @param keyNamingPolicy
      * @param output
      *
-     * @param <M>
-     * @return the specified output parameter: {@code output}.
      */
-    public static <M extends Map<String, Object>> M deepBean2Map(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
+    public static <M extends Map<String, Object>> void deepBean2Map(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
             final NamingPolicy keyNamingPolicy, final M output) {
         final boolean isLowerCamelCaseOrNoChange = keyNamingPolicy == null || NamingPolicy.LOWER_CAMEL_CASE == keyNamingPolicy
                 || NamingPolicy.NO_CHANGE == keyNamingPolicy;
@@ -3428,8 +3410,6 @@ public final class Maps {
                 }
             }
         }
-
-        return output;
     }
 
     /**
@@ -3500,40 +3480,37 @@ public final class Maps {
 
     /**
      * Bean to map.
+     * @param <M>
      * @param bean
      * @param output
      *
-     * @param <M>
-     * @return the specified output parameter: {@code output}.
      */
-    public static <M extends Map<String, Object>> M bean2FlatMap(final Object bean, final M output) {
-        return bean2FlatMap(bean, null, output);
+    public static <M extends Map<String, Object>> void bean2FlatMap(final Object bean, final M output) {
+        bean2FlatMap(bean, null, output);
     }
 
     /**
      * Bean to map.
+     * @param <M>
      * @param bean
      * @param selectPropNames
      * @param output
      *
-     * @param <M>
-     * @return the specified output parameter: {@code output}.
      */
-    public static <M extends Map<String, Object>> M bean2FlatMap(final Object bean, final Collection<String> selectPropNames, final M output) {
-        return bean2FlatMap(bean, selectPropNames, NamingPolicy.LOWER_CAMEL_CASE, output);
+    public static <M extends Map<String, Object>> void bean2FlatMap(final Object bean, final Collection<String> selectPropNames, final M output) {
+        bean2FlatMap(bean, selectPropNames, NamingPolicy.LOWER_CAMEL_CASE, output);
     }
 
     /**
      * Bean to map.
+     * @param <M>
      * @param bean
      * @param selectPropNames
      * @param keyNamingPolicy
      * @param output
      *
-     * @param <M>
-     * @return the specified output parameter: {@code output}.
      */
-    public static <M extends Map<String, Object>> M bean2FlatMap(final Object bean, final Collection<String> selectPropNames, NamingPolicy keyNamingPolicy,
+    public static <M extends Map<String, Object>> void bean2FlatMap(final Object bean, final Collection<String> selectPropNames, NamingPolicy keyNamingPolicy,
             final M output) {
         keyNamingPolicy = keyNamingPolicy == null ? NamingPolicy.LOWER_CAMEL_CASE : keyNamingPolicy;
         final boolean isLowerCamelCaseOrNoChange = NamingPolicy.LOWER_CAMEL_CASE == keyNamingPolicy || NamingPolicy.NO_CHANGE == keyNamingPolicy;
@@ -3566,8 +3543,6 @@ public final class Maps {
                 }
             }
         }
-
-        return output;
     }
 
     /**
@@ -3651,50 +3626,47 @@ public final class Maps {
 
     /**
      * Bean to map.
+     * @param <M>
      * @param bean
      * @param ignoreNullProperty
      * @param output
      *
-     * @param <M>
-     * @return the specified output parameter: {@code output}.
      */
-    public static <M extends Map<String, Object>> M bean2FlatMap(final Object bean, final boolean ignoreNullProperty, final M output) {
-        return bean2FlatMap(bean, ignoreNullProperty, null, output);
+    public static <M extends Map<String, Object>> void bean2FlatMap(final Object bean, final boolean ignoreNullProperty, final M output) {
+        bean2FlatMap(bean, ignoreNullProperty, null, output);
     }
 
     /**
      * Bean to map.
+     * @param <M>
      * @param bean
      * @param ignoreNullProperty
      * @param ignoredPropNames
      * @param output
      *
-     * @param <M>
-     * @return the specified output parameter: {@code output}.
      */
-    public static <M extends Map<String, Object>> M bean2FlatMap(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
+    public static <M extends Map<String, Object>> void bean2FlatMap(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
             final M output) {
-        return bean2FlatMap(bean, ignoreNullProperty, ignoredPropNames, NamingPolicy.LOWER_CAMEL_CASE, output);
+        bean2FlatMap(bean, ignoreNullProperty, ignoredPropNames, NamingPolicy.LOWER_CAMEL_CASE, output);
     }
 
     /**
      * Bean to map.
+     * @param <M>
      * @param bean
      * @param ignoreNullProperty
      * @param ignoredPropNames
      * @param keyNamingPolicy
      * @param output
      *
-     * @param <M>
-     * @return the specified output parameter: {@code output}.
      */
-    public static <M extends Map<String, Object>> M bean2FlatMap(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
+    public static <M extends Map<String, Object>> void bean2FlatMap(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
             final NamingPolicy keyNamingPolicy, final M output) {
-        return bean2FlatMap(bean, ignoreNullProperty, ignoredPropNames, keyNamingPolicy, null, output);
+        bean2FlatMap(bean, ignoreNullProperty, ignoredPropNames, keyNamingPolicy, null, output);
     }
 
-    static <T extends Map<String, Object>> T bean2FlatMap(final Object bean, final boolean ignoreNullProperty, final Collection<String> ignoredPropNames,
-            final NamingPolicy keyNamingPolicy, final String parentPropName, final T output) {
+    static <M extends Map<String, Object>> void bean2FlatMap(final Object bean, final boolean ignoreNullProperty, final Collection<String> ignoredPropNames,
+            final NamingPolicy keyNamingPolicy, final String parentPropName, final M output) {
         final boolean isLowerCamelCaseOrNoChange = keyNamingPolicy == null || NamingPolicy.LOWER_CAMEL_CASE == keyNamingPolicy
                 || NamingPolicy.NO_CHANGE == keyNamingPolicy;
 
@@ -3742,8 +3714,6 @@ public final class Maps {
                 }
             }
         }
-
-        return output;
     }
 
     /**

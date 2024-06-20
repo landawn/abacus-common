@@ -27,63 +27,129 @@ public final class ConcurrentHashSet<E> extends AbstractSet<E> {
 
     private final ConcurrentHashMap<E, Object> map;
 
+    /**
+     * 
+     */
     public ConcurrentHashSet() {
         map = new ConcurrentHashMap<>();
     }
 
+    /**
+     * 
+     *
+     * @param initialCapacity 
+     */
     public ConcurrentHashSet(int initialCapacity) {
         map = new ConcurrentHashMap<>(initialCapacity);
     }
 
+    /**
+     * 
+     *
+     * @param initialCapacity 
+     * @param loadFactor 
+     */
     public ConcurrentHashSet(int initialCapacity, float loadFactor) {
         map = new ConcurrentHashMap<>(initialCapacity, loadFactor);
     }
 
+    /**
+     * 
+     *
+     * @param c 
+     */
     public ConcurrentHashSet(Collection<? extends E> c) {
         map = new ConcurrentHashMap<>(Math.max((int) (c.size() / .75f) + 1, 16));
         addAll(c);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public boolean isEmpty() {
         return map.isEmpty();
     }
 
+    /**
+     * 
+     *
+     * @param e 
+     * @return 
+     */
     @Override
     public boolean add(E e) {
         return map.put(e, PRESENT) == null;
     }
 
+    /**
+     * 
+     *
+     * @param o 
+     * @return 
+     */
     @Override
     public boolean remove(Object o) {
         return map.remove(o) == PRESENT;
     }
 
+    /**
+     * 
+     */
     @Override
     public void clear() {
         map.clear();
     }
 
+    /**
+     * 
+     *
+     * @param o 
+     * @return 
+     */
     @Override
     public boolean contains(Object o) {
         return map.containsKey(o);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public Iterator<E> iterator() {
         return map.keySet().iterator();
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public int size() {
         return map.size();
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public int hashCode() {
         return map.keySet().hashCode();
     }
 
+    /**
+     * 
+     *
+     * @param o 
+     * @return 
+     */
     @Override
     public boolean equals(Object o) {
         if (o == this) {
@@ -93,6 +159,11 @@ public final class ConcurrentHashSet<E> extends AbstractSet<E> {
         return (o instanceof ConcurrentHashSet) && ((ConcurrentHashSet<E>) o).map.keySet().equals(map.keySet());
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public String toString() {
         return map.keySet().toString();

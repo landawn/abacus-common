@@ -304,12 +304,13 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
     }
 
     /**
+     * 
      *
+     * @param <T> 
      * @param source A Base64 encoded String
-     * @param config
-     * @param targetClass
-     * @param <T>
-     * @return
+     * @param config 
+     * @param targetClass 
+     * @return 
      */
     @Override
     public <T> T deserialize(String source, KryoDeserializationConfig config, Class<? extends T> targetClass) {
@@ -325,12 +326,13 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
     }
 
     /**
+     * 
      *
-     * @param source
-     * @param config
-     * @param targetClass
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param source 
+     * @param config 
+     * @param targetClass 
+     * @return 
      */
     @Override
     public <T> T deserialize(File source, KryoDeserializationConfig config, Class<? extends T> targetClass) {
@@ -346,12 +348,13 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
     }
 
     /**
+     * 
      *
-     * @param source
-     * @param config
-     * @param targetClass
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param source 
+     * @param config 
+     * @param targetClass 
+     * @return 
      */
     @Override
     public <T> T deserialize(InputStream source, KryoDeserializationConfig config, Class<? extends T> targetClass) {
@@ -359,12 +362,13 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
     }
 
     /**
+     * 
      *
+     * @param <T> 
      * @param source content is encoded with base64
-     * @param config
-     * @param targetClass
-     * @param <T>
-     * @return
+     * @param config 
+     * @param targetClass 
+     * @return 
      */
     @Override
     public <T> T deserialize(Reader source, KryoDeserializationConfig config, Class<? extends T> targetClass) {

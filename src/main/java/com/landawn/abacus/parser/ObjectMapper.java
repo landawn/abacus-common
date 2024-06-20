@@ -90,78 +90,86 @@ public interface ObjectMapper<C extends MapperConfig> {
     void write(Object obj, C config, Writer output);
 
     /**
+     * 
      *
-     * @param source
-     * @param targetType
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param source 
+     * @param targetType 
+     * @return 
      */
     <T> T read(String source, Class<? extends T> targetType);
 
     /**
+     * 
      *
-     * @param source
-     * @param config
-     * @param targetType
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param source 
+     * @param config 
+     * @param targetType 
+     * @return 
      */
     <T> T read(String source, C config, Class<? extends T> targetType);
 
     /**
+     * 
      *
-     * @param source
-     * @param targetType
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param source 
+     * @param targetType 
+     * @return 
      */
     <T> T read(File source, Class<? extends T> targetType);
 
     /**
+     * 
      *
-     * @param source
-     * @param config
-     * @param targetType
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param source 
+     * @param config 
+     * @param targetType 
+     * @return 
      */
     <T> T read(File source, C config, Class<? extends T> targetType);
 
     /**
+     * 
      *
-     * @param source
-     * @param targetType
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param source 
+     * @param targetType 
+     * @return 
      */
     <T> T read(InputStream source, Class<? extends T> targetType);
 
     /**
+     * 
      *
-     * @param source
-     * @param config
-     * @param targetType
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param source 
+     * @param config 
+     * @param targetType 
+     * @return 
      */
     <T> T read(InputStream source, C config, Class<? extends T> targetType);
 
     /**
+     * 
      *
-     * @param source
-     * @param targetType
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param source 
+     * @param targetType 
+     * @return 
      */
     <T> T read(Reader source, Class<? extends T> targetType);
 
     /**
+     * 
      *
-     * @param source
-     * @param config
-     * @param targetType
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param source 
+     * @param config 
+     * @param targetType 
+     * @return 
      */
     <T> T read(Reader source, C config, Class<? extends T> targetType);
 }

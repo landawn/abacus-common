@@ -153,18 +153,18 @@ public final class Joiner implements Closeable {
         return this;
     }
 
-    /**
-     *
-     * @param trim
-     * @return
-     * @deprecated replaced by {@link #trimBeforeAppend()}
-     */
-    @Deprecated
-    public Joiner trim(boolean trim) {
-        this.trimBeforeAppend = trim;
-
-        return this;
-    }
+    //    /**
+    //     *
+    //     * @param trim
+    //     * @return
+    //     * @deprecated replaced by {@link #trimBeforeAppend()}
+    //     */
+    //    @Deprecated
+    //    public Joiner trim(boolean trim) {
+    //        this.trimBeforeAppend = trim;
+    //
+    //        return this;
+    //    }
 
     /**
      *
@@ -177,19 +177,19 @@ public final class Joiner implements Closeable {
         return this;
     }
 
-    /**
-     * Ignore the {@code null} element/value for {@code key/value, Map, Bean} when the specified {@code element} or {@code value} is {@code null} if it's set to {@code true}.
-     *
-     * @param skipNull
-     * @return
-     * @deprecated replaced by {@link #skipNulls()}
-     */
-    @Deprecated
-    public Joiner skipNull(boolean skipNull) {
-        this.skipNulls = skipNull;
-
-        return this;
-    }
+    //    /**
+    //     * Ignore the {@code null} element/value for {@code key/value, Map, Bean} when the specified {@code element} or {@code value} is {@code null} if it's set to {@code true}.
+    //     *
+    //     * @param skipNull
+    //     * @return
+    //     * @deprecated replaced by {@link #skipNulls()}
+    //     */
+    //    @Deprecated
+    //    public Joiner skipNull(boolean skipNull) {
+    //        this.skipNulls = skipNull;
+    //
+    //        return this;
+    //    }
 
     /**
      *
@@ -232,23 +232,23 @@ public final class Joiner implements Closeable {
     //        return this;
     //    }
 
-    /**
-     * Improving performance by set {@code useCachedBuffer=true}, and must remember to call {@code toString()/map()/mapIfNotEmpty()/stream()/streamIfNotEmpty()} or {@code close()} to recycle the cached buffer.
-     *
-     * @param useCachedBuffer
-     * @return
-     * @deprecated replaced by {@link #reuseCachedBuffer()}
-     */
-    @Deprecated
-    public Joiner reuseCachedBuffer(boolean useCachedBuffer) {
-        if (buffer != null) {
-            throw new IllegalStateException("Can't reset because the buffer has been created");
-        }
-
-        this.useCachedBuffer = useCachedBuffer;
-
-        return this;
-    }
+    //    /**
+    //     * Improving performance by set {@code useCachedBuffer=true}, and must remember to call {@code toString()/map()/mapIfNotEmpty()/stream()/streamIfNotEmpty()} or {@code close()} to recycle the cached buffer.
+    //     *
+    //     * @param useCachedBuffer
+    //     * @return
+    //     * @deprecated replaced by {@link #reuseCachedBuffer()}
+    //     */
+    //    @Deprecated
+    //    public Joiner reuseCachedBuffer(boolean useCachedBuffer) {
+    //        if (buffer != null) {
+    //            throw new IllegalStateException("Can't reset because the buffer has been created");
+    //        }
+    //
+    //        this.useCachedBuffer = useCachedBuffer;
+    //
+    //        return this;
+    //    }
 
     /**
      * Improving performance by set {@code useCachedBuffer=true}, and must remember to call {@code toString()/appendTo()/map()/mapIfNotEmpty()/stream()/streamIfNotEmpty()} or {@code close()} to recycle the cached buffer.
@@ -343,6 +343,43 @@ public final class Joiner implements Closeable {
      * @param element
      * @return
      */
+    public Joiner append(char[] element) {
+        if (element != null || !skipNulls) {
+            if (element == null) {
+                prepareBuilder().append(nullText);
+            } else {
+                prepareBuilder().append(element);
+            }
+        }
+
+        return this;
+    }
+
+    /**
+     *
+     * @param element
+     * @param offset
+     * @param len
+     * @return
+     * @see StringBuilder#append(char[], int, int)
+     */
+    public Joiner append(char[] element, final int offset, final int len) {
+        if (element != null || !skipNulls) {
+            if (element == null) {
+                prepareBuilder().append(nullText);
+            } else {
+                prepareBuilder().append(element, offset, len);
+            }
+        }
+
+        return this;
+    }
+
+    /**
+     *
+     * @param element
+     * @return
+     */
     public Joiner append(CharSequence element) {
         if (element != null || !skipNulls) {
             prepareBuilder().append(element == null ? nullText : (trimBeforeAppend ? element.toString().trim() : element));
@@ -357,6 +394,7 @@ public final class Joiner implements Closeable {
      * @param start
      * @param end
      * @return
+     * @see Appendable#append(CharSequence, int, int)
      */
     public Joiner append(CharSequence element, final int start, final int end) {
         if (element != null || !skipNulls) {
@@ -394,43 +432,7 @@ public final class Joiner implements Closeable {
      * @param element
      * @return
      */
-    public Joiner append(char[] element) {
-        if (element != null || !skipNulls) {
-            if (element == null) {
-                prepareBuilder().append(nullText);
-            } else {
-                prepareBuilder().append(element);
-            }
-        }
-
-        return this;
-    }
-
-    /**
-     *
-     * @param element
-     * @param offset
-     * @param len
-     * @return
-     */
-    public Joiner append(char[] element, final int offset, final int len) {
-        if (element != null || !skipNulls) {
-            if (element == null) {
-                prepareBuilder().append(nullText);
-            } else {
-                prepareBuilder().append(element, offset, len);
-            }
-        }
-
-        return this;
-    }
-
-    /**
-     *
-     * @param element
-     * @return
-     */
-    public Joiner append(Object element) {
+    public Joiner append(Object element) { // Note: DO NOT remove/update this method because it also protect append(boolean/char/byte/.../double) from NullPointerException.
         if (element != null || !skipNulls) {
             prepareBuilder().append(toString(element));
         }

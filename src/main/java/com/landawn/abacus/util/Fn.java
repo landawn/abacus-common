@@ -426,24 +426,27 @@ public final class Fn {
      * Copied from Google Guava under Apache License v2.
      * <br />
      * <br />
-     *
+     * 
      * Returns a supplier that caches the instance supplied by the delegate and removes the cached
      * value after the specified time has passed. Subsequent calls to {@code get()} return the cached
      * value if the expiration time has not passed. After the expiration time, a new value is
      * retrieved, cached, and returned. See: <a
      * href="http://en.wikipedia.org/wiki/Memoization">memoization</a>
-     *
+     * 
      * <p>The returned supplier is thread-safe. The supplier's serialized form does not contain the
      * cached value, which will be recalculated when {@code get()} is called on the reserialized
      * instance. The actual memoization does not happen when the underlying delegate throws an
      * exception.
-     *
+     * 
      * <p>When the underlying delegate throws an exception then this memoizing supplier will keep
      * delegating calls until it returns valid data.
      *
+     * @param <T> 
+     * @param supplier 
      * @param duration the length of time after a value is created that it should stop being returned
      *     by subsequent {@code get()} calls
      * @param unit the unit that {@code duration} is expressed in
+     * @return 
      * @throws IllegalArgumentException if {@code duration} is not positive
      * @since 2.0
      */
@@ -2585,12 +2588,11 @@ public final class Fn {
     }
 
     /**
+     * 
      *
-     *
-     * @param <T>
-     * @param predicate
-     * @param consumer
-     * @return
+     * @param <T> 
+     * @param consumer 
+     * @return 
      */
     @Beta
     public static <T> Consumer<T> acceptIfNotNull(final java.util.function.Consumer<? super T> consumer) {
@@ -10036,24 +10038,28 @@ public final class Fn {
          * Copied from Google Guava under Apache License v2.
          * <br />
          * <br />
-         *
+         * 
          * Returns a supplier that caches the instance supplied by the delegate and removes the cached
          * value after the specified time has passed. Subsequent calls to {@code get()} return the cached
          * value if the expiration time has not passed. After the expiration time, a new value is
          * retrieved, cached, and returned. See: <a
          * href="http://en.wikipedia.org/wiki/Memoization">memoization</a>
-         *
+         * 
          * <p>The returned supplier is thread-safe. The supplier's serialized form does not contain the
          * cached value, which will be recalculated when {@code get()} is called on the reserialized
          * instance. The actual memoization does not happen when the underlying delegate throws an
          * exception.
-         *
+         * 
          * <p>When the underlying delegate throws an exception then this memoizing supplier will keep
          * delegating calls until it returns valid data.
          *
+         * @param <T> 
+         * @param <E> 
+         * @param supplier 
          * @param duration the length of time after a value is created that it should stop being returned
          *     by subsequent {@code get()} calls
          * @param unit the unit that {@code duration} is expressed in
+         * @return 
          * @throws IllegalArgumentException if {@code duration} is not positive
          * @since 2.0
          */
@@ -10177,9 +10183,11 @@ public final class Fn {
         }
 
         /**
+         * 
          *
-         * @param <T>
-         * @return
+         * @param <T> 
+         * @param <E> 
+         * @return 
          */
         public static <T, E extends Exception> Throwables.Function<T, String, E> toStr() {
             return TO_STRING;

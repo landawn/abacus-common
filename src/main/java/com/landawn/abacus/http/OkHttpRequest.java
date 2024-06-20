@@ -849,12 +849,12 @@ public final class OkHttpRequest {
     }
 
     /**
+     * 
      *
-     *
-     * @param resultClass
-     * @param executor
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param resultClass 
+     * @param executor 
+     * @return 
      */
     public <T> ContinuableFuture<T> asyncGet(final Class<T> resultClass, final Executor executor) {
         return ContinuableFuture.call(() -> get(resultClass), executor);
@@ -891,12 +891,12 @@ public final class OkHttpRequest {
     }
 
     /**
+     * 
      *
-     *
-     * @param resultClass
-     * @param executor
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param resultClass 
+     * @param executor 
+     * @return 
      */
     public <T> ContinuableFuture<T> asyncPost(final Class<T> resultClass, final Executor executor) {
         return ContinuableFuture.call(() -> post(resultClass), executor);
@@ -933,12 +933,12 @@ public final class OkHttpRequest {
     }
 
     /**
+     * 
      *
-     *
-     * @param resultClass
-     * @param executor
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param resultClass 
+     * @param executor 
+     * @return 
      */
     public <T> ContinuableFuture<T> asyncPut(final Class<T> resultClass, final Executor executor) {
         return ContinuableFuture.call(() -> put(resultClass), executor);
@@ -975,12 +975,12 @@ public final class OkHttpRequest {
     }
 
     /**
+     * 
      *
-     *
-     * @param resultClass
-     * @param executor
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param resultClass 
+     * @param executor 
+     * @return 
      */
     public <T> ContinuableFuture<T> asyncPatch(final Class<T> resultClass, final Executor executor) {
         return ContinuableFuture.call(() -> patch(resultClass), executor);
@@ -1017,12 +1017,12 @@ public final class OkHttpRequest {
     }
 
     /**
+     * 
      *
-     *
-     * @param resultClass
-     * @param executor
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param resultClass 
+     * @param executor 
+     * @return 
      */
     public <T> ContinuableFuture<T> asyncDelete(final Class<T> resultClass, final Executor executor) {
         return ContinuableFuture.call(() -> delete(resultClass), executor);

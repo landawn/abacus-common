@@ -1824,11 +1824,11 @@ public final class ClassUtil {
     }
 
     /**
+     * 
      *
-     * @param <E>
-     * @param bean
-     * @param propValueFilter
-     * @return
+     * @param bean 
+     * @param propValueFilter 
+     * @return 
      */
     public static List<String> getPropNames(final Object bean, final Predicate<Object> propValueFilter) {
         final BeanInfo beanInfo = ParserUtil.getBeanInfo(bean.getClass());

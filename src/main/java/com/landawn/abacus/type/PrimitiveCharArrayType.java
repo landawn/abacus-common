@@ -267,25 +267,20 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
 
     /**
      * Array 2 collection.
-     * @param x
-     * @param output
      *
-     * @param <E>
-     * @return
+     * @param <E> 
+     * @param x 
+     * @param output 
      */
     @Override
-    public <E> Collection<E> array2Collection(final char[] x, final Collection<E> output) {
-        if (N.isEmpty(x)) {
-            return output;
+    public <E> void array2Collection(final char[] x, final Collection<E> output) {
+        if (N.notEmpty(x)) {
+            final Collection<Object> c = (Collection<Object>) output;
+
+            for (char element : x) {
+                c.add(element);
+            }
         }
-
-        Collection<Object> c = (Collection<Object>) output;
-
-        for (char element : x) {
-            c.add(element);
-        }
-
-        return output;
     }
 
     /**

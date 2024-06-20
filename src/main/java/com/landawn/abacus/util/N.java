@@ -94,11 +94,16 @@ import com.landawn.abacus.util.stream.Stream;
  * </p>
  * Class <code>N</code> is a general java utility class. It provides the most daily used operations for Object/primitive types/String/Array/Collection/Map/Bean...:
  *
+ * <br />
+ * <br />
  * When to throw exception? It's designed to avoid throwing any unnecessary
  * exception if the contract defined by method is not broken. for example, if
  * user tries to reverse a null or empty String. the input String will be
  * returned. But exception will be thrown if trying to repeat/swap a null or
- * empty string or operate Array/Collection by adding/removing... <br>
+ * empty string or operate Array/Collection by adding/removing...
+ * <br />
+ * There are only {@code fromIndex/startIndex} and {toIndex/endIndex} parameters in the methods defined in class {@code CommonUtil/N}, no {@code offset/count} parameters.
+ *
  *
  * @author Haiyang Li
  *
@@ -25701,16 +25706,17 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //    }
 
     /**
+     * 
      *
-     * @param a
-     * @param b
-     * @param zipFunction
-     * @param targetElementType
-     * @param <A>
-     * @param <B>
-     * @param <R>
-     * @param <E>
-     * @return
+     * @param <A> 
+     * @param <B> 
+     * @param <R> 
+     * @param <E> 
+     * @param a 
+     * @param b 
+     * @param zipFunction 
+     * @param targetElementType 
+     * @return 
      * @throws E the e
      */
     public static <A, B, R, E extends Exception> R[] zip(final A[] a, final B[] b,
@@ -25731,18 +25737,19 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * 
      *
-     * @param a
-     * @param b
-     * @param valueForNoneA
-     * @param valueForNoneB
-     * @param zipFunction
-     * @param targetElementType
-     * @param <A>
-     * @param <B>
-     * @param <R>
-     * @param <E>
-     * @return
+     * @param <A> 
+     * @param <B> 
+     * @param <R> 
+     * @param <E> 
+     * @param a 
+     * @param b 
+     * @param valueForNoneA 
+     * @param valueForNoneB 
+     * @param zipFunction 
+     * @param targetElementType 
+     * @return 
      * @throws E the e
      */
     public static <A, B, R, E extends Exception> R[] zip(final A[] a, final B[] b, final A valueForNoneA, final B valueForNoneB,
@@ -25774,18 +25781,19 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * 
      *
-     * @param a
-     * @param b
-     * @param c
-     * @param zipFunction
-     * @param targetElementType
-     * @param <A>
-     * @param <B>
-     * @param <C>
-     * @param <R>
-     * @param <E>
-     * @return
+     * @param <A> 
+     * @param <B> 
+     * @param <C> 
+     * @param <R> 
+     * @param <E> 
+     * @param a 
+     * @param b 
+     * @param c 
+     * @param zipFunction 
+     * @param targetElementType 
+     * @return 
      * @throws E the e
      */
     public static <A, B, C, R, E extends Exception> R[] zip(final A[] a, final B[] b, final C[] c,
@@ -25807,21 +25815,22 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * 
      *
-     * @param a
-     * @param b
-     * @param c
-     * @param valueForNoneA
-     * @param valueForNoneB
-     * @param valueForNoneC
-     * @param zipFunction
-     * @param targetElementType
-     * @param <A>
-     * @param <B>
-     * @param <C>
-     * @param <R>
-     * @param <E>
-     * @return
+     * @param <A> 
+     * @param <B> 
+     * @param <C> 
+     * @param <R> 
+     * @param <E> 
+     * @param a 
+     * @param b 
+     * @param c 
+     * @param valueForNoneA 
+     * @param valueForNoneB 
+     * @param valueForNoneC 
+     * @param zipFunction 
+     * @param targetElementType 
+     * @return 
      * @throws E the e
      */
     public static <A, B, C, R, E extends Exception> R[] zip(final A[] a, final B[] b, final C[] c, final A valueForNoneA, final B valueForNoneB,
@@ -26812,11 +26821,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * 
      *
-     * @param json
-     * @param targetType
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param json 
+     * @param targetType 
+     * @return 
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
@@ -26825,12 +26835,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * 
      *
-     * @param json
-     * @param defaultIfNull
-     * @param targetType
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param json 
+     * @param defaultIfNull 
+     * @param targetType 
+     * @return 
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
@@ -26841,12 +26852,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * 
      *
-     * @param json
-     * @param config
-     * @param targetType
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param json 
+     * @param config 
+     * @param targetType 
+     * @return 
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
@@ -26855,11 +26867,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * 
      *
-     * @param json
-     * @param targetType
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param json 
+     * @param targetType 
+     * @return 
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
@@ -26868,12 +26881,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * 
      *
-     * @param json
-     * @param config
-     * @param targetType
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param json 
+     * @param config 
+     * @param targetType 
+     * @return 
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
@@ -26882,11 +26896,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * 
      *
-     * @param json
-     * @param targetType
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param json 
+     * @param targetType 
+     * @return 
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
@@ -26895,12 +26910,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * 
      *
-     * @param json
-     * @param config
-     * @param targetType
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param json 
+     * @param config 
+     * @param targetType 
+     * @return 
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
@@ -26909,11 +26925,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * 
      *
-     * @param json
-     * @param targetType
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param json 
+     * @param targetType 
+     * @return 
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
@@ -26922,12 +26939,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * 
      *
-     * @param json
-     * @param config
-     * @param targetType
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param json 
+     * @param config 
+     * @param targetType 
+     * @return 
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
@@ -26936,13 +26954,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * 
      *
-     * @param json
-     * @param fromIndex
-     * @param toIndex
-     * @param targetType
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param json 
+     * @param fromIndex 
+     * @param toIndex 
+     * @param targetType 
+     * @return 
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
@@ -26951,14 +26970,15 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * 
      *
-     * @param json
-     * @param fromIndex
-     * @param toIndex
-     * @param config
-     * @param targetType
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param json 
+     * @param fromIndex 
+     * @param toIndex 
+     * @param config 
+     * @param targetType 
+     * @return 
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
@@ -26968,11 +26988,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * 
      *
-     * @param json
+     * @param <T> 
+     * @param json 
      * @param targetType can be the {@code Type} of {@code Bean/Array/Collection/Map}.
-     * @param <T>
-     * @return
+     * @return 
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
@@ -26981,12 +27002,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * 
      *
-     * @param json
-     * @param defaultIfNull
-     * @param targetType
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param json 
+     * @param defaultIfNull 
+     * @param targetType 
+     * @return 
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
@@ -26997,12 +27019,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * 
      *
-     * @param json
-     * @param config
+     * @param <T> 
+     * @param json 
+     * @param config 
      * @param targetType can be the {@code Type} of {@code Bean/Array/Collection/Map}.
-     * @param <T>
-     * @return
+     * @return 
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
@@ -27011,11 +27034,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * 
      *
-     * @param json
+     * @param <T> 
+     * @param json 
      * @param targetType can be the {@code Type} of {@code Bean/Array/Collection/Map}.
-     * @param <T>
-     * @return
+     * @return 
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
@@ -27024,12 +27048,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * 
      *
-     * @param json
-     * @param config
+     * @param <T> 
+     * @param json 
+     * @param config 
      * @param targetType can be the {@code Type} of {@code Bean/Array/Collection/Map}.
-     * @param <T>
-     * @return
+     * @return 
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
@@ -27038,11 +27063,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * 
      *
-     * @param json
+     * @param <T> 
+     * @param json 
      * @param targetType can be the {@code Type} of {@code Bean/Array/Collection/Map}.
-     * @param <T>
-     * @return
+     * @return 
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
@@ -27051,12 +27077,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * 
      *
-     * @param json
-     * @param config
+     * @param <T> 
+     * @param json 
+     * @param config 
      * @param targetType can be the {@code Type} of {@code Bean/Array/Collection/Map}.
-     * @param <T>
-     * @return
+     * @return 
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
@@ -27065,11 +27092,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * 
      *
-     * @param json
+     * @param <T> 
+     * @param json 
      * @param targetType can be the {@code Type} of {@code Bean/Array/Collection/Map}.
-     * @param <T>
-     * @return
+     * @return 
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
@@ -27078,12 +27106,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * 
      *
-     * @param json
-     * @param config
+     * @param <T> 
+     * @param json 
+     * @param config 
      * @param targetType can be the {@code Type} of {@code Bean/Array/Collection/Map}.
-     * @param <T>
-     * @return
+     * @return 
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
@@ -27092,13 +27121,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * 
      *
-     * @param json
-     * @param fromIndex
-     * @param toIndex
+     * @param <T> 
+     * @param json 
+     * @param fromIndex 
+     * @param toIndex 
      * @param targetType can be the {@code Type} of {@code Bean/Array/Collection/Map}.
-     * @param <T>
-     * @return
+     * @return 
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
@@ -27107,14 +27137,15 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * 
      *
-     * @param json
-     * @param fromIndex
-     * @param toIndex
-     * @param config
+     * @param <T> 
+     * @param json 
+     * @param fromIndex 
+     * @param toIndex 
+     * @param config 
      * @param targetType can be the {@code Type} of {@code Bean/Array/Collection/Map}.
-     * @param <T>
-     * @return
+     * @return 
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
@@ -27124,82 +27155,89 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * 
      *
-     * @param json
+     * @param <T> 
+     * @param json 
      * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
-     * @param <T>
-     * @return
+     * @return 
      */
     public static <T> CheckedStream<T, IOException> streamJSON(String json, Class<? extends T> elementClass) {
         return Utils.jsonParser.stream(json, elementClass);
     }
 
     /**
+     * 
      *
-     * @param json
-     * @param config
+     * @param <T> 
+     * @param json 
+     * @param config 
      * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
-     * @param <T>
-     * @return
+     * @return 
      */
     public static <T> CheckedStream<T, IOException> streamJSON(String json, JSONDeserializationConfig config, Class<? extends T> elementClass) {
         return Utils.jsonParser.stream(json, config, elementClass);
     }
 
     /**
+     * 
      *
-     * @param json
+     * @param <T> 
+     * @param json 
      * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
-     * @param <T>
-     * @return
+     * @return 
      */
     public static <T> CheckedStream<T, IOException> streamJSON(File json, Class<? extends T> elementClass) {
         return Utils.jsonParser.stream(json, elementClass);
     }
 
     /**
+     * 
      *
-     * @param json
-     * @param config
+     * @param <T> 
+     * @param json 
+     * @param config 
      * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
-     * @param <T>
-     * @return
+     * @return 
      */
     public static <T> CheckedStream<T, IOException> streamJSON(File json, JSONDeserializationConfig config, Class<? extends T> elementClass) {
         return Utils.jsonParser.stream(json, config, elementClass);
     }
 
     /**
+     * 
      *
-     * @param json
+     * @param <T> 
+     * @param json 
      * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
-     * @param <T>
-     * @return
+     * @return 
      */
     public static <T> CheckedStream<T, IOException> streamJSON(InputStream json, Class<? extends T> elementClass) {
         return streamJSON(json, false, elementClass);
     }
 
     /**
+     * 
      *
-     * @param json
-     * @param closeInputStreamWhenStreamIsClosed
+     * @param <T> 
+     * @param json 
+     * @param closeInputStreamWhenStreamIsClosed 
      * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
-     * @param <T>
-     * @return
+     * @return 
      */
     public static <T> CheckedStream<T, IOException> streamJSON(InputStream json, boolean closeInputStreamWhenStreamIsClosed, Class<? extends T> elementClass) {
         return Utils.jsonParser.stream(json, closeInputStreamWhenStreamIsClosed, elementClass);
     }
 
     /**
+     * 
      *
-     * @param json
-     * @param config
-     * @param closeInputStreamWhenStreamIsClosed
+     * @param <T> 
+     * @param json 
+     * @param config 
+     * @param closeInputStreamWhenStreamIsClosed 
      * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
-     * @param <T>
-     * @return
+     * @return 
      */
     public static <T> CheckedStream<T, IOException> streamJSON(InputStream json, JSONDeserializationConfig config, boolean closeInputStreamWhenStreamIsClosed,
             Class<? extends T> elementClass) {
@@ -27207,36 +27245,39 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * 
      *
-     * @param json
+     * @param <T> 
+     * @param json 
      * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
-     * @param <T>
-     * @return
+     * @return 
      */
     public static <T> CheckedStream<T, IOException> streamJSON(Reader json, Class<? extends T> elementClass) {
         return streamJSON(json, false, elementClass);
     }
 
     /**
+     * 
      *
-     * @param json
-     * @param closeReaderWhenStreamIsClosed
+     * @param <T> 
+     * @param json 
+     * @param closeReaderWhenStreamIsClosed 
      * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
-     * @param <T>
-     * @return
+     * @return 
      */
     public static <T> CheckedStream<T, IOException> streamJSON(Reader json, boolean closeReaderWhenStreamIsClosed, Class<? extends T> elementClass) {
         return Utils.jsonParser.stream(json, closeReaderWhenStreamIsClosed, elementClass);
     }
 
     /**
+     * 
      *
-     * @param json
-     * @param config
-     * @param closeReaderWhenStreamIsClosed
+     * @param <T> 
+     * @param json 
+     * @param config 
+     * @param closeReaderWhenStreamIsClosed 
      * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
-     * @param <T>
-     * @return
+     * @return 
      */
     public static <T> CheckedStream<T, IOException> streamJSON(Reader json, JSONDeserializationConfig config, boolean closeReaderWhenStreamIsClosed,
             Class<? extends T> elementClass) {
@@ -27409,11 +27450,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * 
      *
-     * @param xml
-     * @param targetType
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param xml 
+     * @param targetType 
+     * @return 
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
@@ -27422,12 +27464,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * 
      *
-     * @param xml
-     * @param config
-     * @param targetType
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param xml 
+     * @param config 
+     * @param targetType 
+     * @return 
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
@@ -27436,11 +27479,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * 
      *
-     * @param xml
-     * @param targetType
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param xml 
+     * @param targetType 
+     * @return 
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
@@ -27449,12 +27493,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * 
      *
-     * @param xml
-     * @param config
-     * @param targetType
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param xml 
+     * @param config 
+     * @param targetType 
+     * @return 
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
@@ -27463,11 +27508,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * 
      *
-     * @param xml
-     * @param targetType
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param xml 
+     * @param targetType 
+     * @return 
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
@@ -27476,12 +27522,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * 
      *
-     * @param xml
-     * @param config
-     * @param targetType
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param xml 
+     * @param config 
+     * @param targetType 
+     * @return 
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
@@ -27490,11 +27537,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * 
      *
-     * @param xml
-     * @param targetType
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param xml 
+     * @param targetType 
+     * @return 
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
@@ -27503,12 +27551,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * 
      *
-     * @param xml
-     * @param config
-     * @param targetType
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param xml 
+     * @param config 
+     * @param targetType 
+     * @return 
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
@@ -27517,11 +27566,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * 
      *
-     * @param xml
+     * @param <T> 
+     * @param xml 
      * @param targetType can be the {@code Type} of {@code Bean/Array/Collection/Map}.
-     * @param <T>
-     * @return
+     * @return 
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
@@ -27530,12 +27580,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * 
      *
-     * @param xml
-     * @param config
+     * @param <T> 
+     * @param xml 
+     * @param config 
      * @param targetType can be the {@code Type} of {@code Bean/Array/Collection/Map}.
-     * @param <T>
-     * @return
+     * @return 
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
@@ -27544,11 +27595,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * 
      *
-     * @param xml
+     * @param <T> 
+     * @param xml 
      * @param targetType can be the {@code Type} of {@code Bean/Array/Collection/Map}.
-     * @param <T>
-     * @return
+     * @return 
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
@@ -27557,12 +27609,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * 
      *
-     * @param xml
-     * @param config
+     * @param <T> 
+     * @param xml 
+     * @param config 
      * @param targetType can be the {@code Type} of {@code Bean/Array/Collection/Map}.
-     * @param <T>
-     * @return
+     * @return 
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
@@ -27571,11 +27624,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * 
      *
-     * @param xml
+     * @param <T> 
+     * @param xml 
      * @param targetType can be the {@code Type} of {@code Bean/Array/Collection/Map}.
-     * @param <T>
-     * @return
+     * @return 
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
@@ -27584,12 +27638,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * 
      *
-     * @param xml
-     * @param config
+     * @param <T> 
+     * @param xml 
+     * @param config 
      * @param targetType can be the {@code Type} of {@code Bean/Array/Collection/Map}.
-     * @param <T>
-     * @return
+     * @return 
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
@@ -27598,11 +27653,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * 
      *
-     * @param xml
+     * @param <T> 
+     * @param xml 
      * @param targetType can be the {@code Type} of {@code Bean/Array/Collection/Map}.
-     * @param <T>
-     * @return
+     * @return 
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
@@ -27611,12 +27667,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * 
      *
-     * @param xml
-     * @param config
+     * @param <T> 
+     * @param xml 
+     * @param config 
      * @param targetType can be the {@code Type} of {@code Bean/Array/Collection/Map}.
-     * @param <T>
-     * @return
+     * @return 
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
