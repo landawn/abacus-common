@@ -57,6 +57,11 @@ class JSONStringReader extends AbstractJSONReader {
         defaultOptionals.put(OptionalDouble.class, OptionalDouble.empty());
         defaultOptionals.put(Optional.class, Optional.empty());
         defaultOptionals.put(Nullable.class, Nullable.empty());
+
+        defaultOptionals.put(java.util.Optional.class, java.util.Optional.empty());
+        defaultOptionals.put(java.util.OptionalInt.class, java.util.OptionalInt.empty());
+        defaultOptionals.put(java.util.OptionalLong.class, java.util.OptionalLong.empty());
+        defaultOptionals.put(java.util.OptionalDouble.class, java.util.OptionalDouble.empty());
     }
 
     final Reader reader;

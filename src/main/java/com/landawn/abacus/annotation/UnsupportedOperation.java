@@ -1,4 +1,3 @@
-package com.landawn.abacus.annotation;
 /*
  * Copyright (C) 2020 HaiYang Li
  *
@@ -12,6 +11,8 @@ package com.landawn.abacus.annotation;
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
+package com.landawn.abacus.annotation;
+
 
 import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;

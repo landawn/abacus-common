@@ -502,6 +502,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @param exceptionType
      * @return
      */
+    // Should the name be from?
     public static <T, E extends Exception> CheckedStream<T, E> of(final Stream<? extends T> stream, @SuppressWarnings("unused") final Class<E> exceptionType) { //NOSONAR
         return of(stream);
     }
@@ -514,6 +515,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @param exceptionType
      * @return
      */
+    // Should the name be from?
     public static <T, E extends Exception> CheckedStream<T, E> of(final java.util.stream.Stream<? extends T> stream,
             @SuppressWarnings("unused") final Class<E> exceptionType) { //NOSONAR
         return of(stream);
@@ -987,23 +989,6 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
         return CheckedStream.<K, V, E> of(map).filter(Fn.Entries.ep(filter)).map(Fnn.<K, V, E> value());
     }
-
-    //    /**
-    //     * Lazy evaluation.
-    //     * <br />
-    //     *
-    //     * This is equal to: {@code CheckedStream.just(supplier).flatmap(it -> it.get())}.
-    //     *
-    //     * @param supplier
-    //     * @return
-    //     */
-    //    @Beta
-    //    public static <T, E extends Exception> CheckedStream<T, E> from(final Throwables.Supplier<? extends Collection<? extends T>, ? extends E> supplier) {
-    //        N.checkArgNotNull(supplier, "supplier");
-    //
-    //        return CheckedStream.<Throwables.Supplier<? extends Collection<? extends T>, ? extends E>, E> just(supplier)
-    //                .flatmap(Throwables.Supplier::get);
-    //    }
 
     /**
      * Lazy evaluation.
@@ -10854,11 +10839,11 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     }
 
     /**
-     * 
      *
-     * @param joiner 
-     * @return 
-     * @throws E 
+     *
+     * @param joiner
+     * @return
+     * @throws E
      * @deprecated replaced by {@code joinTo(Joiner)}
      */
     @Deprecated
@@ -10868,11 +10853,11 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     }
 
     /**
-     * 
      *
-     * @param joiner 
+     *
+     * @param joiner
      * @return the input {@code joiner}
-     * @throws E 
+     * @throws E
      */
     @TerminalOp
     public Joiner joinTo(final Joiner joiner) throws E {

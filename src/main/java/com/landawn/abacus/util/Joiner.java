@@ -2063,6 +2063,26 @@ public final class Joiner implements Closeable {
     }
 
     /**
+     * Call {@code mapper} only if at least one element/object/entry is appended.
+     *
+     * <pre>
+     * The underline {@code StringBuilder} will be recycled after this method is called if {@code resueStringBuilder} is set to {@code true},
+     * and should not continue to this instance.
+     * </pre>
+     *
+     * @param <T>
+     * @param <E>
+     * @param mapper
+     * @return
+     * @throws E
+     */
+    public <T, E extends Exception> u.Optional<T> mapToNonNullIfNotEmpty(Throwables.Function<? super String, T, E> mapper) throws E {
+        N.checkArgNotNull(mapper);
+
+        return buffer == null ? u.Optional.<T> empty() : u.Optional.of(mapper.apply(toString()));
+    }
+
+    /**
      * <pre>
      * The underline {@code StringBuilder} will be recycled after this method is called if {@code resueStringBuilder} is set to {@code true},
      * and should not continue to this instance.

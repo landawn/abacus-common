@@ -203,54 +203,6 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
         return iterable == null ? ObjIterator.<T> empty() : of(iterable.iterator());
     }
 
-    //    /**
-    //     * Lazy evaluation.
-    //     *
-    //     * @param <T>
-    //     * @param arraySupplier
-    //     * @return
-    //     */
-    //    public static <T> ObjIterator<T> from(final Supplier<T[]> arraySupplier) {
-    //        N.checkArgNotNull(arraySupplier, "arraySupplier");
-    //
-    //        return new ObjIterator<>() {
-    //            private T[] aar = null;
-    //            private int len = 0;
-    //            private int cur = 0;
-    //            private boolean isInitialized = false;
-    //
-    //            @Override
-    //            public boolean hasNext() {
-    //                if (!isInitialized) {
-    //                    init();
-    //                }
-    //
-    //                return cur < len;
-    //            }
-    //
-    //            @Override
-    //            public T next() {
-    //                if (!isInitialized) {
-    //                    init();
-    //                }
-    //
-    //                if (cur >= len) {
-    //                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
-    //                }
-    //
-    //                return aar[cur++];
-    //            }
-    //
-    //            private void init() {
-    //                if (!isInitialized) {
-    //                    isInitialized = true;
-    //                    aar = arraySupplier.get();
-    //                    len = N.len(aar);
-    //                }
-    //            }
-    //        };
-    //    }
-
     /**
      * Lazy evaluation.
      *

@@ -1,10 +1,3 @@
-package com.landawn.abacus.util;
-
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.function.Supplier;
-
 /*
  * Copyright (C) 2019 HaiYang Li
  *
@@ -18,6 +11,13 @@ import java.util.function.Supplier;
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
+
+package com.landawn.abacus.util;
+
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 public final class Try<T extends AutoCloseable> {
     private final T targetResource;

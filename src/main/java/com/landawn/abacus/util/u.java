@@ -76,9 +76,10 @@ public class u {//NOSONAR
          * Instantiates a new optional.
          *
          * @param value
+         * @throws NullPointerException if {@code value} is {@code null}
          */
-        private Optional(T value) {
-            this.value = N.checkArgNotNull(value);
+        private Optional(T value) throws NullPointerException {
+            this.value = Objects.requireNonNull(value);
         }
 
         /**
@@ -95,9 +96,10 @@ public class u {//NOSONAR
          *
          * @param value
          * @return
+         * @throws NullPointerException if {@code value} is {@code null}
          */
-        public static Optional<String> of(final String value) {
-            N.checkArgNotNull(value);
+        public static Optional<String> of(final String value) throws NullPointerException {
+            Objects.requireNonNull(value);
 
             if (value.length() == 0) {
                 return EMPTY_STRING;
@@ -111,8 +113,9 @@ public class u {//NOSONAR
          * @param <T>
          * @param value
          * @return
+         * @throws NullPointerException if {@code value} is {@code null}
          */
-        public static <T> Optional<T> of(final T value) {
+        public static <T> Optional<T> of(final T value) throws NullPointerException {
             return new Optional<>(value);
         }
 

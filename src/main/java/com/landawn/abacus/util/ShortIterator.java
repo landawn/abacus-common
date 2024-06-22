@@ -106,53 +106,6 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
         };
     }
 
-    //    /**
-    //     * Lazy evaluation.
-    //     *
-    //     * @param arraySupplier
-    //     * @return
-    //     */
-    //    public static ShortIterator from(final Supplier<short[]> arraySupplier) {
-    //        N.checkArgNotNull(arraySupplier, "arraySupplier");
-    //
-    //        return new ShortIterator() {
-    //            private short[] aar = null;
-    //            private int len = 0;
-    //            private int cur = 0;
-    //            private boolean isInitialized = false;
-    //
-    //            @Override
-    //            public boolean hasNext() {
-    //                if (!isInitialized) {
-    //                    init();
-    //                }
-    //
-    //                return cur < len;
-    //            }
-    //
-    //            @Override
-    //            public short nextShort() {
-    //                if (!isInitialized) {
-    //                    init();
-    //                }
-    //
-    //                if (cur >= len) {
-    //                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
-    //                }
-    //
-    //                return aar[cur++];
-    //            }
-    //
-    //            private void init() {
-    //                if (!isInitialized) {
-    //                    isInitialized = true;
-    //                    aar = arraySupplier.get();
-    //                    len = N.len(aar);
-    //                }
-    //            }
-    //        };
-    //    }
-
     /**
      * Lazy evaluation.
      *
