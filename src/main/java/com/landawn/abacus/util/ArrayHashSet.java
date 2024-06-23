@@ -34,11 +34,15 @@ public sealed class ArrayHashSet<E> implements Set<E> permits LinkedArrayHashSet
 
     private final Set<Wrapper<E>> set;
 
+    ArrayHashSet(Set<Wrapper<E>> set) {
+        this.set = set;
+    }
+
     /**
      *
      */
     public ArrayHashSet() {
-        this.set = N.newHashSet();
+        this(N.<Wrapper<E>> newHashSet());
     }
 
     /**
@@ -47,7 +51,7 @@ public sealed class ArrayHashSet<E> implements Set<E> permits LinkedArrayHashSet
      * @param initialCapacity
      */
     public ArrayHashSet(final int initialCapacity) {
-        this.set = N.newHashSet(initialCapacity);
+        this(N.<Wrapper<E>> newHashSet(initialCapacity));
     }
 
     /**
@@ -57,7 +61,7 @@ public sealed class ArrayHashSet<E> implements Set<E> permits LinkedArrayHashSet
      */
     @SuppressWarnings("rawtypes")
     public ArrayHashSet(final Class<? extends Set> setType) {
-        this.set = (Set) N.newCollection(setType);
+        this((Set<Wrapper<E>>) N.<Wrapper<E>> newCollection(setType));
     }
 
     /**
@@ -66,17 +70,9 @@ public sealed class ArrayHashSet<E> implements Set<E> permits LinkedArrayHashSet
      * @param coll
      */
     public ArrayHashSet(final Collection<? extends E> coll) {
-        if (N.isEmpty(coll)) {
-            set = N.newHashSet();
-        } else {
-            set = N.newHashSet(coll.size());
-        }
+        this(N.isEmpty(coll) ? N.<Wrapper<E>> newHashSet() : N.<Wrapper<E>> newHashSet(coll.size()));
 
         addAll(coll); // NOSONAR
-    }
-
-    ArrayHashSet(Set<Wrapper<E>> set) {
-        this.set = set;
     }
 
     /**

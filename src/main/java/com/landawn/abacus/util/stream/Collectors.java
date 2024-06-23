@@ -5212,7 +5212,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors {
                     V oldValue = m1.get(key);
 
                     if (oldValue == null) {
-                        m1.putAll(key, value);
+                        m1.putMany(key, value);
                     } else {
                         oldValue.addAll(value);
                     }

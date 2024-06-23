@@ -1486,6 +1486,50 @@ public class Builder<T> {
         /**
          *
          * @param e
+         * @param occurrences
+         * @return
+         */
+        public MultisetBuilder<T> set(final T e, final int occurrences) {
+            val.set(e, occurrences);
+
+            return this;
+        }
+
+        /**
+         * @param c
+         * @param occurrences
+         * @return
+         */
+        public MultisetBuilder<T> setAll(final Collection<? extends T> c, final int occurrences) {
+            val.setAll(c, occurrences);
+
+            return this;
+        }
+
+        /**
+         *
+         * @param m
+         * @return
+         */
+        public MultisetBuilder<T> setAll(final Map<? extends T, Integer> m) {
+            val.setAll(m);
+
+            return this;
+        }
+
+        /**
+         * @param multiset
+         * @return
+         */
+        public MultisetBuilder<T> setAll(final Multiset<? extends T> multiset) {
+            val.setAll(multiset);
+
+            return this;
+        }
+
+        /**
+         *
+         * @param e
          * @return
          */
         public MultisetBuilder<T> add(T e) {
@@ -1519,7 +1563,6 @@ public class Builder<T> {
         }
 
         /**
-         * Adds the all.
          *
          * @param multiset
          * @return
@@ -1576,6 +1619,28 @@ public class Builder<T> {
 
             return this;
         }
+
+        /**
+         *
+         * @param e
+         * @return
+         */
+        public MultisetBuilder<T> removeAllOccurrences(final Object e) {
+            val.removeAllOccurrences(e);
+
+            return this;
+        }
+
+        /**
+         *
+         * @param c
+         * @return
+         */
+        public MultisetBuilder<T> removeAllOccurrencesForAll(final Collection<?> c) {
+            val.removeAllOccurrencesForAll(c);
+
+            return this;
+        }
     }
 
     /**
@@ -1592,6 +1657,51 @@ public class Builder<T> {
          */
         LongMultisetBuilder(LongMultiset<T> c) {
             super(c);
+        }
+
+        /**
+         *
+         * @param e
+         * @param occurrences
+         * @return
+         */
+        public LongMultisetBuilder<T> set(final T e, final long occurrences) {
+            val.set(e, occurrences);
+
+            return this;
+        }
+
+        /**
+         *
+         * @param c
+         * @return
+         */
+        public LongMultisetBuilder<T> setAll(final Collection<? extends T> c, final long occurrences) {
+            val.setAll(c, occurrences);
+
+            return this;
+        }
+
+        /**
+         *
+         * @param m
+         * @return
+         */
+        public LongMultisetBuilder<T> setAll(final Map<? extends T, Long> m) {
+            val.setAll(m);
+
+            return this;
+        }
+
+        /**
+         *
+         * @param multiset
+         * @return
+         */
+        public LongMultisetBuilder<T> setAll(final LongMultiset<? extends T> multiset) {
+            val.setAll(multiset);
+
+            return this;
         }
 
         /**
@@ -1684,6 +1794,28 @@ public class Builder<T> {
          */
         public LongMultisetBuilder<T> removeAll(LongMultiset<? extends T> multiset) {
             val.removeAll(multiset);
+
+            return this;
+        }
+
+        /**
+         *
+         * @param e
+         * @return
+         */
+        public LongMultisetBuilder<T> removeAllOccurrences(final Object e) {
+            val.removeAllOccurrences(e);
+
+            return this;
+        }
+
+        /**
+         *
+         * @param c
+         * @return
+         */
+        public LongMultisetBuilder<T> removeAllOccurrencesForAll(final Collection<?> c) {
+            val.removeAllOccurrencesForAll(c);
 
             return this;
         }
@@ -1827,12 +1959,23 @@ public class Builder<T> {
 
         /**
          *
+         * @param m
+         * @return
+         */
+        public MultimapBuilder<K, E, V, M> put(Map<? extends K, ? extends E> m) {
+            val.put(m);
+
+            return this;
+        }
+
+        /**
+         *
          * @param k
          * @param c
          * @return
          */
-        public MultimapBuilder<K, E, V, M> putAll(final K k, final Collection<? extends E> c) {
-            val.putAll(k, c);
+        public MultimapBuilder<K, E, V, M> putMany(final K k, final Collection<? extends E> c) {
+            val.putMany(k, c);
 
             return this;
         }
@@ -1842,8 +1985,8 @@ public class Builder<T> {
          * @param m
          * @return
          */
-        public MultimapBuilder<K, E, V, M> putAll(Map<? extends K, ? extends E> m) {
-            val.putAll(m);
+        public MultimapBuilder<K, E, V, M> putMany(final Map<? extends K, ? extends Collection<? extends E>> m) {
+            val.putMany(m);
 
             return this;
         }
@@ -1853,8 +1996,8 @@ public class Builder<T> {
          * @param m
          * @return
          */
-        public MultimapBuilder<K, E, V, M> putAll(Multimap<? extends K, ? extends E, ? extends V> m) {
-            val.putAll(m);
+        public MultimapBuilder<K, E, V, M> putMany(Multimap<? extends K, ? extends E, ? extends V> m) {
+            val.putMany(m);
 
             return this;
         }
@@ -1865,14 +2008,24 @@ public class Builder<T> {
          * @param e
          * @return
          */
-        public MultimapBuilder<K, E, V, M> remove(Object k, Object e) {
-            val.remove(k, e);
+        public MultimapBuilder<K, E, V, M> removeOne(Object k, Object e) {
+            val.removeOne(k, e);
 
             return this;
         }
 
         /**
-         * Removes the all.
+         *
+         * @param m
+         * @return
+         */
+        public MultimapBuilder<K, E, V, M> removeOne(Map<? extends K, ? extends E> m) {
+            val.removeOne(m);
+
+            return this;
+        }
+
+        /**
          *
          * @param k
          * @return
@@ -1884,14 +2037,24 @@ public class Builder<T> {
         }
 
         /**
-         * Removes the all.
          *
          * @param k
          * @param valuesToRemove
          * @return
          */
-        public MultimapBuilder<K, E, V, M> removeAll(Object k, Collection<?> valuesToRemove) {
-            val.removeAll(k, valuesToRemove);
+        public MultimapBuilder<K, E, V, M> removeMany(Object k, Collection<?> valuesToRemove) {
+            val.removeMany(k, valuesToRemove);
+
+            return this;
+        }
+
+        /**
+         *
+         * @param m
+         * @return
+         */
+        public MultimapBuilder<K, E, V, M> removeMany(final Map<?, ? extends Collection<?>> m) {
+            val.removeMany(m);
 
             return this;
         }
@@ -1902,20 +2065,8 @@ public class Builder<T> {
          * @param m
          * @return
          */
-        public MultimapBuilder<K, E, V, M> removeAll(Map<? extends K, ? extends E> m) {
-            val.removeAll(m);
-
-            return this;
-        }
-
-        /**
-         * Removes the all.
-         *
-         * @param m
-         * @return
-         */
-        public MultimapBuilder<K, E, V, M> removeAll(Multimap<?, ?, ?> m) {
-            val.removeAll(m);
+        public MultimapBuilder<K, E, V, M> removeMany(Multimap<?, ?, ?> m) {
+            val.removeMany(m);
 
             return this;
         }
@@ -2469,8 +2620,8 @@ public class Builder<T> {
          * <br />
          * The columns of two {@code DataSet} must be same.
          *
-         * @param other 
-         * @return 
+         * @param other
+         * @return
          * @see DataSet#prepend(DataSet)
          */
         public DataSetBuilder prepend(DataSet other) {
@@ -2484,8 +2635,8 @@ public class Builder<T> {
          * <br />
          * The columns of two {@code DataSet} must be same.
          *
-         * @param other 
-         * @return 
+         * @param other
+         * @return
          * @see DataSet#append(DataSet)
          */
         public DataSetBuilder append(DataSet other) {

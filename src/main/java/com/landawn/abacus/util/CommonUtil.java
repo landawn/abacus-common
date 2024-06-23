@@ -3141,7 +3141,7 @@ sealed class CommonUtil permits N {
     public static <K, E> ListMultimap<K, E> newListMultimap(final Map<? extends K, ? extends E> m) {
         final ListMultimap<K, E> multiMap = newListMultimap(size(m));
 
-        multiMap.putAll(m);
+        multiMap.put(m);
 
         return multiMap;
     }
@@ -3207,7 +3207,7 @@ sealed class CommonUtil permits N {
     public static <K, E> ListMultimap<K, E> newLinkedListMultimap(final Map<? extends K, ? extends E> m) {
         final ListMultimap<K, E> multiMap = new ListMultimap<>(N.<K, List<E>> newLinkedHashMap(N.size(m)), ArrayList.class);
 
-        multiMap.putAll(m);
+        multiMap.put(m);
 
         return multiMap;
     }
@@ -3234,7 +3234,7 @@ sealed class CommonUtil permits N {
     public static <K extends Comparable<? super K>, E> ListMultimap<K, E> newSortedListMultimap(final Map<? extends K, ? extends E> m) {
         final ListMultimap<K, E> multiMap = new ListMultimap<>(new TreeMap<>(), ArrayList.class);
 
-        multiMap.putAll(m);
+        multiMap.put(m);
 
         return multiMap;
     }
@@ -3314,7 +3314,7 @@ sealed class CommonUtil permits N {
     public static <K, E> SetMultimap<K, E> newSetMultimap(final Map<? extends K, ? extends E> m) {
         final SetMultimap<K, E> multiMap = newSetMultimap(N.size(m));
 
-        multiMap.putAll(m);
+        multiMap.put(m);
 
         return multiMap;
     }
@@ -3380,7 +3380,7 @@ sealed class CommonUtil permits N {
     public static <K, E> SetMultimap<K, E> newLinkedSetMultimap(final Map<? extends K, ? extends E> m) {
         final SetMultimap<K, E> multiMap = new SetMultimap<>(N.<K, Set<E>> newLinkedHashMap(N.size(m)), HashSet.class);
 
-        multiMap.putAll(m);
+        multiMap.put(m);
 
         return multiMap;
     }
@@ -3408,7 +3408,7 @@ sealed class CommonUtil permits N {
     public static <K extends Comparable<? super K>, E> SetMultimap<K, E> newSortedSetMultimap(final Map<? extends K, ? extends E> m) {
         final SetMultimap<K, E> multiMap = new SetMultimap<>(new TreeMap<>(), HashSet.class);
 
-        multiMap.putAll(m);
+        multiMap.put(m);
 
         return multiMap;
     }
@@ -15913,11 +15913,11 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param c 
-     * @return 
+     *
+     * @param <T>
+     * @param c
+     * @return
      */
     public static <T> List<T> reverseToList(final Collection<? extends T> c) {
         if (isEmpty(c)) {

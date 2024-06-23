@@ -15,8 +15,13 @@
  */
 package com.landawn.abacus.util;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Set;
 import java.util.function.Supplier;
 
+import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.util.u.Nullable;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.stream.Stream;
@@ -234,7 +239,9 @@ public final class Holder<T> implements Mutable {
      * @param <E>
      * @param action
      * @throws E the e
+     * @deprecated
      */
+    @Deprecated
     public <E extends Exception> void accept(final Throwables.Consumer<? super T, E> action) throws E {
         action.accept(value);
     }
@@ -370,6 +377,107 @@ public final class Holder<T> implements Mutable {
     /**
      * Or else throw if null.
      *
+     * @return
+     * @throws NoSuchElementException the no such element exception
+     */
+    public T orElseThrowIfNull() throws NoSuchElementException {
+        if (isNotNull()) {
+            return value;
+        } else {
+            throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NULL_ELEMENT_EX);
+        }
+    }
+
+    /**
+     * Or else throw.
+     * @param errorMessage
+     *
+     * @return
+     * @throws NoSuchElementException the no such element exception
+     */
+    @Beta
+    public T orElseThrowIfNull(final String errorMessage) throws NoSuchElementException {
+        if (isNotNull()) {
+            return value;
+        } else {
+            throw new NoSuchElementException(errorMessage);
+        }
+    }
+
+    /**
+     * Or else throw.
+     * @param errorMessage
+     * @param param
+     *
+     * @return
+     * @throws NoSuchElementException the no such element exception
+     */
+    @Beta
+    public T orElseThrowIfNull(final String errorMessage, final Object param) throws NoSuchElementException {
+        if (isNotNull()) {
+            return value;
+        } else {
+            throw new NoSuchElementException(N.format(errorMessage, param));
+        }
+    }
+
+    /**
+     * Or else throw.
+     * @param errorMessage
+     * @param param1
+     * @param param2
+     *
+     * @return
+     * @throws NoSuchElementException the no such element exception
+     */
+    @Beta
+    public T orElseThrowIfNull(final String errorMessage, final Object param1, final Object param2) throws NoSuchElementException {
+        if (isNotNull()) {
+            return value;
+        } else {
+            throw new NoSuchElementException(N.format(errorMessage, param1, param2));
+        }
+    }
+
+    /**
+     * Or else throw.
+     * @param errorMessage
+     * @param param1
+     * @param param2
+     * @param param3
+     *
+     * @return
+     * @throws NoSuchElementException the no such element exception
+     */
+    @Beta
+    public T orElseThrowIfNull(final String errorMessage, final Object param1, final Object param2, final Object param3) throws NoSuchElementException {
+        if (isNotNull()) {
+            return value;
+        } else {
+            throw new NoSuchElementException(N.format(errorMessage, param1, param2, param3));
+        }
+    }
+
+    /**
+     * Or else throw.
+     * @param errorMessage
+     * @param params
+     *
+     * @return
+     * @throws NoSuchElementException the no such element exception
+     */
+    @Beta
+    public T orElseThrowIfNull(final String errorMessage, final Object... params) throws NoSuchElementException {
+        if (isNotNull()) {
+            return value;
+        } else {
+            throw new NoSuchElementException(N.format(errorMessage, params));
+        }
+    }
+
+    /**
+     * Or else throw if null.
+     *
      * @param <X>
      * @param exceptionSupplier
      * @return
@@ -403,6 +511,92 @@ public final class Holder<T> implements Mutable {
             return Stream.of(value);
         } else {
             return Stream.<T> empty();
+        }
+    }
+
+    /**
+     *
+     * @return
+     */
+    public List<T> toList() {
+        return N.asList(value);
+    }
+
+    /**
+     * To list if not null.
+     *
+     * @return
+     */
+    public List<T> toListIfNotNull() {
+        if (isNotNull()) {
+            return N.asList(value);
+        } else {
+            return new ArrayList<>();
+        }
+    }
+
+    /**
+     *
+     * @return
+     */
+    public Set<T> toSet() {
+        return N.asSet(value);
+    }
+
+    /**
+     * To set if not null.
+     *
+     * @return
+     */
+    public Set<T> toSetIfNotNull() {
+        if (isNotNull()) {
+            return N.asSet(value);
+        } else {
+            return N.newHashSet();
+        }
+    }
+
+    /**
+     * To immutable list.
+     *
+     * @return
+     */
+    public ImmutableList<T> toImmutableList() {
+        return ImmutableList.of(value);
+    }
+
+    /**
+     * To immutable list if not null.
+     *
+     * @return
+     */
+    public ImmutableList<T> toImmutableListIfNotNull() {
+        if (isNotNull()) {
+            return ImmutableList.of(value);
+        } else {
+            return ImmutableList.empty();
+        }
+    }
+
+    /**
+     * To immutable set.
+     *
+     * @return
+     */
+    public ImmutableSet<T> toImmutableSet() {
+        return ImmutableSet.of(value);
+    }
+
+    /**
+     * To immutable set if not null.
+     *
+     * @return
+     */
+    public ImmutableSet<T> toImmutableSetIfNotNull() {
+        if (isNotNull()) {
+            return ImmutableSet.of(value);
+        } else {
+            return ImmutableSet.empty();
         }
     }
 

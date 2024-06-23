@@ -134,7 +134,7 @@ public class ListMultimapType<K, E> extends AbstractType<ListMultimap<K, E>> {
         final ListMultimap<K, E> multiMap = N.newLinkedListMultimap(map.size());
 
         for (Map.Entry<K, Collection<E>> entry : map.entrySet()) {
-            multiMap.putAll(entry.getKey(), entry.getValue());
+            multiMap.putMany(entry.getKey(), entry.getValue());
         }
 
         return multiMap;

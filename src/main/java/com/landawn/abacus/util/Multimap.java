@@ -17,7 +17,6 @@
 package com.landawn.abacus.util;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.ConcurrentModificationException;
 import java.util.HashMap;
@@ -57,7 +56,7 @@ import com.landawn.abacus.util.stream.Stream;
  * @see N#newSetMultimap(Supplier, Supplier)
  * @since 0.8
  */
-public class Multimap<K, E, V extends Collection<E>> {
+public sealed class Multimap<K, E, V extends Collection<E>> permits ListMultimap, SetMultimap {
 
     final Supplier<? extends Map<K, V>> mapSupplier;
 
@@ -154,6 +153,35 @@ public class Multimap<K, E, V extends Collection<E>> {
     }
 
     /**
+     *
+     * @param m
+     * @return
+     */
+    public boolean put(final Map<? extends K, ? extends E> m) {
+        if (N.isEmpty(m)) {
+            return false;
+        }
+
+        boolean result = false;
+        K key = null;
+        V val = null;
+
+        for (Map.Entry<? extends K, ? extends E> e : m.entrySet()) {
+            key = e.getKey();
+            val = valueMap.get(key);
+
+            if (val == null) {
+                val = valueSupplier.get();
+                valueMap.put(key, val);
+            }
+
+            result |= val.add(e.getValue());
+        }
+
+        return result;
+    }
+
+    /**
      * If the specified value is not already associated with the specified key
      * associates it with the given key and returns {@code true}, else returns {@code false}.
      *
@@ -200,8 +228,9 @@ public class Multimap<K, E, V extends Collection<E>> {
      * @param key
      * @param c
      * @return
+     * @see Collection#addAll(Collection)
      */
-    public boolean putAll(final K key, final Collection<? extends E> c) {
+    public boolean putMany(final K key, final Collection<? extends E> c) {
         if (N.isEmpty(c)) {
             return false;
         }
@@ -224,8 +253,9 @@ public class Multimap<K, E, V extends Collection<E>> {
      * @param key
      * @param c
      * @return
+     * @see Collection#addAll(Collection)
      */
-    public boolean putAllIfKeyAbsent(final K key, final Collection<? extends E> c) {
+    public boolean putManyIfKeyAbsent(final K key, final Collection<? extends E> c) {
         if (N.isEmpty(c)) {
             return false;
         }
@@ -247,7 +277,7 @@ public class Multimap<K, E, V extends Collection<E>> {
      * @param m
      * @return
      */
-    public boolean putAll(final Map<? extends K, ? extends E> m) {
+    public boolean putMany(final Map<? extends K, ? extends Collection<? extends E>> m) {
         if (N.isEmpty(m)) {
             return false;
         }
@@ -256,7 +286,7 @@ public class Multimap<K, E, V extends Collection<E>> {
         K key = null;
         V val = null;
 
-        for (Map.Entry<? extends K, ? extends E> e : m.entrySet()) {
+        for (Map.Entry<? extends K, ? extends Collection<? extends E>> e : m.entrySet()) {
             key = e.getKey();
             val = valueMap.get(key);
 
@@ -265,7 +295,7 @@ public class Multimap<K, E, V extends Collection<E>> {
                 valueMap.put(key, val);
             }
 
-            result |= val.add(e.getValue());
+            result |= val.addAll(e.getValue());
         }
 
         return result;
@@ -275,8 +305,9 @@ public class Multimap<K, E, V extends Collection<E>> {
      *
      * @param m
      * @return
+     * @see Collection#addAll(Collection)
      */
-    public boolean putAll(final Multimap<? extends K, ? extends E, ? extends Collection<? extends E>> m) {
+    public boolean putMany(final Multimap<? extends K, ? extends E, ? extends Collection<? extends E>> m) {
         if (N.isEmpty(m)) {
             return false;
         }
@@ -310,7 +341,7 @@ public class Multimap<K, E, V extends Collection<E>> {
      * @param e
      * @return
      */
-    public boolean remove(final Object key, final Object e) {
+    public boolean removeOne(final Object key, final Object e) {
         V val = valueMap.get(key);
 
         if (val != null && val.remove(e)) {
@@ -322,6 +353,40 @@ public class Multimap<K, E, V extends Collection<E>> {
         }
 
         return false;
+    }
+
+    /**
+     *
+     * @param m
+     * @return
+     */
+    public boolean removeOne(final Map<? extends K, ? extends E> m) {
+        if (N.isEmpty(m)) {
+            return false;
+        }
+
+        boolean result = false;
+        Object key = null;
+        V val = null;
+
+        for (Map.Entry<? extends K, ? extends E> e : m.entrySet()) {
+            key = e.getKey();
+            val = valueMap.get(key);
+
+            if (N.notEmpty(val)) {
+                if (!result) {
+                    result = val.remove(e.getValue());
+                } else {
+                    val.remove(e.getValue());
+                }
+
+                if (val.isEmpty()) {
+                    valueMap.remove(key);
+                }
+            }
+        }
+
+        return result;
     }
 
     /**
@@ -340,8 +405,9 @@ public class Multimap<K, E, V extends Collection<E>> {
      * @param key
      * @param c
      * @return
+     * @see Collection#removeAll(Collection)
      */
-    public boolean removeAll(final Object key, final Collection<?> c) {
+    public boolean removeMany(final Object key, final Collection<?> c) {
         if (N.isEmpty(c)) {
             return false;
         }
@@ -370,8 +436,9 @@ public class Multimap<K, E, V extends Collection<E>> {
      *
      * @param m
      * @return
+     * @see Collection#removeAll(Collection)
      */
-    public boolean removeAll(final Map<?, ? extends Collection<?>> m) {
+    public boolean removeMany(final Map<?, ? extends Collection<?>> m) {
         if (N.isEmpty(m)) {
             return false;
         }
@@ -405,8 +472,9 @@ public class Multimap<K, E, V extends Collection<E>> {
      *
      * @param m
      * @return
+     * @see Collection#removeAll(Collection)
      */
-    public boolean removeAll(final Multimap<?, ?, ?> m) {
+    public boolean removeMany(final Multimap<?, ?, ?> m) {
         if (N.isEmpty(m)) {
             return false;
         }
@@ -443,8 +511,9 @@ public class Multimap<K, E, V extends Collection<E>> {
      * @param predicate
      * @return <code>true</code> if this Multimap is modified by this operation, otherwise <code>false</code>.
      * @throws X the x
+     * @see Collection#remove(Object)
      */
-    public <X extends Exception> boolean removeIf(E value, Throwables.Predicate<? super K, X> predicate) throws X {
+    public <X extends Exception> boolean removeOneIf(E value, Throwables.Predicate<? super K, X> predicate) throws X {
         Set<K> removingKeys = null;
 
         for (K key : this.valueMap.keySet()) {
@@ -464,7 +533,7 @@ public class Multimap<K, E, V extends Collection<E>> {
         boolean modified = false;
 
         for (K k : removingKeys) {
-            if (remove(k, value)) {
+            if (removeOne(k, value)) {
                 modified = true;
             }
         }
@@ -480,8 +549,9 @@ public class Multimap<K, E, V extends Collection<E>> {
      * @param predicate
      * @return <code>true</code> if this Multimap is modified by this operation, otherwise <code>false</code>.
      * @throws X the x
+     * @see Collection#remove(Object)
      */
-    public <X extends Exception> boolean removeIf(E value, Throwables.BiPredicate<? super K, ? super V, X> predicate) throws X {
+    public <X extends Exception> boolean removeOneIf(E value, Throwables.BiPredicate<? super K, ? super V, X> predicate) throws X {
         Set<K> removingKeys = null;
 
         for (Map.Entry<K, V> entry : this.valueMap.entrySet()) {
@@ -501,7 +571,7 @@ public class Multimap<K, E, V extends Collection<E>> {
         boolean modified = false;
 
         for (K k : removingKeys) {
-            if (remove(k, value)) {
+            if (removeOne(k, value)) {
                 modified = true;
             }
         }
@@ -517,8 +587,9 @@ public class Multimap<K, E, V extends Collection<E>> {
      * @param predicate
      * @return <code>true</code> if this Multimap is modified by this operation, otherwise <code>false</code>.
      * @throws X the x
+     * @see Collection#removeAll(Collection)
      */
-    public <X extends Exception> boolean removeAllIf(Collection<?> values, Throwables.Predicate<? super K, X> predicate) throws X {
+    public <X extends Exception> boolean removeManyIf(Collection<?> values, Throwables.Predicate<? super K, X> predicate) throws X {
         Set<K> removingKeys = null;
 
         for (K key : this.valueMap.keySet()) {
@@ -538,7 +609,7 @@ public class Multimap<K, E, V extends Collection<E>> {
         boolean modified = false;
 
         for (K k : removingKeys) {
-            if (removeAll(k, values)) {
+            if (removeMany(k, values)) {
                 modified = true;
             }
         }
@@ -554,8 +625,9 @@ public class Multimap<K, E, V extends Collection<E>> {
      * @param predicate
      * @return <code>true</code> if this Multimap is modified by this operation, otherwise <code>false</code>.
      * @throws X the x
+     * @see Collection#removeAll(Collection)
      */
-    public <X extends Exception> boolean removeAllIf(Collection<?> values, Throwables.BiPredicate<? super K, ? super V, X> predicate) throws X {
+    public <X extends Exception> boolean removeManyIf(Collection<?> values, Throwables.BiPredicate<? super K, ? super V, X> predicate) throws X {
         Set<K> removingKeys = null;
 
         for (Map.Entry<K, V> entry : this.valueMap.entrySet()) {
@@ -575,7 +647,7 @@ public class Multimap<K, E, V extends Collection<E>> {
         boolean modified = false;
 
         for (K k : removingKeys) {
-            if (removeAll(k, values)) {
+            if (removeMany(k, values)) {
                 modified = true;
             }
         }
@@ -656,7 +728,7 @@ public class Multimap<K, E, V extends Collection<E>> {
      * @param newValue
      * @return <code>true</code> if this Multimap is modified by this operation, otherwise <code>false</code>.
      */
-    public boolean replace(final K key, final E oldValue, final E newValue) {
+    public boolean replaceOne(final K key, final E oldValue, final E newValue) {
         final V val = valueMap.get(key);
 
         if (val == null) {
@@ -718,74 +790,77 @@ public class Multimap<K, E, V extends Collection<E>> {
     }
 
     /**
-     * Replace the specified {@code oldValue} (all occurrences) with the specified {@code newValue}.
-     * <code>False</code> is returned if no <code>oldValue</code> is found.
+     * Replace all the values associated to specified {@code key} with the specified {@code newValue}.
+     * <code>False</code> is returned if no value found by the specified {@code key}
      *
      * @param key
-     * @param oldValue
      * @param newValue
      * @return <code>true</code> if this Multimap is modified by this operation, otherwise <code>false</code>.
      */
-    public boolean replaceAll(final K key, final E oldValue, final E newValue) {
+    public boolean replaceAllWithOne(final K key, final E newValue) {
         final V val = valueMap.get(key);
 
         if (val == null) {
             return false;
         }
 
-        return replaceAll(val, oldValue, newValue);
+        val.clear();
+
+        val.add(newValue);
+
+        return true;
     }
 
-    private boolean replaceAll(final V val, final E oldValue, final E newValue) {
-        boolean modified = false;
-
-        if (val instanceof List) {
-            final List<E> list = (List<E>) val;
-
-            if (list instanceof ArrayList) {
-                if (oldValue == null) {
-                    for (int i = 0, len = list.size(); i < len; i++) {
-                        if (list.get(i) == null) {
-                            list.set(i, newValue);
-                            modified = true;
-                        }
-                    }
-                } else {
-                    for (int i = 0, len = list.size(); i < len; i++) {
-                        if (oldValue.equals(list.get(i))) {
-                            list.set(i, newValue);
-                            modified = true;
-                        }
-                    }
-                }
-            } else {
-                final ListIterator<E> iter = list.listIterator();
-
-                if (oldValue == null) {
-                    while (iter.hasNext()) {
-                        if (iter.next() == null) {
-                            iter.set(newValue);
-                            modified = true;
-                        }
-                    }
-                } else {
-                    while (iter.hasNext()) {
-                        if (oldValue.equals(iter.next())) {
-                            iter.set(newValue);
-                            modified = true;
-                        }
-                    }
-                }
-            }
-        } else {
-            final Object[] tmp = val.toArray();
-            modified = N.replaceAll(tmp, oldValue, newValue) > 0;
-            val.clear();
-            val.addAll(Arrays.asList((E[]) tmp));
-        }
-
-        return modified;
-    }
+    //    private boolean replaceAllWithOne(final V val, final E oldValue, final E newValue) {
+    //        boolean modified = false;
+    //
+    //        if (val instanceof List) {
+    //            final List<E> list = (List<E>) val;
+    //
+    //            if (list instanceof ArrayList) {
+    //                if (oldValue == null) {
+    //                    for (int i = 0, len = list.size(); i < len; i++) {
+    //                        if (list.get(i) == null) {
+    //                            list.set(i, newValue);
+    //                            modified = true;
+    //                        }
+    //                    }
+    //                } else {
+    //                    for (int i = 0, len = list.size(); i < len; i++) {
+    //                        if (oldValue.equals(list.get(i))) {
+    //                            list.set(i, newValue);
+    //                            modified = true;
+    //                        }
+    //                    }
+    //                }
+    //            } else {
+    //                final ListIterator<E> iter = list.listIterator();
+    //
+    //                if (oldValue == null) {
+    //                    while (iter.hasNext()) {
+    //                        if (iter.next() == null) {
+    //                            iter.set(newValue);
+    //                            modified = true;
+    //                        }
+    //                    }
+    //                } else {
+    //                    while (iter.hasNext()) {
+    //                        if (oldValue.equals(iter.next())) {
+    //                            iter.set(newValue);
+    //                            modified = true;
+    //                        }
+    //                    }
+    //                }
+    //            }
+    //        } else {
+    //            final Object[] tmp = val.toArray();
+    //            modified = N.replaceAll(tmp, oldValue, newValue) > 0;
+    //            val.clear();
+    //            val.addAll(Arrays.asList((E[]) tmp));
+    //        }
+    //
+    //        return modified;
+    //    }
 
     /**
      * Replace all the specified {@code oldValues} (all occurrences) with single specified {@code newValue}.
@@ -821,7 +896,7 @@ public class Multimap<K, E, V extends Collection<E>> {
      * @return <code>true</code> if this Multimap is modified by this operation, otherwise <code>false</code>.
      * @throws X the x
      */
-    public <X extends Exception> boolean replaceIf(Throwables.Predicate<? super K, X> predicate, E oldValue, E newValue) throws X {
+    public <X extends Exception> boolean replaceOneIf(Throwables.Predicate<? super K, X> predicate, E oldValue, E newValue) throws X {
         boolean modified = false;
 
         for (Map.Entry<K, V> entry : this.valueMap.entrySet()) {
@@ -843,56 +918,12 @@ public class Multimap<K, E, V extends Collection<E>> {
      * @return <code>true</code> if this Multimap is modified by this operation, otherwise <code>false</code>.
      * @throws X the x
      */
-    public <X extends Exception> boolean replaceIf(Throwables.BiPredicate<? super K, ? super V, X> predicate, E oldValue, E newValue) throws X {
+    public <X extends Exception> boolean replaceOneIf(Throwables.BiPredicate<? super K, ? super V, X> predicate, E oldValue, E newValue) throws X {
         boolean modified = false;
 
         for (Map.Entry<K, V> entry : this.valueMap.entrySet()) {
             if (predicate.test(entry.getKey(), entry.getValue())) {
                 modified = modified | replaceOne(entry.getValue(), oldValue, newValue); //NOSONAR
-            }
-        }
-
-        return modified;
-    }
-
-    /**
-     * Replace the specified {@code oldValue} (all occurrences) from the value set associated with keys which satisfy the specified {@code predicate} with the specified {@code newValue}.
-     *
-     * @param <X>
-     * @param predicate
-     * @param oldValue
-     * @param newValue
-     * @return <code>true</code> if this Multimap is modified by this operation, otherwise <code>false</code>.
-     * @throws X the x
-     */
-    public <X extends Exception> boolean replaceAllIf(Throwables.Predicate<? super K, X> predicate, E oldValue, E newValue) throws X {
-        boolean modified = false;
-
-        for (Map.Entry<K, V> entry : this.valueMap.entrySet()) {
-            if (predicate.test(entry.getKey())) {
-                modified = modified | replaceAll(entry.getValue(), oldValue, newValue); //NOSONAR
-            }
-        }
-
-        return modified;
-    }
-
-    /**
-     * Replace the specified {@code oldValue} (all occurrences) from the value set associated with keys which satisfy the specified {@code predicate} with the specified {@code newValue}.
-     *
-     * @param <X>
-     * @param predicate
-     * @param oldValue
-     * @param newValue
-     * @return <code>true</code> if this Multimap is modified by this operation, otherwise <code>false</code>.
-     * @throws X the x
-     */
-    public <X extends Exception> boolean replaceAllIf(Throwables.BiPredicate<? super K, ? super V, X> predicate, E oldValue, E newValue) throws X {
-        boolean modified = false;
-
-        for (Map.Entry<K, V> entry : this.valueMap.entrySet()) {
-            if (predicate.test(entry.getKey(), entry.getValue())) {
-                modified = modified | replaceAll(entry.getValue(), oldValue, newValue); //NOSONAR
             }
         }
 
@@ -948,6 +979,54 @@ public class Multimap<K, E, V extends Collection<E>> {
     }
 
     /**
+     * Replace all the values associated to specified {@code key} which satisfy the specified {@code predicate} with the specified {@code newValue}.
+     *
+     * @param <X>
+     * @param predicate
+     * @param newValue
+     * @return <code>true</code> if this Multimap is modified by this operation, otherwise <code>false</code>.
+     * @throws X the x
+     */
+    public <X extends Exception> boolean replaceAllWithOneIf(Throwables.Predicate<? super K, X> predicate, E newValue) throws X {
+        boolean modified = false;
+
+        for (Map.Entry<K, V> entry : this.valueMap.entrySet()) {
+            if (predicate.test(entry.getKey())) {
+                entry.getValue().clear();
+                entry.getValue().add(newValue);
+
+                modified = true;
+            }
+        }
+
+        return modified;
+    }
+
+    /**
+     * Replace all the values associated to specified {@code key} which satisfy the specified {@code predicate} with the specified {@code newValue}.
+     *
+     * @param <X>
+     * @param predicate
+     * @param newValue
+     * @return <code>true</code> if this Multimap is modified by this operation, otherwise <code>false</code>.
+     * @throws X the x
+     */
+    public <X extends Exception> boolean replaceAllWithOneIf(Throwables.BiPredicate<? super K, ? super V, X> predicate, E newValue) throws X {
+        boolean modified = false;
+
+        for (Map.Entry<K, V> entry : this.valueMap.entrySet()) {
+            if (predicate.test(entry.getKey(), entry.getValue())) {
+                entry.getValue().clear();
+                entry.getValue().add(newValue);
+
+                modified = true;
+            }
+        }
+
+        return modified;
+    }
+
+    /**
      * The associated keys will be removed if null or empty values are returned by the specified <code>function</code>.
      *
      * @param <X>
@@ -981,6 +1060,265 @@ public class Multimap<K, E, V extends Collection<E>> {
                 valueMap.remove(key);
             }
         }
+    }
+
+    /**
+     * The implementation is equivalent to performing the following steps for this Multimap:
+     *
+     * <pre>
+     * final V oldValue = get(key);
+     *
+     * if (N.notEmpty(oldValue)) {
+     *     return oldValue;
+     * }
+     *
+     * final V newValue = mappingFunction.apply(key);
+     *
+     * if (N.notEmpty(newValue)) {
+     *     valueMap.put(key, newValue);
+     * }
+     *
+     * return get(key);
+     * </pre>
+     *
+     * @param <X>
+     * @param key
+     * @param mappingFunction
+     * @return
+     * @throws X the x
+     */
+    public <X extends Exception> V computeIfAbsent(K key, Throwables.Function<? super K, ? extends V, X> mappingFunction) throws X {
+        N.checkArgNotNull(mappingFunction);
+
+        final V oldValue = get(key);
+
+        if (N.notEmpty(oldValue)) {
+            return oldValue;
+        }
+
+        final V newValue = mappingFunction.apply(key);
+
+        if (N.notEmpty(newValue)) {
+            valueMap.put(key, newValue);
+        }
+
+        return get(key);
+    }
+
+    /**
+     * The implementation is equivalent to performing the following steps for this Multimap:
+     *
+     * <pre>
+     * final V oldValue = get(key);
+     *
+     * if (N.isEmpty(oldValue)) {
+     *     return oldValue;
+     * }
+     *
+     * final V newValue = remappingFunction.apply(key, oldValue);
+     *
+     * if (N.notEmpty(newValue)) {
+     *     valueMap.put(key, newValue);
+     * } else {
+     *     valueMap.remove(key);
+     * }
+     *
+     * return get(key);
+     * </pre>
+     *
+     * @param <X>
+     * @param key
+     * @param remappingFunction
+     * @return
+     * @throws X the x
+     */
+    public <X extends Exception> V computeIfPresent(K key, Throwables.BiFunction<? super K, ? super V, ? extends V, X> remappingFunction) throws X {
+        N.checkArgNotNull(remappingFunction);
+
+        final V oldValue = get(key);
+
+        if (N.isEmpty(oldValue)) {
+            return oldValue;
+        }
+
+        final V newValue = remappingFunction.apply(key, oldValue);
+
+        if (N.notEmpty(newValue)) {
+            valueMap.put(key, newValue);
+        } else {
+            valueMap.remove(key);
+        }
+
+        return get(key);
+    }
+
+    /**
+     * The implementation is equivalent to performing the following steps for this Multimap:
+     *
+     * <pre>
+     * final V oldValue = get(key);
+     * final V newValue = remappingFunction.apply(key, oldValue);
+     *
+     * if (N.notEmpty(newValue)) {
+     *     valueMap.put(key, newValue);
+     * } else {
+     *     if (oldValue != null) {
+     *         valueMap.remove(key);
+     *     }
+     * }
+     *
+     * return get(key);
+     * </pre>
+     *
+     * @param <X>
+     * @param key
+     * @param remappingFunction
+     * @return
+     * @throws X the x
+     */
+    public <X extends Exception> V compute(K key, Throwables.BiFunction<? super K, ? super V, ? extends V, X> remappingFunction) throws X {
+        N.checkArgNotNull(remappingFunction);
+
+        final V oldValue = get(key);
+        final V newValue = remappingFunction.apply(key, oldValue);
+
+        if (N.notEmpty(newValue)) {
+            valueMap.put(key, newValue);
+        } else if (oldValue != null) {
+            valueMap.remove(key);
+        }
+
+        return get(key);
+    }
+
+    /**
+     * The implementation is equivalent to performing the following steps for this Multimap:
+     *
+     * <pre>
+     * final V oldValue = get(key);
+     * final V newValue = oldValue == null ? value : remappingFunction.apply(oldValue, value);
+     *
+     * if (N.notEmpty(newValue)) {
+     *     valueMap.put(key, newValue);
+     * } else if (oldValue != null) {
+     *     valueMap.remove(key);
+     * }
+     *
+     * return newValue;
+     * </pre>
+     *
+     * @param <X>
+     * @param key
+     * @param value
+     * @param remappingFunction
+     * @return
+     * @throws X the x
+     */
+    public <X extends Exception> V merge(K key, V value, Throwables.BiFunction<? super V, ? super V, ? extends V, X> remappingFunction) throws X {
+        N.checkArgNotNull(remappingFunction);
+        N.checkArgNotNull(value);
+
+        final V oldValue = get(key);
+        final V newValue = oldValue == null ? value : remappingFunction.apply(oldValue, value);
+
+        if (N.notEmpty(newValue)) {
+            valueMap.put(key, newValue);
+        } else if (oldValue != null) {
+            valueMap.remove(key);
+        }
+
+        return get(key);
+    }
+
+    /**
+     * The implementation is equivalent to performing the following steps for this Multimap:
+     *
+     * <pre>
+     * final V oldValue = get(key);
+     *
+     * if (N.isEmpty(oldValue)) {
+     *     put(key, e);
+     *     return get(key);
+     * }
+     *
+     * final V newValue = remappingFunction.apply(oldValue, e);
+     *
+     * if (N.notEmpty(newValue)) {
+     *     valueMap.put(key, newValue);
+     * } else if (oldValue != null) {
+     *     valueMap.remove(key);
+     * }
+     *
+     * return  get(key);
+     * </pre>
+     *
+     * @param <X>
+     * @param key
+     * @param e
+     * @param remappingFunction
+     * @return
+     * @throws X the x
+     */
+    public <X extends Exception> V merge(K key, E e, Throwables.BiFunction<? super V, ? super E, ? extends V, X> remappingFunction) throws X {
+        N.checkArgNotNull(remappingFunction);
+        N.checkArgNotNull(e);
+
+        final V oldValue = get(key);
+
+        if (N.isEmpty(oldValue)) {
+            put(key, e);
+            return get(key);
+        }
+
+        final V newValue = remappingFunction.apply(oldValue, e);
+
+        if (N.notEmpty(newValue)) {
+            valueMap.put(key, newValue);
+        } else if (oldValue != null) {
+            valueMap.remove(key);
+        }
+
+        return get(key);
+    }
+
+    /**
+     *
+     *
+     * @param <VV>
+     * @param <M>
+     * @param multimapSupplier
+     * @return
+     */
+    public <VV extends Collection<K>, M extends Multimap<E, K, VV>> M inverse(final IntFunction<? extends M> multimapSupplier) {
+        final Multimap<K, E, V> multimap = this;
+        final M res = multimapSupplier.apply(multimap.size());
+
+        if (N.notEmpty(multimap)) {
+            for (Map.Entry<K, V> entry : multimap.entrySet()) {
+                final V c = entry.getValue();
+
+                if (N.notEmpty(c)) {
+                    for (E e : c) {
+                        res.put(e, entry.getKey());
+                    }
+                }
+            }
+        }
+
+        return res;
+    }
+
+    /**
+     *
+     *
+     * @return
+     */
+    public Multimap<K, E, V> copy() {
+        final Multimap<K, E, V> copy = new Multimap<>(mapSupplier, valueSupplier);
+
+        copy.putMany(this);
+
+        return copy;
     }
 
     /**
@@ -1134,6 +1472,7 @@ public class Multimap<K, E, V extends Collection<E>> {
      * @param action
      * @throws X the x
      */
+    @Beta
     public <X extends Exception> void forEachKey(final Throwables.Consumer<? super K, X> action) throws X {
         N.checkArgNotNull(action);
 
@@ -1149,6 +1488,7 @@ public class Multimap<K, E, V extends Collection<E>> {
      * @param action
      * @throws X the x
      */
+    @Beta
     public <X extends Exception> void forEachValue(final Throwables.Consumer<? super V, X> action) throws X {
         N.checkArgNotNull(action);
 
@@ -1164,6 +1504,7 @@ public class Multimap<K, E, V extends Collection<E>> {
      * @param action
      * @throws X the x
      */
+    @Beta
     public <X extends Exception> void flatForEachValue(Throwables.Consumer<? super E, X> action) throws X {
         N.checkArgNotNull(action);
 
@@ -1172,275 +1513,6 @@ public class Multimap<K, E, V extends Collection<E>> {
                 action.accept(e);
             }
         }
-    }
-
-    /**
-     * The implementation is equivalent to performing the following steps for this Multimap:
-     *
-     * <pre>
-     * final V oldValue = get(key);
-     *
-     * if (N.notEmpty(oldValue)) {
-     *     return oldValue;
-     * }
-     *
-     * final V newValue = mappingFunction.apply(key);
-     *
-     * if (N.notEmpty(newValue)) {
-     *     valueMap.put(key, newValue);
-     * }
-     *
-     * return newValue;
-     * </pre>
-     *
-     * @param <X>
-     * @param key
-     * @param mappingFunction
-     * @return
-     * @throws X the x
-     */
-    public <X extends Exception> V computeIfAbsent(K key, Throwables.Function<? super K, ? extends V, X> mappingFunction) throws X {
-        N.checkArgNotNull(mappingFunction);
-
-        final V oldValue = get(key);
-
-        if (N.notEmpty(oldValue)) {
-            return oldValue;
-        }
-
-        final V newValue = mappingFunction.apply(key);
-
-        if (N.notEmpty(newValue)) {
-            valueMap.put(key, newValue);
-        }
-
-        return newValue;
-    }
-
-    /**
-     * The implementation is equivalent to performing the following steps for this Multimap:
-     *
-     * <pre>
-     * final V oldValue = get(key);
-     *
-     * if (N.isEmpty(oldValue)) {
-     *     return oldValue;
-     * }
-     *
-     * final V newValue = remappingFunction.apply(key, oldValue);
-     *
-     * if (N.notEmpty(newValue)) {
-     *     valueMap.put(key, newValue);
-     * } else {
-     *     valueMap.remove(key);
-     * }
-     *
-     * return newValue;
-     * </pre>
-     *
-     * @param <X>
-     * @param key
-     * @param remappingFunction
-     * @return
-     * @throws X the x
-     */
-    public <X extends Exception> V computeIfPresent(K key, Throwables.BiFunction<? super K, ? super V, ? extends V, X> remappingFunction) throws X {
-        N.checkArgNotNull(remappingFunction);
-
-        final V oldValue = get(key);
-
-        if (N.isEmpty(oldValue)) {
-            return oldValue;
-        }
-
-        final V newValue = remappingFunction.apply(key, oldValue);
-
-        if (N.notEmpty(newValue)) {
-            valueMap.put(key, newValue);
-        } else {
-            valueMap.remove(key);
-        }
-
-        return newValue;
-    }
-
-    /**
-     * The implementation is equivalent to performing the following steps for this Multimap:
-     *
-     * <pre>
-     * final V oldValue = get(key);
-     * final V newValue = remappingFunction.apply(key, oldValue);
-     *
-     * if (N.notEmpty(newValue)) {
-     *     valueMap.put(key, newValue);
-     * } else {
-     *     if (oldValue != null) {
-     *         valueMap.remove(key);
-     *     }
-     * }
-     *
-     * return newValue;
-     * </pre>
-     *
-     * @param <X>
-     * @param key
-     * @param remappingFunction
-     * @return
-     * @throws X the x
-     */
-    public <X extends Exception> V compute(K key, Throwables.BiFunction<? super K, ? super V, ? extends V, X> remappingFunction) throws X {
-        N.checkArgNotNull(remappingFunction);
-
-        final V oldValue = get(key);
-        final V newValue = remappingFunction.apply(key, oldValue);
-
-        if (N.notEmpty(newValue)) {
-            valueMap.put(key, newValue);
-        } else {
-            if (oldValue != null) {
-                valueMap.remove(key);
-            }
-        }
-
-        return newValue;
-    }
-
-    /**
-     * The implementation is equivalent to performing the following steps for this Multimap:
-     *
-     * <pre>
-     * final V oldValue = get(key);
-     * final V newValue = oldValue == null ? value : remappingFunction.apply(oldValue, value);
-     *
-     * if (N.notEmpty(newValue)) {
-     *     valueMap.put(key, newValue);
-     * } else {
-     *     if (oldValue != null) {
-     *         valueMap.remove(key);
-     *     }
-     * }
-     *
-     * return newValue;
-     * </pre>
-     *
-     * @param <X>
-     * @param key
-     * @param value
-     * @param remappingFunction
-     * @return
-     * @throws X the x
-     */
-    public <X extends Exception> V merge(K key, V value, Throwables.BiFunction<? super V, ? super V, ? extends V, X> remappingFunction) throws X {
-        N.checkArgNotNull(remappingFunction);
-        N.checkArgNotNull(value);
-
-        final V oldValue = get(key);
-        final V newValue = oldValue == null ? value : remappingFunction.apply(oldValue, value);
-
-        if (N.notEmpty(newValue)) {
-            valueMap.put(key, newValue);
-        } else {
-            if (oldValue != null) {
-                valueMap.remove(key);
-            }
-        }
-
-        return newValue;
-    }
-
-    /**
-     * The implementation is equivalent to performing the following steps for this Multimap:
-     *
-     * <pre>
-     * final V oldValue = get(key);
-     *
-     * if (N.isEmpty(oldValue)) {
-     *     put(key, e);
-     *     return get(key);
-     * }
-     *
-     * final V newValue = remappingFunction.apply(oldValue, e);
-     *
-     * if (N.notEmpty(newValue)) {
-     *     valueMap.put(key, newValue);
-     * } else {
-     *     if (oldValue != null) {
-     *         valueMap.remove(key);
-     *     }
-     * }
-     *
-     * return newValue;
-     * </pre>
-     *
-     * @param <X>
-     * @param key
-     * @param e
-     * @param remappingFunction
-     * @return
-     * @throws X the x
-     */
-    public <X extends Exception> V merge(K key, E e, Throwables.BiFunction<? super V, ? super E, ? extends V, X> remappingFunction) throws X {
-        N.checkArgNotNull(remappingFunction);
-        N.checkArgNotNull(e);
-
-        final V oldValue = get(key);
-
-        if (N.isEmpty(oldValue)) {
-            put(key, e);
-            return get(key);
-        }
-
-        final V newValue = remappingFunction.apply(oldValue, e);
-
-        if (N.notEmpty(newValue)) {
-            valueMap.put(key, newValue);
-        } else {
-            if (oldValue != null) {
-                valueMap.remove(key);
-            }
-        }
-
-        return newValue;
-    }
-
-    /**
-     *
-     *
-     * @return
-     */
-    public Multimap<K, E, V> copy() {
-        final Multimap<K, E, V> copy = new Multimap<>(mapSupplier, valueSupplier);
-
-        copy.putAll(this);
-
-        return copy;
-    }
-
-    /**
-     *
-     *
-     * @param <VV>
-     * @param <M>
-     * @param multimapSupplier
-     * @return
-     */
-    public <VV extends Collection<K>, M extends Multimap<E, K, VV>> M inverse(final IntFunction<? extends M> multimapSupplier) {
-        final Multimap<K, E, V> multimap = this;
-        final M res = multimapSupplier.apply(multimap.size());
-
-        if (N.notEmpty(multimap)) {
-            for (Map.Entry<K, V> entry : multimap.entrySet()) {
-                final V c = entry.getValue();
-
-                if (N.notEmpty(c)) {
-                    for (E e : c) {
-                        res.put(e, entry.getKey());
-                    }
-                }
-            }
-        }
-
-        return res;
     }
 
     /**

@@ -23,6 +23,7 @@ import java.util.function.Function;
 import java.util.function.IntFunction;
 import java.util.function.Supplier;
 
+import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.Internal;
 
 /**
@@ -255,7 +256,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
         final SetMultimap<K, E> multimap = new SetMultimap<>(Maps.newTargetMap(map), HashSet.class);
 
         if (N.notEmpty(map)) {
-            multimap.putAll(map);
+            multimap.put(map);
         }
 
         return multimap;
@@ -415,7 +416,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
             return b == null ? N.<K, E> newSetMultimap() : create(b);
         } else {
             final SetMultimap<K, E> res = create(a);
-            res.putAll(b);
+            res.put(b);
             return res;
         }
     }
@@ -436,13 +437,13 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
                 return c == null ? N.<K, E> newSetMultimap() : create(c);
             } else {
                 final SetMultimap<K, E> res = create(b);
-                res.putAll(c);
+                res.put(c);
                 return res;
             }
         } else {
             final SetMultimap<K, E> res = create(a);
-            res.putAll(b);
-            res.putAll(c);
+            res.put(b);
+            res.put(c);
             return res;
         }
     }
@@ -463,7 +464,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
         final SetMultimap<K, E> res = create(iter.next());
 
         while (iter.hasNext()) {
-            res.putAll(iter.next());
+            res.put(iter.next());
         }
 
         return res;
@@ -478,6 +479,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * @return
      */
     @SuppressWarnings("rawtypes")
+    @Beta
     public static <K, E, V extends Set<E>> SetMultimap<K, E> wrap(final Map<K, V> map) {
         N.checkArgNotNull(map);
         N.checkArgument(N.anyNull(map.values()), "The specified map contains null value: %s", map);
@@ -504,11 +506,51 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * @return
      */
     @SuppressWarnings("rawtypes")
+    @Beta
     public static <K, E, V extends Set<E>> SetMultimap<K, E> wrap(final Map<K, V> map, final Supplier<? extends V> valueSupplier) {
         N.checkArgNotNull(map, "map");
         N.checkArgNotNull(valueSupplier, "valueSupplier");
 
         return new SetMultimap<>((Map) map, valueSupplier);
+    }
+
+    /**
+     *
+     *
+     * @return
+     */
+    @SuppressWarnings("rawtypes")
+    public SetMultimap<E, K> inverse() {
+        final SetMultimap<K, E> multimap = this;
+        final SetMultimap<E, K> res = new SetMultimap<>(Maps.newOrderingMap(valueMap), (Supplier) valueSupplier);
+
+        if (N.notEmpty(multimap)) {
+            for (Map.Entry<K, Set<E>> entry : multimap.entrySet()) {
+                final Set<E> c = entry.getValue();
+
+                if (N.notEmpty(c)) {
+                    for (E e : c) {
+                        res.put(e, entry.getKey());
+                    }
+                }
+            }
+        }
+
+        return res;
+    }
+
+    /**
+     *
+     *
+     * @return
+     */
+    @Override
+    public SetMultimap<K, E> copy() {
+        final SetMultimap<K, E> copy = new SetMultimap<>(mapSupplier, valueSupplier);
+
+        copy.putMany(this);
+
+        return copy;
     }
 
     /**
@@ -571,45 +613,6 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
         }
 
         return result;
-    }
-
-    /**
-     *
-     *
-     * @return
-     */
-    @SuppressWarnings("rawtypes")
-    public SetMultimap<E, K> inverse() {
-        final SetMultimap<K, E> multimap = this;
-        final SetMultimap<E, K> res = new SetMultimap<>(Maps.newOrderingMap(valueMap), (Supplier) valueSupplier);
-
-        if (N.notEmpty(multimap)) {
-            for (Map.Entry<K, Set<E>> entry : multimap.entrySet()) {
-                final Set<E> c = entry.getValue();
-
-                if (N.notEmpty(c)) {
-                    for (E e : c) {
-                        res.put(e, entry.getKey());
-                    }
-                }
-            }
-        }
-
-        return res;
-    }
-
-    /**
-     *
-     *
-     * @return
-     */
-    @Override
-    public SetMultimap<K, E> copy() {
-        final SetMultimap<K, E> copy = new SetMultimap<>(mapSupplier, valueSupplier);
-
-        copy.putAll(this);
-
-        return copy;
     }
 
     /**

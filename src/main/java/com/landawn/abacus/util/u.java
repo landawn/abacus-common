@@ -6333,6 +6333,34 @@ public class u {//NOSONAR
         }
 
         /**
+         * Or else if null.
+         *
+         * @param other
+         * @return
+         */
+        public T orElseIfNull(T other) {
+            return isNotNull() ? value : other;
+        }
+
+        /**
+         * Or else get if null.
+         *
+         * @param <E>
+         * @param other
+         * @return
+         * @throws E the e
+         */
+        public <E extends Exception> T orElseGetIfNull(final Throwables.Supplier<? extends T, E> other) throws E {
+            N.checkArgNotNull(other, "other");
+
+            if (isNotNull()) {
+                return value;
+            } else {
+                return other.get();
+            }
+        }
+
+        /**
          * Or else throw.
          *
          * @return
@@ -6452,34 +6480,6 @@ public class u {//NOSONAR
         }
 
         /**
-         * Or else if null.
-         *
-         * @param other
-         * @return
-         */
-        public T orElseIfNull(T other) {
-            return isNotNull() ? value : other;
-        }
-
-        /**
-         * Or else get if null.
-         *
-         * @param <E>
-         * @param other
-         * @return
-         * @throws E the e
-         */
-        public <E extends Exception> T orElseGetIfNull(final Throwables.Supplier<? extends T, E> other) throws E {
-            N.checkArgNotNull(other, "other");
-
-            if (isNotNull()) {
-                return value;
-            } else {
-                return other.get();
-            }
-        }
-
-        /**
          * Or else throw if null.
          *
          * @return
@@ -6489,7 +6489,94 @@ public class u {//NOSONAR
             if (isNotNull()) {
                 return value;
             } else {
-                throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+                throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NULL_ELEMENT_EX);
+            }
+        }
+
+        /**
+         * Or else throw.
+         * @param errorMessage
+         *
+         * @return
+         * @throws NoSuchElementException the no such element exception
+         */
+        @Beta
+        public T orElseThrowIfNull(final String errorMessage) throws NoSuchElementException {
+            if (isNotNull()) {
+                return value;
+            } else {
+                throw new NoSuchElementException(errorMessage);
+            }
+        }
+
+        /**
+         * Or else throw.
+         * @param errorMessage
+         * @param param
+         *
+         * @return
+         * @throws NoSuchElementException the no such element exception
+         */
+        @Beta
+        public T orElseThrowIfNull(final String errorMessage, final Object param) throws NoSuchElementException {
+            if (isNotNull()) {
+                return value;
+            } else {
+                throw new NoSuchElementException(N.format(errorMessage, param));
+            }
+        }
+
+        /**
+         * Or else throw.
+         * @param errorMessage
+         * @param param1
+         * @param param2
+         *
+         * @return
+         * @throws NoSuchElementException the no such element exception
+         */
+        @Beta
+        public T orElseThrowIfNull(final String errorMessage, final Object param1, final Object param2) throws NoSuchElementException {
+            if (isNotNull()) {
+                return value;
+            } else {
+                throw new NoSuchElementException(N.format(errorMessage, param1, param2));
+            }
+        }
+
+        /**
+         * Or else throw.
+         * @param errorMessage
+         * @param param1
+         * @param param2
+         * @param param3
+         *
+         * @return
+         * @throws NoSuchElementException the no such element exception
+         */
+        @Beta
+        public T orElseThrowIfNull(final String errorMessage, final Object param1, final Object param2, final Object param3) throws NoSuchElementException {
+            if (isNotNull()) {
+                return value;
+            } else {
+                throw new NoSuchElementException(N.format(errorMessage, param1, param2, param3));
+            }
+        }
+
+        /**
+         * Or else throw.
+         * @param errorMessage
+         * @param params
+         *
+         * @return
+         * @throws NoSuchElementException the no such element exception
+         */
+        @Beta
+        public T orElseThrowIfNull(final String errorMessage, final Object... params) throws NoSuchElementException {
+            if (isNotNull()) {
+                return value;
+            } else {
+                throw new NoSuchElementException(N.format(errorMessage, params));
             }
         }
 

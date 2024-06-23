@@ -29,6 +29,7 @@ import com.landawn.abacus.util.CheckedStream.CheckedIterator;
 @Internal
 public final class InternalUtil {
     public static final String ERROR_MSG_FOR_NO_SUCH_EX = "Target object/value does not exist or is not found";
+    public static final String ERROR_MSG_FOR_NULL_ELEMENT_EX = "Target object/value does not exist or is not found, or its value is null";
 
     /**
      *

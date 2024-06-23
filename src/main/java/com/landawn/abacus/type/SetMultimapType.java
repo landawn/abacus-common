@@ -134,7 +134,7 @@ public class SetMultimapType<K, E> extends AbstractType<SetMultimap<K, E>> {
         final SetMultimap<K, E> multiMap = N.newLinkedSetMultimap(map.size());
 
         for (Map.Entry<K, Collection<E>> entry : map.entrySet()) {
-            multiMap.putAll(entry.getKey(), entry.getValue());
+            multiMap.putMany(entry.getKey(), entry.getValue());
         }
 
         return multiMap;

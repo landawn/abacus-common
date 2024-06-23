@@ -213,6 +213,60 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      *
      * @param <T>
      * @param <E>
+     * @param stream
+     * @return
+     */
+    public static <T, E extends Exception> CheckedStream<T, E> from(final Stream<? extends T> stream) {
+        return checked(stream, false);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param <E>
+     * @param stream
+     * @return
+     */
+    public static <T, E extends Exception> CheckedStream<T, E> from(final java.util.stream.Stream<? extends T> stream) {
+        if (stream == null) {
+            return empty();
+        }
+
+        return CheckedStream.<T, E> of(stream.iterator()).onClose(stream::close);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param <E>
+     * @param stream
+     * @param exceptionType
+     * @return
+     */
+    // Should the name be from?
+    public static <T, E extends Exception> CheckedStream<T, E> from(final Stream<? extends T> stream,
+            @SuppressWarnings("unused") final Class<E> exceptionType) { //NOSONAR
+        return from(stream);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param <E>
+     * @param stream
+     * @param exceptionType
+     * @return
+     */
+    // Should the name be from?
+    public static <T, E extends Exception> CheckedStream<T, E> from(final java.util.stream.Stream<? extends T> stream,
+            @SuppressWarnings("unused") final Class<E> exceptionType) { //NOSONAR
+        return from(stream);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param <E>
      * @param e
      * @return
      */
@@ -423,9 +477,11 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @param <E>
      * @param stream
      * @return
+     * @deprecated Use {@link #from(Stream<? extends T>)} instead
      */
+    @Deprecated
     public static <T, E extends Exception> CheckedStream<T, E> of(final Stream<? extends T> stream) {
-        return checked(stream, false);
+        return from(stream);
     }
 
     /**
@@ -434,13 +490,11 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @param <E>
      * @param stream
      * @return
+     * @deprecated Use {@link #from(java.util.stream.Stream<? extends T>)} instead
      */
+    @Deprecated
     public static <T, E extends Exception> CheckedStream<T, E> of(final java.util.stream.Stream<? extends T> stream) {
-        if (stream == null) {
-            return empty();
-        }
-
-        return CheckedStream.<T, E> of(stream.iterator()).onClose(stream::close);
+        return from(stream);
     }
 
     /**
@@ -501,10 +555,12 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @param stream
      * @param exceptionType
      * @return
+     * @deprecated Use {@link #from(Stream<? extends T>,Class<E>)} instead
      */
     // Should the name be from?
-    public static <T, E extends Exception> CheckedStream<T, E> of(final Stream<? extends T> stream, @SuppressWarnings("unused") final Class<E> exceptionType) { //NOSONAR
-        return of(stream);
+    @Deprecated
+    public static <T, E extends Exception> CheckedStream<T, E> of(final Stream<? extends T> stream, @SuppressWarnings("unused") final Class<E> exceptionType) {
+        return from(stream, exceptionType);
     }
 
     /**
@@ -514,11 +570,13 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @param stream
      * @param exceptionType
      * @return
+     * @deprecated Use {@link #from(java.util.stream.Stream<? extends T>,Class<E>)} instead
      */
     // Should the name be from?
+    @Deprecated
     public static <T, E extends Exception> CheckedStream<T, E> of(final java.util.stream.Stream<? extends T> stream,
-            @SuppressWarnings("unused") final Class<E> exceptionType) { //NOSONAR
-        return of(stream);
+            @SuppressWarnings("unused") final Class<E> exceptionType) {
+        return from(stream, exceptionType);
     }
 
     /**

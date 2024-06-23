@@ -250,168 +250,6 @@ public final class LongMultiset<T> implements Iterable<T> {
      * @param e
      * @return
      */
-    public long get(final Object e) {
-        final MutableLong count = valueMap.get(e);
-
-        return count == null ? 0 : count.value();
-    }
-
-    /**
-     * Gets the or default.
-     *
-     * @param e
-     * @param defaultValue
-     * @return
-     */
-    public long getOrDefault(final Object e, long defaultValue) {
-        final MutableLong count = valueMap.get(e);
-
-        return count == null ? defaultValue : count.value();
-    }
-
-    /**
-     * The element will be removed if the specified count is 0.
-     *
-     * @param e
-     * @param occurrences
-     * @return
-     */
-    public long getAndSet(final T e, final long occurrences) {
-        checkOccurrences(occurrences);
-
-        final MutableLong count = valueMap.get(e);
-        long result = count == null ? 0 : count.value();
-
-        if (occurrences == 0) {
-            if (count != null) {
-                valueMap.remove(e);
-            }
-        } else {
-            if (count == null) {
-                valueMap.put(e, MutableLong.of(occurrences));
-            } else {
-                count.setValue(occurrences);
-            }
-        }
-
-        return result;
-    }
-
-    /**
-     * The element will be removed if the specified count is 0.
-     *
-     * @param e
-     * @param occurrences
-     * @return
-     */
-    public long setAndGet(final T e, final long occurrences) {
-        checkOccurrences(occurrences);
-
-        final MutableLong count = valueMap.get(e);
-
-        if (occurrences == 0) {
-            if (count != null) {
-                valueMap.remove(e);
-            }
-        } else {
-            if (count == null) {
-                valueMap.put(e, MutableLong.of(occurrences));
-            } else {
-                count.setValue(occurrences);
-            }
-        }
-
-        return occurrences;
-    }
-
-    /**
-     * The element will be removed if the specified count is 0.
-     *
-     * @param e
-     * @param occurrences
-     * @return this LongMultiset.
-     * @throws IllegalArgumentException if the occurrences of element is less than 0
-     */
-    public LongMultiset<T> set(final T e, final long occurrences) {
-        checkOccurrences(occurrences);
-
-        if (occurrences == 0) {
-            valueMap.remove(e);
-        } else {
-            final MutableLong count = valueMap.get(e);
-
-            if (count == null) {
-                valueMap.put(e, MutableLong.of(occurrences));
-            } else {
-                count.setValue(occurrences);
-            }
-        }
-
-        return this;
-    }
-
-    /**
-     * Sets the all.
-     *
-     * @param c
-     * @param occurrences
-     * @return
-     */
-    public LongMultiset<T> setAll(final Collection<? extends T> c, final long occurrences) {
-        checkOccurrences(occurrences);
-
-        if (N.notEmpty(c)) {
-            for (T e : c) {
-                set(e, occurrences);
-            }
-        }
-
-        return this;
-    }
-
-    /**
-     * Sets the all.
-     *
-     * @param m
-     * @return this LongMultiset.
-     * @throws IllegalArgumentException if the occurrences of element is less than 0.
-     */
-    public LongMultiset<T> setAll(final Map<? extends T, Long> m) throws IllegalArgumentException {
-        if (N.notEmpty(m)) {
-            for (Map.Entry<? extends T, Long> entry : m.entrySet()) {
-                checkOccurrences(entry.getValue());
-            }
-
-            for (Map.Entry<? extends T, Long> entry : m.entrySet()) {
-                set(entry.getKey(), entry.getValue().longValue());
-            }
-        }
-
-        return this;
-    }
-
-    /**
-     * Sets the all.
-     *
-     * @param multiset
-     * @return this LongMultiset.
-     * @throws IllegalArgumentException if the occurrences of element is less than 0.
-     */
-    public LongMultiset<T> setAll(final LongMultiset<? extends T> multiset) throws IllegalArgumentException {
-        if (N.notEmpty(multiset)) {
-            for (Map.Entry<? extends T, MutableLong> entry : multiset.valueMap.entrySet()) {
-                set(entry.getKey(), entry.getValue().value());
-            }
-        }
-
-        return this;
-    }
-
-    /**
-     *
-     * @param e
-     * @return
-     */
     public long occurrencesOf(final Object e) {
         return get(e);
     }
@@ -557,6 +395,154 @@ public final class LongMultiset<T> implements Iterable<T> {
         final double sum = sumOfOccurrences();
 
         return OptionalDouble.of(sum / size());
+    }
+
+    /**
+     *
+     * @param e
+     * @return
+     */
+    public long get(final Object e) {
+        final MutableLong count = valueMap.get(e);
+
+        return count == null ? 0 : count.value();
+    }
+
+    /**
+     * Gets the or default.
+     *
+     * @param e
+     * @param defaultValue
+     * @return
+     */
+    public long getOrDefault(final Object e, long defaultValue) {
+        final MutableLong count = valueMap.get(e);
+
+        return count == null ? defaultValue : count.value();
+    }
+
+    /**
+     * The element will be removed if the specified count is 0.
+     *
+     * @param e
+     * @param occurrences
+     * @return
+     */
+    public long getAndSet(final T e, final long occurrences) {
+        checkOccurrences(occurrences);
+
+        final MutableLong count = valueMap.get(e);
+        long result = count == null ? 0 : count.value();
+
+        if (occurrences == 0) {
+            if (count != null) {
+                valueMap.remove(e);
+            }
+        } else {
+            if (count == null) {
+                valueMap.put(e, MutableLong.of(occurrences));
+            } else {
+                count.setValue(occurrences);
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * The element will be removed if the specified count is 0.
+     *
+     * @param e
+     * @param occurrences
+     * @return
+     */
+    public long setAndGet(final T e, final long occurrences) {
+        checkOccurrences(occurrences);
+
+        final MutableLong count = valueMap.get(e);
+
+        if (occurrences == 0) {
+            if (count != null) {
+                valueMap.remove(e);
+            }
+        } else {
+            if (count == null) {
+                valueMap.put(e, MutableLong.of(occurrences));
+            } else {
+                count.setValue(occurrences);
+            }
+        }
+
+        return occurrences;
+    }
+
+    /**
+     * The element will be removed if the specified count is 0.
+     *
+     * @param e
+     * @param occurrences
+     * @throws IllegalArgumentException if the occurrences of element is less than 0
+     */
+    public void set(final T e, final long occurrences) {
+        checkOccurrences(occurrences);
+
+        if (occurrences == 0) {
+            valueMap.remove(e);
+        } else {
+            final MutableLong count = valueMap.get(e);
+
+            if (count == null) {
+                valueMap.put(e, MutableLong.of(occurrences));
+            } else {
+                count.setValue(occurrences);
+            }
+        }
+    }
+
+    /**
+     * Sets the all.
+     *
+     * @param c
+     * @param occurrences
+     */
+    public void setAll(final Collection<? extends T> c, final long occurrences) {
+        checkOccurrences(occurrences);
+
+        if (N.notEmpty(c)) {
+            for (T e : c) {
+                set(e, occurrences);
+            }
+        }
+    }
+
+    /**
+     *
+     * @param m
+     * @throws IllegalArgumentException if the occurrences of element is less than 0.
+     */
+    public void setAll(final Map<? extends T, Long> m) throws IllegalArgumentException {
+        if (N.notEmpty(m)) {
+            for (Map.Entry<? extends T, Long> entry : m.entrySet()) {
+                checkOccurrences(entry.getValue());
+            }
+
+            for (Map.Entry<? extends T, Long> entry : m.entrySet()) {
+                set(entry.getKey(), entry.getValue().longValue());
+            }
+        }
+    }
+
+    /**
+     *
+     * @param multiset
+     * @throws IllegalArgumentException if the occurrences of element is less than 0.
+     */
+    public void setAll(final LongMultiset<? extends T> multiset) throws IllegalArgumentException {
+        if (N.notEmpty(multiset)) {
+            for (Map.Entry<? extends T, MutableLong> entry : multiset.valueMap.entrySet()) {
+                set(entry.getKey(), entry.getValue().value());
+            }
+        }
     }
 
     /**
@@ -710,109 +696,6 @@ public final class LongMultiset<T> implements Iterable<T> {
     }
 
     /**
-     * Adds the all.
-     *
-     * @param c
-     * @return
-     * @throws IllegalArgumentException if the occurrences of element after this operation is bigger than Long.MAX_VALUE.
-     */
-    public boolean addAll(final Collection<? extends T> c) throws IllegalArgumentException {
-        if (N.isEmpty(c)) {
-            return false;
-        }
-
-        return addAll(c, 1);
-    }
-
-    /**
-     * Adds the all.
-     *
-     * @param c
-     * @param occurrencesToAdd
-     * @return
-     * @throws IllegalArgumentException if the occurrences of element after this operation is bigger than Long.MAX_VALUE.
-     */
-    public boolean addAll(final Collection<? extends T> c, final long occurrencesToAdd) throws IllegalArgumentException {
-        checkOccurrences(occurrencesToAdd);
-
-        if (N.isEmpty(c) || occurrencesToAdd == 0) {
-            return false;
-        }
-
-        for (T e : c) {
-            add(e, occurrencesToAdd);
-        }
-
-        return occurrencesToAdd > 0;
-    }
-
-    /**
-     * Adds the all.
-     *
-     * @param m
-     * @return
-     * @throws IllegalArgumentException if the occurrences of element after this operation is bigger than Long.MAX_VALUE.
-     */
-    public boolean addAll(final Map<? extends T, Long> m) throws IllegalArgumentException {
-        if (N.isEmpty(m)) {
-            return false;
-        }
-
-        for (Map.Entry<? extends T, Long> entry : m.entrySet()) {
-            checkOccurrences(entry.getValue());
-        }
-
-        boolean result = false;
-
-        for (Map.Entry<? extends T, Long> entry : m.entrySet()) {
-            if (!result) {
-                result = add(entry.getKey(), entry.getValue().longValue());
-            } else {
-                add(entry.getKey(), entry.getValue().longValue());
-            }
-        }
-
-        return result;
-    }
-
-    /**
-     * Adds the all.
-     *
-     * @param multiset
-     * @return
-     * @throws IllegalArgumentException if the occurrences of element is less than 0.
-     */
-    public boolean addAll(final LongMultiset<? extends T> multiset) throws IllegalArgumentException {
-        if (N.isEmpty(multiset)) {
-            return false;
-        }
-
-        for (Map.Entry<? extends T, MutableLong> entry : multiset.valueMap.entrySet()) {
-            add(entry.getKey(), entry.getValue().value());
-        }
-
-        return true;
-    }
-
-    /**
-     *
-     * @param o
-     * @return
-     */
-    public boolean contains(final Object o) {
-        return valueMap.containsKey(o);
-    }
-
-    /**
-     *
-     * @param c
-     * @return
-     */
-    public boolean containsAll(final Collection<?> c) {
-        return valueMap.keySet().containsAll(c);
-    }
-
-    /**
      * Remove one occurrence from the specified elements.
      * The element will be removed from this <code>Multiset</code> if the occurrences equals to or less than 0 after the operation.
      *
@@ -919,157 +802,86 @@ public final class LongMultiset<T> implements Iterable<T> {
     }
 
     /**
-     * Removes the all occurrences.
-     *
-     * @param e
-     * @return
-     */
-    public long removeAllOccurrences(final Object e) {
-        final MutableLong count = valueMap.remove(e);
-
-        return count == null ? 0 : count.value();
-    }
-
-    /**
-     * Removes the all occurrences if.
-     *
-     * @param <E>
-     * @param predicate
-     * @return
-     * @throws E the e
-     */
-    public <E extends Exception> boolean removeAllOccurrencesIf(Throwables.Predicate<? super T, E> predicate) throws E {
-        Set<T> removingKeys = null;
-
-        for (T key : this.valueMap.keySet()) {
-            if (predicate.test(key)) {
-                if (removingKeys == null) {
-                    removingKeys = N.newHashSet();
-                }
-
-                removingKeys.add(key);
-            }
-        }
-
-        if (N.isEmpty(removingKeys)) {
-            return false;
-        }
-
-        removeAll(removingKeys);
-
-        return true;
-    }
-
-    /**
-     * Removes the all occurrences if.
-     *
-     * @param <E>
-     * @param predicate
-     * @return
-     * @throws E the e
-     */
-    public <E extends Exception> boolean removeAllOccurrencesIf(Throwables.BiPredicate<? super T, ? super Long, E> predicate) throws E {
-        Set<T> removingKeys = null;
-
-        for (Map.Entry<T, MutableLong> entry : this.valueMap.entrySet()) {
-            if (predicate.test(entry.getKey(), entry.getValue().value())) {
-                if (removingKeys == null) {
-                    removingKeys = N.newHashSet();
-                }
-
-                removingKeys.add(entry.getKey());
-            }
-        }
-
-        if (N.isEmpty(removingKeys)) {
-            return false;
-        }
-
-        removeAll(removingKeys);
-
-        return true;
-    }
-
-    /**
-     * Removes the all occurrences.
+     * Adds the all.
      *
      * @param c
      * @return
+     * @throws IllegalArgumentException if the occurrences of element after this operation is bigger than Long.MAX_VALUE.
      */
-    public boolean removeAllOccurrencesForEach(final Collection<?> c) {
+    public boolean addAll(final Collection<? extends T> c) throws IllegalArgumentException {
         if (N.isEmpty(c)) {
             return false;
         }
 
-        final int size = valueMap.size();
-
-        for (Object e : c) {
-            removeAllOccurrences(e);
-        }
-
-        return valueMap.size() < size;
+        return addAll(c, 1);
     }
 
     /**
-     * Removes the if.
-     * @param <E>
-     * @param occurrences
-     * @param predicate
+     * Adds the all.
+     *
+     * @param c
+     * @param occurrencesToAdd
      * @return
-     * @throws E the e
+     * @throws IllegalArgumentException if the occurrences of element after this operation is bigger than Long.MAX_VALUE.
      */
-    public <E extends Exception> boolean removeIf(final long occurrences, Throwables.Predicate<? super T, E> predicate) throws E {
-        checkOccurrences(occurrences);
+    public boolean addAll(final Collection<? extends T> c, final long occurrencesToAdd) throws IllegalArgumentException {
+        checkOccurrences(occurrencesToAdd);
 
-        Set<T> removingKeys = null;
-
-        for (T key : this.valueMap.keySet()) {
-            if (predicate.test(key)) {
-                if (removingKeys == null) {
-                    removingKeys = N.newHashSet();
-                }
-
-                removingKeys.add(key);
-            }
-        }
-
-        if (N.isEmpty(removingKeys)) {
+        if (N.isEmpty(c) || occurrencesToAdd == 0) {
             return false;
         }
 
-        removeAll(removingKeys, occurrences);
+        for (T e : c) {
+            add(e, occurrencesToAdd);
+        }
 
-        return true;
+        return occurrencesToAdd > 0;
     }
 
     /**
-     * Removes the if.
-     * @param <E>
-     * @param occurrences
-     * @param predicate
+     * Adds the all.
+     *
+     * @param m
      * @return
-     * @throws E the e
+     * @throws IllegalArgumentException if the occurrences of element after this operation is bigger than Long.MAX_VALUE.
      */
-    public <E extends Exception> boolean removeIf(final long occurrences, Throwables.BiPredicate<? super T, ? super Long, E> predicate) throws E {
-        checkOccurrences(occurrences);
-
-        Set<T> removingKeys = null;
-
-        for (Map.Entry<T, MutableLong> entry : this.valueMap.entrySet()) {
-            if (predicate.test(entry.getKey(), entry.getValue().value())) {
-                if (removingKeys == null) {
-                    removingKeys = N.newHashSet();
-                }
-
-                removingKeys.add(entry.getKey());
-            }
-        }
-
-        if (N.isEmpty(removingKeys)) {
+    public boolean addAll(final Map<? extends T, Long> m) throws IllegalArgumentException {
+        if (N.isEmpty(m)) {
             return false;
         }
 
-        removeAll(removingKeys, occurrences);
+        for (Map.Entry<? extends T, Long> entry : m.entrySet()) {
+            checkOccurrences(entry.getValue());
+        }
+
+        boolean result = false;
+
+        for (Map.Entry<? extends T, Long> entry : m.entrySet()) {
+            if (!result) {
+                result = add(entry.getKey(), entry.getValue().longValue());
+            } else {
+                add(entry.getKey(), entry.getValue().longValue());
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Adds the all.
+     *
+     * @param multiset
+     * @return
+     * @throws IllegalArgumentException if the occurrences of element is less than 0.
+     */
+    public boolean addAll(final LongMultiset<? extends T> multiset) throws IllegalArgumentException {
+        if (N.isEmpty(multiset)) {
+            return false;
+        }
+
+        for (Map.Entry<? extends T, MutableLong> entry : multiset.valueMap.entrySet()) {
+            add(entry.getKey(), entry.getValue().value());
+        }
 
         return true;
     }
@@ -1162,88 +974,101 @@ public final class LongMultiset<T> implements Iterable<T> {
 
     /**
      *
-     * @param <E>
-     * @param predicate
-     * @param newOccurrences
+     * @param o
      * @return
-     * @throws E the e
      */
-    public <E extends Exception> boolean replaceIf(Throwables.Predicate<? super T, E> predicate, final long newOccurrences) throws E {
-        checkOccurrences(newOccurrences);
-
-        boolean modified = false;
-
-        if (newOccurrences == 0) {
-            final List<T> keysToRemove = new ArrayList<>();
-
-            for (T key : valueMap.keySet()) {
-                if (predicate.test(key)) {
-                    keysToRemove.add(key);
-                }
-            }
-
-            if (keysToRemove.size() > 0) {
-                for (T key : keysToRemove) {
-                    valueMap.remove(key);
-                }
-
-                modified = true;
-            }
-
-        } else {
-            for (Map.Entry<T, MutableLong> entry : valueMap.entrySet()) {
-                if (predicate.test(entry.getKey())) {
-                    entry.getValue().setValue(newOccurrences);
-
-                    modified = true;
-                }
-            }
-        }
-
-        return modified;
+    public boolean contains(final Object o) {
+        return valueMap.containsKey(o);
     }
 
     /**
      *
+     * @param c
+     * @return
+     */
+    public boolean containsAll(final Collection<?> c) {
+        return valueMap.keySet().containsAll(c);
+    }
+
+    /**
+     * Removes the all occurrences.
+     *
+     * @param e
+     * @return
+     */
+    public long removeAllOccurrences(final Object e) {
+        final MutableLong count = valueMap.remove(e);
+
+        return count == null ? 0 : count.value();
+    }
+
+    /**
+     *
+     * @param c
+     * @return
+     */
+    public boolean removeAllOccurrencesForAll(final Collection<?> c) {
+        return removeAll(c, Long.MAX_VALUE);
+    }
+
+    /**
+     * Removes the all occurrences if.
+     *
      * @param <E>
      * @param predicate
-     * @param newOccurrences
      * @return
      * @throws E the e
      */
-    public <E extends Exception> boolean replaceIf(Throwables.BiPredicate<? super T, ? super Long, E> predicate, final long newOccurrences) throws E {
-        checkOccurrences(newOccurrences);
+    public <E extends Exception> boolean removeAllOccurrencesIf(Throwables.Predicate<? super T, E> predicate) throws E {
+        Set<T> removingKeys = null;
 
-        boolean modified = false;
-
-        if (newOccurrences == 0) {
-            final List<T> keysToRemove = new ArrayList<>();
-
-            for (Map.Entry<T, MutableLong> entry : valueMap.entrySet()) {
-                if (predicate.test(entry.getKey(), entry.getValue().value())) {
-                    keysToRemove.add(entry.getKey());
-                }
-            }
-
-            if (keysToRemove.size() > 0) {
-                for (T key : keysToRemove) {
-                    valueMap.remove(key);
+        for (T key : this.valueMap.keySet()) {
+            if (predicate.test(key)) {
+                if (removingKeys == null) {
+                    removingKeys = N.newHashSet();
                 }
 
-                modified = true;
-            }
-
-        } else {
-            for (Map.Entry<T, MutableLong> entry : valueMap.entrySet()) {
-                if (predicate.test(entry.getKey(), entry.getValue().value())) {
-                    entry.getValue().setValue(newOccurrences);
-
-                    modified = true;
-                }
+                removingKeys.add(key);
             }
         }
 
-        return modified;
+        if (N.isEmpty(removingKeys)) {
+            return false;
+        }
+
+        removeAll(removingKeys);
+
+        return true;
+    }
+
+    /**
+     * Removes the all occurrences if.
+     *
+     * @param <E>
+     * @param predicate
+     * @return
+     * @throws E the e
+     */
+    public <E extends Exception> boolean removeAllOccurrencesIf(Throwables.ObjLongPredicate<? super T, E> predicate) throws E {
+        Set<T> removingKeys = null;
+
+        for (Map.Entry<T, MutableLong> entry : this.valueMap.entrySet()) {
+            if (predicate.test(entry.getKey(), entry.getValue().value())) {
+                if (removingKeys == null) {
+                    removingKeys = N.newHashSet();
+                }
+
+                removingKeys.add(entry.getKey());
+            }
+        }
+
+        if (N.isEmpty(removingKeys)) {
+            return false;
+        }
+
+        removeAll(removingKeys);
+
+        return true;
     }
 
     /**
@@ -1253,7 +1078,7 @@ public final class LongMultiset<T> implements Iterable<T> {
      * @param function
      * @throws E the e
      */
-    public <E extends Exception> void replaceAll(Throwables.BiFunction<? super T, ? super Long, Long, E> function) throws E {
+    public <E extends Exception> void updateAllOccurrences(Throwables.BiFunction<? super T, ? super Long, Long, E> function) throws E {
         List<T> keyToRemove = null;
         Long newVal = null;
 
@@ -1279,6 +1104,180 @@ public final class LongMultiset<T> implements Iterable<T> {
     }
 
     /**
+     * The implementation is equivalent to performing the following steps for this LongMultiset:
+     *
+     * <pre>
+     * final long oldValue = get(e);
+     *
+     * if (oldValue > 0) {
+     *     return oldValue;
+     * }
+     *
+     * final long newValue = mappingFunction.apply(e);
+     *
+     * if (newValue > 0) {
+     *     set(e, newValue);
+     * }
+     *
+     * return newValue;
+     * </pre>
+     *
+     * @param <E>
+     * @param e
+     * @param mappingFunction
+     * @return
+     * @throws E the e
+     */
+    public <E extends Exception> long computeIfAbsent(T e, Throwables.Function<? super T, Long, E> mappingFunction) throws E {
+        N.checkArgNotNull(mappingFunction);
+
+        final long oldValue = get(e);
+
+        if (oldValue > 0) {
+            return oldValue;
+        }
+
+        final long newValue = mappingFunction.apply(e);
+
+        if (newValue > 0) {
+            set(e, newValue);
+        }
+
+        return newValue;
+    }
+
+    /**
+     * The implementation is equivalent to performing the following steps for this LongMultiset:
+     *
+     * <pre>
+     * final long oldValue = get(e);
+     *
+     * if (oldValue == 0) {
+     *     return oldValue;
+     * }
+     *
+     * final long newValue = remappingFunction.apply(e, oldValue);
+     *
+     * if (newValue > 0) {
+     *     set(e, newValue);
+     * } else {
+     *     remove(e);
+     * }
+     *
+     * return newValue;
+     * </pre>
+     *
+     * @param <E>
+     * @param e
+     * @param remappingFunction
+     * @return
+     * @throws E the e
+     */
+    public <E extends Exception> long computeIfPresent(T e, Throwables.BiFunction<? super T, Long, Long, E> remappingFunction) throws E {
+        N.checkArgNotNull(remappingFunction);
+
+        final long oldValue = get(e);
+
+        if (oldValue == 0) {
+            return oldValue;
+        }
+
+        final long newValue = remappingFunction.apply(e, oldValue);
+
+        if (newValue > 0) {
+            set(e, newValue);
+        } else {
+            remove(e);
+        }
+
+        return newValue;
+    }
+
+    /**
+     * The implementation is equivalent to performing the following steps for this LongMultiset:
+     *
+     * <pre>
+     * final long oldValue = get(key);
+     * final long newValue = remappingFunction.apply(key, oldValue);
+     *
+     * if (newValue > 0) {
+     *     set(key, newValue);
+     * } else {
+     *     if (oldValue > 0) {
+     *         remove(key);
+     *     }
+     * }
+     *
+     * return newValue;
+     * </pre>
+     *
+     * @param <E>
+     * @param key
+     * @param remappingFunction
+     * @return
+     * @throws E the e
+     */
+    public <E extends Exception> long compute(T key, Throwables.BiFunction<? super T, Long, Long, E> remappingFunction) throws E {
+        N.checkArgNotNull(remappingFunction);
+
+        final long oldValue = get(key);
+        final long newValue = remappingFunction.apply(key, oldValue);
+
+        if (newValue > 0) {
+            set(key, newValue);
+        } else {
+            if (oldValue > 0) {
+                remove(key);
+            }
+        }
+
+        return newValue;
+    }
+
+    /**
+     * The implementation is equivalent to performing the following steps for this LongMultiset:
+     *
+     * <pre>
+     * long oldValue = get(key);
+     * long newValue = (oldValue == 0) ? value : remappingFunction.apply(oldValue, value);
+     *
+     * if (newValue > 0) {
+     *     set(key, newValue);
+     * } else {
+     *     if (oldValue > 0) {
+     *         remove(key);
+     *     }
+     * }
+     *
+     * return newValue;
+     * </pre>
+     *
+     * @param <E>
+     * @param key
+     * @param value
+     * @param remappingFunction
+     * @return
+     * @throws E the e
+     */
+    public <E extends Exception> long merge(T key, long value, Throwables.BiFunction<Long, Long, Long, E> remappingFunction) throws E {
+        N.checkArgNotNull(remappingFunction);
+        N.checkArgNotNull(value);
+
+        long oldValue = get(key);
+        long newValue = (oldValue == 0) ? value : remappingFunction.apply(oldValue, value);
+
+        if (newValue > 0) {
+            set(key, newValue);
+        } else {
+            if (oldValue > 0) {
+                remove(key);
+            }
+        }
+
+        return newValue;
+    }
+
+    /**
      * Retains only the elements in this collection that are contained in the
      * specified collection (optional operation).  In other words, removes from
      * this collection all of its elements that are not contained in the
@@ -1287,7 +1286,9 @@ public final class LongMultiset<T> implements Iterable<T> {
      * @param c
      * @return <tt>true</tt> if this set changed as a result of the call
      * @see Collection#retainAll(Collection)
+     * @deprecated
      */
+    @Deprecated
     public boolean retainAll(final Collection<?> c) {
         if (N.isEmpty(c)) {
             boolean result = size() > 0;
@@ -1330,6 +1331,37 @@ public final class LongMultiset<T> implements Iterable<T> {
      */
     public ImmutableSet<T> elements() {
         return ImmutableSet.wrap(valueMap.keySet());
+    }
+
+    // It won't work.
+    //    public LongMultiset<T> synchronizedd() {
+    //        return new LongMultiset<>(Collections.synchronizedMap(valueMap));
+    //    }
+
+    /**
+     *
+     * @return a list with all elements, each of them is repeated with the occurrences in this <code>LongMultiset</code>
+     */
+    public List<T> flatten() {
+        final long totalOccurrences = sumOfOccurrences();
+
+        if (totalOccurrences > Integer.MAX_VALUE) {
+            throw new RuntimeException("The total occurrences(" + totalOccurrences + ") is bigger than the max value of int.");
+        }
+
+        final Object[] a = new Object[(int) totalOccurrences];
+
+        int fromIndex = 0;
+        int toIndex = 0;
+
+        for (Map.Entry<T, MutableLong> entry : valueMap.entrySet()) {
+            toIndex = fromIndex + (int) entry.getValue().value();
+
+            Arrays.fill(a, fromIndex, toIndex, entry.getKey());
+            fromIndex = toIndex;
+        }
+
+        return N.asList((T[]) a);
     }
 
     /**
@@ -1541,32 +1573,6 @@ public final class LongMultiset<T> implements Iterable<T> {
 
     /**
      *
-     * @return a list with all elements, each of them is repeated with the occurrences in this <code>LongMultiset</code>
-     */
-    public List<T> flatten() {
-        final long totalOccurrences = sumOfOccurrences();
-
-        if (totalOccurrences > Integer.MAX_VALUE) {
-            throw new RuntimeException("The total occurrences(" + totalOccurrences + ") is bigger than the max value of int.");
-        }
-
-        final Object[] a = new Object[(int) totalOccurrences];
-
-        int fromIndex = 0;
-        int toIndex = 0;
-
-        for (Map.Entry<T, MutableLong> entry : valueMap.entrySet()) {
-            toIndex = fromIndex + (int) entry.getValue().value();
-
-            Arrays.fill(a, fromIndex, toIndex, entry.getKey());
-            fromIndex = toIndex;
-        }
-
-        return N.asList((T[]) a);
-    }
-
-    /**
-     *
      * @param <E>
      * @param filter
      * @return
@@ -1591,7 +1597,7 @@ public final class LongMultiset<T> implements Iterable<T> {
      * @return
      * @throws E the e
      */
-    public <E extends Exception> LongMultiset<T> filter(Throwables.BiPredicate<? super T, Long, E> filter) throws E {
+    public <E extends Exception> LongMultiset<T> filter(Throwables.ObjLongPredicate<? super T, E> filter) throws E {
         final LongMultiset<T> result = new LongMultiset<>(mapSupplier.get());
 
         for (Map.Entry<T, MutableLong> entry : valueMap.entrySet()) {
@@ -1629,180 +1635,6 @@ public final class LongMultiset<T> implements Iterable<T> {
         for (Map.Entry<T, MutableLong> entry : valueMap.entrySet()) {
             action.accept(entry.getKey(), entry.getValue().value());
         }
-    }
-
-    /**
-     * The implementation is equivalent to performing the following steps for this LongMultiset:
-     *
-     * <pre>
-     * final long oldValue = get(e);
-     *
-     * if (oldValue > 0) {
-     *     return oldValue;
-     * }
-     *
-     * final long newValue = mappingFunction.apply(e);
-     *
-     * if (newValue > 0) {
-     *     set(e, newValue);
-     * }
-     *
-     * return newValue;
-     * </pre>
-     *
-     * @param <E>
-     * @param e
-     * @param mappingFunction
-     * @return
-     * @throws E the e
-     */
-    public <E extends Exception> long computeIfAbsent(T e, Throwables.Function<? super T, Long, E> mappingFunction) throws E {
-        N.checkArgNotNull(mappingFunction);
-
-        final long oldValue = get(e);
-
-        if (oldValue > 0) {
-            return oldValue;
-        }
-
-        final long newValue = mappingFunction.apply(e);
-
-        if (newValue > 0) {
-            set(e, newValue);
-        }
-
-        return newValue;
-    }
-
-    /**
-     * The implementation is equivalent to performing the following steps for this LongMultiset:
-     *
-     * <pre>
-     * final long oldValue = get(e);
-     *
-     * if (oldValue == 0) {
-     *     return oldValue;
-     * }
-     *
-     * final long newValue = remappingFunction.apply(e, oldValue);
-     *
-     * if (newValue > 0) {
-     *     set(e, newValue);
-     * } else {
-     *     remove(e);
-     * }
-     *
-     * return newValue;
-     * </pre>
-     *
-     * @param <E>
-     * @param e
-     * @param remappingFunction
-     * @return
-     * @throws E the e
-     */
-    public <E extends Exception> long computeIfPresent(T e, Throwables.BiFunction<? super T, Long, Long, E> remappingFunction) throws E {
-        N.checkArgNotNull(remappingFunction);
-
-        final long oldValue = get(e);
-
-        if (oldValue == 0) {
-            return oldValue;
-        }
-
-        final long newValue = remappingFunction.apply(e, oldValue);
-
-        if (newValue > 0) {
-            set(e, newValue);
-        } else {
-            remove(e);
-        }
-
-        return newValue;
-    }
-
-    /**
-     * The implementation is equivalent to performing the following steps for this LongMultiset:
-     *
-     * <pre>
-     * final long oldValue = get(key);
-     * final long newValue = remappingFunction.apply(key, oldValue);
-     *
-     * if (newValue > 0) {
-     *     set(key, newValue);
-     * } else {
-     *     if (oldValue > 0) {
-     *         remove(key);
-     *     }
-     * }
-     *
-     * return newValue;
-     * </pre>
-     *
-     * @param <E>
-     * @param key
-     * @param remappingFunction
-     * @return
-     * @throws E the e
-     */
-    public <E extends Exception> long compute(T key, Throwables.BiFunction<? super T, Long, Long, E> remappingFunction) throws E {
-        N.checkArgNotNull(remappingFunction);
-
-        final long oldValue = get(key);
-        final long newValue = remappingFunction.apply(key, oldValue);
-
-        if (newValue > 0) {
-            set(key, newValue);
-        } else {
-            if (oldValue > 0) {
-                remove(key);
-            }
-        }
-
-        return newValue;
-    }
-
-    /**
-     * The implementation is equivalent to performing the following steps for this LongMultiset:
-     *
-     * <pre>
-     * long oldValue = get(key);
-     * long newValue = (oldValue == 0) ? value : remappingFunction.apply(oldValue, value);
-     *
-     * if (newValue > 0) {
-     *     set(key, newValue);
-     * } else {
-     *     if (oldValue > 0) {
-     *         remove(key);
-     *     }
-     * }
-     *
-     * return newValue;
-     * </pre>
-     *
-     * @param <E>
-     * @param key
-     * @param value
-     * @param remappingFunction
-     * @return
-     * @throws E the e
-     */
-    public <E extends Exception> long merge(T key, long value, Throwables.BiFunction<Long, Long, Long, E> remappingFunction) throws E {
-        N.checkArgNotNull(remappingFunction);
-        N.checkArgNotNull(value);
-
-        long oldValue = get(key);
-        long newValue = (oldValue == 0) ? value : remappingFunction.apply(oldValue, value);
-
-        if (newValue > 0) {
-            set(key, newValue);
-        } else {
-            if (oldValue > 0) {
-                remove(key);
-            }
-        }
-
-        return newValue;
     }
 
     /**

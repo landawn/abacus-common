@@ -24,6 +24,7 @@ import java.util.function.Function;
 import java.util.function.IntFunction;
 import java.util.function.Supplier;
 
+import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.Internal;
 
 /**
@@ -256,7 +257,7 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
         final ListMultimap<K, E> multimap = new ListMultimap<>(Maps.newTargetMap(map), ArrayList.class);
 
         if (N.notEmpty(map)) {
-            multimap.putAll(map);
+            multimap.put(map);
         }
 
         return multimap;
@@ -416,7 +417,7 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
             return b == null ? N.<K, E> newListMultimap() : create(b);
         } else {
             final ListMultimap<K, E> res = create(a);
-            res.putAll(b);
+            res.put(b);
             return res;
         }
     }
@@ -437,13 +438,13 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
                 return c == null ? N.<K, E> newListMultimap() : create(c);
             } else {
                 final ListMultimap<K, E> res = create(b);
-                res.putAll(c);
+                res.put(c);
                 return res;
             }
         } else {
             final ListMultimap<K, E> res = create(a);
-            res.putAll(b);
-            res.putAll(c);
+            res.put(b);
+            res.put(c);
             return res;
         }
     }
@@ -464,7 +465,7 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
         final ListMultimap<K, E> res = create(iter.next());
 
         while (iter.hasNext()) {
-            res.putAll(iter.next());
+            res.put(iter.next());
         }
 
         return res;
@@ -479,6 +480,7 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      * @return
      */
     @SuppressWarnings("rawtypes")
+    @Beta
     public static <K, E, V extends List<E>> ListMultimap<K, E> wrap(final Map<K, V> map) {
         N.checkArgNotNull(map);
         N.checkArgument(N.anyNull(map.values()), "The specified map contains null value: %s", map);
@@ -505,11 +507,51 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      * @return
      */
     @SuppressWarnings("rawtypes")
+    @Beta
     public static <K, E, V extends List<E>> ListMultimap<K, E> wrap(final Map<K, V> map, final Supplier<? extends V> valueSupplier) {
         N.checkArgNotNull(map, "map");
         N.checkArgNotNull(valueSupplier, "valueSupplier");
 
         return new ListMultimap<>((Map) map, valueSupplier);
+    }
+
+    /**
+     *
+     *
+     * @return
+     */
+    @SuppressWarnings("rawtypes")
+    public ListMultimap<E, K> inverse() {
+        final ListMultimap<K, E> multimap = this;
+        final ListMultimap<E, K> res = new ListMultimap<>(Maps.newOrderingMap(valueMap), (Supplier) valueSupplier);
+
+        if (N.notEmpty(multimap)) {
+            for (Map.Entry<K, List<E>> entry : multimap.entrySet()) {
+                final List<E> c = entry.getValue();
+
+                if (N.notEmpty(c)) {
+                    for (E e : c) {
+                        res.put(e, entry.getKey());
+                    }
+                }
+            }
+        }
+
+        return res;
+    }
+
+    /**
+     *
+     *
+     * @return
+     */
+    @Override
+    public ListMultimap<K, E> copy() {
+        final ListMultimap<K, E> copy = new ListMultimap<>(mapSupplier, valueSupplier);
+
+        copy.putMany(this);
+
+        return copy;
     }
 
     /**
@@ -572,45 +614,6 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
         }
 
         return result;
-    }
-
-    /**
-     *
-     *
-     * @return
-     */
-    @SuppressWarnings("rawtypes")
-    public ListMultimap<E, K> inverse() {
-        final ListMultimap<K, E> multimap = this;
-        final ListMultimap<E, K> res = new ListMultimap<>(Maps.newOrderingMap(valueMap), (Supplier) valueSupplier);
-
-        if (N.notEmpty(multimap)) {
-            for (Map.Entry<K, List<E>> entry : multimap.entrySet()) {
-                final List<E> c = entry.getValue();
-
-                if (N.notEmpty(c)) {
-                    for (E e : c) {
-                        res.put(e, entry.getKey());
-                    }
-                }
-            }
-        }
-
-        return res;
-    }
-
-    /**
-     *
-     *
-     * @return
-     */
-    @Override
-    public ListMultimap<K, E> copy() {
-        final ListMultimap<K, E> copy = new ListMultimap<>(mapSupplier, valueSupplier);
-
-        copy.putAll(this);
-
-        return copy;
     }
 
     /**

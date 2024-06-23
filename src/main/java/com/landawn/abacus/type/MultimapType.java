@@ -141,7 +141,7 @@ public class MultimapType<K, E, V extends Collection<E>> extends AbstractType<Mu
         if (Set.class.isAssignableFrom(parameterTypes[1].clazz())) {
             final Multimap<K, E, V> multiMap = (Multimap<K, E, V>) N.newLinkedSetMultimap(map.size());
             for (Map.Entry<K, Collection<E>> entry : map.entrySet()) {
-                multiMap.putAll(entry.getKey(), entry.getValue());
+                multiMap.putMany(entry.getKey(), entry.getValue());
             }
 
             return multiMap;
@@ -149,7 +149,7 @@ public class MultimapType<K, E, V extends Collection<E>> extends AbstractType<Mu
             final Multimap<K, E, V> multiMap = (Multimap<K, E, V>) N.newLinkedListMultimap(map.size());
 
             for (Map.Entry<K, Collection<E>> entry : map.entrySet()) {
-                multiMap.putAll(entry.getKey(), entry.getValue());
+                multiMap.putMany(entry.getKey(), entry.getValue());
             }
 
             return multiMap;
