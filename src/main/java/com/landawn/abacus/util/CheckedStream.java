@@ -16146,7 +16146,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     }
 
     private static <T, E extends Exception> CheckedStream<T, E> newStream(final Throwables.Iterator<? extends T, ? extends E> iter) {
-        return new CheckedStream<>(iter, null);
+        return newStream(iter, iter::close);
     }
 
     private static <T, E extends Exception> CheckedStream<T, E> newStream(final Throwables.Iterator<? extends T, ? extends E> iter,
