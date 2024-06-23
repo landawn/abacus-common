@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.io.Writer;
+import java.lang.reflect.Field;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.security.SecureRandom;
@@ -86,7 +87,6 @@ import com.landawn.abacus.util.Fn.Factory;
 import com.landawn.abacus.util.Fn.Fnn;
 import com.landawn.abacus.util.Fn.Suppliers;
 import com.landawn.abacus.util.If.OrElse;
-import com.landawn.abacus.util.Strings.StringUtil;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalDouble;
 import com.landawn.abacus.util.u.OptionalInt;
@@ -106,7 +106,7 @@ import com.landawn.abacus.util.stream.Stream;
  * @param <E>
  * @since 1.3
  *
- * @see com.landawn.abacus.util.stream.BaseStream
+ * @see com.landawn.abacus.util.stream.ParallelizableStream
  * @see Stream
  * @see IntStream
  * @see LongStream
@@ -121,82 +121,151 @@ import com.landawn.abacus.util.stream.Stream;
 @com.landawn.abacus.annotation.Immutable
 @SuppressWarnings({ "java:S1192", "java:S1698", "java:S4968", "java:S6539" })
 public final class CheckedStream<T, E extends Exception> implements Closeable, Immutable {
+    private static final Logger logger = LoggerFactory.getLogger(CheckedStream.class);
 
-    static final Logger logger = LoggerFactory.getLogger(CheckedStream.class);
+    private static final Throwables.Function<OptionalInt, Integer, RuntimeException> GET_AS_INT = OptionalInt::get;
 
-    static final String ERROR_MSG_FOR_NO_SUCH_EX = InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX;
-    static final int MAX_WAIT_TIME_FOR_QUEUE_OFFER = 9; // unit is milliseconds
-    static final int MAX_WAIT_TIME_FOR_QUEUE_POLL = 7; // unit is milliseconds
+    private static final Throwables.Function<OptionalLong, Long, RuntimeException> GET_AS_LONG = OptionalLong::get;
 
-    static final int MAX_BUFFERED_SIZE = 10240;
-    static final int DEFAULT_BUFFERED_SIZE_PER_ITERATOR = 64;
-
-    static final Object NONE = N.NULL_MASK;
-
-    static final Random RAND = new SecureRandom();
-
-    static final Throwables.Function<OptionalInt, Integer, RuntimeException> GET_AS_INT = OptionalInt::get;
-
-    static final Throwables.Function<OptionalLong, Long, RuntimeException> GET_AS_LONG = OptionalLong::get;
-
-    static final Throwables.Function<OptionalDouble, Double, RuntimeException> GET_AS_DOUBLE = OptionalDouble::get;
+    private static final Throwables.Function<OptionalDouble, Double, RuntimeException> GET_AS_DOUBLE = OptionalDouble::get;
 
     @SuppressWarnings("rawtypes")
-    static final Throwables.Function<Optional, Object, RuntimeException> GET_AS_IT = it -> it.orElse(null);
+    private static final Throwables.Function<Optional, Object, RuntimeException> GET_AS_IT = it -> it.orElse(null);
 
-    static final Throwables.Function<java.util.OptionalInt, Integer, RuntimeException> GET_AS_INT_JDK = java.util.OptionalInt::getAsInt;
+    private static final Throwables.Function<java.util.OptionalInt, Integer, RuntimeException> GET_AS_INT_JDK = java.util.OptionalInt::getAsInt;
 
-    static final Throwables.Function<java.util.OptionalLong, Long, RuntimeException> GET_AS_LONG_JDK = java.util.OptionalLong::getAsLong;
+    private static final Throwables.Function<java.util.OptionalLong, Long, RuntimeException> GET_AS_LONG_JDK = java.util.OptionalLong::getAsLong;
 
-    static final Throwables.Function<java.util.OptionalDouble, Double, RuntimeException> GET_AS_DOUBLE_JDK = java.util.OptionalDouble::getAsDouble;
-
-    @SuppressWarnings("rawtypes")
-    static final Throwables.Function<java.util.Optional, Object, RuntimeException> GET_AS_IT_JDK = it -> it.orElse(null);
-
-    static final Throwables.Predicate<OptionalInt, RuntimeException> IS_PRESENT_INT = OptionalInt::isPresent;
-
-    static final Throwables.Predicate<OptionalLong, RuntimeException> IS_PRESENT_LONG = OptionalLong::isPresent;
-
-    static final Throwables.Predicate<OptionalDouble, RuntimeException> IS_PRESENT_DOUBLE = OptionalDouble::isPresent;
+    private static final Throwables.Function<java.util.OptionalDouble, Double, RuntimeException> GET_AS_DOUBLE_JDK = java.util.OptionalDouble::getAsDouble;
 
     @SuppressWarnings("rawtypes")
-    static final Throwables.Predicate<Optional, RuntimeException> IS_PRESENT_IT = Optional::isPresent;
+    private static final Throwables.Function<java.util.Optional, Object, RuntimeException> GET_AS_IT_JDK = it -> it.orElse(null);
 
-    static final Throwables.Predicate<java.util.OptionalInt, RuntimeException> IS_PRESENT_INT_JDK = java.util.OptionalInt::isPresent;
+    private static final Throwables.Predicate<OptionalInt, RuntimeException> IS_PRESENT_INT = OptionalInt::isPresent;
 
-    static final Throwables.Predicate<java.util.OptionalLong, RuntimeException> IS_PRESENT_LONG_JDK = java.util.OptionalLong::isPresent;
+    private static final Throwables.Predicate<OptionalLong, RuntimeException> IS_PRESENT_LONG = OptionalLong::isPresent;
 
-    static final Throwables.Predicate<java.util.OptionalDouble, RuntimeException> IS_PRESENT_DOUBLE_JDK = java.util.OptionalDouble::isPresent;
+    private static final Throwables.Predicate<OptionalDouble, RuntimeException> IS_PRESENT_DOUBLE = OptionalDouble::isPresent;
 
     @SuppressWarnings("rawtypes")
-    static final Throwables.Predicate<java.util.Optional, RuntimeException> IS_PRESENT_IT_JDK = java.util.Optional::isPresent;
+    private static final Throwables.Predicate<Optional, RuntimeException> IS_PRESENT_IT = Optional::isPresent;
 
-    static final Throwables.Function<Map.Entry<Keyed<Object, Object>, Object>, Object, Exception> KK = t -> t.getKey().val();
+    private static final Throwables.Predicate<java.util.OptionalInt, RuntimeException> IS_PRESENT_INT_JDK = java.util.OptionalInt::isPresent;
 
-    private final CheckedIterator<T, E> elements;
+    private static final Throwables.Predicate<java.util.OptionalLong, RuntimeException> IS_PRESENT_LONG_JDK = java.util.OptionalLong::isPresent;
 
+    private static final Throwables.Predicate<java.util.OptionalDouble, RuntimeException> IS_PRESENT_DOUBLE_JDK = java.util.OptionalDouble::isPresent;
+
+    @SuppressWarnings("rawtypes")
+    private static final Throwables.Predicate<java.util.Optional, RuntimeException> IS_PRESENT_IT_JDK = java.util.Optional::isPresent;
+
+    private static final Throwables.Function<Map.Entry<Keyed<Object, Object>, Object>, Object, Exception> KK = t -> t.getKey().val();
+
+    private static final Object NONE = new Object();
+
+    private static final Random RAND = new SecureRandom();
+
+    private static final String ERROR_MSG_FOR_NO_SUCH_EX = InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX;
+
+    /**
+     *
+     * Char array with value {@code "['n', 'u', 'l', 'l']"}.
+     */
+    private static final char[] NULL_CHAR_ARRAY = Strings.NULL_STRING.toCharArray();
+
+    private static final char[] ELEMENT_SEPARATOR_CHAR_ARRAY = Strings.ELEMENT_SEPARATOR.toCharArray();
+
+    private static final int MAX_WAIT_TIME_FOR_QUEUE_OFFER = 9; // unit is milliseconds
+    private static final int MAX_WAIT_TIME_FOR_QUEUE_POLL = 7; // unit is milliseconds
+
+    private static final int DEFAULT_BUFFERED_SIZE_PER_ITERATOR = 64;
+
+    @SuppressWarnings("rawtypes")
+    private static final Comparator NATURAL_COMPARATOR = Comparators.naturalOrder();
+
+    @SuppressWarnings("rawtypes")
+    private static final Comparator REVERSED_COMPARATOR = Comparators.reverseOrder();
+
+    private static final Comparator<Character> CHAR_COMPARATOR = Character::compare;
+
+    private static final Comparator<Byte> BYTE_COMPARATOR = Byte::compare;
+
+    private static final Comparator<Short> SHORT_COMPARATOR = Short::compare;
+
+    private static final Comparator<Integer> INT_COMPARATOR = Integer::compare;
+
+    private static final Comparator<Long> LONG_COMPARATOR = Long::compare;
+
+    private static final Comparator<Float> FLOAT_COMPARATOR = Float::compare;
+
+    private static final Comparator<Double> DOUBLE_COMPARATOR = Double::compare;
+
+    private static final BiMap<Class<?>, Comparator<?>> DEFAULT_COMPARATOR_MAP = new BiMap<>();
+
+    static {
+        DEFAULT_COMPARATOR_MAP.put(char.class, CHAR_COMPARATOR);
+        DEFAULT_COMPARATOR_MAP.put(byte.class, BYTE_COMPARATOR);
+        DEFAULT_COMPARATOR_MAP.put(short.class, SHORT_COMPARATOR);
+        DEFAULT_COMPARATOR_MAP.put(int.class, INT_COMPARATOR);
+        DEFAULT_COMPARATOR_MAP.put(long.class, LONG_COMPARATOR);
+        DEFAULT_COMPARATOR_MAP.put(float.class, FLOAT_COMPARATOR);
+        DEFAULT_COMPARATOR_MAP.put(double.class, DOUBLE_COMPARATOR);
+        DEFAULT_COMPARATOR_MAP.put(Object.class, NATURAL_COMPARATOR);
+    }
+
+    private static final LocalRunnable EMPTY_CLOSE_HANDLER = () -> {
+        // do nothing.
+    };
+
+    static volatile boolean isListElementDataFieldGettable = true;
+    private static final Field listElementDataField;
+
+    static {
+        Field tmp = null;
+
+        try {
+            tmp = ArrayList.class.getDeclaredField("elementData");
+        } catch (Throwable e) {
+            // ignore.
+        }
+
+        listElementDataField = tmp != null && tmp.getType().equals(Object[].class) ? tmp : null;
+
+        if (listElementDataField != null) {
+            ClassUtil.setAccessibleQuietly(listElementDataField, true);
+        }
+
+        tmp = null;
+
+        try {
+            tmp = ArrayList.class.getDeclaredField("size");
+        } catch (Throwable e) {
+            // ignore.
+        }
+    }
+
+    private final Throwables.Iterator<T, E> elements;
     private final boolean sorted;
-
     private final Comparator<? super T> cmp;
-
-    private final Deque<Throwables.Runnable<? extends E>> closeHandlers;
-
+    private final Deque<LocalRunnable> closeHandlers;
     private boolean isClosed = false;
 
-    CheckedStream(final CheckedIterator<T, E> iter) {
+    CheckedStream(final Throwables.Iterator<? extends T, ? extends E> iter) {
         this(iter, false, null, null);
     }
 
-    CheckedStream(final CheckedIterator<T, E> iter, final Deque<Throwables.Runnable<? extends E>> closeHandlers) {
+    CheckedStream(final Throwables.Iterator<? extends T, ? extends E> iter, final Collection<LocalRunnable> closeHandlers) {
         this(iter, false, null, closeHandlers);
     }
 
-    CheckedStream(final CheckedIterator<T, E> iter, final boolean sorted, final Comparator<? super T> comparator,
-            final Deque<Throwables.Runnable<? extends E>> closeHandlers) {
-        this.elements = iter;
+    CheckedStream(final Throwables.Iterator<? extends T, ? extends E> iter, final boolean sorted, final Comparator<? super T> cmp,
+            final Collection<LocalRunnable> closeHandlers) {
+        this.elements = (Throwables.Iterator<T, E>) iter;
         this.sorted = sorted;
-        this.cmp = comparator;
-        this.closeHandlers = closeHandlers;
+        this.cmp = cmp;
+        this.closeHandlers = isEmptyCloseHandlers(closeHandlers) ? null
+                : (closeHandlers instanceof LocalArrayDeque ? (LocalArrayDeque<LocalRunnable>) closeHandlers : new LocalArrayDeque<>(closeHandlers));
+
     }
 
     /**
@@ -206,7 +275,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @return
      */
     public static <T, E extends Exception> CheckedStream<T, E> empty() {
-        return new CheckedStream<>(CheckedIterator.EMPTY);
+        return new CheckedStream<>(Throwables.Iterator.empty());
     }
 
     /**
@@ -217,7 +286,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @return
      */
     public static <T, E extends Exception> CheckedStream<T, E> from(final Stream<? extends T> stream) {
-        return checked(stream, false);
+        return newStream(stream, false);
     }
 
     /**
@@ -334,7 +403,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
         final int len = N.len(a);
 
-        return newStream(new CheckedIterator<T, E>() {
+        return newStream(new Throwables.Iterator<T, E>() {
             private int position = 0;
 
             @Override
@@ -379,43 +448,22 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             return empty();
         }
 
-        @SuppressWarnings("deprecation")
-        final T[] a = (T[]) InternalUtil.getInternalArray(c);
+        // return new CollectionStream<T>(c);
+        // return new ArrayStream<T>((T[]) c.toArray()); // faster
 
-        if (a != null) {
-            final int len = c.size();
+        if (isListElementDataFieldGettable && listElementDataField != null && c.getClass().equals(ArrayList.class)) {
+            T[] a = null;
 
-            return newStream(new CheckedIterator<T, E>() {
-                private int position = 0;
+            try {
+                a = (T[]) listElementDataField.get(c);
+            } catch (Throwable e) {
+                // ignore;
+                isListElementDataFieldGettable = false;
+            }
 
-                @Override
-                public boolean hasNext() throws E {
-                    return position < len;
-                }
-
-                @Override
-                public T next() throws E {
-                    if (position >= len) {
-                        throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
-                    }
-
-                    return a[position++];
-                }
-
-                @Override
-                public long count() throws E {
-                    return len - position; //NOSONAR
-                }
-
-                @Override
-                public void advance(long n) throws E {
-                    if (n > len - position) {
-                        position = len;
-                    } else {
-                        position += n;
-                    }
-                }
-            });
+            if (a != null) {
+                return of(a);
+            }
         }
 
         return of(c.iterator());
@@ -433,7 +481,22 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             return empty();
         }
 
-        return newStream(CheckedIterator.<T, E> of(iter));
+        return newStream(Throwables.Iterator.<T, E> of(iter));
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param <E>
+     * @param iter
+     * @return
+     */
+    public static <T, E extends Exception> CheckedStream<T, E> of(final Throwables.Iterator<? extends T, ? extends E> iter) {
+        if (iter == null) {
+            return empty();
+        }
+
+        return newStream(iter);
     }
 
     /**
@@ -593,7 +656,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
         final int len = N.len(a);
 
-        return newStream(new CheckedIterator<Boolean, E>() {
+        return newStream(new Throwables.Iterator<Boolean, E>() {
             private int position = 0;
 
             @Override
@@ -636,7 +699,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
         final int len = N.len(a);
 
-        return newStream(new CheckedIterator<Character, E>() {
+        return newStream(new Throwables.Iterator<Character, E>() {
             private int position = 0;
 
             @Override
@@ -679,7 +742,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
         final int len = N.len(a);
 
-        return newStream(new CheckedIterator<Byte, E>() {
+        return newStream(new Throwables.Iterator<Byte, E>() {
             private int position = 0;
 
             @Override
@@ -722,7 +785,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
         final int len = N.len(a);
 
-        return newStream(new CheckedIterator<Short, E>() {
+        return newStream(new Throwables.Iterator<Short, E>() {
             private int position = 0;
 
             @Override
@@ -764,7 +827,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
         final int len = N.len(a);
 
-        return newStream(new CheckedIterator<Integer, E>() {
+        return newStream(new Throwables.Iterator<Integer, E>() {
             private int position = 0;
 
             @Override
@@ -806,7 +869,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
         final int len = N.len(a);
 
-        return newStream(new CheckedIterator<Long, E>() {
+        return newStream(new Throwables.Iterator<Long, E>() {
             private int position = 0;
 
             @Override
@@ -849,7 +912,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
         final int len = N.len(a);
 
-        return newStream(new CheckedIterator<Float, E>() {
+        return newStream(new Throwables.Iterator<Float, E>() {
             private int position = 0;
 
             @Override
@@ -891,7 +954,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
         final int len = N.len(a);
 
-        return newStream(new CheckedIterator<Double, E>() {
+        return newStream(new Throwables.Iterator<Double, E>() {
             private int position = 0;
 
             @Override
@@ -1052,7 +1115,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * Lazy evaluation.
      * <br />
      *
-     * This is equal to: {@code CheckedStream.just(supplier).flatMap(Throwables.Supplier::get)}.
+     * This is equal to: {@code Seq.just(supplier).flatMap(Throwables.Supplier::get)}.
      *
      * @param <T>
      * @param <E>
@@ -1080,7 +1143,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
         N.checkArgNotNull(hasNext, "hasNext");
         N.checkArgNotNull(next, "next");
 
-        return newStream(new CheckedIterator<T, E>() {
+        return newStream(new Throwables.Iterator<T, E>() {
             private boolean hasNextVal = false;
 
             @Override
@@ -1118,7 +1181,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
         N.checkArgNotNull(hasNext, "hasNext");
         N.checkArgNotNull(f, "f");
 
-        return newStream(new CheckedIterator<T, E>() {
+        return newStream(new Throwables.Iterator<T, E>() {
             private final T none = (T) NONE;
             private T t = none;
             private boolean hasNextVal = false;
@@ -1158,7 +1221,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
         N.checkArgNotNull(hasNext, "hasNext");
         N.checkArgNotNull(f, "f");
 
-        return newStream(new CheckedIterator<T, E>() {
+        return newStream(new Throwables.Iterator<T, E>() {
             private final T none = (T) NONE;
             private T t = none;
             private T cur = none;
@@ -1203,7 +1266,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     public static <T, E extends Exception> CheckedStream<T, E> iterate(final T init, final Throwables.UnaryOperator<T, ? extends E> f) {
         N.checkArgNotNull(f, "f");
 
-        return newStream(new CheckedIterator<T, E>() {
+        return newStream(new Throwables.Iterator<T, E>() {
             private final T none = (T) NONE;
             private T t = none;
 
@@ -1230,7 +1293,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     public static <T, E extends Exception> CheckedStream<T, E> generate(final Throwables.Supplier<T, E> supplier) {
         N.checkArgNotNull(supplier, "supplier");
 
-        return newStream(new CheckedIterator<T, E>() {
+        return newStream(new Throwables.Iterator<T, E>() {
             @Override
             public boolean hasNext() throws E {
                 return true;
@@ -1259,7 +1322,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             return empty();
         }
 
-        return newStream(new CheckedIterator<T, E>() {
+        return newStream(new Throwables.Iterator<T, E>() {
             private long cnt = n;
 
             @Override
@@ -1337,7 +1400,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @return
      */
     public static <E extends Exception> CheckedStream<String, E> split(final CharSequence str, final CharSequence delimiter) {
-        return of(Splitter.with(delimiter).iterate(str));
+        return Splitter.with(delimiter).splitToStream(str).checked();
     }
 
     /**
@@ -1358,7 +1421,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     public static CheckedStream<String, IOException> lines(final File file, final Charset charset) {
         N.checkArgNotNull(file, "file");
 
-        final CheckedIterator<String, IOException> iter = createLazyLineIterator(file, null, charset, null, true);
+        final Throwables.Iterator<String, IOException> iter = createLazyLineIterator(file, null, charset, null, true);
 
         return newStream(iter).onClose(newCloseHandler(iter)); //NOSONAR
     }
@@ -1381,7 +1444,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     public static CheckedStream<String, IOException> lines(final Path path, final Charset charset) {
         N.checkArgNotNull(path, "path");
 
-        final CheckedIterator<String, IOException> iter = createLazyLineIterator(null, path, charset, null, true);
+        final Throwables.Iterator<String, IOException> iter = createLazyLineIterator(null, path, charset, null, true);
 
         return newStream(iter).onClose(newCloseHandler(iter));
     }
@@ -1425,12 +1488,11 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             return of(parentPath.listFiles());
         }
 
-        final CheckedIterator<File, IOException> iter = new CheckedIterator<>() {
+        final Throwables.Iterator<File, IOException> iter = new Throwables.Iterator<>() {
             private final Queue<File> paths = N.asLinkedList(parentPath);
             private File[] subFiles = null;
             private int cursor = 0;
 
-            @Override
             public boolean hasNext() {
                 if ((subFiles == null || cursor >= subFiles.length) && paths.size() > 0) {
                     cursor = 0;
@@ -1448,7 +1510,6 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                 return subFiles != null && cursor < subFiles.length;
             }
 
-            @Override
             public File next() {
                 if (!hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
@@ -1475,15 +1536,15 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @param closeReader
      * @return
      */
-    private static CheckedIterator<String, IOException> createLazyLineIterator(final File file, final Path path, final Charset charset, final Reader reader,
+    private static Throwables.Iterator<String, IOException> createLazyLineIterator(final File file, final Path path, final Charset charset, final Reader reader,
             final boolean closeReader) {
-        return CheckedIterator.defer(new Throwables.Supplier<CheckedIterator<String, IOException>, IOException>() {
-            private CheckedIterator<String, IOException> lazyIter = null;
+        return Throwables.Iterator.defer(new Supplier<Throwables.Iterator<String, IOException>>() {
+            private Throwables.Iterator<String, IOException> lazyIter = null;
 
             @Override
-            public synchronized CheckedIterator<String, IOException> get() {
+            public synchronized Throwables.Iterator<String, IOException> get() {
                 if (lazyIter == null) {
-                    lazyIter = new CheckedIterator<>() {
+                    lazyIter = new Throwables.Iterator<>() {
                         private BufferedReader bufferedReader;
 
                         { //NOSONAR
@@ -1499,7 +1560,6 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                         private String cachedLine;
                         private boolean finished = false;
 
-                        @Override
                         public boolean hasNext() throws IOException {
                             if (this.cachedLine != null) {
                                 return true;
@@ -1516,7 +1576,6 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                             }
                         }
 
-                        @Override
                         public String next() throws IOException {
                             if (!this.hasNext()) {
                                 throw new NoSuchElementException("No more lines");
@@ -1527,8 +1586,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                             }
                         }
 
-                        @Override
-                        public void close() throws IOException {
+                        public void close() {
                             if (closeReader) {
                                 IOUtil.close(bufferedReader);
                             }
@@ -1620,10 +1678,10 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             return empty();
         }
 
-        return newStream(new CheckedIterator<T, E>() {
+        return newStream(new Throwables.Iterator<T, E>() {
             private final Iterator<? extends CheckedStream<? extends T, E>> iterators = c.iterator();
             private CheckedStream<? extends T, E> cur;
-            private CheckedIterator<? extends T, E> iter;
+            private Throwables.Iterator<? extends T, E> iter;
 
             @Override
             public boolean hasNext() throws E {
@@ -1647,7 +1705,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
                 return iter.next();
             }
-        }, mergeCloseHandlers(c));
+        }, newCloseHandler(c));
     }
 
     /**
@@ -1741,7 +1799,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      */
     public static <A, B, T, E extends Exception> CheckedStream<T, E> zip(final Iterator<? extends A> a, final Iterator<? extends B> b,
             final Throwables.BiFunction<? super A, ? super B, ? extends T, ? extends E> zipFunction) {
-        return newStream(new CheckedIterator<T, E>() {
+        return newStream(new Throwables.Iterator<T, E>() {
             private final Iterator<? extends A> iterA = a == null ? ObjIterator.<A> empty() : a;
             private final Iterator<? extends B> iterB = b == null ? ObjIterator.<B> empty() : b;
 
@@ -1774,7 +1832,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      */
     public static <A, B, C, T, E extends Exception> CheckedStream<T, E> zip(final Iterator<? extends A> a, final Iterator<? extends B> b,
             final Iterator<? extends C> c, final Throwables.TriFunction<? super A, ? super B, ? super C, ? extends T, ? extends E> zipFunction) {
-        return newStream(new CheckedIterator<T, E>() {
+        return newStream(new Throwables.Iterator<T, E>() {
             private final Iterator<? extends A> iterA = a == null ? ObjIterator.<A> empty() : a;
             private final Iterator<? extends B> iterB = b == null ? ObjIterator.<B> empty() : b;
             private final Iterator<? extends C> iterC = c == null ? ObjIterator.<C> empty() : c;
@@ -1806,9 +1864,9 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      */
     public static <A, B, T, E extends Exception> CheckedStream<T, E> zip(final CheckedStream<? extends A, E> a, final CheckedStream<? extends B, E> b,
             final Throwables.BiFunction<? super A, ? super B, ? extends T, ? extends E> zipFunction) {
-        return newStream(new CheckedIterator<T, E>() {
-            private final CheckedIterator<? extends A, E> iterA = iterate(a);
-            private final CheckedIterator<? extends B, E> iterB = iterate(b);
+        return newStream(new Throwables.Iterator<T, E>() {
+            private final Throwables.Iterator<? extends A, E> iterA = iterate(a);
+            private final Throwables.Iterator<? extends B, E> iterB = iterate(b);
 
             @Override
             public boolean hasNext() throws E {
@@ -1819,7 +1877,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             public T next() throws E {
                 return zipFunction.apply(iterA.next(), iterB.next());
             }
-        }, mergeCloseHandlers(Array.asList(a, b)));
+        }, newCloseHandler(Array.asList(a, b)));
     }
 
     /**
@@ -1839,10 +1897,10 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      */
     public static <A, B, C, T, E extends Exception> CheckedStream<T, E> zip(final CheckedStream<? extends A, E> a, final CheckedStream<? extends B, E> b,
             final CheckedStream<? extends C, E> c, final Throwables.TriFunction<? super A, ? super B, ? super C, ? extends T, ? extends E> zipFunction) {
-        return newStream(new CheckedIterator<T, E>() {
-            private final CheckedIterator<? extends A, E> iterA = iterate(a);
-            private final CheckedIterator<? extends B, E> iterB = iterate(b);
-            private final CheckedIterator<? extends C, E> iterC = iterate(c);
+        return newStream(new Throwables.Iterator<T, E>() {
+            private final Throwables.Iterator<? extends A, E> iterA = iterate(a);
+            private final Throwables.Iterator<? extends B, E> iterB = iterate(b);
+            private final Throwables.Iterator<? extends C, E> iterC = iterate(c);
 
             @Override
             public boolean hasNext() throws E {
@@ -1853,7 +1911,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             public T next() throws E {
                 return zipFunction.apply(iterA.next(), iterB.next(), iterC.next());
             }
-        }, mergeCloseHandlers(Array.asList(a, b, c)));
+        }, newCloseHandler(Array.asList(a, b, c)));
     }
 
     /**
@@ -1960,7 +2018,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      */
     public static <A, B, T, E extends Exception> CheckedStream<T, E> zip(final Iterator<? extends A> a, final Iterator<? extends B> b, final A valueForNoneA,
             final B valueForNoneB, final Throwables.BiFunction<? super A, ? super B, ? extends T, ? extends E> zipFunction) {
-        return newStream(new CheckedIterator<T, E>() {
+        return newStream(new Throwables.Iterator<T, E>() {
             private final Iterator<? extends A> iterA = a == null ? ObjIterator.<A> empty() : a;
             private final Iterator<? extends B> iterB = b == null ? ObjIterator.<B> empty() : b;
 
@@ -2001,7 +2059,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     public static <A, B, C, T, E extends Exception> CheckedStream<T, E> zip(final Iterator<? extends A> a, final Iterator<? extends B> b,
             final Iterator<? extends C> c, final A valueForNoneA, final B valueForNoneB, final C valueForNoneC,
             final Throwables.TriFunction<? super A, ? super B, ? super C, ? extends T, ? extends E> zipFunction) {
-        return newStream(new CheckedIterator<T, E>() {
+        return newStream(new Throwables.Iterator<T, E>() {
             private final Iterator<? extends A> iterA = a == null ? ObjIterator.<A> empty() : a;
             private final Iterator<? extends B> iterB = b == null ? ObjIterator.<B> empty() : b;
             private final Iterator<? extends C> iterC = c == null ? ObjIterator.<C> empty() : c;
@@ -2040,9 +2098,9 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      */
     public static <A, B, T, E extends Exception> CheckedStream<T, E> zip(final CheckedStream<? extends A, E> a, final CheckedStream<? extends B, E> b,
             final A valueForNoneA, final B valueForNoneB, final Throwables.BiFunction<? super A, ? super B, ? extends T, ? extends E> zipFunction) {
-        return newStream(new CheckedIterator<T, E>() {
-            private final CheckedIterator<? extends A, E> iterA = iterate(a);
-            private final CheckedIterator<? extends B, E> iterB = iterate(b);
+        return newStream(new Throwables.Iterator<T, E>() {
+            private final Throwables.Iterator<? extends A, E> iterA = iterate(a);
+            private final Throwables.Iterator<? extends B, E> iterB = iterate(b);
 
             @Override
             public boolean hasNext() throws E {
@@ -2057,7 +2115,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
                 return zipFunction.apply(iterA.hasNext() ? iterA.next() : valueForNoneA, iterB.hasNext() ? iterB.next() : valueForNoneB);
             }
-        }, mergeCloseHandlers(Array.asList(a, b)));
+        }, newCloseHandler(Array.asList(a, b)));
     }
 
     /**
@@ -2081,10 +2139,10 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     public static <A, B, C, T, E extends Exception> CheckedStream<T, E> zip(final CheckedStream<? extends A, E> a, final CheckedStream<? extends B, E> b,
             final CheckedStream<? extends C, E> c, final A valueForNoneA, final B valueForNoneB, final C valueForNoneC,
             final Throwables.TriFunction<? super A, ? super B, ? super C, ? extends T, ? extends E> zipFunction) {
-        return newStream(new CheckedIterator<T, E>() {
-            private final CheckedIterator<? extends A, E> iterA = iterate(a);
-            private final CheckedIterator<? extends B, E> iterB = iterate(b);
-            private final CheckedIterator<? extends C, E> iterC = iterate(c);
+        return newStream(new Throwables.Iterator<T, E>() {
+            private final Throwables.Iterator<? extends A, E> iterA = iterate(a);
+            private final Throwables.Iterator<? extends B, E> iterB = iterate(b);
+            private final Throwables.Iterator<? extends C, E> iterC = iterate(c);
 
             @Override
             public boolean hasNext() throws E {
@@ -2100,64 +2158,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                 return zipFunction.apply(iterA.hasNext() ? iterA.next() : valueForNoneA, iterB.hasNext() ? iterB.next() : valueForNoneB,
                         iterC.hasNext() ? iterC.next() : valueForNoneC);
             }
-        }, mergeCloseHandlers(Array.asList(a, b, c)));
-    }
-
-    private static <E extends Exception> Deque<Throwables.Runnable<? extends E>> mergeCloseHandlers(final Deque<Throwables.Runnable<? extends E>> closeHandlers,
-            final Throwables.Runnable<? extends E> closeHandlerToAdd) {
-        return mergeCloseHandlers(closeHandlers, closeHandlerToAdd, false);
-    }
-
-    private static <E extends Exception> Deque<Throwables.Runnable<? extends E>> mergeCloseHandlers(final Deque<Throwables.Runnable<? extends E>> closeHandlers,
-            final Throwables.Runnable<? extends E> newCloseHandlerToAdd, final boolean closeNewHandlerFirst) {
-        if (newCloseHandlerToAdd == null) {
-            return closeHandlers;
-        }
-
-        final Deque<Throwables.Runnable<? extends E>> newCloseHandlers = new ArrayDeque<>(N.size(closeHandlers) + 1);
-
-        if (closeNewHandlerFirst) {
-            newCloseHandlers.add(newCloseHandlerToAdd);
-        }
-
-        if (!isEmptyCloseHandlers(closeHandlers)) {
-            newCloseHandlers.addAll(closeHandlers);
-        }
-
-        if (!closeNewHandlerFirst) {
-            newCloseHandlers.add(newCloseHandlerToAdd);
-        }
-
-        return newCloseHandlers;
-    }
-
-    private static <E extends Exception> Deque<Throwables.Runnable<? extends E>> mergeCloseHandlers(
-            Collection<? extends CheckedStream<?, E>> closeHandlersList) {
-        if (N.isEmpty(closeHandlersList)) {
-            return null; // NOSONAR
-        }
-
-        int count = 0;
-
-        for (CheckedStream<?, E> s : closeHandlersList) {
-            count += N.size(s.closeHandlers);
-        }
-
-        if (count == 0) {
-            return null; // NOSONAR
-        }
-
-        final Deque<Throwables.Runnable<? extends E>> newCloseHandlers = new ArrayDeque<>(count);
-
-        for (CheckedStream<?, E> s : closeHandlersList) {
-            if (s.isClosed || isEmptyCloseHandlers(s.closeHandlers)) {
-                continue;
-            }
-
-            newCloseHandlers.addAll(s.closeHandlers);
-        }
-
-        return newCloseHandlers;
+        }, newCloseHandler(Array.asList(a, b, c)));
     }
 
     /**
@@ -2178,7 +2179,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             return of(a);
         }
 
-        return newStream(new CheckedIterator<T, E>() {
+        return newStream(new Throwables.Iterator<T, E>() {
             private final int lenA = a.length;
             private final int lenB = b.length;
             private int cursorA = 0;
@@ -2223,7 +2224,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      */
     public static <T, E extends Exception> CheckedStream<T, E> merge(final T[] a, final T[] b, final T[] c,
             final Throwables.BiFunction<? super T, ? super T, MergeResult, E> nextSelector) {
-        return merge(merge(a, b, nextSelector).iteratorEx(), CheckedIterator.<T, E> of(N.iterate(c)), nextSelector);
+        return merge(merge(a, b, nextSelector).iteratorEx(), Throwables.Iterator.<T, E> of(N.iterate(c)), nextSelector);
     }
 
     /**
@@ -2269,7 +2270,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      */
     public static <T, E extends Exception> CheckedStream<T, E> merge(final Iterator<? extends T> a, final Iterator<? extends T> b,
             final Throwables.BiFunction<? super T, ? super T, MergeResult, E> nextSelector) {
-        return merge(CheckedIterator.<T, E> of(a), CheckedIterator.<T, E> of(b), nextSelector);
+        return merge(Throwables.Iterator.<T, E> of(a), Throwables.Iterator.<T, E> of(b), nextSelector);
     }
 
     /**
@@ -2285,7 +2286,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      */
     public static <T, E extends Exception> CheckedStream<T, E> merge(final Iterator<? extends T> a, final Iterator<? extends T> b,
             final Iterator<? extends T> c, final Throwables.BiFunction<? super T, ? super T, MergeResult, E> nextSelector) {
-        return merge(merge(a, b, nextSelector).iteratorEx(), CheckedIterator.<T, E> of(c), nextSelector);
+        return merge(merge(a, b, nextSelector).iteratorEx(), Throwables.Iterator.<T, E> of(c), nextSelector);
     }
 
     /**
@@ -2329,11 +2330,11 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
         return merge(merge(a, b, nextSelector), c, nextSelector);
     }
 
-    static <T, E extends Exception> CheckedStream<T, E> merge(final CheckedIterator<? extends T, E> a, final CheckedIterator<? extends T, E> b,
+    static <T, E extends Exception> CheckedStream<T, E> merge(final Throwables.Iterator<? extends T, E> a, final Throwables.Iterator<? extends T, E> b,
             final Throwables.BiFunction<? super T, ? super T, MergeResult, E> nextSelector) {
-        return newStream(new CheckedIterator<T, E>() {
-            private final CheckedIterator<T, E> iterA = a == null ? CheckedIterator.EMPTY : (CheckedIterator<T, E>) a;
-            private final CheckedIterator<T, E> iterB = b == null ? CheckedIterator.EMPTY : (CheckedIterator<T, E>) b;
+        return newStream(new Throwables.Iterator<T, E>() {
+            private final Throwables.Iterator<T, E> iterA = a == null ? Throwables.Iterator.empty() : (Throwables.Iterator<T, E>) a;
+            private final Throwables.Iterator<T, E> iterB = b == null ? Throwables.Iterator.empty() : (Throwables.Iterator<T, E>) b;
 
             private T nextA = null;
             private T nextB = null;
@@ -2403,7 +2404,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     public CheckedStream<T, E> filter(final Throwables.Predicate<? super T, ? extends E> predicate) {
         assertNotClosed();
 
-        return newStream(new CheckedIterator<T, E>() {
+        return newStream(new Throwables.Iterator<T, E>() {
             private boolean hasNext = false;
             private T next = null;
 
@@ -2466,7 +2467,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     public CheckedStream<T, E> takeWhile(final Throwables.Predicate<? super T, ? extends E> predicate) {
         assertNotClosed();
 
-        return newStream(new CheckedIterator<T, E>() {
+        return newStream(new Throwables.Iterator<T, E>() {
             private boolean hasMore = true;
             private boolean hasNext = false;
             private T next = null;
@@ -2508,7 +2509,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     public CheckedStream<T, E> dropWhile(final Throwables.Predicate<? super T, ? extends E> predicate) {
         assertNotClosed();
 
-        return newStream(new CheckedIterator<T, E>() {
+        return newStream(new Throwables.Iterator<T, E>() {
             private boolean hasNext = false;
             private T next = null;
             private boolean dropped = false;
@@ -2719,7 +2720,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     public <R> CheckedStream<R, E> map(final Throwables.Function<? super T, ? extends R, ? extends E> mapper) {
         assertNotClosed();
 
-        return newStream(new CheckedIterator<R, E>() {
+        return newStream(new Throwables.Iterator<R, E>() {
             @Override
             public boolean hasNext() throws E {
                 return elements.hasNext();
@@ -2756,7 +2757,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     public CheckedStream<T, E> mapFirst(final Throwables.Function<? super T, ? extends T, ? extends E> mapperForFirst) {
         assertNotClosed();
 
-        return newStream(new CheckedIterator<T, E>() {
+        return newStream(new Throwables.Iterator<T, E>() {
             private boolean isFirst = true;
 
             @Override
@@ -2789,7 +2790,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             final Throwables.Function<? super T, ? extends R, E> mapperForElse) {
         assertNotClosed();
 
-        return newStream(new CheckedIterator<R, E>() {
+        return newStream(new Throwables.Iterator<R, E>() {
             private boolean isFirst = true;
 
             @Override
@@ -2819,7 +2820,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     public CheckedStream<T, E> mapLast(final Throwables.Function<? super T, ? extends T, ? extends E> mapperForLast) {
         assertNotClosed();
 
-        return newStream(new CheckedIterator<T, E>() {
+        return newStream(new Throwables.Iterator<T, E>() {
             private boolean hasNext = false;
             private T next = null;
 
@@ -2854,7 +2855,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             final Throwables.Function<? super T, ? extends R, E> mapperForElse) {
         assertNotClosed();
 
-        return newStream(new CheckedIterator<R, E>() {
+        return newStream(new Throwables.Iterator<R, E>() {
             private T next = null;
 
             @Override
@@ -2885,11 +2886,10 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     public <R> CheckedStream<R, E> flatMap(final Throwables.Function<? super T, ? extends CheckedStream<? extends R, ? extends E>, ? extends E> mapper) {
         assertNotClosed();
 
-        final CheckedIterator<R, E> iter = new CheckedIterator<>() {
+        final Throwables.Iterator<R, E> iter = new Throwables.Iterator<>() {
             private CheckedStream<? extends R, ? extends E> s = null;
-            private CheckedIterator<? extends R, ? extends E> cur = null;
+            private Throwables.Iterator<? extends R, ? extends E> cur = null;
 
-            @Override
             public boolean hasNext() throws E {
                 while (cur == null || !cur.hasNext()) {
                     if (elements.hasNext()) {
@@ -2914,7 +2914,6 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                 return cur != null && cur.hasNext();
             }
 
-            @Override
             public R next() throws E {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
@@ -2923,15 +2922,14 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                 return cur.next();
             }
 
-            @Override
-            public void close() throws E {
+            public void close() {
                 if (s != null) {
                     s.close();
                 }
             }
         };
 
-        return newStream(iter, mergeCloseHandlers(closeHandlers, iter::close));
+        return newStream(iter, mergeCloseHandlers(iter::close, closeHandlers));
     }
 
     /**
@@ -2944,7 +2942,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     public <R> CheckedStream<R, E> flatmap(final Throwables.Function<? super T, ? extends Collection<? extends R>, ? extends E> mapper) { //NOSONAR
         assertNotClosed();
 
-        return newStream(new CheckedIterator<R, E>() {
+        return newStream(new Throwables.Iterator<R, E>() {
             private Collection<? extends R> c = null;
             private Iterator<? extends R> cur = null;
 
@@ -2980,7 +2978,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     public <R> CheckedStream<R, E> flattMap(final Throwables.Function<? super T, R[], ? extends E> mapper) {
         assertNotClosed();
 
-        return newStream(new CheckedIterator<R, E>() {
+        return newStream(new Throwables.Iterator<R, E>() {
             private R[] cur = null;
             private int len = 0;
             private int idx = 0;
@@ -3023,11 +3021,10 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     public <R> CheckedStream<R, E> flattmap(final Throwables.Function<? super T, ? extends Stream<? extends R>, ? extends E> mapper) { //NOSONAR
         assertNotClosed();
 
-        final CheckedIterator<R, E> iter = new CheckedIterator<>() {
+        final Throwables.Iterator<R, E> iter = new Throwables.Iterator<>() {
             private Stream<? extends R> s = null;
             private Iterator<? extends R> cur = null;
 
-            @Override
             public boolean hasNext() throws E {
                 while (cur == null || !cur.hasNext()) {
                     if (elements.hasNext()) {
@@ -3052,7 +3049,6 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                 return cur != null && cur.hasNext();
             }
 
-            @Override
             public R next() throws E {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
@@ -3061,15 +3057,14 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                 return cur.next();
             }
 
-            @Override
-            public void close() throws E {
+            public void close() {
                 if (s != null) {
                     s.close();
                 }
             }
         };
 
-        return newStream(iter, mergeCloseHandlers(closeHandlers, iter::close));
+        return newStream(iter, mergeCloseHandlers(iter::close, closeHandlers));
     }
 
     //    /**
@@ -3080,14 +3075,13 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     //     */
     //    @Beta
     //    @IntermediateOp
-    //    public <R> CheckedStream<R, E> flatMapByStream(final Throwables.Function<? super T, ? extends Stream<? extends R>, ? extends E> mapper) {
+    //    public <R> Seq<R, E> flatMapByStream(final Throwables.Function<? super T, ? extends Stream<? extends R>, ? extends E> mapper) {
     //        assertNotClosed();
-    //        final CheckedIterator<R, E> iter = new CheckedIterator<R, E>() {
+    //        final Throwables.Iterator<R, E> iter = new Throwables.Iterator<R, E>() {
     //            private Stream<? extends R> s = null;
     //            private Iterator<? extends R> cur = null;
     //
-    //            @Override
-    //            public boolean hasNext() throws E {
+    //                //            public boolean hasNext() throws E {
     //                while (cur == null || cur.hasNext() == false) {
     //                    if (elements.hasNext()) {
     //                        if (s != null) {
@@ -3111,8 +3105,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     //                return cur != null && cur.hasNext();
     //            }
     //
-    //            @Override
-    //            public R next() throws E {
+    //                //            public R next() throws E {
     //                if ((cur == null || cur.hasNext() == false) && hasNext() == false) {
     //                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
     //                }
@@ -3120,8 +3113,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     //                return cur.next();
     //            }
     //
-    //            @Override
-    //            public void close() throws E {
+    //                //            public void close()   {
     //                if (s != null) {
     //                    s.close();
     //                }
@@ -3147,15 +3139,14 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     //     */
     //    @Beta
     //    @IntermediateOp
-    //    public <R> CheckedStream<R, E> flatMapByStreamJdk(
+    //    public <R> Seq<R, E> flatMapByStreamJdk(
     //            final Throwables.Function<? super T, ? extends java.util.stream.Stream<? extends R>, ? extends E> mapper) {
     //        assertNotClosed();
-    //        final CheckedIterator<R, E> iter = new CheckedIterator<R, E>() {
+    //        final Throwables.Iterator<R, E> iter = new Throwables.Iterator<R, E>() {
     //            private java.util.stream.Stream<? extends R> s = null;
     //            private Iterator<? extends R> cur = null;
     //
-    //            @Override
-    //            public boolean hasNext() throws E {
+    //                //            public boolean hasNext() throws E {
     //                while (cur == null || cur.hasNext() == false) {
     //                    if (elements.hasNext()) {
     //                        if (s != null) {
@@ -3179,8 +3170,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     //                return cur != null && cur.hasNext();
     //            }
     //
-    //            @Override
-    //            public R next() throws E {
+    //                //            public R next() throws E {
     //                if ((cur == null || cur.hasNext() == false) && hasNext() == false) {
     //                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
     //                }
@@ -3188,8 +3178,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     //                return cur.next();
     //            }
     //
-    //            @Override
-    //            public void close() throws E {
+    //                //            public void close()   {
     //                if (s != null) {
     //                    s.close();
     //                }
@@ -3255,7 +3244,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     public CheckedStream<Boolean, E> flatMapToBoolean(final Throwables.Function<? super T, boolean[], ? extends E> mapper) {
         assertNotClosed();
 
-        return newStream(new CheckedIterator<Boolean, E>() {
+        return newStream(new Throwables.Iterator<Boolean, E>() {
             private boolean[] cur = null;
             private int len = 0;
             private int idx = 0;
@@ -3298,7 +3287,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     public CheckedStream<Character, E> flatMapToChar(final Throwables.Function<? super T, char[], ? extends E> mapper) {
         assertNotClosed();
 
-        return newStream(new CheckedIterator<Character, E>() {
+        return newStream(new Throwables.Iterator<Character, E>() {
             private char[] cur = null;
             private int len = 0;
             private int idx = 0;
@@ -3341,7 +3330,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     public CheckedStream<Byte, E> flatMapToByte(final Throwables.Function<? super T, byte[], ? extends E> mapper) {
         assertNotClosed();
 
-        return newStream(new CheckedIterator<Byte, E>() {
+        return newStream(new Throwables.Iterator<Byte, E>() {
             private byte[] cur = null;
             private int len = 0;
             private int idx = 0;
@@ -3384,7 +3373,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     public CheckedStream<Short, E> flatMapToShort(final Throwables.Function<? super T, short[], ? extends E> mapper) {
         assertNotClosed();
 
-        return newStream(new CheckedIterator<Short, E>() {
+        return newStream(new Throwables.Iterator<Short, E>() {
             private short[] cur = null;
             private int len = 0;
             private int idx = 0;
@@ -3427,7 +3416,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     public CheckedStream<Integer, E> flatMapToInteger(final Throwables.Function<? super T, int[], ? extends E> mapper) {
         assertNotClosed();
 
-        return newStream(new CheckedIterator<Integer, E>() {
+        return newStream(new Throwables.Iterator<Integer, E>() {
             private int[] cur = null;
             private int len = 0;
             private int idx = 0;
@@ -3470,7 +3459,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     public CheckedStream<Long, E> flatMapToLong(final Throwables.Function<? super T, long[], ? extends E> mapper) {
         assertNotClosed();
 
-        return newStream(new CheckedIterator<Long, E>() {
+        return newStream(new Throwables.Iterator<Long, E>() {
             private long[] cur = null;
             private int len = 0;
             private int idx = 0;
@@ -3513,7 +3502,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     public CheckedStream<Float, E> flatMapToFloat(final Throwables.Function<? super T, float[], ? extends E> mapper) {
         assertNotClosed();
 
-        return newStream(new CheckedIterator<Float, E>() {
+        return newStream(new Throwables.Iterator<Float, E>() {
             private float[] cur = null;
             private int len = 0;
             private int idx = 0;
@@ -3556,7 +3545,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     public CheckedStream<Double, E> flatMapToDouble(final Throwables.Function<? super T, double[], ? extends E> mapper) {
         assertNotClosed();
 
-        return newStream(new CheckedIterator<Double, E>() {
+        return newStream(new Throwables.Iterator<Double, E>() {
             private double[] cur = null;
             private int len = 0;
             private int idx = 0;
@@ -3594,11 +3583,10 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     //     * @return
     //     */
     //    @IntermediateOp
-    //    public CheckedStream<Integer, E> flatmapToInt(final Throwables.Function<? super T, ? extends int[], ? extends E> mapper) {
-    //        final Throwables.Function<T, CheckedStream<Integer, E>, E> mapper2 = new Throwables.Function<T, CheckedStream<Integer, E>, E>() {
-    //            @Override
-    //            public CheckedStream<Integer, E> apply(T t) throws E {
-    //                return CheckedStream.of(mapper.apply(t));
+    //    public Seq<Integer, E> flatmapToInt(final Throwables.Function<? super T, ? extends int[], ? extends E> mapper) {
+    //        final Throwables.Function<T, Seq<Integer, E>, E> mapper2 = new Throwables.Function<T, Seq<Integer, E>, E>() {
+    //                //            public Seq<Integer, E> apply(T t) throws E {
+    //                return Seq.of(mapper.apply(t));
     //            }
     //        };
     //
@@ -3611,11 +3599,10 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     //     * @return
     //     */
     //    @IntermediateOp
-    //    public CheckedStream<Long, E> flatmapToLong(final Throwables.Function<? super T, ? extends long[], ? extends E> mapper) {
-    //        final Throwables.Function<T, CheckedStream<Long, E>, E> mapper2 = new Throwables.Function<T, CheckedStream<Long, E>, E>() {
-    //            @Override
-    //            public CheckedStream<Long, E> apply(T t) throws E {
-    //                return CheckedStream.of(mapper.apply(t));
+    //    public Seq<Long, E> flatmapToLong(final Throwables.Function<? super T, ? extends long[], ? extends E> mapper) {
+    //        final Throwables.Function<T, Seq<Long, E>, E> mapper2 = new Throwables.Function<T, Seq<Long, E>, E>() {
+    //                //            public Seq<Long, E> apply(T t) throws E {
+    //                return Seq.of(mapper.apply(t));
     //            }
     //        };
     //
@@ -3628,11 +3615,10 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     //     * @return
     //     */
     //    @IntermediateOp
-    //    public CheckedStream<Double, E> flatmapToDouble(final Throwables.Function<? super T, ? extends double[], ? extends E> mapper) {
-    //        final Throwables.Function<T, CheckedStream<Double, E>, E> mapper2 = new Throwables.Function<T, CheckedStream<Double, E>, E>() {
-    //            @Override
-    //            public CheckedStream<Double, E> apply(T t) throws E {
-    //                return CheckedStream.of(mapper.apply(t));
+    //    public Seq<Double, E> flatmapToDouble(final Throwables.Function<? super T, ? extends double[], ? extends E> mapper) {
+    //        final Throwables.Function<T, Seq<Double, E>, E> mapper2 = new Throwables.Function<T, Seq<Double, E>, E>() {
+    //                //            public Seq<Double, E> apply(T t) throws E {
+    //                return Seq.of(mapper.apply(t));
     //            }
     //        };
     //
@@ -3757,9 +3743,9 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
         final Consumer<R> consumer = queue::offer;
 
-        final CheckedIterator<T, E> iter = iteratorEx();
+        final Throwables.Iterator<T, E> iter = iteratorEx();
 
-        return newStream(new CheckedIterator<R, E>() {
+        return newStream(new Throwables.Iterator<R, E>() {
             @Override
             public boolean hasNext() throws E {
                 if (queue.size() == 0) {
@@ -3828,7 +3814,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
         final int windowSize = 2;
 
-        return newStream(new CheckedIterator<R, E>() {
+        return newStream(new Throwables.Iterator<R, E>() {
             @SuppressWarnings("unchecked")
             private final T none = (T) NONE;
             private T prev = none;
@@ -3916,7 +3902,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
         final int windowSize = 3;
 
-        return newStream(new CheckedIterator<R, E>() {
+        return newStream(new Throwables.Iterator<R, E>() {
             @SuppressWarnings("unchecked")
             private final T none = (T) NONE;
             private T prev = none;
@@ -4036,7 +4022,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             final Throwables.Function<? super T, ? extends V, ? extends E> valueMapper, final Supplier<? extends Map<K, List<V>>> mapFactory) {
         assertNotClosed();
 
-        return newStream(new CheckedIterator<Map.Entry<K, List<V>>, E>() {
+        return newStream(new Throwables.Iterator<Map.Entry<K, List<V>>, E>() {
             private Iterator<Map.Entry<K, List<V>>> iter = null;
 
             @Override
@@ -4096,7 +4082,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             final Supplier<? extends Map<K, V>> mapFactory) {
         assertNotClosed();
 
-        return newStream(new CheckedIterator<Map.Entry<K, V>, E>() {
+        return newStream(new Throwables.Iterator<Map.Entry<K, V>, E>() {
             private Iterator<Map.Entry<K, V>> iter = null;
 
             @Override
@@ -4189,7 +4175,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             final Supplier<? extends Map<K, D>> mapFactory) {
         assertNotClosed();
 
-        return newStream(new CheckedIterator<Map.Entry<K, D>, E>() {
+        return newStream(new Throwables.Iterator<Map.Entry<K, D>, E>() {
             private Iterator<Map.Entry<K, D>> iter = null;
 
             @Override
@@ -4241,7 +4227,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             final Collector<? super T, ?, D> downstream) {
         assertNotClosed();
 
-        return newStream(new CheckedIterator<Entry<Boolean, D>, E>() {
+        return newStream(new Throwables.Iterator<Entry<Boolean, D>, E>() {
             private Iterator<Entry<Boolean, D>> iter = null;
 
             @Override
@@ -4285,9 +4271,9 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     public CheckedStream<List<T>, E> collapse(final Throwables.BiPredicate<? super T, ? super T, ? extends E> collapsible) {
         assertNotClosed();
 
-        final CheckedIterator<T, E> iter = elements;
+        final Throwables.Iterator<T, E> iter = elements;
 
-        return newStream(new CheckedIterator<List<T>, E>() {
+        return newStream(new Throwables.Iterator<List<T>, E>() {
             private boolean hasNext = false;
             private T next = null;
 
@@ -4326,9 +4312,9 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             final Supplier<? extends C> supplier) {
         assertNotClosed();
 
-        final CheckedIterator<T, E> iter = elements;
+        final Throwables.Iterator<T, E> iter = elements;
 
-        return newStream(new CheckedIterator<C, E>() {
+        return newStream(new Throwables.Iterator<C, E>() {
             private boolean hasNext = false;
             private T next = null;
 
@@ -4362,11 +4348,11 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * <p>Example:
      * <pre>
      * <code>
-     * CheckedStream.of(new Integer[0]).collapse((p, c) -> p < c, (r, c) -> r + c) => []
-     * CheckedStream.of(1).collapse((p, c) -> p < c, (r, c) -> r + c) => [1]
-     * CheckedStream.of(1, 2).collapse((p, c) -> p < c, (r, c) -> r + c) => [3]
-     * CheckedStream.of(1, 2, 3).collapse((p, c) -> p < c, (r, c) -> r + c) => [6]
-     * CheckedStream.of(1, 2, 3, 3, 2, 1).collapse((p, c) -> p < c, (r, c) -> r + c) => [6, 3, 2, 1]
+     * Seq.of(new Integer[0]).collapse((p, c) -> p < c, (r, c) -> r + c) => []
+     * Seq.of(1).collapse((p, c) -> p < c, (r, c) -> r + c) => [1]
+     * Seq.of(1, 2).collapse((p, c) -> p < c, (r, c) -> r + c) => [3]
+     * Seq.of(1, 2, 3).collapse((p, c) -> p < c, (r, c) -> r + c) => [6]
+     * Seq.of(1, 2, 3, 3, 2, 1).collapse((p, c) -> p < c, (r, c) -> r + c) => [6, 3, 2, 1]
      * </code>
      * </pre>
      *
@@ -4382,9 +4368,9 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             final Throwables.BiFunction<? super T, ? super T, T, ? extends E> mergeFunction) {
         assertNotClosed();
 
-        final CheckedIterator<T, E> iter = elements;
+        final Throwables.Iterator<T, E> iter = elements;
 
-        return newStream(new CheckedIterator<T, E>() {
+        return newStream(new Throwables.Iterator<T, E>() {
             private boolean hasNext = false;
             private T next = null;
 
@@ -4423,9 +4409,9 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             final Throwables.BiFunction<U, ? super T, U, ? extends E> op) {
         assertNotClosed();
 
-        final CheckedIterator<T, E> iter = elements;
+        final Throwables.Iterator<T, E> iter = elements;
 
-        return newStream(new CheckedIterator<U, E>() {
+        return newStream(new Throwables.Iterator<U, E>() {
             private boolean hasNext = false;
             private T next = null;
 
@@ -4464,9 +4450,9 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             final Throwables.Supplier<R, E> supplier, final Throwables.BiConsumer<? super R, ? super T, ? extends E> accumulator) {
         assertNotClosed();
 
-        final CheckedIterator<T, E> iter = elements;
+        final Throwables.Iterator<T, E> iter = elements;
 
-        return newStream(new CheckedIterator<R, E>() {
+        return newStream(new Throwables.Iterator<R, E>() {
             private boolean hasNext = false;
             private T next = null;
 
@@ -4509,9 +4495,9 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
         final BiConsumer<Object, ? super T> accumulator = (BiConsumer<Object, ? super T>) collector.accumulator();
         final Function<Object, R> finisher = (Function<Object, R>) collector.finisher();
 
-        final CheckedIterator<T, E> iter = elements;
+        final Throwables.Iterator<T, E> iter = elements;
 
-        return newStream(new CheckedIterator<R, E>() {
+        return newStream(new Throwables.Iterator<R, E>() {
             private boolean hasNext = false;
             private T next = null;
 
@@ -4547,9 +4533,9 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     public CheckedStream<List<T>, E> collapse(final Throwables.TriPredicate<? super T, ? super T, ? super T, ? extends E> collapsible) {
         assertNotClosed();
 
-        final CheckedIterator<T, E> iter = elements;
+        final Throwables.Iterator<T, E> iter = elements;
 
-        return newStream(new CheckedIterator<List<T>, E>() {
+        return newStream(new Throwables.Iterator<List<T>, E>() {
             private boolean hasNext = false;
             private T next = null;
 
@@ -4589,9 +4575,9 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             final Supplier<? extends C> supplier) {
         assertNotClosed();
 
-        final CheckedIterator<T, E> iter = elements;
+        final Throwables.Iterator<T, E> iter = elements;
 
-        return newStream(new CheckedIterator<C, E>() {
+        return newStream(new Throwables.Iterator<C, E>() {
             private boolean hasNext = false;
             private T next = null;
 
@@ -4646,9 +4632,9 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             final Throwables.BiFunction<? super T, ? super T, T, ? extends E> mergeFunction) {
         assertNotClosed();
 
-        final CheckedIterator<T, E> iter = elements;
+        final Throwables.Iterator<T, E> iter = elements;
 
-        return newStream(new CheckedIterator<T, E>() {
+        return newStream(new Throwables.Iterator<T, E>() {
             private boolean hasNext = false;
             private T next = null;
 
@@ -4688,9 +4674,9 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             final Throwables.BiFunction<U, ? super T, U, ? extends E> op) {
         assertNotClosed();
 
-        final CheckedIterator<T, E> iter = elements;
+        final Throwables.Iterator<T, E> iter = elements;
 
-        return newStream(new CheckedIterator<U, E>() {
+        return newStream(new Throwables.Iterator<U, E>() {
             private boolean hasNext = false;
             private T next = null;
 
@@ -4730,9 +4716,9 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             final Throwables.Supplier<R, E> supplier, final Throwables.BiConsumer<? super R, ? super T, ? extends E> accumulator) {
         assertNotClosed();
 
-        final CheckedIterator<T, E> iter = elements;
+        final Throwables.Iterator<T, E> iter = elements;
 
-        return newStream(new CheckedIterator<R, E>() {
+        return newStream(new Throwables.Iterator<R, E>() {
             private boolean hasNext = false;
             private T next = null;
 
@@ -4767,11 +4753,11 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * <p>Example:
      * <pre>
      * <code>
-     * CheckedStream.of(new Integer[0]).collapse((f, p, c) -> f < c, Collectors.summingInt(Fn.unboxI())) => []
-     * CheckedStream.of(1).collapse((f, p, c) -> f < c, Collectors.summingInt(Fn.unboxI())) => [1]
-     * CheckedStream.of(1, 2).collapse((f, p, c) -> f < c, Collectors.summingInt(Fn.unboxI())) => [3]
-     * CheckedStream.of(1, 2, 3).collapse((f, p, c) -> f < c, Collectors.summingInt(Fn.unboxI())) => [6]
-     * CheckedStream.of(1, 2, 3, 3, 2, 1).collapse((f, p, c) -> f < c, Collectors.summingInt(Fn.unboxI())) => [11, 1]
+     * Seq.of(new Integer[0]).collapse((f, p, c) -> f < c, Collectors.summingInt(Fn.unboxI())) => []
+     * Seq.of(1).collapse((f, p, c) -> f < c, Collectors.summingInt(Fn.unboxI())) => [1]
+     * Seq.of(1, 2).collapse((f, p, c) -> f < c, Collectors.summingInt(Fn.unboxI())) => [3]
+     * Seq.of(1, 2, 3).collapse((f, p, c) -> f < c, Collectors.summingInt(Fn.unboxI())) => [6]
+     * Seq.of(1, 2, 3, 3, 2, 1).collapse((f, p, c) -> f < c, Collectors.summingInt(Fn.unboxI())) => [11, 1]
      * </code>
      * </pre>
      *
@@ -4790,9 +4776,9 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
         final BiConsumer<Object, ? super T> accumulator = (BiConsumer<Object, ? super T>) collector.accumulator();
         final Function<Object, R> finisher = (Function<Object, R>) collector.finisher();
 
-        final CheckedIterator<T, E> iter = elements;
+        final Throwables.Iterator<T, E> iter = elements;
 
-        return newStream(new CheckedIterator<R, E>() {
+        return newStream(new Throwables.Iterator<R, E>() {
             private boolean hasNext = false;
             private T next = null;
 
@@ -4829,9 +4815,9 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     public CheckedStream<T, E> scan(final Throwables.BiFunction<? super T, ? super T, T, ? extends E> accumulator) {
         assertNotClosed();
 
-        final CheckedIterator<T, E> iter = elements;
+        final Throwables.Iterator<T, E> iter = elements;
 
-        return newStream(new CheckedIterator<T, E>() {
+        return newStream(new Throwables.Iterator<T, E>() {
             private T res = null;
             private boolean isFirst = true;
 
@@ -4863,9 +4849,9 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     public <U> CheckedStream<U, E> scan(final U init, final Throwables.BiFunction<U, ? super T, U, ? extends E> accumulator) {
         assertNotClosed();
 
-        final CheckedIterator<T, E> iter = elements;
+        final Throwables.Iterator<T, E> iter = elements;
 
-        return newStream(new CheckedIterator<U, E>() {
+        return newStream(new Throwables.Iterator<U, E>() {
             private U res = init;
 
             @Override
@@ -4896,9 +4882,9 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             return scan(init, accumulator);
         }
 
-        final CheckedIterator<T, E> iter = elements;
+        final Throwables.Iterator<T, E> iter = elements;
 
-        return newStream(new CheckedIterator<U, E>() {
+        return newStream(new Throwables.Iterator<U, E>() {
             private boolean isFirst = true;
             private U res = init;
 
@@ -5013,7 +4999,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     //     * @see #appendIfEmpty(Object...)
     //     */
     //    @IntermediateOp
-    //    public final CheckedStream<T, E> defaultIfEmpty(final Collection<? extends T> defaultValues) {
+    //    public final Seq<T, E> defaultIfEmpty(final Collection<? extends T> defaultValues) {
     //        return appendIfEmpty(defaultValues);
     //    }
 
@@ -5021,10 +5007,10 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      *
      * @param supplier
      * @return
-     * @see #appendIfEmpty(Throwables.Supplier)
+     * @see #appendIfEmpty(Supplier)
      */
     @IntermediateOp
-    public CheckedStream<T, E> defaultIfEmpty(final Throwables.Supplier<? extends CheckedStream<T, E>, ? extends E> supplier) {
+    public CheckedStream<T, E> defaultIfEmpty(final Supplier<? extends CheckedStream<T, E>> supplier) {
         return appendIfEmpty(supplier);
     }
 
@@ -5065,6 +5051,18 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
     /**
      *
+     * @param op
+     * @return
+     */
+    @IntermediateOp
+    public CheckedStream<T, E> prepend(final u.Optional<T> op) { //NOSONAR
+        assertNotClosed();
+
+        return prepend(op.isEmpty() ? CheckedStream.<T, E> empty() : CheckedStream.<T, E> just(op.orElseThrow()));
+    }
+
+    /**
+     *
      *
      * @param a
      * @return
@@ -5100,6 +5098,18 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
     /**
      *
+     * @param op
+     * @return
+     */
+    @IntermediateOp
+    public CheckedStream<T, E> append(final u.Optional<T> op) { //NOSONAR
+        assertNotClosed();
+
+        return append(op.isEmpty() ? CheckedStream.<T, E> empty() : CheckedStream.<T, E> just(op.orElseThrow()));
+    }
+
+    /**
+     *
      *
      * @param a
      * @return
@@ -5124,8 +5134,8 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             return newStream(elements, closeHandlers);
         }
 
-        return newStream(new CheckedIterator<T, E>() {
-            private CheckedIterator<T, E> iter;
+        return newStream(new Throwables.Iterator<T, E>() {
+            private Throwables.Iterator<T, E> iter;
 
             @Override
             public boolean hasNext() throws E {
@@ -5168,7 +5178,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                     if (elements.hasNext()) {
                         iter = elements;
                     } else {
-                        iter = CheckedIterator.of(c.iterator());
+                        iter = Throwables.Iterator.of(c.iterator());
                     }
                 }
             }
@@ -5182,13 +5192,13 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @return
      */
     @IntermediateOp
-    public CheckedStream<T, E> appendIfEmpty(final Throwables.Supplier<? extends CheckedStream<T, E>, ? extends E> supplier) {
+    public CheckedStream<T, E> appendIfEmpty(final Supplier<? extends CheckedStream<T, E>> supplier) {
         assertNotClosed();
 
         final Holder<CheckedStream<T, E>> holder = new Holder<>();
 
-        return newStream(new CheckedIterator<T, E>() {
-            private CheckedIterator<T, E> iter;
+        return newStream(new Throwables.Iterator<T, E>() {
+            private Throwables.Iterator<T, E> iter;
 
             @Override
             public boolean hasNext() throws E {
@@ -5242,22 +5252,20 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
     //    @SuppressWarnings("rawtypes")
     //    private static final Throwables.Predicate NOT_NULL_MASK = new Throwables.Predicate<Object, RuntimeException>() {
-    //        @Override
-    //        public boolean test(final Object t) {
+    //            //        public boolean test(final Object t) {
     //            return t != NONE;
     //        }
     //    };
     //
     //    @Beta
     //    @IntermediateOp
-    //    public CheckedStream<T, E> appendOnError(final T fallbackValue) {
+    //    public Seq<T, E> appendOnError(final T fallbackValue) {
     //        assertNotClosed();
     //
-    //        return newStream(new CheckedIterator<T, E>() {
+    //        return newStream(new Throwables.Iterator<T, E>() {
     //            private boolean fallbackValueAvaiable = true;
     //
-    //            @Override
-    //            public boolean hasNext() throws E {
+    //                //            public boolean hasNext() throws E {
     //                try {
     //                    return fallbackValueAvaiable && elements.hasNext();
     //                } catch (Exception e) {
@@ -5265,8 +5273,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     //                }
     //            }
     //
-    //            @Override
-    //            public T next() throws E {
+    //                //            public T next() throws E {
     //                if (hasNext() == false) {
     //                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
     //                }
@@ -5283,15 +5290,14 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     //
     //    @Beta
     //    @IntermediateOp
-    //    public <XE extends Exception> CheckedStream<T, E> appendOnError(final Class<XE> type, final T fallbackValue) {
+    //    public <XE extends Exception> Seq<T, E> appendOnError(final Class<XE> type, final T fallbackValue) {
     //        assertNotClosed();
     //        this.checkArgNotNull(type, "type");
     //
-    //        return newStream(new CheckedIterator<T, E>() {
+    //        return newStream(new Throwables.Iterator<T, E>() {
     //            private boolean fallbackValueAvaiable = true;
     //
-    //            @Override
-    //            public boolean hasNext() throws E {
+    //                //            public boolean hasNext() throws E {
     //                try {
     //                    return fallbackValueAvaiable && elements.hasNext();
     //                } catch (Exception e) {
@@ -5303,8 +5309,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     //                }
     //            }
     //
-    //            @Override
-    //            public T next() throws E {
+    //                //            public T next() throws E {
     //                if (hasNext() == false) {
     //                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
     //                }
@@ -5325,15 +5330,14 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     //
     //    @Beta
     //    @IntermediateOp
-    //    public CheckedStream<T, E> appendOnError(final Predicate<? super Exception> predicate, final T fallbackValue) {
+    //    public Seq<T, E> appendOnError(final Predicate<? super Exception> predicate, final T fallbackValue) {
     //        assertNotClosed();
     //        this.checkArgNotNull(predicate, "predicate");
     //
-    //        return newStream(new CheckedIterator<T, E>() {
+    //        return newStream(new Throwables.Iterator<T, E>() {
     //            private boolean fallbackValueAvaiable = true;
     //
-    //            @Override
-    //            public boolean hasNext() throws E {
+    //                //            public boolean hasNext() throws E {
     //                try {
     //                    return fallbackValueAvaiable && elements.hasNext();
     //                } catch (Exception e) {
@@ -5345,8 +5349,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     //                }
     //            }
     //
-    //            @Override
-    //            public T next() throws E {
+    //                //            public T next() throws E {
     //                if (hasNext() == false) {
     //                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
     //                }
@@ -5367,17 +5370,16 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     //
     //    @Beta
     //    @IntermediateOp
-    //    public CheckedStream<T, E> appendOnError(final Supplier<CheckedStream<T, E>> fallbackStreamSupplier) {
+    //    public Seq<T, E> appendOnError(final Supplier<Seq<T, E>> fallbackStreamSupplier) {
     //        assertNotClosed();
     //        this.checkArgNotNull(fallbackStreamSupplier, "fallbackStreamSupplier");
     //
-    //        final CheckedIterator<T, E> iter = new CheckedIterator<T, E>() {
+    //        final Throwables.Iterator<T, E> iter = new Throwables.Iterator<T, E>() {
     //            private boolean fallbackValueAvaiable = true;
-    //            private CheckedIterator<T, E> iter = CheckedStream.this.elements;
-    //            private CheckedStream<T, E> s = null;
+    //            private Throwables.Iterator<T, E> iter = Seq.this.elements;
+    //            private Seq<T, E> s = null;
     //
-    //            @Override
-    //            public boolean hasNext() throws E {
+    //                //            public boolean hasNext() throws E {
     //                try {
     //                    return iter.hasNext();
     //                } catch (Exception e) {
@@ -5391,8 +5393,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     //                }
     //            }
     //
-    //            @Override
-    //            public T next() throws E {
+    //                //            public T next() throws E {
     //                if (hasNext() == false) {
     //                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
     //                }
@@ -5414,20 +5415,19 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     //                }
     //            }
     //
-    //            @Override
-    //            public void close() {
-    //                if ((s != null && N.notEmpty(s.closeHandlers)) || N.notEmpty(CheckedStream.this.closeHandlers)) {
+    //                //            public void close() {
+    //                if ((s != null && N.notEmpty(s.closeHandlers)) || N.notEmpty(Seq.this.closeHandlers)) {
     //                    try {
     //                        if (s != null) {
     //                            s.close();
     //                        }
     //                    } finally {
-    //                        CheckedStream.this.close();
+    //                        Seq.this.close();
     //                    }
     //                }
     //            }
     //
-    //            private void useFallbackStream(final Supplier<CheckedStream<T, E>> fallbackStream) {
+    //            private void useFallbackStream(final Supplier<Seq<T, E>> fallbackStream) {
     //                fallbackValueAvaiable = false;
     //                s = fallbackStream.get();
     //                iter = s.elements;
@@ -5439,18 +5439,17 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     //
     //    @Beta
     //    @IntermediateOp
-    //    public <XE extends Exception> CheckedStream<T, E> appendOnError(final Class<XE> type, final Supplier<CheckedStream<T, E>> fallbackStreamSupplier) {
+    //    public <XE extends Exception> Seq<T, E> appendOnError(final Class<XE> type, final Supplier<Seq<T, E>> fallbackStreamSupplier) {
     //        assertNotClosed();
     //        this.checkArgNotNull(type, "type");
     //        this.checkArgNotNull(fallbackStreamSupplier, "fallbackStreamSupplier");
     //
-    //        final CheckedIterator<T, E> iter = new CheckedIterator<T, E>() {
+    //        final Throwables.Iterator<T, E> iter = new Throwables.Iterator<T, E>() {
     //            private boolean fallbackValueAvaiable = true;
-    //            private CheckedIterator<T, E> iter = CheckedStream.this.elements;
-    //            private CheckedStream<T, E> s = null;
+    //            private Throwables.Iterator<T, E> iter = Seq.this.elements;
+    //            private Seq<T, E> s = null;
     //
-    //            @Override
-    //            public boolean hasNext() throws E {
+    //                //            public boolean hasNext() throws E {
     //                try {
     //                    return iter.hasNext();
     //                } catch (Exception e) {
@@ -5464,8 +5463,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     //                }
     //            }
     //
-    //            @Override
-    //            public T next() throws E {
+    //                //            public T next() throws E {
     //                if (hasNext() == false) {
     //                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
     //                }
@@ -5487,20 +5485,19 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     //                }
     //            }
     //
-    //            @Override
-    //            public void close() {
-    //                if ((s != null && N.notEmpty(s.closeHandlers)) || N.notEmpty(CheckedStream.this.closeHandlers)) {
+    //                //            public void close() {
+    //                if ((s != null && N.notEmpty(s.closeHandlers)) || N.notEmpty(Seq.this.closeHandlers)) {
     //                    try {
     //                        if (s != null) {
     //                            s.close();
     //                        }
     //                    } finally {
-    //                        CheckedStream.this.close();
+    //                        Seq.this.close();
     //                    }
     //                }
     //            }
     //
-    //            private void useFallbackStream(final Supplier<CheckedStream<T, E>> fallbackStream) {
+    //            private void useFallbackStream(final Supplier<Seq<T, E>> fallbackStream) {
     //                fallbackValueAvaiable = false;
     //                s = fallbackStream.get();
     //                iter = s.elements;
@@ -5512,18 +5509,17 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     //
     //    @Beta
     //    @IntermediateOp
-    //    public CheckedStream<T, E> appendOnError(final Predicate<? super Exception> predicate, final Supplier<CheckedStream<T, E>> fallbackStreamSupplier) {
+    //    public Seq<T, E> appendOnError(final Predicate<? super Exception> predicate, final Supplier<Seq<T, E>> fallbackStreamSupplier) {
     //        assertNotClosed();
     //        this.checkArgNotNull(predicate, "predicate");
     //        this.checkArgNotNull(fallbackStreamSupplier, "fallbackStreamSupplier");
     //
-    //        final CheckedIterator<T, E> iter = new CheckedIterator<T, E>() {
+    //        final Throwables.Iterator<T, E> iter = new Throwables.Iterator<T, E>() {
     //            private boolean fallbackValueAvaiable = true;
-    //            private CheckedIterator<T, E> iter = CheckedStream.this.elements;
-    //            private CheckedStream<T, E> s = null;
+    //            private Throwables.Iterator<T, E> iter = Seq.this.elements;
+    //            private Seq<T, E> s = null;
     //
-    //            @Override
-    //            public boolean hasNext() throws E {
+    //                //            public boolean hasNext() throws E {
     //                try {
     //                    return iter.hasNext();
     //                } catch (Exception e) {
@@ -5537,8 +5533,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     //                }
     //            }
     //
-    //            @Override
-    //            public T next() throws E {
+    //                //            public T next() throws E {
     //                if (hasNext() == false) {
     //                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
     //                }
@@ -5560,20 +5555,19 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     //                }
     //            }
     //
-    //            @Override
-    //            public void close() {
-    //                if ((s != null && N.notEmpty(s.closeHandlers)) || N.notEmpty(CheckedStream.this.closeHandlers)) {
+    //                //            public void close() {
+    //                if ((s != null && N.notEmpty(s.closeHandlers)) || N.notEmpty(Seq.this.closeHandlers)) {
     //                    try {
     //                        if (s != null) {
     //                            s.close();
     //                        }
     //                    } finally {
-    //                        CheckedStream.this.close();
+    //                        Seq.this.close();
     //                    }
     //                }
     //            }
     //
-    //            private void useFallbackStream(final Supplier<CheckedStream<T, E>> fallbackStream) {
+    //            private void useFallbackStream(final Supplier<Seq<T, E>> fallbackStream) {
     //                fallbackValueAvaiable = false;
     //                s = fallbackStream.get();
     //                iter = s.elements;
@@ -5584,13 +5578,13 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     //    }
 
     /**
-     * Throws {@code NoSuchElementException} in terminal operation if this {@code CheckedStream} if empty.
+     * Throws {@code NoSuchElementException} in terminal operation if this {@code Seq} if empty.
      *
      * @return
      */
     @IntermediateOp
     public CheckedStream<T, E> throwIfEmpty() {
-        final Throwables.Supplier<CheckedStream<T, E>, E> tmp = () -> {
+        final Supplier<CheckedStream<T, E>> tmp = () -> {
             throw new NoSuchElementException();
         };
 
@@ -5607,17 +5601,59 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     public CheckedStream<T, E> throwIfEmpty(final Supplier<? extends E> exceptionSupplier) {
         this.checkArgNotNull(exceptionSupplier, "exceptionSupplier");
 
-        final Throwables.Supplier<CheckedStream<T, E>, E> tmp = () -> {
-            throw exceptionSupplier.get();
-        };
+        assertNotClosed();
 
-        return this.appendIfEmpty(tmp);
-    }
+        final Holder<CheckedStream<T, E>> holder = new Holder<>();
 
-    void close(Holder<? extends CheckedStream<T, E>> holder) {
-        if (holder.value() != null) {
-            holder.value().close();
-        }
+        return newStream(new Throwables.Iterator<T, E>() {
+            private Throwables.Iterator<T, E> iter;
+
+            @Override
+            public boolean hasNext() throws E {
+                if (iter == null) {
+                    init();
+                }
+
+                return iter.hasNext();
+            }
+
+            @Override
+            public T next() throws E {
+                if (iter == null) {
+                    init();
+                }
+
+                return iter.next();
+            }
+
+            @Override
+            public void advance(long n) throws E {
+                if (iter == null) {
+                    init();
+                }
+
+                iter.advance(n);
+            }
+
+            @Override
+            public long count() throws E {
+                if (iter == null) {
+                    init();
+                }
+
+                return iter.count();
+            }
+
+            private void init() throws E {
+                if (iter == null) {
+                    if (elements.hasNext()) {
+                        iter = elements;
+                    } else {
+                        throw exceptionSupplier.get();
+                    }
+                }
+            }
+        }, closeHandlers).onClose(() -> close(holder));
     }
 
     /**
@@ -5631,7 +5667,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @throws E2
      */
     @TerminalOp
-    public <R, E2 extends Exception> Optional<R> applyIfNotEmpty(final Throwables.Function<? super CheckedStream<T, E>, R, E2> func) throws E, E2 {
+    public <R, E2 extends Exception> u.Optional<R> applyIfNotEmpty(final Throwables.Function<? super CheckedStream<T, E>, R, E2> func) throws E, E2 {
         assertNotClosed();
 
         try {
@@ -5680,7 +5716,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     public CheckedStream<T, E> onEach(final Throwables.Consumer<? super T, ? extends E> action) {
         assertNotClosed();
 
-        return newStream(new CheckedIterator<T, E>() {
+        return newStream(new Throwables.Iterator<T, E>() {
             @Override
             public boolean hasNext() throws E {
                 return elements.hasNext();
@@ -5715,7 +5751,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     public CheckedStream<T, E> peekFirst(final Throwables.Consumer<? super T, ? extends E> action) {
         assertNotClosed();
 
-        return newStream(new CheckedIterator<T, E>() {
+        return newStream(new Throwables.Iterator<T, E>() {
             private boolean isFirst = true;
 
             @Override
@@ -5747,7 +5783,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     public CheckedStream<T, E> peekLast(final Throwables.Consumer<? super T, ? extends E> action) {
         assertNotClosed();
 
-        return newStream(new CheckedIterator<T, E>() {
+        return newStream(new Throwables.Iterator<T, E>() {
             private boolean hasNext = false;
             private T next = null;
 
@@ -5825,7 +5861,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     }
 
     /**
-     * Returns CheckedStream of {@code List<T>} with consecutive sub sequences of the elements, each of the same size (the final sequence may be smaller).
+     * Returns Seq of {@code List<T>} with consecutive sub sequences of the elements, each of the same size (the final sequence may be smaller).
      *
      *
      * @param chunkSize the desired size of each sub sequence (the last may be smaller).
@@ -5837,7 +5873,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     }
 
     /**
-     * Returns CheckedStream of {@code Set<T>} with consecutive sub sequences of the elements, each of the same size (the final sequence may be smaller).
+     * Returns Seq of {@code Set<T>} with consecutive sub sequences of the elements, each of the same size (the final sequence may be smaller).
      *
      *
      * @param chunkSize the desired size of each sub sequence (the last may be smaller).
@@ -5849,7 +5885,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     }
 
     /**
-     * Returns CheckedStream of {@code C} with consecutive sub sequences of the elements, each of the same size (the final sequence may be smaller).
+     * Returns Seq of {@code C} with consecutive sub sequences of the elements, each of the same size (the final sequence may be smaller).
      *
      *
      * @param <C>
@@ -5862,8 +5898,9 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
         assertNotClosed();
 
         checkArgPositive(chunkSize, "chunkSize");
+        checkArgNotNull(collectionSupplier, "collectionSupplier");
 
-        return newStream(new CheckedIterator<C, E>() {
+        return newStream(new Throwables.Iterator<C, E>() {
             @Override
             public boolean hasNext() throws E {
                 return elements.hasNext();
@@ -5912,12 +5949,13 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
         assertNotClosed();
 
         checkArgPositive(chunkSize, "chunkSize");
+        checkArgNotNull(collector, "collector");
 
         final Supplier<Object> supplier = (Supplier<Object>) collector.supplier();
         final BiConsumer<Object, ? super T> accumulator = (BiConsumer<Object, ? super T>) collector.accumulator();
         final Function<Object, R> finisher = (Function<Object, R>) collector.finisher();
 
-        return newStream(new CheckedIterator<R, E>() {
+        return newStream(new Throwables.Iterator<R, E>() {
             @Override
             public boolean hasNext() throws E {
                 return elements.hasNext();
@@ -5957,6 +5995,166 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     /**
      *
      *
+     * @param predicate
+     * @return
+     */
+    @IntermediateOp
+    public CheckedStream<Stream<T>, E> split(final Throwables.Predicate<? super T, ? extends E> predicate) {
+        assertNotClosed();
+
+        return splitToList(predicate).map(Stream::of);
+    }
+
+    /**
+     *
+     *
+     * @param predicate
+     * @return
+     */
+    @IntermediateOp
+    public CheckedStream<List<T>, E> splitToList(final Throwables.Predicate<? super T, ? extends E> predicate) {
+        assertNotClosed();
+
+        return split(predicate, Suppliers.<T> ofList());
+    }
+
+    /**
+     *
+     *
+     * @param predicate
+     * @return
+     */
+    @IntermediateOp
+    public CheckedStream<Set<T>, E> splitToSet(final Throwables.Predicate<? super T, ? extends E> predicate) {
+        assertNotClosed();
+
+        return split(predicate, Suppliers.<T> ofSet());
+    }
+
+    /**
+     *
+     *
+     * @param <C>
+     * @param predicate
+     * @param collectionSupplier
+     * @return
+     */
+    @IntermediateOp
+    public <C extends Collection<T>> CheckedStream<C, E> split(final Throwables.Predicate<? super T, ? extends E> predicate,
+            final Supplier<? extends C> collectionSupplier) {
+        assertNotClosed();
+
+        checkArgNotNull(predicate, "predicate");
+        checkArgNotNull(collectionSupplier, "collectionSupplier");
+
+        return newStream(new Throwables.Iterator<C, E>() {
+            private T next = (T) NONE;
+            private boolean preCondition = false;
+
+            @Override
+            public boolean hasNext() throws E {
+                return next != NONE || elements.hasNext();
+            }
+
+            @Override
+            public C next() throws E {
+                if (!hasNext()) {
+                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
+                }
+
+                final C result = collectionSupplier.get();
+                boolean isFirst = true;
+
+                if (next == NONE) {
+                    next = elements.next();
+                }
+
+                while (next != NONE) {
+                    if (isFirst) {
+                        result.add(next);
+                        preCondition = predicate.test(next);
+                        next = elements.hasNext() ? elements.next() : (T) NONE;
+                        isFirst = false;
+                    } else if (predicate.test(next) == preCondition) {
+                        result.add(next);
+                        next = elements.hasNext() ? elements.next() : (T) NONE;
+                    } else {
+
+                        break;
+                    }
+                }
+
+                return result;
+            }
+
+        }, closeHandlers);
+    }
+
+    /**
+     *
+     *
+     * @param <R>
+     * @param predicate
+     * @param collector
+     * @return
+     */
+    @IntermediateOp
+    public <R> CheckedStream<R, E> split(final Throwables.Predicate<? super T, ? extends E> predicate, final Collector<? super T, ?, R> collector) {
+        assertNotClosed();
+
+        checkArgNotNull(predicate, "predicate");
+        checkArgNotNull(collector, "collector");
+
+        final Supplier<Object> supplier = (Supplier<Object>) collector.supplier();
+        final BiConsumer<Object, ? super T> accumulator = (BiConsumer<Object, ? super T>) collector.accumulator();
+        final Function<Object, R> finisher = (Function<Object, R>) collector.finisher();
+
+        return newStream(new Throwables.Iterator<R, E>() {
+            private T next = (T) NONE;
+            private boolean preCondition = false;
+
+            @Override
+            public boolean hasNext() throws E {
+                return next != NONE || elements.hasNext();
+            }
+
+            @Override
+            public R next() throws E {
+                if (!hasNext()) {
+                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
+                }
+
+                final Object container = supplier.get();
+                boolean isFirst = true;
+
+                if (next == NONE) {
+                    next = elements.next();
+                }
+
+                while (next != NONE) {
+                    if (isFirst) {
+                        accumulator.accept(container, next);
+                        preCondition = predicate.test(next);
+                        next = elements.hasNext() ? elements.next() : (T) NONE;
+                        isFirst = false;
+                    } else if (predicate.test(next) == preCondition) {
+                        accumulator.accept(container, next);
+                        next = elements.hasNext() ? elements.next() : (T) NONE;
+                    } else {
+
+                        break;
+                    }
+                }
+
+                return finisher.apply(container);
+            }
+
+        }, closeHandlers);
+    }
+
+    /**
+     *
+     *
      * @param where
      * @return
      */
@@ -5966,9 +6164,9 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
         checkArgNotNegative(where, "where");
 
-        final CheckedIterator<T, E> iter = elements;
+        final Throwables.Iterator<T, E> iter = elements;
 
-        return newStream(new CheckedIterator<CheckedStream<T, E>, E>() {
+        return newStream(new Throwables.Iterator<CheckedStream<T, E>, E>() {
             private int cursor = 0;
 
             @Override
@@ -5992,7 +6190,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                         list.add(iter.next());
                     }
 
-                    result = new CheckedStream<>(CheckedIterator.of(list.iterator()), sorted, cmp, null);
+                    result = new CheckedStream<>(Throwables.Iterator.of(list.iterator()), sorted, cmp, null);
                 } else {
                     result = new CheckedStream<>(iter, sorted, cmp, null);
                 }
@@ -6038,9 +6236,9 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     public CheckedStream<CheckedStream<T, E>, E> splitAt(final Throwables.Predicate<? super T, ? extends E> where) {
         assertNotClosed();
 
-        final CheckedIterator<T, E> iter = elements;
+        final Throwables.Iterator<T, E> iter = elements;
 
-        return newStream(new CheckedIterator<CheckedStream<T, E>, E>() {
+        return newStream(new Throwables.Iterator<CheckedStream<T, E>, E>() {
             private int cursor = 0;
             private T next = null;
             private boolean hasNext = false;
@@ -6072,20 +6270,18 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                         }
                     }
 
-                    result = new CheckedStream<>(CheckedIterator.of(list.iterator()), sorted, cmp, null);
+                    result = new CheckedStream<>(Throwables.Iterator.of(list.iterator()), sorted, cmp, null);
                 } else {
-                    CheckedIterator<T, E> iterEx = iter;
+                    Throwables.Iterator<T, E> iterEx = iter;
 
                     if (hasNext) {
-                        iterEx = new CheckedIterator<>() {
+                        iterEx = new Throwables.Iterator<>() {
                             private boolean isFirst = true;
 
-                            @Override
                             public boolean hasNext() throws E {
                                 return isFirst || iter.hasNext();
                             }
 
-                            @Override
                             public T next() throws E {
                                 if (!hasNext()) {
                                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
@@ -6146,6 +6342,28 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     /**
      *
      * @param windowSize
+     * @return
+     * @see #sliding(int, int)
+     */
+    @IntermediateOp
+    public CheckedStream<Stream<T>, E> sliding(int windowSize) {
+        return sliding(windowSize, 1);
+    }
+
+    /**
+     *
+     * @param windowSize
+     * @return
+     * @see #sliding(int, int)
+     */
+    @IntermediateOp
+    public CheckedStream<List<T>, E> slidingToList(int windowSize) {
+        return slidingToList(windowSize, 1);
+    }
+
+    /**
+     *
+     * @param windowSize
      * @param increment
      * @return
      */
@@ -6193,8 +6411,9 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
         assertNotClosed();
 
         checkArgument(windowSize > 0 && increment > 0, "windowSize=%s and increment=%s must be bigger than 0", windowSize, increment);
+        checkArgNotNull(collectionSupplier, "collectionSupplier");
 
-        return newStream(new CheckedIterator<C, E>() {
+        return newStream(new Throwables.Iterator<C, E>() {
             private Deque<T> queue = null;
             private boolean toSkip = false;
 
@@ -6329,12 +6548,13 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
         assertNotClosed();
 
         checkArgument(windowSize > 0 && increment > 0, "windowSize=%s and increment=%s must be bigger than 0", windowSize, increment);
+        checkArgNotNull(collector, "collector");
 
         final Supplier<Object> supplier = (Supplier<Object>) collector.supplier();
         final BiConsumer<Object, ? super T> accumulator = (BiConsumer<Object, ? super T>) collector.accumulator();
         final Function<Object, R> finisher = (Function<Object, R>) collector.finisher();
 
-        return newStream(new CheckedIterator<R, E>() {
+        return newStream(new Throwables.Iterator<R, E>() {
             private Deque<T> queue = null;
             private boolean toSkip = false;
 
@@ -6473,7 +6693,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             return newStream(elements, sorted, cmp, closeHandlers);
         }
 
-        return newStream(new CheckedIterator<T, E>() {
+        return newStream(new Throwables.Iterator<T, E>() {
             private boolean skipped = false;
 
             @Override
@@ -6501,13 +6721,25 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     /**
      *
      *
+     * @param n
+     * @param action
      * @return
-     * @deprecated Use {@link #skipNulls()} instead
      */
-    @Deprecated
-    @IntermediateOp
-    public CheckedStream<T, E> skipNull() {
-        return skipNulls();
+    public CheckedStream<T, E> skip(final long n, final Throwables.Consumer<? super T, ? extends E> action) {
+        assertNotClosed();
+
+        checkArgNotNegative(n, "n");
+        checkArgNotNull(action, "action");
+
+        final Throwables.Predicate<T, E> filter = new Throwables.Predicate<>() {
+            final MutableLong cnt = MutableLong.of(n);
+
+            public boolean test(T value) {
+                return cnt.getAndDecrement() > 0;
+            }
+        };
+
+        return dropWhile(filter, action);
     }
 
     /**
@@ -6522,6 +6754,18 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
     /**
      *
+     *
+     * @return
+     * @deprecated Use {@link #skipNulls()} instead
+     */
+    @Deprecated
+    @IntermediateOp
+    public CheckedStream<T, E> skipNull() {
+        return skipNulls();
+    }
+
+    /**
+     *
      * @param maxSize
      * @return
      */
@@ -6531,7 +6775,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
         checkArgNotNegative(maxSize, "maxSize");
 
-        return newStream(new CheckedIterator<T, E>() {
+        return newStream(new Throwables.Iterator<T, E>() {
             private long cnt = 0;
 
             @Override
@@ -6560,7 +6804,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     //     * @deprecated
     //     */
     //    @Deprecated
-    //    public CheckedStream<T, E> slice(final long from, final long to) {
+    //    public Seq<T, E> slice(final long from, final long to) {
     //        checkArgNotNegative(from, "from");
     //        checkArgNotNegative(to, "to");
     //        checkArgument(to >= from, "'to' can't be less than `from`");
@@ -6594,7 +6838,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
         checkArgPositive(n, "n");
 
-        return newStream(new CheckedIterator<T, E>() {
+        return newStream(new Throwables.Iterator<T, E>() {
             private boolean initialized = false;
             private T[] aar = null;
             private int cursor = 0;
@@ -6640,8 +6884,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                 cursor = n < to - cursor ? cursor + (int) n : to;
             }
 
-            //    @Override
-            //    public <A> A[] toArray(A[] b) throws E {
+            //                //    public <A> A[] toArray(A[] b) throws E {
             //        if (initialized == false) {
             //            init();
             //        }
@@ -6717,7 +6960,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             return limit(0);
         }
 
-        return newStream(new CheckedIterator<T, E>() {
+        return newStream(new Throwables.Iterator<T, E>() {
             private Iterator<T> iter;
             private boolean initialized = false;
 
@@ -6777,7 +7020,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             return newStream(elements, sorted, cmp, closeHandlers);
         }
 
-        return newStream(new CheckedIterator<T, E>() {
+        return newStream(new Throwables.Iterator<T, E>() {
             private Deque<T> deque = null;
 
             @Override
@@ -6817,7 +7060,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     public CheckedStream<T, E> reversed() {
         assertNotClosed();
 
-        return newStream(new CheckedIterator<T, E>() {
+        return newStream(new Throwables.Iterator<T, E>() {
             private boolean initialized = false;
             private T[] aar;
             private int cursor;
@@ -6887,7 +7130,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             return newStream(elements, closeHandlers);
         }
 
-        return newStream(new CheckedIterator<T, E>() {
+        return newStream(new Throwables.Iterator<T, E>() {
             private boolean initialized = false;
             private T[] aar;
             private int len;
@@ -6986,7 +7229,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     @IntermediateOp
     @TerminalOpTriggered
     public CheckedStream<T, E> sorted() {
-        return sorted(Comparators.NATURAL_ORDER);
+        return sorted(NATURAL_COMPARATOR);
     }
 
     /**
@@ -6999,7 +7242,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     public CheckedStream<T, E> sorted(final Comparator<? super T> comparator) {
         assertNotClosed();
 
-        final Comparator<? super T> cmp = comparator == null ? Comparators.NATURAL_ORDER : comparator; //NOSONAR
+        final Comparator<? super T> cmp = comparator == null ? NATURAL_COMPARATOR : comparator; //NOSONAR
 
         if (sorted && cmp == this.cmp) {
             return newStream(elements, sorted, comparator, closeHandlers);
@@ -7078,7 +7321,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     @IntermediateOp
     @TerminalOpTriggered
     public CheckedStream<T, E> reverseSorted() {
-        return sorted(Comparators.REVERSED_ORDER);
+        return sorted(REVERSED_COMPARATOR);
     }
 
     /**
@@ -7161,7 +7404,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     private CheckedStream<T, E> lazyLoad(final Function<Object[], Object[]> op, final boolean sorted, final Comparator<? super T> cmp) {
         assertNotClosed();
 
-        return newStream(new CheckedIterator<T, E>() {
+        return newStream(new Throwables.Iterator<T, E>() {
             private boolean initialized = false;
             private T[] aar;
             private int cursor = 0;
@@ -7224,13 +7467,12 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      *
      * @return
      */
-    @SequentialOnly
     @IntermediateOp
     public CheckedStream<T, E> cycled() {
         assertNotClosed();
 
-        return newStream(new CheckedIterator<T, E>() {
-            private CheckedIterator<T, E> iter = null;
+        return newStream(new Throwables.Iterator<T, E>() {
+            private Throwables.Iterator<T, E> iter = null;
             private List<T> list = null;
             private T[] a = null;
             private int len = 0;
@@ -7294,13 +7536,12 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @param rounds
      * @return
      */
-    @SequentialOnly
     @IntermediateOp
     public CheckedStream<T, E> cycled(long rounds) {
         assertNotClosed();
 
-        return newStream(new CheckedIterator<T, E>() {
-            private CheckedIterator<T, E> iter = null;
+        return newStream(new Throwables.Iterator<T, E>() {
+            private Throwables.Iterator<T, E> iter = null;
             private List<T> list = null;
             private T[] a = null;
             private int len = 0;
@@ -7409,16 +7650,17 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
         return onEach(action);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
-    @Beta
-    @IntermediateOp
-    public CheckedStream<Timed<T>, E> timed() {
-        return map(Timed::of);
-    }
+    //
+    //    /**
+    //     *
+    //     *
+    //     * @return
+    //     */
+    //    @Beta
+    //    @IntermediateOp
+    //    public Seq<Timed<T>, E> timed() {
+    //        return map(Timed::of);
+    //    }
 
     /**
      *
@@ -7430,8 +7672,8 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     public CheckedStream<T, E> intersperse(final T delimiter) {
         assertNotClosed();
 
-        return newStream(new CheckedIterator<T, E>() {
-            private final CheckedIterator<T, E> iter = iteratorEx();
+        return newStream(new Throwables.Iterator<T, E>() {
+            private final Throwables.Iterator<T, E> iter = iteratorEx();
             private boolean toInsert = false;
 
             @Override
@@ -7475,15 +7717,13 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
         }
 
         final long skip = step - 1;
-        final CheckedIterator<T, E> iter = this.iteratorEx();
+        final Throwables.Iterator<T, E> iter = this.iteratorEx();
 
-        final CheckedIterator<T, E> iterator = new CheckedIterator<>() {
-            @Override
+        final Throwables.Iterator<T, E> iterator = new Throwables.Iterator<>() {
             public boolean hasNext() throws E {
                 return iter.hasNext();
             }
 
-            @Override
             public T next() throws E {
                 final T next = iter.next();
                 iter.advance(skip);
@@ -7505,7 +7745,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
         assertNotClosed();
 
         return map(new Throwables.Function<T, Indexed<T>, E>() {
-            private final MutableLong idx = new MutableLong(0);
+            private final MutableLong idx = MutableLong.of(0);
 
             @Override
             public Indexed<T> apply(T t) {
@@ -7523,7 +7763,6 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @return
      * @see #buffered()
      */
-    @SequentialOnly
     @IntermediateOp
     public CheckedStream<T, E> buffered() {
         assertNotClosed();
@@ -7539,7 +7778,6 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @return
      * @see #buffered(int)
      */
-    @SequentialOnly
     @IntermediateOp
     public CheckedStream<T, E> buffered(int bufferSize) {
         assertNotClosed();
@@ -7553,11 +7791,11 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
         checkArgNotNull(queueToBuffer, "queueToBuffer");
         checkArgument(queueToBuffer.isEmpty(), "'queueToBuffer' must be empty");
 
-        final Supplier<CheckedIterator<T, E>> supplier = () -> buffered(iteratorEx(), queueToBuffer);
+        final Supplier<Throwables.Iterator<T, E>> supplier = () -> buffered(iteratorEx(), queueToBuffer);
 
-        return CheckedStream.<Supplier<CheckedIterator<T, E>>, E> just(supplier) //
+        return CheckedStream.<Supplier<Throwables.Iterator<T, E>>, E> just(supplier) //
                 .map(Supplier::get)
-                .flatMap(iter -> newStream(iter, sorted, cmp, mergeCloseHandlers(closeHandlers, iter::close, true)));
+                .flatMap(iter -> newStream(iter, sorted, cmp, mergeCloseHandlers(iter::close, closeHandlers, true)));
     }
 
     /**
@@ -7745,17 +7983,16 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     //     */
     //    @Beta
     //    @IntermediateOp
-    //    public CheckedStream<T, E> onErrorContinue(final Throwables.Consumer<? super Throwable, ? extends E> errorConsumer) {
+    //    public Seq<T, E> onErrorContinue(final Throwables.Consumer<? super Throwable, ? extends E> errorConsumer) {
     //        assertNotClosed();
     //
-    //        return newStream(new CheckedIterator<T, E>() {
-    //            private final CheckedIterator<T, E> iter = iteratorEx();
+    //        return newStream(new Throwables.Iterator<T, E>() {
+    //            private final Throwables.Iterator<T, E> iter = iteratorEx();
     //            private final T none = (T) NONE;
     //            private T next = none;
     //            private T ret = null;
     //
-    //            @Override
-    //            public boolean hasNext() throws E {
+    //                //            public boolean hasNext() throws E {
     //                if (next == none) {
     //                    while (true) {
     //                        try {
@@ -7775,8 +8012,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     //                return next != none;
     //            }
     //
-    //            @Override
-    //            public T next() throws E {
+    //                //            public T next() throws E {
     //                if (!hasNext()) {
     //                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
     //                }
@@ -7798,18 +8034,17 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     //     */
     //    @Beta
     //    @IntermediateOp
-    //    public CheckedStream<T, E> onErrorContinue(final Class<? extends Throwable> type,
+    //    public Seq<T, E> onErrorContinue(final Class<? extends Throwable> type,
     //            final Throwables.Consumer<? super Throwable, ? extends E> errorConsumer) {
     //        assertNotClosed();
     //
-    //        return newStream(new CheckedIterator<T, E>() {
-    //            private final CheckedIterator<T, E> iter = iteratorEx();
+    //        return newStream(new Throwables.Iterator<T, E>() {
+    //            private final Throwables.Iterator<T, E> iter = iteratorEx();
     //            private final T none = (T) NONE;
     //            private T next = none;
     //            private T ret = null;
     //
-    //            @Override
-    //            public boolean hasNext() throws E {
+    //                //            public boolean hasNext() throws E {
     //                if (next == none) {
     //                    while (true) {
     //                        try {
@@ -7833,8 +8068,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     //                return next != none;
     //            }
     //
-    //            @Override
-    //            public T next() throws E {
+    //                //            public T next() throws E {
     //                if (!hasNext()) {
     //                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
     //                }
@@ -7856,18 +8090,17 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     //     */
     //    @Beta
     //    @IntermediateOp
-    //    public CheckedStream<T, E> onErrorContinue(final Throwables.Predicate<? super Throwable, ? extends E> errorPredicate,
+    //    public Seq<T, E> onErrorContinue(final Throwables.Predicate<? super Throwable, ? extends E> errorPredicate,
     //            final Throwables.Consumer<? super Throwable, ? extends E> errorConsumer) {
     //        assertNotClosed();
     //
-    //        return newStream(new CheckedIterator<T, E>() {
-    //            private final CheckedIterator<T, E> iter = iteratorEx();
+    //        return newStream(new Throwables.Iterator<T, E>() {
+    //            private final Throwables.Iterator<T, E> iter = iteratorEx();
     //            private final T none = (T) NONE;
     //            private T next = none;
     //            private T ret = null;
     //
-    //            @Override
-    //            public boolean hasNext() throws E {
+    //                //            public boolean hasNext() throws E {
     //                if (next == none) {
     //                    while (true) {
     //                        try {
@@ -7891,8 +8124,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     //                return next != none;
     //            }
     //
-    //            @Override
-    //            public T next() throws E {
+    //                //            public T next() throws E {
     //                if (!hasNext()) {
     //                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
     //                }
@@ -7915,20 +8147,19 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     //     */
     //    @Beta
     //    @IntermediateOp
-    //    public CheckedStream<T, E> onErrorContinue(final Throwables.Predicate<? super Throwable, ? extends E> errorPredicate,
+    //    public Seq<T, E> onErrorContinue(final Throwables.Predicate<? super Throwable, ? extends E> errorPredicate,
     //            final Throwables.Consumer<? super Throwable, ? extends E> errorConsumer, final int maxErrorCountToStop) {
     //        assertNotClosed();
     //        checkArgNotNegative(maxErrorCountToStop, "maxErrorCountToStop");
     //
-    //        return newStream(new CheckedIterator<T, E>() {
+    //        return newStream(new Throwables.Iterator<T, E>() {
     //            private final AtomicInteger errorCounter = new AtomicInteger(maxErrorCountToStop);
-    //            private final CheckedIterator<T, E> iter = iteratorEx();
+    //            private final Throwables.Iterator<T, E> iter = iteratorEx();
     //            private final T none = (T) NONE;
     //            private T next = none;
     //            private T ret = null;
     //
-    //            @Override
-    //            public boolean hasNext() throws E {
+    //                //            public boolean hasNext() throws E {
     //                if (next == none) {
     //                    while (true) {
     //                        try {
@@ -7956,8 +8187,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     //                return next != none;
     //            }
     //
-    //            @Override
-    //            public T next() throws E {
+    //                //            public T next() throws E {
     //                if (!hasNext()) {
     //                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
     //                }
@@ -7978,17 +8208,16 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     //     */
     //    @Beta
     //    @IntermediateOp
-    //    public CheckedStream<T, E> onErrorReturn(final T fallbackValue) {
+    //    public Seq<T, E> onErrorReturn(final T fallbackValue) {
     //        assertNotClosed();
     //
-    //        return newStream(new CheckedIterator<T, E>() {
-    //            private final CheckedIterator<T, E> iter = iteratorEx();
+    //        return newStream(new Throwables.Iterator<T, E>() {
+    //            private final Throwables.Iterator<T, E> iter = iteratorEx();
     //            private final T none = (T) NONE;
     //            private T next = none;
     //            private T ret = null;
     //
-    //            @Override
-    //            public boolean hasNext() {
+    //                //            public boolean hasNext() {
     //                if (next == none) {
     //                    try {
     //                        if (iter.hasNext()) {
@@ -8004,8 +8233,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     //                return next != none;
     //            }
     //
-    //            @Override
-    //            public T next() {
+    //                //            public T next() {
     //                if (!hasNext()) {
     //                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
     //                }
@@ -8027,17 +8255,16 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     //     */
     //    @Beta
     //    @IntermediateOp
-    //    public CheckedStream<T, E> onErrorReturn(final Class<? extends Throwable> type, final T fallbackValue) {
+    //    public Seq<T, E> onErrorReturn(final Class<? extends Throwable> type, final T fallbackValue) {
     //        assertNotClosed();
     //
-    //        return newStream(new CheckedIterator<T, E>() {
-    //            private final CheckedIterator<T, E> iter = iteratorEx();
+    //        return newStream(new Throwables.Iterator<T, E>() {
+    //            private final Throwables.Iterator<T, E> iter = iteratorEx();
     //            private final T none = (T) NONE;
     //            private T next = none;
     //            private T ret = null;
     //
-    //            @Override
-    //            public boolean hasNext() throws E {
+    //                //            public boolean hasNext() throws E {
     //                if (next == none) {
     //                    try {
     //                        if (iter.hasNext()) {
@@ -8057,8 +8284,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     //                return next != none;
     //            }
     //
-    //            @Override
-    //            public T next() throws E {
+    //                //            public T next() throws E {
     //                if (!hasNext()) {
     //                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
     //                }
@@ -8080,17 +8306,16 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     //     */
     //    @Beta
     //    @IntermediateOp
-    //    public CheckedStream<T, E> onErrorReturn(final Throwables.Predicate<? super Throwable, ? extends E> predicate, final T fallbackValue) {
+    //    public Seq<T, E> onErrorReturn(final Throwables.Predicate<? super Throwable, ? extends E> predicate, final T fallbackValue) {
     //        assertNotClosed();
     //
-    //        return newStream(new CheckedIterator<T, E>() {
-    //            private final CheckedIterator<T, E> iter = iteratorEx();
+    //        return newStream(new Throwables.Iterator<T, E>() {
+    //            private final Throwables.Iterator<T, E> iter = iteratorEx();
     //            private final T none = (T) NONE;
     //            private T next = none;
     //            private T ret = null;
     //
-    //            @Override
-    //            public boolean hasNext() throws E {
+    //                //            public boolean hasNext() throws E {
     //                if (next == none) {
     //                    try {
     //                        if (iter.hasNext()) {
@@ -8110,8 +8335,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     //                return next != none;
     //            }
     //
-    //            @Override
-    //            public T next() throws E {
+    //                //            public T next() throws E {
     //                if (!hasNext()) {
     //                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
     //                }
@@ -8133,18 +8357,17 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     //     */
     //    @Beta
     //    @IntermediateOp
-    //    public CheckedStream<T, E> onErrorReturn(final Throwables.Predicate<? super Throwable, ? extends E> predicate,
+    //    public Seq<T, E> onErrorReturn(final Throwables.Predicate<? super Throwable, ? extends E> predicate,
     //            final Throwables.Supplier<? extends T, ? extends E> supplierForFallbackValue) {
     //        assertNotClosed();
     //
-    //        return newStream(new CheckedIterator<T, E>() {
-    //            private final CheckedIterator<T, E> iter = iteratorEx();
+    //        return newStream(new Throwables.Iterator<T, E>() {
+    //            private final Throwables.Iterator<T, E> iter = iteratorEx();
     //            private final T none = (T) NONE;
     //            private T next = none;
     //            private T ret = null;
     //
-    //            @Override
-    //            public boolean hasNext() throws E {
+    //                //            public boolean hasNext() throws E {
     //                if (next == none) {
     //                    try {
     //                        if (iter.hasNext()) {
@@ -8164,8 +8387,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     //                return next != none;
     //            }
     //
-    //            @Override
-    //            public T next() throws E {
+    //                //            public T next() throws E {
     //                if (!hasNext()) {
     //                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
     //                }
@@ -8188,20 +8410,19 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     //     */
     //    @Beta
     //    @IntermediateOp
-    //    public CheckedStream<T, E> onErrorReturn(final Throwables.Predicate<? super Throwable, ? extends E> predicate,
+    //    public Seq<T, E> onErrorReturn(final Throwables.Predicate<? super Throwable, ? extends E> predicate,
     //            final Throwables.Function<? super Throwable, ? extends T, ? extends E> mapperForFallbackValue, final int maxErrorCountToStop) {
     //        assertNotClosed();
     //        checkArgNotNegative(maxErrorCountToStop, "maxErrorCountToStop");
     //
-    //        return newStream(new CheckedIterator<T, E>() {
+    //        return newStream(new Throwables.Iterator<T, E>() {
     //            private final AtomicInteger errorCounter = new AtomicInteger(maxErrorCountToStop);
-    //            private final CheckedIterator<T, E> iter = iteratorEx();
+    //            private final Throwables.Iterator<T, E> iter = iteratorEx();
     //            private final T none = (T) NONE;
     //            private T next = none;
     //            private T ret = null;
     //
-    //            @Override
-    //            public boolean hasNext() throws E {
+    //                //            public boolean hasNext() throws E {
     //                if (next == none) {
     //                    try {
     //                        if (iter.hasNext()) {
@@ -8225,8 +8446,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     //                return next != none;
     //            }
     //
-    //            @Override
-    //            public T next() throws E {
+    //                //            public T next() throws E {
     //                if (!hasNext()) {
     //                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
     //                }
@@ -8240,17 +8460,16 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     //
     //    @Beta
     //    @IntermediateOp
-    //    public CheckedStream<T, E> onErrorStop() {
+    //    public Seq<T, E> onErrorStop() {
     //        assertNotClosed();
     //
-    //        return newStream(new CheckedIterator<T, E>() {
-    //            private final CheckedIterator<T, E> iter = iteratorEx();
+    //        return newStream(new Throwables.Iterator<T, E>() {
+    //            private final Throwables.Iterator<T, E> iter = iteratorEx();
     //            private final T none = (T) NONE;
     //            private T next = none;
     //            private T ret = null;
     //
-    //            @Override
-    //            public boolean hasNext() {
+    //                //            public boolean hasNext() {
     //                if (next == none) {
     //                    try {
     //                        if (iter.hasNext()) {
@@ -8264,8 +8483,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     //                return next != none;
     //            }
     //
-    //            @Override
-    //            public T next() {
+    //                //            public T next() {
     //                if (!hasNext()) {
     //                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
     //                }
@@ -9395,7 +9613,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                 result = Optional.of(elements.next());
 
                 if (elements.hasNext()) {
-                    throw new TooManyElementsException("There are at least two elements: " + StringUtil.concat(result.get(), ", ", elements.next()));
+                    throw new TooManyElementsException("There are at least two elements: " + Strings.concat(result.get(), ", ", elements.next()));
                 }
             }
 
@@ -9420,24 +9638,6 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             close();
         }
     }
-
-    // It won't work for findFirst/only/anyMatch...
-    //    public <R> Pair<Long, R> countAnd(final Throwables.Function<? super CheckedStream<T, E>, R, E> terminalAction) throws E {
-    //        checkArgNotNull(terminalAction, "terminalAction");
-    //
-    //        final MutableLong count = MutableLong.of(0);
-    //
-    //        final Throwables.Consumer<? super T, E> action = new Throwables.Consumer<T, E>() {
-    //            @Override
-    //            public void accept(T t) {
-    //                count.incrementAndGet();
-    //            }
-    //        };
-    //
-    //        final R r = terminalAction.apply(this.onEach(action));
-    //
-    //        return Pair.of(count.value(), r);
-    //    }
 
     /**
      *
@@ -9854,16 +10054,6 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             return result;
         } finally {
             close();
-        }
-    }
-
-    static <K, V, E extends Exception> void merge(Map<K, V> map, K key, V value, Throwables.BinaryOperator<V, E> remappingFunction) throws E {
-        final V oldValue = map.get(key);
-
-        if (oldValue == null && !map.containsKey(key)) {
-            map.put(key, value);
-        } else {
-            map.put(key, remappingFunction.apply(oldValue, value));
         }
     }
 
@@ -10860,7 +11050,6 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
     /**
      *
-     *
      * @param delimiter
      * @return
      * @throws E
@@ -10900,20 +11089,6 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      *
      *
      * @param joiner
-     * @return
-     * @throws E
-     * @deprecated replaced by {@code joinTo(Joiner)}
-     */
-    @Deprecated
-    @TerminalOp
-    public String join(final Joiner joiner) throws E {
-        return joinTo(joiner).toString();
-    }
-
-    /**
-     *
-     *
-     * @param joiner
      * @return the input {@code joiner}
      * @throws E
      */
@@ -10930,6 +11105,28 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             }
 
             return joiner;
+        } finally {
+            close();
+        }
+    }
+
+    /**
+     *
+     *
+     * @return
+     * @throws E
+     */
+    public Optional<Map<Percentage, T>> percentiles() throws E {
+        assertNotClosed();
+
+        try {
+            final Object[] a = sorted().toArray();
+
+            if (N.isEmpty(a)) {
+                return Optional.empty();
+            }
+
+            return Optional.of((Map<Percentage, T>) N.percentiles(a));
         } finally {
             close();
         }
@@ -10961,18 +11158,16 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     public CheckedStream<T, E> saveEach(final Throwables.Function<? super T, String, E> toLine, final File output) {
         assertNotClosed();
 
-        final CheckedIterator<T, E> iter = new CheckedIterator<>() {
-            private final CheckedIterator<T, E> iter = iteratorEx();
+        final Throwables.Iterator<T, E> iter = new Throwables.Iterator<>() {
+            private final Throwables.Iterator<T, E> iter = iteratorEx();
             private Writer writer = null;
             private BufferedWriter bw = null;
             private boolean initialized = false;
 
-            @Override
             public boolean hasNext() throws E {
                 return iter.hasNext();
             }
 
-            @Override
             public T next() throws E {
                 final T next = iter.next();
 
@@ -10990,8 +11185,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                 return next;
             }
 
-            @Override
-            public void close() throws E {
+            public void close() {
                 if (writer != null) {
                     try {
                         Objectory.recycle(bw);
@@ -11009,7 +11203,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             }
         };
 
-        return newStream(iter, sorted, cmp, mergeCloseHandlers(closeHandlers, iter::close, true)); //NOSONAR
+        return newStream(iter, sorted, cmp, mergeCloseHandlers(iter::close, closeHandlers, true)); //NOSONAR
     }
 
     /**
@@ -11025,17 +11219,15 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     public CheckedStream<T, E> saveEach(final Throwables.Function<? super T, String, E> toLine, final OutputStream output) {
         assertNotClosed();
 
-        final CheckedIterator<T, E> iter = new CheckedIterator<>() {
-            private final CheckedIterator<T, E> iter = iteratorEx();
+        final Throwables.Iterator<T, E> iter = new Throwables.Iterator<>() {
+            private final Throwables.Iterator<T, E> iter = iteratorEx();
             private BufferedWriter bw = null;
             private boolean initialized = false;
 
-            @Override
             public boolean hasNext() throws E {
                 return iter.hasNext();
             }
 
-            @Override
             public T next() throws E {
                 final T next = iter.next();
 
@@ -11053,7 +11245,6 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                 return next;
             }
 
-            @Override
             public void close() {
                 Objectory.recycle(bw);
             }
@@ -11065,7 +11256,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             }
         };
 
-        return newStream(iter, sorted, cmp, mergeCloseHandlers(closeHandlers, iter::close, true)); //NOSONAR
+        return newStream(iter, sorted, cmp, mergeCloseHandlers(iter::close, closeHandlers, true)); //NOSONAR
     }
 
     /**
@@ -11081,18 +11272,16 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     public CheckedStream<T, E> saveEach(final Throwables.Function<? super T, String, E> toLine, Writer output) {
         assertNotClosed();
 
-        final CheckedIterator<T, E> iter = new CheckedIterator<>() {
-            private final CheckedIterator<T, E> iter = iteratorEx();
+        final Throwables.Iterator<T, E> iter = new Throwables.Iterator<>() {
+            private final Throwables.Iterator<T, E> iter = iteratorEx();
             private Writer bw = null;
             private boolean isBufferedWriter = false;
             private boolean initialized = false;
 
-            @Override
             public boolean hasNext() throws E {
                 return iter.hasNext();
             }
 
-            @Override
             public T next() throws E {
                 final T next = iter.next();
 
@@ -11110,7 +11299,6 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                 return next;
             }
 
-            @Override
             public void close() {
                 if (isBufferedWriter == false && bw != null) {
                     Objectory.recycle((BufferedWriter) bw);
@@ -11125,7 +11313,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             }
         };
 
-        return newStream(iter, sorted, cmp, mergeCloseHandlers(closeHandlers, iter::close, true)); //NOSONAR
+        return newStream(iter, sorted, cmp, mergeCloseHandlers(iter::close, closeHandlers, true)); //NOSONAR
     }
 
     /**
@@ -11141,18 +11329,16 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     public CheckedStream<T, E> saveEach(final Throwables.BiConsumer<? super T, Writer, IOException> writeLine, final File output) {
         assertNotClosed();
 
-        final CheckedIterator<T, E> iter = new CheckedIterator<>() {
-            private final CheckedIterator<T, E> iter = iteratorEx();
+        final Throwables.Iterator<T, E> iter = new Throwables.Iterator<>() {
+            private final Throwables.Iterator<T, E> iter = iteratorEx();
             private Writer writer = null;
             private BufferedWriter bw = null;
             private boolean initialized = false;
 
-            @Override
             public boolean hasNext() throws E {
                 return iter.hasNext();
             }
 
-            @Override
             public T next() throws E {
                 final T next = iter.next();
 
@@ -11170,7 +11356,6 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                 return next;
             }
 
-            @Override
             public void close() {
                 if (writer != null) {
                     try {
@@ -11189,7 +11374,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             }
         };
 
-        return newStream(iter, sorted, cmp, mergeCloseHandlers(closeHandlers, iter::close, true)); //NOSONAR
+        return newStream(iter, sorted, cmp, mergeCloseHandlers(iter::close, closeHandlers, true)); //NOSONAR
     }
 
     /**
@@ -11205,18 +11390,16 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     public CheckedStream<T, E> saveEach(final Throwables.BiConsumer<? super T, Writer, IOException> writeLine, final Writer output) {
         assertNotClosed();
 
-        final CheckedIterator<T, E> iter = new CheckedIterator<>() {
-            private final CheckedIterator<T, E> iter = iteratorEx();
+        final Throwables.Iterator<T, E> iter = new Throwables.Iterator<>() {
+            private final Throwables.Iterator<T, E> iter = iteratorEx();
             private Writer bw = null;
             private boolean isBufferedWriter = false;
             private boolean initialized = false;
 
-            @Override
             public boolean hasNext() throws E {
                 return iter.hasNext();
             }
 
-            @Override
             public T next() throws E {
                 final T next = iter.next();
 
@@ -11234,7 +11417,6 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                 return next;
             }
 
-            @Override
             public void close() {
                 if (isBufferedWriter == false && bw != null) {
                     Objectory.recycle((BufferedWriter) bw);
@@ -11249,7 +11431,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             }
         };
 
-        return newStream(iter, sorted, cmp, mergeCloseHandlers(closeHandlers, iter::close, true)); //NOSONAR
+        return newStream(iter, sorted, cmp, mergeCloseHandlers(iter::close, closeHandlers, true)); //NOSONAR
     }
 
     /**
@@ -11267,15 +11449,13 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             final Throwables.BiConsumer<? super T, ? super PreparedStatement, SQLException> stmtSetter) {
         assertNotClosed();
 
-        final CheckedIterator<T, E> iter = new CheckedIterator<>() {
-            private final CheckedIterator<T, E> iter = iteratorEx();
+        final Throwables.Iterator<T, E> iter = new Throwables.Iterator<>() {
+            private final Throwables.Iterator<T, E> iter = iteratorEx();
 
-            @Override
             public boolean hasNext() throws E {
                 return iter.hasNext();
             }
 
-            @Override
             public T next() throws E {
                 final T next = iter.next();
 
@@ -11291,7 +11471,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
         };
 
-        return newStream(iter, sorted, cmp, mergeCloseHandlers(closeHandlers, iter::close, true)); //NOSONAR
+        return newStream(iter, sorted, cmp, mergeCloseHandlers(iter::close, closeHandlers, true)); //NOSONAR
     }
 
     /**
@@ -11310,17 +11490,15 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             final Throwables.BiConsumer<? super T, ? super PreparedStatement, SQLException> stmtSetter) {
         assertNotClosed();
 
-        final CheckedIterator<T, E> iter = new CheckedIterator<>() {
-            private final CheckedIterator<T, E> iter = iteratorEx();
+        final Throwables.Iterator<T, E> iter = new Throwables.Iterator<>() {
+            private final Throwables.Iterator<T, E> iter = iteratorEx();
             private PreparedStatement stmt = null;
             private boolean initialized = false;
 
-            @Override
             public boolean hasNext() throws E {
                 return iter.hasNext();
             }
 
-            @Override
             public T next() throws E {
                 final T next = iter.next();
 
@@ -11338,7 +11516,6 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                 return next;
             }
 
-            @Override
             public void close() {
                 if (stmt != null) {
                     DataSourceUtil.closeQuietly(stmt);
@@ -11356,7 +11533,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             }
         };
 
-        return newStream(iter, sorted, cmp, mergeCloseHandlers(closeHandlers, iter::close, true)); //NOSONAR
+        return newStream(iter, sorted, cmp, mergeCloseHandlers(iter::close, closeHandlers, true)); //NOSONAR
     }
 
     /**
@@ -11377,18 +11554,16 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             final Throwables.BiConsumer<? super T, ? super PreparedStatement, SQLException> stmtSetter) {
         assertNotClosed();
 
-        final CheckedIterator<T, E> iter = new CheckedIterator<>() {
-            private final CheckedIterator<T, E> iter = iteratorEx();
+        final Throwables.Iterator<T, E> iter = new Throwables.Iterator<>() {
+            private final Throwables.Iterator<T, E> iter = iteratorEx();
             private Connection conn = null;
             private PreparedStatement stmt = null;
             private boolean initialized = false;
 
-            @Override
             public boolean hasNext() throws E {
                 return iter.hasNext();
             }
 
-            @Override
             public T next() throws E {
                 final T next = iter.next();
 
@@ -11406,7 +11581,6 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                 return next;
             }
 
-            @Override
             public void close() {
                 try {
                     if (stmt != null) {
@@ -11437,7 +11611,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             }
         };
 
-        return newStream(iter, sorted, cmp, mergeCloseHandlers(closeHandlers, iter::close, true)); //NOSONAR
+        return newStream(iter, sorted, cmp, mergeCloseHandlers(iter::close, closeHandlers, true)); //NOSONAR
     }
 
     /**
@@ -11581,7 +11755,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
         try {
             boolean isBufferedWriter = IOUtil.isBufferedWriter(output);
             final Writer bw = isBufferedWriter ? output : Objectory.createBufferedWriter(output); //NOSONAR
-            final CheckedIterator<T, E> iter = iteratorEx();
+            final Throwables.Iterator<T, E> iter = iteratorEx();
             long cnt = 0;
 
             try {
@@ -11690,7 +11864,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
         try {
             boolean isBufferedWriter = IOUtil.isBufferedWriter(output);
             final Writer bw = isBufferedWriter ? output : Objectory.createBufferedWriter(output); //NOSONAR
-            final CheckedIterator<T, E> iter = iteratorEx();
+            final Throwables.Iterator<T, E> iter = iteratorEx();
             long cnt = 0;
 
             try {
@@ -11743,7 +11917,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                 batchSize, batchIntervalInMillis);
 
         try {
-            final CheckedIterator<T, E> iter = iteratorEx();
+            final Throwables.Iterator<T, E> iter = iteratorEx();
             long cnt = 0;
             while (iter.hasNext()) {
                 stmtSetter.accept(iter.next(), stmt);
@@ -11844,7 +12018,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
         WRITE_CSV_ELEMENT_WITH_TYPE = (type, element, bw) -> {
             if (element == null) {
-                bw.write(Strings.NULL_CHAR_ARRAY);
+                bw.write(NULL_CHAR_ARRAY);
             } else {
                 if (type.isSerializable()) {
                     type.writeCharacter(bw, element, config);
@@ -11856,7 +12030,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
         WRITE_CSV_ELEMENT = (element, bw) -> {
             if (element == null) {
-                bw.write(Strings.NULL_CHAR_ARRAY);
+                bw.write(NULL_CHAR_ARRAY);
             } else {
                 WRITE_CSV_ELEMENT_WITH_TYPE.accept(N.typeOf(element.getClass()), element, bw);
             }
@@ -11969,7 +12143,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             final boolean isBufferedWriter = output instanceof BufferedJSONWriter;
             final BufferedJSONWriter bw = isBufferedWriter ? (BufferedJSONWriter) output : Objectory.createBufferedJSONWriter(output);
 
-            final CheckedIterator<T, E> iter = iteratorEx();
+            final Throwables.Iterator<T, E> iter = iteratorEx();
             long cnt = 0;
             T next = null;
             Class<?> cls = null;
@@ -11987,7 +12161,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
                         for (int i = 0; i < headerSize; i++) {
                             if (i > 0) {
-                                bw.write(Strings.ELEMENT_SEPARATOR_CHAR_ARRAY);
+                                bw.write(ELEMENT_SEPARATOR_CHAR_ARRAY);
                             }
 
                             WRITE_CSV_STRING.accept(propInfoList.get(i).name, bw);
@@ -11999,7 +12173,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                             propInfo = propInfoList.get(i);
 
                             if (i > 0) {
-                                bw.write(Strings.ELEMENT_SEPARATOR_CHAR_ARRAY);
+                                bw.write(ELEMENT_SEPARATOR_CHAR_ARRAY);
                             }
 
                             WRITE_CSV_ELEMENT_WITH_TYPE.accept(propInfo.jsonXmlType, propInfo.getPropValue(next), bw);
@@ -12015,7 +12189,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                                 propInfo = propInfoList.get(i);
 
                                 if (i > 0) {
-                                    bw.write(Strings.ELEMENT_SEPARATOR_CHAR_ARRAY);
+                                    bw.write(ELEMENT_SEPARATOR_CHAR_ARRAY);
                                 }
 
                                 WRITE_CSV_ELEMENT_WITH_TYPE.accept(propInfo.jsonXmlType, propInfo.getPropValue(next), bw);
@@ -12028,7 +12202,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
                         for (int i = 0; i < headerSize; i++) {
                             if (i > 0) {
-                                bw.write(Strings.ELEMENT_SEPARATOR_CHAR_ARRAY);
+                                bw.write(ELEMENT_SEPARATOR_CHAR_ARRAY);
                             }
 
                             WRITE_CSV_ELEMENT.accept(keys.get(i), bw);
@@ -12038,7 +12212,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
                         for (int i = 0; i < headerSize; i++) {
                             if (i > 0) {
-                                bw.write(Strings.ELEMENT_SEPARATOR_CHAR_ARRAY);
+                                bw.write(ELEMENT_SEPARATOR_CHAR_ARRAY);
                             }
 
                             WRITE_CSV_ELEMENT.accept(row.get(keys.get(i)), bw);
@@ -12052,7 +12226,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
                             for (int i = 0; i < headerSize; i++) {
                                 if (i > 0) {
-                                    bw.write(Strings.ELEMENT_SEPARATOR_CHAR_ARRAY);
+                                    bw.write(ELEMENT_SEPARATOR_CHAR_ARRAY);
                                 }
 
                                 WRITE_CSV_ELEMENT.accept(row.get(keys.get(i)), bw);
@@ -12095,7 +12269,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             final BufferedJSONWriter bw = isBufferedWriter ? (BufferedJSONWriter) output : Objectory.createBufferedJSONWriter(output);
 
             final int headSize = headers.size();
-            final CheckedIterator<T, E> iter = iteratorEx();
+            final Throwables.Iterator<T, E> iter = iteratorEx();
             long cnt = 0;
             T next = null;
             Class<?> cls = null;
@@ -12117,7 +12291,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
                         for (int i = 0; i < headSize; i++) {
                             if (i > 0) {
-                                bw.write(Strings.ELEMENT_SEPARATOR_CHAR_ARRAY);
+                                bw.write(ELEMENT_SEPARATOR_CHAR_ARRAY);
                             }
 
                             WRITE_CSV_STRING.accept(headers.get(i), bw);
@@ -12129,7 +12303,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                             propInfo = propInfos[i];
 
                             if (i > 0) {
-                                bw.write(Strings.ELEMENT_SEPARATOR_CHAR_ARRAY);
+                                bw.write(ELEMENT_SEPARATOR_CHAR_ARRAY);
                             }
 
                             WRITE_CSV_ELEMENT_WITH_TYPE.accept(propInfo.jsonXmlType, propInfo.getPropValue(next), bw);
@@ -12145,7 +12319,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                                 propInfo = propInfos[i];
 
                                 if (i > 0) {
-                                    bw.write(Strings.ELEMENT_SEPARATOR_CHAR_ARRAY);
+                                    bw.write(ELEMENT_SEPARATOR_CHAR_ARRAY);
                                 }
 
                                 WRITE_CSV_ELEMENT_WITH_TYPE.accept(propInfo.jsonXmlType, propInfo.getPropValue(next), bw);
@@ -12156,7 +12330,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
                         for (int i = 0; i < headSize; i++) {
                             if (i > 0) {
-                                bw.write(Strings.ELEMENT_SEPARATOR_CHAR_ARRAY);
+                                bw.write(ELEMENT_SEPARATOR_CHAR_ARRAY);
                             }
 
                             WRITE_CSV_STRING.accept(headers.get(i), bw);
@@ -12166,7 +12340,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
                         for (int i = 0; i < headSize; i++) {
                             if (i > 0) {
-                                bw.write(Strings.ELEMENT_SEPARATOR_CHAR_ARRAY);
+                                bw.write(ELEMENT_SEPARATOR_CHAR_ARRAY);
                             }
 
                             WRITE_CSV_ELEMENT.accept(row.get(headers.get(i)), bw);
@@ -12180,7 +12354,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
                             for (int i = 0; i < headSize; i++) {
                                 if (i > 0) {
-                                    bw.write(Strings.ELEMENT_SEPARATOR_CHAR_ARRAY);
+                                    bw.write(ELEMENT_SEPARATOR_CHAR_ARRAY);
                                 }
 
                                 WRITE_CSV_ELEMENT.accept(row.get(headers.get(i)), bw);
@@ -12191,7 +12365,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
                         for (int i = 0; i < headSize; i++) {
                             if (i > 0) {
-                                bw.write(Strings.ELEMENT_SEPARATOR_CHAR_ARRAY);
+                                bw.write(ELEMENT_SEPARATOR_CHAR_ARRAY);
                             }
 
                             WRITE_CSV_STRING.accept(headers.get(i), bw);
@@ -12203,7 +12377,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
                         for (int i = 0; i < headSize; i++) {
                             if (i > 0) {
-                                bw.write(Strings.ELEMENT_SEPARATOR_CHAR_ARRAY);
+                                bw.write(ELEMENT_SEPARATOR_CHAR_ARRAY);
                             }
 
                             WRITE_CSV_ELEMENT.accept(rowIter.next(), bw);
@@ -12218,7 +12392,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
                             for (int i = 0; i < headSize; i++) {
                                 if (i > 0) {
-                                    bw.write(Strings.ELEMENT_SEPARATOR_CHAR_ARRAY);
+                                    bw.write(ELEMENT_SEPARATOR_CHAR_ARRAY);
                                 }
 
                                 WRITE_CSV_ELEMENT.accept(rowIter.next(), bw);
@@ -12229,7 +12403,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
                         for (int i = 0; i < headSize; i++) {
                             if (i > 0) {
-                                bw.write(Strings.ELEMENT_SEPARATOR_CHAR_ARRAY);
+                                bw.write(ELEMENT_SEPARATOR_CHAR_ARRAY);
                             }
 
                             WRITE_CSV_STRING.accept(headers.get(i), bw);
@@ -12239,7 +12413,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
                         for (int i = 0; i < headSize; i++) {
                             if (i > 0) {
-                                bw.write(Strings.ELEMENT_SEPARATOR_CHAR_ARRAY);
+                                bw.write(ELEMENT_SEPARATOR_CHAR_ARRAY);
                             }
 
                             WRITE_CSV_ELEMENT.accept(row[i], bw);
@@ -12253,7 +12427,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
                             for (int i = 0; i < headSize; i++) {
                                 if (i > 0) {
-                                    bw.write(Strings.ELEMENT_SEPARATOR_CHAR_ARRAY);
+                                    bw.write(ELEMENT_SEPARATOR_CHAR_ARRAY);
                                 }
 
                                 WRITE_CSV_ELEMENT.accept(row[i], bw);
@@ -12331,7 +12505,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             final boolean isBufferedWriter = output instanceof BufferedJSONWriter;
             final BufferedJSONWriter bw = isBufferedWriter ? (BufferedJSONWriter) output : Objectory.createBufferedJSONWriter(output); // NOSONAR
 
-            final CheckedIterator<T, E> iter = iteratorEx();
+            final Throwables.Iterator<T, E> iter = iteratorEx();
             long cnt = 0;
 
             try {
@@ -12376,6 +12550,19 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      *
      * @return
      */
+    @Beta
+    @IntermediateOp
+    public CheckedStream<T, Exception> cast() {
+        assertNotClosed();
+
+        return (CheckedStream<T, Exception>) this;
+    }
+
+    /**
+     *
+     *
+     * @return
+     */
     @IntermediateOp
     public Stream<T> unchecked() {
         assertNotClosed();
@@ -12383,7 +12570,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
         if (N.isEmpty(this.closeHandlers)) {
             return Stream.of(newObjIteratorEx(elements));
         } else {
-            return Stream.of(newObjIteratorEx(elements)).onClose(CheckedStream.this::close);
+            return Stream.of(newObjIteratorEx(elements)).onClose(this::close);
         }
     }
 
@@ -12401,127 +12588,8 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
         if (isEmptyCloseHandlers(closeHandlers)) {
             return StreamSupport.stream(spliterator, false);
         } else {
-            return StreamSupport.stream(spliterator, false).onClose(CheckedStream.this::close);
+            return StreamSupport.stream(spliterator, false).onClose(this::close);
         }
-    }
-
-    //    public <E2 extends Exception> CheckedStream<T, E2> __(final Class<E2> targetExceptionType) {
-    //        checkArgNotNull(targetExceptionType, "targetExceptionType");
-    //
-    //        final Constructor<E2> msgCauseConstructor = ClassUtil.getDeclaredConstructor(targetExceptionType, String.class, Throwable.class);
-    //        final Constructor<E2> causeOnlyConstructor = ClassUtil.getDeclaredConstructor(targetExceptionType, Throwable.class);
-    //
-    //        checkArgument(msgCauseConstructor != null || causeOnlyConstructor != null,
-    //                "No constructor found with parameters: (String.class, Throwable.class), or (Throwable.class)");
-    //
-    //        final Function<Exception, E2> convertE = msgCauseConstructor != null ? new Function<Exception, E2>() {
-    //            @Override
-    //            public E2 apply(Exception e) {
-    //                return ClassUtil.invokeConstructor(msgCauseConstructor, e.getMessage(), e);
-    //            }
-    //        } : new Function<Exception, E2>() {
-    //            @Override
-    //            public E2 apply(Exception e) {
-    //                return ClassUtil.invokeConstructor(causeOnlyConstructor, e);
-    //            }
-    //        };
-    //
-    //        Deque<Throwables.Runnable<E2>> newCloseHandlers = null;
-    //
-    //        if (closeHandlers != null) {
-    //            newCloseHandlers = new ArrayDeque<>(1);
-    //            newCloseHandlers.add(new Throwables.Runnable<E2>() {
-    //                @Override
-    //                public void run() throws E2 {
-    //                    try {
-    //                        close();
-    //                    } catch (Exception e) {
-    //                        throw convertE.apply(e);
-    //                    }
-    //                }
-    //            });
-    //        }
-    //
-    //        return newStream(new CheckedIterator<T, E2>() {
-    //            private CheckedIterator<T, E> iter = null;
-    //            private boolean initialized = false;
-    //
-    //            @Override
-    //            public boolean hasNext() throws E2 {
-    //                if (initialized == false) {
-    //                    init();
-    //                }
-    //
-    //                try {
-    //                    return iter.hasNext();
-    //                } catch (Exception e) {
-    //                    throw convertE.apply(e);
-    //                }
-    //            }
-    //
-    //            @Override
-    //            public T next() throws E2 {
-    //                if (initialized == false) {
-    //                    init();
-    //                }
-    //
-    //                try {
-    //                    return iter.next();
-    //                } catch (Exception e) {
-    //                    throw convertE.apply(e);
-    //                }
-    //            }
-    //
-    //                @Override
-    //                public void skip(long n) throws E2 {
-    //                    checkArgNotNegative(n, "n");
-    //
-    //                    if (initialized == false) {
-    //                        init();
-    //                    }
-    //
-    //                    try {
-    //                        iter.skip(n);
-    //                    } catch (Exception e) {
-    //                        throw convertE.apply(e);
-    //                    }
-    //                }
-    //
-    //            @Override
-    //            public long count() throws E2 {
-    //                if (initialized == false) {
-    //                    init();
-    //                }
-    //
-    //                try {
-    //                    return iter.count();
-    //                } catch (Exception e) {
-    //                    throw convertE.apply(e);
-    //                }
-    //            }
-    //
-    //            private void init() {
-    //                if (initialized == false) {
-    //                    initialized = true;
-    //
-    //                    iter = CheckedStream.this.elements;
-    //
-    //                }
-    //            }
-    //        }, sorted, comparator, newCloseHandlers);
-    //    }
-
-    /**
-     *
-     *
-     * @return
-     */
-    @Beta
-    @IntermediateOp
-    public CheckedStream<T, Exception> cast() {
-        assertNotClosed();
-
-        return (CheckedStream<T, Exception>) this;
     }
 
     /**
@@ -12539,11 +12607,28 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
         checkArgNotNull(transfer, "transfer");
 
-        return transfer.apply(this);
+        final Throwables.Supplier<CheckedStream<TT, EE>, EE> delayInitializer = () -> transfer.apply(this);
+
+        return defer(delayInitializer);
     }
 
     /**
      *
+     * @param <U>
+     * @param transfer
+     * @return
+     */
+    @Beta
+    @IntermediateOp
+    public <U> CheckedStream<U, E> transformB(final Function<? super Stream<T>, ? extends Stream<? extends U>> transfer) {
+        assertNotClosed();
+
+        final Throwables.Supplier<CheckedStream<U, E>, E> delayInitializer = () -> CheckedStream.from(transfer.apply(this.unchecked()));
+
+        return defer(delayInitializer);
+    }
+
+    /**
      *
      * @param <TT>
      * @param <EE>
@@ -12557,35 +12642,6 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     public <TT, EE extends Exception> CheckedStream<TT, EE> __(Function<? super CheckedStream<T, E>, CheckedStream<TT, EE>> transfer) { //NOSONAR
         return transform(transfer);
     }
-
-    //    /**
-    //     *
-    //     * @param <U>
-    //     * @param <R>
-    //     * @param terminalOp should be terminal operation.
-    //     * @param mapper
-    //     * @return
-    //     */
-    //    @TerminalOp
-    //    @Beta
-    //    public <U, R> R __(final Function<? super CheckedStream<T, E>, U> terminalOp, final Throwables.Function<U, ? extends R, E> mapper) throws E {
-    //        return mapper.apply(terminalOp.apply(this));
-    //    }
-    //
-    //    /**
-    //     *
-    //     * @param <R>
-    //     * @param terminalOp should be terminal operation.
-    //     * @param action
-    //     * @return
-    //     */
-    //    @TerminalOp
-    //    @Beta
-    //    public <R> R __(final Function<? super CheckedStream<T, E>, R> terminalOp, final Throwables.Consumer<R, E> action) throws E {
-    //        final R result = terminalOp.apply(this);
-    //        action.accept(result);
-    //        return result;
-    //    }
 
     /**
      * Temporarily switch the stream to parallel stream for operation {@code ops} and then switch back to sequence stream.
@@ -12606,7 +12662,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     public <R> CheckedStream<R, E> sps(final Function<? super Stream<T>, ? extends Stream<? extends R>> ops) {
         assertNotClosed();
 
-        return checked(((Stream<R>) ops.apply(this.unchecked().parallel())), true);
+        return newStream(((Stream<R>) ops.apply(this.unchecked().parallel())), true);
     }
 
     /**
@@ -12629,7 +12685,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     public <R> CheckedStream<R, E> sps(final int maxThreadNum, final Function<? super Stream<T>, ? extends Stream<? extends R>> ops) {
         assertNotClosed();
 
-        return checked(((Stream<R>) ops.apply(this.unchecked().parallel(maxThreadNum))), true);
+        return newStream(((Stream<R>) ops.apply(this.unchecked().parallel(maxThreadNum))), true);
     }
 
     //    /**
@@ -12642,7 +12698,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     //     */
     //    @Beta
     //    @IntermediateOp
-    //    public <R> CheckedStream<R, E> sps(final int maxThreadNum, final boolean withVirtualThread,
+    //    public <R> Seq<R, E> sps(final int maxThreadNum, final boolean withVirtualThread,
     //            final Function<? super Stream<T>, ? extends Stream<? extends R>> ops) {
     //        assertNotClosed();
     //
@@ -12659,7 +12715,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     //     */
     //    @Beta
     //    @IntermediateOp
-    //    public <R> CheckedStream<R, E> sps(final int maxThreadNum, final int executorNumForVirtualThread,
+    //    public <R> Seq<R, E> sps(final int maxThreadNum, final int executorNumForVirtualThread,
     //            final Function<? super Stream<T>, ? extends Stream<? extends R>> ops) {
     //        assertNotClosed();
     //
@@ -12898,7 +12954,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     @Beta
     @IntermediateOp
     public CheckedStream<T, Exception> spsFilterE(final Throwables.Predicate<? super T, ? extends Exception> predicate) {
-        return checked(unchecked().spsFilterE(predicate), true);
+        return newStream(unchecked().spsFilterE(predicate), true);
     }
 
     /**
@@ -12917,7 +12973,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     @Beta
     @IntermediateOp
     public <U> CheckedStream<U, Exception> spsMapE(final Throwables.Function<? super T, ? extends U, ? extends Exception> mapper) {
-        return checked(unchecked().<U> spsMapE(mapper), true);
+        return newStream(unchecked().<U> spsMapE(mapper), true);
     }
 
     /**
@@ -12937,7 +12993,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     @Beta
     @IntermediateOp
     public <R> CheckedStream<R, Exception> spsFlatMapE(final Throwables.Function<? super T, ? extends Stream<? extends R>, ? extends Exception> mapper) {
-        return checked(unchecked().<R> spsFlatMapE(mapper), true);
+        return newStream(unchecked().<R> spsFlatMapE(mapper), true);
     }
 
     /**
@@ -12958,7 +13014,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     @IntermediateOp
     public <R> CheckedStream<R, Exception> spsFlatmapE( //NOSONAR
             final Throwables.Function<? super T, ? extends Collection<? extends R>, ? extends Exception> mapper) {
-        return checked(unchecked().<R> spsFlatmapE(mapper), true);
+        return newStream(unchecked().<R> spsFlatmapE(mapper), true);
     }
 
     /**
@@ -12977,7 +13033,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     @Beta
     @IntermediateOp
     public CheckedStream<T, Exception> spsOnEachE(final Throwables.Consumer<? super T, ? extends Exception> action) {
-        return checked(unchecked().spsOnEachE(action), true);
+        return newStream(unchecked().spsOnEachE(action), true);
     }
 
     /**
@@ -12997,7 +13053,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     @Beta
     @IntermediateOp
     public CheckedStream<T, Exception> spsFilterE(final int maxThreadNum, final Throwables.Predicate<? super T, ? extends Exception> predicate) {
-        return checked(unchecked().spsFilterE(maxThreadNum, predicate), true);
+        return newStream(unchecked().spsFilterE(maxThreadNum, predicate), true);
     }
 
     /**
@@ -13017,7 +13073,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     @Beta
     @IntermediateOp
     public <U> CheckedStream<U, Exception> spsMapE(final int maxThreadNum, final Throwables.Function<? super T, ? extends U, ? extends Exception> mapper) {
-        return checked(unchecked().<U> spsMapE(maxThreadNum, mapper), true);
+        return newStream(unchecked().<U> spsMapE(maxThreadNum, mapper), true);
     }
 
     /**
@@ -13039,7 +13095,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     @IntermediateOp
     public <R> CheckedStream<R, Exception> spsFlatMapE(final int maxThreadNum, //NOSONAR
             final Throwables.Function<? super T, ? extends Stream<? extends R>, ? extends Exception> mapper) {
-        return checked(unchecked().<R> spsFlatMapE(maxThreadNum, mapper), true);
+        return newStream(unchecked().<R> spsFlatMapE(maxThreadNum, mapper), true);
     }
 
     /**
@@ -13061,7 +13117,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     @IntermediateOp
     public <R> CheckedStream<R, Exception> spsFlatmapE(final int maxThreadNum, //NOSONAR
             final Throwables.Function<? super T, ? extends Collection<? extends R>, ? extends Exception> mapper) {
-        return checked(unchecked().<R> spsFlatmapE(maxThreadNum, mapper), true);
+        return newStream(unchecked().<R> spsFlatmapE(maxThreadNum, mapper), true);
     }
 
     /**
@@ -13081,149 +13137,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     @Beta
     @IntermediateOp
     public CheckedStream<T, Exception> spsOnEachE(final int maxThreadNum, final Throwables.Consumer<? super T, ? extends Exception> action) {
-        return checked(unchecked().spsOnEachE(maxThreadNum, action), true);
-    }
-
-    static <T, E extends Exception> CheckedStream<T, E> checked(final Stream<? extends T> stream, final boolean isForSps) {
-        if (stream == null) {
-            return empty();
-        }
-
-        CheckedIterator<T, E> iter = null;
-
-        if (isForSps) {
-            iter = new CheckedIterator<>() {
-                private Stream<? extends T> s = stream;
-                private Iterator<? extends T> iter = null;
-                private boolean isInitialized = false;
-
-                @Override
-                public boolean hasNext() throws E {
-                    try {
-                        if (!isInitialized) {
-                            init();
-                        }
-
-                        return iter.hasNext();
-                    } catch (Exception e) {
-                        throw (E) ExceptionUtil.tryToGetOriginalCheckedException(e);
-                    }
-                }
-
-                @Override
-                public T next() throws E {
-                    try {
-                        if (!isInitialized) {
-                            init();
-                        }
-
-                        return iter.next();
-                    } catch (Exception e) {
-                        throw (E) ExceptionUtil.tryToGetOriginalCheckedException(e);
-                    }
-                }
-
-                @Override
-                public void advance(long n) throws E {
-                    try {
-                        if (iter == null) {
-                            s = s.skip(n);
-                        } else {
-                            super.advance(n);
-                        }
-                    } catch (Exception e) {
-                        throw (E) ExceptionUtil.tryToGetOriginalCheckedException(e);
-                    }
-                }
-
-                @Override
-                public long count() throws E {
-                    try {
-                        if (iter == null) {
-                            return s.count();
-                        } else {
-                            return super.count();
-                        }
-                    } catch (Exception e) {
-                        throw (E) ExceptionUtil.tryToGetOriginalCheckedException(e);
-                    }
-                }
-
-                @Override
-                public void close() throws E {
-                    try {
-                        s.close();
-                    } catch (Exception e) {
-                        throw (E) ExceptionUtil.tryToGetOriginalCheckedException(e);
-                    }
-                }
-
-                private void init() {
-                    if (!isInitialized) {
-                        isInitialized = true;
-                        iter = s.iterator();
-                    }
-                }
-            };
-        } else {
-            iter = new CheckedIterator<>() {
-                private Stream<? extends T> s = stream;
-                private Iterator<? extends T> iter = null;
-                private boolean isInitialized = false;
-
-                @Override
-                public boolean hasNext() throws E {
-                    if (!isInitialized) {
-                        init();
-                    }
-
-                    return iter.hasNext();
-                }
-
-                @Override
-                public T next() throws E {
-                    if (!isInitialized) {
-                        init();
-                    }
-
-                    return iter.next();
-                }
-
-                @Override
-                public void advance(long n) throws E {
-                    if (iter == null) {
-                        s = s.skip(n);
-                    } else {
-                        super.advance(n);
-                    }
-                }
-
-                @Override
-                public long count() throws E {
-                    if (iter == null) {
-                        return s.count();
-                    } else {
-                        return super.count();
-                    }
-                }
-
-                @Override
-                public void close() throws E {
-                    s.close();
-                }
-
-                private void init() {
-                    if (!isInitialized) {
-                        isInitialized = true;
-                        iter = stream.iterator();
-                    }
-                }
-            };
-        }
-
-        final CheckedIterator<T, E> tmp = iter;
-
-        return newStream(tmp).onClose(newCloseHandler(tmp));
+        return newStream(unchecked().spsOnEachE(maxThreadNum, action), true);
     }
 
     /**
@@ -13237,7 +13151,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     public CheckedStream<T, Exception> filterE(final Throwables.Predicate<? super T, ? extends Exception> predicate) {
         assertNotClosed();
 
-        return newStream(new CheckedIterator<T, Exception>() {
+        return newStream(new Throwables.Iterator<T, Exception>() {
             private boolean hasNext = false;
             private T next = null;
 
@@ -13282,7 +13196,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     public <U> CheckedStream<U, Exception> mapE(final Throwables.Function<? super T, ? extends U, ? extends Exception> mapper) {
         assertNotClosed();
 
-        return newStream(new CheckedIterator<U, Exception>() {
+        return newStream(new Throwables.Iterator<U, Exception>() {
             @Override
             public boolean hasNext() throws Exception {
                 return elements.hasNext();
@@ -13307,17 +13221,16 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             final Throwables.Function<? super T, ? extends CheckedStream<? extends R, ? extends Exception>, ? extends Exception> mapper) {
         assertNotClosed();
 
-        final CheckedIterator<R, Exception> iter = new CheckedIterator<>() {
-            private CheckedIterator<? extends R, ? extends Exception> cur = null;
+        final Throwables.Iterator<R, Exception> iter = new Throwables.Iterator<>() {
+            private Throwables.Iterator<? extends R, ? extends Exception> cur = null;
             private CheckedStream<? extends R, ? extends Exception> s = null;
-            private Deque<? extends Throwables.Runnable<? extends Exception>> closeHandle = null;
+            private Deque<LocalRunnable> closeHandle = null;
 
-            @Override
             public boolean hasNext() throws Exception {
                 while (cur == null || !cur.hasNext()) {
                     if (elements.hasNext()) {
                         if (closeHandle != null) {
-                            final Deque<? extends Throwables.Runnable<? extends Exception>> tmp = closeHandle;
+                            final Deque<LocalRunnable> tmp = closeHandle;
                             closeHandle = null;
                             CheckedStream.close(tmp);
                         }
@@ -13342,7 +13255,6 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                 return cur != null && cur.hasNext();
             }
 
-            @Override
             public R next() throws Exception {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
@@ -13351,15 +13263,14 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                 return cur.next();
             }
 
-            @Override
-            public void close() throws Exception {
+            public void close() {
                 if (closeHandle != null) {
                     CheckedStream.close(closeHandle);
                 }
             }
         };
 
-        final Deque<Throwables.Runnable<? extends Exception>> newCloseHandlers = new ArrayDeque<>(N.size(closeHandlers) + 1);
+        final Deque<LocalRunnable> newCloseHandlers = new ArrayDeque<>(N.size(closeHandlers) + 1);
 
         if (N.notEmpty(closeHandlers)) {
             newCloseHandlers.addAll(closeHandlers);
@@ -13382,7 +13293,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     public <R> CheckedStream<R, Exception> flatmapE(final Throwables.Function<? super T, ? extends Collection<? extends R>, ? extends Exception> mapper) { //NOSONAR
         assertNotClosed();
 
-        return newStream(new CheckedIterator<R, Exception>() {
+        return newStream(new Throwables.Iterator<R, Exception>() {
             private Iterator<? extends R> cur = null;
             private Collection<? extends R> c = null;
 
@@ -13418,7 +13329,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     public CheckedStream<T, Exception> onEachE(final Throwables.Consumer<? super T, ? extends Exception> action) {
         assertNotClosed();
 
-        return newStream(new CheckedIterator<T, Exception>() {
+        return newStream(new Throwables.Iterator<T, Exception>() {
             @Override
             public boolean hasNext() throws Exception {
                 return elements.hasNext();
@@ -14208,7 +14119,6 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             private volatile Map<K, List<U>> map = null; //NOSONAR
             private List<U> val = null;
 
-            @Override
             public R apply(T t) throws E {
                 if (!initialized) {
                     init();
@@ -14290,7 +14200,6 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             private volatile Map<K, List<U>> map = null; //NOSONAR
             private List<U> val = null;
 
-            @Override
             public R apply(T t) throws E {
                 if (!initialized) {
                     init();
@@ -14361,7 +14270,6 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             private volatile Map<K, U> map = null; //NOSONAR
             private U val = null;
 
-            @Override
             public R apply(T t) throws E {
                 if (!initialized) {
                     init();
@@ -14415,7 +14323,6 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             private volatile Map<K, U> map = null; //NOSONAR
             private U val = null;
 
-            @Override
             public R apply(T t) throws E {
                 if (!initialized) {
                     init();
@@ -14487,7 +14394,6 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             private volatile Map<K, D> map = null; //NOSONAR
             private D val = null;
 
-            @Override
             public R apply(T t) throws E {
                 if (!initialized) {
                     init();
@@ -14578,7 +14484,6 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             private volatile Map<K, D> map = null; //NOSONAR
             private D val = null;
 
-            @Override
             public R apply(T t) throws E {
                 if (!initialized) {
                     init();
@@ -14625,7 +14530,6 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             private final U none = (U) NONE;
             private U next = none;
 
-            @Override
             public Pair<T, List<U>> apply(T t) throws E {
                 final List<U> list = new ArrayList<>();
 
@@ -14702,7 +14606,6 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             private final U none = (U) NONE;
             private U next = none;
 
-            @Override
             public R apply(T t) throws E {
                 final Object container = supplier.get();
 
@@ -14771,7 +14674,6 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             private final Iterator<U> iter = b;
             private U next = none;
 
-            @Override
             public R apply(T t) throws E {
                 final Object container = supplier.get();
 
@@ -14809,7 +14711,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     /**
      *
      * @param <U>
-     * @param b should be ordered. It will be closed along with this {@code CheckedStream}
+     * @param b should be ordered. It will be closed along with this {@code Seq}
      * @param predicate
      * @return
      */
@@ -14828,7 +14730,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      *
      * @param <U>
      * @param <R>
-     * @param b should be ordered. It will be closed along with this {@code CheckedStream}
+     * @param b should be ordered. It will be closed along with this {@code Seq}
      * @param predicate
      * @param collector
      * @return
@@ -14845,7 +14747,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @param <U>
      * @param <D>
      * @param <R>
-     * @param b should be ordered. It will be closed along with this {@code CheckedStream}
+     * @param b should be ordered. It will be closed along with this {@code Seq}
      * @param predicate
      * @param collector
      * @param func
@@ -14870,7 +14772,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @param <U>
      * @param <D>
      * @param <R>
-     * @param b should be ordered. It will be closed along with this {@code CheckedStream}
+     * @param b should be ordered. It will be closed along with this {@code Seq}
      * @param predicate
      * @param collector
      * @param func
@@ -14899,7 +14801,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     /**
      *
      * @param <U>
-     * @param b should be ordered. It will be closed along with this {@code CheckedStream}
+     * @param b should be ordered. It will be closed along with this {@code Seq}
      * @param predicate
      * @return
      */
@@ -14909,15 +14811,14 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             final Throwables.BiPredicate<? super T, ? super U, ? extends E> predicate) {
         assertNotClosed();
 
-        checkArgNotNull(b, "CheckedStream 'b' can not be null");
+        checkArgNotNull(b, "Seq 'b' can not be null");
         checkArgNotNull(predicate, "'predicate' can not be null");
 
         final Throwables.Function<T, Pair<T, List<U>>, E> mapper = new Throwables.Function<>() {
-            private final CheckedIterator<U, ? extends E> iter = b.iteratorEx();
+            private final Throwables.Iterator<U, ? extends E> iter = b.iteratorEx();
             private final U none = (U) NONE;
             private U next = none;
 
-            @Override
             public Pair<T, List<U>> apply(T t) throws E {
                 final List<U> list = new ArrayList<>();
 
@@ -14951,7 +14852,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      *
      * @param <U>
      * @param <R>
-     * @param b should be ordered. It will be closed along with this {@code CheckedStream}
+     * @param b should be ordered. It will be closed along with this {@code Seq}
      * @param predicate
      * @param collector
      * @return
@@ -14968,7 +14869,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @param <U>
      * @param <D>
      * @param <R>
-     * @param b should be ordered. It will be closed along with this {@code CheckedStream}
+     * @param b should be ordered. It will be closed along with this {@code Seq}
      * @param predicate
      * @param collector
      * @param func
@@ -14981,7 +14882,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             final Throwables.BiFunction<? super T, ? super D, ? extends R, ? extends E> func) {
         assertNotClosed();
 
-        checkArgNotNull(b, "CheckedStream 'b' can not be null");
+        checkArgNotNull(b, "Seq 'b' can not be null");
         checkArgNotNull(predicate, "'predicate' can not be null");
         checkArgNotNull(collector, "'collector' can not be null");
         checkArgNotNull(func, "'func' can not be null");
@@ -14991,11 +14892,10 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
         final Function<Object, D> finisher = (Function<Object, D>) collector.finisher();
 
         final Throwables.Function<T, R, E> mapper = new Throwables.Function<>() {
-            private final CheckedIterator<U, ? extends E> iter = b.iteratorEx();
+            private final Throwables.Iterator<U, ? extends E> iter = b.iteratorEx();
             private final U none = (U) NONE;
             private U next = none;
 
-            @Override
             public R apply(T t) throws E {
                 final Object container = supplier.get();
 
@@ -15030,14 +14930,14 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @param <U>
      * @param <D>
      * @param <R>
-     * @param b should be ordered. It will be closed along with this {@code CheckedStream}
+     * @param b should be ordered. It will be closed along with this {@code Seq}
      * @param predicate
      * @param collector
      * @param func
      * @param mapperForUnJoinedEelements
      *       In a lot of scenarios, there could be an previous element which is took out from the specified {@code Iterator b} but not joined, you may need to consider including that element in this {@code mapperForUnJoinedEelements}.
      *       <br />
-     *       This input {@code CheckedIterator} comes from {@code b.iterator()}.
+     *       This input {@code Throwables.Iterator} comes from {@code b.iterator()}.
      * @return
      */
     @Beta
@@ -15045,10 +14945,10 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     public <U, D, R> CheckedStream<R, E> joinByRange(final CheckedStream<U, ? extends E> b,
             final Throwables.BiPredicate<? super T, ? super U, ? extends E> predicate, final Collector<? super U, ?, D> collector,
             final Throwables.BiFunction<? super T, ? super D, ? extends R, ? extends E> func,
-            final Throwables.Function<CheckedIterator<U, E>, CheckedStream<R, E>, ? extends E> mapperForUnJoinedEelements) {
+            final Throwables.Function<Throwables.Iterator<U, E>, CheckedStream<R, E>, ? extends E> mapperForUnJoinedEelements) {
         assertNotClosed();
 
-        checkArgNotNull(b, "CheckedStream 'b' can not be null");
+        checkArgNotNull(b, "Seq 'b' can not be null");
         checkArgNotNull(predicate, "'predicate' can not be null");
         checkArgNotNull(collector, "'collector' can not be null");
         checkArgNotNull(func, "'func' can not be null");
@@ -15059,12 +14959,11 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
         final Function<Object, D> finisher = (Function<Object, D>) collector.finisher();
         final U none = (U) NONE;
         final Holder<U> nextValueHolder = Holder.of(none);
-        final CheckedIterator<U, ? extends E> iter = b.iteratorEx();
+        final Throwables.Iterator<U, ? extends E> iter = b.iteratorEx();
 
         final Throwables.Function<T, R, E> mapper = new Throwables.Function<>() {
             private U next = none;
 
-            @Override
             public R apply(T t) throws E {
                 final Object container = supplier.get();
 
@@ -15094,7 +14993,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
         };
 
         final Throwables.Supplier<CheckedStream<R, E>, E> tmp = () -> nextValueHolder.value() == none ? CheckedStream.<R, E> empty()
-                : mapperForUnJoinedEelements.apply(CheckedIterator.concat(CheckedIterator.of(nextValueHolder.value()), iter));
+                : mapperForUnJoinedEelements.apply(Throwables.Iterator.concat(Throwables.Iterator.of(nextValueHolder.value()), iter));
 
         return map(mapper).append(CheckedStream.defer(tmp)).onClose(newCloseHandler(b));
     }
@@ -15254,13 +15153,13 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     @Beta
     @IntermediateOp
     public <U, R> CheckedStream<R, E> join(final CheckedStream<U, ? extends E> b,
-            final Throwables.BiFunction<? super T, ? super CheckedIterator<U, ? extends E>, ? extends R, ? extends E> joinFunc) {
+            final Throwables.BiFunction<? super T, ? super Throwables.Iterator<U, ? extends E>, ? extends R, ? extends E> joinFunc) {
         assertNotClosed();
 
-        checkArgNotNull(b, "CheckedStream 'b' can not be null");
+        checkArgNotNull(b, "Seq 'b' can not be null");
         checkArgNotNull(joinFunc, "'joinFunc' can not be null");
 
-        final CheckedIterator<U, ? extends E> iter = b.iteratorEx();
+        final Throwables.Iterator<U, ? extends E> iter = b.iteratorEx();
 
         final Throwables.Function<T, R, E> mapper = t -> joinFunc.apply(t, iter);
 
@@ -15281,15 +15180,15 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     @Beta
     @IntermediateOp
     public <U, R> CheckedStream<R, E> join(final CheckedStream<U, ? extends E> b,
-            final Throwables.BiFunction<? super T, ? super CheckedIterator<U, ? extends E>, ? extends R, ? extends E> joinFunc,
-            final Throwables.Function<? super CheckedIterator<U, ? extends E>, CheckedStream<R, E>, ? extends E> mapperForUnJoinedEelements) {
+            final Throwables.BiFunction<? super T, ? super Throwables.Iterator<U, ? extends E>, ? extends R, ? extends E> joinFunc,
+            final Throwables.Function<? super Throwables.Iterator<U, ? extends E>, CheckedStream<R, E>, ? extends E> mapperForUnJoinedEelements) {
         assertNotClosed();
 
-        checkArgNotNull(b, "CheckedStream 'b' can not be null");
+        checkArgNotNull(b, "Seq 'b' can not be null");
         checkArgNotNull(joinFunc, "'joinFunc' can not be null");
         checkArgNotNull(mapperForUnJoinedEelements, "'mapperForUnJoinedEelements' can not be null");
 
-        final CheckedIterator<U, ? extends E> iter = b.iteratorEx();
+        final Throwables.Iterator<U, ? extends E> iter = b.iteratorEx();
 
         final Throwables.Function<T, R, E> mapper = t -> joinFunc.apply(t, iter);
 
@@ -15313,22 +15212,6 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
         return multimap;
     }
 
-    private static <E extends Exception> Throwables.Runnable<E> newCloseHandler(final CheckedStream<?, E> b) {
-        if (b == null || N.isEmpty(b.closeHandlers)) {
-            return EMPTY_CLOSE_HANDLER;
-        }
-
-        return b::close;
-    }
-
-    private static <E extends Exception> Throwables.Runnable<E> newCloseHandler(final Stream<?> b) {
-        if (b == null) {
-            return EMPTY_CLOSE_HANDLER;
-        }
-
-        return b::close;
-    }
-
     /**
      * Add a new Stream with terminal action to listen/consume the elements from upstream.
      *
@@ -15337,7 +15220,6 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @see #addSubscriber(com.landawn.abacus.util.Throwables.Consumer, int, Executor)
      */
     @Beta
-    @SequentialOnly
     @IntermediateOp
     public CheckedStream<T, E> addSubscriber(
             final Throwables.Consumer<? super CheckedStream<T, E>, ? extends Exception> consumerForNewStreamWithTerminalAction) {
@@ -15378,7 +15260,6 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @return
      */
     @Beta
-    @SequentialOnly
     @IntermediateOp
     public CheckedStream<T, E> addSubscriber(final Throwables.Consumer<? super CheckedStream<T, E>, ? extends Exception> consumerForNewStreamWithTerminalAction,
             final int queueSize, final Executor executor) {
@@ -15394,15 +15275,14 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             final Throwables.Consumer<? super CheckedStream<T, E>, ? extends Exception> consumerForNewStreamWithTerminalAction, final int queueSize,
             final Executor executor) {
         final BlockingQueue<T> queue = new ArrayBlockingQueue<>(queueSize <= 0 ? DEFAULT_BUFFERED_SIZE_PER_ITERATOR : queueSize);
-        final CheckedIterator<T, E> iter = iteratorEx();
+        final Throwables.Iterator<T, E> iter = iteratorEx();
         final T none = (T) NONE;
 
         final MutableBoolean isMainStreamCompleted = MutableBoolean.of(false);
 
-        final CheckedIterator<T, E> iterForNewStream = new CheckedIterator<>() { //NOSONAR
+        final Throwables.Iterator<T, E> iterForNewStream = new Throwables.Iterator<>() { //NOSONAR
             private T next = null;
 
-            @Override
             public boolean hasNext() throws E {
                 if (next == null) {
                     if (isMainStreamCompleted.isFalse() || queue.size() > 0) {
@@ -15419,7 +15299,6 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                 return next != null || (isMainStreamCompleted.isTrue() && iter.hasNext());
             }
 
-            @Override
             public T next() throws E {
                 if (!hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
@@ -15431,16 +15310,14 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             }
         };
 
-        final CheckedIterator<T, E> iterA = new CheckedIterator<>() { //NOSONAR
+        final Throwables.Iterator<T, E> iterA = new Throwables.Iterator<>() { //NOSONAR
             private boolean isNewStreamStarted = false;
             private ContinuableFuture<Void> futureForNewStream = null;
 
-            @Override
             public boolean hasNext() throws E {
                 return iter.hasNext();
             }
 
-            @Override
             public T next() throws E {
                 final T next = iter.next();
 
@@ -15453,7 +15330,6 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                 return next;
             }
 
-            @Override
             public void close() {
                 isMainStreamCompleted.setTrue();
 
@@ -15481,7 +15357,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             }
         };
 
-        return newStream(iterA, sorted, cmp, mergeCloseHandlers(closeHandlers, iterA::close, true));
+        return newStream(iterA, sorted, cmp, mergeCloseHandlers(iterA::close, closeHandlers, true));
     }
 
     /**
@@ -15527,15 +15403,14 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             final Throwables.Consumer<? super CheckedStream<T, E>, ? extends Exception> consumerForNewStreamWithTerminalAction, final int queueSize,
             final Executor executor) {
         final BlockingQueue<T> queue = new ArrayBlockingQueue<>(queueSize <= 0 ? DEFAULT_BUFFERED_SIZE_PER_ITERATOR : queueSize);
-        final CheckedIterator<T, E> iter = iteratorEx();
+        final Throwables.Iterator<T, E> iter = iteratorEx();
         final T none = (T) NONE;
 
         final MutableBoolean isMainStreamCompleted = MutableBoolean.of(false);
 
-        final CheckedIterator<T, E> iterForNewStream = new CheckedIterator<>() { //NOSONAR
+        final Throwables.Iterator<T, E> iterForNewStream = new Throwables.Iterator<>() { //NOSONAR
             private T next = null;
 
-            @Override
             public boolean hasNext() throws E {
                 if (next == null) {
                     if (isMainStreamCompleted.isFalse() || queue.size() > 0) {
@@ -15566,7 +15441,6 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                 return next != null;
             }
 
-            @Override
             public T next() throws E {
                 if (!hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
@@ -15578,13 +15452,12 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             }
         };
 
-        final CheckedIterator<T, E> iterA = new CheckedIterator<>() { //NOSONAR
+        final Throwables.Iterator<T, E> iterA = new Throwables.Iterator<>() { //NOSONAR
             private boolean isNewStreamStarted = false;
             private ContinuableFuture<Void> futureForNewStream = null;
             private boolean hasNext = false;
             private T next = null;
 
-            @Override
             public boolean hasNext() throws E {
                 if (!hasNext) {
                     while (iter.hasNext()) {
@@ -15606,7 +15479,6 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                 return hasNext;
             }
 
-            @Override
             public T next() throws E {
                 if (!hasNext && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
@@ -15617,7 +15489,6 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                 return next;
             }
 
-            @Override
             public void close() {
                 isMainStreamCompleted.setTrue();
 
@@ -15645,7 +15516,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             }
         };
 
-        return newStream(iterA, sorted, cmp, mergeCloseHandlers(closeHandlers, iterA::close, true));
+        return newStream(iterA, sorted, cmp, mergeCloseHandlers(iterA::close, closeHandlers, true));
     }
 
     /**
@@ -15691,16 +15562,15 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             final Throwables.Consumer<? super CheckedStream<T, E>, ? extends Exception> consumerForNewStreamWithTerminalAction, final int queueSize,
             final Executor executor) {
         final BlockingQueue<T> queue = new ArrayBlockingQueue<>(queueSize <= 0 ? DEFAULT_BUFFERED_SIZE_PER_ITERATOR : queueSize);
-        final CheckedIterator<T, E> iter = iteratorEx();
+        final Throwables.Iterator<T, E> iter = iteratorEx();
         final T none = (T) NONE;
 
         final MutableBoolean isMainStreamCompleted = MutableBoolean.of(false);
         final MutableBoolean isTokenInMainStream = MutableBoolean.of(false);
 
-        final CheckedIterator<T, E> iterForNewStream = new CheckedIterator<>() { //NOSONAR
+        final Throwables.Iterator<T, E> iterForNewStream = new Throwables.Iterator<>() { //NOSONAR
             private T next = null;
 
-            @Override
             public boolean hasNext() throws E {
                 if (next == null) {
                     if ((isTokenInMainStream.isFalse() && isMainStreamCompleted.isFalse()) || queue.size() > 0) {
@@ -15735,7 +15605,6 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                 return next != null || iter.hasNext();
             }
 
-            @Override
             public T next() throws E {
                 if (!hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
@@ -15747,14 +15616,13 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             }
         };
 
-        final CheckedIterator<T, E> iterA = new CheckedIterator<>() { //NOSONAR
+        final Throwables.Iterator<T, E> iterA = new Throwables.Iterator<>() { //NOSONAR
             private boolean isNewStreamStarted = false;
             private ContinuableFuture<Void> futureForNewStream = null;
             private boolean hasMore = true;
             private boolean hasNext = false;
             private T next = null;
 
-            @Override
             public boolean hasNext() throws E {
                 if (!hasNext && hasMore && iter.hasNext()) {
                     next = iter.next();
@@ -15776,7 +15644,6 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                 return hasNext;
             }
 
-            @Override
             public T next() throws E {
                 if (!hasNext && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
@@ -15787,7 +15654,6 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                 return next;
             }
 
-            @Override
             public void close() {
                 isMainStreamCompleted.setTrue();
 
@@ -15815,7 +15681,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             }
         };
 
-        return newStream(iterA, sorted, cmp, mergeCloseHandlers(closeHandlers, iterA::close, true));
+        return newStream(iterA, sorted, cmp, mergeCloseHandlers(iterA::close, closeHandlers, true));
     }
 
     /**
@@ -15861,16 +15727,15 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             final Throwables.Consumer<? super CheckedStream<T, E>, ? extends Exception> consumerForNewStreamWithTerminalAction, final int queueSize,
             final Executor executor) {
         final BlockingQueue<T> queue = new ArrayBlockingQueue<>(queueSize <= 0 ? DEFAULT_BUFFERED_SIZE_PER_ITERATOR : queueSize);
-        final CheckedIterator<T, E> iter = iteratorEx();
+        final Throwables.Iterator<T, E> iter = iteratorEx();
         final T none = (T) NONE;
 
         final MutableBoolean isMainStreamCompleted = MutableBoolean.of(false);
         final MutableBoolean isDroppedInMainStream = MutableBoolean.of(false);
 
-        final CheckedIterator<T, E> iterForNewStream = new CheckedIterator<>() { //NOSONAR
+        final Throwables.Iterator<T, E> iterForNewStream = new Throwables.Iterator<>() { //NOSONAR
             private T next = null;
 
-            @Override
             public boolean hasNext() throws E {
                 if (next == null) {
                     if ((isDroppedInMainStream.isFalse() && isMainStreamCompleted.isFalse()) || queue.size() > 0) {
@@ -15904,7 +15769,6 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                 return next != null;
             }
 
-            @Override
             public T next() throws E {
                 if (!hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
@@ -15916,14 +15780,13 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             }
         };
 
-        final CheckedIterator<T, E> iterA = new CheckedIterator<>() { //NOSONAR
+        final Throwables.Iterator<T, E> iterA = new Throwables.Iterator<>() { //NOSONAR
             private boolean isNewStreamStarted = false;
             private ContinuableFuture<Void> futureForNewStream = null;
             private boolean hasNext = false;
             private T next = null;
             private boolean dropped = false;
 
-            @Override
             public boolean hasNext() throws E {
                 if (!hasNext) {
                     if (!dropped) {
@@ -15953,7 +15816,6 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                 return hasNext;
             }
 
-            @Override
             public T next() throws E {
                 if (!hasNext && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
@@ -15964,7 +15826,6 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                 return next;
             }
 
-            @Override
             public void close() {
                 isMainStreamCompleted.setTrue();
 
@@ -15992,7 +15853,11 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             }
         };
 
-        return newStream(iterA, sorted, cmp, mergeCloseHandlers(closeHandlers, iterA::close, true));
+        return newStream(iterA, sorted, cmp, mergeCloseHandlers(iterA::close, closeHandlers, true));
+    }
+
+    Throwables.Iterator<T, E> iteratorEx() {
+        return elements;
     }
 
     /**
@@ -16070,24 +15935,24 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @return
      */
     @IntermediateOp
-    public CheckedStream<T, E> onClose(final Throwables.Runnable<? extends E> closeHandler) {
+    public CheckedStream<T, E> onClose(final Runnable closeHandler) {
         assertNotClosed();
 
         if (isEmptyCloseHandler(closeHandler)) {
             return this;
         }
 
-        final Deque<Throwables.Runnable<? extends E>> newCloseHandlers = new ArrayDeque<>(N.size(closeHandlers) + 1);
+        final Deque<LocalRunnable> newCloseHandlers = new ArrayDeque<>(N.size(closeHandlers) + 1);
 
         if (N.notEmpty(this.closeHandlers)) {
             newCloseHandlers.addAll(this.closeHandlers);
         }
 
-        newCloseHandlers.add(new Throwables.Runnable<E>() {
+        newCloseHandlers.add(new LocalRunnable() {
             private volatile boolean isClosed = false;
 
             @Override
-            public void run() throws E {
+            public void run() {
                 if (isClosed) {
                     return;
                 }
@@ -16103,8 +15968,8 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     /**
      * It will be called by terminal operations in final.
      */
-    @TerminalOp
     @Override
+    @TerminalOp
     public synchronized void close() {
         if (isClosed) {
             return;
@@ -16126,7 +15991,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
         isClosed = true;
 
-        logger.debug("Closing CheckedStream");
+        logger.debug("Closing Seq");
 
         close(closeHandlers);
 
@@ -16135,67 +16000,12 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
         }
     }
 
-    static boolean isEmptyCloseHandler(final Throwables.Runnable<?> closeHandler) {
-        return closeHandler == null || closeHandler == EMPTY_CLOSE_HANDLER;
-    }
-
-    static boolean isEmptyCloseHandlers(final Collection<? extends Throwables.Runnable<?>> closeHandlers) {
-        return N.isEmpty(closeHandlers) || isEmptyCloseHandler(N.firstOrNullIfEmpty(closeHandlers));
-    }
-
-    @SuppressWarnings("rawtypes")
-    private static final Throwables.Runnable EMPTY_CLOSE_HANDLER = () -> {
-        // do nothing.
-    };
-
-    private static <E extends Exception, T> Throwables.Runnable<E> newCloseHandler(final CheckedIterator<T, E> iter) {
-        if (iter == null) {
-            return EMPTY_CLOSE_HANDLER;
-        }
-
-        return iter::close;
-    }
-
-    static void close(final Deque<? extends Throwables.Runnable<? extends Exception>> closeHandlers) {
-        Exception ex = null;
-
-        for (Throwables.Runnable<? extends Exception> closeHandler : closeHandlers) {
-            try {
-                closeHandler.run();
-            } catch (Exception e) {
-                if (ex == null) {
-                    ex = e;
-                } else {
-                    ex.addSuppressed(e);
-                }
-            }
-        }
-
-        if (ex != null) {
-            throw ExceptionUtil.toRuntimeException(ex);
-        }
-    }
-
-    CheckedIterator<T, E> iteratorEx() {
-        return elements;
-    }
-
-    /**
-     * Assert not closed.
-     */
-    void assertNotClosed() {
+    private void assertNotClosed() {
         if (isClosed) {
-            throw new IllegalStateException("This stream has been closed");
+            throw new IllegalStateException("This stream is already terminated.");
         }
     }
 
-    /**
-     * Check arg positive.
-     *
-     * @param arg
-     * @param argNameOrErrorMsg
-     * @return
-     */
     private int checkArgPositive(final int arg, final String argNameOrErrorMsg) {
         if (arg <= 0) {
             try {
@@ -16220,13 +16030,18 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
         return arg;
     }
 
-    /**
-     * Check arg not negative.
-     *
-     * @param arg
-     * @param argNameOrErrorMsg
-     * @return
-     */
+    private int checkArgNotNegative(final int arg, final String argNameOrErrorMsg) {
+        if (arg < 0) {
+            try {
+                N.checkArgNotNegative(arg, argNameOrErrorMsg);
+            } finally {
+                close();
+            }
+        }
+
+        return arg;
+    }
+
     private long checkArgNotNegative(final long arg, final String argNameOrErrorMsg) {
         if (arg < 0) {
             try {
@@ -16239,14 +16054,6 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
         return arg;
     }
 
-    /**
-     * Check arg not null.
-     *
-     * @param <ARG>
-     * @param obj
-     * @param errorMessage
-     * @return
-     */
     private <ARG> ARG checkArgNotNull(final ARG obj, final String errorMessage) {
         if (obj == null) {
             try {
@@ -16260,7 +16067,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     }
 
     @SuppressWarnings("rawtypes")
-    <ARG extends Collection> ARG checkArgNotEmpty(final ARG obj, final String errorMessage) {
+    private <ARG extends Collection> ARG checkArgNotEmpty(final ARG obj, final String errorMessage) {
         if (obj == null || obj.size() == 0) {
             try {
                 N.checkArgNotEmpty(obj, errorMessage);
@@ -16272,11 +16079,6 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
         return obj;
     }
 
-    /**
-     *
-     * @param b
-     * @param errorMessage
-     */
     private void checkArgument(boolean b, String errorMessage) {
         if (!b) {
             try {
@@ -16287,13 +16089,6 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
         }
     }
 
-    /**
-     *
-     * @param b
-     * @param errorMessageTemplate
-     * @param p1
-     * @param p2
-     */
     private void checkArgument(boolean b, String errorMessageTemplate, int p1, int p2) {
         if (!b) {
             try {
@@ -16304,13 +16099,6 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
         }
     }
 
-    /**
-     *
-     * @param b
-     * @param errorMessageTemplate
-     * @param p1
-     * @param p2
-     */
     private void checkArgument(boolean b, String errorMessageTemplate, long p1, long p2) {
         if (!b) {
             try {
@@ -16321,9 +16109,8 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
         }
     }
 
-    ObjIteratorEx<T> newObjIteratorEx(final CheckedIterator<T, E> elements) {
+    private ObjIteratorEx<T> newObjIteratorEx(final Throwables.Iterator<T, E> elements) {
         return new ObjIteratorEx<>() {
-            @Override
             public boolean hasNext() {
                 try {
                     return elements.hasNext();
@@ -16332,7 +16119,6 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                 }
             }
 
-            @Override
             public T next() { // NOSONAR
                 try {
                     return elements.next();
@@ -16341,7 +16127,6 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                 }
             }
 
-            @Override
             public void advance(long n) {
                 try {
                     elements.advance(n);
@@ -16350,7 +16135,6 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                 }
             }
 
-            @Override
             public long count() {
                 try {
                     return elements.count();
@@ -16361,78 +16145,183 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
         };
     }
 
-    /**
-     *
-     * @param <T>
-     * @param <E>
-     * @param iter
-     * @return
-     */
-    static <T, E extends Exception> CheckedStream<T, E> newStream(final CheckedIterator<T, E> iter) {
+    private static <T, E extends Exception> CheckedStream<T, E> newStream(final Throwables.Iterator<? extends T, ? extends E> iter) {
         return new CheckedStream<>(iter, null);
     }
 
-    /**
-     *
-     * @param <T>
-     * @param <E>
-     * @param iter
-     * @param closeHandlers
-     * @return
-     */
-    static <T, E extends Exception> CheckedStream<T, E> newStream(final CheckedIterator<T, E> iter,
-            final Deque<Throwables.Runnable<? extends E>> closeHandlers) {
+    private static <T, E extends Exception> CheckedStream<T, E> newStream(final Throwables.Iterator<? extends T, ? extends E> iter,
+            final LocalRunnable closeHandler) {
+        final Deque<LocalRunnable> closeHandlers = new LocalArrayDeque<>();
+        closeHandlers.add(closeHandler);
+
+        return newStream(iter, closeHandlers);
+    }
+
+    private static <T, E extends Exception> CheckedStream<T, E> newStream(final Throwables.Iterator<? extends T, ? extends E> iter,
+            final Collection<LocalRunnable> closeHandlers) {
         return new CheckedStream<>(iter, closeHandlers);
     }
 
-    /**
-     *
-     * @param <T>
-     * @param <E>
-     * @param iter
-     * @param sorted
-     * @param comparator
-     * @param closeHandlers
-     * @return
-     */
-    static <T, E extends Exception> CheckedStream<T, E> newStream(final CheckedIterator<T, E> iter, final boolean sorted,
-            final Comparator<? super T> comparator, final Deque<Throwables.Runnable<? extends E>> closeHandlers) {
+    private static <T, E extends Exception> CheckedStream<T, E> newStream(final Throwables.Iterator<T, E> iter, final boolean sorted,
+            final Comparator<? super T> comparator, final Collection<LocalRunnable> closeHandlers) {
         return new CheckedStream<>(iter, sorted, comparator, closeHandlers);
     }
 
-    /**
-     *
-     * @param obj
-     * @return
-     */
-    static Object hashKey(Object obj) {
-        return obj == null || !obj.getClass().isArray() ? obj : Wrapper.of(obj);
+    private static <T, E extends Exception> CheckedStream<T, E> newStream(final Stream<? extends T> stream, final boolean isForSps) {
+        if (stream == null) {
+            return empty();
+        }
+
+        Throwables.Iterator<T, E> iter = null;
+
+        if (isForSps) {
+            iter = new Throwables.Iterator<>() {
+                private Stream<? extends T> s = stream;
+                private Iterator<? extends T> iter = null;
+                private boolean isInitialized = false;
+
+                public boolean hasNext() throws E {
+                    try {
+                        if (!isInitialized) {
+                            init();
+                        }
+
+                        return iter.hasNext();
+                    } catch (Exception e) {
+                        throw (E) ExceptionUtil.tryToGetOriginalCheckedException(e);
+                    }
+                }
+
+                public T next() throws E {
+                    try {
+                        if (!isInitialized) {
+                            init();
+                        }
+
+                        return iter.next();
+                    } catch (Exception e) {
+                        throw (E) ExceptionUtil.tryToGetOriginalCheckedException(e);
+                    }
+                }
+
+                public void advance(long n) throws E {
+                    try {
+                        if (iter == null) {
+                            s = s.skip(n);
+                        } else {
+                            while (n-- > 0 && hasNext()) {
+                                next();
+                            }
+                        }
+                    } catch (Exception e) {
+                        throw (E) ExceptionUtil.tryToGetOriginalCheckedException(e);
+                    }
+                }
+
+                public long count() throws E {
+                    try {
+                        if (iter == null) {
+                            return s.count();
+                        } else {
+                            long result = 0;
+
+                            while (hasNext()) {
+                                next();
+                                result++;
+                            }
+
+                            return result;
+                        }
+                    } catch (Exception e) {
+                        throw (E) ExceptionUtil.tryToGetOriginalCheckedException(e);
+                    }
+                }
+
+                public void close() {
+                    s.close();
+                }
+
+                private void init() {
+                    if (!isInitialized) {
+                        isInitialized = true;
+                        iter = s.iterator();
+                    }
+                }
+            };
+        } else {
+            iter = new Throwables.Iterator<>() {
+                private Stream<? extends T> s = stream;
+                private Iterator<? extends T> iter = null;
+                private boolean isInitialized = false;
+
+                public boolean hasNext() throws E {
+                    if (!isInitialized) {
+                        init();
+                    }
+
+                    return iter.hasNext();
+                }
+
+                public T next() throws E {
+                    if (!isInitialized) {
+                        init();
+                    }
+
+                    return iter.next();
+                }
+
+                public void advance(long n) throws E {
+                    if (iter == null) {
+                        s = s.skip(n);
+                    } else {
+                        while (n-- > 0 && hasNext()) {
+                            next();
+                        }
+                    }
+                }
+
+                public long count() throws E {
+                    if (iter == null) {
+                        return s.count();
+                    } else {
+                        long result = 0;
+
+                        while (hasNext()) {
+                            next();
+                            result++;
+                        }
+
+                        return result;
+                    }
+                }
+
+                public void close() {
+                    s.close();
+                }
+
+                private void init() {
+                    if (!isInitialized) {
+                        isInitialized = true;
+                        iter = stream.iterator();
+                    }
+                }
+            };
+        }
+
+        final Throwables.Iterator<T, E> tmp = iter;
+
+        return newStream(tmp).onClose(newCloseHandler(tmp));
     }
 
-    /**
-     * Checks if is same comparator.
-     *
-     * @param a
-     * @param b
-     * @return true, if is same comparator
-     */
-    static boolean isSameComparator(Comparator<?> a, Comparator<?> b) {
-        return a == b || (a == null && b == Comparators.NATURAL_ORDER) || (b == null && a == Comparators.NATURAL_ORDER);
+    private static <T, E extends Exception> Throwables.Iterator<T, E> iterate(final CheckedStream<? extends T, E> s) {
+        return s == null ? Throwables.Iterator.empty() : (Throwables.Iterator<T, E>) s.iteratorEx();
     }
 
-    static <T, E extends Exception> CheckedIterator<T, E> iterate(final CheckedStream<? extends T, E> s) {
-        return s == null ? CheckedIterator.EMPTY : (CheckedIterator<T, E>) s.iteratorEx();
-    }
-
-    static <T> List<T> subList(final List<T> list, final int fromIndex, final int toIndex) {
-        return list.subList(fromIndex, N.min(list.size(), toIndex));
-    }
-
-    static <T, E extends Exception> CheckedIterator<T, E> buffered(final CheckedIterator<T, E> iter, final BlockingQueue<T> queueToBuffer) {
+    private static <T, E extends Exception> Throwables.Iterator<T, E> buffered(final Throwables.Iterator<T, E> iter, final BlockingQueue<T> queueToBuffer) {
         return buffered(iter, queueToBuffer, null);
     }
 
-    static <T, E extends Exception> CheckedIterator<T, E> buffered(final CheckedIterator<T, E> iter, final BlockingQueue<T> queueToBuffer,
+    private static <T, E extends Exception> Throwables.Iterator<T, E> buffered(final Throwables.Iterator<T, E> iter, final BlockingQueue<T> queueToBuffer,
             final MutableBoolean hasMore) {
         final MutableBoolean onGoing = MutableBoolean.of(true);
 
@@ -16490,11 +16379,10 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             }
         }
 
-        return new CheckedIterator<>() {
+        return new Throwables.Iterator<>() {
             private boolean isClosed = false;
             private T next = null;
 
-            @Override
             public boolean hasNext() throws E {
                 try {
                     if (next == null && (next = queueToBuffer.poll()) == null) {
@@ -16515,7 +16403,6 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                 return next != null;
             }
 
-            @Override
             public T next() throws E {
                 if (next == null && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
@@ -16527,7 +16414,6 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                 return result;
             }
 
-            @Override
             public void close() {
                 if (isClosed) {
                     return;
@@ -16539,7 +16425,140 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
         };
     }
 
-    static void setError(final Holder<Throwable> errorHolder, Throwable e) {
+    private static <K, V, E extends Exception> void merge(Map<K, V> map, K key, V value, Throwables.BinaryOperator<V, E> remappingFunction) throws E {
+        final V oldValue = map.get(key);
+
+        if (oldValue == null && !map.containsKey(key)) {
+            map.put(key, value);
+        } else {
+            map.put(key, remappingFunction.apply(oldValue, value));
+        }
+    }
+
+    private static void close(final Collection<? extends Runnable> closeHandlers) {
+        Exception ex = null;
+
+        for (Runnable closeHandler : closeHandlers) {
+            try {
+                closeHandler.run();
+            } catch (Exception e) {
+                if (ex == null) {
+                    ex = e;
+                } else {
+                    ex.addSuppressed(e);
+                }
+            }
+        }
+
+        if (ex != null) {
+            throw toRuntimeException(ex);
+        }
+    }
+
+    @SuppressWarnings("rawtypes")
+    private static void close(Holder<? extends CheckedStream> holder) {
+        if (holder.value() != null) {
+            holder.value().close();
+        }
+    }
+
+    private static boolean isEmptyCloseHandler(final Runnable closeHandler) {
+        return closeHandler == null || closeHandler == EMPTY_CLOSE_HANDLER;
+    }
+
+    private static boolean isEmptyCloseHandlers(final Collection<? extends Runnable> closeHandlers) {
+        return N.isEmpty(closeHandlers) || (closeHandlers.size() == 1 && isEmptyCloseHandler(N.firstOrNullIfEmpty(closeHandlers)));
+    }
+
+    private static LocalRunnable newCloseHandler(final Runnable closeHandler) {
+        return LocalRunnable.wrap(closeHandler);
+    }
+
+    private static LocalRunnable newCloseHandler(final AutoCloseable closeable) {
+        return LocalRunnable.wrap(closeable);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private static LocalRunnable newCloseHandler(final CheckedStream s) {
+        if (s == null || isEmptyCloseHandlers(s.closeHandlers)) {
+            return EMPTY_CLOSE_HANDLER;
+        }
+
+        return s::close;
+    }
+
+    @SuppressWarnings("rawtypes")
+    private static LocalRunnable newCloseHandler(final Collection<? extends CheckedStream> c) {
+        if (N.isEmpty(c)) {
+            return EMPTY_CLOSE_HANDLER;
+        }
+
+        boolean allEmptyHandlers = true;
+
+        for (CheckedStream s : c) {
+            if (!(s == null || s.isClosed || isEmptyCloseHandlers(s.closeHandlers))) {
+                allEmptyHandlers = false;
+                break;
+            }
+        }
+
+        if (allEmptyHandlers) {
+            return EMPTY_CLOSE_HANDLER;
+        }
+
+        return () -> {
+            RuntimeException runtimeException = null;
+
+            for (CheckedStream s : c) {
+                if (s == null || s.isClosed || isEmptyCloseHandlers(s.closeHandlers)) {
+                    continue;
+                }
+
+                try {
+                    s.close();
+                } catch (Exception throwable) {
+                    if (runtimeException == null) {
+                        runtimeException = toRuntimeException(throwable);
+                    } else {
+                        runtimeException.addSuppressed(throwable);
+                    }
+                }
+            }
+
+            if (runtimeException != null) {
+                throw runtimeException;
+            }
+        };
+    }
+
+    private static Deque<LocalRunnable> mergeCloseHandlers(final Runnable newCloseHandlerToAdd, final Deque<LocalRunnable> closeHandlers) {
+        return mergeCloseHandlers(newCloseHandlerToAdd, closeHandlers, false);
+    }
+
+    private static Deque<LocalRunnable> mergeCloseHandlers(final Runnable newCloseHandlerToAdd, final Deque<LocalRunnable> closeHandlers,
+            final boolean closeNewHandlerFirst) {
+        if (isEmptyCloseHandler(newCloseHandlerToAdd)) {
+            return closeHandlers;
+        }
+
+        final Deque<LocalRunnable> newCloseHandlers = new LocalArrayDeque<>(isEmptyCloseHandlers(closeHandlers) ? 1 : closeHandlers.size() + 1);
+
+        if (closeNewHandlerFirst) {
+            newCloseHandlers.add(newCloseHandler(newCloseHandlerToAdd));
+        }
+
+        if (!isEmptyCloseHandlers(closeHandlers)) {
+            newCloseHandlers.addAll(closeHandlers);
+        }
+
+        if (!closeNewHandlerFirst) {
+            newCloseHandlers.add(newCloseHandler(newCloseHandlerToAdd));
+        }
+
+        return newCloseHandlers;
+    }
+
+    private static void setError(final Holder<Throwable> errorHolder, Throwable e) {
         synchronized (errorHolder) { //NOSONAR
             if (errorHolder.value() == null) {
                 errorHolder.setValue(e);
@@ -16549,7 +16568,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
         }
     }
 
-    static void setError(final Holder<Throwable> errorHolder, Throwable e, final MutableBoolean onGoing) {
+    private static void setError(final Holder<Throwable> errorHolder, Throwable e, final MutableBoolean onGoing) {
         // Set error handle first, then set onGoing sign.
         // If onGoing sign is set first but error has not been set, threads may stop without throwing exception because errorHolder is empty.
         setError(errorHolder, e);
@@ -16557,7 +16576,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
         onGoing.setFalse();
     }
 
-    static void setStopFlagAndThrowException(final Holder<Throwable> errorHolder, final MutableBoolean onGoing) {
+    private static void setStopFlagAndThrowException(final Holder<Throwable> errorHolder, final MutableBoolean onGoing) {
         onGoing.setFalse();
 
         synchronized (errorHolder) { //NOSONAR
@@ -16567,421 +16586,97 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
         }
     }
 
-    static RuntimeException toRuntimeException(final Throwable e) {
+    private static RuntimeException toRuntimeException(final Exception e) {
         return ExceptionUtil.toRuntimeException(e);
     }
 
-    static RuntimeException toRuntimeException(final Throwable e, final boolean throwIfItIsError) {
+    private static RuntimeException toRuntimeException(final Throwable e, final boolean throwIfItIsError) {
         return ExceptionUtil.toRuntimeException(e, throwIfItIsError);
     }
 
-    /**
-     * The Class CheckedIterator.
-     *
-     * @param <T>
-     * @param <E>
-     */
+    private static boolean isSameComparator(Comparator<?> a, Comparator<?> b) {
+        if (a == b) { // NOSONAR
+            return true;
+        } else if (a == null) {
+            return DEFAULT_COMPARATOR_MAP.containsValue(b);
+        } else if (b == null) {
+            return DEFAULT_COMPARATOR_MAP.containsValue(a);
+        } else {
+            return (a == NATURAL_COMPARATOR && DEFAULT_COMPARATOR_MAP.containsValue(b)) || (b == NATURAL_COMPARATOR && DEFAULT_COMPARATOR_MAP.containsValue(a)); // NOSONAR
+        }
+    }
+
+    private static Object hashKey(Object obj) {
+        return obj == null ? NONE : (obj.getClass().isArray() ? Wrapper.of(obj) : obj);
+    }
+
+    private static <T> List<T> subList(final List<T> list, final int fromIndex, final int toIndex) {
+        return list.subList(fromIndex, N.min(list.size(), toIndex));
+    }
+
     @Internal
-    @com.landawn.abacus.annotation.Immutable
-    public abstract static class CheckedIterator<T, E extends Exception> implements Immutable {
+    private interface LocalRunnable extends Runnable {
 
-        /** The Constant EMPTY. */
-        @SuppressWarnings("rawtypes")
-        private static final CheckedIterator EMPTY = new CheckedIterator() {
-            @Override
-            public boolean hasNext() throws Exception {
-                return false;
+        static LocalRunnable wrap(Runnable closeHandler) {
+            if (closeHandler == null) {
+                return EMPTY_CLOSE_HANDLER;
+            } else if (closeHandler instanceof LocalRunnable) {
+                return (LocalRunnable) closeHandler;
             }
 
-            @Override
-            public Object next() throws Exception {
-                throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
-            }
-        };
-
-        /**
-         *
-         *
-         * @param <T>
-         * @param <E>
-         * @return
-         */
-        public static <T, E extends Exception> CheckedIterator<T, E> empty() {
-            return EMPTY;
-        }
-
-        /**
-         *
-         *
-         * @param <T>
-         * @param <E>
-         * @param val
-         * @return
-         */
-        public static <T, E extends Exception> CheckedIterator<T, E> just(final T val) {
-            return new CheckedIterator<>() {
-                private boolean done = false;
+            return new LocalRunnable() {
+                private volatile boolean isClosed = false;
 
                 @Override
-                public boolean hasNext() {
-                    return !done;
-                }
-
-                @Override
-                public T next() {
-                    if (done) {
-                        throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
+                public void run() {
+                    if (isClosed) {
+                        return;
                     }
 
-                    done = true;
-
-                    return val;
+                    isClosed = true;
+                    closeHandler.run();
                 }
             };
         }
 
-        /**
-         *
-         *
-         * @param <T>
-         * @param <E>
-         * @param a
-         * @return
-         */
-        @SafeVarargs
-        public static <T, E extends Exception> CheckedIterator<T, E> of(final T... a) {
-            return N.isEmpty(a) ? EMPTY : of(a, 0, a.length);
-        }
-
-        /**
-         *
-         *
-         * @param <T>
-         * @param <E>
-         * @param a
-         * @param fromIndex
-         * @param toIndex
-         * @return
-         */
-        public static <T, E extends Exception> CheckedIterator<T, E> of(final T[] a, final int fromIndex, final int toIndex) {
-            N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
-
-            if (fromIndex == toIndex) {
-                return EMPTY;
-            }
-
-            return new CheckedIterator<>() {
-                private int cursor = fromIndex;
+        static LocalRunnable wrap(final AutoCloseable closeable) {
+            return new LocalRunnable() {
+                private volatile boolean isClosed = false;
 
                 @Override
-                public boolean hasNext() {
-                    return cursor < toIndex;
-                }
-
-                @Override
-                public T next() {
-                    if (cursor >= toIndex) {
-                        throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
+                public void run() {
+                    if (isClosed) {
+                        return;
                     }
 
-                    return a[cursor++];
-                }
-
-                @Override
-                public void advance(long n) throws E {
-                    if (n > toIndex - cursor) {
-                        cursor = toIndex;
-                    } else {
-                        cursor += n;
-                    }
-                }
-
-                @Override
-                public long count() {
-                    return toIndex - cursor; //NOSONAR
+                    isClosed = true;
+                    IOUtil.close(closeable);
                 }
             };
         }
+    }
 
-        /**
-         *
-         *
-         * @param <T>
-         * @param <E>
-         * @param iter
-         * @return
-         */
-        public static <T, E extends Exception> CheckedIterator<T, E> of(final Iterator<? extends T> iter) {
-            if (iter == null) {
-                return EMPTY;
-            }
+    @Internal
+    private static final class LocalArrayDeque<T> extends ArrayDeque<T> {
+        private static final long serialVersionUID = -97425473105100734L;
 
-            return new CheckedIterator<>() {
-                @Override
-                public boolean hasNext() throws E {
-                    return iter.hasNext();
-                }
-
-                @Override
-                public T next() throws E {
-                    return iter.next();
-                }
-            };
+        public LocalArrayDeque() {
         }
 
-        //        /**
-        //         * Lazy evaluation.
-        //         *
-        //         * @param <T>
-        //         * @param <E>
-        //         * @param arraySupplier
-        //         * @return
-        //         */
-        //        @Beta
-        //        static <T, E extends Exception> CheckedIterator<T, E> of(final Throwables.Supplier<T[], E> arraySupplier) {
-        //            N.checkArgNotNull(arraySupplier, "arraySupplier");
-        //
-        //            return new CheckedIterator<>() {
-        //                private T[] a;
-        //                private int len;
-        //                private int position = 0;
-        //                private boolean isInitialized = false;
-        //
-        //                @Override
-        //                public boolean hasNext() throws E {
-        //                    if (!isInitialized) {
-        //                        init();
-        //                    }
-        //
-        //                    return position < len;
-        //                }
-        //
-        //                @Override
-        //                public T next() throws E {
-        //                    if (!isInitialized) {
-        //                        init();
-        //                    }
-        //
-        //                    if (position >= len) {
-        //                        throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
-        //                    }
-        //
-        //                    return a[position++];
-        //                }
-        //
-        //                @Override
-        //                public long count() throws E {
-        //                    if (!isInitialized) {
-        //                        init();
-        //                    }
-        //
-        //                    return len - position; //NOSONAR
-        //                }
-        //
-        //                @Override
-        //                public void advance(long n) throws E {
-        //                    N.checkArgNotNegative(n, "n");
-        //
-        //                    if (!isInitialized) {
-        //                        init();
-        //                    }
-        //
-        //                    if (n > len - position) {
-        //                        position = len;
-        //                    } else {
-        //                        position += n;
-        //                    }
-        //
-        //                }
-        //
-        //                private void init() throws E {
-        //                    if (!isInitialized) {
-        //                        isInitialized = true;
-        //                        a = arraySupplier.get();
-        //                        len = N.len(a);
-        //                    }
-        //                }
-        //            };
-        //        }
-
-        /**
-         * Lazy evaluation.
-         *
-         * @param <T>
-         * @param <E>
-         * @param iteratorSupplier
-         * @return
-         */
-        public static <T, E extends Exception> CheckedIterator<T, E> defer(final Throwables.Supplier<CheckedIterator<T, E>, E> iteratorSupplier) {
-            N.checkArgNotNull(iteratorSupplier, "iteratorSupplier");
-
-            return new CheckedIterator<>() {
-                private CheckedIterator<T, E> iter = null;
-                private boolean isInitialized = false;
-
-                @Override
-                public boolean hasNext() throws E {
-                    if (!isInitialized) {
-                        init();
-                    }
-
-                    return iter.hasNext();
-                }
-
-                @Override
-                public T next() throws E {
-                    if (!isInitialized) {
-                        init();
-                    }
-
-                    return iter.next();
-                }
-
-                @Override
-                public void advance(long n) throws E {
-                    N.checkArgNotNegative(n, "n");
-
-                    if (!isInitialized) {
-                        init();
-                    }
-
-                    iter.advance(n);
-                }
-
-                @Override
-                public long count() throws E {
-                    if (!isInitialized) {
-                        init();
-                    }
-
-                    return iter.count();
-                }
-
-                @Override
-                public void close() throws E {
-                    if (!isInitialized) {
-                        init();
-                    }
-
-                    iter.close();
-                }
-
-                private void init() throws E {
-                    if (!isInitialized) {
-                        isInitialized = true;
-                        iter = iteratorSupplier.get();
-                    }
-                }
-            };
+        public LocalArrayDeque(int initialCapacity) {
+            super(initialCapacity);
         }
 
-        /**
-         *
-         *
-         * @param <T>
-         * @param <E>
-         * @param a
-         * @return
-         */
-        public static <T, E extends Exception> CheckedIterator<T, E> concat(final CheckedIterator<? extends T, ? extends E>... a) {
-            return concat(N.asList(a));
-        }
-
-        /**
-         *
-         *
-         * @param <T>
-         * @param <E>
-         * @param c
-         * @return
-         */
-        public static <T, E extends Exception> CheckedIterator<T, E> concat(final Collection<? extends CheckedIterator<? extends T, ? extends E>> c) {
-            if (N.isEmpty(c)) {
-                return CheckedIterator.empty();
-            }
-
-            return new CheckedIterator<>() {
-                private final Iterator<? extends CheckedIterator<? extends T, ? extends E>> iter = c.iterator();
-                private CheckedIterator<? extends T, ? extends E> cur;
-
-                @Override
-                public boolean hasNext() throws E {
-                    while ((cur == null || !cur.hasNext()) && iter.hasNext()) {
-                        cur = iter.next();
-                    }
-
-                    return cur != null && cur.hasNext();
-                }
-
-                @Override
-                public T next() throws E {
-                    if ((cur == null || !cur.hasNext()) && !hasNext()) {
-                        throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
-                    }
-
-                    return cur.next();
-                }
-            };
-        }
-
-        /**
-         * Checks for next.
-         *
-         * @return
-         * @throws E the e
-         */
-        public abstract boolean hasNext() throws E;
-
-        /**
-         *
-         * @return
-         * @throws E the e
-         */
-        public abstract T next() throws E;
-
-        /**
-         *
-         * @param n
-         * @throws E the e
-         */
-        public void advance(long n) throws E {
-            N.checkArgNotNegative(n, "n");
-
-            while (n-- > 0 && hasNext()) {
-                next();
-            }
-        }
-
-        /**
-         *
-         * @return
-         * @throws E the e
-         */
-        public long count() throws E {
-            long result = 0;
-
-            while (hasNext()) {
-                next();
-                result++;
-            }
-
-            return result;
-        }
-
-        /**
-         *
-         * @throws E the e
-         */
-        public void close() throws E {
-            // Nothing to do by default.
+        public LocalArrayDeque(Collection<? extends T> c) {
+            super(c);
         }
     }
 
     // CheckedException -> Maybe makes sense. Checked exception...
-    // But what does CheckedStream mean? Checked stream ???
-    //    public static final class CheckedStream<T, E extends Exception> extends CheckedStream<T, E> {
+    // But what does Seq mean? Checked stream ???
+    //    public static final class Seq<T, E extends Exception> extends Seq<T, E> {
     //
-    //        CheckedStream(CheckedIterator<T, E> iter, boolean sorted, Comparator<? super T> comparator, Deque<Throwables.Runnable<? extends E>> closeHandlers) {
+    //        Seq(Throwables.Iterator<T, E> iter, boolean sorted, Comparator<? super T> comparator, Deque<Throwables.Runnable<? extends E>> closeHandlers) {
     //            super(iter, sorted, comparator, closeHandlers);
     //        }
     //    }
@@ -16991,9 +16686,9 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     // * @param <T>
     // * @param <E>
     // */
-    //public static final class Seq<T> extends CheckedStream<T, RuntimeException> {
+    //public static final class Seq<T> extends Seq<T, RuntimeException> {
     //
-    //    Seq(CheckedIterator<T, RuntimeException> iter, boolean sorted, Comparator<? super T> comparator,
+    //    Seq(Throwables.Iterator<T, RuntimeException> iter, boolean sorted, Comparator<? super T> comparator,
     //            Deque<Throwables.Runnable<? extends RuntimeException>> closeHandlers) {
     //        super(iter, sorted, comparator, closeHandlers);
     //    }
@@ -17002,7 +16697,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     //    /**
     //     * Mostly it's for android.
     //     *
-    //     * @see {@code CheckedStream<T, RuntimeException>}
+    //     * @see {@code Seq<T, RuntimeException>}
     //     *
     //     * @deprecated Mostly it's for android.
     //     */
@@ -17017,7 +16712,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     //    /**
     //     * Mostly it's for android.
     //     *
-    //     * @see {@code CheckedStream<T, RuntimeException>}
+    //     * @see {@code Seq<T, RuntimeException>}
     //     *
     //     * @deprecated Mostly it's for android.
     //     */
@@ -17028,272 +16723,272 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     //            // singleton for utility class.
     //        }
     //
-    //        public static <T> CheckedStream<T, RuntimeException> empty() {
-    //            return CheckedStream.<T, RuntimeException> empty();
+    //        public static <T> Seq<T, RuntimeException> empty() {
+    //            return Seq.<T, RuntimeException> empty();
     //        }
     //
-    //        public static <T> CheckedStream<T, RuntimeException> just(final T e) {
-    //            return CheckedStream.<T, RuntimeException> just(e);
+    //        public static <T> Seq<T, RuntimeException> just(final T e) {
+    //            return Seq.<T, RuntimeException> just(e);
     //        }
     //
-    //        public static <T> CheckedStream<T, RuntimeException> ofNullable(final T e) {
-    //            return CheckedStream.<T, RuntimeException> ofNullable(e);
+    //        public static <T> Seq<T, RuntimeException> ofNullable(final T e) {
+    //            return Seq.<T, RuntimeException> ofNullable(e);
     //        }
     //
-    //        public static <T> CheckedStream<T, RuntimeException> of(final T... a) {
-    //            return CheckedStream.<T, RuntimeException> of(a);
+    //        public static <T> Seq<T, RuntimeException> of(final T... a) {
+    //            return Seq.<T, RuntimeException> of(a);
     //        }
     //
-    //        public static <T> CheckedStream<T, RuntimeException> of(final Collection<? extends T> c) {
-    //            return CheckedStream.<T, RuntimeException> of(c);
+    //        public static <T> Seq<T, RuntimeException> of(final Collection<? extends T> c) {
+    //            return Seq.<T, RuntimeException> of(c);
     //        }
     //
-    //        public static <T> CheckedStream<T, RuntimeException> of(final Iterator<? extends T> iter) {
-    //            return CheckedStream.<T, RuntimeException> of(iter);
+    //        public static <T> Seq<T, RuntimeException> of(final Iterator<? extends T> iter) {
+    //            return Seq.<T, RuntimeException> of(iter);
     //        }
     //
-    //        public static <T> CheckedStream<T, RuntimeException> of(final Iterable<? extends T> iterable) {
-    //            return CheckedStream.<T, RuntimeException> of(iterable);
+    //        public static <T> Seq<T, RuntimeException> of(final Iterable<? extends T> iterable) {
+    //            return Seq.<T, RuntimeException> of(iterable);
     //        }
     //
-    //        public static <K, V> CheckedStream<Map.Entry<K, V>, RuntimeException> of(final Map<K, V> m) {
-    //            return CheckedStream.<K, V, RuntimeException> of(m);
+    //        public static <K, V> Seq<Map.Entry<K, V>, RuntimeException> of(final Map<K, V> m) {
+    //            return Seq.<K, V, RuntimeException> of(m);
     //        }
     //
-    //        public static <T> CheckedStream<T, RuntimeException> of(final Stream<? extends T> stream) {
-    //            return CheckedStream.<T, RuntimeException> of(stream);
+    //        public static <T> Seq<T, RuntimeException> of(final Stream<? extends T> stream) {
+    //            return Seq.<T, RuntimeException> of(stream);
     //        }
     //
-    //        public static <T> CheckedStream<T, RuntimeException> of(final java.util.stream.Stream<? extends T> stream) {
-    //            return CheckedStream.<T, RuntimeException> of(stream);
+    //        public static <T> Seq<T, RuntimeException> of(final java.util.stream.Stream<? extends T> stream) {
+    //            return Seq.<T, RuntimeException> of(stream);
     //        }
     //
-    //        public static CheckedStream<Boolean, RuntimeException> of(final boolean[] a) {
-    //            return CheckedStream.<RuntimeException> of(a);
+    //        public static Seq<Boolean, RuntimeException> of(final boolean[] a) {
+    //            return Seq.<RuntimeException> of(a);
     //        }
     //
-    //        public static CheckedStream<Character, RuntimeException> of(final char[] a) {
-    //            return CheckedStream.<RuntimeException> of(a);
+    //        public static Seq<Character, RuntimeException> of(final char[] a) {
+    //            return Seq.<RuntimeException> of(a);
     //        }
     //
-    //        public static CheckedStream<Byte, RuntimeException> of(final byte[] a) {
-    //            return CheckedStream.<RuntimeException> of(a);
+    //        public static Seq<Byte, RuntimeException> of(final byte[] a) {
+    //            return Seq.<RuntimeException> of(a);
     //        }
     //
-    //        public static CheckedStream<Short, RuntimeException> of(final short[] a) {
-    //            return CheckedStream.<RuntimeException> of(a);
+    //        public static Seq<Short, RuntimeException> of(final short[] a) {
+    //            return Seq.<RuntimeException> of(a);
     //        }
     //
-    //        public static CheckedStream<Integer, RuntimeException> of(final int[] a) {
-    //            return CheckedStream.<RuntimeException> of(a);
+    //        public static Seq<Integer, RuntimeException> of(final int[] a) {
+    //            return Seq.<RuntimeException> of(a);
     //        }
     //
-    //        public static CheckedStream<Long, RuntimeException> of(final long[] a) {
-    //            return CheckedStream.<RuntimeException> of(a);
+    //        public static Seq<Long, RuntimeException> of(final long[] a) {
+    //            return Seq.<RuntimeException> of(a);
     //        }
     //
-    //        public static CheckedStream<Float, RuntimeException> of(final float[] a) {
-    //            return CheckedStream.<RuntimeException> of(a);
+    //        public static Seq<Float, RuntimeException> of(final float[] a) {
+    //            return Seq.<RuntimeException> of(a);
     //        }
     //
-    //        public static CheckedStream<Double, RuntimeException> of(final double[] a) {
-    //            return CheckedStream.<RuntimeException> of(a);
+    //        public static Seq<Double, RuntimeException> of(final double[] a) {
+    //            return Seq.<RuntimeException> of(a);
     //        }
     //
-    //        public static <T> CheckedStream<T, RuntimeException> of(final Optional<T> op) {
-    //            return CheckedStream.<T, RuntimeException> of(op);
+    //        public static <T> Seq<T, RuntimeException> of(final Optional<T> op) {
+    //            return Seq.<T, RuntimeException> of(op);
     //        }
     //
-    //        public static <T> CheckedStream<T, RuntimeException> of(final java.util.Optional<T> op) {
-    //            return CheckedStream.<T, RuntimeException> of(op);
+    //        public static <T> Seq<T, RuntimeException> of(final java.util.Optional<T> op) {
+    //            return Seq.<T, RuntimeException> of(op);
     //        }
     //
-    //        public static <K> CheckedStream<K, RuntimeException> ofKeys(final Map<K, ?> map) {
-    //            return CheckedStream.<K, RuntimeException> ofKeys(map);
+    //        public static <K> Seq<K, RuntimeException> ofKeys(final Map<K, ?> map) {
+    //            return Seq.<K, RuntimeException> ofKeys(map);
     //        }
     //
-    //        public static <K, V> CheckedStream<K, RuntimeException> ofKeys(final Map<K, V> map,
+    //        public static <K, V> Seq<K, RuntimeException> ofKeys(final Map<K, V> map,
     //                final Throwables.Predicate<? super V, RuntimeException> valueFilter) {
-    //            return CheckedStream.<K, V, RuntimeException> ofKeys(map, valueFilter);
+    //            return Seq.<K, V, RuntimeException> ofKeys(map, valueFilter);
     //        }
     //
-    //        public static <K, V> CheckedStream<K, RuntimeException> ofKeys(final Map<K, V> map,
+    //        public static <K, V> Seq<K, RuntimeException> ofKeys(final Map<K, V> map,
     //                final Throwables.BiPredicate<? super K, ? super V, RuntimeException> filter) {
-    //            return CheckedStream.ofKeys(map, filter);
+    //            return Seq.ofKeys(map, filter);
     //        }
     //
-    //        public static <V> CheckedStream<V, RuntimeException> ofValues(final Map<?, V> map) {
-    //            return CheckedStream.<V, RuntimeException> ofValues(map);
+    //        public static <V> Seq<V, RuntimeException> ofValues(final Map<?, V> map) {
+    //            return Seq.<V, RuntimeException> ofValues(map);
     //        }
     //
-    //        public static <K, V> CheckedStream<V, RuntimeException> ofValues(final Map<K, V> map,
+    //        public static <K, V> Seq<V, RuntimeException> ofValues(final Map<K, V> map,
     //                final Throwables.Predicate<? super K, RuntimeException> keyFilter) {
-    //            return CheckedStream.<K, V, RuntimeException> ofValues(map, keyFilter);
+    //            return Seq.<K, V, RuntimeException> ofValues(map, keyFilter);
     //        }
     //
-    //        public static <K, V> CheckedStream<V, RuntimeException> ofValues(final Map<K, V> map,
+    //        public static <K, V> Seq<V, RuntimeException> ofValues(final Map<K, V> map,
     //                final Throwables.BiPredicate<? super K, ? super V, RuntimeException> filter) {
-    //            return CheckedStream.ofValues(map, filter);
+    //            return Seq.ofValues(map, filter);
     //        }
     //
     //        //    @Beta
-    //        //    public static <T> CheckedStream<T, RuntimeException> from(final Throwables.Supplier<Collection<? extends T>, RuntimeException> supplier) {
-    //        //        return CheckedStream.<T, RuntimeException> from(supplier);
+    //        //    public static <T> Seq<T, RuntimeException> from(final Throwables.Supplier<Collection<? extends T>, RuntimeException> supplier) {
+    //        //        return Seq.<T, RuntimeException> from(supplier);
     //        //    }
     //
-    //        public static <T> CheckedStream<T, RuntimeException> defer(
-    //                final Throwables.Supplier<CheckedStream<? extends T, ? extends RuntimeException>, RuntimeException> supplier) {
-    //            return CheckedStream.<T, RuntimeException> defer(supplier);
+    //        public static <T> Seq<T, RuntimeException> defer(
+    //                final Throwables.Supplier<Seq<? extends T, ? extends RuntimeException>, RuntimeException> supplier) {
+    //            return Seq.<T, RuntimeException> defer(supplier);
     //        }
     //
-    //        public static <T> CheckedStream<T, RuntimeException> iterate(final Throwables.BooleanSupplier<? extends RuntimeException> hasNext,
+    //        public static <T> Seq<T, RuntimeException> iterate(final Throwables.BooleanSupplier<? extends RuntimeException> hasNext,
     //                final Throwables.Supplier<? extends T, RuntimeException> next) {
-    //            return CheckedStream.<T, RuntimeException> iterate(hasNext, next);
+    //            return Seq.<T, RuntimeException> iterate(hasNext, next);
     //        }
     //
-    //        public static <T> CheckedStream<T, RuntimeException> iterate(final T init, final Throwables.BooleanSupplier<? extends RuntimeException> hasNext,
+    //        public static <T> Seq<T, RuntimeException> iterate(final T init, final Throwables.BooleanSupplier<? extends RuntimeException> hasNext,
     //                final Throwables.UnaryOperator<T, ? extends RuntimeException> f) {
-    //            return CheckedStream.<T, RuntimeException> iterate(init, hasNext, f);
+    //            return Seq.<T, RuntimeException> iterate(init, hasNext, f);
     //        }
     //
-    //        public static <T> CheckedStream<T, RuntimeException> iterate(final T init, final Throwables.Predicate<? super T, RuntimeException> hasNext,
+    //        public static <T> Seq<T, RuntimeException> iterate(final T init, final Throwables.Predicate<? super T, RuntimeException> hasNext,
     //                final Throwables.UnaryOperator<T, RuntimeException> f) {
-    //            return CheckedStream.<T, RuntimeException> iterate(init, hasNext, f);
+    //            return Seq.<T, RuntimeException> iterate(init, hasNext, f);
     //        }
     //
-    //        public static <T> CheckedStream<T, RuntimeException> iterate(final T init, final Throwables.UnaryOperator<T, RuntimeException> f) {
-    //            return CheckedStream.<T, RuntimeException> iterate(init, f);
+    //        public static <T> Seq<T, RuntimeException> iterate(final T init, final Throwables.UnaryOperator<T, RuntimeException> f) {
+    //            return Seq.<T, RuntimeException> iterate(init, f);
     //        }
     //
-    //        public static <T> CheckedStream<T, RuntimeException> generate(final Throwables.Supplier<T, RuntimeException> supplier) {
-    //            return CheckedStream.<T, RuntimeException> generate(supplier);
+    //        public static <T> Seq<T, RuntimeException> generate(final Throwables.Supplier<T, RuntimeException> supplier) {
+    //            return Seq.<T, RuntimeException> generate(supplier);
     //        }
     //
-    //        public static <T> CheckedStream<T, RuntimeException> repeat(final T element, final long n) {
-    //            return CheckedStream.<T, RuntimeException> repeat(element, n);
+    //        public static <T> Seq<T, RuntimeException> repeat(final T element, final long n) {
+    //            return Seq.<T, RuntimeException> repeat(element, n);
     //        }
     //
-    //        public static CheckedStream<Integer, RuntimeException> range(final int startInclusive, final int endExclusive) {
-    //            return CheckedStream.<RuntimeException> range(startInclusive, endExclusive);
+    //        public static Seq<Integer, RuntimeException> range(final int startInclusive, final int endExclusive) {
+    //            return Seq.<RuntimeException> range(startInclusive, endExclusive);
     //        }
     //
-    //        public static CheckedStream<Integer, RuntimeException> range(final int startInclusive, final int endExclusive, final int by) {
-    //            return CheckedStream.<RuntimeException> range(startInclusive, endExclusive, by);
+    //        public static Seq<Integer, RuntimeException> range(final int startInclusive, final int endExclusive, final int by) {
+    //            return Seq.<RuntimeException> range(startInclusive, endExclusive, by);
     //        }
     //
-    //        public static CheckedStream<Integer, RuntimeException> rangeClosed(final int startInclusive, final int endExclusive) {
-    //            return CheckedStream.<RuntimeException> rangeClosed(startInclusive, endExclusive);
+    //        public static Seq<Integer, RuntimeException> rangeClosed(final int startInclusive, final int endExclusive) {
+    //            return Seq.<RuntimeException> rangeClosed(startInclusive, endExclusive);
     //        }
     //
-    //        public static CheckedStream<Integer, RuntimeException> rangeClosed(final int startInclusive, final int endExclusive, final int by) {
-    //            return CheckedStream.<RuntimeException> rangeClosed(startInclusive, endExclusive, by);
-    //        }
-    //
-    //        @SafeVarargs
-    //        public static <T> CheckedStream<T, RuntimeException> concat(final T[]... a) {
-    //            return CheckedStream.<T, RuntimeException> concat(a);
+    //        public static Seq<Integer, RuntimeException> rangeClosed(final int startInclusive, final int endExclusive, final int by) {
+    //            return Seq.<RuntimeException> rangeClosed(startInclusive, endExclusive, by);
     //        }
     //
     //        @SafeVarargs
-    //        public static <T> CheckedStream<T, RuntimeException> concat(final Iterable<? extends T>... a) {
-    //            return CheckedStream.<T, RuntimeException> concat(a);
+    //        public static <T> Seq<T, RuntimeException> concat(final T[]... a) {
+    //            return Seq.<T, RuntimeException> concat(a);
     //        }
     //
     //        @SafeVarargs
-    //        public static <T> CheckedStream<T, RuntimeException> concat(final Iterator<? extends T>... a) {
-    //            return CheckedStream.<T, RuntimeException> concat(a);
+    //        public static <T> Seq<T, RuntimeException> concat(final Iterable<? extends T>... a) {
+    //            return Seq.<T, RuntimeException> concat(a);
     //        }
     //
-    //        public static <A, B, T> CheckedStream<T, RuntimeException> zip(final A[] a, final B[] b,
+    //        @SafeVarargs
+    //        public static <T> Seq<T, RuntimeException> concat(final Iterator<? extends T>... a) {
+    //            return Seq.<T, RuntimeException> concat(a);
+    //        }
+    //
+    //        public static <A, B, T> Seq<T, RuntimeException> zip(final A[] a, final B[] b,
     //                final Throwables.BiFunction<? super A, ? super B, T, RuntimeException> zipFunction) {
-    //            return CheckedStream.<A, B, T, RuntimeException> zip(a, b, zipFunction);
+    //            return Seq.<A, B, T, RuntimeException> zip(a, b, zipFunction);
     //        }
     //
-    //        public static <A, B, C, T> CheckedStream<T, RuntimeException> zip(final A[] a, final B[] b, final C[] c,
+    //        public static <A, B, C, T> Seq<T, RuntimeException> zip(final A[] a, final B[] b, final C[] c,
     //                final Throwables.TriFunction<? super A, ? super B, ? super C, T, RuntimeException> zipFunction) {
-    //            return CheckedStream.<A, B, C, T, RuntimeException> zip(a, b, c, zipFunction);
+    //            return Seq.<A, B, C, T, RuntimeException> zip(a, b, c, zipFunction);
     //        }
     //
-    //        public static <A, B, T> CheckedStream<T, RuntimeException> zip(final Iterable<? extends A> a, final Iterable<? extends B> b,
+    //        public static <A, B, T> Seq<T, RuntimeException> zip(final Iterable<? extends A> a, final Iterable<? extends B> b,
     //                final Throwables.BiFunction<? super A, ? super B, T, RuntimeException> zipFunction) {
-    //            return CheckedStream.<A, B, T, RuntimeException> zip(a, b, zipFunction);
+    //            return Seq.<A, B, T, RuntimeException> zip(a, b, zipFunction);
     //        }
     //
-    //        public static <A, B, C, T> CheckedStream<T, RuntimeException> zip(final Iterable<? extends A> a, final Iterable<? extends B> b,
+    //        public static <A, B, C, T> Seq<T, RuntimeException> zip(final Iterable<? extends A> a, final Iterable<? extends B> b,
     //                final Iterable<? extends C> c, final Throwables.TriFunction<? super A, ? super B, ? super C, T, RuntimeException> zipFunction) {
-    //            return CheckedStream.<A, B, C, T, RuntimeException> zip(a, b, c, zipFunction);
+    //            return Seq.<A, B, C, T, RuntimeException> zip(a, b, c, zipFunction);
     //        }
     //
-    //        public static <A, B, T> CheckedStream<T, RuntimeException> zip(final Iterator<? extends A> a, final Iterator<? extends B> b,
+    //        public static <A, B, T> Seq<T, RuntimeException> zip(final Iterator<? extends A> a, final Iterator<? extends B> b,
     //                final Throwables.BiFunction<? super A, ? super B, T, RuntimeException> zipFunction) {
-    //            return CheckedStream.<A, B, T, RuntimeException> zip(a, b, zipFunction);
+    //            return Seq.<A, B, T, RuntimeException> zip(a, b, zipFunction);
     //        }
     //
-    //        public static <A, B, C, T> CheckedStream<T, RuntimeException> zip(final Iterator<? extends A> a, final Iterator<? extends B> b,
+    //        public static <A, B, C, T> Seq<T, RuntimeException> zip(final Iterator<? extends A> a, final Iterator<? extends B> b,
     //                final Iterator<? extends C> c, final Throwables.TriFunction<? super A, ? super B, ? super C, T, RuntimeException> zipFunction) {
-    //            return CheckedStream.<A, B, C, T, RuntimeException> zip(a, b, c, zipFunction);
+    //            return Seq.<A, B, C, T, RuntimeException> zip(a, b, c, zipFunction);
     //        }
     //
-    //        public static <A, B, T> CheckedStream<T, RuntimeException> zip(final A[] a, final B[] b, final A valueForNoneA, final B valueForNoneB,
+    //        public static <A, B, T> Seq<T, RuntimeException> zip(final A[] a, final B[] b, final A valueForNoneA, final B valueForNoneB,
     //                final Throwables.BiFunction<? super A, ? super B, T, RuntimeException> zipFunction) {
-    //            return CheckedStream.<A, B, T, RuntimeException> zip(a, b, valueForNoneA, valueForNoneB, zipFunction);
+    //            return Seq.<A, B, T, RuntimeException> zip(a, b, valueForNoneA, valueForNoneB, zipFunction);
     //        }
     //
-    //        public static <A, B, C, T> CheckedStream<T, RuntimeException> zip(final A[] a, final B[] b, final C[] c, final A valueForNoneA,
+    //        public static <A, B, C, T> Seq<T, RuntimeException> zip(final A[] a, final B[] b, final C[] c, final A valueForNoneA,
     //                final B valueForNoneB, final C valueForNoneC, final Throwables.TriFunction<? super A, ? super B, ? super C, T, RuntimeException> zipFunction) {
-    //            return CheckedStream.<A, B, C, T, RuntimeException> zip(a, b, c, valueForNoneA, valueForNoneB, valueForNoneC, zipFunction);
+    //            return Seq.<A, B, C, T, RuntimeException> zip(a, b, c, valueForNoneA, valueForNoneB, valueForNoneC, zipFunction);
     //        }
     //
-    //        public static <A, B, T> CheckedStream<T, RuntimeException> zip(final Iterable<? extends A> a, final Iterable<? extends B> b, final A valueForNoneA,
+    //        public static <A, B, T> Seq<T, RuntimeException> zip(final Iterable<? extends A> a, final Iterable<? extends B> b, final A valueForNoneA,
     //                final B valueForNoneB, final Throwables.BiFunction<? super A, ? super B, T, RuntimeException> zipFunction) {
-    //            return CheckedStream.<A, B, T, RuntimeException> zip(a, b, valueForNoneA, valueForNoneB, zipFunction);
+    //            return Seq.<A, B, T, RuntimeException> zip(a, b, valueForNoneA, valueForNoneB, zipFunction);
     //        }
     //
-    //        public static <A, B, C, T> CheckedStream<T, RuntimeException> zip(final Iterable<? extends A> a, final Iterable<? extends B> b,
+    //        public static <A, B, C, T> Seq<T, RuntimeException> zip(final Iterable<? extends A> a, final Iterable<? extends B> b,
     //                final Iterable<? extends C> c, final A valueForNoneA, final B valueForNoneB, final C valueForNoneC,
     //                final Throwables.TriFunction<? super A, ? super B, ? super C, T, RuntimeException> zipFunction) {
-    //            return CheckedStream.<A, B, C, T, RuntimeException> zip(a, b, c, valueForNoneA, valueForNoneB, valueForNoneC, zipFunction);
+    //            return Seq.<A, B, C, T, RuntimeException> zip(a, b, c, valueForNoneA, valueForNoneB, valueForNoneC, zipFunction);
     //        }
     //
-    //        public static <A, B, T> CheckedStream<T, RuntimeException> zip(final Iterator<? extends A> a, final Iterator<? extends B> b, final A valueForNoneA,
+    //        public static <A, B, T> Seq<T, RuntimeException> zip(final Iterator<? extends A> a, final Iterator<? extends B> b, final A valueForNoneA,
     //                final B valueForNoneB, final Throwables.BiFunction<? super A, ? super B, T, RuntimeException> zipFunction) {
-    //            return CheckedStream.<A, B, T, RuntimeException> zip(a, b, valueForNoneA, valueForNoneB, zipFunction);
+    //            return Seq.<A, B, T, RuntimeException> zip(a, b, valueForNoneA, valueForNoneB, zipFunction);
     //        }
     //
-    //        public static <A, B, C, T> CheckedStream<T, RuntimeException> zip(final Iterator<? extends A> a, final Iterator<? extends B> b,
+    //        public static <A, B, C, T> Seq<T, RuntimeException> zip(final Iterator<? extends A> a, final Iterator<? extends B> b,
     //                final Iterator<? extends C> c, final A valueForNoneA, final B valueForNoneB, final C valueForNoneC,
     //                final Throwables.TriFunction<? super A, ? super B, ? super C, T, RuntimeException> zipFunction) {
-    //            return CheckedStream.<A, B, C, T, RuntimeException> zip(a, b, c, valueForNoneA, valueForNoneB, valueForNoneC, zipFunction);
+    //            return Seq.<A, B, C, T, RuntimeException> zip(a, b, c, valueForNoneA, valueForNoneB, valueForNoneC, zipFunction);
     //        }
     //
-    //        public static <T> CheckedStream<T, RuntimeException> merge(final T[] a, final T[] b,
+    //        public static <T> Seq<T, RuntimeException> merge(final T[] a, final T[] b,
     //                final Throwables.BiFunction<? super T, ? super T, MergeResult, RuntimeException> nextSelector) {
-    //            return CheckedStream.<T, RuntimeException> merge(a, b, nextSelector);
+    //            return Seq.<T, RuntimeException> merge(a, b, nextSelector);
     //        }
     //
-    //        public static <T> CheckedStream<T, RuntimeException> merge(final T[] a, final T[] b, final T[] c,
+    //        public static <T> Seq<T, RuntimeException> merge(final T[] a, final T[] b, final T[] c,
     //                final Throwables.BiFunction<? super T, ? super T, MergeResult, RuntimeException> nextSelector) {
-    //            return CheckedStream.<T, RuntimeException> merge(a, b, c, nextSelector);
+    //            return Seq.<T, RuntimeException> merge(a, b, c, nextSelector);
     //        }
     //
-    //        public static <T> CheckedStream<T, RuntimeException> merge(final Iterable<? extends T> a, final Iterable<? extends T> b,
+    //        public static <T> Seq<T, RuntimeException> merge(final Iterable<? extends T> a, final Iterable<? extends T> b,
     //                final Throwables.BiFunction<? super T, ? super T, MergeResult, RuntimeException> nextSelector) {
-    //            return CheckedStream.<T, RuntimeException> merge(a, b, nextSelector);
+    //            return Seq.<T, RuntimeException> merge(a, b, nextSelector);
     //        }
     //
-    //        public static <T> CheckedStream<T, RuntimeException> merge(final Iterable<? extends T> a, final Iterable<? extends T> b,
+    //        public static <T> Seq<T, RuntimeException> merge(final Iterable<? extends T> a, final Iterable<? extends T> b,
     //                final Iterable<? extends T> c, final Throwables.BiFunction<? super T, ? super T, MergeResult, RuntimeException> nextSelector) {
-    //            return CheckedStream.<T, RuntimeException> merge(a, b, c, nextSelector);
+    //            return Seq.<T, RuntimeException> merge(a, b, c, nextSelector);
     //        }
     //
-    //        public static <T> CheckedStream<T, RuntimeException> merge(final Iterator<? extends T> a, final Iterator<? extends T> b,
+    //        public static <T> Seq<T, RuntimeException> merge(final Iterator<? extends T> a, final Iterator<? extends T> b,
     //                final Throwables.BiFunction<? super T, ? super T, MergeResult, RuntimeException> nextSelector) {
-    //            return CheckedStream.<T, RuntimeException> merge(a, b, nextSelector);
+    //            return Seq.<T, RuntimeException> merge(a, b, nextSelector);
     //        }
     //
-    //        public static <T> CheckedStream<T, RuntimeException> merge(final Iterator<? extends T> a, final Iterator<? extends T> b,
+    //        public static <T> Seq<T, RuntimeException> merge(final Iterator<? extends T> a, final Iterator<? extends T> b,
     //                final Iterator<? extends T> c, final Throwables.BiFunction<? super T, ? super T, MergeResult, RuntimeException> nextSelector) {
-    //            return CheckedStream.<T, RuntimeException> merge(a, b, c, nextSelector);
+    //            return Seq.<T, RuntimeException> merge(a, b, c, nextSelector);
     //        }
     //    }
 }

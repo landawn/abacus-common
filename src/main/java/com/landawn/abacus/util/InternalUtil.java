@@ -24,7 +24,6 @@ import java.util.List;
 
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.Internal;
-import com.landawn.abacus.util.CheckedStream.CheckedIterator;
 
 @Internal
 public final class InternalUtil {
@@ -241,18 +240,6 @@ public final class InternalUtil {
     @Deprecated
     static boolean notNullOrDefault(final Object value) {
         return (value != null) && !N.equals(value, N.defaultValueOf(value.getClass()));
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param <E>
-     * @param iter
-     * @return
-     */
-    @Beta
-    public static <T, E extends Exception> CheckedStream<T, E> newStream(final CheckedIterator<T, E> iter) {
-        return CheckedStream.newStream(iter);
     }
 
     private InternalUtil() {

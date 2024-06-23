@@ -1672,9 +1672,11 @@ public class Builder<T> {
         }
 
         /**
+         * 
          *
-         * @param c
-         * @return
+         * @param c 
+         * @param occurrences 
+         * @return 
          */
         public LongMultisetBuilder<T> setAll(final Collection<? extends T> c, final long occurrences) {
             val.setAll(c, occurrences);

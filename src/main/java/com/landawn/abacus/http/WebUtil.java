@@ -27,7 +27,6 @@ import com.landawn.abacus.util.ImmutableBiMap;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Objectory;
 import com.landawn.abacus.util.Strings;
-import com.landawn.abacus.util.Strings.StringUtil;
 
 public final class WebUtil {
 
@@ -53,13 +52,13 @@ public final class WebUtil {
 
             if (httpMethod == null && (token.equals("-X") || token.equals("--request")) && httpMethodMap.containsValue(tokens.get(i + 1).toUpperCase())) {
                 httpMethod = HttpMethod.valueOf(tokens.get(++i).toUpperCase());
-            } else if (Strings.isEmpty(url) && (StringUtil.startsWithIgnoreCase(token, "https://") || StringUtil.startsWithIgnoreCase(token, "http://"))) {
+            } else if (Strings.isEmpty(url) && (Strings.startsWithIgnoreCase(token, "https://") || Strings.startsWithIgnoreCase(token, "http://"))) {
                 url = token;
-            } else if (StringUtil.equals(token, "--header") || StringUtil.equals(token, "-H")) {
+            } else if (Strings.equals(token, "--header") || Strings.equals(token, "-H")) {
                 String header = tokens.get(++i);
                 int idx = header.indexOf(':');
                 headers = headers + indent + ".header(\"" + header.substring(0, idx).trim() + "\", \"" + escapeJava(header.substring(idx + 1).trim()) + "\")"; //NOSONAR
-            } else if (StringUtil.equals(token, "--data-raw") || StringUtil.equals(token, "--data") || StringUtil.equals(token, "-d")) {
+            } else if (Strings.equals(token, "--data-raw") || Strings.equals(token, "--data") || Strings.equals(token, "-d")) {
                 body = tokens.get(++i);
             }
         }
@@ -89,7 +88,7 @@ public final class WebUtil {
         } else if (httpMethod == HttpMethod.POST) {
             sb.append(indent).append(".post(");
 
-            if (StringUtil.isNotEmpty(body)) {
+            if (Strings.isNotEmpty(body)) {
                 sb.append("requestBody");
             }
 
@@ -97,7 +96,7 @@ public final class WebUtil {
         } else if (httpMethod == HttpMethod.PUT) {
             sb.append(indent).append(".put(");
 
-            if (StringUtil.isNotEmpty(body)) {
+            if (Strings.isNotEmpty(body)) {
                 sb.append("requestBody");
             }
 
@@ -105,7 +104,7 @@ public final class WebUtil {
         } else {
             sb.append(indent).append(".execute(HttpMethod.").append(httpMethod.name());
 
-            if (StringUtil.isNotEmpty(body)) {
+            if (Strings.isNotEmpty(body)) {
                 sb.append(", requestBody");
             }
 
@@ -136,9 +135,9 @@ public final class WebUtil {
 
             if (httpMethod == null && (token.equals("-X") || token.equals("--request")) && httpMethodMap.containsValue(tokens.get(i + 1).toUpperCase())) {
                 httpMethod = HttpMethod.valueOf(tokens.get(++i).toUpperCase());
-            } else if (Strings.isEmpty(url) && (StringUtil.startsWithIgnoreCase(token, "https://") || StringUtil.startsWithIgnoreCase(token, "http://"))) {
+            } else if (Strings.isEmpty(url) && (Strings.startsWithIgnoreCase(token, "https://") || Strings.startsWithIgnoreCase(token, "http://"))) {
                 url = token;
-            } else if (StringUtil.equals(token, "--header") || StringUtil.equals(token, "-H")) {
+            } else if (Strings.equals(token, "--header") || Strings.equals(token, "-H")) {
                 String header = tokens.get(++i);
                 int idx = header.indexOf(':');
                 headers = headers + indent + ".header(\"" + header.substring(0, idx).trim() + "\", \"" + escapeJava(header.substring(idx + 1).trim()) + "\")"; //NOSONAR
@@ -146,7 +145,7 @@ public final class WebUtil {
                 if ("Content-Type".equalsIgnoreCase(header.substring(0, idx).trim())) {
                     mediaType = "MediaType.parse(\"" + header.substring(idx + 1).trim() + "\")";
                 }
-            } else if (StringUtil.equals(token, "--data-raw") || StringUtil.equals(token, "--data") || StringUtil.equals(token, "-d")) {
+            } else if (Strings.equals(token, "--data-raw") || Strings.equals(token, "--data") || Strings.equals(token, "-d")) {
                 body = tokens.get(++i);
             }
         }
@@ -195,7 +194,7 @@ public final class WebUtil {
     private static List<String> parseCurl(final String curl) {
         N.checkArgNotEmpty(curl, "curl");
         String str = curl.trim();
-        N.checkArgument(StringUtil.startsWithIgnoreCase(str, "curl"), "Input curl script doesn't start with 'curl'");
+        N.checkArgument(Strings.startsWithIgnoreCase(str, "curl"), "Input curl script doesn't start with 'curl'");
 
         final List<String> tokens = new ArrayList<>();
         final int len = str.length();
@@ -319,7 +318,7 @@ public final class WebUtil {
                             .append(quoteChar)
                             .append(e.getKey())
                             .append(": ")
-                            .append(StringUtil.quoteEscaped(headerValue, quoteChar))
+                            .append(Strings.quoteEscaped(headerValue, quoteChar))
                             .append(quoteChar);
                 }
             }
@@ -332,11 +331,11 @@ public final class WebUtil {
                             .append(quoteChar)
                             .append(HttpHeaders.Names.CONTENT_TYPE)
                             .append(": ")
-                            .append(StringUtil.quoteEscaped(bodyType, quoteChar))
+                            .append(Strings.quoteEscaped(bodyType, quoteChar))
                             .append(quoteChar);
                 }
 
-                sb.append(" -d ").append(quoteChar).append(StringUtil.quoteEscaped(body, quoteChar)).append(quoteChar);
+                sb.append(" -d ").append(quoteChar).append(Strings.quoteEscaped(body, quoteChar)).append(quoteChar);
             }
 
             sb.append(IOUtil.LINE_SEPARATOR);

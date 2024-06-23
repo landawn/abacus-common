@@ -359,12 +359,10 @@ public final class Holder<T> implements Mutable {
     /**
      * Or else get if null.
      *
-     * @param <E>
      * @param other
      * @return
-     * @throws E the e
      */
-    public <E extends Exception> T orElseGetIfNull(final Throwables.Supplier<? extends T, E> other) throws E {
+    public T orElseGetIfNull(final Supplier<? extends T> other) {
         N.checkArgNotNull(other, "other");
 
         if (isNotNull()) {

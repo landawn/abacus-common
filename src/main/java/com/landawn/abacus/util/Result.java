@@ -149,14 +149,12 @@ public class Result<T, E extends Throwable> implements Immutable {
 
     /**
      *
-     * @param <E2>
      * @param otherIfErrorOccurred
      * @return
-     * @throws E2
-     * @deprecated replaced by {@link #orElseGetIfFailure(Throwables.Supplier)}
+     * @deprecated replaced by {@link #orElseGetIfFailure(Supplier)}
      */
     @Deprecated
-    public <E2 extends Throwable> T orElseGet(final Throwables.Supplier<? extends T, E2> otherIfErrorOccurred) throws E2 {
+    public T orElseGet(final Supplier<? extends T> otherIfErrorOccurred) {
         return orElseGetIfFailure(otherIfErrorOccurred);
     }
 
@@ -175,12 +173,10 @@ public class Result<T, E extends Throwable> implements Immutable {
 
     /**
      *
-     * @param <E2>
      * @param otherIfErrorOccurred
      * @return
-     * @throws E2
      */
-    public <E2 extends Throwable> T orElseGetIfFailure(final Throwables.Supplier<? extends T, E2> otherIfErrorOccurred) throws E2 {
+    public T orElseGetIfFailure(final Supplier<? extends T> otherIfErrorOccurred) {
         N.checkArgNotNull(otherIfErrorOccurred, "otherIfErrorOccurred");
 
         if (exception == null) {

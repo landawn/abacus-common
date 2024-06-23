@@ -21,10 +21,18 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.BooleanSupplier;
+import java.util.function.DoubleSupplier;
+import java.util.function.IntSupplier;
+import java.util.function.LongSupplier;
 import java.util.function.Supplier;
 
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.SuppressFBWarnings;
+import com.landawn.abacus.util.function.ByteSupplier;
+import com.landawn.abacus.util.function.CharSupplier;
+import com.landawn.abacus.util.function.FloatSupplier;
+import com.landawn.abacus.util.function.ShortSupplier;
 import com.landawn.abacus.util.stream.ByteStream;
 import com.landawn.abacus.util.stream.CharStream;
 import com.landawn.abacus.util.stream.DoubleStream;
@@ -459,12 +467,10 @@ public class u {//NOSONAR
 
         /**
          *
-         * @param <E>
          * @param supplier
          * @return
-         * @throws E the e
          */
-        public <E extends Exception> Optional<T> or(final Throwables.Supplier<Optional<T>, E> supplier) throws E {
+        public Optional<T> or(final Supplier<Optional<T>> supplier) {
             N.checkArgNotNull(supplier, "supplier");
 
             if (isPresent()) {
@@ -504,12 +510,10 @@ public class u {//NOSONAR
         /**
          * Or else get.
          *
-         * @param <E>
          * @param other
          * @return
-         * @throws E the e
          */
-        public <E extends Exception> T orElseGet(final Throwables.Supplier<? extends T, E> other) throws E {
+        public T orElseGet(final Supplier<? extends T> other) {
             if (isPresent()) {
                 return value;
             } else {
@@ -1042,13 +1046,12 @@ public class u {//NOSONAR
         }
 
         /**
+         * 
          *
-         * @param <E>
-         * @param supplier
-         * @return
-         * @throws E the e
+         * @param supplier 
+         * @return 
          */
-        public <E extends Exception> OptionalBoolean or(final Throwables.Supplier<OptionalBoolean, E> supplier) throws E {
+        public OptionalBoolean or(final Supplier<OptionalBoolean> supplier) {
             if (isPresent) {
                 return this;
             } else {
@@ -1096,12 +1099,10 @@ public class u {//NOSONAR
         /**
          * Or else get.
          *
-         * @param <E>
          * @param other
          * @return
-         * @throws E the e
          */
-        public <E extends Exception> boolean orElseGet(final Throwables.BooleanSupplier<E> other) throws E {
+        public boolean orElseGet(final BooleanSupplier other) {
             N.checkArgNotNull(other, "other");
 
             if (isPresent) {
@@ -1638,12 +1639,10 @@ public class u {//NOSONAR
 
         /**
          *
-         * @param <E>
          * @param supplier
          * @return
-         * @throws E the e
          */
-        public <E extends Exception> OptionalChar or(final Throwables.Supplier<OptionalChar, E> supplier) throws E {
+        public OptionalChar or(final Supplier<OptionalChar> supplier) {
             if (isPresent()) {
                 return this;
             } else {
@@ -1682,12 +1681,10 @@ public class u {//NOSONAR
         /**
          * Or else get.
          *
-         * @param <E>
          * @param other
          * @return
-         * @throws E the e
          */
-        public <E extends Exception> char orElseGet(final Throwables.CharSupplier<E> other) throws E {
+        public char orElseGet(final CharSupplier other) {
             N.checkArgNotNull(other, "other");
 
             if (isPresent()) {
@@ -2206,12 +2203,10 @@ public class u {//NOSONAR
 
         /**
          *
-         * @param <E>
          * @param supplier
          * @return
-         * @throws E the e
          */
-        public <E extends Exception> OptionalByte or(final Throwables.Supplier<OptionalByte, E> supplier) throws E {
+        public OptionalByte or(final Supplier<OptionalByte> supplier) {
             if (isPresent) {
                 return this;
             } else {
@@ -2250,12 +2245,10 @@ public class u {//NOSONAR
         /**
          * Or else get.
          *
-         * @param <E>
          * @param other
          * @return
-         * @throws E the e
          */
-        public <E extends Exception> byte orElseGet(final Throwables.ByteSupplier<E> other) throws E {
+        public byte orElseGet(final ByteSupplier other) {
             N.checkArgNotNull(other, "other");
 
             if (isPresent) {
@@ -2774,12 +2767,10 @@ public class u {//NOSONAR
 
         /**
          *
-         * @param <E>
          * @param supplier
          * @return
-         * @throws E the e
          */
-        public <E extends Exception> OptionalShort or(final Throwables.Supplier<OptionalShort, E> supplier) throws E {
+        public OptionalShort or(final Supplier<OptionalShort> supplier) {
             if (isPresent) {
                 return this;
             } else {
@@ -2818,12 +2809,10 @@ public class u {//NOSONAR
         /**
          * Or else get.
          *
-         * @param <E>
          * @param other
          * @return
-         * @throws E the e
          */
-        public <E extends Exception> short orElseGet(final Throwables.ShortSupplier<E> other) throws E {
+        public short orElseGet(final ShortSupplier other) {
             N.checkArgNotNull(other, "other");
 
             if (isPresent) {
@@ -3427,12 +3416,10 @@ public class u {//NOSONAR
 
         /**
          *
-         * @param <E>
          * @param supplier
          * @return
-         * @throws E the e
          */
-        public <E extends Exception> OptionalInt or(final Throwables.Supplier<OptionalInt, E> supplier) throws E {
+        public OptionalInt or(final Supplier<OptionalInt> supplier) {
             if (isPresent) {
                 return this;
             } else {
@@ -3471,12 +3458,10 @@ public class u {//NOSONAR
         /**
          * Or else get.
          *
-         * @param <E>
          * @param other
          * @return
-         * @throws E the e
          */
-        public <E extends Exception> int orElseGet(final Throwables.IntSupplier<E> other) throws E {
+        public int orElseGet(final IntSupplier other) {
             N.checkArgNotNull(other, "other");
 
             if (isPresent) {
@@ -4048,12 +4033,10 @@ public class u {//NOSONAR
 
         /**
          *
-         * @param <E>
          * @param supplier
          * @return
-         * @throws E the e
          */
-        public <E extends Exception> OptionalLong or(final Throwables.Supplier<OptionalLong, E> supplier) throws E {
+        public OptionalLong or(final Supplier<OptionalLong> supplier) {
             if (isPresent) {
                 return this;
             } else {
@@ -4092,12 +4075,10 @@ public class u {//NOSONAR
         /**
          * Or else get.
          *
-         * @param <E>
          * @param other
          * @return
-         * @throws E the e
          */
-        public <E extends Exception> long orElseGet(final Throwables.LongSupplier<E> other) throws E {
+        public long orElseGet(final LongSupplier other) {
             N.checkArgNotNull(other, "other");
 
             if (isPresent) {
@@ -4641,12 +4622,10 @@ public class u {//NOSONAR
 
         /**
          *
-         * @param <E>
          * @param supplier
          * @return
-         * @throws E the e
          */
-        public <E extends Exception> OptionalFloat or(final Throwables.Supplier<OptionalFloat, E> supplier) throws E {
+        public OptionalFloat or(final Supplier<OptionalFloat> supplier) {
             if (isPresent) {
                 return this;
             } else {
@@ -4685,12 +4664,10 @@ public class u {//NOSONAR
         /**
          * Or else get.
          *
-         * @param <E>
          * @param other
          * @return
-         * @throws E the e
          */
-        public <E extends Exception> float orElseGet(final Throwables.FloatSupplier<E> other) throws E {
+        public float orElseGet(final FloatSupplier other) {
             N.checkArgNotNull(other, "other");
 
             if (isPresent) {
@@ -5225,12 +5202,10 @@ public class u {//NOSONAR
 
         /**
          *
-         * @param <E>
          * @param supplier
          * @return
-         * @throws E the e
          */
-        public <E extends Exception> OptionalDouble or(final Throwables.Supplier<OptionalDouble, E> supplier) throws E {
+        public OptionalDouble or(final Supplier<OptionalDouble> supplier) {
             if (isPresent) {
                 return this;
             } else {
@@ -5269,12 +5244,10 @@ public class u {//NOSONAR
         /**
          * Or else get.
          *
-         * @param <E>
          * @param other
          * @return
-         * @throws E the e
          */
-        public <E extends Exception> double orElseGet(final Throwables.DoubleSupplier<E> other) throws E {
+        public double orElseGet(final DoubleSupplier other) {
             N.checkArgNotNull(other, "other");
 
             if (isPresent) {
@@ -6254,12 +6227,10 @@ public class u {//NOSONAR
 
         /**
          *
-         * @param <E>
          * @param supplier
          * @return
-         * @throws E the e
          */
-        public <E extends Exception> Nullable<T> or(final Throwables.Supplier<Nullable<? extends T>, E> supplier) throws E {
+        public Nullable<T> or(final Supplier<Nullable<? extends T>> supplier) {
             N.checkArgNotNull(supplier, "supplier");
 
             if (isPresent()) {
@@ -6272,12 +6243,10 @@ public class u {//NOSONAR
         /**
          * Or if null.
          *
-         * @param <E>
          * @param supplier
          * @return
-         * @throws E the e
          */
-        public <E extends Exception> Nullable<T> orIfNull(final Throwables.Supplier<Nullable<? extends T>, E> supplier) throws E {
+        public Nullable<T> orIfNull(final Supplier<Nullable<? extends T>> supplier) {
             N.checkArgNotNull(supplier, "supplier");
 
             if (isNotNull()) {
@@ -6317,12 +6286,10 @@ public class u {//NOSONAR
         /**
          * Or else get.
          *
-         * @param <E>
          * @param other
          * @return
-         * @throws E the e
          */
-        public <E extends Exception> T orElseGet(final Throwables.Supplier<? extends T, E> other) throws E {
+        public T orElseGet(final Supplier<? extends T> other) {
             N.checkArgNotNull(other, "other");
 
             if (isPresent()) {
@@ -6345,12 +6312,10 @@ public class u {//NOSONAR
         /**
          * Or else get if null.
          *
-         * @param <E>
          * @param other
          * @return
-         * @throws E the e
          */
-        public <E extends Exception> T orElseGetIfNull(final Throwables.Supplier<? extends T, E> other) throws E {
+        public T orElseGetIfNull(final Supplier<? extends T> other) {
             N.checkArgNotNull(other, "other");
 
             if (isNotNull()) {
