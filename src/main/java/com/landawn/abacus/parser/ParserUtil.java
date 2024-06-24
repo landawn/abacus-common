@@ -1711,7 +1711,7 @@ public final class ParserUtil {
 
             try {
                 return (T) (isFieldAccessible ? field.get(obj) : getMethod.invoke(obj));
-            } catch (IllegalAccessException | InvocationTargetException e) {
+            } catch (Exception e) {
                 throw ExceptionUtil.toRuntimeException(e);
             }
         }

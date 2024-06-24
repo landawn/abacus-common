@@ -3586,11 +3586,11 @@ public final class IOUtil {
     }
 
     /**
-     * 
      *
-     * @param lines 
-     * @param targetFile 
-     * @throws IOException 
+     *
+     * @param lines
+     * @param targetFile
+     * @throws IOException
      */
     public static void appendLines(final Iterable<?> lines, final File targetFile) throws IOException {
         if (N.isEmpty(lines)) {
@@ -3601,12 +3601,12 @@ public final class IOUtil {
     }
 
     /**
-     * 
      *
-     * @param lines 
-     * @param charset 
-     * @param targetFile 
-     * @throws IOException 
+     *
+     * @param lines
+     * @param charset
+     * @param targetFile
+     * @throws IOException
      */
     public static void appendLines(final Iterable<?> lines, final Charset charset, final File targetFile) throws IOException {
         if (N.isEmpty(lines)) {
@@ -5083,10 +5083,10 @@ public final class IOUtil {
     }
 
     /**
-     * 
      *
-     * @param writer 
-     * @return 
+     *
+     * @param writer
+     * @return
      */
     public static boolean isBufferedWriter(final Writer writer) {
         return writer instanceof BufferedWriter || writer instanceof java.io.BufferedWriter;

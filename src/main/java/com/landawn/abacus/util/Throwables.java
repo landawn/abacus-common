@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 import com.landawn.abacus.annotation.Beta;
+import com.landawn.abacus.annotation.Internal;
 import com.landawn.abacus.util.u.Nullable;
 
 /**
@@ -193,7 +194,7 @@ public final class Throwables {
     };
 
     @SuppressWarnings({ "java:S6548" })
-    public interface Iterator<T, E extends Throwable> extends Closeable, Immutable {
+    public static abstract class Iterator<T, E extends Throwable> implements Closeable, Immutable {
         /**
          *
          *
@@ -201,7 +202,7 @@ public final class Throwables {
          * @param <E>
          * @return
          */
-        static <T, E extends Throwable> Throwables.Iterator<T, E> empty() {
+        public static <T, E extends Throwable> Throwables.Iterator<T, E> empty() {
             return EMPTY;
         }
 
@@ -213,7 +214,7 @@ public final class Throwables {
          * @param val
          * @return
          */
-        static <T, E extends Throwable> Throwables.Iterator<T, E> just(final T val) {
+        public static <T, E extends Throwable> Throwables.Iterator<T, E> just(final T val) {
             return new Throwables.Iterator<>() {
                 private boolean done = false;
 
@@ -244,7 +245,7 @@ public final class Throwables {
          * @return
          */
         @SafeVarargs
-        static <T, E extends Exception> Throwables.Iterator<T, E> of(final T... a) {
+        public static <T, E extends Exception> Throwables.Iterator<T, E> of(final T... a) {
             return N.isEmpty(a) ? EMPTY : of(a, 0, a.length);
         }
 
@@ -258,7 +259,7 @@ public final class Throwables {
          * @param toIndex
          * @return
          */
-        static <T, E extends Exception> Throwables.Iterator<T, E> of(final T[] a, final int fromIndex, final int toIndex) {
+        public static <T, E extends Exception> Throwables.Iterator<T, E> of(final T[] a, final int fromIndex, final int toIndex) {
             N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
             if (fromIndex == toIndex) {
@@ -306,7 +307,7 @@ public final class Throwables {
          * @param iterable
          * @return
          */
-        static <T, E extends Throwable> Iterator<T, E> of(final Iterable<? extends T> iterable) {
+        public static <T, E extends Throwable> Iterator<T, E> of(final Iterable<? extends T> iterable) {
             if (iterable == null) {
                 return empty();
             }
@@ -334,7 +335,7 @@ public final class Throwables {
          * @param iter
          * @return
          */
-        static <T, E extends Exception> Throwables.Iterator<T, E> of(final java.util.Iterator<? extends T> iter) {
+        public static <T, E extends Exception> Throwables.Iterator<T, E> of(final java.util.Iterator<? extends T> iter) {
             if (iter == null) {
                 return EMPTY;
             }
@@ -360,7 +361,7 @@ public final class Throwables {
          * @param iteratorSupplier
          * @return
          */
-        static <T, E extends Exception> Throwables.Iterator<T, E> defer(final java.util.function.Supplier<Throwables.Iterator<T, E>> iteratorSupplier) {
+        public static <T, E extends Exception> Throwables.Iterator<T, E> defer(final java.util.function.Supplier<Throwables.Iterator<T, E>> iteratorSupplier) {
             N.checkArgNotNull(iteratorSupplier, "iteratorSupplier");
 
             return new Throwables.Iterator<>() {
@@ -406,7 +407,7 @@ public final class Throwables {
                 }
 
                 @Override
-                public void close() {
+                protected void closeResource() {
                     if (!isInitialized) {
                         init();
                     }
@@ -433,7 +434,7 @@ public final class Throwables {
          * @param a
          * @return
          */
-        static <T, E extends Exception> Throwables.Iterator<T, E> concat(final Throwables.Iterator<? extends T, ? extends E>... a) {
+        public static <T, E extends Exception> Throwables.Iterator<T, E> concat(final Throwables.Iterator<? extends T, ? extends E>... a) {
             return concat(N.asList(a));
         }
 
@@ -445,7 +446,7 @@ public final class Throwables {
          * @param c
          * @return
          */
-        static <T, E extends Exception> Throwables.Iterator<T, E> concat(final Collection<? extends Throwables.Iterator<? extends T, ? extends E>> c) {
+        public static <T, E extends Exception> Throwables.Iterator<T, E> concat(final Collection<? extends Throwables.Iterator<? extends T, ? extends E>> c) {
             if (N.isEmpty(c)) {
                 return Iterator.empty();
             }
@@ -480,7 +481,7 @@ public final class Throwables {
          * @param reader
          * @return
          */
-        static Throwables.Iterator<String, IOException> lines(final Reader reader) {
+        public static Throwables.Iterator<String, IOException> lines(final Reader reader) {
             if (reader == null) {
                 return empty();
             }
@@ -528,7 +529,7 @@ public final class Throwables {
          * @return
          * @throws E
          */
-        boolean hasNext() throws E;
+        public abstract boolean hasNext() throws E;
 
         /**
          *
@@ -536,14 +537,14 @@ public final class Throwables {
          * @return
          * @throws E
          */
-        T next() throws E;
+        public abstract T next() throws E;
 
         /**
          *
          * @param n
          * @throws E the e
          */
-        default void advance(long n) throws E {
+        public void advance(long n) throws E {
             N.checkArgNotNegative(n, "n");
 
             while (n-- > 0 && hasNext()) {
@@ -556,7 +557,7 @@ public final class Throwables {
          * @return
          * @throws E the e
          */
-        default long count() throws E {
+        public long count() throws E {
             long result = 0;
 
             while (hasNext()) {
@@ -567,12 +568,21 @@ public final class Throwables {
             return result;
         }
 
-        /**
-         * 
-         */
+        private boolean isClosed = false;
+
         @Override
-        default void close() {
-            // Nothing to do by default.
+        public final void close() {
+            if (isClosed) {
+                return;
+            }
+
+            isClosed = true;
+            closeResource();
+        }
+
+        @Internal
+        protected void closeResource() {
+
         }
 
         /**
@@ -581,7 +591,7 @@ public final class Throwables {
          * @param predicate
          * @return
          */
-        default Throwables.Iterator<T, E> filter(final Throwables.Predicate<? super T, E> predicate) {
+        public Throwables.Iterator<T, E> filter(final Throwables.Predicate<? super T, E> predicate) {
             final Throwables.Iterator<T, E> iter = this;
 
             return new Throwables.Iterator<>() {
@@ -625,7 +635,7 @@ public final class Throwables {
          * @param mapper
          * @return
          */
-        default <U> Throwables.Iterator<U, E> map(final Throwables.Function<? super T, U, E> mapper) {
+        public <U> Throwables.Iterator<U, E> map(final Throwables.Function<? super T, U, E> mapper) {
             final Throwables.Iterator<T, E> iter = this;
 
             return new Throwables.Iterator<>() {
@@ -647,7 +657,7 @@ public final class Throwables {
          * @return
          * @throws E
          */
-        default Nullable<T> first() throws E {
+        public Nullable<T> first() throws E {
             if (hasNext()) {
                 return Nullable.of(next());
             } else {
@@ -661,7 +671,7 @@ public final class Throwables {
          * @return
          * @throws E
          */
-        default u.Optional<T> firstNonNull() throws E {
+        public u.Optional<T> firstNonNull() throws E {
             T next = null;
 
             while (hasNext()) {
@@ -681,7 +691,7 @@ public final class Throwables {
          * @return
          * @throws E
          */
-        default Nullable<T> last() throws E {
+        public Nullable<T> last() throws E {
             if (hasNext()) {
                 T next = next();
 
@@ -701,7 +711,7 @@ public final class Throwables {
          * @return
          * @throws E
          */
-        default Object[] toArray() throws E {
+        public Object[] toArray() throws E {
             return toArray(N.EMPTY_OBJECT_ARRAY);
         }
 
@@ -713,7 +723,7 @@ public final class Throwables {
          * @return
          * @throws E
          */
-        default <A> A[] toArray(A[] a) throws E {
+        public <A> A[] toArray(A[] a) throws E {
             return toList().toArray(a);
         }
 
@@ -723,7 +733,7 @@ public final class Throwables {
          * @return
          * @throws E
          */
-        default List<T> toList() throws E {
+        public List<T> toList() throws E {
             final List<T> list = new ArrayList<>();
 
             while (hasNext()) {
@@ -739,7 +749,7 @@ public final class Throwables {
          * @param action
          * @throws E
          */
-        default void forEachRemaining(java.util.function.Consumer<? super T> action) throws E { // NOSONAR
+        public void forEachRemaining(java.util.function.Consumer<? super T> action) throws E { // NOSONAR
             N.checkArgNotNull(action);
 
             while (hasNext()) {
@@ -755,7 +765,7 @@ public final class Throwables {
          * @throws E the e
          * @throws E2
          */
-        default <E2 extends Throwable> void foreachRemaining(Throwables.Consumer<? super T, E2> action) throws E, E2 { // NOSONAR
+        public <E2 extends Throwable> void foreachRemaining(Throwables.Consumer<? super T, E2> action) throws E, E2 { // NOSONAR
             N.checkArgNotNull(action);
 
             while (hasNext()) {
@@ -771,7 +781,7 @@ public final class Throwables {
          * @throws E the e
          * @throws E2
          */
-        default <E2 extends Throwable> void foreachIndexed(Throwables.IntObjConsumer<? super T, E2> action) throws E, E2 {
+        public <E2 extends Throwable> void foreachIndexed(Throwables.IntObjConsumer<? super T, E2> action) throws E, E2 {
             N.checkArgNotNull(action);
 
             int idx = 0;

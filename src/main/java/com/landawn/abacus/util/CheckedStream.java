@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.io.Writer;
-import java.lang.reflect.Field;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.security.SecureRandom;
@@ -216,33 +215,6 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     private static final LocalRunnable EMPTY_CLOSE_HANDLER = () -> {
         // do nothing.
     };
-
-    static volatile boolean isListElementDataFieldGettable = true;
-    private static final Field listElementDataField;
-
-    static {
-        Field tmp = null;
-
-        try {
-            tmp = ArrayList.class.getDeclaredField("elementData");
-        } catch (Throwable e) {
-            // ignore.
-        }
-
-        listElementDataField = tmp != null && tmp.getType().equals(Object[].class) ? tmp : null;
-
-        if (listElementDataField != null) {
-            ClassUtil.setAccessibleQuietly(listElementDataField, true);
-        }
-
-        tmp = null;
-
-        try {
-            tmp = ArrayList.class.getDeclaredField("size");
-        } catch (Throwable e) {
-            // ignore.
-        }
-    }
 
     private final Throwables.Iterator<T, E> elements;
     private final boolean sorted;
@@ -440,33 +412,15 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      *
      * @param <T>
      * @param <E>
-     * @param c
+     * @param iterable
      * @return
      */
-    public static <T, E extends Exception> CheckedStream<T, E> of(final Collection<? extends T> c) {
-        if (N.isEmpty(c)) {
+    public static <T, E extends Exception> CheckedStream<T, E> of(final Iterable<? extends T> iterable) {
+        if (iterable == null) {
             return empty();
         }
 
-        // return new CollectionStream<T>(c);
-        // return new ArrayStream<T>((T[]) c.toArray()); // faster
-
-        if (isListElementDataFieldGettable && listElementDataField != null && c.getClass().equals(ArrayList.class)) {
-            T[] a = null;
-
-            try {
-                a = (T[]) listElementDataField.get(c);
-            } catch (Throwable e) {
-                // ignore;
-                isListElementDataFieldGettable = false;
-            }
-
-            if (a != null) {
-                return of(a);
-            }
-        }
-
-        return of(c.iterator());
+        return of(iterable.iterator());
     }
 
     /**
@@ -497,25 +451,6 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
         }
 
         return newStream(iter);
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param <E>
-     * @param iterable
-     * @return
-     */
-    public static <T, E extends Exception> CheckedStream<T, E> of(final Iterable<? extends T> iterable) {
-        if (iterable == null) {
-            return empty();
-        }
-
-        if (iterable instanceof Collection) {
-            return of((Collection<T>) iterable);
-        } else {
-            return of(iterable.iterator());
-        }
     }
 
     /**
@@ -564,12 +499,13 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      *
      * @param <T>
      * @param <E>
-     * @param c
+     * @param iterable
      * @param exceptionType
      * @return
      */
-    public static <T, E extends Exception> CheckedStream<T, E> of(final Collection<? extends T> c, @SuppressWarnings("unused") final Class<E> exceptionType) { //NOSONAR
-        return of(c);
+    public static <T, E extends Exception> CheckedStream<T, E> of(final Iterable<? extends T> iterable,
+            @SuppressWarnings("unused") final Class<E> exceptionType) { //NOSONAR
+        return of(iterable);
     }
 
     /**
@@ -582,19 +518,6 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      */
     public static <T, E extends Exception> CheckedStream<T, E> of(final Iterator<? extends T> iter, @SuppressWarnings("unused") final Class<E> exceptionType) { //NOSONAR
         return of(iter);
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param <E>
-     * @param iterable
-     * @param exceptionType
-     * @return
-     */
-    public static <T, E extends Exception> CheckedStream<T, E> of(final Iterable<? extends T> iterable,
-            @SuppressWarnings("unused") final Class<E> exceptionType) { //NOSONAR
-        return of(iterable);
     }
 
     /**
@@ -1586,7 +1509,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                             }
                         }
 
-                        public void close() {
+                        protected void closeResource() {
                             if (closeReader) {
                                 IOUtil.close(bufferedReader);
                             }
@@ -2922,7 +2845,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                 return cur.next();
             }
 
-            public void close() {
+            protected void closeResource() {
                 if (s != null) {
                     s.close();
                 }
@@ -3057,7 +2980,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                 return cur.next();
             }
 
-            public void close() {
+            protected void closeResource() {
                 if (s != null) {
                     s.close();
                 }
@@ -11185,7 +11108,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                 return next;
             }
 
-            public void close() {
+            protected void closeResource() {
                 if (writer != null) {
                     try {
                         Objectory.recycle(bw);
@@ -11245,7 +11168,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                 return next;
             }
 
-            public void close() {
+            protected void closeResource() {
                 Objectory.recycle(bw);
             }
 
@@ -11299,7 +11222,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                 return next;
             }
 
-            public void close() {
+            protected void closeResource() {
                 if (isBufferedWriter == false && bw != null) {
                     Objectory.recycle((BufferedWriter) bw);
                 }
@@ -11356,7 +11279,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                 return next;
             }
 
-            public void close() {
+            protected void closeResource() {
                 if (writer != null) {
                     try {
                         Objectory.recycle(bw);
@@ -11417,7 +11340,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                 return next;
             }
 
-            public void close() {
+            protected void closeResource() {
                 if (isBufferedWriter == false && bw != null) {
                     Objectory.recycle((BufferedWriter) bw);
                 }
@@ -11516,7 +11439,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                 return next;
             }
 
-            public void close() {
+            protected void closeResource() {
                 if (stmt != null) {
                     DataSourceUtil.closeQuietly(stmt);
                 }
@@ -11581,7 +11504,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                 return next;
             }
 
-            public void close() {
+            protected void closeResource() {
                 try {
                     if (stmt != null) {
                         DataSourceUtil.closeQuietly(stmt);
@@ -13263,7 +13186,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                 return cur.next();
             }
 
-            public void close() {
+            protected void closeResource() {
                 if (closeHandle != null) {
                     CheckedStream.close(closeHandle);
                 }
@@ -15330,7 +15253,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                 return next;
             }
 
-            public void close() {
+            protected void closeResource() {
                 isMainStreamCompleted.setTrue();
 
                 if (!isNewStreamStarted) {
@@ -15489,7 +15412,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                 return next;
             }
 
-            public void close() {
+            protected void closeResource() {
                 isMainStreamCompleted.setTrue();
 
                 if (!isNewStreamStarted) {
@@ -15654,7 +15577,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                 return next;
             }
 
-            public void close() {
+            protected void closeResource() {
                 isMainStreamCompleted.setTrue();
 
                 if (!isNewStreamStarted) {
@@ -15826,7 +15749,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                 return next;
             }
 
-            public void close() {
+            protected void closeResource() {
                 isMainStreamCompleted.setTrue();
 
                 if (!isNewStreamStarted) {
@@ -16237,7 +16160,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                     }
                 }
 
-                public void close() {
+                protected void closeResource() {
                     s.close();
                 }
 
@@ -16295,7 +16218,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                     }
                 }
 
-                public void close() {
+                protected void closeResource() {
                     s.close();
                 }
 
@@ -16414,7 +16337,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                 return result;
             }
 
-            public void close() {
+            protected void closeResource() {
                 if (isClosed) {
                     return;
                 }
