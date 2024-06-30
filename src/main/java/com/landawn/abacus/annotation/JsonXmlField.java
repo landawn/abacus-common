@@ -102,7 +102,7 @@ public @interface JsonXmlField {
      */
     Expose expose() default Expose.DEFAULT;
 
-    public static enum Expose {
+    public enum Expose {
         /**
          * @deprecated don't need to set it. It's {@code DEFAULT} by default.
          */

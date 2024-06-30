@@ -43,9 +43,9 @@ public @interface Type {
     String value() default "";
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     String name() default "";
 
@@ -57,23 +57,23 @@ public @interface Type {
     Class<? extends com.landawn.abacus.type.Type> clazz() default com.landawn.abacus.type.Type.class;
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     EnumBy enumerated() default EnumBy.NAME;
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     Scope scope() default Scope.ALL;
 
     /**
      * The Enum EnumType.
      */
-    public static enum EnumBy {
+    public enum EnumBy {
         /** Persist enumerated type property or field as an integer. */
         ORDINAL,
 
@@ -84,7 +84,7 @@ public @interface Type {
     /**
      * The Enum Scope.
      */
-    public static enum Scope {
+    public enum Scope {
         /**
          * Used for json/xml/... serialization/deserialization.
          */

@@ -2847,6 +2847,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                 return cur.next();
             }
 
+            @Override
             protected void closeResource() {
                 if (s != null) {
                     s.close();
@@ -2982,6 +2983,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                 return cur.next();
             }
 
+            @Override
             protected void closeResource() {
                 if (s != null) {
                     s.close();
@@ -11117,6 +11119,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                 return next;
             }
 
+            @Override
             protected void closeResource() {
                 if (writer != null) {
                     try {
@@ -11177,6 +11180,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                 return next;
             }
 
+            @Override
             protected void closeResource() {
                 Objectory.recycle(bw);
             }
@@ -11231,6 +11235,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                 return next;
             }
 
+            @Override
             protected void closeResource() {
                 if (isBufferedWriter == false && bw != null) {
                     Objectory.recycle((BufferedWriter) bw);
@@ -11288,6 +11293,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                 return next;
             }
 
+            @Override
             protected void closeResource() {
                 if (writer != null) {
                     try {
@@ -11349,6 +11355,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                 return next;
             }
 
+            @Override
             protected void closeResource() {
                 if (isBufferedWriter == false && bw != null) {
                     Objectory.recycle((BufferedWriter) bw);
@@ -11448,6 +11455,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                 return next;
             }
 
+            @Override
             protected void closeResource() {
                 if (stmt != null) {
                     DataSourceUtil.closeQuietly(stmt);
@@ -11513,6 +11521,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                 return next;
             }
 
+            @Override
             protected void closeResource() {
                 try {
                     if (stmt != null) {
@@ -13221,6 +13230,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                 return cur.next();
             }
 
+            @Override
             protected void closeResource() {
                 if (closeHandle != null) {
                     CheckedStream.close(closeHandle);
@@ -15237,36 +15247,33 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
         final MutableBoolean isMainStreamCompleted = MutableBoolean.of(false);
         final MutableBoolean isSubscriberStreamCompleted = MutableBoolean.of(false);
-        final MutableBoolean wasQueueFull = MutableBoolean.of(false);
+        final MutableBoolean isFailedToOfferToQueue = MutableBoolean.of(false);
         final MutableInt nextCallCount = MutableInt.of(0); // it should end with 0 if there is no exception happening during hasNext()/next() call.
 
         final Throwables.Iterator<T, E> iterForSubscriberStream = new Throwables.Iterator<>() { //NOSONAR
+            private final MutableBoolean isExceptionThrown = MutableBoolean.of(false);
             private T next = null;
 
             public boolean hasNext() throws E {
                 if (next == null) {
-                    if (isMainStreamCompleted.isFalse() || queue.size() > 0) {
+                    if ((isFailedToOfferToQueue.isFalse() && isMainStreamCompleted.isFalse()) || queue.size() > 0) {
                         try {
                             do {
                                 next = queue.poll(MAX_WAIT_TIME_FOR_QUEUE_POLL, TimeUnit.MILLISECONDS);
 
                                 if (nextCallCount.value() > 1 || (isMainStreamCompleted.isTrue() && nextCallCount.value() > 0)) {
+                                    isExceptionThrown.setTrue();
+
                                     throw new IllegalStateException("Exception happened in calling hasNext()/next()");
                                 }
-                            } while (next == null && (isMainStreamCompleted.isFalse() || queue.size() > 0));
+                            } while (next == null && ((isFailedToOfferToQueue.isFalse() && isMainStreamCompleted.isFalse()) || queue.size() > 0));
                         } catch (InterruptedException e) {
                             throw toRuntimeException(e);
                         }
                     }
                 }
 
-                if (wasQueueFull.isTrue()) {
-                    throw new IllegalStateException("Queue(size=" + queueSize + ") was full at some moment. Elements may be missed");
-                }
-
-                if (nextCallCount.value() > 1 || (isMainStreamCompleted.isTrue() && nextCallCount.value() > 0)) {
-                    throw new IllegalStateException("Exception happened in calling hasNext()/next()");
-                }
+                checkExceptionsForSubscriber(isExceptionThrown, isMainStreamCompleted, isFailedToOfferToQueue, nextCallCount, queueSize);
 
                 return next != null || (isMainStreamCompleted.isTrue() && elements.hasNext());
             }
@@ -15286,13 +15293,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                 isSubscriberStreamCompleted.setTrue();
                 queue.clear();
 
-                if (wasQueueFull.isTrue()) {
-                    throw new IllegalStateException("Queue(size=" + queueSize + ") was full at some moment. Elements may be missed");
-                }
-
-                if (nextCallCount.value() > 1 || (isMainStreamCompleted.isTrue() && nextCallCount.value() > 0)) {
-                    throw new IllegalStateException("Exception happened in calling hasNext()/next()");
-                }
+                checkExceptionsForSubscriber(isExceptionThrown, isMainStreamCompleted, isFailedToOfferToQueue, nextCallCount, queueSize);
             }
         };
 
@@ -15300,14 +15301,23 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             private boolean isNewStreamStarted = false;
             private ContinuableFuture<Void> futureForNewStream = null;
             private boolean hasNext = false;
+            private T next = null;
 
             @Override
             public boolean hasNext() throws E {
-                nextCallCount.increment();
+                if (!hasNext) {
+                    nextCallCount.increment();
 
-                hasNext = elements.hasNext();
+                    try {
+                        hasNext = elements.hasNext();
 
-                nextCallCount.decrement();
+                        nextCallCount.decrement();
+                    } finally {
+                        if (nextCallCount.value() > 0) { // exception happened. set nextCallCount to 2.
+                            nextCallCount.increment();
+                        }
+                    }
+                }
 
                 return hasNext;
             }
@@ -15315,27 +15325,38 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             public T next() throws E {
                 nextCallCount.increment();
 
-                final T next = elements.next();
+                try {
+                    next = elements.next();
 
-                nextCallCount.decrement();
+                    nextCallCount.decrement();
+                } finally {
+                    hasNext = false;
+
+                    if (nextCallCount.value() > 0) { // exception happened. set nextCallCount to 2.
+                        nextCallCount.increment();
+                    }
+                }
 
                 if (!isNewStreamStarted) {
                     startNewStream();
                 }
 
-                if (isSubscriberStreamCompleted.isFalse()) {
+                if (isFailedToOfferToQueue.isFalse() && isSubscriberStreamCompleted.isFalse()) {
                     try {
                         if (!queue.offer(next == null ? none : next, maxWaitForAddingElementToQuery, TimeUnit.MILLISECONDS)) {
-                            wasQueueFull.setTrue();
+                            isFailedToOfferToQueue.setTrue();
                         }
-                    } catch (InterruptedException e) {
-                        throw toRuntimeException(e);
+                    } catch (Exception e) {
+                        isFailedToOfferToQueue.setTrue();
+
+                        // throw toRuntimeException(e);
                     }
                 }
 
                 return next;
             }
 
+            @Override
             protected void closeResource() {
                 isMainStreamCompleted.setTrue();
 
@@ -15426,50 +15447,46 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
         final MutableBoolean isMainStreamCompleted = MutableBoolean.of(false);
         final MutableBoolean isSubscriberStreamCompleted = MutableBoolean.of(false);
-        final MutableBoolean wasQueueFull = MutableBoolean.of(false);
+        final MutableBoolean isFailedToOfferToQueue = MutableBoolean.of(false);
         final MutableInt nextCallCount = MutableInt.of(0); // it should end with 0 if there is no exception happening during hasNext()/next() call.
 
         final Throwables.Iterator<T, E> iterForSubscriberStream = new Throwables.Iterator<>() { //NOSONAR
+            private final MutableBoolean isExceptionThrown = MutableBoolean.of(false);
             private T next = null;
 
             public boolean hasNext() throws E {
                 if (next == null) {
-                    if (isMainStreamCompleted.isFalse() || queue.size() > 0) {
+                    if ((isFailedToOfferToQueue.isFalse() && isMainStreamCompleted.isFalse()) || queue.size() > 0) {
                         try {
                             do {
                                 next = queue.poll(MAX_WAIT_TIME_FOR_QUEUE_POLL, TimeUnit.MILLISECONDS);
 
                                 if (nextCallCount.value() > 1 || (isMainStreamCompleted.isTrue() && nextCallCount.value() > 0)) {
+                                    isExceptionThrown.setTrue();
+
                                     throw new IllegalStateException("Exception happened in calling hasNext()/next()");
                                 }
-                            } while (next == null && (isMainStreamCompleted.isFalse() || queue.size() > 0));
+                            } while (next == null && ((isFailedToOfferToQueue.isFalse() && isMainStreamCompleted.isFalse()) || queue.size() > 0));
                         } catch (InterruptedException e) {
                             throw toRuntimeException(e);
                         }
                     }
                 }
 
-                if (next == null && isMainStreamCompleted.isTrue()) {
+                if (next == null && isFailedToOfferToQueue.isFalse() && isMainStreamCompleted.isTrue()) {
                     while (elements.hasNext()) {
                         next = elements.next();
 
                         if (!predicate.test(next)) {
                             next = next == null ? none : next;
-                            return true;
+                            break;
+                        } else {
+                            next = null;
                         }
                     }
-
-                    next = null;
-                    return false;
                 }
 
-                if (wasQueueFull.isTrue()) {
-                    throw new IllegalStateException("Queue(size=" + queueSize + ") was full at some moment. Elements may be missed");
-                }
-
-                if (nextCallCount.value() > 1 || (isMainStreamCompleted.isTrue() && nextCallCount.value() > 0)) {
-                    throw new IllegalStateException("Exception happened in calling hasNext()/next()");
-                }
+                checkExceptionsForSubscriber(isExceptionThrown, isMainStreamCompleted, isFailedToOfferToQueue, nextCallCount, queueSize);
 
                 return next != null;
             }
@@ -15489,13 +15506,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                 isSubscriberStreamCompleted.setTrue();
                 queue.clear();
 
-                if (wasQueueFull.isTrue()) {
-                    throw new IllegalStateException("Queue(size=" + queueSize + ") was full at some moment. Elements may be missed");
-                }
-
-                if (nextCallCount.value() > 1 || (isMainStreamCompleted.isTrue() && nextCallCount.value() > 0)) {
-                    throw new IllegalStateException("Exception happened in calling hasNext()/next()");
-                }
+                checkExceptionsForSubscriber(isExceptionThrown, isMainStreamCompleted, isFailedToOfferToQueue, nextCallCount, queueSize);
             }
         };
 
@@ -15509,30 +15520,38 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                 if (!hasNext) {
                     nextCallCount.increment();
 
-                    while (elements.hasNext()) {
-                        next = elements.next();
+                    try {
+                        while (elements.hasNext()) {
+                            next = elements.next();
 
-                        if (predicate.test(next)) {
-                            hasNext = true;
-                            break;
-                        } else {
-                            if (!isNewStreamStarted) {
-                                startNewStream();
-                            }
+                            if (predicate.test(next)) {
+                                hasNext = true;
+                                break;
+                            } else {
+                                if (!isNewStreamStarted) {
+                                    startNewStream();
+                                }
 
-                            if (isSubscriberStreamCompleted.isFalse()) {
-                                try {
-                                    if (!queue.offer(next == null ? none : next, maxWaitForAddingElementToQuery, TimeUnit.MILLISECONDS)) {
-                                        wasQueueFull.setTrue();
+                                if (isFailedToOfferToQueue.isFalse() && isSubscriberStreamCompleted.isFalse()) {
+                                    try {
+                                        if (!queue.offer(next == null ? none : next, maxWaitForAddingElementToQuery, TimeUnit.MILLISECONDS)) {
+                                            isFailedToOfferToQueue.setTrue();
+                                        }
+                                    } catch (Exception e) {
+                                        isFailedToOfferToQueue.setTrue();
+
+                                        // throw toRuntimeException(e);
                                     }
-                                } catch (InterruptedException e) {
-                                    throw toRuntimeException(e);
                                 }
                             }
                         }
-                    }
 
-                    nextCallCount.decrement();
+                        nextCallCount.decrement();
+                    } finally {
+                        if (nextCallCount.value() > 0) { // exception happened. set nextCallCount to 2.
+                            nextCallCount.increment();
+                        }
+                    }
                 }
 
                 return hasNext;
@@ -15548,6 +15567,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                 return next;
             }
 
+            @Override
             protected void closeResource() {
                 isMainStreamCompleted.setTrue();
 
@@ -15633,56 +15653,53 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
         final T none = (T) NONE;
 
         final MutableBoolean isMainStreamCompleted = MutableBoolean.of(false);
-        final MutableBoolean isTokenInMainStream = MutableBoolean.of(false);
+        final MutableBoolean isTakeCompletedInMainStream = MutableBoolean.of(false);
         final MutableBoolean isSubscriberStreamCompleted = MutableBoolean.of(false);
-        final MutableBoolean wasQueueFull = MutableBoolean.of(false);
+        final MutableBoolean isFailedToOfferToQueue = MutableBoolean.of(false);
         final MutableInt nextCallCount = MutableInt.of(0); // it should end with 0 if there is no exception happening during hasNext()/next() call.
 
         final Throwables.Iterator<T, E> iterForSubscriberStream = new Throwables.Iterator<>() { //NOSONAR
+            private final MutableBoolean isExceptionThrown = MutableBoolean.of(false);
             private T next = null;
 
             public boolean hasNext() throws E {
                 if (next == null) {
-                    if ((isTokenInMainStream.isFalse() && isMainStreamCompleted.isFalse()) || queue.size() > 0) {
+                    if ((isFailedToOfferToQueue.isFalse() && isTakeCompletedInMainStream.isFalse() && isMainStreamCompleted.isFalse()) || queue.size() > 0) {
                         try {
                             do {
                                 next = queue.poll(MAX_WAIT_TIME_FOR_QUEUE_POLL, TimeUnit.MILLISECONDS);
 
                                 if (nextCallCount.value() > 1 || (isMainStreamCompleted.isTrue() && nextCallCount.value() > 0)) {
+                                    isExceptionThrown.setTrue();
+
                                     throw new IllegalStateException("Exception happened in calling hasNext()/next()");
                                 }
-                            } while (next == null && ((isTokenInMainStream.isFalse() && isMainStreamCompleted.isFalse()) || queue.size() > 0));
+                            } while (next == null
+                                    && ((isFailedToOfferToQueue.isFalse() && isTakeCompletedInMainStream.isFalse() && isMainStreamCompleted.isFalse())
+                                            || queue.size() > 0));
                         } catch (InterruptedException e) {
                             throw toRuntimeException(e);
                         }
                     }
                 }
 
-                if (next == null) {
-                    if (isTokenInMainStream.isFalse()) { // it also means isMainStreamCompleted.isTrue()
-                        while (elements.hasNext()) {
-                            next = elements.next();
+                if (next == null && isFailedToOfferToQueue.isFalse() && isTakeCompletedInMainStream.isFalse()) { // it also means isMainStreamCompleted.isTrue()
+                    while (elements.hasNext()) {
+                        next = elements.next();
 
-                            if (!predicate.test(next)) {
-                                next = next == null ? none : next;
-                                isTokenInMainStream.setTrue();
-                                return true;
-                            }
+                        if (!predicate.test(next)) {
+                            next = next == null ? none : next;
+
+                            break;
+                        } else {
+                            next = null;
                         }
-
-                        next = null;
-                        isTokenInMainStream.setTrue();
-                        return false;
                     }
+
+                    isTakeCompletedInMainStream.setTrue();
                 }
 
-                if (wasQueueFull.isTrue()) {
-                    throw new IllegalStateException("Queue(size=" + queueSize + ") was full at some moment. Elements may be missed");
-                }
-
-                if (nextCallCount.value() > 1 || (isMainStreamCompleted.isTrue() && nextCallCount.value() > 0)) {
-                    throw new IllegalStateException("Exception happened in calling hasNext()/next()");
-                }
+                checkExceptionsForSubscriber(isExceptionThrown, isMainStreamCompleted, isFailedToOfferToQueue, nextCallCount, queueSize);
 
                 return next != null || elements.hasNext();
             }
@@ -15702,13 +15719,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                 isSubscriberStreamCompleted.setTrue();
                 queue.clear();
 
-                if (wasQueueFull.isTrue()) {
-                    throw new IllegalStateException("Queue(size=" + queueSize + ") was full at some moment. Elements may be missed");
-                }
-
-                if (nextCallCount.value() > 1 || (isMainStreamCompleted.isTrue() && nextCallCount.value() > 0)) {
-                    throw new IllegalStateException("Exception happened in calling hasNext()/next()");
-                }
+                checkExceptionsForSubscriber(isExceptionThrown, isMainStreamCompleted, isFailedToOfferToQueue, nextCallCount, queueSize);
             }
         };
 
@@ -15720,38 +15731,44 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             private T next = null;
 
             public boolean hasNext() throws E {
-                nextCallCount.increment();
-
                 if (!hasNext && hasMore) {
                     nextCallCount.increment();
 
-                    if (elements.hasNext()) {
-                        next = elements.next();
+                    try {
+                        if (elements.hasNext()) {
+                            next = elements.next();
 
-                        if (predicate.test(next)) {
-                            hasNext = true;
-                        } else {
-                            hasMore = false;
+                            if (predicate.test(next)) {
+                                hasNext = true;
+                            } else {
+                                hasMore = false;
 
-                            isTokenInMainStream.setTrue();
-
-                            if (!isNewStreamStarted) {
-                                startNewStream();
-                            }
-
-                            if (isSubscriberStreamCompleted.isFalse()) {
-                                try {
-                                    if (!queue.offer(next == null ? none : next, maxWaitForAddingElementToQuery, TimeUnit.MILLISECONDS)) {
-                                        wasQueueFull.setTrue();
-                                    }
-                                } catch (InterruptedException e) {
-                                    throw toRuntimeException(e);
+                                if (!isNewStreamStarted) {
+                                    startNewStream();
                                 }
+
+                                if (isFailedToOfferToQueue.isFalse() && isSubscriberStreamCompleted.isFalse()) {
+                                    try {
+                                        if (!queue.offer(next == null ? none : next, maxWaitForAddingElementToQuery, TimeUnit.MILLISECONDS)) {
+                                            isFailedToOfferToQueue.setTrue();
+                                        }
+                                    } catch (Exception e) {
+                                        isFailedToOfferToQueue.setTrue();
+
+                                        // throw toRuntimeException(e);
+                                    }
+                                }
+
+                                isTakeCompletedInMainStream.setTrue();
                             }
                         }
-                    }
 
-                    nextCallCount.decrement();
+                        nextCallCount.decrement();
+                    } finally {
+                        if (nextCallCount.value() > 0) { // exception happened. set nextCallCount to 2.
+                            nextCallCount.increment();
+                        }
+                    }
                 }
 
                 return hasNext;
@@ -15767,6 +15784,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                 return next;
             }
 
+            @Override
             protected void closeResource() {
                 isMainStreamCompleted.setTrue();
 
@@ -15856,55 +15874,49 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
         final T none = (T) NONE;
 
         final MutableBoolean isMainStreamCompleted = MutableBoolean.of(false);
-        final MutableBoolean isDroppedInMainStream = MutableBoolean.of(false);
+        final MutableBoolean isDropCompletedInMainStream = MutableBoolean.of(false);
         final MutableBoolean isSubscriberStreamCompleted = MutableBoolean.of(false);
-        final MutableBoolean wasQueueFull = MutableBoolean.of(false);
+        final MutableBoolean isFailedToOfferToQueue = MutableBoolean.of(false);
         final MutableInt nextCallCount = MutableInt.of(0); // it should end with 0 if there is no exception happening during hasNext()/next() call.
 
         final Throwables.Iterator<T, E> iterForSubscriberStream = new Throwables.Iterator<>() { //NOSONAR
+            private final MutableBoolean isExceptionThrown = MutableBoolean.of(false);
             private T next = null;
 
             public boolean hasNext() throws E {
                 if (next == null) {
-                    if ((isDroppedInMainStream.isFalse() && isMainStreamCompleted.isFalse()) || queue.size() > 0) {
+                    if ((isFailedToOfferToQueue.isFalse() && isDropCompletedInMainStream.isFalse() && isMainStreamCompleted.isFalse()) || queue.size() > 0) {
                         try {
                             do {
                                 next = queue.poll(MAX_WAIT_TIME_FOR_QUEUE_POLL, TimeUnit.MILLISECONDS);
 
                                 if (nextCallCount.value() > 1 || (isMainStreamCompleted.isTrue() && nextCallCount.value() > 0)) {
+                                    isExceptionThrown.setTrue();
                                     throw new IllegalStateException("Exception happened in calling hasNext()/next()");
                                 }
-                            } while (next == null && ((isDroppedInMainStream.isFalse() && isMainStreamCompleted.isFalse()) || queue.size() > 0));
+                            } while (next == null
+                                    && ((isFailedToOfferToQueue.isFalse() && isDropCompletedInMainStream.isFalse() && isMainStreamCompleted.isFalse())
+                                            || queue.size() > 0));
                         } catch (InterruptedException e) {
                             throw toRuntimeException(e);
                         }
                     }
                 }
 
-                if (next == null) {
-                    if (isDroppedInMainStream.isFalse()) { // it also means isMainStreamCompleted.isTrue()
-                        if (elements.hasNext()) {
-                            next = elements.next();
+                if (next == null && isFailedToOfferToQueue.isFalse() && isDropCompletedInMainStream.isFalse()) {// it also means isMainStreamCompleted.isTrue()
+                    if (elements.hasNext()) {
+                        next = elements.next();
 
-                            if (predicate.test(next)) {
-                                next = next == null ? none : next;
-                                return true;
-                            }
+                        if (predicate.test(next)) {
+                            next = next == null ? none : next;
+                        } else {
+                            next = null;
+                            isDropCompletedInMainStream.setTrue();
                         }
-
-                        next = null;
-                        isDroppedInMainStream.setTrue();
-                        return false;
                     }
                 }
 
-                if (wasQueueFull.isTrue()) {
-                    throw new IllegalStateException("Queue(size=" + queueSize + ") was full at some moment. Elements may be missed");
-                }
-
-                if (nextCallCount.value() > 1 || (isMainStreamCompleted.isTrue() && nextCallCount.value() > 0)) {
-                    throw new IllegalStateException("Exception happened in calling hasNext()/next()");
-                }
+                checkExceptionsForSubscriber(isExceptionThrown, isMainStreamCompleted, isFailedToOfferToQueue, nextCallCount, queueSize);
 
                 return next != null;
             }
@@ -15924,13 +15936,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                 isSubscriberStreamCompleted.setTrue();
                 queue.clear();
 
-                if (wasQueueFull.isTrue()) {
-                    throw new IllegalStateException("Queue(size=" + queueSize + ") was full at some moment. Elements may be missed");
-                }
-
-                if (nextCallCount.value() > 1 || (isMainStreamCompleted.isTrue() && nextCallCount.value() > 0)) {
-                    throw new IllegalStateException("Exception happened in calling hasNext()/next()");
-                }
+                checkExceptionsForSubscriber(isExceptionThrown, isMainStreamCompleted, isFailedToOfferToQueue, nextCallCount, queueSize);
             }
         };
 
@@ -15953,7 +15959,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                                 next = elements.next();
 
                                 if (!predicate.test(next)) {
-                                    isDroppedInMainStream.setTrue();
+                                    isDropCompletedInMainStream.setTrue();
                                     hasNext = true;
                                     break;
                                 } else {
@@ -15961,13 +15967,15 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                                         startNewStream();
                                     }
 
-                                    if (isSubscriberStreamCompleted.isFalse()) {
+                                    if (isFailedToOfferToQueue.isFalse() && isSubscriberStreamCompleted.isFalse()) {
                                         try {
                                             if (!queue.offer(next == null ? none : next, maxWaitForAddingElementToQuery, TimeUnit.MILLISECONDS)) {
-                                                wasQueueFull.setTrue();
+                                                isFailedToOfferToQueue.setTrue();
                                             }
-                                        } catch (InterruptedException e) {
-                                            throw toRuntimeException(e);
+                                        } catch (Exception e) {
+                                            isFailedToOfferToQueue.setTrue();
+
+                                            // throw toRuntimeException(e);
                                         }
                                     }
                                 }
@@ -15998,6 +16006,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                 return next;
             }
 
+            @Override
             protected void closeResource() {
                 isMainStreamCompleted.setTrue();
 
@@ -16028,6 +16037,24 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
         };
 
         return newStream(iterA, sorted, cmp, mergeCloseHandlers(iterA::close, closeHandlers, true));
+    }
+
+    private static void checkExceptionsForSubscriber(final MutableBoolean isExceptionThrown, final MutableBoolean isMainStreamCompleted,
+            final MutableBoolean isFailedToOfferToQueue, final MutableInt nextCallCount, final int queueSize) {
+        if (isExceptionThrown.isFalse()) {
+            if (isFailedToOfferToQueue.isTrue()) {
+                isExceptionThrown.setTrue();
+
+                throw new IllegalStateException(
+                        "Failed to add element to queue(size=" + queueSize + ") because it's full or exception happened. Elements may be missed");
+            }
+
+            if (nextCallCount.value() > 1 || (isMainStreamCompleted.isTrue() && nextCallCount.value() > 0)) {
+                isExceptionThrown.setTrue();
+
+                throw new IllegalStateException("Exception happened in calling hasNext()/next()");
+            }
+        }
     }
 
     Throwables.Iterator<T, E> iteratorEx() {
@@ -16519,7 +16546,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                             disposableChecked.setTrue();
 
                             if (next instanceof NoCachingNoUpdating) {
-                                throw new RuntimeException("Can't run NoCachingNoUpdating Objects in parallel Stream or Queue");
+                                throw new IllegalStateException("Can't run NoCachingNoUpdating Objects in parallel Stream or Queue");
                             }
                         }
 
@@ -16588,6 +16615,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                 return result;
             }
 
+            @Override
             protected void closeResource() {
                 if (isClosed) {
                     return;
