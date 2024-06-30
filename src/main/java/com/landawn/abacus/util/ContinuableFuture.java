@@ -1463,6 +1463,8 @@ public class ContinuableFuture<T> implements Future<T> {
         };
     }
 
+    // https://stackoverflow.com/questions/23301598/transform-java-future-into-a-completablefuture
+
     // Doesn't work.
     //    public CompletableFuture<T> toCompletableFuture() {
     //        return new CompletableFuture<T>() {
@@ -1492,5 +1494,17 @@ public class ContinuableFuture<T> implements Future<T> {
     //                return ContinuableFuture.this.get(timeout, unit);
     //            }
     //        };
+    //    }
+
+    //    public CompletableFuture<T> toCompletableFuture() {
+    //        return CompletableFuture.completedFuture(null).thenCompose(none -> {
+    //            try {
+    //                return CompletableFuture.completedFuture(this.get());
+    //            } catch (InterruptedException e) {
+    //                return CompletableFuture.failedFuture(e);
+    //            } catch (ExecutionException e) {
+    //                return CompletableFuture.failedFuture(e.getCause());
+    //            }
+    //        });
     //    }
 }

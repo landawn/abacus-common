@@ -2273,8 +2273,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
     /**
      * Converts all the words from the specified split by {@code ' '} by the specified Function {@code converter}.
      *
-     * @param str 
-     * @param converter 
+     * @param str
+     * @param converter
      * @return the specified String if it's {@code null} or empty.
      */
     public static String convertWords(final String str, final Function<String, String> converter) {
@@ -2284,9 +2284,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
     /**
      * Converts all the words from the specified split by {@code delimiter} by the specified Function {@code converter}.
      *
-     * @param str 
-     * @param delimiter 
-     * @param converter 
+     * @param str
+     * @param delimiter
+     * @param converter
      * @return the specified String if it's {@code null} or empty.
      */
     public static String convertWords(final String str, final String delimiter, final Function<String, String> converter) {
@@ -2308,11 +2308,11 @@ public abstract sealed class Strings permits Strings.StringUtil {
     /**
      * Converts all the words from the specified split by {@code delimiter} by the specified Function {@code converter}.
      *
-     * @param str 
-     * @param delimiter 
-     * @param excludedWords 
-     * @param converter 
-     * @return 
+     * @param str
+     * @param delimiter
+     * @param excludedWords
+     * @param converter
+     * @return
      */
     public static String convertWords(final String str, final String delimiter, final Collection<String> excludedWords,
             final Function<String, String> converter) {
@@ -8462,13 +8462,13 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
-     * 
      *
-     * @param str 
-     * @param fromIndex 
-     * @param toIndex 
-     * @param replacement 
-     * @return 
+     *
+     * @param str
+     * @param fromIndex
+     * @param toIndex
+     * @param replacement
+     * @return
      * @see N#replaceRange(String, int, int, String)
      * @deprecated Replaced By {@code N.replaceRange(String, int, int, String)}
      */
@@ -8479,13 +8479,13 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
-     * 
      *
-     * @param str 
-     * @param fromIndex 
-     * @param toIndex 
-     * @param newPositionStartIndex 
-     * @return 
+     *
+     * @param str
+     * @param fromIndex
+     * @param toIndex
+     * @param newPositionStartIndex
+     * @return
      * @see N#moveRange(String, int, int, int)
      * @deprecated Replaced By {@code N.moveRange(String, int, int, int)}
      */
@@ -8496,12 +8496,12 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
-     * 
      *
-     * @param str 
-     * @param fromIndex 
-     * @param toIndex 
-     * @return 
+     *
+     * @param str
+     * @param fromIndex
+     * @param toIndex
+     * @return
      * @see N#deleteRange(String, int, int)
      * @deprecated Replaced By {@code N.deleteRange(String, int, int)}
      */
@@ -12070,6 +12070,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
         return copyThenApplyToEach(strs, Fn.strip());
     }
 
+    /**
+     * @deprecated repalced by {@code Strings}
+     */
+    @Deprecated
     @Beta
     public static final class StringUtil extends Strings {
         private StringUtil() {

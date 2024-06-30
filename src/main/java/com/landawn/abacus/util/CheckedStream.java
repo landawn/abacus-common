@@ -177,6 +177,8 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     private static final int MAX_WAIT_TIME_FOR_QUEUE_OFFER = 9; // unit is milliseconds
     private static final int MAX_WAIT_TIME_FOR_QUEUE_POLL = 7; // unit is milliseconds
 
+    static final int MAX_WAIT_TIME_FOR_QUEUE_OFFER_FOR_ADD_SUBSCRIBER = 30_000; // unit is milliseconds
+
     private static final int DEFAULT_BUFFERED_SIZE_PER_ITERATOR = 64;
 
     @SuppressWarnings("rawtypes")
@@ -5784,7 +5786,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     }
 
     /**
-     * Returns Seq of {@code List<T>} with consecutive sub sequences of the elements, each of the same size (the final sequence may be smaller).
+     * Returns CheckedStream of {@code List<T>} with consecutive sub sequences of the elements, each of the same size (the final sequence may be smaller).
      *
      *
      * @param chunkSize the desired size of each sub sequence (the last may be smaller).
@@ -5796,7 +5798,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     }
 
     /**
-     * Returns Seq of {@code Set<T>} with consecutive sub sequences of the elements, each of the same size (the final sequence may be smaller).
+     * Returns CheckedStream of {@code Set<T>} with consecutive sub sequences of the elements, each of the same size (the final sequence may be smaller).
      *
      *
      * @param chunkSize the desired size of each sub sequence (the last may be smaller).
@@ -5808,7 +5810,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     }
 
     /**
-     * Returns Seq of {@code C} with consecutive sub sequences of the elements, each of the same size (the final sequence may be smaller).
+     * Returns CheckedStream of {@code C} with consecutive sub sequences of the elements, each of the same size (the final sequence may be smaller).
      *
      *
      * @param <C>
@@ -6609,11 +6611,14 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     @IntermediateOp
     public CheckedStream<T, E> skip(final long n) {
         assertNotClosed();
-
         checkArgNotNegative(n, "n");
 
+        //    if (n == 0) {
+        //        return newStream(elements, sorted, cmp, closeHandlers);
+        //    }
+
         if (n == 0) {
-            return newStream(elements, sorted, cmp, closeHandlers);
+            return this;
         }
 
         return newStream(new Throwables.Iterator<T, E>() {
@@ -6653,6 +6658,10 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
         checkArgNotNegative(n, "n");
         checkArgNotNull(action, "action");
+
+        if (n == 0) {
+            return this;
+        }
 
         final Throwables.Predicate<T, E> filter = new Throwables.Predicate<>() {
             final MutableLong cnt = MutableLong.of(n);
@@ -12516,7 +12525,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     }
 
     /**
-     *
+     * To avoid eager loading by terminal operations invoked in {@code transfer}, we can call {@code stream.transform(s -> CheckedStream.defer(() -> s.someTerminalOperation(...)))}
      *
      * @param <TT>
      * @param <EE>
@@ -12527,12 +12536,13 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     @IntermediateOp
     public <TT, EE extends Exception> CheckedStream<TT, EE> transform(Function<? super CheckedStream<T, E>, CheckedStream<TT, EE>> transfer) { //NOSONAR
         assertNotClosed();
-
         checkArgNotNull(transfer, "transfer");
 
-        final Throwables.Supplier<CheckedStream<TT, EE>, EE> delayInitializer = () -> transfer.apply(this);
+        //    final Throwables.Supplier<CheckedStream<TT, EE>, EE> delayInitializer = () -> transfer.apply(this);
+        //
+        //    return CheckedStream.defer(delayInitializer);
 
-        return defer(delayInitializer);
+        return transfer.apply(this);
     }
 
     /**
@@ -12544,11 +12554,36 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     @Beta
     @IntermediateOp
     public <U> CheckedStream<U, E> transformB(final Function<? super Stream<T>, ? extends Stream<? extends U>> transfer) {
+        // Major reason for commenting out below lines is to keep consistent with method transform.
+        //        assertNotClosed();
+        //        checkArgNotNull(transfer, "transfer");
+        //
+        //        final Throwables.Supplier<CheckedStream<U, E>, E> delayInitializer = () -> CheckedStream.from(transfer.apply(this.unchecked()));
+        //
+        //        return CheckedStream.defer(delayInitializer);
+
+        return transformB(transfer, false);
+    }
+
+    /**
+     *
+     * @param <U>
+     * @param transfer
+     * @param deferred
+     * @return
+     */
+    @Beta
+    @IntermediateOp
+    public <U> CheckedStream<U, E> transformB(final Function<? super Stream<T>, ? extends Stream<? extends U>> transfer, final boolean deferred) {
         assertNotClosed();
+        checkArgNotNull(transfer, "transfer");
 
-        final Throwables.Supplier<CheckedStream<U, E>, E> delayInitializer = () -> CheckedStream.from(transfer.apply(this.unchecked()));
-
-        return defer(delayInitializer);
+        if (deferred) {
+            final Throwables.Supplier<CheckedStream<U, E>, E> delayInitializer = () -> CheckedStream.from(transfer.apply(this.unchecked()));
+            return CheckedStream.defer(delayInitializer);
+        } else {
+            return CheckedStream.from(transfer.apply(this.unchecked()));
+        }
     }
 
     /**
@@ -14734,7 +14769,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             final Throwables.BiPredicate<? super T, ? super U, ? extends E> predicate) {
         assertNotClosed();
 
-        checkArgNotNull(b, "Seq 'b' can not be null");
+        checkArgNotNull(b, "CheckedStream 'b' can not be null");
         checkArgNotNull(predicate, "'predicate' can not be null");
 
         final Throwables.Function<T, Pair<T, List<U>>, E> mapper = new Throwables.Function<>() {
@@ -14805,7 +14840,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             final Throwables.BiFunction<? super T, ? super D, ? extends R, ? extends E> func) {
         assertNotClosed();
 
-        checkArgNotNull(b, "Seq 'b' can not be null");
+        checkArgNotNull(b, "CheckedStream 'b' can not be null");
         checkArgNotNull(predicate, "'predicate' can not be null");
         checkArgNotNull(collector, "'collector' can not be null");
         checkArgNotNull(func, "'func' can not be null");
@@ -14871,7 +14906,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             final Throwables.Function<Throwables.Iterator<U, E>, CheckedStream<R, E>, ? extends E> mapperForUnJoinedEelements) {
         assertNotClosed();
 
-        checkArgNotNull(b, "Seq 'b' can not be null");
+        checkArgNotNull(b, "CheckedStream 'b' can not be null");
         checkArgNotNull(predicate, "'predicate' can not be null");
         checkArgNotNull(collector, "'collector' can not be null");
         checkArgNotNull(func, "'func' can not be null");
@@ -15079,7 +15114,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             final Throwables.BiFunction<? super T, ? super Throwables.Iterator<U, ? extends E>, ? extends R, ? extends E> joinFunc) {
         assertNotClosed();
 
-        checkArgNotNull(b, "Seq 'b' can not be null");
+        checkArgNotNull(b, "CheckedStream 'b' can not be null");
         checkArgNotNull(joinFunc, "'joinFunc' can not be null");
 
         final Throwables.Iterator<U, ? extends E> iter = b.iteratorEx();
@@ -15107,7 +15142,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             final Throwables.Function<? super Throwables.Iterator<U, ? extends E>, CheckedStream<R, E>, ? extends E> mapperForUnJoinedEelements) {
         assertNotClosed();
 
-        checkArgNotNull(b, "Seq 'b' can not be null");
+        checkArgNotNull(b, "CheckedStream 'b' can not be null");
         checkArgNotNull(joinFunc, "'joinFunc' can not be null");
         checkArgNotNull(mapperForUnJoinedEelements, "'mapperForUnJoinedEelements' can not be null");
 
@@ -15136,74 +15171,76 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     }
 
     /**
-     * Add a new Stream with terminal action to listen/consume the elements from upstream.
+     * Attach a new stream with terminal action to consume the elements from upstream.
+     * The Intermediate and terminate operations in the attached stream will be executed in a new Thread.
+     * The new thread is started when the main stream(the returned stream or its downstream) receives the first element or is closed if there is no element pulled.
+     * Elements from upstream pulled by the main stream will be put in a queue for the attached stream to consume.
+     * After the main stream is finished, the attached stream will continue to pull remaining elements from upstream if needed.
+     * The main stream and the attached stream run independently. Operations in one stream won't impact the elements or final result in another Stream.
+     * But when the main stream is to close, it will wait to the attached stream to close before calling close actions.
      *
      * @param consumerForNewStreamWithTerminalAction
      * @return
-     * @see #addSubscriber(com.landawn.abacus.util.Throwables.Consumer, int, Executor)
+     * @see #addSubscriber(com.landawn.abacus.util.Throwables.Consumer, int, long, Executor)
      */
     @Beta
     @IntermediateOp
     public CheckedStream<T, E> addSubscriber(
             final Throwables.Consumer<? super CheckedStream<T, E>, ? extends Exception> consumerForNewStreamWithTerminalAction) {
-        assertNotClosed();
-        checkArgNotNull(consumerForNewStreamWithTerminalAction, "consumerForNewStreamWithTerminalAction");
-
-        return addSubscriberForAll(consumerForNewStreamWithTerminalAction, DEFAULT_BUFFERED_SIZE_PER_ITERATOR, null);
+        return addSubscriber(consumerForNewStreamWithTerminalAction, DEFAULT_BUFFERED_SIZE_PER_ITERATOR, MAX_WAIT_TIME_FOR_QUEUE_OFFER_FOR_ADD_SUBSCRIBER,
+                Stream.executor());
     }
 
     /**
-     * Add a new Stream with terminal action to listen/consume the elements from upstream.
-     * The terminal action of the new Stream will be executed in a new Thread.
-     * The new thread is started when the new Stream receives first element or this stream is closed if there is no element pulled by this Stream.
-     * At the begin, elements from upstream will be pulled by this Stream and put in a queue to share with the new Stream.
-     * After this Stream is finished, the new Stream will continue to pull remaining elements from upstream if needed.
-     * This stream and the new Stream run independently. Operations in one stream won't impact the elements or final result in another Stream.
-     * <br/>
-     * <br/>
-     * If the new Stream fetch more elements than this Stream, the new Stream may be finished later.
-     * <br/>
-     * If the new Stream fetch less elements than this Stream, the new Stream may be finished earlier.
-     * <br />
-     * If the new Stream is finished later, this Stream will wait to it's finished in the close method.
-     * <br />
-     * <br/>
+     * Attach a new stream with terminal action to consume the elements from upstream.
+     * The Intermediate and terminate operations in the attached stream will be executed in a new Thread.
+     * The new thread is started when the main stream(the returned stream or its downstream) receives the first element or is closed if there is no element pulled.
+     * Elements from upstream pulled by the main stream will be put in a queue for the attached stream to consume.
+     * After the main stream is finished, the attached stream will continue to pull remaining elements from upstream if needed.
+     * The main stream and the attached stream run independently. Operations in one stream won't impact the elements or final result in another Stream.
+     * But when the main stream is to close, it will wait to the attached stream to close before calling close actions.
      *
-     * To get the return value of the new Stream, An output parameter can be used. for example:
+     * To get the return value of the attached stream, An output parameter can be used. for example:
      * <pre>
      * <code>
      *     final Holder<String> resultHolder = new Holder<>();
-     *     thisStream.injectNewStream(newStream -> resultHolder.set(newStream.filter(...).map(...).join(",")));
+     *     thisStream.addSubscriber(newStream -> resultHolder.set(newStream.filter(...).map(...).join(",")))...;
      * </code>
      * </pre>
      *
      * @param consumerForNewStreamWithTerminalAction
      * @param queueSize
+     * @param maxWaitForAddingElementToQuery default value is 30000 (unit is milliseconds)
      * @param executor
      * @return
      */
     @Beta
+    @SequentialOnly
     @IntermediateOp
     public CheckedStream<T, E> addSubscriber(final Throwables.Consumer<? super CheckedStream<T, E>, ? extends Exception> consumerForNewStreamWithTerminalAction,
-            final int queueSize, final Executor executor) {
+            final int queueSize, final long maxWaitForAddingElementToQuery, final Executor executor) {
         assertNotClosed();
         checkArgNotNull(consumerForNewStreamWithTerminalAction, "consumerForNewStreamWithTerminalAction");
         checkArgPositive(queueSize, "queueSize");
+        checkArgPositive(maxWaitForAddingElementToQuery, "maxWaitForAddingElementToQuery");
         checkArgNotNull(executor, "executor");
 
-        return addSubscriberForAll(consumerForNewStreamWithTerminalAction, queueSize, executor);
+        return addSubscriberForAll(consumerForNewStreamWithTerminalAction, queueSize, maxWaitForAddingElementToQuery, executor);
     }
 
     private CheckedStream<T, E> addSubscriberForAll(
             final Throwables.Consumer<? super CheckedStream<T, E>, ? extends Exception> consumerForNewStreamWithTerminalAction, final int queueSize,
-            final Executor executor) {
+            final long maxWaitForAddingElementToQuery, final Executor executor) {
         final BlockingQueue<T> queue = new ArrayBlockingQueue<>(queueSize <= 0 ? DEFAULT_BUFFERED_SIZE_PER_ITERATOR : queueSize);
         final Throwables.Iterator<T, E> iter = iteratorEx();
         final T none = (T) NONE;
 
         final MutableBoolean isMainStreamCompleted = MutableBoolean.of(false);
+        final MutableBoolean isSubscriberStreamCompleted = MutableBoolean.of(false);
+        final MutableBoolean wasQueueFull = MutableBoolean.of(false);
+        final MutableInt nextCallCount = MutableInt.of(0); // it should end with 0 if there is no exception happening during hasNext()/next() call.
 
-        final Throwables.Iterator<T, E> iterForNewStream = new Throwables.Iterator<>() { //NOSONAR
+        final Throwables.Iterator<T, E> iterForSubscriberStream = new Throwables.Iterator<>() { //NOSONAR
             private T next = null;
 
             public boolean hasNext() throws E {
@@ -15212,6 +15249,10 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                         try {
                             do {
                                 next = queue.poll(MAX_WAIT_TIME_FOR_QUEUE_POLL, TimeUnit.MILLISECONDS);
+
+                                if (nextCallCount.value() > 1 || (isMainStreamCompleted.isTrue() && nextCallCount.value() > 0)) {
+                                    throw new IllegalStateException("Exception happened in calling hasNext()/next()");
+                                }
                             } while (next == null && (isMainStreamCompleted.isFalse() || queue.size() > 0));
                         } catch (InterruptedException e) {
                             throw toRuntimeException(e);
@@ -15219,7 +15260,15 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                     }
                 }
 
-                return next != null || (isMainStreamCompleted.isTrue() && iter.hasNext());
+                if (wasQueueFull.isTrue()) {
+                    throw new IllegalStateException("Queue(size=" + queueSize + ") was full at some moment. Elements may be missed");
+                }
+
+                if (nextCallCount.value() > 1 || (isMainStreamCompleted.isTrue() && nextCallCount.value() > 0)) {
+                    throw new IllegalStateException("Exception happened in calling hasNext()/next()");
+                }
+
+                return next != null || (isMainStreamCompleted.isTrue() && elements.hasNext());
             }
 
             public T next() throws E {
@@ -15231,23 +15280,57 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                 next = null;
                 return ret;
             }
+
+            @Override
+            protected void closeResource() {
+                isSubscriberStreamCompleted.setTrue();
+                queue.clear();
+
+                if (wasQueueFull.isTrue()) {
+                    throw new IllegalStateException("Queue(size=" + queueSize + ") was full at some moment. Elements may be missed");
+                }
+
+                if (nextCallCount.value() > 1 || (isMainStreamCompleted.isTrue() && nextCallCount.value() > 0)) {
+                    throw new IllegalStateException("Exception happened in calling hasNext()/next()");
+                }
+            }
         };
 
         final Throwables.Iterator<T, E> iterA = new Throwables.Iterator<>() { //NOSONAR
             private boolean isNewStreamStarted = false;
             private ContinuableFuture<Void> futureForNewStream = null;
+            private boolean hasNext = false;
 
+            @Override
             public boolean hasNext() throws E {
-                return iter.hasNext();
+                nextCallCount.increment();
+
+                hasNext = elements.hasNext();
+
+                nextCallCount.decrement();
+
+                return hasNext;
             }
 
             public T next() throws E {
-                final T next = iter.next();
+                nextCallCount.increment();
 
-                queue.add(next == null ? none : next);
+                final T next = elements.next();
+
+                nextCallCount.decrement();
 
                 if (!isNewStreamStarted) {
                     startNewStream();
+                }
+
+                if (isSubscriberStreamCompleted.isFalse()) {
+                    try {
+                        if (!queue.offer(next == null ? none : next, maxWaitForAddingElementToQuery, TimeUnit.MILLISECONDS)) {
+                            wasQueueFull.setTrue();
+                        }
+                    } catch (InterruptedException e) {
+                        throw toRuntimeException(e);
+                    }
                 }
 
                 return next;
@@ -15273,9 +15356,11 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                 isNewStreamStarted = true;
 
                 if (executor == null) {
-                    futureForNewStream = newStream(iterForNewStream).asyncRun(consumerForNewStreamWithTerminalAction); //NOSONAR
+                    futureForNewStream = newStream(iterForSubscriberStream).onClose(iterForSubscriberStream::close)
+                            .asyncRun(consumerForNewStreamWithTerminalAction); //NOSONAR
                 } else {
-                    futureForNewStream = newStream(iterForNewStream).asyncRun(consumerForNewStreamWithTerminalAction, executor); //NOSONAR
+                    futureForNewStream = newStream(iterForSubscriberStream).onClose(iterForSubscriberStream::close)
+                            .asyncRun(consumerForNewStreamWithTerminalAction, executor); //NOSONAR
                 }
             }
         };
@@ -15284,54 +15369,67 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     }
 
     /**
-     * Add a new Stream with terminal action to listen/consume the elements filtered out by the specified {@code predicate}.
+     * Attach a new stream with terminal action to consume the elements filtered out by the specified {@code predicate}.
+     * The Intermediate and terminate operations in the attached stream will be executed in a new Thread.
+     * The new thread is started when the main stream(the returned stream or its downstream) receives the first element or is closed if there is no element pulled.
+     * Elements from upstream pulled by the main stream will be put in a queue for the attached stream to consume.
+     * After the main stream is finished, the attached stream will continue to pull remaining elements from upstream if needed.
+     * The main stream and the attached stream run independently. Operations in one stream won't impact the elements or final result in another Stream.
+     * But when the main stream is to close, it will wait to the attached stream to close before calling close actions.
      *
      * @param predicate
      * @param consumerForNewStreamWithTerminalAction
      * @return
-     * @see #addSubscriber(com.landawn.abacus.util.Throwables.Consumer, int, Executor)
+     * @see #filterWhileAddSubscriber(com.landawn.abacus.util.Throwables.Consumer, int, long, Executor)
      */
-    public CheckedStream<T, E> filterWhileAddSubscriber(final Predicate<? super T> predicate,
+    public CheckedStream<T, E> filterWhileAddSubscriber(final Throwables.Predicate<? super T, ? extends E> predicate,
             final Throwables.Consumer<? super CheckedStream<T, E>, ? extends Exception> consumerForNewStreamWithTerminalAction) {
-        assertNotClosed();
-        checkArgNotNull(predicate, "predicate");
-        checkArgNotNull(consumerForNewStreamWithTerminalAction, "consumerForNewStreamWithTerminalAction");
-
-        return addSubscriberForFilter(predicate, consumerForNewStreamWithTerminalAction, DEFAULT_BUFFERED_SIZE_PER_ITERATOR, null);
+        return filterWhileAddSubscriber(predicate, consumerForNewStreamWithTerminalAction, DEFAULT_BUFFERED_SIZE_PER_ITERATOR,
+                MAX_WAIT_TIME_FOR_QUEUE_OFFER_FOR_ADD_SUBSCRIBER, Stream.executor());
     }
 
     /**
-     * Add a new Stream with terminal action to listen/consume the elements filtered out by the specified {@code predicate}.
+     * Attach a new stream with terminal action to consume the elements filtered out by the specified {@code predicate}.
+     * The Intermediate and terminate operations in the attached stream will be executed in a new Thread.
+     * The new thread is started when the main stream(the returned stream or its downstream) receives the first element or is closed if there is no element pulled.
+     * Elements from upstream pulled by the main stream will be put in a queue for the attached stream to consume.
+     * After the main stream is finished, the attached stream will continue to pull remaining elements from upstream if needed.
+     * The main stream and the attached stream run independently. Operations in one stream won't impact the elements or final result in another Stream.
+     * But when the main stream is to close, it will wait to the attached stream to close before calling close actions.
      *
      * @param predicate
      * @param consumerForNewStreamWithTerminalAction
      * @param queueSize
+     * @param maxWaitForAddingElementToQuery default value is 30000 (unit is milliseconds)
      * @param executor
      * @return
-     * @see #addSubscriber(com.landawn.abacus.util.Throwables.Consumer, int, Executor)
      */
-    public CheckedStream<T, E> filterWhileAddSubscriber(final Predicate<? super T> predicate,
+    public CheckedStream<T, E> filterWhileAddSubscriber(final Throwables.Predicate<? super T, ? extends E> predicate,
             final Throwables.Consumer<? super CheckedStream<T, E>, ? extends Exception> consumerForNewStreamWithTerminalAction, final int queueSize,
-            final Executor executor) {
+            final long maxWaitForAddingElementToQuery, final Executor executor) {
         assertNotClosed();
         checkArgNotNull(predicate, "predicate");
         checkArgNotNull(consumerForNewStreamWithTerminalAction, "consumerForNewStreamWithTerminalAction");
         checkArgPositive(queueSize, "queueSize");
+        checkArgPositive(maxWaitForAddingElementToQuery, "maxWaitForAddingElementToQuery");
         checkArgNotNull(executor, "executor");
 
-        return addSubscriberForFilter(predicate, consumerForNewStreamWithTerminalAction, queueSize, executor);
+        return addSubscriberForFilter(predicate, consumerForNewStreamWithTerminalAction, queueSize, maxWaitForAddingElementToQuery, executor);
     }
 
-    private CheckedStream<T, E> addSubscriberForFilter(final Predicate<? super T> predicate,
+    private CheckedStream<T, E> addSubscriberForFilter(final Throwables.Predicate<? super T, ? extends E> predicate,
             final Throwables.Consumer<? super CheckedStream<T, E>, ? extends Exception> consumerForNewStreamWithTerminalAction, final int queueSize,
-            final Executor executor) {
+            final long maxWaitForAddingElementToQuery, final Executor executor) {
         final BlockingQueue<T> queue = new ArrayBlockingQueue<>(queueSize <= 0 ? DEFAULT_BUFFERED_SIZE_PER_ITERATOR : queueSize);
         final Throwables.Iterator<T, E> iter = iteratorEx();
         final T none = (T) NONE;
 
         final MutableBoolean isMainStreamCompleted = MutableBoolean.of(false);
+        final MutableBoolean isSubscriberStreamCompleted = MutableBoolean.of(false);
+        final MutableBoolean wasQueueFull = MutableBoolean.of(false);
+        final MutableInt nextCallCount = MutableInt.of(0); // it should end with 0 if there is no exception happening during hasNext()/next() call.
 
-        final Throwables.Iterator<T, E> iterForNewStream = new Throwables.Iterator<>() { //NOSONAR
+        final Throwables.Iterator<T, E> iterForSubscriberStream = new Throwables.Iterator<>() { //NOSONAR
             private T next = null;
 
             public boolean hasNext() throws E {
@@ -15340,6 +15438,10 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                         try {
                             do {
                                 next = queue.poll(MAX_WAIT_TIME_FOR_QUEUE_POLL, TimeUnit.MILLISECONDS);
+
+                                if (nextCallCount.value() > 1 || (isMainStreamCompleted.isTrue() && nextCallCount.value() > 0)) {
+                                    throw new IllegalStateException("Exception happened in calling hasNext()/next()");
+                                }
                             } while (next == null && (isMainStreamCompleted.isFalse() || queue.size() > 0));
                         } catch (InterruptedException e) {
                             throw toRuntimeException(e);
@@ -15348,8 +15450,8 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                 }
 
                 if (next == null && isMainStreamCompleted.isTrue()) {
-                    while (iter.hasNext()) {
-                        next = iter.next();
+                    while (elements.hasNext()) {
+                        next = elements.next();
 
                         if (!predicate.test(next)) {
                             next = next == null ? none : next;
@@ -15359,6 +15461,14 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
                     next = null;
                     return false;
+                }
+
+                if (wasQueueFull.isTrue()) {
+                    throw new IllegalStateException("Queue(size=" + queueSize + ") was full at some moment. Elements may be missed");
+                }
+
+                if (nextCallCount.value() > 1 || (isMainStreamCompleted.isTrue() && nextCallCount.value() > 0)) {
+                    throw new IllegalStateException("Exception happened in calling hasNext()/next()");
                 }
 
                 return next != null;
@@ -15373,6 +15483,20 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                 next = null;
                 return ret;
             }
+
+            @Override
+            protected void closeResource() {
+                isSubscriberStreamCompleted.setTrue();
+                queue.clear();
+
+                if (wasQueueFull.isTrue()) {
+                    throw new IllegalStateException("Queue(size=" + queueSize + ") was full at some moment. Elements may be missed");
+                }
+
+                if (nextCallCount.value() > 1 || (isMainStreamCompleted.isTrue() && nextCallCount.value() > 0)) {
+                    throw new IllegalStateException("Exception happened in calling hasNext()/next()");
+                }
+            }
         };
 
         final Throwables.Iterator<T, E> iterA = new Throwables.Iterator<>() { //NOSONAR
@@ -15383,20 +15507,32 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
             public boolean hasNext() throws E {
                 if (!hasNext) {
-                    while (iter.hasNext()) {
-                        next = iter.next();
+                    nextCallCount.increment();
+
+                    while (elements.hasNext()) {
+                        next = elements.next();
 
                         if (predicate.test(next)) {
                             hasNext = true;
                             break;
                         } else {
-                            queue.add(next == null ? none : next);
-
                             if (!isNewStreamStarted) {
                                 startNewStream();
                             }
+
+                            if (isSubscriberStreamCompleted.isFalse()) {
+                                try {
+                                    if (!queue.offer(next == null ? none : next, maxWaitForAddingElementToQuery, TimeUnit.MILLISECONDS)) {
+                                        wasQueueFull.setTrue();
+                                    }
+                                } catch (InterruptedException e) {
+                                    throw toRuntimeException(e);
+                                }
+                            }
                         }
                     }
+
+                    nextCallCount.decrement();
                 }
 
                 return hasNext;
@@ -15432,9 +15568,11 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                 isNewStreamStarted = true;
 
                 if (executor == null) {
-                    futureForNewStream = newStream(iterForNewStream).asyncRun(consumerForNewStreamWithTerminalAction); //NOSONAR
+                    futureForNewStream = newStream(iterForSubscriberStream).onClose(iterForSubscriberStream::close)
+                            .asyncRun(consumerForNewStreamWithTerminalAction); //NOSONAR
                 } else {
-                    futureForNewStream = newStream(iterForNewStream).asyncRun(consumerForNewStreamWithTerminalAction, executor); //NOSONAR
+                    futureForNewStream = newStream(iterForSubscriberStream).onClose(iterForSubscriberStream::close)
+                            .asyncRun(consumerForNewStreamWithTerminalAction, executor); //NOSONAR
                 }
             }
         };
@@ -15443,55 +15581,64 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     }
 
     /**
-     * Add a new Stream with terminal action to listen/consume the elements not token by the specified {@code predicate}.
+     * Attach a new stream with terminal action to consume the elements not token by the specified {@code predicate}.
+     * The Intermediate and terminate operations in the attached stream will be executed in a new Thread.
+     * The new thread is started when the main stream(the returned stream or its downstream) receives the first element or is closed if there is no element pulled.
+     * Elements from upstream pulled by the main stream will be put in a queue for the attached stream to consume.
+     * After the main stream is finished, the attached stream will continue to pull remaining elements from upstream if needed.
+     * The main stream and the attached stream run independently. Operations in one stream won't impact the elements or final result in another Stream.
+     * But when the main stream is to close, it will wait to the attached stream to close before calling close actions.
      *
      * @param predicate
      * @param consumerForNewStreamWithTerminalAction
      * @return
-     * @see #addSubscriber(com.landawn.abacus.util.Throwables.Consumer, int, Executor)
+     * @see #takeWhileAddSubscriber(com.landawn.abacus.util.Throwables.Consumer, int, long, Executor)
      */
-    public CheckedStream<T, E> takeWhileAddSubscriber(final Predicate<? super T> predicate,
+    public CheckedStream<T, E> takeWhileAddSubscriber(final Throwables.Predicate<? super T, ? extends E> predicate,
             final Throwables.Consumer<? super CheckedStream<T, E>, ? extends Exception> consumerForNewStreamWithTerminalAction) {
-        assertNotClosed();
-        checkArgNotNull(predicate, "predicate");
-        checkArgNotNull(consumerForNewStreamWithTerminalAction, "consumerForNewStreamWithTerminalAction");
-
-        return addSubscriberForTakeWhile(predicate, consumerForNewStreamWithTerminalAction, DEFAULT_BUFFERED_SIZE_PER_ITERATOR, null);
+        return takeWhileAddSubscriber(predicate, consumerForNewStreamWithTerminalAction, Stream.executor());
     }
 
     /**
-     * Add a new Stream with terminal action to listen/consume the elements not token by the specified {@code predicate}.
+     * Attach a new stream with terminal action to consume the elements not token by the specified {@code predicate}.
+     * The Intermediate and terminate operations in the attached stream will be executed in a new Thread.
+     * The new thread is started when the main stream(the returned stream or its downstream) receives the first element or is closed if there is no element pulled.
+     * Elements from upstream pulled by the main stream will be put in a queue for the attached stream to consume.
+     * After the main stream is finished, the attached stream will continue to pull remaining elements from upstream if needed.
+     * The main stream and the attached stream run independently. Operations in one stream won't impact the elements or final result in another Stream.
+     * But when the main stream is to close, it will wait to the attached stream to close before calling close actions.
      *
      * @param predicate
      * @param consumerForNewStreamWithTerminalAction
-     * @param queueSize
      * @param executor
      * @return
-     * @see #addSubscriber(com.landawn.abacus.util.Throwables.Consumer, int, Executor)
      */
-    public CheckedStream<T, E> takeWhileAddSubscriber(final Predicate<? super T> predicate,
-            final Throwables.Consumer<? super CheckedStream<T, E>, ? extends Exception> consumerForNewStreamWithTerminalAction, final int queueSize,
-            final Executor executor) {
+    public CheckedStream<T, E> takeWhileAddSubscriber(final Throwables.Predicate<? super T, ? extends E> predicate,
+            final Throwables.Consumer<? super CheckedStream<T, E>, ? extends Exception> consumerForNewStreamWithTerminalAction, final Executor executor) {
         assertNotClosed();
         checkArgNotNull(predicate, "predicate");
         checkArgNotNull(consumerForNewStreamWithTerminalAction, "consumerForNewStreamWithTerminalAction");
-        checkArgPositive(queueSize, "queueSize");
         checkArgNotNull(executor, "executor");
 
-        return addSubscriberForTakeWhile(predicate, consumerForNewStreamWithTerminalAction, queueSize, executor);
+        // There will only one element will be put into queue at most at the begin for take while. Queue won't be used after the first element.
+        return addSubscriberForTakeWhile(predicate, consumerForNewStreamWithTerminalAction, DEFAULT_BUFFERED_SIZE_PER_ITERATOR,
+                MAX_WAIT_TIME_FOR_QUEUE_OFFER_FOR_ADD_SUBSCRIBER, executor);
     }
 
-    private CheckedStream<T, E> addSubscriberForTakeWhile(final Predicate<? super T> predicate,
+    private CheckedStream<T, E> addSubscriberForTakeWhile(final Throwables.Predicate<? super T, ? extends E> predicate,
             final Throwables.Consumer<? super CheckedStream<T, E>, ? extends Exception> consumerForNewStreamWithTerminalAction, final int queueSize,
-            final Executor executor) {
+            final long maxWaitForAddingElementToQuery, final Executor executor) {
         final BlockingQueue<T> queue = new ArrayBlockingQueue<>(queueSize <= 0 ? DEFAULT_BUFFERED_SIZE_PER_ITERATOR : queueSize);
         final Throwables.Iterator<T, E> iter = iteratorEx();
         final T none = (T) NONE;
 
         final MutableBoolean isMainStreamCompleted = MutableBoolean.of(false);
         final MutableBoolean isTokenInMainStream = MutableBoolean.of(false);
+        final MutableBoolean isSubscriberStreamCompleted = MutableBoolean.of(false);
+        final MutableBoolean wasQueueFull = MutableBoolean.of(false);
+        final MutableInt nextCallCount = MutableInt.of(0); // it should end with 0 if there is no exception happening during hasNext()/next() call.
 
-        final Throwables.Iterator<T, E> iterForNewStream = new Throwables.Iterator<>() { //NOSONAR
+        final Throwables.Iterator<T, E> iterForSubscriberStream = new Throwables.Iterator<>() { //NOSONAR
             private T next = null;
 
             public boolean hasNext() throws E {
@@ -15500,6 +15647,10 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                         try {
                             do {
                                 next = queue.poll(MAX_WAIT_TIME_FOR_QUEUE_POLL, TimeUnit.MILLISECONDS);
+
+                                if (nextCallCount.value() > 1 || (isMainStreamCompleted.isTrue() && nextCallCount.value() > 0)) {
+                                    throw new IllegalStateException("Exception happened in calling hasNext()/next()");
+                                }
                             } while (next == null && ((isTokenInMainStream.isFalse() && isMainStreamCompleted.isFalse()) || queue.size() > 0));
                         } catch (InterruptedException e) {
                             throw toRuntimeException(e);
@@ -15509,8 +15660,8 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
                 if (next == null) {
                     if (isTokenInMainStream.isFalse()) { // it also means isMainStreamCompleted.isTrue()
-                        while (iter.hasNext()) {
-                            next = iter.next();
+                        while (elements.hasNext()) {
+                            next = elements.next();
 
                             if (!predicate.test(next)) {
                                 next = next == null ? none : next;
@@ -15525,7 +15676,15 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                     }
                 }
 
-                return next != null || iter.hasNext();
+                if (wasQueueFull.isTrue()) {
+                    throw new IllegalStateException("Queue(size=" + queueSize + ") was full at some moment. Elements may be missed");
+                }
+
+                if (nextCallCount.value() > 1 || (isMainStreamCompleted.isTrue() && nextCallCount.value() > 0)) {
+                    throw new IllegalStateException("Exception happened in calling hasNext()/next()");
+                }
+
+                return next != null || elements.hasNext();
             }
 
             public T next() throws E {
@@ -15537,6 +15696,20 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                 next = null;
                 return ret;
             }
+
+            @Override
+            protected void closeResource() {
+                isSubscriberStreamCompleted.setTrue();
+                queue.clear();
+
+                if (wasQueueFull.isTrue()) {
+                    throw new IllegalStateException("Queue(size=" + queueSize + ") was full at some moment. Elements may be missed");
+                }
+
+                if (nextCallCount.value() > 1 || (isMainStreamCompleted.isTrue() && nextCallCount.value() > 0)) {
+                    throw new IllegalStateException("Exception happened in calling hasNext()/next()");
+                }
+            }
         };
 
         final Throwables.Iterator<T, E> iterA = new Throwables.Iterator<>() { //NOSONAR
@@ -15547,21 +15720,38 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             private T next = null;
 
             public boolean hasNext() throws E {
-                if (!hasNext && hasMore && iter.hasNext()) {
-                    next = iter.next();
+                nextCallCount.increment();
 
-                    if (predicate.test(next)) {
-                        hasNext = true;
-                    } else {
-                        hasMore = false;
+                if (!hasNext && hasMore) {
+                    nextCallCount.increment();
 
-                        queue.add(next == null ? none : next);
-                        isTokenInMainStream.setTrue();
+                    if (elements.hasNext()) {
+                        next = elements.next();
 
-                        if (!isNewStreamStarted) {
-                            startNewStream();
+                        if (predicate.test(next)) {
+                            hasNext = true;
+                        } else {
+                            hasMore = false;
+
+                            isTokenInMainStream.setTrue();
+
+                            if (!isNewStreamStarted) {
+                                startNewStream();
+                            }
+
+                            if (isSubscriberStreamCompleted.isFalse()) {
+                                try {
+                                    if (!queue.offer(next == null ? none : next, maxWaitForAddingElementToQuery, TimeUnit.MILLISECONDS)) {
+                                        wasQueueFull.setTrue();
+                                    }
+                                } catch (InterruptedException e) {
+                                    throw toRuntimeException(e);
+                                }
+                            }
                         }
                     }
+
+                    nextCallCount.decrement();
                 }
 
                 return hasNext;
@@ -15597,9 +15787,11 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                 isNewStreamStarted = true;
 
                 if (executor == null) {
-                    futureForNewStream = newStream(iterForNewStream).asyncRun(consumerForNewStreamWithTerminalAction); //NOSONAR
+                    futureForNewStream = newStream(iterForSubscriberStream).onClose(iterForSubscriberStream::close)
+                            .asyncRun(consumerForNewStreamWithTerminalAction); //NOSONAR
                 } else {
-                    futureForNewStream = newStream(iterForNewStream).asyncRun(consumerForNewStreamWithTerminalAction, executor); //NOSONAR
+                    futureForNewStream = newStream(iterForSubscriberStream).onClose(iterForSubscriberStream::close)
+                            .asyncRun(consumerForNewStreamWithTerminalAction, executor); //NOSONAR
                 }
             }
         };
@@ -15608,55 +15800,68 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     }
 
     /**
-     * Add a new Stream with terminal action to listen/consume the elements dropped by the specified {@code predicate}.
+     * Attach a new stream with terminal action to consume the elements dropped by the specified {@code predicate}.
+     * The Intermediate and terminate operations in the attached stream will be executed in a new Thread.
+     * The new thread is started when the main stream(the returned stream or its downstream) receives the first element or is closed if there is no element pulled.
+     * Elements from upstream pulled by the main stream will be put in a queue for the attached stream to consume.
+     * After the main stream is finished, the attached stream will continue to pull remaining elements from upstream if needed.
+     * The main stream and the attached stream run independently. Operations in one stream won't impact the elements or final result in another Stream.
+     * But when the main stream is to close, it will wait to the attached stream to close before calling close actions.
      *
      * @param predicate
      * @param consumerForNewStreamWithTerminalAction
      * @return
-     * @see #addSubscriber(com.landawn.abacus.util.Throwables.Consumer, int, Executor)
+     * @see #dropWhileAddSubscriber(com.landawn.abacus.util.Throwables.Consumer, int, long, Executor)
      */
-    public CheckedStream<T, E> dropWhileAddSubscriber(final Predicate<? super T> predicate,
+    public CheckedStream<T, E> dropWhileAddSubscriber(final Throwables.Predicate<? super T, ? extends E> predicate,
             final Throwables.Consumer<? super CheckedStream<T, E>, ? extends Exception> consumerForNewStreamWithTerminalAction) {
-        assertNotClosed();
-        checkArgNotNull(predicate, "predicate");
-        checkArgNotNull(consumerForNewStreamWithTerminalAction, "consumerForNewStreamWithTerminalAction");
-
-        return addSubscriberForDropWhile(predicate, consumerForNewStreamWithTerminalAction, DEFAULT_BUFFERED_SIZE_PER_ITERATOR, null);
+        return dropWhileAddSubscriber(predicate, consumerForNewStreamWithTerminalAction, DEFAULT_BUFFERED_SIZE_PER_ITERATOR,
+                MAX_WAIT_TIME_FOR_QUEUE_OFFER_FOR_ADD_SUBSCRIBER, Stream.executor());
     }
 
     /**
-     * Add a new Stream with terminal action to listen/consume the elements dropped by the specified {@code predicate}.
+     * Attach a new stream with terminal action to consume the elements dropped by the specified {@code predicate}.
+     * The Intermediate and terminate operations in the attached stream will be executed in a new Thread.
+     * The new thread is started when the main stream(the returned stream or its downstream) receives the first element or is closed if there is no element pulled.
+     * Elements from upstream pulled by the main stream will be put in a queue for the attached stream to consume.
+     * After the main stream is finished, the attached stream will continue to pull remaining elements from upstream if needed.
+     * The main stream and the attached stream run independently. Operations in one stream won't impact the elements or final result in another Stream.
+     * But when the main stream is to close, it will wait to the attached stream to close before calling close actions.
      *
      * @param predicate
      * @param consumerForNewStreamWithTerminalAction
      * @param queueSize
+     * @param maxWaitForAddingElementToQuery default value is 30000 (unit is milliseconds)
      * @param executor
      * @return
-     * @see #addSubscriber(com.landawn.abacus.util.Throwables.Consumer, int, Executor)
      */
-    public CheckedStream<T, E> dropWhileAddSubscriber(final Predicate<? super T> predicate,
+    public CheckedStream<T, E> dropWhileAddSubscriber(final Throwables.Predicate<? super T, ? extends E> predicate,
             final Throwables.Consumer<? super CheckedStream<T, E>, ? extends Exception> consumerForNewStreamWithTerminalAction, final int queueSize,
-            final Executor executor) {
+            final long maxWaitForAddingElementToQuery, final Executor executor) {
         assertNotClosed();
         checkArgNotNull(predicate, "predicate");
         checkArgNotNull(consumerForNewStreamWithTerminalAction, "consumerForNewStreamWithTerminalAction");
         checkArgPositive(queueSize, "queueSize");
+        checkArgPositive(maxWaitForAddingElementToQuery, "maxWaitForAddingElementToQuery");
         checkArgNotNull(executor, "executor");
 
-        return addSubscriberForDropWhile(predicate, consumerForNewStreamWithTerminalAction, queueSize, executor);
+        return addSubscriberForDropWhile(predicate, consumerForNewStreamWithTerminalAction, queueSize, maxWaitForAddingElementToQuery, executor);
     }
 
-    private CheckedStream<T, E> addSubscriberForDropWhile(final Predicate<? super T> predicate,
+    private CheckedStream<T, E> addSubscriberForDropWhile(final Throwables.Predicate<? super T, ? extends E> predicate,
             final Throwables.Consumer<? super CheckedStream<T, E>, ? extends Exception> consumerForNewStreamWithTerminalAction, final int queueSize,
-            final Executor executor) {
+            final long maxWaitForAddingElementToQuery, final Executor executor) {
         final BlockingQueue<T> queue = new ArrayBlockingQueue<>(queueSize <= 0 ? DEFAULT_BUFFERED_SIZE_PER_ITERATOR : queueSize);
         final Throwables.Iterator<T, E> iter = iteratorEx();
         final T none = (T) NONE;
 
         final MutableBoolean isMainStreamCompleted = MutableBoolean.of(false);
         final MutableBoolean isDroppedInMainStream = MutableBoolean.of(false);
+        final MutableBoolean isSubscriberStreamCompleted = MutableBoolean.of(false);
+        final MutableBoolean wasQueueFull = MutableBoolean.of(false);
+        final MutableInt nextCallCount = MutableInt.of(0); // it should end with 0 if there is no exception happening during hasNext()/next() call.
 
-        final Throwables.Iterator<T, E> iterForNewStream = new Throwables.Iterator<>() { //NOSONAR
+        final Throwables.Iterator<T, E> iterForSubscriberStream = new Throwables.Iterator<>() { //NOSONAR
             private T next = null;
 
             public boolean hasNext() throws E {
@@ -15665,6 +15870,10 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                         try {
                             do {
                                 next = queue.poll(MAX_WAIT_TIME_FOR_QUEUE_POLL, TimeUnit.MILLISECONDS);
+
+                                if (nextCallCount.value() > 1 || (isMainStreamCompleted.isTrue() && nextCallCount.value() > 0)) {
+                                    throw new IllegalStateException("Exception happened in calling hasNext()/next()");
+                                }
                             } while (next == null && ((isDroppedInMainStream.isFalse() && isMainStreamCompleted.isFalse()) || queue.size() > 0));
                         } catch (InterruptedException e) {
                             throw toRuntimeException(e);
@@ -15674,8 +15883,8 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
                 if (next == null) {
                     if (isDroppedInMainStream.isFalse()) { // it also means isMainStreamCompleted.isTrue()
-                        if (iter.hasNext()) {
-                            next = iter.next();
+                        if (elements.hasNext()) {
+                            next = elements.next();
 
                             if (predicate.test(next)) {
                                 next = next == null ? none : next;
@@ -15689,6 +15898,14 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                     }
                 }
 
+                if (wasQueueFull.isTrue()) {
+                    throw new IllegalStateException("Queue(size=" + queueSize + ") was full at some moment. Elements may be missed");
+                }
+
+                if (nextCallCount.value() > 1 || (isMainStreamCompleted.isTrue() && nextCallCount.value() > 0)) {
+                    throw new IllegalStateException("Exception happened in calling hasNext()/next()");
+                }
+
                 return next != null;
             }
 
@@ -15700,6 +15917,20 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                 final T ret = next != null ? (next == none ? null : next) : iter.next();
                 next = null;
                 return ret;
+            }
+
+            @Override
+            protected void closeResource() {
+                isSubscriberStreamCompleted.setTrue();
+                queue.clear();
+
+                if (wasQueueFull.isTrue()) {
+                    throw new IllegalStateException("Queue(size=" + queueSize + ") was full at some moment. Elements may be missed");
+                }
+
+                if (nextCallCount.value() > 1 || (isMainStreamCompleted.isTrue() && nextCallCount.value() > 0)) {
+                    throw new IllegalStateException("Exception happened in calling hasNext()/next()");
+                }
             }
         };
 
@@ -15715,23 +15946,41 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                     if (!dropped) {
                         dropped = true;
 
-                        while (iter.hasNext()) {
-                            next = iter.next();
+                        try {
+                            nextCallCount.increment();
 
-                            if (!predicate.test(next)) {
-                                hasNext = true;
-                                break;
-                            } else {
-                                queue.add(next == null ? none : next);
-                                isDroppedInMainStream.setTrue();
+                            while (elements.hasNext()) {
+                                next = elements.next();
 
-                                if (!isNewStreamStarted) {
-                                    startNewStream();
+                                if (!predicate.test(next)) {
+                                    isDroppedInMainStream.setTrue();
+                                    hasNext = true;
+                                    break;
+                                } else {
+                                    if (!isNewStreamStarted) {
+                                        startNewStream();
+                                    }
+
+                                    if (isSubscriberStreamCompleted.isFalse()) {
+                                        try {
+                                            if (!queue.offer(next == null ? none : next, maxWaitForAddingElementToQuery, TimeUnit.MILLISECONDS)) {
+                                                wasQueueFull.setTrue();
+                                            }
+                                        } catch (InterruptedException e) {
+                                            throw toRuntimeException(e);
+                                        }
+                                    }
                                 }
                             }
+
+                            nextCallCount.decrement();
+                        } finally {
+                            if (nextCallCount.value() > 0) { // exception happened. set nextCallCount to 2.
+                                nextCallCount.increment();
+                            }
                         }
-                    } else if (iter.hasNext()) {
-                        next = iter.next();
+                    } else if (elements.hasNext()) {
+                        next = elements.next();
                         hasNext = true;
                     }
                 }
@@ -15769,9 +16018,11 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                 isNewStreamStarted = true;
 
                 if (executor == null) {
-                    futureForNewStream = newStream(iterForNewStream).asyncRun(consumerForNewStreamWithTerminalAction); //NOSONAR
+                    futureForNewStream = newStream(iterForSubscriberStream).onClose(iterForSubscriberStream::close)
+                            .asyncRun(consumerForNewStreamWithTerminalAction); //NOSONAR
                 } else {
-                    futureForNewStream = newStream(iterForNewStream).asyncRun(consumerForNewStreamWithTerminalAction, executor); //NOSONAR
+                    futureForNewStream = newStream(iterForSubscriberStream).onClose(iterForSubscriberStream::close)
+                            .asyncRun(consumerForNewStreamWithTerminalAction, executor); //NOSONAR
                 }
             }
         };
