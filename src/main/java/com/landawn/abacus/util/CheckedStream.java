@@ -9084,6 +9084,52 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     }
 
     /**
+     * Consider using: {@code stream.reversed().findFirst(predicate)} for better performance if possible.
+     *
+     * @param <E2>
+     * @param predicate
+     * @return
+     * @throws E
+     * @throws E2
+     */
+    @TerminalOp
+    public <E2 extends Exception> Optional<T> findLast(final Throwables.Predicate<? super T, E2> predicate) throws E, E2 {
+        assertNotClosed();
+
+        try {
+            T result = (T) NONE;
+            T next = null;
+
+            while (elements.hasNext()) {
+                next = elements.next();
+
+                if (predicate.test(next)) {
+                    result = next;
+                }
+            }
+
+            return result == NONE ? Optional.<T> empty() : Optional.of(result);
+        } finally {
+            close();
+        }
+    }
+
+    /**
+     * Same as {@code findFirst(Throwables.Predicate)}.
+     *
+     * @param <E2>
+     * @param predicate
+     * @return
+     * @throws E
+     * @throws E2
+     * @see #findFirst(Throwables.Predicate)
+     */
+    @TerminalOp
+    public <E2 extends Exception> Optional<T> findAny(final Throwables.Predicate<? super T, E2> predicate) throws E, E2 {
+        return findFirst(predicate);
+    }
+
+    /**
      * Returns the first element matched by {@code predicateForFirst} if found or the first element if this stream is not empty
      * Otherwise an empty {@code Optional<T>} will be returned.
      *
@@ -9107,44 +9153,6 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                 if (predicateForFirst.test(next)) {
                     return Optional.of(next);
                 } else if (ret == NONE) {
-                    ret = next;
-                }
-            }
-
-            return ret == NONE ? Optional.<T> empty() : Optional.of(ret);
-        } finally {
-            close();
-        }
-    }
-
-    /**
-     * Returns the first element matched by {@code predicateForFirst} if found or the first element matched by {@code predicateForAny}.
-     * Otherwise an empty {@code Optional<T>} will be returned.
-     *
-     * @param <E2>
-     * @param <E3>
-     * @param predicateForFirst
-     * @param predicateForAny
-     * @return
-     * @throws E
-     * @throws E2
-     * @throws E3
-     */
-    @TerminalOp
-    public <E2 extends Exception, E3 extends Exception> Optional<T> findFirstOrElseAny(final Throwables.Predicate<? super T, E2> predicateForFirst,
-            final Throwables.Predicate<? super T, E3> predicateForAny) throws E, E2, E3 {
-        assertNotClosed();
-
-        try {
-            T ret = (T) NONE;
-            T next = null;
-
-            while (elements.hasNext()) {
-                next = elements.next();
-
-                if (predicateForFirst.test(next)) {
-                    return Optional.of(next);
-                } else if (ret == NONE && predicateForAny.test(next)) {
                     ret = next;
                 }
             }
@@ -9190,49 +9198,41 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     }
 
     /**
-     * Consider using: {@code stream.reversed().findFirst(predicate)} for better performance if possible.
+     * Returns the first element matched by {@code predicateForFirst} if found or the first element matched by {@code predicateForAny}.
+     * Otherwise an empty {@code Optional<T>} will be returned.
      *
      * @param <E2>
-     * @param predicate
+     * @param <E3>
+     * @param predicateForFirst
+     * @param predicateForAny
      * @return
      * @throws E
      * @throws E2
+     * @throws E3
      */
     @TerminalOp
-    public <E2 extends Exception> Optional<T> findLast(final Throwables.Predicate<? super T, E2> predicate) throws E, E2 {
+    public <E2 extends Exception, E3 extends Exception> Optional<T> findFirstOrAny(final Throwables.Predicate<? super T, E2> predicateForFirst,
+            final Throwables.Predicate<? super T, E3> predicateForAny) throws E, E2, E3 {
         assertNotClosed();
 
         try {
-            T result = (T) NONE;
+            T ret = (T) NONE;
             T next = null;
 
             while (elements.hasNext()) {
                 next = elements.next();
 
-                if (predicate.test(next)) {
-                    result = next;
+                if (predicateForFirst.test(next)) {
+                    return Optional.of(next);
+                } else if (ret == NONE && predicateForAny.test(next)) {
+                    ret = next;
                 }
             }
 
-            return result == NONE ? Optional.<T> empty() : Optional.of(result);
+            return ret == NONE ? Optional.<T> empty() : Optional.of(ret);
         } finally {
             close();
         }
-    }
-
-    /**
-     * Same as {@code findFirst(Throwables.Predicate)}.
-     *
-     * @param <E2>
-     * @param predicate
-     * @return
-     * @throws E
-     * @throws E2
-     * @see #findFirst(Throwables.Predicate)
-     */
-    @TerminalOp
-    public <E2 extends Exception> Optional<T> findAny(final Throwables.Predicate<? super T, E2> predicate) throws E, E2 {
-        return findFirst(predicate);
     }
 
     /**
