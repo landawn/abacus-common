@@ -29,6 +29,7 @@ import com.landawn.abacus.util.Fn.Fnn;
 import com.landawn.abacus.util.Fn.Suppliers;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.function.IntObjConsumer;
+import com.landawn.abacus.util.stream.EntryStream;
 import com.landawn.abacus.util.stream.Stream;
 
 /**
@@ -968,6 +969,14 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
         } else {
             return Optional.<Pair<A, B>> empty();
         }
+    }
+
+    /**
+     *
+     * @return
+     */
+    public EntryStream<A, B> stream() {
+        return EntryStream.of(this);
     }
 
     /**

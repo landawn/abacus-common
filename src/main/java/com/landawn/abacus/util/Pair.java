@@ -16,7 +16,6 @@
 
 package com.landawn.abacus.util;
 
-import java.util.AbstractMap;
 import java.util.Map;
 
 import com.landawn.abacus.annotation.Beta;
@@ -31,7 +30,7 @@ import com.landawn.abacus.util.stream.Stream;
  * @param <R>
  * @since 0.8
  */
-public final class Pair<L, R> implements Mutable {
+public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
     // implements Map.Entry<L, R> {
     public L left; //NOSONAR
 
@@ -465,15 +464,6 @@ public final class Pair<L, R> implements Mutable {
      *
      * @return
      */
-    public Map.Entry<L, R> toEntry() {
-        return new AbstractMap.SimpleEntry<>(left, right);
-    }
-
-    /**
-     *
-     *
-     * @return
-     */
     public ImmutableEntry<L, R> toImmutableEntry() {
         return ImmutableEntry.of(left, right);
     }
@@ -519,5 +509,33 @@ public final class Pair<L, R> implements Mutable {
     @Override
     public String toString() {
         return "[" + N.toString(left) + ", " + N.toString(right) + "]";
+    }
+
+    /**
+     * @deprecated using {@link #getLeft()}
+     */
+    @Deprecated
+    @Override
+    public L getKey() {
+        return left;
+    }
+
+    /**
+     * @deprecated using {@link #getRight()}
+     */
+    @Deprecated
+    @Override
+    public R getValue() {
+        return right;
+    }
+
+    /**
+     * @param value
+     * @deprecated using {@link #setRight(Object)}
+     */
+    @Deprecated
+    @Override
+    public R setValue(R value) {
+        return right;
     }
 }

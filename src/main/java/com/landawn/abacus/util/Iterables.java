@@ -1896,7 +1896,7 @@ public final class Iterables {
      * @throws E the e
      * @throws E2 the e2
      */
-    public static <T, E extends Exception, E2 extends Exception> Nullable<T> findFirstOrLast(final T[] a,
+    public static <T, E extends Exception, E2 extends Exception> Nullable<T> findFirstOrElseLast(final T[] a,
             final Throwables.Predicate<? super T, E> predicateForFirst, final Throwables.Predicate<? super T, E2> predicateForLast) throws E, E2 {
         if (N.isEmpty(a)) {
             return Nullable.<T> empty();
@@ -1920,7 +1920,7 @@ public final class Iterables {
      * @throws E the e
      * @throws E2 the e2
      */
-    public static <T, E extends Exception, E2 extends Exception> Nullable<T> findFirstOrLast(final Collection<? extends T> c,
+    public static <T, E extends Exception, E2 extends Exception> Nullable<T> findFirstOrElseLast(final Collection<? extends T> c,
             final Throwables.Predicate<? super T, E> predicateForFirst, final Throwables.Predicate<? super T, E2> predicateForLast) throws E, E2 {
         if (N.isEmpty(c)) {
             return Nullable.<T> empty();
@@ -1944,7 +1944,7 @@ public final class Iterables {
      * @throws E the e
      * @throws E2 the e2
      */
-    public static <T, E extends Exception, E2 extends Exception> OptionalInt findFirstOrLastIndex(final T[] a,
+    public static <T, E extends Exception, E2 extends Exception> OptionalInt findFirstOrElseLastIndex(final T[] a,
             final Throwables.Predicate<? super T, E> predicateForFirst, final Throwables.Predicate<? super T, E2> predicateForLast) throws E, E2 {
         if (N.isEmpty(a)) {
             return OptionalInt.empty();
@@ -1968,7 +1968,7 @@ public final class Iterables {
      * @throws E
      * @throws E2
      */
-    public static <T, E extends Exception, E2 extends Exception> OptionalInt findFirstOrLastIndex(final Collection<? extends T> c,
+    public static <T, E extends Exception, E2 extends Exception> OptionalInt findFirstOrElseLastIndex(final Collection<? extends T> c,
             final Throwables.Predicate<? super T, E> predicateForFirst, final Throwables.Predicate<? super T, E2> predicateForLast) throws E, E2 {
         if (N.isEmpty(c)) {
             return OptionalInt.empty();

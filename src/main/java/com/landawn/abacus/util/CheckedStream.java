@@ -9094,7 +9094,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @throws E2
      */
     @TerminalOp
-    public <E2 extends Exception> Optional<T> findFirstOrAny(final Throwables.Predicate<? super T, E2> predicateForFirst) throws E, E2 {
+    public <E2 extends Exception> Optional<T> findFirstOrElseAny(final Throwables.Predicate<? super T, E2> predicateForFirst) throws E, E2 {
         assertNotClosed();
 
         try {
@@ -9131,7 +9131,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @throws E3
      */
     @TerminalOp
-    public <E2 extends Exception, E3 extends Exception> Optional<T> findFirstOrAny(final Throwables.Predicate<? super T, E2> predicateForFirst,
+    public <E2 extends Exception, E3 extends Exception> Optional<T> findFirstOrElseAny(final Throwables.Predicate<? super T, E2> predicateForFirst,
             final Throwables.Predicate<? super T, E3> predicateForAny) throws E, E2, E3 {
         assertNotClosed();
 
@@ -9166,7 +9166,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @throws E2
      */
     @TerminalOp
-    public <E2 extends Exception> Optional<T> findFirstOrLast(final Throwables.Predicate<? super T, E2> predicateForFirst) throws E, E2 {
+    public <E2 extends Exception> Optional<T> findFirstOrElseLast(final Throwables.Predicate<? super T, E2> predicateForFirst) throws E, E2 {
         assertNotClosed();
 
         try {
