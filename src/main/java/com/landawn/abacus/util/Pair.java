@@ -469,6 +469,43 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
     }
 
     /**
+     * 
+     *
+     * @return 
+     * @deprecated using {@link #getLeft()}
+     */
+    @Deprecated
+    @Override
+    public L getKey() {
+        return left;
+    }
+
+    /**
+     * 
+     *
+     * @return 
+     * @deprecated using {@link #getRight()}
+     */
+    @Deprecated
+    @Override
+    public R getValue() {
+        return right;
+    }
+
+    /**
+     * 
+     *
+     * @param value 
+     * @return 
+     * @deprecated using {@link #setRight(Object)}
+     */
+    @Deprecated
+    @Override
+    public R setValue(R value) {
+        return right;
+    }
+
+    /**
      *
      *
      * @return
@@ -509,33 +546,5 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
     @Override
     public String toString() {
         return "[" + N.toString(left) + ", " + N.toString(right) + "]";
-    }
-
-    /**
-     * @deprecated using {@link #getLeft()}
-     */
-    @Deprecated
-    @Override
-    public L getKey() {
-        return left;
-    }
-
-    /**
-     * @deprecated using {@link #getRight()}
-     */
-    @Deprecated
-    @Override
-    public R getValue() {
-        return right;
-    }
-
-    /**
-     * @param value
-     * @deprecated using {@link #setRight(Object)}
-     */
-    @Deprecated
-    @Override
-    public R setValue(R value) {
-        return right;
     }
 }

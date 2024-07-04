@@ -59,6 +59,7 @@ import com.landawn.abacus.util.ByteList;
 import com.landawn.abacus.util.ByteSummaryStatistics;
 import com.landawn.abacus.util.CharList;
 import com.landawn.abacus.util.CharSummaryStatistics;
+import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.Comparators;
 import com.landawn.abacus.util.DataSet;
 import com.landawn.abacus.util.DoubleList;
@@ -112,7 +113,8 @@ import com.landawn.abacus.util.function.TriFunction;
  */
 @SuppressWarnings({ "java:S1694" })
 public abstract sealed class Collectors permits Collectors.MoreCollectors {
-    static final Object NONE = new Object(); //NOSONAR
+
+    static final Object NONE = ClassUtil.createNullMask(); //NOSONAR
 
     /**
      * @deprecated

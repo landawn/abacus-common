@@ -1,3 +1,7 @@
+### 3.12.12
+
+* Improvements and bug fixes.
+
 ### 3.12.11
 
 * Improvements and bug fixes.

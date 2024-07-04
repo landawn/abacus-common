@@ -33,6 +33,7 @@ import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.logging.Logger;
@@ -1744,6 +1745,7 @@ public final class Iterators {
      * @param unzip the second parameter is an output parameter.
      * @return
      * @see BiIterator#unzip(Iterator, BiConsumer)
+     * @see TriIterator#unzip(Iterator, BiConsumer)
      */
     public static <T, A, B> BiIterator<A, B> unzip(final Iterator<? extends T> iter, final BiConsumer<? super T, Pair<A, B>> unzip) {
         return BiIterator.unzip(iter, unzip);
@@ -1758,6 +1760,7 @@ public final class Iterators {
      * @param unzip the second parameter is an output parameter.
      * @return
      * @see BiIterator#unzip(Iterable, BiConsumer)
+     * @see TriIterator#unzip(Iterable, BiConsumer)
      */
     public static <T, A, B> BiIterator<A, B> unzip(final Iterable<? extends T> c, final BiConsumer<? super T, Pair<A, B>> unzip) {
         return BiIterator.unzip(N.iterate(c), unzip);
@@ -1773,7 +1776,11 @@ public final class Iterators {
      * @param unzip the second parameter is an output parameter.
      * @return
      * @see TriIterator#unzip(Iterator, BiConsumer)
+     * @see TriIterator#toMultiList(Supplier)
+     * @see TriIterator#toMultiSet(Supplier)
+     * @deprecated replaced by {@link TriIterator#unzip(Iterator, BiConsumer)}
      */
+    @Deprecated
     @Beta
     public static <T, A, B, C> TriIterator<A, B, C> unzipp(final Iterator<? extends T> iter, final BiConsumer<? super T, Triple<A, B, C>> unzip) {
         return TriIterator.unzip(iter, unzip);
@@ -1789,7 +1796,11 @@ public final class Iterators {
      * @param unzip the second parameter is an output parameter.
      * @return
      * @see TriIterator#unzip(Iterable, BiConsumer)
+     * @see TriIterator#toMultiList(Supplier)
+     * @see TriIterator#toMultiSet(Supplier)
+     * @deprecated replaced by {@link TriIterator#unzip(Iterable, BiConsumer)}
      */
+    @Deprecated
     @Beta
     public static <T, A, B, C> TriIterator<A, B, C> unzipp(final Iterable<? extends T> c, final BiConsumer<? super T, Triple<A, B, C>> unzip) {
         return TriIterator.unzip(N.iterate(c), unzip);

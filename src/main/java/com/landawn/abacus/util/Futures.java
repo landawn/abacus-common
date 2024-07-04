@@ -26,6 +26,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.function.Function;
 
 import com.landawn.abacus.util.Tuple.Tuple2;
 import com.landawn.abacus.util.Tuple.Tuple3;
@@ -621,7 +622,7 @@ public final class Futures {
 
             @Override
             public T get() throws InterruptedException, ExecutionException {
-                final Iterator<Result<T, Exception>> iter = iteratte(cfs);
+                final Iterator<Result<T, Exception>> iter = iterate(cfs, Fn.identity());
                 Result<T, Exception> result = null;
 
                 while (iter.hasNext()) {
@@ -637,7 +638,7 @@ public final class Futures {
 
             @Override
             public T get(final long timeout, final TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
-                final Iterator<Result<T, Exception>> iter = iteratte(cfs, timeout, unit);
+                final Iterator<Result<T, Exception>> iter = iterate(cfs, timeout, unit, Fn.identity());
                 Result<T, Exception> result = null;
 
                 while (iter.hasNext()) {
@@ -706,9 +707,9 @@ public final class Futures {
      * @return
      */
     private static <T> ObjIterator<T> iterate02(final Collection<? extends Future<? extends T>> cfs, final long totalTimeoutForAll, final TimeUnit unit) {
-        return new ObjIterator<>() {
-            private final Iterator<Result<T, Exception>> iter = iterate22(cfs, totalTimeoutForAll, unit);
+        final Iterator<Result<T, Exception>> iter = iterate02(cfs, totalTimeoutForAll, unit, Fn.identity());
 
+        return new ObjIterator<>() {
             @Override
             public boolean hasNext() {
                 return iter.hasNext();
@@ -726,60 +727,43 @@ public final class Futures {
     /**
      *
      * @param <T>
+     * @param <R>
      * @param cfs
+     * @param resultHandler
      * @return
      */
-    @SafeVarargs
-    public static <T> ObjIterator<Result<T, Exception>> iteratte(final Future<? extends T>... cfs) {
-        return iterate22(Arrays.asList(cfs));
+    public static <T, R> ObjIterator<R> iterate(final Collection<? extends Future<? extends T>> cfs,
+            final Function<Result<T, Exception>, ? extends R> resultHandler) {
+        return iterate02(cfs, resultHandler);
     }
 
     /**
+     * 
      *
-     * @param <T>
-     * @param cfs
-     * @return
-     */
-    public static <T> ObjIterator<Result<T, Exception>> iteratte(final Collection<? extends Future<? extends T>> cfs) {
-        return iterate22(cfs);
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param cfs
-     * @param totalTimeoutForAll
-     * @param unit
-     * @return
+     * @param <T> 
+     * @param <R> 
+     * @param cfs 
+     * @param totalTimeoutForAll 
+     * @param unit 
+     * @param resultHandler 
+     * @return 
      * @see {@code ExecutorCompletionService}
      */
-    public static <T> ObjIterator<Result<T, Exception>> iteratte(final Collection<? extends Future<? extends T>> cfs, final long totalTimeoutForAll,
-            final TimeUnit unit) {
-        return iterate22(cfs, totalTimeoutForAll, unit);
+    public static <T, R> ObjIterator<R> iterate(final Collection<? extends Future<? extends T>> cfs, final long totalTimeoutForAll, final TimeUnit unit,
+            final Function<Result<T, Exception>, ? extends R> resultHandler) {
+        return iterate02(cfs, totalTimeoutForAll, unit, resultHandler);
     }
 
-    /**
-     *
-     * @param <T>
-     * @param cfs
-     * @return
-     */
-    private static <T> ObjIterator<Result<T, Exception>> iterate22(final Collection<? extends Future<? extends T>> cfs) {
-        return iterate22(cfs, Long.MAX_VALUE, TimeUnit.MILLISECONDS);
+    private static <T, R> ObjIterator<R> iterate02(final Collection<? extends Future<? extends T>> cfs,
+            final Function<Result<T, Exception>, ? extends R> resultHandler) {
+        return iterate02(cfs, Long.MAX_VALUE, TimeUnit.MILLISECONDS, resultHandler);
     }
 
-    /**
-     *
-     * @param <T>
-     * @param cfs
-     * @param totalTimeoutForAll
-     * @param unit
-     * @return
-     */
-    private static <T> ObjIterator<Result<T, Exception>> iterate22(final Collection<? extends Future<? extends T>> cfs, final long totalTimeoutForAll,
-            final TimeUnit unit) {
+    private static <T, R> ObjIterator<R> iterate02(final Collection<? extends Future<? extends T>> cfs, final long totalTimeoutForAll, final TimeUnit unit,
+            final Function<Result<T, Exception>, ? extends R> resultHandler) {
         N.checkArgPositive(totalTimeoutForAll, "totalTimeoutForAll");
         N.checkArgNotNull(unit, "unit");
+        N.checkArgNotNull(resultHandler, "resultHandler");
 
         final long now = System.currentTimeMillis();
         final long totalTimeoutForAllInMillis = totalTimeoutForAll == Long.MAX_VALUE ? Long.MAX_VALUE : unit.toMillis(totalTimeoutForAll);
@@ -796,7 +780,7 @@ public final class Futures {
             }
 
             @Override
-            public Result<T, Exception> next() {
+            public R next() {
                 if (!hasNext()) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -805,9 +789,9 @@ public final class Futures {
                     for (Future<? extends T> cf : activeFutures) {
                         if (cf.isDone()) {
                             try {
-                                return Result.<T, Exception> of(cf.get(), null);
+                                return resultHandler.apply(Result.<T, Exception> of(cf.get(), null));
                             } catch (Exception e) {
-                                return Result.of(null, e);
+                                return resultHandler.apply(Result.of(null, e));
                             } finally {
                                 activeFutures.remove(cf);
                             }
@@ -815,7 +799,7 @@ public final class Futures {
                     }
 
                     if (System.currentTimeMillis() - now >= totalTimeoutForAllInMillis) {
-                        return Result.<T, Exception> of(null, new TimeoutException());
+                        return resultHandler.apply(Result.<T, Exception> of(null, new TimeoutException()));
                     }
 
                     N.sleepUninterruptibly(1);

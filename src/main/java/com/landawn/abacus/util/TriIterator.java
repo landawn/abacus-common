@@ -18,9 +18,11 @@ package com.landawn.abacus.util;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 import com.landawn.abacus.util.Fn.Suppliers;
 import com.landawn.abacus.util.u.Optional;
@@ -952,5 +954,45 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      */
     public List<Triple<A, B, C>> toList() {
         return toCollection(Suppliers.ofList());
+    }
+
+    /**
+     * 
+     *
+     * @param supplier 
+     * @return 
+     */
+    public Triple<List<A>, List<B>, List<C>> toMultiList(@SuppressWarnings("rawtypes") final Supplier<? extends List> supplier) {
+        final List<A> listA = supplier.get();
+        final List<B> listB = supplier.get();
+        final List<C> listC = supplier.get();
+
+        this.foreachRemaining((a, b, c) -> {
+            listA.add(a);
+            listB.add(b);
+            listC.add(c);
+        });
+
+        return Triple.of(listA, listB, listC);
+    }
+
+    /**
+     * 
+     *
+     * @param supplier 
+     * @return 
+     */
+    public Triple<Set<A>, Set<B>, Set<C>> toMultiSet(@SuppressWarnings("rawtypes") final Supplier<? extends Set> supplier) {
+        final Set<A> listA = supplier.get();
+        final Set<B> listB = supplier.get();
+        final Set<C> listC = supplier.get();
+
+        this.foreachRemaining((a, b, c) -> {
+            listA.add(a);
+            listB.add(b);
+            listC.add(c);
+        });
+
+        return Triple.of(listA, listB, listC);
     }
 }

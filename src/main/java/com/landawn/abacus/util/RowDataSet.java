@@ -65,6 +65,7 @@ import com.landawn.abacus.parser.XMLSerializationConfig.XSC;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.util.Fn.Factory;
 import com.landawn.abacus.util.Fn.Fnn;
+import com.landawn.abacus.util.If.OrElse;
 import com.landawn.abacus.util.NoCachingNoUpdating.DisposableObjArray;
 import com.landawn.abacus.util.Tuple.Tuple2;
 import com.landawn.abacus.util.Tuple.Tuple3;
@@ -2062,10 +2063,10 @@ public class RowDataSet implements DataSet, Cloneable {
     /**
      * Gets the row.
      *
-     * @param <T> 
-     * @param rowIndex 
-     * @param rowType 
-     * @return 
+     * @param <T>
+     * @param rowIndex
+     * @param rowType
+     * @return
      */
     @Override
     public <T> T getRow(final int rowIndex, final Class<? extends T> rowType) {
@@ -2075,11 +2076,11 @@ public class RowDataSet implements DataSet, Cloneable {
     /**
      * Gets the row.
      *
-     * @param <T> 
-     * @param rowIndex 
-     * @param columnNames 
-     * @param rowType 
-     * @return 
+     * @param <T>
+     * @param rowIndex
+     * @param columnNames
+     * @param rowType
+     * @return
      */
     @SuppressWarnings("unchecked")
     @Override
@@ -2282,12 +2283,12 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param columnNames 
-     * @param rowType 
-     * @return 
+     *
+     * @param <T>
+     * @param columnNames
+     * @param rowType
+     * @return
      */
     @Override
     public <T> Optional<T> firstRow(final Collection<String> columnNames, final Class<? extends T> rowType) {
@@ -2346,12 +2347,12 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param columnNames 
-     * @param rowType 
-     * @return 
+     *
+     * @param <T>
+     * @param columnNames
+     * @param rowType
+     * @return
      */
     @Override
     public <T> Optional<T> lastRow(final Collection<String> columnNames, final Class<? extends T> rowType) {
@@ -2701,13 +2702,13 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param fromRowIndex 
-     * @param toRowIndex 
-     * @param rowType 
-     * @return 
+     *
+     * @param <T>
+     * @param fromRowIndex
+     * @param toRowIndex
+     * @param rowType
+     * @return
      */
     @Override
     public <T> List<T> toList(final int fromRowIndex, final int toRowIndex, final Class<? extends T> rowType) {
@@ -2715,12 +2716,12 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param columnNames 
-     * @param rowType 
-     * @return 
+     *
+     * @param <T>
+     * @param columnNames
+     * @param rowType
+     * @return
      */
     @SuppressWarnings("unchecked")
     @Override
@@ -2729,14 +2730,14 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param fromRowIndex 
-     * @param toRowIndex 
-     * @param columnNames 
-     * @param rowType 
-     * @return 
+     *
+     * @param <T>
+     * @param fromRowIndex
+     * @param toRowIndex
+     * @param columnNames
+     * @param rowType
+     * @return
      */
     @Override
     public <T> List<T> toList(final int fromRowIndex, final int toRowIndex, Collection<String> columnNames, final Class<? extends T> rowType) {
@@ -2884,17 +2885,17 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <E> 
-     * @param <E2> 
-     * @param columnNameFilter 
-     * @param columnNameConverter 
-     * @param rowType 
-     * @return 
-     * @throws E 
-     * @throws E2 
+     *
+     * @param <T>
+     * @param <E>
+     * @param <E2>
+     * @param columnNameFilter
+     * @param columnNameConverter
+     * @param rowType
+     * @return
+     * @throws E
+     * @throws E2
      */
     @Override
     public <T, E extends Exception, E2 extends Exception> List<T> toList(final Throwables.Predicate<? super String, E> columnNameFilter,
@@ -2903,19 +2904,19 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <E> 
-     * @param <E2> 
-     * @param fromRowIndex 
-     * @param toRowIndex 
-     * @param columnNameFilter 
-     * @param columnNameConverter 
-     * @param rowType 
-     * @return 
-     * @throws E 
-     * @throws E2 
+     *
+     * @param <T>
+     * @param <E>
+     * @param <E2>
+     * @param fromRowIndex
+     * @param toRowIndex
+     * @param columnNameFilter
+     * @param columnNameConverter
+     * @param rowType
+     * @return
+     * @throws E
+     * @throws E2
      */
     @Override
     public <T, E extends Exception, E2 extends Exception> List<T> toList(final int fromRowIndex, final int toRowIndex,
@@ -3024,12 +3025,12 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param prefixAndFieldNameMap 
-     * @param rowType 
-     * @return 
+     *
+     * @param <T>
+     * @param prefixAndFieldNameMap
+     * @param rowType
+     * @return
      */
     @Override
     public <T> List<T> toEntities(Map<String, String> prefixAndFieldNameMap, Class<? extends T> rowType) {
@@ -3037,14 +3038,14 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param fromRowIndex 
-     * @param toRowIndex 
-     * @param prefixAndFieldNameMap 
-     * @param rowType 
-     * @return 
+     *
+     * @param <T>
+     * @param fromRowIndex
+     * @param toRowIndex
+     * @param prefixAndFieldNameMap
+     * @param rowType
+     * @return
      */
     @Override
     public <T> List<T> toEntities(int fromRowIndex, int toRowIndex, Map<String, String> prefixAndFieldNameMap, Class<? extends T> rowType) {
@@ -3052,13 +3053,13 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param columnNames 
-     * @param prefixAndFieldNameMap 
-     * @param rowType 
-     * @return 
+     *
+     * @param <T>
+     * @param columnNames
+     * @param prefixAndFieldNameMap
+     * @param rowType
+     * @return
      */
     @Override
     public <T> List<T> toEntities(Collection<String> columnNames, Map<String, String> prefixAndFieldNameMap, Class<? extends T> rowType) {
@@ -3066,15 +3067,15 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param fromRowIndex 
-     * @param toRowIndex 
-     * @param columnNames 
-     * @param prefixAndFieldNameMap 
-     * @param rowType 
-     * @return 
+     *
+     * @param <T>
+     * @param fromRowIndex
+     * @param toRowIndex
+     * @param columnNames
+     * @param prefixAndFieldNameMap
+     * @param rowType
+     * @return
      */
     @Override
     public <T> List<T> toEntities(int fromRowIndex, int toRowIndex, Collection<String> columnNames, Map<String, String> prefixAndFieldNameMap,
@@ -3097,12 +3098,12 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param selectPropNames 
-     * @param rowType 
-     * @return 
+     *
+     * @param <T>
+     * @param selectPropNames
+     * @param rowType
+     * @return
      */
     @Override
     public <T> List<T> toMergedEntities(final Collection<String> selectPropNames, final Class<? extends T> rowType) {
@@ -3110,12 +3111,12 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param idPropName 
-     * @param rowType 
-     * @return 
+     *
+     * @param <T>
+     * @param idPropName
+     * @param rowType
+     * @return
      */
     @Override
     public <T> List<T> toMergedEntities(final String idPropName, final Class<? extends T> rowType) {
@@ -3123,13 +3124,13 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param idPropName 
-     * @param selectPropNames 
-     * @param rowType 
-     * @return 
+     *
+     * @param <T>
+     * @param idPropName
+     * @param selectPropNames
+     * @param rowType
+     * @return
      */
     @Override
     public <T> List<T> toMergedEntities(final String idPropName, final Collection<String> selectPropNames, final Class<? extends T> rowType) {
@@ -3137,13 +3138,13 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param idPropNames 
-     * @param selectPropNames 
-     * @param rowType 
-     * @return 
+     *
+     * @param <T>
+     * @param idPropNames
+     * @param selectPropNames
+     * @param rowType
+     * @return
      */
     @Override
     public <T> List<T> toMergedEntities(final Collection<String> idPropNames, final Collection<String> selectPropNames, final Class<? extends T> rowType) {
@@ -3151,14 +3152,14 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param idPropNames 
-     * @param selectPropNames 
-     * @param prefixAndFieldNameMap 
-     * @param rowType 
-     * @return 
+     *
+     * @param <T>
+     * @param idPropNames
+     * @param selectPropNames
+     * @param prefixAndFieldNameMap
+     * @param rowType
+     * @return
      */
     @Override
     public <T> List<T> toMergedEntities(final Collection<String> idPropNames, Collection<String> selectPropNames,
@@ -3606,14 +3607,14 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * 
+     *
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param keyColumnName 
-     * @param valueColumnNames 
-     * @param rowType 
-     * @return 
+     * @param keyColumnName
+     * @param valueColumnNames
+     * @param rowType
+     * @return
      */
     @Override
     public <K, V> Map<K, V> toMap(final String keyColumnName, final Collection<String> valueColumnNames, final Class<? extends V> rowType) {
@@ -3621,16 +3622,16 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * 
      *
-     * @param <K> 
-     * @param <V> 
-     * @param <M> 
-     * @param keyColumnName 
-     * @param valueColumnNames 
-     * @param rowType 
-     * @param supplier 
-     * @return 
+     *
+     * @param <K>
+     * @param <V>
+     * @param <M>
+     * @param keyColumnName
+     * @param valueColumnNames
+     * @param rowType
+     * @param supplier
+     * @return
      */
     @Override
     public <K, V, M extends Map<K, V>> M toMap(String keyColumnName, Collection<String> valueColumnNames, Class<? extends V> rowType,
@@ -3639,16 +3640,16 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * 
+     *
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param fromRowIndex 
-     * @param toRowIndex 
-     * @param keyColumnName 
-     * @param valueColumnNames 
-     * @param rowType 
-     * @return 
+     * @param fromRowIndex
+     * @param toRowIndex
+     * @param keyColumnName
+     * @param valueColumnNames
+     * @param rowType
+     * @return
      */
     @Override
     public <K, V> Map<K, V> toMap(final int fromRowIndex, final int toRowIndex, final String keyColumnName, final Collection<String> valueColumnNames,
@@ -3657,18 +3658,18 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * 
+     *
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <M> 
-     * @param fromRowIndex 
-     * @param toRowIndex 
-     * @param keyColumnName 
-     * @param valueColumnNames 
-     * @param rowType 
-     * @param supplier 
-     * @return 
+     * @param <M>
+     * @param fromRowIndex
+     * @param toRowIndex
+     * @param keyColumnName
+     * @param valueColumnNames
+     * @param rowType
+     * @param supplier
+     * @return
      */
     @Override
     public <K, V, M extends Map<K, V>> M toMap(int fromRowIndex, int toRowIndex, String keyColumnName, Collection<String> valueColumnNames,
@@ -3970,14 +3971,14 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * 
+     *
      *
      * @param <K> the key type
-     * @param <E> 
-     * @param keyColumnName 
-     * @param valueColumnNames 
-     * @param rowType 
-     * @return 
+     * @param <E>
+     * @param keyColumnName
+     * @param valueColumnNames
+     * @param rowType
+     * @return
      */
     @Override
     public <K, E> ListMultimap<K, E> toMultimap(final String keyColumnName, final Collection<String> valueColumnNames, final Class<? extends E> rowType) {
@@ -3985,17 +3986,17 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * 
      *
-     * @param <K> 
-     * @param <E> 
-     * @param <V> 
-     * @param <M> 
-     * @param keyColumnName 
-     * @param valueColumnNames 
-     * @param rowType 
-     * @param supplier 
-     * @return 
+     *
+     * @param <K>
+     * @param <E>
+     * @param <V>
+     * @param <M>
+     * @param keyColumnName
+     * @param valueColumnNames
+     * @param rowType
+     * @param supplier
+     * @return
      */
     @Override
     public <K, E, V extends Collection<E>, M extends Multimap<K, E, V>> M toMultimap(String keyColumnName, Collection<String> valueColumnNames,
@@ -4004,16 +4005,16 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * 
+     *
      *
      * @param <K> the key type
-     * @param <E> 
-     * @param fromRowIndex 
-     * @param toRowIndex 
-     * @param keyColumnName 
-     * @param valueColumnNames 
-     * @param rowType 
-     * @return 
+     * @param <E>
+     * @param fromRowIndex
+     * @param toRowIndex
+     * @param keyColumnName
+     * @param valueColumnNames
+     * @param rowType
+     * @return
      */
     @Override
     public <K, E> ListMultimap<K, E> toMultimap(final int fromRowIndex, final int toRowIndex, final String keyColumnName,
@@ -4023,19 +4024,19 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * 
+     *
      *
      * @param <K> the key type
-     * @param <E> 
+     * @param <E>
      * @param <V> the value type
-     * @param <M> 
-     * @param fromRowIndex 
-     * @param toRowIndex 
-     * @param keyColumnName 
-     * @param valueColumnNames 
-     * @param rowType 
-     * @param supplier 
-     * @return 
+     * @param <M>
+     * @param fromRowIndex
+     * @param toRowIndex
+     * @param keyColumnName
+     * @param valueColumnNames
+     * @param rowType
+     * @param supplier
+     * @return
      */
     @Override
     public <K, E, V extends Collection<E>, M extends Multimap<K, E, V>> M toMultimap(int fromRowIndex, int toRowIndex, String keyColumnName,
@@ -4971,11 +4972,11 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * 
      *
-     * @param writeTitle 
-     * @param quoted 
-     * @param output 
+     *
+     * @param writeTitle
+     * @param quoted
+     * @param output
      */
     @Override
     public void toCSV(final boolean writeTitle, final boolean quoted, final File output) {
@@ -4983,14 +4984,14 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * 
      *
-     * @param fromRowIndex 
-     * @param toRowIndex 
-     * @param columnNames 
-     * @param writeTitle 
-     * @param quoted 
-     * @param output 
+     *
+     * @param fromRowIndex
+     * @param toRowIndex
+     * @param columnNames
+     * @param writeTitle
+     * @param quoted
+     * @param output
      */
     @Override
     public void toCSV(final int fromRowIndex, final int toRowIndex, final Collection<String> columnNames, final boolean writeTitle, final boolean quoted,
@@ -5034,11 +5035,11 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * 
      *
-     * @param writeTitle 
-     * @param quoted 
-     * @param output 
+     *
+     * @param writeTitle
+     * @param quoted
+     * @param output
      */
     @Override
     public void toCSV(final boolean writeTitle, final boolean quoted, final OutputStream output) {
@@ -5046,14 +5047,14 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * 
      *
-     * @param fromRowIndex 
-     * @param toRowIndex 
-     * @param columnNames 
-     * @param writeTitle 
-     * @param quoted 
-     * @param output 
+     *
+     * @param fromRowIndex
+     * @param toRowIndex
+     * @param columnNames
+     * @param writeTitle
+     * @param quoted
+     * @param output
      * @throws UncheckedIOException the unchecked IO exception
      */
     @Override
@@ -5094,11 +5095,11 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * 
      *
-     * @param writeTitle 
-     * @param quoted 
-     * @param output 
+     *
+     * @param writeTitle
+     * @param quoted
+     * @param output
      */
     @Override
     public void toCSV(final boolean writeTitle, final boolean quoted, final Writer output) {
@@ -5106,14 +5107,14 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * 
      *
-     * @param fromRowIndex 
-     * @param toRowIndex 
-     * @param columnNames 
-     * @param writeTitle 
-     * @param quoted 
-     * @param output 
+     *
+     * @param fromRowIndex
+     * @param toRowIndex
+     * @param columnNames
+     * @param writeTitle
+     * @param quoted
+     * @param output
      * @throws UncheckedIOException the unchecked IO exception
      */
     @SuppressWarnings("deprecation")
@@ -11778,13 +11779,13 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param fromRowIndex 
-     * @param toRowIndex 
-     * @param rowType 
-     * @return 
+     *
+     * @param <T>
+     * @param fromRowIndex
+     * @param toRowIndex
+     * @param rowType
+     * @return
      */
     @Override
     public <T> Stream<T> stream(int fromRowIndex, int toRowIndex, Class<? extends T> rowType) {
@@ -11792,12 +11793,12 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param columnNames 
-     * @param rowType 
-     * @return 
+     *
+     * @param <T>
+     * @param columnNames
+     * @param rowType
+     * @return
      */
     @Override
     public <T> Stream<T> stream(Collection<String> columnNames, Class<? extends T> rowType) {
@@ -11805,14 +11806,14 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param fromRowIndex 
-     * @param toRowIndex 
-     * @param columnNames 
-     * @param rowType 
-     * @return 
+     *
+     * @param <T>
+     * @param fromRowIndex
+     * @param toRowIndex
+     * @param columnNames
+     * @param rowType
+     * @return
      */
     @Override
     public <T> Stream<T> stream(final int fromRowIndex, final int toRowIndex, final Collection<String> columnNames, final Class<? extends T> rowType) {
@@ -11874,12 +11875,12 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param prefixAndFieldNameMap 
-     * @param rowType 
-     * @return 
+     *
+     * @param <T>
+     * @param prefixAndFieldNameMap
+     * @param rowType
+     * @return
      */
     @Override
     public <T> Stream<T> stream(Map<String, String> prefixAndFieldNameMap, Class<? extends T> rowType) {
@@ -11887,14 +11888,14 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param fromRowIndex 
-     * @param toRowIndex 
-     * @param prefixAndFieldNameMap 
-     * @param rowType 
-     * @return 
+     *
+     * @param <T>
+     * @param fromRowIndex
+     * @param toRowIndex
+     * @param prefixAndFieldNameMap
+     * @param rowType
+     * @return
      */
     @Override
     public <T> Stream<T> stream(int fromRowIndex, int toRowIndex, Map<String, String> prefixAndFieldNameMap, Class<? extends T> rowType) {
@@ -11902,13 +11903,13 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param columnNames 
-     * @param prefixAndFieldNameMap 
-     * @param rowType 
-     * @return 
+     *
+     * @param <T>
+     * @param columnNames
+     * @param prefixAndFieldNameMap
+     * @param rowType
+     * @return
      */
     @Override
     public <T> Stream<T> stream(Collection<String> columnNames, Map<String, String> prefixAndFieldNameMap, Class<? extends T> rowType) {
@@ -11916,15 +11917,15 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param fromRowIndex 
-     * @param toRowIndex 
-     * @param columnNames 
-     * @param prefixAndFieldNameMap 
-     * @param rowType 
-     * @return 
+     *
+     * @param <T>
+     * @param fromRowIndex
+     * @param toRowIndex
+     * @param columnNames
+     * @param prefixAndFieldNameMap
+     * @param rowType
+     * @return
      */
     @Override
     public <T> Stream<T> stream(int fromRowIndex, int toRowIndex, Collection<String> columnNames, final Map<String, String> prefixAndFieldNameMap,
@@ -12356,10 +12357,14 @@ public class RowDataSet implements DataSet, Cloneable {
      * @throws E the e
      */
     @Override
-    public <E extends Exception> void acceptIfNotEmpty(Throwables.Consumer<? super DataSet, E> action) throws E {
+    public <E extends Exception> OrElse acceptIfNotEmpty(Throwables.Consumer<? super DataSet, E> action) throws E {
         if (size() > 0) {
             action.accept(this);
+
+            return OrElse.TRUE;
         }
+
+        return OrElse.FALSE;
     }
 
     /**
@@ -12540,9 +12545,9 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * 
      *
-     * @param outputWriter 
+     *
+     * @param outputWriter
      * @throws UncheckedIOException the unchecked IO exception
      */
     @Override
@@ -12551,12 +12556,12 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * 
      *
-     * @param fromRowIndex 
-     * @param toRowIndex 
-     * @param columnNames 
-     * @param outputWriter 
+     *
+     * @param fromRowIndex
+     * @param toRowIndex
+     * @param columnNames
+     * @param outputWriter
      * @throws UncheckedIOException the unchecked IO exception
      */
     @Override

@@ -33,6 +33,8 @@ import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.parser.KryoParser;
 import com.landawn.abacus.parser.ParserFactory;
+import com.landawn.abacus.util.If.OrElse;
+import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.stream.IntStream;
 import com.landawn.abacus.util.stream.ObjIteratorEx;
 import com.landawn.abacus.util.stream.Stream;
@@ -1756,11 +1758,24 @@ public final class Sheet<R, C, V> implements Cloneable {
     }
 
     /**
+     * Trim to size.
+     */
+    public void trimToSize() {
+        if (_initialized && _columnList.size() > 0) {
+            for (List<V> column : _columnList) {
+                if (column instanceof ArrayList) {
+                    ((ArrayList<?>) column).trimToSize();
+                }
+            }
+        }
+    }
+
+    /**
      * Returns the count of non-null values.
      *
      * @return
      */
-    public int size() {
+    public long countOfNonNullValue() {
         if (_initialized) {
             long count = 0;
 
@@ -1772,22 +1787,9 @@ public final class Sheet<R, C, V> implements Cloneable {
                 }
             }
 
-            return Numbers.toIntExact(count);
+            return count;
         } else {
             return 0;
-        }
-    }
-
-    /**
-     * Trim to size.
-     */
-    public void trimToSize() {
-        if (_initialized && _columnList.size() > 0) {
-            for (List<V> column : _columnList) {
-                if (column instanceof ArrayList) {
-                    ((ArrayList<?>) column).trimToSize();
-                }
-            }
         }
     }
 
@@ -2911,12 +2913,44 @@ public final class Sheet<R, C, V> implements Cloneable {
 
     /**
      *
+     * @param <T>
+     * @param <X>
+     * @param func
+     * @return
+     * @throws X the x
+     */
+    public <T, X extends Exception> Optional<T> applyIfNotEmpty(Throwables.Function<? super Sheet<R, C, V>, T, X> func) throws X {
+        if (!isEmpty()) {
+            return Optional.ofNullable(func.apply(this));
+        } else {
+            return Optional.empty();
+        }
+    }
+
+    /**
+     *
      * @param <X>
      * @param action
      * @throws X the x
      */
     public <X extends Exception> void accept(Throwables.Consumer<? super Sheet<R, C, V>, X> action) throws X {
         action.accept(this);
+    }
+
+    /**
+     *
+     * @param <X>
+     * @param action
+     * @throws X the x
+     */
+    public <X extends Exception> OrElse acceptIfNotEmpty(Throwables.Consumer<? super Sheet<R, C, V>, X> action) throws X {
+        if (!isEmpty()) {
+            action.accept(this);
+
+            return OrElse.TRUE;
+        }
+
+        return OrElse.FALSE;
     }
 
     /**
@@ -2938,9 +2972,9 @@ public final class Sheet<R, C, V> implements Cloneable {
     }
 
     /**
-     * 
      *
-     * @param output 
+     *
+     * @param output
      * @throws UncheckedIOException the unchecked IO exception
      */
     public void println(final Writer output) throws UncheckedIOException {
@@ -2948,11 +2982,11 @@ public final class Sheet<R, C, V> implements Cloneable {
     }
 
     /**
-     * 
      *
-     * @param rowKeySet 
-     * @param columnKeySet 
-     * @param output 
+     *
+     * @param rowKeySet
+     * @param columnKeySet
+     * @param output
      * @throws UncheckedIOException the unchecked IO exception
      */
     public void println(final Collection<R> rowKeySet, final Collection<C> columnKeySet, final Writer output) throws UncheckedIOException {

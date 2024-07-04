@@ -5558,7 +5558,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param str
      * @param substrs
      * @return
-     * @see #smallestindicesOfAll(String, String...)
+     * @see #smallestIndicesOfAll(String, String...)
      */
     @SafeVarargs
     public static int indexOfAny(final String str, final String... substrs) {
@@ -5572,7 +5572,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param fromIndex
      * @param substrs
      * @return
-     * @see #smallestindicesOfAll(String, int, String...)
+     * @see #smallestIndicesOfAll(String, int, String...)
      */
     @SafeVarargs
     public static int indexOfAny(final String str, final int fromIndex, final String... substrs) {
@@ -5676,32 +5676,38 @@ public abstract sealed class Strings permits Strings.StringUtil {
     public static int indexOf(final String str, final int fromIndex, final String substr, final String delimiter) {
         if (isEmpty(delimiter)) {
             return indexOf(str, fromIndex, substr);
-        } else if (str == null || substr == null) {
+        }
+
+        if (str == null || substr == null) {
             return N.INDEX_NOT_FOUND;
         }
 
         final int len = str.length();
 
-        int index = str.indexOf(substr, fromIndex);
+        final int index = str.indexOf(substr, fromIndex);
 
         if (index < 0) {
             return N.INDEX_NOT_FOUND;
         }
 
-        if (index == fromIndex && (index + substr.length() == len || (len >= index + substr.length() + delimiter.length()
-                && delimiter.equals(str.substring(index + substr.length(), index + substr.length() + delimiter.length()))))) {
+        final int strLen = substr.length();
+        final int delimiterLen = delimiter.length();
+
+        if ((index == fromIndex || (index - fromIndex >= delimiterLen && delimiter.equals(str.substring(index - delimiterLen, index))))
+                && (index + strLen == len
+                        || (len >= index + strLen + delimiterLen && delimiter.equals(str.substring(index + strLen, index + strLen + delimiterLen))))) {
             return index;
         }
 
-        index = str.indexOf(delimiter + substr + delimiter, fromIndex);
+        int idx = str.indexOf(delimiter + substr + delimiter, index);
 
-        if (index >= 0) {
-            return index + delimiter.length();
+        if (idx >= 0) {
+            return idx + delimiterLen;
         } else {
-            index = str.indexOf(delimiter + substr, fromIndex);
+            idx = str.indexOf(delimiter + substr, index);
 
-            if (index >= 0 && index + delimiter.length() + substr.length() == len) {
-                return index + delimiter.length();
+            if (idx >= 0 && idx + delimiterLen + strLen == len) {
+                return idx + delimiterLen;
             }
         }
 
@@ -5735,6 +5741,66 @@ public abstract sealed class Strings permits Strings.StringUtil {
         for (int i = fromIndex, len = str.length(), substrLen = substr.length(), end = len - substrLen + 1; i < end; i++) {
             if (str.regionMatches(true, i, substr, 0, substrLen)) {
                 return i;
+            }
+        }
+
+        return N.INDEX_NOT_FOUND;
+    }
+
+    /**
+     *
+     * @param str
+     * @param substr
+     * @param delimiter
+     * @return
+     */
+    public static int indexOfIgnoreCase(final String str, final String substr, final String delimiter) {
+        return indexOfIgnoreCase(str, 0, substr, delimiter);
+    }
+
+    /**
+     *
+     * @param str
+     * @param fromIndex the index from which to start the search.
+     * @param substr
+     * @param delimiter
+     * @return
+     */
+    public static int indexOfIgnoreCase(final String str, final int fromIndex, final String substr, final String delimiter) {
+        if (isEmpty(delimiter)) {
+            return indexOfIgnoreCase(str, fromIndex, substr);
+        }
+
+        if (str == null || substr == null) {
+            return N.INDEX_NOT_FOUND;
+        }
+
+        final int len = str.length();
+
+        final int index = indexOfIgnoreCase(str, fromIndex, substr);
+
+        if (index < 0) {
+            return N.INDEX_NOT_FOUND;
+        }
+
+        final int strLen = substr.length();
+        final int delimiterLen = delimiter.length();
+
+        if ((index == fromIndex || (index - fromIndex >= delimiterLen && delimiter.equalsIgnoreCase(str.substring(index - delimiterLen, index))))
+                && (index + strLen == len || (len >= index + strLen + delimiterLen
+                        && delimiter.equalsIgnoreCase(str.substring(index + strLen, index + strLen + delimiterLen))))) {
+            return index;
+        }
+
+        int idx = indexOfIgnoreCase(str, index, delimiter + substr + delimiter);
+
+        if (idx >= 0) {
+            return idx + delimiterLen;
+        } else {
+            idx = indexOfIgnoreCase(str, index, delimiter + substr);
+
+            if (idx >= 0 && idx + delimiterLen + strLen == len) {
+                return idx + delimiterLen;
             }
         }
 
@@ -5992,7 +6058,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param str
      * @param substrs
      * @return
-     * @see #largestindicesOfAll(String, String...)
+     * @see #largestIndicesOfAll(String, String...)
      */
     @SafeVarargs
     public static int lastIndexOfAny(final String str, final String... substrs) {
@@ -6065,8 +6131,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @see #indexOfAny(String, String...)
      */
     @SafeVarargs
-    public static int smallestindicesOfAll(final String str, final String... substrs) {
-        return smallestindicesOfAll(str, 0, substrs);
+    public static int smallestIndicesOfAll(final String str, final String... substrs) {
+        return smallestIndicesOfAll(str, 0, substrs);
     }
 
     /**
@@ -6080,7 +6146,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @see #indexOfAny(String, int, String...)
      */
     @SafeVarargs
-    public static int smallestindicesOfAll(final String str, final int fromIndex, final String... substrs) {
+    public static int smallestIndicesOfAll(final String str, final int fromIndex, final String... substrs) {
         if (str == null || N.isEmpty(substrs)) {
             return N.INDEX_NOT_FOUND;
         }
@@ -6114,8 +6180,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @see #indexOfAny(String, String...)
      */
     @SafeVarargs
-    public static int largestindicesOfAll(final String str, final String... substrs) {
-        return largestindicesOfAll(str, 0, substrs);
+    public static int largestIndicesOfAll(final String str, final String... substrs) {
+        return largestIndicesOfAll(str, 0, substrs);
     }
 
     /**
@@ -6129,7 +6195,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @see #indexOfAny(String, int, String...)
      */
     @SafeVarargs
-    public static int largestindicesOfAll(final String str, final int fromIndex, final String... substrs) {
+    public static int largestIndicesOfAll(final String str, final int fromIndex, final String... substrs) {
         if (str == null || N.isEmpty(substrs)) {
             return N.INDEX_NOT_FOUND;
         }
@@ -6389,6 +6455,21 @@ public abstract sealed class Strings permits Strings.StringUtil {
         }
 
         return indexOfIgnoreCase(str, substr) != N.INDEX_NOT_FOUND;
+    }
+
+    /**
+     *
+     * @param str
+     * @param substr
+     * @param delimiter
+     * @return
+     */
+    public static boolean containsIgnoreCase(final String str, final String substr, final String delimiter) {
+        if (str == null || substr == null) {
+            return false;
+        }
+
+        return indexOfIgnoreCase(str, substr, delimiter) != N.INDEX_NOT_FOUND;
     }
 
     /**

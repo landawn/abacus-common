@@ -570,6 +570,9 @@ public final class Throwables {
 
         private boolean isClosed = false;
 
+        /**
+         * 
+         */
         @Override
         public final void close() {
             if (isClosed) {

@@ -43,7 +43,9 @@ import java.util.function.Predicate;
 @com.landawn.abacus.annotation.Immutable
 public abstract class Observer<T> implements Immutable {
 
-    private static final Object COMPLETE_FLAG = new Object();
+    private static final Object NONE = ClassUtil.createNullMask();
+
+    private static final Object COMPLETE_FLAG = ClassUtil.createNullMask();
 
     protected static final double INTERVAL_FACTOR = 3;
 
@@ -256,7 +258,7 @@ public abstract class Observer<T> implements Immutable {
                 synchronized (holder) {
                     final long now = System.currentTimeMillis();
 
-                    if (holder.value() == N.NULL_MASK || now - lastScheduledTime > intervalDurationInMillis * INTERVAL_FACTOR) {
+                    if (holder.value() == NONE || now - lastScheduledTime > intervalDurationInMillis * INTERVAL_FACTOR) {
                         holder.setValue(param);
                         prevTimestamp = now;
 
@@ -278,10 +280,10 @@ public abstract class Observer<T> implements Immutable {
 
                             synchronized (holder) {
                                 lastParam = holder.value();
-                                holder.setValue(N.NULL_MASK);
+                                holder.setValue(NONE);
                             }
 
-                            if (lastParam != N.NULL_MASK && downDispatcher != null) {
+                            if (lastParam != NONE && downDispatcher != null) {
                                 downDispatcher.onNext(lastParam);
                             }
                         } else {
@@ -291,7 +293,7 @@ public abstract class Observer<T> implements Immutable {
 
                     lastScheduledTime = System.currentTimeMillis();
                 } catch (Exception e) {
-                    holder.setValue(N.NULL_MASK);
+                    holder.setValue(NONE);
 
                     if (downDispatcher != null) {
                         downDispatcher.onError(e);
@@ -338,7 +340,7 @@ public abstract class Observer<T> implements Immutable {
                 synchronized (holder) {
                     final long now = System.currentTimeMillis();
 
-                    if (holder.value() == N.NULL_MASK || now - lastScheduledTime > intervalDurationInMillis * INTERVAL_FACTOR) {
+                    if (holder.value() == NONE || now - lastScheduledTime > intervalDurationInMillis * INTERVAL_FACTOR) {
                         holder.setValue(param);
 
                         try {
@@ -347,17 +349,17 @@ public abstract class Observer<T> implements Immutable {
 
                                 synchronized (holder) {
                                     firstParam = holder.value();
-                                    holder.setValue(N.NULL_MASK);
+                                    holder.setValue(NONE);
                                 }
 
-                                if (firstParam != N.NULL_MASK && downDispatcher != null) {
+                                if (firstParam != NONE && downDispatcher != null) {
                                     downDispatcher.onNext(firstParam);
                                 }
                             }, intervalDuration, unit);
 
                             lastScheduledTime = now;
                         } catch (Exception e) {
-                            holder.setValue(N.NULL_MASK);
+                            holder.setValue(NONE);
 
                             if (downDispatcher != null) {
                                 downDispatcher.onError(e);
@@ -406,7 +408,7 @@ public abstract class Observer<T> implements Immutable {
                 synchronized (holder) {
                     final long now = System.currentTimeMillis();
 
-                    if (holder.value() == N.NULL_MASK || now - lastScheduledTime > intervalDurationInMillis * INTERVAL_FACTOR) {
+                    if (holder.value() == NONE || now - lastScheduledTime > intervalDurationInMillis * INTERVAL_FACTOR) {
                         holder.setValue(param);
 
                         try {
@@ -415,17 +417,17 @@ public abstract class Observer<T> implements Immutable {
 
                                 synchronized (holder) {
                                     lastParam = holder.value();
-                                    holder.setValue(N.NULL_MASK);
+                                    holder.setValue(NONE);
                                 }
 
-                                if (lastParam != N.NULL_MASK && downDispatcher != null) {
+                                if (lastParam != NONE && downDispatcher != null) {
                                     downDispatcher.onNext(lastParam);
                                 }
                             }, intervalDuration, unit);
 
                             lastScheduledTime = now;
                         } catch (Exception e) {
-                            holder.setValue(N.NULL_MASK);
+                            holder.setValue(NONE);
 
                             if (downDispatcher != null) {
                                 downDispatcher.onError(e);
@@ -896,7 +898,7 @@ public abstract class Observer<T> implements Immutable {
     protected static class Dispatcher<T> {
 
         /** The holder. */
-        protected final Holder<Object> holder = Holder.of(N.NULL_MASK);
+        protected final Holder<Object> holder = Holder.of(NONE);
 
         /** The down dispatcher. */
         protected Dispatcher<T> downDispatcher;

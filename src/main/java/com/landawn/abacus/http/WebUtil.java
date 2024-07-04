@@ -314,12 +314,7 @@ public final class WebUtil {
                 for (Map.Entry<String, ?> e : headers.entrySet()) {
                     headerValue = HttpUtil.readHttpHeadValue(e.getValue());
 
-                    sb.append(" -H ")
-                            .append(quoteChar)
-                            .append(e.getKey())
-                            .append(": ")
-                            .append(Strings.quoteEscaped(headerValue, quoteChar))
-                            .append(quoteChar);
+                    sb.append(" -H ").append(quoteChar).append(e.getKey()).append(": ").append(Strings.quoteEscaped(headerValue, quoteChar)).append(quoteChar);
                 }
             }
 

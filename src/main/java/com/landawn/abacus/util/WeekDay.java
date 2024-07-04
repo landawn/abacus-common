@@ -22,5 +22,53 @@ package com.landawn.abacus.util;
  */
 public enum WeekDay {
 
-    SUNDAY, MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY;
+    SUNDAY(0), MONDAY(1), TUESDAY(2), WEDNESDAY(3), THURSDAY(4), FRIDAY(5), SATURDAY(6);
+
+    private final int intValue;
+
+    WeekDay(int intValue) {
+        this.intValue = intValue;
+    }
+
+    /**
+     *
+     *
+     * @return
+     */
+    public int intValue() {
+        return intValue;
+    }
+
+    /**
+     *
+     * @param intValue
+     * @return
+     */
+    public static WeekDay valueOf(int intValue) {
+        switch (intValue) {
+            case 0:
+                return SUNDAY;
+
+            case 1:
+                return MONDAY;
+
+            case 2:
+                return TUESDAY;
+
+            case 3:
+                return WEDNESDAY;
+
+            case 4:
+                return THURSDAY;
+
+            case 5:
+                return FRIDAY;
+
+            case 6:
+                return SATURDAY;
+
+            default:
+                throw new IllegalArgumentException("No mapping instance found by int value: " + intValue);
+        }
+    }
 }

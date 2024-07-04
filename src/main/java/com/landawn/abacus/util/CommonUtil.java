@@ -19,7 +19,6 @@ package com.landawn.abacus.util;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.Reader;
-import java.io.Serializable;
 import java.io.StringReader;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationHandler;
@@ -383,7 +382,7 @@ sealed class CommonUtil permits N {
     static final Comparator<Double> DOUBLE_COMPARATOR = Double::compare;
 
     // ...
-    static final Object NULL_MASK = new NullMask();
+    static final Object NULL_MASK = ClassUtil.createNullMask();
 
     // ...
     static final Map<Class<?>, Object> CLASS_EMPTY_ARRAY = new ConcurrentHashMap<>();
@@ -23584,37 +23583,5 @@ sealed class CommonUtil permits N {
         };
 
         return newProxyInstance(interfaceClass, h);
-    }
-
-    /**
-     * The Class NullMask.
-     */
-    static class NullMask implements Serializable {
-
-        /** The Constant serialVersionUID. */
-        private static final long serialVersionUID = 5887875956120266479L;
-
-        /**
-         * Instantiates a new null mask.
-         */
-        private NullMask() {
-        }
-
-        /**
-         *
-         * @return
-         */
-        @Override
-        public String toString() {
-            return "NULL";
-        }
-
-        /**
-         *
-         * @return
-         */
-        protected Object readResolve() {
-            return NULL_MASK;
-        }
     }
 }

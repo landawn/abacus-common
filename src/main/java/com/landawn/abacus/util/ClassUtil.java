@@ -1824,11 +1824,11 @@ public final class ClassUtil {
     }
 
     /**
-     * 
      *
-     * @param bean 
-     * @param propValueFilter 
-     * @return 
+     *
+     * @param bean
+     * @param propValueFilter
+     * @return
      */
     public static List<String> getPropNames(final Object bean, final Predicate<Object> propValueFilter) {
         final BeanInfo beanInfo = ParserUtil.getBeanInfo(bean.getClass());
@@ -3669,5 +3669,42 @@ public final class ClassUtil {
         Class<?> unwrapped = PRIMITIVE_2_WRAPPER.getByValue(cls);
 
         return unwrapped == null ? cls : unwrapped;
+    }
+
+    public static Object createNullMask() {
+        return new None();
+    }
+
+    /**
+     *
+     */
+    static class None {
+        // private static final int HASH_CODE = -2147483629; // is a prime.
+
+        /**
+         *
+         */
+        private None() {
+        }
+
+        @Override
+        public int hashCode() {
+            // return HASH_CODE;
+            return System.identityHashCode(this);
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            return obj == this;
+        }
+
+        /**
+         *
+         * @return
+         */
+        @Override
+        public String toString() {
+            return "NULL";
+        }
     }
 }

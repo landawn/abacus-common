@@ -160,7 +160,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
     private static final Throwables.Function<Map.Entry<Keyed<Object, Object>, Object>, Object, Exception> KK = t -> t.getKey().val();
 
-    private static final Object NONE = new Object();
+    private static final Object NONE = ClassUtil.createNullMask();
 
     private static final Random RAND = new SecureRandom();
 
@@ -3136,7 +3136,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      */
     @Beta
     @IntermediateOp
-    public <R> CheckedStream<R, E> flatMapIfNotNull(final Throwables.Function<? super T, ? extends Collection<? extends R>, ? extends E> mapper) {
+    public <R> CheckedStream<R, E> flatmapIfNotNull(final Throwables.Function<? super T, ? extends Collection<? extends R>, ? extends E> mapper) {
         return skipNulls().flatmap(mapper);
     }
 
@@ -3155,7 +3155,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      */
     @Beta
     @IntermediateOp
-    public <U, R> CheckedStream<R, E> flatMapIfNotNull(final Throwables.Function<? super T, ? extends Collection<? extends U>, ? extends E> mapper,
+    public <U, R> CheckedStream<R, E> flatmapIfNotNull(final Throwables.Function<? super T, ? extends Collection<? extends U>, ? extends E> mapper,
             final Throwables.Function<? super U, ? extends Collection<? extends R>, ? extends E> mapper2) {
         return skipNulls().flatmap(mapper).skipNulls().flatmap(mapper2);
     }
@@ -9781,7 +9781,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      *
      *
      * @param <R>
-     * @param <CC>
+     * @param <C>
      * @param <E2>
      * @param supplier
      * @param func
@@ -9790,8 +9790,8 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @throws E2
      */
     @TerminalOp
-    public <R, CC extends Collection<T>, E2 extends Exception> R toCollectionThenApply(Supplier<? extends CC> supplier,
-            Throwables.Function<? super CC, R, E2> func) throws E, E2 {
+    public <R, C extends Collection<T>, E2 extends Exception> R toCollectionThenApply(Supplier<? extends C> supplier,
+            Throwables.Function<? super C, R, E2> func) throws E, E2 {
         assertNotClosed();
 
         return func.apply(toCollection(supplier));
@@ -9800,7 +9800,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     /**
      *
      *
-     * @param <CC>
+     * @param <C>
      * @param <E2>
      * @param supplier
      * @param consumer
@@ -9808,8 +9808,8 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @throws E2
      */
     @TerminalOp
-    public <CC extends Collection<T>, E2 extends Exception> void toCollectionThenAccept(Supplier<? extends CC> supplier,
-            Throwables.Consumer<? super CC, E2> consumer) throws E, E2 {
+    public <C extends Collection<T>, E2 extends Exception> void toCollectionThenAccept(Supplier<? extends C> supplier,
+            Throwables.Consumer<? super C, E2> consumer) throws E, E2 {
         assertNotClosed();
 
         consumer.accept(toCollection(supplier));
@@ -15188,6 +15188,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * After the main stream is finished, the attached stream will continue to pull remaining elements from upstream if needed.
      * The main stream and the attached stream run independently. Operations in one stream won't impact the elements or final result in another Stream.
      * But when the main stream is to close, it will wait to the attached stream to close before calling close actions.
+     * So the attached stream may ends up earlier than the main stream, or at least no later than the main stream.
      *
      * @param consumerForNewStreamWithTerminalAction
      * @return
@@ -15209,6 +15210,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * After the main stream is finished, the attached stream will continue to pull remaining elements from upstream if needed.
      * The main stream and the attached stream run independently. Operations in one stream won't impact the elements or final result in another Stream.
      * But when the main stream is to close, it will wait to the attached stream to close before calling close actions.
+     * So the attached stream may ends up earlier than the main stream, or at least no later than the main stream.
      *
      * To get the return value of the attached stream, An output parameter can be used. for example:
      * <pre>
@@ -15347,9 +15349,8 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                             isFailedToOfferToQueue.setTrue();
                         }
                     } catch (Exception e) {
+                        // N.toRuntimeException(e); // This may impact main stream. Error happened in attached stream should not impact main stream.
                         isFailedToOfferToQueue.setTrue();
-
-                        // throw toRuntimeException(e);
                     }
                 }
 
@@ -15368,7 +15369,8 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                     try {
                         futureForNewStream.get();
                     } catch (ExecutionException | InterruptedException e) {
-                        N.toRuntimeException(e);
+                        // N.toRuntimeException(e); // This may impact main stream. Error happened in attached stream should not impact main stream.
+                        logger.error(e, "Error happened in waiting for attached stream to close");
                     }
                 }
             }
@@ -15397,6 +15399,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * After the main stream is finished, the attached stream will continue to pull remaining elements from upstream if needed.
      * The main stream and the attached stream run independently. Operations in one stream won't impact the elements or final result in another Stream.
      * But when the main stream is to close, it will wait to the attached stream to close before calling close actions.
+     * So the attached stream may ends up earlier than the main stream, or at least no later than the main stream.
      *
      * @param predicate
      * @param consumerForNewStreamWithTerminalAction
@@ -15417,6 +15420,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * After the main stream is finished, the attached stream will continue to pull remaining elements from upstream if needed.
      * The main stream and the attached stream run independently. Operations in one stream won't impact the elements or final result in another Stream.
      * But when the main stream is to close, it will wait to the attached stream to close before calling close actions.
+     * So the attached stream may ends up earlier than the main stream, or at least no later than the main stream.
      *
      * @param predicate
      * @param consumerForNewStreamWithTerminalAction
@@ -15538,9 +15542,8 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                                             isFailedToOfferToQueue.setTrue();
                                         }
                                     } catch (Exception e) {
+                                        // N.toRuntimeException(e); // This may impact main stream. Error happened in attached stream should not impact main stream.
                                         isFailedToOfferToQueue.setTrue();
-
-                                        // throw toRuntimeException(e);
                                     }
                                 }
                             }
@@ -15579,7 +15582,8 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                     try {
                         futureForNewStream.get();
                     } catch (ExecutionException | InterruptedException e) {
-                        N.toRuntimeException(e);
+                        // N.toRuntimeException(e); // This may impact main stream. Error happened in attached stream should not impact main stream.
+                        logger.error(e, "Error happened in waiting for attached stream to close");
                     }
                 }
             }
@@ -15608,6 +15612,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * After the main stream is finished, the attached stream will continue to pull remaining elements from upstream if needed.
      * The main stream and the attached stream run independently. Operations in one stream won't impact the elements or final result in another Stream.
      * But when the main stream is to close, it will wait to the attached stream to close before calling close actions.
+     * So the attached stream may ends up earlier than the main stream, or at least no later than the main stream.
      *
      * @param predicate
      * @param consumerForNewStreamWithTerminalAction
@@ -15627,6 +15632,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * After the main stream is finished, the attached stream will continue to pull remaining elements from upstream if needed.
      * The main stream and the attached stream run independently. Operations in one stream won't impact the elements or final result in another Stream.
      * But when the main stream is to close, it will wait to the attached stream to close before calling close actions.
+     * So the attached stream may ends up earlier than the main stream, or at least no later than the main stream.
      *
      * @param predicate
      * @param consumerForNewStreamWithTerminalAction
@@ -15753,9 +15759,8 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                                             isFailedToOfferToQueue.setTrue();
                                         }
                                     } catch (Exception e) {
+                                        // N.toRuntimeException(e); // This may impact main stream. Error happened in attached stream should not impact main stream.
                                         isFailedToOfferToQueue.setTrue();
-
-                                        // throw toRuntimeException(e);
                                     }
                                 }
 
@@ -15796,7 +15801,8 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                     try {
                         futureForNewStream.get();
                     } catch (ExecutionException | InterruptedException e) {
-                        N.toRuntimeException(e);
+                        // N.toRuntimeException(e); // This may impact main stream. Error happened in attached stream should not impact main stream.
+                        logger.error(e, "Error happened in waiting for attached stream to close");
                     }
                 }
             }
@@ -15825,6 +15831,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * After the main stream is finished, the attached stream will continue to pull remaining elements from upstream if needed.
      * The main stream and the attached stream run independently. Operations in one stream won't impact the elements or final result in another Stream.
      * But when the main stream is to close, it will wait to the attached stream to close before calling close actions.
+     * So the attached stream may ends up earlier than the main stream, or at least no later than the main stream.
      *
      * @param predicate
      * @param consumerForNewStreamWithTerminalAction
@@ -15845,6 +15852,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * After the main stream is finished, the attached stream will continue to pull remaining elements from upstream if needed.
      * The main stream and the attached stream run independently. Operations in one stream won't impact the elements or final result in another Stream.
      * But when the main stream is to close, it will wait to the attached stream to close before calling close actions.
+     * So the attached stream may ends up earlier than the main stream, or at least no later than the main stream.
      *
      * @param predicate
      * @param consumerForNewStreamWithTerminalAction
@@ -15973,9 +15981,8 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                                                 isFailedToOfferToQueue.setTrue();
                                             }
                                         } catch (Exception e) {
+                                            // N.toRuntimeException(e); // This may impact main stream. Error happened in attached stream should not impact main stream.
                                             isFailedToOfferToQueue.setTrue();
-
-                                            // throw toRuntimeException(e);
                                         }
                                     }
                                 }
@@ -16018,7 +16025,8 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                     try {
                         futureForNewStream.get();
                     } catch (ExecutionException | InterruptedException e) {
-                        N.toRuntimeException(e);
+                        // N.toRuntimeException(e); // This may impact main stream. Error happened in attached stream should not impact main stream.
+                        logger.error(e, "Error happened in waiting for attached stream to close");
                     }
                 }
             }

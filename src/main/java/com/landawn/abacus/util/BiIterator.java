@@ -19,11 +19,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 import com.landawn.abacus.util.Fn.Fnn;
 import com.landawn.abacus.util.Fn.Suppliers;
@@ -1019,5 +1021,41 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
      */
     public List<Pair<A, B>> toList() {
         return toCollection(Suppliers.<Pair<A, B>> ofList());
+    }
+
+    /**
+     * 
+     *
+     * @param supplier 
+     * @return 
+     */
+    public Pair<List<A>, List<B>> toMultiList(@SuppressWarnings("rawtypes") final Supplier<? extends List> supplier) {
+        final List<A> listA = supplier.get();
+        final List<B> listB = supplier.get();
+
+        this.foreachRemaining((a, b) -> {
+            listA.add(a);
+            listB.add(b);
+        });
+
+        return Pair.of(listA, listB);
+    }
+
+    /**
+     * 
+     *
+     * @param supplier 
+     * @return 
+     */
+    public Pair<Set<A>, Set<B>> toMultiSet(@SuppressWarnings("rawtypes") final Supplier<? extends Set> supplier) {
+        final Set<A> listA = supplier.get();
+        final Set<B> listB = supplier.get();
+
+        this.foreachRemaining((a, b) -> {
+            listA.add(a);
+            listB.add(b);
+        });
+
+        return Pair.of(listA, listB);
     }
 }

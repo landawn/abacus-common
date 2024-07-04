@@ -983,7 +983,7 @@ public class ContinuableFuture<T> implements Future<T> {
      */
     public ContinuableFuture<Void> runAfterFirstSucceed(final ContinuableFuture<?> other, final Throwables.Runnable<? extends Exception> action) {
         return execute(() -> {
-            final ObjIterator<Result<Object, Exception>> iter = Futures.iteratte(ContinuableFuture.this, other);
+            final ObjIterator<Result<Object, Exception>> iter = Futures.iterate(Arrays.asList(ContinuableFuture.this, other), Fn.identity());
             final Result<Object, Exception> firstResult = iter.next();
 
             if (firstResult.isFailure()) {
@@ -1009,7 +1009,7 @@ public class ContinuableFuture<T> implements Future<T> {
     public ContinuableFuture<Void> runAfterFirstSucceed(final ContinuableFuture<? extends T> other,
             final Throwables.Consumer<? super T, ? extends Exception> action) {
         return execute(() -> {
-            final ObjIterator<Result<T, Exception>> iter = Futures.iteratte(ContinuableFuture.this, other);
+            final ObjIterator<Result<T, Exception>> iter = Futures.iterate(Arrays.asList(ContinuableFuture.this, other), Fn.identity());
             final Result<T, Exception> firstResult = iter.next();
             T ret = null;
 
@@ -1041,7 +1041,7 @@ public class ContinuableFuture<T> implements Future<T> {
     public ContinuableFuture<Void> runAfterFirstSucceed(final ContinuableFuture<? extends T> other,
             final Throwables.BiConsumer<? super T, ? super Exception, ? extends Exception> action) {
         return execute(() -> {
-            final ObjIterator<Result<T, Exception>> iter = Futures.iteratte(ContinuableFuture.this, other);
+            final ObjIterator<Result<T, Exception>> iter = Futures.iterate(Arrays.asList(ContinuableFuture.this, other), Fn.identity());
             final Result<T, Exception> firstResult = iter.next();
             Result<T, Exception> ret = null;
 
@@ -1072,7 +1072,7 @@ public class ContinuableFuture<T> implements Future<T> {
      */
     public <R> ContinuableFuture<R> callAfterFirstSucceed(final ContinuableFuture<?> other, final Callable<R> action) {
         return execute(() -> {
-            final ObjIterator<Result<Object, Exception>> iter = Futures.iteratte(ContinuableFuture.this, other);
+            final ObjIterator<Result<Object, Exception>> iter = Futures.iterate(Arrays.asList(ContinuableFuture.this, other), Fn.identity());
             final Result<Object, Exception> firstResult = iter.next();
 
             if (firstResult.isFailure()) {
@@ -1098,7 +1098,7 @@ public class ContinuableFuture<T> implements Future<T> {
     public <R> ContinuableFuture<R> callAfterFirstSucceed(final ContinuableFuture<? extends T> other,
             final Throwables.Function<? super T, ? extends R, ? extends Exception> action) {
         return execute(() -> {
-            final ObjIterator<Result<T, Exception>> iter = Futures.iteratte(ContinuableFuture.this, other);
+            final ObjIterator<Result<T, Exception>> iter = Futures.iterate(Arrays.asList(ContinuableFuture.this, other), Fn.identity());
             final Result<T, Exception> firstResult = iter.next();
             T ret = null;
 
@@ -1129,7 +1129,7 @@ public class ContinuableFuture<T> implements Future<T> {
     public <R> ContinuableFuture<R> callAfterFirstSucceed(final ContinuableFuture<? extends T> other,
             final Throwables.BiFunction<? super T, ? super Exception, ? extends R, ? extends Exception> action) {
         return execute(() -> {
-            final ObjIterator<Result<T, Exception>> iter = Futures.iteratte(ContinuableFuture.this, other);
+            final ObjIterator<Result<T, Exception>> iter = Futures.iterate(Arrays.asList(ContinuableFuture.this, other), Fn.identity());
             final Result<T, Exception> firstResult = iter.next();
             Result<T, Exception> ret = null;
 
