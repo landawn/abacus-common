@@ -44,12 +44,12 @@ import com.landawn.abacus.exception.UncheckedIOException;
  * Note: This class includes codes copied from Apache Commons Lang, Google Guava and other open source projects under the Apache License 2.0.
  * The methods copied from other libraries/frameworks/projects may be modified in this class.
  * </p>
- *
+ * @see DateTimeFormatter
  * @author Haiyang Li
  * @since 1.2.6
  */
 @SuppressWarnings({ "java:S1694", "java:S2143" })
-public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Dates, DateUtil.Times {
+public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Dates {
 
     private static final String DATE_STR = "date";
     private static final String DATE1_STR = "date1";
@@ -1807,9 +1807,8 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
      * @param amount
      * @param unit
      * @return a new instance of Date with the specified amount rolled.
-     * @deprecated replaced by {@code addYears/addMonths/addWeeks/...}
      */
-    @Deprecated
+    @Beta
     public static <T extends java.util.Date> T roll(final T date, final long amount, final TimeUnit unit) {
         N.checkArgNotNull(date, DATE_STR);
 
@@ -1828,19 +1827,18 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
      * @param amount
      * @param unit
      * @return a new instance of Date with the specified amount rolled.
-     * @deprecated replaced by {@code addYears/addMonths/addWeeks/...}
      */
-    @Deprecated
-    public static <T extends java.util.Date> T roll(final T date, final long amount, final CalendarField unit) {
+    @Beta
+    public static <T extends java.util.Date> T roll(final T date, final int amount, final CalendarField unit) {
         N.checkArgNotNull(date, DATE_STR);
 
-        if (amount > Integer.MAX_VALUE || amount < Integer.MIN_VALUE) {
-            throw new IllegalArgumentException("The amount :" + amount + " is too big for unit: " + unit);
-        }
+        //    if (amount > Integer.MAX_VALUE || amount < Integer.MIN_VALUE) {
+        //        throw new IllegalArgumentException("The amount :" + amount + " is too big for unit: " + unit);
+        //    }
 
         if (unit == CalendarField.MONTH || unit == CalendarField.YEAR) {
             final Calendar c = createCalendar(date);
-            c.add(unit.value(), (int) amount);
+            c.add(unit.value(), amount);
 
             return createDate(c.getTimeInMillis(), date.getClass());
         } else {
@@ -1890,9 +1888,8 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
      * @param amount
      * @param unit
      * @return a new instance of Calendar with the specified amount rolled.
-     * @deprecated replaced by {@code addYears/addMonths/addWeeks/...}
      */
-    @Deprecated
+    @Beta
     public static <T extends Calendar> T roll(final T calendar, final long amount, final TimeUnit unit) {
         N.checkArgNotNull(calendar, CALENDAR_STR); //NOSONAR
 
@@ -1911,19 +1908,18 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
      * @param amount
      * @param unit
      * @return a new instance of Calendar with the specified amount rolled.
-     * @deprecated replaced by {@code addYears/addMonths/addWeeks/...}
      */
-    @Deprecated
-    public static <T extends Calendar> T roll(final T calendar, final long amount, final CalendarField unit) {
+    @Beta
+    public static <T extends Calendar> T roll(final T calendar, final int amount, final CalendarField unit) {
         N.checkArgNotNull(calendar, CALENDAR_STR);
 
-        if (amount > Integer.MAX_VALUE || amount < Integer.MIN_VALUE) {
-            throw new IllegalArgumentException("The amount :" + amount + " is too big for unit: " + unit);
-        }
+        //    if (amount > Integer.MAX_VALUE || amount < Integer.MIN_VALUE) {
+        //        throw new IllegalArgumentException("The amount :" + amount + " is too big for unit: " + unit);
+        //    }
 
         final T result = createCalendar(calendar, calendar.getTimeInMillis());
 
-        result.add(unit.value(), (int) amount);
+        result.add(unit.value(), amount);
 
         return result;
     }
@@ -3820,17 +3816,6 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
     public static final class Dates extends DateUtil {
 
         private Dates() {
-            // singleton.
-        }
-    }
-
-    /**
-     * The Class Times.
-     */
-    @Beta
-    public static final class Times extends DateUtil {
-
-        private Times() {
             // singleton.
         }
     }

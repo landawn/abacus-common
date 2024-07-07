@@ -252,9 +252,9 @@ public final class ParserFactory {
     /**
      * Creates a new Parser object.
      *
-     * @param xsc 
-     * @param xdc 
-     * @return 
+     * @param xsc
+     * @param xdc
+     * @return
      */
     public static XMLParser createXMLParser(final XMLSerializationConfig xsc, final XMLDeserializationConfig xdc) {
         return new XMLParserImpl(XMLParserType.StAX, xsc, xdc);
@@ -288,38 +288,38 @@ public final class ParserFactory {
     }
 
     /**
-     * 
      *
-     * @param xsc 
-     * @param xdc 
-     * @return 
+     *
+     * @param xsc
+     * @param xdc
+     * @return
      */
     public static XMLParser createJAXBParser(final XMLSerializationConfig xsc, final XMLDeserializationConfig xdc) {
         return new JAXBParser(xsc, xdc);
     }
 
-    /**
-     * Creates a new Parser object.
-     *
-     * @return
-     */
-    public static JacksonMapper createJacksonMapper() {
-        return new JacksonMapper();
-    }
+    //    /**
+    //     * Creates a new Parser object.
+    //     *
+    //     * @return
+    //     */
+    //    public static JacksonMapper createJacksonMapper() {
+    //        return new JacksonMapper();
+    //    }
+    //
+    //    /**
+    //     *
+    //     * @param jmc
+    //     * @return
+    //     */
+    //    public static JacksonMapper createJacksonMapper(final JacksonMapperConfig jmc) {
+    //        return new JacksonMapper(jmc);
+    //    }
 
     /**
      *
-     * @param jmc
-     * @return
-     */
-    public static JacksonMapper createJacksonMapper(final JacksonMapperConfig jmc) {
-        return new JacksonMapper(jmc);
-    }
-
-    /**
-     * 
      *
-     * @param type 
+     * @param type
      */
     public static void registerKryo(final Class<?> type) {
         N.checkArgNotNull(type, "type");
@@ -328,10 +328,10 @@ public final class ParserFactory {
     }
 
     /**
-     * 
      *
-     * @param type 
-     * @param id 
+     *
+     * @param type
+     * @param id
      */
     public static void registerKryo(final Class<?> type, final int id) {
         N.checkArgNotNull(type, "type");
@@ -340,10 +340,10 @@ public final class ParserFactory {
     }
 
     /**
-     * 
      *
-     * @param type 
-     * @param serializer 
+     *
+     * @param type
+     * @param serializer
      */
     public static void registerKryo(final Class<?> type, final Serializer<?> serializer) {
         N.checkArgNotNull(type, "type");
@@ -353,11 +353,11 @@ public final class ParserFactory {
     }
 
     /**
-     * 
      *
-     * @param type 
-     * @param serializer 
-     * @param id 
+     *
+     * @param type
+     * @param serializer
+     * @param id
      */
     public static void registerKryo(final Class<?> type, final Serializer<?> serializer, final int id) {
         N.checkArgNotNull(type, "type");

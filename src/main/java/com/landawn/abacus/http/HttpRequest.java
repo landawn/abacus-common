@@ -17,11 +17,14 @@ package com.landawn.abacus.http;
 import java.io.File;
 import java.io.OutputStream;
 import java.io.Writer;
+import java.net.Proxy;
 import java.net.URL;
 import java.time.Duration;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executor;
+
+import javax.net.ssl.SSLSocketFactory;
 
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.exception.UncheckedIOException;
@@ -113,6 +116,24 @@ public final class HttpRequest {
     }
 
     /**
+     * Overwrite the existing HTTP settings with specified {@code httpSettings}
+     *
+     * @param httpSettings
+     * @return
+     * @see HttpSettings
+     */
+    @Beta
+    public HttpRequest settings(final HttpSettings httpSettings) {
+        checkSettings();
+
+        if (httpSettings != null) {
+            N.merge(this.settings, httpSettings);
+        }
+
+        return this;
+    }
+
+    /**
      *
      * @param user
      * @param password
@@ -196,7 +217,7 @@ public final class HttpRequest {
      * @see HttpSettings#headers(Map)
      * @see HttpHeaders
      */
-    public HttpRequest headers(Map<String, ?> headers) {
+    public HttpRequest headers(final Map<String, ?> headers) {
         checkSettings();
 
         settings.headers(headers);
@@ -212,7 +233,7 @@ public final class HttpRequest {
      * @see HttpSettings#headers(HttpHeaders)
      * @see HttpHeaders
      */
-    public HttpRequest headers(HttpHeaders headers) {
+    public HttpRequest headers(final HttpHeaders headers) {
         checkSettings();
 
         settings.headers(headers);
@@ -254,7 +275,7 @@ public final class HttpRequest {
      * @param readTimeout
      * @return
      */
-    public HttpRequest readTimeout(long readTimeout) {
+    public HttpRequest readTimeout(final long readTimeout) {
         checkSettings();
 
         settings.setReadTimeout(readTimeout);
@@ -282,10 +303,38 @@ public final class HttpRequest {
      * @param useCaches
      * @return
      */
-    public HttpRequest useCaches(boolean useCaches) {
+    public HttpRequest useCaches(final boolean useCaches) {
         checkSettings();
 
         settings.setUseCaches(useCaches);
+
+        return this;
+    }
+
+    /**
+     *
+     *
+     * @param sslSocketFactory
+     * @return
+     */
+    public HttpRequest sslSocketFactory(final SSLSocketFactory sslSocketFactory) {
+        checkSettings();
+
+        settings.setSSLSocketFactory(sslSocketFactory);
+
+        return this;
+    }
+
+    /**
+     *
+     *
+     * @param proxy
+     * @return
+     */
+    public HttpRequest proxy(Proxy proxy) {
+        checkSettings();
+
+        settings.setProxy(proxy);
 
         return this;
     }
@@ -653,12 +702,12 @@ public final class HttpRequest {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param resultClass 
-     * @param executor 
-     * @return 
+     *
+     * @param <T>
+     * @param resultClass
+     * @param executor
+     * @return
      */
     public <T> ContinuableFuture<T> asyncGet(final Class<T> resultClass, final Executor executor) {
         return asyncExecute(HttpMethod.GET, resultClass, executor);
@@ -692,12 +741,12 @@ public final class HttpRequest {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param resultClass 
-     * @param executor 
-     * @return 
+     *
+     * @param <T>
+     * @param resultClass
+     * @param executor
+     * @return
      */
     public <T> ContinuableFuture<T> asyncPost(final Class<T> resultClass, final Executor executor) {
         return asyncExecute(HttpMethod.POST, resultClass, executor);
@@ -731,12 +780,12 @@ public final class HttpRequest {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param resultClass 
-     * @param executor 
-     * @return 
+     *
+     * @param <T>
+     * @param resultClass
+     * @param executor
+     * @return
      */
     public <T> ContinuableFuture<T> asyncPut(final Class<T> resultClass, final Executor executor) {
         return asyncExecute(HttpMethod.PUT, resultClass, executor);
@@ -811,12 +860,12 @@ public final class HttpRequest {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param resultClass 
-     * @param executor 
-     * @return 
+     *
+     * @param <T>
+     * @param resultClass
+     * @param executor
+     * @return
      */
     public <T> ContinuableFuture<T> asyncDelete(final Class<T> resultClass, final Executor executor) {
         return asyncExecute(HttpMethod.DELETE, resultClass, executor);

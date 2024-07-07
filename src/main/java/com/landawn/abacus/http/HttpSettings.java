@@ -14,6 +14,7 @@
 
 package com.landawn.abacus.http;
 
+import java.net.Proxy;
 import java.util.Map;
 
 import javax.net.ssl.SSLSocketFactory;
@@ -32,8 +33,6 @@ public final class HttpSettings {
 
     private long readTimeout;
 
-    private SSLSocketFactory sslSocketFactory;
-
     private boolean useCaches = false;
 
     private boolean doInput = true;
@@ -45,6 +44,10 @@ public final class HttpSettings {
     private ContentFormat contentFormat;
 
     private HttpHeaders headers = null;
+
+    private SSLSocketFactory sslSocketFactory;
+
+    private Proxy proxy;
 
     /**
      *
@@ -121,6 +124,16 @@ public final class HttpSettings {
      */
     public HttpSettings setSSLSocketFactory(final SSLSocketFactory sslSocketFactory) {
         this.sslSocketFactory = sslSocketFactory;
+
+        return this;
+    }
+
+    public Proxy getProxy() {
+        return proxy;
+    }
+
+    public HttpSettings setProxy(Proxy proxy) {
+        this.proxy = proxy;
 
         return this;
     }
@@ -268,18 +281,6 @@ public final class HttpSettings {
     /**
      *
      *
-     * @param contentType
-     * @return
-     */
-    public HttpSettings setContentType(final String contentType) {
-        header(HttpHeaders.Names.CONTENT_TYPE, contentType);
-
-        return this;
-    }
-
-    /**
-     *
-     *
      * @return
      */
     public String getContentType() {
@@ -299,11 +300,11 @@ public final class HttpSettings {
     /**
      *
      *
-     * @param contentEncoding
+     * @param contentType
      * @return
      */
-    public HttpSettings setContentEncoding(final String contentEncoding) {
-        header(HttpHeaders.Names.CONTENT_ENCODING, contentEncoding);
+    public HttpSettings setContentType(final String contentType) {
+        header(HttpHeaders.Names.CONTENT_TYPE, contentType);
 
         return this;
     }
@@ -325,6 +326,18 @@ public final class HttpSettings {
         }
 
         return contentEncoding;
+    }
+
+    /**
+     *
+     *
+     * @param contentEncoding
+     * @return
+     */
+    public HttpSettings setContentEncoding(final String contentEncoding) {
+        header(HttpHeaders.Names.CONTENT_ENCODING, contentEncoding);
+
+        return this;
     }
 
     /**
@@ -445,6 +458,7 @@ public final class HttpSettings {
         return new HttpSettings().setConnectionTimeout(connectionTimeout)
                 .setReadTimeout(readTimeout)
                 .setSSLSocketFactory(sslSocketFactory)
+                .setProxy(proxy)
                 .setUseCaches(useCaches)
                 .doInput(doInput)
                 .doOutput(doOutput)
@@ -460,9 +474,9 @@ public final class HttpSettings {
      */
     @Override
     public String toString() {
-        return "{connectionTimeout=" + connectionTimeout + ", readTimeout=" + readTimeout + ", sslSocketFactory=" + sslSocketFactory + ", useCaches="
-                + useCaches + ", doInput=" + doInput + ", doOutput=" + doOutput + ", isOneWayRequest=" + isOneWayRequest + ", contentFormat=" + contentFormat
-                + ", headers=" + headers + "}";
+        return "{connectionTimeout=" + connectionTimeout + ", readTimeout=" + readTimeout + ", sslSocketFactory=" + sslSocketFactory + ", proxy=" + proxy
+                + ", useCaches=" + useCaches + ", doInput=" + doInput + ", doOutput=" + doOutput + ", isOneWayRequest=" + isOneWayRequest + ", contentFormat="
+                + contentFormat + ", headers=" + headers + "}";
     }
 
 }

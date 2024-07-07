@@ -104,9 +104,9 @@ public final class HttpRequest {
     /**
      * Sets the URI target of this request.
      *
-     * @param uri 
-     * @param httpClient 
-     * @return 
+     * @param uri
+     * @param httpClient
+     * @return
      * @throws IllegalArgumentException if the scheme of {@code url} is not {@code http} or {@code https}.
      */
     public static HttpRequest create(URI uri, final HttpClient httpClient) {
@@ -663,12 +663,12 @@ public final class HttpRequest {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param httpMethod 
-     * @param responseBodyHandler 
-     * @return 
+     *
+     * @param <T>
+     * @param httpMethod
+     * @param responseBodyHandler
+     * @return
      * @throws UncheckedIOException the unchecked IO exception
      */
     @Beta
@@ -687,12 +687,12 @@ public final class HttpRequest {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param httpMethod 
-     * @param resultClass 
-     * @return 
+     *
+     * @param <T>
+     * @param httpMethod
+     * @param resultClass
+     * @return
      * @throws UncheckedIOException the unchecked IO exception
      */
     @Beta
@@ -966,12 +966,12 @@ public final class HttpRequest {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param httpMethod 
-     * @param responseBodyHandler 
-     * @return 
+     *
+     * @param <T>
+     * @param httpMethod
+     * @param responseBodyHandler
+     * @return
      */
     @Beta
     public <T> CompletableFuture<HttpResponse<T>> asyncExecute(final HttpMethod httpMethod, final HttpResponse.BodyHandler<T> responseBodyHandler) {
@@ -1054,6 +1054,10 @@ public final class HttpRequest {
     private <T> T getBody(final HttpResponse<?> httpResponse, final Class<T> resultClass) {
         if (!HttpUtil.isSuccessfulResponseCode(httpResponse.statusCode())) {
             throw new UncheckedIOException(new IOException(httpResponse.statusCode() + ": " + httpResponse.body()));
+        }
+
+        if (resultClass == null || Void.class.equals(resultClass)) {
+            return null; // refer to isOneWayRequest.
         }
 
         return N.convert(httpResponse.body(), resultClass);
