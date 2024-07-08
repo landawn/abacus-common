@@ -1511,6 +1511,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                             }
                         }
 
+                        @Override
                         protected void closeResource() {
                             if (closeReader) {
                                 IOUtil.close(bufferedReader);
@@ -12454,7 +12455,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                 bw.write(IOUtil.LINE_SEPARATOR);
 
                 while (iter.hasNext()) {
-                    N.toJSON(iter.next(), bw);
+                    N.toJson(iter.next(), bw);
                     cnt++;
                 }
 
@@ -16336,6 +16337,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                 }
             }
 
+            @Override
             public void advance(long n) {
                 try {
                     elements.advance(n);
@@ -16344,6 +16346,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                 }
             }
 
+            @Override
             public long count() {
                 try {
                     return elements.count();
@@ -16413,6 +16416,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                     }
                 }
 
+                @Override
                 public void advance(long n) throws E {
                     try {
                         if (iter == null) {
@@ -16427,6 +16431,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                     }
                 }
 
+                @Override
                 public long count() throws E {
                     try {
                         if (iter == null) {
@@ -16446,6 +16451,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                     }
                 }
 
+                @Override
                 protected void closeResource() {
                     s.close();
                 }
@@ -16489,6 +16495,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                     }
                 }
 
+                @Override
                 public long count() throws E {
                     if (iter == null) {
                         return s.count();
@@ -16504,6 +16511,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                     }
                 }
 
+                @Override
                 protected void closeResource() {
                     s.close();
                 }

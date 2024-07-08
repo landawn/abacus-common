@@ -1724,7 +1724,7 @@ public final class ParserUtil {
          */
         public void setPropValue(final Object obj, Object propValue) {
             if (isJsonRawValue && propValue != null && !clazz.isAssignableFrom(propValue.getClass())) {
-                propValue = N.toJSON(propValue);
+                propValue = N.toJson(propValue);
             }
 
             if (isImmutableBean && !isByBuilder) {

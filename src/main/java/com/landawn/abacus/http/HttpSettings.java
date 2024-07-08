@@ -128,10 +128,21 @@ public final class HttpSettings {
         return this;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public Proxy getProxy() {
         return proxy;
     }
 
+    /**
+     * 
+     *
+     * @param proxy 
+     * @return 
+     */
     public HttpSettings setProxy(Proxy proxy) {
         this.proxy = proxy;
 

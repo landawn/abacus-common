@@ -194,7 +194,7 @@ public final class Throwables {
     };
 
     @SuppressWarnings({ "java:S6548" })
-    public static abstract class Iterator<T, E extends Throwable> implements Closeable, Immutable {
+    public abstract static class Iterator<T, E extends Throwable> implements Closeable, Immutable {
         /**
          *
          *
@@ -571,7 +571,7 @@ public final class Throwables {
         private boolean isClosed = false;
 
         /**
-         * 
+         *
          */
         @Override
         public final void close() {

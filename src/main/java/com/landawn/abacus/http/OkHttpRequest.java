@@ -435,7 +435,7 @@ public final class OkHttpRequest {
      * @return
      */
     public OkHttpRequest jsonBody(final Object obj) {
-        return body(N.toJSON(obj), APPLICATION_JSON_MEDIA_TYPE);
+        return body(N.toJson(obj), APPLICATION_JSON_MEDIA_TYPE);
     }
 
     /**
@@ -453,7 +453,7 @@ public final class OkHttpRequest {
      * @return
      */
     public OkHttpRequest xmlBody(final Object obj) {
-        return body(N.toXML(obj), APPLICATION_XML_MEDIA_TYPE);
+        return body(N.toXml(obj), APPLICATION_XML_MEDIA_TYPE);
     }
 
     /**

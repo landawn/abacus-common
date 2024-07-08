@@ -187,9 +187,9 @@ public class HttpResponse {
             } else if (bodyFormat == ContentFormat.FormUrlEncoded) {
                 return URLEncodedUtil.decode(new String(body, respCharset), resultType.clazz());
             } else if (bodyFormat != null && bodyFormat.name().contains("JSON")) {
-                return N.fromJSON(new String(body, respCharset), resultType);
+                return N.fromJson(new String(body, respCharset), resultType);
             } else if (bodyFormat != null && bodyFormat.name().contains("XML")) {
-                return N.fromXML(new String(body, respCharset), resultType);
+                return N.fromXml(new String(body, respCharset), resultType);
             } else {
                 return HttpUtil.getParser(bodyFormat).deserialize(new String(body, respCharset), resultType.clazz());
             }

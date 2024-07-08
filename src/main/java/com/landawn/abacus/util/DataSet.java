@@ -1878,7 +1878,7 @@ public interface DataSet {
      *
      * @return
      */
-    String toJSON();
+    String toJson();
 
     /**
      *
@@ -1886,125 +1886,7 @@ public interface DataSet {
      * @param toRowIndex
      * @return
      */
-    String toJSON(int fromRowIndex, int toRowIndex);
-
-    /**
-     *
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param columnNames
-     * @return
-     */
-    String toJSON(int fromRowIndex, int toRowIndex, Collection<String> columnNames);
-
-    /**
-     *
-     * @param output
-     * @throws UncheckedIOException the unchecked IO exception
-     */
-    void toJSON(File output) throws UncheckedIOException;
-
-    /**
-     *
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param output
-     * @throws UncheckedIOException the unchecked IO exception
-     */
-    void toJSON(int fromRowIndex, int toRowIndex, File output) throws UncheckedIOException;
-
-    /**
-     *
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param columnNames
-     * @param output
-     * @throws UncheckedIOException the unchecked IO exception
-     */
-    void toJSON(int fromRowIndex, int toRowIndex, Collection<String> columnNames, File output) throws UncheckedIOException;
-
-    /**
-     *
-     * @param output
-     * @throws UncheckedIOException the unchecked IO exception
-     */
-    void toJSON(OutputStream output) throws UncheckedIOException;
-
-    /**
-     *
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param output
-     * @throws UncheckedIOException the unchecked IO exception
-     */
-    void toJSON(int fromRowIndex, int toRowIndex, OutputStream output) throws UncheckedIOException;
-
-    /**
-     *
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param columnNames
-     * @param output
-     * @throws UncheckedIOException the unchecked IO exception
-     */
-    void toJSON(int fromRowIndex, int toRowIndex, Collection<String> columnNames, OutputStream output) throws UncheckedIOException;
-
-    /**
-     *
-     * @param output
-     * @throws UncheckedIOException the unchecked IO exception
-     */
-    void toJSON(Writer output) throws UncheckedIOException;
-
-    /**
-     *
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param output
-     * @throws UncheckedIOException the unchecked IO exception
-     */
-    void toJSON(int fromRowIndex, int toRowIndex, Writer output) throws UncheckedIOException;
-
-    /**
-     *
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param columnNames
-     * @param output
-     * @throws UncheckedIOException the unchecked IO exception
-     */
-    void toJSON(int fromRowIndex, int toRowIndex, Collection<String> columnNames, Writer output) throws UncheckedIOException;
-
-    /**
-     *
-     *
-     * @return
-     */
-    String toXML();
-
-    /**
-     *
-     * @param rowElementName
-     * @return
-     */
-    String toXML(String rowElementName);
-
-    /**
-     *
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @return
-     */
-    String toXML(int fromRowIndex, int toRowIndex);
-
-    /**
-     *
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param rowElementName
-     * @return
-     */
-    String toXML(int fromRowIndex, int toRowIndex, String rowElementName);
+    String toJson(int fromRowIndex, int toRowIndex);
 
     /**
      *
@@ -2013,7 +1895,125 @@ public interface DataSet {
      * @param columnNames
      * @return
      */
-    String toXML(int fromRowIndex, int toRowIndex, Collection<String> columnNames);
+    String toJson(int fromRowIndex, int toRowIndex, Collection<String> columnNames);
+
+    /**
+     *
+     * @param output
+     * @throws UncheckedIOException the unchecked IO exception
+     */
+    void toJson(File output) throws UncheckedIOException;
+
+    /**
+     *
+     * @param fromRowIndex
+     * @param toRowIndex
+     * @param output
+     * @throws UncheckedIOException the unchecked IO exception
+     */
+    void toJson(int fromRowIndex, int toRowIndex, File output) throws UncheckedIOException;
+
+    /**
+     *
+     * @param fromRowIndex
+     * @param toRowIndex
+     * @param columnNames
+     * @param output
+     * @throws UncheckedIOException the unchecked IO exception
+     */
+    void toJson(int fromRowIndex, int toRowIndex, Collection<String> columnNames, File output) throws UncheckedIOException;
+
+    /**
+     *
+     * @param output
+     * @throws UncheckedIOException the unchecked IO exception
+     */
+    void toJson(OutputStream output) throws UncheckedIOException;
+
+    /**
+     *
+     * @param fromRowIndex
+     * @param toRowIndex
+     * @param output
+     * @throws UncheckedIOException the unchecked IO exception
+     */
+    void toJson(int fromRowIndex, int toRowIndex, OutputStream output) throws UncheckedIOException;
+
+    /**
+     *
+     * @param fromRowIndex
+     * @param toRowIndex
+     * @param columnNames
+     * @param output
+     * @throws UncheckedIOException the unchecked IO exception
+     */
+    void toJson(int fromRowIndex, int toRowIndex, Collection<String> columnNames, OutputStream output) throws UncheckedIOException;
+
+    /**
+     *
+     * @param output
+     * @throws UncheckedIOException the unchecked IO exception
+     */
+    void toJson(Writer output) throws UncheckedIOException;
+
+    /**
+     *
+     * @param fromRowIndex
+     * @param toRowIndex
+     * @param output
+     * @throws UncheckedIOException the unchecked IO exception
+     */
+    void toJson(int fromRowIndex, int toRowIndex, Writer output) throws UncheckedIOException;
+
+    /**
+     *
+     * @param fromRowIndex
+     * @param toRowIndex
+     * @param columnNames
+     * @param output
+     * @throws UncheckedIOException the unchecked IO exception
+     */
+    void toJson(int fromRowIndex, int toRowIndex, Collection<String> columnNames, Writer output) throws UncheckedIOException;
+
+    /**
+     *
+     *
+     * @return
+     */
+    String toXml();
+
+    /**
+     *
+     * @param rowElementName
+     * @return
+     */
+    String toXml(String rowElementName);
+
+    /**
+     *
+     * @param fromRowIndex
+     * @param toRowIndex
+     * @return
+     */
+    String toXml(int fromRowIndex, int toRowIndex);
+
+    /**
+     *
+     * @param fromRowIndex
+     * @param toRowIndex
+     * @param rowElementName
+     * @return
+     */
+    String toXml(int fromRowIndex, int toRowIndex, String rowElementName);
+
+    /**
+     *
+     * @param fromRowIndex
+     * @param toRowIndex
+     * @param columnNames
+     * @return
+     */
+    String toXml(int fromRowIndex, int toRowIndex, Collection<String> columnNames);
 
     /**
      *
@@ -2023,14 +2023,14 @@ public interface DataSet {
      * @param rowElementName
      * @return
      */
-    String toXML(int fromRowIndex, int toRowIndex, Collection<String> columnNames, String rowElementName);
+    String toXml(int fromRowIndex, int toRowIndex, Collection<String> columnNames, String rowElementName);
 
     /**
      *
      * @param output
      * @throws UncheckedIOException the unchecked IO exception
      */
-    void toXML(File output) throws UncheckedIOException;
+    void toXml(File output) throws UncheckedIOException;
 
     /**
      *
@@ -2038,7 +2038,7 @@ public interface DataSet {
      * @param output
      * @throws UncheckedIOException the unchecked IO exception
      */
-    void toXML(String rowElementName, File output) throws UncheckedIOException;
+    void toXml(String rowElementName, File output) throws UncheckedIOException;
 
     /**
      *
@@ -2047,7 +2047,7 @@ public interface DataSet {
      * @param output
      * @throws UncheckedIOException the unchecked IO exception
      */
-    void toXML(int fromRowIndex, int toRowIndex, File output) throws UncheckedIOException;
+    void toXml(int fromRowIndex, int toRowIndex, File output) throws UncheckedIOException;
 
     /**
      *
@@ -2057,7 +2057,7 @@ public interface DataSet {
      * @param output
      * @throws UncheckedIOException the unchecked IO exception
      */
-    void toXML(int fromRowIndex, int toRowIndex, String rowElementName, File output) throws UncheckedIOException;
+    void toXml(int fromRowIndex, int toRowIndex, String rowElementName, File output) throws UncheckedIOException;
 
     /**
      *
@@ -2067,62 +2067,7 @@ public interface DataSet {
      * @param output
      * @throws UncheckedIOException the unchecked IO exception
      */
-    void toXML(int fromRowIndex, int toRowIndex, Collection<String> columnNames, File output) throws UncheckedIOException;
-
-    /**
-     *
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param columnNames
-     * @param rowElementName
-     * @param output
-     * @throws UncheckedIOException the unchecked IO exception
-     */
-    void toXML(int fromRowIndex, int toRowIndex, Collection<String> columnNames, String rowElementName, File output) throws UncheckedIOException;
-
-    /**
-     *
-     * @param output
-     * @throws UncheckedIOException the unchecked IO exception
-     */
-    void toXML(OutputStream output) throws UncheckedIOException;
-
-    /**
-     *
-     * @param rowElementName
-     * @param output
-     * @throws UncheckedIOException the unchecked IO exception
-     */
-    void toXML(String rowElementName, OutputStream output) throws UncheckedIOException;
-
-    /**
-     *
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param output
-     * @throws UncheckedIOException the unchecked IO exception
-     */
-    void toXML(int fromRowIndex, int toRowIndex, OutputStream output) throws UncheckedIOException;
-
-    /**
-     *
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param rowElementName
-     * @param output
-     * @throws UncheckedIOException the unchecked IO exception
-     */
-    void toXML(int fromRowIndex, int toRowIndex, String rowElementName, OutputStream output) throws UncheckedIOException;
-
-    /**
-     *
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param columnNames
-     * @param output
-     * @throws UncheckedIOException the unchecked IO exception
-     */
-    void toXML(int fromRowIndex, int toRowIndex, Collection<String> columnNames, OutputStream output) throws UncheckedIOException;
+    void toXml(int fromRowIndex, int toRowIndex, Collection<String> columnNames, File output) throws UncheckedIOException;
 
     /**
      *
@@ -2133,14 +2078,14 @@ public interface DataSet {
      * @param output
      * @throws UncheckedIOException the unchecked IO exception
      */
-    void toXML(int fromRowIndex, int toRowIndex, Collection<String> columnNames, String rowElementName, OutputStream output) throws UncheckedIOException;
+    void toXml(int fromRowIndex, int toRowIndex, Collection<String> columnNames, String rowElementName, File output) throws UncheckedIOException;
 
     /**
      *
      * @param output
      * @throws UncheckedIOException the unchecked IO exception
      */
-    void toXML(Writer output) throws UncheckedIOException;
+    void toXml(OutputStream output) throws UncheckedIOException;
 
     /**
      *
@@ -2148,7 +2093,7 @@ public interface DataSet {
      * @param output
      * @throws UncheckedIOException the unchecked IO exception
      */
-    void toXML(String rowElementName, Writer output) throws UncheckedIOException;
+    void toXml(String rowElementName, OutputStream output) throws UncheckedIOException;
 
     /**
      *
@@ -2157,7 +2102,7 @@ public interface DataSet {
      * @param output
      * @throws UncheckedIOException the unchecked IO exception
      */
-    void toXML(int fromRowIndex, int toRowIndex, Writer output) throws UncheckedIOException;
+    void toXml(int fromRowIndex, int toRowIndex, OutputStream output) throws UncheckedIOException;
 
     /**
      *
@@ -2167,7 +2112,7 @@ public interface DataSet {
      * @param output
      * @throws UncheckedIOException the unchecked IO exception
      */
-    void toXML(int fromRowIndex, int toRowIndex, String rowElementName, Writer output) throws UncheckedIOException;
+    void toXml(int fromRowIndex, int toRowIndex, String rowElementName, OutputStream output) throws UncheckedIOException;
 
     /**
      *
@@ -2177,7 +2122,7 @@ public interface DataSet {
      * @param output
      * @throws UncheckedIOException the unchecked IO exception
      */
-    void toXML(int fromRowIndex, int toRowIndex, Collection<String> columnNames, Writer output) throws UncheckedIOException;
+    void toXml(int fromRowIndex, int toRowIndex, Collection<String> columnNames, OutputStream output) throws UncheckedIOException;
 
     /**
      *
@@ -2188,14 +2133,69 @@ public interface DataSet {
      * @param output
      * @throws UncheckedIOException the unchecked IO exception
      */
-    void toXML(int fromRowIndex, int toRowIndex, Collection<String> columnNames, String rowElementName, Writer output) throws UncheckedIOException;
+    void toXml(int fromRowIndex, int toRowIndex, Collection<String> columnNames, String rowElementName, OutputStream output) throws UncheckedIOException;
+
+    /**
+     *
+     * @param output
+     * @throws UncheckedIOException the unchecked IO exception
+     */
+    void toXml(Writer output) throws UncheckedIOException;
+
+    /**
+     *
+     * @param rowElementName
+     * @param output
+     * @throws UncheckedIOException the unchecked IO exception
+     */
+    void toXml(String rowElementName, Writer output) throws UncheckedIOException;
+
+    /**
+     *
+     * @param fromRowIndex
+     * @param toRowIndex
+     * @param output
+     * @throws UncheckedIOException the unchecked IO exception
+     */
+    void toXml(int fromRowIndex, int toRowIndex, Writer output) throws UncheckedIOException;
+
+    /**
+     *
+     * @param fromRowIndex
+     * @param toRowIndex
+     * @param rowElementName
+     * @param output
+     * @throws UncheckedIOException the unchecked IO exception
+     */
+    void toXml(int fromRowIndex, int toRowIndex, String rowElementName, Writer output) throws UncheckedIOException;
+
+    /**
+     *
+     * @param fromRowIndex
+     * @param toRowIndex
+     * @param columnNames
+     * @param output
+     * @throws UncheckedIOException the unchecked IO exception
+     */
+    void toXml(int fromRowIndex, int toRowIndex, Collection<String> columnNames, Writer output) throws UncheckedIOException;
+
+    /**
+     *
+     * @param fromRowIndex
+     * @param toRowIndex
+     * @param columnNames
+     * @param rowElementName
+     * @param output
+     * @throws UncheckedIOException the unchecked IO exception
+     */
+    void toXml(int fromRowIndex, int toRowIndex, Collection<String> columnNames, String rowElementName, Writer output) throws UncheckedIOException;
 
     /**
      * Each line in the output file/Writer is an array of JSON String without root bracket.
      *
      * @return
      */
-    String toCSV();
+    String toCsv();
 
     /**
      * Each line in the output file/Writer is an array of JSON String without root bracket.
@@ -2205,7 +2205,7 @@ public interface DataSet {
      *
      * @return
      */
-    String toCSV(int fromRowIndex, int toRowIndex, Collection<String> columnNames);
+    String toCsv(int fromRowIndex, int toRowIndex, Collection<String> columnNames);
 
     /**
      * Each line in the output file/Writer is an array of JSON String without root bracket.
@@ -2214,7 +2214,7 @@ public interface DataSet {
      * @param quoteValue
      * @return
      */
-    String toCSV(boolean writeTitle, boolean quoteValue);
+    String toCsv(boolean writeTitle, boolean quoteValue);
 
     /**
      * Each line in the output file/Writer is an array of JSON String without root bracket.
@@ -2226,7 +2226,7 @@ public interface DataSet {
      *
      * @return
      */
-    String toCSV(int fromRowIndex, int toRowIndex, Collection<String> columnNames, boolean writeTitle, boolean quoteValue);
+    String toCsv(int fromRowIndex, int toRowIndex, Collection<String> columnNames, boolean writeTitle, boolean quoteValue);
 
     /**
      * Each line in the output file/Writer is an array of JSON String without root bracket.
@@ -2234,7 +2234,7 @@ public interface DataSet {
      * @param output
      * @throws UncheckedIOException the unchecked IO exception
      */
-    void toCSV(File output) throws UncheckedIOException;
+    void toCsv(File output) throws UncheckedIOException;
 
     /**
      * Each line in the output file/Writer is an array of JSON String without root bracket.
@@ -2245,7 +2245,7 @@ public interface DataSet {
      *
      * @throws UncheckedIOException the unchecked IO exception
      */
-    void toCSV(int fromRowIndex, int toRowIndex, Collection<String> columnNames, File output) throws UncheckedIOException;
+    void toCsv(int fromRowIndex, int toRowIndex, Collection<String> columnNames, File output) throws UncheckedIOException;
 
     /**
      * Each line in the output file/Writer is an array of JSON String without root bracket.
@@ -2255,7 +2255,7 @@ public interface DataSet {
      *
      * @throws UncheckedIOException the unchecked IO exception
      */
-    void toCSV(boolean writeTitle, boolean quoteValue, File output) throws UncheckedIOException;
+    void toCsv(boolean writeTitle, boolean quoteValue, File output) throws UncheckedIOException;
 
     /**
      * Each line in the output file/Writer is an array of JSON String without root bracket.
@@ -2268,7 +2268,7 @@ public interface DataSet {
      *
      * @throws UncheckedIOException the unchecked IO exception
      */
-    void toCSV(int fromRowIndex, int toRowIndex, Collection<String> columnNames, boolean writeTitle, boolean quoteValue, File output)
+    void toCsv(int fromRowIndex, int toRowIndex, Collection<String> columnNames, boolean writeTitle, boolean quoteValue, File output)
             throws UncheckedIOException;
 
     /**
@@ -2277,7 +2277,7 @@ public interface DataSet {
      * @param output
      * @throws UncheckedIOException the unchecked IO exception
      */
-    void toCSV(OutputStream output);
+    void toCsv(OutputStream output);
 
     /**
      * Each line in the output file/Writer is an array of JSON String without root bracket.
@@ -2288,7 +2288,7 @@ public interface DataSet {
      *
      * @throws UncheckedIOException the unchecked IO exception
      */
-    void toCSV(int fromRowIndex, int toRowIndex, Collection<String> columnNames, OutputStream output) throws UncheckedIOException;
+    void toCsv(int fromRowIndex, int toRowIndex, Collection<String> columnNames, OutputStream output) throws UncheckedIOException;
 
     /**
      * Each line in the output file/Writer is an array of JSON String without root bracket.
@@ -2298,7 +2298,7 @@ public interface DataSet {
      *
      * @throws UncheckedIOException the unchecked IO exception
      */
-    void toCSV(boolean writeTitle, boolean quoteValue, OutputStream output) throws UncheckedIOException;
+    void toCsv(boolean writeTitle, boolean quoteValue, OutputStream output) throws UncheckedIOException;
 
     /**
      * Each line in the output file/Writer is an array of JSON String without root bracket.
@@ -2311,7 +2311,7 @@ public interface DataSet {
      *
      * @throws UncheckedIOException the unchecked IO exception
      */
-    void toCSV(int fromRowIndex, int toRowIndex, Collection<String> columnNames, boolean writeTitle, boolean quoteValue, OutputStream output)
+    void toCsv(int fromRowIndex, int toRowIndex, Collection<String> columnNames, boolean writeTitle, boolean quoteValue, OutputStream output)
             throws UncheckedIOException;
 
     /**
@@ -2320,7 +2320,7 @@ public interface DataSet {
      * @param output
      * @throws UncheckedIOException the unchecked IO exception
      */
-    void toCSV(Writer output);
+    void toCsv(Writer output);
 
     /**
      * Each line in the output file/Writer is an array of JSON String without root bracket.
@@ -2331,7 +2331,7 @@ public interface DataSet {
      *
      * @throws UncheckedIOException the unchecked IO exception
      */
-    void toCSV(int fromRowIndex, int toRowIndex, Collection<String> columnNames, Writer output) throws UncheckedIOException;
+    void toCsv(int fromRowIndex, int toRowIndex, Collection<String> columnNames, Writer output) throws UncheckedIOException;
 
     /**
      * Each line in the output file/Writer is an array of JSON String without root bracket.
@@ -2341,7 +2341,7 @@ public interface DataSet {
      *
      * @throws UncheckedIOException the unchecked IO exception
      */
-    void toCSV(boolean writeTitle, boolean quoteValue, Writer output) throws UncheckedIOException;
+    void toCsv(boolean writeTitle, boolean quoteValue, Writer output) throws UncheckedIOException;
 
     /**
      * Each line in the output file/Writer is an array of JSON String without root bracket.
@@ -2354,7 +2354,7 @@ public interface DataSet {
      *
      * @throws UncheckedIOException the unchecked IO exception
      */
-    void toCSV(int fromRowIndex, int toRowIndex, Collection<String> columnNames, boolean writeTitle, boolean quoteValue, Writer output)
+    void toCsv(int fromRowIndex, int toRowIndex, Collection<String> columnNames, boolean writeTitle, boolean quoteValue, Writer output)
             throws UncheckedIOException;
 
     //    /**
@@ -4719,9 +4719,11 @@ public interface DataSet {
     <E extends Exception> void accept(Throwables.Consumer<? super DataSet, E> action) throws E;
 
     /**
+     * 
      *
-     * @param <E>
-     * @param action
+     * @param <E> 
+     * @param action 
+     * @return 
      * @throws E the e
      */
     <E extends Exception> OrElse acceptIfNotEmpty(Throwables.Consumer<? super DataSet, E> action) throws E;

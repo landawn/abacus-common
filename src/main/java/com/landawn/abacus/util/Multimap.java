@@ -1295,10 +1295,10 @@ public sealed class Multimap<K, E, V extends Collection<E>> permits ListMultimap
 
         if (N.notEmpty(multimap)) {
             for (Map.Entry<K, V> entry : multimap.entrySet()) {
-                final V c = entry.getValue();
+                final V v = entry.getValue();
 
-                if (N.notEmpty(c)) {
-                    for (E e : c) {
+                if (N.notEmpty(v)) {
+                    for (E e : v) {
                         res.put(e, entry.getKey());
                     }
                 }

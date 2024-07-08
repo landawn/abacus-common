@@ -2938,9 +2938,11 @@ public final class Sheet<R, C, V> implements Cloneable {
     }
 
     /**
+     * 
      *
-     * @param <X>
-     * @param action
+     * @param <X> 
+     * @param action 
+     * @return 
      * @throws X the x
      */
     public <X extends Exception> OrElse acceptIfNotEmpty(Throwables.Consumer<? super Sheet<R, C, V>, X> action) throws X {

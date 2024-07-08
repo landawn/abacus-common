@@ -3671,6 +3671,11 @@ public final class ClassUtil {
         return unwrapped == null ? cls : unwrapped;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public static Object createNullMask() {
         return new None();
     }

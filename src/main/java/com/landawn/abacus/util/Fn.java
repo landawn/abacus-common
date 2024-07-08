@@ -1034,7 +1034,7 @@ public final class Fn {
     }
 
     @SuppressWarnings("rawtypes")
-    private static final Function TO_JSON = N::toJSON;
+    private static final Function TO_JSON = N::toJson;
 
     /**
      *
@@ -1046,7 +1046,7 @@ public final class Fn {
     }
 
     @SuppressWarnings("rawtypes")
-    private static final Function TO_XML = N::toXML;
+    private static final Function TO_XML = N::toXml;
 
     /**
      *

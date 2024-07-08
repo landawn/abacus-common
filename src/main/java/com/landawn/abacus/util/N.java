@@ -26749,7 +26749,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param obj
      * @return
      */
-    public static String toJSON(final Object obj) {
+    public static String toJson(final Object obj) {
         return Utils.jsonParser.serialize(obj, Utils.jsc);
     }
 
@@ -26759,7 +26759,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param prettyFormat
      * @return
      */
-    public static String toJSON(final Object obj, final boolean prettyFormat) {
+    public static String toJson(final Object obj, final boolean prettyFormat) {
         return Utils.jsonParser.serialize(obj, prettyFormat ? Utils.jscPrettyFormat : Utils.jsc);
     }
 
@@ -26769,7 +26769,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param config
      * @return
      */
-    public static String toJSON(final Object obj, final JSONSerializationConfig config) {
+    public static String toJson(final Object obj, final JSONSerializationConfig config) {
         return Utils.jsonParser.serialize(obj, config);
     }
 
@@ -26778,7 +26778,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param obj
      * @param output
      */
-    public static void toJSON(final Object obj, final File output) {
+    public static void toJson(final Object obj, final File output) {
         Utils.jsonParser.serialize(obj, output);
     }
 
@@ -26788,7 +26788,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param config
      * @param output
      */
-    public static void toJSON(final Object obj, final JSONSerializationConfig config, final File output) {
+    public static void toJson(final Object obj, final JSONSerializationConfig config, final File output) {
         Utils.jsonParser.serialize(obj, config, output);
     }
 
@@ -26797,7 +26797,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param obj
      * @param output
      */
-    public static void toJSON(final Object obj, final OutputStream output) {
+    public static void toJson(final Object obj, final OutputStream output) {
         Utils.jsonParser.serialize(obj, output);
     }
 
@@ -26807,7 +26807,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param config
      * @param output
      */
-    public static void toJSON(final Object obj, final JSONSerializationConfig config, final OutputStream output) {
+    public static void toJson(final Object obj, final JSONSerializationConfig config, final OutputStream output) {
         Utils.jsonParser.serialize(obj, config, output);
     }
 
@@ -26816,7 +26816,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param obj
      * @param output
      */
-    public static void toJSON(final Object obj, final Writer output) {
+    public static void toJson(final Object obj, final Writer output) {
         Utils.jsonParser.serialize(obj, output);
     }
 
@@ -26826,7 +26826,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param config
      * @param output
      */
-    public static void toJSON(final Object obj, final JSONSerializationConfig config, final Writer output) {
+    public static void toJson(final Object obj, final JSONSerializationConfig config, final Writer output) {
         Utils.jsonParser.serialize(obj, config, output);
     }
 
@@ -26840,7 +26840,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
-    public static <T> T fromJSON(final String json, final Class<? extends T> targetType) {
+    public static <T> T fromJson(final String json, final Class<? extends T> targetType) {
         return Utils.jsonParser.deserialize(json, targetType);
     }
 
@@ -26855,8 +26855,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
-    public static <T> T fromJSON(final String json, final T defaultIfNull, final Class<? extends T> targetType) {
-        final T ret = fromJSON(json, targetType);
+    public static <T> T fromJson(final String json, final T defaultIfNull, final Class<? extends T> targetType) {
+        final T ret = fromJson(json, targetType);
 
         return ret == null ? defaultIfNull : ret;
     }
@@ -26872,7 +26872,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
-    public static <T> T fromJSON(final String json, final JSONDeserializationConfig config, final Class<? extends T> targetType) {
+    public static <T> T fromJson(final String json, final JSONDeserializationConfig config, final Class<? extends T> targetType) {
         return Utils.jsonParser.deserialize(json, config, targetType);
     }
 
@@ -26886,7 +26886,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
-    public static <T> T fromJSON(final File json, final Class<? extends T> targetType) {
+    public static <T> T fromJson(final File json, final Class<? extends T> targetType) {
         return Utils.jsonParser.deserialize(json, targetType);
     }
 
@@ -26901,7 +26901,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
-    public static <T> T fromJSON(final File json, final JSONDeserializationConfig config, final Class<? extends T> targetType) {
+    public static <T> T fromJson(final File json, final JSONDeserializationConfig config, final Class<? extends T> targetType) {
         return Utils.jsonParser.deserialize(json, config, targetType);
     }
 
@@ -26915,7 +26915,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
-    public static <T> T fromJSON(final InputStream json, final Class<? extends T> targetType) {
+    public static <T> T fromJson(final InputStream json, final Class<? extends T> targetType) {
         return Utils.jsonParser.deserialize(json, targetType);
     }
 
@@ -26930,7 +26930,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
-    public static <T> T fromJSON(final InputStream json, final JSONDeserializationConfig config, final Class<? extends T> targetType) {
+    public static <T> T fromJson(final InputStream json, final JSONDeserializationConfig config, final Class<? extends T> targetType) {
         return Utils.jsonParser.deserialize(json, config, targetType);
     }
 
@@ -26944,7 +26944,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
-    public static <T> T fromJSON(final Reader json, final Class<? extends T> targetType) {
+    public static <T> T fromJson(final Reader json, final Class<? extends T> targetType) {
         return Utils.jsonParser.deserialize(json, targetType);
     }
 
@@ -26959,7 +26959,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
-    public static <T> T fromJSON(final Reader json, final JSONDeserializationConfig config, final Class<? extends T> targetType) {
+    public static <T> T fromJson(final Reader json, final JSONDeserializationConfig config, final Class<? extends T> targetType) {
         return Utils.jsonParser.deserialize(json, config, targetType);
     }
 
@@ -26975,7 +26975,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
-    public static <T> T fromJSON(final String json, final int fromIndex, final int toIndex, final Class<? extends T> targetType) {
+    public static <T> T fromJson(final String json, final int fromIndex, final int toIndex, final Class<? extends T> targetType) {
         return Utils.jsonParser.deserialize(json, fromIndex, toIndex, targetType);
     }
 
@@ -26992,7 +26992,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
-    public static <T> T fromJSON(final String json, final int fromIndex, final int toIndex, final JSONDeserializationConfig config,
+    public static <T> T fromJson(final String json, final int fromIndex, final int toIndex, final JSONDeserializationConfig config,
             final Class<? extends T> targetType) {
         return Utils.jsonParser.deserialize(json, fromIndex, toIndex, config, targetType);
     }
@@ -27007,8 +27007,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
-    public static <T> T fromJSON(final String json, final Type<? extends T> targetType) {
-        return fromJSON(json, null, targetType);
+    public static <T> T fromJson(final String json, final Type<? extends T> targetType) {
+        return fromJson(json, null, targetType);
     }
 
     /**
@@ -27022,8 +27022,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
-    public static <T> T fromJSON(final String json, final T defaultIfNull, final Type<? extends T> targetType) {
-        final T ret = fromJSON(json, targetType);
+    public static <T> T fromJson(final String json, final T defaultIfNull, final Type<? extends T> targetType) {
+        final T ret = fromJson(json, targetType);
 
         return ret == null ? defaultIfNull : ret;
     }
@@ -27039,7 +27039,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
-    public static <T> T fromJSON(final String json, final JSONDeserializationConfig config, final Type<? extends T> targetType) {
+    public static <T> T fromJson(final String json, final JSONDeserializationConfig config, final Type<? extends T> targetType) {
         return Utils.jsonParser.deserialize(json, setConfig(targetType, config, true), targetType.clazz());
     }
 
@@ -27053,8 +27053,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
-    public static <T> T fromJSON(final File json, final Type<? extends T> targetType) {
-        return fromJSON(json, null, targetType);
+    public static <T> T fromJson(final File json, final Type<? extends T> targetType) {
+        return fromJson(json, null, targetType);
     }
 
     /**
@@ -27068,7 +27068,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
-    public static <T> T fromJSON(final File json, final JSONDeserializationConfig config, final Type<? extends T> targetType) {
+    public static <T> T fromJson(final File json, final JSONDeserializationConfig config, final Type<? extends T> targetType) {
         return Utils.jsonParser.deserialize(json, setConfig(targetType, config, true), targetType.clazz());
     }
 
@@ -27082,8 +27082,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
-    public static <T> T fromJSON(final InputStream json, final Type<? extends T> targetType) {
-        return fromJSON(json, null, targetType);
+    public static <T> T fromJson(final InputStream json, final Type<? extends T> targetType) {
+        return fromJson(json, null, targetType);
     }
 
     /**
@@ -27097,7 +27097,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
-    public static <T> T fromJSON(final InputStream json, final JSONDeserializationConfig config, final Type<? extends T> targetType) {
+    public static <T> T fromJson(final InputStream json, final JSONDeserializationConfig config, final Type<? extends T> targetType) {
         return Utils.jsonParser.deserialize(json, setConfig(targetType, config, true), targetType.clazz());
     }
 
@@ -27111,8 +27111,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
-    public static <T> T fromJSON(final Reader json, final Type<? extends T> targetType) {
-        return fromJSON(json, null, targetType);
+    public static <T> T fromJson(final Reader json, final Type<? extends T> targetType) {
+        return fromJson(json, null, targetType);
     }
 
     /**
@@ -27126,7 +27126,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
-    public static <T> T fromJSON(final Reader json, final JSONDeserializationConfig config, final Type<? extends T> targetType) {
+    public static <T> T fromJson(final Reader json, final JSONDeserializationConfig config, final Type<? extends T> targetType) {
         return Utils.jsonParser.deserialize(json, setConfig(targetType, config, true), targetType.clazz());
     }
 
@@ -27142,8 +27142,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
-    public static <T> T fromJSON(final String json, final int fromIndex, final int toIndex, final Type<? extends T> targetType) {
-        return fromJSON(json, fromIndex, toIndex, null, targetType);
+    public static <T> T fromJson(final String json, final int fromIndex, final int toIndex, final Type<? extends T> targetType) {
+        return fromJson(json, fromIndex, toIndex, null, targetType);
     }
 
     /**
@@ -27159,7 +27159,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
-    public static <T> T fromJSON(final String json, final int fromIndex, final int toIndex, final JSONDeserializationConfig config,
+    public static <T> T fromJson(final String json, final int fromIndex, final int toIndex, final JSONDeserializationConfig config,
             final Type<? extends T> targetType) {
         return Utils.jsonParser.deserialize(json, fromIndex, toIndex, setConfig(targetType, config, true), targetType.clazz());
     }
@@ -27172,7 +27172,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
      * @return
      */
-    public static <T> CheckedStream<T, IOException> streamJSON(String json, Class<? extends T> elementClass) {
+    public static <T> CheckedStream<T, IOException> streamJson(String json, Class<? extends T> elementClass) {
         return Utils.jsonParser.stream(json, elementClass);
     }
 
@@ -27185,7 +27185,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
      * @return
      */
-    public static <T> CheckedStream<T, IOException> streamJSON(String json, JSONDeserializationConfig config, Class<? extends T> elementClass) {
+    public static <T> CheckedStream<T, IOException> streamJson(String json, JSONDeserializationConfig config, Class<? extends T> elementClass) {
         return Utils.jsonParser.stream(json, config, elementClass);
     }
 
@@ -27197,7 +27197,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
      * @return
      */
-    public static <T> CheckedStream<T, IOException> streamJSON(File json, Class<? extends T> elementClass) {
+    public static <T> CheckedStream<T, IOException> streamJson(File json, Class<? extends T> elementClass) {
         return Utils.jsonParser.stream(json, elementClass);
     }
 
@@ -27210,7 +27210,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
      * @return
      */
-    public static <T> CheckedStream<T, IOException> streamJSON(File json, JSONDeserializationConfig config, Class<? extends T> elementClass) {
+    public static <T> CheckedStream<T, IOException> streamJson(File json, JSONDeserializationConfig config, Class<? extends T> elementClass) {
         return Utils.jsonParser.stream(json, config, elementClass);
     }
 
@@ -27222,8 +27222,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
      * @return
      */
-    public static <T> CheckedStream<T, IOException> streamJSON(InputStream json, Class<? extends T> elementClass) {
-        return streamJSON(json, false, elementClass);
+    public static <T> CheckedStream<T, IOException> streamJson(InputStream json, Class<? extends T> elementClass) {
+        return streamJson(json, false, elementClass);
     }
 
     /**
@@ -27235,7 +27235,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
      * @return
      */
-    public static <T> CheckedStream<T, IOException> streamJSON(InputStream json, boolean closeInputStreamWhenStreamIsClosed, Class<? extends T> elementClass) {
+    public static <T> CheckedStream<T, IOException> streamJson(InputStream json, boolean closeInputStreamWhenStreamIsClosed, Class<? extends T> elementClass) {
         return Utils.jsonParser.stream(json, closeInputStreamWhenStreamIsClosed, elementClass);
     }
 
@@ -27249,7 +27249,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
      * @return
      */
-    public static <T> CheckedStream<T, IOException> streamJSON(InputStream json, JSONDeserializationConfig config, boolean closeInputStreamWhenStreamIsClosed,
+    public static <T> CheckedStream<T, IOException> streamJson(InputStream json, JSONDeserializationConfig config, boolean closeInputStreamWhenStreamIsClosed,
             Class<? extends T> elementClass) {
         return Utils.jsonParser.stream(json, config, closeInputStreamWhenStreamIsClosed, elementClass);
     }
@@ -27262,8 +27262,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
      * @return
      */
-    public static <T> CheckedStream<T, IOException> streamJSON(Reader json, Class<? extends T> elementClass) {
-        return streamJSON(json, false, elementClass);
+    public static <T> CheckedStream<T, IOException> streamJson(Reader json, Class<? extends T> elementClass) {
+        return streamJson(json, false, elementClass);
     }
 
     /**
@@ -27275,7 +27275,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
      * @return
      */
-    public static <T> CheckedStream<T, IOException> streamJSON(Reader json, boolean closeReaderWhenStreamIsClosed, Class<? extends T> elementClass) {
+    public static <T> CheckedStream<T, IOException> streamJson(Reader json, boolean closeReaderWhenStreamIsClosed, Class<? extends T> elementClass) {
         return Utils.jsonParser.stream(json, closeReaderWhenStreamIsClosed, elementClass);
     }
 
@@ -27289,7 +27289,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
      * @return
      */
-    public static <T> CheckedStream<T, IOException> streamJSON(Reader json, JSONDeserializationConfig config, boolean closeReaderWhenStreamIsClosed,
+    public static <T> CheckedStream<T, IOException> streamJson(Reader json, JSONDeserializationConfig config, boolean closeReaderWhenStreamIsClosed,
             Class<? extends T> elementClass) {
         return Utils.jsonParser.stream(json, config, closeReaderWhenStreamIsClosed, elementClass);
     }
@@ -27301,8 +27301,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
-    public static String formatJSON(final String json) {
-        return formatJSON(json, Utils.jscPrettyFormat, Object.class);
+    public static String formatJson(final String json) {
+        return formatJson(json, Utils.jscPrettyFormat, Object.class);
     }
 
     /**
@@ -27313,8 +27313,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
-    public static String formatJSON(final String json, final JSONSerializationConfig config) {
-        return formatJSON(json, config, Object.class);
+    public static String formatJson(final String json, final JSONSerializationConfig config) {
+        return formatJson(json, config, Object.class);
     }
 
     /**
@@ -27325,8 +27325,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
-    public static String formatJSON(final String json, final Class<?> transferType) {
-        return toJSON(fromJSON(json, transferType), Utils.jscPrettyFormat);
+    public static String formatJson(final String json, final Class<?> transferType) {
+        return toJson(fromJson(json, transferType), Utils.jscPrettyFormat);
     }
 
     /**
@@ -27338,11 +27338,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
-    public static String formatJSON(final String json, final JSONSerializationConfig config, final Class<?> transferType) {
+    public static String formatJson(final String json, final JSONSerializationConfig config, final Class<?> transferType) {
         final JSONSerializationConfig configToUse = config == null ? Utils.jscPrettyFormat
                 : (config.prettyFormat() == false ? config.copy().prettyFormat(true) : config);
 
-        return toJSON(fromJSON(json, transferType), configToUse);
+        return toJson(fromJson(json, transferType), configToUse);
     }
 
     /**
@@ -27353,8 +27353,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
-    public static String formatJSON(final String json, final Type<?> transferType) {
-        return toJSON(fromJSON(json, transferType), Utils.jscPrettyFormat);
+    public static String formatJson(final String json, final Type<?> transferType) {
+        return toJson(fromJson(json, transferType), Utils.jscPrettyFormat);
     }
 
     /**
@@ -27366,11 +27366,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
-    public static String formatJSON(final String json, final JSONSerializationConfig config, final Type<?> transferType) {
+    public static String formatJson(final String json, final JSONSerializationConfig config, final Type<?> transferType) {
         final JSONSerializationConfig configToUse = config == null ? Utils.jscPrettyFormat
                 : (config.prettyFormat() == false ? config.copy().prettyFormat(true) : config);
 
-        return toJSON(fromJSON(json, transferType), configToUse);
+        return toJson(fromJson(json, transferType), configToUse);
     }
 
     /**
@@ -27378,7 +27378,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param obj
      * @return
      */
-    public static String toXML(final Object obj) {
+    public static String toXml(final Object obj) {
         return Utils.xmlParser.serialize(obj);
     }
 
@@ -27388,7 +27388,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param prettyFormat
      * @return
      */
-    public static String toXML(final Object obj, final boolean prettyFormat) {
+    public static String toXml(final Object obj, final boolean prettyFormat) {
         return Utils.xmlParser.serialize(obj, prettyFormat ? Utils.xscPrettyFormat : Utils.xsc);
     }
 
@@ -27398,7 +27398,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param config
      * @return
      */
-    public static String toXML(final Object obj, final XMLSerializationConfig config) {
+    public static String toXml(final Object obj, final XMLSerializationConfig config) {
         return Utils.xmlParser.serialize(obj, config);
     }
 
@@ -27407,7 +27407,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param obj
      * @param output
      */
-    public static void toXML(final Object obj, final File output) {
+    public static void toXml(final Object obj, final File output) {
         Utils.xmlParser.serialize(obj, output);
     }
 
@@ -27417,7 +27417,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param config
      * @param output
      */
-    public static void toXML(final Object obj, final XMLSerializationConfig config, final File output) {
+    public static void toXml(final Object obj, final XMLSerializationConfig config, final File output) {
         Utils.xmlParser.serialize(obj, config, output);
     }
 
@@ -27426,7 +27426,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param obj
      * @param output
      */
-    public static void toXML(final Object obj, final OutputStream output) {
+    public static void toXml(final Object obj, final OutputStream output) {
         Utils.xmlParser.serialize(obj, output);
     }
 
@@ -27436,7 +27436,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param config
      * @param output
      */
-    public static void toXML(final Object obj, final XMLSerializationConfig config, final OutputStream output) {
+    public static void toXml(final Object obj, final XMLSerializationConfig config, final OutputStream output) {
         Utils.xmlParser.serialize(obj, config, output);
     }
 
@@ -27445,7 +27445,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param obj
      * @param output
      */
-    public static void toXML(final Object obj, final Writer output) {
+    public static void toXml(final Object obj, final Writer output) {
         Utils.xmlParser.serialize(obj, output);
     }
 
@@ -27455,7 +27455,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param config
      * @param output
      */
-    public static void toXML(final Object obj, final XMLSerializationConfig config, final Writer output) {
+    public static void toXml(final Object obj, final XMLSerializationConfig config, final Writer output) {
         Utils.xmlParser.serialize(obj, config, output);
     }
 
@@ -27469,7 +27469,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
-    public static <T> T fromXML(final String xml, final Class<? extends T> targetType) {
+    public static <T> T fromXml(final String xml, final Class<? extends T> targetType) {
         return Utils.xmlParser.deserialize(xml, targetType);
     }
 
@@ -27484,7 +27484,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
-    public static <T> T fromXML(final String xml, final XMLDeserializationConfig config, final Class<? extends T> targetType) {
+    public static <T> T fromXml(final String xml, final XMLDeserializationConfig config, final Class<? extends T> targetType) {
         return Utils.xmlParser.deserialize(xml, config, targetType);
     }
 
@@ -27498,7 +27498,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
-    public static <T> T fromXML(final File xml, final Class<? extends T> targetType) {
+    public static <T> T fromXml(final File xml, final Class<? extends T> targetType) {
         return Utils.xmlParser.deserialize(xml, targetType);
     }
 
@@ -27513,7 +27513,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
-    public static <T> T fromXML(final File xml, final XMLDeserializationConfig config, final Class<? extends T> targetType) {
+    public static <T> T fromXml(final File xml, final XMLDeserializationConfig config, final Class<? extends T> targetType) {
         return Utils.xmlParser.deserialize(xml, config, targetType);
     }
 
@@ -27527,7 +27527,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
-    public static <T> T fromXML(final InputStream xml, final Class<? extends T> targetType) {
+    public static <T> T fromXml(final InputStream xml, final Class<? extends T> targetType) {
         return Utils.xmlParser.deserialize(xml, targetType);
     }
 
@@ -27542,7 +27542,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
-    public static <T> T fromXML(final InputStream xml, final XMLDeserializationConfig config, final Class<? extends T> targetType) {
+    public static <T> T fromXml(final InputStream xml, final XMLDeserializationConfig config, final Class<? extends T> targetType) {
         return Utils.xmlParser.deserialize(xml, config, targetType);
     }
 
@@ -27556,7 +27556,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
-    public static <T> T fromXML(final Reader xml, final Class<? extends T> targetType) {
+    public static <T> T fromXml(final Reader xml, final Class<? extends T> targetType) {
         return Utils.xmlParser.deserialize(xml, targetType);
     }
 
@@ -27571,7 +27571,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
-    public static <T> T fromXML(final Reader xml, final XMLDeserializationConfig config, final Class<? extends T> targetType) {
+    public static <T> T fromXml(final Reader xml, final XMLDeserializationConfig config, final Class<? extends T> targetType) {
         return Utils.xmlParser.deserialize(xml, config, targetType);
     }
 
@@ -27585,8 +27585,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
-    public static <T> T fromXML(final String xml, final Type<? extends T> targetType) {
-        return fromJSON(xml, null, targetType);
+    public static <T> T fromXml(final String xml, final Type<? extends T> targetType) {
+        return fromJson(xml, null, targetType);
     }
 
     /**
@@ -27600,7 +27600,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
-    public static <T> T fromXML(final String xml, final XMLDeserializationConfig config, final Type<? extends T> targetType) {
+    public static <T> T fromXml(final String xml, final XMLDeserializationConfig config, final Type<? extends T> targetType) {
         return Utils.xmlParser.deserialize(xml, setConfig(targetType, config, false), targetType.clazz());
     }
 
@@ -27614,8 +27614,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
-    public static <T> T fromXML(final File xml, final Type<? extends T> targetType) {
-        return fromJSON(xml, null, targetType);
+    public static <T> T fromXml(final File xml, final Type<? extends T> targetType) {
+        return fromJson(xml, null, targetType);
     }
 
     /**
@@ -27629,7 +27629,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
-    public static <T> T fromXML(final File xml, final XMLDeserializationConfig config, final Type<? extends T> targetType) {
+    public static <T> T fromXml(final File xml, final XMLDeserializationConfig config, final Type<? extends T> targetType) {
         return Utils.xmlParser.deserialize(xml, setConfig(targetType, config, false), targetType.clazz());
     }
 
@@ -27643,8 +27643,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
-    public static <T> T fromXML(final InputStream xml, final Type<? extends T> targetType) {
-        return fromJSON(xml, null, targetType);
+    public static <T> T fromXml(final InputStream xml, final Type<? extends T> targetType) {
+        return fromJson(xml, null, targetType);
     }
 
     /**
@@ -27658,7 +27658,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
-    public static <T> T fromXML(final InputStream xml, final XMLDeserializationConfig config, final Type<? extends T> targetType) {
+    public static <T> T fromXml(final InputStream xml, final XMLDeserializationConfig config, final Type<? extends T> targetType) {
         return Utils.xmlParser.deserialize(xml, setConfig(targetType, config, false), targetType.clazz());
     }
 
@@ -27672,8 +27672,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
-    public static <T> T fromXML(final Reader xml, final Type<? extends T> targetType) {
-        return fromJSON(xml, null, targetType);
+    public static <T> T fromXml(final Reader xml, final Type<? extends T> targetType) {
+        return fromJson(xml, null, targetType);
     }
 
     /**
@@ -27687,7 +27687,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
-    public static <T> T fromXML(final Reader xml, final XMLDeserializationConfig config, final Type<? extends T> targetType) {
+    public static <T> T fromXml(final Reader xml, final XMLDeserializationConfig config, final Type<? extends T> targetType) {
         return Utils.xmlParser.deserialize(xml, setConfig(targetType, config, false), targetType.clazz());
     }
 
@@ -27731,8 +27731,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
-    public static String formatXML(final String xml) {
-        return formatXML(xml, MapEntity.class);
+    public static String formatXml(final String xml) {
+        return formatXml(xml, MapEntity.class);
     }
 
     /**
@@ -27743,8 +27743,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
-    public static String formatXML(final String xml, final XMLSerializationConfig config) {
-        return formatXML(xml, config, MapEntity.class);
+    public static String formatXml(final String xml, final XMLSerializationConfig config) {
+        return formatXml(xml, config, MapEntity.class);
     }
 
     /**
@@ -27755,8 +27755,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
-    public static String formatXML(final String xml, final Class<?> transferType) {
-        return toXML(fromXML(xml, transferType), Utils.xscPrettyFormat);
+    public static String formatXml(final String xml, final Class<?> transferType) {
+        return toXml(fromXml(xml, transferType), Utils.xscPrettyFormat);
     }
 
     /**
@@ -27768,11 +27768,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
-    public static String formatXML(final String xml, final XMLSerializationConfig config, final Class<?> transferType) {
+    public static String formatXml(final String xml, final XMLSerializationConfig config, final Class<?> transferType) {
         final XMLSerializationConfig configToUse = config == null ? Utils.xscPrettyFormat
                 : (config.prettyFormat() == false ? config.copy().prettyFormat(true) : config);
 
-        return toXML(fromXML(xml, transferType), configToUse);
+        return toXml(fromXml(xml, transferType), configToUse);
     }
 
     /**
@@ -27783,8 +27783,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
-    public static String formatXML(final String xml, final Type<?> transferType) {
-        return toXML(fromXML(xml, transferType), Utils.xscPrettyFormat);
+    public static String formatXml(final String xml, final Type<?> transferType) {
+        return toXml(fromXml(xml, transferType), Utils.xscPrettyFormat);
     }
 
     /**
@@ -27796,11 +27796,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
-    public static String formatXML(final String xml, final XMLSerializationConfig config, final Type<?> transferType) {
+    public static String formatXml(final String xml, final XMLSerializationConfig config, final Type<?> transferType) {
         final XMLSerializationConfig configToUse = config == null ? Utils.xscPrettyFormat
                 : (config.prettyFormat() == false ? config.copy().prettyFormat(true) : config);
 
-        return toXML(fromXML(xml, transferType), configToUse);
+        return toXml(fromXml(xml, transferType), configToUse);
     }
 
     /**
@@ -27811,8 +27811,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
-    public static String xml2JSON(final String xml) {
-        return xml2JSON(xml, Map.class);
+    public static String xml2Json(final String xml) {
+        return xml2Json(xml, Map.class);
     }
 
     /**
@@ -27824,7 +27824,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
-    public static String xml2JSON(final String xml, final Class<?> transferType) {
+    public static String xml2Json(final String xml, final Class<?> transferType) {
         return Utils.jsonParser.serialize(Utils.xmlParser.deserialize(xml, transferType), Utils.jsc);
     }
 
@@ -27836,8 +27836,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
-    public static String json2XML(final String json) {
-        return json2XML(json, Map.class);
+    public static String json2Xml(final String json) {
+        return json2Xml(json, Map.class);
     }
 
     /**
@@ -27849,7 +27849,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
-    public static String json2XML(final String json, final Class<?> transferType) {
+    public static String json2Xml(final String json, final Class<?> transferType) {
         return Utils.xmlParser.serialize(Utils.jsonParser.deserialize(json, transferType));
     }
 

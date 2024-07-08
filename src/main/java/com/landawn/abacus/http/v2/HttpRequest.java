@@ -395,7 +395,7 @@ public final class HttpRequest {
     public HttpRequest jsonBody(final Object obj) {
         setContentType(HttpHeaders.Values.APPLICATION_JSON);
 
-        this.bodyPublisher = BodyPublishers.ofString(N.toJSON(obj));
+        this.bodyPublisher = BodyPublishers.ofString(N.toJson(obj));
 
         return this;
     }
@@ -421,7 +421,7 @@ public final class HttpRequest {
     public HttpRequest xmlBody(final Object obj) {
         setContentType(HttpHeaders.Values.APPLICATION_XML);
 
-        this.bodyPublisher = BodyPublishers.ofString(N.toXML(obj));
+        this.bodyPublisher = BodyPublishers.ofString(N.toXml(obj));
 
         return this;
     }

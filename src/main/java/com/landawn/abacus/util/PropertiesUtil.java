@@ -111,7 +111,7 @@ public final class PropertiesUtil {
                                 if (resource.getType() == ResourceType.PROPERTIES) {
                                     load((Properties<String, String>) properties, is);
                                 } else {
-                                    loadFromXML(properties, is, properties.getClass());
+                                    loadFromXml(properties, is, properties.getClass());
                                 }
 
                                 if (m == null) {
@@ -293,8 +293,8 @@ public final class PropertiesUtil {
      * @param source
      * @return
      */
-    public static Properties<String, Object> loadFromXML(File source) {
-        return loadFromXML(source, false);
+    public static Properties<String, Object> loadFromXml(File source) {
+        return loadFromXml(source, false);
     }
 
     /**
@@ -304,8 +304,8 @@ public final class PropertiesUtil {
      * @param autoRefresh
      * @return
      */
-    public static Properties<String, Object> loadFromXML(File source, boolean autoRefresh) {
-        return loadFromXML(source, autoRefresh, Properties.class);
+    public static Properties<String, Object> loadFromXml(File source, boolean autoRefresh) {
+        return loadFromXml(source, autoRefresh, Properties.class);
     }
 
     /**
@@ -314,8 +314,8 @@ public final class PropertiesUtil {
      * @param source
      * @return
      */
-    public static Properties<String, Object> loadFromXML(InputStream source) {
-        return loadFromXML(source, Properties.class);
+    public static Properties<String, Object> loadFromXml(InputStream source) {
+        return loadFromXml(source, Properties.class);
     }
 
     /**
@@ -326,8 +326,8 @@ public final class PropertiesUtil {
      * @param targetClass
      * @return
      */
-    public static <T extends Properties<String, Object>> T loadFromXML(File source, Class<? extends T> targetClass) {
-        return loadFromXML(source, false, targetClass);
+    public static <T extends Properties<String, Object>> T loadFromXml(File source, Class<? extends T> targetClass) {
+        return loadFromXml(source, false, targetClass);
     }
 
     /**
@@ -339,7 +339,7 @@ public final class PropertiesUtil {
      * @param targetClass
      * @return
      */
-    public static <T extends Properties<String, Object>> T loadFromXML(File source, boolean autoRefresh, Class<? extends T> targetClass) {
+    public static <T extends Properties<String, Object>> T loadFromXml(File source, boolean autoRefresh, Class<? extends T> targetClass) {
         T properties = null;
         InputStream is = null;
 
@@ -354,13 +354,13 @@ public final class PropertiesUtil {
                     properties = (T) registeredAutoRefreshProperties.get(resource);
 
                     if (properties == null) {
-                        properties = loadFromXML(is, targetClass);
+                        properties = loadFromXml(is, targetClass);
 
                         registeredAutoRefreshProperties.put(resource, properties);
                     }
                 }
             } else {
-                properties = loadFromXML(is, targetClass);
+                properties = loadFromXml(is, targetClass);
             }
 
             return properties;
@@ -377,8 +377,8 @@ public final class PropertiesUtil {
      * @param targetClass
      * @return
      */
-    public static <T extends Properties<String, Object>> T loadFromXML(InputStream source, Class<? extends T> targetClass) {
-        return loadFromXML(null, source, targetClass);
+    public static <T extends Properties<String, Object>> T loadFromXml(InputStream source, Class<? extends T> targetClass) {
+        return loadFromXml(null, source, targetClass);
     }
 
     /**
@@ -390,7 +390,7 @@ public final class PropertiesUtil {
      * @param targetClass
      * @return
      */
-    private static <T extends Properties<String, Object>> T loadFromXML(Object targetProperties, InputStream source, Class<? extends T> targetClass) {
+    private static <T extends Properties<String, Object>> T loadFromXml(Object targetProperties, InputStream source, Class<? extends T> targetClass) {
         DocumentBuilder docBuilder = XMLUtil.createDOMParser(true, true);
 
         Document doc;
@@ -403,7 +403,7 @@ public final class PropertiesUtil {
         }
 
         Node node = doc.getFirstChild();
-        return loadFromXML(targetProperties, targetClass, node, null, true);
+        return loadFromXml(targetProperties, targetClass, node, null, true);
     }
 
     /**
@@ -418,7 +418,7 @@ public final class PropertiesUtil {
      * @return
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    private static <T extends Properties<String, Object>> T loadFromXML(Object targetProperties, Class<T> inputClass, Node source, Method propSetMethod,
+    private static <T extends Properties<String, Object>> T loadFromXml(Object targetProperties, Class<T> inputClass, Node source, Method propSetMethod,
             boolean isFirstCall) {
 
         // TODO it's difficult to support duplicated property and may be misused.
@@ -468,7 +468,7 @@ public final class PropertiesUtil {
                 // How to get target property value for auto-refresh if it's list of Properties or entities.
                 Object targetPropValue = properties.get(propName);
                 Class<T> propClass = (Class<T>) (propSetMethod == null ? Properties.class : propSetMethod.getParameterTypes()[0]);
-                propValue = loadFromXML(targetPropValue, propClass, propNode, propSetMethod, false);
+                propValue = loadFromXml(targetPropValue, propClass, propNode, propSetMethod, false);
             }
 
             Object oldPropValue = properties.get(propName);
@@ -601,7 +601,7 @@ public final class PropertiesUtil {
      * @param ignoreTypeInfo
      * @param output
      */
-    public static void storeToXML(Properties<?, ?> properties, String rootElementName, boolean ignoreTypeInfo, File output) {
+    public static void storeToXml(Properties<?, ?> properties, String rootElementName, boolean ignoreTypeInfo, File output) {
         OutputStream os = null;
 
         try {
@@ -609,7 +609,7 @@ public final class PropertiesUtil {
 
             os = IOUtil.newFileOutputStream(output);
 
-            storeToXML(properties, rootElementName, ignoreTypeInfo, os);
+            storeToXml(properties, rootElementName, ignoreTypeInfo, os);
 
             os.flush();
         } catch (IOException e) {
@@ -627,9 +627,9 @@ public final class PropertiesUtil {
      * @param ignoreTypeInfo
      * @param output
      */
-    public static void storeToXML(Properties<?, ?> properties, String rootElementName, boolean ignoreTypeInfo, OutputStream output) {
+    public static void storeToXml(Properties<?, ?> properties, String rootElementName, boolean ignoreTypeInfo, OutputStream output) {
         try {
-            storeToXML(properties, rootElementName, ignoreTypeInfo, true, output);
+            storeToXml(properties, rootElementName, ignoreTypeInfo, true, output);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
@@ -645,7 +645,7 @@ public final class PropertiesUtil {
      * @param output
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    private static void storeToXML(Properties<?, ?> properties, String rootElementName, boolean ignoreTypeInfo, boolean isFirstCall, OutputStream output)
+    private static void storeToXml(Properties<?, ?> properties, String rootElementName, boolean ignoreTypeInfo, boolean isFirstCall, OutputStream output)
             throws IOException {
         final BufferedXMLWriter bw = Objectory.createBufferedXMLWriter(output);
 
@@ -691,7 +691,7 @@ public final class PropertiesUtil {
                         } else if (e instanceof Properties) {
                             bw.flush();
 
-                            storeToXML((Properties<?, ?>) e, elementPropName, ignoreTypeInfo, false, output);
+                            storeToXml((Properties<?, ?>) e, elementPropName, ignoreTypeInfo, false, output);
                         } else {
                             type = N.typeOf(e.getClass());
 
@@ -714,7 +714,7 @@ public final class PropertiesUtil {
                 } else if (propValue instanceof Properties) {
                     bw.flush();
 
-                    storeToXML((Properties<?, ?>) propValue, propName.toString(), ignoreTypeInfo, false, output);
+                    storeToXml((Properties<?, ?>) propValue, propName.toString(), ignoreTypeInfo, false, output);
                 } else {
                     type = N.typeOf(propValue.getClass());
 

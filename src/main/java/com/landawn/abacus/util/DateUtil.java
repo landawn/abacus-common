@@ -3819,4 +3819,15 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
             // singleton.
         }
     }
+
+    //    /**
+    //     * The Class Times.
+    //     */
+    //    @Beta
+    //    public static final class Times extends DateUtil {
+    //
+    //        private Times() {
+    //            // singleton.
+    //        }
+    //    }
 }

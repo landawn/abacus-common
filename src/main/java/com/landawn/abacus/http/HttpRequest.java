@@ -116,10 +116,10 @@ public final class HttpRequest {
     }
 
     /**
-     * Overwrite the existing HTTP settings with specified {@code httpSettings}
+     * Overwrite the existing HTTP settings with specified {@code httpSettings}.
      *
-     * @param httpSettings
-     * @return
+     * @param httpSettings 
+     * @return 
      * @see HttpSettings
      */
     @Beta
@@ -384,7 +384,7 @@ public final class HttpRequest {
     public HttpRequest jsonBody(final Object obj) {
         setContentType(HttpHeaders.Values.APPLICATION_JSON);
 
-        this.request = N.toJSON(obj);
+        this.request = N.toJson(obj);
 
         return this;
     }
@@ -410,7 +410,7 @@ public final class HttpRequest {
     public HttpRequest xmlBody(final Object obj) {
         setContentType(HttpHeaders.Values.APPLICATION_XML);
 
-        this.request = N.toXML(obj);
+        this.request = N.toXml(obj);
 
         return this;
     }
