@@ -214,8 +214,8 @@ Please refer to [Wiki](https://github.com/landawn/abacus-common/wiki)
 
 ## Recommended Java programming libraries/frameworks:
 [lombok](https://github.com/rzwitserloot/lombok), 
-[protobuf](https://github.com/protocolbuffers/protobuf), 
 [Guava](https://github.com/google/guava), 
+[protobuf](https://github.com/protocolbuffers/protobuf), 
 [Kyro](https://github.com/EsotericSoftware/kryo), 
 [snappy-java](https://github.com/xerial/snappy-java), 
 [lz4-java](https://github.com/lz4/lz4-java), 
