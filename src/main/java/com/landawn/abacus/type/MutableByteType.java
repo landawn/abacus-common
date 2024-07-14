@@ -47,7 +47,7 @@ public class MutableByteType extends MutableType<MutableByte> {
      */
     @Override
     public String stringOf(MutableByte x) {
-        return x == null ? null : N.stringOf(x.byteValue());
+        return x == null ? null : N.stringOf(x.value());
     }
 
     /**
@@ -93,7 +93,7 @@ public class MutableByteType extends MutableType<MutableByte> {
      */
     @Override
     public void set(PreparedStatement stmt, int columnIndex, MutableByte x) throws SQLException {
-        stmt.setByte(columnIndex, (x == null) ? 0 : x.byteValue());
+        stmt.setByte(columnIndex, (x == null) ? 0 : x.value());
     }
 
     /**
@@ -105,7 +105,7 @@ public class MutableByteType extends MutableType<MutableByte> {
      */
     @Override
     public void set(CallableStatement stmt, String parameterName, MutableByte x) throws SQLException {
-        stmt.setByte(parameterName, (x == null) ? 0 : x.byteValue());
+        stmt.setByte(parameterName, (x == null) ? 0 : x.value());
     }
 
     /**
@@ -119,7 +119,7 @@ public class MutableByteType extends MutableType<MutableByte> {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
-            appendable.append(String.valueOf(x.byteValue()));
+            appendable.append(String.valueOf(x.value()));
         }
     }
 
@@ -135,7 +135,7 @@ public class MutableByteType extends MutableType<MutableByte> {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
-            writer.write(x.byteValue());
+            writer.write(x.value());
         }
     }
 }

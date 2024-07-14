@@ -1084,31 +1084,39 @@ public final class Iterables {
         return N.isEmpty(c) ? Nullable.<T> empty() : Nullable.of(N.median(c, cmp));
     }
 
-    /**
-     * Returns {@code Nullable.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
-     *
-     * @param <T>
-     * @param a
-     * @param keyMapper
-     * @return
-     */
-    @SuppressWarnings("rawtypes")
-    public static <T> Nullable<T> medianBy(final T[] a, final Function<? super T, ? extends Comparable> keyMapper) {
-        return median(a, Comparators.comparingBy(keyMapper));
-    }
-
-    /**
-     * Returns {@code Nullable.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
-     *
-     * @param <T>
-     * @param c
-     * @param keyMapper
-     * @return
-     */
-    @SuppressWarnings("rawtypes")
-    public static <T> Nullable<T> medianBy(final Collection<? extends T> c, final Function<? super T, ? extends Comparable> keyMapper) {
-        return median(c, Comparators.comparingBy(keyMapper));
-    }
+    //    /**
+    //     * Returns {@code Nullable.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
+    //     *
+    //     * @param <T>
+    //     * @param a
+    //     * @param keyMapper
+    //     * @return
+    //     * @deprecated
+    //     * @see Comparators#comparingBy(Function)
+    //     */
+    //    @Deprecated
+    //    @Beta
+    //    @SuppressWarnings("rawtypes")
+    //    public static <T> Nullable<T> medianBy(final T[] a, final Function<? super T, ? extends Comparable> keyMapper) {
+    //        return median(a, Comparators.comparingBy(keyMapper));
+    //    }
+    //
+    //    /**
+    //     * Returns {@code Nullable.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
+    //     *
+    //     * @param <T>
+    //     * @param c
+    //     * @param keyMapper
+    //     * @return
+    //     * @deprecated
+    //     * @see Comparators#comparingBy(Function)
+    //     */
+    //    @Deprecated
+    //    @Beta
+    //    @SuppressWarnings("rawtypes")
+    //    public static <T> Nullable<T> medianBy(final Collection<? extends T> c, final Function<? super T, ? extends Comparable> keyMapper) {
+    //        return median(c, Comparators.comparingBy(keyMapper));
+    //    }
 
     /**
      * Returns {@code Nullable.empty()} if the specified {@code Array/Collection} is {@code null} or empty, or its length/size is less than {@code k}.
@@ -1396,10 +1404,11 @@ public final class Iterables {
      * @param toIndex
      * @param func
      * @return
+     * @throws IndexOutOfBoundsException
      * @throws E the e
      */
     public static <T, E extends Exception> OptionalDouble averageInt(final T[] a, final int fromIndex, final int toIndex,
-            final Throwables.ToIntFunction<? super T, E> func) throws E {
+            final Throwables.ToIntFunction<? super T, E> func) throws IndexOutOfBoundsException, E {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
         if (fromIndex == toIndex) {
@@ -1432,10 +1441,11 @@ public final class Iterables {
      * @param toIndex
      * @param func
      * @return
+     * @throws IndexOutOfBoundsException
      * @throws E the e
      */
     public static <T, E extends Exception> OptionalDouble averageInt(final Collection<? extends T> c, final int fromIndex, final int toIndex,
-            final Throwables.ToIntFunction<? super T, E> func) throws E {
+            final Throwables.ToIntFunction<? super T, E> func) throws IndexOutOfBoundsException, E {
         N.checkFromToIndex(fromIndex, toIndex, N.size(c));
 
         if (fromIndex == toIndex) {
@@ -1529,10 +1539,11 @@ public final class Iterables {
      * @param toIndex
      * @param func
      * @return
+     * @throws IndexOutOfBoundsException
      * @throws E the e
      */
     public static <T, E extends Exception> OptionalDouble averageLong(final T[] a, final int fromIndex, final int toIndex,
-            final Throwables.ToLongFunction<? super T, E> func) throws E {
+            final Throwables.ToLongFunction<? super T, E> func) throws IndexOutOfBoundsException, E {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
         if (fromIndex == toIndex) {
@@ -1565,10 +1576,11 @@ public final class Iterables {
      * @param toIndex
      * @param func
      * @return
+     * @throws IndexOutOfBoundsException
      * @throws E the e
      */
     public static <T, E extends Exception> OptionalDouble averageLong(final Collection<? extends T> c, final int fromIndex, final int toIndex,
-            final Throwables.ToLongFunction<? super T, E> func) throws E {
+            final Throwables.ToLongFunction<? super T, E> func) throws IndexOutOfBoundsException, E {
         N.checkFromToIndex(fromIndex, toIndex, N.size(c));
 
         if (fromIndex == toIndex) {
@@ -1662,10 +1674,11 @@ public final class Iterables {
      * @param toIndex
      * @param func
      * @return
+     * @throws IndexOutOfBoundsException
      * @throws E the e
      */
     public static <T, E extends Exception> OptionalDouble averageDouble(final T[] a, final int fromIndex, final int toIndex,
-            final Throwables.ToDoubleFunction<? super T, E> func) throws E {
+            final Throwables.ToDoubleFunction<? super T, E> func) throws IndexOutOfBoundsException, E {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
         if (fromIndex == toIndex) {
@@ -1704,10 +1717,11 @@ public final class Iterables {
      * @param toIndex
      * @param func
      * @return
+     * @throws IndexOutOfBoundsException
      * @throws E the e
      */
     public static <T, E extends Exception> OptionalDouble averageDouble(final Collection<? extends T> c, final int fromIndex, final int toIndex,
-            final Throwables.ToDoubleFunction<? super T, E> func) throws E {
+            final Throwables.ToDoubleFunction<? super T, E> func) throws IndexOutOfBoundsException, E {
         N.checkFromToIndex(fromIndex, toIndex, N.size(c));
 
         if (fromIndex == toIndex) {
@@ -2159,8 +2173,9 @@ public final class Iterables {
      * @param set1
      * @param set2
      * @return
+     * @throws IllegalArgumentException
      */
-    public static <E> SetView<E> union(final Set<? extends E> set1, final Set<? extends E> set2) {
+    public static <E> SetView<E> union(final Set<? extends E> set1, final Set<? extends E> set2) throws IllegalArgumentException {
         // N.checkArgNotNull(set1, "set1");
         // N.checkArgNotNull(set2, "set2");
 
@@ -2283,8 +2298,9 @@ public final class Iterables {
      * @param set1
      * @param set2
      * @return
+     * @throws IllegalArgumentException
      */
-    public static <E> SetView<E> intersection(final Set<E> set1, final Set<?> set2) {
+    public static <E> SetView<E> intersection(final Set<E> set1, final Set<?> set2) throws IllegalArgumentException {
         // N.checkArgNotNull(set1, "set1");
         // N.checkArgNotNull(set2, "set2");
 
@@ -2382,8 +2398,9 @@ public final class Iterables {
      * @param set1
      * @param set2
      * @return
+     * @throws IllegalArgumentException
      */
-    public static <E> SetView<E> difference(final Set<E> set1, final Set<?> set2) {
+    public static <E> SetView<E> difference(final Set<E> set1, final Set<?> set2) throws IllegalArgumentException {
         // N.checkArgNotNull(set1, "set1");
         // N.checkArgNotNull(set2, "set2");
 
@@ -2475,9 +2492,10 @@ public final class Iterables {
      * @param set1
      * @param set2
      * @return
+     * @throws IllegalArgumentException
      * @since 3.0
      */
-    public static <E> SetView<E> symmetricDifference(final Set<? extends E> set1, final Set<? extends E> set2) {
+    public static <E> SetView<E> symmetricDifference(final Set<? extends E> set1, final Set<? extends E> set2) throws IllegalArgumentException {
         // N.checkArgNotNull(set1, "set1");
         // N.checkArgNotNull(set2, "set2");
 
@@ -2580,8 +2598,9 @@ public final class Iterables {
      * @param set
      * @param range
      * @return
+     * @throws IllegalArgumentException
      */
-    public static <K extends Comparable<? super K>> NavigableSet<K> subSet(NavigableSet<K> set, Range<K> range) {
+    public static <K extends Comparable<? super K>> NavigableSet<K> subSet(NavigableSet<K> set, Range<K> range) throws IllegalArgumentException {
         if (set.comparator() != null && set.comparator() != N.NATURAL_COMPARATOR) { // NOSONAR
             N.checkArgument(set.comparator().compare(range.lowerEndpoint(), range.upperEndpoint()) <= 0,
                     "set is using a custom comparator which is inconsistent with the natural ordering.");
@@ -3377,7 +3396,7 @@ public final class Iterables {
          * @return the list
          */
         @Override
-        public List<E> get(final int index) {
+        public List<E> get(final int index) throws IllegalArgumentException {
             N.checkArgument(index < size(), "Invalid index %s. It must be less than the size %s", index, size());
 
             final List<E> result = new ArrayList<>(axes.length);

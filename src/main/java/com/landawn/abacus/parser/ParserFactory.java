@@ -317,35 +317,38 @@ public final class ParserFactory {
     //    }
 
     /**
+     * 
      *
-     *
-     * @param type
+     * @param type 
+     * @throws IllegalArgumentException 
      */
-    public static void registerKryo(final Class<?> type) {
+    public static void registerKryo(final Class<?> type) throws IllegalArgumentException {
         N.checkArgNotNull(type, "type");
 
         _kryoClassSet.add(type);
     }
 
     /**
+     * 
      *
-     *
-     * @param type
-     * @param id
+     * @param type 
+     * @param id 
+     * @throws IllegalArgumentException 
      */
-    public static void registerKryo(final Class<?> type, final int id) {
+    public static void registerKryo(final Class<?> type, final int id) throws IllegalArgumentException {
         N.checkArgNotNull(type, "type");
 
         _kryoClassIdMap.put(type, id);
     }
 
     /**
+     * 
      *
-     *
-     * @param type
-     * @param serializer
+     * @param type 
+     * @param serializer 
+     * @throws IllegalArgumentException 
      */
-    public static void registerKryo(final Class<?> type, final Serializer<?> serializer) {
+    public static void registerKryo(final Class<?> type, final Serializer<?> serializer) throws IllegalArgumentException {
         N.checkArgNotNull(type, "type");
         N.checkArgNotNull(serializer, "serializer");
 
@@ -353,13 +356,14 @@ public final class ParserFactory {
     }
 
     /**
+     * 
      *
-     *
-     * @param type
-     * @param serializer
-     * @param id
+     * @param type 
+     * @param serializer 
+     * @param id 
+     * @throws IllegalArgumentException 
      */
-    public static void registerKryo(final Class<?> type, final Serializer<?> serializer, final int id) {
+    public static void registerKryo(final Class<?> type, final Serializer<?> serializer, final int id) throws IllegalArgumentException {
         N.checkArgNotNull(type, "type");
         N.checkArgNotNull(serializer, "serializer");
 

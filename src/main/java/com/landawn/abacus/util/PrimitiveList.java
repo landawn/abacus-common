@@ -571,12 +571,14 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
     }
 
     /**
+     * 
      *
-     * @param fromIndex
-     * @param toIndex
-     * @return
+     * @param fromIndex 
+     * @param toIndex 
+     * @return 
+     * @throws IndexOutOfBoundsException 
      */
-    public Multiset<B> toMultiset(final int fromIndex, final int toIndex) {
+    public Multiset<B> toMultiset(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
 
         final IntFunction<Multiset<B>> supplier = createMultisetSupplier();

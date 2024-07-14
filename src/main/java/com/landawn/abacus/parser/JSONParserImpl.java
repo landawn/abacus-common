@@ -1563,10 +1563,11 @@ final class JSONParserImpl extends AbstractJSONParser {
      * @param config 
      * @param targetClass 
      * @return 
+     * @throws IndexOutOfBoundsException 
      */
     @Override
     public <T> T deserialize(final String source, final int fromIndex, final int toIndex, final JSONDeserializationConfig config,
-            final Class<? extends T> targetClass) {
+            final Class<? extends T> targetClass) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, N.len(source));
         final JSONDeserializationConfig configToUse = check(config);
         final Type<T> type = N.typeOf(targetClass);
@@ -3357,11 +3358,12 @@ final class JSONParserImpl extends AbstractJSONParser {
      * @param closeReaderWhenStreamIsClosed 
      * @param elementClass 
      * @return 
+     * @throws IllegalArgumentException 
      */
     @Override
     public <T> CheckedStream<T, IOException> stream(final Reader source, final JSONDeserializationConfig config, final boolean closeReaderWhenStreamIsClosed,
-            final Class<? extends T> elementClass) {
-        N.checkArgNotNull(source, "reader");
+            final Class<? extends T> elementClass) throws IllegalArgumentException {
+        N.checkArgNotNull(source, "source");
         CheckedStream<T, IOException> result = null;
         final char[] rbuf = Objectory.createCharArrayBuffer();
         final char[] cbuf = Objectory.createCharArrayBuffer();

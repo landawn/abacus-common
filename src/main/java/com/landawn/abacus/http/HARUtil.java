@@ -55,8 +55,9 @@ public final class HARUtil {
      *
      *
      * @param httpHeaderFilterForHARRequest
+     * @throws IllegalArgumentException
      */
-    public static void setHttpHeaderFilterForHARRequest(final BiPredicate<String, String> httpHeaderFilterForHARRequest) {
+    public static void setHttpHeaderFilterForHARRequest(final BiPredicate<String, String> httpHeaderFilterForHARRequest) throws IllegalArgumentException {
         N.checkArgNotNull(httpHeaderFilterForHARRequest, "httpHeaderFilterForHARRequest");
 
         httpHeaderFilterForHARRequest_TL.set(httpHeaderFilterForHARRequest);

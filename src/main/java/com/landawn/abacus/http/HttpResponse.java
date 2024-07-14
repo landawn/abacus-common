@@ -145,12 +145,14 @@ public class HttpResponse {
     }
 
     /**
+     * 
      *
-     * @param <T>
-     * @param resultClass
-     * @return
+     * @param <T> 
+     * @param resultClass 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public <T> T body(Class<T> resultClass) {
+    public <T> T body(Class<T> resultClass) throws IllegalArgumentException {
         N.checkArgNotNull(resultClass, "resultClass");
 
         if (resultClass == null || resultClass.equals(String.class)) {
@@ -169,12 +171,14 @@ public class HttpResponse {
     }
 
     /**
+     * 
      *
-     * @param <T>
-     * @param resultType
-     * @return
+     * @param <T> 
+     * @param resultType 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public <T> T body(Type<T> resultType) {
+    public <T> T body(Type<T> resultType) throws IllegalArgumentException {
         N.checkArgNotNull(resultType, "resultType");
 
         if (resultType == null || resultType.clazz().equals(String.class)) {

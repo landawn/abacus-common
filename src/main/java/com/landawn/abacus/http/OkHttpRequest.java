@@ -480,11 +480,13 @@ public final class OkHttpRequest {
 
     /**
      *
+     *
      * @param formBodyByBean
      * @return
+     * @throws IllegalArgumentException
      * @see {@code FormBody.Builder}
      */
-    public OkHttpRequest formBody(final Object formBodyByBean) {
+    public OkHttpRequest formBody(final Object formBodyByBean) throws IllegalArgumentException {
         if (formBodyByBean == null) {
             this.body = Util.EMPTY_REQUEST;
             return this;
@@ -729,16 +731,17 @@ public final class OkHttpRequest {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param httpMethod 
-     * @param resultClass 
-     * @return 
-     * @throws IOException 
+     *
+     * @param <T>
+     * @param httpMethod
+     * @param resultClass
+     * @return
+     * @throws IllegalArgumentException
+     * @throws IOException
      */
     @Beta
-    public <T> T execute(final HttpMethod httpMethod, final Class<T> resultClass) throws IOException {
+    public <T> T execute(final HttpMethod httpMethod, final Class<T> resultClass) throws IllegalArgumentException, IOException {
         N.checkArgNotNull(resultClass, "resultClass");
         N.checkArgument(!HttpResponse.class.equals(resultClass), "Return type can't be HttpResponse");
         final Request request = createRequest(httpMethod);
@@ -849,12 +852,12 @@ public final class OkHttpRequest {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param resultClass 
-     * @param executor 
-     * @return 
+     *
+     * @param <T>
+     * @param resultClass
+     * @param executor
+     * @return
      */
     public <T> ContinuableFuture<T> asyncGet(final Class<T> resultClass, final Executor executor) {
         return ContinuableFuture.call(() -> get(resultClass), executor);
@@ -891,12 +894,12 @@ public final class OkHttpRequest {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param resultClass 
-     * @param executor 
-     * @return 
+     *
+     * @param <T>
+     * @param resultClass
+     * @param executor
+     * @return
      */
     public <T> ContinuableFuture<T> asyncPost(final Class<T> resultClass, final Executor executor) {
         return ContinuableFuture.call(() -> post(resultClass), executor);
@@ -933,12 +936,12 @@ public final class OkHttpRequest {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param resultClass 
-     * @param executor 
-     * @return 
+     *
+     * @param <T>
+     * @param resultClass
+     * @param executor
+     * @return
      */
     public <T> ContinuableFuture<T> asyncPut(final Class<T> resultClass, final Executor executor) {
         return ContinuableFuture.call(() -> put(resultClass), executor);
@@ -975,12 +978,12 @@ public final class OkHttpRequest {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param resultClass 
-     * @param executor 
-     * @return 
+     *
+     * @param <T>
+     * @param resultClass
+     * @param executor
+     * @return
      */
     public <T> ContinuableFuture<T> asyncPatch(final Class<T> resultClass, final Executor executor) {
         return ContinuableFuture.call(() -> patch(resultClass), executor);
@@ -1017,12 +1020,12 @@ public final class OkHttpRequest {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param resultClass 
-     * @param executor 
-     * @return 
+     *
+     * @param <T>
+     * @param resultClass
+     * @param executor
+     * @return
      */
     public <T> ContinuableFuture<T> asyncDelete(final Class<T> resultClass, final Executor executor) {
         return ContinuableFuture.call(() -> delete(resultClass), executor);
@@ -1071,12 +1074,12 @@ public final class OkHttpRequest {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param httpMethod 
-     * @param resultClass 
-     * @return 
+     *
+     * @param <T>
+     * @param httpMethod
+     * @param resultClass
+     * @return
      */
     @Beta
     public <T> ContinuableFuture<T> asyncExecute(final HttpMethod httpMethod, final Class<T> resultClass) {
@@ -1084,13 +1087,13 @@ public final class OkHttpRequest {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param httpMethod 
-     * @param resultClass 
-     * @param executor 
-     * @return 
+     *
+     * @param <T>
+     * @param httpMethod
+     * @param resultClass
+     * @param executor
+     * @return
      */
     @Beta
     public <T> ContinuableFuture<T> asyncExecute(final HttpMethod httpMethod, final Class<T> resultClass, final Executor executor) {

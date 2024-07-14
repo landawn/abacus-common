@@ -97,15 +97,17 @@ public final class ExceptionUtil {
     }
 
     /**
+     * 
      *
-     * @param <E>
-     * @param exceptionClass
-     * @param runtimeExceptionMapper
-     * @param force
+     * @param <E> 
+     * @param exceptionClass 
+     * @param runtimeExceptionMapper 
+     * @param force 
+     * @throws IllegalArgumentException 
      */
     @SuppressWarnings("rawtypes")
     public static <E extends Throwable> void registerRuntimeExceptionMapper(final Class<E> exceptionClass,
-            final Function<E, RuntimeException> runtimeExceptionMapper, final boolean force) {
+            final Function<E, RuntimeException> runtimeExceptionMapper, final boolean force) throws IllegalArgumentException {
         N.checkArgNotNull(exceptionClass, "exceptionClass");
         N.checkArgNotNull(runtimeExceptionMapper, "runtimeExceptionMapper");
 

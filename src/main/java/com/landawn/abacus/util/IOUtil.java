@@ -3092,16 +3092,19 @@ public final class IOUtil {
     }
 
     /**
+     * 
      *
-     * @param source
+     * @param source 
      * @param offset by byte
      * @param count by byte
-     * @param output
-     * @param flush
-     * @return
-     * @throws IOException
+     * @param output 
+     * @param flush 
+     * @return 
+     * @throws IllegalArgumentException 
+     * @throws IOException 
      */
-    public static long write(final InputStream source, final long offset, final long count, final OutputStream output, final boolean flush) throws IOException {
+    public static long write(final InputStream source, final long offset, final long count, final OutputStream output, final boolean flush)
+            throws IllegalArgumentException, IOException {
         N.checkArgNotNull(source, "source");
         N.checkArgNotNull(output, "output");
 
@@ -3245,16 +3248,19 @@ public final class IOUtil {
     }
 
     /**
+     * 
      *
-     * @param source
+     * @param source 
      * @param offset by char
      * @param count by char
-     * @param output
-     * @param flush
-     * @return
-     * @throws IOException
+     * @param output 
+     * @param flush 
+     * @return 
+     * @throws IllegalArgumentException 
+     * @throws IOException 
      */
-    public static long write(final Reader source, final long offset, final long count, final Writer output, final boolean flush) throws IOException {
+    public static long write(final Reader source, final long offset, final long count, final Writer output, final boolean flush)
+            throws IllegalArgumentException, IOException {
         N.checkArgNotNull(source, "source");
         N.checkArgNotNull(output, "output");
 
@@ -3733,11 +3739,12 @@ public final class IOUtil {
     /**
      * Note: copied from Google Guava under Apache License v2.
      *
-     * @param file
-     * @return
-     * @throws IOException
+     * @param file 
+     * @return 
+     * @throws IllegalArgumentException 
+     * @throws IOException 
      */
-    public static MappedByteBuffer map(File file) throws IOException {
+    public static MappedByteBuffer map(File file) throws IllegalArgumentException, IOException {
         N.checkArgNotNull(file);
 
         return map(file, MapMode.READ_ONLY);
@@ -3745,23 +3752,24 @@ public final class IOUtil {
 
     /**
      * Note: copied from Google Guava under Apache License v2.
-     *
+     * 
      * Fully maps a file in to memory as per
      * {@link FileChannel#map(java.nio.channels.FileChannel.MapMode, long, long)}
      * using the requested {@link MapMode}.
-     *
+     * 
      * <p>Files are mapped from offset 0 to its length.
-     *
+     * 
      * <p>This only works for files {@code <= {@link Integer#MAX_VALUE}} bytes.
      *
      * @param file the file to map
      * @param mode the mode to use when mapping {@code file}
      * @return a buffer reflecting {@code file}
-     * @throws IOException
+     * @throws IllegalArgumentException 
+     * @throws IOException 
      * @see FileChannel#map(MapMode, long, long)
      * @since 2.0
      */
-    public static MappedByteBuffer map(File file, MapMode mode) throws IOException {
+    public static MappedByteBuffer map(File file, MapMode mode) throws IllegalArgumentException, IOException {
         N.checkArgNotNull(file);
         N.checkArgNotNull(mode);
 
@@ -3774,29 +3782,30 @@ public final class IOUtil {
 
     /**
      * Note: copied from Google Guava under Apache License v2.
-     *
+     * 
      * Maps a file in to memory as per
      * {@link FileChannel#map(java.nio.channels.FileChannel.MapMode, long, long)}
      * using the requested {@link MapMode}.
-     *
+     * 
      * <p>Files are mapped from offset 0 to {@code size}.
-     *
+     * 
      * <p>If the mode is {@link MapMode#READ_WRITE} and the file does not exist,
      * it will be created with the requested {@code size}. Thus this method is
      * useful for creating memory mapped files which do not yet exist.
-     *
+     * 
      * <p>This only works for files {@code <= {@link Integer#MAX_VALUE}} bytes.
      *
      * @param file the file to map
      * @param mode the mode to use when mapping {@code file}
-     * @param offset
-     * @param count
+     * @param offset 
+     * @param count 
      * @return a buffer reflecting {@code file}
-     * @throws IOException
+     * @throws IllegalArgumentException 
+     * @throws IOException 
      * @see FileChannel#map(MapMode, long, long)
      * @since 2.0
      */
-    public static MappedByteBuffer map(File file, MapMode mode, long offset, long count) throws IOException {
+    public static MappedByteBuffer map(File file, MapMode mode, long offset, long count) throws IllegalArgumentException, IOException {
         N.checkArgNotNull(file);
         N.checkArgNotNull(mode);
         N.checkArgNotNegative(offset, "offset");
@@ -3885,16 +3894,17 @@ public final class IOUtil {
 
     /**
      * Note: copied from Google Guava under Apache License v2.
-     *
+     * 
      * Returns the <a href="http://en.wikipedia.org/wiki/Filename_extension">file
      * extension</a> for the given file name, or the empty string if the file has
      * no extension.  The result does not include the '{@code .}'.
      *
-     * @param fullName
-     * @return
+     * @param fullName 
+     * @return 
+     * @throws IllegalArgumentException 
      * @since 11.0
      */
-    public static String getFileExtension(String fullName) {
+    public static String getFileExtension(String fullName) throws IllegalArgumentException {
         N.checkArgNotNull(fullName);
 
         String fileName = new File(fullName).getName();
@@ -3904,7 +3914,7 @@ public final class IOUtil {
 
     /**
      * Note: copied from Google Guava under Apache License v2.
-     *
+     * 
      * Returns the file name without its
      * <a href="http://en.wikipedia.org/wiki/Filename_extension">file extension</a> or path. This is
      * similar to the {@code basename} unix command. The result does not include the '{@code .}'.
@@ -3912,9 +3922,10 @@ public final class IOUtil {
      * @param file The name of the file to trim the extension from. This can be either a fully
      *     qualified file name (including a path) or just a file name.
      * @return The file name without its path or extension.
+     * @throws IllegalArgumentException 
      * @since 14.0
      */
-    public static String getNameWithoutExtension(String file) {
+    public static String getNameWithoutExtension(String file) throws IllegalArgumentException {
         N.checkArgNotNull(file);
 
         String fileName = new File(file).getName();
@@ -5100,7 +5111,7 @@ public final class IOUtil {
      * @return true if the {@code File} exists and has been modified after the given {@code Date}.
      * @throws IllegalArgumentException if the file or date is {@code null}
      */
-    public static boolean isFileNewer(final File file, final Date date) {
+    public static boolean isFileNewer(final File file, final Date date) throws IllegalArgumentException {
         N.checkArgNotNull(file, "file");
         N.checkArgNotNull(date, "date");
 
@@ -5115,7 +5126,7 @@ public final class IOUtil {
      * @return true if the {@code File} exists and has been modified more recently than the reference {@code File}
      * @throws IllegalArgumentException if the file or reference file is {@code null} or the reference file doesn't exist
      */
-    public static boolean isFileNewer(final File file, final File reference) {
+    public static boolean isFileNewer(final File file, final File reference) throws IllegalArgumentException {
         N.checkArgNotNull(file, "file");
         N.checkArgNotNull(reference, "reference");
 
@@ -5130,7 +5141,7 @@ public final class IOUtil {
      * @return true if the {@code File} exists and has been modified before the given {@code Date}
      * @throws IllegalArgumentException if the file or date is {@code null}
      */
-    public static boolean isFileOlder(final File file, final Date date) {
+    public static boolean isFileOlder(final File file, final Date date) throws IllegalArgumentException {
         N.checkArgNotNull(file, "file");
         N.checkArgNotNull(date, "date");
 
@@ -5145,7 +5156,7 @@ public final class IOUtil {
      * @return true if the {@code File} exists and has been modified before the reference {@code File}
      * @throws IllegalArgumentException if the file or reference file is {@code null} or the reference file doesn't exist
      */
-    public static boolean isFileOlder(final File file, final File reference) {
+    public static boolean isFileOlder(final File file, final File reference) throws IllegalArgumentException {
         N.checkArgNotNull(file, "file");
         N.checkArgNotNull(reference, "reference");
 
@@ -5161,7 +5172,7 @@ public final class IOUtil {
      * <p>
      * When using jdk1.7, this method delegates to {@code boolean java.nio.file.Files.isSymbolicLink(Path path)}
      * </p>
-     *
+     * 
      * <p>
      * <b>Note:</b> the current implementation always returns {@code false} if running on
      * jkd1.6 and the system is detected as Windows using {@link FilenameUtil#isSystemWindows()}
@@ -5169,13 +5180,15 @@ public final class IOUtil {
      * <p>
      * For code that runs on Java 1.7 or later, use the following method instead:
      * </p>
-     *
+     * 
      * {@code boolean java.nio.file.Files.isSymbolicLink(Path path)}
+     *
      * @param file the file to check
      * @return true if the file is a Symbolic Link
+     * @throws IllegalArgumentException 
      * @since 2.0
      */
-    public static boolean isSymbolicLink(final File file) {
+    public static boolean isSymbolicLink(final File file) throws IllegalArgumentException {
         N.checkArgNotNull(file, "file");
 
         return Files.isSymbolicLink(file.toPath());
@@ -5202,7 +5215,7 @@ public final class IOUtil {
      *
      * @since 2.0
      */
-    public static long sizeOf(final File file) {
+    public static long sizeOf(final File file) throws IllegalArgumentException {
         N.checkArgNotNull(file, "file");
 
         if (!file.exists()) {
@@ -5229,7 +5242,7 @@ public final class IOUtil {
      * @return size of directory in bytes, 0 if directory is security restricted, a negative number when the real total is greater than {@link Long#MAX_VALUE}.
      * @throws IllegalArgumentException if the directory is {@code null} or it's not existed directory.
      */
-    public static long sizeOfDirectory(final File directory) {
+    public static long sizeOfDirectory(final File directory) throws IllegalArgumentException {
         N.checkArgNotNull(directory, "directory");
 
         checkDirectory(directory);

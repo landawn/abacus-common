@@ -29,24 +29,28 @@ public final class IndexedLong extends AbstractIndexed {
     }
 
     /**
+     * 
      *
-     * @param value
-     * @param index
-     * @return
+     * @param value 
+     * @param index 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static IndexedLong of(long value, int index) {
+    public static IndexedLong of(long value, int index) throws IllegalArgumentException {
         N.checkArgNotNegative(index, "index");
 
         return new IndexedLong(index, value);
     }
 
     /**
+     * 
      *
-     * @param value
-     * @param index
-     * @return
+     * @param value 
+     * @param index 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static IndexedLong of(long value, long index) {
+    public static IndexedLong of(long value, long index) throws IllegalArgumentException {
         N.checkArgNotNegative(index, "index");
 
         return new IndexedLong(index, value);

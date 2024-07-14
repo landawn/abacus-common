@@ -541,26 +541,30 @@ public final class HttpHeaders {
     }
 
     /**
+     * 
      *
-     * @param name
-     * @param value
-     * @return
+     * @param name 
+     * @param value 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static HttpHeaders of(final String name, final Object value) {
+    public static HttpHeaders of(final String name, final Object value) throws IllegalArgumentException {
         N.checkArgNotNull(name, "name");
 
         return create().set(name, value);
     }
 
     /**
+     * 
      *
-     * @param name1
-     * @param value1
-     * @param name2
-     * @param value2
-     * @return
+     * @param name1 
+     * @param value1 
+     * @param name2 
+     * @param value2 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static HttpHeaders of(final String name1, final Object value1, final String name2, final Object value2) {
+    public static HttpHeaders of(final String name1, final Object value1, final String name2, final Object value2) throws IllegalArgumentException {
         N.checkArgNotNull(name1, "name1");
         N.checkArgNotNull(name2, "name2");
 
@@ -568,16 +572,19 @@ public final class HttpHeaders {
     }
 
     /**
+     * 
      *
-     * @param name1
-     * @param value1
-     * @param name2
-     * @param value2
-     * @param name3
-     * @param value3
-     * @return
+     * @param name1 
+     * @param value1 
+     * @param name2 
+     * @param value2 
+     * @param name3 
+     * @param value3 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static HttpHeaders of(final String name1, final Object value1, final String name2, final Object value2, final String name3, final Object value3) {
+    public static HttpHeaders of(final String name1, final Object value1, final String name2, final Object value2, final String name3, final Object value3)
+            throws IllegalArgumentException {
         N.checkArgNotNull(name1, "name1");
         N.checkArgNotNull(name2, "name2");
         N.checkArgNotNull(name3, "name3");
@@ -586,22 +593,26 @@ public final class HttpHeaders {
     }
 
     /**
+     * 
      *
-     * @param headers
-     * @return
+     * @param headers 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static HttpHeaders of(final Map<String, ?> headers) {
+    public static HttpHeaders of(final Map<String, ?> headers) throws IllegalArgumentException {
         N.checkArgNotNull(headers);
 
         return new HttpHeaders(headers);
     }
 
     /**
+     * 
      *
-     * @param headers
-     * @return
+     * @param headers 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static HttpHeaders copyOf(final Map<String, ?> headers) {
+    public static HttpHeaders copyOf(final Map<String, ?> headers) throws IllegalArgumentException {
         N.checkArgNotNull(headers);
 
         final Map<String, Object> copyMap = N.newMap(headers.getClass(), headers.size());

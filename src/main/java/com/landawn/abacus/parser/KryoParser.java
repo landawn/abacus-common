@@ -113,7 +113,6 @@ import com.landawn.abacus.util.LinkedArrayHashMap;
 import com.landawn.abacus.util.LinkedArrayHashSet;
 import com.landawn.abacus.util.ListMultimap;
 import com.landawn.abacus.util.LongList;
-import com.landawn.abacus.util.LongMultiset;
 import com.landawn.abacus.util.Multimap;
 import com.landawn.abacus.util.Multiset;
 import com.landawn.abacus.util.MutableBoolean;
@@ -529,8 +528,9 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
      * 
      *
      * @param type 
+     * @throws IllegalArgumentException 
      */
-    public void register(Class<?> type) {
+    public void register(Class<?> type) throws IllegalArgumentException {
         N.checkArgNotNull(type, "type");
 
         synchronized (kryoPool) {
@@ -546,8 +546,9 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
      *
      * @param type 
      * @param id 
+     * @throws IllegalArgumentException 
      */
-    public void register(Class<?> type, int id) {
+    public void register(Class<?> type, int id) throws IllegalArgumentException {
         N.checkArgNotNull(type, "type");
 
         synchronized (kryoPool) {
@@ -563,8 +564,9 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
      *
      * @param type 
      * @param serializer 
+     * @throws IllegalArgumentException 
      */
-    public void register(Class<?> type, Serializer<?> serializer) {
+    public void register(Class<?> type, Serializer<?> serializer) throws IllegalArgumentException {
         N.checkArgNotNull(type, "type");
         N.checkArgNotNull(serializer, "serializer");
 
@@ -582,8 +584,9 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
      * @param type 
      * @param serializer 
      * @param id 
+     * @throws IllegalArgumentException 
      */
-    public void register(final Class<?> type, final Serializer<?> serializer, final int id) {
+    public void register(final Class<?> type, final Serializer<?> serializer, final int id) throws IllegalArgumentException {
         N.checkArgNotNull(type, "type");
         N.checkArgNotNull(serializer, "serializer");
 
@@ -747,7 +750,6 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
         builtInClassesToRegister.add(ListMultimap.class);
         builtInClassesToRegister.add(SetMultimap.class);
         builtInClassesToRegister.add(Multiset.class);
-        builtInClassesToRegister.add(LongMultiset.class);
         builtInClassesToRegister.add(HBaseColumn.class);
 
         builtInClassesToRegister.add(Type.class);

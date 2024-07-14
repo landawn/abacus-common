@@ -64,13 +64,15 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
     }
 
     /**
+     * 
      *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return
+     * @param a 
+     * @param fromIndex 
+     * @param toIndex 
+     * @return 
+     * @throws IndexOutOfBoundsException 
      */
-    public static ShortIterator of(final short[] a, final int fromIndex, final int toIndex) {
+    public static ShortIterator of(final short[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
         if (fromIndex == toIndex) {
@@ -109,10 +111,11 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
     /**
      * Lazy evaluation.
      *
-     * @param iteratorSupplier
-     * @return
+     * @param iteratorSupplier 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static ShortIterator defer(final Supplier<? extends ShortIterator> iteratorSupplier) {
+    public static ShortIterator defer(final Supplier<? extends ShortIterator> iteratorSupplier) throws IllegalArgumentException {
         N.checkArgNotNull(iteratorSupplier, "iteratorSupplier");
 
         return new ShortIterator() {
@@ -149,10 +152,11 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
     /**
      * Returns an infinite {@code ShortIterator}.
      *
-     * @param supplier
-     * @return
+     * @param supplier 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static ShortIterator generate(final ShortSupplier supplier) {
+    public static ShortIterator generate(final ShortSupplier supplier) throws IllegalArgumentException {
         N.checkArgNotNull(supplier);
 
         return new ShortIterator() {
@@ -169,12 +173,14 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
     }
 
     /**
+     * 
      *
-     * @param hasNext
-     * @param supplier
-     * @return
+     * @param hasNext 
+     * @param supplier 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static ShortIterator generate(final BooleanSupplier hasNext, final ShortSupplier supplier) {
+    public static ShortIterator generate(final BooleanSupplier hasNext, final ShortSupplier supplier) throws IllegalArgumentException {
         N.checkArgNotNull(hasNext);
         N.checkArgNotNull(supplier);
 
@@ -214,12 +220,13 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
     public abstract short nextShort();
 
     /**
+     * 
      *
-     *
-     * @param n
-     * @return
+     * @param n 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public ShortIterator skip(final long n) {
+    public ShortIterator skip(final long n) throws IllegalArgumentException {
         N.checkArgNotNegative(n, "n");
 
         if (n <= 0) {
@@ -262,12 +269,13 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
     }
 
     /**
+     * 
      *
-     *
-     * @param count
-     * @return
+     * @param count 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public ShortIterator limit(final long count) {
+    public ShortIterator limit(final long count) throws IllegalArgumentException {
         N.checkArgNotNegative(count, "count");
 
         if (count == 0) {
@@ -297,12 +305,13 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
     }
 
     /**
+     * 
      *
-     *
-     * @param predicate
-     * @return
+     * @param predicate 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public ShortIterator filter(final ShortPredicate predicate) {
+    public ShortIterator filter(final ShortPredicate predicate) throws IllegalArgumentException {
         N.checkArgNotNull(predicate, "predicate");
 
         final ShortIterator iter = this;
@@ -447,12 +456,13 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
     /**
      * For each remaining.
      *
-     * @param action
-     * @deprecated
+     * @param action 
+     * @throws IllegalArgumentException 
+     * @deprecated 
      */
     @Override
     @Deprecated
-    public void forEachRemaining(java.util.function.Consumer<? super Short> action) {
+    public void forEachRemaining(java.util.function.Consumer<? super Short> action) throws IllegalArgumentException {
         super.forEachRemaining(action);
     }
 
@@ -471,12 +481,14 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
     }
 
     /**
+     * 
      *
-     * @param <E>
-     * @param action
+     * @param <E> 
+     * @param action 
+     * @throws IllegalArgumentException 
      * @throws E the e
      */
-    public <E extends Exception> void foreachIndexed(Throwables.IndexedShortConsumer<E> action) throws E {
+    public <E extends Exception> void foreachIndexed(Throwables.IndexedShortConsumer<E> action) throws IllegalArgumentException, E {
         N.checkArgNotNull(action);
 
         int idx = 0;

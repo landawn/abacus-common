@@ -634,7 +634,7 @@ public abstract class Tuple<TP> implements Immutable {
         }
 
         @Override
-        public <E extends Exception> void forEach(Throwables.Consumer<?, E> consumer) throws E {
+        public <E extends Exception> void forEach(Throwables.Consumer<?, E> consumer) throws IllegalArgumentException, E {
             N.checkArgNotNull(consumer);
             // do nothing.
         }

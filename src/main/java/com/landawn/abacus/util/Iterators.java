@@ -67,13 +67,15 @@ public final class Iterators {
     }
 
     /**
+     * 
      *
-     * @param <T>
-     * @param iter
-     * @param index
-     * @return
+     * @param <T> 
+     * @param iter 
+     * @param index 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static <T> Nullable<T> get(final Iterator<? extends T> iter, long index) {
+    public static <T> Nullable<T> get(final Iterator<? extends T> iter, long index) throws IllegalArgumentException {
         N.checkArgNotNegative(index, "index");
 
         if (iter == null) {
@@ -142,16 +144,18 @@ public final class Iterators {
     }
 
     /**
+     * 
      *
-     *
-     * @param <T>
-     * @param <E>
-     * @param iter
-     * @param predicate
-     * @return
-     * @throws E
+     * @param <T> 
+     * @param <E> 
+     * @param iter 
+     * @param predicate 
+     * @return 
+     * @throws IllegalArgumentException 
+     * @throws E 
      */
-    public static <T, E extends Exception> long count(final Iterator<? extends T> iter, final Throwables.Predicate<? super T, E> predicate) throws E {
+    public static <T, E extends Exception> long count(final Iterator<? extends T> iter, final Throwables.Predicate<? super T, E> predicate)
+            throws IllegalArgumentException, E {
         N.checkArgNotNull(predicate, "predicate"); //NOSONAR
 
         if (iter == null) {
@@ -170,13 +174,15 @@ public final class Iterators {
     }
 
     /**
+     * 
      *
-     * @param <T>
-     * @param e
-     * @param n
-     * @return
+     * @param <T> 
+     * @param e 
+     * @param n 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static <T> ObjIterator<T> repeat(final T e, final int n) {
+    public static <T> ObjIterator<T> repeat(final T e, final int n) throws IllegalArgumentException {
         N.checkArgument(n >= 0, "'n' can't be negative: %s", n); //NOSONAR
 
         if (n == 0) {
@@ -204,13 +210,15 @@ public final class Iterators {
     }
 
     /**
+     * 
      *
-     * @param <T>
-     * @param e
-     * @param n
-     * @return
+     * @param <T> 
+     * @param e 
+     * @param n 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static <T> ObjIterator<T> repeat(final T e, final long n) {
+    public static <T> ObjIterator<T> repeat(final T e, final long n) throws IllegalArgumentException {
         N.checkArgument(n >= 0, "'n' can't be negative: %s", n); //NOSONAR
 
         if (n == 0) {
@@ -240,13 +248,14 @@ public final class Iterators {
     /**
      * Repeats the elements in the specified Collection one by one.
      *
-     * @param <T>
-     * @param c
-     * @param n
-     * @return
+     * @param <T> 
+     * @param c 
+     * @param n 
+     * @return 
+     * @throws IllegalArgumentException 
      * @see N#repeatElements(Collection, int)
      */
-    public static <T> ObjIterator<T> repeatElements(final Collection<? extends T> c, final long n) {
+    public static <T> ObjIterator<T> repeatElements(final Collection<? extends T> c, final long n) throws IllegalArgumentException {
         N.checkArgument(n >= 0, "'n' can't be negative: %s", n);
 
         if (n == 0 || N.isEmpty(c)) {
@@ -284,13 +293,14 @@ public final class Iterators {
     /**
      * Repeats the whole specified Collection {@code n} times.
      *
-     * @param <T>
-     * @param c
-     * @param n
-     * @return
+     * @param <T> 
+     * @param c 
+     * @param n 
+     * @return 
+     * @throws IllegalArgumentException 
      * @see N#repeatCollection(Collection, int)
      */
-    public static <T> ObjIterator<T> repeatCollection(final Collection<? extends T> c, final long n) {
+    public static <T> ObjIterator<T> repeatCollection(final Collection<? extends T> c, final long n) throws IllegalArgumentException {
         N.checkArgument(n >= 0, "'n' can't be negative: %s", n);
 
         if (n == 0 || N.isEmpty(c)) {
@@ -325,13 +335,14 @@ public final class Iterators {
     /**
      * Repeats the elements in the specified Collection one by one till reach the specified size.
      *
-     * @param <T>
-     * @param c
-     * @param size
-     * @return
+     * @param <T> 
+     * @param c 
+     * @param size 
+     * @return 
+     * @throws IllegalArgumentException 
      * @see N#repeatElementsToSize(Collection, int)
      */
-    public static <T> ObjIterator<T> repeatElementsToSize(final Collection<? extends T> c, final long size) {
+    public static <T> ObjIterator<T> repeatElementsToSize(final Collection<? extends T> c, final long size) throws IllegalArgumentException {
         N.checkArgument(size >= 0, "'size' can't be negative: %s", size);
         N.checkArgument(size == 0 || N.notEmpty(c), "Collection can't be empty or null when size > 0");
 
@@ -376,13 +387,14 @@ public final class Iterators {
     /**
      * Repeats the whole specified Collection till reach the specified size.
      *
-     * @param <T>
-     * @param c
-     * @param size
-     * @return
+     * @param <T> 
+     * @param c 
+     * @param size 
+     * @return 
+     * @throws IllegalArgumentException 
      * @see N#repeatCollectionToSize(Collection, int)
      */
-    public static <T> ObjIterator<T> repeatCollectionToSize(final Collection<? extends T> c, final long size) {
+    public static <T> ObjIterator<T> repeatCollectionToSize(final Collection<? extends T> c, final long size) throws IllegalArgumentException {
         N.checkArgument(size >= 0, "'size' can't be negative: %s", size);
         N.checkArgument(size == 0 || N.notEmpty(c), "Collection can't be empty or null when size > 0");
 
@@ -1170,7 +1182,7 @@ public final class Iterators {
             }
 
             @Override
-            public <R> ObjIterator<R> map(final BiFunction<? super A, ? super B, ? extends R> mapper) {
+            public <R> ObjIterator<R> map(final BiFunction<? super A, ? super B, ? extends R> mapper) throws IllegalArgumentException {
                 N.checkArgNotNull(mapper);
 
                 return new ObjIterator<>() {
@@ -1265,7 +1277,7 @@ public final class Iterators {
             }
 
             @Override
-            public <R> ObjIterator<R> map(final TriFunction<? super A, ? super B, ? super C, ? extends R> mapper) {
+            public <R> ObjIterator<R> map(final TriFunction<? super A, ? super B, ? super C, ? extends R> mapper) throws IllegalArgumentException {
                 N.checkArgNotNull(mapper);
 
                 return new ObjIterator<>() {
@@ -1300,15 +1312,17 @@ public final class Iterators {
     }
 
     /**
+     * 
      *
-     * @param <T>
-     * @param a
-     * @param b
-     * @param nextSelector
-     * @return
+     * @param <T> 
+     * @param a 
+     * @param b 
+     * @param nextSelector 
+     * @return 
+     * @throws IllegalArgumentException 
      */
     public static <T> ObjIterator<T> merge(final Iterator<? extends T> a, final Iterator<? extends T> b,
-            final BiFunction<? super T, ? super T, MergeResult> nextSelector) {
+            final BiFunction<? super T, ? super T, MergeResult> nextSelector) throws IllegalArgumentException {
         N.checkArgNotNull(nextSelector);
 
         return new ObjIterator<>() {
@@ -1372,15 +1386,16 @@ public final class Iterators {
     }
 
     /**
+     * 
      *
-     *
-     * @param <T>
-     * @param c
+     * @param <T> 
+     * @param c 
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
-     * @return
+     * @return 
+     * @throws IllegalArgumentException 
      */
     public static <T> ObjIterator<T> merge(final Collection<? extends Iterator<? extends T>> c,
-            final BiFunction<? super T, ? super T, MergeResult> nextSelector) {
+            final BiFunction<? super T, ? super T, MergeResult> nextSelector) throws IllegalArgumentException {
         N.checkArgNotNull(nextSelector);
 
         if (N.isEmpty(c)) {
@@ -1434,15 +1449,16 @@ public final class Iterators {
     //    }
 
     /**
+     * 
      *
-     *
-     * @param <T>
-     * @param iterables
-     * @param nextSelector
-     * @return
+     * @param <T> 
+     * @param iterables 
+     * @param nextSelector 
+     * @return 
+     * @throws IllegalArgumentException 
      */
     public static <T> ObjIterator<T> mergeIterables(final Collection<? extends Iterable<? extends T>> iterables,
-            final BiFunction<? super T, ? super T, MergeResult> nextSelector) {
+            final BiFunction<? super T, ? super T, MergeResult> nextSelector) throws IllegalArgumentException {
         N.checkArgNotNull(nextSelector);
 
         if (N.isEmpty(iterables)) {
@@ -1476,14 +1492,17 @@ public final class Iterators {
     }
 
     /**
+     * 
      *
-     * @param <T>
+     * @param <T> 
      * @param sortedA should be in non-descending order as this method does not sort its input.
      * @param sortedB should be in non-descending order as this method does not sort its input.
-     * @param cmp
-     * @return
+     * @param cmp 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static <T> ObjIterator<T> mergeSorted(final Iterator<? extends T> sortedA, final Iterator<? extends T> sortedB, final Comparator<? super T> cmp) {
+    public static <T> ObjIterator<T> mergeSorted(final Iterator<? extends T> sortedA, final Iterator<? extends T> sortedB, final Comparator<? super T> cmp)
+            throws IllegalArgumentException {
         N.checkArgNotNull(cmp);
 
         return merge(sortedA, sortedB, MergeResult.minFirst(cmp));
@@ -1517,16 +1536,19 @@ public final class Iterators {
     }
 
     /**
+     * 
      *
-     * @param <A>
-     * @param <B>
-     * @param <R>
-     * @param a
-     * @param b
-     * @param zipFunction
-     * @return
+     * @param <A> 
+     * @param <B> 
+     * @param <R> 
+     * @param a 
+     * @param b 
+     * @param zipFunction 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static <A, B, R> ObjIterator<R> zip(final Iterator<A> a, final Iterator<B> b, final BiFunction<? super A, ? super B, ? extends R> zipFunction) {
+    public static <A, B, R> ObjIterator<R> zip(final Iterator<A> a, final Iterator<B> b, final BiFunction<? super A, ? super B, ? extends R> zipFunction)
+            throws IllegalArgumentException {
         N.checkArgNotNull(zipFunction);
 
         return new ObjIterator<>() {
@@ -1563,19 +1585,21 @@ public final class Iterators {
     }
 
     /**
+     * 
      *
-     * @param <A>
-     * @param <B>
-     * @param <C>
-     * @param <R>
-     * @param a
-     * @param b
-     * @param c
-     * @param zipFunction
-     * @return
+     * @param <A> 
+     * @param <B> 
+     * @param <C> 
+     * @param <R> 
+     * @param a 
+     * @param b 
+     * @param c 
+     * @param zipFunction 
+     * @return 
+     * @throws IllegalArgumentException 
      */
     public static <A, B, C, R> ObjIterator<R> zip(final Iterator<A> a, final Iterator<B> b, final Iterator<C> c,
-            final TriFunction<? super A, ? super B, ? super C, ? extends R> zipFunction) {
+            final TriFunction<? super A, ? super B, ? super C, ? extends R> zipFunction) throws IllegalArgumentException {
         N.checkArgNotNull(zipFunction);
 
         return new ObjIterator<>() {
@@ -1617,19 +1641,21 @@ public final class Iterators {
     }
 
     /**
+     * 
      *
-     * @param <A>
-     * @param <B>
-     * @param <R>
-     * @param a
-     * @param b
-     * @param valueForNoneA
-     * @param valueForNoneB
-     * @param zipFunction
-     * @return
+     * @param <A> 
+     * @param <B> 
+     * @param <R> 
+     * @param a 
+     * @param b 
+     * @param valueForNoneA 
+     * @param valueForNoneB 
+     * @param zipFunction 
+     * @return 
+     * @throws IllegalArgumentException 
      */
     public static <A, B, R> ObjIterator<R> zip(final Iterator<A> a, final Iterator<B> b, final A valueForNoneA, final B valueForNoneB,
-            final BiFunction<? super A, ? super B, ? extends R> zipFunction) {
+            final BiFunction<? super A, ? super B, ? extends R> zipFunction) throws IllegalArgumentException {
         N.checkArgNotNull(zipFunction);
 
         return new ObjIterator<>() {
@@ -1812,11 +1838,12 @@ public final class Iterators {
      * Calls {@code next()} on {@code iterator}, either {@code numberToAdvance} times
      * or until {@code hasNext()} returns {@code false}, whichever comes first.
      *
-     * @param iterator
-     * @param numberToAdvance
-     * @return
+     * @param iterator 
+     * @param numberToAdvance 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static long advance(Iterator<?> iterator, long numberToAdvance) {
+    public static long advance(Iterator<?> iterator, long numberToAdvance) throws IllegalArgumentException {
         N.checkArgNotNegative(numberToAdvance, "numberToAdvance");
 
         long i;
@@ -1831,15 +1858,16 @@ public final class Iterators {
     /**
      * Calls {@code next()} on {@code iterator}, either {@code n} times
      * or until {@code hasNext()} returns {@code false}, whichever comes first.
-     *
+     * 
      * This is a lazy evaluation operation. The {@code skip} action is only triggered when {@code Iterator.hasNext()} or {@code Iterator.next()} is called.
      *
-     * @param <T>
-     * @param iter
-     * @param n
-     * @return
+     * @param <T> 
+     * @param iter 
+     * @param n 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static <T> ObjIterator<T> skip(final Iterator<? extends T> iter, final long n) {
+    public static <T> ObjIterator<T> skip(final Iterator<? extends T> iter, final long n) throws IllegalArgumentException {
         N.checkArgNotNegative(n, "n");
 
         if (iter == null) {
@@ -1884,12 +1912,13 @@ public final class Iterators {
     /**
      * Returns a new {@code Iterator}.
      *
-     * @param <T>
-     * @param iter
-     * @param count
-     * @return
+     * @param <T> 
+     * @param iter 
+     * @param count 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static <T> ObjIterator<T> limit(final Iterator<? extends T> iter, final long count) {
+    public static <T> ObjIterator<T> limit(final Iterator<? extends T> iter, final long count) throws IllegalArgumentException {
         N.checkArgNotNegative(count, "count");
 
         if (iter == null || count == 0) {
@@ -2086,15 +2115,16 @@ public final class Iterators {
     }
 
     /**
+     * 
      *
-     *
-     * @param <T>
-     * @param c
-     * @param keyMapper
-     * @return
+     * @param <T> 
+     * @param c 
+     * @param keyMapper 
+     * @return 
+     * @throws IllegalArgumentException 
      */
     @Beta
-    public static <T> ObjIterator<T> distinctBy(final Iterable<? extends T> c, final Function<? super T, ?> keyMapper) {
+    public static <T> ObjIterator<T> distinctBy(final Iterable<? extends T> c, final Function<? super T, ?> keyMapper) throws IllegalArgumentException {
         N.checkArgNotNull(keyMapper, "keyMapper");
 
         if (c == null) {
@@ -2105,14 +2135,15 @@ public final class Iterators {
     }
 
     /**
+     * 
      *
-     *
-     * @param <T>
-     * @param iter
-     * @param keyMapper
-     * @return
+     * @param <T> 
+     * @param iter 
+     * @param keyMapper 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static <T> ObjIterator<T> distinctBy(final Iterator<? extends T> iter, final Function<? super T, ?> keyMapper) {
+    public static <T> ObjIterator<T> distinctBy(final Iterator<? extends T> iter, final Function<? super T, ?> keyMapper) throws IllegalArgumentException {
         N.checkArgNotNull(keyMapper, "keyMapper");
 
         if (iter == null) {
@@ -2156,14 +2187,16 @@ public final class Iterators {
     }
 
     /**
+     * 
      *
-     * @param <T>
-     * @param c
-     * @param predicate
-     * @return
+     * @param <T> 
+     * @param c 
+     * @param predicate 
+     * @return 
+     * @throws IllegalArgumentException 
      */
     @Beta
-    public static <T> ObjIterator<T> filter(final Iterable<? extends T> c, final Predicate<? super T> predicate) {
+    public static <T> ObjIterator<T> filter(final Iterable<? extends T> c, final Predicate<? super T> predicate) throws IllegalArgumentException {
         N.checkArgNotNull(predicate, "predicate");
 
         if (c == null) {
@@ -2174,13 +2207,15 @@ public final class Iterators {
     }
 
     /**
+     * 
      *
-     * @param <T>
-     * @param iter
-     * @param predicate
-     * @return
+     * @param <T> 
+     * @param iter 
+     * @param predicate 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static <T> ObjIterator<T> filter(final Iterator<? extends T> iter, final Predicate<? super T> predicate) {
+    public static <T> ObjIterator<T> filter(final Iterator<? extends T> iter, final Predicate<? super T> predicate) throws IllegalArgumentException {
         N.checkArgNotNull(predicate, "predicate");
 
         if (iter == null) {
@@ -2222,14 +2257,16 @@ public final class Iterators {
     }
 
     /**
+     * 
      *
-     * @param <T>
-     * @param c
-     * @param predicate
-     * @return
+     * @param <T> 
+     * @param c 
+     * @param predicate 
+     * @return 
+     * @throws IllegalArgumentException 
      */
     @Beta
-    public static <T> ObjIterator<T> takeWhile(final Iterable<? extends T> c, final Predicate<? super T> predicate) {
+    public static <T> ObjIterator<T> takeWhile(final Iterable<? extends T> c, final Predicate<? super T> predicate) throws IllegalArgumentException {
         N.checkArgNotNull(predicate, "predicate");
 
         if (c == null) {
@@ -2240,14 +2277,15 @@ public final class Iterators {
     }
 
     /**
+     * 
      *
-     *
-     * @param <T>
-     * @param iter
-     * @param predicate
-     * @return
+     * @param <T> 
+     * @param iter 
+     * @param predicate 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static <T> ObjIterator<T> takeWhile(final Iterator<? extends T> iter, final Predicate<? super T> predicate) {
+    public static <T> ObjIterator<T> takeWhile(final Iterator<? extends T> iter, final Predicate<? super T> predicate) throws IllegalArgumentException {
         N.checkArgNotNull(predicate, "predicate");
 
         if (iter == null) {
@@ -2289,14 +2327,16 @@ public final class Iterators {
     }
 
     /**
+     * 
      *
-     * @param <T>
-     * @param c
-     * @param predicate
-     * @return
+     * @param <T> 
+     * @param c 
+     * @param predicate 
+     * @return 
+     * @throws IllegalArgumentException 
      */
     @Beta
-    public static <T> ObjIterator<T> takeWhileInclusive(final Iterable<? extends T> c, final Predicate<? super T> predicate) {
+    public static <T> ObjIterator<T> takeWhileInclusive(final Iterable<? extends T> c, final Predicate<? super T> predicate) throws IllegalArgumentException {
         N.checkArgNotNull(predicate, "predicate");
 
         if (c == null) {
@@ -2307,14 +2347,16 @@ public final class Iterators {
     }
 
     /**
+     * 
      *
-     *
-     * @param <T>
-     * @param iter
-     * @param predicate
-     * @return
+     * @param <T> 
+     * @param iter 
+     * @param predicate 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static <T> ObjIterator<T> takeWhileInclusive(final Iterator<? extends T> iter, final Predicate<? super T> predicate) {
+    public static <T> ObjIterator<T> takeWhileInclusive(final Iterator<? extends T> iter, final Predicate<? super T> predicate)
+            throws IllegalArgumentException {
         N.checkArgNotNull(predicate, "predicate");
 
         if (iter == null) {
@@ -2357,14 +2399,16 @@ public final class Iterators {
     }
 
     /**
+     * 
      *
-     * @param <T>
-     * @param c
-     * @param predicate
-     * @return
+     * @param <T> 
+     * @param c 
+     * @param predicate 
+     * @return 
+     * @throws IllegalArgumentException 
      */
     @Beta
-    public static <T> ObjIterator<T> dropWhile(final Iterable<? extends T> c, final Predicate<? super T> predicate) {
+    public static <T> ObjIterator<T> dropWhile(final Iterable<? extends T> c, final Predicate<? super T> predicate) throws IllegalArgumentException {
         N.checkArgNotNull(predicate, "predicate");
 
         if (c == null) {
@@ -2375,14 +2419,15 @@ public final class Iterators {
     }
 
     /**
+     * 
      *
-     *
-     * @param <T>
-     * @param iter
-     * @param predicate
-     * @return
+     * @param <T> 
+     * @param iter 
+     * @param predicate 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static <T> ObjIterator<T> dropWhile(final Iterator<? extends T> iter, final Predicate<? super T> predicate) {
+    public static <T> ObjIterator<T> dropWhile(final Iterator<? extends T> iter, final Predicate<? super T> predicate) throws IllegalArgumentException {
         N.checkArgNotNull(predicate, "predicate");
 
         if (iter == null) {
@@ -2430,14 +2475,16 @@ public final class Iterators {
     }
 
     /**
+     * 
      *
-     * @param <T>
-     * @param c
-     * @param predicate
-     * @return
+     * @param <T> 
+     * @param c 
+     * @param predicate 
+     * @return 
+     * @throws IllegalArgumentException 
      */
     @Beta
-    public static <T> ObjIterator<T> skipUntil(final Iterable<? extends T> c, final Predicate<? super T> predicate) {
+    public static <T> ObjIterator<T> skipUntil(final Iterable<? extends T> c, final Predicate<? super T> predicate) throws IllegalArgumentException {
         N.checkArgNotNull(predicate, "predicate");
 
         if (c == null) {
@@ -2448,14 +2495,15 @@ public final class Iterators {
     }
 
     /**
+     * 
      *
-     *
-     * @param <T>
-     * @param iter
-     * @param predicate
-     * @return
+     * @param <T> 
+     * @param iter 
+     * @param predicate 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static <T> ObjIterator<T> skipUntil(final Iterator<? extends T> iter, final Predicate<? super T> predicate) {
+    public static <T> ObjIterator<T> skipUntil(final Iterator<? extends T> iter, final Predicate<? super T> predicate) throws IllegalArgumentException {
         N.checkArgNotNull(predicate, "predicate");
 
         if (iter == null) {
@@ -2503,15 +2551,17 @@ public final class Iterators {
     }
 
     /**
+     * 
      *
-     * @param <T>
-     * @param <U>
-     * @param c
-     * @param mapper
-     * @return
+     * @param <T> 
+     * @param <U> 
+     * @param c 
+     * @param mapper 
+     * @return 
+     * @throws IllegalArgumentException 
      */
     @Beta
-    public static <T, U> ObjIterator<U> map(final Iterable<? extends T> c, final Function<? super T, U> mapper) {
+    public static <T, U> ObjIterator<U> map(final Iterable<? extends T> c, final Function<? super T, U> mapper) throws IllegalArgumentException {
         N.checkArgNotNull(mapper, "mapper"); //NOSONAR
 
         if (c == null) {
@@ -2522,14 +2572,16 @@ public final class Iterators {
     }
 
     /**
+     * 
      *
-     * @param <T>
-     * @param <U>
-     * @param iter
-     * @param mapper
-     * @return
+     * @param <T> 
+     * @param <U> 
+     * @param iter 
+     * @param mapper 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static <T, U> ObjIterator<U> map(final Iterator<? extends T> iter, final Function<? super T, U> mapper) {
+    public static <T, U> ObjIterator<U> map(final Iterator<? extends T> iter, final Function<? super T, U> mapper) throws IllegalArgumentException {
         N.checkArgNotNull(mapper, "mapper"); //NOSONAR
 
         if (iter == null) {
@@ -2550,15 +2602,18 @@ public final class Iterators {
     }
 
     /**
+     * 
      *
-     * @param <T>
-     * @param <U>
-     * @param c
-     * @param mapper
-     * @return
+     * @param <T> 
+     * @param <U> 
+     * @param c 
+     * @param mapper 
+     * @return 
+     * @throws IllegalArgumentException 
      */
     @Beta
-    public static <T, U> ObjIterator<U> flatMap(final Iterable<? extends T> c, final Function<? super T, ? extends Iterable<? extends U>> mapper) {
+    public static <T, U> ObjIterator<U> flatMap(final Iterable<? extends T> c, final Function<? super T, ? extends Iterable<? extends U>> mapper)
+            throws IllegalArgumentException {
         N.checkArgNotNull(mapper, "mapper"); //NOSONAR
 
         if (c == null) {
@@ -2569,14 +2624,17 @@ public final class Iterators {
     }
 
     /**
+     * 
      *
-     * @param <T>
-     * @param <U>
-     * @param iter
-     * @param mapper
-     * @return
+     * @param <T> 
+     * @param <U> 
+     * @param iter 
+     * @param mapper 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static <T, U> ObjIterator<U> flatMap(final Iterator<? extends T> iter, final Function<? super T, ? extends Iterable<? extends U>> mapper) {
+    public static <T, U> ObjIterator<U> flatMap(final Iterator<? extends T> iter, final Function<? super T, ? extends Iterable<? extends U>> mapper)
+            throws IllegalArgumentException {
         N.checkArgNotNull(mapper, "mapper");
 
         if (iter == null) {
@@ -2604,7 +2662,7 @@ public final class Iterators {
             }
 
             @Override
-            public U next() {
+            public U next() throws IllegalArgumentException {
                 if (!hasNext()) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -2902,23 +2960,24 @@ public final class Iterators {
     /**
      * Parse the elements in the specified iterators one by one.
      *
-     * @param <T>
-     * @param <E>
-     * @param <E2>
-     * @param iterators
-     * @param offset
-     * @param count
+     * @param <T> 
+     * @param <E> 
+     * @param <E2> 
+     * @param iterators 
+     * @param offset 
+     * @param count 
      * @param readThreadNum new threads started to parse/process the lines/records
      * @param processThreadNum new threads started to parse/process the lines/records
      * @param queueSize size of queue to save the processing records/lines loaded from source data. Default size is 1024.
-     * @param elementConsumer
-     * @param onComplete
+     * @param elementConsumer 
+     * @param onComplete 
+     * @throws IllegalArgumentException 
      * @throws E the e
      * @throws E2 the e2
      */
     public static <T, E extends Exception, E2 extends Exception> void forEach(final Collection<? extends Iterator<? extends T>> iterators, final long offset,
             final long count, final int readThreadNum, final int processThreadNum, final int queueSize, final Throwables.Consumer<? super T, E> elementConsumer,
-            final Throwables.Runnable<E2> onComplete) throws E, E2 {
+            final Throwables.Runnable<E2> onComplete) throws IllegalArgumentException, E, E2 {
         N.checkArgument(offset >= 0 && count >= 0, "'offset'=%s and 'count'=%s can not be negative", offset, count);
 
         if (N.isEmpty(iterators)) {

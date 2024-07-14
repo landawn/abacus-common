@@ -411,11 +411,13 @@ public final class Splitter {
     }
 
     /**
+     * 
      *
-     * @param limit
-     * @return
+     * @param limit 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public Splitter limit(int limit) {
+    public Splitter limit(int limit) throws IllegalArgumentException {
         N.checkArgPositive(limit, "limit");
 
         this.limit = limit;
@@ -476,14 +478,15 @@ public final class Splitter {
     }
 
     /**
+     * 
      *
-     *
-     * @param <T>
-     * @param source
-     * @param targetType
-     * @return
+     * @param <T> 
+     * @param source 
+     * @param targetType 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public <T> List<T> split(final CharSequence source, final Class<? extends T> targetType) {
+    public <T> List<T> split(final CharSequence source, final Class<? extends T> targetType) throws IllegalArgumentException {
         N.checkArgNotNull(targetType, "targetType");
 
         final Type<T> type = N.typeOf(targetType);
@@ -510,14 +513,15 @@ public final class Splitter {
     }
 
     /**
+     * 
      *
-     *
-     * @param <T>
-     * @param source
-     * @param targetType
-     * @return
+     * @param <T> 
+     * @param source 
+     * @param targetType 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public <T> List<T> split(final CharSequence source, final Type<? extends T> targetType) {
+    public <T> List<T> split(final CharSequence source, final Type<? extends T> targetType) throws IllegalArgumentException {
         N.checkArgNotNull(targetType, "targetType");
 
         final List<T> result = new ArrayList<>();
@@ -551,8 +555,9 @@ public final class Splitter {
      * @param <C> 
      * @param source 
      * @param output 
+     * @throws IllegalArgumentException 
      */
-    public <C extends Collection<String>> void split(final CharSequence source, final C output) {
+    public <C extends Collection<String>> void split(final CharSequence source, final C output) throws IllegalArgumentException {
         N.checkArgNotNull(output, "output");
 
         final ObjIterator<String> iter = iterate(source);
@@ -571,8 +576,10 @@ public final class Splitter {
      * @param targetType 
      * @param output 
      * @return the specified output parameter: {@code output}
+     * @throws IllegalArgumentException 
      */
-    public <T, C extends Collection<T>> void split(final CharSequence source, final Class<? extends T> targetType, final C output) {
+    public <T, C extends Collection<T>> void split(final CharSequence source, final Class<? extends T> targetType, final C output)
+            throws IllegalArgumentException {
         N.checkArgNotNull(targetType, "targetType");
         N.checkArgNotNull(output, "output");
 
@@ -589,8 +596,10 @@ public final class Splitter {
      * @param source 
      * @param targetType 
      * @param output 
+     * @throws IllegalArgumentException 
      */
-    public <T, C extends Collection<T>> void split(final CharSequence source, final Type<? extends T> targetType, final C output) {
+    public <T, C extends Collection<T>> void split(final CharSequence source, final Type<? extends T> targetType, final C output)
+            throws IllegalArgumentException {
         N.checkArgNotNull(targetType, "targetType");
         N.checkArgNotNull(output, "output");
 
@@ -653,12 +662,13 @@ public final class Splitter {
     /**
      * Split to array.
      *
-     * @param <T>
-     * @param source
-     * @param arrayType
-     * @return
+     * @param <T> 
+     * @param source 
+     * @param arrayType 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public <T> T splitToArray(final CharSequence source, final Class<T> arrayType) {
+    public <T> T splitToArray(final CharSequence source, final Class<T> arrayType) throws IllegalArgumentException {
         N.checkArgNotNull(arrayType, "arrayType");
 
         final Class<?> eleCls = arrayType.getComponentType();
@@ -689,11 +699,12 @@ public final class Splitter {
 
     /**
      * Split to array.
-     * @param source
-     * @param output
      *
+     * @param source 
+     * @param output 
+     * @throws IllegalArgumentException 
      */
-    public void splitToArray(final CharSequence source, final String[] output) {
+    public void splitToArray(final CharSequence source, final String[] output) throws IllegalArgumentException {
         N.checkArgNotEmpty(output, "output");
 
         final ObjIterator<String> iter = iterate(source);
@@ -894,11 +905,13 @@ public final class Splitter {
         }
 
         /**
+         * 
          *
-         * @param limit
-         * @return
+         * @param limit 
+         * @return 
+         * @throws IllegalArgumentException 
          */
-        public MapSplitter limit(int limit) {
+        public MapSplitter limit(int limit) throws IllegalArgumentException {
             N.checkArgPositive(limit, "limit");
 
             entrySplitter.limit(limit);
@@ -935,16 +948,17 @@ public final class Splitter {
         }
 
         /**
-         *
+         * 
          *
          * @param <K> the key type
          * @param <V> the value type
-         * @param source
-         * @param keyType
-         * @param valueType
-         * @return
+         * @param source 
+         * @param keyType 
+         * @param valueType 
+         * @return 
+         * @throws IllegalArgumentException 
          */
-        public <K, V> Map<K, V> split(final CharSequence source, final Class<K> keyType, final Class<V> valueType) {
+        public <K, V> Map<K, V> split(final CharSequence source, final Class<K> keyType, final Class<V> valueType) throws IllegalArgumentException {
             N.checkArgNotNull(keyType, "keyType");
             N.checkArgNotNull(valueType, "valueType");
 
@@ -955,16 +969,17 @@ public final class Splitter {
         }
 
         /**
-         *
+         * 
          *
          * @param <K> the key type
          * @param <V> the value type
-         * @param source
-         * @param keyType
-         * @param valueType
-         * @return
+         * @param source 
+         * @param keyType 
+         * @param valueType 
+         * @return 
+         * @throws IllegalArgumentException 
          */
-        public <K, V> Map<K, V> split(final CharSequence source, final Type<K> keyType, final Type<V> valueType) {
+        public <K, V> Map<K, V> split(final CharSequence source, final Type<K> keyType, final Type<V> valueType) throws IllegalArgumentException {
             N.checkArgNotNull(keyType, "keyType");
             N.checkArgNotNull(valueType, "valueType");
 
@@ -1023,8 +1038,9 @@ public final class Splitter {
          * @param <M> 
          * @param source 
          * @param output 
+         * @throws IllegalArgumentException 
          */
-        public <M extends Map<String, String>> void split(final CharSequence source, final M output) {
+        public <M extends Map<String, String>> void split(final CharSequence source, final M output) throws IllegalArgumentException {
             N.checkArgNotNull(output, "output");
 
             entrySplitter.omitEmptyStrings();
@@ -1068,8 +1084,10 @@ public final class Splitter {
          * @param keyType 
          * @param valueType 
          * @param output 
+         * @throws IllegalArgumentException 
          */
-        public <K, V, M extends Map<K, V>> void split(final CharSequence source, final Class<K> keyType, final Class<V> valueType, final M output) {
+        public <K, V, M extends Map<K, V>> void split(final CharSequence source, final Class<K> keyType, final Class<V> valueType, final M output)
+                throws IllegalArgumentException {
             N.checkArgNotNull(keyType, "keyType");
             N.checkArgNotNull(valueType, "valueType");
             N.checkArgNotNull(output, "output");
@@ -1090,8 +1108,10 @@ public final class Splitter {
          * @param keyType 
          * @param valueType 
          * @param output 
+         * @throws IllegalArgumentException 
          */
-        public <K, V, M extends Map<K, V>> void split(final CharSequence source, final Type<K> keyType, final Type<V> valueType, final M output) {
+        public <K, V, M extends Map<K, V>> void split(final CharSequence source, final Type<K> keyType, final Type<V> valueType, final M output)
+                throws IllegalArgumentException {
             N.checkArgNotNull(keyType, "keyType");
             N.checkArgNotNull(valueType, "valueType");
             N.checkArgNotNull(output, "output");

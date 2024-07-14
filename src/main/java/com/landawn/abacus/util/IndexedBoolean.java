@@ -29,24 +29,28 @@ public final class IndexedBoolean extends AbstractIndexed {
     }
 
     /**
+     * 
      *
-     * @param value
-     * @param index
-     * @return
+     * @param value 
+     * @param index 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static IndexedBoolean of(boolean value, int index) {
+    public static IndexedBoolean of(boolean value, int index) throws IllegalArgumentException {
         N.checkArgNotNegative(index, "index");
 
         return new IndexedBoolean(index, value);
     }
 
     /**
+     * 
      *
-     * @param value
-     * @param index
-     * @return
+     * @param value 
+     * @param index 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static IndexedBoolean of(boolean value, long index) {
+    public static IndexedBoolean of(boolean value, long index) throws IllegalArgumentException {
         N.checkArgNotNegative(index, "index");
 
         return new IndexedBoolean(index, value);

@@ -47,7 +47,7 @@ public class MutableIntType extends MutableType<MutableInt> {
      */
     @Override
     public String stringOf(MutableInt x) {
-        return x == null ? null : N.stringOf(x.intValue());
+        return x == null ? null : N.stringOf(x.value());
     }
 
     /**
@@ -93,7 +93,7 @@ public class MutableIntType extends MutableType<MutableInt> {
      */
     @Override
     public void set(PreparedStatement stmt, int columnIndex, MutableInt x) throws SQLException {
-        stmt.setInt(columnIndex, (x == null) ? 0 : x.intValue());
+        stmt.setInt(columnIndex, (x == null) ? 0 : x.value());
     }
 
     /**
@@ -105,7 +105,7 @@ public class MutableIntType extends MutableType<MutableInt> {
      */
     @Override
     public void set(CallableStatement stmt, String parameterName, MutableInt x) throws SQLException {
-        stmt.setInt(parameterName, (x == null) ? 0 : x.intValue());
+        stmt.setInt(parameterName, (x == null) ? 0 : x.value());
     }
 
     /**
@@ -119,7 +119,7 @@ public class MutableIntType extends MutableType<MutableInt> {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
-            appendable.append(String.valueOf(x.intValue()));
+            appendable.append(String.valueOf(x.value()));
         }
     }
 
@@ -135,7 +135,7 @@ public class MutableIntType extends MutableType<MutableInt> {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
-            writer.writeInt(x.intValue());
+            writer.writeInt(x.value());
         }
     }
 }

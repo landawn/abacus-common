@@ -64,13 +64,15 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
     }
 
     /**
+     * 
      *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return
+     * @param a 
+     * @param fromIndex 
+     * @param toIndex 
+     * @return 
+     * @throws IndexOutOfBoundsException 
      */
-    public static IntIterator of(final int[] a, final int fromIndex, final int toIndex) {
+    public static IntIterator of(final int[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
         if (fromIndex == toIndex) {
@@ -109,10 +111,11 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
     /**
      * Lazy evaluation.
      *
-     * @param iteratorSupplier
-     * @return
+     * @param iteratorSupplier 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static IntIterator defer(final Supplier<? extends IntIterator> iteratorSupplier) {
+    public static IntIterator defer(final Supplier<? extends IntIterator> iteratorSupplier) throws IllegalArgumentException {
         N.checkArgNotNull(iteratorSupplier, "iteratorSupplier");
 
         return new IntIterator() {
@@ -149,10 +152,11 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
     /**
      * Returns an infinite {@code IntIterator}.
      *
-     * @param supplier
-     * @return
+     * @param supplier 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static IntIterator generate(final IntSupplier supplier) {
+    public static IntIterator generate(final IntSupplier supplier) throws IllegalArgumentException {
         N.checkArgNotNull(supplier);
 
         return new IntIterator() {
@@ -169,12 +173,14 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
     }
 
     /**
+     * 
      *
-     * @param hasNext
-     * @param supplier
-     * @return
+     * @param hasNext 
+     * @param supplier 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static IntIterator generate(final BooleanSupplier hasNext, final IntSupplier supplier) {
+    public static IntIterator generate(final BooleanSupplier hasNext, final IntSupplier supplier) throws IllegalArgumentException {
         N.checkArgNotNull(hasNext);
         N.checkArgNotNull(supplier);
 
@@ -214,12 +220,13 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
     public abstract int nextInt();
 
     /**
+     * 
      *
-     *
-     * @param n
-     * @return
+     * @param n 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public IntIterator skip(final long n) {
+    public IntIterator skip(final long n) throws IllegalArgumentException {
         N.checkArgNotNegative(n, "n");
 
         if (n <= 0) {
@@ -262,12 +269,13 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
     }
 
     /**
+     * 
      *
-     *
-     * @param count
-     * @return
+     * @param count 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public IntIterator limit(final long count) {
+    public IntIterator limit(final long count) throws IllegalArgumentException {
         N.checkArgNotNegative(count, "count");
 
         if (count == 0) {
@@ -297,12 +305,13 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
     }
 
     /**
+     * 
      *
-     *
-     * @param predicate
-     * @return
+     * @param predicate 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public IntIterator filter(final IntPredicate predicate) {
+    public IntIterator filter(final IntPredicate predicate) throws IllegalArgumentException {
         N.checkArgNotNull(predicate, "predicate");
 
         final IntIterator iter = this;
@@ -447,12 +456,13 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
     /**
      * For each remaining.
      *
-     * @param action
-     * @deprecated
+     * @param action 
+     * @throws IllegalArgumentException 
+     * @deprecated 
      */
     @Override
     @Deprecated
-    public void forEachRemaining(java.util.function.Consumer<? super Integer> action) {
+    public void forEachRemaining(java.util.function.Consumer<? super Integer> action) throws IllegalArgumentException {
         super.forEachRemaining(action);
     }
 
@@ -471,12 +481,14 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
     }
 
     /**
+     * 
      *
-     * @param <E>
-     * @param action
+     * @param <E> 
+     * @param action 
+     * @throws IllegalArgumentException 
      * @throws E the e
      */
-    public <E extends Exception> void foreachIndexed(Throwables.IndexedIntConsumer<E> action) throws E {
+    public <E extends Exception> void foreachIndexed(Throwables.IndexedIntConsumer<E> action) throws IllegalArgumentException, E {
         N.checkArgNotNull(action);
 
         int idx = 0;

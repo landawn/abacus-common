@@ -70,8 +70,9 @@ public class AsyncExecutor {
      * @param maxThreadPoolSize 
      * @param keepAliveTime 
      * @param unit 
+     * @throws IllegalArgumentException 
      */
-    public AsyncExecutor(int coreThreadPoolSize, int maxThreadPoolSize, long keepAliveTime, TimeUnit unit) {
+    public AsyncExecutor(int coreThreadPoolSize, int maxThreadPoolSize, long keepAliveTime, TimeUnit unit) throws IllegalArgumentException {
         N.checkArgNotNegative(coreThreadPoolSize, "coreThreadPoolSize");
         N.checkArgNotNegative(maxThreadPoolSize, "maxThreadPoolSize");
         N.checkArgNotNegative(keepAliveTime, "keepAliveTime");

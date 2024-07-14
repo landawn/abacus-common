@@ -48,7 +48,6 @@ import com.landawn.abacus.util.ImmutableSet;
 import com.landawn.abacus.util.Indexed;
 import com.landawn.abacus.util.InternalUtil;
 import com.landawn.abacus.util.ListMultimap;
-import com.landawn.abacus.util.LongMultiset;
 import com.landawn.abacus.util.Multimap;
 import com.landawn.abacus.util.Multiset;
 import com.landawn.abacus.util.N;
@@ -265,8 +264,6 @@ public final class TypeFactory {
             classes.add(com.landawn.abacus.type.XMLGregorianCalendarType.class);
             classes.add(com.landawn.abacus.type.XMLType.class);
             classes.add(com.landawn.abacus.type.MultisetType.class);
-            classes.add(com.landawn.abacus.type.LongMultisetType.class);
-            classes.add(com.landawn.abacus.type.ListMultimapType.class);
             classes.add(com.landawn.abacus.type.SetMultimapType.class);
             classes.add(com.landawn.abacus.type.MultimapType.class);
 
@@ -386,7 +383,7 @@ public final class TypeFactory {
         }
 
         for (Type<?> type : typePool.values()) {
-            if (typeClassMultiset.get(type.clazz()) > 1 && !builtinType.contains(type.getClass())) {
+            if (typeClassMultiset.getCount(type.clazz()) > 1 && !builtinType.contains(type.getClass())) {
                 if (type.getClass().getPackage() == null || !type.getClass().getPackageName().startsWith("com.landawn.abacus.type")) {
                     logger.info("More than one types are defined for class: " + getClassName(type.clazz()) + ". Ignore type: " + type.name());
                 }
@@ -558,21 +555,6 @@ public final class TypeFactory {
                         type = new MultisetType(ObjectType.OBJECT);
                     } else {
                         type = new MultisetType(typeParameters[0]);
-                    }
-
-                } else if (LongMultiset.class.isAssignableFrom(cls)) {
-                    if (typeParameters.length > 1) {
-                        throw new IllegalArgumentException(
-                                "IncorrecT type parameters: " + typeName + ". LongMultiset Type can only have zero or one type parameter.");
-                    }
-                    if (parameters.length > 0) {
-                        throw new IllegalArgumentException("Incorrect parameters: " + typeName + ". LongMultiset Type can only have zero parameter.");
-                    }
-
-                    if (typeParameters.length == 0) {
-                        type = new LongMultisetType(ObjectType.OBJECT);
-                    } else {
-                        type = new LongMultisetType(typeParameters[0]);
                     }
 
                 } else if (ListMultimap.class.isAssignableFrom(cls)) {
@@ -1022,9 +1004,10 @@ public final class TypeFactory {
      * @param <T>
      * @param cls
      * @return
+     * @throws IllegalArgumentException
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    public static <T> Type<T> getType(final Class<?> cls) {
+    public static <T> Type<T> getType(final Class<?> cls) throws IllegalArgumentException {
         N.checkArgNotNull(cls, "cls");
 
         Type type = classTypePool.get(cls);
@@ -1091,8 +1074,9 @@ public final class TypeFactory {
      * @param <T>
      * @param typeName
      * @return
+     * @throws IllegalArgumentException
      */
-    public static <T> Type<T> getType(String typeName) {
+    public static <T> Type<T> getType(String typeName) throws IllegalArgumentException {
         N.checkArgNotNull(typeName, "typeName");
 
         return getType(null, typeName);
@@ -1100,13 +1084,15 @@ public final class TypeFactory {
 
     /**
      *
+     *
      * @param <T>
      * @param targetClass
      * @param toStringFunc
      * @param fromStringFunc
+     * @throws IllegalArgumentException
      */
     public static <T> void registerType(final Class<T> targetClass, final BiFunction<T, JSONParser, String> toStringFunc,
-            final BiFunction<String, JSONParser, T> fromStringFunc) {
+            final BiFunction<String, JSONParser, T> fromStringFunc) throws IllegalArgumentException {
         N.checkArgNotNull(targetClass, "targetClass");
         N.checkArgNotNull(toStringFunc, "toStringFunc");
         N.checkArgNotNull(fromStringFunc, "fromStringFunc");
@@ -1131,12 +1117,15 @@ public final class TypeFactory {
 
     /**
      *
+     *
      * @param <T>
      * @param cls
      * @param toStringFunc
      * @param fromStringFunc
+     * @throws IllegalArgumentException
      */
-    public static <T> void registerType(final Class<T> cls, final Function<T, String> toStringFunc, final Function<String, T> fromStringFunc) {
+    public static <T> void registerType(final Class<T> cls, final Function<T, String> toStringFunc, final Function<String, T> fromStringFunc)
+            throws IllegalArgumentException {
         N.checkArgNotNull(cls, "cls");
         N.checkArgNotNull(toStringFunc, "toStringFunc");
         N.checkArgNotNull(fromStringFunc, "fromStringFunc");
@@ -1165,8 +1154,9 @@ public final class TypeFactory {
      * @param <T>
      * @param cls
      * @param type
+     * @throws IllegalArgumentException
      */
-    public static <T> void registerType(final Class<T> cls, final Type<T> type) {
+    public static <T> void registerType(final Class<T> cls, final Type<T> type) throws IllegalArgumentException {
         N.checkArgNotNull(cls, "cls");
         N.checkArgNotNull(type, "type");
 
@@ -1181,14 +1171,16 @@ public final class TypeFactory {
 
     /**
      *
+     *
      * @param <T>
      * @param typeName
      * @param targetClass
      * @param toStringFunc
      * @param fromStringFunc
+     * @throws IllegalArgumentException
      */
     public static <T> void registerType(final String typeName, final Class<T> targetClass, final BiFunction<T, JSONParser, String> toStringFunc,
-            final BiFunction<String, JSONParser, T> fromStringFunc) {
+            final BiFunction<String, JSONParser, T> fromStringFunc) throws IllegalArgumentException {
         N.checkArgNotNull(typeName, "typeName");
         N.checkArgNotNull(targetClass, "targetClass");
         N.checkArgNotNull(toStringFunc, "toStringFunc");
@@ -1220,14 +1212,16 @@ public final class TypeFactory {
 
     /**
      *
+     *
      * @param <T>
      * @param typeName
      * @param targetClass
      * @param toStringFunc
      * @param fromStringFunc
+     * @throws IllegalArgumentException
      */
     public static <T> void registerType(final String typeName, final Class<T> targetClass, final Function<T, String> toStringFunc,
-            final Function<String, T> fromStringFunc) {
+            final Function<String, T> fromStringFunc) throws IllegalArgumentException {
         N.checkArgNotNull(typeName, "typeName");
         N.checkArgNotNull(targetClass, "targetClass");
         N.checkArgNotNull(toStringFunc, "toStringFunc");
@@ -1259,10 +1253,12 @@ public final class TypeFactory {
 
     /**
      *
+     *
      * @param typeName
      * @param type
+     * @throws IllegalArgumentException
      */
-    public static void registerType(final String typeName, final Type<?> type) {
+    public static void registerType(final String typeName, final Type<?> type) throws IllegalArgumentException {
         N.checkArgNotNull(typeName, "typeName");
         N.checkArgNotNull(type, "type");
 
@@ -1277,9 +1273,11 @@ public final class TypeFactory {
 
     /**
      *
+     *
      * @param type
+     * @throws IllegalArgumentException
      */
-    public static void registerType(final Type<?> type) {
+    public static void registerType(final Type<?> type) throws IllegalArgumentException {
         N.checkArgNotNull(type, "type");
 
         if (typePool.containsKey(type.name())) {

@@ -79,12 +79,13 @@ public final class Sheet<R, C, V> implements Cloneable {
     }
 
     /**
+     * 
      *
-     *
-     * @param rowKeySet
-     * @param columnKeySet
+     * @param rowKeySet 
+     * @param columnKeySet 
+     * @throws IllegalArgumentException 
      */
-    public Sheet(Collection<R> rowKeySet, Collection<C> columnKeySet) {
+    public Sheet(Collection<R> rowKeySet, Collection<C> columnKeySet) throws IllegalArgumentException {
         N.checkArgument(!N.anyNull(rowKeySet), "Row key can't be null");
         N.checkArgument(!N.anyNull(columnKeySet), "Column key can't be null");
 
@@ -93,13 +94,14 @@ public final class Sheet<R, C, V> implements Cloneable {
     }
 
     /**
+     * 
      *
-     *
-     * @param rowKeySet
-     * @param columnKeySet
-     * @param rows
+     * @param rowKeySet 
+     * @param columnKeySet 
+     * @param rows 
+     * @throws IllegalArgumentException 
      */
-    public Sheet(Collection<R> rowKeySet, Collection<C> columnKeySet, Object[][] rows) {
+    public Sheet(Collection<R> rowKeySet, Collection<C> columnKeySet, Object[][] rows) throws IllegalArgumentException {
         this(rowKeySet, columnKeySet);
 
         final int rowLength = this.rowLength();
@@ -164,16 +166,19 @@ public final class Sheet<R, C, V> implements Cloneable {
     }
 
     /**
+     * 
      *
-     * @param <R>
-     * @param <C>
-     * @param <E>
-     * @param rowKeySet
-     * @param columnKeySet
-     * @param rows
-     * @return
+     * @param <R> 
+     * @param <C> 
+     * @param <E> 
+     * @param rowKeySet 
+     * @param columnKeySet 
+     * @param rows 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static <R, C, E> Sheet<R, C, E> rows(Collection<R> rowKeySet, Collection<C> columnKeySet, Collection<? extends Collection<? extends E>> rows) {
+    public static <R, C, E> Sheet<R, C, E> rows(Collection<R> rowKeySet, Collection<C> columnKeySet, Collection<? extends Collection<? extends E>> rows)
+            throws IllegalArgumentException {
         final Sheet<R, C, E> instance = new Sheet<>(rowKeySet, columnKeySet);
 
         final int rowLength = instance.rowLength();
@@ -210,16 +215,18 @@ public final class Sheet<R, C, V> implements Cloneable {
     }
 
     /**
+     * 
      *
-     * @param <R>
-     * @param <C>
-     * @param <E>
-     * @param rowKeySet
-     * @param columnKeySet
-     * @param columns
-     * @return
+     * @param <R> 
+     * @param <C> 
+     * @param <E> 
+     * @param rowKeySet 
+     * @param columnKeySet 
+     * @param columns 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static <R, C, E> Sheet<R, C, E> columns(Collection<R> rowKeySet, Collection<C> columnKeySet, Object[][] columns) {
+    public static <R, C, E> Sheet<R, C, E> columns(Collection<R> rowKeySet, Collection<C> columnKeySet, Object[][] columns) throws IllegalArgumentException {
         final Sheet<R, C, E> instance = new Sheet<>(rowKeySet, columnKeySet);
 
         final int rowLength = instance.rowLength();
@@ -247,16 +254,19 @@ public final class Sheet<R, C, V> implements Cloneable {
     }
 
     /**
+     * 
      *
-     * @param <R>
-     * @param <C>
-     * @param <E>
-     * @param rowKeySet
-     * @param columnKeySet
-     * @param columns
-     * @return
+     * @param <R> 
+     * @param <C> 
+     * @param <E> 
+     * @param rowKeySet 
+     * @param columnKeySet 
+     * @param columns 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static <R, C, E> Sheet<R, C, E> columns(Collection<R> rowKeySet, Collection<C> columnKeySet, Collection<? extends Collection<? extends E>> columns) {
+    public static <R, C, E> Sheet<R, C, E> columns(Collection<R> rowKeySet, Collection<C> columnKeySet, Collection<? extends Collection<? extends E>> columns)
+            throws IllegalArgumentException {
         final Sheet<R, C, E> instance = new Sheet<>(rowKeySet, columnKeySet);
 
         final int rowLength = instance.rowLength();
@@ -1623,6 +1633,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      *
      * @return
      */
+    @Beta
     @Override
     public Sheet<R, C, V> clone() { //NOSONAR
         return clone(this._isFrozen);
@@ -1912,12 +1923,14 @@ public final class Sheet<R, C, V> implements Cloneable {
     }
 
     /**
+     * 
      *
-     * @param fromRowIndex
-     * @param toRowIndex
+     * @param fromRowIndex 
+     * @param toRowIndex 
      * @return a stream of Cells based on the order of row.
+     * @throws IndexOutOfBoundsException 
      */
-    public Stream<Sheet.Cell<R, C, V>> cellsH(final int fromRowIndex, final int toRowIndex) {
+    public Stream<Sheet.Cell<R, C, V>> cellsH(final int fromRowIndex, final int toRowIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromRowIndex, toRowIndex, rowLength());
 
         if (rowLength() == 0 || columnLength() == 0) {
@@ -1951,7 +1964,7 @@ public final class Sheet<R, C, V> implements Cloneable {
             }
 
             @Override
-            public void advance(long n) {
+            public void advance(long n) throws IllegalArgumentException {
                 N.checkArgNotNegative(n, "n");
 
                 cursor = n < toIndex - cursor ? cursor + n : toIndex;
@@ -1982,13 +1995,15 @@ public final class Sheet<R, C, V> implements Cloneable {
     }
 
     /**
+     * 
      *
-     * @param fromColumnIndex
-     * @param toColumnIndex
+     * @param fromColumnIndex 
+     * @param toColumnIndex 
      * @return a stream of Cells based on the order of column.
+     * @throws IndexOutOfBoundsException 
      */
 
-    public Stream<Sheet.Cell<R, C, V>> cellsV(final int fromColumnIndex, final int toColumnIndex) {
+    public Stream<Sheet.Cell<R, C, V>> cellsV(final int fromColumnIndex, final int toColumnIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromColumnIndex, toColumnIndex, columnLength());
 
         if (rowLength() == 0 || columnLength() == 0) {
@@ -2022,7 +2037,7 @@ public final class Sheet<R, C, V> implements Cloneable {
             }
 
             @Override
-            public void advance(long n) {
+            public void advance(long n) throws IllegalArgumentException {
                 N.checkArgNotNegative(n, "n");
 
                 cursor = n < toIndex - cursor ? cursor + n : toIndex;
@@ -2044,12 +2059,14 @@ public final class Sheet<R, C, V> implements Cloneable {
     }
 
     /**
+     * 
      *
-     * @param fromRowIndex
-     * @param toRowIndex
+     * @param fromRowIndex 
+     * @param toRowIndex 
      * @return a stream based on the order of row.
+     * @throws IndexOutOfBoundsException 
      */
-    public Stream<Stream<Cell<R, C, V>>> cellsR(final int fromRowIndex, final int toRowIndex) {
+    public Stream<Stream<Cell<R, C, V>>> cellsR(final int fromRowIndex, final int toRowIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromRowIndex, toRowIndex, rowLength());
 
         if (rowLength() == 0 || columnLength() == 0) {
@@ -2095,7 +2112,7 @@ public final class Sheet<R, C, V> implements Cloneable {
                     }
 
                     @Override
-                    public void advance(long n) {
+                    public void advance(long n) throws IllegalArgumentException {
                         N.checkArgNotNegative(n, "n");
 
                         columnIndex = n < columnLength - columnIndex ? columnIndex + (int) n : columnLength;
@@ -2109,7 +2126,7 @@ public final class Sheet<R, C, V> implements Cloneable {
             }
 
             @Override
-            public void advance(long n) {
+            public void advance(long n) throws IllegalArgumentException {
                 N.checkArgNotNegative(n, "n");
 
                 rowIndex = n < toRowIndex - rowIndex ? rowIndex + (int) n : toRowIndex;
@@ -2131,12 +2148,14 @@ public final class Sheet<R, C, V> implements Cloneable {
     }
 
     /**
+     * 
      *
-     * @param fromColumnIndex
-     * @param toColumnIndex
+     * @param fromColumnIndex 
+     * @param toColumnIndex 
      * @return a stream based on the order of column.
+     * @throws IndexOutOfBoundsException 
      */
-    public Stream<Stream<Cell<R, C, V>>> cellsC(final int fromColumnIndex, final int toColumnIndex) {
+    public Stream<Stream<Cell<R, C, V>>> cellsC(final int fromColumnIndex, final int toColumnIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromColumnIndex, toColumnIndex, columnLength());
 
         if (rowLength() == 0 || columnLength() == 0) {
@@ -2173,7 +2192,7 @@ public final class Sheet<R, C, V> implements Cloneable {
             }
 
             @Override
-            public void advance(long n) {
+            public void advance(long n) throws IllegalArgumentException {
                 N.checkArgNotNegative(n, "n");
 
                 columnIndex = n < toColumnIndex - columnIndex ? columnIndex + (int) n : toColumnIndex;
@@ -2206,12 +2225,14 @@ public final class Sheet<R, C, V> implements Cloneable {
     }
 
     /**
+     * 
      *
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @return
+     * @param fromRowIndex 
+     * @param toRowIndex 
+     * @return 
+     * @throws IndexOutOfBoundsException 
      */
-    public Stream<IntPair> pointsH(int fromRowIndex, int toRowIndex) {
+    public Stream<IntPair> pointsH(int fromRowIndex, int toRowIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromRowIndex, toRowIndex, rowLength());
 
         final int columnLength = columnLength();
@@ -2239,12 +2260,14 @@ public final class Sheet<R, C, V> implements Cloneable {
     }
 
     /**
+     * 
      *
-     * @param fromColumnIndex
-     * @param toColumnIndex
-     * @return
+     * @param fromColumnIndex 
+     * @param toColumnIndex 
+     * @return 
+     * @throws IndexOutOfBoundsException 
      */
-    public Stream<IntPair> pointsV(int fromColumnIndex, int toColumnIndex) {
+    public Stream<IntPair> pointsV(int fromColumnIndex, int toColumnIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromColumnIndex, toColumnIndex, columnLength());
 
         final int rowLength = rowLength();
@@ -2263,12 +2286,14 @@ public final class Sheet<R, C, V> implements Cloneable {
     }
 
     /**
+     * 
      *
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @return
+     * @param fromRowIndex 
+     * @param toRowIndex 
+     * @return 
+     * @throws IndexOutOfBoundsException 
      */
-    public Stream<Stream<IntPair>> pointsR(int fromRowIndex, int toRowIndex) {
+    public Stream<Stream<IntPair>> pointsR(int fromRowIndex, int toRowIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromRowIndex, toRowIndex, rowLength());
 
         final int columnLength = columnLength();
@@ -2287,12 +2312,14 @@ public final class Sheet<R, C, V> implements Cloneable {
     }
 
     /**
+     * 
      *
-     * @param fromColumnIndex
-     * @param toColumnIndex
-     * @return
+     * @param fromColumnIndex 
+     * @param toColumnIndex 
+     * @return 
+     * @throws IndexOutOfBoundsException 
      */
-    public Stream<Stream<IntPair>> pointsC(int fromColumnIndex, int toColumnIndex) {
+    public Stream<Stream<IntPair>> pointsC(int fromColumnIndex, int toColumnIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromColumnIndex, toColumnIndex, columnLength());
 
         final int rowLength = rowLength();
@@ -2319,12 +2346,14 @@ public final class Sheet<R, C, V> implements Cloneable {
     }
 
     /**
+     * 
      *
-     * @param fromRowIndex
-     * @param toRowIndex
+     * @param fromRowIndex 
+     * @param toRowIndex 
      * @return a stream based on the order of row.
+     * @throws IndexOutOfBoundsException 
      */
-    public Stream<V> streamH(final int fromRowIndex, final int toRowIndex) {
+    public Stream<V> streamH(final int fromRowIndex, final int toRowIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromRowIndex, toRowIndex, rowLength());
 
         if (rowLength() == 0 || columnLength() == 0) {
@@ -2356,7 +2385,7 @@ public final class Sheet<R, C, V> implements Cloneable {
             }
 
             @Override
-            public void advance(long n) {
+            public void advance(long n) throws IllegalArgumentException {
                 N.checkArgNotNegative(n, "n");
 
                 cursor = n < toIndex - cursor ? cursor + n : toIndex;
@@ -2387,12 +2416,14 @@ public final class Sheet<R, C, V> implements Cloneable {
     }
 
     /**
+     * 
      *
-     * @param fromColumnIndex
-     * @param toColumnIndex
+     * @param fromColumnIndex 
+     * @param toColumnIndex 
      * @return a stream based on the order of column.
+     * @throws IndexOutOfBoundsException 
      */
-    public Stream<V> streamV(final int fromColumnIndex, final int toColumnIndex) {
+    public Stream<V> streamV(final int fromColumnIndex, final int toColumnIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromColumnIndex, toColumnIndex, columnLength());
 
         if (rowLength() == 0 || columnLength() == 0) {
@@ -2424,7 +2455,7 @@ public final class Sheet<R, C, V> implements Cloneable {
             }
 
             @Override
-            public void advance(long n) {
+            public void advance(long n) throws IllegalArgumentException {
                 N.checkArgNotNegative(n, "n");
 
                 cursor = n < toIndex - cursor ? cursor + n : toIndex;
@@ -2446,12 +2477,14 @@ public final class Sheet<R, C, V> implements Cloneable {
     }
 
     /**
+     * 
      *
-     * @param fromRowIndex
-     * @param toRowIndex
+     * @param fromRowIndex 
+     * @param toRowIndex 
      * @return a stream based on the order of row.
+     * @throws IndexOutOfBoundsException 
      */
-    public Stream<Stream<V>> streamR(final int fromRowIndex, final int toRowIndex) {
+    public Stream<Stream<V>> streamR(final int fromRowIndex, final int toRowIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromRowIndex, toRowIndex, rowLength());
 
         if (rowLength() == 0 || columnLength() == 0) {
@@ -2498,7 +2531,7 @@ public final class Sheet<R, C, V> implements Cloneable {
                     }
 
                     @Override
-                    public void advance(long n) {
+                    public void advance(long n) throws IllegalArgumentException {
                         N.checkArgNotNegative(n, "n");
 
                         cursor2 = n < toIndex2 - cursor2 ? cursor2 + (int) n : toIndex2;
@@ -2512,7 +2545,7 @@ public final class Sheet<R, C, V> implements Cloneable {
             }
 
             @Override
-            public void advance(long n) {
+            public void advance(long n) throws IllegalArgumentException {
                 N.checkArgNotNegative(n, "n");
 
                 cursor = n < toIndex - cursor ? cursor + (int) n : toIndex;
@@ -2534,12 +2567,14 @@ public final class Sheet<R, C, V> implements Cloneable {
     }
 
     /**
+     * 
      *
-     * @param fromColumnIndex
-     * @param toColumnIndex
+     * @param fromColumnIndex 
+     * @param toColumnIndex 
      * @return a stream based on the order of column.
+     * @throws IndexOutOfBoundsException 
      */
-    public Stream<Stream<V>> streamC(final int fromColumnIndex, final int toColumnIndex) {
+    public Stream<Stream<V>> streamC(final int fromColumnIndex, final int toColumnIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromColumnIndex, toColumnIndex, columnLength());
 
         if (rowLength() == 0 || columnLength() == 0) {
@@ -2570,7 +2605,7 @@ public final class Sheet<R, C, V> implements Cloneable {
             }
 
             @Override
-            public void advance(long n) {
+            public void advance(long n) throws IllegalArgumentException {
                 N.checkArgNotNegative(n, "n");
 
                 cursor = n < toIndex - cursor ? cursor + (int) n : toIndex;
@@ -2592,12 +2627,14 @@ public final class Sheet<R, C, V> implements Cloneable {
     }
 
     /**
+     * 
      *
-     * @param fromRowIndex
-     * @param toRowIndex
+     * @param fromRowIndex 
+     * @param toRowIndex 
      * @return a stream based on the order of row.
+     * @throws IndexOutOfBoundsException 
      */
-    public Stream<Pair<R, Stream<V>>> rows(final int fromRowIndex, final int toRowIndex) {
+    public Stream<Pair<R, Stream<V>>> rows(final int fromRowIndex, final int toRowIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromRowIndex, toRowIndex, rowLength());
 
         if (rowLength() == 0 || columnLength() == 0) {
@@ -2646,7 +2683,7 @@ public final class Sheet<R, C, V> implements Cloneable {
                     }
 
                     @Override
-                    public void advance(long n) {
+                    public void advance(long n) throws IllegalArgumentException {
                         N.checkArgNotNegative(n, "n");
 
                         cursor2 = n < toIndex2 - cursor2 ? cursor2 + (int) n : toIndex2;
@@ -2662,7 +2699,7 @@ public final class Sheet<R, C, V> implements Cloneable {
             }
 
             @Override
-            public void advance(long n) {
+            public void advance(long n) throws IllegalArgumentException {
                 N.checkArgNotNegative(n, "n");
 
                 cursor = n < toIndex - cursor ? cursor + (int) n : toIndex;
@@ -2684,12 +2721,14 @@ public final class Sheet<R, C, V> implements Cloneable {
     }
 
     /**
+     * 
      *
-     * @param fromColumnIndex
-     * @param toColumnIndex
+     * @param fromColumnIndex 
+     * @param toColumnIndex 
      * @return a stream based on the order of column.
+     * @throws IndexOutOfBoundsException 
      */
-    public Stream<Pair<C, Stream<V>>> columns(final int fromColumnIndex, final int toColumnIndex) {
+    public Stream<Pair<C, Stream<V>>> columns(final int fromColumnIndex, final int toColumnIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromColumnIndex, toColumnIndex, columnLength());
 
         if (rowLength() == 0 || columnLength() == 0) {
@@ -2722,7 +2761,7 @@ public final class Sheet<R, C, V> implements Cloneable {
             }
 
             @Override
-            public void advance(long n) {
+            public void advance(long n) throws IllegalArgumentException {
                 N.checkArgNotNegative(n, "n");
 
                 cursor = n < toIndex - cursor ? cursor + (int) n : toIndex;
@@ -2938,11 +2977,11 @@ public final class Sheet<R, C, V> implements Cloneable {
     }
 
     /**
-     * 
      *
-     * @param <X> 
-     * @param action 
-     * @return 
+     *
+     * @param <X>
+     * @param action
+     * @return
      * @throws X the x
      */
     public <X extends Exception> OrElse acceptIfNotEmpty(Throwables.Consumer<? super Sheet<R, C, V>, X> action) throws X {
@@ -2984,14 +3023,16 @@ public final class Sheet<R, C, V> implements Cloneable {
     }
 
     /**
+     * 
      *
-     *
-     * @param rowKeySet
-     * @param columnKeySet
-     * @param output
+     * @param rowKeySet 
+     * @param columnKeySet 
+     * @param output 
+     * @throws IllegalArgumentException 
      * @throws UncheckedIOException the unchecked IO exception
      */
-    public void println(final Collection<R> rowKeySet, final Collection<C> columnKeySet, final Writer output) throws UncheckedIOException {
+    public void println(final Collection<R> rowKeySet, final Collection<C> columnKeySet, final Writer output)
+            throws IllegalArgumentException, UncheckedIOException {
         if (N.notEmpty(rowKeySet) && !this._rowKeySet.containsAll(rowKeySet)) {
             throw new IllegalArgumentException(
                     "Row keys: " + N.difference(rowKeySet, this._rowKeySet) + " are not included in this sheet row keys: " + this._rowKeySet);
@@ -3002,7 +3043,7 @@ public final class Sheet<R, C, V> implements Cloneable {
                     "Column keys: " + N.difference(columnKeySet, this._columnKeySet) + " are not included in this sheet Column keys: " + this._columnKeySet);
         }
 
-        N.checkArgNotNull(output, "outputWriter");
+        N.checkArgNotNull(output, "output");
 
         boolean isBufferedWriter = output instanceof BufferedWriter || output instanceof java.io.BufferedWriter;
         final Writer bw = isBufferedWriter ? output : Objectory.createBufferedWriter(output);

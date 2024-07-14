@@ -33,14 +33,7 @@ package com.landawn.abacus.util;
  * @see Byte
  * @since 2.1
  */
-public final class MutableByte extends Number implements Comparable<MutableByte>, Mutable {
-
-    /**
-     * Required for serialization support.
-     *
-     * @see java.io.Serializable
-     */
-    private static final long serialVersionUID = -1585823265L;
+public final class MutableByte implements Comparable<MutableByte>, Mutable { // Should not extends Number because Number is immutable
 
     private byte value;
 
@@ -69,9 +62,9 @@ public final class MutableByte extends Number implements Comparable<MutableByte>
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public byte value() {
         return value;
@@ -257,58 +250,6 @@ public final class MutableByte extends Number implements Comparable<MutableByte>
      */
     public byte addAndGet(final byte delta) {
         return value += delta;
-    }
-
-    //-----------------------------------------------------------------------
-    // shortValue relies on Number implementation
-    /**
-     * Returns the value of this MutableByte as a byte.
-     *
-     * @return
-     */
-    @Override
-    public byte byteValue() {
-        return value;
-    }
-
-    /**
-     * Returns the value of this MutableByte as an int.
-     *
-     * @return
-     */
-    @Override
-    public int intValue() {
-        return value;
-    }
-
-    /**
-     * Returns the value of this MutableByte as a long.
-     *
-     * @return
-     */
-    @Override
-    public long longValue() {
-        return value;
-    }
-
-    /**
-     * Returns the value of this MutableByte as a float.
-     *
-     * @return
-     */
-    @Override
-    public float floatValue() {
-        return value;
-    }
-
-    /**
-     * Returns the value of this MutableByte as a double.
-     *
-     * @return
-     */
-    @Override
-    public double doubleValue() {
-        return value;
     }
 
     //-----------------------------------------------------------------------

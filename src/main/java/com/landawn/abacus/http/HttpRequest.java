@@ -593,16 +593,17 @@ public final class HttpRequest {
     }
 
     /**
+     * 
      *
-     *
-     * @param <T>
-     * @param httpMethod
-     * @param resultClass
-     * @return
+     * @param <T> 
+     * @param httpMethod 
+     * @param resultClass 
+     * @return 
+     * @throws IllegalArgumentException 
      * @throws UncheckedIOException the unchecked IO exception
      */
     @Beta
-    public <T> T execute(final HttpMethod httpMethod, final Class<T> resultClass) throws UncheckedIOException {
+    public <T> T execute(final HttpMethod httpMethod, final Class<T> resultClass) throws IllegalArgumentException, UncheckedIOException {
         N.checkArgNotNull(httpMethod, HTTP_METHOD_STR);
 
         try {
@@ -613,14 +614,15 @@ public final class HttpRequest {
     }
 
     /**
+     * 
      *
-     *
-     * @param httpMethod
-     * @param output
-     * @throws UncheckedIOException
+     * @param httpMethod 
+     * @param output 
+     * @throws IllegalArgumentException 
+     * @throws UncheckedIOException 
      */
     @Beta
-    public void execute(final HttpMethod httpMethod, final File output) throws UncheckedIOException {
+    public void execute(final HttpMethod httpMethod, final File output) throws IllegalArgumentException, UncheckedIOException {
         N.checkArgNotNull(httpMethod, HTTP_METHOD_STR);
 
         try {
@@ -631,14 +633,15 @@ public final class HttpRequest {
     }
 
     /**
+     * 
      *
-     *
-     * @param httpMethod
-     * @param output
-     * @throws UncheckedIOException
+     * @param httpMethod 
+     * @param output 
+     * @throws IllegalArgumentException 
+     * @throws UncheckedIOException 
      */
     @Beta
-    public void execute(final HttpMethod httpMethod, final OutputStream output) throws UncheckedIOException {
+    public void execute(final HttpMethod httpMethod, final OutputStream output) throws IllegalArgumentException, UncheckedIOException {
         N.checkArgNotNull(httpMethod, HTTP_METHOD_STR);
 
         try {
@@ -649,14 +652,15 @@ public final class HttpRequest {
     }
 
     /**
+     * 
      *
-     *
-     * @param httpMethod
-     * @param output
-     * @throws UncheckedIOException
+     * @param httpMethod 
+     * @param output 
+     * @throws IllegalArgumentException 
+     * @throws UncheckedIOException 
      */
     @Beta
-    public void execute(final HttpMethod httpMethod, final Writer output) throws UncheckedIOException {
+    public void execute(final HttpMethod httpMethod, final Writer output) throws IllegalArgumentException, UncheckedIOException {
         N.checkArgNotNull(httpMethod, HTTP_METHOD_STR);
 
         try {
@@ -933,15 +937,16 @@ public final class HttpRequest {
     }
 
     /**
+     * 
      *
-     *
-     * @param <T>
-     * @param httpMethod
-     * @param resultClass
-     * @return
+     * @param <T> 
+     * @param httpMethod 
+     * @param resultClass 
+     * @return 
+     * @throws IllegalArgumentException 
      */
     @Beta
-    public <T> ContinuableFuture<T> asyncExecute(final HttpMethod httpMethod, final Class<T> resultClass) {
+    public <T> ContinuableFuture<T> asyncExecute(final HttpMethod httpMethod, final Class<T> resultClass) throws IllegalArgumentException {
         N.checkArgNotNull(httpMethod, HTTP_METHOD_STR);
 
         final Callable<T> cmd = () -> execute(httpMethod, resultClass);
@@ -950,16 +955,18 @@ public final class HttpRequest {
     }
 
     /**
+     * 
      *
-     *
-     * @param <T>
-     * @param httpMethod
-     * @param resultClass
-     * @param executor
-     * @return
+     * @param <T> 
+     * @param httpMethod 
+     * @param resultClass 
+     * @param executor 
+     * @return 
+     * @throws IllegalArgumentException 
      */
     @Beta
-    public <T> ContinuableFuture<T> asyncExecute(final HttpMethod httpMethod, final Class<T> resultClass, final Executor executor) {
+    public <T> ContinuableFuture<T> asyncExecute(final HttpMethod httpMethod, final Class<T> resultClass, final Executor executor)
+            throws IllegalArgumentException {
         N.checkArgNotNull(httpMethod, HTTP_METHOD_STR);
 
         final Callable<T> cmd = () -> execute(httpMethod, resultClass);

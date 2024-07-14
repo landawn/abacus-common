@@ -24,7 +24,6 @@ import java.math.BigInteger;
 import java.nio.charset.Charset;
 import java.text.Normalizer;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Base64.Decoder;
 import java.util.Base64.Encoder;
 import java.util.Collection;
@@ -333,6 +332,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
     public static boolean isBlank(final CharSequence cs) {
         if (isEmpty(cs)) {
             return true;
+        }
+
+        if (cs instanceof String) {
+            return ((String) cs).isBlank();
         }
 
         for (int i = 0, len = cs.length(); i < len; i++) {
@@ -1299,9 +1302,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param size the int size of new String.
      * @param padChar the character to pad the new String with
      * @return centered String
+     * @throws IllegalArgumentException
      * @since 2.0
      */
-    public static String center(String str, final int size, final char padChar) {
+    public static String center(String str, final int size, final char padChar) throws IllegalArgumentException {
         N.checkArgNotNegative(size, "size");
 
         if (str == null) {
@@ -1339,8 +1343,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param minLength the minimum size of new String.
      * @param padStr the String to pad the new String with, must not be null or empty
      * @return centered String
+     * @throws IllegalArgumentException
      */
-    public static String center(String str, final int minLength, String padStr) {
+    public static String center(String str, final int minLength, String padStr) throws IllegalArgumentException {
         N.checkArgNotNegative(minLength, "minLength");
         // N.checkArgNotEmpty(padStr, "padStr");
 
@@ -1530,12 +1535,13 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
     /**
      *
+     *
      * @param ch
      * @param n
      * @return
+     * @throws IllegalArgumentException
      */
-    @SuppressWarnings("deprecation")
-    public static String repeat(final char ch, final int n) {
+    public static String repeat(final char ch, final int n) throws IllegalArgumentException {
         N.checkArgNotNegative(n, "n");
 
         if (n == 0) {
@@ -1544,27 +1550,29 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return String.valueOf(ch);
         }
 
-        if (n < 16) {
-            final char[] array = new char[n];
-            Arrays.fill(array, ch);
+        //    if (n < 16) {
+        //        final char[] array = new char[n];
+        //        Arrays.fill(array, ch);
+        //
+        //        return InternalUtil.newString(array, true);
+        //    } else {
+        //        final char[] array = new char[n];
+        //        array[0] = ch;
+        //
+        //        int cnt = 1;
+        //
+        //        for (; cnt < n - cnt; cnt <<= 1) {
+        //            N.copy(array, 0, array, cnt, cnt);
+        //        }
+        //
+        //        if (cnt < n) {
+        //            N.copy(array, 0, array, cnt, n - cnt);
+        //        }
+        //
+        //        return InternalUtil.newString(array, true);
+        //    }
 
-            return InternalUtil.newString(array, true);
-        } else {
-            final char[] array = new char[n];
-            array[0] = ch;
-
-            int cnt = 1;
-
-            for (; cnt < n - cnt; cnt <<= 1) {
-                N.copy(array, 0, array, cnt, cnt);
-            }
-
-            if (cnt < n) {
-                N.copy(array, 0, array, cnt, n - cnt);
-            }
-
-            return InternalUtil.newString(array, true);
-        }
+        return String.valueOf(ch).repeat(n);
     }
 
     /**
@@ -1573,23 +1581,29 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param n
      * @param delimiter
      * @return
+     * @throws IllegalArgumentException
      */
-    public static String repeat(final char ch, final int n, final char delimiter) {
+    public static String repeat(final char ch, final int n, final char delimiter) throws IllegalArgumentException {
+        N.checkArgNotNegative(n, "n");
+
         return repeat(String.valueOf(ch), n, String.valueOf(delimiter));
     }
 
     /**
      *
      * @param str
-     * @param repeat
+     * @param n
      * @return
+     * @throws IllegalArgumentException
      */
-    public static String repeat(final String str, final int repeat) {
-        if (N.len(str) == 1) {
-            return repeat(str.charAt(0), repeat);
+    public static String repeat(final String str, final int n) throws IllegalArgumentException {
+        N.checkArgNotNegative(n, "n");
+
+        if (N.isEmpty(str)) {
+            return EMPTY_STRING;
         }
 
-        return repeat(str, repeat, EMPTY_STRING);
+        return str.repeat(n);
     }
 
     /**
@@ -1598,12 +1612,18 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param n
      * @param delimiter
      * @return
+     * @throws IllegalArgumentException
      */
-    public static String repeat(final String str, final int n, final String delimiter) {
+    public static String repeat(final String str, final int n, final String delimiter) throws IllegalArgumentException {
+        if (N.isEmpty(delimiter)) {
+            return repeat(str, n);
+        }
+
         return repeat(str, n, delimiter, EMPTY_STRING, EMPTY_STRING);
     }
 
     /**
+     *
      *
      * @param str
      * @param n
@@ -1611,9 +1631,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param prefix
      * @param suffix
      * @return
+     * @throws IllegalArgumentException
      */
     @SuppressWarnings("deprecation")
-    public static String repeat(String str, final int n, String delimiter, String prefix, String suffix) {
+    public static String repeat(String str, final int n, String delimiter, String prefix, String suffix) throws IllegalArgumentException {
         N.checkArgNotNegative(n, "n");
 
         str = str == null ? EMPTY_STRING : str;
@@ -1668,7 +1689,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     @MayReturnNull
     public static byte[] getBytes(final String string) {
-        return string == null ? null : string.getBytes(IOUtil.DEFAULT_CHARSET);
+        return string == null ? null : string.getBytes();
     }
 
     /**
@@ -2203,9 +2224,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param str
      * @param delimiter
      * @return the specified String if it's {@code null} or empty.
+     * @throws IllegalArgumentException
      * @see #convertWords(String, String, Collection, Function)
      */
-    public static String capitalizeFully(final String str, final String delimiter) {
+    public static String capitalizeFully(final String str, final String delimiter) throws IllegalArgumentException {
         N.checkArgNotEmpty(delimiter, "delimiter"); // NOSONAR
 
         if (str == null || str.length() == 0) {
@@ -2226,9 +2248,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param delimiter
      * @param excludedWords
      * @return the specified String if it's {@code null} or empty.
+     * @throws IllegalArgumentException
      * @see #convertWords(String, String, Collection, Function)
      */
-    public static String capitalizeFully(final String str, final String delimiter, final String... excludedWords) {
+    public static String capitalizeFully(final String str, final String delimiter, final String... excludedWords) throws IllegalArgumentException {
         N.checkArgNotEmpty(delimiter, "delimiter"); // NOSONAR
 
         if (str == null || str.length() == 0) {
@@ -2244,13 +2267,15 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
     /**
      *
+     *
      * @param str
      * @param delimiter
      * @param excludedWords
      * @return
+     * @throws IllegalArgumentException
      * @see #convertWords(String, String, Collection, Function)
      */
-    public static String capitalizeFully(final String str, final String delimiter, final Collection<String> excludedWords) {
+    public static String capitalizeFully(final String str, final String delimiter, final Collection<String> excludedWords) throws IllegalArgumentException {
         N.checkArgNotEmpty(delimiter, "delimiter"); // NOSONAR
 
         if (str == null || str.length() == 0) {
@@ -2288,8 +2313,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param delimiter
      * @param converter
      * @return the specified String if it's {@code null} or empty.
+     * @throws IllegalArgumentException
      */
-    public static String convertWords(final String str, final String delimiter, final Function<String, String> converter) {
+    public static String convertWords(final String str, final String delimiter, final Function<String, String> converter) throws IllegalArgumentException {
         N.checkArgNotEmpty(delimiter, "delimiter"); // NOSONAR
 
         if (str == null || str.length() == 0) {
@@ -2313,9 +2339,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param excludedWords
      * @param converter
      * @return
+     * @throws IllegalArgumentException
      */
     public static String convertWords(final String str, final String delimiter, final Collection<String> excludedWords,
-            final Function<String, String> converter) {
+            final Function<String, String> converter) throws IllegalArgumentException {
         N.checkArgNotEmpty(delimiter, "delimiter"); // NOSONAR
 
         if (str == null || str.length() == 0) {
@@ -2836,9 +2863,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param toIndex
      * @param replacement
      * @return
+     * @throws IndexOutOfBoundsException
      * @see #largestSubstring(String, int, int)
      */
-    public static String replace(final String str, final int fromIndex, final int toIndex, final String replacement) {
+    public static String replace(final String str, final int fromIndex, final int toIndex, final String replacement) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, N.len(str));
 
         if (N.isEmpty(str)) {
@@ -4190,7 +4218,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @since 3.5
      */
     @MayReturnNull
-    public static String truncate(final String str, final int offset, final int maxWidth) {
+    public static String truncate(final String str, final int offset, final int maxWidth) throws IllegalArgumentException {
         N.checkArgNotNegative(offset, "offset");
         N.checkArgNotNegative(maxWidth, "maxWidth");
 
@@ -4266,8 +4294,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param str
      * @param suffix
      * @return
+     * @throws IllegalArgumentException
      */
-    public static String appendIfMissing(final String str, final String suffix) {
+    public static String appendIfMissing(final String str, final String suffix) throws IllegalArgumentException {
         N.checkArgNotNull(suffix);
 
         if (str == null || str.length() == 0) {
@@ -4281,11 +4310,13 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
     /**
      *
+     *
      * @param str
      * @param suffix
      * @return
+     * @throws IllegalArgumentException
      */
-    public static String appendIfMissingIgnoreCase(final String str, final String suffix) {
+    public static String appendIfMissingIgnoreCase(final String str, final String suffix) throws IllegalArgumentException {
         N.checkArgNotNull(suffix);
 
         if (str == null || str.length() == 0) {
@@ -4303,8 +4334,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param str
      * @param prefix
      * @return
+     * @throws IllegalArgumentException
      */
-    public static String prependIfMissing(final String str, final String prefix) {
+    public static String prependIfMissing(final String str, final String prefix) throws IllegalArgumentException {
         N.checkArgNotNull(prefix);
 
         if (str == null || str.length() == 0) {
@@ -4322,8 +4354,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param str
      * @param prefix
      * @return
+     * @throws IllegalArgumentException
      */
-    public static String prependIfMissingIgnoreCase(final String str, final String prefix) {
+    public static String prependIfMissingIgnoreCase(final String str, final String prefix) throws IllegalArgumentException {
         N.checkArgNotNull(prefix);
 
         if (str == null || str.length() == 0) {
@@ -4363,8 +4396,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param prefix
      * @param suffix
      * @return
+     * @throws IllegalArgumentException
      */
-    public static String wrapIfMissing(final String str, final String prefix, final String suffix) {
+    public static String wrapIfMissing(final String str, final String prefix, final String suffix) throws IllegalArgumentException {
         N.checkArgNotNull(prefix);
         N.checkArgNotNull(suffix);
 
@@ -4405,8 +4439,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param prefix
      * @param suffix
      * @return
+     * @throws IllegalArgumentException
      */
-    public static String wrap(final String str, final String prefix, final String suffix) {
+    public static String wrap(final String str, final String prefix, final String suffix) throws IllegalArgumentException {
         N.checkArgNotNull(prefix);
         N.checkArgNotNull(suffix);
 
@@ -4428,7 +4463,6 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
-     *
      * <p>
      * Unwraps the specified string {@code str} if and only if it's wrapped by the specified {@code prefix} and {@code suffix}
      * </p>
@@ -4449,8 +4483,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param prefix
      * @param suffix
      * @return the specified String if it's {@code null} or empty.
+     * @throws IllegalArgumentException
      */
-    public static String unwrap(final String str, final String prefix, final String suffix) {
+    public static String unwrap(final String str, final String prefix, final String suffix) throws IllegalArgumentException {
         N.checkArgNotNull(prefix);
         N.checkArgNotNull(suffix);
 
@@ -8408,9 +8443,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param delimiterOfExclusiveBeginIndex
      * @param delimiterOfExclusiveEndIndex
      * @return
+     * @throws IndexOutOfBoundsException
      */
     public static List<int[]> substringIndicesBetween(final String str, final int fromIndex, final int toIndex, final char delimiterOfExclusiveBeginIndex,
-            final char delimiterOfExclusiveEndIndex) {
+            final char delimiterOfExclusiveEndIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, N.len(str));
 
         if (str == null || str.length() == 0) {
@@ -8475,9 +8511,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param delimiterOfExclusiveBeginIndex
      * @param delimiterOfExclusiveEndIndex
      * @return
+     * @throws IndexOutOfBoundsException
      */
     public static List<int[]> substringIndicesBetween(final String str, final int fromIndex, final int toIndex, final String delimiterOfExclusiveBeginIndex,
-            final String delimiterOfExclusiveEndIndex) {
+            final String delimiterOfExclusiveEndIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, N.len(str));
 
         if (str == null || isEmpty(delimiterOfExclusiveBeginIndex) || isEmpty(delimiterOfExclusiveEndIndex)) {
@@ -8625,9 +8662,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param str
      * @param n
      * @return
+     * @throws IllegalArgumentException
      */
     @Beta
-    public static String firstChars(final String str, final int n) {
+    public static String firstChars(final String str, final int n) throws IllegalArgumentException {
         N.checkArgNotNegative(n, "n");
 
         if (str == null || str.length() == 0 || n == 0) {
@@ -8646,9 +8684,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param str
      * @param n
      * @return
+     * @throws IllegalArgumentException
      */
     @Beta
-    public static String lastChars(final String str, final int n) {
+    public static String lastChars(final String str, final int n) throws IllegalArgumentException {
         N.checkArgNotNegative(n, "n");
 
         if (str == null || str.length() == 0 || n == 0) {
@@ -8699,13 +8738,15 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
     /**
      *
+     *
      * @param a
      * @param fromIndex
      * @param toIndex
      * @param delimiter
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static String join(final boolean[] a, final int fromIndex, final int toIndex, final char delimiter) {
+    public static String join(final boolean[] a, final int fromIndex, final int toIndex, final char delimiter) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
         if (N.isEmpty(a) || fromIndex == toIndex) {
@@ -8733,13 +8774,15 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
     /**
      *
+     *
      * @param a
      * @param fromIndex
      * @param toIndex
      * @param delimiter
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static String join(final boolean[] a, final int fromIndex, final int toIndex, final String delimiter) {
+    public static String join(final boolean[] a, final int fromIndex, final int toIndex, final String delimiter) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
         if (N.isEmpty(a) || fromIndex == toIndex) {
@@ -8781,8 +8824,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param prefix
      * @param suffix
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static String join(final boolean[] a, final int fromIndex, final int toIndex, final String delimiter, final String prefix, final String suffix) {
+    public static String join(final boolean[] a, final int fromIndex, final int toIndex, final String delimiter, final String prefix, final String suffix)
+            throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
         if (N.isEmpty(a) || fromIndex == toIndex) {
@@ -8869,13 +8914,15 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
     /**
      *
+     *
      * @param a
      * @param fromIndex
      * @param toIndex
      * @param delimiter
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static String join(final char[] a, final int fromIndex, final int toIndex, final char delimiter) {
+    public static String join(final char[] a, final int fromIndex, final int toIndex, final char delimiter) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
         if (N.isEmpty(a) || fromIndex == toIndex) {
@@ -8903,13 +8950,15 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
     /**
      *
+     *
      * @param a
      * @param fromIndex
      * @param toIndex
      * @param delimiter
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static String join(final char[] a, final int fromIndex, final int toIndex, final String delimiter) {
+    public static String join(final char[] a, final int fromIndex, final int toIndex, final String delimiter) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
         if (N.isEmpty(a) || fromIndex == toIndex) {
@@ -8951,8 +9000,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param prefix
      * @param suffix
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static String join(final char[] a, final int fromIndex, final int toIndex, final String delimiter, final String prefix, final String suffix) {
+    public static String join(final char[] a, final int fromIndex, final int toIndex, final String delimiter, final String prefix, final String suffix)
+            throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
         if (N.isEmpty(a) || fromIndex == toIndex) {
@@ -9039,13 +9090,15 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
     /**
      *
+     *
      * @param a
      * @param fromIndex
      * @param toIndex
      * @param delimiter
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static String join(final byte[] a, final int fromIndex, final int toIndex, final char delimiter) {
+    public static String join(final byte[] a, final int fromIndex, final int toIndex, final char delimiter) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
         if (N.isEmpty(a) || fromIndex == toIndex) {
@@ -9073,13 +9126,15 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
     /**
      *
+     *
      * @param a
      * @param fromIndex
      * @param toIndex
      * @param delimiter
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static String join(final byte[] a, final int fromIndex, final int toIndex, final String delimiter) {
+    public static String join(final byte[] a, final int fromIndex, final int toIndex, final String delimiter) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
         if (N.isEmpty(a) || fromIndex == toIndex) {
@@ -9121,8 +9176,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param prefix
      * @param suffix
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static String join(final byte[] a, final int fromIndex, final int toIndex, final String delimiter, final String prefix, final String suffix) {
+    public static String join(final byte[] a, final int fromIndex, final int toIndex, final String delimiter, final String prefix, final String suffix)
+            throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
         if (N.isEmpty(a) || fromIndex == toIndex) {
@@ -9209,13 +9266,15 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
     /**
      *
+     *
      * @param a
      * @param fromIndex
      * @param toIndex
      * @param delimiter
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static String join(final short[] a, final int fromIndex, final int toIndex, final char delimiter) {
+    public static String join(final short[] a, final int fromIndex, final int toIndex, final char delimiter) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
         if (N.isEmpty(a) || fromIndex == toIndex) {
@@ -9243,13 +9302,15 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
     /**
      *
+     *
      * @param a
      * @param fromIndex
      * @param toIndex
      * @param delimiter
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static String join(final short[] a, final int fromIndex, final int toIndex, final String delimiter) {
+    public static String join(final short[] a, final int fromIndex, final int toIndex, final String delimiter) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
         if (N.isEmpty(a) || fromIndex == toIndex) {
@@ -9291,8 +9352,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param prefix
      * @param suffix
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static String join(final short[] a, final int fromIndex, final int toIndex, final String delimiter, final String prefix, final String suffix) {
+    public static String join(final short[] a, final int fromIndex, final int toIndex, final String delimiter, final String prefix, final String suffix)
+            throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
         if (N.isEmpty(a) || fromIndex == toIndex) {
@@ -9379,13 +9442,15 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
     /**
      *
+     *
      * @param a
      * @param fromIndex
      * @param toIndex
      * @param delimiter
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static String join(final int[] a, final int fromIndex, final int toIndex, final char delimiter) {
+    public static String join(final int[] a, final int fromIndex, final int toIndex, final char delimiter) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
         if (N.isEmpty(a) || fromIndex == toIndex) {
@@ -9413,13 +9478,15 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
     /**
      *
+     *
      * @param a
      * @param fromIndex
      * @param toIndex
      * @param delimiter
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static String join(final int[] a, final int fromIndex, final int toIndex, final String delimiter) {
+    public static String join(final int[] a, final int fromIndex, final int toIndex, final String delimiter) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
         if (N.isEmpty(a) || fromIndex == toIndex) {
@@ -9461,8 +9528,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param prefix
      * @param suffix
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static String join(final int[] a, final int fromIndex, final int toIndex, final String delimiter, final String prefix, final String suffix) {
+    public static String join(final int[] a, final int fromIndex, final int toIndex, final String delimiter, final String prefix, final String suffix)
+            throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
         if (N.isEmpty(a) || fromIndex == toIndex) {
@@ -9549,13 +9618,15 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
     /**
      *
+     *
      * @param a
      * @param fromIndex
      * @param toIndex
      * @param delimiter
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static String join(final long[] a, final int fromIndex, final int toIndex, final char delimiter) {
+    public static String join(final long[] a, final int fromIndex, final int toIndex, final char delimiter) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
         if (N.isEmpty(a) || fromIndex == toIndex) {
@@ -9583,13 +9654,15 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
     /**
      *
+     *
      * @param a
      * @param fromIndex
      * @param toIndex
      * @param delimiter
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static String join(final long[] a, final int fromIndex, final int toIndex, final String delimiter) {
+    public static String join(final long[] a, final int fromIndex, final int toIndex, final String delimiter) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
         if (N.isEmpty(a) || fromIndex == toIndex) {
@@ -9631,8 +9704,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param prefix
      * @param suffix
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static String join(final long[] a, final int fromIndex, final int toIndex, final String delimiter, final String prefix, final String suffix) {
+    public static String join(final long[] a, final int fromIndex, final int toIndex, final String delimiter, final String prefix, final String suffix)
+            throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
         if (N.isEmpty(a) || fromIndex == toIndex) {
@@ -9719,13 +9794,15 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
     /**
      *
+     *
      * @param a
      * @param fromIndex
      * @param toIndex
      * @param delimiter
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static String join(final float[] a, final int fromIndex, final int toIndex, final char delimiter) {
+    public static String join(final float[] a, final int fromIndex, final int toIndex, final char delimiter) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
         if (N.isEmpty(a) || fromIndex == toIndex) {
@@ -9753,13 +9830,15 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
     /**
      *
+     *
      * @param a
      * @param fromIndex
      * @param toIndex
      * @param delimiter
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static String join(final float[] a, final int fromIndex, final int toIndex, final String delimiter) {
+    public static String join(final float[] a, final int fromIndex, final int toIndex, final String delimiter) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
         if (N.isEmpty(a) || fromIndex == toIndex) {
@@ -9801,8 +9880,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param prefix
      * @param suffix
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static String join(final float[] a, final int fromIndex, final int toIndex, final String delimiter, final String prefix, final String suffix) {
+    public static String join(final float[] a, final int fromIndex, final int toIndex, final String delimiter, final String prefix, final String suffix)
+            throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
         if (N.isEmpty(a) || fromIndex == toIndex) {
@@ -9889,13 +9970,15 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
     /**
      *
+     *
      * @param a
      * @param fromIndex
      * @param toIndex
      * @param delimiter
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static String join(final double[] a, final int fromIndex, final int toIndex, final char delimiter) {
+    public static String join(final double[] a, final int fromIndex, final int toIndex, final char delimiter) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
         if (N.isEmpty(a) || fromIndex == toIndex) {
@@ -9923,13 +10006,15 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
     /**
      *
+     *
      * @param a
      * @param fromIndex
      * @param toIndex
      * @param delimiter
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static String join(final double[] a, final int fromIndex, final int toIndex, final String delimiter) {
+    public static String join(final double[] a, final int fromIndex, final int toIndex, final String delimiter) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
         if (N.isEmpty(a) || fromIndex == toIndex) {
@@ -9971,8 +10056,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param prefix
      * @param suffix
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static String join(final double[] a, final int fromIndex, final int toIndex, final String delimiter, final String prefix, final String suffix) {
+    public static String join(final double[] a, final int fromIndex, final int toIndex, final String delimiter, final String prefix, final String suffix)
+            throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
         if (N.isEmpty(a) || fromIndex == toIndex) {
@@ -10098,14 +10185,17 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
     /**
      *
+     *
      * @param a
      * @param fromIndex
      * @param toIndex
      * @param delimiter
      * @param trim
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static String join(final Object[] a, final int fromIndex, final int toIndex, final char delimiter, final boolean trim) {
+    public static String join(final Object[] a, final int fromIndex, final int toIndex, final char delimiter, final boolean trim)
+            throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
         if (N.isEmpty(a) || fromIndex == toIndex) {
@@ -10158,6 +10248,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
     /**
      *
+     *
      * @param a
      * @param fromIndex
      * @param toIndex
@@ -10166,9 +10257,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param suffix
      * @param trim
      * @return
+     * @throws IndexOutOfBoundsException
      */
     public static String join(final Object[] a, final int fromIndex, final int toIndex, final String delimiter, final String prefix, final String suffix,
-            final boolean trim) {
+            final boolean trim) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
         if (N.isEmpty(a) || fromIndex == toIndex) {
@@ -10286,14 +10378,17 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
     /**
      *
+     *
      * @param c
      * @param fromIndex
      * @param toIndex
      * @param delimiter
      * @param trim
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static String join(final Collection<?> c, final int fromIndex, final int toIndex, final char delimiter, final boolean trim) {
+    public static String join(final Collection<?> c, final int fromIndex, final int toIndex, final char delimiter, final boolean trim)
+            throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, N.size(c));
 
         if (N.isEmpty(c) || fromIndex == toIndex) {
@@ -10351,6 +10446,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
     /**
      *
+     *
      * @param c
      * @param fromIndex
      * @param toIndex
@@ -10359,9 +10455,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param suffix
      * @param trim
      * @return
+     * @throws IndexOutOfBoundsException
      */
     public static String join(final Collection<?> c, final int fromIndex, final int toIndex, final String delimiter, final String prefix, final String suffix,
-            final boolean trim) {
+            final boolean trim) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, N.size(c));
 
         if (N.isEmpty(c) || fromIndex == toIndex) {
@@ -10670,9 +10767,11 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param keyMapper
      * @param valueMapper
      * @return
+     * @throws IllegalArgumentException
      */
     public static <K, V> String joinEntries(final Map<K, V> m, final String entryDelimiter, final String keyValueDelimiter, final String prefix,
-            final String suffix, final boolean trim, final Function<? super K, ?> keyMapper, final Function<? super V, ?> valueMapper) {
+            final String suffix, final boolean trim, final Function<? super K, ?> keyMapper, final Function<? super V, ?> valueMapper)
+            throws IllegalArgumentException {
         N.checkArgNotNull(keyMapper, "keyMapper");
         N.checkArgNotNull(valueMapper, "valueMapper");
 
@@ -10788,6 +10887,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
     /**
      *
+     *
      * @param m
      * @param fromIndex
      * @param toIndex
@@ -10795,9 +10895,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param keyValueDelimiter
      * @param trim
      * @return
+     * @throws IndexOutOfBoundsException
      */
     public static String joinEntries(final Map<?, ?> m, final int fromIndex, final int toIndex, final char entryDelimiter, final char keyValueDelimiter,
-            final boolean trim) {
+            final boolean trim) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, N.size(m));
 
         if (N.isEmpty(m) || fromIndex == toIndex) {
@@ -10856,9 +10957,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param suffix
      * @param trim
      * @return
+     * @throws IndexOutOfBoundsException
      */
     public static String joinEntries(final Map<?, ?> m, final int fromIndex, final int toIndex, final String entryDelimiter, final String keyValueDelimiter,
-            final String prefix, final String suffix, final boolean trim) {
+            final String prefix, final String suffix, final boolean trim) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, N.size(m));
 
         if (N.isEmpty(m) || fromIndex == toIndex) {
@@ -10922,12 +11024,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @return
      */
     public static String concat(final String a, final String b) {
-        final StringBuilder sb = Objectory.createStringBuilder();
-
-        try {
-            return sb.append(a).append(b).toString();
-        } finally {
-            Objectory.recycle(sb);
+        if (N.isEmpty(a)) {
+            return N.isEmpty(b) ? Strings.EMPTY_STRING : b;
+        } else {
+            return N.isEmpty(b) ? a : a.concat(b);
         }
     }
 
@@ -10939,13 +11039,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @return
      */
     public static String concat(final String a, final String b, final String c) {
-        final StringBuilder sb = Objectory.createStringBuilder();
-
-        try {
-            return sb.append(a).append(b).append(c).toString();
-        } finally {
-            Objectory.recycle(sb);
-        }
+        return String.join(Strings.EMPTY_STRING, nullToEmpty(a), nullToEmpty(b), nullToEmpty(c));
     }
 
     /**
@@ -10957,13 +11051,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @return
      */
     public static String concat(final String a, final String b, final String c, final String d) {
-        final StringBuilder sb = Objectory.createStringBuilder();
-
-        try {
-            return sb.append(a).append(b).append(c).append(d).toString();
-        } finally {
-            Objectory.recycle(sb);
-        }
+        return String.join(Strings.EMPTY_STRING, nullToEmpty(a), nullToEmpty(b), nullToEmpty(c), nullToEmpty(d));
     }
 
     /**
@@ -10976,13 +11064,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @return
      */
     public static String concat(final String a, final String b, final String c, final String d, final String e) {
-        final StringBuilder sb = Objectory.createStringBuilder();
-
-        try {
-            return sb.append(a).append(b).append(c).append(d).append(e).toString();
-        } finally {
-            Objectory.recycle(sb);
-        }
+        return String.join(Strings.EMPTY_STRING, nullToEmpty(a), nullToEmpty(b), nullToEmpty(c), nullToEmpty(d), nullToEmpty(e));
     }
 
     /**
@@ -10996,13 +11078,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @return
      */
     public static String concat(final String a, final String b, final String c, final String d, final String e, final String f) {
-        final StringBuilder sb = Objectory.createStringBuilder();
-
-        try {
-            return sb.append(a).append(b).append(c).append(d).append(e).append(f).toString();
-        } finally {
-            Objectory.recycle(sb);
-        }
+        return String.join(Strings.EMPTY_STRING, nullToEmpty(a), nullToEmpty(b), nullToEmpty(c), nullToEmpty(d), nullToEmpty(e), nullToEmpty(f));
     }
 
     /**
@@ -11017,13 +11093,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @return
      */
     public static String concat(final String a, final String b, final String c, final String d, final String e, final String f, final String g) {
-        final StringBuilder sb = Objectory.createStringBuilder();
-
-        try {
-            return sb.append(a).append(b).append(c).append(d).append(e).append(f).append(g).toString();
-        } finally {
-            Objectory.recycle(sb);
-        }
+        return String.join(Strings.EMPTY_STRING, nullToEmpty(a), nullToEmpty(b), nullToEmpty(c), nullToEmpty(d), nullToEmpty(e), nullToEmpty(f),
+                nullToEmpty(g));
     }
 
     /**
@@ -11040,13 +11111,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     public static String concat(final String a, final String b, final String c, final String d, final String e, final String f, final String g,
             final String h) {
-        final StringBuilder sb = Objectory.createStringBuilder();
-
-        try {
-            return sb.append(a).append(b).append(c).append(d).append(e).append(f).append(g).append(h).toString();
-        } finally {
-            Objectory.recycle(sb);
-        }
+        return String.join(Strings.EMPTY_STRING, nullToEmpty(a), nullToEmpty(b), nullToEmpty(c), nullToEmpty(d), nullToEmpty(e), nullToEmpty(f), nullToEmpty(g),
+                nullToEmpty(h));
     }
 
     /**
@@ -11064,13 +11130,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     public static String concat(final String a, final String b, final String c, final String d, final String e, final String f, final String g, final String h,
             final String i) {
-        final StringBuilder sb = Objectory.createStringBuilder();
-
-        try {
-            return sb.append(a).append(b).append(c).append(d).append(e).append(f).append(g).append(h).append(i).toString();
-        } finally {
-            Objectory.recycle(sb);
-        }
+        return String.join(Strings.EMPTY_STRING, nullToEmpty(a), nullToEmpty(b), nullToEmpty(c), nullToEmpty(d), nullToEmpty(e), nullToEmpty(f), nullToEmpty(g),
+                nullToEmpty(h), nullToEmpty(i));
     }
 
     /**
@@ -11083,19 +11144,16 @@ public abstract sealed class Strings permits Strings.StringUtil {
         if (N.isEmpty(a)) {
             return EMPTY_STRING;
         } else if (a.length == 1) {
-            return N.toString(a[0]);
+            return nullToEmpty(a[0]);
+        } else if (a.length == 2) {
+            return concat(a[0], a[1]);
+        } else if (a.length == 3) {
+            return concat(a[0], a[1], a[2]);
         }
 
-        final StringBuilder sb = Objectory.createStringBuilder();
+        final String[] b = Strings.copyThenApplyToEach(a, Fn.nullToEmpty());
 
-        try {
-            for (String e : a) {
-                sb.append(e);
-            }
-            return sb.toString();
-        } finally {
-            Objectory.recycle(sb);
-        }
+        return String.join(Strings.EMPTY_STRING, b);
     }
 
     /**
@@ -11461,7 +11519,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
         N.reverse(strs);
 
-        return Joiner.with(delimiter).reuseCachedBuffer().appendAll(strs).toString();
+        return join(strs, delimiter);
     }
 
     /**
@@ -11578,9 +11636,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param start the position to start overlaying at
      * @param end the position to stop overlaying before
      * @return overlayed String, {@code ""} if null String input
+     * @throws IndexOutOfBoundsException
      * @since 2.0
      */
-    public static String overlay(String str, String overlay, int start, int end) {
+    public static String overlay(String str, String overlay, int start, int end) throws IndexOutOfBoundsException {
         N.checkFromToIndex(start, end, N.len(str));
 
         if (overlay == null) {
@@ -12072,14 +12131,16 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
     /**
      *
+     *
      * @param <T>
      * @param a
      * @param converter
+     * @throws IllegalArgumentException
      * @see #copyThenApplyToEach(CharSequence[], Function)
      * @see N#applyToEach(Object[], com.landawn.abacus.util.Throwables.Function)
      */
     @Beta
-    public static <T extends CharSequence> void applyToEach(final T[] a, final Function<? super T, ? extends T> converter) {
+    public static <T extends CharSequence> void applyToEach(final T[] a, final Function<? super T, ? extends T> converter) throws IllegalArgumentException {
         N.checkArgNotNull(converter);
 
         if (N.isEmpty(a)) {
@@ -12093,17 +12154,20 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
     /**
      *
+     *
      * @param <T>
      * @param a
      * @param converter
      * @return
+     * @throws IllegalArgumentException
      * @see #copyThenTrim(String[])
      * @see #copyThenStrip(String[])
      * @see N#copyThenApplyToEach(Object[], com.landawn.abacus.util.Throwables.Function)
      */
     @Beta
     @MayReturnNull
-    public static <T extends CharSequence> T[] copyThenApplyToEach(final T[] a, final Function<? super T, ? extends T> converter) {
+    public static <T extends CharSequence> T[] copyThenApplyToEach(final T[] a, final Function<? super T, ? extends T> converter)
+            throws IllegalArgumentException {
         N.checkArgNotNull(converter);
 
         if (a == null) {

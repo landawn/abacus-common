@@ -60,13 +60,14 @@ public final class Median {
      * Returns a {@code Pair} with {@code left} is the value at the index of {@code (a.length - 1) / 2} when the array is sorted,
      * and the {@code right} is the value at the index of {@code a.length / 2} if the length of array is even.
      *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return
+     * @param a 
+     * @param fromIndex 
+     * @param toIndex 
+     * @return 
+     * @throws IndexOutOfBoundsException 
      * @see #of(int[])
      */
-    public static Pair<Character, OptionalChar> of(final char[] a, final int fromIndex, final int toIndex) {
+    public static Pair<Character, OptionalChar> of(final char[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         if (N.isEmpty(a) || toIndex - fromIndex < 1) {
             throw new IllegalArgumentException("The length of array can't be null or empty"); //NOSONAR
         }
@@ -121,13 +122,14 @@ public final class Median {
      * Returns a {@code Pair} with {@code left} is the value at the index of {@code (a.length - 1) / 2} when the array is sorted,
      * and the {@code right} is the value at the index of {@code a.length / 2} if the length of array is even.
      *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return
+     * @param a 
+     * @param fromIndex 
+     * @param toIndex 
+     * @return 
+     * @throws IndexOutOfBoundsException 
      * @see #of(int[])
      */
-    public static Pair<Byte, OptionalByte> of(final byte[] a, final int fromIndex, final int toIndex) {
+    public static Pair<Byte, OptionalByte> of(final byte[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         if (N.isEmpty(a) || toIndex - fromIndex < 1) {
             throw new IllegalArgumentException("The length of array can't be null or empty");
         }
@@ -182,13 +184,14 @@ public final class Median {
      * Returns a {@code Pair} with {@code left} is the value at the index of {@code (a.length - 1) / 2} when the array is sorted,
      * and the {@code right} is the value at the index of {@code a.length / 2} if the length of array is even.
      *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return
+     * @param a 
+     * @param fromIndex 
+     * @param toIndex 
+     * @return 
+     * @throws IndexOutOfBoundsException 
      * @see #of(int[])
      */
-    public static Pair<Short, OptionalShort> of(final short[] a, final int fromIndex, final int toIndex) {
+    public static Pair<Short, OptionalShort> of(final short[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         if (N.isEmpty(a) || toIndex - fromIndex < 1) {
             throw new IllegalArgumentException("The length of array can't be null or empty");
         }
@@ -261,13 +264,14 @@ public final class Median {
      * Returns a {@code Pair} with {@code left} is the value at the index of {@code (a.length - 1) / 2} when the array is sorted,
      * and the {@code right} is the value at the index of {@code a.length / 2} if the length of array is even.
      *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return
+     * @param a 
+     * @param fromIndex 
+     * @param toIndex 
+     * @return 
+     * @throws IndexOutOfBoundsException 
      * @throws IllegalArgumentException if specified array is empty or length is zero.
      */
-    public static Pair<Integer, OptionalInt> of(final int[] a, final int fromIndex, final int toIndex) {
+    public static Pair<Integer, OptionalInt> of(final int[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         if (N.isEmpty(a) || toIndex - fromIndex < 1) {
             throw new IllegalArgumentException("The length of array can't be null or empty");
         }
@@ -322,13 +326,14 @@ public final class Median {
      * Returns a {@code Pair} with {@code left} is the value at the index of {@code (a.length - 1) / 2} when the array is sorted,
      * and the {@code right} is the value at the index of {@code a.length / 2} if the length of array is even.
      *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return
+     * @param a 
+     * @param fromIndex 
+     * @param toIndex 
+     * @return 
+     * @throws IndexOutOfBoundsException 
      * @see #of(int[])
      */
-    public static Pair<Long, OptionalLong> of(final long[] a, final int fromIndex, final int toIndex) {
+    public static Pair<Long, OptionalLong> of(final long[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         if (N.isEmpty(a) || toIndex - fromIndex < 1) {
             throw new IllegalArgumentException("The length of array can't be null or empty");
         }
@@ -383,13 +388,14 @@ public final class Median {
      * Returns a {@code Pair} with {@code left} is the value at the index of {@code (a.length - 1) / 2} when the array is sorted,
      * and the {@code right} is the value at the index of {@code a.length / 2} if the length of array is even.
      *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return
+     * @param a 
+     * @param fromIndex 
+     * @param toIndex 
+     * @return 
+     * @throws IndexOutOfBoundsException 
      * @see #of(int[])
      */
-    public static Pair<Float, OptionalFloat> of(final float[] a, final int fromIndex, final int toIndex) {
+    public static Pair<Float, OptionalFloat> of(final float[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         if (N.isEmpty(a) || toIndex - fromIndex < 1) {
             throw new IllegalArgumentException("The length of array can't be null or empty");
         }
@@ -444,13 +450,14 @@ public final class Median {
      * Returns a {@code Pair} with {@code left} is the value at the index of {@code (a.length - 1) / 2} when the array is sorted,
      * and the {@code right} is the value at the index of {@code a.length / 2} if the length of array is even.
      *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return
+     * @param a 
+     * @param fromIndex 
+     * @param toIndex 
+     * @return 
+     * @throws IndexOutOfBoundsException 
      * @see #of(int[])
      */
-    public static Pair<Double, OptionalDouble> of(final double[] a, final int fromIndex, final int toIndex) {
+    public static Pair<Double, OptionalDouble> of(final double[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         if (N.isEmpty(a) || toIndex - fromIndex < 1) {
             throw new IllegalArgumentException("The length of array can't be null or empty");
         }
@@ -537,16 +544,17 @@ public final class Median {
      * Returns a {@code Pair} with {@code left} is the value at the index of {@code (a.length - 1) / 2} when the array is sorted,
      * and the {@code right} is the value at the index of {@code a.length / 2} if the length of array is even.
      *
-     * @param <T>
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param cmp
-     * @return
+     * @param <T> 
+     * @param a 
+     * @param fromIndex 
+     * @param toIndex 
+     * @param cmp 
+     * @return 
+     * @throws IndexOutOfBoundsException 
      * @see #of(int[])
      */
     @SuppressWarnings("rawtypes")
-    public static <T> Pair<T, Nullable<T>> of(final T[] a, final int fromIndex, final int toIndex, Comparator<? super T> cmp) {
+    public static <T> Pair<T, Nullable<T>> of(final T[] a, final int fromIndex, final int toIndex, Comparator<? super T> cmp) throws IndexOutOfBoundsException {
         if (N.isEmpty(a) || toIndex - fromIndex < 1) {
             throw new IllegalArgumentException("The length of array can't be null or empty");
         }

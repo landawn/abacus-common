@@ -791,7 +791,7 @@ public final class ParserUtil {
             for (PropInfo e : propInfos) {
                 hashPropInfoMap.put(ParserUtil.hashCode(e.jsonNameTags[defaultNameIndex].name), e);
 
-                if (multiSet.get(e.jsonNameTags[defaultNameIndex].name.length) == 1) {
+                if (multiSet.getCount(e.jsonNameTags[defaultNameIndex].name.length) == 1) {
                     propInfoArray[e.jsonNameTags[defaultNameIndex].name.length] = e;
                 }
             }
@@ -1514,6 +1514,8 @@ public final class ParserUtil {
 
         final boolean isByBuilder;
 
+        volatile int failureCountForSetProp = 0;
+
         @SuppressWarnings("deprecation")
         PropInfo(String propName) {
             this.declaringClass = null;
@@ -1734,23 +1736,7 @@ public final class ParserUtil {
 
             propValue = propValue == null ? type.defaultValue() : propValue;
 
-            try {
-                if (isFieldSettable) {
-                    field.set(obj, propValue); //NOSONAR
-                } else if (setMethod != null) {
-                    setMethod.invoke(obj, propValue);
-                } else if (canSetFieldByGetMethod) {
-                    ClassUtil.setPropValueByGet(obj, getMethod, propValue);
-                } else {
-                    field.set(obj, propValue); //NOSONAR
-                }
-
-            } catch (Exception e) {
-                if (logger.isWarnEnabled()) {
-                    logger.warn("Failed to set value for field: {} in class: {} with value type {}", field == null ? name : field.getName(),
-                            declaringClass.getName(), propValue == null ? "null" : propValue.getClass().getName());
-                }
-
+            if (failureCountForSetProp > 100 && propValue != null && !clazz.isAssignableFrom(propValue.getClass())) {
                 propValue = N.convert(propValue, jsonXmlType);
 
                 try {
@@ -1761,8 +1747,52 @@ public final class ParserUtil {
                     } else {
                         field.set(obj, propValue); //NOSONAR
                     }
-                } catch (IllegalAccessException | InvocationTargetException e2) {
+
+                    if (failureCountForSetProp > 0) {
+                        failureCountForSetProp--;
+                    }
+                } catch (IllegalAccessException | InvocationTargetException e) {
                     throw ExceptionUtil.toRuntimeException(e);
+                }
+            } else {
+                try {
+                    if (isFieldSettable) {
+                        field.set(obj, propValue); //NOSONAR
+                    } else if (setMethod != null) {
+                        setMethod.invoke(obj, propValue);
+                    } else if (canSetFieldByGetMethod) {
+                        ClassUtil.setPropValueByGet(obj, getMethod, propValue);
+                    } else {
+                        field.set(obj, propValue); //NOSONAR
+                    }
+
+                    if (failureCountForSetProp > 0) {
+                        failureCountForSetProp--;
+                    }
+                } catch (Exception e) {
+                    // why don't check value type first before set? Because it's expected 99% chance set will success.
+                    // Checking value type first may not improve performance.
+
+                    failureCountForSetProp++;
+
+                    if (logger.isWarnEnabled()) {
+                        logger.warn("Failed to set value for field: {} in class: {} with value type {}", field == null ? name : field.getName(),
+                                declaringClass.getName(), propValue == null ? "null" : propValue.getClass().getName());
+                    }
+
+                    propValue = N.convert(propValue, jsonXmlType);
+
+                    try {
+                        if (isFieldSettable) {
+                            field.set(obj, propValue); //NOSONAR
+                        } else if (setMethod != null) {
+                            setMethod.invoke(obj, propValue);
+                        } else {
+                            field.set(obj, propValue); //NOSONAR
+                        }
+                    } catch (IllegalAccessException | InvocationTargetException e2) {
+                        throw ExceptionUtil.toRuntimeException(e);
+                    }
                 }
             }
         }
@@ -2434,7 +2464,9 @@ public final class ParserUtil {
 
             propValue = propValue == null ? type.defaultValue() : propValue;
 
-            try {
+            if (failureCountForSetProp > 100 && propValue != null && !clazz.isAssignableFrom(propValue.getClass())) {
+                propValue = N.convert(propValue, jsonXmlType);
+
                 if (isFieldSettable && fieldAccessIndex > -1) {
                     fieldAccess.set(obj, fieldAccessIndex, propValue);
                 } else if (setMethodAccessIndex > -1) {
@@ -2442,26 +2474,54 @@ public final class ParserUtil {
                 } else if (canSetFieldByGetMethod) {
                     ClassUtil.setPropValueByGet(obj, getMethod, propValue);
                 } else {
-                    field.set(obj, propValue); //NOSONAR
-                }
-
-            } catch (Exception e) {
-                if (logger.isWarnEnabled()) {
-                    logger.warn("Failed to set value for field: {} in class: {} with value type {}", field == null ? name : field.getName(),
-                            declaringClass.getName(), propValue == null ? "null" : propValue.getClass().getName());
-                }
-
-                propValue = N.convert(propValue, jsonXmlType);
-
-                if (fieldAccessIndex > -1) {
-                    fieldAccess.set(obj, fieldAccessIndex, propValue);
-                } else if (setMethodAccessIndex > -1) {
-                    getMethodAccess.invoke(obj, setMethodAccessIndex, propValue);
-                } else {
                     try {
                         field.set(obj, propValue); //NOSONAR
-                    } catch (IllegalAccessException e2) {
+                    } catch (IllegalAccessException e) {
                         throw ExceptionUtil.toRuntimeException(e);
+                    }
+                }
+
+                if (failureCountForSetProp > 0) {
+                    failureCountForSetProp--;
+                }
+            } else {
+                try {
+                    if (isFieldSettable && fieldAccessIndex > -1) {
+                        fieldAccess.set(obj, fieldAccessIndex, propValue);
+                    } else if (setMethodAccessIndex > -1) {
+                        setMethodAccess.invoke(obj, setMethodAccessIndex, propValue);
+                    } else if (canSetFieldByGetMethod) {
+                        ClassUtil.setPropValueByGet(obj, getMethod, propValue);
+                    } else {
+                        field.set(obj, propValue); //NOSONAR
+                    }
+
+                    if (failureCountForSetProp > 0) {
+                        failureCountForSetProp--;
+                    }
+                } catch (Exception e) {
+                    // why don't check value type first before set? Because it's expected 99% chance set will success.
+                    // Checking value type first may not improve performance.
+
+                    failureCountForSetProp++;
+
+                    if (logger.isWarnEnabled()) {
+                        logger.warn("Failed to set value for field: {} in class: {} with value type {}", field == null ? name : field.getName(),
+                                declaringClass.getName(), propValue == null ? "null" : propValue.getClass().getName());
+                    }
+
+                    propValue = N.convert(propValue, jsonXmlType);
+
+                    if (fieldAccessIndex > -1) {
+                        fieldAccess.set(obj, fieldAccessIndex, propValue);
+                    } else if (setMethodAccessIndex > -1) {
+                        getMethodAccess.invoke(obj, setMethodAccessIndex, propValue);
+                    } else {
+                        try {
+                            field.set(obj, propValue); //NOSONAR
+                        } catch (IllegalAccessException e2) {
+                            throw ExceptionUtil.toRuntimeException(e);
+                        }
                     }
                 }
             }

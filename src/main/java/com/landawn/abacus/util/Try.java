@@ -31,54 +31,60 @@ public final class Try<T extends AutoCloseable> {
     }
 
     /**
+     * 
      *
-     *
-     * @param <T>
-     * @param targetResource
-     * @return
+     * @param <T> 
+     * @param targetResource 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static <T extends AutoCloseable> Try<T> with(final T targetResource) {
-        N.checkArgNotNull(targetResource, "targetResourceSupplier");//NOSONAR
+    public static <T extends AutoCloseable> Try<T> with(final T targetResource) throws IllegalArgumentException {
+        N.checkArgNotNull(targetResource, "targetResource");//NOSONAR
 
         return new Try<>(targetResource, null, null);
     }
 
     /**
+     * 
      *
-     *
-     * @param <T>
-     * @param targetResource
-     * @param finalAction
-     * @return
+     * @param <T> 
+     * @param targetResource 
+     * @param finalAction 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static <T extends AutoCloseable> Try<T> with(final T targetResource, final Runnable finalAction) {
-        N.checkArgNotNull(targetResource, "targetResourceSupplier");
+    public static <T extends AutoCloseable> Try<T> with(final T targetResource, final Runnable finalAction) throws IllegalArgumentException {
+        N.checkArgNotNull(targetResource, "targetResource");
         N.checkArgNotNull(finalAction, "finalAction");
 
         return new Try<>(targetResource, null, finalAction);
     }
 
     /**
+     * 
      *
-     *
-     * @param <T>
-     * @param targetResourceSupplier
-     * @return
+     * @param <T> 
+     * @param targetResourceSupplier 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static <T extends AutoCloseable> Try<T> with(final Throwables.Supplier<T, ? extends Exception> targetResourceSupplier) {
+    public static <T extends AutoCloseable> Try<T> with(final Throwables.Supplier<T, ? extends Exception> targetResourceSupplier)
+            throws IllegalArgumentException {
         N.checkArgNotNull(targetResourceSupplier, "targetResourceSupplier");
         return new Try<>(null, targetResourceSupplier, null);
     }
 
     /**
+     * 
      *
-     *
-     * @param <T>
-     * @param targetResourceSupplier
-     * @param finalAction
-     * @return
+     * @param <T> 
+     * @param targetResourceSupplier 
+     * @param finalAction 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static <T extends AutoCloseable> Try<T> with(final Throwables.Supplier<T, ? extends Exception> targetResourceSupplier, final Runnable finalAction) {
+    public static <T extends AutoCloseable> Try<T> with(final Throwables.Supplier<T, ? extends Exception> targetResourceSupplier, final Runnable finalAction)
+            throws IllegalArgumentException {
         N.checkArgNotNull(targetResourceSupplier, "targetResourceSupplier");
         N.checkArgNotNull(finalAction, "finalAction");
 

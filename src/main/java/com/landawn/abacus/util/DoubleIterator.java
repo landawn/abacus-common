@@ -64,13 +64,15 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
     }
 
     /**
+     * 
      *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return
+     * @param a 
+     * @param fromIndex 
+     * @param toIndex 
+     * @return 
+     * @throws IndexOutOfBoundsException 
      */
-    public static DoubleIterator of(final double[] a, final int fromIndex, final int toIndex) {
+    public static DoubleIterator of(final double[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
         if (fromIndex == toIndex) {
@@ -109,10 +111,11 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
     /**
      * Lazy evaluation.
      *
-     * @param iteratorSupplier
-     * @return
+     * @param iteratorSupplier 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static DoubleIterator defer(final Supplier<? extends DoubleIterator> iteratorSupplier) {
+    public static DoubleIterator defer(final Supplier<? extends DoubleIterator> iteratorSupplier) throws IllegalArgumentException {
         N.checkArgNotNull(iteratorSupplier, "iteratorSupplier");
 
         return new DoubleIterator() {
@@ -149,10 +152,11 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
     /**
      * Returns an infinite {@code DoubleIterator}.
      *
-     * @param supplier
-     * @return
+     * @param supplier 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static DoubleIterator generate(final DoubleSupplier supplier) {
+    public static DoubleIterator generate(final DoubleSupplier supplier) throws IllegalArgumentException {
         N.checkArgNotNull(supplier);
 
         return new DoubleIterator() {
@@ -169,12 +173,14 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
     }
 
     /**
+     * 
      *
-     * @param hasNext
-     * @param supplier
-     * @return
+     * @param hasNext 
+     * @param supplier 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static DoubleIterator generate(final BooleanSupplier hasNext, final DoubleSupplier supplier) {
+    public static DoubleIterator generate(final BooleanSupplier hasNext, final DoubleSupplier supplier) throws IllegalArgumentException {
         N.checkArgNotNull(hasNext);
         N.checkArgNotNull(supplier);
 
@@ -214,12 +220,13 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
     public abstract double nextDouble();
 
     /**
+     * 
      *
-     *
-     * @param n
-     * @return
+     * @param n 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public DoubleIterator skip(final long n) {
+    public DoubleIterator skip(final long n) throws IllegalArgumentException {
         N.checkArgNotNegative(n, "n");
 
         if (n <= 0) {
@@ -262,12 +269,13 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
     }
 
     /**
+     * 
      *
-     *
-     * @param count
-     * @return
+     * @param count 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public DoubleIterator limit(final long count) {
+    public DoubleIterator limit(final long count) throws IllegalArgumentException {
         N.checkArgNotNegative(count, "count");
 
         if (count == 0) {
@@ -297,12 +305,13 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
     }
 
     /**
+     * 
      *
-     *
-     * @param predicate
-     * @return
+     * @param predicate 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public DoubleIterator filter(final DoublePredicate predicate) {
+    public DoubleIterator filter(final DoublePredicate predicate) throws IllegalArgumentException {
         N.checkArgNotNull(predicate, "predicate");
 
         final DoubleIterator iter = this;
@@ -445,14 +454,15 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
     }
 
     /**
+     * 
      *
-     *
-     * @param action
-     * @deprecated
+     * @param action 
+     * @throws IllegalArgumentException 
+     * @deprecated 
      */
     @Override
     @Deprecated
-    public void forEachRemaining(java.util.function.Consumer<? super Double> action) {
+    public void forEachRemaining(java.util.function.Consumer<? super Double> action) throws IllegalArgumentException {
         super.forEachRemaining(action);
     }
 
@@ -472,13 +482,14 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
     }
 
     /**
+     * 
      *
-     *
-     * @param <E>
-     * @param action
-     * @throws E
+     * @param <E> 
+     * @param action 
+     * @throws IllegalArgumentException 
+     * @throws E 
      */
-    public <E extends Exception> void foreachIndexed(Throwables.IndexedDoubleConsumer<E> action) throws E {
+    public <E extends Exception> void foreachIndexed(Throwables.IndexedDoubleConsumer<E> action) throws IllegalArgumentException, E {
         N.checkArgNotNull(action);
 
         int idx = 0;

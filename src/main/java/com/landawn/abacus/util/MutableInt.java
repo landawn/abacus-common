@@ -33,14 +33,7 @@ package com.landawn.abacus.util;
  * @see Integer
  * @since 2.1
  */
-public final class MutableInt extends Number implements Comparable<MutableInt>, Mutable {
-
-    /**
-     * Required for serialization support.
-     *
-     * @see java.io.Serializable
-     */
-    private static final long serialVersionUID = 512176391864L;
+public final class MutableInt implements Comparable<MutableInt>, Mutable { // Should not extends Number because Number is immutable
 
     private int value;
 
@@ -69,9 +62,9 @@ public final class MutableInt extends Number implements Comparable<MutableInt>, 
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public int value() {
         return value;
@@ -257,48 +250,6 @@ public final class MutableInt extends Number implements Comparable<MutableInt>, 
      */
     public int addAndGet(final int delta) {
         return value += delta;
-    }
-
-    //-----------------------------------------------------------------------
-    // shortValue and byteValue rely on Number implementation
-    /**
-     * Returns the value of this MutableInt as an int.
-     *
-     * @return
-     */
-    @Override
-    public int intValue() {
-        return value;
-    }
-
-    /**
-     * Returns the value of this MutableInt as a long.
-     *
-     * @return
-     */
-    @Override
-    public long longValue() {
-        return value;
-    }
-
-    /**
-     * Returns the value of this MutableInt as a float.
-     *
-     * @return
-     */
-    @Override
-    public float floatValue() {
-        return value;
-    }
-
-    /**
-     * Returns the value of this MutableInt as a double.
-     *
-     * @return
-     */
-    @Override
-    public double doubleValue() {
-        return value;
     }
 
     //-----------------------------------------------------------------------

@@ -115,13 +115,14 @@ public class JSONDeserializationConfig extends DeserializationConfig<JSONDeseria
     }
 
     /**
+     * 
      *
-     *
-     * @param mapInstanceType
-     * @return
+     * @param mapInstanceType 
+     * @return 
+     * @throws IllegalArgumentException 
      */
     @SuppressWarnings("rawtypes")
-    public JSONDeserializationConfig setMapInstanceType(Class<? extends Map> mapInstanceType) {
+    public JSONDeserializationConfig setMapInstanceType(Class<? extends Map> mapInstanceType) throws IllegalArgumentException {
         N.checkArgNotNull(mapInstanceType, "mapInstanceType");
 
         this.mapInstanceType = mapInstanceType;
@@ -134,9 +135,10 @@ public class JSONDeserializationConfig extends DeserializationConfig<JSONDeseria
      *
      * @param propName TODO should it be {@code parentEntity.propNameA(subEntity).propNameB...} For examaple: {@code account.devices.model}
      * @param handler the first parameter will be Collection or Map, the second parameter will be the current element or entry
-     * @return
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public JSONDeserializationConfig setPropHandler(final String propName, final BiConsumer<? super Collection<?>, ?> handler) {
+    public JSONDeserializationConfig setPropHandler(final String propName, final BiConsumer<? super Collection<?>, ?> handler) throws IllegalArgumentException {
         N.checkArgNotEmpty(propName, "propName");
         N.checkArgNotNull(handler, "handler");
 

@@ -154,7 +154,7 @@ public abstract class RateLimiter {
      * @throws IllegalArgumentException if {@code permitsPerSecond} is negative or zero or
      *     {@code warmupPeriod} is negative
      */
-    public static RateLimiter create(double permitsPerSecond, long warmupPeriod, TimeUnit unit) {
+    public static RateLimiter create(double permitsPerSecond, long warmupPeriod, TimeUnit unit) throws IllegalArgumentException {
         N.checkArgument(warmupPeriod >= 0, "warmupPeriod must not be negative: %s", warmupPeriod);
         return create(permitsPerSecond, warmupPeriod, unit, 3.0, SleepingStopwatch.createFromSystemTimer());
     }
@@ -218,7 +218,7 @@ public abstract class RateLimiter {
      * @param permitsPerSecond the new stable rate of this {@code RateLimiter}
      * @throws IllegalArgumentException if {@code permitsPerSecond} is negative or zero
      */
-    public final void setRate(double permitsPerSecond) {
+    public final void setRate(double permitsPerSecond) throws IllegalArgumentException {
         N.checkArgument(permitsPerSecond > 0.0 && !Double.isNaN(permitsPerSecond), "rate must be positive");
         synchronized (mutex()) {
             doSetRate(permitsPerSecond, stopwatch.readMicros());

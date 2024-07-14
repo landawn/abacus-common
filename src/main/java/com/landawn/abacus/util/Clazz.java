@@ -691,29 +691,6 @@ public final class Clazz {
     }
 
     /**
-     * Of long multiset.
-     *
-     * @param <T>
-     * @return
-     */
-    @SuppressWarnings("rawtypes")
-    public static <T> Class<LongMultiset<T>> ofLongMultiset() {
-        return (Class) LongMultiset.class;
-    }
-
-    /**
-     * Of long multiset.
-     *
-     * @param <T>
-     * @param eleCls
-     * @return
-     */
-    @SuppressWarnings("rawtypes")
-    public static <T> Class<LongMultiset<T>> ofLongMultiset(@SuppressWarnings("unused") final Class<T> eleCls) {
-        return (Class) LongMultiset.class;
-    }
-
-    /**
      * Of list multimap.
      *
      * @param <K> the key type

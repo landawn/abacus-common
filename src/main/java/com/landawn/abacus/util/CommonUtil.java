@@ -1052,102 +1052,155 @@ sealed class CommonUtil permits N {
      * convert successfully
      *
      * @param <T>
-     * @param obj
+     * @param srcObj
      * @param targetType
      * @return
      */
-    public static <T> T convert(final Object obj, final Class<? extends T> targetType) {
-        if (obj == null) {
+    public static <T> T convert(final Object srcObj, final Class<? extends T> targetType) {
+        if (srcObj == null) {
             return defaultValueOf(targetType);
         }
 
-        final Class<?> srcClass = obj.getClass();
+        final Class<?> srcClass = srcObj.getClass();
         BiFunction<Object, Class<?>, Object> converterFunc = null;
 
         if ((converterFunc = converterMap.get(srcClass)) != null) {
-            return (T) converterFunc.apply(obj, targetType);
+            return (T) converterFunc.apply(srcObj, targetType);
         }
 
         final Type<T> type = typeOf(targetType);
 
-        return convert(obj, srcClass, type);
+        return convert(srcObj, srcClass, type);
     }
 
     /**
      *
      * @param <T>
-     * @param obj
+     * @param srcObj
      * @param targetType
      * @return
      */
-    public static <T> T convert(final Object obj, final Type<? extends T> targetType) {
-        if (obj == null) {
+    public static <T> T convert(final Object srcObj, final Type<? extends T> targetType) {
+        if (srcObj == null) {
             return targetType.defaultValue();
         }
 
-        final Class<?> srcClass = obj.getClass();
+        final Class<?> srcClass = srcObj.getClass();
         BiFunction<Object, Class<?>, Object> converterFunc = null;
 
         if ((converterFunc = converterMap.get(srcClass)) != null) {
-            return (T) converterFunc.apply(obj, targetType.clazz());
+            return (T) converterFunc.apply(srcObj, targetType.clazz());
         }
 
-        return convert(obj, srcClass, targetType);
+        return convert(srcObj, srcClass, targetType);
     }
 
     @SuppressWarnings({ "rawtypes" })
-    private static <T> T convert(final Object obj, Class<?> srcClass, final Type<? extends T> targetType) {
+    private static <T> T convert(final Object srcObj, Class<?> srcClass, final Type<? extends T> targetType) {
         if (targetType.clazz().isAssignableFrom(srcClass)) {
-            return (T) obj;
+            return (T) srcObj;
         }
 
         final Type<Object> srcType = typeOf(srcClass);
 
-        if (targetType.isBoolean() && srcType.isNumber()) {
-            return (T) ((Boolean) (((Number) obj).longValue() > 0));
+        if (targetType.isString()) {
+            return (T) srcType.stringOf(srcObj);
+        } else if (targetType.isNumber()) {
+            if (srcType.isString()) {
+                return targetType.valueOf(srcObj);
+            } else if (srcType.isNumber()) {
+                return (T) Numbers.convert((Number) srcObj, (Type) targetType);
+            }
+        } else if (targetType.isBoolean() && srcType.isNumber()) {
+            return (T) ((Boolean) (((Number) srcObj).longValue() > 0));
+        } else if ((targetType.clazz().equals(int.class) || targetType.clazz().equals(Integer.class)) && srcType.clazz().equals(Character.class)) {
+            return (T) (Integer.valueOf(((Character) srcObj).charValue())); //NOSONAR
+        } else if ((targetType.clazz().equals(char.class) || targetType.clazz().equals(Character.class)) && srcType.clazz().equals(Integer.class)) {
+            return (T) (Character.valueOf((char) ((Integer) srcObj).intValue()));
+        } else if ((targetType.clazz().equals(long.class) || targetType.clazz().equals(Long.class)) && java.util.Date.class.isAssignableFrom(srcType.clazz())) {
+            return (T) (Long) ((java.util.Date) srcObj).getTime();
         }
 
         if (targetType.isBean()) {
             if (srcType.isBean()) {
-                return copy(obj, targetType.clazz());
+                return copy(srcObj, targetType.clazz());
             } else if (srcType.isMap()) {
-                return Maps.map2Bean((Map<String, Object>) obj, targetType.clazz());
+                return Maps.map2Bean((Map<String, Object>) srcObj, targetType.clazz());
             }
         } else if (targetType.isMap()) {
             if (srcType.isBean() && targetType.getParameterTypes()[0].clazz().isAssignableFrom(String.class)
                     && Object.class.equals(targetType.getParameterTypes()[1].clazz())) {
                 try {
                     final Map<String, Object> result = N.<String, Object> newMap((Class<Map>) targetType.clazz());
-                    Maps.bean2Map(obj, result);
+                    Maps.bean2Map(srcObj, result);
                     return (T) result;
                 } catch (Exception e) {
                     // ignore.
                 }
-            } else if (srcType.isMap() && Object.class.equals(targetType.getParameterTypes()[0].clazz())
-                    && Object.class.equals(targetType.getParameterTypes()[1].clazz())) {
-                final Map result = N.newMap((Class<Map>) targetType.clazz());
-                result.putAll((Map) obj);
+            } else if (srcType.isMap()) {
+                final Map srcMap = (Map) srcObj;
+                final Optional<Object> firstNonNullKeyOp = firstNonNull(srcMap.keySet());
+                final Optional<Object> firstNonNullValueOp = firstNonNull(srcMap.values());
+
+                if ((firstNonNullKeyOp.isEmpty() || targetType.getParameterTypes()[0].clazz().isAssignableFrom(firstNonNullKeyOp.get().getClass()))
+                        && (firstNonNullValueOp.isEmpty()
+                                || targetType.getParameterTypes()[1].clazz().isAssignableFrom(firstNonNullValueOp.get().getClass()))) {
+                    final Map result = N.newMap((Class<Map>) targetType.clazz(), srcMap.size());
+                    result.putAll(srcMap);
+                    return (T) result;
+                }
+            }
+        }
+
+        if (targetType.isCollection()) {
+            if (srcType.isCollection()) {
+                final Collection srcColl = (Collection) srcObj;
+                final Optional<Object> op = firstNonNull(srcColl);
+
+                if (op.isEmpty() || targetType.getParameterTypes()[0].clazz().isAssignableFrom(op.get().getClass())) {
+                    final Collection result = N.newCollection((Class<Collection>) targetType.clazz(), srcColl.size());
+                    result.addAll(srcColl);
+                    return (T) result;
+                }
+            } else if (srcType.isObjectArray() && targetType.getParameterTypes()[0].clazz().isAssignableFrom(srcType.clazz().getComponentType())) {
+                final Object[] srcArray = (Object[]) srcObj;
+                final Collection result = N.newCollection((Class<Collection>) targetType.clazz(), srcArray.length);
+                result.addAll(Arrays.asList(srcArray));
                 return (T) result;
             }
         }
 
-        if (targetType.isCollection() && (srcType.isCollection() && Object.class.equals(targetType.getParameterTypes()[0].clazz()))) {
-            final Collection result = N.newCollection((Class<Collection>) targetType.clazz());
-            result.addAll((Collection) obj);
-            return (T) result;
+        if (targetType.isObjectArray()) {
+            if (srcType.isCollection()) {
+                final Collection srcColl = (Collection) srcObj;
+                final Optional<Object> op = firstNonNull(srcColl);
+
+                if (op.isEmpty() || targetType.clazz().getComponentType().isAssignableFrom(op.get().getClass())) {
+                    try {
+                        final Object[] a = N.newArray(targetType.clazz().getComponentType(), srcColl.size());
+                        srcColl.toArray(a);
+                        return (T) a;
+                    } catch (Exception e) {
+                        // ignore;
+                    }
+                }
+            }
+            // If it works, it has returned by: targetType.clazz().isAssignableFrom(srcClass)
+            //    } else if (srcType.isObjectArray()) {
+            //        try {
+            //            final Object[] srcArray = (Object[]) obj;
+            //            final Object[] a = N.newArray(targetType.clazz().getComponentType(), srcArray.length);
+            //            N.copy(srcArray, 0, a, 0, srcArray.length);
+            //            return (T) a;
+            //        } catch (Exception e) {
+            //            // ignore;
+            //        }
+            //    }
         }
 
-        if (targetType.isNumber() && srcType.isNumber()) {
-            return (T) Numbers.convert((Number) obj, (Type) targetType);
-        } else if ((targetType.clazz().equals(int.class) || targetType.clazz().equals(Integer.class)) && srcType.clazz().equals(Character.class)) {
-            return (T) (Integer.valueOf(((Character) obj).charValue())); //NOSONAR
-        } else if ((targetType.clazz().equals(char.class) || targetType.clazz().equals(Character.class)) && srcType.clazz().equals(Integer.class)) {
-            return (T) (Character.valueOf((char) ((Integer) obj).intValue()));
-        } else if ((targetType.clazz().equals(long.class) || targetType.clazz().equals(Long.class)) && java.util.Date.class.isAssignableFrom(srcType.clazz())) {
-            return (T) (Long) ((java.util.Date) obj).getTime();
-        } else if (targetType.clazz().equals(byte[].class)) {
+        if (targetType.clazz().equals(byte[].class)) {
             if (srcType.clazz().equals(Blob.class)) {
-                final Blob blob = (Blob) obj;
+                final Blob blob = (Blob) srcObj;
 
                 try {
                     return (T) blob.getBytes(1, (int) blob.length());
@@ -1161,7 +1214,7 @@ sealed class CommonUtil permits N {
                     }
                 }
             } else if (srcType.clazz().equals(InputStream.class)) {
-                final InputStream is = (InputStream) obj;
+                final InputStream is = (InputStream) srcObj;
 
                 try {
                     return (T) IOUtil.readAllBytes(is);
@@ -1171,7 +1224,7 @@ sealed class CommonUtil permits N {
             }
         } else if (targetType.clazz().equals(char[].class)) {
             if (srcType.clazz().equals(Clob.class)) {
-                final Clob clob = (Clob) obj;
+                final Clob clob = (Clob) srcObj;
 
                 try {
                     return (T) clob.getSubString(1, (int) clob.length()).toCharArray();
@@ -1185,7 +1238,7 @@ sealed class CommonUtil permits N {
                     }
                 }
             } else if (srcType.clazz().equals(Reader.class)) {
-                final Reader reader = (Reader) obj;
+                final Reader reader = (Reader) srcObj;
 
                 try {
                     return (T) IOUtil.readAllChars(reader);
@@ -1193,7 +1246,7 @@ sealed class CommonUtil permits N {
                     IOUtil.close(reader);
                 }
             } else if (srcType.clazz().equals(InputStream.class)) {
-                final InputStream is = (InputStream) obj;
+                final InputStream is = (InputStream) srcObj;
 
                 try {
                     return (T) IOUtil.readAllChars(is);
@@ -1203,9 +1256,9 @@ sealed class CommonUtil permits N {
             }
         } else if (targetType.clazz().equals(String.class)) {
             if (CharSequence.class.isAssignableFrom(srcType.clazz())) {
-                return (T) ((CharSequence) obj).toString();
+                return (T) ((CharSequence) srcObj).toString();
             } else if (srcType.clazz().equals(Clob.class)) {
-                final Clob clob = (Clob) obj;
+                final Clob clob = (Clob) srcObj;
 
                 try {
                     return (T) clob.getSubString(1, (int) clob.length());
@@ -1219,7 +1272,7 @@ sealed class CommonUtil permits N {
                     }
                 }
             } else if (srcType.clazz().equals(Reader.class)) {
-                final Reader reader = (Reader) obj;
+                final Reader reader = (Reader) srcObj;
 
                 try {
                     return (T) IOUtil.readAllToString(reader);
@@ -1227,7 +1280,7 @@ sealed class CommonUtil permits N {
                     IOUtil.close(reader);
                 }
             } else if (srcType.clazz().equals(InputStream.class)) {
-                final InputStream is = (InputStream) obj;
+                final InputStream is = (InputStream) srcObj;
 
                 try {
                     return (T) IOUtil.readAllToString(is);
@@ -1236,19 +1289,19 @@ sealed class CommonUtil permits N {
                 }
             }
         } else if (targetType.clazz().equals(InputStream.class) && srcType.clazz().equals(byte[].class)) {
-            return (T) new ByteArrayInputStream((byte[]) obj);
-        } else if (targetType.clazz().equals(Reader.class) && srcType.clazz().equals(String.class)) {
-            return (T) new StringReader((String) obj);
+            return (T) new ByteArrayInputStream((byte[]) srcObj);
+        } else if (targetType.clazz().equals(Reader.class) && CharSequence.class.isAssignableFrom(srcType.clazz())) {
+            return (T) new StringReader(srcObj.toString());
         }
 
-        if (obj instanceof AutoCloseable closeable) {
+        if (srcObj instanceof AutoCloseable closeable) {
             try {
-                return targetType.valueOf(obj);
+                return targetType.valueOf(srcObj);
             } finally {
                 IOUtil.closeQuietly(closeable);
             }
         } else {
-            return targetType.valueOf(obj);
+            return targetType.valueOf(srcObj);
         }
     }
 
@@ -1745,7 +1798,6 @@ sealed class CommonUtil permits N {
         return merge(sourceBean, targetBean, selectPropNames, ParserUtil.getBeanInfo(targetBean.getClass()));
     }
 
-    @SuppressWarnings("deprecation")
     private static <T> T merge(final Object sourceBean, final T targetBean, final Collection<String> selectPropNames, final BeanInfo targetBeanInfo)
             throws IllegalArgumentException {
         N.checkArgNotNull(targetBean, "targetBean");
@@ -1763,7 +1815,7 @@ sealed class CommonUtil permits N {
             for (PropInfo propInfo : srcBeanInfo.propInfoList) {
                 propValue = propInfo.getPropValue(sourceBean);
 
-                if (InternalUtil.notNullOrDefault(propValue)) {
+                if (notNullOrDefault(propValue)) {
                     targetBeanInfo.setPropValue(targetBean, propInfo, propValue, ignoreUnmatchedProperty);
                 }
             }
@@ -1804,7 +1856,6 @@ sealed class CommonUtil permits N {
         return merge(sourceBean, targetBean, ignoreUnmatchedProperty, ignoredPropNames, ParserUtil.getBeanInfo(targetBean.getClass()));
     }
 
-    @SuppressWarnings("deprecation")
     private static <T> T merge(final Object sourceBean, final T targetBean, final boolean ignoreUnmatchedProperty, final Set<String> ignoredPropNames,
             final BeanInfo targetBeanInfo) throws IllegalArgumentException {
         N.checkArgNotNull(targetBean, "targetBean");
@@ -1821,7 +1872,7 @@ sealed class CommonUtil permits N {
             if (ignoredPropNames == null || !ignoredPropNames.contains(propInfo.name)) {
                 propValue = propInfo.getPropValue(sourceBean);
 
-                if (InternalUtil.notNullOrDefault(propValue)) {
+                if (notNullOrDefault(propValue)) {
                     targetBeanInfo.setPropValue(targetBean, propInfo, propValue, ignoreUnmatchedProperty);
                 }
             }
@@ -2638,56 +2689,6 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     *
-     * @param <T>
-     * @return
-     */
-    public static <T> LongMultiset<T> newLongMultiset() {
-        return new LongMultiset<>();
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param initialCapacity
-     * @return
-     */
-    public static <T> LongMultiset<T> newLongMultiset(final int initialCapacity) {
-        return new LongMultiset<>(initialCapacity);
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param valueMapType
-     * @return
-     */
-    @SuppressWarnings("rawtypes")
-    public static <T> LongMultiset<T> newLongMultiset(final Class<? extends Map> valueMapType) {
-        return new LongMultiset<>(valueMapType);
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param mapSupplier
-     * @return
-     */
-    public static <T> LongMultiset<T> newLongMultiset(final Supplier<? extends Map<T, ?>> mapSupplier) {
-        return new LongMultiset<>(mapSupplier);
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param c
-     * @return
-     */
-    public static <T> LongMultiset<T> newLongMultiset(final Collection<? extends T> c) {
-        return new LongMultiset<>(c);
-    }
-
-    /**
      * New array deque.
      *
      * @param <T>
@@ -2788,10 +2789,11 @@ sealed class CommonUtil permits N {
      * @param c
      * @param keyMapper
      * @return
+     * @throws IllegalArgumentException
      * @throws E the e
      */
     public static <K, V, E extends Exception> Map<K, V> newHashMap(final Collection<? extends V> c,
-            final Throwables.Function<? super V, ? extends K, E> keyMapper) throws E {
+            final Throwables.Function<? super V, ? extends K, E> keyMapper) throws IllegalArgumentException, E {
         checkArgNotNull(keyMapper);
 
         if (isEmpty(c)) {
@@ -2851,10 +2853,11 @@ sealed class CommonUtil permits N {
      * @param c
      * @param keyMapper
      * @return
+     * @throws IllegalArgumentException
      * @throws E the e
      */
     public static <K, V, E extends Exception> Map<K, V> newLinkedHashMap(final Collection<? extends V> c,
-            final Throwables.Function<? super V, ? extends K, E> keyMapper) throws E {
+            final Throwables.Function<? super V, ? extends K, E> keyMapper) throws IllegalArgumentException, E {
         checkArgNotNull(keyMapper);
 
         if (isEmpty(c)) {
@@ -3677,8 +3680,9 @@ sealed class CommonUtil permits N {
      * @param a
      * @param b
      * @return
+     * @throws IllegalArgumentException
      */
-    public static DataSet merge(final DataSet a, final DataSet b) {
+    public static DataSet merge(final DataSet a, final DataSet b) throws IllegalArgumentException {
         N.checkArgNotNull(a);
         N.checkArgNotNull(b);
 
@@ -3692,8 +3696,9 @@ sealed class CommonUtil permits N {
      * @param b
      * @param c
      * @return
+     * @throws IllegalArgumentException
      */
-    public static DataSet merge(final DataSet a, final DataSet b, final DataSet c) {
+    public static DataSet merge(final DataSet a, final DataSet b, final DataSet c) throws IllegalArgumentException {
         N.checkArgNotNull(a);
         N.checkArgNotNull(b);
         N.checkArgNotNull(c);
@@ -3803,13 +3808,15 @@ sealed class CommonUtil permits N {
 
     /**
      *
+     *
      * @param c
      * @param fromIndex
      * @param toIndex
      * @return
+     * @throws IndexOutOfBoundsException
      */
     @SuppressWarnings("rawtypes")
-    public static Object[] toArray(final Collection<?> c, final int fromIndex, final int toIndex) {
+    public static Object[] toArray(final Collection<?> c, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, size(c));
 
         if (isEmpty(c)) {
@@ -3839,14 +3846,16 @@ sealed class CommonUtil permits N {
 
     /**
      *
+     *
      * @param <A>
      * @param <T>
      * @param c
      * @param a
      * @return the specified array if the specified collection is {@code null} or empty.
+     * @throws IndexOutOfBoundsException
      * @throws IllegalArgumentException if the specified {@code Array} is <code>null</code>.
      */
-    public static <A, T extends A> A[] toArray(final Collection<? extends T> c, final A[] a) throws IllegalArgumentException {
+    public static <A, T extends A> A[] toArray(final Collection<? extends T> c, final A[] a) throws IndexOutOfBoundsException, IllegalArgumentException {
         checkArgNotNull(a);
 
         if (isEmpty(c)) {
@@ -3899,13 +3908,15 @@ sealed class CommonUtil permits N {
 
     /**
      *
+     *
      * @param <A>
      * @param <T>
      * @param c
      * @param arraySupplier
      * @return
+     * @throws IllegalArgumentException
      */
-    public static <A, T extends A> A[] toArray(final Collection<? extends T> c, final IntFunction<A[]> arraySupplier) {
+    public static <A, T extends A> A[] toArray(final Collection<? extends T> c, final IntFunction<A[]> arraySupplier) throws IllegalArgumentException {
         checkArgNotNull(arraySupplier);
 
         if (isEmpty(c)) {
@@ -3917,6 +3928,7 @@ sealed class CommonUtil permits N {
 
     /**
      *
+     *
      * @param <A>
      * @param <T>
      * @param c
@@ -3924,8 +3936,11 @@ sealed class CommonUtil permits N {
      * @param toIndex
      * @param arraySupplier
      * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
      */
-    public static <A, T extends A> A[] toArray(final Collection<? extends T> c, final int fromIndex, final int toIndex, final IntFunction<A[]> arraySupplier) {
+    public static <A, T extends A> A[] toArray(final Collection<? extends T> c, final int fromIndex, final int toIndex, final IntFunction<A[]> arraySupplier)
+            throws IllegalArgumentException, IndexOutOfBoundsException {
         checkArgNotNull(arraySupplier);
         checkFromToIndex(fromIndex, toIndex, size(c));
 
@@ -3962,9 +3977,11 @@ sealed class CommonUtil permits N {
      * @param c
      * @param targetType
      * @return
+     * @throws IndexOutOfBoundsException
      * @throws IllegalArgumentException if the specified {@code Class} is <code>null</code>.
      */
-    public static <A, T extends A> A[] toArray(final Collection<? extends T> c, final Class<A[]> targetType) throws IllegalArgumentException {
+    public static <A, T extends A> A[] toArray(final Collection<? extends T> c, final Class<A[]> targetType)
+            throws IndexOutOfBoundsException, IllegalArgumentException {
         checkArgNotNull(targetType);
 
         if (isEmpty(c)) {
@@ -4058,8 +4075,10 @@ sealed class CommonUtil permits N {
      * @param toIndex
      * @param defaultForNull
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static boolean[] toBooleanArray(final Collection<Boolean> c, final int fromIndex, final int toIndex, final boolean defaultForNull) {
+    public static boolean[] toBooleanArray(final Collection<Boolean> c, final int fromIndex, final int toIndex, final boolean defaultForNull)
+            throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, size(c));
 
         if (fromIndex == toIndex) {
@@ -4170,8 +4189,10 @@ sealed class CommonUtil permits N {
      * @param toIndex
      * @param defaultForNull
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static char[] toCharArray(final Collection<Character> c, final int fromIndex, final int toIndex, final char defaultForNull) {
+    public static char[] toCharArray(final Collection<Character> c, final int fromIndex, final int toIndex, final char defaultForNull)
+            throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, size(c));
 
         if (fromIndex == toIndex) {
@@ -4258,8 +4279,10 @@ sealed class CommonUtil permits N {
      * @param toIndex
      * @param defaultForNull
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static byte[] toByteArray(final Collection<? extends Number> c, final int fromIndex, final int toIndex, final byte defaultForNull) {
+    public static byte[] toByteArray(final Collection<? extends Number> c, final int fromIndex, final int toIndex, final byte defaultForNull)
+            throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, size(c));
 
         if (fromIndex == toIndex) {
@@ -4370,8 +4393,10 @@ sealed class CommonUtil permits N {
      * @param toIndex
      * @param defaultForNull
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static short[] toShortArray(final Collection<? extends Number> c, final int fromIndex, final int toIndex, final short defaultForNull) {
+    public static short[] toShortArray(final Collection<? extends Number> c, final int fromIndex, final int toIndex, final short defaultForNull)
+            throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, size(c));
 
         if (fromIndex == toIndex) {
@@ -4458,8 +4483,10 @@ sealed class CommonUtil permits N {
      * @param toIndex
      * @param defaultForNull
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static int[] toIntArray(final Collection<? extends Number> c, final int fromIndex, final int toIndex, final int defaultForNull) {
+    public static int[] toIntArray(final Collection<? extends Number> c, final int fromIndex, final int toIndex, final int defaultForNull)
+            throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, size(c));
 
         if (fromIndex == toIndex) {
@@ -4570,8 +4597,10 @@ sealed class CommonUtil permits N {
      * @param toIndex
      * @param defaultForNull
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static long[] toLongArray(final Collection<? extends Number> c, final int fromIndex, final int toIndex, final long defaultForNull) {
+    public static long[] toLongArray(final Collection<? extends Number> c, final int fromIndex, final int toIndex, final long defaultForNull)
+            throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, size(c));
 
         if (fromIndex == toIndex) {
@@ -4658,8 +4687,10 @@ sealed class CommonUtil permits N {
      * @param toIndex
      * @param defaultForNull
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static float[] toFloatArray(final Collection<? extends Number> c, final int fromIndex, final int toIndex, final float defaultForNull) {
+    public static float[] toFloatArray(final Collection<? extends Number> c, final int fromIndex, final int toIndex, final float defaultForNull)
+            throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, size(c));
 
         if (fromIndex == toIndex) {
@@ -4746,8 +4777,10 @@ sealed class CommonUtil permits N {
      * @param toIndex
      * @param defaultForNull
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static double[] toDoubleArray(final Collection<? extends Number> c, final int fromIndex, final int toIndex, final double defaultForNull) {
+    public static double[] toDoubleArray(final Collection<? extends Number> c, final int fromIndex, final int toIndex, final double defaultForNull)
+            throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, size(c));
 
         if (fromIndex == toIndex) {
@@ -4804,12 +4837,14 @@ sealed class CommonUtil permits N {
 
     /**
      *
+     *
      * @param a
      * @param fromIndex
      * @param toIndex
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static List<Boolean> toList(final boolean[] a, final int fromIndex, final int toIndex) {
+    public static List<Boolean> toList(final boolean[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (fromIndex == toIndex) {
@@ -4836,12 +4871,14 @@ sealed class CommonUtil permits N {
 
     /**
      *
+     *
      * @param a
      * @param fromIndex
      * @param toIndex
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static List<Character> toList(final char[] a, final int fromIndex, final int toIndex) {
+    public static List<Character> toList(final char[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (fromIndex == toIndex) {
@@ -4868,12 +4905,14 @@ sealed class CommonUtil permits N {
 
     /**
      *
+     *
      * @param a
      * @param fromIndex
      * @param toIndex
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static List<Byte> toList(final byte[] a, final int fromIndex, final int toIndex) {
+    public static List<Byte> toList(final byte[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (fromIndex == toIndex) {
@@ -4900,12 +4939,14 @@ sealed class CommonUtil permits N {
 
     /**
      *
+     *
      * @param a
      * @param fromIndex
      * @param toIndex
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static List<Short> toList(final short[] a, final int fromIndex, final int toIndex) {
+    public static List<Short> toList(final short[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (fromIndex == toIndex) {
@@ -4932,12 +4973,14 @@ sealed class CommonUtil permits N {
 
     /**
      *
+     *
      * @param a
      * @param fromIndex
      * @param toIndex
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static List<Integer> toList(final int[] a, final int fromIndex, final int toIndex) {
+    public static List<Integer> toList(final int[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (fromIndex == toIndex) {
@@ -4964,12 +5007,14 @@ sealed class CommonUtil permits N {
 
     /**
      *
+     *
      * @param a
      * @param fromIndex
      * @param toIndex
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static List<Long> toList(final long[] a, final int fromIndex, final int toIndex) {
+    public static List<Long> toList(final long[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (fromIndex == toIndex) {
@@ -4996,12 +5041,14 @@ sealed class CommonUtil permits N {
 
     /**
      *
+     *
      * @param a
      * @param fromIndex
      * @param toIndex
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static List<Float> toList(final float[] a, final int fromIndex, final int toIndex) {
+    public static List<Float> toList(final float[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (fromIndex == toIndex) {
@@ -5028,12 +5075,14 @@ sealed class CommonUtil permits N {
 
     /**
      *
+     *
      * @param a
      * @param fromIndex
      * @param toIndex
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static List<Double> toList(final double[] a, final int fromIndex, final int toIndex) {
+    public static List<Double> toList(final double[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (fromIndex == toIndex) {
@@ -5065,13 +5114,15 @@ sealed class CommonUtil permits N {
 
     /**
      *
+     *
      * @param <T>
      * @param a
      * @param fromIndex
      * @param toIndex
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static <T> List<T> toList(final T[] a, final int fromIndex, final int toIndex) {
+    public static <T> List<T> toList(final T[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (fromIndex == toIndex) {
@@ -5121,12 +5172,14 @@ sealed class CommonUtil permits N {
 
     /**
      *
+     *
      * @param a
      * @param fromIndex
      * @param toIndex
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static Set<Boolean> toSet(final boolean[] a, final int fromIndex, final int toIndex) {
+    public static Set<Boolean> toSet(final boolean[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (fromIndex == toIndex) {
@@ -5153,12 +5206,14 @@ sealed class CommonUtil permits N {
 
     /**
      *
+     *
      * @param a
      * @param fromIndex
      * @param toIndex
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static Set<Character> toSet(final char[] a, final int fromIndex, final int toIndex) {
+    public static Set<Character> toSet(final char[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (fromIndex == toIndex) {
@@ -5185,12 +5240,14 @@ sealed class CommonUtil permits N {
 
     /**
      *
+     *
      * @param a
      * @param fromIndex
      * @param toIndex
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static Set<Byte> toSet(final byte[] a, final int fromIndex, final int toIndex) {
+    public static Set<Byte> toSet(final byte[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (fromIndex == toIndex) {
@@ -5217,12 +5274,14 @@ sealed class CommonUtil permits N {
 
     /**
      *
+     *
      * @param a
      * @param fromIndex
      * @param toIndex
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static Set<Short> toSet(final short[] a, final int fromIndex, final int toIndex) {
+    public static Set<Short> toSet(final short[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (fromIndex == toIndex) {
@@ -5249,12 +5308,14 @@ sealed class CommonUtil permits N {
 
     /**
      *
+     *
      * @param a
      * @param fromIndex
      * @param toIndex
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static Set<Integer> toSet(final int[] a, final int fromIndex, final int toIndex) {
+    public static Set<Integer> toSet(final int[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (fromIndex == toIndex) {
@@ -5281,12 +5342,14 @@ sealed class CommonUtil permits N {
 
     /**
      *
+     *
      * @param a
      * @param fromIndex
      * @param toIndex
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static Set<Long> toSet(final long[] a, final int fromIndex, final int toIndex) {
+    public static Set<Long> toSet(final long[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (fromIndex == toIndex) {
@@ -5313,12 +5376,14 @@ sealed class CommonUtil permits N {
 
     /**
      *
+     *
      * @param a
      * @param fromIndex
      * @param toIndex
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static Set<Float> toSet(final float[] a, final int fromIndex, final int toIndex) {
+    public static Set<Float> toSet(final float[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (fromIndex == toIndex) {
@@ -5345,12 +5410,14 @@ sealed class CommonUtil permits N {
 
     /**
      *
+     *
      * @param a
      * @param fromIndex
      * @param toIndex
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static Set<Double> toSet(final double[] a, final int fromIndex, final int toIndex) {
+    public static Set<Double> toSet(final double[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (fromIndex == toIndex) {
@@ -5382,13 +5449,15 @@ sealed class CommonUtil permits N {
 
     /**
      *
+     *
      * @param <T>
      * @param a
      * @param fromIndex
      * @param toIndex
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static <T> Set<T> toSet(final T[] a, final int fromIndex, final int toIndex) {
+    public static <T> Set<T> toSet(final T[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (fromIndex == toIndex) {
@@ -5438,15 +5507,17 @@ sealed class CommonUtil permits N {
 
     /**
      *
+     *
      * @param <C>
      * @param a
      * @param fromIndex
      * @param toIndex
      * @param supplier
      * @return
+     * @throws IndexOutOfBoundsException
      */
     public static <C extends Collection<Boolean>> C toCollection(final boolean[] a, final int fromIndex, final int toIndex,
-            final IntFunction<? extends C> supplier) {
+            final IntFunction<? extends C> supplier) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (fromIndex == toIndex) {
@@ -5475,15 +5546,17 @@ sealed class CommonUtil permits N {
 
     /**
      *
+     *
      * @param <C>
      * @param a
      * @param fromIndex
      * @param toIndex
      * @param supplier
      * @return
+     * @throws IndexOutOfBoundsException
      */
     public static <C extends Collection<Character>> C toCollection(final char[] a, final int fromIndex, final int toIndex,
-            final IntFunction<? extends C> supplier) {
+            final IntFunction<? extends C> supplier) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (fromIndex == toIndex) {
@@ -5512,14 +5585,17 @@ sealed class CommonUtil permits N {
 
     /**
      *
+     *
      * @param <C>
      * @param a
      * @param fromIndex
      * @param toIndex
      * @param supplier
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static <C extends Collection<Byte>> C toCollection(final byte[] a, final int fromIndex, final int toIndex, final IntFunction<? extends C> supplier) {
+    public static <C extends Collection<Byte>> C toCollection(final byte[] a, final int fromIndex, final int toIndex, final IntFunction<? extends C> supplier)
+            throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (fromIndex == toIndex) {
@@ -5548,15 +5624,17 @@ sealed class CommonUtil permits N {
 
     /**
      *
+     *
      * @param <C>
      * @param a
      * @param fromIndex
      * @param toIndex
      * @param supplier
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static <C extends Collection<Short>> C toCollection(final short[] a, final int fromIndex, final int toIndex,
-            final IntFunction<? extends C> supplier) {
+    public static <C extends Collection<Short>> C toCollection(final short[] a, final int fromIndex, final int toIndex, final IntFunction<? extends C> supplier)
+            throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (fromIndex == toIndex) {
@@ -5585,15 +5663,17 @@ sealed class CommonUtil permits N {
 
     /**
      *
+     *
      * @param <C>
      * @param a
      * @param fromIndex
      * @param toIndex
      * @param supplier
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static <C extends Collection<Integer>> C toCollection(final int[] a, final int fromIndex, final int toIndex,
-            final IntFunction<? extends C> supplier) {
+    public static <C extends Collection<Integer>> C toCollection(final int[] a, final int fromIndex, final int toIndex, final IntFunction<? extends C> supplier)
+            throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (fromIndex == toIndex) {
@@ -5622,14 +5702,17 @@ sealed class CommonUtil permits N {
 
     /**
      *
+     *
      * @param <C>
      * @param a
      * @param fromIndex
      * @param toIndex
      * @param supplier
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static <C extends Collection<Long>> C toCollection(final long[] a, final int fromIndex, final int toIndex, final IntFunction<? extends C> supplier) {
+    public static <C extends Collection<Long>> C toCollection(final long[] a, final int fromIndex, final int toIndex, final IntFunction<? extends C> supplier)
+            throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (fromIndex == toIndex) {
@@ -5658,15 +5741,17 @@ sealed class CommonUtil permits N {
 
     /**
      *
+     *
      * @param <C>
      * @param a
      * @param fromIndex
      * @param toIndex
      * @param supplier
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static <C extends Collection<Float>> C toCollection(final float[] a, final int fromIndex, final int toIndex,
-            final IntFunction<? extends C> supplier) {
+    public static <C extends Collection<Float>> C toCollection(final float[] a, final int fromIndex, final int toIndex, final IntFunction<? extends C> supplier)
+            throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (fromIndex == toIndex) {
@@ -5695,15 +5780,17 @@ sealed class CommonUtil permits N {
 
     /**
      *
+     *
      * @param <C>
      * @param a
      * @param fromIndex
      * @param toIndex
      * @param supplier
      * @return
+     * @throws IndexOutOfBoundsException
      */
     public static <C extends Collection<Double>> C toCollection(final double[] a, final int fromIndex, final int toIndex,
-            final IntFunction<? extends C> supplier) {
+            final IntFunction<? extends C> supplier) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (fromIndex == toIndex) {
@@ -5737,6 +5824,7 @@ sealed class CommonUtil permits N {
 
     /**
      *
+     *
      * @param <T>
      * @param <C>
      * @param a
@@ -5744,8 +5832,10 @@ sealed class CommonUtil permits N {
      * @param toIndex
      * @param supplier
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static <T, C extends Collection<T>> C toCollection(final T[] a, final int fromIndex, final int toIndex, final IntFunction<? extends C> supplier) {
+    public static <T, C extends Collection<T>> C toCollection(final T[] a, final int fromIndex, final int toIndex, final IntFunction<? extends C> supplier)
+            throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (fromIndex == toIndex) {
@@ -5823,13 +5913,15 @@ sealed class CommonUtil permits N {
 
     /**
      *
+     *
      * @param <T>
      * @param <K> the key type
      * @param c
      * @param keyMapper
      * @return
+     * @throws IllegalArgumentException
      */
-    public static <T, K> Map<K, T> toMap(Iterable<? extends T> c, final Function<? super T, ? extends K> keyMapper) {
+    public static <T, K> Map<K, T> toMap(Iterable<? extends T> c, final Function<? super T, ? extends K> keyMapper) throws IllegalArgumentException {
         N.checkArgNotNull(keyMapper);
 
         if (c == null) {
@@ -5847,6 +5939,7 @@ sealed class CommonUtil permits N {
 
     /**
      *
+     *
      * @param <T>
      * @param <K> the key type
      * @param <V> the value type
@@ -5854,9 +5947,10 @@ sealed class CommonUtil permits N {
      * @param keyMapper
      * @param valueExtractor
      * @return
+     * @throws IllegalArgumentException
      */
     public static <T, K, V> Map<K, V> toMap(Iterable<? extends T> c, final Function<? super T, ? extends K> keyMapper,
-            final Function<? super T, ? extends V> valueExtractor) {
+            final Function<? super T, ? extends V> valueExtractor) throws IllegalArgumentException {
         N.checkArgNotNull(keyMapper);
         N.checkArgNotNull(valueExtractor);
 
@@ -5875,6 +5969,7 @@ sealed class CommonUtil permits N {
 
     /**
      *
+     *
      * @param <T>
      * @param <K> the key type
      * @param <V> the value type
@@ -5884,9 +5979,10 @@ sealed class CommonUtil permits N {
      * @param valueExtractor
      * @param mapSupplier
      * @return
+     * @throws IllegalArgumentException
      */
     public static <T, K, V, M extends Map<K, V>> M toMap(Iterable<? extends T> c, final Function<? super T, ? extends K> keyMapper,
-            final Function<? super T, ? extends V> valueExtractor, final IntFunction<? extends M> mapSupplier) {
+            final Function<? super T, ? extends V> valueExtractor, final IntFunction<? extends M> mapSupplier) throws IllegalArgumentException {
         N.checkArgNotNull(keyMapper);
         N.checkArgNotNull(valueExtractor);
         N.checkArgNotNull(mapSupplier);
@@ -5906,6 +6002,7 @@ sealed class CommonUtil permits N {
 
     /**
      *
+     *
      * @param <T>
      * @param <K>
      * @param <V>
@@ -5916,9 +6013,11 @@ sealed class CommonUtil permits N {
      * @param mergeFunction
      * @param mapSupplier
      * @return
+     * @throws IllegalArgumentException
      */
     public static <T, K, V, M extends Map<K, V>> M toMap(Iterable<? extends T> c, final Function<? super T, ? extends K> keyMapper,
-            final Function<? super T, ? extends V> valueExtractor, final BinaryOperator<V> mergeFunction, final IntFunction<? extends M> mapSupplier) {
+            final Function<? super T, ? extends V> valueExtractor, final BinaryOperator<V> mergeFunction, final IntFunction<? extends M> mapSupplier)
+            throws IllegalArgumentException {
         N.checkArgNotNull(keyMapper);
         N.checkArgNotNull(valueExtractor);
         N.checkArgNotNull(mergeFunction);
@@ -5948,13 +6047,15 @@ sealed class CommonUtil permits N {
 
     /**
      *
+     *
      * @param <T>
      * @param <K> the key type
      * @param iter
      * @param keyMapper
      * @return
+     * @throws IllegalArgumentException
      */
-    public static <T, K> Map<K, T> toMap(final Iterator<? extends T> iter, final Function<? super T, K> keyMapper) {
+    public static <T, K> Map<K, T> toMap(final Iterator<? extends T> iter, final Function<? super T, K> keyMapper) throws IllegalArgumentException {
         N.checkArgNotNull(keyMapper);
 
         if (iter == null) {
@@ -5974,6 +6075,7 @@ sealed class CommonUtil permits N {
 
     /**
      *
+     *
      * @param <T>
      * @param <K> the key type
      * @param <V> the value type
@@ -5981,9 +6083,10 @@ sealed class CommonUtil permits N {
      * @param keyMapper
      * @param valueExtractor
      * @return
+     * @throws IllegalArgumentException
      */
     public static <T, K, V> Map<K, V> toMap(final Iterator<? extends T> iter, final Function<? super T, K> keyMapper,
-            final Function<? super T, ? extends V> valueExtractor) {
+            final Function<? super T, ? extends V> valueExtractor) throws IllegalArgumentException {
         N.checkArgNotNull(keyMapper);
         N.checkArgNotNull(valueExtractor);
 
@@ -6004,6 +6107,7 @@ sealed class CommonUtil permits N {
 
     /**
      *
+     *
      * @param <T>
      * @param <K> the key type
      * @param <V> the value type
@@ -6013,9 +6117,10 @@ sealed class CommonUtil permits N {
      * @param valueExtractor
      * @param mapSupplier
      * @return
+     * @throws IllegalArgumentException
      */
     public static <T, K, V, M extends Map<K, V>> M toMap(final Iterator<? extends T> iter, final Function<? super T, K> keyMapper,
-            final Function<? super T, ? extends V> valueExtractor, final Supplier<? extends M> mapSupplier) {
+            final Function<? super T, ? extends V> valueExtractor, final Supplier<? extends M> mapSupplier) throws IllegalArgumentException {
         N.checkArgNotNull(keyMapper);
         N.checkArgNotNull(valueExtractor);
         N.checkArgNotNull(mapSupplier);
@@ -6037,6 +6142,7 @@ sealed class CommonUtil permits N {
 
     /**
      *
+     *
      * @param <T>
      * @param <K>
      * @param <V>
@@ -6047,9 +6153,11 @@ sealed class CommonUtil permits N {
      * @param mergeFunction
      * @param mapSupplier
      * @return
+     * @throws IllegalArgumentException
      */
     public static <T, K, V, M extends Map<K, V>> M toMap(final Iterator<? extends T> iter, final Function<? super T, K> keyMapper,
-            final Function<? super T, ? extends V> valueExtractor, final BinaryOperator<V> mergeFunction, final Supplier<? extends M> mapSupplier) {
+            final Function<? super T, ? extends V> valueExtractor, final BinaryOperator<V> mergeFunction, final Supplier<? extends M> mapSupplier)
+            throws IllegalArgumentException {
         N.checkArgNotNull(keyMapper);
         N.checkArgNotNull(valueExtractor);
         N.checkArgNotNull(mergeFunction);
@@ -7788,13 +7896,15 @@ sealed class CommonUtil permits N {
 
     /**
      *
+     *
      * @param <T>
      * @param c
      * @param index
      * @return
+     * @throws IllegalArgumentException
      * @throws IndexOutOfBoundsException the index out of bounds exception
      */
-    public static <T> T getElement(final Iterable<? extends T> c, int index) throws IndexOutOfBoundsException {
+    public static <T> T getElement(final Iterable<? extends T> c, int index) throws IllegalArgumentException, IndexOutOfBoundsException {
         checkArgNotNull(c, "c");
 
         if (c instanceof Collection) {
@@ -7810,13 +7920,15 @@ sealed class CommonUtil permits N {
 
     /**
      *
+     *
      * @param <T>
      * @param iter
      * @param index
      * @return
+     * @throws IllegalArgumentException
      * @throws IndexOutOfBoundsException the index out of bounds exception
      */
-    public static <T> T getElement(final Iterator<? extends T> iter, long index) throws IndexOutOfBoundsException {
+    public static <T> T getElement(final Iterator<? extends T> iter, long index) throws IllegalArgumentException, IndexOutOfBoundsException {
         checkArgNotNull(iter, "iter");
 
         while (index-- > 0 && iter.hasNext()) {
@@ -7955,9 +8067,10 @@ sealed class CommonUtil permits N {
      * @param c
      * @param n
      * @return the list
+     * @throws IllegalArgumentException
      */
     @Beta
-    public static <T> List<T> firstElements(final Collection<? extends T> c, final int n) {
+    public static <T> List<T> firstElements(final Collection<? extends T> c, final int n) throws IllegalArgumentException {
         N.checkArgument(n >= 0, "'n' can't be negative: " + n);
 
         if (N.isEmpty(c) || n == 0) {
@@ -7989,9 +8102,10 @@ sealed class CommonUtil permits N {
      * @param c
      * @param n
      * @return the list
+     * @throws IllegalArgumentException
      */
     @Beta
-    public static <T> List<T> lastElements(final Collection<? extends T> c, final int n) {
+    public static <T> List<T> lastElements(final Collection<? extends T> c, final int n) throws IllegalArgumentException {
         N.checkArgument(n >= 0, "'n' can't be negative: " + n);
 
         if (N.isEmpty(c) || n == 0) {
@@ -9637,16 +9751,6 @@ sealed class CommonUtil permits N {
     /**
      * Checks if is null or empty.
      *
-     * @param s
-     * @return true, if is null or empty
-     */
-    public static boolean isEmpty(final LongMultiset<?> s) {
-        return (s == null) || (s.isEmpty());
-    }
-
-    /**
-     * Checks if is null or empty.
-     *
      * @param m
      * @return true, if is null or empty
      */
@@ -9858,16 +9962,6 @@ sealed class CommonUtil permits N {
     /**
      * Not null or empty.
      *
-     * @param s
-     * @return
-     */
-    public static boolean notEmpty(final LongMultiset<?> s) {
-        return (s != null) && (s.size() > 0);
-    }
-
-    /**
-     * Not null or empty.
-     *
      * @param m
      * @return
      */
@@ -9892,6 +9986,19 @@ sealed class CommonUtil permits N {
      */
     public static boolean notBlank(final CharSequence cs) {
         return !isBlank(cs);
+    }
+
+    /**
+     * Checks if it's not null or default. {@code null} is default value for all reference types, {@code false} is default value for primitive boolean, {@code 0} is the default value for primitive number type.
+     *
+     *
+     * @param s
+     * @return true, if it's not null or default
+     * @deprecated DO NOT call the methods defined in this class. it's for internal use only.
+     */
+    @Deprecated
+    static boolean notNullOrDefault(final Object value) {
+        return (value != null) && !N.equals(value, N.defaultValueOf(value.getClass()));
     }
 
     /**
@@ -10484,7 +10591,7 @@ sealed class CommonUtil permits N {
      * @return
      * @throws IllegalArgumentException if {@code obj} is {@code null}
      */
-    public static <T> T checkArgNotNull(final T obj) {
+    public static <T> T checkArgNotNull(final T obj) throws IllegalArgumentException {
         if (obj == null) {
             throw new IllegalArgumentException();
         }
@@ -10501,7 +10608,7 @@ sealed class CommonUtil permits N {
      * @return
      * @throws IllegalArgumentException if {@code obj} is {@code null}
      */
-    public static <T> T checkArgNotNull(final T obj, final String errorMessage) {
+    public static <T> T checkArgNotNull(final T obj, final String errorMessage) throws IllegalArgumentException {
         if (obj == null) {
             if (isArgNameOnly(errorMessage)) {
                 throw new IllegalArgumentException("'" + errorMessage + "' can not be null");
@@ -10527,7 +10634,7 @@ sealed class CommonUtil permits N {
      * @return
      * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
      */
-    public static <T extends CharSequence> T checkArgNotEmpty(final T arg, final String argNameOrErrorMsg) {
+    public static <T extends CharSequence> T checkArgNotEmpty(final T arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
         if (Strings.isEmpty(arg)) {
             throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
         }
@@ -10543,7 +10650,7 @@ sealed class CommonUtil permits N {
      * @return
      * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
      */
-    public static boolean[] checkArgNotEmpty(final boolean[] arg, final String argNameOrErrorMsg) {
+    public static boolean[] checkArgNotEmpty(final boolean[] arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
         if (isEmpty(arg)) {
             throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
         }
@@ -10559,7 +10666,7 @@ sealed class CommonUtil permits N {
      * @return
      * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
      */
-    public static char[] checkArgNotEmpty(final char[] arg, final String argNameOrErrorMsg) {
+    public static char[] checkArgNotEmpty(final char[] arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
         if (isEmpty(arg)) {
             throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
         }
@@ -10575,7 +10682,7 @@ sealed class CommonUtil permits N {
      * @return
      * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
      */
-    public static byte[] checkArgNotEmpty(final byte[] arg, final String argNameOrErrorMsg) {
+    public static byte[] checkArgNotEmpty(final byte[] arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
         if (isEmpty(arg)) {
             throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
         }
@@ -10591,7 +10698,7 @@ sealed class CommonUtil permits N {
      * @return
      * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
      */
-    public static short[] checkArgNotEmpty(final short[] arg, final String argNameOrErrorMsg) {
+    public static short[] checkArgNotEmpty(final short[] arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
         if (isEmpty(arg)) {
             throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
         }
@@ -10607,7 +10714,7 @@ sealed class CommonUtil permits N {
      * @return
      * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
      */
-    public static int[] checkArgNotEmpty(final int[] arg, final String argNameOrErrorMsg) {
+    public static int[] checkArgNotEmpty(final int[] arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
         if (isEmpty(arg)) {
             throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
         }
@@ -10623,7 +10730,7 @@ sealed class CommonUtil permits N {
      * @return
      * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
      */
-    public static long[] checkArgNotEmpty(final long[] arg, final String argNameOrErrorMsg) {
+    public static long[] checkArgNotEmpty(final long[] arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
         if (isEmpty(arg)) {
             throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
         }
@@ -10639,7 +10746,7 @@ sealed class CommonUtil permits N {
      * @return
      * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
      */
-    public static float[] checkArgNotEmpty(final float[] arg, final String argNameOrErrorMsg) {
+    public static float[] checkArgNotEmpty(final float[] arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
         if (isEmpty(arg)) {
             throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
         }
@@ -10655,24 +10762,7 @@ sealed class CommonUtil permits N {
      * @return
      * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
      */
-    public static double[] checkArgNotEmpty(final double[] arg, final String argNameOrErrorMsg) {
-        if (isEmpty(arg)) {
-            throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
-        }
-
-        return arg;
-    }
-
-    /**
-     * Checks if the specified {@code arg} is {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
-     *
-     * @param <T>
-     * @param arg
-     * @param argNameOrErrorMsg
-     * @return
-     * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
-     */
-    public static <T> T[] checkArgNotEmpty(final T[] arg, final String argNameOrErrorMsg) {
+    public static double[] checkArgNotEmpty(final double[] arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
         if (isEmpty(arg)) {
             throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
         }
@@ -10689,7 +10779,7 @@ sealed class CommonUtil permits N {
      * @return
      * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
      */
-    public static <T extends Collection<?>> T checkArgNotEmpty(final T arg, final String argNameOrErrorMsg) {
+    public static <T> T[] checkArgNotEmpty(final T[] arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
         if (isEmpty(arg)) {
             throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
         }
@@ -10706,8 +10796,7 @@ sealed class CommonUtil permits N {
      * @return
      * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
      */
-    @Beta
-    public static <T extends Iterable<?>> T checkArgNotEmpty(final T arg, final String argNameOrErrorMsg) {
+    public static <T extends Collection<?>> T checkArgNotEmpty(final T arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
         if (isEmpty(arg)) {
             throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
         }
@@ -10725,7 +10814,7 @@ sealed class CommonUtil permits N {
      * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
      */
     @Beta
-    public static <T extends Iterator<?>> T checkArgNotEmpty(final T arg, final String argNameOrErrorMsg) {
+    public static <T extends Iterable<?>> T checkArgNotEmpty(final T arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
         if (isEmpty(arg)) {
             throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
         }
@@ -10742,7 +10831,8 @@ sealed class CommonUtil permits N {
      * @return
      * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
      */
-    public static <T extends Map<?, ?>> T checkArgNotEmpty(final T arg, final String argNameOrErrorMsg) {
+    @Beta
+    public static <T extends Iterator<?>> T checkArgNotEmpty(final T arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
         if (isEmpty(arg)) {
             throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
         }
@@ -10759,7 +10849,7 @@ sealed class CommonUtil permits N {
      * @return
      * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
      */
-    public static <T extends PrimitiveList<?, ?, ?>> T checkArgNotEmpty(final T arg, final String argNameOrErrorMsg) {
+    public static <T extends Map<?, ?>> T checkArgNotEmpty(final T arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
         if (isEmpty(arg)) {
             throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
         }
@@ -10776,7 +10866,7 @@ sealed class CommonUtil permits N {
      * @return
      * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
      */
-    public static <T> Multiset<T> checkArgNotEmpty(final Multiset<T> arg, final String argNameOrErrorMsg) {
+    public static <T extends PrimitiveList<?, ?, ?>> T checkArgNotEmpty(final T arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
         if (isEmpty(arg)) {
             throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
         }
@@ -10793,7 +10883,7 @@ sealed class CommonUtil permits N {
      * @return
      * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
      */
-    public static <T> LongMultiset<T> checkArgNotEmpty(final LongMultiset<T> arg, final String argNameOrErrorMsg) {
+    public static <T> Multiset<T> checkArgNotEmpty(final Multiset<T> arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
         if (isEmpty(arg)) {
             throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
         }
@@ -10810,7 +10900,7 @@ sealed class CommonUtil permits N {
      * @return
      * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
      */
-    public static <T extends Multimap<?, ?, ?>> T checkArgNotEmpty(final T arg, final String argNameOrErrorMsg) {
+    public static <T extends Multimap<?, ?, ?>> T checkArgNotEmpty(final T arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
         if (isEmpty(arg)) {
             throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
         }
@@ -10827,7 +10917,7 @@ sealed class CommonUtil permits N {
      * @return
      * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
      */
-    public static <T extends DataSet> T checkArgNotEmpty(final T arg, final String argNameOrErrorMsg) {
+    public static <T extends DataSet> T checkArgNotEmpty(final T arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
         if (isEmpty(arg)) {
             throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
         }
@@ -10855,7 +10945,7 @@ sealed class CommonUtil permits N {
      * @see Strings#isNotBlank(CharSequence)
      */
     // DON'T change 'OrEmptyOrBlank' to 'OrBlank' because of the occurring order in the auto-completed context menu.
-    public static <T extends CharSequence> T checkArgNotBlank(final T arg, final String msg) {
+    public static <T extends CharSequence> T checkArgNotBlank(final T arg, final String msg) throws IllegalArgumentException {
         if (Strings.isBlank(arg)) {
             if (isArgNameOnly(msg)) {
                 throw new IllegalArgumentException("'" + msg + "' can not be null or empty or blank");
@@ -10875,7 +10965,7 @@ sealed class CommonUtil permits N {
      * @return
      * @throws IllegalArgumentException if the specified {@code arg} is negative.
      */
-    public static byte checkArgNotNegative(final byte arg, final String argNameOrErrorMsg) {
+    public static byte checkArgNotNegative(final byte arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
         if (arg < 0) {
             if (isArgNameOnly(argNameOrErrorMsg)) {
                 throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' can not be negative: " + arg); //NOSONAR
@@ -10895,7 +10985,7 @@ sealed class CommonUtil permits N {
      * @return
      * @throws IllegalArgumentException if the specified {@code arg} is negative.
      */
-    public static short checkArgNotNegative(final short arg, final String argNameOrErrorMsg) {
+    public static short checkArgNotNegative(final short arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
         if (arg < 0) {
             if (isArgNameOnly(argNameOrErrorMsg)) {
                 throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' can not be negative: " + arg); //NOSONAR
@@ -10915,7 +11005,7 @@ sealed class CommonUtil permits N {
      * @return
      * @throws IllegalArgumentException if the specified {@code arg} is negative.
      */
-    public static int checkArgNotNegative(final int arg, final String argNameOrErrorMsg) {
+    public static int checkArgNotNegative(final int arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
         if (arg < 0) {
             if (isArgNameOnly(argNameOrErrorMsg)) {
                 throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' can not be negative: " + arg); //NOSONAR
@@ -10935,7 +11025,7 @@ sealed class CommonUtil permits N {
      * @return
      * @throws IllegalArgumentException if the specified {@code arg} is negative.
      */
-    public static long checkArgNotNegative(final long arg, final String argNameOrErrorMsg) {
+    public static long checkArgNotNegative(final long arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
         if (arg < 0) {
             if (isArgNameOnly(argNameOrErrorMsg)) {
                 throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' can not be negative: " + arg);
@@ -10955,7 +11045,7 @@ sealed class CommonUtil permits N {
      * @return
      * @throws IllegalArgumentException if the specified {@code arg} is negative.
      */
-    public static float checkArgNotNegative(final float arg, final String argNameOrErrorMsg) {
+    public static float checkArgNotNegative(final float arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
         if (arg < 0) {
             if (isArgNameOnly(argNameOrErrorMsg)) {
                 throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' can not be negative: " + arg);
@@ -10975,7 +11065,7 @@ sealed class CommonUtil permits N {
      * @return
      * @throws IllegalArgumentException if the specified {@code arg} is negative.
      */
-    public static double checkArgNotNegative(final double arg, final String argNameOrErrorMsg) {
+    public static double checkArgNotNegative(final double arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
         if (arg < 0) {
             if (isArgNameOnly(argNameOrErrorMsg)) {
                 throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' can not be negative: " + arg);
@@ -10995,7 +11085,7 @@ sealed class CommonUtil permits N {
      * @return
      * @throws IllegalArgumentException if the specified {@code arg} is negative.
      */
-    public static byte checkArgPositive(final byte arg, final String argNameOrErrorMsg) {
+    public static byte checkArgPositive(final byte arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
         if (arg <= 0) {
             if (isArgNameOnly(argNameOrErrorMsg)) {
                 throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' can not be zero or negative: " + arg);
@@ -11015,7 +11105,7 @@ sealed class CommonUtil permits N {
      * @return
      * @throws IllegalArgumentException if the specified {@code arg} is negative.
      */
-    public static short checkArgPositive(final short arg, final String argNameOrErrorMsg) {
+    public static short checkArgPositive(final short arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
         if (arg <= 0) {
             if (isArgNameOnly(argNameOrErrorMsg)) {
                 throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' can not be zero or negative: " + arg);
@@ -11035,7 +11125,7 @@ sealed class CommonUtil permits N {
      * @return
      * @throws IllegalArgumentException if the specified {@code arg} is negative.
      */
-    public static int checkArgPositive(final int arg, final String argNameOrErrorMsg) {
+    public static int checkArgPositive(final int arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
         if (arg <= 0) {
             if (isArgNameOnly(argNameOrErrorMsg)) {
                 throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' can not be zero or negative: " + arg);
@@ -11055,7 +11145,7 @@ sealed class CommonUtil permits N {
      * @return
      * @throws IllegalArgumentException if the specified {@code arg} is negative.
      */
-    public static long checkArgPositive(final long arg, final String argNameOrErrorMsg) {
+    public static long checkArgPositive(final long arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
         if (arg <= 0) {
             if (isArgNameOnly(argNameOrErrorMsg)) {
                 throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' can not be zero or negative: " + arg);
@@ -11075,7 +11165,7 @@ sealed class CommonUtil permits N {
      * @return
      * @throws IllegalArgumentException if the specified {@code arg} is negative.
      */
-    public static float checkArgPositive(final float arg, final String argNameOrErrorMsg) {
+    public static float checkArgPositive(final float arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
         if (arg <= 0) {
             if (isArgNameOnly(argNameOrErrorMsg)) {
                 throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' can not be zero or negative: " + arg);
@@ -11095,7 +11185,7 @@ sealed class CommonUtil permits N {
      * @return
      * @throws IllegalArgumentException if the specified {@code arg} is negative.
      */
-    public static double checkArgPositive(final double arg, final String argNameOrErrorMsg) {
+    public static double checkArgPositive(final double arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
         if (arg <= 0) {
             if (isArgNameOnly(argNameOrErrorMsg)) {
                 throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' can not be zero or negative: " + arg);
@@ -11113,7 +11203,7 @@ sealed class CommonUtil permits N {
      * @param a
      * @throws IllegalArgumentException if {@code null} element found in {@code a}
      */
-    public static void checkElementNotNull(final Object[] a) {
+    public static void checkElementNotNull(final Object[] a) throws IllegalArgumentException {
         if (N.isEmpty(a)) {
             return;
         }
@@ -11132,7 +11222,7 @@ sealed class CommonUtil permits N {
      * @param argNameOrErrorMsg
      * @throws IllegalArgumentException if {@code null} element found in {@code a}
      */
-    public static void checkElementNotNull(final Object[] a, final String argNameOrErrorMsg) {
+    public static void checkElementNotNull(final Object[] a, final String argNameOrErrorMsg) throws IllegalArgumentException {
         if (N.isEmpty(a)) {
             return;
         }
@@ -11154,7 +11244,7 @@ sealed class CommonUtil permits N {
      * @param c
      * @throws IllegalArgumentException if {@code null} element found in {@code c}
      */
-    public static void checkElementNotNull(final Collection<?> c) {
+    public static void checkElementNotNull(final Collection<?> c) throws IllegalArgumentException {
         if (N.isEmpty(c)) {
             return;
         }
@@ -11173,7 +11263,7 @@ sealed class CommonUtil permits N {
      * @param argNameOrErrorMsg
      * @throws IllegalArgumentException if {@code null} element found in {@code c}
      */
-    public static void checkElementNotNull(final Collection<?> c, final String argNameOrErrorMsg) {
+    public static void checkElementNotNull(final Collection<?> c, final String argNameOrErrorMsg) throws IllegalArgumentException {
         if (N.isEmpty(c)) {
             return;
         }
@@ -11195,7 +11285,7 @@ sealed class CommonUtil permits N {
      * @param m
      * @throws IllegalArgumentException if {@code null} key found in {@code m}
      */
-    public static void checkKeyNotNull(final Map<?, ?> m) {
+    public static void checkKeyNotNull(final Map<?, ?> m) throws IllegalArgumentException {
         if (N.isEmpty(m)) {
             return;
         }
@@ -11214,7 +11304,7 @@ sealed class CommonUtil permits N {
      * @param argNameOrErrorMsg
      * @throws IllegalArgumentException if {@code null} key found in {@code m}
      */
-    public static void checkKeyNotNull(final Map<?, ?> m, final String argNameOrErrorMsg) {
+    public static void checkKeyNotNull(final Map<?, ?> m, final String argNameOrErrorMsg) throws IllegalArgumentException {
         if (N.isEmpty(m)) {
             return;
         }
@@ -11236,7 +11326,7 @@ sealed class CommonUtil permits N {
      * @param m
      * @throws IllegalArgumentException if {@code null} value found in {@code m}
      */
-    public static void checkValueNotNull(final Map<?, ?> m) {
+    public static void checkValueNotNull(final Map<?, ?> m) throws IllegalArgumentException {
         if (N.isEmpty(m)) {
             return;
         }
@@ -11255,7 +11345,7 @@ sealed class CommonUtil permits N {
      * @param argNameOrErrorMsg
      * @throws IllegalArgumentException if {@code null} value found in {@code m}
      */
-    public static void checkValueNotNull(final Map<?, ?> m, final String argNameOrErrorMsg) {
+    public static void checkValueNotNull(final Map<?, ?> m, final String argNameOrErrorMsg) throws IllegalArgumentException {
         if (N.isEmpty(m)) {
             return;
         }
@@ -11277,7 +11367,7 @@ sealed class CommonUtil permits N {
      * @param expression a boolean expression
      * @throws IllegalArgumentException if {@code expression} is false
      */
-    public static void checkArgument(boolean expression) {
+    public static void checkArgument(boolean expression) throws IllegalArgumentException {
         if (!expression) {
             throw new IllegalArgumentException();
         }
@@ -11291,7 +11381,7 @@ sealed class CommonUtil permits N {
      *     string using {@link String#valueOf(Object)}
      * @throws IllegalArgumentException if {@code expression} is false
      */
-    public static void checkArgument(boolean expression, String errorMessage) {
+    public static void checkArgument(boolean expression, String errorMessage) throws IllegalArgumentException {
         if (!expression) {
             throw new IllegalArgumentException(errorMessage);
         }
@@ -11305,8 +11395,9 @@ sealed class CommonUtil permits N {
      * @param b
      * @param errorMessageTemplate
      * @param p
+     * @throws IllegalArgumentException
      */
-    public static void checkArgument(boolean b, String errorMessageTemplate, boolean p) {
+    public static void checkArgument(boolean b, String errorMessageTemplate, boolean p) throws IllegalArgumentException {
         if (!b) {
             throw new IllegalArgumentException(format(errorMessageTemplate, p));
         }
@@ -11321,8 +11412,9 @@ sealed class CommonUtil permits N {
      * @param errorMessageTemplate
      * @param p1
      * @param p2
+     * @throws IllegalArgumentException
      */
-    public static void checkArgument(boolean b, String errorMessageTemplate, boolean p1, boolean p2) {
+    public static void checkArgument(boolean b, String errorMessageTemplate, boolean p1, boolean p2) throws IllegalArgumentException {
         if (!b) {
             throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
         }
@@ -11338,8 +11430,9 @@ sealed class CommonUtil permits N {
      * @param p1
      * @param p2
      * @param p3
+     * @throws IllegalArgumentException
      */
-    public static void checkArgument(boolean b, String errorMessageTemplate, boolean p1, boolean p2, boolean p3) {
+    public static void checkArgument(boolean b, String errorMessageTemplate, boolean p1, boolean p2, boolean p3) throws IllegalArgumentException {
         if (!b) {
             throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2, p3));
         }
@@ -11353,8 +11446,9 @@ sealed class CommonUtil permits N {
      * @param b
      * @param errorMessageTemplate
      * @param p
+     * @throws IllegalArgumentException
      */
-    public static void checkArgument(boolean b, String errorMessageTemplate, char p) {
+    public static void checkArgument(boolean b, String errorMessageTemplate, char p) throws IllegalArgumentException {
         if (!b) {
             throw new IllegalArgumentException(format(errorMessageTemplate, p));
         }
@@ -11368,8 +11462,9 @@ sealed class CommonUtil permits N {
      * @param b
      * @param errorMessageTemplate
      * @param p
+     * @throws IllegalArgumentException
      */
-    public static void checkArgument(boolean b, String errorMessageTemplate, byte p) {
+    public static void checkArgument(boolean b, String errorMessageTemplate, byte p) throws IllegalArgumentException {
         if (!b) {
             throw new IllegalArgumentException(format(errorMessageTemplate, p));
         }
@@ -11383,8 +11478,9 @@ sealed class CommonUtil permits N {
      * @param b
      * @param errorMessageTemplate
      * @param p
+     * @throws IllegalArgumentException
      */
-    public static void checkArgument(boolean b, String errorMessageTemplate, short p) {
+    public static void checkArgument(boolean b, String errorMessageTemplate, short p) throws IllegalArgumentException {
         if (!b) {
             throw new IllegalArgumentException(format(errorMessageTemplate, p));
         }
@@ -11398,8 +11494,9 @@ sealed class CommonUtil permits N {
      * @param b
      * @param errorMessageTemplate
      * @param p
+     * @throws IllegalArgumentException
      */
-    public static void checkArgument(boolean b, String errorMessageTemplate, int p) {
+    public static void checkArgument(boolean b, String errorMessageTemplate, int p) throws IllegalArgumentException {
         if (!b) {
             throw new IllegalArgumentException(format(errorMessageTemplate, p));
         }
@@ -11414,8 +11511,9 @@ sealed class CommonUtil permits N {
      * @param errorMessageTemplate
      * @param p1
      * @param p2
+     * @throws IllegalArgumentException
      */
-    public static void checkArgument(boolean b, String errorMessageTemplate, int p1, int p2) {
+    public static void checkArgument(boolean b, String errorMessageTemplate, int p1, int p2) throws IllegalArgumentException {
         if (!b) {
             throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
         }
@@ -11431,8 +11529,9 @@ sealed class CommonUtil permits N {
      * @param p1
      * @param p2
      * @param p3
+     * @throws IllegalArgumentException
      */
-    public static void checkArgument(boolean b, String errorMessageTemplate, int p1, int p2, int p3) {
+    public static void checkArgument(boolean b, String errorMessageTemplate, int p1, int p2, int p3) throws IllegalArgumentException {
         if (!b) {
             throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2, p3));
         }
@@ -11446,8 +11545,9 @@ sealed class CommonUtil permits N {
      * @param b
      * @param errorMessageTemplate
      * @param p
+     * @throws IllegalArgumentException
      */
-    public static void checkArgument(boolean b, String errorMessageTemplate, long p) {
+    public static void checkArgument(boolean b, String errorMessageTemplate, long p) throws IllegalArgumentException {
         if (!b) {
             throw new IllegalArgumentException(format(errorMessageTemplate, p));
         }
@@ -11462,8 +11562,9 @@ sealed class CommonUtil permits N {
      * @param errorMessageTemplate
      * @param p1
      * @param p2
+     * @throws IllegalArgumentException
      */
-    public static void checkArgument(boolean b, String errorMessageTemplate, long p1, long p2) {
+    public static void checkArgument(boolean b, String errorMessageTemplate, long p1, long p2) throws IllegalArgumentException {
         if (!b) {
             throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
         }
@@ -11479,8 +11580,9 @@ sealed class CommonUtil permits N {
      * @param p1
      * @param p2
      * @param p3
+     * @throws IllegalArgumentException
      */
-    public static void checkArgument(boolean b, String errorMessageTemplate, long p1, long p2, long p3) {
+    public static void checkArgument(boolean b, String errorMessageTemplate, long p1, long p2, long p3) throws IllegalArgumentException {
         if (!b) {
             throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2, p3));
         }
@@ -11494,8 +11596,9 @@ sealed class CommonUtil permits N {
      * @param b
      * @param errorMessageTemplate
      * @param p
+     * @throws IllegalArgumentException
      */
-    public static void checkArgument(boolean b, String errorMessageTemplate, float p) {
+    public static void checkArgument(boolean b, String errorMessageTemplate, float p) throws IllegalArgumentException {
         if (!b) {
             throw new IllegalArgumentException(format(errorMessageTemplate, p));
         }
@@ -11510,8 +11613,9 @@ sealed class CommonUtil permits N {
      * @param errorMessageTemplate
      * @param p1
      * @param p2
+     * @throws IllegalArgumentException
      */
-    public static void checkArgument(boolean b, String errorMessageTemplate, float p1, float p2) {
+    public static void checkArgument(boolean b, String errorMessageTemplate, float p1, float p2) throws IllegalArgumentException {
         if (!b) {
             throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
         }
@@ -11527,8 +11631,9 @@ sealed class CommonUtil permits N {
      * @param p1
      * @param p2
      * @param p3
+     * @throws IllegalArgumentException
      */
-    public static void checkArgument(boolean b, String errorMessageTemplate, float p1, float p2, float p3) {
+    public static void checkArgument(boolean b, String errorMessageTemplate, float p1, float p2, float p3) throws IllegalArgumentException {
         if (!b) {
             throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2, p3));
         }
@@ -11542,8 +11647,9 @@ sealed class CommonUtil permits N {
      * @param b
      * @param errorMessageTemplate
      * @param p
+     * @throws IllegalArgumentException
      */
-    public static void checkArgument(boolean b, String errorMessageTemplate, double p) {
+    public static void checkArgument(boolean b, String errorMessageTemplate, double p) throws IllegalArgumentException {
         if (!b) {
             throw new IllegalArgumentException(format(errorMessageTemplate, p));
         }
@@ -11558,8 +11664,9 @@ sealed class CommonUtil permits N {
      * @param errorMessageTemplate
      * @param p1
      * @param p2
+     * @throws IllegalArgumentException
      */
-    public static void checkArgument(boolean b, String errorMessageTemplate, double p1, double p2) {
+    public static void checkArgument(boolean b, String errorMessageTemplate, double p1, double p2) throws IllegalArgumentException {
         if (!b) {
             throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
         }
@@ -11575,8 +11682,9 @@ sealed class CommonUtil permits N {
      * @param p1
      * @param p2
      * @param p3
+     * @throws IllegalArgumentException
      */
-    public static void checkArgument(boolean b, String errorMessageTemplate, double p1, double p2, double p3) {
+    public static void checkArgument(boolean b, String errorMessageTemplate, double p1, double p2, double p3) throws IllegalArgumentException {
         if (!b) {
             throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2, p3));
         }
@@ -11590,8 +11698,9 @@ sealed class CommonUtil permits N {
      * @param b
      * @param errorMessageTemplate
      * @param p
+     * @throws IllegalArgumentException
      */
-    public static void checkArgument(boolean b, String errorMessageTemplate, Object p) {
+    public static void checkArgument(boolean b, String errorMessageTemplate, Object p) throws IllegalArgumentException {
         if (!b) {
             throw new IllegalArgumentException(format(errorMessageTemplate, p));
         }
@@ -11606,8 +11715,9 @@ sealed class CommonUtil permits N {
      * @param errorMessageTemplate
      * @param p1
      * @param p2
+     * @throws IllegalArgumentException
      */
-    public static void checkArgument(boolean b, String errorMessageTemplate, Object p1, Object p2) {
+    public static void checkArgument(boolean b, String errorMessageTemplate, Object p1, Object p2) throws IllegalArgumentException {
         if (!b) {
             throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
         }
@@ -11623,8 +11733,9 @@ sealed class CommonUtil permits N {
      * @param p1
      * @param p2
      * @param p3
+     * @throws IllegalArgumentException
      */
-    public static void checkArgument(boolean b, String errorMessageTemplate, Object p1, Object p2, Object p3) {
+    public static void checkArgument(boolean b, String errorMessageTemplate, Object p1, Object p2, Object p3) throws IllegalArgumentException {
         if (!b) {
             throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2, p3));
         }
@@ -11635,8 +11746,9 @@ sealed class CommonUtil permits N {
      *
      * @param b
      * @param errorMessageSupplier
+     * @throws IllegalArgumentException
      */
-    public static void checkArgument(boolean b, Supplier<String> errorMessageSupplier) {
+    public static void checkArgument(boolean b, Supplier<String> errorMessageSupplier) throws IllegalArgumentException {
         if (!b) {
             throw new IllegalArgumentException(errorMessageSupplier.get());
         }
@@ -12531,14 +12643,18 @@ sealed class CommonUtil permits N {
 
     /**
      *
+     *
      * @param a
      * @param fromIndexA
      * @param b
      * @param fromIndexB
      * @param len
      * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
      */
-    public static int compare(final boolean[] a, final int fromIndexA, final boolean[] b, final int fromIndexB, final int len) {
+    public static int compare(final boolean[] a, final int fromIndexA, final boolean[] b, final int fromIndexB, final int len)
+            throws IllegalArgumentException, IndexOutOfBoundsException {
         checkArgNotNegative(len, "len");
         checkFromIndexSize(fromIndexA, len, len(a));
         checkFromIndexSize(fromIndexB, len, len(b));
@@ -12580,14 +12696,18 @@ sealed class CommonUtil permits N {
 
     /**
      *
+     *
      * @param a
      * @param fromIndexA
      * @param b
      * @param fromIndexB
      * @param len
      * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
      */
-    public static int compare(final char[] a, final int fromIndexA, final char[] b, final int fromIndexB, final int len) {
+    public static int compare(final char[] a, final int fromIndexA, final char[] b, final int fromIndexB, final int len)
+            throws IllegalArgumentException, IndexOutOfBoundsException {
         checkArgNotNegative(len, "len");
         checkFromIndexSize(fromIndexA, len, len(a));
         checkFromIndexSize(fromIndexB, len, len(b));
@@ -12629,14 +12749,18 @@ sealed class CommonUtil permits N {
 
     /**
      *
+     *
      * @param a
      * @param fromIndexA
      * @param b
      * @param fromIndexB
      * @param len
      * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
      */
-    public static int compare(final byte[] a, final int fromIndexA, final byte[] b, final int fromIndexB, final int len) {
+    public static int compare(final byte[] a, final int fromIndexA, final byte[] b, final int fromIndexB, final int len)
+            throws IllegalArgumentException, IndexOutOfBoundsException {
         checkArgNotNegative(len, "len");
         checkFromIndexSize(fromIndexA, len, len(a));
         checkFromIndexSize(fromIndexB, len, len(b));
@@ -12678,14 +12802,18 @@ sealed class CommonUtil permits N {
 
     /**
      *
+     *
      * @param a
      * @param fromIndexA
      * @param b
      * @param fromIndexB
      * @param len
      * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
      */
-    public static int compare(final short[] a, final int fromIndexA, final short[] b, final int fromIndexB, final int len) {
+    public static int compare(final short[] a, final int fromIndexA, final short[] b, final int fromIndexB, final int len)
+            throws IllegalArgumentException, IndexOutOfBoundsException {
         checkArgNotNegative(len, "len");
         checkFromIndexSize(fromIndexA, len, len(a));
         checkFromIndexSize(fromIndexB, len, len(b));
@@ -12727,14 +12855,18 @@ sealed class CommonUtil permits N {
 
     /**
      *
+     *
      * @param a
      * @param fromIndexA
      * @param b
      * @param fromIndexB
      * @param len
      * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
      */
-    public static int compare(final int[] a, final int fromIndexA, final int[] b, final int fromIndexB, final int len) {
+    public static int compare(final int[] a, final int fromIndexA, final int[] b, final int fromIndexB, final int len)
+            throws IllegalArgumentException, IndexOutOfBoundsException {
         checkArgNotNegative(len, "len");
         checkFromIndexSize(fromIndexA, len, len(a));
         checkFromIndexSize(fromIndexB, len, len(b));
@@ -12776,14 +12908,18 @@ sealed class CommonUtil permits N {
 
     /**
      *
+     *
      * @param a
      * @param fromIndexA
      * @param b
      * @param fromIndexB
      * @param len
      * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
      */
-    public static int compare(final long[] a, final int fromIndexA, final long[] b, final int fromIndexB, final int len) {
+    public static int compare(final long[] a, final int fromIndexA, final long[] b, final int fromIndexB, final int len)
+            throws IllegalArgumentException, IndexOutOfBoundsException {
         checkArgNotNegative(len, "len");
         checkFromIndexSize(fromIndexA, len, len(a));
         checkFromIndexSize(fromIndexB, len, len(b));
@@ -12827,14 +12963,18 @@ sealed class CommonUtil permits N {
 
     /**
      *
+     *
      * @param a
      * @param fromIndexA
      * @param b
      * @param fromIndexB
      * @param len
      * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
      */
-    public static int compare(final float[] a, final int fromIndexA, final float[] b, final int fromIndexB, final int len) {
+    public static int compare(final float[] a, final int fromIndexA, final float[] b, final int fromIndexB, final int len)
+            throws IllegalArgumentException, IndexOutOfBoundsException {
         checkArgNotNegative(len, "len");
         checkFromIndexSize(fromIndexA, len, len(a));
         checkFromIndexSize(fromIndexB, len, len(b));
@@ -12880,14 +13020,18 @@ sealed class CommonUtil permits N {
 
     /**
      *
+     *
      * @param a
      * @param fromIndexA
      * @param b
      * @param fromIndexB
      * @param len
      * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
      */
-    public static int compare(final double[] a, final int fromIndexA, final double[] b, final int fromIndexB, final int len) {
+    public static int compare(final double[] a, final int fromIndexA, final double[] b, final int fromIndexB, final int len)
+            throws IllegalArgumentException, IndexOutOfBoundsException {
         checkArgNotNegative(len, "len");
         checkFromIndexSize(fromIndexA, len, len(a));
         checkFromIndexSize(fromIndexB, len, len(b));
@@ -12966,6 +13110,7 @@ sealed class CommonUtil permits N {
 
     /**
      *
+     *
      * @param <T>
      * @param a
      * @param fromIndexA
@@ -12974,8 +13119,11 @@ sealed class CommonUtil permits N {
      * @param len
      * @param cmp
      * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
      */
-    public static <T> int compare(final T[] a, final int fromIndexA, final T[] b, final int fromIndexB, final int len, Comparator<? super T> cmp) {
+    public static <T> int compare(final T[] a, final int fromIndexA, final T[] b, final int fromIndexB, final int len, Comparator<? super T> cmp)
+            throws IllegalArgumentException, IndexOutOfBoundsException {
         checkArgNotNegative(len, "len");
         checkFromIndexSize(fromIndexA, len, len(a));
         checkFromIndexSize(fromIndexB, len, len(b));
@@ -13040,6 +13188,7 @@ sealed class CommonUtil permits N {
 
     /**
      *
+     *
      * @param <T>
      * @param a
      * @param fromIndexA
@@ -13048,8 +13197,11 @@ sealed class CommonUtil permits N {
      * @param len
      * @param cmp
      * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
      */
-    public static <T> int compare(final Collection<T> a, int fromIndexA, final Collection<T> b, int fromIndexB, final int len, Comparator<? super T> cmp) {
+    public static <T> int compare(final Collection<T> a, int fromIndexA, final Collection<T> b, int fromIndexB, final int len, Comparator<? super T> cmp)
+            throws IllegalArgumentException, IndexOutOfBoundsException {
         checkArgNotNegative(len, "len");
         checkFromIndexSize(fromIndexA, len, size(a));
         checkFromIndexSize(fromIndexB, len, size(b));
@@ -13607,14 +13759,18 @@ sealed class CommonUtil permits N {
 
     /**
      *
+     *
      * @param a
      * @param fromIndexA
      * @param b
      * @param fromIndexB
      * @param len
      * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
      */
-    public static boolean equals(final boolean[] a, final int fromIndexA, final boolean[] b, final int fromIndexB, final int len) {
+    public static boolean equals(final boolean[] a, final int fromIndexA, final boolean[] b, final int fromIndexB, final int len)
+            throws IllegalArgumentException, IndexOutOfBoundsException {
         checkArgNotNegative(len, "len");
         checkFromIndexSize(fromIndexA, len, len(a));
         checkFromIndexSize(fromIndexB, len, len(b));
@@ -13645,14 +13801,18 @@ sealed class CommonUtil permits N {
 
     /**
      *
+     *
      * @param a
      * @param fromIndexA
      * @param b
      * @param fromIndexB
      * @param len
      * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
      */
-    public static boolean equals(final char[] a, final int fromIndexA, final char[] b, final int fromIndexB, final int len) {
+    public static boolean equals(final char[] a, final int fromIndexA, final char[] b, final int fromIndexB, final int len)
+            throws IllegalArgumentException, IndexOutOfBoundsException {
         checkArgNotNegative(len, "len");
         checkFromIndexSize(fromIndexA, len, len(a));
         checkFromIndexSize(fromIndexB, len, len(b));
@@ -13683,14 +13843,18 @@ sealed class CommonUtil permits N {
 
     /**
      *
+     *
      * @param a
      * @param fromIndexA
      * @param b
      * @param fromIndexB
      * @param len
      * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
      */
-    public static boolean equals(final byte[] a, final int fromIndexA, final byte[] b, final int fromIndexB, final int len) {
+    public static boolean equals(final byte[] a, final int fromIndexA, final byte[] b, final int fromIndexB, final int len)
+            throws IllegalArgumentException, IndexOutOfBoundsException {
         checkArgNotNegative(len, "len");
         checkFromIndexSize(fromIndexA, len, len(a));
         checkFromIndexSize(fromIndexB, len, len(b));
@@ -13721,14 +13885,18 @@ sealed class CommonUtil permits N {
 
     /**
      *
+     *
      * @param a
      * @param fromIndexA
      * @param b
      * @param fromIndexB
      * @param len
      * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
      */
-    public static boolean equals(final short[] a, final int fromIndexA, final short[] b, final int fromIndexB, final int len) {
+    public static boolean equals(final short[] a, final int fromIndexA, final short[] b, final int fromIndexB, final int len)
+            throws IllegalArgumentException, IndexOutOfBoundsException {
         checkArgNotNegative(len, "len");
         checkFromIndexSize(fromIndexA, len, len(a));
         checkFromIndexSize(fromIndexB, len, len(b));
@@ -13759,14 +13927,18 @@ sealed class CommonUtil permits N {
 
     /**
      *
+     *
      * @param a
      * @param fromIndexA
      * @param b
      * @param fromIndexB
      * @param len
      * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
      */
-    public static boolean equals(final int[] a, final int fromIndexA, final int[] b, final int fromIndexB, final int len) {
+    public static boolean equals(final int[] a, final int fromIndexA, final int[] b, final int fromIndexB, final int len)
+            throws IllegalArgumentException, IndexOutOfBoundsException {
         checkArgNotNegative(len, "len");
         checkFromIndexSize(fromIndexA, len, len(a));
         checkFromIndexSize(fromIndexB, len, len(b));
@@ -13797,14 +13969,18 @@ sealed class CommonUtil permits N {
 
     /**
      *
+     *
      * @param a
      * @param fromIndexA
      * @param b
      * @param fromIndexB
      * @param len
      * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
      */
-    public static boolean equals(final long[] a, final int fromIndexA, final long[] b, final int fromIndexB, final int len) {
+    public static boolean equals(final long[] a, final int fromIndexA, final long[] b, final int fromIndexB, final int len)
+            throws IllegalArgumentException, IndexOutOfBoundsException {
         checkArgNotNegative(len, "len");
         checkFromIndexSize(fromIndexA, len, len(a));
         checkFromIndexSize(fromIndexB, len, len(b));
@@ -13835,14 +14011,18 @@ sealed class CommonUtil permits N {
 
     /**
      *
+     *
      * @param a
      * @param fromIndexA
      * @param b
      * @param fromIndexB
      * @param len
      * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
      */
-    public static boolean equals(final float[] a, final int fromIndexA, final float[] b, final int fromIndexB, final int len) {
+    public static boolean equals(final float[] a, final int fromIndexA, final float[] b, final int fromIndexB, final int len)
+            throws IllegalArgumentException, IndexOutOfBoundsException {
         checkArgNotNegative(len, "len");
         checkFromIndexSize(fromIndexA, len, len(a));
         checkFromIndexSize(fromIndexB, len, len(b));
@@ -13873,14 +14053,18 @@ sealed class CommonUtil permits N {
 
     /**
      *
+     *
      * @param a
      * @param fromIndexA
      * @param b
      * @param fromIndexB
      * @param len
      * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
      */
-    public static boolean equals(final double[] a, final int fromIndexA, final double[] b, final int fromIndexB, final int len) {
+    public static boolean equals(final double[] a, final int fromIndexA, final double[] b, final int fromIndexB, final int len)
+            throws IllegalArgumentException, IndexOutOfBoundsException {
         checkArgNotNegative(len, "len");
         checkFromIndexSize(fromIndexA, len, len(a));
         checkFromIndexSize(fromIndexB, len, len(b));
@@ -13911,14 +14095,18 @@ sealed class CommonUtil permits N {
 
     /**
      *
+     *
      * @param a
      * @param fromIndexA
      * @param b
      * @param fromIndexB
      * @param len
      * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
      */
-    public static boolean equals(final Object[] a, final int fromIndexA, final Object[] b, final int fromIndexB, final int len) {
+    public static boolean equals(final Object[] a, final int fromIndexA, final Object[] b, final int fromIndexB, final int len)
+            throws IllegalArgumentException, IndexOutOfBoundsException {
         checkArgNotNegative(len, "len");
         checkFromIndexSize(fromIndexA, len, len(a));
         checkFromIndexSize(fromIndexB, len, len(b));
@@ -13951,14 +14139,18 @@ sealed class CommonUtil permits N {
 
     /**
      *
+     *
      * @param a
      * @param fromIndexA
      * @param b
      * @param fromIndexB
      * @param len
      * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
      */
-    public static boolean deepEquals(final Object[] a, final int fromIndexA, final Object[] b, final int fromIndexB, final int len) {
+    public static boolean deepEquals(final Object[] a, final int fromIndexA, final Object[] b, final int fromIndexB, final int len)
+            throws IllegalArgumentException, IndexOutOfBoundsException {
         checkArgNotNegative(len, "len");
         checkFromIndexSize(fromIndexA, len, len(a));
         checkFromIndexSize(fromIndexB, len, len(b));
@@ -13998,8 +14190,11 @@ sealed class CommonUtil permits N {
      * @param fromIndexB
      * @param len
      * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
      */
-    public static boolean equalsIgnoreCase(final String[] a, final int fromIndexA, final String[] b, final int fromIndexB, final int len) {
+    public static boolean equalsIgnoreCase(final String[] a, final int fromIndexA, final String[] b, final int fromIndexB, final int len)
+            throws IllegalArgumentException, IndexOutOfBoundsException {
         checkArgNotNegative(len, "len");
         checkFromIndexSize(fromIndexA, len, len(a));
         checkFromIndexSize(fromIndexB, len, len(b));
@@ -14021,12 +14216,14 @@ sealed class CommonUtil permits N {
 
     /**
      *
+     *
      * @param bean1
      * @param bean2
      * @return
+     * @throws IllegalArgumentException
      * @see Difference.MapDifference#of(Object, Object)
      */
-    public static boolean equalsByCommonProps(final Object bean1, final Object bean2) {
+    public static boolean equalsByCommonProps(final Object bean1, final Object bean2) throws IllegalArgumentException {
         N.checkArgNotNull(bean1);
         N.checkArgNotNull(bean2);
         N.checkArgument(ClassUtil.isBeanClass(bean1.getClass()), "{} is not a bean class", bean1.getClass());
@@ -14055,13 +14252,16 @@ sealed class CommonUtil permits N {
 
     /**
      *
+     *
      * @param bean1
      * @param bean2
      * @param propNamesToCompare
      * @return
+     * @throws IllegalArgumentException
      * @see Difference.MapDifference#of(Object, Object)
      */
-    public static boolean equalsByCommonProps(final Object bean1, final Object bean2, final Collection<String> propNamesToCompare) {
+    public static boolean equalsByCommonProps(final Object bean1, final Object bean2, final Collection<String> propNamesToCompare)
+            throws IllegalArgumentException {
         N.checkArgNotNull(bean1);
         N.checkArgNotNull(bean2);
         N.checkArgument(ClassUtil.isBeanClass(bean1.getClass()), "{} is not a bean class", bean1.getClass());
@@ -15505,8 +15705,9 @@ sealed class CommonUtil permits N {
      * @param a
      * @param fromIndex
      * @param toIndex
+     * @throws IndexOutOfBoundsException
      */
-    public static void reverse(final boolean[] a, int fromIndex, int toIndex) {
+    public static void reverse(final boolean[] a, int fromIndex, int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (isEmpty(a) || a.length == 1) {
@@ -15545,8 +15746,9 @@ sealed class CommonUtil permits N {
      * @param a
      * @param fromIndex
      * @param toIndex
+     * @throws IndexOutOfBoundsException
      */
-    public static void reverse(final char[] a, int fromIndex, int toIndex) {
+    public static void reverse(final char[] a, int fromIndex, int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (isEmpty(a) || a.length == 1) {
@@ -15585,8 +15787,9 @@ sealed class CommonUtil permits N {
      * @param a
      * @param fromIndex
      * @param toIndex
+     * @throws IndexOutOfBoundsException
      */
-    public static void reverse(final byte[] a, int fromIndex, int toIndex) {
+    public static void reverse(final byte[] a, int fromIndex, int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (isEmpty(a) || a.length == 1) {
@@ -15625,8 +15828,9 @@ sealed class CommonUtil permits N {
      * @param a
      * @param fromIndex
      * @param toIndex
+     * @throws IndexOutOfBoundsException
      */
-    public static void reverse(final short[] a, int fromIndex, int toIndex) {
+    public static void reverse(final short[] a, int fromIndex, int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (isEmpty(a) || a.length == 1) {
@@ -15665,8 +15869,9 @@ sealed class CommonUtil permits N {
      * @param a
      * @param fromIndex
      * @param toIndex
+     * @throws IndexOutOfBoundsException
      */
-    public static void reverse(final int[] a, int fromIndex, int toIndex) {
+    public static void reverse(final int[] a, int fromIndex, int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (isEmpty(a) || a.length == 1) {
@@ -15705,8 +15910,9 @@ sealed class CommonUtil permits N {
      * @param a
      * @param fromIndex
      * @param toIndex
+     * @throws IndexOutOfBoundsException
      */
-    public static void reverse(final long[] a, int fromIndex, int toIndex) {
+    public static void reverse(final long[] a, int fromIndex, int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (isEmpty(a) || a.length == 1) {
@@ -15745,8 +15951,9 @@ sealed class CommonUtil permits N {
      * @param a
      * @param fromIndex
      * @param toIndex
+     * @throws IndexOutOfBoundsException
      */
-    public static void reverse(final float[] a, int fromIndex, int toIndex) {
+    public static void reverse(final float[] a, int fromIndex, int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (isEmpty(a) || a.length == 1) {
@@ -15785,8 +15992,9 @@ sealed class CommonUtil permits N {
      * @param a
      * @param fromIndex
      * @param toIndex
+     * @throws IndexOutOfBoundsException
      */
-    public static void reverse(final double[] a, int fromIndex, int toIndex) {
+    public static void reverse(final double[] a, int fromIndex, int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (isEmpty(a) || a.length == 1) {
@@ -15831,8 +16039,9 @@ sealed class CommonUtil permits N {
      * @param a
      * @param fromIndex
      * @param toIndex
+     * @throws IndexOutOfBoundsException
      */
-    public static void reverse(final Object[] a, int fromIndex, int toIndex) {
+    public static void reverse(final Object[] a, int fromIndex, int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (isEmpty(a) || a.length == 1) {
@@ -15862,11 +16071,13 @@ sealed class CommonUtil permits N {
 
     /**
      *
+     *
      * @param list
      * @param fromIndex
      * @param toIndex
+     * @throws IndexOutOfBoundsException
      */
-    public static void reverse(final List<?> list, int fromIndex, int toIndex) {
+    public static void reverse(final List<?> list, int fromIndex, int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, size(list));
 
         if (isEmpty(list) || list.size() == 1) {
@@ -16959,10 +17170,11 @@ sealed class CommonUtil permits N {
      * @param fromIndex
      * @param toIndex
      * @param val
+     * @throws IndexOutOfBoundsException
      * @see #padLeft(List, int, Object)
      * @see #padRight(Collection, int, Object)
      */
-    public static <T> void fill(final List<? super T> list, final int fromIndex, final int toIndex, final T val) {
+    public static <T> void fill(final List<? super T> list, final int fromIndex, final int toIndex, final T val) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, Integer.MAX_VALUE);
 
         int size = list.size();
@@ -17065,11 +17277,12 @@ sealed class CommonUtil permits N {
      * @param minSize
      * @param objToAdd
      * @return
+     * @throws IllegalArgumentException
      * @see #fill(List, Object)
      * @see #fill(List, int, int, Object)
      */
     @SuppressWarnings("rawtypes")
-    public static <T> boolean padLeft(final List<T> list, final int minSize, final T objToAdd) {
+    public static <T> boolean padLeft(final List<T> list, final int minSize, final T objToAdd) throws IllegalArgumentException {
         N.checkArgNotNegative(minSize, "minSize");
 
         final int size = N.size(list);
@@ -17098,11 +17311,12 @@ sealed class CommonUtil permits N {
      * @param minSize
      * @param objToAdd
      * @return
+     * @throws IllegalArgumentException
      * @see #fill(List, Object)
      * @see #fill(List, int, int, Object)
      */
     @SuppressWarnings("rawtypes")
-    public static <T> boolean padRight(final Collection<T> c, final int minSize, final T objToAdd) {
+    public static <T> boolean padRight(final Collection<T> c, final int minSize, final T objToAdd) throws IllegalArgumentException {
         N.checkArgNotNegative(minSize, "minSize");
 
         final int size = N.size(c);
@@ -17125,13 +17339,15 @@ sealed class CommonUtil permits N {
 
     /**
      *
+     *
      * @param <T>
      * @param value
      * @param n
      * @return
+     * @throws IllegalArgumentException
      * @see Iterators#repeat(Object, int)
      */
-    public static <T> List<T> repeat(final T value, final int n) {
+    public static <T> List<T> repeat(final T value, final int n) throws IllegalArgumentException {
         checkArgNotNegative(n, "n");
 
         final List<T> res = new ArrayList<>(n);
@@ -17152,9 +17368,10 @@ sealed class CommonUtil permits N {
      * @param c
      * @param n
      * @return
+     * @throws IllegalArgumentException
      * @see Iterators#repeatElements(Collection, long)
      */
-    public static <T> List<T> repeatElements(final Collection<? extends T> c, final int n) {
+    public static <T> List<T> repeatElements(final Collection<? extends T> c, final int n) throws IllegalArgumentException {
         checkArgNotNegative(n, "n");
 
         if (n == 0 || isEmpty(c)) {
@@ -17185,9 +17402,10 @@ sealed class CommonUtil permits N {
      * @param c
      * @param n
      * @return
+     * @throws IllegalArgumentException
      * @see Iterators#repeatCollection(Collection, long)
      */
-    public static <T> List<T> repeatCollection(final Collection<T> c, final int n) {
+    public static <T> List<T> repeatCollection(final Collection<T> c, final int n) throws IllegalArgumentException {
         checkArgNotNegative(n, "n");
 
         if (n == 0 || isEmpty(c)) {
@@ -17216,9 +17434,10 @@ sealed class CommonUtil permits N {
      * @param c
      * @param size
      * @return
+     * @throws IllegalArgumentException
      * @see Iterators#repeatElementsToSize(Collection, long)
      */
-    public static <T> List<T> repeatElementsToSize(final Collection<T> c, final int size) {
+    public static <T> List<T> repeatElementsToSize(final Collection<T> c, final int size) throws IllegalArgumentException {
         checkArgNotNegative(size, "size");
         checkArgument(size == 0 || notEmpty(c), "Collection can not be empty or null when size > 0");
 
@@ -17257,9 +17476,10 @@ sealed class CommonUtil permits N {
      * @param c
      * @param size
      * @return
+     * @throws IllegalArgumentException
      * @see Iterators#repeatCollectionToSize(Collection, long)
      */
-    public static <T> List<T> repeatCollectionToSize(final Collection<? extends T> c, final int size) {
+    public static <T> List<T> repeatCollectionToSize(final Collection<? extends T> c, final int size) throws IllegalArgumentException {
         checkArgNotNegative(size, "size");
         checkArgument(size == 0 || notEmpty(c), "Collection can not be empty or null when size > 0");
 
@@ -17316,14 +17536,17 @@ sealed class CommonUtil permits N {
 
     /**
      *
+     *
      * @param <T>
      * @param src
      * @param srcPos
      * @param dest
      * @param destPos
      * @param length
+     * @throws IndexOutOfBoundsException
      */
-    public static <T> void copy(final List<? extends T> src, final int srcPos, final List<? super T> dest, final int destPos, final int length) {
+    public static <T> void copy(final List<? extends T> src, final int srcPos, final List<? super T> dest, final int destPos, final int length)
+            throws IndexOutOfBoundsException {
         N.checkFromToIndex(srcPos, srcPos + length, size(src));
         N.checkFromToIndex(destPos, destPos + length, size(dest));
 
@@ -17360,13 +17583,15 @@ sealed class CommonUtil permits N {
 
     /**
      *
+     *
      * @param src
      * @param srcPos
      * @param dest
      * @param destPos
      * @param length
+     * @throws IndexOutOfBoundsException
      */
-    public static void copy(final boolean[] src, final int srcPos, final boolean[] dest, final int destPos, final int length) {
+    public static void copy(final boolean[] src, final int srcPos, final boolean[] dest, final int destPos, final int length) throws IndexOutOfBoundsException {
         N.checkFromToIndex(srcPos, srcPos + length, len(src));
         N.checkFromToIndex(destPos, destPos + length, len(dest));
 
@@ -17392,13 +17617,15 @@ sealed class CommonUtil permits N {
 
     /**
      *
+     *
      * @param src
      * @param srcPos
      * @param dest
      * @param destPos
      * @param length
+     * @throws IndexOutOfBoundsException
      */
-    public static void copy(final char[] src, final int srcPos, final char[] dest, final int destPos, final int length) {
+    public static void copy(final char[] src, final int srcPos, final char[] dest, final int destPos, final int length) throws IndexOutOfBoundsException {
         N.checkFromToIndex(srcPos, srcPos + length, len(src));
         N.checkFromToIndex(destPos, destPos + length, len(dest));
 
@@ -17424,13 +17651,15 @@ sealed class CommonUtil permits N {
 
     /**
      *
+     *
      * @param src
      * @param srcPos
      * @param dest
      * @param destPos
      * @param length
+     * @throws IndexOutOfBoundsException
      */
-    public static void copy(final byte[] src, final int srcPos, final byte[] dest, final int destPos, final int length) {
+    public static void copy(final byte[] src, final int srcPos, final byte[] dest, final int destPos, final int length) throws IndexOutOfBoundsException {
         N.checkFromToIndex(srcPos, srcPos + length, len(src));
         N.checkFromToIndex(destPos, destPos + length, len(dest));
 
@@ -17456,13 +17685,15 @@ sealed class CommonUtil permits N {
 
     /**
      *
+     *
      * @param src
      * @param srcPos
      * @param dest
      * @param destPos
      * @param length
+     * @throws IndexOutOfBoundsException
      */
-    public static void copy(final short[] src, final int srcPos, final short[] dest, final int destPos, final int length) {
+    public static void copy(final short[] src, final int srcPos, final short[] dest, final int destPos, final int length) throws IndexOutOfBoundsException {
         N.checkFromToIndex(srcPos, srcPos + length, len(src));
         N.checkFromToIndex(destPos, destPos + length, len(dest));
 
@@ -17488,13 +17719,15 @@ sealed class CommonUtil permits N {
 
     /**
      *
+     *
      * @param src
      * @param srcPos
      * @param dest
      * @param destPos
      * @param length
+     * @throws IndexOutOfBoundsException
      */
-    public static void copy(final int[] src, final int srcPos, final int[] dest, final int destPos, final int length) {
+    public static void copy(final int[] src, final int srcPos, final int[] dest, final int destPos, final int length) throws IndexOutOfBoundsException {
         N.checkFromToIndex(srcPos, srcPos + length, len(src));
         N.checkFromToIndex(destPos, destPos + length, len(dest));
 
@@ -17520,13 +17753,15 @@ sealed class CommonUtil permits N {
 
     /**
      *
+     *
      * @param src
      * @param srcPos
      * @param dest
      * @param destPos
      * @param length
+     * @throws IndexOutOfBoundsException
      */
-    public static void copy(final long[] src, final int srcPos, final long[] dest, final int destPos, final int length) {
+    public static void copy(final long[] src, final int srcPos, final long[] dest, final int destPos, final int length) throws IndexOutOfBoundsException {
         N.checkFromToIndex(srcPos, srcPos + length, len(src));
         N.checkFromToIndex(destPos, destPos + length, len(dest));
 
@@ -17552,13 +17787,15 @@ sealed class CommonUtil permits N {
 
     /**
      *
+     *
      * @param src
      * @param srcPos
      * @param dest
      * @param destPos
      * @param length
+     * @throws IndexOutOfBoundsException
      */
-    public static void copy(final float[] src, final int srcPos, final float[] dest, final int destPos, final int length) {
+    public static void copy(final float[] src, final int srcPos, final float[] dest, final int destPos, final int length) throws IndexOutOfBoundsException {
         N.checkFromToIndex(srcPos, srcPos + length, len(src));
         N.checkFromToIndex(destPos, destPos + length, len(dest));
 
@@ -17584,13 +17821,15 @@ sealed class CommonUtil permits N {
 
     /**
      *
+     *
      * @param src
      * @param srcPos
      * @param dest
      * @param destPos
      * @param length
+     * @throws IndexOutOfBoundsException
      */
-    public static void copy(final double[] src, final int srcPos, final double[] dest, final int destPos, final int length) {
+    public static void copy(final double[] src, final int srcPos, final double[] dest, final int destPos, final int length) throws IndexOutOfBoundsException {
         N.checkFromToIndex(srcPos, srcPos + length, len(src));
         N.checkFromToIndex(destPos, destPos + length, len(dest));
 
@@ -17616,13 +17855,15 @@ sealed class CommonUtil permits N {
 
     /**
      *
+     *
      * @param src
      * @param srcPos
      * @param dest
      * @param destPos
      * @param length
+     * @throws IndexOutOfBoundsException
      */
-    public static void copy(final Object[] src, final int srcPos, final Object[] dest, final int destPos, final int length) {
+    public static void copy(final Object[] src, final int srcPos, final Object[] dest, final int destPos, final int length) throws IndexOutOfBoundsException {
         N.checkFromToIndex(srcPos, srcPos + length, len(src));
         N.checkFromToIndex(destPos, destPos + length, len(dest));
 
@@ -17648,14 +17889,16 @@ sealed class CommonUtil permits N {
 
     /**
      *
+     *
      * @param src
      * @param srcPos
      * @param dest
      * @param destPos
      * @param length
+     * @throws IndexOutOfBoundsException
      * @see System#arraycopy(Object, int, Object, int, int) is called
      */
-    public static void copy(final Object src, final int srcPos, final Object dest, final int destPos, final int length) {
+    public static void copy(final Object src, final int srcPos, final Object dest, final int destPos, final int length) throws IndexOutOfBoundsException {
         N.checkFromToIndex(srcPos, srcPos + length, Array.getLength(src));
         N.checkFromToIndex(destPos, destPos + length, Array.getLength(dest));
 
@@ -17894,9 +18137,10 @@ sealed class CommonUtil permits N {
      * @param toIndex
      * @param step
      * @return
+     * @throws IndexOutOfBoundsException
      * @see copyOfRange(int[], int, int, int)
      */
-    public static boolean[] copyOfRange(final boolean[] original, int fromIndex, final int toIndex, final int step) {
+    public static boolean[] copyOfRange(final boolean[] original, int fromIndex, final int toIndex, final int step) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), fromIndex < toIndex ? toIndex : fromIndex, original.length);
 
         if (step == 0) {
@@ -17950,9 +18194,10 @@ sealed class CommonUtil permits N {
      * @param toIndex
      * @param step
      * @return
+     * @throws IndexOutOfBoundsException
      * @see copyOfRange(int[], int, int, int)
      */
-    public static char[] copyOfRange(final char[] original, int fromIndex, final int toIndex, final int step) {
+    public static char[] copyOfRange(final char[] original, int fromIndex, final int toIndex, final int step) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), fromIndex < toIndex ? toIndex : fromIndex, original.length);
 
         if (step == 0) {
@@ -18006,9 +18251,10 @@ sealed class CommonUtil permits N {
      * @param toIndex
      * @param step
      * @return
+     * @throws IndexOutOfBoundsException
      * @see copyOfRange(int[], int, int, int)
      */
-    public static byte[] copyOfRange(final byte[] original, int fromIndex, final int toIndex, final int step) {
+    public static byte[] copyOfRange(final byte[] original, int fromIndex, final int toIndex, final int step) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), fromIndex < toIndex ? toIndex : fromIndex, original.length);
 
         if (step == 0) {
@@ -18062,9 +18308,10 @@ sealed class CommonUtil permits N {
      * @param toIndex
      * @param step
      * @return
+     * @throws IndexOutOfBoundsException
      * @see copyOfRange(int[], int, int, int)
      */
-    public static short[] copyOfRange(final short[] original, int fromIndex, final int toIndex, final int step) {
+    public static short[] copyOfRange(final short[] original, int fromIndex, final int toIndex, final int step) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), fromIndex < toIndex ? toIndex : fromIndex, original.length);
 
         if (step == 0) {
@@ -18131,8 +18378,9 @@ sealed class CommonUtil permits N {
      * @param toIndex
      * @param step
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static int[] copyOfRange(final int[] original, int fromIndex, final int toIndex, final int step) {
+    public static int[] copyOfRange(final int[] original, int fromIndex, final int toIndex, final int step) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), fromIndex < toIndex ? toIndex : fromIndex, original.length);
 
         if (step == 0) {
@@ -18186,9 +18434,10 @@ sealed class CommonUtil permits N {
      * @param toIndex
      * @param step
      * @return
+     * @throws IndexOutOfBoundsException
      * @see copyOfRange(int[], int, int, int)
      */
-    public static long[] copyOfRange(final long[] original, int fromIndex, final int toIndex, final int step) {
+    public static long[] copyOfRange(final long[] original, int fromIndex, final int toIndex, final int step) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), fromIndex < toIndex ? toIndex : fromIndex, original.length);
 
         if (step == 0) {
@@ -18242,9 +18491,10 @@ sealed class CommonUtil permits N {
      * @param toIndex
      * @param step
      * @return
+     * @throws IndexOutOfBoundsException
      * @see copyOfRange(int[], int, int, int)
      */
-    public static float[] copyOfRange(final float[] original, int fromIndex, final int toIndex, final int step) {
+    public static float[] copyOfRange(final float[] original, int fromIndex, final int toIndex, final int step) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), fromIndex < toIndex ? toIndex : fromIndex, original.length);
 
         if (step == 0) {
@@ -18298,9 +18548,10 @@ sealed class CommonUtil permits N {
      * @param toIndex
      * @param step
      * @return
+     * @throws IndexOutOfBoundsException
      * @see copyOfRange(int[], int, int, int)
      */
-    public static double[] copyOfRange(final double[] original, int fromIndex, final int toIndex, final int step) {
+    public static double[] copyOfRange(final double[] original, int fromIndex, final int toIndex, final int step) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), fromIndex < toIndex ? toIndex : fromIndex, original.length);
 
         if (step == 0) {
@@ -18386,9 +18637,11 @@ sealed class CommonUtil permits N {
      * @param step
      * @param newType
      * @return
+     * @throws IndexOutOfBoundsException
      * @see copyOfRange(int[], int, int, int)
      */
-    public static <T> T[] copyOfRange(final T[] original, int fromIndex, final int toIndex, final int step, final Class<? extends T[]> newType) {
+    public static <T> T[] copyOfRange(final T[] original, int fromIndex, final int toIndex, final int step, final Class<? extends T[]> newType)
+            throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), fromIndex < toIndex ? toIndex : fromIndex, original.length);
 
         if (step == 0) {
@@ -18422,9 +18675,10 @@ sealed class CommonUtil permits N {
      * @param fromIndex
      * @param toIndex
      * @return
+     * @throws IndexOutOfBoundsException
      * @see Arrays#copyOfRange(Object[], int, int)
      */
-    public static <T> List<T> copyOfRange(final List<T> c, final int fromIndex, final int toIndex) {
+    public static <T> List<T> copyOfRange(final List<T> c, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, c.size());
 
         final List<T> result = new ArrayList<>(toIndex - fromIndex);
@@ -18441,9 +18695,10 @@ sealed class CommonUtil permits N {
      * @param toIndex
      * @param step
      * @return
+     * @throws IndexOutOfBoundsException
      */
     @SuppressWarnings("deprecation")
-    public static <T> List<T> copyOfRange(final List<T> c, int fromIndex, final int toIndex, final int step) {
+    public static <T> List<T> copyOfRange(final List<T> c, int fromIndex, final int toIndex, final int step) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), fromIndex < toIndex ? toIndex : fromIndex, c.size());
 
         if (step == 0) {
@@ -18496,10 +18751,11 @@ sealed class CommonUtil permits N {
      * @param toIndex
      * @param step
      * @return
+     * @throws IndexOutOfBoundsException
      * @see copyOfRange(int[], int, int, int)
      */
     @SuppressWarnings("deprecation")
-    public static String copyOfRange(final String str, int fromIndex, final int toIndex, final int step) {
+    public static String copyOfRange(final String str, int fromIndex, final int toIndex, final int step) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), fromIndex < toIndex ? toIndex : fromIndex, str.length());
 
         if (step == 0) {
@@ -19127,8 +19383,9 @@ sealed class CommonUtil permits N {
      * @param fromIndex
      * @param toIndex
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static boolean isSorted(final boolean[] a, final int fromIndex, final int toIndex) {
+    public static boolean isSorted(final boolean[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         final int len = N.len(a);
 
         N.checkFromToIndex(fromIndex, toIndex, len);
@@ -19179,8 +19436,9 @@ sealed class CommonUtil permits N {
      * @param fromIndex
      * @param toIndex
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static boolean isSorted(final char[] a, final int fromIndex, final int toIndex) {
+    public static boolean isSorted(final char[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
         if (toIndex - fromIndex < 2) {
@@ -19229,8 +19487,9 @@ sealed class CommonUtil permits N {
      * @param fromIndex
      * @param toIndex
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static boolean isSorted(final byte[] a, final int fromIndex, final int toIndex) {
+    public static boolean isSorted(final byte[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
         if (toIndex - fromIndex < 2) {
@@ -19279,8 +19538,9 @@ sealed class CommonUtil permits N {
      * @param fromIndex
      * @param toIndex
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static boolean isSorted(final short[] a, final int fromIndex, final int toIndex) {
+    public static boolean isSorted(final short[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
         if (toIndex - fromIndex < 2) {
@@ -19329,8 +19589,9 @@ sealed class CommonUtil permits N {
      * @param fromIndex
      * @param toIndex
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static boolean isSorted(final int[] a, final int fromIndex, final int toIndex) {
+    public static boolean isSorted(final int[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
         if (toIndex - fromIndex < 2) {
@@ -19379,8 +19640,9 @@ sealed class CommonUtil permits N {
      * @param fromIndex
      * @param toIndex
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static boolean isSorted(final long[] a, final int fromIndex, final int toIndex) {
+    public static boolean isSorted(final long[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
         if (toIndex - fromIndex < 2) {
@@ -19429,8 +19691,9 @@ sealed class CommonUtil permits N {
      * @param fromIndex
      * @param toIndex
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static boolean isSorted(final float[] a, final int fromIndex, final int toIndex) {
+    public static boolean isSorted(final float[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
         if (toIndex - fromIndex < 2) {
@@ -19479,8 +19742,9 @@ sealed class CommonUtil permits N {
      * @param fromIndex
      * @param toIndex
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static boolean isSorted(final double[] a, final int fromIndex, final int toIndex) {
+    public static boolean isSorted(final double[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
         if (toIndex - fromIndex < 2) {
@@ -19531,8 +19795,9 @@ sealed class CommonUtil permits N {
      * @param fromIndex
      * @param toIndex
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static <T extends Comparable<? super T>> boolean isSorted(final T[] a, final int fromIndex, final int toIndex) {
+    public static <T extends Comparable<? super T>> boolean isSorted(final T[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
         if (toIndex - fromIndex < 2) {
@@ -19587,8 +19852,9 @@ sealed class CommonUtil permits N {
      * @param toIndex
      * @param cmp
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static <T> boolean isSorted(final T[] a, final int fromIndex, final int toIndex, Comparator<? super T> cmp) {
+    public static <T> boolean isSorted(final T[] a, final int fromIndex, final int toIndex, Comparator<? super T> cmp) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
         cmp = checkComparator(cmp);
@@ -19645,8 +19911,10 @@ sealed class CommonUtil permits N {
      * @param fromIndex
      * @param toIndex
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static <T extends Comparable<? super T>> boolean isSorted(final Collection<? extends T> c, final int fromIndex, final int toIndex) {
+    public static <T extends Comparable<? super T>> boolean isSorted(final Collection<? extends T> c, final int fromIndex, final int toIndex)
+            throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, N.size(c));
 
         if (toIndex - fromIndex < 2) {
@@ -19720,8 +19988,10 @@ sealed class CommonUtil permits N {
      * @param toIndex
      * @param cmp
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static <T> boolean isSorted(final Collection<? extends T> c, final int fromIndex, final int toIndex, Comparator<? super T> cmp) {
+    public static <T> boolean isSorted(final Collection<? extends T> c, final int fromIndex, final int toIndex, Comparator<? super T> cmp)
+            throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, N.size(c));
 
         if (toIndex - fromIndex < 2) {
@@ -19790,11 +20060,13 @@ sealed class CommonUtil permits N {
 
     /**
      *
+     *
      * @param a
      * @param fromIndex
      * @param toIndex
+     * @throws IndexOutOfBoundsException
      */
-    public static void sort(final char[] a, final int fromIndex, final int toIndex) {
+    public static void sort(final char[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
         if (N.isEmpty(a) || fromIndex == toIndex) {
@@ -19818,11 +20090,13 @@ sealed class CommonUtil permits N {
 
     /**
      *
+     *
      * @param a
      * @param fromIndex
      * @param toIndex
+     * @throws IndexOutOfBoundsException
      */
-    public static void sort(final byte[] a, final int fromIndex, final int toIndex) {
+    public static void sort(final byte[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
         if (N.isEmpty(a) || fromIndex == toIndex) {
@@ -19846,11 +20120,13 @@ sealed class CommonUtil permits N {
 
     /**
      *
+     *
      * @param a
      * @param fromIndex
      * @param toIndex
+     * @throws IndexOutOfBoundsException
      */
-    public static void sort(final short[] a, final int fromIndex, final int toIndex) {
+    public static void sort(final short[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
         if (N.isEmpty(a) || fromIndex == toIndex) {
@@ -19874,11 +20150,13 @@ sealed class CommonUtil permits N {
 
     /**
      *
+     *
      * @param a
      * @param fromIndex
      * @param toIndex
+     * @throws IndexOutOfBoundsException
      */
-    public static void sort(final int[] a, final int fromIndex, final int toIndex) {
+    public static void sort(final int[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
         if (N.isEmpty(a) || fromIndex == toIndex) {
@@ -19902,11 +20180,13 @@ sealed class CommonUtil permits N {
 
     /**
      *
+     *
      * @param a
      * @param fromIndex
      * @param toIndex
+     * @throws IndexOutOfBoundsException
      */
-    public static void sort(final long[] a, final int fromIndex, final int toIndex) {
+    public static void sort(final long[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
         if (N.isEmpty(a) || fromIndex == toIndex) {
@@ -19930,11 +20210,13 @@ sealed class CommonUtil permits N {
 
     /**
      *
+     *
      * @param a
      * @param fromIndex
      * @param toIndex
+     * @throws IndexOutOfBoundsException
      */
-    public static void sort(final float[] a, final int fromIndex, final int toIndex) {
+    public static void sort(final float[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
         if (N.isEmpty(a) || fromIndex == toIndex) {
@@ -19958,11 +20240,13 @@ sealed class CommonUtil permits N {
 
     /**
      *
+     *
      * @param a
      * @param fromIndex
      * @param toIndex
+     * @throws IndexOutOfBoundsException
      */
-    public static void sort(final double[] a, final int fromIndex, final int toIndex) {
+    public static void sort(final double[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
         if (N.isEmpty(a) || fromIndex == toIndex) {
@@ -20010,13 +20294,15 @@ sealed class CommonUtil permits N {
 
     /**
      *
+     *
      * @param <T>
      * @param a
      * @param fromIndex
      * @param toIndex
      * @param cmp
+     * @throws IndexOutOfBoundsException
      */
-    public static <T> void sort(final T[] a, final int fromIndex, final int toIndex, final Comparator<? super T> cmp) {
+    public static <T> void sort(final T[] a, final int fromIndex, final int toIndex, final Comparator<? super T> cmp) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
         if (N.isEmpty(a) || fromIndex == toIndex) {
@@ -20224,11 +20510,13 @@ sealed class CommonUtil permits N {
 
     /**
      *
+     *
      * @param a
      * @param fromIndex
      * @param toIndex
+     * @throws IndexOutOfBoundsException
      */
-    public static void parallelSort(final char[] a, final int fromIndex, final int toIndex) {
+    public static void parallelSort(final char[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
         if (N.isEmpty(a) || fromIndex == toIndex) {
@@ -20252,11 +20540,13 @@ sealed class CommonUtil permits N {
 
     /**
      *
+     *
      * @param a
      * @param fromIndex
      * @param toIndex
+     * @throws IndexOutOfBoundsException
      */
-    public static void parallelSort(final byte[] a, final int fromIndex, final int toIndex) {
+    public static void parallelSort(final byte[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
         if (N.isEmpty(a) || fromIndex == toIndex) {
@@ -20280,11 +20570,13 @@ sealed class CommonUtil permits N {
 
     /**
      *
+     *
      * @param a
      * @param fromIndex
      * @param toIndex
+     * @throws IndexOutOfBoundsException
      */
-    public static void parallelSort(final short[] a, final int fromIndex, final int toIndex) {
+    public static void parallelSort(final short[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
         if (N.isEmpty(a) || fromIndex == toIndex) {
@@ -20308,11 +20600,13 @@ sealed class CommonUtil permits N {
 
     /**
      *
+     *
      * @param a
      * @param fromIndex
      * @param toIndex
+     * @throws IndexOutOfBoundsException
      */
-    public static void parallelSort(final int[] a, final int fromIndex, final int toIndex) {
+    public static void parallelSort(final int[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
         if (N.isEmpty(a) || fromIndex == toIndex) {
@@ -20336,11 +20630,13 @@ sealed class CommonUtil permits N {
 
     /**
      *
+     *
      * @param a
      * @param fromIndex
      * @param toIndex
+     * @throws IndexOutOfBoundsException
      */
-    public static void parallelSort(final long[] a, final int fromIndex, final int toIndex) {
+    public static void parallelSort(final long[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
         if (N.isEmpty(a) || fromIndex == toIndex) {
@@ -20364,11 +20660,13 @@ sealed class CommonUtil permits N {
 
     /**
      *
+     *
      * @param a
      * @param fromIndex
      * @param toIndex
+     * @throws IndexOutOfBoundsException
      */
-    public static void parallelSort(final float[] a, final int fromIndex, final int toIndex) {
+    public static void parallelSort(final float[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
         if (N.isEmpty(a) || fromIndex == toIndex) {
@@ -20392,11 +20690,13 @@ sealed class CommonUtil permits N {
 
     /**
      *
+     *
      * @param a
      * @param fromIndex
      * @param toIndex
+     * @throws IndexOutOfBoundsException
      */
-    public static void parallelSort(final double[] a, final int fromIndex, final int toIndex) {
+    public static void parallelSort(final double[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
         if (N.isEmpty(a) || fromIndex == toIndex) {
@@ -20427,8 +20727,9 @@ sealed class CommonUtil permits N {
      * @param a
      * @param fromIndex
      * @param toIndex
+     * @throws IndexOutOfBoundsException
      */
-    public static <T extends Comparable<? super T>> void parallelSort(T[] a, int fromIndex, int toIndex) {
+    public static <T extends Comparable<? super T>> void parallelSort(T[] a, int fromIndex, int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
         if (N.isEmpty(a) || fromIndex == toIndex) {
@@ -20454,13 +20755,15 @@ sealed class CommonUtil permits N {
 
     /**
      *
+     *
      * @param <T>
      * @param a
      * @param fromIndex
      * @param toIndex
      * @param cmp
+     * @throws IndexOutOfBoundsException
      */
-    public static <T> void parallelSort(final T[] a, final int fromIndex, final int toIndex, final Comparator<? super T> cmp) {
+    public static <T> void parallelSort(final T[] a, final int fromIndex, final int toIndex, final Comparator<? super T> cmp) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
         if (N.isEmpty(a) || fromIndex == toIndex) {
@@ -20949,11 +21252,13 @@ sealed class CommonUtil permits N {
 
     /**
      *
+     *
      * @param <T>
      * @param list
      * @param keyMapper
+     * @throws IndexOutOfBoundsException
      */
-    public static <T> void reverseSortByDouble(final List<? extends T> list, final ToDoubleFunction<? super T> keyMapper) {
+    public static <T> void reverseSortByDouble(final List<? extends T> list, final ToDoubleFunction<? super T> keyMapper) throws IndexOutOfBoundsException {
         sort(list, Comparators.reversedComparingDouble(keyMapper));
     }
 

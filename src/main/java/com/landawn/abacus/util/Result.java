@@ -85,15 +85,16 @@ public class Result<T, E extends Throwable> implements Immutable {
     /**
      * If failure or else.
      *
-     * @param <E2>
-     * @param <E3>
-     * @param actionOnFailure
-     * @param actionOnSuccess
+     * @param <E2> 
+     * @param <E3> 
+     * @param actionOnFailure 
+     * @param actionOnSuccess 
+     * @throws IllegalArgumentException 
      * @throws E2 the e2
      * @throws E3 the e3
      */
     public <E2 extends Throwable, E3 extends Throwable> void ifFailureOrElse(final Throwables.Consumer<? super E, E2> actionOnFailure,
-            final Throwables.Consumer<? super T, E3> actionOnSuccess) throws E2, E3 {
+            final Throwables.Consumer<? super T, E3> actionOnSuccess) throws IllegalArgumentException, E2, E3 {
         N.checkArgNotNull(actionOnFailure, "actionOnFailure");
         N.checkArgNotNull(actionOnSuccess, "actionOnSuccess");
 
@@ -117,15 +118,16 @@ public class Result<T, E extends Throwable> implements Immutable {
     /**
      * If success or else.
      *
-     * @param <E2>
-     * @param <E3>
-     * @param actionOnSuccess
-     * @param actionOnFailure
+     * @param <E2> 
+     * @param <E3> 
+     * @param actionOnSuccess 
+     * @param actionOnFailure 
+     * @throws IllegalArgumentException 
      * @throws E2 the e2
      * @throws E3 the e3
      */
     public <E2 extends Throwable, E3 extends Throwable> void ifSuccessOrElse(final Throwables.Consumer<? super T, E2> actionOnSuccess,
-            final Throwables.Consumer<? super E, E3> actionOnFailure) throws E2, E3 {
+            final Throwables.Consumer<? super E, E3> actionOnFailure) throws IllegalArgumentException, E2, E3 {
         N.checkArgNotNull(actionOnSuccess, "actionOnSuccess");
         N.checkArgNotNull(actionOnFailure, "actionOnFailure");
 
@@ -172,11 +174,13 @@ public class Result<T, E extends Throwable> implements Immutable {
     }
 
     /**
+     * 
      *
-     * @param otherIfErrorOccurred
-     * @return
+     * @param otherIfErrorOccurred 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public T orElseGetIfFailure(final Supplier<? extends T> otherIfErrorOccurred) {
+    public T orElseGetIfFailure(final Supplier<? extends T> otherIfErrorOccurred) throws IllegalArgumentException {
         N.checkArgNotNull(otherIfErrorOccurred, "otherIfErrorOccurred");
 
         if (exception == null) {
@@ -203,12 +207,13 @@ public class Result<T, E extends Throwable> implements Immutable {
     /**
      * Or else throw.
      *
-     * @param <E2>
-     * @param exceptionSupplierIfErrorOccurred
-     * @return
+     * @param <E2> 
+     * @param exceptionSupplierIfErrorOccurred 
+     * @return 
+     * @throws IllegalArgumentException 
      * @throws E2 the e2
      */
-    public <E2 extends Throwable> T orElseThrow(final Function<? super E, E2> exceptionSupplierIfErrorOccurred) throws E2 {
+    public <E2 extends Throwable> T orElseThrow(final Function<? super E, E2> exceptionSupplierIfErrorOccurred) throws IllegalArgumentException, E2 {
         N.checkArgNotNull(exceptionSupplierIfErrorOccurred, "exceptionSupplierIfErrorOccurred");
 
         if (exception == null) {

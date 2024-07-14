@@ -175,6 +175,7 @@ public class Difference<L, R> {
      * @see N#intersection(Collection, Collection)
      * @see N#commonSet(Collection, Collection)
      */
+    @SuppressWarnings("unlikely-arg-type")
     public static <T1, T2, L extends List<T1>, R extends List<T2>> Difference<L, R> of(Collection<? extends T1> a, Collection<? extends T2> b) {
         List<T1> common = new ArrayList<>();
         List<T1> leftOnly = new ArrayList<>();
@@ -192,7 +193,7 @@ public class Difference<L, R> {
             final Multiset<T2> bOccurrences = Multiset.create(b);
 
             for (T1 e : a) {
-                if (bOccurrences.getAndRemove(e) > 0) {
+                if (bOccurrences.remove(e)) {
                     common.add(e);
                 } else {
                     leftOnly.add(e);
@@ -200,7 +201,7 @@ public class Difference<L, R> {
             }
 
             for (T2 e : b) {
-                if (bOccurrences.getAndRemove(e) > 0) {
+                if (bOccurrences.remove(e)) {
                     rightOnly.add(e);
                 }
 
@@ -239,7 +240,7 @@ public class Difference<L, R> {
             for (int i = 0, len = a.size(); i < len; i++) {
                 e = a.get(i);
 
-                if (bOccurrences.getAndRemove(e) > 0) {
+                if (bOccurrences.remove(e)) {
                     common.add(e);
                 } else {
                     leftOnly.add(e);
@@ -249,7 +250,7 @@ public class Difference<L, R> {
             for (int i = 0, len = b.size(); i < len; i++) {
                 e = b.get(i);
 
-                if (bOccurrences.getAndRemove(e) > 0) {
+                if (bOccurrences.remove(e)) {
                     rightOnly.add(e);
                 }
 
@@ -288,7 +289,7 @@ public class Difference<L, R> {
             for (int i = 0, len = a.size(); i < len; i++) {
                 e = a.get(i);
 
-                if (bOccurrences.getAndRemove(e) > 0) {
+                if (bOccurrences.remove(e)) {
                     common.add(e);
                 } else {
                     leftOnly.add(e);
@@ -298,7 +299,7 @@ public class Difference<L, R> {
             for (int i = 0, len = b.size(); i < len; i++) {
                 e = b.get(i);
 
-                if (bOccurrences.getAndRemove(e) > 0) {
+                if (bOccurrences.remove(e)) {
                     rightOnly.add(e);
                 }
 
@@ -337,7 +338,7 @@ public class Difference<L, R> {
             for (int i = 0, len = a.size(); i < len; i++) {
                 e = a.get(i);
 
-                if (bOccurrences.getAndRemove(e) > 0) {
+                if (bOccurrences.remove(e)) {
                     common.add(e);
                 } else {
                     leftOnly.add(e);
@@ -347,7 +348,7 @@ public class Difference<L, R> {
             for (int i = 0, len = b.size(); i < len; i++) {
                 e = b.get(i);
 
-                if (bOccurrences.getAndRemove(e) > 0) {
+                if (bOccurrences.remove(e)) {
                     rightOnly.add(e);
                 }
 
@@ -386,7 +387,7 @@ public class Difference<L, R> {
             for (int i = 0, len = a.size(); i < len; i++) {
                 e = a.get(i);
 
-                if (bOccurrences.getAndRemove(e) > 0) {
+                if (bOccurrences.remove(e)) {
                     common.add(e);
                 } else {
                     leftOnly.add(e);
@@ -396,7 +397,7 @@ public class Difference<L, R> {
             for (int i = 0, len = b.size(); i < len; i++) {
                 e = b.get(i);
 
-                if (bOccurrences.getAndRemove(e) > 0) {
+                if (bOccurrences.remove(e)) {
                     rightOnly.add(e);
                 }
 
@@ -435,7 +436,7 @@ public class Difference<L, R> {
             for (int i = 0, len = a.size(); i < len; i++) {
                 e = a.get(i);
 
-                if (bOccurrences.getAndRemove(e) > 0) {
+                if (bOccurrences.remove(e)) {
                     common.add(e);
                 } else {
                     leftOnly.add(e);
@@ -445,7 +446,7 @@ public class Difference<L, R> {
             for (int i = 0, len = b.size(); i < len; i++) {
                 e = b.get(i);
 
-                if (bOccurrences.getAndRemove(e) > 0) {
+                if (bOccurrences.remove(e)) {
                     rightOnly.add(e);
                 }
 
@@ -484,7 +485,7 @@ public class Difference<L, R> {
             for (int i = 0, len = a.size(); i < len; i++) {
                 e = a.get(i);
 
-                if (bOccurrences.getAndRemove(e) > 0) {
+                if (bOccurrences.remove(e)) {
                     common.add(e);
                 } else {
                     leftOnly.add(e);
@@ -494,7 +495,7 @@ public class Difference<L, R> {
             for (int i = 0, len = b.size(); i < len; i++) {
                 e = b.get(i);
 
-                if (bOccurrences.getAndRemove(e) > 0) {
+                if (bOccurrences.remove(e)) {
                     rightOnly.add(e);
                 }
 
@@ -533,7 +534,7 @@ public class Difference<L, R> {
             for (int i = 0, len = a.size(); i < len; i++) {
                 e = a.get(i);
 
-                if (bOccurrences.getAndRemove(e) > 0) {
+                if (bOccurrences.remove(e)) {
                     common.add(e);
                 } else {
                     leftOnly.add(e);
@@ -543,7 +544,7 @@ public class Difference<L, R> {
             for (int i = 0, len = b.size(); i < len; i++) {
                 e = b.get(i);
 
-                if (bOccurrences.getAndRemove(e) > 0) {
+                if (bOccurrences.remove(e)) {
                     rightOnly.add(e);
                 }
 
@@ -582,7 +583,7 @@ public class Difference<L, R> {
             for (int i = 0, len = a.size(); i < len; i++) {
                 e = a.get(i);
 
-                if (bOccurrences.getAndRemove(e) > 0) {
+                if (bOccurrences.remove(e)) {
                     common.add(e);
                 } else {
                     leftOnly.add(e);
@@ -592,7 +593,7 @@ public class Difference<L, R> {
             for (int i = 0, len = b.size(); i < len; i++) {
                 e = b.get(i);
 
-                if (bOccurrences.getAndRemove(e) > 0) {
+                if (bOccurrences.remove(e)) {
                     rightOnly.add(e);
                 }
 
@@ -606,9 +607,9 @@ public class Difference<L, R> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public L inCommon() {
         return common;
@@ -643,9 +644,9 @@ public class Difference<L, R> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public String toString() {
@@ -704,22 +705,23 @@ public class Difference<L, R> {
         }
 
         /**
-         * 
          *
-         * @param <CK> 
-         * @param <K1> 
-         * @param <V1> 
-         * @param <K2> 
-         * @param <V2> 
-         * @param map1 
-         * @param map2 
-         * @param valueEquivalence 
-         * @return 
+         *
+         * @param <CK>
+         * @param <K1>
+         * @param <V1>
+         * @param <K2>
+         * @param <V2>
+         * @param map1
+         * @param map2
+         * @param valueEquivalence
+         * @return
+         * @throws IllegalArgumentException
          */
         @SuppressWarnings("unlikely-arg-type")
         public static <CK, K1 extends CK, V1, K2 extends CK, V2> MapDifference<Map<K1, V1>, Map<K2, V2>, Map<CK, Pair<V1, V2>>> of(
                 final Map<? extends K1, ? extends V1> map1, final Map<? extends K2, ? extends V2> map2,
-                final BiPredicate<? super V1, ? super V2> valueEquivalence) {
+                final BiPredicate<? super V1, ? super V2> valueEquivalence) throws IllegalArgumentException {
             N.checkArgNotNull(valueEquivalence, "valueEquivalence");
 
             final Map<K1, V1> common = new LinkedHashMap<>();

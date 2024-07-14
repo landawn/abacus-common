@@ -64,13 +64,15 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
     }
 
     /**
+     * 
      *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return
+     * @param a 
+     * @param fromIndex 
+     * @param toIndex 
+     * @return 
+     * @throws IndexOutOfBoundsException 
      */
-    public static FloatIterator of(final float[] a, final int fromIndex, final int toIndex) {
+    public static FloatIterator of(final float[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
         if (fromIndex == toIndex) {
@@ -109,10 +111,11 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
     /**
      * Lazy evaluation.
      *
-     * @param iteratorSupplier
-     * @return
+     * @param iteratorSupplier 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static FloatIterator defer(final Supplier<? extends FloatIterator> iteratorSupplier) {
+    public static FloatIterator defer(final Supplier<? extends FloatIterator> iteratorSupplier) throws IllegalArgumentException {
         N.checkArgNotNull(iteratorSupplier, "iteratorSupplier");
 
         return new FloatIterator() {
@@ -149,10 +152,11 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
     /**
      * Returns an infinite {@code FloatIterator}.
      *
-     * @param supplier
-     * @return
+     * @param supplier 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static FloatIterator generate(final FloatSupplier supplier) {
+    public static FloatIterator generate(final FloatSupplier supplier) throws IllegalArgumentException {
         N.checkArgNotNull(supplier);
 
         return new FloatIterator() {
@@ -169,12 +173,14 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
     }
 
     /**
+     * 
      *
-     * @param hasNext
-     * @param supplier
-     * @return
+     * @param hasNext 
+     * @param supplier 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static FloatIterator generate(final BooleanSupplier hasNext, final FloatSupplier supplier) {
+    public static FloatIterator generate(final BooleanSupplier hasNext, final FloatSupplier supplier) throws IllegalArgumentException {
         N.checkArgNotNull(hasNext);
         N.checkArgNotNull(supplier);
 
@@ -214,12 +220,13 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
     public abstract float nextFloat();
 
     /**
+     * 
      *
-     *
-     * @param n
-     * @return
+     * @param n 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public FloatIterator skip(final long n) {
+    public FloatIterator skip(final long n) throws IllegalArgumentException {
         N.checkArgNotNegative(n, "n");
 
         if (n <= 0) {
@@ -262,12 +269,13 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
     }
 
     /**
+     * 
      *
-     *
-     * @param count
-     * @return
+     * @param count 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public FloatIterator limit(final long count) {
+    public FloatIterator limit(final long count) throws IllegalArgumentException {
         N.checkArgNotNegative(count, "count");
 
         if (count == 0) {
@@ -297,12 +305,13 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
     }
 
     /**
+     * 
      *
-     *
-     * @param predicate
-     * @return
+     * @param predicate 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public FloatIterator filter(final FloatPredicate predicate) {
+    public FloatIterator filter(final FloatPredicate predicate) throws IllegalArgumentException {
         N.checkArgNotNull(predicate, "predicate");
 
         final FloatIterator iter = this;
@@ -447,12 +456,13 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
     /**
      * For each remaining.
      *
-     * @param action
-     * @deprecated
+     * @param action 
+     * @throws IllegalArgumentException 
+     * @deprecated 
      */
     @Override
     @Deprecated
-    public void forEachRemaining(java.util.function.Consumer<? super Float> action) {
+    public void forEachRemaining(java.util.function.Consumer<? super Float> action) throws IllegalArgumentException {
         super.forEachRemaining(action);
     }
 
@@ -471,12 +481,14 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
     }
 
     /**
+     * 
      *
-     * @param <E>
-     * @param action
+     * @param <E> 
+     * @param action 
+     * @throws IllegalArgumentException 
      * @throws E the e
      */
-    public <E extends Exception> void foreachIndexed(Throwables.IndexedFloatConsumer<E> action) throws E {
+    public <E extends Exception> void foreachIndexed(Throwables.IndexedFloatConsumer<E> action) throws IllegalArgumentException, E {
         N.checkArgNotNull(action);
 
         int idx = 0;

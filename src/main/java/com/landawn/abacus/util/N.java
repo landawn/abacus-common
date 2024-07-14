@@ -482,7 +482,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         final Map<T, Integer> map = mapSupplier.get();
 
         for (T e : multiset) {
-            map.put(e, multiset.get(e));
+            map.put(e, multiset.getCount(e));
         }
 
         return map;
@@ -513,7 +513,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return mapSupplier.get();
         }
 
-        final LongMultiset<T> multiset = new LongMultiset<>();
+        final Multiset<T> multiset = new Multiset<>();
 
         while (iter.hasNext()) {
             multiset.add(iter.next(), 1);
@@ -522,7 +522,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         final Map<T, Integer> map = mapSupplier.get();
 
         for (T e : multiset) {
-            map.put(e, Numbers.toIntExact(multiset.get(e)));
+            map.put(e, Numbers.toIntExact(multiset.getCount(e)));
         }
 
         return map;
@@ -880,8 +880,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param fromIndex
      * @param toIndex
      * @return an {@code ImmutableList<T>}
+     * @throws IndexOutOfBoundsException
      */
-    public static <T> ImmutableList<T> slice(final T[] a, final int fromIndex, final int toIndex) {
+    public static <T> ImmutableList<T> slice(final T[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (isEmpty(a)) {
@@ -899,8 +900,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param fromIndex
      * @param toIndex
      * @return an {@code ImmutableList<T>}
+     * @throws IndexOutOfBoundsException
      */
-    public static <T> ImmutableList<T> slice(final List<? extends T> c, final int fromIndex, final int toIndex) {
+    public static <T> ImmutableList<T> slice(final List<? extends T> c, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, size(c));
 
         if (isEmpty(c)) {
@@ -918,8 +920,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param fromIndex
      * @param toIndex
      * @return an {@code ImmutableCollection<T>}
+     * @throws IndexOutOfBoundsException
      */
-    public static <T> ImmutableCollection<T> slice(final Collection<? extends T> c, final int fromIndex, final int toIndex) {
+    public static <T> ImmutableCollection<T> slice(final Collection<? extends T> c, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, size(c));
 
         if (isEmpty(c)) {
@@ -960,8 +963,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a
      * @param chunkSize the desired size of each sub array (the last may be smaller).
      * @return
+     * @throws IllegalArgumentException
      */
-    public static List<boolean[]> split(final boolean[] a, final int chunkSize) {
+    public static List<boolean[]> split(final boolean[] a, final int chunkSize) throws IllegalArgumentException {
         checkArgPositive(chunkSize, "chunkSize"); //NOSONAR
 
         if (isEmpty(a)) {
@@ -987,8 +991,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param toIndex
      * @param chunkSize the desired size of each sub array (the last may be smaller).
      * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
      */
-    public static List<boolean[]> split(final boolean[] a, final int fromIndex, final int toIndex, final int chunkSize) {
+    public static List<boolean[]> split(final boolean[] a, final int fromIndex, final int toIndex, final int chunkSize)
+            throws IllegalArgumentException, IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgPositive(chunkSize, "chunkSize");
 
@@ -1013,8 +1020,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a
      * @param chunkSize the desired size of each sub array (the last may be smaller).
      * @return
+     * @throws IllegalArgumentException
      */
-    public static List<char[]> split(final char[] a, final int chunkSize) {
+    public static List<char[]> split(final char[] a, final int chunkSize) throws IllegalArgumentException {
         checkArgPositive(chunkSize, "chunkSize");
 
         if (isEmpty(a)) {
@@ -1040,8 +1048,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param toIndex
      * @param chunkSize the desired size of each sub array (the last may be smaller).
      * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
      */
-    public static List<char[]> split(final char[] a, final int fromIndex, final int toIndex, final int chunkSize) {
+    public static List<char[]> split(final char[] a, final int fromIndex, final int toIndex, final int chunkSize)
+            throws IllegalArgumentException, IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgPositive(chunkSize, "chunkSize");
 
@@ -1066,8 +1077,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a
      * @param chunkSize the desired size of each sub array (the last may be smaller).
      * @return
+     * @throws IllegalArgumentException
      */
-    public static List<byte[]> split(final byte[] a, final int chunkSize) {
+    public static List<byte[]> split(final byte[] a, final int chunkSize) throws IllegalArgumentException {
         checkArgPositive(chunkSize, "chunkSize");
 
         if (isEmpty(a)) {
@@ -1093,8 +1105,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param toIndex
      * @param chunkSize the desired size of each sub array (the last may be smaller).
      * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
      */
-    public static List<byte[]> split(final byte[] a, final int fromIndex, final int toIndex, final int chunkSize) {
+    public static List<byte[]> split(final byte[] a, final int fromIndex, final int toIndex, final int chunkSize)
+            throws IllegalArgumentException, IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgPositive(chunkSize, "chunkSize");
 
@@ -1119,8 +1134,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a
      * @param chunkSize the desired size of each sub array (the last may be smaller).
      * @return
+     * @throws IllegalArgumentException
      */
-    public static List<short[]> split(final short[] a, final int chunkSize) {
+    public static List<short[]> split(final short[] a, final int chunkSize) throws IllegalArgumentException {
         checkArgPositive(chunkSize, "chunkSize");
 
         if (isEmpty(a)) {
@@ -1146,8 +1162,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param toIndex
      * @param chunkSize the desired size of each sub array (the last may be smaller).
      * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
      */
-    public static List<short[]> split(final short[] a, final int fromIndex, final int toIndex, final int chunkSize) {
+    public static List<short[]> split(final short[] a, final int fromIndex, final int toIndex, final int chunkSize)
+            throws IllegalArgumentException, IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgPositive(chunkSize, "chunkSize");
 
@@ -1172,8 +1191,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a
      * @param chunkSize the desired size of each sub array (the last may be smaller).
      * @return
+     * @throws IllegalArgumentException
      */
-    public static List<int[]> split(final int[] a, final int chunkSize) {
+    public static List<int[]> split(final int[] a, final int chunkSize) throws IllegalArgumentException {
         checkArgPositive(chunkSize, "chunkSize");
 
         if (isEmpty(a)) {
@@ -1199,8 +1219,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param toIndex
      * @param chunkSize the desired size of each sub array (the last may be smaller).
      * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
      */
-    public static List<int[]> split(final int[] a, final int fromIndex, final int toIndex, final int chunkSize) {
+    public static List<int[]> split(final int[] a, final int fromIndex, final int toIndex, final int chunkSize)
+            throws IllegalArgumentException, IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgPositive(chunkSize, "chunkSize");
 
@@ -1225,8 +1248,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a
      * @param chunkSize the desired size of each sub array (the last may be smaller).
      * @return
+     * @throws IllegalArgumentException
      */
-    public static List<long[]> split(final long[] a, final int chunkSize) {
+    public static List<long[]> split(final long[] a, final int chunkSize) throws IllegalArgumentException {
         checkArgPositive(chunkSize, "chunkSize");
 
         if (isEmpty(a)) {
@@ -1252,8 +1276,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param toIndex
      * @param chunkSize the desired size of each sub array (the last may be smaller).
      * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
      */
-    public static List<long[]> split(final long[] a, final int fromIndex, final int toIndex, final int chunkSize) {
+    public static List<long[]> split(final long[] a, final int fromIndex, final int toIndex, final int chunkSize)
+            throws IllegalArgumentException, IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgPositive(chunkSize, "chunkSize");
 
@@ -1278,8 +1305,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a
      * @param chunkSize the desired size of each sub array (the last may be smaller).
      * @return
+     * @throws IllegalArgumentException
      */
-    public static List<float[]> split(final float[] a, final int chunkSize) {
+    public static List<float[]> split(final float[] a, final int chunkSize) throws IllegalArgumentException {
         checkArgPositive(chunkSize, "chunkSize");
 
         if (isEmpty(a)) {
@@ -1305,8 +1333,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param toIndex
      * @param chunkSize the desired size of each sub array (the last may be smaller).
      * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
      */
-    public static List<float[]> split(final float[] a, final int fromIndex, final int toIndex, final int chunkSize) {
+    public static List<float[]> split(final float[] a, final int fromIndex, final int toIndex, final int chunkSize)
+            throws IllegalArgumentException, IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgPositive(chunkSize, "chunkSize");
 
@@ -1331,8 +1362,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a
      * @param chunkSize the desired size of each sub array (the last may be smaller).
      * @return
+     * @throws IllegalArgumentException
      */
-    public static List<double[]> split(final double[] a, final int chunkSize) {
+    public static List<double[]> split(final double[] a, final int chunkSize) throws IllegalArgumentException {
         checkArgPositive(chunkSize, "chunkSize");
 
         if (isEmpty(a)) {
@@ -1358,8 +1390,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param toIndex
      * @param chunkSize the desired size of each sub array (the last may be smaller).
      * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
      */
-    public static List<double[]> split(final double[] a, final int fromIndex, final int toIndex, final int chunkSize) {
+    public static List<double[]> split(final double[] a, final int fromIndex, final int toIndex, final int chunkSize)
+            throws IllegalArgumentException, IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgPositive(chunkSize, "chunkSize");
 
@@ -1385,8 +1420,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a
      * @param chunkSize the desired size of each sub array (the last may be smaller).
      * @return
+     * @throws IllegalArgumentException
      */
-    public static <T> List<T[]> split(final T[] a, final int chunkSize) {
+    public static <T> List<T[]> split(final T[] a, final int chunkSize) throws IllegalArgumentException {
         checkArgPositive(chunkSize, "chunkSize");
 
         if (isEmpty(a)) {
@@ -1413,8 +1449,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param toIndex
      * @param chunkSize the desired size of each sub array (the last may be smaller).
      * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
      */
-    public static <T> List<T[]> split(final T[] a, final int fromIndex, final int toIndex, final int chunkSize) {
+    public static <T> List<T[]> split(final T[] a, final int fromIndex, final int toIndex, final int chunkSize)
+            throws IllegalArgumentException, IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgPositive(chunkSize, "chunkSize");
 
@@ -1433,13 +1472,15 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     *
      *
      * @param <T>
      * @param c
      * @param chunkSize
      * @return
+     * @throws IllegalArgumentException
      */
-    public static <T> List<List<T>> split(final Collection<? extends T> c, final int chunkSize) {
+    public static <T> List<List<T>> split(final Collection<? extends T> c, final int chunkSize) throws IllegalArgumentException {
         checkArgPositive(chunkSize, "chunkSize");
 
         if (isEmpty(c)) {
@@ -1459,8 +1500,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param toIndex
      * @param chunkSize the desired size of each sub list (the last may be smaller).
      * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
      */
-    public static <T> List<List<T>> split(final Collection<? extends T> c, final int fromIndex, final int toIndex, final int chunkSize) {
+    public static <T> List<List<T>> split(final Collection<? extends T> c, final int fromIndex, final int toIndex, final int chunkSize)
+            throws IllegalArgumentException, IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, size(c));
         checkArgPositive(chunkSize, "chunkSize");
 
@@ -1508,8 +1552,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param c
      * @param chunkSize the desired size of each sub list (the last may be smaller).
      * @return
+     * @throws IllegalArgumentException
      */
-    public static <T> List<List<T>> split(final Iterable<? extends T> c, final int chunkSize) {
+    public static <T> List<List<T>> split(final Iterable<? extends T> c, final int chunkSize) throws IllegalArgumentException {
         checkArgPositive(chunkSize, "chunkSize");
 
         if (c == null) {
@@ -1530,8 +1575,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param iter
      * @param chunkSize
      * @return
+     * @throws IllegalArgumentException
      */
-    public static <T> ObjIterator<List<T>> split(final Iterator<? extends T> iter, final int chunkSize) {
+    public static <T> ObjIterator<List<T>> split(final Iterator<? extends T> iter, final int chunkSize) throws IllegalArgumentException {
         checkArgument(chunkSize > 0, "'chunkSize' must be greater than 0, can't be: %s", chunkSize);
 
         if (iter == null) {
@@ -1570,8 +1616,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param str
      * @param chunkSize the desired size of each sub String (the last may be smaller).
      * @return
+     * @throws IllegalArgumentException
      */
-    public static List<String> split(final CharSequence str, final int chunkSize) {
+    public static List<String> split(final CharSequence str, final int chunkSize) throws IllegalArgumentException {
         checkArgPositive(chunkSize, "chunkSize");
 
         if (Strings.isEmpty(str)) {
@@ -1590,8 +1637,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param toIndex
      * @param chunkSize the desired size of each sub String (the last may be smaller).
      * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
      */
-    public static List<String> split(final CharSequence str, final int fromIndex, final int toIndex, final int chunkSize) {
+    public static List<String> split(final CharSequence str, final int fromIndex, final int toIndex, final int chunkSize)
+            throws IllegalArgumentException, IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(str));
         checkArgPositive(chunkSize, "chunkSize");
 
@@ -1650,7 +1700,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return the stream
      */
     static <T> Stream<T> splitByCountSmallerFirst(final int maxChunkCount, final int totalSize, final IntBiFunction<? extends T> func) {
-        checkArgPositive(maxChunkCount, "maxCount");
+        checkArgPositive(maxChunkCount, "maxChunkCount");
         checkArgNotNegative(totalSize, "totalSize");
         checkArgNotNull(func, "func");
 
@@ -1680,7 +1730,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             }
 
             @Override
-            public void advance(long n) {
+            public void advance(long n) throws IllegalArgumentException {
                 checkArgNotNegative(n, "n");
 
                 if (n > 0) {
@@ -1715,7 +1765,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return the stream
      */
     static <T> Stream<T> splitByCountSmallerLast(final int maxChunkCount, final int totalSize, final IntBiFunction<? extends T> func) {
-        checkArgPositive(maxChunkCount, "maxCount");
+        checkArgPositive(maxChunkCount, "maxChunkCount");
         checkArgNotNegative(totalSize, "totalSize");
         checkArgNotNull(func, "func");
 
@@ -1745,7 +1795,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             }
 
             @Override
-            public void advance(long n) {
+            public void advance(long n) throws IllegalArgumentException {
                 checkArgNotNegative(n, "n");
 
                 if (n > 0) {
@@ -2270,13 +2320,15 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <T>
      * @param aa
      * @return {@code null} if the specified array {@code aa} is {@code null}.
+     * @throws IllegalArgumentException
      */
     @MayReturnNull
     @SafeVarargs
-    public static <T> T[] concat(final T[]... aa) {
+    public static <T> T[] concat(final T[]... aa) throws IllegalArgumentException {
         // checkArgNotNull(aa, "aa");
 
         if (aa == null) {
@@ -3016,7 +3068,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         final List<T> result = new ArrayList<>(min(9, a.length, b.length));
 
         for (T e : a) {
-            if (bOccurrences.getAndRemove(e) > 0) {
+            if (bOccurrences.remove(e)) {
                 result.add(e);
             }
         }
@@ -3044,7 +3096,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         final List<T> result = new ArrayList<>(min(9, a.size(), b.size()));
 
         for (T e : a) {
-            if (bOccurrences.getAndRemove(e) > 0) {
+            if (bOccurrences.remove(e)) {
                 result.add(e);
             }
         }
@@ -3266,7 +3318,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         final List<T> result = new ArrayList<>(min(a.length, max(9, a.length - b.length)));
 
         for (T e : a) {
-            if (bOccurrences.getAndRemove(e) < 1) {
+            if (!bOccurrences.remove(e)) {
                 result.add(e);
             }
         }
@@ -3300,7 +3352,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         final List<T> result = new ArrayList<>(min(a.size(), max(9, a.size() - b.size())));
 
         for (T e : a) {
-            if (bOccurrences.getAndRemove(e) < 1) {
+            if (!bOccurrences.remove(e)) {
                 result.add(e);
             }
         }
@@ -3474,13 +3526,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
         final List<T> result = new ArrayList<>(max(9, Math.abs(a.length - b.length)));
 
         for (T e : a) {
-            if (bOccurrences.getAndRemove(e) < 1) {
+            if (!bOccurrences.remove(e)) {
                 result.add(e);
             }
         }
 
         for (T e : b) {
-            if (bOccurrences.getAndRemove(e) > 0) {
+            if (bOccurrences.remove(e)) {
                 result.add(e);
             }
 
@@ -3515,13 +3567,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
         final List<T> result = new ArrayList<>(max(9, Math.abs(a.size() - b.size())));
 
         for (T e : a) {
-            if (bOccurrences.getAndRemove(e) < 1) {
+            if (!bOccurrences.remove(e)) {
                 result.add(e);
             }
         }
 
         for (T e : b) {
-            if (bOccurrences.getAndRemove(e) > 0) {
+            if (bOccurrences.remove(e)) {
                 result.add(e);
             }
 
@@ -3660,9 +3712,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
                 if (val == null) {
                     // do nothing.
-                } else if (val.intValue() < cnt) {
+                } else if (val.value() < cnt) {
                     // map.remove(e);
-                } else if (val.intValue() == cnt) {
+                } else if (val.value() == cnt) {
                     val.increment();
                 }
             }
@@ -3673,7 +3725,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         final Set<T> result = newHashSet(map.size());
 
         for (Map.Entry<T, MutableInt> entry : map.entrySet()) {
-            if (entry.getValue().intValue() == cnt) {
+            if (entry.getValue().value() == cnt) {
                 result.add(entry.getKey());
             }
         }
@@ -3808,12 +3860,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param subColl the first (sub?) collection, must not be null
      * @param coll the second (super?) collection, must not be null
      * @return <code>true</code> if <i>subColl</i> is a sub-collection of <i>coll</i>
+     * @throws IllegalArgumentException
      * @see #isProperSubCollection
      * @see Collection#containsAll
      */
-    public static boolean isSubCollection(final Collection<?> subColl, final Collection<?> coll) {
-        checkArgNotNull(subColl, "a");
-        checkArgNotNull(coll, "b");
+    public static boolean isSubCollection(final Collection<?> subColl, final Collection<?> coll) throws IllegalArgumentException {
+        checkArgNotNull(subColl, "subColl");
+        checkArgNotNull(coll, "coll");
 
         if (isEmpty(subColl)) {
             return true;
@@ -3852,12 +3905,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param subColl the first (sub?) collection, must not be null
      * @param coll the second (super?) collection, must not be null
      * @return <code>true</code> if <i>subColl</i> is a <i>proper</i> sub-collection of <i>coll</i>
+     * @throws IllegalArgumentException
      * @see #isSubCollection
      * @see Collection#containsAll
      */
-    public static boolean isProperSubCollection(final Collection<?> subColl, final Collection<?> coll) {
-        checkArgNotNull(subColl, "a");
-        checkArgNotNull(coll, "b");
+    public static boolean isProperSubCollection(final Collection<?> subColl, final Collection<?> coll) throws IllegalArgumentException {
+        checkArgNotNull(subColl, "subColl");
+        checkArgNotNull(coll, "coll");
 
         return subColl.size() < coll.size() && isSubCollection(subColl, coll);
     }
@@ -5617,8 +5671,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param index
      * @param strToInsert
      * @return a new String
+     * @throws IndexOutOfBoundsException
      */
-    public static String insert(final String str, final int index, final String strToInsert) {
+    public static String insert(final String str, final int index, final String strToInsert) throws IndexOutOfBoundsException {
         checkIndex(index, len(str));
 
         if (Strings.isEmpty(strToInsert)) {
@@ -6037,8 +6092,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param index the position of the element to be removed
      * @return A new array containing the existing elements except the element
      *         at the specified position.
+     * @throws IllegalArgumentException
      */
-    public static boolean[] deleteByIndex(final boolean[] a, final int index) {
+    public static boolean[] deleteByIndex(final boolean[] a, final int index) throws IllegalArgumentException {
         checkArgNotNull(a, "a");
 
         final boolean[] result = new boolean[a.length - 1];
@@ -6071,8 +6127,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param index the position of the element to be removed
      * @return A new array containing the existing elements except the element
      *         at the specified position.
+     * @throws IllegalArgumentException
      */
-    public static char[] deleteByIndex(final char[] a, final int index) {
+    public static char[] deleteByIndex(final char[] a, final int index) throws IllegalArgumentException {
         checkArgNotNull(a, "a");
 
         final char[] result = new char[a.length - 1];
@@ -6105,8 +6162,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param index the position of the element to be removed
      * @return A new array containing the existing elements except the element
      *         at the specified position.
+     * @throws IllegalArgumentException
      */
-    public static byte[] deleteByIndex(final byte[] a, final int index) {
+    public static byte[] deleteByIndex(final byte[] a, final int index) throws IllegalArgumentException {
         checkArgNotNull(a, "a");
 
         final byte[] result = new byte[a.length - 1];
@@ -6139,8 +6197,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param index the position of the element to be removed
      * @return A new array containing the existing elements except the element
      *         at the specified position.
+     * @throws IllegalArgumentException
      */
-    public static short[] deleteByIndex(final short[] a, final int index) {
+    public static short[] deleteByIndex(final short[] a, final int index) throws IllegalArgumentException {
         checkArgNotNull(a, "a");
 
         final short[] result = new short[a.length - 1];
@@ -6173,8 +6232,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param index the position of the element to be removed
      * @return A new array containing the existing elements except the element
      *         at the specified position.
+     * @throws IllegalArgumentException
      */
-    public static int[] deleteByIndex(final int[] a, final int index) {
+    public static int[] deleteByIndex(final int[] a, final int index) throws IllegalArgumentException {
         checkArgNotNull(a, "a");
 
         final int[] result = new int[a.length - 1];
@@ -6207,8 +6267,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param index the position of the element to be removed
      * @return A new array containing the existing elements except the element
      *         at the specified position.
+     * @throws IllegalArgumentException
      */
-    public static long[] deleteByIndex(final long[] a, final int index) {
+    public static long[] deleteByIndex(final long[] a, final int index) throws IllegalArgumentException {
         checkArgNotNull(a, "a");
 
         final long[] result = new long[a.length - 1];
@@ -6241,8 +6302,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param index the position of the element to be removed
      * @return A new array containing the existing elements except the element
      *         at the specified position.
+     * @throws IllegalArgumentException
      */
-    public static float[] deleteByIndex(final float[] a, final int index) {
+    public static float[] deleteByIndex(final float[] a, final int index) throws IllegalArgumentException {
         checkArgNotNull(a, "a");
 
         final float[] result = new float[a.length - 1];
@@ -6275,8 +6337,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param index the position of the element to be removed
      * @return A new array containing the existing elements except the element
      *         at the specified position.
+     * @throws IllegalArgumentException
      */
-    public static double[] deleteByIndex(final double[] a, final int index) {
+    public static double[] deleteByIndex(final double[] a, final int index) throws IllegalArgumentException {
         checkArgNotNull(a, "a");
 
         final double[] result = new double[a.length - 1];
@@ -7019,10 +7082,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param list
      * @param indices
      * @return
+     * @throws IllegalArgumentException
      */
     @SuppressWarnings("rawtypes")
     @SafeVarargs
-    public static boolean deleteAllByIndices(final List<?> list, int... indices) {
+    public static boolean deleteAllByIndices(final List<?> list, int... indices) throws IllegalArgumentException {
         checkArgNotNull(list);
 
         if (isEmpty(indices)) {
@@ -8030,8 +8094,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param fromIndex
      * @param toIndex
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static boolean[] removeDuplicates(final boolean[] a, final int fromIndex, final int toIndex) {
+    public static boolean[] removeDuplicates(final boolean[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (isEmpty(a) && fromIndex == 0 && toIndex == 0) {
@@ -8091,8 +8156,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param toIndex
      * @param isSorted
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static char[] removeDuplicates(final char[] a, final int fromIndex, final int toIndex, final boolean isSorted) {
+    public static char[] removeDuplicates(final char[] a, final int fromIndex, final int toIndex, final boolean isSorted) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (isEmpty(a) && fromIndex == 0 && toIndex == 0) {
@@ -8173,8 +8239,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param toIndex
      * @param isSorted
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static byte[] removeDuplicates(final byte[] a, final int fromIndex, final int toIndex, final boolean isSorted) {
+    public static byte[] removeDuplicates(final byte[] a, final int fromIndex, final int toIndex, final boolean isSorted) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (isEmpty(a) && fromIndex == 0 && toIndex == 0) {
@@ -8255,8 +8322,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param toIndex
      * @param isSorted
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static short[] removeDuplicates(final short[] a, final int fromIndex, final int toIndex, final boolean isSorted) {
+    public static short[] removeDuplicates(final short[] a, final int fromIndex, final int toIndex, final boolean isSorted) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (isEmpty(a) && fromIndex == 0 && toIndex == 0) {
@@ -8337,8 +8405,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param toIndex
      * @param isSorted
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static int[] removeDuplicates(final int[] a, final int fromIndex, final int toIndex, final boolean isSorted) {
+    public static int[] removeDuplicates(final int[] a, final int fromIndex, final int toIndex, final boolean isSorted) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (isEmpty(a) && fromIndex == 0 && toIndex == 0) {
@@ -8419,8 +8488,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param toIndex
      * @param isSorted
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static long[] removeDuplicates(final long[] a, final int fromIndex, final int toIndex, final boolean isSorted) {
+    public static long[] removeDuplicates(final long[] a, final int fromIndex, final int toIndex, final boolean isSorted) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (isEmpty(a) && fromIndex == 0 && toIndex == 0) {
@@ -8501,8 +8571,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param toIndex
      * @param isSorted
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static float[] removeDuplicates(final float[] a, final int fromIndex, final int toIndex, final boolean isSorted) {
+    public static float[] removeDuplicates(final float[] a, final int fromIndex, final int toIndex, final boolean isSorted) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (isEmpty(a) && fromIndex == 0 && toIndex == 0) {
@@ -8584,8 +8655,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param toIndex
      * @param isSorted
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static double[] removeDuplicates(final double[] a, final int fromIndex, final int toIndex, final boolean isSorted) {
+    public static double[] removeDuplicates(final double[] a, final int fromIndex, final int toIndex, final boolean isSorted) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (isEmpty(a) && fromIndex == 0 && toIndex == 0) {
@@ -8666,8 +8738,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param toIndex
      * @param isSorted
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static String[] removeDuplicates(final String[] a, final int fromIndex, final int toIndex, final boolean isSorted) {
+    public static String[] removeDuplicates(final String[] a, final int fromIndex, final int toIndex, final boolean isSorted) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (isEmpty(a) && fromIndex == 0 && toIndex == 0) {
@@ -8758,8 +8831,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param toIndex
      * @param isSorted
      * @return the specified array if it's {@code null} or empty.
+     * @throws IndexOutOfBoundsException
      */
-    public static <T> T[] removeDuplicates(final T[] a, final int fromIndex, final int toIndex, final boolean isSorted) {
+    public static <T> T[] removeDuplicates(final T[] a, final int fromIndex, final int toIndex, final boolean isSorted) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (isEmpty(a) && fromIndex == 0 && toIndex == 0) {
@@ -8857,8 +8931,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param fromIndex
      * @param toIndex
      * @return a new array
+     * @throws IndexOutOfBoundsException
      */
-    public static boolean[] deleteRange(final boolean[] a, final int fromIndex, final int toIndex) {
+    public static boolean[] deleteRange(final boolean[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (fromIndex == toIndex) {
@@ -8886,8 +8961,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param fromIndex
      * @param toIndex
      * @return a new array
+     * @throws IndexOutOfBoundsException
      */
-    public static char[] deleteRange(final char[] a, final int fromIndex, final int toIndex) {
+    public static char[] deleteRange(final char[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (fromIndex == toIndex) {
@@ -8915,8 +8991,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param fromIndex
      * @param toIndex
      * @return a new array
+     * @throws IndexOutOfBoundsException
      */
-    public static byte[] deleteRange(final byte[] a, final int fromIndex, final int toIndex) {
+    public static byte[] deleteRange(final byte[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (fromIndex == toIndex) {
@@ -8944,8 +9021,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param fromIndex
      * @param toIndex
      * @return a new array
+     * @throws IndexOutOfBoundsException
      */
-    public static short[] deleteRange(final short[] a, final int fromIndex, final int toIndex) {
+    public static short[] deleteRange(final short[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (fromIndex == toIndex) {
@@ -8973,8 +9051,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param fromIndex
      * @param toIndex
      * @return a new array
+     * @throws IndexOutOfBoundsException
      */
-    public static int[] deleteRange(final int[] a, final int fromIndex, final int toIndex) {
+    public static int[] deleteRange(final int[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (fromIndex == toIndex) {
@@ -9002,8 +9081,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param fromIndex
      * @param toIndex
      * @return a new array
+     * @throws IndexOutOfBoundsException
      */
-    public static long[] deleteRange(final long[] a, final int fromIndex, final int toIndex) {
+    public static long[] deleteRange(final long[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (fromIndex == toIndex) {
@@ -9031,8 +9111,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param fromIndex
      * @param toIndex
      * @return a new array
+     * @throws IndexOutOfBoundsException
      */
-    public static float[] deleteRange(final float[] a, final int fromIndex, final int toIndex) {
+    public static float[] deleteRange(final float[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (fromIndex == toIndex) {
@@ -9060,8 +9141,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param fromIndex
      * @param toIndex
      * @return a new array
+     * @throws IndexOutOfBoundsException
      */
-    public static double[] deleteRange(final double[] a, final int fromIndex, final int toIndex) {
+    public static double[] deleteRange(final double[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (fromIndex == toIndex) {
@@ -9089,9 +9171,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param fromIndex
      * @param toIndex
      * @return
+     * @throws IndexOutOfBoundsException
      * @throws IllegalArgumentException
      */
-    public static String[] deleteRange(final String[] a, final int fromIndex, final int toIndex) throws IllegalArgumentException {
+    public static String[] deleteRange(final String[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException, IllegalArgumentException {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (fromIndex == toIndex) {
@@ -9120,9 +9203,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param fromIndex
      * @param toIndex
      * @return a new array
+     * @throws IndexOutOfBoundsException
      * @throws IllegalArgumentException if the specified {@code Array} is <code>null</code>.
      */
-    public static <T> T[] deleteRange(final T[] a, final int fromIndex, final int toIndex) throws IllegalArgumentException {
+    public static <T> T[] deleteRange(final T[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException, IllegalArgumentException {
         checkArgNotNull(a, "a");
 
         checkFromToIndex(fromIndex, toIndex, len(a));
@@ -9153,9 +9237,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param fromIndex
      * @param toIndex
      * @return
+     * @throws IndexOutOfBoundsException
      */
     @SuppressWarnings({ "unchecked" })
-    public static <T> boolean deleteRange(final List<T> c, final int fromIndex, final int toIndex) {
+    public static <T> boolean deleteRange(final List<T> c, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, size(c));
 
         if (fromIndex == toIndex) {
@@ -9191,8 +9276,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param fromIndex
      * @param toIndex
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static String deleteRange(String str, final int fromIndex, final int toIndex) {
+    public static String deleteRange(String str, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         final int len = len(str);
 
         checkFromToIndex(fromIndex, toIndex, len);
@@ -9214,8 +9300,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param toIndex
      * @param replacement
      * @return a new array.
+     * @throws IndexOutOfBoundsException
      */
-    public static boolean[] replaceRange(final boolean[] a, final int fromIndex, final int toIndex, final boolean[] replacement) {
+    public static boolean[] replaceRange(final boolean[] a, final int fromIndex, final int toIndex, final boolean[] replacement)
+            throws IndexOutOfBoundsException {
         final int len = len(a);
 
         checkFromToIndex(fromIndex, toIndex, len);
@@ -9249,8 +9337,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param toIndex
      * @param replacement
      * @return a new array.
+     * @throws IndexOutOfBoundsException
      */
-    public static char[] replaceRange(final char[] a, final int fromIndex, final int toIndex, final char[] replacement) {
+    public static char[] replaceRange(final char[] a, final int fromIndex, final int toIndex, final char[] replacement) throws IndexOutOfBoundsException {
         final int len = len(a);
 
         checkFromToIndex(fromIndex, toIndex, len);
@@ -9284,8 +9373,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param toIndex
      * @param replacement
      * @return a new array.
+     * @throws IndexOutOfBoundsException
      */
-    public static byte[] replaceRange(final byte[] a, final int fromIndex, final int toIndex, final byte[] replacement) {
+    public static byte[] replaceRange(final byte[] a, final int fromIndex, final int toIndex, final byte[] replacement) throws IndexOutOfBoundsException {
         final int len = len(a);
 
         checkFromToIndex(fromIndex, toIndex, len);
@@ -9319,8 +9409,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param toIndex
      * @param replacement
      * @return a new array.
+     * @throws IndexOutOfBoundsException
      */
-    public static short[] replaceRange(final short[] a, final int fromIndex, final int toIndex, final short[] replacement) {
+    public static short[] replaceRange(final short[] a, final int fromIndex, final int toIndex, final short[] replacement) throws IndexOutOfBoundsException {
         final int len = len(a);
 
         checkFromToIndex(fromIndex, toIndex, len);
@@ -9354,8 +9445,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param toIndex
      * @param replacement
      * @return a new array.
+     * @throws IndexOutOfBoundsException
      */
-    public static int[] replaceRange(final int[] a, final int fromIndex, final int toIndex, final int[] replacement) {
+    public static int[] replaceRange(final int[] a, final int fromIndex, final int toIndex, final int[] replacement) throws IndexOutOfBoundsException {
         final int len = len(a);
 
         checkFromToIndex(fromIndex, toIndex, len);
@@ -9389,8 +9481,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param toIndex
      * @param replacement
      * @return a new array.
+     * @throws IndexOutOfBoundsException
      */
-    public static long[] replaceRange(final long[] a, final int fromIndex, final int toIndex, final long[] replacement) {
+    public static long[] replaceRange(final long[] a, final int fromIndex, final int toIndex, final long[] replacement) throws IndexOutOfBoundsException {
         final int len = len(a);
 
         checkFromToIndex(fromIndex, toIndex, len);
@@ -9424,8 +9517,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param toIndex
      * @param replacement
      * @return a new array.
+     * @throws IndexOutOfBoundsException
      */
-    public static float[] replaceRange(final float[] a, final int fromIndex, final int toIndex, final float[] replacement) {
+    public static float[] replaceRange(final float[] a, final int fromIndex, final int toIndex, final float[] replacement) throws IndexOutOfBoundsException {
         final int len = len(a);
 
         checkFromToIndex(fromIndex, toIndex, len);
@@ -9459,8 +9553,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param toIndex
      * @param replacement
      * @return a new array.
+     * @throws IndexOutOfBoundsException
      */
-    public static double[] replaceRange(final double[] a, final int fromIndex, final int toIndex, final double[] replacement) {
+    public static double[] replaceRange(final double[] a, final int fromIndex, final int toIndex, final double[] replacement) throws IndexOutOfBoundsException {
         final int len = len(a);
 
         checkFromToIndex(fromIndex, toIndex, len);
@@ -9494,8 +9589,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param toIndex
      * @param replacement
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static String[] replaceRange(final String[] a, final int fromIndex, final int toIndex, final String[] replacement) {
+    public static String[] replaceRange(final String[] a, final int fromIndex, final int toIndex, final String[] replacement) throws IndexOutOfBoundsException {
         final int len = len(a);
 
         checkFromToIndex(fromIndex, toIndex, len);
@@ -9530,9 +9626,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param toIndex
      * @param replacement
      * @return a new array.
+     * @throws IndexOutOfBoundsException
      * @throws IllegalArgumentException if the specified {@code Array} is <code>null</code>.
      */
-    public static <T> T[] replaceRange(final T[] a, final int fromIndex, final int toIndex, final T[] replacement) throws IllegalArgumentException {
+    public static <T> T[] replaceRange(final T[] a, final int fromIndex, final int toIndex, final T[] replacement)
+            throws IndexOutOfBoundsException, IllegalArgumentException {
         checkArgNotNull(a, "a");
 
         final int len = len(a);
@@ -9609,9 +9707,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param toIndex
      * @param replacement
      * @return
+     * @throws IndexOutOfBoundsException
      */
     @SuppressWarnings("deprecation")
-    public static String replaceRange(final String str, final int fromIndex, final int toIndex, final String replacement) {
+    public static String replaceRange(final String str, final int fromIndex, final int toIndex, final String replacement) throws IndexOutOfBoundsException {
         final int len = len(str);
 
         checkFromToIndex(fromIndex, toIndex, len);
@@ -10397,8 +10496,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param startInclusive
      * @param endExclusive
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static <T> T[] skipRange(final T[] a, final int startInclusive, final int endExclusive) {
+    public static <T> T[] skipRange(final T[] a, final int startInclusive, final int endExclusive) throws IndexOutOfBoundsException {
         final int len = len(a);
 
         checkFromToIndex(startInclusive, endExclusive, len);
@@ -10445,9 +10545,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param endExclusive
      * @param supplier
      * @return
+     * @throws IndexOutOfBoundsException
      */
     public static <T, C extends Collection<T>> C skipRange(final Collection<? extends T> c, final int startInclusive, final int endExclusive,
-            final IntFunction<C> supplier) {
+            final IntFunction<C> supplier) throws IndexOutOfBoundsException {
         final int size = size(c);
 
         checkFromToIndex(startInclusive, endExclusive, size);
@@ -11119,12 +11220,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param a
      * @param fromIndex
      * @param toIndex
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static int sum(final char[] a, final int fromIndex, final int toIndex) {
+    public static int sum(final char[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (isEmpty(a) || fromIndex == toIndex) {
@@ -11156,12 +11259,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param a
      * @param fromIndex
      * @param toIndex
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static int sum(final byte[] a, final int fromIndex, final int toIndex) {
+    public static int sum(final byte[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (isEmpty(a) || fromIndex == toIndex) {
@@ -11193,12 +11298,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param a
      * @param fromIndex
      * @param toIndex
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static int sum(final short[] a, final int fromIndex, final int toIndex) {
+    public static int sum(final short[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (isEmpty(a) || fromIndex == toIndex) {
@@ -11255,12 +11362,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param a
      * @param fromIndex
      * @param toIndex
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static long sumToLong(final int[] a, final int fromIndex, final int toIndex) {
+    public static long sumToLong(final int[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (isEmpty(a) || fromIndex == toIndex) {
@@ -11292,12 +11401,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param a
      * @param fromIndex
      * @param toIndex
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static long sum(final long[] a, final int fromIndex, final int toIndex) {
+    public static long sum(final long[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (isEmpty(a) || fromIndex == toIndex) {
@@ -11329,12 +11440,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param a
      * @param fromIndex
      * @param toIndex
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static float sum(final float[] a, final int fromIndex, final int toIndex) {
+    public static float sum(final float[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (isEmpty(a) || fromIndex == toIndex) {
@@ -11366,12 +11479,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param a
      * @param fromIndex
      * @param toIndex
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static double sumToDouble(final float[] a, final int fromIndex, final int toIndex) {
+    public static double sumToDouble(final float[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (isEmpty(a) || fromIndex == toIndex) {
@@ -11403,12 +11518,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param a
      * @param fromIndex
      * @param toIndex
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static double sum(final double[] a, final int fromIndex, final int toIndex) {
+    public static double sum(final double[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (isEmpty(a) || fromIndex == toIndex) {
@@ -11446,8 +11563,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param fromIndex
      * @param toIndex
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static double average(final char[] a, final int fromIndex, final int toIndex) {
+    public static double average(final char[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (isEmpty(a) || fromIndex == toIndex) {
@@ -11479,8 +11597,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param fromIndex
      * @param toIndex
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static double average(final byte[] a, final int fromIndex, final int toIndex) {
+    public static double average(final byte[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (isEmpty(a) || fromIndex == toIndex) {
@@ -11512,8 +11631,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param fromIndex
      * @param toIndex
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static double average(final short[] a, final int fromIndex, final int toIndex) {
+    public static double average(final short[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (isEmpty(a) || fromIndex == toIndex) {
@@ -11545,8 +11665,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param fromIndex
      * @param toIndex
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static double average(final int[] a, final int fromIndex, final int toIndex) {
+    public static double average(final int[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (isEmpty(a) || fromIndex == toIndex) {
@@ -11584,8 +11705,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param fromIndex
      * @param toIndex
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static double average(final long[] a, final int fromIndex, final int toIndex) {
+    public static double average(final long[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (isEmpty(a) || fromIndex == toIndex) {
@@ -11617,8 +11739,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param fromIndex
      * @param toIndex
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static double average(final float[] a, final int fromIndex, final int toIndex) {
+    public static double average(final float[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (isEmpty(a) || fromIndex == toIndex) {
@@ -11656,8 +11779,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param fromIndex
      * @param toIndex
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static double average(final double[] a, final int fromIndex, final int toIndex) {
+    public static double average(final double[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (isEmpty(a) || fromIndex == toIndex) {
@@ -11697,14 +11821,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <T>
      * @param <E>
      * @param a
      * @param func
      * @return
+     * @throws IndexOutOfBoundsException
      * @throws E the e
      */
-    public static <T, E extends Exception> int sumInt(final T[] a, final Throwables.ToIntFunction<? super T, E> func) throws E {
+    public static <T, E extends Exception> int sumInt(final T[] a, final Throwables.ToIntFunction<? super T, E> func) throws IndexOutOfBoundsException, E {
         if (isEmpty(a)) {
             return 0;
         }
@@ -11754,6 +11880,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <T>
      * @param <E>
      * @param c
@@ -11761,10 +11888,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param toIndex
      * @param func
      * @return
+     * @throws IndexOutOfBoundsException
      * @throws E the e
      */
     public static <T, E extends Exception> int sumInt(final Collection<? extends T> c, final int fromIndex, final int toIndex,
-            final Throwables.ToIntFunction<? super T, E> func) throws E {
+            final Throwables.ToIntFunction<? super T, E> func) throws IndexOutOfBoundsException, E {
         checkFromToIndex(fromIndex, toIndex, size(c));
 
         if (fromIndex == toIndex) {
@@ -11878,14 +12006,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <T>
      * @param <E>
      * @param a
      * @param func
      * @return
+     * @throws IndexOutOfBoundsException
      * @throws E the e
      */
-    public static <T, E extends Exception> long sumLong(final T[] a, final Throwables.ToLongFunction<? super T, E> func) throws E {
+    public static <T, E extends Exception> long sumLong(final T[] a, final Throwables.ToLongFunction<? super T, E> func) throws IndexOutOfBoundsException, E {
         if (isEmpty(a)) {
             return 0L;
         }
@@ -11935,6 +12065,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <T>
      * @param <E>
      * @param c
@@ -11942,10 +12073,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param toIndex
      * @param func
      * @return
+     * @throws IndexOutOfBoundsException
      * @throws E the e
      */
     public static <T, E extends Exception> long sumLong(final Collection<? extends T> c, final int fromIndex, final int toIndex,
-            final Throwables.ToLongFunction<? super T, E> func) throws E {
+            final Throwables.ToLongFunction<? super T, E> func) throws IndexOutOfBoundsException, E {
         checkFromToIndex(fromIndex, toIndex, size(c));
 
         if (fromIndex == toIndex) {
@@ -12053,6 +12185,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <T>
      * @param <E>
      * @param a
@@ -12060,10 +12193,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param toIndex
      * @param func
      * @return
+     * @throws IndexOutOfBoundsException
      * @throws E the e
      */
     public static <T, E extends Exception> double sumDouble(final T[] a, final int fromIndex, final int toIndex,
-            final Throwables.ToDoubleFunction<? super T, E> func) throws E {
+            final Throwables.ToDoubleFunction<? super T, E> func) throws IndexOutOfBoundsException, E {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (fromIndex == toIndex) {
@@ -12093,6 +12227,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <T>
      * @param <E>
      * @param c
@@ -12100,10 +12235,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param toIndex
      * @param func
      * @return
+     * @throws IndexOutOfBoundsException
      * @throws E the e
      */
     public static <T, E extends Exception> double sumDouble(final Collection<? extends T> c, final int fromIndex, final int toIndex,
-            final Throwables.ToDoubleFunction<? super T, E> func) throws E {
+            final Throwables.ToDoubleFunction<? super T, E> func) throws IndexOutOfBoundsException, E {
         checkFromToIndex(fromIndex, toIndex, size(c));
 
         if (fromIndex == toIndex) {
@@ -12301,10 +12437,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param toIndex
      * @param func
      * @return
+     * @throws IndexOutOfBoundsException
      * @throws E the e
      */
     public static <T, E extends Exception> double averageInt(final T[] a, final int fromIndex, final int toIndex,
-            final Throwables.ToIntFunction<? super T, E> func) throws E {
+            final Throwables.ToIntFunction<? super T, E> func) throws IndexOutOfBoundsException, E {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (fromIndex == toIndex) {
@@ -12343,10 +12480,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param toIndex
      * @param func
      * @return
+     * @throws IndexOutOfBoundsException
      * @throws E the e
      */
     public static <T, E extends Exception> double averageInt(final Collection<? extends T> c, final int fromIndex, final int toIndex,
-            final Throwables.ToIntFunction<? super T, E> func) throws E {
+            final Throwables.ToIntFunction<? super T, E> func) throws IndexOutOfBoundsException, E {
         checkFromToIndex(fromIndex, toIndex, size(c));
 
         if (fromIndex == toIndex) {
@@ -12469,10 +12607,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param toIndex
      * @param func
      * @return
+     * @throws IndexOutOfBoundsException
      * @throws E the e
      */
     public static <T, E extends Exception> double averageLong(final T[] a, final int fromIndex, final int toIndex,
-            final Throwables.ToLongFunction<? super T, E> func) throws E {
+            final Throwables.ToLongFunction<? super T, E> func) throws IndexOutOfBoundsException, E {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (fromIndex == toIndex) {
@@ -12505,10 +12644,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param toIndex
      * @param func
      * @return
+     * @throws IndexOutOfBoundsException
      * @throws E the e
      */
     public static <T, E extends Exception> double averageLong(final Collection<? extends T> c, final int fromIndex, final int toIndex,
-            final Throwables.ToLongFunction<? super T, E> func) throws E {
+            final Throwables.ToLongFunction<? super T, E> func) throws IndexOutOfBoundsException, E {
         checkFromToIndex(fromIndex, toIndex, size(c));
 
         if (fromIndex == toIndex) {
@@ -12609,11 +12749,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param toIndex
      * @param func
      * @return
+     * @throws IndexOutOfBoundsException
      * @throws E the e
      * @see Iterables#averageDouble(Object[], int, int, Throwables.ToDoubleFunction)
      */
     public static <T, E extends Exception> double averageDouble(final T[] a, final int fromIndex, final int toIndex,
-            final Throwables.ToDoubleFunction<? super T, E> func) throws E {
+            final Throwables.ToDoubleFunction<? super T, E> func) throws IndexOutOfBoundsException, E {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (fromIndex == toIndex) {
@@ -12646,11 +12787,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param toIndex
      * @param func
      * @return
+     * @throws IndexOutOfBoundsException
      * @throws E the e
      * @see Iterables#averageDouble(Collection, int, int, Throwables.ToDoubleFunction)
      */
     public static <T, E extends Exception> double averageDouble(final Collection<? extends T> c, final int fromIndex, final int toIndex,
-            final Throwables.ToDoubleFunction<? super T, E> func) throws E {
+            final Throwables.ToDoubleFunction<? super T, E> func) throws IndexOutOfBoundsException, E {
         checkFromToIndex(fromIndex, toIndex, size(c));
 
         if (fromIndex == toIndex) {
@@ -13355,15 +13497,18 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <T>
      * @param a
      * @param fromIndex
      * @param toIndex
      * @param cmp
      * @return
+     * @throws IndexOutOfBoundsException
      * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
      */
-    public static <T> T min(final T[] a, final int fromIndex, final int toIndex, Comparator<? super T> cmp) throws IllegalArgumentException {
+    public static <T> T min(final T[] a, final int fromIndex, final int toIndex, Comparator<? super T> cmp)
+            throws IndexOutOfBoundsException, IllegalArgumentException {
         if (isEmpty(a) || toIndex - fromIndex < 1) {
             throw new IllegalArgumentException("The spcified array can not be null or empty");
         }
@@ -14680,15 +14825,18 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <T>
      * @param a
      * @param fromIndex
      * @param toIndex
      * @param cmp
      * @return
+     * @throws IndexOutOfBoundsException
      * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
      */
-    public static <T> T max(final T[] a, final int fromIndex, final int toIndex, Comparator<? super T> cmp) throws IllegalArgumentException {
+    public static <T> T max(final T[] a, final int fromIndex, final int toIndex, Comparator<? super T> cmp)
+            throws IndexOutOfBoundsException, IllegalArgumentException {
         if (isEmpty(a) || toIndex - fromIndex < 1) {
             throw new IllegalArgumentException("The spcified array can not be null or empty");
         }
@@ -15518,13 +15666,15 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param a
      * @param fromIndex
      * @param toIndex
      * @return
+     * @throws IndexOutOfBoundsException
      * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
      */
-    public static char median(final char[] a, final int fromIndex, final int toIndex) throws IllegalArgumentException {
+    public static char median(final char[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException, IllegalArgumentException {
         if (isEmpty(a) || toIndex - fromIndex < 1) {
             throw new IllegalArgumentException("The spcified array can not be null or empty");
         }
@@ -15561,13 +15711,15 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param a
      * @param fromIndex
      * @param toIndex
      * @return
+     * @throws IndexOutOfBoundsException
      * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
      */
-    public static byte median(final byte[] a, final int fromIndex, final int toIndex) throws IllegalArgumentException {
+    public static byte median(final byte[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException, IllegalArgumentException {
         if (isEmpty(a) || toIndex - fromIndex < 1) {
             throw new IllegalArgumentException("The spcified array can not be null or empty");
         }
@@ -15604,13 +15756,15 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param a
      * @param fromIndex
      * @param toIndex
      * @return
+     * @throws IndexOutOfBoundsException
      * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
      */
-    public static short median(final short[] a, final int fromIndex, final int toIndex) throws IllegalArgumentException {
+    public static short median(final short[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException, IllegalArgumentException {
         if (isEmpty(a) || toIndex - fromIndex < 1) {
             throw new IllegalArgumentException("The spcified array can not be null or empty");
         }
@@ -15647,13 +15801,15 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param a
      * @param fromIndex
      * @param toIndex
      * @return
+     * @throws IndexOutOfBoundsException
      * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
      */
-    public static int median(final int[] a, final int fromIndex, final int toIndex) throws IllegalArgumentException {
+    public static int median(final int[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException, IllegalArgumentException {
         if (isEmpty(a) || toIndex - fromIndex < 1) {
             throw new IllegalArgumentException("The spcified array can not be null or empty");
         }
@@ -15690,13 +15846,15 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param a
      * @param fromIndex
      * @param toIndex
      * @return
+     * @throws IndexOutOfBoundsException
      * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
      */
-    public static long median(final long[] a, final int fromIndex, final int toIndex) throws IllegalArgumentException {
+    public static long median(final long[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException, IllegalArgumentException {
         if (isEmpty(a) || toIndex - fromIndex < 1) {
             throw new IllegalArgumentException("The spcified array can not be null or empty");
         }
@@ -15733,13 +15891,15 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param a
      * @param fromIndex
      * @param toIndex
      * @return
+     * @throws IndexOutOfBoundsException
      * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
      */
-    public static float median(final float[] a, final int fromIndex, final int toIndex) throws IllegalArgumentException {
+    public static float median(final float[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException, IllegalArgumentException {
         if (isEmpty(a) || toIndex - fromIndex < 1) {
             throw new IllegalArgumentException("The spcified array can not be null or empty");
         }
@@ -15776,13 +15936,15 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param a
      * @param fromIndex
      * @param toIndex
      * @return
+     * @throws IndexOutOfBoundsException
      * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
      */
-    public static double median(final double[] a, final int fromIndex, final int toIndex) throws IllegalArgumentException {
+    public static double median(final double[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException, IllegalArgumentException {
         if (isEmpty(a) || toIndex - fromIndex < 1) {
             throw new IllegalArgumentException("The spcified array can not be null or empty");
         }
@@ -15852,15 +16014,18 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <T>
      * @param a
      * @param fromIndex
      * @param toIndex
      * @param cmp
      * @return
+     * @throws IndexOutOfBoundsException
      * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
      */
-    public static <T> T median(final T[] a, final int fromIndex, final int toIndex, Comparator<? super T> cmp) throws IllegalArgumentException {
+    public static <T> T median(final T[] a, final int fromIndex, final int toIndex, Comparator<? super T> cmp)
+            throws IndexOutOfBoundsException, IllegalArgumentException {
         if (isEmpty(a) || toIndex - fromIndex < 1) {
             throw new IllegalArgumentException("The spcified array can not be null or empty");
         }
@@ -15910,10 +16075,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param c
      * @param cmp
      * @return
+     * @throws IndexOutOfBoundsException
      * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
      * @see #median(int...)
      */
-    public static <T> T median(final Collection<? extends T> c, Comparator<? super T> cmp) throws IllegalArgumentException {
+    public static <T> T median(final Collection<? extends T> c, Comparator<? super T> cmp) throws IndexOutOfBoundsException, IllegalArgumentException {
         checkArgNotEmpty(c, "The spcified collection can not be null or empty");
 
         return median(c, 0, c.size(), cmp);
@@ -15959,14 +16125,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param a
      * @param fromIndex
      * @param toIndex
      * @param k
      * @return
+     * @throws IndexOutOfBoundsException
      * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or its length/size is less than {@code k}, or {@code toIndex - fromIndex < k}.
      */
-    public static char kthLargest(final char[] a, final int fromIndex, final int toIndex, int k) throws IllegalArgumentException {
+    public static char kthLargest(final char[] a, final int fromIndex, final int toIndex, int k) throws IndexOutOfBoundsException, IllegalArgumentException {
         if (isEmpty(a) || toIndex - fromIndex < 1) {
             throw new IllegalArgumentException("The spcified array can not be null or empty");
         }
@@ -16032,14 +16200,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param a
      * @param fromIndex
      * @param toIndex
      * @param k
      * @return
+     * @throws IndexOutOfBoundsException
      * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or its length/size is less than {@code k}, or {@code toIndex - fromIndex < k}.
      */
-    public static byte kthLargest(final byte[] a, final int fromIndex, final int toIndex, int k) throws IllegalArgumentException {
+    public static byte kthLargest(final byte[] a, final int fromIndex, final int toIndex, int k) throws IndexOutOfBoundsException, IllegalArgumentException {
         if (isEmpty(a) || toIndex - fromIndex < 1) {
             throw new IllegalArgumentException("The spcified array can not be null or empty");
         }
@@ -16105,14 +16275,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param a
      * @param fromIndex
      * @param toIndex
      * @param k
      * @return
+     * @throws IndexOutOfBoundsException
      * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or its length/size is less than {@code k}, or {@code toIndex - fromIndex < k}.
      */
-    public static short kthLargest(final short[] a, final int fromIndex, final int toIndex, int k) throws IllegalArgumentException {
+    public static short kthLargest(final short[] a, final int fromIndex, final int toIndex, int k) throws IndexOutOfBoundsException, IllegalArgumentException {
         if (isEmpty(a) || toIndex - fromIndex < 1) {
             throw new IllegalArgumentException("The spcified array can not be null or empty");
         }
@@ -16178,14 +16350,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param a
      * @param fromIndex
      * @param toIndex
      * @param k
      * @return
+     * @throws IndexOutOfBoundsException
      * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or its length/size is less than {@code k}, or {@code toIndex - fromIndex < k}.
      */
-    public static int kthLargest(final int[] a, final int fromIndex, final int toIndex, int k) throws IllegalArgumentException {
+    public static int kthLargest(final int[] a, final int fromIndex, final int toIndex, int k) throws IndexOutOfBoundsException, IllegalArgumentException {
         if (isEmpty(a) || toIndex - fromIndex < 1) {
             throw new IllegalArgumentException("The spcified array can not be null or empty");
         }
@@ -16251,14 +16425,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param a
      * @param fromIndex
      * @param toIndex
      * @param k
      * @return
+     * @throws IndexOutOfBoundsException
      * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or its length/size is less than {@code k}, or {@code toIndex - fromIndex < k}.
      */
-    public static long kthLargest(final long[] a, final int fromIndex, final int toIndex, int k) throws IllegalArgumentException {
+    public static long kthLargest(final long[] a, final int fromIndex, final int toIndex, int k) throws IndexOutOfBoundsException, IllegalArgumentException {
         if (isEmpty(a) || toIndex - fromIndex < 1) {
             throw new IllegalArgumentException("The spcified array can not be null or empty");
         }
@@ -16324,14 +16500,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param a
      * @param fromIndex
      * @param toIndex
      * @param k
      * @return
+     * @throws IndexOutOfBoundsException
      * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or its length/size is less than {@code k}, or {@code toIndex - fromIndex < k}.
      */
-    public static float kthLargest(final float[] a, final int fromIndex, final int toIndex, int k) throws IllegalArgumentException {
+    public static float kthLargest(final float[] a, final int fromIndex, final int toIndex, int k) throws IndexOutOfBoundsException, IllegalArgumentException {
         if (isEmpty(a) || toIndex - fromIndex < 1) {
             throw new IllegalArgumentException("The spcified array can not be null or empty");
         }
@@ -16397,14 +16575,17 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param a
      * @param fromIndex
      * @param toIndex
      * @param k
      * @return
+     * @throws IndexOutOfBoundsException
      * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or its length/size is less than {@code k}, or {@code toIndex - fromIndex < k}.
      */
-    public static double kthLargest(final double[] a, final int fromIndex, final int toIndex, int k) throws IllegalArgumentException {
+    public static double kthLargest(final double[] a, final int fromIndex, final int toIndex, int k)
+            throws IndexOutOfBoundsException, IllegalArgumentException {
         if (isEmpty(a) || toIndex - fromIndex < 1) {
             throw new IllegalArgumentException("The spcified array can not be null or empty");
         }
@@ -16490,14 +16671,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <T>
      * @param a
      * @param k
      * @param cmp
      * @return
+     * @throws IndexOutOfBoundsException
      * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or its length/size is less than {@code k}, or {@code toIndex - fromIndex < k}.
      */
-    public static <T> T kthLargest(final T[] a, final int k, final Comparator<? super T> cmp) throws IllegalArgumentException {
+    public static <T> T kthLargest(final T[] a, final int k, final Comparator<? super T> cmp) throws IndexOutOfBoundsException, IllegalArgumentException {
         checkArgNotEmpty(a, "The spcified array can not be null or empty");
 
         return kthLargest(a, 0, a.length, k, cmp);
@@ -16602,14 +16785,17 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <T>
      * @param c
      * @param k
      * @param cmp
      * @return
+     * @throws IndexOutOfBoundsException
      * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or its length/size is less than {@code k}, or {@code toIndex - fromIndex < k}.
      */
-    public static <T> T kthLargest(final Collection<? extends T> c, final int k, final Comparator<? super T> cmp) throws IllegalArgumentException {
+    public static <T> T kthLargest(final Collection<? extends T> c, final int k, final Comparator<? super T> cmp)
+            throws IndexOutOfBoundsException, IllegalArgumentException {
         checkArgNotEmpty(c, "The spcified collection can not be null or empty");
 
         return kthLargest(c, 0, c.size(), k, cmp);
@@ -16738,14 +16924,17 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param a
      * @param fromIndex
      * @param toIndex
      * @param n
      * @param cmp
      * @return
+     * @throws IllegalArgumentException
      */
-    public static short[] top(final short[] a, final int fromIndex, final int toIndex, final int n, final Comparator<? super Short> cmp) {
+    public static short[] top(final short[] a, final int fromIndex, final int toIndex, final int n, final Comparator<? super Short> cmp)
+            throws IllegalArgumentException {
         checkArgNotNegative(n, "n");
 
         if (n == 0) {
@@ -16814,14 +17003,17 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param a
      * @param fromIndex
      * @param toIndex
      * @param n
      * @param cmp
      * @return
+     * @throws IllegalArgumentException
      */
-    public static int[] top(final int[] a, final int fromIndex, final int toIndex, final int n, final Comparator<? super Integer> cmp) {
+    public static int[] top(final int[] a, final int fromIndex, final int toIndex, final int n, final Comparator<? super Integer> cmp)
+            throws IllegalArgumentException {
         checkArgNotNegative(n, "n");
 
         if (n == 0) {
@@ -16890,14 +17082,17 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param a
      * @param fromIndex
      * @param toIndex
      * @param n
      * @param cmp
      * @return
+     * @throws IllegalArgumentException
      */
-    public static long[] top(final long[] a, final int fromIndex, final int toIndex, final int n, final Comparator<? super Long> cmp) {
+    public static long[] top(final long[] a, final int fromIndex, final int toIndex, final int n, final Comparator<? super Long> cmp)
+            throws IllegalArgumentException {
         checkArgNotNegative(n, "n");
 
         if (n == 0) {
@@ -16966,14 +17161,17 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param a
      * @param fromIndex
      * @param toIndex
      * @param n
      * @param cmp
      * @return
+     * @throws IllegalArgumentException
      */
-    public static float[] top(final float[] a, final int fromIndex, final int toIndex, final int n, final Comparator<? super Float> cmp) {
+    public static float[] top(final float[] a, final int fromIndex, final int toIndex, final int n, final Comparator<? super Float> cmp)
+            throws IllegalArgumentException {
         checkArgNotNegative(n, "n");
 
         if (n == 0) {
@@ -17042,14 +17240,17 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param a
      * @param fromIndex
      * @param toIndex
      * @param n
      * @param cmp
      * @return
+     * @throws IllegalArgumentException
      */
-    public static double[] top(final double[] a, final int fromIndex, final int toIndex, final int n, final Comparator<? super Double> cmp) {
+    public static double[] top(final double[] a, final int fromIndex, final int toIndex, final int n, final Comparator<? super Double> cmp)
+            throws IllegalArgumentException {
         checkArgNotNegative(n, "n");
 
         if (n == 0) {
@@ -17121,6 +17322,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <T>
      * @param a
      * @param fromIndex
@@ -17128,9 +17330,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param n
      * @param cmp
      * @return
+     * @throws IllegalArgumentException
      */
     @SuppressWarnings("deprecation")
-    public static <T> List<T> top(final T[] a, final int fromIndex, final int toIndex, final int n, final Comparator<? super T> cmp) {
+    public static <T> List<T> top(final T[] a, final int fromIndex, final int toIndex, final int n, final Comparator<? super T> cmp)
+            throws IllegalArgumentException {
         checkArgNotNegative(n, "n");
 
         if (n == 0) {
@@ -17194,6 +17398,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <T>
      * @param c
      * @param fromIndex
@@ -17201,9 +17406,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param n
      * @param cmp
      * @return
+     * @throws IllegalArgumentException
      */
     @SuppressWarnings("deprecation")
-    public static <T> List<T> top(final Collection<? extends T> c, final int fromIndex, final int toIndex, final int n, final Comparator<? super T> cmp) {
+    public static <T> List<T> top(final Collection<? extends T> c, final int fromIndex, final int toIndex, final int n, final Comparator<? super T> cmp)
+            throws IllegalArgumentException {
         checkArgNotNegative(n, "n");
 
         if (n == 0) {
@@ -17316,6 +17523,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <T>
      * @param a
      * @param fromIndex
@@ -17324,9 +17532,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param cmp
      * @param keepEncounterOrder
      * @return
+     * @throws IllegalArgumentException
      */
     public static <T> List<T> top(final T[] a, final int fromIndex, final int toIndex, final int n, final Comparator<? super T> cmp,
-            final boolean keepEncounterOrder) {
+            final boolean keepEncounterOrder) throws IllegalArgumentException {
         checkArgNotNegative(n, "n");
 
         if (!keepEncounterOrder) {
@@ -17428,6 +17637,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <T>
      * @param c
      * @param fromIndex
@@ -17436,9 +17646,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param cmp
      * @param keepEncounterOrder
      * @return
+     * @throws IllegalArgumentException
      */
     public static <T> List<T> top(final Collection<? extends T> c, final int fromIndex, final int toIndex, final int n, final Comparator<? super T> cmp,
-            final boolean keepEncounterOrder) {
+            final boolean keepEncounterOrder) throws IllegalArgumentException {
         checkArgNotNegative(n, "n");
 
         if (!keepEncounterOrder) {
@@ -17726,14 +17937,17 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <E>
      * @param startInclusive
      * @param endExclusive
      * @param step
      * @param action
+     * @throws IllegalArgumentException
      * @throws E the e
      */
-    public static <E extends Exception> void forEach(final int startInclusive, final int endExclusive, final int step, Throwables.Runnable<E> action) throws E {
+    public static <E extends Exception> void forEach(final int startInclusive, final int endExclusive, final int step, Throwables.Runnable<E> action)
+            throws IllegalArgumentException, E {
         checkArgument(step != 0, "The input parameter 'step' can not be zero"); //NOSONAR
 
         if (endExclusive == startInclusive || endExclusive > startInclusive != step > 0) {
@@ -17749,13 +17963,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <E>
      * @param startInclusive
      * @param endExclusive
      * @param action
+     * @throws IllegalArgumentException
      * @throws E the e
      */
-    public static <E extends Exception> void forEach(final int startInclusive, final int endExclusive, Throwables.IntConsumer<E> action) throws E {
+    public static <E extends Exception> void forEach(final int startInclusive, final int endExclusive, Throwables.IntConsumer<E> action)
+            throws IllegalArgumentException, E {
         forEach(startInclusive, endExclusive, 1, action);
     }
 
@@ -17802,6 +18019,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <T>
      * @param <E>
      * @param startInclusive
@@ -17809,10 +18027,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param step
      * @param a
      * @param action
+     * @throws IllegalArgumentException
      * @throws E the e
      */
     public static <T, E extends Exception> void forEach(final int startInclusive, final int endExclusive, final int step, final T a,
-            Throwables.IntObjConsumer<? super T, E> action) throws E {
+            Throwables.IntObjConsumer<? super T, E> action) throws IllegalArgumentException, E {
         checkArgument(step != 0, "The input parameter 'step' can not be zero");
 
         if (endExclusive == startInclusive || endExclusive > startInclusive != step > 0) {
@@ -17830,13 +18049,17 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <T>
      * @param <E>
      * @param a
      * @param action
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
      * @throws E the e
      */
-    public static <T, E extends Exception> void forEach(final T[] a, final Throwables.Consumer<? super T, E> action) throws E {
+    public static <T, E extends Exception> void forEach(final T[] a, final Throwables.Consumer<? super T, E> action)
+            throws IllegalArgumentException, IndexOutOfBoundsException, E {
         checkArgNotNull(action);
 
         if (isEmpty(a)) {
@@ -17880,13 +18103,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <T>
      * @param <E>
      * @param c
      * @param action
+     * @throws IllegalArgumentException
      * @throws E the e
      */
-    public static <T, E extends Exception> void forEach(final Iterable<? extends T> c, final Throwables.Consumer<? super T, E> action) throws E {
+    public static <T, E extends Exception> void forEach(final Iterable<? extends T> c, final Throwables.Consumer<? super T, E> action)
+            throws IllegalArgumentException, E {
         checkArgNotNull(action);
 
         if (c == null) {
@@ -17900,13 +18126,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <T>
      * @param <E>
      * @param iter
      * @param action
+     * @throws IllegalArgumentException
      * @throws E the e
      */
-    public static <T, E extends Exception> void forEach(final Iterator<? extends T> iter, final Throwables.Consumer<? super T, E> action) throws E {
+    public static <T, E extends Exception> void forEach(final Iterator<? extends T> iter, final Throwables.Consumer<? super T, E> action)
+            throws IllegalArgumentException, E {
         checkArgNotNull(action);
 
         if (iter == null) {
@@ -17931,10 +18160,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param fromIndex
      * @param toIndex
      * @param action
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
      * @throws E the e
      */
     public static <T, E extends Exception> void forEach(final Collection<? extends T> c, int fromIndex, final int toIndex,
-            final Throwables.Consumer<? super T, E> action) throws E {
+            final Throwables.Consumer<? super T, E> action) throws IllegalArgumentException, IndexOutOfBoundsException, E {
         checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), fromIndex < toIndex ? toIndex : fromIndex, size(c));
         checkArgNotNull(action);
 
@@ -18020,14 +18251,17 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <K>
      * @param <V>
      * @param <E>
      * @param map
      * @param action
+     * @throws IllegalArgumentException
      * @throws E the e
      */
-    public static <K, V, E extends Exception> void forEach(final Map<K, V> map, final Throwables.Consumer<? super Map.Entry<K, V>, E> action) throws E {
+    public static <K, V, E extends Exception> void forEach(final Map<K, V> map, final Throwables.Consumer<? super Map.Entry<K, V>, E> action)
+            throws IllegalArgumentException, E {
         checkArgNotNull(action);
 
         if (isEmpty(map)) {
@@ -18039,14 +18273,17 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <K>
      * @param <V>
      * @param <E>
      * @param map
      * @param action
+     * @throws IllegalArgumentException
      * @throws E the e
      */
-    public static <K, V, E extends Exception> void forEach(final Map<K, V> map, final Throwables.BiConsumer<? super K, ? super V, E> action) throws E {
+    public static <K, V, E extends Exception> void forEach(final Map<K, V> map, final Throwables.BiConsumer<? super K, ? super V, E> action)
+            throws IllegalArgumentException, E {
         checkArgNotNull(action);
 
         if (isEmpty(map)) {
@@ -18060,6 +18297,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <A>
      * @param <B>
      * @param <C>
@@ -18071,10 +18309,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param valueForNoneB
      * @param valueForNoneC
      * @param action
+     * @throws IllegalArgumentException
      * @throws E the e
      */
     public static <A, B, C, E extends Exception> void forEach(final Iterator<A> a, final Iterator<B> b, final Iterator<C> c, final A valueForNoneA,
-            final B valueForNoneB, final C valueForNoneC, final Throwables.TriConsumer<? super A, ? super B, ? super C, E> action) throws E {
+            final B valueForNoneB, final C valueForNoneC, final Throwables.TriConsumer<? super A, ? super B, ? super C, E> action)
+            throws IllegalArgumentException, E {
         checkArgNotNull(action);
 
         final Iterator<A> iterA = a == null ? ObjIterator.<A> empty() : a;
@@ -18151,11 +18391,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param elementConsumer
      * @param processThreadNum
      * @param executor
+     * @throws IllegalArgumentException
      * @see {@link Fnn#c(com.landawn.abacus.util.Throwables.Consumer)}
      * @see {@link Fnn#f(com.landawn.abacus.util.Throwables.Function)
      */
     public static <T, E extends Exception> void forEach(final Iterator<? extends T> iter, final Throwables.Consumer<? super T, E> elementConsumer,
-            final int processThreadNum, final Executor executor) {
+            final int processThreadNum, final Executor executor) throws IllegalArgumentException {
         N.checkArgNotNull(elementConsumer, "elementConsumer");
         N.checkArgPositive(processThreadNum, "processThreadNum");
         N.checkArgNotNull(executor, "executor");
@@ -18584,15 +18825,18 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <A>
      * @param <B>
      * @param <E>
      * @param a
      * @param b
      * @param action
+     * @throws IllegalArgumentException
      * @throws E the e
      */
-    public static <A, B, E extends Exception> void forEach(final A[] a, final B[] b, final Throwables.BiConsumer<? super A, ? super B, E> action) throws E {
+    public static <A, B, E extends Exception> void forEach(final A[] a, final B[] b, final Throwables.BiConsumer<? super A, ? super B, E> action)
+            throws IllegalArgumentException, E {
         checkArgNotNull(action);
 
         if (isEmpty(a) || isEmpty(b)) {
@@ -18606,16 +18850,18 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <A>
      * @param <B>
      * @param <E>
      * @param a
      * @param b
      * @param action
+     * @throws IllegalArgumentException
      * @throws E the e
      */
     public static <A, B, E extends Exception> void forEach(final Iterable<A> a, final Iterable<B> b,
-            final Throwables.BiConsumer<? super A, ? super B, E> action) throws E {
+            final Throwables.BiConsumer<? super A, ? super B, E> action) throws IllegalArgumentException, E {
         checkArgNotNull(action);
 
         if (a == null || b == null) {
@@ -18630,16 +18876,18 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <A>
      * @param <B>
      * @param <E>
      * @param a
      * @param b
      * @param action
+     * @throws IllegalArgumentException
      * @throws E the e
      */
     public static <A, B, E extends Exception> void forEach(final Iterator<A> a, final Iterator<B> b,
-            final Throwables.BiConsumer<? super A, ? super B, E> action) throws E {
+            final Throwables.BiConsumer<? super A, ? super B, E> action) throws IllegalArgumentException, E {
         checkArgNotNull(action);
 
         if (a == null || b == null) {
@@ -18653,6 +18901,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <A>
      * @param <B>
      * @param <C>
@@ -18661,10 +18910,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param b
      * @param c
      * @param action
+     * @throws IllegalArgumentException
      * @throws E the e
      */
     public static <A, B, C, E extends Exception> void forEach(final A[] a, final B[] b, final C[] c,
-            final Throwables.TriConsumer<? super A, ? super B, ? super C, E> action) throws E {
+            final Throwables.TriConsumer<? super A, ? super B, ? super C, E> action) throws IllegalArgumentException, E {
         checkArgNotNull(action);
 
         if (isEmpty(a) || isEmpty(b) || isEmpty(c)) {
@@ -18678,6 +18928,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <A>
      * @param <B>
      * @param <C>
@@ -18686,10 +18937,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param b
      * @param c
      * @param action
+     * @throws IllegalArgumentException
      * @throws E the e
      */
     public static <A, B, C, E extends Exception> void forEach(final Iterable<A> a, final Iterable<B> b, final Iterable<C> c,
-            final Throwables.TriConsumer<? super A, ? super B, ? super C, E> action) throws E {
+            final Throwables.TriConsumer<? super A, ? super B, ? super C, E> action) throws IllegalArgumentException, E {
         checkArgNotNull(action);
 
         if (a == null || b == null || c == null) {
@@ -18705,6 +18957,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <A>
      * @param <B>
      * @param <C>
@@ -18713,10 +18966,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param b
      * @param c
      * @param action
+     * @throws IllegalArgumentException
      * @throws E the e
      */
     public static <A, B, C, E extends Exception> void forEach(final Iterator<A> a, final Iterator<B> b, final Iterator<C> c,
-            final Throwables.TriConsumer<? super A, ? super B, ? super C, E> action) throws E {
+            final Throwables.TriConsumer<? super A, ? super B, ? super C, E> action) throws IllegalArgumentException, E {
         checkArgNotNull(action);
 
         if (a == null || b == null || c == null) {
@@ -18730,6 +18984,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <A>
      * @param <B>
      * @param <E>
@@ -18738,10 +18993,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param valueForNoneA
      * @param valueForNoneB
      * @param action
+     * @throws IllegalArgumentException
      * @throws E the e
      */
     public static <A, B, E extends Exception> void forEach(final A[] a, final B[] b, final A valueForNoneA, final B valueForNoneB,
-            final Throwables.BiConsumer<? super A, ? super B, E> action) throws E {
+            final Throwables.BiConsumer<? super A, ? super B, E> action) throws IllegalArgumentException, E {
         checkArgNotNull(action);
 
         final int lenA = len(a);
@@ -18754,6 +19010,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <A>
      * @param <B>
      * @param <E>
@@ -18762,10 +19019,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param valueForNoneA
      * @param valueForNoneB
      * @param action
+     * @throws IllegalArgumentException
      * @throws E the e
      */
     public static <A, B, E extends Exception> void forEach(final Iterable<A> a, final Iterable<B> b, final A valueForNoneA, final B valueForNoneB,
-            final Throwables.BiConsumer<? super A, ? super B, E> action) throws E {
+            final Throwables.BiConsumer<? super A, ? super B, E> action) throws IllegalArgumentException, E {
         checkArgNotNull(action);
 
         final Iterator<A> iterA = a == null ? ObjIterator.<A> empty() : a.iterator();
@@ -18776,6 +19034,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <A>
      * @param <B>
      * @param <E>
@@ -18784,10 +19043,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param valueForNoneA
      * @param valueForNoneB
      * @param action
+     * @throws IllegalArgumentException
      * @throws E the e
      */
     public static <A, B, E extends Exception> void forEach(final Iterator<A> a, final Iterator<B> b, final A valueForNoneA, final B valueForNoneB,
-            final Throwables.BiConsumer<? super A, ? super B, E> action) throws E {
+            final Throwables.BiConsumer<? super A, ? super B, E> action) throws IllegalArgumentException, E {
         checkArgNotNull(action);
 
         final Iterator<A> iterA = a == null ? ObjIterator.<A> empty() : a;
@@ -18806,6 +19066,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <A>
      * @param <B>
      * @param <C>
@@ -18817,10 +19078,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param valueForNoneB
      * @param valueForNoneC
      * @param action
+     * @throws IllegalArgumentException
      * @throws E the e
      */
     public static <A, B, C, E extends Exception> void forEach(final A[] a, final B[] b, final C[] c, final A valueForNoneA, final B valueForNoneB,
-            final C valueForNoneC, final Throwables.TriConsumer<? super A, ? super B, ? super C, E> action) throws E {
+            final C valueForNoneC, final Throwables.TriConsumer<? super A, ? super B, ? super C, E> action) throws IllegalArgumentException, E {
         checkArgNotNull(action);
 
         final int lenA = len(a);
@@ -18834,6 +19096,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <A>
      * @param <B>
      * @param <C>
@@ -18845,10 +19108,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param valueForNoneB
      * @param valueForNoneC
      * @param action
+     * @throws IllegalArgumentException
      * @throws E the e
      */
     public static <A, B, C, E extends Exception> void forEach(final Iterable<A> a, final Iterable<B> b, final Iterable<C> c, final A valueForNoneA,
-            final B valueForNoneB, final C valueForNoneC, final Throwables.TriConsumer<? super A, ? super B, ? super C, E> action) throws E {
+            final B valueForNoneB, final C valueForNoneC, final Throwables.TriConsumer<? super A, ? super B, ? super C, E> action)
+            throws IllegalArgumentException, E {
         checkArgNotNull(action);
 
         final Iterator<A> iterA = a == null ? ObjIterator.<A> empty() : a.iterator();
@@ -18865,9 +19130,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <E>
      * @param a
      * @param action
+     * @throws IllegalArgumentException
      * @throws E the e
      */
-    public static <T, E extends Exception> void forEachNonNull(final T[] a, final Throwables.Consumer<? super T, E> action) throws E {
+    public static <T, E extends Exception> void forEachNonNull(final T[] a, final Throwables.Consumer<? super T, E> action) throws IllegalArgumentException, E {
         checkArgNotNull(action);
 
         if (isEmpty(a)) {
@@ -18888,9 +19154,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <E>
      * @param c
      * @param action
+     * @throws IllegalArgumentException
      * @throws E the e
      */
-    public static <T, E extends Exception> void forEachNonNull(final Iterable<? extends T> c, final Throwables.Consumer<? super T, E> action) throws E {
+    public static <T, E extends Exception> void forEachNonNull(final Iterable<? extends T> c, final Throwables.Consumer<? super T, E> action)
+            throws IllegalArgumentException, E {
         checkArgNotNull(action);
 
         if (c == null) {
@@ -19184,13 +19452,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <T>
      * @param <E>
      * @param a
      * @param action
+     * @throws IllegalArgumentException
      * @throws E the e
      */
-    public static <T, E extends Exception> void forEachIndexed(final T[] a, final Throwables.IntObjConsumer<? super T, E> action) throws E {
+    public static <T, E extends Exception> void forEachIndexed(final T[] a, final Throwables.IntObjConsumer<? super T, E> action)
+            throws IllegalArgumentException, E {
         checkArgNotNull(action);
 
         if (isEmpty(a)) {
@@ -19202,16 +19473,19 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <T>
      * @param <E>
      * @param a
      * @param fromIndex
      * @param toIndex
      * @param action
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
      * @throws E the e
      */
     public static <T, E extends Exception> void forEachIndexed(final T[] a, final int fromIndex, final int toIndex,
-            final Throwables.IntObjConsumer<? super T, E> action) throws E {
+            final Throwables.IntObjConsumer<? super T, E> action) throws IllegalArgumentException, IndexOutOfBoundsException, E {
         checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), fromIndex < toIndex ? toIndex : fromIndex, len(a));
         checkArgNotNull(action);
 
@@ -19232,13 +19506,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <T>
      * @param <E>
      * @param c
      * @param action
+     * @throws IllegalArgumentException
      * @throws E the e
      */
-    public static <T, E extends Exception> void forEachIndexed(final Iterable<? extends T> c, final Throwables.IntObjConsumer<? super T, E> action) throws E {
+    public static <T, E extends Exception> void forEachIndexed(final Iterable<? extends T> c, final Throwables.IntObjConsumer<? super T, E> action)
+            throws IllegalArgumentException, E {
         checkArgNotNull(action);
 
         if (c == null) {
@@ -19288,10 +19565,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param fromIndex
      * @param toIndex
      * @param action
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
      * @throws E the e
      */
     public static <T, E extends Exception> void forEachIndexed(final Collection<? extends T> c, int fromIndex, final int toIndex,
-            final Throwables.IntObjConsumer<? super T, E> action) throws E {
+            final Throwables.IntObjConsumer<? super T, E> action) throws IllegalArgumentException, IndexOutOfBoundsException, E {
         checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), fromIndex < toIndex ? toIndex : fromIndex, size(c));
         checkArgNotNull(action);
 
@@ -19476,11 +19755,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param elementConsumer
      * @param processThreadNum
      * @param executor
+     * @throws IllegalArgumentException
      * @see Throwables.IntObjConsumer#of(com.landawn.abacus.util.Throwables.IntObjConsumer)
      * @see Throwables.IntObjFunction#of(com.landawn.abacus.util.Throwables.IntObjFunction)
      */
     public static <T, E extends Exception> void forEachIndexed(final Iterator<? extends T> iter, final Throwables.IntObjConsumer<? super T, E> elementConsumer,
-            final int processThreadNum, final Executor executor) {
+            final int processThreadNum, final Executor executor) throws IllegalArgumentException {
         N.checkArgNotNull(elementConsumer, "elementConsumer");
         N.checkArgPositive(processThreadNum, "processThreadNum");
         N.checkArgNotNull(executor, "executor");
@@ -19675,9 +19955,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <E>
      * @param a
      * @param action
+     * @throws IllegalArgumentException
      * @throws E the e
      */
-    public static <T, E extends Exception> void forEachPair(final T[] a, final Throwables.BiConsumer<? super T, ? super T, E> action) throws E {
+    public static <T, E extends Exception> void forEachPair(final T[] a, final Throwables.BiConsumer<? super T, ? super T, E> action)
+            throws IllegalArgumentException, E {
         forEachPair(a, 1, action);
     }
 
@@ -19727,10 +20009,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param c
      * @param increment
      * @param action
+     * @throws IllegalArgumentException
      * @throws E the e
      */
     public static <T, E extends Exception> void forEachPair(final Iterable<? extends T> c, final int increment,
-            final Throwables.BiConsumer<? super T, ? super T, E> action) throws E {
+            final Throwables.BiConsumer<? super T, ? super T, E> action) throws IllegalArgumentException, E {
         checkArgNotNull(action);
         final int windowSize = 2;
         checkArgument(windowSize > 0 && increment > 0, "windowSize=%s and increment=%s must be bigger than 0", windowSize, increment);
@@ -19765,10 +20048,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param iter
      * @param increment
      * @param action
+     * @throws IllegalArgumentException
      * @throws E the e
      */
     public static <T, E extends Exception> void forEachPair(final Iterator<? extends T> iter, final int increment,
-            final Throwables.BiConsumer<? super T, ? super T, E> action) throws E {
+            final Throwables.BiConsumer<? super T, ? super T, E> action) throws IllegalArgumentException, E {
         checkArgNotNull(action);
         final int windowSize = 2;
         checkArgument(windowSize > 0 && increment > 0, "windowSize=%s and increment=%s must be bigger than 0", windowSize, increment);
@@ -19824,10 +20108,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a
      * @param increment
      * @param action
+     * @throws IllegalArgumentException
      * @throws E the e
      */
     public static <T, E extends Exception> void forEachTriple(final T[] a, final int increment,
-            final Throwables.TriConsumer<? super T, ? super T, ? super T, E> action) throws E {
+            final Throwables.TriConsumer<? super T, ? super T, ? super T, E> action) throws IllegalArgumentException, E {
         checkArgNotNull(action);
         final int windowSize = 3;
         checkArgument(windowSize > 0 && increment > 0, "windowSize=%s and increment=%s must be bigger than 0", windowSize, increment);
@@ -19862,10 +20147,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param c
      * @param increment
      * @param action
+     * @throws IllegalArgumentException
      * @throws E the e
      */
     public static <T, E extends Exception> void forEachTriple(final Iterable<? extends T> c, final int increment,
-            final Throwables.TriConsumer<? super T, ? super T, ? super T, E> action) throws E {
+            final Throwables.TriConsumer<? super T, ? super T, ? super T, E> action) throws IllegalArgumentException, E {
         checkArgNotNull(action);
         final int windowSize = 3;
         checkArgument(windowSize > 0 && increment > 0, "windowSize=%s and increment=%s must be bigger than 0", windowSize, increment);
@@ -19900,10 +20186,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param iter
      * @param increment
      * @param action
+     * @throws IllegalArgumentException
      * @throws E the e
      */
     public static <T, E extends Exception> void forEachTriple(final Iterator<? extends T> iter, final int increment,
-            final Throwables.TriConsumer<? super T, ? super T, ? super T, E> action) throws E {
+            final Throwables.TriConsumer<? super T, ? super T, ? super T, E> action) throws IllegalArgumentException, E {
         checkArgNotNull(action);
         final int windowSize = 3;
         checkArgument(windowSize > 0 && increment > 0, "windowSize=%s and increment=%s must be bigger than 0", windowSize, increment);
@@ -19944,13 +20231,15 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <E>
      * @param a
      * @param filter
      * @return
+     * @throws IllegalArgumentException
      * @throws E the e
      */
-    public static <E extends Exception> boolean[] filter(final boolean[] a, final Throwables.BooleanPredicate<E> filter) throws E {
+    public static <E extends Exception> boolean[] filter(final boolean[] a, final Throwables.BooleanPredicate<E> filter) throws IllegalArgumentException, E {
         checkArgNotNull(filter, "filter"); //NOSONAR
 
         if (isEmpty(a)) {
@@ -19962,14 +20251,17 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <E>
      * @param a
      * @param max
      * @param filter
      * @return
+     * @throws IllegalArgumentException
      * @throws E the e
      */
-    public static <E extends Exception> boolean[] filter(final boolean[] a, final int max, final Throwables.BooleanPredicate<E> filter) throws E {
+    public static <E extends Exception> boolean[] filter(final boolean[] a, final int max, final Throwables.BooleanPredicate<E> filter)
+            throws IllegalArgumentException, E {
         checkArgNotNull(filter, "filter");
 
         if (isEmpty(a)) {
@@ -20005,10 +20297,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param filter
      * @param max maximum return result.
      * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
      * @throws E the e
      */
     public static <E extends Exception> boolean[] filter(final boolean[] a, final int fromIndex, final int toIndex, final Throwables.BooleanPredicate<E> filter,
-            final int max) throws E {
+            final int max) throws IllegalArgumentException, IndexOutOfBoundsException, E {
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgNotNull(filter, "filter");
 
@@ -20036,13 +20330,15 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <E>
      * @param a
      * @param filter
      * @return
+     * @throws IllegalArgumentException
      * @throws E the e
      */
-    public static <E extends Exception> char[] filter(final char[] a, final Throwables.CharPredicate<E> filter) throws E {
+    public static <E extends Exception> char[] filter(final char[] a, final Throwables.CharPredicate<E> filter) throws IllegalArgumentException, E {
         checkArgNotNull(filter, "filter");
 
         if (isEmpty(a)) {
@@ -20054,14 +20350,17 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <E>
      * @param a
      * @param filter
      * @param max
      * @return
+     * @throws IllegalArgumentException
      * @throws E the e
      */
-    public static <E extends Exception> char[] filter(final char[] a, final Throwables.CharPredicate<E> filter, final int max) throws E {
+    public static <E extends Exception> char[] filter(final char[] a, final Throwables.CharPredicate<E> filter, final int max)
+            throws IllegalArgumentException, E {
         checkArgNotNull(filter, "filter");
 
         if (isEmpty(a)) {
@@ -20097,10 +20396,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param filter
      * @param max maximum return result.
      * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
      * @throws E the e
      */
     public static <E extends Exception> char[] filter(final char[] a, final int fromIndex, final int toIndex, final Throwables.CharPredicate<E> filter,
-            final int max) throws E {
+            final int max) throws IllegalArgumentException, IndexOutOfBoundsException, E {
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgNotNull(filter, "filter");
 
@@ -20128,13 +20429,15 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <E>
      * @param a
      * @param filter
      * @return
+     * @throws IllegalArgumentException
      * @throws E the e
      */
-    public static <E extends Exception> byte[] filter(final byte[] a, final Throwables.BytePredicate<E> filter) throws E {
+    public static <E extends Exception> byte[] filter(final byte[] a, final Throwables.BytePredicate<E> filter) throws IllegalArgumentException, E {
         checkArgNotNull(filter, "filter");
 
         if (isEmpty(a)) {
@@ -20146,14 +20449,17 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <E>
      * @param a
      * @param filter
      * @param max
      * @return
+     * @throws IllegalArgumentException
      * @throws E the e
      */
-    public static <E extends Exception> byte[] filter(final byte[] a, final Throwables.BytePredicate<E> filter, final int max) throws E {
+    public static <E extends Exception> byte[] filter(final byte[] a, final Throwables.BytePredicate<E> filter, final int max)
+            throws IllegalArgumentException, E {
         checkArgNotNull(filter, "filter");
 
         if (isEmpty(a)) {
@@ -20189,10 +20495,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param filter
      * @param max maximum return result.
      * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
      * @throws E the e
      */
     public static <E extends Exception> byte[] filter(final byte[] a, final int fromIndex, final int toIndex, final Throwables.BytePredicate<E> filter,
-            final int max) throws E {
+            final int max) throws IllegalArgumentException, IndexOutOfBoundsException, E {
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgNotNull(filter, "filter");
 
@@ -20220,13 +20528,15 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <E>
      * @param a
      * @param filter
      * @return
+     * @throws IllegalArgumentException
      * @throws E the e
      */
-    public static <E extends Exception> short[] filter(final short[] a, final Throwables.ShortPredicate<E> filter) throws E {
+    public static <E extends Exception> short[] filter(final short[] a, final Throwables.ShortPredicate<E> filter) throws IllegalArgumentException, E {
         checkArgNotNull(filter, "filter");
 
         if (isEmpty(a)) {
@@ -20238,14 +20548,17 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <E>
      * @param a
      * @param filter
      * @param max
      * @return
+     * @throws IllegalArgumentException
      * @throws E the e
      */
-    public static <E extends Exception> short[] filter(final short[] a, final Throwables.ShortPredicate<E> filter, final int max) throws E {
+    public static <E extends Exception> short[] filter(final short[] a, final Throwables.ShortPredicate<E> filter, final int max)
+            throws IllegalArgumentException, E {
         checkArgNotNull(filter, "filter");
 
         if (isEmpty(a)) {
@@ -20281,10 +20594,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param filter
      * @param max maximum return result.
      * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
      * @throws E the e
      */
     public static <E extends Exception> short[] filter(final short[] a, final int fromIndex, final int toIndex, final Throwables.ShortPredicate<E> filter,
-            final int max) throws E {
+            final int max) throws IllegalArgumentException, IndexOutOfBoundsException, E {
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgNotNull(filter, "filter");
 
@@ -20312,13 +20627,15 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <E>
      * @param a
      * @param filter
      * @return
+     * @throws IllegalArgumentException
      * @throws E the e
      */
-    public static <E extends Exception> int[] filter(final int[] a, final Throwables.IntPredicate<E> filter) throws E {
+    public static <E extends Exception> int[] filter(final int[] a, final Throwables.IntPredicate<E> filter) throws IllegalArgumentException, E {
         checkArgNotNull(filter, "filter");
 
         if (isEmpty(a)) {
@@ -20330,14 +20647,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <E>
      * @param a
      * @param filter
      * @param max
      * @return
+     * @throws IllegalArgumentException
      * @throws E the e
      */
-    public static <E extends Exception> int[] filter(final int[] a, final Throwables.IntPredicate<E> filter, final int max) throws E {
+    public static <E extends Exception> int[] filter(final int[] a, final Throwables.IntPredicate<E> filter, final int max) throws IllegalArgumentException, E {
         checkArgNotNull(filter, "filter");
 
         if (isEmpty(a)) {
@@ -20372,10 +20691,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param filter
      * @param max maximum return result.
      * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
      * @throws E the e
      */
     public static <E extends Exception> int[] filter(final int[] a, final int fromIndex, final int toIndex, final Throwables.IntPredicate<E> filter,
-            final int max) throws E {
+            final int max) throws IllegalArgumentException, IndexOutOfBoundsException, E {
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgNotNull(filter, "filter");
 
@@ -20403,13 +20724,15 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <E>
      * @param a
      * @param filter
      * @return
+     * @throws IllegalArgumentException
      * @throws E the e
      */
-    public static <E extends Exception> long[] filter(final long[] a, final Throwables.LongPredicate<E> filter) throws E {
+    public static <E extends Exception> long[] filter(final long[] a, final Throwables.LongPredicate<E> filter) throws IllegalArgumentException, E {
         checkArgNotNull(filter, "filter");
 
         if (isEmpty(a)) {
@@ -20421,14 +20744,17 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <E>
      * @param a
      * @param filter
      * @param max
      * @return
+     * @throws IllegalArgumentException
      * @throws E the e
      */
-    public static <E extends Exception> long[] filter(final long[] a, final Throwables.LongPredicate<E> filter, final int max) throws E {
+    public static <E extends Exception> long[] filter(final long[] a, final Throwables.LongPredicate<E> filter, final int max)
+            throws IllegalArgumentException, E {
         checkArgNotNull(filter, "filter");
 
         if (isEmpty(a)) {
@@ -20464,10 +20790,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param filter
      * @param max maximum return result.
      * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
      * @throws E the e
      */
     public static <E extends Exception> long[] filter(final long[] a, final int fromIndex, final int toIndex, final Throwables.LongPredicate<E> filter,
-            final int max) throws E {
+            final int max) throws IllegalArgumentException, IndexOutOfBoundsException, E {
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgNotNull(filter, "filter");
 
@@ -20495,13 +20823,15 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <E>
      * @param a
      * @param filter
      * @return
+     * @throws IllegalArgumentException
      * @throws E the e
      */
-    public static <E extends Exception> float[] filter(final float[] a, final Throwables.FloatPredicate<E> filter) throws E {
+    public static <E extends Exception> float[] filter(final float[] a, final Throwables.FloatPredicate<E> filter) throws IllegalArgumentException, E {
         checkArgNotNull(filter, "filter");
 
         if (isEmpty(a)) {
@@ -20513,14 +20843,17 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <E>
      * @param a
      * @param filter
      * @param max
      * @return
+     * @throws IllegalArgumentException
      * @throws E the e
      */
-    public static <E extends Exception> float[] filter(final float[] a, final Throwables.FloatPredicate<E> filter, final int max) throws E {
+    public static <E extends Exception> float[] filter(final float[] a, final Throwables.FloatPredicate<E> filter, final int max)
+            throws IllegalArgumentException, E {
         checkArgNotNull(filter, "filter");
 
         if (isEmpty(a)) {
@@ -20556,10 +20889,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param filter
      * @param max maximum return result.
      * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
      * @throws E the e
      */
     public static <E extends Exception> float[] filter(final float[] a, final int fromIndex, final int toIndex, final Throwables.FloatPredicate<E> filter,
-            final int max) throws E {
+            final int max) throws IllegalArgumentException, IndexOutOfBoundsException, E {
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgNotNull(filter, "filter");
 
@@ -20587,13 +20922,15 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <E>
      * @param a
      * @param filter
      * @return
+     * @throws IllegalArgumentException
      * @throws E the e
      */
-    public static <E extends Exception> double[] filter(final double[] a, final Throwables.DoublePredicate<E> filter) throws E {
+    public static <E extends Exception> double[] filter(final double[] a, final Throwables.DoublePredicate<E> filter) throws IllegalArgumentException, E {
         checkArgNotNull(filter, "filter");
 
         if (isEmpty(a)) {
@@ -20605,14 +20942,17 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <E>
      * @param a
      * @param filter
      * @param max
      * @return
+     * @throws IllegalArgumentException
      * @throws E the e
      */
-    public static <E extends Exception> double[] filter(final double[] a, final Throwables.DoublePredicate<E> filter, final int max) throws E {
+    public static <E extends Exception> double[] filter(final double[] a, final Throwables.DoublePredicate<E> filter, final int max)
+            throws IllegalArgumentException, E {
         checkArgNotNull(filter, "filter");
 
         if (isEmpty(a)) {
@@ -20648,10 +20988,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param filter
      * @param max maximum return result.
      * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
      * @throws E the e
      */
     public static <E extends Exception> double[] filter(final double[] a, final int fromIndex, final int toIndex, final Throwables.DoublePredicate<E> filter,
-            final int max) throws E {
+            final int max) throws IllegalArgumentException, IndexOutOfBoundsException, E {
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgNotNull(filter, "filter");
 
@@ -20679,14 +21021,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <T>
      * @param <E>
      * @param a
      * @param filter
      * @return
+     * @throws IllegalArgumentException
      * @throws E the e
      */
-    public static <T, E extends Exception> List<T> filter(final T[] a, final Throwables.Predicate<? super T, E> filter) throws E {
+    public static <T, E extends Exception> List<T> filter(final T[] a, final Throwables.Predicate<? super T, E> filter) throws IllegalArgumentException, E {
         checkArgNotNull(filter, "filter");
 
         if (isEmpty(a)) {
@@ -20698,6 +21042,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <T>
      * @param <R>
      * @param <E>
@@ -20705,10 +21050,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param filter
      * @param supplier
      * @return
+     * @throws IllegalArgumentException
      * @throws E the e
      */
     public static <T, R extends Collection<T>, E extends Exception> R filter(final T[] a, final Throwables.Predicate<? super T, E> filter,
-            final IntFunction<R> supplier) throws E {
+            final IntFunction<R> supplier) throws IllegalArgumentException, E {
         checkArgNotNull(filter, "filter");
 
         if (isEmpty(a)) {
@@ -20720,15 +21066,18 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <T>
      * @param <E>
      * @param a
      * @param filter
      * @param max
      * @return
+     * @throws IllegalArgumentException
      * @throws E the e
      */
-    public static <T, E extends Exception> List<T> filter(final T[] a, final Throwables.Predicate<? super T, E> filter, final int max) throws E {
+    public static <T, E extends Exception> List<T> filter(final T[] a, final Throwables.Predicate<? super T, E> filter, final int max)
+            throws IllegalArgumentException, E {
         checkArgNotNull(filter, "filter");
 
         if (isEmpty(a)) {
@@ -20740,6 +21089,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <T>
      * @param <R>
      * @param <E>
@@ -20748,10 +21098,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param max
      * @param supplier
      * @return
+     * @throws IllegalArgumentException
      * @throws E the e
      */
     public static <T, R extends Collection<T>, E extends Exception> R filter(final T[] a, final Throwables.Predicate<? super T, E> filter, final int max,
-            final IntFunction<R> supplier) throws E {
+            final IntFunction<R> supplier) throws IllegalArgumentException, E {
         checkArgNotNull(filter, "filter");
 
         if (isEmpty(a)) {
@@ -20828,10 +21179,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param max
      * @param supplier
      * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
      * @throws E the e
      */
     public static <T, R extends Collection<T>, E extends Exception> R filter(final T[] a, final int fromIndex, final int toIndex,
-            final Throwables.Predicate<? super T, E> filter, final int max, final IntFunction<R> supplier) throws E {
+            final Throwables.Predicate<? super T, E> filter, final int max, final IntFunction<R> supplier)
+            throws IllegalArgumentException, IndexOutOfBoundsException, E {
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgNotNull(filter, "filter");
 
@@ -20897,6 +21251,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <T>
      * @param <R>
      * @param <E>
@@ -20905,10 +21260,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param max
      * @param supplier
      * @return
+     * @throws IllegalArgumentException
      * @throws E the e
      */
     public static <T, R extends Collection<T>, E extends Exception> R filter(final Iterable<? extends T> c, final Throwables.Predicate<? super T, E> filter,
-            final int max, final IntFunction<R> supplier) throws E {
+            final int max, final IntFunction<R> supplier) throws IllegalArgumentException, E {
         checkArgNotNull(filter, "filter");
 
         if (c == null) {
@@ -20984,6 +21340,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <T>
      * @param <R>
      * @param <E>
@@ -20994,10 +21351,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param max
      * @param supplier
      * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
      * @throws E the e
      */
     public static <T, R extends Collection<T>, E extends Exception> R filter(final Collection<? extends T> c, final int fromIndex, final int toIndex,
-            final Throwables.Predicate<? super T, E> filter, final int max, final IntFunction<R> supplier) throws E {
+            final Throwables.Predicate<? super T, E> filter, final int max, final IntFunction<R> supplier)
+            throws IllegalArgumentException, IndexOutOfBoundsException, E {
         checkFromToIndex(fromIndex, toIndex, size(c));
         checkArgNotNull(filter, "filter");
 
@@ -21143,9 +21503,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a
      * @param mapper
      * @return
+     * @throws IllegalArgumentException
      * @throws E the e
      */
-    public static <T, E extends Exception> boolean[] mapToBoolean(final T[] a, final Throwables.ToBooleanFunction<? super T, E> mapper) throws E {
+    public static <T, E extends Exception> boolean[] mapToBoolean(final T[] a, final Throwables.ToBooleanFunction<? super T, E> mapper)
+            throws IllegalArgumentException, E {
         checkArgNotNull(mapper);
 
         if (isEmpty(a)) {
@@ -21166,10 +21528,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param toIndex
      * @param mapper
      * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
      * @throws E the e
      */
     public static <T, E extends Exception> boolean[] mapToBoolean(final T[] a, final int fromIndex, final int toIndex,
-            final Throwables.ToBooleanFunction<? super T, E> mapper) throws E {
+            final Throwables.ToBooleanFunction<? super T, E> mapper) throws IllegalArgumentException, IndexOutOfBoundsException, E {
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgNotNull(mapper);
 
@@ -21218,10 +21582,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param toIndex
      * @param mapper
      * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
      * @throws E the e
      */
     public static <T, E extends Exception> boolean[] mapToBoolean(final Collection<? extends T> c, final int fromIndex, final int toIndex,
-            final Throwables.ToBooleanFunction<? super T, E> mapper) throws E {
+            final Throwables.ToBooleanFunction<? super T, E> mapper) throws IllegalArgumentException, IndexOutOfBoundsException, E {
         checkFromToIndex(fromIndex, toIndex, size(c));
         checkArgNotNull(mapper);
 
@@ -21264,9 +21630,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a
      * @param mapper
      * @return
+     * @throws IllegalArgumentException
      * @throws E the e
      */
-    public static <T, E extends Exception> char[] mapToChar(final T[] a, final Throwables.ToCharFunction<? super T, E> mapper) throws E {
+    public static <T, E extends Exception> char[] mapToChar(final T[] a, final Throwables.ToCharFunction<? super T, E> mapper)
+            throws IllegalArgumentException, E {
         checkArgNotNull(mapper);
 
         if (isEmpty(a)) {
@@ -21287,10 +21655,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param toIndex
      * @param mapper
      * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
      * @throws E the e
      */
     public static <T, E extends Exception> char[] mapToChar(final T[] a, final int fromIndex, final int toIndex,
-            final Throwables.ToCharFunction<? super T, E> mapper) throws E {
+            final Throwables.ToCharFunction<? super T, E> mapper) throws IllegalArgumentException, IndexOutOfBoundsException, E {
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgNotNull(mapper);
 
@@ -21315,9 +21685,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param c
      * @param mapper
      * @return
+     * @throws IllegalArgumentException
      * @throws E the e
      */
-    public static <T, E extends Exception> char[] mapToChar(final Collection<? extends T> c, final Throwables.ToCharFunction<? super T, E> mapper) throws E {
+    public static <T, E extends Exception> char[] mapToChar(final Collection<? extends T> c, final Throwables.ToCharFunction<? super T, E> mapper)
+            throws IllegalArgumentException, E {
         checkArgNotNull(mapper);
 
         if (isEmpty(c)) {
@@ -21338,10 +21710,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param toIndex
      * @param mapper
      * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
      * @throws E the e
      */
     public static <T, E extends Exception> char[] mapToChar(final Collection<? extends T> c, final int fromIndex, final int toIndex,
-            final Throwables.ToCharFunction<? super T, E> mapper) throws E {
+            final Throwables.ToCharFunction<? super T, E> mapper) throws IllegalArgumentException, IndexOutOfBoundsException, E {
         checkFromToIndex(fromIndex, toIndex, size(c));
         checkArgNotNull(mapper);
 
@@ -21384,9 +21758,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a
      * @param mapper
      * @return
+     * @throws IllegalArgumentException
      * @throws E the e
      */
-    public static <T, E extends Exception> byte[] mapToByte(final T[] a, final Throwables.ToByteFunction<? super T, E> mapper) throws E {
+    public static <T, E extends Exception> byte[] mapToByte(final T[] a, final Throwables.ToByteFunction<? super T, E> mapper)
+            throws IllegalArgumentException, E {
         checkArgNotNull(mapper);
 
         if (isEmpty(a)) {
@@ -21407,10 +21783,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param toIndex
      * @param mapper
      * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
      * @throws E the e
      */
     public static <T, E extends Exception> byte[] mapToByte(final T[] a, final int fromIndex, final int toIndex,
-            final Throwables.ToByteFunction<? super T, E> mapper) throws E {
+            final Throwables.ToByteFunction<? super T, E> mapper) throws IllegalArgumentException, IndexOutOfBoundsException, E {
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgNotNull(mapper);
 
@@ -21435,9 +21813,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param c
      * @param mapper
      * @return
+     * @throws IllegalArgumentException
      * @throws E the e
      */
-    public static <T, E extends Exception> byte[] mapToByte(final Collection<? extends T> c, final Throwables.ToByteFunction<? super T, E> mapper) throws E {
+    public static <T, E extends Exception> byte[] mapToByte(final Collection<? extends T> c, final Throwables.ToByteFunction<? super T, E> mapper)
+            throws IllegalArgumentException, E {
         checkArgNotNull(mapper);
 
         if (isEmpty(c)) {
@@ -21458,10 +21838,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param toIndex
      * @param mapper
      * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
      * @throws E the e
      */
     public static <T, E extends Exception> byte[] mapToByte(final Collection<? extends T> c, final int fromIndex, final int toIndex,
-            final Throwables.ToByteFunction<? super T, E> mapper) throws E {
+            final Throwables.ToByteFunction<? super T, E> mapper) throws IllegalArgumentException, IndexOutOfBoundsException, E {
         checkFromToIndex(fromIndex, toIndex, size(c));
         checkArgNotNull(mapper);
 
@@ -21504,9 +21886,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a
      * @param mapper
      * @return
+     * @throws IllegalArgumentException
      * @throws E the e
      */
-    public static <T, E extends Exception> short[] mapToShort(final T[] a, final Throwables.ToShortFunction<? super T, E> mapper) throws E {
+    public static <T, E extends Exception> short[] mapToShort(final T[] a, final Throwables.ToShortFunction<? super T, E> mapper)
+            throws IllegalArgumentException, E {
         checkArgNotNull(mapper);
 
         if (isEmpty(a)) {
@@ -21527,10 +21911,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param toIndex
      * @param mapper
      * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
      * @throws E the e
      */
     public static <T, E extends Exception> short[] mapToShort(final T[] a, final int fromIndex, final int toIndex,
-            final Throwables.ToShortFunction<? super T, E> mapper) throws E {
+            final Throwables.ToShortFunction<? super T, E> mapper) throws IllegalArgumentException, IndexOutOfBoundsException, E {
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgNotNull(mapper);
 
@@ -21555,9 +21941,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param c
      * @param mapper
      * @return
+     * @throws IllegalArgumentException
      * @throws E the e
      */
-    public static <T, E extends Exception> short[] mapToShort(final Collection<? extends T> c, final Throwables.ToShortFunction<? super T, E> mapper) throws E {
+    public static <T, E extends Exception> short[] mapToShort(final Collection<? extends T> c, final Throwables.ToShortFunction<? super T, E> mapper)
+            throws IllegalArgumentException, E {
         checkArgNotNull(mapper);
 
         if (isEmpty(c)) {
@@ -21578,10 +21966,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param toIndex
      * @param mapper
      * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
      * @throws E the e
      */
     public static <T, E extends Exception> short[] mapToShort(final Collection<? extends T> c, final int fromIndex, final int toIndex,
-            final Throwables.ToShortFunction<? super T, E> mapper) throws E {
+            final Throwables.ToShortFunction<? super T, E> mapper) throws IllegalArgumentException, IndexOutOfBoundsException, E {
         checkFromToIndex(fromIndex, toIndex, size(c));
         checkArgNotNull(mapper);
 
@@ -21624,9 +22014,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a
      * @param mapper
      * @return
+     * @throws IllegalArgumentException
      * @throws E the e
      */
-    public static <T, E extends Exception> int[] mapToInt(final T[] a, final Throwables.ToIntFunction<? super T, E> mapper) throws E {
+    public static <T, E extends Exception> int[] mapToInt(final T[] a, final Throwables.ToIntFunction<? super T, E> mapper) throws IllegalArgumentException, E {
         checkArgNotNull(mapper);
 
         if (isEmpty(a)) {
@@ -21647,10 +22038,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param toIndex
      * @param mapper
      * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
      * @throws E the e
      */
     public static <T, E extends Exception> int[] mapToInt(final T[] a, final int fromIndex, final int toIndex,
-            final Throwables.ToIntFunction<? super T, E> mapper) throws E {
+            final Throwables.ToIntFunction<? super T, E> mapper) throws IllegalArgumentException, IndexOutOfBoundsException, E {
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgNotNull(mapper);
 
@@ -21675,9 +22068,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param c
      * @param mapper
      * @return
+     * @throws IllegalArgumentException
      * @throws E the e
      */
-    public static <T, E extends Exception> int[] mapToInt(final Collection<? extends T> c, final Throwables.ToIntFunction<? super T, E> mapper) throws E {
+    public static <T, E extends Exception> int[] mapToInt(final Collection<? extends T> c, final Throwables.ToIntFunction<? super T, E> mapper)
+            throws IllegalArgumentException, E {
         checkArgNotNull(mapper);
 
         if (isEmpty(c)) {
@@ -21698,10 +22093,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param toIndex
      * @param mapper
      * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
      * @throws E the e
      */
     public static <T, E extends Exception> int[] mapToInt(final Collection<? extends T> c, final int fromIndex, final int toIndex,
-            final Throwables.ToIntFunction<? super T, E> mapper) throws E {
+            final Throwables.ToIntFunction<? super T, E> mapper) throws IllegalArgumentException, IndexOutOfBoundsException, E {
         checkFromToIndex(fromIndex, toIndex, size(c));
         checkArgNotNull(mapper);
 
@@ -21792,9 +22189,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a
      * @param mapper
      * @return
+     * @throws IllegalArgumentException
      * @throws E the e
      */
-    public static <T, E extends Exception> long[] mapToLong(final T[] a, final Throwables.ToLongFunction<? super T, E> mapper) throws E {
+    public static <T, E extends Exception> long[] mapToLong(final T[] a, final Throwables.ToLongFunction<? super T, E> mapper)
+            throws IllegalArgumentException, E {
         checkArgNotNull(mapper);
 
         if (isEmpty(a)) {
@@ -21815,10 +22214,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param toIndex
      * @param mapper
      * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
      * @throws E the e
      */
     public static <T, E extends Exception> long[] mapToLong(final T[] a, final int fromIndex, final int toIndex,
-            final Throwables.ToLongFunction<? super T, E> mapper) throws E {
+            final Throwables.ToLongFunction<? super T, E> mapper) throws IllegalArgumentException, IndexOutOfBoundsException, E {
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgNotNull(mapper);
 
@@ -21843,9 +22244,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param c
      * @param mapper
      * @return
+     * @throws IllegalArgumentException
      * @throws E the e
      */
-    public static <T, E extends Exception> long[] mapToLong(final Collection<? extends T> c, final Throwables.ToLongFunction<? super T, E> mapper) throws E {
+    public static <T, E extends Exception> long[] mapToLong(final Collection<? extends T> c, final Throwables.ToLongFunction<? super T, E> mapper)
+            throws IllegalArgumentException, E {
         checkArgNotNull(mapper);
 
         if (isEmpty(c)) {
@@ -21866,10 +22269,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param toIndex
      * @param mapper
      * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
      * @throws E the e
      */
     public static <T, E extends Exception> long[] mapToLong(final Collection<? extends T> c, final int fromIndex, final int toIndex,
-            final Throwables.ToLongFunction<? super T, E> mapper) throws E {
+            final Throwables.ToLongFunction<? super T, E> mapper) throws IllegalArgumentException, IndexOutOfBoundsException, E {
         checkFromToIndex(fromIndex, toIndex, size(c));
         checkArgNotNull(mapper);
 
@@ -21960,9 +22365,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a
      * @param mapper
      * @return
+     * @throws IllegalArgumentException
      * @throws E the e
      */
-    public static <T, E extends Exception> float[] mapToFloat(final T[] a, final Throwables.ToFloatFunction<? super T, E> mapper) throws E {
+    public static <T, E extends Exception> float[] mapToFloat(final T[] a, final Throwables.ToFloatFunction<? super T, E> mapper)
+            throws IllegalArgumentException, E {
         checkArgNotNull(mapper);
 
         if (isEmpty(a)) {
@@ -21983,10 +22390,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param toIndex
      * @param mapper
      * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
      * @throws E the e
      */
     public static <T, E extends Exception> float[] mapToFloat(final T[] a, final int fromIndex, final int toIndex,
-            final Throwables.ToFloatFunction<? super T, E> mapper) throws E {
+            final Throwables.ToFloatFunction<? super T, E> mapper) throws IllegalArgumentException, IndexOutOfBoundsException, E {
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgNotNull(mapper);
 
@@ -22011,9 +22420,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param c
      * @param mapper
      * @return
+     * @throws IllegalArgumentException
      * @throws E the e
      */
-    public static <T, E extends Exception> float[] mapToFloat(final Collection<? extends T> c, final Throwables.ToFloatFunction<? super T, E> mapper) throws E {
+    public static <T, E extends Exception> float[] mapToFloat(final Collection<? extends T> c, final Throwables.ToFloatFunction<? super T, E> mapper)
+            throws IllegalArgumentException, E {
         checkArgNotNull(mapper);
 
         if (isEmpty(c)) {
@@ -22034,10 +22445,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param toIndex
      * @param mapper
      * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
      * @throws E the e
      */
     public static <T, E extends Exception> float[] mapToFloat(final Collection<? extends T> c, final int fromIndex, final int toIndex,
-            final Throwables.ToFloatFunction<? super T, E> mapper) throws E {
+            final Throwables.ToFloatFunction<? super T, E> mapper) throws IllegalArgumentException, IndexOutOfBoundsException, E {
         checkFromToIndex(fromIndex, toIndex, size(c));
         checkArgNotNull(mapper);
 
@@ -22080,9 +22493,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a
      * @param mapper
      * @return
+     * @throws IllegalArgumentException
      * @throws E the e
      */
-    public static <T, E extends Exception> double[] mapToDouble(final T[] a, final Throwables.ToDoubleFunction<? super T, E> mapper) throws E {
+    public static <T, E extends Exception> double[] mapToDouble(final T[] a, final Throwables.ToDoubleFunction<? super T, E> mapper)
+            throws IllegalArgumentException, E {
         checkArgNotNull(mapper);
 
         if (isEmpty(a)) {
@@ -22103,10 +22518,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param toIndex
      * @param mapper
      * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
      * @throws E the e
      */
     public static <T, E extends Exception> double[] mapToDouble(final T[] a, final int fromIndex, final int toIndex,
-            final Throwables.ToDoubleFunction<? super T, E> mapper) throws E {
+            final Throwables.ToDoubleFunction<? super T, E> mapper) throws IllegalArgumentException, IndexOutOfBoundsException, E {
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgNotNull(mapper);
 
@@ -22155,10 +22572,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param toIndex
      * @param mapper
      * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
      * @throws E the e
      */
     public static <T, E extends Exception> double[] mapToDouble(final Collection<? extends T> c, final int fromIndex, final int toIndex,
-            final Throwables.ToDoubleFunction<? super T, E> mapper) throws E {
+            final Throwables.ToDoubleFunction<? super T, E> mapper) throws IllegalArgumentException, IndexOutOfBoundsException, E {
         checkFromToIndex(fromIndex, toIndex, size(c));
         checkArgNotNull(mapper);
 
@@ -22243,15 +22662,18 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <T>
      * @param <R>
      * @param <E>
      * @param a
      * @param mapper
      * @return
+     * @throws IllegalArgumentException
      * @throws E the e
      */
-    public static <T, R, E extends Exception> List<R> map(final T[] a, final Throwables.Function<? super T, ? extends R, E> mapper) throws E {
+    public static <T, R, E extends Exception> List<R> map(final T[] a, final Throwables.Function<? super T, ? extends R, E> mapper)
+            throws IllegalArgumentException, E {
         checkArgNotNull(mapper);
 
         if (isEmpty(a)) {
@@ -22263,6 +22685,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <T>
      * @param <R>
      * @param <C>
@@ -22271,10 +22694,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param mapper
      * @param supplier
      * @return
+     * @throws IllegalArgumentException
      * @throws E the e
      */
     public static <T, R, C extends Collection<R>, E extends Exception> C map(final T[] a, final Throwables.Function<? super T, ? extends R, E> mapper,
-            final IntFunction<? extends C> supplier) throws E {
+            final IntFunction<? extends C> supplier) throws IllegalArgumentException, E {
         checkArgNotNull(mapper);
 
         if (isEmpty(a)) {
@@ -22317,10 +22741,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param mapper
      * @param supplier
      * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
      * @throws E the e
      */
     public static <T, R, C extends Collection<R>, E extends Exception> C map(final T[] a, final int fromIndex, final int toIndex,
-            final Throwables.Function<? super T, ? extends R, E> mapper, final IntFunction<? extends C> supplier) throws E {
+            final Throwables.Function<? super T, ? extends R, E> mapper, final IntFunction<? extends C> supplier)
+            throws IllegalArgumentException, IndexOutOfBoundsException, E {
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgNotNull(mapper);
 
@@ -22370,10 +22797,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param mapper
      * @param supplier
      * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
      * @throws E the e
      */
     public static <T, R, C extends Collection<R>, E extends Exception> C map(final Collection<? extends T> c, final int fromIndex, final int toIndex,
-            final Throwables.Function<? super T, ? extends R, E> mapper, final IntFunction<? extends C> supplier) throws E {
+            final Throwables.Function<? super T, ? extends R, E> mapper, final IntFunction<? extends C> supplier)
+            throws IllegalArgumentException, IndexOutOfBoundsException, E {
         checkFromToIndex(fromIndex, toIndex, size(c));
         checkArgNotNull(mapper);
 
@@ -22469,6 +22899,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <T>
      * @param <R>
      * @param <C>
@@ -22477,10 +22908,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param mapper
      * @param supplier
      * @return
+     * @throws IllegalArgumentException
      * @throws E the e
      */
     public static <T, R, C extends Collection<R>, E extends Exception> C map(final Iterable<? extends T> c,
-            final Throwables.Function<? super T, ? extends R, E> mapper, final IntFunction<? extends C> supplier) throws E {
+            final Throwables.Function<? super T, ? extends R, E> mapper, final IntFunction<? extends C> supplier) throws IllegalArgumentException, E {
         checkArgNotNull(mapper);
 
         if (c == null) {
@@ -22519,6 +22951,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <T>
      * @param <R>
      * @param <C>
@@ -22527,10 +22960,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param mapper
      * @param supplier
      * @return
+     * @throws IllegalArgumentException
      * @throws E the e
      */
     public static <T, R, C extends Collection<R>, E extends Exception> C flatMap(final T[] a,
-            final Throwables.Function<? super T, ? extends Collection<? extends R>, E> mapper, final IntFunction<? extends C> supplier) throws E {
+            final Throwables.Function<? super T, ? extends Collection<? extends R>, E> mapper, final IntFunction<? extends C> supplier)
+            throws IllegalArgumentException, E {
         checkArgNotNull(mapper);
 
         if (isEmpty(a)) {
@@ -22573,10 +23008,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param mapper
      * @param supplier
      * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
      * @throws E the e
      */
     public static <T, R, C extends Collection<R>, E extends Exception> C flatMap(final T[] a, final int fromIndex, final int toIndex,
-            final Throwables.Function<? super T, ? extends Collection<? extends R>, E> mapper, final IntFunction<? extends C> supplier) throws E {
+            final Throwables.Function<? super T, ? extends Collection<? extends R>, E> mapper, final IntFunction<? extends C> supplier)
+            throws IllegalArgumentException, IndexOutOfBoundsException, E {
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgNotNull(mapper);
 
@@ -22630,10 +23068,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param mapper
      * @param supplier
      * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
      * @throws E the e
      */
     public static <T, R, C extends Collection<R>, E extends Exception> C flatMap(final Collection<? extends T> c, final int fromIndex, final int toIndex,
-            final Throwables.Function<? super T, ? extends Collection<? extends R>, E> mapper, final IntFunction<? extends C> supplier) throws E {
+            final Throwables.Function<? super T, ? extends Collection<? extends R>, E> mapper, final IntFunction<? extends C> supplier)
+            throws IllegalArgumentException, IndexOutOfBoundsException, E {
         checkFromToIndex(fromIndex, toIndex, size(c));
         checkArgNotNull(mapper);
 
@@ -22691,6 +23132,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <T>
      * @param <R>
      * @param <C>
@@ -22699,10 +23141,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param mapper
      * @param supplier
      * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
      * @throws E the e
      */
     public static <T, R, C extends Collection<R>, E extends Exception> C flatMap(final Iterable<? extends T> c,
-            final Throwables.Function<? super T, ? extends Collection<? extends R>, E> mapper, final IntFunction<? extends C> supplier) throws E {
+            final Throwables.Function<? super T, ? extends Collection<? extends R>, E> mapper, final IntFunction<? extends C> supplier)
+            throws IllegalArgumentException, IndexOutOfBoundsException, E {
         checkArgNotNull(mapper);
 
         if (c == null) {
@@ -22806,12 +23251,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param mapper2
      * @param supplier
      * @return
+     * @throws IllegalArgumentException
      * @throws E the e
      * @throws E2 the e2
      */
     public static <T, U, R, C extends Collection<R>, E extends Exception, E2 extends Exception> C flatMap(final T[] a,
             final Throwables.Function<? super T, ? extends Collection<? extends U>, E> mapper,
-            final Throwables.Function<? super U, ? extends Collection<? extends R>, E2> mapper2, final IntFunction<? extends C> supplier) throws E, E2 {
+            final Throwables.Function<? super U, ? extends Collection<? extends R>, E2> mapper2, final IntFunction<? extends C> supplier)
+            throws IllegalArgumentException, E, E2 {
         checkArgNotNull(mapper);
         checkArgNotNull(mapper2);
 
@@ -22876,12 +23323,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param mapper2
      * @param supplier
      * @return
+     * @throws IllegalArgumentException
      * @throws E the e
      * @throws E2 the e2
      */
     public static <T, U, R, C extends Collection<R>, E extends Exception, E2 extends Exception> C flatMap(final Iterable<? extends T> c,
             final Throwables.Function<? super T, ? extends Collection<? extends U>, E> mapper,
-            final Throwables.Function<? super U, ? extends Collection<? extends R>, E2> mapper2, final IntFunction<? extends C> supplier) throws E, E2 {
+            final Throwables.Function<? super U, ? extends Collection<? extends R>, E2> mapper2, final IntFunction<? extends C> supplier)
+            throws IllegalArgumentException, E, E2 {
         checkArgNotNull(mapper);
         checkArgNotNull(mapper2);
 
@@ -22930,6 +23379,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <T>
      * @param <R>
      * @param <C>
@@ -22938,10 +23388,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param mapper
      * @param supplier
      * @return
+     * @throws IllegalArgumentException
      * @throws E the e
      */
     public static <T, R, C extends Collection<R>, E extends Exception> C flatmap(final T[] a, final Throwables.Function<? super T, ? extends R[], E> mapper, //NOSONAR
-            final IntFunction<? extends C> supplier) throws E {
+            final IntFunction<? extends C> supplier) throws IllegalArgumentException, E {
         checkArgNotNull(mapper);
 
         if (isEmpty(a)) {
@@ -22984,10 +23435,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param mapper
      * @param supplier
      * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
      * @throws E the e
      */
     public static <T, R, C extends Collection<R>, E extends Exception> C flatmap(final T[] a, final int fromIndex, final int toIndex, //NOSONAR
-            final Throwables.Function<? super T, ? extends R[], E> mapper, final IntFunction<? extends C> supplier) throws E {
+            final Throwables.Function<? super T, ? extends R[], E> mapper, final IntFunction<? extends C> supplier)
+            throws IllegalArgumentException, IndexOutOfBoundsException, E {
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgNotNull(mapper);
 
@@ -23041,10 +23495,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param mapper
      * @param supplier
      * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
      * @throws E the e
      */
     public static <T, R, C extends Collection<R>, E extends Exception> C flatmap(final Collection<? extends T> c, final int fromIndex, final int toIndex, //NOSONAR
-            final Throwables.Function<? super T, ? extends R[], E> mapper, final IntFunction<? extends C> supplier) throws E {
+            final Throwables.Function<? super T, ? extends R[], E> mapper, final IntFunction<? extends C> supplier)
+            throws IllegalArgumentException, IndexOutOfBoundsException, E {
         checkFromToIndex(fromIndex, toIndex, size(c));
         checkArgNotNull(mapper);
 
@@ -23102,6 +23559,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <T>
      * @param <R>
      * @param <C>
@@ -23110,10 +23568,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param mapper
      * @param supplier
      * @return
+     * @throws IllegalArgumentException
      * @throws E the e
      */
     public static <T, R, C extends Collection<R>, E extends Exception> C flatmap(final Iterable<? extends T> c, //NOSONAR
-            final Throwables.Function<? super T, ? extends R[], E> mapper, final IntFunction<? extends C> supplier) throws E {
+            final Throwables.Function<? super T, ? extends R[], E> mapper, final IntFunction<? extends C> supplier) throws IllegalArgumentException, E {
         checkArgNotNull(mapper);
 
         if (c == null) {
@@ -23134,14 +23593,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <T>
      * @param <E>
      * @param a
      * @param filter
      * @return the list
+     * @throws IllegalArgumentException
      * @throws E the e
      */
-    public static <T, E extends Exception> List<T> takeWhile(final T[] a, final Throwables.Predicate<? super T, E> filter) throws E {
+    public static <T, E extends Exception> List<T> takeWhile(final T[] a, final Throwables.Predicate<? super T, E> filter) throws IllegalArgumentException, E {
         checkArgNotNull(filter, "filter");
 
         final List<T> result = new ArrayList<>(min(9, len(a)));
@@ -23163,14 +23624,17 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <T>
      * @param <E>
      * @param c
      * @param filter
      * @return the list
+     * @throws IllegalArgumentException
      * @throws E the e
      */
-    public static <T, E extends Exception> List<T> takeWhile(final Iterable<? extends T> c, final Throwables.Predicate<? super T, E> filter) throws E {
+    public static <T, E extends Exception> List<T> takeWhile(final Iterable<? extends T> c, final Throwables.Predicate<? super T, E> filter)
+            throws IllegalArgumentException, E {
         checkArgNotNull(filter, "filter");
 
         final List<T> result = new ArrayList<>(min(9, getSizeOrDefault(c, 0)));
@@ -23198,9 +23662,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a
      * @param filter
      * @return the list
+     * @throws IllegalArgumentException
      * @throws E the e
      */
-    public static <T, E extends Exception> List<T> takeWhileInclusive(final T[] a, final Throwables.Predicate<? super T, E> filter) throws E {
+    public static <T, E extends Exception> List<T> takeWhileInclusive(final T[] a, final Throwables.Predicate<? super T, E> filter)
+            throws IllegalArgumentException, E {
         checkArgNotNull(filter, "filter");
 
         final List<T> result = new ArrayList<>(min(9, len(a)));
@@ -23228,9 +23694,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param c
      * @param filter
      * @return the list
+     * @throws IllegalArgumentException
      * @throws E the e
      */
-    public static <T, E extends Exception> List<T> takeWhileInclusive(final Iterable<? extends T> c, final Throwables.Predicate<? super T, E> filter) throws E {
+    public static <T, E extends Exception> List<T> takeWhileInclusive(final Iterable<? extends T> c, final Throwables.Predicate<? super T, E> filter)
+            throws IllegalArgumentException, E {
         checkArgNotNull(filter, "filter");
 
         final List<T> result = new ArrayList<>(min(9, getSizeOrDefault(c, 0)));
@@ -23252,14 +23720,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <T>
      * @param <E>
      * @param a
      * @param filter
      * @return the list
+     * @throws IllegalArgumentException
      * @throws E the e
      */
-    public static <T, E extends Exception> List<T> dropWhile(final T[] a, final Throwables.Predicate<? super T, E> filter) throws E {
+    public static <T, E extends Exception> List<T> dropWhile(final T[] a, final Throwables.Predicate<? super T, E> filter) throws IllegalArgumentException, E {
         checkArgNotNull(filter, "filter");
 
         final List<T> result = new ArrayList<>(min(9, len(a)));
@@ -23284,14 +23754,17 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <T>
      * @param <E>
      * @param c
      * @param filter
      * @return the list
+     * @throws IllegalArgumentException
      * @throws E the e
      */
-    public static <T, E extends Exception> List<T> dropWhile(final Iterable<? extends T> c, final Throwables.Predicate<? super T, E> filter) throws E {
+    public static <T, E extends Exception> List<T> dropWhile(final Iterable<? extends T> c, final Throwables.Predicate<? super T, E> filter)
+            throws IllegalArgumentException, E {
         checkArgNotNull(filter, "filter");
 
         final List<T> result = new ArrayList<>(min(9, getSizeOrDefault(c, 0)));
@@ -23321,14 +23794,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <T>
      * @param <E>
      * @param a
      * @param filter
      * @return the list
+     * @throws IllegalArgumentException
      * @throws E the e
      */
-    public static <T, E extends Exception> List<T> skipUntil(final T[] a, final Throwables.Predicate<? super T, E> filter) throws E {
+    public static <T, E extends Exception> List<T> skipUntil(final T[] a, final Throwables.Predicate<? super T, E> filter) throws IllegalArgumentException, E {
         checkArgNotNull(filter, "filter");
 
         final List<T> result = new ArrayList<>(min(9, len(a)));
@@ -23353,14 +23828,17 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <T>
      * @param <E>
      * @param c
      * @param filter
      * @return the list
+     * @throws IllegalArgumentException
      * @throws E the e
      */
-    public static <T, E extends Exception> List<T> skipUntil(final Iterable<? extends T> c, final Throwables.Predicate<? super T, E> filter) throws E {
+    public static <T, E extends Exception> List<T> skipUntil(final Iterable<? extends T> c, final Throwables.Predicate<? super T, E> filter)
+            throws IllegalArgumentException, E {
         checkArgNotNull(filter, "filter");
 
         final List<T> result = new ArrayList<>(getMinSize(c));
@@ -23621,8 +24099,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param fromIndex
      * @param toIndex
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static <T> List<T> distinct(final T[] a, final int fromIndex, final int toIndex) {
+    public static <T> List<T> distinct(final T[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (isEmpty(a) || fromIndex == toIndex) {
@@ -23693,8 +24172,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param fromIndex
      * @param toIndex
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static <T> List<T> distinct(final Collection<? extends T> c, final int fromIndex, final int toIndex) {
+    public static <T> List<T> distinct(final Collection<? extends T> c, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, size(c));
 
         if ((isEmpty(c) && fromIndex == 0 && toIndex == 0) || fromIndex == toIndex) {
@@ -23769,10 +24249,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param toIndex
      * @param keyMapper don't change value of the input parameter.
      * @return
+     * @throws IndexOutOfBoundsException
      * @throws E the e
      */
     public static <T, E extends Exception> List<T> distinctBy(final T[] a, final int fromIndex, final int toIndex,
-            final Throwables.Function<? super T, ?, E> keyMapper) throws E {
+            final Throwables.Function<? super T, ?, E> keyMapper) throws IndexOutOfBoundsException, E {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (isEmpty(a) || fromIndex == toIndex) {
@@ -23838,10 +24319,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param toIndex
      * @param keyMapper don't change value of the input parameter.
      * @return
+     * @throws IndexOutOfBoundsException
      * @throws E the e
      */
     public static <T, E extends Exception> List<T> distinctBy(final Collection<? extends T> c, final int fromIndex, final int toIndex,
-            final Throwables.Function<? super T, ?, E> keyMapper) throws E {
+            final Throwables.Function<? super T, ?, E> keyMapper) throws IndexOutOfBoundsException, E {
         checkFromToIndex(fromIndex, toIndex, size(c));
 
         if ((isEmpty(c) && fromIndex == 0 && toIndex == 0) || fromIndex == toIndex) {
@@ -23996,14 +24478,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <T>
      * @param <E>
      * @param a
      * @param filter
      * @return
+     * @throws IllegalArgumentException
      * @throws E the e
      */
-    public static <T, E extends Exception> boolean allMatch(final T[] a, final Throwables.Predicate<? super T, E> filter) throws E {
+    public static <T, E extends Exception> boolean allMatch(final T[] a, final Throwables.Predicate<? super T, E> filter) throws IllegalArgumentException, E {
         checkArgNotNull(filter, "filter");
 
         if (isEmpty(a)) {
@@ -24021,14 +24505,17 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <T>
      * @param <E>
      * @param c
      * @param filter
      * @return
+     * @throws IllegalArgumentException
      * @throws E the e
      */
-    public static <T, E extends Exception> boolean allMatch(final Iterable<? extends T> c, final Throwables.Predicate<? super T, E> filter) throws E {
+    public static <T, E extends Exception> boolean allMatch(final Iterable<? extends T> c, final Throwables.Predicate<? super T, E> filter)
+            throws IllegalArgumentException, E {
         checkArgNotNull(filter, "filter");
 
         if (c == null) {
@@ -24046,14 +24533,17 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <T>
      * @param <E>
      * @param iter
      * @param filter
      * @return
+     * @throws IllegalArgumentException
      * @throws E the e
      */
-    public static <T, E extends Exception> boolean allMatch(final Iterator<? extends T> iter, final Throwables.Predicate<? super T, E> filter) throws E {
+    public static <T, E extends Exception> boolean allMatch(final Iterator<? extends T> iter, final Throwables.Predicate<? super T, E> filter)
+            throws IllegalArgumentException, E {
         checkArgNotNull(filter, "filter");
 
         if (iter == null) {
@@ -24071,14 +24561,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <T>
      * @param <E>
      * @param a
      * @param filter
      * @return
+     * @throws IllegalArgumentException
      * @throws E the e
      */
-    public static <T, E extends Exception> boolean anyMatch(final T[] a, final Throwables.Predicate<? super T, E> filter) throws E {
+    public static <T, E extends Exception> boolean anyMatch(final T[] a, final Throwables.Predicate<? super T, E> filter) throws IllegalArgumentException, E {
         checkArgNotNull(filter, "filter");
 
         if (isEmpty(a)) {
@@ -24096,14 +24588,17 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <T>
      * @param <E>
      * @param c
      * @param filter
      * @return
+     * @throws IllegalArgumentException
      * @throws E the e
      */
-    public static <T, E extends Exception> boolean anyMatch(final Iterable<? extends T> c, final Throwables.Predicate<? super T, E> filter) throws E {
+    public static <T, E extends Exception> boolean anyMatch(final Iterable<? extends T> c, final Throwables.Predicate<? super T, E> filter)
+            throws IllegalArgumentException, E {
         checkArgNotNull(filter, "filter");
 
         if (c == null) {
@@ -24121,14 +24616,17 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <T>
      * @param <E>
      * @param iter
      * @param filter
      * @return
+     * @throws IllegalArgumentException
      * @throws E the e
      */
-    public static <T, E extends Exception> boolean anyMatch(final Iterator<? extends T> iter, final Throwables.Predicate<? super T, E> filter) throws E {
+    public static <T, E extends Exception> boolean anyMatch(final Iterator<? extends T> iter, final Throwables.Predicate<? super T, E> filter)
+            throws IllegalArgumentException, E {
         checkArgNotNull(filter, "filter");
 
         if (iter == null) {
@@ -24146,14 +24644,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <T>
      * @param <E>
      * @param a
      * @param filter
      * @return
+     * @throws IllegalArgumentException
      * @throws E the e
      */
-    public static <T, E extends Exception> boolean noneMatch(final T[] a, final Throwables.Predicate<? super T, E> filter) throws E {
+    public static <T, E extends Exception> boolean noneMatch(final T[] a, final Throwables.Predicate<? super T, E> filter) throws IllegalArgumentException, E {
         checkArgNotNull(filter, "filter");
 
         if (isEmpty(a)) {
@@ -24171,14 +24671,17 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <T>
      * @param <E>
      * @param c
      * @param filter
      * @return
+     * @throws IllegalArgumentException
      * @throws E the e
      */
-    public static <T, E extends Exception> boolean noneMatch(final Iterable<? extends T> c, final Throwables.Predicate<? super T, E> filter) throws E {
+    public static <T, E extends Exception> boolean noneMatch(final Iterable<? extends T> c, final Throwables.Predicate<? super T, E> filter)
+            throws IllegalArgumentException, E {
         checkArgNotNull(filter, "filter");
 
         if (c == null) {
@@ -24196,14 +24699,17 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <T>
      * @param <E>
      * @param iter
      * @param filter
      * @return
+     * @throws IllegalArgumentException
      * @throws E the e
      */
-    public static <T, E extends Exception> boolean noneMatch(final Iterator<? extends T> iter, final Throwables.Predicate<? super T, E> filter) throws E {
+    public static <T, E extends Exception> boolean noneMatch(final Iterator<? extends T> iter, final Throwables.Predicate<? super T, E> filter)
+            throws IllegalArgumentException, E {
         checkArgNotNull(filter, "filter");
 
         if (iter == null) {
@@ -24260,6 +24766,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <T>
      * @param <E>
      * @param c
@@ -24267,10 +24774,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param atMost
      * @param filter
      * @return
+     * @throws IllegalArgumentException
      * @throws E the e
      */
     public static <T, E extends Exception> boolean nMatch(final Iterable<? extends T> c, final int atLeast, final int atMost,
-            final Throwables.Predicate<? super T, E> filter) throws E {
+            final Throwables.Predicate<? super T, E> filter) throws IllegalArgumentException, E {
         checkArgNotNegative(atLeast, "atLeast");
         checkArgNotNegative(atMost, "atMost");
         checkArgument(atLeast <= atMost, "'atLeast' must be <= 'atMost'");
@@ -24293,10 +24801,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param atMost
      * @param filter
      * @return
+     * @throws IllegalArgumentException
      * @throws E the e
      */
     public static <T, E extends Exception> boolean nMatch(final Iterator<? extends T> iter, final int atLeast, final int atMost,
-            final Throwables.Predicate<? super T, E> filter) throws E {
+            final Throwables.Predicate<? super T, E> filter) throws IllegalArgumentException, E {
         checkArgNotNegative(atLeast, "atLeast");
         checkArgNotNegative(atMost, "atMost");
         checkArgument(atLeast <= atMost, "'atLeast' must be <= 'atMost'");
@@ -24405,9 +24914,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a
      * @param filter
      * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
      * @throws E the e
      */
-    public static <E extends Exception> int count(final boolean[] a, final Throwables.BooleanPredicate<E> filter) throws E {
+    public static <E extends Exception> int count(final boolean[] a, final Throwables.BooleanPredicate<E> filter)
+            throws IllegalArgumentException, IndexOutOfBoundsException, E {
         checkArgNotNull(filter, "filter");
 
         if (isEmpty(a)) {
@@ -24457,9 +24969,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a
      * @param filter
      * @return
+     * @throws IllegalArgumentException
      * @throws E the e
      */
-    public static <E extends Exception> int count(final char[] a, final Throwables.CharPredicate<E> filter) throws E {
+    public static <E extends Exception> int count(final char[] a, final Throwables.CharPredicate<E> filter) throws IllegalArgumentException, E {
         checkArgNotNull(filter, "filter");
 
         if (isEmpty(a)) {
@@ -24479,9 +24992,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param toIndex
      * @param filter
      * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
      * @throws E the e
      */
-    public static <E extends Exception> int count(final char[] a, final int fromIndex, final int toIndex, final Throwables.CharPredicate<E> filter) throws E {
+    public static <E extends Exception> int count(final char[] a, final int fromIndex, final int toIndex, final Throwables.CharPredicate<E> filter)
+            throws IllegalArgumentException, IndexOutOfBoundsException, E {
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgNotNull(filter, "filter");
 
@@ -24508,9 +25024,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a
      * @param filter
      * @return
+     * @throws IllegalArgumentException
      * @throws E the e
      */
-    public static <E extends Exception> int count(final byte[] a, final Throwables.BytePredicate<E> filter) throws E {
+    public static <E extends Exception> int count(final byte[] a, final Throwables.BytePredicate<E> filter) throws IllegalArgumentException, E {
         checkArgNotNull(filter, "filter");
 
         if (isEmpty(a)) {
@@ -24530,9 +25047,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param toIndex
      * @param filter
      * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
      * @throws E the e
      */
-    public static <E extends Exception> int count(final byte[] a, final int fromIndex, final int toIndex, final Throwables.BytePredicate<E> filter) throws E {
+    public static <E extends Exception> int count(final byte[] a, final int fromIndex, final int toIndex, final Throwables.BytePredicate<E> filter)
+            throws IllegalArgumentException, IndexOutOfBoundsException, E {
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgNotNull(filter, "filter");
 
@@ -24559,9 +25079,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a
      * @param filter
      * @return
+     * @throws IllegalArgumentException
      * @throws E the e
      */
-    public static <E extends Exception> int count(final short[] a, final Throwables.ShortPredicate<E> filter) throws E {
+    public static <E extends Exception> int count(final short[] a, final Throwables.ShortPredicate<E> filter) throws IllegalArgumentException, E {
         checkArgNotNull(filter, "filter");
 
         if (isEmpty(a)) {
@@ -24581,9 +25102,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param toIndex
      * @param filter
      * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
      * @throws E the e
      */
-    public static <E extends Exception> int count(final short[] a, final int fromIndex, final int toIndex, final Throwables.ShortPredicate<E> filter) throws E {
+    public static <E extends Exception> int count(final short[] a, final int fromIndex, final int toIndex, final Throwables.ShortPredicate<E> filter)
+            throws IllegalArgumentException, IndexOutOfBoundsException, E {
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgNotNull(filter, "filter");
 
@@ -24610,9 +25134,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a
      * @param filter
      * @return
+     * @throws IllegalArgumentException
      * @throws E the e
      */
-    public static <E extends Exception> int count(final int[] a, final Throwables.IntPredicate<E> filter) throws E {
+    public static <E extends Exception> int count(final int[] a, final Throwables.IntPredicate<E> filter) throws IllegalArgumentException, E {
         checkArgNotNull(filter, "filter");
 
         if (isEmpty(a)) {
@@ -24632,9 +25157,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param toIndex
      * @param filter
      * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
      * @throws E the e
      */
-    public static <E extends Exception> int count(final int[] a, final int fromIndex, final int toIndex, final Throwables.IntPredicate<E> filter) throws E {
+    public static <E extends Exception> int count(final int[] a, final int fromIndex, final int toIndex, final Throwables.IntPredicate<E> filter)
+            throws IllegalArgumentException, IndexOutOfBoundsException, E {
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgNotNull(filter, "filter");
 
@@ -24661,9 +25189,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a
      * @param filter
      * @return
+     * @throws IllegalArgumentException
      * @throws E the e
      */
-    public static <E extends Exception> int count(final long[] a, final Throwables.LongPredicate<E> filter) throws E {
+    public static <E extends Exception> int count(final long[] a, final Throwables.LongPredicate<E> filter) throws IllegalArgumentException, E {
         checkArgNotNull(filter, "filter");
 
         if (isEmpty(a)) {
@@ -24683,9 +25212,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param toIndex
      * @param filter
      * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
      * @throws E the e
      */
-    public static <E extends Exception> int count(final long[] a, final int fromIndex, final int toIndex, final Throwables.LongPredicate<E> filter) throws E {
+    public static <E extends Exception> int count(final long[] a, final int fromIndex, final int toIndex, final Throwables.LongPredicate<E> filter)
+            throws IllegalArgumentException, IndexOutOfBoundsException, E {
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgNotNull(filter, "filter");
 
@@ -24712,9 +25244,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a
      * @param filter
      * @return
+     * @throws IllegalArgumentException
      * @throws E the e
      */
-    public static <E extends Exception> int count(final float[] a, final Throwables.FloatPredicate<E> filter) throws E {
+    public static <E extends Exception> int count(final float[] a, final Throwables.FloatPredicate<E> filter) throws IllegalArgumentException, E {
         checkArgNotNull(filter, "filter");
 
         if (isEmpty(a)) {
@@ -24734,9 +25267,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param toIndex
      * @param filter
      * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
      * @throws E the e
      */
-    public static <E extends Exception> int count(final float[] a, final int fromIndex, final int toIndex, final Throwables.FloatPredicate<E> filter) throws E {
+    public static <E extends Exception> int count(final float[] a, final int fromIndex, final int toIndex, final Throwables.FloatPredicate<E> filter)
+            throws IllegalArgumentException, IndexOutOfBoundsException, E {
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgNotNull(filter, "filter");
 
@@ -24763,9 +25299,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a
      * @param filter
      * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
      * @throws E the e
      */
-    public static <E extends Exception> int count(final double[] a, final Throwables.DoublePredicate<E> filter) throws E {
+    public static <E extends Exception> int count(final double[] a, final Throwables.DoublePredicate<E> filter)
+            throws IllegalArgumentException, IndexOutOfBoundsException, E {
         checkArgNotNull(filter, "filter");
 
         if (isEmpty(a)) {
@@ -24816,9 +25355,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a
      * @param filter
      * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
      * @throws E the e
      */
-    public static <T, E extends Exception> int count(final T[] a, final Throwables.Predicate<? super T, E> filter) throws E {
+    public static <T, E extends Exception> int count(final T[] a, final Throwables.Predicate<? super T, E> filter)
+            throws IllegalArgumentException, IndexOutOfBoundsException, E {
         checkArgNotNull(filter, "filter");
 
         if (isEmpty(a)) {
@@ -24872,10 +25414,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param toIndex
      * @param filter
      * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
      * @throws E the e
      */
     public static <T, E extends Exception> int count(final Collection<? extends T> c, final int fromIndex, final int toIndex,
-            final Throwables.Predicate<? super T, E> filter) throws E {
+            final Throwables.Predicate<? super T, E> filter) throws IllegalArgumentException, IndexOutOfBoundsException, E {
         checkFromToIndex(fromIndex, toIndex, size(c));
         checkArgNotNull(filter, "filter");
 
@@ -24923,9 +25467,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param c
      * @param filter
      * @return
+     * @throws IllegalArgumentException
      * @throws E the e
      */
-    public static <T, E extends Exception> int count(final Iterable<? extends T> c, final Throwables.Predicate<? super T, E> filter) throws E {
+    public static <T, E extends Exception> int count(final Iterable<? extends T> c, final Throwables.Predicate<? super T, E> filter)
+            throws IllegalArgumentException, E {
         checkArgNotNull(filter, "filter");
 
         if (c == null) {
@@ -24945,11 +25491,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param iter
      * @return
+     * @throws IllegalArgumentException
      * @throws ArithmeticException if the total {@code count} overflows an {@code int}.
      */
-    public static int count(final Iterator<?> iter) throws ArithmeticException {
+    public static int count(final Iterator<?> iter) throws IllegalArgumentException, ArithmeticException {
         if (iter == null) {
             return 0;
         }
@@ -25239,6 +25787,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <A>
      * @param <B>
      * @param <R>
@@ -25247,10 +25796,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param b
      * @param zipFunction
      * @return
+     * @throws IllegalArgumentException
      * @throws E the e
      */
     public static <A, B, R, E extends Exception> List<R> zip(final A[] a, final B[] b,
-            final Throwables.BiFunction<? super A, ? super B, ? extends R, E> zipFunction) throws E {
+            final Throwables.BiFunction<? super A, ? super B, ? extends R, E> zipFunction) throws IllegalArgumentException, E {
         checkArgNotNull(zipFunction);
 
         if (isEmpty(a) || isEmpty(b)) {
@@ -25269,6 +25819,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <A>
      * @param <B>
      * @param <R>
@@ -25277,10 +25828,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param b
      * @param zipFunction
      * @return
+     * @throws IllegalArgumentException
      * @throws E the e
      */
     public static <A, B, R, E extends Exception> List<R> zip(final Iterable<A> a, final Iterable<B> b,
-            final Throwables.BiFunction<? super A, ? super B, ? extends R, E> zipFunction) throws E {
+            final Throwables.BiFunction<? super A, ? super B, ? extends R, E> zipFunction) throws IllegalArgumentException, E {
         checkArgNotNull(zipFunction);
 
         if (a == null || b == null) {
@@ -25301,6 +25853,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <A>
      * @param <B>
      * @param <C>
@@ -25311,10 +25864,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param c
      * @param zipFunction
      * @return
+     * @throws IllegalArgumentException
      * @throws E the e
      */
     public static <A, B, C, R, E extends Exception> List<R> zip(final A[] a, final B[] b, final C[] c,
-            final Throwables.TriFunction<? super A, ? super B, ? super C, ? extends R, E> zipFunction) throws E {
+            final Throwables.TriFunction<? super A, ? super B, ? super C, ? extends R, E> zipFunction) throws IllegalArgumentException, E {
         checkArgNotNull(zipFunction);
 
         if (isEmpty(a) || isEmpty(b) || isEmpty(c)) {
@@ -25333,6 +25887,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <A>
      * @param <B>
      * @param <C>
@@ -25343,10 +25898,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param c
      * @param zipFunction
      * @return
+     * @throws IllegalArgumentException
      * @throws E the e
      */
     public static <A, B, C, R, E extends Exception> List<R> zip(final Iterable<A> a, final Iterable<B> b, final Iterable<C> c,
-            final Throwables.TriFunction<? super A, ? super B, ? super C, ? extends R, E> zipFunction) throws E {
+            final Throwables.TriFunction<? super A, ? super B, ? super C, ? extends R, E> zipFunction) throws IllegalArgumentException, E {
         checkArgNotNull(zipFunction);
 
         if (a == null || b == null || c == null) {
@@ -25368,6 +25924,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <A>
      * @param <B>
      * @param <R>
@@ -25378,10 +25935,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param valueForNoneB
      * @param zipFunction
      * @return
+     * @throws IllegalArgumentException
      * @throws E the e
      */
     public static <A, B, R, E extends Exception> List<R> zip(final A[] a, final B[] b, final A valueForNoneA, final B valueForNoneB,
-            final Throwables.BiFunction<? super A, ? super B, ? extends R, E> zipFunction) throws E {
+            final Throwables.BiFunction<? super A, ? super B, ? extends R, E> zipFunction) throws IllegalArgumentException, E {
         checkArgNotNull(zipFunction);
 
         final int lenA = len(a);
@@ -25398,6 +25956,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <A>
      * @param <B>
      * @param <R>
@@ -25408,10 +25967,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param valueForNoneB
      * @param zipFunction
      * @return
+     * @throws IllegalArgumentException
      * @throws E the e
      */
     public static <A, B, R, E extends Exception> List<R> zip(final Iterable<A> a, final Iterable<B> b, final A valueForNoneA, final B valueForNoneB,
-            final Throwables.BiFunction<? super A, ? super B, ? extends R, E> zipFunction) throws E {
+            final Throwables.BiFunction<? super A, ? super B, ? extends R, E> zipFunction) throws IllegalArgumentException, E {
         checkArgNotNull(zipFunction);
 
         final Iterator<A> iterA = a == null ? ObjIterator.<A> empty() : a.iterator();
@@ -25446,6 +26006,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <A>
      * @param <B>
      * @param <C>
@@ -25459,10 +26020,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param valueForNoneC
      * @param zipFunction
      * @return
+     * @throws IllegalArgumentException
      * @throws E the e
      */
     public static <A, B, C, R, E extends Exception> List<R> zip(final A[] a, final B[] b, final C[] c, final A valueForNoneA, final B valueForNoneB,
-            final C valueForNoneC, final Throwables.TriFunction<? super A, ? super B, ? super C, ? extends R, E> zipFunction) throws E {
+            final C valueForNoneC, final Throwables.TriFunction<? super A, ? super B, ? super C, ? extends R, E> zipFunction)
+            throws IllegalArgumentException, E {
         checkArgNotNull(zipFunction);
 
         final int lenA = len(a);
@@ -25480,6 +26043,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <A>
      * @param <B>
      * @param <C>
@@ -25493,10 +26057,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param valueForNoneC
      * @param zipFunction
      * @return
+     * @throws IllegalArgumentException
      * @throws E the e
      */
     public static <A, B, C, R, E extends Exception> List<R> zip(final Iterable<A> a, final Iterable<B> b, final Iterable<C> c, final A valueForNoneA,
-            final B valueForNoneB, final C valueForNoneC, final Throwables.TriFunction<? super A, ? super B, ? super C, ? extends R, E> zipFunction) throws E {
+            final B valueForNoneB, final C valueForNoneC, final Throwables.TriFunction<? super A, ? super B, ? super C, ? extends R, E> zipFunction)
+            throws IllegalArgumentException, E {
         checkArgNotNull(zipFunction);
 
         final Iterator<A> iterA = a == null ? ObjIterator.<A> empty() : a.iterator();
@@ -25717,10 +26283,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param zipFunction
      * @param targetElementType
      * @return
+     * @throws IllegalArgumentException
      * @throws E the e
      */
     public static <A, B, R, E extends Exception> R[] zip(final A[] a, final B[] b,
-            final Throwables.BiFunction<? super A, ? super B, ? extends R, E> zipFunction, final Class<R> targetElementType) throws E {
+            final Throwables.BiFunction<? super A, ? super B, ? extends R, E> zipFunction, final Class<R> targetElementType)
+            throws IllegalArgumentException, E {
         checkArgNotNull(zipFunction);
 
         final int lenA = len(a);
@@ -25750,10 +26318,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param zipFunction
      * @param targetElementType
      * @return
+     * @throws IllegalArgumentException
      * @throws E the e
      */
     public static <A, B, R, E extends Exception> R[] zip(final A[] a, final B[] b, final A valueForNoneA, final B valueForNoneB,
-            final Throwables.BiFunction<? super A, ? super B, ? extends R, E> zipFunction, final Class<R> targetElementType) throws E {
+            final Throwables.BiFunction<? super A, ? super B, ? extends R, E> zipFunction, final Class<R> targetElementType)
+            throws IllegalArgumentException, E {
         checkArgNotNull(zipFunction);
 
         final int lenA = len(a);
@@ -25794,10 +26364,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param zipFunction
      * @param targetElementType
      * @return
+     * @throws IllegalArgumentException
      * @throws E the e
      */
     public static <A, B, C, R, E extends Exception> R[] zip(final A[] a, final B[] b, final C[] c,
-            final Throwables.TriFunction<? super A, ? super B, ? super C, ? extends R, E> zipFunction, final Class<R> targetElementType) throws E {
+            final Throwables.TriFunction<? super A, ? super B, ? super C, ? extends R, E> zipFunction, final Class<R> targetElementType)
+            throws IllegalArgumentException, E {
         checkArgNotNull(zipFunction);
 
         final int lenA = len(a);
@@ -25877,6 +26449,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <T>
      * @param <A>
      * @param <B>
@@ -25887,10 +26460,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param unzip the second parameter is an output parameter.
      * @param supplier
      * @return
+     * @throws IllegalArgumentException
      * @throws E the e
      */
     public static <T, A, B, LC extends Collection<A>, RC extends Collection<B>, E extends Exception> Pair<LC, RC> unzip(final Iterable<? extends T> c,
-            final Throwables.BiConsumer<? super T, Pair<A, B>, E> unzip, final IntFunction<? extends Collection<?>> supplier) throws E {
+            final Throwables.BiConsumer<? super T, Pair<A, B>, E> unzip, final IntFunction<? extends Collection<?>> supplier)
+            throws IllegalArgumentException, E {
         checkArgNotNull(unzip);
 
         final int len = getSizeOrDefault(c, 0);
@@ -25971,6 +26546,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <T>
      * @param <A>
      * @param <B>
@@ -25983,6 +26559,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param unzip the second parameter is an output parameter.
      * @param supplier
      * @return
+     * @throws IllegalArgumentException
      * @throws E the e
      * @see TriIterator#unzip(Iterable, BiConsumer)
      * @see TriIterator#toMultiList(Supplier)
@@ -25992,7 +26569,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     @Deprecated
     public static <T, A, B, C, LC extends Collection<A>, MC extends Collection<B>, RC extends Collection<C>, E extends Exception> Triple<LC, MC, RC> unzipp(
             final Iterable<? extends T> c, final Throwables.BiConsumer<? super T, Triple<A, B, C>, E> unzip,
-            final IntFunction<? extends Collection<?>> supplier) throws E {
+            final IntFunction<? extends Collection<?>> supplier) throws IllegalArgumentException, E {
         checkArgNotNull(unzip);
 
         final int len = getSizeOrDefault(c, 0);
@@ -26081,11 +26658,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param keyExtractor
      * @param mapSupplier
      * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
      * @throws E
      */
     @Beta
     public static <T, K, M extends Map<K, List<T>>, E extends Exception> M groupBy(final T[] a, final int fromIndex, final int toIndex,
-            final Throwables.Function<? super T, ? extends K, E> keyExtractor, final Supplier<M> mapSupplier) throws E {
+            final Throwables.Function<? super T, ? extends K, E> keyExtractor, final Supplier<M> mapSupplier)
+            throws IllegalArgumentException, IndexOutOfBoundsException, E {
         final int length = len(a);
 
         checkFromToIndex(fromIndex, toIndex, length);
@@ -26140,11 +26720,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param keyExtractor
      * @param mapSupplier
      * @return
+     * @throws IllegalArgumentException
      * @throws E
      */
     @Beta
     public static <T, K, M extends Map<K, List<T>>, E extends Exception> M groupBy(final Iterable<? extends T> c,
-            final Throwables.Function<? super T, ? extends K, E> keyExtractor, final Supplier<M> mapSupplier) throws E {
+            final Throwables.Function<? super T, ? extends K, E> keyExtractor, final Supplier<M> mapSupplier) throws IllegalArgumentException, E {
         checkArgNotNull(keyExtractor, "keyExtractor");
         checkArgNotNull(mapSupplier, "mapSupplier");
 
@@ -26201,11 +26782,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param keyExtractor
      * @param mapSupplier
      * @return
+     * @throws IllegalArgumentException
      * @throws E
      */
     @Beta
     public static <T, K, M extends Map<K, List<T>>, E extends Exception> M groupBy(final Iterator<? extends T> iter,
-            final Throwables.Function<? super T, ? extends K, E> keyExtractor, final Supplier<M> mapSupplier) throws E {
+            final Throwables.Function<? super T, ? extends K, E> keyExtractor, final Supplier<M> mapSupplier) throws IllegalArgumentException, E {
         checkArgNotNull(keyExtractor, "keyExtractor");
         checkArgNotNull(mapSupplier, "mapSupplier");
 
@@ -26261,6 +26843,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <T>
      * @param <K>
      * @param <V>
@@ -26272,13 +26855,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param valueExtractor
      * @param mapSupplier
      * @return
+     * @throws IllegalArgumentException
      * @throws E
      * @throws E2
      */
     @Beta
     public static <T, K, V, M extends Map<K, List<V>>, E extends Exception, E2 extends Exception> M groupBy(final Iterable<? extends T> c,
             final Throwables.Function<? super T, ? extends K, E> keyExtractor, final Throwables.Function<? super T, ? extends V, E2> valueExtractor,
-            final Supplier<M> mapSupplier) throws E, E2 {
+            final Supplier<M> mapSupplier) throws IllegalArgumentException, E, E2 {
         checkArgNotNull(keyExtractor, "keyExtractor");
         checkArgNotNull(valueExtractor, "valueExtractor");
         checkArgNotNull(mapSupplier, "mapSupplier");
@@ -26331,6 +26915,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <T>
      * @param <K>
      * @param <V>
@@ -26342,13 +26927,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param valueExtractor
      * @param mapSupplier
      * @return
+     * @throws IllegalArgumentException
      * @throws E
      * @throws E2
      */
     @Beta
     public static <T, K, V, M extends Map<K, List<V>>, E extends Exception, E2 extends Exception> M groupBy(final Iterator<? extends T> iter,
             final Throwables.Function<? super T, ? extends K, E> keyExtractor, final Throwables.Function<? super T, ? extends V, E2> valueExtractor,
-            final Supplier<M> mapSupplier) throws E, E2 {
+            final Supplier<M> mapSupplier) throws IllegalArgumentException, E, E2 {
         checkArgNotNull(keyExtractor, "keyExtractor");
         checkArgNotNull(valueExtractor, "valueExtractor");
         checkArgNotNull(mapSupplier, "mapSupplier");
@@ -26392,11 +26978,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param keyExtractor
      * @param collector
      * @return
+     * @throws IllegalArgumentException
      * @throws E
      */
     @Beta
     public static <T, K, R, E extends Exception> Map<K, R> groupBy(final Iterable<? extends T> c,
-            final Throwables.Function<? super T, ? extends K, E> keyExtractor, final Collector<? super T, ?, R> collector) throws E {
+            final Throwables.Function<? super T, ? extends K, E> keyExtractor, final Collector<? super T, ?, R> collector) throws IllegalArgumentException, E {
         return groupBy(c, keyExtractor, collector, Suppliers.ofMap());
     }
 
@@ -26464,11 +27051,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param keyExtractor
      * @param collector
      * @return
+     * @throws IllegalArgumentException
      * @throws E
      */
     @Beta
     public static <K, T, R, E extends Exception> Map<K, R> groupBy(final Iterator<? extends T> iter,
-            final Throwables.Function<? super T, ? extends K, E> keyExtractor, final Collector<? super T, ?, R> collector) throws E {
+            final Throwables.Function<? super T, ? extends K, E> keyExtractor, final Collector<? super T, ?, R> collector) throws IllegalArgumentException, E {
         return groupBy(iter, keyExtractor, collector, Suppliers.ofMap());
     }
 
@@ -26556,11 +27144,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param keyExtractor
      * @param mapSupplier
      * @return
+     * @throws IllegalArgumentException
      * @throws E
      */
     @Beta
     public static <T, K, M extends Map<K, Integer>, E extends Exception> M countBy(final Iterable<? extends T> c,
-            final Throwables.Function<? super T, ? extends K, E> keyExtractor, final Supplier<M> mapSupplier) throws E {
+            final Throwables.Function<? super T, ? extends K, E> keyExtractor, final Supplier<M> mapSupplier) throws IllegalArgumentException, E {
         checkArgNotNull(keyExtractor, "keyExtractor");
         checkArgNotNull(mapSupplier, "mapSupplier");
 
@@ -26620,11 +27209,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param keyExtractor
      * @param mapSupplier
      * @return
+     * @throws IllegalArgumentException
      * @throws E
      */
     @Beta
     public static <T, K, M extends Map<K, Integer>, E extends Exception> M countBy(final Iterator<? extends T> iter,
-            final Throwables.Function<? super T, ? extends K, E> keyExtractor, final Supplier<M> mapSupplier) throws E {
+            final Throwables.Function<? super T, ? extends K, E> keyExtractor, final Supplier<M> mapSupplier) throws IllegalArgumentException, E {
         checkArgNotNull(keyExtractor, "keyExtractor");
         checkArgNotNull(mapSupplier, "mapSupplier");
 
@@ -27168,130 +27758,131 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      *
      * @param <T>
-     * @param json
+     * @param jsonArray must be a json array/list.
      * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
      * @return
      */
-    public static <T> CheckedStream<T, IOException> streamJson(String json, Class<? extends T> elementClass) {
-        return Utils.jsonParser.stream(json, elementClass);
+    public static <T> CheckedStream<T, IOException> streamJson(String jsonArray, Class<? extends T> elementClass) {
+        return Utils.jsonParser.stream(jsonArray, elementClass);
     }
 
     /**
      *
      *
      * @param <T>
-     * @param json
+     * @param jsonArray must be a json array/list.
      * @param config
      * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
      * @return
      */
-    public static <T> CheckedStream<T, IOException> streamJson(String json, JSONDeserializationConfig config, Class<? extends T> elementClass) {
-        return Utils.jsonParser.stream(json, config, elementClass);
+    public static <T> CheckedStream<T, IOException> streamJson(String jsonArray, JSONDeserializationConfig config, Class<? extends T> elementClass) {
+        return Utils.jsonParser.stream(jsonArray, config, elementClass);
     }
 
     /**
      *
      *
      * @param <T>
-     * @param json
+     * @param jsonArray must be a json array/list.
      * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
      * @return
      */
-    public static <T> CheckedStream<T, IOException> streamJson(File json, Class<? extends T> elementClass) {
-        return Utils.jsonParser.stream(json, elementClass);
+    public static <T> CheckedStream<T, IOException> streamJson(File jsonArray, Class<? extends T> elementClass) {
+        return Utils.jsonParser.stream(jsonArray, elementClass);
     }
 
     /**
      *
      *
      * @param <T>
-     * @param json
+     * @param jsonArray must be a json array/list.
      * @param config
      * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
      * @return
      */
-    public static <T> CheckedStream<T, IOException> streamJson(File json, JSONDeserializationConfig config, Class<? extends T> elementClass) {
-        return Utils.jsonParser.stream(json, config, elementClass);
+    public static <T> CheckedStream<T, IOException> streamJson(File jsonArray, JSONDeserializationConfig config, Class<? extends T> elementClass) {
+        return Utils.jsonParser.stream(jsonArray, config, elementClass);
     }
 
     /**
      *
      *
      * @param <T>
-     * @param json
+     * @param jsonArray must be a json array/list.
      * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
      * @return
      */
-    public static <T> CheckedStream<T, IOException> streamJson(InputStream json, Class<? extends T> elementClass) {
-        return streamJson(json, false, elementClass);
+    public static <T> CheckedStream<T, IOException> streamJson(InputStream jsonArray, Class<? extends T> elementClass) {
+        return streamJson(jsonArray, false, elementClass);
     }
 
     /**
      *
      *
      * @param <T>
-     * @param json
+     * @param jsonArray must be a json array/list.
      * @param closeInputStreamWhenStreamIsClosed
      * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
      * @return
      */
-    public static <T> CheckedStream<T, IOException> streamJson(InputStream json, boolean closeInputStreamWhenStreamIsClosed, Class<? extends T> elementClass) {
-        return Utils.jsonParser.stream(json, closeInputStreamWhenStreamIsClosed, elementClass);
+    public static <T> CheckedStream<T, IOException> streamJson(InputStream jsonArray, boolean closeInputStreamWhenStreamIsClosed,
+            Class<? extends T> elementClass) {
+        return Utils.jsonParser.stream(jsonArray, closeInputStreamWhenStreamIsClosed, elementClass);
     }
 
     /**
      *
      *
      * @param <T>
-     * @param json
+     * @param jsonArray must be a json array/list.
      * @param config
      * @param closeInputStreamWhenStreamIsClosed
      * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
      * @return
      */
-    public static <T> CheckedStream<T, IOException> streamJson(InputStream json, JSONDeserializationConfig config, boolean closeInputStreamWhenStreamIsClosed,
-            Class<? extends T> elementClass) {
-        return Utils.jsonParser.stream(json, config, closeInputStreamWhenStreamIsClosed, elementClass);
+    public static <T> CheckedStream<T, IOException> streamJson(InputStream jsonArray, JSONDeserializationConfig config,
+            boolean closeInputStreamWhenStreamIsClosed, Class<? extends T> elementClass) {
+        return Utils.jsonParser.stream(jsonArray, config, closeInputStreamWhenStreamIsClosed, elementClass);
     }
 
     /**
      *
      *
      * @param <T>
-     * @param json
+     * @param jsonArray must be a json array/list.
      * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
      * @return
      */
-    public static <T> CheckedStream<T, IOException> streamJson(Reader json, Class<? extends T> elementClass) {
-        return streamJson(json, false, elementClass);
+    public static <T> CheckedStream<T, IOException> streamJson(Reader jsonArray, Class<? extends T> elementClass) {
+        return streamJson(jsonArray, false, elementClass);
     }
 
     /**
      *
      *
      * @param <T>
-     * @param json
+     * @param jsonArray must be a json array/list.
      * @param closeReaderWhenStreamIsClosed
      * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
      * @return
      */
-    public static <T> CheckedStream<T, IOException> streamJson(Reader json, boolean closeReaderWhenStreamIsClosed, Class<? extends T> elementClass) {
-        return Utils.jsonParser.stream(json, closeReaderWhenStreamIsClosed, elementClass);
+    public static <T> CheckedStream<T, IOException> streamJson(Reader jsonArray, boolean closeReaderWhenStreamIsClosed, Class<? extends T> elementClass) {
+        return Utils.jsonParser.stream(jsonArray, closeReaderWhenStreamIsClosed, elementClass);
     }
 
     /**
      *
      *
      * @param <T>
-     * @param json
+     * @param jsonArray must be a json array/list.
      * @param config
      * @param closeReaderWhenStreamIsClosed
      * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
      * @return
      */
-    public static <T> CheckedStream<T, IOException> streamJson(Reader json, JSONDeserializationConfig config, boolean closeReaderWhenStreamIsClosed,
+    public static <T> CheckedStream<T, IOException> streamJson(Reader jsonArray, JSONDeserializationConfig config, boolean closeReaderWhenStreamIsClosed,
             Class<? extends T> elementClass) {
-        return Utils.jsonParser.stream(json, config, closeReaderWhenStreamIsClosed, elementClass);
+        return Utils.jsonParser.stream(jsonArray, config, closeReaderWhenStreamIsClosed, elementClass);
     }
 
     /**
@@ -28141,14 +28732,15 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <br />
      * If error happens in one command/task, iteration will be interrupted and error will be thrown. But other commands/tasks won't be impacted or cancelled.
      *
-     *
      * @param commands
      * @param executor
      * @return
+     * @throws IllegalArgumentException
      * @see Futures#iterate(Collection)
      * @see Futures#iterate(Collection, Function)
      */
-    public static ObjIterator<Void> asynRun(final Collection<? extends Throwables.Runnable<? extends Exception>> commands, final Executor executor) {
+    public static ObjIterator<Void> asynRun(final Collection<? extends Throwables.Runnable<? extends Exception>> commands, final Executor executor)
+            throws IllegalArgumentException {
         checkArgNotNull(executor, "executor");
 
         if (isEmpty(commands)) {
@@ -28257,15 +28849,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <br />
      * If error happens in one command/task, iteration will be interrupted and error will be thrown. But other commands/tasks won't be impacted or cancelled.
      *
-     *
      * @param <R>
      * @param commands
      * @param executor
      * @return
+     * @throws IllegalArgumentException
      * @see Futures#iterate(Collection)
      * @see Futures#iterate(Collection, Function)
      */
-    public static <R> ObjIterator<R> asynCall(final Collection<? extends Callable<? extends R>> commands, final Executor executor) {
+    public static <R> ObjIterator<R> asynCall(final Collection<? extends Callable<? extends R>> commands, final Executor executor)
+            throws IllegalArgumentException {
         checkArgNotNull(executor, "executor");
 
         if (isEmpty(commands)) {
@@ -28540,8 +29133,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param commands
      * @param executor
+     * @throws IllegalArgumentException
      */
-    public static void runInParallel(final Collection<? extends Throwables.Runnable<? extends Exception>> commands, final Executor executor) {
+    public static void runInParallel(final Collection<? extends Throwables.Runnable<? extends Exception>> commands, final Executor executor)
+            throws IllegalArgumentException {
         checkArgNotNull(executor, "executor");
 
         if (isEmpty(commands)) {
@@ -28787,8 +29382,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param commands
      * @param executor
      * @return
+     * @throws IllegalArgumentException
      */
-    public static <R> List<R> callInParallel(final Collection<? extends Callable<? extends R>> commands, final Executor executor) {
+    public static <R> List<R> callInParallel(final Collection<? extends Callable<? extends R>> commands, final Executor executor)
+            throws IllegalArgumentException {
         checkArgNotNull(executor, "executor");
 
         if (isEmpty(commands)) {
@@ -28851,16 +29448,18 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-    *
-    * @param <T>
-    * @param <E>
-    * @param iter
-    * @param batchSize
-    * @param batchAction
-    * @throws E
-    */
+     *
+     *
+     * @param <T>
+     * @param <E>
+     * @param iter
+     * @param batchSize
+     * @param batchAction
+     * @throws IllegalArgumentException
+     * @throws E
+     */
     public static <T, E extends Exception> void runByBatch(Iterable<? extends T> iter, final int batchSize,
-            final Throwables.Consumer<? super List<? extends T>, E> batchAction) throws E {
+            final Throwables.Consumer<? super List<? extends T>, E> batchAction) throws IllegalArgumentException, E {
         checkArgPositive(batchSize, "batchSize");
         checkArgNotNull(batchAction, "batchAction");
 
@@ -28881,16 +29480,18 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-    *
-    * @param <T>
-    * @param <E>
-    * @param iter
-    * @param batchSize
-    * @param batchAction
-    * @throws E
-    */
+     *
+     *
+     * @param <T>
+     * @param <E>
+     * @param iter
+     * @param batchSize
+     * @param batchAction
+     * @throws IllegalArgumentException
+     * @throws E
+     */
     public static <T, E extends Exception> void runByBatch(final Iterator<? extends T> iter, final int batchSize,
-            final Throwables.Consumer<? super List<? extends T>, E> batchAction) throws E {
+            final Throwables.Consumer<? super List<? extends T>, E> batchAction) throws IllegalArgumentException, E {
         checkArgPositive(batchSize, "batchSize");
         checkArgNotNull(batchAction, "batchAction");
 
@@ -28958,6 +29559,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <T>
      * @param <E>
      * @param <E2>
@@ -28965,11 +29567,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param batchSize
      * @param elementConsumer
      * @param batchAction
+     * @throws IllegalArgumentException
      * @throws E
      * @throws E2
      */
     public static <T, E extends Exception, E2 extends Exception> void runByBatch(final Iterator<? extends T> iter, final int batchSize,
-            final Throwables.IntObjConsumer<? super T, E> elementConsumer, final Throwables.Runnable<E2> batchAction) throws E, E2 {
+            final Throwables.IntObjConsumer<? super T, E> elementConsumer, final Throwables.Runnable<E2> batchAction) throws IllegalArgumentException, E, E2 {
         checkArgPositive(batchSize, "batchSize");
         checkArgNotNull(elementConsumer, "elementConsumer");
         checkArgNotNull(batchAction, "batchAction");
@@ -29025,10 +29628,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param batchSize
      * @param batchAction
      * @return
+     * @throws IllegalArgumentException
      * @throws E
      */
     public static <T, R, E extends Exception> List<R> callByBatch(Iterable<? extends T> iter, final int batchSize,
-            final Throwables.Function<? super List<? extends T>, R, E> batchAction) throws E {
+            final Throwables.Function<? super List<? extends T>, R, E> batchAction) throws IllegalArgumentException, E {
         checkArgPositive(batchSize, "batchSize");
         checkArgNotNull(batchAction, "batchAction");
 
@@ -29061,10 +29665,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param batchSize
      * @param batchAction
      * @return
+     * @throws IllegalArgumentException
      * @throws E
      */
     public static <T, R, E extends Exception> List<R> callByBatch(final Iterator<? extends T> iter, final int batchSize,
-            final Throwables.Function<? super List<? extends T>, R, E> batchAction) throws E {
+            final Throwables.Function<? super List<? extends T>, R, E> batchAction) throws IllegalArgumentException, E {
         checkArgPositive(batchSize, "batchSize");
         checkArgNotNull(batchAction, "batchAction");
 
@@ -29151,11 +29756,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param elementConsumer
      * @param batchAction
      * @return
+     * @throws IllegalArgumentException
      * @throws E
      * @throws E2
      */
     public static <T, R, E extends Exception, E2 extends Exception> List<R> callByBatch(final Iterator<? extends T> iter, final int batchSize,
-            final Throwables.IntObjConsumer<? super T, E> elementConsumer, final Throwables.Callable<? extends R, E2> batchAction) throws E, E2 {
+            final Throwables.IntObjConsumer<? super T, E> elementConsumer, final Throwables.Callable<? extends R, E2> batchAction)
+            throws IllegalArgumentException, E, E2 {
         checkArgPositive(batchSize, "batchSize");
         checkArgNotNull(elementConsumer, "elementConsumer");
         checkArgNotNull(batchAction, "batchAction");
@@ -29191,8 +29798,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * timeout elapses, and only then re-interrupts the thread.
      *
      * @param cmd
+     * @throws IllegalArgumentException
      */
-    public static void runUninterruptibly(final Throwables.Runnable<InterruptedException> cmd) {
+    public static void runUninterruptibly(final Throwables.Runnable<InterruptedException> cmd) throws IllegalArgumentException {
         checkArgNotNull(cmd);
 
         boolean interrupted = false;
@@ -29223,8 +29831,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param timeoutInMillis
      * @param cmd
+     * @throws IllegalArgumentException
      */
-    public static void runUninterruptibly(final long timeoutInMillis, final Throwables.LongConsumer<InterruptedException> cmd) {
+    public static void runUninterruptibly(final long timeoutInMillis, final Throwables.LongConsumer<InterruptedException> cmd) throws IllegalArgumentException {
         checkArgNotNull(cmd);
 
         boolean interrupted = false;
@@ -29302,8 +29911,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T>
      * @param cmd
      * @return
+     * @throws IllegalArgumentException
      */
-    public static <T> T callUninterruptibly(Throwables.Callable<T, InterruptedException> cmd) {
+    public static <T> T callUninterruptibly(Throwables.Callable<T, InterruptedException> cmd) throws IllegalArgumentException {
         checkArgNotNull(cmd);
 
         boolean interrupted = false;
@@ -29334,8 +29944,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param timeoutInMillis
      * @param cmd
      * @return
+     * @throws IllegalArgumentException
      */
-    public static <T> T callUninterruptibly(final long timeoutInMillis, final Throwables.LongFunction<T, InterruptedException> cmd) {
+    public static <T> T callUninterruptibly(final long timeoutInMillis, final Throwables.LongFunction<T, InterruptedException> cmd)
+            throws IllegalArgumentException {
         checkArgNotNull(cmd);
 
         boolean interrupted = false;
@@ -29768,10 +30380,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <E>
      * @param a
      * @param converter
+     * @throws IllegalArgumentException
      * @throws E
      */
     @Beta
-    public static <T, E extends Exception> void applyToEach(final T[] a, final Throwables.Function<? super T, ? extends T, E> converter) throws E {
+    public static <T, E extends Exception> void applyToEach(final T[] a, final Throwables.Function<? super T, ? extends T, E> converter)
+            throws IllegalArgumentException, E {
         checkArgNotNull(converter);
 
         if (isEmpty(a)) {
@@ -29790,10 +30404,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <E>
      * @param c
      * @param converter
+     * @throws IllegalArgumentException
      * @throws E
      */
     @Beta
-    public static <T, E extends Exception> void applyToEach(final List<T> c, final Throwables.Function<? super T, ? extends T, E> converter) throws E {
+    public static <T, E extends Exception> void applyToEach(final List<T> c, final Throwables.Function<? super T, ? extends T, E> converter)
+            throws IllegalArgumentException, E {
         checkArgNotNull(converter);
 
         if (isEmpty(c)) {
@@ -29821,12 +30437,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a
      * @param converter
      * @return updated copy of {@code a}. {@code null} if {@code (a == null)}. (auto-generated java doc for return)
+     * @throws IllegalArgumentException
      * @throws E
      * @see {@link #map(Object[], com.landawn.abacus.util.Throwables.Function)}
      * @see {@link N#map(Iterable, com.landawn.abacus.util.Throwables.Function)}
      */
     @MayReturnNull
-    public static <T, E extends Exception> T[] copyThenApplyToEach(final T[] a, final Throwables.Function<? super T, ? extends T, E> converter) throws E {
+    public static <T, E extends Exception> T[] copyThenApplyToEach(final T[] a, final Throwables.Function<? super T, ? extends T, E> converter)
+            throws IllegalArgumentException, E {
         checkArgNotNull(converter);
 
         if (a == null) {
@@ -30208,9 +30826,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a
      * @param fromIndex
      * @param toIndex
+     * @throws IndexOutOfBoundsException
      */
     @Beta
-    public static void negate(final boolean[] a, final int fromIndex, final int toIndex) {
+    public static void negate(final boolean[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (fromIndex == toIndex) {

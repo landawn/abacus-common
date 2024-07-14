@@ -30,26 +30,30 @@ public final class Indexed<T> extends AbstractIndexed {
     }
 
     /**
+     * 
      *
-     * @param <T>
-     * @param value
-     * @param index
-     * @return
+     * @param <T> 
+     * @param value 
+     * @param index 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static <T> Indexed<T> of(T value, int index) {
+    public static <T> Indexed<T> of(T value, int index) throws IllegalArgumentException {
         N.checkArgNotNegative(index, "index");
 
         return new Indexed<>(index, value);
     }
 
     /**
+     * 
      *
-     * @param <T>
-     * @param value
-     * @param index
-     * @return
+     * @param <T> 
+     * @param value 
+     * @param index 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static <T> Indexed<T> of(T value, long index) {
+    public static <T> Indexed<T> of(T value, long index) throws IllegalArgumentException {
         N.checkArgNotNegative(index, "index");
 
         return new Indexed<>(index, value);

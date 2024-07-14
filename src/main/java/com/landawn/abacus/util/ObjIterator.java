@@ -108,14 +108,16 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
     }
 
     /**
+     * 
      *
-     * @param <T>
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return
+     * @param <T> 
+     * @param a 
+     * @param fromIndex 
+     * @param toIndex 
+     * @return 
+     * @throws IndexOutOfBoundsException 
      */
-    public static <T> ObjIterator<T> of(final T[] a, final int fromIndex, final int toIndex) {
+    public static <T> ObjIterator<T> of(final T[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
         if (fromIndex == toIndex) {
@@ -206,11 +208,12 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
     /**
      * Lazy evaluation.
      *
-     * @param <T>
-     * @param iteratorSupplier
-     * @return
+     * @param <T> 
+     * @param iteratorSupplier 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static <T> ObjIterator<T> defer(final Supplier<? extends Iterator<? extends T>> iteratorSupplier) {
+    public static <T> ObjIterator<T> defer(final Supplier<? extends Iterator<? extends T>> iteratorSupplier) throws IllegalArgumentException {
         N.checkArgNotNull(iteratorSupplier, "iteratorSupplier");
 
         return new ObjIterator<>() {
@@ -247,11 +250,12 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
     /**
      * Returns an infinite {@code ObjIterator}.
      *
-     * @param <T>
-     * @param supplier
-     * @return
+     * @param <T> 
+     * @param supplier 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static <T> ObjIterator<T> generate(final Supplier<? extends T> supplier) {
+    public static <T> ObjIterator<T> generate(final Supplier<? extends T> supplier) throws IllegalArgumentException {
         N.checkArgNotNull(supplier);
 
         return new ObjIterator<>() {
@@ -268,13 +272,15 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
     }
 
     /**
+     * 
      *
-     * @param <T>
-     * @param hasNext
-     * @param supplier
-     * @return
+     * @param <T> 
+     * @param hasNext 
+     * @param supplier 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static <T> ObjIterator<T> generate(final BooleanSupplier hasNext, final Supplier<? extends T> supplier) {
+    public static <T> ObjIterator<T> generate(final BooleanSupplier hasNext, final Supplier<? extends T> supplier) throws IllegalArgumentException {
         N.checkArgNotNull(hasNext);
         N.checkArgNotNull(supplier);
 
@@ -421,15 +427,18 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
     //    }
 
     /**
+     * 
      *
-     * @param <T>
-     * @param <U>
-     * @param init
-     * @param hasNext
-     * @param supplier
-     * @return
+     * @param <T> 
+     * @param <U> 
+     * @param init 
+     * @param hasNext 
+     * @param supplier 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static <T, U> ObjIterator<T> generate(final U init, final Predicate<? super U> hasNext, final Function<? super U, T> supplier) {
+    public static <T, U> ObjIterator<T> generate(final U init, final Predicate<? super U> hasNext, final Function<? super U, T> supplier)
+            throws IllegalArgumentException {
         N.checkArgNotNull(hasNext);
         N.checkArgNotNull(supplier);
 
@@ -451,15 +460,18 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
     }
 
     /**
+     * 
      *
-     * @param <T>
-     * @param <U>
-     * @param init
-     * @param hasNext
-     * @param supplier
-     * @return
+     * @param <T> 
+     * @param <U> 
+     * @param init 
+     * @param hasNext 
+     * @param supplier 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static <T, U> ObjIterator<T> generate(final U init, final BiPredicate<? super U, T> hasNext, final BiFunction<? super U, T, T> supplier) {
+    public static <T, U> ObjIterator<T> generate(final U init, final BiPredicate<? super U, T> hasNext, final BiFunction<? super U, T, T> supplier)
+            throws IllegalArgumentException {
         N.checkArgNotNull(hasNext);
         N.checkArgNotNull(supplier);
 
@@ -483,12 +495,13 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
     }
 
     /**
+     * 
      *
-     *
-     * @param n
-     * @return
+     * @param n 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public ObjIterator<T> skip(final long n) {
+    public ObjIterator<T> skip(final long n) throws IllegalArgumentException {
         N.checkArgNotNegative(n, "n");
 
         if (n <= 0) {
@@ -531,12 +544,13 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
     }
 
     /**
+     * 
      *
-     *
-     * @param count
-     * @return
+     * @param count 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public ObjIterator<T> limit(final long count) {
+    public ObjIterator<T> limit(final long count) throws IllegalArgumentException {
         N.checkArgNotNegative(count, "count");
 
         if (count == 0) {
@@ -742,12 +756,14 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
     }
 
     /**
+     * 
      *
-     * @param <E>
-     * @param action
+     * @param <E> 
+     * @param action 
+     * @throws IllegalArgumentException 
      * @throws E the e
      */
-    public <E extends Exception> void foreachRemaining(Throwables.Consumer<? super T, E> action) throws E {
+    public <E extends Exception> void foreachRemaining(Throwables.Consumer<? super T, E> action) throws IllegalArgumentException, E {
         N.checkArgNotNull(action);
 
         while (hasNext()) {
@@ -756,12 +772,14 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
     }
 
     /**
+     * 
      *
-     * @param <E>
-     * @param action
+     * @param <E> 
+     * @param action 
+     * @throws IllegalArgumentException 
      * @throws E the e
      */
-    public <E extends Exception> void foreachIndexed(Throwables.IntObjConsumer<? super T, E> action) throws E {
+    public <E extends Exception> void foreachIndexed(Throwables.IntObjConsumer<? super T, E> action) throws IllegalArgumentException, E {
         N.checkArgNotNull(action);
 
         int idx = 0;

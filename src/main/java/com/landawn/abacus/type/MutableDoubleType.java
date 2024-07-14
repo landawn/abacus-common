@@ -47,7 +47,7 @@ public class MutableDoubleType extends MutableType<MutableDouble> {
      */
     @Override
     public String stringOf(MutableDouble x) {
-        return x == null ? null : N.stringOf(x.doubleValue());
+        return x == null ? null : N.stringOf(x.value());
     }
 
     /**
@@ -93,7 +93,7 @@ public class MutableDoubleType extends MutableType<MutableDouble> {
      */
     @Override
     public void set(PreparedStatement stmt, int columnIndex, MutableDouble x) throws SQLException {
-        stmt.setDouble(columnIndex, (x == null) ? 0 : x.doubleValue());
+        stmt.setDouble(columnIndex, (x == null) ? 0 : x.value());
     }
 
     /**
@@ -105,7 +105,7 @@ public class MutableDoubleType extends MutableType<MutableDouble> {
      */
     @Override
     public void set(CallableStatement stmt, String parameterName, MutableDouble x) throws SQLException {
-        stmt.setDouble(parameterName, (x == null) ? 0 : x.doubleValue());
+        stmt.setDouble(parameterName, (x == null) ? 0 : x.value());
     }
 
     /**
@@ -119,7 +119,7 @@ public class MutableDoubleType extends MutableType<MutableDouble> {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
-            appendable.append(String.valueOf(x.doubleValue()));
+            appendable.append(String.valueOf(x.value()));
         }
     }
 
@@ -135,7 +135,7 @@ public class MutableDoubleType extends MutableType<MutableDouble> {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
-            writer.write(x.doubleValue());
+            writer.write(x.value());
         }
     }
 }

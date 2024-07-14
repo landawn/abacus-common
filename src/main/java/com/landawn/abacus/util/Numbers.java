@@ -712,12 +712,13 @@ public final class Numbers {
      * </code>
      * </pre>
      *
-     * @param x
-     * @param decimalFormat
-     * @return
+     * @param x 
+     * @param decimalFormat 
+     * @return 
+     * @throws IllegalArgumentException 
      * @see DecimalFormat#format(double)
      */
-    public static String format(final float x, String decimalFormat) {
+    public static String format(final float x, String decimalFormat) throws IllegalArgumentException {
         N.checkArgNotNull(decimalFormat, "decimalFormat");
 
         DecimalFormat df = decimalFormatPool.get(decimalFormat);
@@ -730,13 +731,15 @@ public final class Numbers {
     }
 
     /**
+     * 
      *
-     * @param x
-     * @param decimalFormat
-     * @return
+     * @param x 
+     * @param decimalFormat 
+     * @return 
+     * @throws IllegalArgumentException 
      * @see DecimalFormat#format(double)
      */
-    public static String format(final Float x, String decimalFormat) {
+    public static String format(final Float x, String decimalFormat) throws IllegalArgumentException {
         N.checkArgNotNull(decimalFormat, "decimalFormat");
 
         DecimalFormat df = decimalFormatPool.get(decimalFormat);
@@ -768,12 +771,13 @@ public final class Numbers {
      * </code>
      * </pre>
      *
-     * @param x
-     * @param decimalFormat
-     * @return
+     * @param x 
+     * @param decimalFormat 
+     * @return 
+     * @throws IllegalArgumentException 
      * @see DecimalFormat#format(double)
      */
-    public static String format(final double x, String decimalFormat) {
+    public static String format(final double x, String decimalFormat) throws IllegalArgumentException {
         N.checkArgNotNull(decimalFormat, "decimalFormat");
 
         DecimalFormat df = decimalFormatPool.get(decimalFormat);
@@ -786,13 +790,15 @@ public final class Numbers {
     }
 
     /**
+     * 
      *
-     * @param x
-     * @param decimalFormat
-     * @return
+     * @param x 
+     * @param decimalFormat 
+     * @return 
+     * @throws IllegalArgumentException 
      * @see DecimalFormat#format(double)
      */
-    public static String format(final Double x, String decimalFormat) {
+    public static String format(final Double x, String decimalFormat) throws IllegalArgumentException {
         N.checkArgNotNull(decimalFormat, "decimalFormat");
 
         DecimalFormat df = decimalFormatPool.get(decimalFormat);
@@ -2423,10 +2429,11 @@ public final class Numbers {
     /**
      * Returns {@code true} if {@code x} represents a power of two.
      *
-     * @param x
+     * @param x 
      * @return true, if is power of two
+     * @throws IllegalArgumentException 
      */
-    public static boolean isPowerOfTwo(BigInteger x) {
+    public static boolean isPowerOfTwo(BigInteger x) throws IllegalArgumentException {
         N.checkArgNotNull(x);
         return x.signum() > 0 && x.getLowestSetBit() == x.bitLength() - 1;
     }
@@ -2560,7 +2567,7 @@ public final class Numbers {
      *     infinite
      */
     @SuppressWarnings("fallthrough")
-    public static int log2(double x, RoundingMode mode) {
+    public static int log2(double x, RoundingMode mode) throws IllegalArgumentException {
         N.checkArgument(x > 0.0 && isFinite(x), "x must be positive and finite");
         int exponent = getExponent(x);
         if (!isNormal(x)) {
@@ -2611,7 +2618,7 @@ public final class Numbers {
      */
     @SuppressWarnings("fallthrough")
     // TODO(kevinb): remove after this warning is disabled globally
-    public static int log2(BigInteger x, RoundingMode mode) {
+    public static int log2(BigInteger x, RoundingMode mode) throws IllegalArgumentException {
         checkPositive("x", N.checkArgNotNull(x));
         int logFloor = x.bitLength() - 1;
         switch (mode) {
@@ -3214,15 +3221,16 @@ public final class Numbers {
      * Returns the result of dividing {@code p} by {@code q}, rounding using the specified
      * {@code RoundingMode}.
      *
-     * @param p
-     * @param q
-     * @param mode
-     * @return
+     * @param p 
+     * @param q 
+     * @param mode 
+     * @return 
+     * @throws IllegalArgumentException 
      * @throws ArithmeticException if {@code q == 0}, or if {@code mode == UNNECESSARY} and {@code a}
      *         is not an integer multiple of {@code b}
      */
     @SuppressWarnings("fallthrough")
-    public static int divide(int p, int q, RoundingMode mode) {
+    public static int divide(int p, int q, RoundingMode mode) throws IllegalArgumentException {
         N.checkArgNotNull(mode);
         if (q == 0) {
             throw new ArithmeticException("/ by zero"); // for GWT
@@ -3282,15 +3290,16 @@ public final class Numbers {
      * Returns the result of dividing {@code p} by {@code q}, rounding using the specified
      * {@code RoundingMode}.
      *
-     * @param p
-     * @param q
-     * @param mode
-     * @return
+     * @param p 
+     * @param q 
+     * @param mode 
+     * @return 
+     * @throws IllegalArgumentException 
      * @throws ArithmeticException if {@code q == 0}, or if {@code mode == UNNECESSARY} and {@code a}
      *     is not an integer multiple of {@code b}
      */
     @SuppressWarnings("fallthrough")
-    public static long divide(long p, long q, RoundingMode mode) {
+    public static long divide(long p, long q, RoundingMode mode) throws IllegalArgumentException {
         N.checkArgNotNull(mode);
         long div = p / q; // throws if q == 0
         long rem = p - q * div; // equals p % q
@@ -4229,7 +4238,7 @@ public final class Numbers {
      * @return
      * @throws IllegalArgumentException if {@code n < 0}, {@code k < 0} or {@code k > n}
      */
-    public static int binomial(int n, int k) {
+    public static int binomial(int n, int k) throws IllegalArgumentException {
         checkNonNegative("n", n);
         checkNonNegative("k", k);
         N.checkArgument(k <= n, "k (%s) > n (%s)", k, n);
@@ -4263,7 +4272,7 @@ public final class Numbers {
      * @return
      * @throws IllegalArgumentException if {@code n < 0}, {@code k < 0}, or {@code k > n}
      */
-    public static long binomialToLong(int n, int k) {
+    public static long binomialToLong(int n, int k) throws IllegalArgumentException {
         checkNonNegative("n", n);
         checkNonNegative("k", k);
         N.checkArgument(k <= n, "k (%s) > n (%s)", k, n);
@@ -4334,7 +4343,7 @@ public final class Numbers {
      * @return
      * @throws IllegalArgumentException if {@code n < 0}, {@code k < 0}, or {@code k > n}
      */
-    public static BigInteger binomialToBigInteger(int n, int k) {
+    public static BigInteger binomialToBigInteger(int n, int k) throws IllegalArgumentException {
         checkNonNegative("n", n);
         checkNonNegative("k", k);
         N.checkArgument(k <= n, "k (%s) > n (%s)", k, n);
@@ -4431,7 +4440,7 @@ public final class Numbers {
      * @throws IllegalArgumentException if {@code values} is empty
      */
     @SafeVarargs
-    public static double mean(int... values) {
+    public static double mean(int... values) throws IllegalArgumentException {
         N.checkArgument(values.length > 0, "Cannot take mean of 0 values");
         // The upper bound on the the length of an array and the bounds on the int values mean that, in
         // this case only, we can compute the sum as a long without risking overflow or loss of
@@ -4456,7 +4465,7 @@ public final class Numbers {
      * @throws IllegalArgumentException if {@code values} is empty
      */
     @SafeVarargs
-    public static double mean(long... values) {
+    public static double mean(long... values) throws IllegalArgumentException {
         N.checkArgument(values.length > 0, "Cannot take mean of 0 values");
         long count = 1;
         double mean = values[0];
@@ -4469,12 +4478,14 @@ public final class Numbers {
     }
 
     /**
+     * 
      *
-     * @param values
-     * @return
+     * @param values 
+     * @return 
+     * @throws IllegalArgumentException 
      */
     @SafeVarargs
-    public static double mean(double... values) {
+    public static double mean(double... values) throws IllegalArgumentException {
         N.checkArgument(values.length > 0, "Cannot take mean of 0 values");
         long count = 1;
         double mean = checkFinite(values[0]);
@@ -4575,13 +4586,15 @@ public final class Numbers {
     }
 
     /**
+     * 
      *
-     * @param x
-     * @param scale
-     * @return
+     * @param x 
+     * @param scale 
+     * @return 
+     * @throws IllegalArgumentException 
      * @see Math#round(double)
      */
-    public static double round(final double x, final int scale) {
+    public static double round(final double x, final int scale) throws IllegalArgumentException {
         N.checkArgNotNegative(scale, "scale");
 
         if (scale == 0) {
@@ -4661,28 +4674,32 @@ public final class Numbers {
     }
 
     /**
+     * 
      *
-     * @param x
-     * @param decimalFormat
-     * @return
+     * @param x 
+     * @param decimalFormat 
+     * @return 
+     * @throws IllegalArgumentException 
      * @see DecimalFormat#format(double)
      * @see #toFloat(String)
      */
-    public static float round(final float x, final DecimalFormat decimalFormat) {
+    public static float round(final float x, final DecimalFormat decimalFormat) throws IllegalArgumentException {
         N.checkArgNotNull(decimalFormat, "decimalFormat");
 
         return toFloat(decimalFormat.format(x));
     }
 
     /**
+     * 
      *
-     * @param x
-     * @param decimalFormat
-     * @return
+     * @param x 
+     * @param decimalFormat 
+     * @return 
+     * @throws IllegalArgumentException 
      * @see DecimalFormat#format(double)
      * @see #toDouble(String)
      */
-    public static double round(final double x, final DecimalFormat decimalFormat) {
+    public static double round(final double x, final DecimalFormat decimalFormat) throws IllegalArgumentException {
         N.checkArgNotNull(decimalFormat, "decimalFormat");
 
         return toDouble(decimalFormat.format(x));

@@ -64,13 +64,15 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
     }
 
     /**
+     * 
      *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return
+     * @param a 
+     * @param fromIndex 
+     * @param toIndex 
+     * @return 
+     * @throws IndexOutOfBoundsException 
      */
-    public static ByteIterator of(final byte[] a, final int fromIndex, final int toIndex) {
+    public static ByteIterator of(final byte[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
         if (fromIndex == toIndex) {
@@ -109,10 +111,11 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
     /**
      * Lazy evaluation.
      *
-     * @param iteratorSupplier
-     * @return
+     * @param iteratorSupplier 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static ByteIterator defer(final Supplier<? extends ByteIterator> iteratorSupplier) {
+    public static ByteIterator defer(final Supplier<? extends ByteIterator> iteratorSupplier) throws IllegalArgumentException {
         N.checkArgNotNull(iteratorSupplier, "iteratorSupplier");
 
         return new ByteIterator() {
@@ -149,10 +152,11 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
     /**
      * Returns an infinite {@code ByteIterator}.
      *
-     * @param supplier
-     * @return
+     * @param supplier 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static ByteIterator generate(final ByteSupplier supplier) {
+    public static ByteIterator generate(final ByteSupplier supplier) throws IllegalArgumentException {
         N.checkArgNotNull(supplier);
 
         return new ByteIterator() {
@@ -169,12 +173,14 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
     }
 
     /**
+     * 
      *
-     * @param hasNext
-     * @param supplier
-     * @return
+     * @param hasNext 
+     * @param supplier 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static ByteIterator generate(final BooleanSupplier hasNext, final ByteSupplier supplier) {
+    public static ByteIterator generate(final BooleanSupplier hasNext, final ByteSupplier supplier) throws IllegalArgumentException {
         N.checkArgNotNull(hasNext);
         N.checkArgNotNull(supplier);
 
@@ -214,12 +220,13 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
     public abstract byte nextByte();
 
     /**
+     * 
      *
-     *
-     * @param n
-     * @return
+     * @param n 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public ByteIterator skip(final long n) {
+    public ByteIterator skip(final long n) throws IllegalArgumentException {
         N.checkArgNotNegative(n, "n");
 
         if (n <= 0) {
@@ -262,12 +269,13 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
     }
 
     /**
+     * 
      *
-     *
-     * @param count
-     * @return
+     * @param count 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public ByteIterator limit(final long count) {
+    public ByteIterator limit(final long count) throws IllegalArgumentException {
         N.checkArgNotNegative(count, "count");
 
         if (count == 0) {
@@ -297,12 +305,13 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
     }
 
     /**
+     * 
      *
-     *
-     * @param predicate
-     * @return
+     * @param predicate 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public ByteIterator filter(final BytePredicate predicate) {
+    public ByteIterator filter(final BytePredicate predicate) throws IllegalArgumentException {
         N.checkArgNotNull(predicate, "predicate");
 
         final ByteIterator iter = this;
@@ -447,12 +456,13 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
     /**
      * For each remaining.
      *
-     * @param action
-     * @deprecated
+     * @param action 
+     * @throws IllegalArgumentException 
+     * @deprecated 
      */
     @Override
     @Deprecated
-    public void forEachRemaining(java.util.function.Consumer<? super Byte> action) {
+    public void forEachRemaining(java.util.function.Consumer<? super Byte> action) throws IllegalArgumentException {
         super.forEachRemaining(action);
     }
 
@@ -471,12 +481,14 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
     }
 
     /**
+     * 
      *
-     * @param <E>
-     * @param action
+     * @param <E> 
+     * @param action 
+     * @throws IllegalArgumentException 
      * @throws E the e
      */
-    public <E extends Exception> void foreachIndexed(Throwables.IndexedByteConsumer<E> action) throws E {
+    public <E extends Exception> void foreachIndexed(Throwables.IndexedByteConsumer<E> action) throws IllegalArgumentException, E {
         N.checkArgNotNull(action);
 
         int idx = 0;

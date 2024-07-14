@@ -663,16 +663,18 @@ public final class HttpRequest {
     }
 
     /**
+     * 
      *
-     *
-     * @param <T>
-     * @param httpMethod
-     * @param responseBodyHandler
-     * @return
+     * @param <T> 
+     * @param httpMethod 
+     * @param responseBodyHandler 
+     * @return 
+     * @throws IllegalArgumentException 
      * @throws UncheckedIOException the unchecked IO exception
      */
     @Beta
-    public <T> HttpResponse<T> execute(final HttpMethod httpMethod, final HttpResponse.BodyHandler<T> responseBodyHandler) throws UncheckedIOException {
+    public <T> HttpResponse<T> execute(final HttpMethod httpMethod, final HttpResponse.BodyHandler<T> responseBodyHandler)
+            throws IllegalArgumentException, UncheckedIOException {
         N.checkArgNotNull(httpMethod, HTTP_METHOD_STR);
 
         final HttpClient httpClientToUse = checkUrlAndHttpClient();
@@ -966,15 +968,17 @@ public final class HttpRequest {
     }
 
     /**
+     * 
      *
-     *
-     * @param <T>
-     * @param httpMethod
-     * @param responseBodyHandler
-     * @return
+     * @param <T> 
+     * @param httpMethod 
+     * @param responseBodyHandler 
+     * @return 
+     * @throws IllegalArgumentException 
      */
     @Beta
-    public <T> CompletableFuture<HttpResponse<T>> asyncExecute(final HttpMethod httpMethod, final HttpResponse.BodyHandler<T> responseBodyHandler) {
+    public <T> CompletableFuture<HttpResponse<T>> asyncExecute(final HttpMethod httpMethod, final HttpResponse.BodyHandler<T> responseBodyHandler)
+            throws IllegalArgumentException {
         N.checkArgNotNull(httpMethod, HTTP_METHOD_STR);
 
         final HttpClient httpClientToUse = checkUrlAndHttpClient();
@@ -988,14 +992,16 @@ public final class HttpRequest {
     }
 
     /**
+     * 
      *
-     * @param <T>
-     * @param httpMethod
-     * @param resultClass
-     * @return
+     * @param <T> 
+     * @param httpMethod 
+     * @param resultClass 
+     * @return 
+     * @throws IllegalArgumentException 
      */
     @Beta
-    public <T> CompletableFuture<T> asyncExecute(final HttpMethod httpMethod, final Class<T> resultClass) {
+    public <T> CompletableFuture<T> asyncExecute(final HttpMethod httpMethod, final Class<T> resultClass) throws IllegalArgumentException {
         N.checkArgNotNull(httpMethod, HTTP_METHOD_STR);
 
         final HttpClient httpClientToUse = checkUrlAndHttpClient();
@@ -1011,16 +1017,18 @@ public final class HttpRequest {
     }
 
     /**
+     * 
      *
-     * @param <T>
-     * @param httpMethod
-     * @param responseBodyHandler
-     * @param pushPromiseHandler
-     * @return
+     * @param <T> 
+     * @param httpMethod 
+     * @param responseBodyHandler 
+     * @param pushPromiseHandler 
+     * @return 
+     * @throws IllegalArgumentException 
      */
     @Beta
     public <T> CompletableFuture<HttpResponse<T>> asyncExecute(final HttpMethod httpMethod, final HttpResponse.BodyHandler<T> responseBodyHandler,
-            final PushPromiseHandler<T> pushPromiseHandler) {
+            final PushPromiseHandler<T> pushPromiseHandler) throws IllegalArgumentException {
         N.checkArgNotNull(httpMethod, HTTP_METHOD_STR);
 
         final HttpClient httpClientToUse = checkUrlAndHttpClient();

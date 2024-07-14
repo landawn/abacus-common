@@ -52,11 +52,14 @@ public final class Throwables {
     }
 
     /**
+     * 
      *
-     * @param cmd
-     * @param actionOnError
+     * @param cmd 
+     * @param actionOnError 
+     * @throws IllegalArgumentException 
      */
-    public static void run(final Throwables.Runnable<? extends Throwable> cmd, final java.util.function.Consumer<? super Throwable> actionOnError) {
+    public static void run(final Throwables.Runnable<? extends Throwable> cmd, final java.util.function.Consumer<? super Throwable> actionOnError)
+            throws IllegalArgumentException {
         N.checkArgNotNull(actionOnError);
 
         try {
@@ -82,14 +85,16 @@ public final class Throwables {
     }
 
     /**
+     * 
      *
-     * @param <R>
-     * @param cmd
-     * @param actionOnError
-     * @return
+     * @param <R> 
+     * @param cmd 
+     * @param actionOnError 
+     * @return 
+     * @throws IllegalArgumentException 
      */
     public static <R> R call(final Throwables.Callable<R, ? extends Throwable> cmd,
-            final java.util.function.Function<? super Throwable, ? extends R> actionOnError) {
+            final java.util.function.Function<? super Throwable, ? extends R> actionOnError) throws IllegalArgumentException {
         N.checkArgNotNull(actionOnError);
 
         try {
@@ -100,13 +105,16 @@ public final class Throwables {
     }
 
     /**
+     * 
      *
-     * @param <R>
-     * @param cmd
-     * @param supplier
-     * @return
+     * @param <R> 
+     * @param cmd 
+     * @param supplier 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static <R> R call(final Throwables.Callable<R, ? extends Throwable> cmd, final java.util.function.Supplier<R> supplier) {
+    public static <R> R call(final Throwables.Callable<R, ? extends Throwable> cmd, final java.util.function.Supplier<R> supplier)
+            throws IllegalArgumentException {
         N.checkArgNotNull(supplier);
 
         try {
@@ -132,16 +140,18 @@ public final class Throwables {
     }
 
     /**
+     * 
      *
-     * @param <R>
-     * @param cmd
-     * @param predicate
-     * @param supplier
-     * @return
+     * @param <R> 
+     * @param cmd 
+     * @param predicate 
+     * @param supplier 
+     * @return 
+     * @throws IllegalArgumentException 
      * @throws RuntimeException if some error happens and <code>predicate</code> return false.
      */
     public static <R> R call(final Throwables.Callable<R, ? extends Throwable> cmd, final java.util.function.Predicate<? super Throwable> predicate,
-            final java.util.function.Supplier<R> supplier) {
+            final java.util.function.Supplier<R> supplier) throws IllegalArgumentException {
         N.checkArgNotNull(predicate);
         N.checkArgNotNull(supplier);
 
@@ -157,16 +167,18 @@ public final class Throwables {
     }
 
     /**
+     * 
      *
-     * @param <R>
-     * @param cmd
-     * @param predicate
-     * @param defaultValue
-     * @return
+     * @param <R> 
+     * @param cmd 
+     * @param predicate 
+     * @param defaultValue 
+     * @return 
+     * @throws IllegalArgumentException 
      * @throws RuntimeException if some error happens and <code>predicate</code> return false.
      */
     public static <R> R call(final Throwables.Callable<R, ? extends Throwable> cmd, final java.util.function.Predicate<? super Throwable> predicate,
-            final R defaultValue) {
+            final R defaultValue) throws IllegalArgumentException {
         N.checkArgNotNull(predicate);
 
         try {
@@ -250,16 +262,18 @@ public final class Throwables {
         }
 
         /**
+         * 
          *
-         *
-         * @param <T>
-         * @param <E>
-         * @param a
-         * @param fromIndex
-         * @param toIndex
-         * @return
+         * @param <T> 
+         * @param <E> 
+         * @param a 
+         * @param fromIndex 
+         * @param toIndex 
+         * @return 
+         * @throws IndexOutOfBoundsException 
          */
-        public static <T, E extends Exception> Throwables.Iterator<T, E> of(final T[] a, final int fromIndex, final int toIndex) {
+        public static <T, E extends Exception> Throwables.Iterator<T, E> of(final T[] a, final int fromIndex, final int toIndex)
+                throws IndexOutOfBoundsException {
             N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
             if (fromIndex == toIndex) {
@@ -356,12 +370,14 @@ public final class Throwables {
         /**
          * Lazy evaluation.
          *
-         * @param <T>
-         * @param <E>
-         * @param iteratorSupplier
-         * @return
+         * @param <T> 
+         * @param <E> 
+         * @param iteratorSupplier 
+         * @return 
+         * @throws IllegalArgumentException 
          */
-        public static <T, E extends Exception> Throwables.Iterator<T, E> defer(final java.util.function.Supplier<Throwables.Iterator<T, E>> iteratorSupplier) {
+        public static <T, E extends Exception> Throwables.Iterator<T, E> defer(final java.util.function.Supplier<Throwables.Iterator<T, E>> iteratorSupplier)
+                throws IllegalArgumentException {
             N.checkArgNotNull(iteratorSupplier, "iteratorSupplier");
 
             return new Throwables.Iterator<>() {
@@ -387,7 +403,7 @@ public final class Throwables {
                 }
 
                 @Override
-                public void advance(long n) throws E {
+                public void advance(long n) throws IllegalArgumentException, E {
                     N.checkArgNotNegative(n, "n");
 
                     if (!isInitialized) {
@@ -540,11 +556,13 @@ public final class Throwables {
         public abstract T next() throws E;
 
         /**
+         * 
          *
-         * @param n
+         * @param n 
+         * @throws IllegalArgumentException 
          * @throws E the e
          */
-        public void advance(long n) throws E {
+        public void advance(long n) throws IllegalArgumentException, E {
             N.checkArgNotNegative(n, "n");
 
             while (n-- > 0 && hasNext()) {
@@ -731,12 +749,13 @@ public final class Throwables {
         }
 
         /**
+         * 
          *
-         *
-         * @return
-         * @throws E
+         * @return 
+         * @throws IllegalArgumentException 
+         * @throws E 
          */
-        public List<T> toList() throws E {
+        public List<T> toList() throws IllegalArgumentException, E {
             final List<T> list = new ArrayList<>();
 
             while (hasNext()) {
@@ -777,14 +796,15 @@ public final class Throwables {
         }
 
         /**
+         * 
          *
-         *
-         * @param <E2>
-         * @param action
+         * @param <E2> 
+         * @param action 
+         * @throws IllegalArgumentException 
          * @throws E the e
-         * @throws E2
+         * @throws E2 
          */
-        public <E2 extends Throwable> void foreachIndexed(Throwables.IntObjConsumer<? super T, E2> action) throws E, E2 {
+        public <E2 extends Throwable> void foreachIndexed(Throwables.IntObjConsumer<? super T, E2> action) throws IllegalArgumentException, E, E2 {
             N.checkArgNotNull(action);
 
             int idx = 0;
@@ -4715,7 +4735,7 @@ public final class Throwables {
          * @param supplier
          * @return
          */
-        public static <T, E extends Throwable> LazyInitializer<T, E> of(final Throwables.Supplier<T, E> supplier) {
+        public static <T, E extends Throwable> LazyInitializer<T, E> of(final Throwables.Supplier<T, E> supplier) throws IllegalArgumentException {
             N.checkArgNotNull(supplier);
 
             if (supplier instanceof LazyInitializer) {

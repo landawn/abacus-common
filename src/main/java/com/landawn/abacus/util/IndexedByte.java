@@ -29,24 +29,28 @@ public final class IndexedByte extends AbstractIndexed {
     }
 
     /**
+     * 
      *
-     * @param value
-     * @param index
-     * @return
+     * @param value 
+     * @param index 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static IndexedByte of(byte value, int index) {
+    public static IndexedByte of(byte value, int index) throws IllegalArgumentException {
         N.checkArgNotNegative(index, "index");
 
         return new IndexedByte(index, value);
     }
 
     /**
+     * 
      *
-     * @param value
-     * @param index
-     * @return
+     * @param value 
+     * @param index 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static IndexedByte of(byte value, long index) {
+    public static IndexedByte of(byte value, long index) throws IllegalArgumentException {
         N.checkArgNotNegative(index, "index");
 
         return new IndexedByte(index, value);

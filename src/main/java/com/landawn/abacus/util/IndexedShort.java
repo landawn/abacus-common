@@ -29,24 +29,28 @@ public final class IndexedShort extends AbstractIndexed {
     }
 
     /**
+     * 
      *
-     * @param value
-     * @param index
-     * @return
+     * @param value 
+     * @param index 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static IndexedShort of(short value, int index) {
+    public static IndexedShort of(short value, int index) throws IllegalArgumentException {
         N.checkArgNotNegative(index, "index");
 
         return new IndexedShort(index, value);
     }
 
     /**
+     * 
      *
-     * @param value
-     * @param index
-     * @return
+     * @param value 
+     * @param index 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static IndexedShort of(short value, long index) {
+    public static IndexedShort of(short value, long index) throws IllegalArgumentException {
         N.checkArgNotNegative(index, "index");
 
         return new IndexedShort(index, value);

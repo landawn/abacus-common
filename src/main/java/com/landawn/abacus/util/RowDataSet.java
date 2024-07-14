@@ -166,8 +166,10 @@ public class RowDataSet implements DataSet, Cloneable {
      * @param columnNameList
      * @param columnList
      * @param properties
+     * @throws IllegalArgumentException
      */
-    public RowDataSet(final List<String> columnNameList, final List<List<Object>> columnList, final Properties<String, Object> properties) {
+    public RowDataSet(final List<String> columnNameList, final List<List<Object>> columnList, final Properties<String, Object> properties)
+            throws IllegalArgumentException {
         N.checkArgNotNull(columnNameList);
         N.checkArgNotNull(columnList);
 
@@ -2532,11 +2534,12 @@ public class RowDataSet implements DataSet, Cloneable {
      * @param toRowIndex
      * @param columnNames
      * @param action
+     * @throws IllegalArgumentException
      * @throws E the e
      */
     @Override
     public <E extends Exception> void forEach(final int fromRowIndex, final int toRowIndex, final Collection<String> columnNames,
-            final Throwables.Consumer<? super DisposableObjArray, E> action) throws E {
+            final Throwables.Consumer<? super DisposableObjArray, E> action) throws IllegalArgumentException, E {
         final int[] columnIndexes = checkColumnName(columnNames);
         checkRowIndex(fromRowIndex < toRowIndex ? fromRowIndex : (toRowIndex == -1 ? 0 : toRowIndex), fromRowIndex < toRowIndex ? toRowIndex : fromRowIndex);
         N.checkArgNotNull(action);
@@ -2570,13 +2573,15 @@ public class RowDataSet implements DataSet, Cloneable {
 
     /**
      *
+     *
      * @param <E>
      * @param columnNames
      * @param action
+     * @throws IllegalArgumentException
      * @throws E the e
      */
     @Override
-    public <E extends Exception> void forEach(Tuple2<String, String> columnNames, Throwables.BiConsumer<?, ?, E> action) throws E {
+    public <E extends Exception> void forEach(Tuple2<String, String> columnNames, Throwables.BiConsumer<?, ?, E> action) throws IllegalArgumentException, E {
         forEach(0, size(), columnNames, action);
     }
 
@@ -2637,11 +2642,12 @@ public class RowDataSet implements DataSet, Cloneable {
      * @param toRowIndex
      * @param columnNames
      * @param action
+     * @throws IllegalArgumentException
      * @throws E the e
      */
     @Override
     public <E extends Exception> void forEach(int fromRowIndex, int toRowIndex, Tuple3<String, String, String> columnNames,
-            Throwables.TriConsumer<?, ?, ?, E> action) throws E {
+            Throwables.TriConsumer<?, ?, ?, E> action) throws IllegalArgumentException, E {
         final List<Object> column1 = _columnList.get(checkColumnName(columnNames._1));
         final List<Object> column2 = _columnList.get(checkColumnName(columnNames._2));
         final List<Object> column3 = _columnList.get(checkColumnName(columnNames._3));
@@ -3076,10 +3082,11 @@ public class RowDataSet implements DataSet, Cloneable {
      * @param prefixAndFieldNameMap
      * @param rowType
      * @return
+     * @throws IllegalArgumentException
      */
     @Override
     public <T> List<T> toEntities(int fromRowIndex, int toRowIndex, Collection<String> columnNames, Map<String, String> prefixAndFieldNameMap,
-            Class<? extends T> rowType) {
+            Class<? extends T> rowType) throws IllegalArgumentException {
         N.checkArgument(ClassUtil.isBeanClass(rowType), "{} is not a bean class", rowType);
 
         return toList(fromRowIndex, toRowIndex, columnNames, prefixAndFieldNameMap, rowType, null);
@@ -3160,10 +3167,11 @@ public class RowDataSet implements DataSet, Cloneable {
      * @param prefixAndFieldNameMap
      * @param rowType
      * @return
+     * @throws IllegalArgumentException
      */
     @Override
     public <T> List<T> toMergedEntities(final Collection<String> idPropNames, Collection<String> selectPropNames,
-            final Map<String, String> prefixAndFieldNameMap, final Class<? extends T> rowType) {
+            final Map<String, String> prefixAndFieldNameMap, final Class<? extends T> rowType) throws IllegalArgumentException {
         N.checkArgument(ClassUtil.isBeanClass(rowType), "{} is not a bean class", rowType);
 
         final BeanInfo beanInfo = ParserUtil.getBeanInfo(rowType);
@@ -3178,7 +3186,7 @@ public class RowDataSet implements DataSet, Cloneable {
             }
         }
 
-        N.checkArgNotNull(idPropNamesToUse, "idPropNames");
+        N.checkArgNotNull(idPropNamesToUse, "idPropNamesToUse");
 
         if (!this._columnNameList.containsAll(idPropNamesToUse)) {
             final List<String> tmp = new ArrayList<>(idPropNamesToUse.size());
@@ -5524,6 +5532,7 @@ public class RowDataSet implements DataSet, Cloneable {
 
     /**
      *
+     *
      * @param <T>
      * @param <E>
      * @param <E2>
@@ -5534,13 +5543,15 @@ public class RowDataSet implements DataSet, Cloneable {
      * @param rowMapper
      * @param collector
      * @return
+     * @throws IllegalArgumentException
      * @throws E the e
      * @throws E2 the e2
      */
     @Override
     public <T, E extends Exception, E2 extends Exception> DataSet groupBy(final String keyColumnName, Throwables.Function<?, ?, E> keyMapper,
             String aggregateResultColumnName, Collection<String> aggregateOnColumnNames,
-            final Throwables.Function<? super DisposableObjArray, ? extends T, E2> rowMapper, final Collector<? super T, ?, ?> collector) throws E, E2 {
+            final Throwables.Function<? super DisposableObjArray, ? extends T, E2> rowMapper, final Collector<? super T, ?, ?> collector)
+            throws IllegalArgumentException, E, E2 {
         final int columnIndex = checkColumnName(keyColumnName);
         final int[] aggOnColumnIndexes = checkColumnName(aggregateOnColumnNames);
 
@@ -5660,10 +5671,12 @@ public class RowDataSet implements DataSet, Cloneable {
      * @param aggregateOnColumnNames
      * @param rowType
      * @return
+     * @throws IllegalArgumentException
      */
     @Override
-    public DataSet groupBy(Collection<String> keyColumnNames, String aggregateResultColumnName, Collection<String> aggregateOnColumnNames, Class<?> rowType) {
-        N.checkArgNotEmpty(keyColumnNames, "columnNames");
+    public DataSet groupBy(Collection<String> keyColumnNames, String aggregateResultColumnName, Collection<String> aggregateOnColumnNames, Class<?> rowType)
+            throws IllegalArgumentException {
+        N.checkArgNotEmpty(keyColumnNames, "keyColumnNames");
         N.checkArgNotEmpty(aggregateOnColumnNames, "aggregateOnColumnNames");
 
         if (keyColumnNames.size() == 1) {
@@ -5778,7 +5791,7 @@ public class RowDataSet implements DataSet, Cloneable {
     @Override
     public <E extends Exception> DataSet groupBy(final Collection<String> keyColumnNames, final Throwables.Function<? super DisposableObjArray, ?, E> keyMapper)
             throws E {
-        N.checkArgNotEmpty(keyColumnNames, "columnNames");
+        N.checkArgNotEmpty(keyColumnNames, "keyColumnNames");
 
         final boolean isNullOrIdentityKeyMapper = keyMapper == null || keyMapper == Fn.identity();
 
@@ -5844,6 +5857,7 @@ public class RowDataSet implements DataSet, Cloneable {
 
     /**
      *
+     *
      * @param <E>
      * @param keyColumnNames
      * @param keyMapper
@@ -5851,12 +5865,13 @@ public class RowDataSet implements DataSet, Cloneable {
      * @param aggregateOnColumnName
      * @param collector
      * @return
+     * @throws IllegalArgumentException
      * @throws E the e
      */
     @Override
     public <E extends Exception> DataSet groupBy(Collection<String> keyColumnNames, final Throwables.Function<? super DisposableObjArray, ?, E> keyMapper,
-            String aggregateResultColumnName, String aggregateOnColumnName, final Collector<?, ?, ?> collector) throws E {
-        N.checkArgNotEmpty(keyColumnNames, "columnNames");
+            String aggregateResultColumnName, String aggregateOnColumnName, final Collector<?, ?, ?> collector) throws IllegalArgumentException, E {
+        N.checkArgNotEmpty(keyColumnNames, "keyColumnNames");
 
         if (N.notEmpty(keyColumnNames) && keyColumnNames.contains(aggregateResultColumnName)) {
             throw new IllegalArgumentException("Duplicated Property name: " + aggregateResultColumnName);
@@ -5981,12 +5996,13 @@ public class RowDataSet implements DataSet, Cloneable {
      * @param aggregateOnColumnNames
      * @param rowType
      * @return
+     * @throws IllegalArgumentException
      * @throws E
      */
     @Override
     public <E extends Exception> DataSet groupBy(Collection<String> keyColumnNames, Throwables.Function<? super DisposableObjArray, ?, E> keyMapper,
-            String aggregateResultColumnName, Collection<String> aggregateOnColumnNames, Class<?> rowType) throws E {
-        N.checkArgNotEmpty(keyColumnNames, "columnNames");
+            String aggregateResultColumnName, Collection<String> aggregateOnColumnNames, Class<?> rowType) throws IllegalArgumentException, E {
+        N.checkArgNotEmpty(keyColumnNames, "keyColumnNames");
         N.checkArgNotEmpty(aggregateOnColumnNames, "aggregateOnColumnNames");
 
         final boolean isNullOrIdentityKeyMapper = keyMapper == null || keyMapper == Fn.identity();
@@ -6076,6 +6092,7 @@ public class RowDataSet implements DataSet, Cloneable {
 
     /**
      *
+     *
      * @param <T>
      * @param <E>
      * @param <E2>
@@ -6086,14 +6103,16 @@ public class RowDataSet implements DataSet, Cloneable {
      * @param rowMapper
      * @param collector
      * @return
+     * @throws IllegalArgumentException
      * @throws E the e
      * @throws E2 the e2
      */
     @Override
     public <T, E extends Exception, E2 extends Exception> DataSet groupBy(Collection<String> keyColumnNames,
             Throwables.Function<? super DisposableObjArray, ?, E> keyMapper, String aggregateResultColumnName, Collection<String> aggregateOnColumnNames,
-            final Throwables.Function<? super DisposableObjArray, ? extends T, E2> rowMapper, final Collector<? super T, ?, ?> collector) throws E, E2 {
-        N.checkArgNotEmpty(keyColumnNames, "columnNames");
+            final Throwables.Function<? super DisposableObjArray, ? extends T, E2> rowMapper, final Collector<? super T, ?, ?> collector)
+            throws IllegalArgumentException, E, E2 {
+        N.checkArgNotEmpty(keyColumnNames, "keyColumnNames");
 
         if (N.notEmpty(keyColumnNames) && keyColumnNames.contains(aggregateResultColumnName)) {
             throw new IllegalArgumentException("Duplicated Property name: " + aggregateResultColumnName);
@@ -7461,11 +7480,12 @@ public class RowDataSet implements DataSet, Cloneable {
      * @param filter
      * @param max
      * @return
+     * @throws IllegalArgumentException
      * @throws E the e
      */
     @Override
     public <E extends Exception> DataSet filter(int fromRowIndex, int toRowIndex, Tuple2<String, String> columnNames, Throwables.BiPredicate<?, ?, E> filter,
-            int max) throws E {
+            int max) throws IllegalArgumentException, E {
         final List<Object> column1 = _columnList.get(checkColumnName(columnNames._1));
         final List<Object> column2 = _columnList.get(checkColumnName(columnNames._2));
         checkRowIndex(fromRowIndex, toRowIndex);
@@ -7559,11 +7579,12 @@ public class RowDataSet implements DataSet, Cloneable {
      * @param filter
      * @param max
      * @return
+     * @throws IllegalArgumentException
      * @throws E the e
      */
     @Override
     public <E extends Exception> DataSet filter(final int fromRowIndex, final int toRowIndex, final Tuple3<String, String, String> columnNames,
-            final Throwables.TriPredicate<?, ?, ?, E> filter, final int max) throws E {
+            final Throwables.TriPredicate<?, ?, ?, E> filter, final int max) throws IllegalArgumentException, E {
         final List<Object> column1 = _columnList.get(checkColumnName(columnNames._1));
         final List<Object> column2 = _columnList.get(checkColumnName(columnNames._2));
         final List<Object> column3 = _columnList.get(checkColumnName(columnNames._3));
@@ -7620,15 +7641,17 @@ public class RowDataSet implements DataSet, Cloneable {
 
     /**
      *
+     *
      * @param <E>
      * @param columnName
      * @param filter
      * @param max
      * @return
+     * @throws IllegalArgumentException
      * @throws E the e
      */
     @Override
-    public <E extends Exception> DataSet filter(final String columnName, Throwables.Predicate<?, E> filter, int max) throws E {
+    public <E extends Exception> DataSet filter(final String columnName, Throwables.Predicate<?, E> filter, int max) throws IllegalArgumentException, E {
         return filter(0, size(), columnName, filter, max);
     }
 
@@ -7756,11 +7779,12 @@ public class RowDataSet implements DataSet, Cloneable {
      * @param filter
      * @param max
      * @return
+     * @throws IllegalArgumentException
      * @throws E the e
      */
     @Override
     public <E extends Exception> DataSet filter(int fromRowIndex, int toRowIndex, Collection<String> columnNames,
-            Throwables.Predicate<? super DisposableObjArray, E> filter, int max) throws E {
+            Throwables.Predicate<? super DisposableObjArray, E> filter, int max) throws IllegalArgumentException, E {
         final int[] filterColumnIndexes = checkColumnName(columnNames);
         checkRowIndex(fromRowIndex, toRowIndex);
         N.checkArgNotNull(filter, "filter");
@@ -7822,17 +7846,19 @@ public class RowDataSet implements DataSet, Cloneable {
 
     /**
      *
+     *
      * @param <E>
      * @param fromColumnName
      * @param newColumnName
      * @param copyingColumnNames
      * @param mapper
      * @return
+     * @throws IllegalArgumentException
      * @throws E the e
      */
     @Override
     public <E extends Exception> DataSet map(final String fromColumnName, final String newColumnName, final Collection<String> copyingColumnNames,
-            final Throwables.Function<?, ?, E> mapper) throws E {
+            final Throwables.Function<?, ?, E> mapper) throws IllegalArgumentException, E {
         N.checkArgNotNull(mapper, "mapper");
         final int fromColumnIndex = checkColumnName(fromColumnName);
         final int[] copyingColumnIndices = N.isEmpty(copyingColumnNames) ? N.EMPTY_INT_ARRAY : checkColumnName(copyingColumnNames);
@@ -7866,17 +7892,19 @@ public class RowDataSet implements DataSet, Cloneable {
 
     /**
      *
+     *
      * @param <E>
      * @param fromColumnNames
      * @param newColumnName
      * @param copyingColumnNames
      * @param mapper
      * @return
+     * @throws IllegalArgumentException
      * @throws E the e
      */
     @Override
     public <E extends Exception> DataSet map(final Tuple2<String, String> fromColumnNames, final String newColumnName,
-            final Collection<String> copyingColumnNames, final Throwables.BiFunction<?, ?, ?, E> mapper) throws E {
+            final Collection<String> copyingColumnNames, final Throwables.BiFunction<?, ?, ?, E> mapper) throws IllegalArgumentException, E {
         N.checkArgNotNull(mapper, "mapper");
         final List<Object> fromColumn1 = _columnList.get(checkColumnName(fromColumnNames._1));
         final List<Object> fromColumn2 = _columnList.get(checkColumnName(fromColumnNames._2));
@@ -7911,17 +7939,19 @@ public class RowDataSet implements DataSet, Cloneable {
 
     /**
      *
+     *
      * @param <E>
      * @param fromColumnNames
      * @param newColumnName
      * @param copyingColumnNames
      * @param mapper
      * @return
+     * @throws IllegalArgumentException
      * @throws E the e
      */
     @Override
     public <E extends Exception> DataSet map(final Tuple3<String, String, String> fromColumnNames, final String newColumnName,
-            final Collection<String> copyingColumnNames, final Throwables.TriFunction<?, ?, ?, ?, E> mapper) throws E {
+            final Collection<String> copyingColumnNames, final Throwables.TriFunction<?, ?, ?, ?, E> mapper) throws IllegalArgumentException, E {
         N.checkArgNotNull(mapper, "mapper");
         final List<Object> fromColumn1 = _columnList.get(checkColumnName(fromColumnNames._1));
         final List<Object> fromColumn2 = _columnList.get(checkColumnName(fromColumnNames._2));
@@ -7958,17 +7988,19 @@ public class RowDataSet implements DataSet, Cloneable {
 
     /**
      *
+     *
      * @param <E>
      * @param fromColumnNames
      * @param newColumnName
      * @param copyingColumnNames
      * @param mapper
      * @return
+     * @throws IllegalArgumentException
      * @throws E the e
      */
     @Override
     public <E extends Exception> DataSet map(final Collection<String> fromColumnNames, final String newColumnName, final Collection<String> copyingColumnNames,
-            final Throwables.Function<? super DisposableObjArray, ?, E> mapper) throws E {
+            final Throwables.Function<? super DisposableObjArray, ?, E> mapper) throws IllegalArgumentException, E {
         N.checkArgNotNull(mapper, "mapper");
         final int[] fromColumnIndices = checkColumnName(fromColumnNames);
         final int[] copyingColumnIndices = N.isEmpty(copyingColumnNames) ? N.EMPTY_INT_ARRAY : checkColumnName(copyingColumnNames);
@@ -8025,17 +8057,19 @@ public class RowDataSet implements DataSet, Cloneable {
 
     /**
      *
+     *
      * @param <E>
      * @param fromColumnName
      * @param newColumnName
      * @param copyingColumnNames
      * @param mapper
      * @return
+     * @throws IllegalArgumentException
      * @throws E the e
      */
     @Override
     public <E extends Exception> DataSet flatMap(final String fromColumnName, final String newColumnName, final Collection<String> copyingColumnNames,
-            final Throwables.Function<?, ? extends Collection<?>, E> mapper) throws E {
+            final Throwables.Function<?, ? extends Collection<?>, E> mapper) throws IllegalArgumentException, E {
         N.checkArgNotNull(mapper, "mapper");
         final int fromColumnIndex = checkColumnName(fromColumnName);
         final int[] copyingColumnIndices = N.isEmpty(copyingColumnNames) ? N.EMPTY_INT_ARRAY : checkColumnName(copyingColumnNames);
@@ -8097,17 +8131,20 @@ public class RowDataSet implements DataSet, Cloneable {
 
     /**
      *
+     *
      * @param <E>
      * @param fromColumnNames
      * @param newColumnName
      * @param copyingColumnNames
      * @param mapper
      * @return
+     * @throws IllegalArgumentException
      * @throws E the e
      */
     @Override
     public <E extends Exception> DataSet flatMap(final Tuple2<String, String> fromColumnNames, final String newColumnName,
-            final Collection<String> copyingColumnNames, final Throwables.BiFunction<?, ?, ? extends Collection<?>, E> mapper) throws E {
+            final Collection<String> copyingColumnNames, final Throwables.BiFunction<?, ?, ? extends Collection<?>, E> mapper)
+            throws IllegalArgumentException, E {
         N.checkArgNotNull(mapper, "mapper");
         final List<Object> fromColumn1 = _columnList.get(checkColumnName(fromColumnNames._1));
         final List<Object> fromColumn2 = _columnList.get(checkColumnName(fromColumnNames._2));
@@ -8170,17 +8207,20 @@ public class RowDataSet implements DataSet, Cloneable {
 
     /**
      *
+     *
      * @param <E>
      * @param fromColumnNames
      * @param newColumnName
      * @param copyingColumnNames
      * @param mapper
      * @return
+     * @throws IllegalArgumentException
      * @throws E the e
      */
     @Override
     public <E extends Exception> DataSet flatMap(final Tuple3<String, String, String> fromColumnNames, final String newColumnName,
-            final Collection<String> copyingColumnNames, final Throwables.TriFunction<?, ?, ?, ? extends Collection<?>, E> mapper) throws E {
+            final Collection<String> copyingColumnNames, final Throwables.TriFunction<?, ?, ?, ? extends Collection<?>, E> mapper)
+            throws IllegalArgumentException, E {
         N.checkArgNotNull(mapper, "mapper");
         final List<Object> fromColumn1 = _columnList.get(checkColumnName(fromColumnNames._1));
         final List<Object> fromColumn2 = _columnList.get(checkColumnName(fromColumnNames._2));
@@ -8244,17 +8284,20 @@ public class RowDataSet implements DataSet, Cloneable {
 
     /**
      *
+     *
      * @param <E>
      * @param fromColumnNames
      * @param newColumnName
      * @param copyingColumnNames
      * @param mapper
      * @return
+     * @throws IllegalArgumentException
      * @throws E the e
      */
     @Override
     public <E extends Exception> DataSet flatMap(final Collection<String> fromColumnNames, final String newColumnName,
-            final Collection<String> copyingColumnNames, final Throwables.Function<? super DisposableObjArray, ? extends Collection<?>, E> mapper) throws E {
+            final Collection<String> copyingColumnNames, final Throwables.Function<? super DisposableObjArray, ? extends Collection<?>, E> mapper)
+            throws IllegalArgumentException, E {
         N.checkArgNotNull(mapper, "mapper");
         final int[] fromColumnIndices = checkColumnName(fromColumnNames);
         final int[] copyingColumnIndices = N.isEmpty(copyingColumnNames) ? N.EMPTY_INT_ARRAY : checkColumnName(copyingColumnNames);
@@ -8407,15 +8450,22 @@ public class RowDataSet implements DataSet, Cloneable {
      */
     @Override
     public DataSet clone(boolean freeze) { //NOSONAR
-        RowDataSet dataSet = null;
-
-        if (kryoParser != null) {
-            dataSet = kryoParser.clone(this);
-        } else {
-            dataSet = jsonParser.deserialize(jsonParser.serialize(this), RowDataSet.class);
+        if (kryoParser == null) {
+            throw new RuntimeException("Kryo is required");
         }
 
+        RowDataSet dataSet = null;
+
+        //    if (kryoParser != null) {
+        //        dataSet = kryoParser.clone(this);
+        //    } else {
+        //        dataSet = jsonParser.deserialize(jsonParser.serialize(this), RowDataSet.class); // column type could be different by json Serialization/Deserialization
+        //    }
+
+        dataSet = kryoParser.clone(this);
+
         dataSet._isFrozen = freeze;
+
         return dataSet;
     }
 
@@ -9554,17 +9604,19 @@ public class RowDataSet implements DataSet, Cloneable {
 
     /**
      *
+     *
      * @param right
      * @param onColumnNames
      * @param newColumnName
      * @param newColumnType
      * @param collSupplier
      * @return
+     * @throws IllegalArgumentException
      */
     @SuppressWarnings("rawtypes")
     @Override
     public DataSet rightJoin(final DataSet right, final Map<String, String> onColumnNames, final String newColumnName, final Class<?> newColumnType,
-            final IntFunction<? extends Collection> collSupplier) {
+            final IntFunction<? extends Collection> collSupplier) throws IllegalArgumentException {
         checkJoinOnColumnNames(onColumnNames);
         checkNewColumnName(newColumnName);
         N.checkArgNotNull(collSupplier);
@@ -10097,17 +10149,19 @@ public class RowDataSet implements DataSet, Cloneable {
 
     /**
      *
+     *
      * @param right
      * @param onColumnNames
      * @param newColumnName
      * @param newColumnType
      * @param collSupplier
      * @return
+     * @throws IllegalArgumentException
      */
     @SuppressWarnings("rawtypes")
     @Override
     public DataSet fullJoin(final DataSet right, final Map<String, String> onColumnNames, final String newColumnName, final Class<?> newColumnType,
-            final IntFunction<? extends Collection> collSupplier) {
+            final IntFunction<? extends Collection> collSupplier) throws IllegalArgumentException {
         checkJoinOnColumnNames(onColumnNames);
         checkNewColumnName(newColumnName);
         N.checkArgNotNull(collSupplier);
@@ -11051,7 +11105,7 @@ public class RowDataSet implements DataSet, Cloneable {
             final List<Object> keyColumn = _columnList.get(keyColumnIndex);
 
             for (int rowIndex = 0; rowIndex < size; rowIndex++) {
-                if ((rowKeySet.getAndRemove(hashKey(keyColumn.get(rowIndex))) > 0) == retain) {
+                if ((rowKeySet.remove(hashKey(keyColumn.get(rowIndex)), 1) > 0) == retain) {
                     for (int i = 0; i < keyColumnCount; i++) {
                         newColumnList.get(i).add(_columnList.get(i).get(rowIndex));
                     }
@@ -11077,7 +11131,7 @@ public class RowDataSet implements DataSet, Cloneable {
                     row[i] = keyColumnsInOther[i].get(rowIndex);
                 }
 
-                if (rowKeySet.getAndAdd(row) == 0) {
+                if (rowKeySet.add(row, 1) == 0) {
                     row = null;
                 }
             }
@@ -11100,7 +11154,7 @@ public class RowDataSet implements DataSet, Cloneable {
                     row[i] = keyColumns[i].get(rowIndex);
                 }
 
-                if ((rowKeySet.getAndRemove(row) > 0) == retain) {
+                if ((rowKeySet.remove(row, 1) > 0) == retain) {
                     for (int i = 0; i < keyColumnCount; i++) {
                         newColumnList.get(i).add(_columnList.get(i).get(rowIndex));
                     }
@@ -11362,12 +11416,14 @@ public class RowDataSet implements DataSet, Cloneable {
 
     /**
      *
+     *
      * @param chunkSize
      * @param columnNames
      * @return
+     * @throws IllegalArgumentException
      */
     @Override
-    public Stream<DataSet> split(final int chunkSize, final Collection<String> columnNames) {
+    public Stream<DataSet> split(final int chunkSize, final Collection<String> columnNames) throws IllegalArgumentException {
         final int[] columnIndexes = checkColumnName(columnNames);
         N.checkArgPositive(chunkSize, "chunkSize");
 
@@ -11395,12 +11451,14 @@ public class RowDataSet implements DataSet, Cloneable {
 
     /**
      *
+     *
      * @param chunkSize
      * @param columnNames
      * @return
+     * @throws IllegalArgumentException
      */
     @Override
-    public List<DataSet> splitToList(final int chunkSize, final Collection<String> columnNames) {
+    public List<DataSet> splitToList(final int chunkSize, final Collection<String> columnNames) throws IllegalArgumentException {
         final int[] columnIndexes = checkColumnName(columnNames);
         N.checkArgPositive(chunkSize, "chunkSize");
 
@@ -11510,13 +11568,15 @@ public class RowDataSet implements DataSet, Cloneable {
 
     /**
      *
+     *
      * @param fromRowIndex
      * @param toRowIndex
      * @param columnNames
      * @return
+     * @throws IndexOutOfBoundsException
      */
     @Override
-    public DataSet slice(int fromRowIndex, int toRowIndex, Collection<String> columnNames) {
+    public DataSet slice(int fromRowIndex, int toRowIndex, Collection<String> columnNames) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromRowIndex, toRowIndex, size());
         DataSet ds = null;
 
@@ -11613,9 +11673,10 @@ public class RowDataSet implements DataSet, Cloneable {
      * @param toRowIndex
      * @param columnName
      * @return
+     * @throws IllegalArgumentException
      */
     @Override
-    public <T> Stream<T> stream(int fromRowIndex, int toRowIndex, final String columnName) {
+    public <T> Stream<T> stream(int fromRowIndex, int toRowIndex, final String columnName) throws IllegalArgumentException {
         this.checkRowIndex(fromRowIndex, toRowIndex);
 
         return (Stream<T>) Stream.of(_columnList.get(checkColumnName(columnName)), fromRowIndex, toRowIndex);
@@ -11926,10 +11987,11 @@ public class RowDataSet implements DataSet, Cloneable {
      * @param prefixAndFieldNameMap
      * @param rowType
      * @return
+     * @throws IllegalArgumentException
      */
     @Override
     public <T> Stream<T> stream(int fromRowIndex, int toRowIndex, Collection<String> columnNames, final Map<String, String> prefixAndFieldNameMap,
-            Class<? extends T> rowType) {
+            Class<? extends T> rowType) throws IllegalArgumentException {
         N.checkArgument(ClassUtil.isBeanClass(rowType), "{} is not a bean class", rowType);
 
         return stream(fromRowIndex, toRowIndex, columnNames, prefixAndFieldNameMap, rowType, null);
@@ -11984,7 +12046,7 @@ public class RowDataSet implements DataSet, Cloneable {
             }
 
             @Override
-            public void advance(long n) {
+            public void advance(long n) throws IllegalArgumentException {
                 N.checkArgNotNegative(n, "n");
 
                 checkConcurrentModification();
@@ -12061,10 +12123,11 @@ public class RowDataSet implements DataSet, Cloneable {
      * @param inputColumnNames
      * @param rowMapper
      * @return
+     * @throws IllegalArgumentException
      */
     @Override
     public <T> Stream<T> stream(int fromRowIndex, int toRowIndex, Collection<String> inputColumnNames,
-            IntObjFunction<? super DisposableObjArray, ? extends T> rowMapper) {
+            IntObjFunction<? super DisposableObjArray, ? extends T> rowMapper) throws IllegalArgumentException {
         checkRowIndex(fromRowIndex, toRowIndex);
 
         final Collection<String> columnNames = N.isEmpty(inputColumnNames) ? this._columnNameList : inputColumnNames;
@@ -12111,7 +12174,7 @@ public class RowDataSet implements DataSet, Cloneable {
             }
 
             @Override
-            public void advance(long n) {
+            public void advance(long n) throws IllegalArgumentException {
                 N.checkArgNotNegative(n, "n");
 
                 checkConcurrentModification();
@@ -12190,7 +12253,7 @@ public class RowDataSet implements DataSet, Cloneable {
             }
 
             @Override
-            public void advance(long n) {
+            public void advance(long n) throws IllegalArgumentException {
                 N.checkArgNotNegative(n, "n");
 
                 checkConcurrentModification();
@@ -12270,7 +12333,7 @@ public class RowDataSet implements DataSet, Cloneable {
             }
 
             @Override
-            public void advance(long n) {
+            public void advance(long n) throws IllegalArgumentException {
                 N.checkArgNotNegative(n, "n");
 
                 checkConcurrentModification();
@@ -12351,11 +12414,11 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * 
      *
-     * @param <E> 
-     * @param action 
-     * @return 
+     *
+     * @param <E>
+     * @param action
+     * @return
      * @throws E the e
      */
     @Override
@@ -12564,10 +12627,12 @@ public class RowDataSet implements DataSet, Cloneable {
      * @param toRowIndex
      * @param columnNames
      * @param outputWriter
+     * @throws IllegalArgumentException
      * @throws UncheckedIOException the unchecked IO exception
      */
     @Override
-    public void println(int fromRowIndex, int toRowIndex, Collection<String> columnNames, final Writer outputWriter) throws UncheckedIOException {
+    public void println(int fromRowIndex, int toRowIndex, Collection<String> columnNames, final Writer outputWriter)
+            throws IllegalArgumentException, UncheckedIOException {
         final int[] columnIndexes = N.isEmpty(columnNames) ? N.EMPTY_INT_ARRAY : checkColumnName(columnNames);
         checkRowIndex(fromRowIndex, toRowIndex);
         N.checkArgNotNull(outputWriter, "outputWriter");

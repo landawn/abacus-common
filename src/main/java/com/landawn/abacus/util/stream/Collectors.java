@@ -80,7 +80,6 @@ import com.landawn.abacus.util.Joiner;
 import com.landawn.abacus.util.KahanSummation;
 import com.landawn.abacus.util.ListMultimap;
 import com.landawn.abacus.util.LongList;
-import com.landawn.abacus.util.LongMultiset;
 import com.landawn.abacus.util.LongSummaryStatistics;
 import com.landawn.abacus.util.Multimap;
 import com.landawn.abacus.util.Multiset;
@@ -145,13 +144,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors {
     static final BiConsumer<Multiset<Object>, Object> Multiset_Accumulator = Multiset::add;
 
     static final BinaryOperator<Multiset<Object>> Multiset_Combiner = (a, b) -> {
-        a.addAll(b);
-        return a;
-    };
-
-    static final BiConsumer<LongMultiset<Object>, Object> LongMultiset_Accumulator = LongMultiset::add;
-
-    static final BinaryOperator<LongMultiset<Object>> LongMultiset_Combiner = (a, b) -> {
         a.addAll(b);
         return a;
     };
@@ -1115,33 +1107,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors {
      * @param <T>
      * @return
      */
-    public static <T> Collector<T, ?, LongMultiset<T>> toLongMultiset() {
-        final Supplier<LongMultiset<T>> supplier = Suppliers.ofLongMultiset();
-
-        return toLongMultiset(supplier);
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param supplier
-     * @return
-     */
-    @SuppressWarnings("rawtypes")
-    public static <T> Collector<T, ?, LongMultiset<T>> toLongMultiset(Supplier<LongMultiset<T>> supplier) {
-        final BiConsumer<LongMultiset<T>, T> accumulator = (BiConsumer) LongMultiset_Accumulator;
-        final BinaryOperator<LongMultiset<T>> combiner = (BinaryOperator) LongMultiset_Combiner;
-
-        return new CollectorImpl<>(supplier, accumulator, combiner, CH_UNORDERED_ID);
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @return
-     */
     public static <T> Collector<T, ?, Object[]> toArray() {
         return toArray(Suppliers.ofEmptyObjectArray());
     }
@@ -1512,12 +1477,13 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors {
     /**
      * Only works for sequential Stream.
      *
-     * @param <T>
-     * @param n
-     * @return
+     * @param <T> 
+     * @param n 
+     * @return 
+     * @throws IllegalArgumentException 
      * @throws UnsupportedOperationException operated by multiple threads
      */
-    public static <T> Collector<T, ?, List<T>> first(final int n) {
+    public static <T> Collector<T, ?, List<T>> first(final int n) throws IllegalArgumentException {
         N.checkArgNotNegative(n, "n");
 
         final Supplier<List<T>> supplier = () -> new ArrayList<>(N.min(256, n));
@@ -1542,12 +1508,13 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors {
     /**
      * Only works for sequential Stream.
      *
-     * @param <T>
-     * @param n
-     * @return
+     * @param <T> 
+     * @param n 
+     * @return 
+     * @throws IllegalArgumentException 
      * @throws UnsupportedOperationException operated by multiple threads
      */
-    public static <T> Collector<T, ?, List<T>> last(final int n) {
+    public static <T> Collector<T, ?, List<T>> last(final int n) throws IllegalArgumentException {
         N.checkArgNotNegative(n, "n");
 
         final Supplier<Deque<T>> supplier = () -> n <= 1024 ? new ArrayDeque<>(n) : new LinkedList<>();
@@ -1990,17 +1957,19 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors {
     }
 
     /**
+     * 
      *
-     *
-     * @param <T>
-     * @param <A>
-     * @param <R>
-     * @param <RR>
-     * @param downstream
-     * @param finisher
-     * @return
+     * @param <T> 
+     * @param <A> 
+     * @param <R> 
+     * @param <RR> 
+     * @param downstream 
+     * @param finisher 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static <T, A, R, RR> Collector<T, A, RR> collectingAndThen(final Collector<T, A, R> downstream, final Function<R, RR> finisher) {
+    public static <T, A, R, RR> Collector<T, A, RR> collectingAndThen(final Collector<T, A, R> downstream, final Function<R, RR> finisher)
+            throws IllegalArgumentException {
         N.checkArgNotNull(downstream);
         N.checkArgNotNull(finisher);
 
@@ -2024,16 +1993,17 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors {
     }
 
     /**
+     * 
      *
-     *
-     * @param <T>
-     * @param <A>
-     * @param <R>
-     * @param collector
-     * @return
+     * @param <T> 
+     * @param <A> 
+     * @param <R> 
+     * @param collector 
+     * @return 
+     * @throws IllegalArgumentException 
      */
     @Beta
-    public static <T, A, R> Collector<T, A, Optional<R>> collectingOrEmpty(final Collector<T, A, R> collector) {
+    public static <T, A, R> Collector<T, A, Optional<R>> collectingOrEmpty(final Collector<T, A, R> collector) throws IllegalArgumentException {
         N.checkArgNotNull(collector);
 
         final MutableBoolean accumulated = MutableBoolean.of(false);
@@ -2084,17 +2054,19 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors {
     }
 
     /**
+     * 
      *
-     *
-     * @param <T>
-     * @param <A>
-     * @param <R>
-     * @param collector
-     * @param defaultForEmpty
-     * @return
+     * @param <T> 
+     * @param <A> 
+     * @param <R> 
+     * @param collector 
+     * @param defaultForEmpty 
+     * @return 
+     * @throws IllegalArgumentException 
      */
     @Beta
-    public static <T, A, R> Collector<T, A, R> collectingOrElseGetIfEmpty(final Collector<T, A, R> collector, final Supplier<? extends R> defaultForEmpty) {
+    public static <T, A, R> Collector<T, A, R> collectingOrElseGetIfEmpty(final Collector<T, A, R> collector, final Supplier<? extends R> defaultForEmpty)
+            throws IllegalArgumentException {
         N.checkArgNotNull(collector);
 
         final MutableBoolean accumulated = MutableBoolean.of(false);
@@ -2291,13 +2263,14 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors {
     }
 
     /**
+     * 
      *
-     *
-     * @param <T>
-     * @param comparator
-     * @return
+     * @param <T> 
+     * @param comparator 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static <T> Collector<T, ?, Optional<T>> min(final Comparator<? super T> comparator) {
+    public static <T> Collector<T, ?, Optional<T>> min(final Comparator<? super T> comparator) throws IllegalArgumentException {
         N.checkArgNotNull(comparator);
 
         final BinaryOperator<T> op = (a, b) -> comparator.compare(a, b) <= 0 ? a : b;
@@ -2340,14 +2313,16 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors {
     }
 
     /**
+     * 
      *
-     *
-     * @param <T>
-     * @param comparator
-     * @param supplierForEmpty
-     * @return
+     * @param <T> 
+     * @param comparator 
+     * @param supplierForEmpty 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static <T> Collector<T, ?, T> minOrElseGet(final Comparator<? super T> comparator, final Supplier<? extends T> supplierForEmpty) {
+    public static <T> Collector<T, ?, T> minOrElseGet(final Comparator<? super T> comparator, final Supplier<? extends T> supplierForEmpty)
+            throws IllegalArgumentException {
         N.checkArgNotNull(comparator);
 
         final BinaryOperator<T> op = (a, b) -> comparator.compare(a, b) <= 0 ? a : b;
@@ -2377,14 +2352,16 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors {
     }
 
     /**
+     * 
      *
-     *
-     * @param <T>
-     * @param comparator
-     * @param exceptionSupplier
-     * @return
+     * @param <T> 
+     * @param comparator 
+     * @param exceptionSupplier 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static <T> Collector<T, ?, T> minOrElseThrow(final Comparator<? super T> comparator, final Supplier<? extends RuntimeException> exceptionSupplier) {
+    public static <T> Collector<T, ?, T> minOrElseThrow(final Comparator<? super T> comparator, final Supplier<? extends RuntimeException> exceptionSupplier)
+            throws IllegalArgumentException {
         N.checkArgNotNull(comparator);
 
         final BinaryOperator<T> op = (a, b) -> comparator.compare(a, b) <= 0 ? a : b;
@@ -2457,13 +2434,14 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors {
     }
 
     /**
+     * 
      *
-     *
-     * @param <T>
-     * @param comparator
-     * @return
+     * @param <T> 
+     * @param comparator 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static <T> Collector<T, ?, Optional<T>> max(final Comparator<? super T> comparator) {
+    public static <T> Collector<T, ?, Optional<T>> max(final Comparator<? super T> comparator) throws IllegalArgumentException {
         N.checkArgNotNull(comparator);
 
         final BinaryOperator<T> op = (a, b) -> comparator.compare(a, b) >= 0 ? a : b;
@@ -2506,14 +2484,16 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors {
     }
 
     /**
+     * 
      *
-     *
-     * @param <T>
-     * @param comparator
-     * @param supplierForEmpty
-     * @return
+     * @param <T> 
+     * @param comparator 
+     * @param supplierForEmpty 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static <T> Collector<T, ?, T> maxOrElseGet(final Comparator<? super T> comparator, final Supplier<? extends T> supplierForEmpty) {
+    public static <T> Collector<T, ?, T> maxOrElseGet(final Comparator<? super T> comparator, final Supplier<? extends T> supplierForEmpty)
+            throws IllegalArgumentException {
         N.checkArgNotNull(comparator);
 
         final BinaryOperator<T> op = (a, b) -> comparator.compare(a, b) >= 0 ? a : b;
@@ -2543,14 +2523,16 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors {
     }
 
     /**
+     * 
      *
-     *
-     * @param <T>
-     * @param comparator
-     * @param exceptionSupplier
-     * @return
+     * @param <T> 
+     * @param comparator 
+     * @param exceptionSupplier 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static <T> Collector<T, ?, T> maxOrElseThrow(final Comparator<? super T> comparator, final Supplier<? extends RuntimeException> exceptionSupplier) {
+    public static <T> Collector<T, ?, T> maxOrElseThrow(final Comparator<? super T> comparator, final Supplier<? extends RuntimeException> exceptionSupplier)
+            throws IllegalArgumentException {
         N.checkArgNotNull(comparator);
 
         final BinaryOperator<T> op = (a, b) -> comparator.compare(a, b) >= 0 ? a : b;
@@ -4090,20 +4072,21 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors {
     }
 
     /**
+     * 
      *
-     *
-     * @param <T>
-     * @param <K>
-     * @param <A>
-     * @param <D>
-     * @param <M>
-     * @param keyMapper
-     * @param downstream
-     * @param mapFactory
-     * @return
+     * @param <T> 
+     * @param <K> 
+     * @param <A> 
+     * @param <D> 
+     * @param <M> 
+     * @param keyMapper 
+     * @param downstream 
+     * @param mapFactory 
+     * @return 
+     * @throws IllegalArgumentException 
      */
     public static <T, K, A, D, M extends Map<K, D>> Collector<T, ?, M> groupingBy(final Function<? super T, ? extends K> keyMapper,
-            final Collector<? super T, A, D> downstream, final Supplier<? extends M> mapFactory) {
+            final Collector<? super T, A, D> downstream, final Supplier<? extends M> mapFactory) throws IllegalArgumentException {
         final Supplier<A> downstreamSupplier = downstream.supplier();
         final BiConsumer<A, ? super T> downstreamAccumulator = downstream.accumulator();
 
@@ -4182,20 +4165,21 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors {
     }
 
     /**
+     * 
      *
-     *
-     * @param <T>
-     * @param <K>
-     * @param <A>
-     * @param <D>
-     * @param <M>
-     * @param keyMapper
-     * @param downstream
-     * @param mapFactory
-     * @return
+     * @param <T> 
+     * @param <K> 
+     * @param <A> 
+     * @param <D> 
+     * @param <M> 
+     * @param keyMapper 
+     * @param downstream 
+     * @param mapFactory 
+     * @return 
+     * @throws IllegalArgumentException 
      */
     public static <T, K, A, D, M extends ConcurrentMap<K, D>> Collector<T, ?, M> groupingByConcurrent(final Function<? super T, ? extends K> keyMapper,
-            Collector<? super T, A, D> downstream, final Supplier<? extends M> mapFactory) {
+            Collector<? super T, A, D> downstream, final Supplier<? extends M> mapFactory) throws IllegalArgumentException {
         final Supplier<A> downstreamSupplier = downstream.supplier();
         final BiConsumer<A, ? super T> downstreamAccumulator = downstream.accumulator();
 
@@ -5750,25 +5734,26 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors {
         }
 
         /**
+         * 
          *
-         *
-         * @param <T>
-         * @param <R1>
-         * @param <R2>
-         * @param <R3>
-         * @param <R4>
-         * @param <R5>
-         * @param downstream1
-         * @param downstream2
-         * @param downstream3
-         * @param downstream4
-         * @param downstream5
-         * @return
+         * @param <T> 
+         * @param <R1> 
+         * @param <R2> 
+         * @param <R3> 
+         * @param <R4> 
+         * @param <R5> 
+         * @param downstream1 
+         * @param downstream2 
+         * @param downstream3 
+         * @param downstream4 
+         * @param downstream5 
+         * @return 
+         * @throws IllegalArgumentException 
          */
         @SuppressWarnings("rawtypes")
         public static <T, R1, R2, R3, R4, R5> Collector<T, ?, Tuple5<R1, R2, R3, R4, R5>> combine(final Collector<? super T, ?, R1> downstream1,
                 final Collector<? super T, ?, R2> downstream2, final Collector<? super T, ?, R3> downstream3, final Collector<? super T, ?, R4> downstream4,
-                final Collector<? super T, ?, R5> downstream5) {
+                final Collector<? super T, ?, R5> downstream5) throws IllegalArgumentException {
             N.checkArgNotNull(downstream1, "downstream1"); //NOSONAR
             N.checkArgNotNull(downstream2, "downstream2"); //NOSONAR
             N.checkArgNotNull(downstream3, "downstream3"); //NOSONAR
@@ -5783,27 +5768,28 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors {
         }
 
         /**
+         * 
          *
-         *
-         * @param <T>
-         * @param <R1>
-         * @param <R2>
-         * @param <R3>
-         * @param <R4>
-         * @param <R5>
-         * @param <R6>
-         * @param downstream1
-         * @param downstream2
-         * @param downstream3
-         * @param downstream4
-         * @param downstream5
-         * @param downstream6
-         * @return
+         * @param <T> 
+         * @param <R1> 
+         * @param <R2> 
+         * @param <R3> 
+         * @param <R4> 
+         * @param <R5> 
+         * @param <R6> 
+         * @param downstream1 
+         * @param downstream2 
+         * @param downstream3 
+         * @param downstream4 
+         * @param downstream5 
+         * @param downstream6 
+         * @return 
+         * @throws IllegalArgumentException 
          */
         @SuppressWarnings("rawtypes")
         public static <T, R1, R2, R3, R4, R5, R6> Collector<T, ?, Tuple6<R1, R2, R3, R4, R5, R6>> combine(final Collector<? super T, ?, R1> downstream1,
                 final Collector<? super T, ?, R2> downstream2, final Collector<? super T, ?, R3> downstream3, final Collector<? super T, ?, R4> downstream4,
-                final Collector<? super T, ?, R5> downstream5, final Collector<? super T, ?, R6> downstream6) {
+                final Collector<? super T, ?, R5> downstream5, final Collector<? super T, ?, R6> downstream6) throws IllegalArgumentException {
             N.checkArgNotNull(downstream1, "downstream1");
             N.checkArgNotNull(downstream2, "downstream2");
             N.checkArgNotNull(downstream3, "downstream3");
@@ -5821,29 +5807,31 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors {
         }
 
         /**
+         * 
          *
-         *
-         * @param <T>
-         * @param <R1>
-         * @param <R2>
-         * @param <R3>
-         * @param <R4>
-         * @param <R5>
-         * @param <R6>
-         * @param <R7>
-         * @param downstream1
-         * @param downstream2
-         * @param downstream3
-         * @param downstream4
-         * @param downstream5
-         * @param downstream6
-         * @param downstream7
-         * @return
+         * @param <T> 
+         * @param <R1> 
+         * @param <R2> 
+         * @param <R3> 
+         * @param <R4> 
+         * @param <R5> 
+         * @param <R6> 
+         * @param <R7> 
+         * @param downstream1 
+         * @param downstream2 
+         * @param downstream3 
+         * @param downstream4 
+         * @param downstream5 
+         * @param downstream6 
+         * @param downstream7 
+         * @return 
+         * @throws IllegalArgumentException 
          */
         @SuppressWarnings("rawtypes")
         public static <T, R1, R2, R3, R4, R5, R6, R7> Collector<T, ?, Tuple7<R1, R2, R3, R4, R5, R6, R7>> combine(final Collector<? super T, ?, R1> downstream1,
                 final Collector<? super T, ?, R2> downstream2, final Collector<? super T, ?, R3> downstream3, final Collector<? super T, ?, R4> downstream4,
-                final Collector<? super T, ?, R5> downstream5, final Collector<? super T, ?, R6> downstream6, final Collector<? super T, ?, R7> downstream7) {
+                final Collector<? super T, ?, R5> downstream5, final Collector<? super T, ?, R6> downstream6, final Collector<? super T, ?, R7> downstream7)
+                throws IllegalArgumentException {
             N.checkArgNotNull(downstream1, "downstream1");
             N.checkArgNotNull(downstream2, "downstream2");
             N.checkArgNotNull(downstream3, "downstream3");
@@ -5862,19 +5850,21 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors {
         }
 
         /**
+         * 
          *
-         * @param <T>
-         * @param <R1>
-         * @param <R2>
-         * @param <R>
-         * @param downstream1
-         * @param downstream2
-         * @param merger
-         * @return
+         * @param <T> 
+         * @param <R1> 
+         * @param <R2> 
+         * @param <R> 
+         * @param downstream1 
+         * @param downstream2 
+         * @param merger 
+         * @return 
+         * @throws IllegalArgumentException 
          */
         @SuppressWarnings("rawtypes")
         public static <T, R1, R2, R> Collector<T, ?, R> combine(final Collector<? super T, ?, R1> downstream1, final Collector<? super T, ?, R2> downstream2,
-                final BiFunction<? super R1, ? super R2, R> merger) {
+                final BiFunction<? super R1, ? super R2, R> merger) throws IllegalArgumentException {
             N.checkArgNotNull(downstream1, "downstream1");
             N.checkArgNotNull(downstream2, "downstream2");
             N.checkArgNotNull(merger, "merger"); //NOSONAR
@@ -5907,22 +5897,24 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors {
         }
 
         /**
+         * 
          *
-         * @param <T>
-         * @param <R1>
-         * @param <R2>
-         * @param <R3>
-         * @param <R>
-         * @param downstream1
-         * @param downstream2
-         * @param downstream3
-         * @param merger
-         * @return
+         * @param <T> 
+         * @param <R1> 
+         * @param <R2> 
+         * @param <R3> 
+         * @param <R> 
+         * @param downstream1 
+         * @param downstream2 
+         * @param downstream3 
+         * @param merger 
+         * @return 
+         * @throws IllegalArgumentException 
          */
         @SuppressWarnings("rawtypes")
         public static <T, R1, R2, R3, R> Collector<T, ?, R> combine(final Collector<? super T, ?, R1> downstream1,
                 final Collector<? super T, ?, R2> downstream2, final Collector<? super T, ?, R3> downstream3,
-                final TriFunction<? super R1, ? super R2, ? super R3, R> merger) {
+                final TriFunction<? super R1, ? super R2, ? super R3, R> merger) throws IllegalArgumentException {
             N.checkArgNotNull(downstream1, "downstream1");
             N.checkArgNotNull(downstream2, "downstream2");
             N.checkArgNotNull(downstream3, "downstream3");
@@ -5963,25 +5955,26 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors {
         }
 
         /**
+         * 
          *
-         *
-         * @param <T>
-         * @param <R1>
-         * @param <R2>
-         * @param <R3>
-         * @param <R4>
-         * @param <R>
-         * @param downstream1
-         * @param downstream2
-         * @param downstream3
-         * @param downstream4
-         * @param merger
-         * @return
+         * @param <T> 
+         * @param <R1> 
+         * @param <R2> 
+         * @param <R3> 
+         * @param <R4> 
+         * @param <R> 
+         * @param downstream1 
+         * @param downstream2 
+         * @param downstream3 
+         * @param downstream4 
+         * @param merger 
+         * @return 
+         * @throws IllegalArgumentException 
          */
         @SuppressWarnings("rawtypes")
         public static <T, R1, R2, R3, R4, R> Collector<T, ?, R> combine(final Collector<? super T, ?, R1> downstream1,
                 final Collector<? super T, ?, R2> downstream2, final Collector<? super T, ?, R3> downstream3, final Collector<? super T, ?, R4> downstream4,
-                final QuadFunction<? super R1, ? super R2, ? super R3, ? super R4, R> merger) {
+                final QuadFunction<? super R1, ? super R2, ? super R3, ? super R4, R> merger) throws IllegalArgumentException {
             N.checkArgNotNull(downstream1, "downstream1");
             N.checkArgNotNull(downstream2, "downstream2");
             N.checkArgNotNull(downstream3, "downstream3");

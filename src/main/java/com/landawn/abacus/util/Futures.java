@@ -42,7 +42,7 @@ import com.landawn.abacus.util.Tuple.Tuple7;
  */
 public final class Futures {
 
-    private Futures() {
+    private Futures() throws IllegalArgumentException {
         // singleton.
     }
 
@@ -171,18 +171,20 @@ public final class Futures {
     }
 
     /**
+     * 
      *
-     * @param <T>
-     * @param <FC>
-     * @param <R>
-     * @param cfs
-     * @param zipFunctionForGet
-     * @param zipFunctionTimeoutGet
-     * @return
+     * @param <T> 
+     * @param <FC> 
+     * @param <R> 
+     * @param cfs 
+     * @param zipFunctionForGet 
+     * @param zipFunctionTimeoutGet 
+     * @return 
+     * @throws IllegalArgumentException 
      */
     public static <T, FC extends Collection<? extends Future<? extends T>>, R> ContinuableFuture<R> compose(final FC cfs,
             final Throwables.Function<? super FC, R, Exception> zipFunctionForGet,
-            final Throwables.Function<? super Tuple3<FC, Long, TimeUnit>, R, Exception> zipFunctionTimeoutGet) {
+            final Throwables.Function<? super Tuple3<FC, Long, TimeUnit>, R, Exception> zipFunctionTimeoutGet) throws IllegalArgumentException {
         N.checkArgument(N.notEmpty(cfs), "'cfs' can't be null or empty"); //NOSONAR
         N.checkArgNotNull(zipFunctionForGet);
         N.checkArgNotNull(zipFunctionTimeoutGet);

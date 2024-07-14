@@ -47,7 +47,7 @@ public class MutableShortType extends MutableType<MutableShort> {
      */
     @Override
     public String stringOf(MutableShort x) {
-        return x == null ? null : N.stringOf(x.shortValue());
+        return x == null ? null : N.stringOf(x.value());
     }
 
     /**
@@ -93,7 +93,7 @@ public class MutableShortType extends MutableType<MutableShort> {
      */
     @Override
     public void set(PreparedStatement stmt, int columnIndex, MutableShort x) throws SQLException {
-        stmt.setShort(columnIndex, (x == null) ? 0 : x.shortValue());
+        stmt.setShort(columnIndex, (x == null) ? 0 : x.value());
     }
 
     /**
@@ -105,7 +105,7 @@ public class MutableShortType extends MutableType<MutableShort> {
      */
     @Override
     public void set(CallableStatement stmt, String parameterName, MutableShort x) throws SQLException {
-        stmt.setShort(parameterName, (x == null) ? 0 : x.shortValue());
+        stmt.setShort(parameterName, (x == null) ? 0 : x.value());
     }
 
     /**
@@ -119,7 +119,7 @@ public class MutableShortType extends MutableType<MutableShort> {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
-            appendable.append(String.valueOf(x.shortValue()));
+            appendable.append(String.valueOf(x.value()));
         }
     }
 
@@ -135,7 +135,7 @@ public class MutableShortType extends MutableType<MutableShort> {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
-            writer.write(x.shortValue());
+            writer.write(x.value());
         }
     }
 }

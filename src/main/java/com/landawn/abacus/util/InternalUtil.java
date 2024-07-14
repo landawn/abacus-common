@@ -16,7 +16,6 @@
 
 package com.landawn.abacus.util;
 
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -116,38 +115,38 @@ public final class InternalUtil {
         return N.asList(a);
     }
 
-    static volatile boolean isStringCharsGettable = JavaVersion.of(System.getProperty("java.version")).atMost(JavaVersion.JAVA_1_8);
-    static volatile boolean isStringCharsCreatable = JavaVersion.of(System.getProperty("java.version")).atMost(JavaVersion.JAVA_1_8);
-
-    static final Field strValueField;
-    static final Constructor<String> sharedStringConstructor;
-
-    static {
-        Field tmp = null;
-
-        try {
-            tmp = String.class.getDeclaredField("value");
-        } catch (Throwable e) {
-            // ignore.
-        }
-
-        strValueField = ((tmp != null) && tmp.getName().equals("value") && tmp.getType().equals(char[].class)) ? tmp : null;
-
-        if (strValueField != null) {
-            ClassUtil.setAccessibleQuietly(strValueField, true);
-        }
-
-        Constructor<String> tmpConstructor = null;
-
-        try {
-            tmpConstructor = String.class.getDeclaredConstructor(char[].class, boolean.class);
-            ClassUtil.setAccessibleQuietly(tmpConstructor, true);
-        } catch (Throwable e) {
-            // ignore.
-        }
-
-        sharedStringConstructor = tmpConstructor;
-    }
+    //    static volatile boolean isStringCharsGettable = JavaVersion.of(System.getProperty("java.version")).atMost(JavaVersion.JAVA_1_8);
+    //    static volatile boolean isStringCharsCreatable = JavaVersion.of(System.getProperty("java.version")).atMost(JavaVersion.JAVA_1_8);
+    //
+    //    static final Field strValueField;
+    //    static final Constructor<String> sharedStringConstructor;
+    //
+    //    static {
+    //        Field tmp = null;
+    //
+    //        try {
+    //            tmp = String.class.getDeclaredField("value");
+    //        } catch (Throwable e) {
+    //            // ignore.
+    //        }
+    //
+    //        strValueField = ((tmp != null) && tmp.getName().equals("value") && tmp.getType().equals(char[].class)) ? tmp : null;
+    //
+    //        if (strValueField != null) {
+    //            ClassUtil.setAccessibleQuietly(strValueField, true);
+    //        }
+    //
+    //        Constructor<String> tmpConstructor = null;
+    //
+    //        try {
+    //            tmpConstructor = String.class.getDeclaredConstructor(char[].class, boolean.class);
+    //            ClassUtil.setAccessibleQuietly(tmpConstructor, true);
+    //        } catch (Throwable e) {
+    //            // ignore.
+    //        }
+    //
+    //        sharedStringConstructor = tmpConstructor;
+    //    }
 
     /**
      * Gets the chars for read only.
@@ -159,20 +158,24 @@ public final class InternalUtil {
     @Deprecated
     @Beta
     public static char[] getCharsForReadOnly(final String str) {
-        if (isStringCharsGettable && strValueField != null && str.length() > 3) {
-            try {
-                final char[] chars = (char[]) strValueField.get(str);
+        //    if (isStringCharsGettable && strValueField != null && str.length() > 3) {
+        //        try {
+        //            final char[] chars = (char[]) strValueField.get(str);
+        //
+        //            if (chars.length == str.length()) {
+        //                return chars;
+        //            } else {
+        //                isStringCharsGettable = false;
+        //            }
+        //
+        //        } catch (Throwable e) {
+        //            // ignore.
+        //            isStringCharsGettable = false;
+        //        }
+        //    }
 
-                if (chars.length == str.length()) {
-                    return chars;
-                } else {
-                    isStringCharsGettable = false;
-                }
-
-            } catch (Throwable e) {
-                // ignore.
-                isStringCharsGettable = false;
-            }
+        if (N.isEmpty(str)) {
+            return N.EMPTY_CHAR_ARRAY;
         }
 
         return str.toCharArray();
@@ -189,15 +192,15 @@ public final class InternalUtil {
      */
     @Deprecated
     @Beta
-    static String newString(final char[] a, final boolean share) {
-        if (isStringCharsCreatable && share && sharedStringConstructor != null) {
-            try {
-                return sharedStringConstructor.newInstance(a, true);
-            } catch (Throwable e) {
-                // ignore
-                isStringCharsCreatable = false;
-            }
-        }
+    static String newString(final char[] a, @SuppressWarnings("unused") final boolean share) {
+        //    if (isStringCharsCreatable && share && sharedStringConstructor != null) {
+        //        try {
+        //            return sharedStringConstructor.newInstance(a, true);
+        //        } catch (Throwable e) {
+        //            // ignore
+        //            isStringCharsCreatable = false;
+        //        }
+        //    }
 
         return String.valueOf(a);
     }
@@ -217,30 +220,30 @@ public final class InternalUtil {
     //        return (value != null) && !equals(value, defaultValueOf(value.getClass()));
     //    }
 
-    /**
-     * Checks if is null or default. {@code null} is default value for all reference types, {@code false} is default value for primitive boolean, {@code 0} is the default value for primitive number type.
-     *
-     * @param s
-     * @return true, if is null or default
-     * @deprecated DO NOT call the methods defined in this class. it's for internal use only.
-     */
-    @Deprecated
-    static boolean isNullOrDefault(final Object value) {
-        return (value == null) || N.equals(value, N.defaultValueOf(value.getClass()));
-    }
+    //    /**
+    //     * Checks if is null or default. {@code null} is default value for all reference types, {@code false} is default value for primitive boolean, {@code 0} is the default value for primitive number type.
+    //     *
+    //     * @param s
+    //     * @return true, if is null or default
+    //     * @deprecated DO NOT call the methods defined in this class. it's for internal use only.
+    //     */
+    //    @Deprecated
+    //    static boolean isNullOrDefault(final Object value) {
+    //        return (value == null) || N.equals(value, N.defaultValueOf(value.getClass()));
+    //    }
 
-    /**
-     * Checks if it's not null or default. {@code null} is default value for all reference types, {@code false} is default value for primitive boolean, {@code 0} is the default value for primitive number type.
-     *
-     *
-     * @param s
-     * @return true, if it's not null or default
-     * @deprecated DO NOT call the methods defined in this class. it's for internal use only.
-     */
-    @Deprecated
-    static boolean notNullOrDefault(final Object value) {
-        return (value != null) && !N.equals(value, N.defaultValueOf(value.getClass()));
-    }
+    //    /**
+    //     * Checks if it's not null or default. {@code null} is default value for all reference types, {@code false} is default value for primitive boolean, {@code 0} is the default value for primitive number type.
+    //     *
+    //     *
+    //     * @param s
+    //     * @return true, if it's not null or default
+    //     * @deprecated DO NOT call the methods defined in this class. it's for internal use only.
+    //     */
+    //    @Deprecated
+    //    static boolean notNullOrDefault(final Object value) {
+    //        return (value != null) && !N.equals(value, N.defaultValueOf(value.getClass()));
+    //    }
 
     private InternalUtil() {
         // singleton for utility class

@@ -197,9 +197,10 @@ final class GuavaHasher implements Hasher {
      * @param off 
      * @param len 
      * @return 
+     * @throws IndexOutOfBoundsException 
      */
     @Override
-    public Hasher put(final char[] chars, final int off, final int len) {
+    public Hasher put(final char[] chars, final int off, final int len) throws IndexOutOfBoundsException {
         N.checkFromIndexSize(off, len, N.len(chars));
 
         for (int i = off, to = off + len; i < to; i++) {

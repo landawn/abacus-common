@@ -319,12 +319,14 @@ public final class Comparators {
     }
 
     /**
+     * 
      *
-     * @param <T>
-     * @param cmp
-     * @return
+     * @param <T> 
+     * @param cmp 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static <T> Comparator<u.Optional<T>> emptiesFirst(final Comparator<? super T> cmp) {
+    public static <T> Comparator<u.Optional<T>> emptiesFirst(final Comparator<? super T> cmp) throws IllegalArgumentException {
         N.checkArgNotNull(cmp);
 
         // return Comparators.<u.Optional<T>, T> comparingBy(o -> o.orElse(null), Comparator.nullsFirst(cmp));
@@ -333,12 +335,14 @@ public final class Comparators {
     }
 
     /**
+     * 
      *
-     * @param <T>
-     * @param cmp
-     * @return
+     * @param <T> 
+     * @param cmp 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static <T> Comparator<u.Optional<T>> emptiesLast(final Comparator<? super T> cmp) {
+    public static <T> Comparator<u.Optional<T>> emptiesLast(final Comparator<? super T> cmp) throws IllegalArgumentException {
         N.checkArgNotNull(cmp);
 
         // return Comparators.<u.Optional<T>, T> comparingBy(o -> o.orElse(null), Comparator.nullsLast(cmp));
@@ -349,14 +353,16 @@ public final class Comparators {
     /**
      * Comparing the key/value extracted by {@code keyMapper} by {@code nullsFirst()} comparator.
      *
-     * @param <T>
-     * @param <U>
-     * @param keyMapper
-     * @return
+     * @param <T> 
+     * @param <U> 
+     * @param keyMapper 
+     * @return 
+     * @throws IllegalArgumentException 
      * @see #comparingByIfNotNullOrElseNullsFirst(Function)
      * @see #comparingByIfNotNullOrElseNullsLast(Function)
      */
-    public static <T, U extends Comparable<? super U>> Comparator<T> nullsFirstBy(final Function<? super T, ? extends U> keyMapper) {
+    public static <T, U extends Comparable<? super U>> Comparator<T> nullsFirstBy(final Function<? super T, ? extends U> keyMapper)
+            throws IllegalArgumentException {
         N.checkArgNotNull(keyMapper);
 
         return (a, b) -> NULL_FIRST_COMPARATOR.compare(keyMapper.apply(a), keyMapper.apply(b));
@@ -365,14 +371,16 @@ public final class Comparators {
     /**
      * Comparing the key/value extracted by {@code keyMapper} by {@code nullsLast()} comparator.
      *
-     * @param <T>
-     * @param <U>
-     * @param keyMapper
-     * @return
+     * @param <T> 
+     * @param <U> 
+     * @param keyMapper 
+     * @return 
+     * @throws IllegalArgumentException 
      * @see #comparingByIfNotNullOrElseNullsFirst(Function)
      * @see #comparingByIfNotNullOrElseNullsLast(Function)
      */
-    public static <T, U extends Comparable<? super U>> Comparator<T> nullsLastBy(final Function<? super T, ? extends U> keyMapper) {
+    public static <T, U extends Comparable<? super U>> Comparator<T> nullsLastBy(final Function<? super T, ? extends U> keyMapper)
+            throws IllegalArgumentException {
         N.checkArgNotNull(keyMapper);
 
         return (a, b) -> NULL_LAST_COMPARATOR.compare(keyMapper.apply(a), keyMapper.apply(b));
@@ -381,30 +389,35 @@ public final class Comparators {
     /**
      * Comparing the key/value extracted by {@code keyMapper} by {@code nullsFirst()} comparator.
      *
-     * @param <T>
-     * @param <U>
-     * @param keyMapper
-     * @return
+     * @param <T> 
+     * @param <U> 
+     * @param keyMapper 
+     * @return 
+     * @throws IllegalArgumentException 
      * @see #nullsFirstBy(Function)
      * @see #nullsLastBy(Function)
      * @see #comparingByIfNotNullOrElseNullsFirst(Function)
      * @see #comparingByIfNotNullOrElseNullsLast(Function)
      */
-    public static <T, U extends Comparable<? super U>> Comparator<T> comparingBy(final Function<? super T, ? extends U> keyMapper) {
+    public static <T, U extends Comparable<? super U>> Comparator<T> comparingBy(final Function<? super T, ? extends U> keyMapper)
+            throws IllegalArgumentException {
         N.checkArgNotNull(keyMapper);
 
         return (a, b) -> NATURAL_ORDER.compare(keyMapper.apply(a), keyMapper.apply(b));
     }
 
     /**
+     * 
      *
-     * @param <T>
-     * @param <U>
-     * @param keyMapper
-     * @return
+     * @param <T> 
+     * @param <U> 
+     * @param keyMapper 
+     * @return 
+     * @throws IllegalArgumentException 
      */
     @Beta
-    public static <T, U extends Comparable<? super U>> Comparator<T> comparingByIfNotNullOrElseNullsFirst(final Function<? super T, ? extends U> keyMapper) {
+    public static <T, U extends Comparable<? super U>> Comparator<T> comparingByIfNotNullOrElseNullsFirst(final Function<? super T, ? extends U> keyMapper)
+            throws IllegalArgumentException {
         N.checkArgNotNull(keyMapper);
 
         @SuppressWarnings("rawtypes")
@@ -414,14 +427,17 @@ public final class Comparators {
     }
 
     /**
+     * 
      *
-     * @param <T>
-     * @param <U>
-     * @param keyMapper
-     * @return
+     * @param <T> 
+     * @param <U> 
+     * @param keyMapper 
+     * @return 
+     * @throws IllegalArgumentException 
      */
     @Beta
-    public static <T, U extends Comparable<? super U>> Comparator<T> comparingByIfNotNullOrElseNullsLast(final Function<? super T, ? extends U> keyMapper) {
+    public static <T, U extends Comparable<? super U>> Comparator<T> comparingByIfNotNullOrElseNullsLast(final Function<? super T, ? extends U> keyMapper)
+            throws IllegalArgumentException {
         N.checkArgNotNull(keyMapper);
 
         @SuppressWarnings("rawtypes")
@@ -431,16 +447,19 @@ public final class Comparators {
     }
 
     /**
+     * 
      *
-     * @param <T>
-     * @param <U>
-     * @param keyMapper
-     * @param keyComparator
-     * @return
+     * @param <T> 
+     * @param <U> 
+     * @param keyMapper 
+     * @param keyComparator 
+     * @return 
+     * @throws IllegalArgumentException 
      * @see #comparingByIfNotNullOrElseNullsFirst(Function, Comparator)
      * @see #comparingByIfNotNullOrElseNullsLast(Function, Comparator)
      */
-    public static <T, U> Comparator<T> comparingBy(final Function<? super T, ? extends U> keyMapper, final Comparator<? super U> keyComparator) {
+    public static <T, U> Comparator<T> comparingBy(final Function<? super T, ? extends U> keyMapper, final Comparator<? super U> keyComparator)
+            throws IllegalArgumentException {
         N.checkArgNotNull(keyMapper);
         N.checkArgNotNull(keyComparator);
 
@@ -448,15 +467,17 @@ public final class Comparators {
     }
 
     /**
+     * 
      *
-     * @param <T>
-     * @param <U>
-     * @param keyMapper
-     * @param keyComparator
-     * @return
+     * @param <T> 
+     * @param <U> 
+     * @param keyMapper 
+     * @param keyComparator 
+     * @return 
+     * @throws IllegalArgumentException 
      */
     public static <T, U> Comparator<T> comparingByIfNotNullOrElseNullsFirst(final Function<? super T, ? extends U> keyMapper,
-            final Comparator<? super U> keyComparator) {
+            final Comparator<? super U> keyComparator) throws IllegalArgumentException {
         N.checkArgNotNull(keyMapper);
         N.checkArgNotNull(keyComparator);
 
@@ -464,15 +485,17 @@ public final class Comparators {
     }
 
     /**
+     * 
      *
-     * @param <T>
-     * @param <U>
-     * @param keyMapper
-     * @param keyComparator
-     * @return
+     * @param <T> 
+     * @param <U> 
+     * @param keyMapper 
+     * @param keyComparator 
+     * @return 
+     * @throws IllegalArgumentException 
      */
     public static <T, U> Comparator<T> comparingByIfNotNullOrElseNullsLast(final Function<? super T, ? extends U> keyMapper,
-            final Comparator<? super U> keyComparator) {
+            final Comparator<? super U> keyComparator) throws IllegalArgumentException {
         N.checkArgNotNull(keyMapper);
         N.checkArgNotNull(keyComparator);
 
@@ -480,96 +503,112 @@ public final class Comparators {
     }
 
     /**
+     * 
      *
-     * @param <T>
-     * @param keyMapper
-     * @return
+     * @param <T> 
+     * @param keyMapper 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static <T> Comparator<T> comparingBoolean(final ToBooleanFunction<? super T> keyMapper) {
+    public static <T> Comparator<T> comparingBoolean(final ToBooleanFunction<? super T> keyMapper) throws IllegalArgumentException {
         N.checkArgNotNull(keyMapper);
 
         return (a, b) -> Boolean.compare(keyMapper.applyAsBoolean(a), keyMapper.applyAsBoolean(b));
     }
 
     /**
+     * 
      *
-     * @param <T>
-     * @param keyMapper
-     * @return
+     * @param <T> 
+     * @param keyMapper 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static <T> Comparator<T> comparingChar(final ToCharFunction<? super T> keyMapper) {
+    public static <T> Comparator<T> comparingChar(final ToCharFunction<? super T> keyMapper) throws IllegalArgumentException {
         N.checkArgNotNull(keyMapper);
 
         return (a, b) -> Character.compare(keyMapper.applyAsChar(a), keyMapper.applyAsChar(b));
     }
 
     /**
+     * 
      *
-     * @param <T>
-     * @param keyMapper
-     * @return
+     * @param <T> 
+     * @param keyMapper 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static <T> Comparator<T> comparingByte(final ToByteFunction<? super T> keyMapper) {
+    public static <T> Comparator<T> comparingByte(final ToByteFunction<? super T> keyMapper) throws IllegalArgumentException {
         N.checkArgNotNull(keyMapper);
 
         return (a, b) -> Byte.compare(keyMapper.applyAsByte(a), keyMapper.applyAsByte(b));
     }
 
     /**
+     * 
      *
-     * @param <T>
-     * @param keyMapper
-     * @return
+     * @param <T> 
+     * @param keyMapper 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static <T> Comparator<T> comparingShort(final ToShortFunction<? super T> keyMapper) {
+    public static <T> Comparator<T> comparingShort(final ToShortFunction<? super T> keyMapper) throws IllegalArgumentException {
         N.checkArgNotNull(keyMapper);
 
         return (a, b) -> Short.compare(keyMapper.applyAsShort(a), keyMapper.applyAsShort(b));
     }
 
     /**
+     * 
      *
-     * @param <T>
-     * @param keyMapper
-     * @return
+     * @param <T> 
+     * @param keyMapper 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static <T> Comparator<T> comparingInt(final ToIntFunction<? super T> keyMapper) {
+    public static <T> Comparator<T> comparingInt(final ToIntFunction<? super T> keyMapper) throws IllegalArgumentException {
         N.checkArgNotNull(keyMapper);
 
         return (a, b) -> Integer.compare(keyMapper.applyAsInt(a), keyMapper.applyAsInt(b));
     }
 
     /**
+     * 
      *
-     * @param <T>
-     * @param keyMapper
-     * @return
+     * @param <T> 
+     * @param keyMapper 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static <T> Comparator<T> comparingLong(final ToLongFunction<? super T> keyMapper) {
+    public static <T> Comparator<T> comparingLong(final ToLongFunction<? super T> keyMapper) throws IllegalArgumentException {
         N.checkArgNotNull(keyMapper);
 
         return (a, b) -> Long.compare(keyMapper.applyAsLong(a), keyMapper.applyAsLong(b));
     }
 
     /**
+     * 
      *
-     * @param <T>
-     * @param keyMapper
-     * @return
+     * @param <T> 
+     * @param keyMapper 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static <T> Comparator<T> comparingFloat(final ToFloatFunction<? super T> keyMapper) {
+    public static <T> Comparator<T> comparingFloat(final ToFloatFunction<? super T> keyMapper) throws IllegalArgumentException {
         N.checkArgNotNull(keyMapper);
 
         return (a, b) -> Float.compare(keyMapper.applyAsFloat(a), keyMapper.applyAsFloat(b));
     }
 
     /**
+     * 
      *
-     * @param <T>
-     * @param keyMapper
-     * @return
+     * @param <T> 
+     * @param keyMapper 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static <T> Comparator<T> comparingDouble(final ToDoubleFunction<? super T> keyMapper) {
+    public static <T> Comparator<T> comparingDouble(final ToDoubleFunction<? super T> keyMapper) throws IllegalArgumentException {
         N.checkArgNotNull(keyMapper);
 
         return (a, b) -> Double.compare(keyMapper.applyAsDouble(a), keyMapper.applyAsDouble(b));
@@ -587,11 +626,12 @@ public final class Comparators {
     /**
      * Comparing ignore case.
      *
-     * @param <T>
-     * @param keyMapper
-     * @return
+     * @param <T> 
+     * @param keyMapper 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static <T> Comparator<T> comparingIgnoreCase(final Function<? super T, String> keyMapper) {
+    public static <T> Comparator<T> comparingIgnoreCase(final Function<? super T, String> keyMapper) throws IllegalArgumentException {
         N.checkArgNotNull(keyMapper);
 
         return (a, b) -> COMPARING_IGNORE_CASE.compare(keyMapper.apply(a), keyMapper.apply(b));
@@ -624,10 +664,11 @@ public final class Comparators {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param cmp
-     * @return
+     * @param cmp 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static <K, V> Comparator<Map.Entry<K, V>> comparingByKey(final Comparator<? super K> cmp) {
+    public static <K, V> Comparator<Map.Entry<K, V>> comparingByKey(final Comparator<? super K> cmp) throws IllegalArgumentException {
         N.checkArgNotNull(cmp);
 
         return (a, b) -> cmp.compare(a.getKey(), b.getKey());
@@ -638,10 +679,11 @@ public final class Comparators {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param cmp
-     * @return
+     * @param cmp 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static <K, V> Comparator<Map.Entry<K, V>> comparingByValue(final Comparator<? super V> cmp) {
+    public static <K, V> Comparator<Map.Entry<K, V>> comparingByValue(final Comparator<? super V> cmp) throws IllegalArgumentException {
         N.checkArgNotNull(cmp);
 
         return (a, b) -> cmp.compare(a.getValue(), b.getValue());
@@ -721,13 +763,14 @@ public final class Comparators {
     }
 
     /**
+     * 
      *
-     *
-     * @param <T>
-     * @param cmp
-     * @return
+     * @param <T> 
+     * @param cmp 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static <T> Comparator<T[]> comparingArray(final Comparator<? super T> cmp) {
+    public static <T> Comparator<T[]> comparingArray(final Comparator<? super T> cmp) throws IllegalArgumentException {
         N.checkArgNotNull(cmp);
 
         return (a, b) -> {
@@ -766,14 +809,15 @@ public final class Comparators {
     }
 
     /**
+     * 
      *
-     *
-     * @param <T>
-     * @param <C>
-     * @param cmp
-     * @return
+     * @param <T> 
+     * @param <C> 
+     * @param cmp 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static <T, C extends Collection<T>> Comparator<C> comparingCollection(final Comparator<? super T> cmp) {
+    public static <T, C extends Collection<T>> Comparator<C> comparingCollection(final Comparator<? super T> cmp) throws IllegalArgumentException {
         N.checkArgNotNull(cmp);
 
         return (a, b) -> {
@@ -815,13 +859,15 @@ public final class Comparators {
     }
 
     /**
+     * 
      *
-     * @param <T>
-     * @param <C>
-     * @param cmp
-     * @return
+     * @param <T> 
+     * @param <C> 
+     * @param cmp 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static <T, C extends Iterable<T>> Comparator<C> comparingIterable(final Comparator<? super T> cmp) {
+    public static <T, C extends Iterable<T>> Comparator<C> comparingIterable(final Comparator<? super T> cmp) throws IllegalArgumentException {
         N.checkArgNotNull(cmp);
 
         return (a, b) -> {
@@ -861,14 +907,15 @@ public final class Comparators {
     }
 
     /**
+     * 
      *
-     *
-     * @param <T>
-     * @param <C>
-     * @param cmp
-     * @return
+     * @param <T> 
+     * @param <C> 
+     * @param cmp 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static <T, C extends Iterator<T>> Comparator<C> comparingIterator(final Comparator<? super T> cmp) {
+    public static <T, C extends Iterator<T>> Comparator<C> comparingIterator(final Comparator<? super T> cmp) throws IllegalArgumentException {
         N.checkArgNotNull(cmp);
 
         return (a, b) -> {
@@ -922,96 +969,112 @@ public final class Comparators {
     }
 
     /**
+     * 
      *
-     * @param <T>
-     * @param keyMapper
-     * @return
+     * @param <T> 
+     * @param keyMapper 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static <T> Comparator<T> reversedComparingBoolean(final ToBooleanFunction<? super T> keyMapper) {
+    public static <T> Comparator<T> reversedComparingBoolean(final ToBooleanFunction<? super T> keyMapper) throws IllegalArgumentException {
         N.checkArgNotNull(keyMapper);
 
         return (a, b) -> Boolean.compare(keyMapper.applyAsBoolean(b), keyMapper.applyAsBoolean(a));
     }
 
     /**
+     * 
      *
-     * @param <T>
-     * @param keyMapper
-     * @return
+     * @param <T> 
+     * @param keyMapper 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static <T> Comparator<T> reversedComparingChar(final ToCharFunction<? super T> keyMapper) {
+    public static <T> Comparator<T> reversedComparingChar(final ToCharFunction<? super T> keyMapper) throws IllegalArgumentException {
         N.checkArgNotNull(keyMapper);
 
         return (a, b) -> Character.compare(keyMapper.applyAsChar(b), keyMapper.applyAsChar(a));
     }
 
     /**
+     * 
      *
-     * @param <T>
-     * @param keyMapper
-     * @return
+     * @param <T> 
+     * @param keyMapper 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static <T> Comparator<T> reversedComparingByte(final ToByteFunction<? super T> keyMapper) {
+    public static <T> Comparator<T> reversedComparingByte(final ToByteFunction<? super T> keyMapper) throws IllegalArgumentException {
         N.checkArgNotNull(keyMapper);
 
         return (a, b) -> Byte.compare(keyMapper.applyAsByte(b), keyMapper.applyAsByte(a));
     }
 
     /**
+     * 
      *
-     * @param <T>
-     * @param keyMapper
-     * @return
+     * @param <T> 
+     * @param keyMapper 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static <T> Comparator<T> reversedComparingShort(final ToShortFunction<? super T> keyMapper) {
+    public static <T> Comparator<T> reversedComparingShort(final ToShortFunction<? super T> keyMapper) throws IllegalArgumentException {
         N.checkArgNotNull(keyMapper);
 
         return (a, b) -> Short.compare(keyMapper.applyAsShort(b), keyMapper.applyAsShort(a));
     }
 
     /**
+     * 
      *
-     * @param <T>
-     * @param keyMapper
-     * @return
+     * @param <T> 
+     * @param keyMapper 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static <T> Comparator<T> reversedComparingInt(final ToIntFunction<? super T> keyMapper) {
+    public static <T> Comparator<T> reversedComparingInt(final ToIntFunction<? super T> keyMapper) throws IllegalArgumentException {
         N.checkArgNotNull(keyMapper);
 
         return (a, b) -> Integer.compare(keyMapper.applyAsInt(b), keyMapper.applyAsInt(a));
     }
 
     /**
+     * 
      *
-     * @param <T>
-     * @param keyMapper
-     * @return
+     * @param <T> 
+     * @param keyMapper 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static <T> Comparator<T> reversedComparingLong(final ToLongFunction<? super T> keyMapper) {
+    public static <T> Comparator<T> reversedComparingLong(final ToLongFunction<? super T> keyMapper) throws IllegalArgumentException {
         N.checkArgNotNull(keyMapper);
 
         return (a, b) -> Long.compare(keyMapper.applyAsLong(b), keyMapper.applyAsLong(a));
     }
 
     /**
+     * 
      *
-     * @param <T>
-     * @param keyMapper
-     * @return
+     * @param <T> 
+     * @param keyMapper 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static <T> Comparator<T> reversedComparingFloat(final ToFloatFunction<? super T> keyMapper) {
+    public static <T> Comparator<T> reversedComparingFloat(final ToFloatFunction<? super T> keyMapper) throws IllegalArgumentException {
         N.checkArgNotNull(keyMapper);
 
         return (a, b) -> Float.compare(keyMapper.applyAsFloat(b), keyMapper.applyAsFloat(a));
     }
 
     /**
+     * 
      *
-     * @param <T>
-     * @param keyMapper
-     * @return
+     * @param <T> 
+     * @param keyMapper 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static <T> Comparator<T> reversedComparingDouble(final ToDoubleFunction<? super T> keyMapper) {
+    public static <T> Comparator<T> reversedComparingDouble(final ToDoubleFunction<? super T> keyMapper) throws IllegalArgumentException {
         N.checkArgNotNull(keyMapper);
 
         return (a, b) -> Double.compare(keyMapper.applyAsDouble(b), keyMapper.applyAsDouble(a));
@@ -1020,29 +1083,33 @@ public final class Comparators {
     /**
      * Reversed comparing by.
      *
-     * @param <T>
-     * @param <U>
-     * @param keyMapper
-     * @return
+     * @param <T> 
+     * @param <U> 
+     * @param keyMapper 
+     * @return 
+     * @throws IllegalArgumentException 
      * @see #reversedComparingByIfNotNullOrElseNullsFirst(Function)
      * @see #reversedComparingByIfNotNullOrElseNullsLast(Function)
      */
-    public static <T, U extends Comparable<? super U>> Comparator<T> reversedComparingBy(final Function<? super T, ? extends U> keyMapper) {
+    public static <T, U extends Comparable<? super U>> Comparator<T> reversedComparingBy(final Function<? super T, ? extends U> keyMapper)
+            throws IllegalArgumentException {
         N.checkArgNotNull(keyMapper);
 
         return (a, b) -> REVERSED_ORDER.compare(keyMapper.apply(a), keyMapper.apply(b));
     }
 
     /**
+     * 
      *
-     * @param <T>
-     * @param <U>
-     * @param keyMapper
-     * @return
+     * @param <T> 
+     * @param <U> 
+     * @param keyMapper 
+     * @return 
+     * @throws IllegalArgumentException 
      */
     @Beta
     public static <T, U extends Comparable<? super U>> Comparator<T> reversedComparingByIfNotNullOrElseNullsFirst(
-            final Function<? super T, ? extends U> keyMapper) {
+            final Function<? super T, ? extends U> keyMapper) throws IllegalArgumentException {
         N.checkArgNotNull(keyMapper);
 
         @SuppressWarnings("rawtypes")
@@ -1052,15 +1119,17 @@ public final class Comparators {
     }
 
     /**
+     * 
      *
-     * @param <T>
-     * @param <U>
-     * @param keyMapper
-     * @return
+     * @param <T> 
+     * @param <U> 
+     * @param keyMapper 
+     * @return 
+     * @throws IllegalArgumentException 
      */
     @Beta
     public static <T, U extends Comparable<? super U>> Comparator<T> reversedComparingByIfNotNullOrElseNullsLast(
-            final Function<? super T, ? extends U> keyMapper) {
+            final Function<? super T, ? extends U> keyMapper) throws IllegalArgumentException {
         N.checkArgNotNull(keyMapper);
 
         @SuppressWarnings("rawtypes")
@@ -1096,11 +1165,12 @@ public final class Comparators {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param cmp
-     * @return
+     * @param cmp 
+     * @return 
+     * @throws IllegalArgumentException 
      */
     @Beta
-    public static <K, V> Comparator<Map.Entry<K, V>> reversedComparingByKey(final Comparator<? super K> cmp) {
+    public static <K, V> Comparator<Map.Entry<K, V>> reversedComparingByKey(final Comparator<? super K> cmp) throws IllegalArgumentException {
         N.checkArgNotNull(cmp);
 
         final Comparator<? super K> reversedOrder = reverseOrder(cmp);
@@ -1113,11 +1183,12 @@ public final class Comparators {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param cmp
-     * @return
+     * @param cmp 
+     * @return 
+     * @throws IllegalArgumentException 
      */
     @Beta
-    public static <K, V> Comparator<Map.Entry<K, V>> reversedComparingByValue(final Comparator<? super V> cmp) {
+    public static <K, V> Comparator<Map.Entry<K, V>> reversedComparingByValue(final Comparator<? super V> cmp) throws IllegalArgumentException {
         N.checkArgNotNull(cmp);
 
         final Comparator<? super V> reversedOrder = reverseOrder(cmp);

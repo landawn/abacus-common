@@ -315,10 +315,11 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
     /**
      * Sets value types by bean class.
      *
-     * @param beanClass
-     * @return
+     * @param beanClass 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public C setValueTypesByBeanClass(final Class<?> beanClass) {
+    public C setValueTypesByBeanClass(final Class<?> beanClass) throws IllegalArgumentException {
         if (beanClass == null) {
             this.beanInfoForValueTypes = null;
         } else {

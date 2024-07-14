@@ -103,23 +103,25 @@ public final class CSVUtil {
     static final ThreadLocal<BiConsumer<String, String[]>> csvLineParser_TL = ThreadLocal.withInitial(() -> defaultCsvLineParser);
 
     /**
+     * 
      *
-     *
-     * @param parser
+     * @param parser 
+     * @throws IllegalArgumentException 
      */
     // TODO should share/use the same parser for line?
-    public static void setCSVHeaderParser(final Function<String, String[]> parser) {
+    public static void setCSVHeaderParser(final Function<String, String[]> parser) throws IllegalArgumentException {
         N.checkArgNotNull(parser, "parser");
 
         csvHeaderParser_TL.set(parser);
     }
 
     /**
+     * 
      *
-     *
-     * @param parser
+     * @param parser 
+     * @throws IllegalArgumentException 
      */
-    public static void setCSVLineParser(final BiConsumer<String, String[]> parser) {
+    public static void setCSVLineParser(final BiConsumer<String, String[]> parser) throws IllegalArgumentException {
         N.checkArgNotNull(parser, "parser");
 
         csvLineParser_TL.set(parser);
@@ -310,18 +312,19 @@ public final class CSVUtil {
     /**
      * Load the data from CSV.
      *
-     * @param <E>
-     * @param source
-     * @param selectColumnNames
-     * @param offset
-     * @param count
-     * @param filter
-     * @return
+     * @param <E> 
+     * @param source 
+     * @param selectColumnNames 
+     * @param offset 
+     * @param count 
+     * @param filter 
+     * @return 
+     * @throws IllegalArgumentException 
      * @throws UncheckedIOException the unchecked IO exception
      * @throws E the e
      */
     public static <E extends Exception> DataSet loadCSV(final Reader source, final Collection<String> selectColumnNames, long offset, long count,
-            final Throwables.Predicate<String[], E> filter) throws UncheckedIOException, E {
+            final Throwables.Predicate<String[], E> filter) throws IllegalArgumentException, UncheckedIOException, E {
         N.checkArgument(offset >= 0 && count >= 0, "'offset'=%s and 'count'=%s can't be negative", offset, count); //NOSONAR
 
         final Function<String, String[]> headerParser = csvHeaderParser_TL.get();
@@ -563,11 +566,12 @@ public final class CSVUtil {
      * @param filter 
      * @param beanClassForColumnType 
      * @return 
+     * @throws IllegalArgumentException 
      * @throws UncheckedIOException the unchecked IO exception
      * @throws E the e
      */
     public static <E extends Exception> DataSet loadCSV(final Reader source, final Collection<String> selectColumnNames, long offset, long count,
-            final Throwables.Predicate<String[], E> filter, final Class<?> beanClassForColumnType) throws UncheckedIOException, E {
+            final Throwables.Predicate<String[], E> filter, final Class<?> beanClassForColumnType) throws IllegalArgumentException, UncheckedIOException, E {
         N.checkArgument(offset >= 0 && count >= 0, "'offset'=%s and 'count'=%s can't be negative", offset, count);
 
         final Function<String, String[]> headerParser = csvHeaderParser_TL.get();
@@ -777,19 +781,20 @@ public final class CSVUtil {
     /**
      * Load the data from CSV.
      *
-     * @param <E>
-     * @param source
-     * @param offset
-     * @param count
-     * @param filter
-     * @param columnTypeMap
-     * @return
+     * @param <E> 
+     * @param source 
+     * @param offset 
+     * @param count 
+     * @param filter 
+     * @param columnTypeMap 
+     * @return 
+     * @throws IllegalArgumentException 
      * @throws UncheckedIOException the unchecked IO exception
      * @throws E the e
      */
     @SuppressWarnings("rawtypes")
     public static <E extends Exception> DataSet loadCSV(final Reader source, long offset, long count, final Throwables.Predicate<String[], E> filter,
-            final Map<String, ? extends Type> columnTypeMap) throws UncheckedIOException, E {
+            final Map<String, ? extends Type> columnTypeMap) throws IllegalArgumentException, UncheckedIOException, E {
         N.checkArgument(offset >= 0 && count >= 0, "'offset'=%s and 'count'=%s can't be negative", offset, count);
 
         if (N.isEmpty(columnTypeMap)) {
@@ -1057,14 +1062,14 @@ public final class CSVUtil {
      * @param filter 
      * @param columnTypeList 
      * @return 
+     * @throws IllegalArgumentException if the size of {@code columnTypeList} is not equal to the size of columns in CSV.
      * @throws UncheckedIOException the unchecked IO exception
      * @throws UncheckedIOException the unchecked IO exception
      * @throws E the e
-     * @throws IllegalArgumentException if the size of {@code columnTypeList} is not equal to the size of columns in CSV.
      */
     @SuppressWarnings("rawtypes")
     public static <E extends Exception> DataSet loadCSV(final Reader source, long offset, long count, final Throwables.Predicate<String[], E> filter,
-            final List<? extends Type> columnTypeList) throws UncheckedIOException, UncheckedIOException, E {
+            final List<? extends Type> columnTypeList) throws IllegalArgumentException, UncheckedIOException, UncheckedIOException, E {
         N.checkArgument(offset >= 0 && count >= 0, "'offset'=%s and 'count'=%s can't be negative", offset, count);
 
         if (N.isEmpty(columnTypeList)) {
@@ -1225,9 +1230,11 @@ public final class CSVUtil {
      * @param closeReaderWhenStreamIsClosed 
      * @param targetType 
      * @return 
+     * @throws IllegalArgumentException 
      */
     public static <T> Stream<T> stream(final Reader source, final Collection<String> selectColumnNames, final long offset, final long count,
-            final Predicate<String[]> filter, final boolean closeReaderWhenStreamIsClosed, final Class<? extends T> targetType) {
+            final Predicate<String[]> filter, final boolean closeReaderWhenStreamIsClosed, final Class<? extends T> targetType)
+            throws IllegalArgumentException {
 
         return Stream.defer(() -> {
             N.checkArgNotNull(targetType, "targetType");

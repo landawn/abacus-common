@@ -2114,13 +2114,15 @@ public interface NoCachingNoUpdating {
     public abstract static class DisposableEntry<K, V> implements Map.Entry<K, V>, NoCachingNoUpdating {
 
         /**
+         * 
          *
          * @param <K> the key type
          * @param <V> the value type
-         * @param entry
-         * @return
+         * @param entry 
+         * @return 
+         * @throws IllegalArgumentException 
          */
-        public static <K, V> DisposableEntry<K, V> wrap(final Map.Entry<K, V> entry) {
+        public static <K, V> DisposableEntry<K, V> wrap(final Map.Entry<K, V> entry) throws IllegalArgumentException {
             N.checkArgNotNull(entry, "entry");
 
             return new DisposableEntry<>() {
@@ -2233,13 +2235,15 @@ public interface NoCachingNoUpdating {
     public abstract static class DisposablePair<L, R> implements NoCachingNoUpdating {
 
         /**
+         * 
          *
-         * @param <L>
-         * @param <R>
-         * @param p
-         * @return
+         * @param <L> 
+         * @param <R> 
+         * @param p 
+         * @return 
+         * @throws IllegalArgumentException 
          */
-        public static <L, R> DisposablePair<L, R> wrap(final Pair<L, R> p) {
+        public static <L, R> DisposablePair<L, R> wrap(final Pair<L, R> p) throws IllegalArgumentException {
             N.checkArgNotNull(p, "pair");
 
             return new DisposablePair<>() {
@@ -2331,14 +2335,16 @@ public interface NoCachingNoUpdating {
     public abstract static class DisposableTriple<L, M, R> implements NoCachingNoUpdating {
 
         /**
+         * 
          *
-         * @param <L>
-         * @param <M>
-         * @param <R>
-         * @param p
-         * @return
+         * @param <L> 
+         * @param <M> 
+         * @param <R> 
+         * @param p 
+         * @return 
+         * @throws IllegalArgumentException 
          */
-        public static <L, M, R> DisposableTriple<L, M, R> wrap(final Triple<L, M, R> p) {
+        public static <L, M, R> DisposableTriple<L, M, R> wrap(final Triple<L, M, R> p) throws IllegalArgumentException {
             N.checkArgNotNull(p, "triple");
 
             return new DisposableTriple<>() {

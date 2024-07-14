@@ -99,8 +99,9 @@ public enum MergeResult {
      * @param <T> 
      * @param cmp 
      * @return 
+     * @throws IllegalArgumentException 
      */
-    public static <T> BiFunction<T, T, MergeResult> minFirst(final Comparator<? super T> cmp) {
+    public static <T> BiFunction<T, T, MergeResult> minFirst(final Comparator<? super T> cmp) throws IllegalArgumentException {
         N.checkArgNotNull(cmp, "cmp");
 
         return (a, b) -> cmp.compare(a, b) <= 0 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND;
@@ -127,8 +128,9 @@ public enum MergeResult {
      * @param <T> 
      * @param cmp 
      * @return 
+     * @throws IllegalArgumentException 
      */
-    public static <T> BiFunction<T, T, MergeResult> maxFirst(final Comparator<? super T> cmp) {
+    public static <T> BiFunction<T, T, MergeResult> maxFirst(final Comparator<? super T> cmp) throws IllegalArgumentException {
         N.checkArgNotNull(cmp, "cmp");
 
         return (a, b) -> cmp.compare(a, b) >= 0 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND;

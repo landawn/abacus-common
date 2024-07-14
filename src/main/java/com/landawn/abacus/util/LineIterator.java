@@ -276,11 +276,12 @@ public final class LineIterator extends ObjIterator<String> implements Closeable
     /**
      * Returns the next line in the wrapped <code>Reader</code>.
      *
-     * @return
+     * @return 
+     * @throws IllegalArgumentException 
      * @throws NoSuchElementException if there is no line to return
      */
     @Override
-    public String next() {
+    public String next() throws IllegalArgumentException {
         if (!hasNext()) {
             throw new NoSuchElementException("No more lines");
         }

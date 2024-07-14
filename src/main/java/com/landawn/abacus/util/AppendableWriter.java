@@ -28,8 +28,9 @@ public sealed class AppendableWriter extends Writer permits StringWriter {
      * 
      *
      * @param appendable 
+     * @throws IllegalArgumentException 
      */
-    public AppendableWriter(final Appendable appendable) {
+    public AppendableWriter(final Appendable appendable) throws IllegalArgumentException {
         N.checkArgNotNull(appendable, "appendable");
 
         this.appendable = appendable;

@@ -4345,6 +4345,7 @@ public interface DataSet {
      *
      * @return
      */
+    @Beta
     DataSet clone(); //NOSONAR
 
     /**
@@ -4353,6 +4354,7 @@ public interface DataSet {
      * @param freeze
      * @return
      */
+    @Beta
     DataSet clone(boolean freeze);
 
     /**
@@ -4719,11 +4721,11 @@ public interface DataSet {
     <E extends Exception> void accept(Throwables.Consumer<? super DataSet, E> action) throws E;
 
     /**
-     * 
      *
-     * @param <E> 
-     * @param action 
-     * @return 
+     *
+     * @param <E>
+     * @param action
+     * @return
      * @throws E the e
      */
     <E extends Exception> OrElse acceptIfNotEmpty(Throwables.Consumer<? super DataSet, E> action) throws E;

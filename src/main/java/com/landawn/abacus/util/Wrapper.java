@@ -99,14 +99,17 @@ public final class Wrapper<T> implements Immutable {
     }
 
     /**
+     * 
      *
-     * @param <T>
-     * @param value
-     * @param hashFunction
-     * @param equalsFunction
-     * @return
+     * @param <T> 
+     * @param value 
+     * @param hashFunction 
+     * @param equalsFunction 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static <T> Wrapper<T> of(T value, ToIntFunction<? super T> hashFunction, BiPredicate<? super T, ? super T> equalsFunction) {
+    public static <T> Wrapper<T> of(T value, ToIntFunction<? super T> hashFunction, BiPredicate<? super T, ? super T> equalsFunction)
+            throws IllegalArgumentException {
         N.checkArgNotNull(hashFunction, "hashFunction");
         N.checkArgNotNull(equalsFunction, "equalsFunction");
 
@@ -114,16 +117,18 @@ public final class Wrapper<T> implements Immutable {
     }
 
     /**
+     * 
      *
-     * @param <T>
-     * @param value
-     * @param hashFunction
-     * @param equalsFunction
-     * @param toStringFunction
-     * @return
+     * @param <T> 
+     * @param value 
+     * @param hashFunction 
+     * @param equalsFunction 
+     * @param toStringFunction 
+     * @return 
+     * @throws IllegalArgumentException 
      */
     public static <T> Wrapper<T> of(T value, ToIntFunction<? super T> hashFunction, BiPredicate<? super T, ? super T> equalsFunction,
-            Function<? super T, String> toStringFunction) {
+            Function<? super T, String> toStringFunction) throws IllegalArgumentException {
         N.checkArgNotNull(hashFunction, "hashFunction");
         N.checkArgNotNull(equalsFunction, "equalsFunction");
         N.checkArgNotNull(toStringFunction, "toStringFunction");

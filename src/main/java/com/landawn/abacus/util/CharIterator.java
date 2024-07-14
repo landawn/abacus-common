@@ -63,13 +63,15 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
     }
 
     /**
+     * 
      *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return
+     * @param a 
+     * @param fromIndex 
+     * @param toIndex 
+     * @return 
+     * @throws IndexOutOfBoundsException 
      */
-    public static CharIterator of(final char[] a, final int fromIndex, final int toIndex) {
+    public static CharIterator of(final char[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
         if (fromIndex == toIndex) {
@@ -108,10 +110,11 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
     /**
      * Lazy evaluation.
      *
-     * @param iteratorSupplier
-     * @return
+     * @param iteratorSupplier 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static CharIterator defer(final Supplier<? extends CharIterator> iteratorSupplier) {
+    public static CharIterator defer(final Supplier<? extends CharIterator> iteratorSupplier) throws IllegalArgumentException {
         N.checkArgNotNull(iteratorSupplier, "iteratorSupplier");
 
         return new CharIterator() {
@@ -148,10 +151,11 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
     /**
      * Returns an infinite {@code CharIterator}.
      *
-     * @param supplier
-     * @return
+     * @param supplier 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static CharIterator generate(final CharSupplier supplier) {
+    public static CharIterator generate(final CharSupplier supplier) throws IllegalArgumentException {
         N.checkArgNotNull(supplier);
 
         return new CharIterator() {
@@ -168,12 +172,14 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
     }
 
     /**
+     * 
      *
-     * @param hasNext
-     * @param supplier
-     * @return
+     * @param hasNext 
+     * @param supplier 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static CharIterator generate(final BooleanSupplier hasNext, final CharSupplier supplier) {
+    public static CharIterator generate(final BooleanSupplier hasNext, final CharSupplier supplier) throws IllegalArgumentException {
         N.checkArgNotNull(hasNext);
         N.checkArgNotNull(supplier);
 
@@ -319,12 +325,13 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
     /**
      * For each remaining.
      *
-     * @param action
-     * @deprecated
+     * @param action 
+     * @throws IllegalArgumentException 
+     * @deprecated 
      */
     @Override
     @Deprecated
-    public void forEachRemaining(java.util.function.Consumer<? super Character> action) {
+    public void forEachRemaining(java.util.function.Consumer<? super Character> action) throws IllegalArgumentException {
         super.forEachRemaining(action);
     }
 
@@ -343,12 +350,14 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
     }
 
     /**
+     * 
      *
-     * @param <E>
-     * @param action
+     * @param <E> 
+     * @param action 
+     * @throws IllegalArgumentException 
      * @throws E the e
      */
-    public <E extends Exception> void foreachIndexed(Throwables.IndexedCharConsumer<E> action) throws E {
+    public <E extends Exception> void foreachIndexed(Throwables.IndexedCharConsumer<E> action) throws IllegalArgumentException, E {
         N.checkArgNotNull(action);
 
         int idx = 0;

@@ -762,14 +762,15 @@ public final class BiMap<K, V> implements Map<K, V> {
     }
 
     /**
+     * 
      *
-     *
-     * @param <K>
-     * @param <V>
-     * @param map
-     * @return
+     * @param <K> 
+     * @param <V> 
+     * @param map 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static <K, V> Builder<K, V> builder(final Map<K, V> map) {
+    public static <K, V> Builder<K, V> builder(final Map<K, V> map) throws IllegalArgumentException {
         N.checkArgNotNull(map);
 
         return new Builder<>(map);

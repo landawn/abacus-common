@@ -334,7 +334,6 @@ public final class ClassUtil {
         BUILT_IN_TYPE.put(SetMultimap.class.getCanonicalName(), SetMultimap.class);
         BUILT_IN_TYPE.put(Multimap.class.getCanonicalName(), Multimap.class);
         BUILT_IN_TYPE.put(Multiset.class.getCanonicalName(), Multiset.class);
-        BUILT_IN_TYPE.put(LongMultiset.class.getCanonicalName(), LongMultiset.class);
         BUILT_IN_TYPE.put(HBaseColumn.class.getCanonicalName(), HBaseColumn.class);
 
         BUILT_IN_TYPE.put(Type.class.getCanonicalName(), Type.class);
@@ -2489,13 +2488,14 @@ public final class ClassUtil {
     private static final Map<Class<?>, Tuple3<Class<?>, com.landawn.abacus.util.function.Supplier<Object>, com.landawn.abacus.util.function.Function<Object, Object>>> builderMap = new ConcurrentHashMap<>();
 
     /**
+     * 
      *
-     *
-     * @param cls
-     * @return
+     * @param cls 
+     * @return 
+     * @throws IllegalArgumentException 
      */
     public static Tuple3<Class<?>, com.landawn.abacus.util.function.Supplier<Object>, com.landawn.abacus.util.function.Function<Object, Object>> getBuilderInfo(
-            final Class<?> cls) {
+            final Class<?> cls) throws IllegalArgumentException {
         N.checkArgNotNull(cls, "cls");
 
         Tuple3<Class<?>, com.landawn.abacus.util.function.Supplier<Object>, com.landawn.abacus.util.function.Function<Object, Object>> builderInfo = builderMap
@@ -3573,10 +3573,11 @@ public final class ClassUtil {
     /**
      * Checks if is primitive type.
      *
-     * @param cls
+     * @param cls 
      * @return true, if is primitive type
+     * @throws IllegalArgumentException 
      */
-    public static boolean isPrimitiveType(final Class<?> cls) {
+    public static boolean isPrimitiveType(final Class<?> cls) throws IllegalArgumentException {
         N.checkArgNotNull(cls, "cls");
 
         return N.typeOf(cls).isPrimitiveType();
@@ -3585,10 +3586,11 @@ public final class ClassUtil {
     /**
      * Checks if is wrapper type.
      *
-     * @param cls
+     * @param cls 
      * @return true, if is wrapper type
+     * @throws IllegalArgumentException 
      */
-    public static boolean isPrimitiveWrapper(final Class<?> cls) {
+    public static boolean isPrimitiveWrapper(final Class<?> cls) throws IllegalArgumentException {
         N.checkArgNotNull(cls, "cls");
 
         return N.typeOf(cls).isPrimitiveWrapper();
@@ -3597,10 +3599,11 @@ public final class ClassUtil {
     /**
      * Checks if is primitive array type.
      *
-     * @param cls
+     * @param cls 
      * @return true, if is primitive array type
+     * @throws IllegalArgumentException 
      */
-    public static boolean isPrimitiveArrayType(final Class<?> cls) {
+    public static boolean isPrimitiveArrayType(final Class<?> cls) throws IllegalArgumentException {
         N.checkArgNotNull(cls, "cls");
 
         return N.typeOf(cls).isPrimitiveArray();
@@ -3632,17 +3635,18 @@ public final class ClassUtil {
     /**
      * Returns the corresponding wrapper type of {@code type} if it is a primitive type; otherwise
      * returns {@code type} itself. Idempotent.
-     *
+     * 
      * <pre>
      *     wrap(int.class) == Integer.class
      *     wrap(Integer.class) == Integer.class
      *     wrap(String.class) == String.class
      * </pre>
      *
-     * @param cls
-     * @return
+     * @param cls 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static Class<?> wrap(final Class<?> cls) {
+    public static Class<?> wrap(final Class<?> cls) throws IllegalArgumentException {
         N.checkArgNotNull(cls, "cls");
 
         final Class<?> wrapped = PRIMITIVE_2_WRAPPER.get(cls);
@@ -3653,17 +3657,18 @@ public final class ClassUtil {
     /**
      * Returns the corresponding primitive type of {@code type} if it is a wrapper type; otherwise
      * returns {@code type} itself. Idempotent.
-     *
+     * 
      * <pre>
      *     unwrap(Integer.class) == int.class
      *     unwrap(int.class) == int.class
      *     unwrap(String.class) == String.class
      * </pre>
      *
-     * @param cls
-     * @return
+     * @param cls 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static Class<?> unwrap(final Class<?> cls) {
+    public static Class<?> unwrap(final Class<?> cls) throws IllegalArgumentException {
         N.checkArgNotNull(cls, "cls");
 
         Class<?> unwrapped = PRIMITIVE_2_WRAPPER.getByValue(cls);

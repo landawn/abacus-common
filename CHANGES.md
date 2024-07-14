@@ -1,3 +1,7 @@
+### 5.1.0
+
+* Improvements and bug fixes.
+
 ### 5.0.0
 
 * Rename `toJSON/XML, fromJSON/XML` to `toJson/Xml, fromJson/Xml`.

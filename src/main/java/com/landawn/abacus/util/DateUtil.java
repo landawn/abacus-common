@@ -375,10 +375,11 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
     /**
      * Creates the JU date.
      *
-     * @param timeInMillis
-     * @return
+     * @param timeInMillis 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static java.util.Date createJUDate(final long timeInMillis) {
+    public static java.util.Date createJUDate(final long timeInMillis) throws IllegalArgumentException {
         //    N.checkArgPositive(timeInMillis, "timeInMillis");
         //
         //    if (timeInMillis == 0) {
@@ -411,10 +412,11 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
     /**
      * Creates the date.
      *
-     * @param timeInMillis
-     * @return
+     * @param timeInMillis 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static Date createDate(final long timeInMillis) {
+    public static Date createDate(final long timeInMillis) throws IllegalArgumentException {
         //    N.checkArgPositive(timeInMillis, "timeInMillis");
         //
         //    if (timeInMillis == 0) {
@@ -447,10 +449,11 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
     /**
      * Creates the time.
      *
-     * @param timeInMillis
-     * @return
+     * @param timeInMillis 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static Time createTime(final long timeInMillis) {
+    public static Time createTime(final long timeInMillis) throws IllegalArgumentException {
         //    N.checkArgPositive(timeInMillis, "timeInMillis");
         //
         //    if (timeInMillis == 0) {
@@ -483,10 +486,11 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
     /**
      * Creates the timestamp.
      *
-     * @param timeInMillis
-     * @return
+     * @param timeInMillis 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static Timestamp createTimestamp(final long timeInMillis) {
+    public static Timestamp createTimestamp(final long timeInMillis) throws IllegalArgumentException {
         //    N.checkArgPositive(timeInMillis, "timeInMillis");
         //
         //    if (timeInMillis == 0) {
@@ -519,10 +523,11 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
     /**
      * Creates the calendar.
      *
-     * @param timeInMillis
-     * @return
+     * @param timeInMillis 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static Calendar createCalendar(final long timeInMillis) {
+    public static Calendar createCalendar(final long timeInMillis) throws IllegalArgumentException {
         //    N.checkArgPositive(timeInMillis, "timeInMillis");
         //
         //    if (timeInMillis == 0) {
@@ -539,11 +544,12 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
     /**
      * Creates the calendar.
      *
-     * @param timeInMillis
-     * @param tz
-     * @return
+     * @param timeInMillis 
+     * @param tz 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static Calendar createCalendar(final long timeInMillis, final TimeZone tz) {
+    public static Calendar createCalendar(final long timeInMillis, final TimeZone tz) throws IllegalArgumentException {
         //    N.checkArgPositive(timeInMillis, "timeInMillis");
         //
         //    if (timeInMillis == 0) {
@@ -580,10 +586,11 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
     /**
      * Creates the gregorian calendar.
      *
-     * @param timeInMillis
-     * @return
+     * @param timeInMillis 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static GregorianCalendar createGregorianCalendar(final long timeInMillis) {
+    public static GregorianCalendar createGregorianCalendar(final long timeInMillis) throws IllegalArgumentException {
         //    N.checkArgPositive(timeInMillis, "timeInMillis");
         //
         //    if (timeInMillis == 0) {
@@ -600,11 +607,12 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
     /**
      * Creates the gregorian calendar.
      *
-     * @param timeInMillis
-     * @param tz
-     * @return
+     * @param timeInMillis 
+     * @param tz 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static GregorianCalendar createGregorianCalendar(final long timeInMillis, final TimeZone tz) {
+    public static GregorianCalendar createGregorianCalendar(final long timeInMillis, final TimeZone tz) throws IllegalArgumentException {
         //    N.checkArgPositive(timeInMillis, "timeInMillis");
         //
         //    if (timeInMillis == 0) {
@@ -641,10 +649,11 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
     /**
      * Creates the XML gregorian calendar.
      *
-     * @param timeInMillis
-     * @return
+     * @param timeInMillis 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static XMLGregorianCalendar createXMLGregorianCalendar(final long timeInMillis) {
+    public static XMLGregorianCalendar createXMLGregorianCalendar(final long timeInMillis) throws IllegalArgumentException {
         //    N.checkArgPositive(timeInMillis, "timeInMillis");
         //
         //    if (timeInMillis == 0) {
@@ -1802,14 +1811,15 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
      * <p>
      * <code>N.roll(date, -5, TimeUnit.DAYS)</code>.
      *
-     * @param <T>
-     * @param date
-     * @param amount
-     * @param unit
+     * @param <T> 
+     * @param date 
+     * @param amount 
+     * @param unit 
      * @return a new instance of Date with the specified amount rolled.
+     * @throws IllegalArgumentException 
      */
     @Beta
-    public static <T extends java.util.Date> T roll(final T date, final long amount, final TimeUnit unit) {
+    public static <T extends java.util.Date> T roll(final T date, final long amount, final TimeUnit unit) throws IllegalArgumentException {
         N.checkArgNotNull(date, DATE_STR);
 
         return createDate(date.getTime() + unit.toMillis(amount), date.getClass());
@@ -1822,14 +1832,15 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
      * <p>
      * <code>N.roll(date, -5, CalendarUnit.DAY)</code>.
      *
-     * @param <T>
-     * @param date
-     * @param amount
-     * @param unit
+     * @param <T> 
+     * @param date 
+     * @param amount 
+     * @param unit 
      * @return a new instance of Date with the specified amount rolled.
+     * @throws IllegalArgumentException 
      */
     @Beta
-    public static <T extends java.util.Date> T roll(final T date, final int amount, final CalendarField unit) {
+    public static <T extends java.util.Date> T roll(final T date, final int amount, final CalendarField unit) throws IllegalArgumentException {
         N.checkArgNotNull(date, DATE_STR);
 
         //    if (amount > Integer.MAX_VALUE || amount < Integer.MIN_VALUE) {
@@ -1883,14 +1894,15 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
      * <p>
      * <code>N.roll(c, -5, TimeUnit.DAYS)</code>.
      *
-     * @param <T>
-     * @param calendar
-     * @param amount
-     * @param unit
+     * @param <T> 
+     * @param calendar 
+     * @param amount 
+     * @param unit 
      * @return a new instance of Calendar with the specified amount rolled.
+     * @throws IllegalArgumentException 
      */
     @Beta
-    public static <T extends Calendar> T roll(final T calendar, final long amount, final TimeUnit unit) {
+    public static <T extends Calendar> T roll(final T calendar, final long amount, final TimeUnit unit) throws IllegalArgumentException {
         N.checkArgNotNull(calendar, CALENDAR_STR); //NOSONAR
 
         return createCalendar(calendar, calendar.getTimeInMillis() + unit.toMillis(amount));
@@ -1903,14 +1915,15 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
      * <p>
      * <code>N.roll(c, -5, CalendarUnit.DAY)</code>.
      *
-     * @param <T>
-     * @param calendar
-     * @param amount
-     * @param unit
+     * @param <T> 
+     * @param calendar 
+     * @param amount 
+     * @param unit 
      * @return a new instance of Calendar with the specified amount rolled.
+     * @throws IllegalArgumentException 
      */
     @Beta
-    public static <T extends Calendar> T roll(final T calendar, final int amount, final CalendarField unit) {
+    public static <T extends Calendar> T roll(final T calendar, final int amount, final CalendarField unit) throws IllegalArgumentException {
         N.checkArgNotNull(calendar, CALENDAR_STR);
 
         //    if (amount > Integer.MAX_VALUE || amount < Integer.MIN_VALUE) {
@@ -2169,15 +2182,15 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
     /**
      * Copied from Apache Commons Lang under Apache License v2.
      * <br />
-     *
+     * 
      * <p>Rounds a date, leaving the field specified as the most
      * significant field.</p>
-     *
+     * 
      * <p>For example, if you had the date-time of 28 Mar 2002
      * 13:45:01.231, if this was passed with HOUR, it would return
      * 28 Mar 2002 14:00:00.000. If this was passed with MONTH, it
      * would return 1 April 2002 0:00:00.000.</p>
-     *
+     * 
      * <p>For a date in a timezone that handles the change to daylight
      * saving time, rounding to Calendar.HOUR_OF_DAY will behave as follows.
      * Suppose daylight saving time begins at 02:00 on March 30. Rounding a
@@ -2190,13 +2203,14 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
      * <li>March 30, 2003 02:40 rounds to March 30, 2003 04:00</li>
      * </ul>
      *
-     * @param <T>
+     * @param <T> 
      * @param date the date to work with, not null
      * @param field the field from {@code Calendar} or <code>SEMI_MONTH</code>
-     * @return
+     * @return 
+     * @throws IllegalArgumentException 
      * @throws ArithmeticException if the year is over 280 million
      */
-    public static <T extends java.util.Date> T round(final T date, final int field) {
+    public static <T extends java.util.Date> T round(final T date, final int field) throws IllegalArgumentException {
         N.checkArgNotNull(date, DATE_STR);
 
         final Calendar gval = Calendar.getInstance();
@@ -2249,7 +2263,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
      * @throws IllegalArgumentException if the date is <code>null</code>
      * @throws ArithmeticException if the year is over 280 million
      */
-    public static <T extends Calendar> T round(final T calendar, final int field) {
+    public static <T extends Calendar> T round(final T calendar, final int field) throws IllegalArgumentException {
         N.checkArgNotNull(calendar, CALENDAR_STR);
 
         final Calendar rounded = (Calendar) calendar.clone();
@@ -2294,7 +2308,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
      * @throws IllegalArgumentException if the date is <code>null</code>
      * @throws ArithmeticException if the year is over 280 million
      */
-    public static <T extends java.util.Date> T truncate(final T date, final int field) {
+    public static <T extends java.util.Date> T truncate(final T date, final int field) throws IllegalArgumentException {
         N.checkArgNotNull(date, DATE_STR);
 
         final Calendar gval = Calendar.getInstance();
@@ -2334,7 +2348,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
      * @throws IllegalArgumentException if the date is <code>null</code>
      * @throws ArithmeticException if the year is over 280 million
      */
-    public static <T extends Calendar> T truncate(final T calendar, final int field) {
+    public static <T extends Calendar> T truncate(final T calendar, final int field) throws IllegalArgumentException {
         N.checkArgNotNull(calendar, CALENDAR_STR);
 
         final Calendar truncated = (Calendar) calendar.clone();
@@ -2379,7 +2393,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
      * @throws ArithmeticException if the year is over 280 million
      * @since 2.5
      */
-    public static <T extends java.util.Date> T ceiling(final T date, final int field) {
+    public static <T extends java.util.Date> T ceiling(final T date, final int field) throws IllegalArgumentException {
         N.checkArgNotNull(date, DATE_STR);
 
         final Calendar gval = Calendar.getInstance();
@@ -2420,7 +2434,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
      * @throws ArithmeticException if the year is over 280 million
      * @since 2.5
      */
-    public static <T extends Calendar> T ceiling(final T calendar, final int field) {
+    public static <T extends Calendar> T ceiling(final T calendar, final int field) throws IllegalArgumentException {
         N.checkArgNotNull(calendar, CALENDAR_STR);
 
         final Calendar ceiled = (Calendar) calendar.clone();
@@ -3235,7 +3249,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
      * @throws IllegalArgumentException if either date is {@code null}
      * @since 2.1
      */
-    public static boolean isSameDay(final java.util.Date date1, final java.util.Date date2) {
+    public static boolean isSameDay(final java.util.Date date1, final java.util.Date date2) throws IllegalArgumentException {
         N.checkArgNotNull(date1, DATE1_STR);
         N.checkArgNotNull(date2, DATE2_STR);
 
@@ -3264,7 +3278,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
      * @throws IllegalArgumentException if either calendar is {@code null}
      * @since 2.1
      */
-    public static boolean isSameDay(final Calendar cal1, final Calendar cal2) {
+    public static boolean isSameDay(final Calendar cal1, final Calendar cal2) throws IllegalArgumentException {
         N.checkArgNotNull(cal1, CAL1_STR);
         N.checkArgNotNull(cal2, CAL2_STR);
 
@@ -3273,13 +3287,14 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
     }
 
     /**
+     * 
      *
-     *
-     * @param date1
-     * @param date2
-     * @return
+     * @param date1 
+     * @param date2 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static boolean isSameMonth(final java.util.Date date1, final java.util.Date date2) {
+    public static boolean isSameMonth(final java.util.Date date1, final java.util.Date date2) throws IllegalArgumentException {
         N.checkArgNotNull(date1, DATE1_STR);
         N.checkArgNotNull(date2, DATE2_STR);
 
@@ -3293,13 +3308,14 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
     }
 
     /**
+     * 
      *
-     *
-     * @param cal1
-     * @param cal2
-     * @return
+     * @param cal1 
+     * @param cal2 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static boolean isSameMonth(final Calendar cal1, final Calendar cal2) {
+    public static boolean isSameMonth(final Calendar cal1, final Calendar cal2) throws IllegalArgumentException {
         N.checkArgNotNull(cal1, CAL1_STR);
         N.checkArgNotNull(cal2, CAL2_STR);
 
@@ -3308,13 +3324,14 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
     }
 
     /**
+     * 
      *
-     *
-     * @param date1
-     * @param date2
-     * @return
+     * @param date1 
+     * @param date2 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static boolean isSameYear(final java.util.Date date1, final java.util.Date date2) {
+    public static boolean isSameYear(final java.util.Date date1, final java.util.Date date2) throws IllegalArgumentException {
         N.checkArgNotNull(date1, DATE1_STR);
         N.checkArgNotNull(date2, DATE2_STR);
 
@@ -3328,13 +3345,14 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
     }
 
     /**
+     * 
      *
-     *
-     * @param cal1
-     * @param cal2
-     * @return
+     * @param cal1 
+     * @param cal2 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static boolean isSameYear(final Calendar cal1, final Calendar cal2) {
+    public static boolean isSameYear(final Calendar cal1, final Calendar cal2) throws IllegalArgumentException {
         N.checkArgNotNull(cal1, CAL1_STR);
         N.checkArgNotNull(cal2, CAL2_STR);
 
@@ -3356,7 +3374,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
      * @throws IllegalArgumentException if either date is {@code null}
      * @since 2.1
      */
-    public static boolean isSameInstant(final java.util.Date date1, final java.util.Date date2) {
+    public static boolean isSameInstant(final java.util.Date date1, final java.util.Date date2) throws IllegalArgumentException {
         N.checkArgNotNull(date1, DATE1_STR);
         N.checkArgNotNull(date2, DATE2_STR);
         return date1.getTime() == date2.getTime();
@@ -3376,7 +3394,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
      * @throws IllegalArgumentException if either date is {@code null}
      * @since 2.1
      */
-    public static boolean isSameInstant(final Calendar cal1, final Calendar cal2) {
+    public static boolean isSameInstant(final Calendar cal1, final Calendar cal2) throws IllegalArgumentException {
         N.checkArgNotNull(cal1, CAL1_STR);
         N.checkArgNotNull(cal2, CAL2_STR);
 
@@ -3399,7 +3417,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
      * @throws IllegalArgumentException if either date is {@code null}
      * @since 2.1
      */
-    public static boolean isSameLocalTime(final Calendar cal1, final Calendar cal2) {
+    public static boolean isSameLocalTime(final Calendar cal1, final Calendar cal2) throws IllegalArgumentException {
         N.checkArgNotNull(cal1, CAL1_STR);
         N.checkArgNotNull(cal2, CAL2_STR);
 
@@ -3739,12 +3757,13 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
     }
 
     /**
+     * 
      *
-     *
-     * @param date
-     * @return
+     * @param date 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static boolean isLastDateOfMonth(final java.util.Date date) {
+    public static boolean isLastDateOfMonth(final java.util.Date date) throws IllegalArgumentException {
         N.checkArgNotNull(date, DATE_STR);
 
         final Calendar cal = Calendar.getInstance();
@@ -3754,12 +3773,13 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
     }
 
     /**
+     * 
      *
-     *
-     * @param date
-     * @return
+     * @param date 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static boolean isLastDateOfYear(final java.util.Date date) {
+    public static boolean isLastDateOfYear(final java.util.Date date) throws IllegalArgumentException {
         N.checkArgNotNull(date, DATE_STR);
 
         final Calendar cal = Calendar.getInstance();
@@ -3769,12 +3789,13 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
     }
 
     /**
+     * 
      *
-     *
-     * @param date
-     * @return
+     * @param date 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static int getLastDateOfMonth(final java.util.Date date) {
+    public static int getLastDateOfMonth(final java.util.Date date) throws IllegalArgumentException {
         N.checkArgNotNull(date, DATE_STR);
 
         final Calendar cal = Calendar.getInstance();
@@ -3784,12 +3805,13 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
     }
 
     /**
+     * 
      *
-     *
-     * @param date
-     * @return
+     * @param date 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static int getLastDateOfYear(final java.util.Date date) {
+    public static int getLastDateOfYear(final java.util.Date date) throws IllegalArgumentException {
         N.checkArgNotNull(date, DATE_STR);
 
         final Calendar cal = Calendar.getInstance();

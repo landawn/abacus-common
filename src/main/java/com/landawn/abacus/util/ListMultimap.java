@@ -20,8 +20,10 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.function.IntFunction;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import com.landawn.abacus.annotation.Beta;
@@ -285,13 +287,16 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
 
     /**
      *
+     *
      * @param <T>
      * @param <K> the key type
      * @param c
      * @param keyMapper
      * @return
+     * @throws IllegalArgumentException
      */
-    public static <T, K> ListMultimap<K, T> create(final Collection<? extends T> c, final Function<? super T, ? extends K> keyMapper) {
+    public static <T, K> ListMultimap<K, T> create(final Collection<? extends T> c, final Function<? super T, ? extends K> keyMapper)
+            throws IllegalArgumentException {
         N.checkArgNotNull(keyMapper);
 
         final ListMultimap<K, T> multimap = N.newListMultimap(N.size(c));
@@ -307,6 +312,7 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
 
     /**
      *
+     *
      * @param <T>
      * @param <K> the key type
      * @param <E>
@@ -314,9 +320,10 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      * @param keyMapper
      * @param valueExtractor
      * @return
+     * @throws IllegalArgumentException
      */
     public static <T, K, E> ListMultimap<K, E> create(final Collection<? extends T> c, final Function<? super T, ? extends K> keyMapper,
-            final Function<? super T, ? extends E> valueExtractor) {
+            final Function<? super T, ? extends E> valueExtractor) throws IllegalArgumentException {
         N.checkArgNotNull(keyMapper);
         N.checkArgNotNull(valueExtractor);
 
@@ -473,15 +480,17 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
 
     /**
      *
+     *
      * @param <K> the key type
      * @param <E>
      * @param <V> the value type
      * @param map
      * @return
+     * @throws IllegalArgumentException
      */
     @SuppressWarnings("rawtypes")
     @Beta
-    public static <K, E, V extends List<E>> ListMultimap<K, E> wrap(final Map<K, V> map) {
+    public static <K, E, V extends List<E>> ListMultimap<K, E> wrap(final Map<K, V> map) throws IllegalArgumentException {
         N.checkArgNotNull(map);
         N.checkArgument(N.anyNull(map.values()), "The specified map contains null value: %s", map);
 
@@ -499,16 +508,19 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
 
     /**
      *
+     *
      * @param <K> the key type
      * @param <E>
      * @param <V> the value type
      * @param map
      * @param valueSupplier
      * @return
+     * @throws IllegalArgumentException
      */
     @SuppressWarnings("rawtypes")
     @Beta
-    public static <K, E, V extends List<E>> ListMultimap<K, E> wrap(final Map<K, V> map, final Supplier<? extends V> valueSupplier) {
+    public static <K, E, V extends List<E>> ListMultimap<K, E> wrap(final Map<K, V> map, final Supplier<? extends V> valueSupplier)
+            throws IllegalArgumentException {
         N.checkArgNotNull(map, "map");
         N.checkArgNotNull(valueSupplier, "valueSupplier");
 
@@ -523,7 +535,7 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
     @SuppressWarnings("rawtypes")
     public ListMultimap<E, K> inverse() {
         final ListMultimap<K, E> multimap = this;
-        final ListMultimap<E, K> res = new ListMultimap<>(Maps.newOrderingMap(valueMap), (Supplier) valueSupplier);
+        final ListMultimap<E, K> res = new ListMultimap<>(Maps.newOrderingMap(backingMap), (Supplier) valueSupplier);
 
         if (N.notEmpty(multimap)) {
             for (Map.Entry<K, List<E>> entry : multimap.entrySet()) {
@@ -557,18 +569,16 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
     /**
      * Filter by key.
      *
-     * @param <X>
      * @param filter
      * @return
-     * @throws X the x
      */
     @Override
-    public <X extends Exception> ListMultimap<K, E> filterByKey(Throwables.Predicate<? super K, X> filter) throws X {
+    public ListMultimap<K, E> filterByKey(Predicate<? super K> filter) {
         final ListMultimap<K, E> result = new ListMultimap<>(mapSupplier, valueSupplier);
 
-        for (Map.Entry<K, List<E>> entry : valueMap.entrySet()) {
+        for (Map.Entry<K, List<E>> entry : backingMap.entrySet()) {
             if (filter.test(entry.getKey())) {
-                result.valueMap.put(entry.getKey(), entry.getValue());
+                result.backingMap.put(entry.getKey(), entry.getValue());
             }
         }
 
@@ -578,18 +588,16 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
     /**
      * Filter by value.
      *
-     * @param <X>
      * @param filter
      * @return
-     * @throws X the x
      */
     @Override
-    public <X extends Exception> ListMultimap<K, E> filterByValue(Throwables.Predicate<? super List<E>, X> filter) throws X {
+    public ListMultimap<K, E> filterByValue(Predicate<? super List<E>> filter) {
         final ListMultimap<K, E> result = new ListMultimap<>(mapSupplier, valueSupplier);
 
-        for (Map.Entry<K, List<E>> entry : valueMap.entrySet()) {
+        for (Map.Entry<K, List<E>> entry : backingMap.entrySet()) {
             if (filter.test(entry.getValue())) {
-                result.valueMap.put(entry.getKey(), entry.getValue());
+                result.backingMap.put(entry.getKey(), entry.getValue());
             }
         }
 
@@ -598,18 +606,16 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
 
     /**
      *
-     * @param <X>
      * @param filter
      * @return
-     * @throws X the x
      */
     @Override
-    public <X extends Exception> ListMultimap<K, E> filter(Throwables.BiPredicate<? super K, ? super List<E>, X> filter) throws X {
+    public ListMultimap<K, E> filter(BiPredicate<? super K, ? super List<E>> filter) {
         final ListMultimap<K, E> result = new ListMultimap<>(mapSupplier, valueSupplier);
 
-        for (Map.Entry<K, List<E>> entry : valueMap.entrySet()) {
+        for (Map.Entry<K, List<E>> entry : backingMap.entrySet()) {
             if (filter.test(entry.getKey(), entry.getValue())) {
-                result.valueMap.put(entry.getKey(), entry.getValue());
+                result.backingMap.put(entry.getKey(), entry.getValue());
             }
         }
 
@@ -622,9 +628,9 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      * @return
      */
     public ImmutableMap<K, ImmutableList<E>> toImmutableMap() {
-        final Map<K, ImmutableList<E>> map = Maps.newTargetMap(valueMap);
+        final Map<K, ImmutableList<E>> map = Maps.newTargetMap(backingMap);
 
-        for (Map.Entry<K, List<E>> entry : valueMap.entrySet()) {
+        for (Map.Entry<K, List<E>> entry : backingMap.entrySet()) {
             map.put(entry.getKey(), ImmutableList.copyOf(entry.getValue()));
         }
 
@@ -638,9 +644,9 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      * @return
      */
     public ImmutableMap<K, ImmutableList<E>> toImmutableMap(final IntFunction<? extends Map<K, ImmutableList<E>>> mapSupplier) {
-        final Map<K, ImmutableList<E>> map = mapSupplier.apply(valueMap.size());
+        final Map<K, ImmutableList<E>> map = mapSupplier.apply(backingMap.size());
 
-        for (Map.Entry<K, List<E>> entry : valueMap.entrySet()) {
+        for (Map.Entry<K, List<E>> entry : backingMap.entrySet()) {
             map.put(entry.getKey(), ImmutableList.copyOf(entry.getValue()));
         }
 

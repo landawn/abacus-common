@@ -20,11 +20,19 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.ConcurrentModificationException;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
+import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
+import java.util.function.BiPredicate;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.IntFunction;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import com.landawn.abacus.annotation.Beta;
@@ -56,13 +64,13 @@ import com.landawn.abacus.util.stream.Stream;
  * @see N#newSetMultimap(Supplier, Supplier)
  * @since 0.8
  */
-public sealed class Multimap<K, E, V extends Collection<E>> permits ListMultimap, SetMultimap {
+public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<Map.Entry<K, V>> permits ListMultimap, SetMultimap {
 
     final Supplier<? extends Map<K, V>> mapSupplier;
 
     final Supplier<? extends V> valueSupplier;
 
-    final Map<K, V> valueMap;
+    final Map<K, V> backingMap;
 
     /**
      * Returns a <code>Multimap<K, E, List<E>></code>.
@@ -88,14 +96,14 @@ public sealed class Multimap<K, E, V extends Collection<E>> permits ListMultimap
     Multimap(final Supplier<? extends Map<K, V>> mapSupplier, final Supplier<? extends V> valueSupplier) {
         this.mapSupplier = mapSupplier;
         this.valueSupplier = valueSupplier;
-        this.valueMap = mapSupplier.get();
+        this.backingMap = mapSupplier.get();
     }
 
     @Internal
     Multimap(final Map<K, V> valueMap, final Supplier<? extends V> valueSupplier) {
         this.mapSupplier = Suppliers.ofMap(valueMap.getClass());
         this.valueSupplier = valueSupplier;
-        this.valueMap = valueMap;
+        this.backingMap = valueMap;
     }
 
     /**
@@ -115,7 +123,7 @@ public sealed class Multimap<K, E, V extends Collection<E>> permits ListMultimap
      * @return
      */
     public V get(final Object key) {
-        return valueMap.get(key);
+        return backingMap.get(key);
     }
 
     /**
@@ -126,7 +134,7 @@ public sealed class Multimap<K, E, V extends Collection<E>> permits ListMultimap
      * @return
      */
     public V getOrDefault(final Object key, V defaultValue) {
-        final V value = valueMap.get(key);
+        final V value = backingMap.get(key);
 
         if (value == null) {
             return defaultValue;
@@ -142,11 +150,11 @@ public sealed class Multimap<K, E, V extends Collection<E>> permits ListMultimap
      * @return
      */
     public boolean put(final K key, final E e) {
-        V val = valueMap.get(key);
+        V val = backingMap.get(key);
 
         if (val == null) {
             val = valueSupplier.get();
-            valueMap.put(key, val);
+            backingMap.put(key, val);
         }
 
         return val.add(e);
@@ -168,11 +176,11 @@ public sealed class Multimap<K, E, V extends Collection<E>> permits ListMultimap
 
         for (Map.Entry<? extends K, ? extends E> e : m.entrySet()) {
             key = e.getKey();
-            val = valueMap.get(key);
+            val = backingMap.get(key);
 
             if (val == null) {
                 val = valueSupplier.get();
-                valueMap.put(key, val);
+                backingMap.put(key, val);
             }
 
             result |= val.add(e.getValue());
@@ -190,11 +198,11 @@ public sealed class Multimap<K, E, V extends Collection<E>> permits ListMultimap
      * @return
      */
     public boolean putIfAbsent(final K key, final E e) {
-        V val = valueMap.get(key);
+        V val = backingMap.get(key);
 
         if (val == null) {
             val = valueSupplier.get();
-            valueMap.put(key, val);
+            backingMap.put(key, val);
         } else if (val.contains(e)) {
             return false;
         }
@@ -211,12 +219,12 @@ public sealed class Multimap<K, E, V extends Collection<E>> permits ListMultimap
      * @return
      */
     public boolean putIfKeyAbsent(final K key, final E e) {
-        V val = valueMap.get(key);
+        V val = backingMap.get(key);
 
         if (val == null) {
             val = valueSupplier.get();
             val.add(e);
-            valueMap.put(key, val);
+            backingMap.put(key, val);
             return true;
         }
 
@@ -235,11 +243,11 @@ public sealed class Multimap<K, E, V extends Collection<E>> permits ListMultimap
             return false;
         }
 
-        V val = valueMap.get(key);
+        V val = backingMap.get(key);
 
         if (val == null) {
             val = valueSupplier.get();
-            valueMap.put(key, val);
+            backingMap.put(key, val);
         }
 
         return val.addAll(c);
@@ -260,12 +268,12 @@ public sealed class Multimap<K, E, V extends Collection<E>> permits ListMultimap
             return false;
         }
 
-        V val = valueMap.get(key);
+        V val = backingMap.get(key);
 
         if (val == null) {
             val = valueSupplier.get();
             val.addAll(c);
-            valueMap.put(key, val);
+            backingMap.put(key, val);
             return true;
         }
 
@@ -288,11 +296,11 @@ public sealed class Multimap<K, E, V extends Collection<E>> permits ListMultimap
 
         for (Map.Entry<? extends K, ? extends Collection<? extends E>> e : m.entrySet()) {
             key = e.getKey();
-            val = valueMap.get(key);
+            val = backingMap.get(key);
 
             if (val == null) {
                 val = valueSupplier.get();
-                valueMap.put(key, val);
+                backingMap.put(key, val);
             }
 
             result |= val.addAll(e.getValue());
@@ -322,11 +330,11 @@ public sealed class Multimap<K, E, V extends Collection<E>> permits ListMultimap
             }
 
             key = e.getKey();
-            val = valueMap.get(key);
+            val = backingMap.get(key);
 
             if (val == null) {
                 val = valueSupplier.get();
-                valueMap.put(key, val);
+                backingMap.put(key, val);
             }
 
             result |= val.addAll(e.getValue());
@@ -342,11 +350,11 @@ public sealed class Multimap<K, E, V extends Collection<E>> permits ListMultimap
      * @return
      */
     public boolean removeOne(final Object key, final Object e) {
-        V val = valueMap.get(key);
+        V val = backingMap.get(key);
 
         if (val != null && val.remove(e)) {
             if (val.isEmpty()) {
-                valueMap.remove(key);
+                backingMap.remove(key);
             }
 
             return true;
@@ -371,7 +379,7 @@ public sealed class Multimap<K, E, V extends Collection<E>> permits ListMultimap
 
         for (Map.Entry<? extends K, ? extends E> e : m.entrySet()) {
             key = e.getKey();
-            val = valueMap.get(key);
+            val = backingMap.get(key);
 
             if (N.notEmpty(val)) {
                 if (!result) {
@@ -381,7 +389,7 @@ public sealed class Multimap<K, E, V extends Collection<E>> permits ListMultimap
                 }
 
                 if (val.isEmpty()) {
-                    valueMap.remove(key);
+                    backingMap.remove(key);
                 }
             }
         }
@@ -396,7 +404,7 @@ public sealed class Multimap<K, E, V extends Collection<E>> permits ListMultimap
      * @return values associated with specified key.
      */
     public V removeAll(final Object key) {
-        return valueMap.remove(key);
+        return backingMap.remove(key);
     }
 
     /**
@@ -413,13 +421,13 @@ public sealed class Multimap<K, E, V extends Collection<E>> permits ListMultimap
         }
 
         boolean result = false;
-        final V val = valueMap.get(key);
+        final V val = backingMap.get(key);
 
         if (N.notEmpty(val)) {
             result = val.removeAll(c);
 
             if (val.isEmpty()) {
-                valueMap.remove(key);
+                backingMap.remove(key);
             }
         }
 
@@ -449,7 +457,7 @@ public sealed class Multimap<K, E, V extends Collection<E>> permits ListMultimap
 
         for (Map.Entry<?, ? extends Collection<?>> e : m.entrySet()) {
             key = e.getKey();
-            val = valueMap.get(key);
+            val = backingMap.get(key);
 
             if (N.notEmpty(val)) {
                 if (!result) {
@@ -459,7 +467,7 @@ public sealed class Multimap<K, E, V extends Collection<E>> permits ListMultimap
                 }
 
                 if (val.isEmpty()) {
-                    valueMap.remove(key);
+                    backingMap.remove(key);
                 }
             }
         }
@@ -485,7 +493,7 @@ public sealed class Multimap<K, E, V extends Collection<E>> permits ListMultimap
 
         for (Map.Entry<?, ? extends Collection<?>> e : m.entrySet()) {
             key = e.getKey();
-            val = valueMap.get(key);
+            val = backingMap.get(key);
 
             if (N.notEmpty(val) && N.notEmpty(e.getValue())) {
                 if (!result) {
@@ -495,7 +503,7 @@ public sealed class Multimap<K, E, V extends Collection<E>> permits ListMultimap
                 }
 
                 if (val.isEmpty()) {
-                    valueMap.remove(key);
+                    backingMap.remove(key);
                 }
             }
         }
@@ -506,17 +514,15 @@ public sealed class Multimap<K, E, V extends Collection<E>> permits ListMultimap
     /**
      * Remove the specified value (one occurrence) from the value set associated with keys which satisfy the specified <code>predicate</code>.
      *
-     * @param <X>
      * @param value
      * @param predicate
      * @return <code>true</code> if this Multimap is modified by this operation, otherwise <code>false</code>.
-     * @throws X the x
      * @see Collection#remove(Object)
      */
-    public <X extends Exception> boolean removeOneIf(E value, Throwables.Predicate<? super K, X> predicate) throws X {
+    public boolean removeOneIf(E value, final Predicate<? super K> predicate) {
         Set<K> removingKeys = null;
 
-        for (K key : this.valueMap.keySet()) {
+        for (K key : this.backingMap.keySet()) {
             if (predicate.test(key)) {
                 if (removingKeys == null) {
                     removingKeys = N.newHashSet();
@@ -544,17 +550,15 @@ public sealed class Multimap<K, E, V extends Collection<E>> permits ListMultimap
     /**
      * Remove the specified value (one occurrence) from the value set associated with keys which satisfy the specified <code>predicate</code>.
      *
-     * @param <X>
      * @param value
      * @param predicate
      * @return <code>true</code> if this Multimap is modified by this operation, otherwise <code>false</code>.
-     * @throws X the x
      * @see Collection#remove(Object)
      */
-    public <X extends Exception> boolean removeOneIf(E value, Throwables.BiPredicate<? super K, ? super V, X> predicate) throws X {
+    public boolean removeOneIf(E value, final BiPredicate<? super K, ? super V> predicate) {
         Set<K> removingKeys = null;
 
-        for (Map.Entry<K, V> entry : this.valueMap.entrySet()) {
+        for (Map.Entry<K, V> entry : this.backingMap.entrySet()) {
             if (predicate.test(entry.getKey(), entry.getValue())) {
                 if (removingKeys == null) {
                     removingKeys = N.newHashSet();
@@ -582,17 +586,15 @@ public sealed class Multimap<K, E, V extends Collection<E>> permits ListMultimap
     /**
      * Remove the specified values (all occurrences) from the value set associated with keys which satisfy the specified <code>predicate</code>.
      *
-     * @param <X>
      * @param values
      * @param predicate
      * @return <code>true</code> if this Multimap is modified by this operation, otherwise <code>false</code>.
-     * @throws X the x
      * @see Collection#removeAll(Collection)
      */
-    public <X extends Exception> boolean removeManyIf(Collection<?> values, Throwables.Predicate<? super K, X> predicate) throws X {
+    public boolean removeManyIf(final Collection<?> values, final Predicate<? super K> predicate) {
         Set<K> removingKeys = null;
 
-        for (K key : this.valueMap.keySet()) {
+        for (K key : this.backingMap.keySet()) {
             if (predicate.test(key)) {
                 if (removingKeys == null) {
                     removingKeys = N.newHashSet();
@@ -620,17 +622,15 @@ public sealed class Multimap<K, E, V extends Collection<E>> permits ListMultimap
     /**
      * Remove the specified values (all occurrences) from the value set associated with keys which satisfy the specified <code>predicate</code>.
      *
-     * @param <X>
      * @param values
      * @param predicate
      * @return <code>true</code> if this Multimap is modified by this operation, otherwise <code>false</code>.
-     * @throws X the x
      * @see Collection#removeAll(Collection)
      */
-    public <X extends Exception> boolean removeManyIf(Collection<?> values, Throwables.BiPredicate<? super K, ? super V, X> predicate) throws X {
+    public boolean removeManyIf(Collection<?> values, BiPredicate<? super K, ? super V> predicate) {
         Set<K> removingKeys = null;
 
-        for (Map.Entry<K, V> entry : this.valueMap.entrySet()) {
+        for (Map.Entry<K, V> entry : this.backingMap.entrySet()) {
             if (predicate.test(entry.getKey(), entry.getValue())) {
                 if (removingKeys == null) {
                     removingKeys = N.newHashSet();
@@ -658,15 +658,13 @@ public sealed class Multimap<K, E, V extends Collection<E>> permits ListMultimap
     /**
      * Remove all the values associated with keys which satisfy the specified <code>predicate</code>.
      *
-     * @param <X>
      * @param predicate
      * @return <code>true</code> if this Multimap is modified by this operation, otherwise <code>false</code>.
-     * @throws X the x
      */
-    public <X extends Exception> boolean removeAllIf(Throwables.Predicate<? super K, X> predicate) throws X {
+    public boolean removeAllIf(Predicate<? super K> predicate) {
         Set<K> removingKeys = null;
 
-        for (K key : this.valueMap.keySet()) {
+        for (K key : this.backingMap.keySet()) {
             if (predicate.test(key)) {
                 if (removingKeys == null) {
                     removingKeys = N.newHashSet();
@@ -690,15 +688,13 @@ public sealed class Multimap<K, E, V extends Collection<E>> permits ListMultimap
     /**
      * Remove all the values associated with keys which satisfy the specified <code>predicate</code>.
      *
-     * @param <X>
      * @param predicate
      * @return <code>true</code> if this Multimap is modified by this operation, otherwise <code>false</code>.
-     * @throws X the x
      */
-    public <X extends Exception> boolean removeAllIf(Throwables.BiPredicate<? super K, ? super V, X> predicate) throws X {
+    public boolean removeAllIf(BiPredicate<? super K, ? super V> predicate) {
         Set<K> removingKeys = null;
 
-        for (Map.Entry<K, V> entry : this.valueMap.entrySet()) {
+        for (Map.Entry<K, V> entry : this.backingMap.entrySet()) {
             if (predicate.test(entry.getKey(), entry.getValue())) {
                 if (removingKeys == null) {
                     removingKeys = N.newHashSet();
@@ -729,7 +725,7 @@ public sealed class Multimap<K, E, V extends Collection<E>> permits ListMultimap
      * @return <code>true</code> if this Multimap is modified by this operation, otherwise <code>false</code>.
      */
     public boolean replaceOne(final K key, final E oldValue, final E newValue) {
-        final V val = valueMap.get(key);
+        final V val = backingMap.get(key);
 
         if (val == null) {
             return false;
@@ -798,7 +794,7 @@ public sealed class Multimap<K, E, V extends Collection<E>> permits ListMultimap
      * @return <code>true</code> if this Multimap is modified by this operation, otherwise <code>false</code>.
      */
     public boolean replaceAllWithOne(final K key, final E newValue) {
-        final V val = valueMap.get(key);
+        final V val = backingMap.get(key);
 
         if (val == null) {
             return false;
@@ -872,7 +868,7 @@ public sealed class Multimap<K, E, V extends Collection<E>> permits ListMultimap
      * @return <code>true</code> if this Multimap is modified by this operation, otherwise <code>false</code>.
      */
     public boolean replaceManyWithOne(final K key, final Collection<? extends E> oldValues, final E newValue) {
-        final V val = valueMap.get(key);
+        final V val = backingMap.get(key);
 
         if (val == null) {
             return false;
@@ -889,17 +885,15 @@ public sealed class Multimap<K, E, V extends Collection<E>> permits ListMultimap
     /**
      * Replace the specified {@code oldValue} (one occurrence) from the value set associated with keys which satisfy the specified {@code predicate} with the specified {@code newValue}.
      *
-     * @param <X>
      * @param predicate
      * @param oldValue
      * @param newValue
      * @return <code>true</code> if this Multimap is modified by this operation, otherwise <code>false</code>.
-     * @throws X the x
      */
-    public <X extends Exception> boolean replaceOneIf(Throwables.Predicate<? super K, X> predicate, E oldValue, E newValue) throws X {
+    public boolean replaceOneIf(Predicate<? super K> predicate, E oldValue, E newValue) {
         boolean modified = false;
 
-        for (Map.Entry<K, V> entry : this.valueMap.entrySet()) {
+        for (Map.Entry<K, V> entry : this.backingMap.entrySet()) {
             if (predicate.test(entry.getKey())) {
                 modified = modified | replaceOne(entry.getValue(), oldValue, newValue); //NOSONAR
             }
@@ -911,17 +905,15 @@ public sealed class Multimap<K, E, V extends Collection<E>> permits ListMultimap
     /**
      * Replace the specified {@code oldValue} (one occurrence) from the value set associated with keys which satisfy the specified {@code predicate} with the specified {@code newValue}.
      *
-     * @param <X>
      * @param predicate
      * @param oldValue
      * @param newValue
      * @return <code>true</code> if this Multimap is modified by this operation, otherwise <code>false</code>.
-     * @throws X the x
      */
-    public <X extends Exception> boolean replaceOneIf(Throwables.BiPredicate<? super K, ? super V, X> predicate, E oldValue, E newValue) throws X {
+    public boolean replaceOneIf(BiPredicate<? super K, ? super V> predicate, E oldValue, E newValue) {
         boolean modified = false;
 
-        for (Map.Entry<K, V> entry : this.valueMap.entrySet()) {
+        for (Map.Entry<K, V> entry : this.backingMap.entrySet()) {
             if (predicate.test(entry.getKey(), entry.getValue())) {
                 modified = modified | replaceOne(entry.getValue(), oldValue, newValue); //NOSONAR
             }
@@ -933,18 +925,15 @@ public sealed class Multimap<K, E, V extends Collection<E>> permits ListMultimap
     /**
      * Replace all the specified {@code oldValue} (all occurrences) from the value set associated with keys which satisfy the specified {@code predicate} with single specified {@code newValue}.
      *
-     * @param <X>
      * @param predicate
      * @param oldValues
      * @param newValue
      * @return <code>true</code> if this Multimap is modified by this operation, otherwise <code>false</code>.
-     * @throws X the x
      */
-    public <X extends Exception> boolean replaceManyWithOneIf(Throwables.Predicate<? super K, X> predicate, Collection<? extends E> oldValues, E newValue)
-            throws X {
+    public boolean replaceManyWithOneIf(Predicate<? super K> predicate, Collection<? extends E> oldValues, E newValue) {
         boolean modified = false;
 
-        for (Map.Entry<K, V> entry : this.valueMap.entrySet()) {
+        for (Map.Entry<K, V> entry : this.backingMap.entrySet()) {
             if (predicate.test(entry.getKey()) && entry.getValue().removeAll(oldValues)) {
                 entry.getValue().add(newValue);
                 modified = true;
@@ -957,18 +946,15 @@ public sealed class Multimap<K, E, V extends Collection<E>> permits ListMultimap
     /**
      * Replace all the specified {@code oldValue} (all occurrences) from the value set associated with keys which satisfy the specified {@code predicate} with single specified {@code newValue}.
      *
-     * @param <X>
      * @param predicate
      * @param oldValues
      * @param newValue
      * @return <code>true</code> if this Multimap is modified by this operation, otherwise <code>false</code>.
-     * @throws X the x
      */
-    public <X extends Exception> boolean replaceManyWithOneIf(Throwables.BiPredicate<? super K, ? super V, X> predicate, Collection<? extends E> oldValues,
-            E newValue) throws X {
+    public boolean replaceManyWithOneIf(BiPredicate<? super K, ? super V> predicate, Collection<? extends E> oldValues, E newValue) {
         boolean modified = false;
 
-        for (Map.Entry<K, V> entry : this.valueMap.entrySet()) {
+        for (Map.Entry<K, V> entry : this.backingMap.entrySet()) {
             if (predicate.test(entry.getKey(), entry.getValue()) && entry.getValue().removeAll(oldValues)) {
                 entry.getValue().add(newValue);
                 modified = true;
@@ -981,16 +967,14 @@ public sealed class Multimap<K, E, V extends Collection<E>> permits ListMultimap
     /**
      * Replace all the values associated to specified {@code key} which satisfy the specified {@code predicate} with the specified {@code newValue}.
      *
-     * @param <X>
      * @param predicate
      * @param newValue
      * @return <code>true</code> if this Multimap is modified by this operation, otherwise <code>false</code>.
-     * @throws X the x
      */
-    public <X extends Exception> boolean replaceAllWithOneIf(Throwables.Predicate<? super K, X> predicate, E newValue) throws X {
+    public boolean replaceAllWithOneIf(Predicate<? super K> predicate, E newValue) {
         boolean modified = false;
 
-        for (Map.Entry<K, V> entry : this.valueMap.entrySet()) {
+        for (Map.Entry<K, V> entry : this.backingMap.entrySet()) {
             if (predicate.test(entry.getKey())) {
                 entry.getValue().clear();
                 entry.getValue().add(newValue);
@@ -1005,16 +989,14 @@ public sealed class Multimap<K, E, V extends Collection<E>> permits ListMultimap
     /**
      * Replace all the values associated to specified {@code key} which satisfy the specified {@code predicate} with the specified {@code newValue}.
      *
-     * @param <X>
      * @param predicate
      * @param newValue
      * @return <code>true</code> if this Multimap is modified by this operation, otherwise <code>false</code>.
-     * @throws X the x
      */
-    public <X extends Exception> boolean replaceAllWithOneIf(Throwables.BiPredicate<? super K, ? super V, X> predicate, E newValue) throws X {
+    public boolean replaceAllWithOneIf(BiPredicate<? super K, ? super V> predicate, E newValue) {
         boolean modified = false;
 
-        for (Map.Entry<K, V> entry : this.valueMap.entrySet()) {
+        for (Map.Entry<K, V> entry : this.backingMap.entrySet()) {
             if (predicate.test(entry.getKey(), entry.getValue())) {
                 entry.getValue().clear();
                 entry.getValue().add(newValue);
@@ -1029,15 +1011,13 @@ public sealed class Multimap<K, E, V extends Collection<E>> permits ListMultimap
     /**
      * The associated keys will be removed if null or empty values are returned by the specified <code>function</code>.
      *
-     * @param <X>
      * @param function
-     * @throws X the x
      */
-    public <X extends Exception> void replaceAll(Throwables.BiFunction<? super K, ? super V, ? extends V, X> function) throws X {
+    public void replaceAll(BiFunction<? super K, ? super V, ? extends V> function) {
         List<K> keyToRemove = null;
         V newVal = null;
 
-        for (Map.Entry<K, V> entry : valueMap.entrySet()) {
+        for (Map.Entry<K, V> entry : backingMap.entrySet()) {
             newVal = function.apply(entry.getKey(), entry.getValue());
 
             if (N.isEmpty(newVal)) {
@@ -1057,7 +1037,7 @@ public sealed class Multimap<K, E, V extends Collection<E>> permits ListMultimap
 
         if (N.notEmpty(keyToRemove)) {
             for (K key : keyToRemove) {
-                valueMap.remove(key);
+                backingMap.remove(key);
             }
         }
     }
@@ -1081,13 +1061,12 @@ public sealed class Multimap<K, E, V extends Collection<E>> permits ListMultimap
      * return get(key);
      * </pre>
      *
-     * @param <X>
      * @param key
      * @param mappingFunction
      * @return
-     * @throws X the x
+     * @throws IllegalArgumentException
      */
-    public <X extends Exception> V computeIfAbsent(K key, Throwables.Function<? super K, ? extends V, X> mappingFunction) throws X {
+    public V computeIfAbsent(K key, Function<? super K, ? extends V> mappingFunction) throws IllegalArgumentException {
         N.checkArgNotNull(mappingFunction);
 
         final V oldValue = get(key);
@@ -1099,7 +1078,7 @@ public sealed class Multimap<K, E, V extends Collection<E>> permits ListMultimap
         final V newValue = mappingFunction.apply(key);
 
         if (N.notEmpty(newValue)) {
-            valueMap.put(key, newValue);
+            backingMap.put(key, newValue);
         }
 
         return get(key);
@@ -1126,13 +1105,12 @@ public sealed class Multimap<K, E, V extends Collection<E>> permits ListMultimap
      * return get(key);
      * </pre>
      *
-     * @param <X>
      * @param key
      * @param remappingFunction
      * @return
-     * @throws X the x
+     * @throws IllegalArgumentException
      */
-    public <X extends Exception> V computeIfPresent(K key, Throwables.BiFunction<? super K, ? super V, ? extends V, X> remappingFunction) throws X {
+    public V computeIfPresent(K key, BiFunction<? super K, ? super V, ? extends V> remappingFunction) throws IllegalArgumentException {
         N.checkArgNotNull(remappingFunction);
 
         final V oldValue = get(key);
@@ -1144,9 +1122,9 @@ public sealed class Multimap<K, E, V extends Collection<E>> permits ListMultimap
         final V newValue = remappingFunction.apply(key, oldValue);
 
         if (N.notEmpty(newValue)) {
-            valueMap.put(key, newValue);
+            backingMap.put(key, newValue);
         } else {
-            valueMap.remove(key);
+            backingMap.remove(key);
         }
 
         return get(key);
@@ -1170,22 +1148,21 @@ public sealed class Multimap<K, E, V extends Collection<E>> permits ListMultimap
      * return get(key);
      * </pre>
      *
-     * @param <X>
      * @param key
      * @param remappingFunction
      * @return
-     * @throws X the x
+     * @throws IllegalArgumentException
      */
-    public <X extends Exception> V compute(K key, Throwables.BiFunction<? super K, ? super V, ? extends V, X> remappingFunction) throws X {
+    public V compute(K key, BiFunction<? super K, ? super V, ? extends V> remappingFunction) throws IllegalArgumentException {
         N.checkArgNotNull(remappingFunction);
 
         final V oldValue = get(key);
         final V newValue = remappingFunction.apply(key, oldValue);
 
         if (N.notEmpty(newValue)) {
-            valueMap.put(key, newValue);
+            backingMap.put(key, newValue);
         } else if (oldValue != null) {
-            valueMap.remove(key);
+            backingMap.remove(key);
         }
 
         return get(key);
@@ -1207,14 +1184,13 @@ public sealed class Multimap<K, E, V extends Collection<E>> permits ListMultimap
      * return newValue;
      * </pre>
      *
-     * @param <X>
      * @param key
      * @param value
      * @param remappingFunction
      * @return
-     * @throws X the x
+     * @throws IllegalArgumentException
      */
-    public <X extends Exception> V merge(K key, V value, Throwables.BiFunction<? super V, ? super V, ? extends V, X> remappingFunction) throws X {
+    public V merge(K key, V value, BiFunction<? super V, ? super V, ? extends V> remappingFunction) throws IllegalArgumentException {
         N.checkArgNotNull(remappingFunction);
         N.checkArgNotNull(value);
 
@@ -1222,9 +1198,9 @@ public sealed class Multimap<K, E, V extends Collection<E>> permits ListMultimap
         final V newValue = oldValue == null ? value : remappingFunction.apply(oldValue, value);
 
         if (N.notEmpty(newValue)) {
-            valueMap.put(key, newValue);
+            backingMap.put(key, newValue);
         } else if (oldValue != null) {
-            valueMap.remove(key);
+            backingMap.remove(key);
         }
 
         return get(key);
@@ -1252,14 +1228,13 @@ public sealed class Multimap<K, E, V extends Collection<E>> permits ListMultimap
      * return  get(key);
      * </pre>
      *
-     * @param <X>
      * @param key
      * @param e
      * @param remappingFunction
      * @return
-     * @throws X the x
+     * @throws IllegalArgumentException
      */
-    public <X extends Exception> V merge(K key, E e, Throwables.BiFunction<? super V, ? super E, ? extends V, X> remappingFunction) throws X {
+    public V merge(K key, E e, BiFunction<? super V, ? super E, ? extends V> remappingFunction) throws IllegalArgumentException {
         N.checkArgNotNull(remappingFunction);
         N.checkArgNotNull(e);
 
@@ -1273,9 +1248,9 @@ public sealed class Multimap<K, E, V extends Collection<E>> permits ListMultimap
         final V newValue = remappingFunction.apply(oldValue, e);
 
         if (N.notEmpty(newValue)) {
-            valueMap.put(key, newValue);
+            backingMap.put(key, newValue);
         } else if (oldValue != null) {
-            valueMap.remove(key);
+            backingMap.remove(key);
         }
 
         return get(key);
@@ -1328,7 +1303,7 @@ public sealed class Multimap<K, E, V extends Collection<E>> permits ListMultimap
      * @return
      */
     public boolean contains(final Object key, final Object e) {
-        final V val = valueMap.get(key);
+        final V val = backingMap.get(key);
 
         return val == null ? false : val.contains(e);
     }
@@ -1339,7 +1314,7 @@ public sealed class Multimap<K, E, V extends Collection<E>> permits ListMultimap
      * @return
      */
     public boolean containsKey(final Object key) {
-        return valueMap.containsKey(key);
+        return backingMap.containsKey(key);
     }
 
     /**
@@ -1366,7 +1341,7 @@ public sealed class Multimap<K, E, V extends Collection<E>> permits ListMultimap
      * @return
      */
     public boolean containsAll(final Object key, final Collection<?> c) {
-        final V val = valueMap.get(key);
+        final V val = backingMap.get(key);
 
         return val == null ? false : (N.isEmpty(c) ? true : val.containsAll(c));
     }
@@ -1374,17 +1349,15 @@ public sealed class Multimap<K, E, V extends Collection<E>> permits ListMultimap
     /**
      * Filter by key.
      *
-     * @param <X>
      * @param filter
      * @return
-     * @throws X the x
      */
-    public <X extends Exception> Multimap<K, E, V> filterByKey(Throwables.Predicate<? super K, X> filter) throws X {
+    public Multimap<K, E, V> filterByKey(Predicate<? super K> filter) {
         final Multimap<K, E, V> result = new Multimap<>(mapSupplier, valueSupplier);
 
-        for (Map.Entry<K, V> entry : valueMap.entrySet()) {
+        for (Map.Entry<K, V> entry : backingMap.entrySet()) {
             if (filter.test(entry.getKey())) {
-                result.valueMap.put(entry.getKey(), entry.getValue());
+                result.backingMap.put(entry.getKey(), entry.getValue());
             }
         }
 
@@ -1394,17 +1367,15 @@ public sealed class Multimap<K, E, V extends Collection<E>> permits ListMultimap
     /**
      * Filter by value.
      *
-     * @param <X>
      * @param filter
      * @return
-     * @throws X the x
      */
-    public <X extends Exception> Multimap<K, E, V> filterByValue(Throwables.Predicate<? super V, X> filter) throws X {
+    public Multimap<K, E, V> filterByValue(Predicate<? super V> filter) {
         final Multimap<K, E, V> result = new Multimap<>(mapSupplier, valueSupplier);
 
-        for (Map.Entry<K, V> entry : valueMap.entrySet()) {
+        for (Map.Entry<K, V> entry : backingMap.entrySet()) {
             if (filter.test(entry.getValue())) {
-                result.valueMap.put(entry.getKey(), entry.getValue());
+                result.backingMap.put(entry.getKey(), entry.getValue());
             }
         }
 
@@ -1413,17 +1384,15 @@ public sealed class Multimap<K, E, V extends Collection<E>> permits ListMultimap
 
     /**
      *
-     * @param <X>
      * @param filter
      * @return
-     * @throws X the x
      */
-    public <X extends Exception> Multimap<K, E, V> filter(Throwables.BiPredicate<? super K, ? super V, X> filter) throws X {
+    public Multimap<K, E, V> filter(BiPredicate<? super K, ? super V> filter) {
         final Multimap<K, E, V> result = new Multimap<>(mapSupplier, valueSupplier);
 
-        for (Map.Entry<K, V> entry : valueMap.entrySet()) {
+        for (Map.Entry<K, V> entry : backingMap.entrySet()) {
             if (filter.test(entry.getKey(), entry.getValue())) {
-                result.valueMap.put(entry.getKey(), entry.getValue());
+                result.backingMap.put(entry.getKey(), entry.getValue());
             }
         }
 
@@ -1432,14 +1401,14 @@ public sealed class Multimap<K, E, V extends Collection<E>> permits ListMultimap
 
     /**
      *
-     * @param <X>
+     *
      * @param action
-     * @throws X the x
+     * @throws IllegalArgumentException
      */
-    public <X extends Exception> void forEach(Throwables.BiConsumer<? super K, ? super V, X> action) throws X {
+    public void forEach(BiConsumer<? super K, ? super V> action) throws IllegalArgumentException {
         N.checkArgNotNull(action);
 
-        for (Map.Entry<K, V> entry : valueMap.entrySet()) {
+        for (Map.Entry<K, V> entry : backingMap.entrySet()) {
             action.accept(entry.getKey(), entry.getValue());
         }
     }
@@ -1447,16 +1416,15 @@ public sealed class Multimap<K, E, V extends Collection<E>> permits ListMultimap
     /**
      * Flat for each.
      *
-     * @param <X>
      * @param action
-     * @throws X the x
+     * @throws IllegalArgumentException
      */
-    public <X extends Exception> void flatForEach(Throwables.BiConsumer<? super K, ? super E, X> action) throws X {
+    public void flatForEach(BiConsumer<? super K, ? super E> action) throws IllegalArgumentException {
         N.checkArgNotNull(action);
 
         K key = null;
 
-        for (Map.Entry<K, V> entry : valueMap.entrySet()) {
+        for (Map.Entry<K, V> entry : backingMap.entrySet()) {
             key = entry.getKey();
 
             for (E e : entry.getValue()) {
@@ -1468,15 +1436,14 @@ public sealed class Multimap<K, E, V extends Collection<E>> permits ListMultimap
     /**
      * For each key.
      *
-     * @param <X>
      * @param action
-     * @throws X the x
+     * @throws IllegalArgumentException
      */
     @Beta
-    public <X extends Exception> void forEachKey(final Throwables.Consumer<? super K, X> action) throws X {
+    public void forEachKey(final Consumer<? super K> action) throws IllegalArgumentException {
         N.checkArgNotNull(action);
 
-        for (K k : valueMap.keySet()) {
+        for (K k : backingMap.keySet()) {
             action.accept(k);
         }
     }
@@ -1484,15 +1451,14 @@ public sealed class Multimap<K, E, V extends Collection<E>> permits ListMultimap
     /**
      * For each value.
      *
-     * @param <X>
      * @param action
-     * @throws X the x
+     * @throws IllegalArgumentException
      */
     @Beta
-    public <X extends Exception> void forEachValue(final Throwables.Consumer<? super V, X> action) throws X {
+    public void forEachValue(final Consumer<? super V> action) throws IllegalArgumentException {
         N.checkArgNotNull(action);
 
-        for (V v : valueMap.values()) {
+        for (V v : backingMap.values()) {
             action.accept(v);
         }
     }
@@ -1500,15 +1466,14 @@ public sealed class Multimap<K, E, V extends Collection<E>> permits ListMultimap
     /**
      * Flat for each value.
      *
-     * @param <X>
      * @param action
-     * @throws X the x
+     * @throws IllegalArgumentException
      */
     @Beta
-    public <X extends Exception> void flatForEachValue(Throwables.Consumer<? super E, X> action) throws X {
+    public void flatForEachValue(Consumer<? super E> action) throws IllegalArgumentException {
         N.checkArgNotNull(action);
 
-        for (V v : valueMap.values()) {
+        for (V v : backingMap.values()) {
             for (E e : v) {
                 action.accept(e);
             }
@@ -1521,7 +1486,7 @@ public sealed class Multimap<K, E, V extends Collection<E>> permits ListMultimap
      * @return
      */
     public Set<K> keySet() {
-        return valueMap.keySet();
+        return backingMap.keySet();
     }
 
     /**
@@ -1530,7 +1495,16 @@ public sealed class Multimap<K, E, V extends Collection<E>> permits ListMultimap
      * @return
      */
     public Collection<V> values() {
-        return valueMap.values();
+        return backingMap.values();
+    }
+
+    /**
+     *
+     *
+     * @return
+     */
+    public Set<Map.Entry<K, V>> entrySet() {
+        return backingMap.entrySet();
     }
 
     /**
@@ -1541,7 +1515,7 @@ public sealed class Multimap<K, E, V extends Collection<E>> permits ListMultimap
     public List<E> flatValues() {
         final List<E> result = new ArrayList<>(totalCountOfValues());
 
-        for (V v : valueMap.values()) {
+        for (V v : backingMap.values()) {
             result.addAll(v);
         }
 
@@ -1557,7 +1531,7 @@ public sealed class Multimap<K, E, V extends Collection<E>> permits ListMultimap
     public <R extends Collection<E>> R flatValues(final IntFunction<R> supplier) {
         final R result = supplier.apply(totalCountOfValues());
 
-        for (V v : valueMap.values()) {
+        for (V v : backingMap.values()) {
             result.addAll(v);
         }
 
@@ -1569,19 +1543,19 @@ public sealed class Multimap<K, E, V extends Collection<E>> permits ListMultimap
      *
      * @return
      */
-    public Set<Map.Entry<K, V>> entrySet() {
-        return valueMap.entrySet();
-    }
-
-    /**
-     *
-     *
-     * @return
-     */
     public Map<K, V> toMap() {
-        final Map<K, V> result = Maps.newTargetMap(valueMap);
+        final Map<K, V> result = Maps.newTargetMap(backingMap);
 
-        result.putAll(valueMap);
+        // result.putAll(backingMap);
+
+        V val = null;
+
+        for (Map.Entry<K, V> e : backingMap.entrySet()) {
+            val = valueSupplier.get();
+            val.addAll(e.getValue());
+
+            result.put(e.getKey(), val);
+        }
 
         return result;
     }
@@ -1593,9 +1567,20 @@ public sealed class Multimap<K, E, V extends Collection<E>> permits ListMultimap
      * @return
      */
     public <M extends Map<K, V>> M toMap(final IntFunction<? extends M> supplier) {
-        final M map = supplier.apply(size());
-        map.putAll(valueMap);
-        return map;
+        final M result = supplier.apply(size());
+
+        // result.putAll(backingMap);
+
+        V val = null;
+
+        for (Map.Entry<K, V> e : backingMap.entrySet()) {
+            val = valueSupplier.get();
+            val.addAll(e.getValue());
+
+            result.put(e.getKey(), val);
+        }
+
+        return result;
     }
 
     /**
@@ -1604,10 +1589,10 @@ public sealed class Multimap<K, E, V extends Collection<E>> permits ListMultimap
      * @return
      */
     public Multiset<K> toMultiset() {
-        final Multiset<K> multiset = new Multiset<>(valueMap.getClass());
+        final Multiset<K> multiset = new Multiset<>(backingMap.getClass());
 
-        for (Map.Entry<K, V> entry : valueMap.entrySet()) {
-            multiset.set(entry.getKey(), entry.getValue().size());
+        for (Map.Entry<K, V> entry : backingMap.entrySet()) {
+            multiset.setCount(entry.getKey(), entry.getValue().size());
         }
 
         return multiset;
@@ -1624,18 +1609,25 @@ public sealed class Multimap<K, E, V extends Collection<E>> permits ListMultimap
     //        return new Multimap<>(Collections.synchronizedMap(valueMap), concreteValueType);
     //    }
 
-    /**
-     * Returns a view of this multimap as a {@code Map} from each distinct key
-     * to the nonempty collection of that key's associated values.
-     *
-     * <p>Changes to the returned map or the collections that serve as its values
-     * will update the underlying multimap, and vice versa.
-     *
-     * @return
-     */
-    @Beta
-    public Map<K, V> unwrap() {
-        return valueMap;
+    //    /**
+    //     * Returns a view of this multimap as a {@code Map} from each distinct key
+    //     * to the nonempty collection of that key's associated values.
+    //     *
+    //     * <p>Changes to the returned map or the collections that serve as its values
+    //     * will update the underlying multimap, and vice versa.
+    //     *
+    //     * @return
+    //     * @deprecated
+    //     */
+    //    @Deprecated
+    //    @Beta
+    //    public Map<K, V> unwrap() {
+    //        return backingMap;
+    //    }
+
+    @Override
+    public Iterator<Entry<K, V>> iterator() {
+        return backingMap.entrySet().iterator();
     }
 
     /**
@@ -1644,7 +1636,7 @@ public sealed class Multimap<K, E, V extends Collection<E>> permits ListMultimap
      * @return
      */
     public Stream<Map.Entry<K, V>> stream() {
-        return Stream.of(valueMap.entrySet());
+        return Stream.of(backingMap.entrySet());
     }
 
     /**
@@ -1653,14 +1645,14 @@ public sealed class Multimap<K, E, V extends Collection<E>> permits ListMultimap
      * @return
      */
     public EntryStream<K, V> entryStream() {
-        return EntryStream.of(valueMap);
+        return EntryStream.of(backingMap);
     }
 
     /**
      * Clear.
      */
     public void clear() {
-        valueMap.clear();
+        backingMap.clear();
     }
 
     /**
@@ -1669,7 +1661,7 @@ public sealed class Multimap<K, E, V extends Collection<E>> permits ListMultimap
      * @return
      */
     public int size() {
-        return valueMap.size();
+        return backingMap.size();
     }
 
     /**
@@ -1680,7 +1672,7 @@ public sealed class Multimap<K, E, V extends Collection<E>> permits ListMultimap
     public int totalCountOfValues() {
         int count = 0;
 
-        for (V v : valueMap.values()) {
+        for (V v : backingMap.values()) {
             count += v.size();
         }
 
@@ -1693,7 +1685,7 @@ public sealed class Multimap<K, E, V extends Collection<E>> permits ListMultimap
      * @return true, if is empty
      */
     public boolean isEmpty() {
-        return valueMap.isEmpty();
+        return backingMap.isEmpty();
     }
 
     /**
@@ -1749,7 +1741,7 @@ public sealed class Multimap<K, E, V extends Collection<E>> permits ListMultimap
      */
     @Override
     public int hashCode() {
-        return valueMap.hashCode();
+        return backingMap.hashCode();
     }
 
     /**
@@ -1760,7 +1752,7 @@ public sealed class Multimap<K, E, V extends Collection<E>> permits ListMultimap
     @SuppressWarnings("unchecked")
     @Override
     public boolean equals(final Object obj) {
-        return obj == this || (obj instanceof Multimap && valueMap.equals(((Multimap<K, E, V>) obj).valueMap));
+        return obj == this || (obj instanceof Multimap && backingMap.equals(((Multimap<K, E, V>) obj).backingMap));
     }
 
     /**
@@ -1770,6 +1762,6 @@ public sealed class Multimap<K, E, V extends Collection<E>> permits ListMultimap
      */
     @Override
     public String toString() {
-        return valueMap.toString();
+        return backingMap.toString();
     }
 }

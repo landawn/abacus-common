@@ -71,13 +71,15 @@ public final class SnappyInputStream extends InputStream {
     }
 
     /**
+     * 
      *
-     * @param n
-     * @return
+     * @param n 
+     * @return 
+     * @throws IllegalArgumentException 
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public long skip(long n) throws IOException {
+    public long skip(long n) throws IllegalArgumentException, IOException {
         N.checkArgNotNegative(n, "n");
 
         return in.skip(n);

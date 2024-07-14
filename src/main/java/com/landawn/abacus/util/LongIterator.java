@@ -64,13 +64,15 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
     }
 
     /**
+     * 
      *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return
+     * @param a 
+     * @param fromIndex 
+     * @param toIndex 
+     * @return 
+     * @throws IndexOutOfBoundsException 
      */
-    public static LongIterator of(final long[] a, final int fromIndex, final int toIndex) {
+    public static LongIterator of(final long[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
         if (fromIndex == toIndex) {
@@ -109,10 +111,11 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
     /**
      * Lazy evaluation.
      *
-     * @param iteratorSupplier
-     * @return
+     * @param iteratorSupplier 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static LongIterator defer(final Supplier<? extends LongIterator> iteratorSupplier) {
+    public static LongIterator defer(final Supplier<? extends LongIterator> iteratorSupplier) throws IllegalArgumentException {
         N.checkArgNotNull(iteratorSupplier, "iteratorSupplier");
 
         return new LongIterator() {
@@ -149,10 +152,11 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
     /**
      * Returns an infinite {@code LongIterator}.
      *
-     * @param supplier
-     * @return
+     * @param supplier 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static LongIterator generate(final LongSupplier supplier) {
+    public static LongIterator generate(final LongSupplier supplier) throws IllegalArgumentException {
         N.checkArgNotNull(supplier);
 
         return new LongIterator() {
@@ -169,12 +173,14 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
     }
 
     /**
+     * 
      *
-     * @param hasNext
-     * @param supplier
-     * @return
+     * @param hasNext 
+     * @param supplier 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static LongIterator generate(final BooleanSupplier hasNext, final LongSupplier supplier) {
+    public static LongIterator generate(final BooleanSupplier hasNext, final LongSupplier supplier) throws IllegalArgumentException {
         N.checkArgNotNull(hasNext);
         N.checkArgNotNull(supplier);
 
@@ -214,12 +220,13 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
     public abstract long nextLong();
 
     /**
+     * 
      *
-     *
-     * @param n
-     * @return
+     * @param n 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public LongIterator skip(final long n) {
+    public LongIterator skip(final long n) throws IllegalArgumentException {
         N.checkArgNotNegative(n, "n");
 
         if (n <= 0) {
@@ -262,12 +269,13 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
     }
 
     /**
+     * 
      *
-     *
-     * @param count
-     * @return
+     * @param count 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public LongIterator limit(final long count) {
+    public LongIterator limit(final long count) throws IllegalArgumentException {
         N.checkArgNotNegative(count, "count");
 
         if (count == 0) {
@@ -297,12 +305,13 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
     }
 
     /**
+     * 
      *
-     *
-     * @param predicate
-     * @return
+     * @param predicate 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public LongIterator filter(final LongPredicate predicate) {
+    public LongIterator filter(final LongPredicate predicate) throws IllegalArgumentException {
         N.checkArgNotNull(predicate, "predicate");
 
         final LongIterator iter = this;
@@ -447,12 +456,13 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
     /**
      * For each remaining.
      *
-     * @param action
-     * @deprecated
+     * @param action 
+     * @throws IllegalArgumentException 
+     * @deprecated 
      */
     @Override
     @Deprecated
-    public void forEachRemaining(java.util.function.Consumer<? super Long> action) {
+    public void forEachRemaining(java.util.function.Consumer<? super Long> action) throws IllegalArgumentException {
         super.forEachRemaining(action);
     }
 
@@ -471,12 +481,14 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
     }
 
     /**
+     * 
      *
-     * @param <E>
-     * @param action
+     * @param <E> 
+     * @param action 
+     * @throws IllegalArgumentException 
      * @throws E the e
      */
-    public <E extends Exception> void foreachIndexed(Throwables.IndexedLongConsumer<E> action) throws E {
+    public <E extends Exception> void foreachIndexed(Throwables.IndexedLongConsumer<E> action) throws IllegalArgumentException, E {
         N.checkArgNotNull(action);
 
         int idx = 0;

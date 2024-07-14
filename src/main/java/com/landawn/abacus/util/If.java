@@ -212,16 +212,6 @@ public final class If {
     /**
      * Checks if is null or empty.
      *
-     * @param s
-     * @return
-     */
-    public static If isEmpty(final LongMultiset<?> s) {
-        return is(N.isEmpty(s));
-    }
-
-    /**
-     * Checks if is null or empty.
-     *
      * @param m
      * @return
      */
@@ -384,16 +374,6 @@ public final class If {
     /**
      * Not null or empty.
      *
-     * @param s
-     * @return
-     */
-    public static If notEmpty(final LongMultiset<?> s) {
-        return is(N.notEmpty(s));
-    }
-
-    /**
-     * Not null or empty.
-     *
      * @param m
      * @return
      */
@@ -442,13 +422,15 @@ public final class If {
     }
 
     /**
+     * 
      *
-     * @param <E>
-     * @param cmd
-     * @return
+     * @param <E> 
+     * @param cmd 
+     * @return 
+     * @throws IllegalArgumentException 
      * @throws E the e
      */
-    public <E extends Throwable> OrElse then(final Throwables.Runnable<E> cmd) throws E {
+    public <E extends Throwable> OrElse then(final Throwables.Runnable<E> cmd) throws IllegalArgumentException, E {
         N.checkArgNotNull(cmd);
 
         if (b) {
@@ -459,15 +441,17 @@ public final class If {
     }
 
     /**
+     * 
      *
-     * @param <U>
-     * @param <E>
-     * @param init
-     * @param action
-     * @return
+     * @param <U> 
+     * @param <E> 
+     * @param init 
+     * @param action 
+     * @return 
+     * @throws IllegalArgumentException 
      * @throws E the e
      */
-    public <U, E extends Throwable> OrElse then(final U init, final Throwables.Consumer<? super U, E> action) throws E {
+    public <U, E extends Throwable> OrElse then(final U init, final Throwables.Consumer<? super U, E> action) throws IllegalArgumentException, E {
         N.checkArgNotNull(action);
 
         if (b) {
@@ -478,13 +462,15 @@ public final class If {
     }
 
     /**
+     * 
      *
-     * @param <E>
-     * @param exceptionSupplier
-     * @return
+     * @param <E> 
+     * @param exceptionSupplier 
+     * @return 
+     * @throws IllegalArgumentException 
      * @throws E the e
      */
-    public <E extends Throwable> OrElse thenThrow(final Supplier<? extends E> exceptionSupplier) throws E {
+    public <E extends Throwable> OrElse thenThrow(final Supplier<? extends E> exceptionSupplier) throws IllegalArgumentException, E {
         N.checkArgNotNull(exceptionSupplier);
 
         if (b) {
@@ -547,12 +533,14 @@ public final class If {
         }
 
         /**
+         * 
          *
-         * @param <E>
-         * @param cmd
+         * @param <E> 
+         * @param cmd 
+         * @throws IllegalArgumentException 
          * @throws E the e
          */
-        public <E extends Throwable> void orElse(final Throwables.Runnable<E> cmd) throws E {
+        public <E extends Throwable> void orElse(final Throwables.Runnable<E> cmd) throws IllegalArgumentException, E {
             N.checkArgNotNull(cmd);
 
             if (!isIfTrue) {
@@ -561,14 +549,16 @@ public final class If {
         }
 
         /**
+         * 
          *
-         * @param <U>
-         * @param <E>
-         * @param init
-         * @param action
+         * @param <U> 
+         * @param <E> 
+         * @param init 
+         * @param action 
+         * @throws IllegalArgumentException 
          * @throws E the e
          */
-        public <U, E extends Throwable> void orElse(final U init, final Throwables.Consumer<? super U, E> action) throws E {
+        public <U, E extends Throwable> void orElse(final U init, final Throwables.Consumer<? super U, E> action) throws IllegalArgumentException, E {
             N.checkArgNotNull(action);
 
             if (!isIfTrue) {
@@ -579,11 +569,12 @@ public final class If {
         /**
          * Or else throw.
          *
-         * @param <E>
-         * @param exceptionSupplier
+         * @param <E> 
+         * @param exceptionSupplier 
+         * @throws IllegalArgumentException 
          * @throws E the e
          */
-        public <E extends Throwable> void orElseThrow(final Supplier<? extends E> exceptionSupplier) throws E {
+        public <E extends Throwable> void orElseThrow(final Supplier<? extends E> exceptionSupplier) throws IllegalArgumentException, E {
             N.checkArgNotNull(exceptionSupplier);
 
             if (!isIfTrue) {

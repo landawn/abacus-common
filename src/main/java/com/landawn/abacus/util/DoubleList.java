@@ -31,7 +31,6 @@ import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.util.If.OrElse;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalDouble;
-import com.landawn.abacus.util.u.OptionalInt;
 import com.landawn.abacus.util.stream.DoubleStream;
 
 /**
@@ -79,12 +78,13 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     }
 
     /**
+     * 
      *
-     *
-     * @param a
-     * @param size
+     * @param a 
+     * @param size 
+     * @throws IndexOutOfBoundsException 
      */
-    public DoubleList(double[] a, int size) {
+    public DoubleList(double[] a, int size) throws IndexOutOfBoundsException {
         N.checkFromIndexSize(0, size, a.length);
 
         this.elementData = a;
@@ -102,12 +102,14 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     }
 
     /**
+     * 
      *
-     * @param a
-     * @param size
-     * @return
+     * @param a 
+     * @param size 
+     * @return 
+     * @throws IndexOutOfBoundsException 
      */
-    public static DoubleList of(final double[] a, final int size) {
+    public static DoubleList of(final double[] a, final int size) throws IndexOutOfBoundsException {
         N.checkFromIndexSize(0, size, N.len(a));
 
         return new DoubleList(N.nullToEmpty(a), size);
@@ -168,13 +170,15 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     }
 
     /**
+     * 
      *
-     * @param c
-     * @param fromIndex
-     * @param toIndex
-     * @return
+     * @param c 
+     * @param fromIndex 
+     * @param toIndex 
+     * @return 
+     * @throws IndexOutOfBoundsException 
      */
-    public static DoubleList from(final Collection<Double> c, final int fromIndex, final int toIndex) {
+    public static DoubleList from(final Collection<Double> c, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, N.size(c));
 
         if (N.isEmpty(c)) {
@@ -670,12 +674,14 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     }
 
     /**
+     * 
      *
-     * @param fromIndex
-     * @param toIndex
+     * @param fromIndex 
+     * @param toIndex 
+     * @throws IndexOutOfBoundsException 
      */
     @Override
-    public void deleteRange(final int fromIndex, final int toIndex) {
+    public void deleteRange(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, size());
 
         if (fromIndex == toIndex) {
@@ -707,14 +713,15 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     }
 
     /**
+     * 
      *
-     *
-     * @param fromIndex
-     * @param toIndex
-     * @param replacement
+     * @param fromIndex 
+     * @param toIndex 
+     * @param replacement 
+     * @throws IndexOutOfBoundsException 
      */
     @Override
-    public void replaceRange(final int fromIndex, final int toIndex, final double[] replacement) {
+    public void replaceRange(final int fromIndex, final int toIndex, final double[] replacement) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, size());
 
         if (N.isEmpty(replacement)) {
@@ -809,12 +816,14 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     }
 
     /**
+     * 
      *
-     * @param fromIndex
-     * @param toIndex
-     * @param val
+     * @param fromIndex 
+     * @param toIndex 
+     * @param val 
+     * @throws IndexOutOfBoundsException 
      */
-    public void fill(final int fromIndex, final int toIndex, final double val) {
+    public void fill(final int fromIndex, final int toIndex, final double val) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
 
         N.fill(elementData, fromIndex, toIndex, val);
@@ -974,7 +983,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
         final DoubleList c = new DoubleList(N.min(9, size(), b.size()));
 
         for (int i = 0, len = size(); i < len; i++) {
-            if (bOccurrences.getAndRemove(elementData[i]) > 0) {
+            if (bOccurrences.remove(elementData[i])) {
                 c.add(elementData[i]);
             }
         }
@@ -1013,7 +1022,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
         final DoubleList c = new DoubleList(N.min(size(), N.max(9, size() - b.size())));
 
         for (int i = 0, len = size(); i < len; i++) {
-            if (bOccurrences.getAndRemove(elementData[i]) < 1) {
+            if (!bOccurrences.remove(elementData[i])) {
                 c.add(elementData[i]);
             }
         }
@@ -1053,13 +1062,13 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
         final DoubleList c = new DoubleList(N.max(9, Math.abs(size() - b.size())));
 
         for (int i = 0, len = size(); i < len; i++) {
-            if (bOccurrences.getAndRemove(elementData[i]) < 1) {
+            if (!bOccurrences.remove(elementData[i])) {
                 c.add(elementData[i]);
             }
         }
 
         for (int i = 0, len = b.size(); i < len; i++) {
-            if (bOccurrences.getAndRemove(b.elementData[i]) > 0) {
+            if (bOccurrences.remove(b.elementData[i])) {
                 c.add(b.elementData[i]);
             }
 
@@ -1166,12 +1175,14 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     }
 
     /**
+     * 
      *
-     * @param fromIndex
-     * @param toIndex
-     * @return
+     * @param fromIndex 
+     * @param toIndex 
+     * @return 
+     * @throws IndexOutOfBoundsException 
      */
-    public OptionalDouble min(final int fromIndex, final int toIndex) {
+    public OptionalDouble min(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
 
         return fromIndex == toIndex ? OptionalDouble.empty() : OptionalDouble.of(N.min(elementData, fromIndex, toIndex));
@@ -1187,12 +1198,14 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     }
 
     /**
+     * 
      *
-     * @param fromIndex
-     * @param toIndex
-     * @return
+     * @param fromIndex 
+     * @param toIndex 
+     * @return 
+     * @throws IndexOutOfBoundsException 
      */
-    public OptionalDouble median(final int fromIndex, final int toIndex) {
+    public OptionalDouble median(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
 
         return fromIndex == toIndex ? OptionalDouble.empty() : OptionalDouble.of(N.median(elementData, fromIndex, toIndex));
@@ -1208,12 +1221,14 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     }
 
     /**
+     * 
      *
-     * @param fromIndex
-     * @param toIndex
-     * @return
+     * @param fromIndex 
+     * @param toIndex 
+     * @return 
+     * @throws IndexOutOfBoundsException 
      */
-    public OptionalDouble max(final int fromIndex, final int toIndex) {
+    public OptionalDouble max(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
 
         return fromIndex == toIndex ? OptionalDouble.empty() : OptionalDouble.of(N.max(elementData, fromIndex, toIndex));
@@ -1229,13 +1244,16 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     }
 
     /**
+     * 
      *
-     * @param fromIndex
-     * @param toIndex
-     * @param k
-     * @return
+     * @param fromIndex 
+     * @param toIndex 
+     * @param k 
+     * @return 
+     * @throws IllegalArgumentException 
+     * @throws IndexOutOfBoundsException 
      */
-    public OptionalDouble kthLargest(final int fromIndex, final int toIndex, final int k) {
+    public OptionalDouble kthLargest(final int fromIndex, final int toIndex, final int k) throws IllegalArgumentException, IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
         N.checkArgPositive(k, "k");
 
@@ -1252,12 +1270,14 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     }
 
     /**
+     * 
      *
-     * @param fromIndex
-     * @param toIndex
-     * @return
+     * @param fromIndex 
+     * @param toIndex 
+     * @return 
+     * @throws IndexOutOfBoundsException 
      */
-    public double sum(final int fromIndex, final int toIndex) {
+    public double sum(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
 
         return N.sum(elementData, fromIndex, toIndex);
@@ -1273,12 +1293,14 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     }
 
     /**
+     * 
      *
-     * @param fromIndex
-     * @param toIndex
-     * @return
+     * @param fromIndex 
+     * @param toIndex 
+     * @return 
+     * @throws IndexOutOfBoundsException 
      */
-    public OptionalDouble average(final int fromIndex, final int toIndex) {
+    public OptionalDouble average(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
 
         return fromIndex == toIndex ? OptionalDouble.empty() : OptionalDouble.of(N.average(elementData, fromIndex, toIndex));
@@ -1295,14 +1317,16 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     }
 
     /**
+     * 
      *
-     * @param <E>
-     * @param fromIndex
-     * @param toIndex
-     * @param action
+     * @param <E> 
+     * @param fromIndex 
+     * @param toIndex 
+     * @param action 
+     * @throws IndexOutOfBoundsException 
      * @throws E the e
      */
-    public <E extends Exception> void forEach(final int fromIndex, final int toIndex, Throwables.DoubleConsumer<E> action) throws E {
+    public <E extends Exception> void forEach(final int fromIndex, final int toIndex, Throwables.DoubleConsumer<E> action) throws IndexOutOfBoundsException, E {
         N.checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), fromIndex < toIndex ? toIndex : fromIndex, size);
 
         if (size > 0) {
@@ -1329,14 +1353,17 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     }
 
     /**
+     * 
      *
-     * @param <E>
-     * @param fromIndex
-     * @param toIndex
-     * @param action
+     * @param <E> 
+     * @param fromIndex 
+     * @param toIndex 
+     * @param action 
+     * @throws IndexOutOfBoundsException 
      * @throws E the e
      */
-    public <E extends Exception> void forEachIndexed(final int fromIndex, final int toIndex, Throwables.IndexedDoubleConsumer<E> action) throws E {
+    public <E extends Exception> void forEachIndexed(final int fromIndex, final int toIndex, Throwables.IndexedDoubleConsumer<E> action)
+            throws IndexOutOfBoundsException, E {
         N.checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), fromIndex < toIndex ? toIndex : fromIndex, size);
 
         if (size > 0) {
@@ -1371,411 +1398,15 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     }
 
     /**
+     * 
      *
-     * @param <E>
-     * @param predicate
-     * @return
-     * @throws E the e
-     */
-    public <E extends Exception> OptionalDouble findFirst(Throwables.DoublePredicate<E> predicate) throws E {
-        for (int i = 0; i < size; i++) {
-            if (predicate.test(elementData[i])) {
-                return OptionalDouble.of(elementData[i]);
-            }
-        }
-
-        return OptionalDouble.empty();
-    }
-
-    /**
-     *
-     * @param <E>
-     * @param predicate
-     * @return
-     * @throws E the e
-     */
-    public <E extends Exception> OptionalDouble findLast(Throwables.DoublePredicate<E> predicate) throws E {
-        for (int i = size - 1; i >= 0; i--) {
-            if (predicate.test(elementData[i])) {
-                return OptionalDouble.of(elementData[i]);
-            }
-        }
-
-        return OptionalDouble.empty();
-    }
-
-    /**
-     * Find first index.
-     *
-     * @param <E>
-     * @param predicate
-     * @return
-     * @throws E the e
-     */
-    public <E extends Exception> OptionalInt findFirstIndex(Throwables.DoublePredicate<E> predicate) throws E {
-        for (int i = 0; i < size; i++) {
-            if (predicate.test(elementData[i])) {
-                return OptionalInt.of(i);
-            }
-        }
-
-        return OptionalInt.empty();
-    }
-
-    /**
-     * Find last index.
-     *
-     * @param <E>
-     * @param predicate
-     * @return
-     * @throws E the e
-     */
-    public <E extends Exception> OptionalInt findLastIndex(Throwables.DoublePredicate<E> predicate) throws E {
-        for (int i = size - 1; i >= 0; i--) {
-            if (predicate.test(elementData[i])) {
-                return OptionalInt.of(i);
-            }
-        }
-
-        return OptionalInt.empty();
-    }
-
-    /**
-     * Returns whether all elements of this List match the provided predicate.
-     *
-     * @param <E>
-     * @param filter
-     * @return
-     * @throws E the e
-     */
-    public <E extends Exception> boolean allMatch(Throwables.DoublePredicate<E> filter) throws E {
-        return allMatch(0, size(), filter);
-    }
-
-    /**
-     *
-     * @param <E>
-     * @param fromIndex
-     * @param toIndex
-     * @param filter
-     * @return
-     * @throws E the e
-     */
-    public <E extends Exception> boolean allMatch(final int fromIndex, final int toIndex, Throwables.DoublePredicate<E> filter) throws E {
-        checkFromToIndex(fromIndex, toIndex);
-
-        if (size > 0) {
-            for (int i = fromIndex; i < toIndex; i++) {
-                if (!filter.test(elementData[i])) {
-                    return false;
-                }
-            }
-        }
-
-        return true;
-    }
-
-    /**
-     * Returns whether any elements of this List match the provided predicate.
-     *
-     * @param <E>
-     * @param filter
-     * @return
-     * @throws E the e
-     */
-    public <E extends Exception> boolean anyMatch(Throwables.DoublePredicate<E> filter) throws E {
-        return anyMatch(0, size(), filter);
-    }
-
-    /**
-     *
-     * @param <E>
-     * @param fromIndex
-     * @param toIndex
-     * @param filter
-     * @return
-     * @throws E the e
-     */
-    public <E extends Exception> boolean anyMatch(final int fromIndex, final int toIndex, Throwables.DoublePredicate<E> filter) throws E {
-        checkFromToIndex(fromIndex, toIndex);
-
-        if (size > 0) {
-            for (int i = fromIndex; i < toIndex; i++) {
-                if (filter.test(elementData[i])) {
-                    return true;
-                }
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     * Returns whether no elements of this List match the provided predicate.
-     *
-     * @param <E>
-     * @param filter
-     * @return
-     * @throws E the e
-     */
-    public <E extends Exception> boolean noneMatch(Throwables.DoublePredicate<E> filter) throws E {
-        return noneMatch(0, size(), filter);
-    }
-
-    /**
-     *
-     * @param <E>
-     * @param fromIndex
-     * @param toIndex
-     * @param filter
-     * @return
-     * @throws E the e
-     */
-    public <E extends Exception> boolean noneMatch(final int fromIndex, final int toIndex, Throwables.DoublePredicate<E> filter) throws E {
-        checkFromToIndex(fromIndex, toIndex);
-
-        if (size > 0) {
-            for (int i = fromIndex; i < toIndex; i++) {
-                if (filter.test(elementData[i])) {
-                    return false;
-                }
-            }
-        }
-
-        return true;
-    }
-
-    /**
-     *
-     * @param <E>
-     * @param filter
-     * @return
-     * @throws E the e
-     */
-    public <E extends Exception> int count(Throwables.DoublePredicate<E> filter) throws E {
-        return count(0, size(), filter);
-    }
-
-    /**
-     *
-     * @param <E>
-     * @param fromIndex
-     * @param toIndex
-     * @param filter
-     * @return
-     * @throws E the e
-     */
-    public <E extends Exception> int count(final int fromIndex, final int toIndex, Throwables.DoublePredicate<E> filter) throws E {
-        checkFromToIndex(fromIndex, toIndex);
-
-        return N.count(elementData, fromIndex, toIndex, filter);
-    }
-
-    /**
-     *
-     * @param <E>
-     * @param filter
-     * @return a new List with the elements match the provided predicate.
-     * @throws E the e
-     */
-    public <E extends Exception> DoubleList filter(Throwables.DoublePredicate<E> filter) throws E {
-        return filter(0, size(), filter);
-    }
-
-    /**
-     *
-     * @param <E>
-     * @param fromIndex
-     * @param toIndex
-     * @param filter
-     * @return
-     * @throws E the e
-     */
-    public <E extends Exception> DoubleList filter(final int fromIndex, final int toIndex, Throwables.DoublePredicate<E> filter) throws E {
-        checkFromToIndex(fromIndex, toIndex);
-
-        return DoubleList.of(N.filter(elementData, fromIndex, toIndex, filter));
-    }
-
-    /**
-     *
-     * @param <E>
-     * @param filter
-     * @param max
-     * @return a new List with the elements match the provided predicate.
-     * @throws E the e
-     */
-    public <E extends Exception> DoubleList filter(Throwables.DoublePredicate<E> filter, int max) throws E {
-        return filter(0, size(), filter, max);
-    }
-
-    /**
-     *
-     * @param <E>
-     * @param fromIndex
-     * @param toIndex
-     * @param filter
-     * @param max
-     * @return
-     * @throws E the e
-     */
-    public <E extends Exception> DoubleList filter(final int fromIndex, final int toIndex, Throwables.DoublePredicate<E> filter, final int max) throws E {
-        checkFromToIndex(fromIndex, toIndex);
-
-        return DoubleList.of(N.filter(elementData, fromIndex, toIndex, filter, max));
-    }
-
-    /**
-     *
-     * @param <E>
-     * @param mapper
-     * @return
-     * @throws E the e
-     */
-    public <E extends Exception> DoubleList map(final Throwables.DoubleUnaryOperator<E> mapper) throws E {
-        return map(0, size, mapper);
-    }
-
-    /**
-     *
-     * @param <E>
-     * @param fromIndex
-     * @param toIndex
-     * @param mapper
-     * @return
-     * @throws E the e
-     */
-    public <E extends Exception> DoubleList map(final int fromIndex, final int toIndex, final Throwables.DoubleUnaryOperator<E> mapper) throws E {
-        checkFromToIndex(fromIndex, toIndex);
-
-        final DoubleList result = new DoubleList(toIndex - fromIndex);
-
-        for (int i = fromIndex; i < toIndex; i++) {
-            result.add(mapper.applyAsDouble(elementData[i]));
-        }
-
-        return result;
-    }
-
-    /**
-     * Map to obj.
-     *
-     * @param <T>
-     * @param <E>
-     * @param mapper
-     * @return
-     * @throws E the e
-     */
-    public <T, E extends Exception> List<T> mapToObj(final Throwables.DoubleFunction<? extends T, E> mapper) throws E {
-        return mapToObj(0, size, mapper);
-    }
-
-    /**
-     * Map to obj.
-     *
-     * @param <T>
-     * @param <E>
-     * @param fromIndex
-     * @param toIndex
-     * @param mapper
-     * @return
-     * @throws E the e
-     */
-    public <T, E extends Exception> List<T> mapToObj(final int fromIndex, final int toIndex, final Throwables.DoubleFunction<? extends T, E> mapper) throws E {
-        checkFromToIndex(fromIndex, toIndex);
-
-        final List<T> result = new ArrayList<>(toIndex - fromIndex);
-
-        for (int i = fromIndex; i < toIndex; i++) {
-            result.add(mapper.apply(elementData[i]));
-        }
-
-        return result;
-    }
-
-    /**
-     * This is equivalent to:
-     * <pre>
-     * <code>
-     *    if (isEmpty()) {
-     *        return OptionalDouble.empty();
-     *    }
-     *
-     *    double result = elementData[0];
-     *
-     *    for (int i = 1; i &lt; size; i++) {
-     *        result = accumulator.applyAsDouble(result, elementData[i]);
-     *    }
-     *
-     *    return OptionalDouble.of(result);
-     * </code>
-     * </pre>
-     *
-     * @param <E>
-     * @param accumulator
-     * @return
-     * @throws E the e
-     */
-    public <E extends Exception> OptionalDouble reduce(final Throwables.DoubleBinaryOperator<E> accumulator) throws E {
-        if (isEmpty()) {
-            return OptionalDouble.empty();
-        }
-
-        double result = elementData[0];
-
-        for (int i = 1; i < size; i++) {
-            result = accumulator.applyAsDouble(result, elementData[i]);
-        }
-
-        return OptionalDouble.of(result);
-    }
-
-    /**
-     * This is equivalent to:
-     * <pre>
-     * <code>
-     *     if (isEmpty()) {
-     *         return identity;
-     *     }
-     *
-     *     double result = identity;
-     *
-     *     for (int i = 0; i &lt; size; i++) {
-     *         result = accumulator.applyAsDouble(result, elementData[i]);
-     *    }
-     *
-     *     return result;
-     * </code>
-     * </pre>
-     *
-     * @param <E>
-     * @param identity
-     * @param accumulator
-     * @return
-     * @throws E the e
-     */
-    public <E extends Exception> double reduce(final double identity, final Throwables.DoubleBinaryOperator<E> accumulator) throws E {
-        if (isEmpty()) {
-            return identity;
-        }
-
-        double result = identity;
-
-        for (int i = 0; i < size; i++) {
-            result = accumulator.applyAsDouble(result, elementData[i]);
-        }
-
-        return result;
-    }
-
-    /**
-     *
-     * @param fromIndex
-     * @param toIndex
-     * @return
+     * @param fromIndex 
+     * @param toIndex 
+     * @return 
+     * @throws IndexOutOfBoundsException 
      */
     @Override
-    public DoubleList distinct(final int fromIndex, final int toIndex) {
+    public DoubleList distinct(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
 
         if (toIndex - fromIndex > 1) {
@@ -1805,13 +1436,15 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     }
 
     /**
+     * 
      *
-     * @param fromIndex
-     * @param toIndex
-     * @param n
-     * @return
+     * @param fromIndex 
+     * @param toIndex 
+     * @param n 
+     * @return 
+     * @throws IndexOutOfBoundsException 
      */
-    public DoubleList top(final int fromIndex, final int toIndex, final int n) {
+    public DoubleList top(final int fromIndex, final int toIndex, final int n) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
 
         return of(N.top(elementData, fromIndex, toIndex, n));
@@ -1828,14 +1461,16 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     }
 
     /**
+     * 
      *
-     * @param fromIndex
-     * @param toIndex
-     * @param n
-     * @param cmp
-     * @return
+     * @param fromIndex 
+     * @param toIndex 
+     * @param n 
+     * @param cmp 
+     * @return 
+     * @throws IndexOutOfBoundsException 
      */
-    public DoubleList top(final int fromIndex, final int toIndex, final int n, Comparator<? super Double> cmp) {
+    public DoubleList top(final int fromIndex, final int toIndex, final int n, Comparator<? super Double> cmp) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
 
         return of(N.top(elementData, fromIndex, toIndex, n, cmp));
@@ -1894,12 +1529,13 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * This List should be sorted first.
      *
-     * @param fromIndex
-     * @param toIndex
-     * @param valueToFind
-     * @return
+     * @param fromIndex 
+     * @param toIndex 
+     * @param valueToFind 
+     * @return 
+     * @throws IndexOutOfBoundsException 
      */
-    public int binarySearch(final int fromIndex, final int toIndex, final double valueToFind) {
+    public int binarySearch(final int fromIndex, final int toIndex, final double valueToFind) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
 
         return N.binarySearch(elementData, fromIndex, toIndex, valueToFind);
@@ -1916,12 +1552,14 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     }
 
     /**
+     * 
      *
-     * @param fromIndex
-     * @param toIndex
+     * @param fromIndex 
+     * @param toIndex 
+     * @throws IndexOutOfBoundsException 
      */
     @Override
-    public void reverse(final int fromIndex, final int toIndex) {
+    public void reverse(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
 
         if (toIndex - fromIndex > 1) {
@@ -1985,28 +1623,32 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     }
 
     /**
+     * 
      *
-     * @param fromIndex
-     * @param toIndex
-     * @return
+     * @param fromIndex 
+     * @param toIndex 
+     * @return 
+     * @throws IndexOutOfBoundsException 
      */
     @Override
-    public DoubleList copy(final int fromIndex, final int toIndex) {
+    public DoubleList copy(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
 
         return new DoubleList(N.copyOfRange(elementData, fromIndex, toIndex));
     }
 
     /**
+     * 
      *
-     * @param fromIndex
-     * @param toIndex
-     * @param step
-     * @return
+     * @param fromIndex 
+     * @param toIndex 
+     * @param step 
+     * @return 
+     * @throws IndexOutOfBoundsException 
      * @see N#copyOfRange(int[], int, int, int)
      */
     @Override
-    public DoubleList copy(final int fromIndex, final int toIndex, final int step) {
+    public DoubleList copy(final int fromIndex, final int toIndex, final int step) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), fromIndex < toIndex ? toIndex : fromIndex);
 
         return new DoubleList(N.copyOfRange(elementData, fromIndex, toIndex, step));
@@ -2015,14 +1657,14 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Returns List of {@code DoubleList} with consecutive sub sequences of the elements, each of the same size (the final sequence may be smaller).
      *
-     *
-     * @param fromIndex
-     * @param toIndex
+     * @param fromIndex 
+     * @param toIndex 
      * @param chunkSize the desired size of each sub sequence (the last may be smaller).
-     * @return
+     * @return 
+     * @throws IndexOutOfBoundsException 
      */
     @Override
-    public List<DoubleList> split(final int fromIndex, final int toIndex, final int chunkSize) {
+    public List<DoubleList> split(final int fromIndex, final int toIndex, final int chunkSize) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
 
         final List<double[]> list = N.split(elementData, fromIndex, toIndex, chunkSize);
@@ -2065,28 +1707,32 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     //    }
 
     /**
+     * 
      *
-     * @param fromIndex
-     * @param toIndex
-     * @param delimiter
-     * @return
+     * @param fromIndex 
+     * @param toIndex 
+     * @param delimiter 
+     * @return 
+     * @throws IndexOutOfBoundsException 
      */
     @Override
-    public String join(int fromIndex, int toIndex, char delimiter) {
+    public String join(int fromIndex, int toIndex, char delimiter) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
 
         return Strings.join(elementData, fromIndex, toIndex, delimiter);
     }
 
     /**
+     * 
      *
-     * @param fromIndex
-     * @param toIndex
-     * @param delimiter
-     * @return
+     * @param fromIndex 
+     * @param toIndex 
+     * @param delimiter 
+     * @return 
+     * @throws IndexOutOfBoundsException 
      */
     @Override
-    public String join(int fromIndex, int toIndex, String delimiter) {
+    public String join(int fromIndex, int toIndex, String delimiter) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
 
         return Strings.join(elementData, fromIndex, toIndex, delimiter);
@@ -2148,12 +1794,14 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     }
 
     /**
+     * 
      *
-     * @param fromIndex
-     * @param toIndex
-     * @return
+     * @param fromIndex 
+     * @param toIndex 
+     * @return 
+     * @throws IndexOutOfBoundsException 
      */
-    public List<Double> boxed(int fromIndex, int toIndex) {
+    public List<Double> boxed(int fromIndex, int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
 
         final List<Double> res = new ArrayList<>(toIndex - fromIndex);
@@ -2176,15 +1824,18 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     }
 
     /**
+     * 
      *
-     * @param <C>
-     * @param fromIndex
-     * @param toIndex
-     * @param supplier
-     * @return
+     * @param <C> 
+     * @param fromIndex 
+     * @param toIndex 
+     * @param supplier 
+     * @return 
+     * @throws IndexOutOfBoundsException 
      */
     @Override
-    public <C extends Collection<Double>> C toCollection(final int fromIndex, final int toIndex, final IntFunction<? extends C> supplier) {
+    public <C extends Collection<Double>> C toCollection(final int fromIndex, final int toIndex, final IntFunction<? extends C> supplier)
+            throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
 
         final C c = supplier.apply(toIndex - fromIndex);
@@ -2197,14 +1848,16 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     }
 
     /**
+     * 
      *
-     * @param fromIndex
-     * @param toIndex
-     * @param supplier
-     * @return
+     * @param fromIndex 
+     * @param toIndex 
+     * @param supplier 
+     * @return 
+     * @throws IndexOutOfBoundsException 
      */
     @Override
-    public Multiset<Double> toMultiset(final int fromIndex, final int toIndex, final IntFunction<Multiset<Double>> supplier) {
+    public Multiset<Double> toMultiset(final int fromIndex, final int toIndex, final IntFunction<Multiset<Double>> supplier) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
 
         final Multiset<Double> multiset = supplier.apply(toIndex - fromIndex);
@@ -2239,12 +1892,14 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     }
 
     /**
+     * 
      *
-     * @param fromIndex
-     * @param toIndex
-     * @return
+     * @param fromIndex 
+     * @param toIndex 
+     * @return 
+     * @throws IndexOutOfBoundsException 
      */
-    public DoubleStream stream(final int fromIndex, final int toIndex) {
+    public DoubleStream stream(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
 
         return DoubleStream.of(elementData, fromIndex, toIndex);

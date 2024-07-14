@@ -599,14 +599,15 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
     }
 
     /**
+     * 
      *
-     *
-     * @param <K>
-     * @param <V>
-     * @param backedMap
-     * @return
+     * @param <K> 
+     * @param <V> 
+     * @param backedMap 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static <K, V> Builder<K, V> builder(final Map<K, V> backedMap) {
+    public static <K, V> Builder<K, V> builder(final Map<K, V> backedMap) throws IllegalArgumentException {
         N.checkArgNotNull(backedMap);
 
         return new Builder<>(backedMap);

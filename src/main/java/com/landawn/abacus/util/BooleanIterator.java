@@ -63,13 +63,15 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
     }
 
     /**
+     * 
      *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return
+     * @param a 
+     * @param fromIndex 
+     * @param toIndex 
+     * @return 
+     * @throws IndexOutOfBoundsException 
      */
-    public static BooleanIterator of(final boolean[] a, final int fromIndex, final int toIndex) {
+    public static BooleanIterator of(final boolean[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
         if (fromIndex == toIndex) {
@@ -108,10 +110,11 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
     /**
      * Lazy evaluation.
      *
-     * @param iteratorSupplier
-     * @return
+     * @param iteratorSupplier 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static BooleanIterator defer(final Supplier<? extends BooleanIterator> iteratorSupplier) {
+    public static BooleanIterator defer(final Supplier<? extends BooleanIterator> iteratorSupplier) throws IllegalArgumentException {
         N.checkArgNotNull(iteratorSupplier, "iteratorSupplier");
 
         return new BooleanIterator() {
@@ -148,10 +151,11 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
     /**
      * Returns an infinite {@code BooleanIterator}.
      *
-     * @param supplier
-     * @return
+     * @param supplier 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static BooleanIterator generate(final BooleanSupplier supplier) {
+    public static BooleanIterator generate(final BooleanSupplier supplier) throws IllegalArgumentException {
         N.checkArgNotNull(supplier);
 
         return new BooleanIterator() {
@@ -168,12 +172,14 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
     }
 
     /**
+     * 
      *
-     * @param hasNext
-     * @param supplier
-     * @return
+     * @param hasNext 
+     * @param supplier 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static BooleanIterator generate(final BooleanSupplier hasNext, final BooleanSupplier supplier) {
+    public static BooleanIterator generate(final BooleanSupplier hasNext, final BooleanSupplier supplier) throws IllegalArgumentException {
         N.checkArgNotNull(hasNext);
         N.checkArgNotNull(supplier);
 
@@ -214,12 +220,13 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
     public abstract boolean nextBoolean();
 
     /**
+     * 
      *
-     *
-     * @param n
-     * @return
+     * @param n 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public BooleanIterator skip(final long n) {
+    public BooleanIterator skip(final long n) throws IllegalArgumentException {
         N.checkArgNotNegative(n, "n");
 
         if (n <= 0) {
@@ -262,12 +269,13 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
     }
 
     /**
+     * 
      *
-     *
-     * @param count
-     * @return
+     * @param count 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public BooleanIterator limit(final long count) {
+    public BooleanIterator limit(final long count) throws IllegalArgumentException {
         N.checkArgNotNegative(count, "count");
 
         if (count == 0) {
@@ -297,12 +305,13 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
     }
 
     /**
+     * 
      *
-     *
-     * @param predicate
-     * @return
+     * @param predicate 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public BooleanIterator filter(final BooleanPredicate predicate) {
+    public BooleanIterator filter(final BooleanPredicate predicate) throws IllegalArgumentException {
         N.checkArgNotNull(predicate, "predicate");
 
         final BooleanIterator iter = this;
@@ -447,12 +456,13 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
     /**
      * For each remaining.
      *
-     * @param action
-     * @deprecated
+     * @param action 
+     * @throws IllegalArgumentException 
+     * @deprecated 
      */
     @Override
     @Deprecated
-    public void forEachRemaining(java.util.function.Consumer<? super Boolean> action) {
+    public void forEachRemaining(java.util.function.Consumer<? super Boolean> action) throws IllegalArgumentException {
         super.forEachRemaining(action);
     }
 
@@ -471,12 +481,14 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
     }
 
     /**
+     * 
      *
-     * @param <E>
-     * @param action
+     * @param <E> 
+     * @param action 
+     * @throws IllegalArgumentException 
      * @throws E the e
      */
-    public <E extends Exception> void foreachIndexed(Throwables.IndexedBooleanConsumer<E> action) throws E {
+    public <E extends Exception> void foreachIndexed(Throwables.IndexedBooleanConsumer<E> action) throws IllegalArgumentException, E {
         N.checkArgNotNull(action);
 
         int idx = 0;

@@ -123,8 +123,9 @@ public class Utf8 {
      * @param off the offset in the buffer of the first byte to read
      * @param len the number of bytes to read from the buffer
      * @return 
+     * @throws IndexOutOfBoundsException 
      */
-    public static boolean isWellFormed(byte[] bytes, int off, int len) {
+    public static boolean isWellFormed(byte[] bytes, int off, int len) throws IndexOutOfBoundsException {
         N.checkFromIndexSize(off, len, bytes.length);
 
         int end = off + len;

@@ -187,17 +187,6 @@ public class Builder<T> {
 
     /**
      *
-     * @param <T>
-     * @param val
-     * @return
-     * @throws IllegalArgumentException if the specified {@code val} is {@code null}.
-     */
-    public static final <T> LongMultisetBuilder<T> of(LongMultiset<T> val) throws IllegalArgumentException {
-        return new LongMultisetBuilder<>(val);
-    }
-
-    /**
-     *
      * @param <K> the key type
      * @param <E>
      * @param <V> the value type
@@ -253,7 +242,6 @@ public class Builder<T> {
         creatorMap.put(TreeMap.class, val -> Builder.of((Map) val));
 
         creatorMap.put(Multiset.class, val -> Builder.of((Multiset) val));
-        creatorMap.put(LongMultiset.class, val -> Builder.of((LongMultiset) val));
 
         creatorMap.put(Multimap.class, val -> Builder.of((Multimap) val));
         creatorMap.put(ListMultimap.class, val -> Builder.of((Multimap) val));
@@ -271,7 +259,7 @@ public class Builder<T> {
      * @throws IllegalArgumentException if the specified {@code val} is {@code null}.
      */
     @SuppressWarnings("rawtypes")
-    public static final <T> Builder<T> of(T val) {
+    public static final <T> Builder<T> of(T val) throws IllegalArgumentException {
         N.checkArgNotNull(val);
 
         final Function<Object, Builder> func = creatorMap.get(val.getClass());
@@ -294,8 +282,6 @@ public class Builder<T> {
             result = of((DataSet) val);
         } else if (val instanceof Multiset) {
             result = of((Multiset) val);
-        } else if (val instanceof LongMultiset) {
-            result = of((LongMultiset) val);
         } else {
             result = new Builder<>(val);
         }
@@ -1348,8 +1334,9 @@ public class Builder<T> {
          * @param index
          * @param c
          * @return
+         * @throws IndexOutOfBoundsException
          */
-        public ListBuilder<T, L> addAll(int index, Collection<? extends T> c) {
+        public ListBuilder<T, L> addAll(int index, Collection<? extends T> c) throws IndexOutOfBoundsException {
             N.checkIndex(index, val.size());
 
             if (N.notEmpty(c)) {
@@ -1489,40 +1476,8 @@ public class Builder<T> {
          * @param occurrences
          * @return
          */
-        public MultisetBuilder<T> set(final T e, final int occurrences) {
-            val.set(e, occurrences);
-
-            return this;
-        }
-
-        /**
-         * @param c
-         * @param occurrences
-         * @return
-         */
-        public MultisetBuilder<T> setAll(final Collection<? extends T> c, final int occurrences) {
-            val.setAll(c, occurrences);
-
-            return this;
-        }
-
-        /**
-         *
-         * @param m
-         * @return
-         */
-        public MultisetBuilder<T> setAll(final Map<? extends T, Integer> m) {
-            val.setAll(m);
-
-            return this;
-        }
-
-        /**
-         * @param multiset
-         * @return
-         */
-        public MultisetBuilder<T> setAll(final Multiset<? extends T> multiset) {
-            val.setAll(multiset);
+        public MultisetBuilder<T> setCount(final T e, final int occurrences) {
+            val.setCount(e, occurrences);
 
             return this;
         }
@@ -1532,43 +1487,20 @@ public class Builder<T> {
          * @param e
          * @return
          */
-        public MultisetBuilder<T> add(T e) {
+        public MultisetBuilder<T> add(final T e) {
             val.add(e);
 
             return this;
         }
 
         /**
-         * Adds the all.
          *
-         * @param c
+         * @param e
+         * @param occurrencesToAdd
          * @return
          */
-        public MultisetBuilder<T> addAll(final Collection<? extends T> c) {
-            val.addAll(c);
-
-            return this;
-        }
-
-        /**
-         * Adds the all.
-         *
-         * @param m
-         * @return
-         */
-        public MultisetBuilder<T> addAll(final Map<? extends T, Integer> m) {
-            val.addAll(m);
-
-            return this;
-        }
-
-        /**
-         *
-         * @param multiset
-         * @return
-         */
-        public MultisetBuilder<T> addAll(final Multiset<? extends T> multiset) {
-            val.addAll(multiset);
+        public MultisetBuilder<T> add(final T e, final int occurrencesToAdd) {
+            val.add(e, occurrencesToAdd);
 
             return this;
         }
@@ -1578,8 +1510,20 @@ public class Builder<T> {
          * @param e
          * @return
          */
-        public MultisetBuilder<T> remove(Object e) {
+        public MultisetBuilder<T> remove(final Object e) {
             val.remove(e);
+
+            return this;
+        }
+
+        /**
+         *
+         * @param e
+         * @param occurrencesToAdd
+         * @return
+         */
+        public MultisetBuilder<T> remove(final Object e, final int occurrencesToAdd) {
+            val.remove(e, occurrencesToAdd);
 
             return this;
         }
@@ -1589,35 +1533,12 @@ public class Builder<T> {
          *
          * @param c
          * @return
+         * @see #removeAllOccurrences(Collection)
+         * @deprecated Use {@link #removeAllOccurrences(Collection<?>)} instead
          */
-        public MultisetBuilder<T> removeAll(Collection<?> c) {
-            val.removeAll(c);
-
-            return this;
-        }
-
-        /**
-         * Removes the all.
-         *
-         * @param m
-         * @return
-         */
-        public MultisetBuilder<T> removeAll(final Map<? extends T, Integer> m) {
-            val.removeAll(m);
-
-            return this;
-        }
-
-        /**
-         * Removes the all.
-         *
-         * @param multiset
-         * @return
-         */
-        public MultisetBuilder<T> removeAll(Multiset<? extends T> multiset) {
-            val.removeAll(multiset);
-
-            return this;
+        @Deprecated
+        public MultisetBuilder<T> removeAll(final Collection<?> c) {
+            return removeAllOccurrences(c);
         }
 
         /**
@@ -1636,188 +1557,8 @@ public class Builder<T> {
          * @param c
          * @return
          */
-        public MultisetBuilder<T> removeAllOccurrencesForAll(final Collection<?> c) {
-            val.removeAllOccurrencesForAll(c);
-
-            return this;
-        }
-    }
-
-    /**
-     * The Class LongMultisetBuilder.
-     *
-     * @param <T>
-     */
-    public static final class LongMultisetBuilder<T> extends Builder<LongMultiset<T>> {
-
-        /**
-         * Instantiates a new long multiset builder.
-         *
-         * @param c
-         */
-        LongMultisetBuilder(LongMultiset<T> c) {
-            super(c);
-        }
-
-        /**
-         *
-         * @param e
-         * @param occurrences
-         * @return
-         */
-        public LongMultisetBuilder<T> set(final T e, final long occurrences) {
-            val.set(e, occurrences);
-
-            return this;
-        }
-
-        /**
-         * 
-         *
-         * @param c 
-         * @param occurrences 
-         * @return 
-         */
-        public LongMultisetBuilder<T> setAll(final Collection<? extends T> c, final long occurrences) {
-            val.setAll(c, occurrences);
-
-            return this;
-        }
-
-        /**
-         *
-         * @param m
-         * @return
-         */
-        public LongMultisetBuilder<T> setAll(final Map<? extends T, Long> m) {
-            val.setAll(m);
-
-            return this;
-        }
-
-        /**
-         *
-         * @param multiset
-         * @return
-         */
-        public LongMultisetBuilder<T> setAll(final LongMultiset<? extends T> multiset) {
-            val.setAll(multiset);
-
-            return this;
-        }
-
-        /**
-         *
-         * @param e
-         * @return
-         */
-        public LongMultisetBuilder<T> add(T e) {
-            val.add(e);
-
-            return this;
-        }
-
-        /**
-         * Adds the all.
-         *
-         * @param c
-         * @return
-         */
-        public LongMultisetBuilder<T> addAll(final Collection<? extends T> c) {
-            val.addAll(c);
-
-            return this;
-        }
-
-        /**
-         * Adds the all.
-         *
-         * @param m
-         * @return
-         */
-        public LongMultisetBuilder<T> addAll(final Map<? extends T, Long> m) {
-            val.addAll(m);
-
-            return this;
-        }
-
-        /**
-         * Adds the all.
-         *
-         * @param multiset
-         * @return
-         */
-        public LongMultisetBuilder<T> addAll(final LongMultiset<? extends T> multiset) {
-            val.addAll(multiset);
-
-            return this;
-        }
-
-        /**
-         *
-         * @param e
-         * @return
-         */
-        public LongMultisetBuilder<T> remove(Object e) {
-            val.remove(e);
-
-            return this;
-        }
-
-        /**
-         * Removes the all.
-         *
-         * @param c
-         * @return
-         */
-        public LongMultisetBuilder<T> removeAll(Collection<?> c) {
-            val.removeAll(c);
-
-            return this;
-        }
-
-        /**
-         * Removes the all.
-         *
-         * @param m
-         * @return
-         */
-        public LongMultisetBuilder<T> removeAll(final Map<? extends T, Long> m) {
-            val.removeAll(m);
-
-            return this;
-        }
-
-        /**
-         * Removes the all.
-         *
-         * @param multiset
-         * @return
-         */
-        public LongMultisetBuilder<T> removeAll(LongMultiset<? extends T> multiset) {
-            val.removeAll(multiset);
-
-            return this;
-        }
-
-        /**
-         *
-         * @param e
-         * @return
-         */
-        public LongMultisetBuilder<T> removeAllOccurrences(final Object e) {
-            val.removeAllOccurrences(e);
-
-            return this;
-        }
-
-        /**
-         *
-         * @param c
-         * @return
-         */
-        public LongMultisetBuilder<T> removeAllOccurrencesForAll(final Collection<?> c) {
-            val.removeAllOccurrencesForAll(c);
+        public MultisetBuilder<T> removeAllOccurrences(final Collection<?> c) {
+            val.removeAllOccurrences(c);
 
             return this;
         }
@@ -3226,8 +2967,9 @@ public class Builder<T> {
          * @param right
          * @param comparator
          * @return this
+         * @throws IllegalArgumentException
          */
-        public <T> ComparisonBuilder compare(T left, T right, Comparator<T> comparator) {
+        public <T> ComparisonBuilder compare(T left, T right, Comparator<T> comparator) throws IllegalArgumentException {
             if (result == 0) {
                 if (comparator == null) {
                     result = Comparators.NATURAL_ORDER.compare(left, right);
@@ -3485,13 +3227,15 @@ public class Builder<T> {
 
         /**
          *
+         *
          * @param <T>
          * @param left
          * @param right
          * @param func
          * @return
+         * @throws IllegalArgumentException
          */
-        public <T> EquivalenceBuilder equals(T left, T right, BiFunction<? super T, ? super T, Boolean> func) {
+        public <T> EquivalenceBuilder equals(T left, T right, BiFunction<? super T, ? super T, Boolean> func) throws IllegalArgumentException {
             N.checkArgNotNull(func, "func");
 
             if (result) {
@@ -3675,12 +3419,14 @@ public class Builder<T> {
 
         /**
          *
+         *
          * @param <T>
          * @param value
          * @param func
          * @return
+         * @throws IllegalArgumentException
          */
-        public <T> HashCodeBuilder hash(T value, ToIntFunction<? super T> func) {
+        public <T> HashCodeBuilder hash(T value, ToIntFunction<? super T> func) throws IllegalArgumentException {
             N.checkArgNotNull(func, "func");
 
             result = result * 31 + func.applyAsInt(value);

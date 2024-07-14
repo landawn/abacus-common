@@ -90,11 +90,13 @@ public final class MoreExecutors {
     /**
      * Adds the delayed shutdown hook.
      *
-     * @param service
-     * @param terminationTimeout
-     * @param timeUnit
+     * @param service 
+     * @param terminationTimeout 
+     * @param timeUnit 
+     * @throws IllegalArgumentException 
      */
-    public static void addDelayedShutdownHook(final ExecutorService service, final long terminationTimeout, final TimeUnit timeUnit) {
+    public static void addDelayedShutdownHook(final ExecutorService service, final long terminationTimeout, final TimeUnit timeUnit)
+            throws IllegalArgumentException {
         N.checkArgNotNull(service);
         N.checkArgNotNull(timeUnit);
         addShutdownHook(MoreExecutors.newThread("DelayedShutdownHook-for-" + service, () -> {

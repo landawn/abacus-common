@@ -47,7 +47,7 @@ public class MutableFloatType extends MutableType<MutableFloat> {
      */
     @Override
     public String stringOf(MutableFloat x) {
-        return x == null ? null : N.stringOf(x.floatValue());
+        return x == null ? null : N.stringOf(x.value());
     }
 
     /**
@@ -93,7 +93,7 @@ public class MutableFloatType extends MutableType<MutableFloat> {
      */
     @Override
     public void set(PreparedStatement stmt, int columnIndex, MutableFloat x) throws SQLException {
-        stmt.setFloat(columnIndex, (x == null) ? 0 : x.floatValue());
+        stmt.setFloat(columnIndex, (x == null) ? 0 : x.value());
     }
 
     /**
@@ -105,7 +105,7 @@ public class MutableFloatType extends MutableType<MutableFloat> {
      */
     @Override
     public void set(CallableStatement stmt, String parameterName, MutableFloat x) throws SQLException {
-        stmt.setFloat(parameterName, (x == null) ? 0 : x.floatValue());
+        stmt.setFloat(parameterName, (x == null) ? 0 : x.value());
     }
 
     /**
@@ -119,7 +119,7 @@ public class MutableFloatType extends MutableType<MutableFloat> {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
-            appendable.append(String.valueOf(x.floatValue()));
+            appendable.append(String.valueOf(x.value()));
         }
     }
 
@@ -135,7 +135,7 @@ public class MutableFloatType extends MutableType<MutableFloat> {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
-            writer.write(x.floatValue());
+            writer.write(x.value());
         }
     }
 }

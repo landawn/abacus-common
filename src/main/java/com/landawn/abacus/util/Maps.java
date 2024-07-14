@@ -109,9 +109,10 @@ public final class Maps {
      * @param <V>
      * @param map
      * @return
+     * @throws IllegalArgumentException
      */
     @SuppressWarnings({ "rawtypes" })
-    public static <K, V> ImmutableSet<Map.Entry<K, V>> entrySet(Map<? extends K, ? extends V> map) {
+    public static <K, V> ImmutableSet<Map.Entry<K, V>> entrySet(Map<? extends K, ? extends V> map) throws IllegalArgumentException {
         return N.isEmpty(map) ? ImmutableSet.empty() : ImmutableSet.wrap((Set) map.entrySet());
     }
 
@@ -817,7 +818,7 @@ public final class Maps {
      * @param defaultValue
      * @return
      */
-    public static <K, V> V getOrDefault(final Map<K, ? extends V> map, final K key, final V defaultValue) {
+    public static <K, V> V getOrDefaultIfAbsent(final Map<K, ? extends V> map, final K key, final V defaultValue) {
         if (N.isEmpty(map)) {
             return defaultValue;
         }
@@ -841,8 +842,11 @@ public final class Maps {
      * @param key
      * @param defaultForNull to return if the specified {@code map} doesn't contain the specified {@code key} or the mapped value is {@code null}.
      * @return
+     * @throws IllegalArgumentException
      */
-    public static <K, V> V getOrDefaultIfNull(final Map<K, ? extends V> map, final K key, final V defaultForNull) {
+    public static <K, V> V getOrDefaultIfNull(final Map<K, ? extends V> map, final K key, final V defaultForNull) throws IllegalArgumentException {
+        N.checkArgNotNull(defaultForNull, "defaultForNull");
+
         if (N.isEmpty(map)) {
             return defaultForNull;
         }
@@ -1281,8 +1285,9 @@ public final class Maps {
      * @param key
      * @param defaultForNull to return if the specified {@code map} doesn't contain the specified {@code key} or the mapped value is {@code null}.
      * @return
+     * @throws IllegalArgumentException
      */
-    public static <K> String getString(final Map<? super K, ?> map, final K key, final String defaultForNull) {
+    public static <K> String getString(final Map<? super K, ?> map, final K key, final String defaultForNull) throws IllegalArgumentException {
         N.checkArgNotNull(defaultForNull, "defaultForNull");
 
         if (N.isEmpty(map)) {
@@ -1330,6 +1335,34 @@ public final class Maps {
         }
     }
 
+    //    /**
+    //     *
+    //     * @param <K>
+    //     * @param <T>
+    //     * @param map
+    //     * @param key
+    //     * @param defaultValueForNull
+    //     * @param targetType
+    //     * @return
+    //     * @see #get(Map, Object, Object)
+    //     */
+    //    public static <K, T> T get(final Map<? super K, ?> map, final K key, final T defaultValueForNull, final Class<? extends T> targetType) {
+    //        if (N.isEmpty(map)) {
+    //            return defaultValueForNull;
+    //        }
+    //
+    //        final Object val = map.get(key);
+    //
+    //        if (val == null) {
+    //            return defaultValueForNull;
+    //        } else if (targetType.isAssignableFrom(val.getClass())) {
+    //            return (T) val;
+    //        } else {
+    //            return N.convert(val, targetType);
+    //        }
+    //
+    //    }
+
     /**
      * Returns an empty {@code Optional<String>} if the specified {@code map} is empty, or no value found by the specified {@code key}, or the value is {@code null}.
      *
@@ -1360,8 +1393,36 @@ public final class Maps {
         }
     }
 
+    //    /**
+    //     *
+    //     * @param <K>
+    //     * @param <T>
+    //     * @param map
+    //     * @param key
+    //     * @param defaultValueForNull
+    //     * @param targetType
+    //     * @return
+    //     * @see #get(Map, Object, Object)
+    //     */
+    //    public static <K, T> T get(final Map<? super K, ?> map, final K key, final T defaultValueForNull, final Type<? extends T> targetType) {
+    //        if (N.isEmpty(map)) {
+    //            return defaultValueForNull;
+    //        }
+    //
+    //        final Object val = map.get(key);
+    //
+    //        if (val == null) {
+    //            return defaultValueForNull;
+    //        } else if (targetType.clazz().isAssignableFrom(val.getClass())) {
+    //            return (T) val;
+    //        } else {
+    //            return N.convert(val, targetType);
+    //        }
+    //
+    //    }
+
     /**
-     * Returns the mapped {@code T} or a {@code T} converted from {@code N.valueOf((Class<T>) defaultForNull.getClass(), N.stringOf(val))}.
+     * Returns the mapped {@code T} or a {@code T} converted from {@code N.convert(val, defaultForNull.getClass())}.
      * {@code defaultForNull} is returned if the specified {@code map} doesn't contain the specified {@code key} or the mapped value is {@code null}.
      *
      * @param <K>
@@ -1370,8 +1431,9 @@ public final class Maps {
      * @param key
      * @param defaultForNull to return if the specified {@code map} doesn't contain the specified {@code key} or the mapped value is {@code null}.
      * @return
+     * @throws IllegalArgumentException
      */
-    public static <K, T> T get(final Map<? super K, ?> map, final K key, final T defaultForNull) {
+    public static <K, T> T get(final Map<? super K, ?> map, final K key, final T defaultForNull) throws IllegalArgumentException {
         N.checkArgNotNull(defaultForNull, "defaultForNull");
 
         if (N.isEmpty(map)) {
@@ -1686,15 +1748,17 @@ public final class Maps {
 
     /**
      *
+     *
      * @param <T>
      * @param map
      * @param path
      * @param defaultValue
      * @return {@code defaultValue} if there is no value found by the specified path.
+     * @throws IllegalArgumentException
      * @see #getByPath(Map, String)
      */
     @SuppressWarnings("rawtypes")
-    public static <T> T getByPathOrDefault(final Map<?, ?> map, final String path, final T defaultValue) {
+    public static <T> T getByPathOrDefault(final Map<?, ?> map, final String path, final T defaultValue) throws IllegalArgumentException {
         N.checkArgNotNull(defaultValue, "defaultValue");
 
         if (N.isEmpty(map)) {
@@ -2108,6 +2172,41 @@ public final class Maps {
      * @return {@code true} if there are one or more than one entries removed from the specified map.
      * @throws E the e
      */
+    public static <K, V, E extends Exception> boolean removeIf(final Map<K, V> map, final Throwables.BiPredicate<? super K, ? super V, E> filter) throws E {
+        List<K> keysToRemove = null;
+
+        for (Map.Entry<K, V> entry : map.entrySet()) {
+            if (filter.test(entry.getKey(), entry.getValue())) {
+                if (keysToRemove == null) {
+                    keysToRemove = new ArrayList<>(7);
+                }
+
+                keysToRemove.add(entry.getKey());
+            }
+        }
+
+        if (N.notEmpty(keysToRemove)) {
+            for (K key : keysToRemove) {
+                map.remove(key);
+            }
+
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Removes entries from the specified {@code map} by the the specified {@code filter}.
+     *
+     * @param <K> the key type
+     * @param <V> the value type
+     * @param <E>
+     * @param map
+     * @param filter
+     * @return {@code true} if there are one or more than one entries removed from the specified map.
+     * @throws E the e
+     */
     public static <K, V, E extends Exception> boolean removeIfKey(final Map<K, V> map, final Throwables.Predicate<? super K, E> filter) throws E {
         List<K> keysToRemove = null;
 
@@ -2194,15 +2293,17 @@ public final class Maps {
 
     /**
      *
+     *
      * @param <K> the key type
      * @param <V> the value type
      * @param map
      * @param key
      * @param newValue
      * @return {@code null} if {@code (N.isEmpty(map))}. (auto-generated java doc for return)
+     * @throws IllegalArgumentException
      */
     @MayReturnNull
-    public static <K, V> V replace(final Map<K, V> map, final K key, final V newValue) {
+    public static <K, V> V replace(final Map<K, V> map, final K key, final V newValue) throws IllegalArgumentException {
         if (N.isEmpty(map)) {
             return null;
         }
@@ -2291,6 +2392,32 @@ public final class Maps {
     //            action.accept(entry.getKey(), entry.getValue());
     //        }
     //    }
+
+    /**
+     *
+     * @param <K> the key type
+     * @param <V> the value type
+     * @param <E>
+     * @param map
+     * @param predicate
+     * @return
+     * @throws E the e
+     */
+    public static <K, V, E extends Exception> Map<K, V> filter(final Map<K, V> map, final Throwables.Predicate<? super Map.Entry<K, V>, E> predicate) throws E {
+        if (map == null) {
+            return new HashMap<>();
+        }
+
+        final Map<K, V> result = newTargetMap(map, 0);
+
+        for (Map.Entry<K, V> entry : map.entrySet()) {
+            if (predicate.test(entry)) {
+                result.put(entry.getKey(), entry.getValue());
+            }
+        }
+
+        return result;
+    }
 
     /**
      *
@@ -2395,13 +2522,15 @@ public final class Maps {
 
     /**
      *
+     *
      * @param <K> the key type
      * @param <V> the value type
      * @param map
      * @param mergeOp
      * @return
+     * @throws IllegalArgumentException
      */
-    public static <K, V> Map<V, K> invert(final Map<K, V> map, final BinaryOperator<K> mergeOp) {
+    public static <K, V> Map<V, K> invert(final Map<K, V> map, final BinaryOperator<K> mergeOp) throws IllegalArgumentException {
         N.checkArgNotNull(mergeOp, "mergeOp");
 
         if (map == null) {
@@ -3814,11 +3943,11 @@ public final class Maps {
     public static class MapGetter<K, V> {
 
         private final Map<K, V> map;
-        private final boolean defaultForPrimitive;
+        private final boolean defaultForPrimitiveOrBoxedType;
 
-        MapGetter(final Map<K, V> map, final boolean defaultForPrimitive) {
+        MapGetter(final Map<K, V> map, final boolean defaultForPrimitiveOrBoxedType) {
             this.map = map;
-            this.defaultForPrimitive = defaultForPrimitive;
+            this.defaultForPrimitiveOrBoxedType = defaultForPrimitiveOrBoxedType;
         }
 
         /**
@@ -3839,11 +3968,11 @@ public final class Maps {
          * @param <K>
          * @param <V>
          * @param map
-         * @param defaultForPrimitive
+         * @param defaultForPrimitiveOrBoxedType
          * @return
          */
-        public static <K, V> MapGetter<K, V> of(final Map<K, V> map, final boolean defaultForPrimitive) {
-            return new MapGetter<>(map, defaultForPrimitive);
+        public static <K, V> MapGetter<K, V> of(final Map<K, V> map, final boolean defaultForPrimitiveOrBoxedType) {
+            return new MapGetter<>(map, defaultForPrimitiveOrBoxedType);
         }
 
         /**
@@ -3855,7 +3984,7 @@ public final class Maps {
         public Boolean getBoolean(K key) {
             Object value = map.get(key);
 
-            if (value == null && defaultForPrimitive) {
+            if (value == null && defaultForPrimitiveOrBoxedType) {
                 return Boolean.FALSE;
             } else if (value instanceof Boolean) {
                 return (Boolean) value;
@@ -3873,7 +4002,7 @@ public final class Maps {
         public Character getChar(K key) {
             Object value = map.get(key);
 
-            if (value == null && defaultForPrimitive) {
+            if (value == null && defaultForPrimitiveOrBoxedType) {
                 return 0;
             } else if (value instanceof Character) {
                 return (Character) value;
@@ -3891,7 +4020,7 @@ public final class Maps {
         public Byte getByte(K key) {
             Object value = map.get(key);
 
-            if (value == null && defaultForPrimitive) {
+            if (value == null && defaultForPrimitiveOrBoxedType) {
                 return 0;
             } else if (value instanceof Byte) {
                 return (Byte) value;
@@ -3909,7 +4038,7 @@ public final class Maps {
         public Short getShort(K key) {
             Object value = map.get(key);
 
-            if (value == null && defaultForPrimitive) {
+            if (value == null && defaultForPrimitiveOrBoxedType) {
                 return 0;
             } else if (value instanceof Short) {
                 return (Short) value;
@@ -3927,7 +4056,7 @@ public final class Maps {
         public Integer getInt(K key) {
             Object value = map.get(key);
 
-            if (value == null && defaultForPrimitive) {
+            if (value == null && defaultForPrimitiveOrBoxedType) {
                 return 0;
             } else if (value instanceof Integer) {
                 return (Integer) value;
@@ -3942,10 +4071,10 @@ public final class Maps {
          * @param key
          * @return
          */
-        public Long getLong(K key) {
+        public Long getLong(final K key) {
             Object value = map.get(key);
 
-            if (value == null && defaultForPrimitive) {
+            if (value == null && defaultForPrimitiveOrBoxedType) {
                 return 0L;
             } else if (value instanceof Long) {
                 return (Long) value;
@@ -3963,7 +4092,7 @@ public final class Maps {
         public Float getFloat(K key) {
             Object value = map.get(key);
 
-            if (value == null && defaultForPrimitive) {
+            if (value == null && defaultForPrimitiveOrBoxedType) {
                 return 0F;
             } else if (value instanceof Float) {
                 return (Float) value;
@@ -3981,7 +4110,7 @@ public final class Maps {
         public Double getDouble(K key) {
             Object value = map.get(key);
 
-            if (value == null && defaultForPrimitive) {
+            if (value == null && defaultForPrimitiveOrBoxedType) {
                 return 0d;
             } else if (value instanceof Double) {
                 return (Double) value;
@@ -4195,20 +4324,17 @@ public final class Maps {
         /**
          * Returns {@code null} if no value found by the specified {@code key}, or the value is {@code null}.
          *
-         * <br />
-         * Node: To follow one of general design rules in {@code Abacus}, if there is a conversion behind when the source value is not assignable to the target type, put the {@code targetType} to last parameter of the method.
-         * Otherwise, put the {@code targetTpye} to the first parameter of the method.
          *
          * @param <T>
          * @param key
          * @param targetType
          * @return
          */
-        public <T> T get(Object key, Class<? extends T> targetType) {
+        public <T> T get(final Object key, final Class<? extends T> targetType) {
             final V val = map.get(key);
 
             if (val == null) {
-                return (T) (defaultForPrimitive && ClassUtil.isPrimitiveWrapper(targetType) ? N.defaultValueOf(ClassUtil.unwrap(targetType))
+                return (T) (defaultForPrimitiveOrBoxedType && ClassUtil.isPrimitiveWrapper(targetType) ? N.defaultValueOf(ClassUtil.unwrap(targetType))
                         : N.defaultValueOf(targetType));
             }
 
@@ -4222,20 +4348,17 @@ public final class Maps {
         /**
          * Returns {@code null} if no value found by the specified {@code key}, or the value is {@code null}.
          *
-         * <br />
-         * Node: To follow one of general design rules in {@code Abacus}, if there is a conversion behind when the source value is not assignable to the target type, put the {@code targetType} to last parameter of the method.
-         * Otherwise, put the {@code targetTpye} to the first parameter of the method.
          *
          * @param <T>
          * @param key
          * @param targetType
          * @return
          */
-        public <T> T get(Object key, Type<? extends T> targetType) {
+        public <T> T get(final Object key, final Type<? extends T> targetType) {
             final V val = map.get(key);
 
             if (val == null) {
-                return (T) (defaultForPrimitive && targetType.isPrimitiveWrapper() ? N.defaultValueOf(ClassUtil.unwrap(targetType.clazz()))
+                return (T) (defaultForPrimitiveOrBoxedType && targetType.isPrimitiveWrapper() ? N.defaultValueOf(ClassUtil.unwrap(targetType.clazz()))
                         : targetType.defaultValue());
             }
 
@@ -4244,6 +4367,30 @@ public final class Maps {
             }
 
             return N.convert(val, targetType);
+        }
+
+        /**
+         *
+         * @param <T>
+         * @param key
+         * @param defaultForNull
+         * @return
+         * @throws IllegalArgumentException
+         */
+        public <T> T get(final Object key, final T defaultForNull) throws IllegalArgumentException {
+            N.checkArgNotNull(defaultForNull, "defaultForNull");
+
+            final V val = map.get(key);
+
+            if (val == null) {
+                return defaultForNull;
+            }
+
+            if (defaultForNull.getClass().isAssignableFrom(val.getClass())) {
+                return (T) val;
+            }
+
+            return (T) N.convert(val, defaultForNull.getClass());
         }
     }
 }
