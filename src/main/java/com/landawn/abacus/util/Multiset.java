@@ -16,6 +16,7 @@
 
 package com.landawn.abacus.util;
 
+import java.util.AbstractSet;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -26,7 +27,6 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -36,6 +36,10 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.function.ToIntFunction;
 
+import javax.annotation.CheckForNull;
+
+import com.google.common.base.Objects;
+import com.google.common.collect.Multisets;
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.util.Fn.Suppliers;
 import com.landawn.abacus.util.If.OrElse;
@@ -44,7 +48,6 @@ import com.landawn.abacus.util.u.OptionalDouble;
 import com.landawn.abacus.util.function.IntBiFunction;
 import com.landawn.abacus.util.function.ObjIntFunction;
 import com.landawn.abacus.util.function.ObjIntPredicate;
-import com.landawn.abacus.util.stream.EntryStream;
 import com.landawn.abacus.util.stream.Stream;
 
 // Copied from Google Guava under Apache License 2.0 and modified.
@@ -1158,21 +1161,83 @@ public final class Multiset<E> implements Collection<E> {
     // Refined Collection Methods
 
     /**
-     * Returns the set of distinct elements contained in this multiset. The element set is backed by
-     * the same data as the multiset, so any change to either is immediately reflected in the other.
+     * Returns the unmodifiable set of distinct elements contained in this multiset. The element set is backed by
+     * the same data as the multiset, so any change to the multiset is immediately reflected in the returned {@code Set}.
      * The order of the elements in the element set is unspecified.
      *
-     * <p>If the element set supports any removal operations, these necessarily cause <b>all</b>
-     * occurrences of the removed element(s) to be removed from the multiset. Implementations are not
-     * expected to support the add operations, although this is possible.
-     *
-     * <p>A common use for the element set is to find the number of distinct elements in the multiset:
-     * {@code elementSet().size()}.
      *
      * @return a view of the set of distinct elements in this multiset
      */
     public Set<E> elementSet() {
         return ImmutableSet.wrap(backingMap.keySet());
+    }
+
+    private transient Set<Entry<E>> entrySet;
+
+    /**
+     * Returns a unmodifiable view of the contents of this multiset, grouped into {@code Multiset.Entry} instances,
+     * each providing an element of the multiset and the count of that element. This set contains
+     * exactly one entry for each distinct element in the multiset (thus it always has the same size
+     * as the {@link #elementSet}). The order of the elements in the element set is unspecified.
+     *
+     * <p>The entry set is backed by the same data as the multiset, so any change to the multiset is immediately reflected in the returned {@code Set}.
+     *
+     * @return a set of entries representing the data of this multiset
+     */
+    public Set<Multiset.Entry<E>> entrySet() {
+        Set<Multiset.Entry<E>> result = entrySet;
+
+        if (result == null) {
+            entrySet = result = createEntrySet();
+        }
+
+        return result;
+    }
+
+    Set<Multiset.Entry<E>> createEntrySet() {
+        final Set<Multiset.Entry<E>> entrySet = new EntrySet();
+
+        return ImmutableSet.wrap(entrySet);
+    }
+
+    class EntrySet extends AbstractSet<Multiset.Entry<E>> {
+
+        @Override
+        public boolean contains(Object obj) {
+            if (obj instanceof Multiset.Entry) {
+                final Multiset.Entry<?> entry = (Multiset.Entry<?>) obj;
+                final MutableInt count = backingMap.get(entry.element());
+
+                return count == null ? entry.count() == 0 : count.value() == entry.count();
+            }
+
+            return false;
+        }
+
+        @Override
+        public int size() {
+            return backingMap.size();
+        }
+
+        @Override
+        public ObjIterator<Entry<E>> iterator() {
+            final Iterator<Map.Entry<E, MutableInt>> backingEntryIter = backingMap.entrySet().iterator();
+
+            return new ObjIterator<>() {
+                private Map.Entry<E, MutableInt> next;
+
+                @Override
+                public boolean hasNext() {
+                    return backingEntryIter.hasNext();
+                }
+
+                @Override
+                public Entry<E> next() {
+                    next = backingEntryIter.next();
+                    return new ImmutableEntry<>(next.getKey(), next.getValue().value());
+                }
+            };
+        }
     }
 
     /**
@@ -1183,8 +1248,9 @@ public final class Multiset<E> implements Collection<E> {
      */
     @Override
     public Iterator<E> iterator() {
+        final Iterator<Map.Entry<E, MutableInt>> entryIter = backingMap.entrySet().iterator();
+
         return new ObjIterator<>() {
-            private Iterator<Map.Entry<E, MutableInt>> entryIter = null;
             private Map.Entry<E, MutableInt> entry = null;
             private E element = null;
             private int count = 0;
@@ -1192,10 +1258,6 @@ public final class Multiset<E> implements Collection<E> {
 
             @Override
             public boolean hasNext() {
-                if (entryIter == null) {
-                    init();
-                }
-
                 if (cnt >= count) {
                     while (cnt >= count && entryIter.hasNext()) {
                         entry = entryIter.next();
@@ -1217,12 +1279,6 @@ public final class Multiset<E> implements Collection<E> {
                 cnt++;
 
                 return element;
-            }
-
-            private void init() {
-                if (entryIter == null) {
-                    entryIter = backingMap.entrySet().iterator();
-                }
             }
         };
     }
@@ -1499,15 +1555,13 @@ public final class Multiset<E> implements Collection<E> {
         return Stream.of(iterator());
     }
 
-    private static final com.landawn.abacus.util.function.Function<MutableInt, Integer> TO_INT = MutableInt::value;
-
     /**
      *
      *
      * @return
      */
-    public EntryStream<E, Integer> entries() {
-        return EntryStream.of(backingMap).mapValue(TO_INT);
+    public Stream<Multiset.Entry<E>> entries() {
+        return Stream.of(entrySet());
     }
 
     /**
@@ -1597,5 +1651,125 @@ public final class Multiset<E> implements Collection<E> {
         }
 
         return occurrences;
+    }
+
+    /**
+     * An unmodifiable element-count pair for a multiset. The {@link Multiset#entrySet} method returns
+     * a view of the multiset whose elements are of this class. A multiset implementation may return
+     * Entry instances that are either live "read-through" views to the Multiset, or immutable
+     * snapshots. Note that this type is unrelated to the similarly-named type {@code Map.Entry}.
+     *
+     * @since 2.0
+     */
+    public interface Entry<E> {
+
+        /**
+         * Returns the multiset element corresponding to this entry. Multiple calls to this method
+         * always return the same instance.
+         *
+         * @return the element corresponding to this entry
+         */
+        E element();
+
+        /**
+         * Returns the count of the associated element in the underlying multiset. This count may either
+         * be an unchanging snapshot of the count at the time the entry was retrieved, or a live view of
+         * the current count of the element in the multiset, depending on the implementation. Note that
+         * in the former case, this method can never return zero, while in the latter, it will return
+         * zero if all occurrences of the element were since removed from the multiset.
+         *
+         * @return the count of the element; never negative
+         */
+        int count();
+
+        /**
+         * {@inheritDoc}
+         *
+         * <p>Returns {@code true} if the given object is also a multiset entry and the two entries
+         * represent the same element and count. That is, two entries {@code a} and {@code b} are equal
+         * if:
+         *
+         * <pre>{@code
+         * Objects.equal(a.getElement(), b.getElement())
+         *     && a.getCount() == b.getCount()
+         * }</pre>
+         */
+        @Override
+        // TODO(kevinb): check this wrt TreeMultiset?
+        boolean equals(Object o);
+
+        /**
+         * {@inheritDoc}
+         *
+         * <p>The hash code of a multiset entry for element {@code element} and count {@code count} is
+         * defined as:
+         *
+         * <pre>{@code
+         * ((element == null) ? 0 : element.hashCode()) ^ count
+         * }</pre>
+         */
+        @Override
+        int hashCode();
+
+        /**
+         * Returns the canonical string representation of this entry, defined as follows. If the count
+         * for this entry is one, this is simply the string representation of the corresponding element.
+         * Otherwise, it is the string representation of the element, followed by the three characters
+         * {@code " x "} (space, letter x, space), followed by the count.
+         */
+        @Override
+        String toString();
+    }
+
+    static final class ImmutableEntry<E> implements Entry<E> {
+        private final E element;
+        private final int count;
+
+        ImmutableEntry(final E element, final int count) {
+            this.element = element;
+            this.count = count;
+        }
+
+        @Override
+        public E element() {
+            return element;
+        }
+
+        @Override
+        public int count() {
+            return count;
+        }
+
+        @Override
+        public boolean equals(@CheckForNull Object object) {
+            if (object instanceof Multiset.Entry) {
+                final Multiset.Entry<?> that = (Multiset.Entry<?>) object;
+                return this.count == that.count() && Objects.equal(this.element, that.element());
+            }
+
+            return false;
+        }
+
+        /**
+         * Return this entry's hash code, following the behavior specified in {@link
+         * Multiset.Entry#hashCode}.
+         */
+        @Override
+        public int hashCode() {
+            return ((element == null) ? 0 : element.hashCode()) ^ count;
+        }
+
+        /**
+         * Returns a string representation of this multiset entry. The string representation consists of
+         * the associated element if the associated count is one, and otherwise the associated element
+         * followed by the characters " x " (space, x and space) followed by the count. Elements and
+         * counts are converted to strings as by {@code String.valueOf}.
+         */
+        @Override
+        public String toString() {
+            final String text = String.valueOf(element);
+
+            return (count == 1) ? text : (text + " x " + count);
+        }
     }
 }

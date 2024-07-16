@@ -1419,6 +1419,7 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * @param action
      * @throws IllegalArgumentException
      */
+    @Beta
     public void flatForEach(BiConsumer<? super K, ? super E> action) throws IllegalArgumentException {
         N.checkArgNotNull(action);
 
@@ -1670,6 +1671,10 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * @return
      */
     public int totalCountOfValues() {
+        if (backingMap.isEmpty()) {
+            return 0;
+        }
+
         int count = 0;
 
         for (V v : backingMap.values()) {
