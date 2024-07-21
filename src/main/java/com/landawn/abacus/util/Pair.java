@@ -381,7 +381,7 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * @return
      * @throws E the e
      */
-    public <U, E extends Exception> U map(final Throwables.BiFunction<? super L, ? super R, U, E> mapper) throws E {
+    public <U, E extends Exception> U map(final Throwables.BiFunction<? super L, ? super R, ? extends U, E> mapper) throws E {
         return mapper.apply(left, right);
     }
 
@@ -393,7 +393,7 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * @return
      * @throws E the e
      */
-    public <U, E extends Exception> U map(final Throwables.Function<? super Pair<L, R>, U, E> mapper) throws E {
+    public <U, E extends Exception> U map(final Throwables.Function<? super Pair<L, R>, ? extends U, E> mapper) throws E {
         return mapper.apply(this);
     }
 
@@ -469,9 +469,9 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      * @deprecated using {@link #getLeft()}
      */
     @Deprecated
@@ -481,9 +481,9 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      * @deprecated using {@link #getRight()}
      */
     @Deprecated
@@ -493,10 +493,10 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
     }
 
     /**
-     * 
      *
-     * @param value 
-     * @return 
+     *
+     * @param value
+     * @return
      * @deprecated using {@link #setRight(Object)}
      */
     @Deprecated

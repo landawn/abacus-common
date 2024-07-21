@@ -1626,6 +1626,11 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
     //        return backingMap;
     //    }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public Iterator<Entry<K, V>> iterator() {
         return backingMap.entrySet().iterator();

@@ -1091,8 +1091,8 @@ public final class TypeFactory {
      * @param fromStringFunc
      * @throws IllegalArgumentException
      */
-    public static <T> void registerType(final Class<T> targetClass, final BiFunction<T, JSONParser, String> toStringFunc,
-            final BiFunction<String, JSONParser, T> fromStringFunc) throws IllegalArgumentException {
+    public static <T> void registerType(final Class<T> targetClass, final BiFunction<? super T, JSONParser, String> toStringFunc,
+            final BiFunction<? super String, JSONParser, T> fromStringFunc) throws IllegalArgumentException {
         N.checkArgNotNull(targetClass, "targetClass");
         N.checkArgNotNull(toStringFunc, "toStringFunc");
         N.checkArgNotNull(fromStringFunc, "fromStringFunc");
@@ -1124,7 +1124,7 @@ public final class TypeFactory {
      * @param fromStringFunc
      * @throws IllegalArgumentException
      */
-    public static <T> void registerType(final Class<T> cls, final Function<T, String> toStringFunc, final Function<String, T> fromStringFunc)
+    public static <T> void registerType(final Class<T> cls, final Function<? super T, String> toStringFunc, final Function<? super String, T> fromStringFunc)
             throws IllegalArgumentException {
         N.checkArgNotNull(cls, "cls");
         N.checkArgNotNull(toStringFunc, "toStringFunc");
@@ -1179,8 +1179,8 @@ public final class TypeFactory {
      * @param fromStringFunc
      * @throws IllegalArgumentException
      */
-    public static <T> void registerType(final String typeName, final Class<T> targetClass, final BiFunction<T, JSONParser, String> toStringFunc,
-            final BiFunction<String, JSONParser, T> fromStringFunc) throws IllegalArgumentException {
+    public static <T> void registerType(final String typeName, final Class<T> targetClass, final BiFunction<? super T, JSONParser, String> toStringFunc,
+            final BiFunction<? super String, JSONParser, T> fromStringFunc) throws IllegalArgumentException {
         N.checkArgNotNull(typeName, "typeName");
         N.checkArgNotNull(targetClass, "targetClass");
         N.checkArgNotNull(toStringFunc, "toStringFunc");
@@ -1220,8 +1220,8 @@ public final class TypeFactory {
      * @param fromStringFunc
      * @throws IllegalArgumentException
      */
-    public static <T> void registerType(final String typeName, final Class<T> targetClass, final Function<T, String> toStringFunc,
-            final Function<String, T> fromStringFunc) throws IllegalArgumentException {
+    public static <T> void registerType(final String typeName, final Class<T> targetClass, final Function<? super T, String> toStringFunc,
+            final Function<? super String, T> fromStringFunc) throws IllegalArgumentException {
         N.checkArgNotNull(typeName, "typeName");
         N.checkArgNotNull(targetClass, "targetClass");
         N.checkArgNotNull(toStringFunc, "toStringFunc");

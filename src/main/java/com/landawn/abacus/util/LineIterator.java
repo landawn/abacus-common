@@ -290,38 +290,6 @@ public final class LineIterator extends ObjIterator<String> implements Closeable
         return res;
     }
 
-    //    /**
-    //     *
-    //     * @param <E>
-    //     * @param action
-    //     * @throws E the e
-    //     */
-    //    @Override
-    //    public <E extends Exception> void foreachRemaining(Throwables.Consumer<? super String, E> action) throws E {
-    //        N.checkArgNotNull(action);
-    //
-    //        while (hasNext()) {
-    //            action.accept(next());
-    //        }
-    //    }
-    //
-    //    /**
-    //     *
-    //     * @param <E>
-    //     * @param action
-    //     * @throws E the e
-    //     */
-    //    @Override
-    //    public <E extends Exception> void foreachIndexed(Throwables.IntObjConsumer<? super String, E> action) throws E {
-    //        N.checkArgNotNull(action);
-    //
-    //        int idx = 0;
-    //
-    //        while (hasNext()) {
-    //            action.accept(idx++, next());
-    //        }
-    //    }
-
     /**
      * Closes the underlying <code>Reader</code> quietly.
      * This method is useful if you only want to process the first few

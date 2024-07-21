@@ -57,20 +57,20 @@ public class AsyncExecutor {
     private volatile Executor executor; //NOSONAR
 
     /**
-     * 
+     *
      */
     public AsyncExecutor() {
         this(DEFAULT_CORE_POOL_SIZE, DEFAULT_MAX_THREAD_POOL_SIZE, 180L, TimeUnit.SECONDS);
     }
 
     /**
-     * 
      *
-     * @param coreThreadPoolSize 
-     * @param maxThreadPoolSize 
-     * @param keepAliveTime 
-     * @param unit 
-     * @throws IllegalArgumentException 
+     *
+     * @param coreThreadPoolSize
+     * @param maxThreadPoolSize
+     * @param keepAliveTime
+     * @param unit
+     * @throws IllegalArgumentException
      */
     public AsyncExecutor(int coreThreadPoolSize, int maxThreadPoolSize, long keepAliveTime, TimeUnit unit) throws IllegalArgumentException {
         N.checkArgNotNegative(coreThreadPoolSize, "coreThreadPoolSize");
@@ -85,9 +85,9 @@ public class AsyncExecutor {
     }
 
     /**
-     * 
      *
-     * @param executor 
+     *
+     * @param executor
      */
     public AsyncExecutor(final Executor executor) {
         this(getCorePoolSize(executor), getMaximumPoolSize(executor), getKeepAliveTime(executor), TimeUnit.MILLISECONDS);
@@ -137,27 +137,27 @@ public class AsyncExecutor {
         }));
     }
 
-    /**
-     *
-     * @param commands
-     * @return
-     * @deprecated
-     */
-    @Deprecated
-    @SafeVarargs
-    public final List<ContinuableFuture<Void>> execute(final Throwables.Runnable<? extends Exception>... commands) {
-        if (N.isEmpty(commands)) {
-            return new ArrayList<>();
-        }
-
-        final List<ContinuableFuture<Void>> results = new ArrayList<>(commands.length);
-
-        for (Throwables.Runnable<? extends Exception> command : commands) {
-            results.add(execute(command));
-        }
-
-        return results;
-    }
+    //    /**
+    //     *
+    //     * @param commands
+    //     * @return
+    //     * @deprecated
+    //     */
+    //    @Deprecated
+    //    @SafeVarargs
+    //    public final List<ContinuableFuture<Void>> execute(final Throwables.Runnable<? extends Exception>... commands) {
+    //        if (N.isEmpty(commands)) {
+    //            return new ArrayList<>();
+    //        }
+    //
+    //        final List<ContinuableFuture<Void>> results = new ArrayList<>(commands.length);
+    //
+    //        for (Throwables.Runnable<? extends Exception> command : commands) {
+    //            results.add(execute(command));
+    //        }
+    //
+    //        return results;
+    //    }
 
     /**
      *
@@ -205,28 +205,28 @@ public class AsyncExecutor {
         }));
     }
 
-    /**
-     *
-     * @param <R>
-     * @param commands
-     * @return
-     * @deprecated
-     */
-    @Deprecated
-    @SafeVarargs
-    public final <R> List<ContinuableFuture<R>> execute(final Callable<R>... commands) {
-        if (N.isEmpty(commands)) {
-            return new ArrayList<>();
-        }
-
-        final List<ContinuableFuture<R>> results = new ArrayList<>(commands.length);
-
-        for (Callable<R> command : commands) {
-            results.add(execute(command));
-        }
-
-        return results;
-    }
+    //    /**
+    //     *
+    //     * @param <R>
+    //     * @param commands
+    //     * @return
+    //     * @deprecated
+    //     */
+    //    @Deprecated
+    //    @SafeVarargs
+    //    public final <R> List<ContinuableFuture<R>> execute(final Callable<R>... commands) {
+    //        if (N.isEmpty(commands)) {
+    //            return new ArrayList<>();
+    //        }
+    //
+    //        final List<ContinuableFuture<R>> results = new ArrayList<>(commands.length);
+    //
+    //        for (Callable<R> command : commands) {
+    //            results.add(execute(command));
+    //        }
+    //
+    //        return results;
+    //    }
 
     /**
      *
@@ -327,17 +327,17 @@ public class AsyncExecutor {
     }
 
     /**
-     * 
+     *
      */
     public synchronized void shutdown() {
         shutdown(0, TimeUnit.SECONDS);
     }
 
     /**
-     * 
      *
-     * @param terminationTimeout 
-     * @param timeUnit 
+     *
+     * @param terminationTimeout
+     * @param timeUnit
      */
     public synchronized void shutdown(final long terminationTimeout, final TimeUnit timeUnit) {
         if (executor == null || !(executor instanceof ExecutorService executorService)) {
@@ -361,9 +361,9 @@ public class AsyncExecutor {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public String toString() {

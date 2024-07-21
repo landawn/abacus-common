@@ -299,7 +299,7 @@ public final class Profiler {
         final AtomicInteger threadCounter = new AtomicInteger();
         // MXBean mxBean = new MXBean();
         final List<LoopStatistics> loopStatisticsList = Collections.synchronizedList(new ArrayList<>());
-        final PrintStream ps = System.out;
+        final PrintStream ps = System.out; //NOSONAR
         final long startTimeInMillis = System.currentTimeMillis();
         final long startTimeInNano = System.nanoTime();
         for (int threadIndex = 0; threadIndex < (suspended ? 1 : threadNum); threadIndex++) {
@@ -1540,7 +1540,7 @@ public final class Profiler {
          * Prints the result.
          */
         public void printResult() {
-            writeResult(new PrintWriter(System.out));
+            writeResult(new PrintWriter(System.out)); //NOSONAR
         }
 
         /**
@@ -1674,7 +1674,8 @@ public final class Profiler {
             output.println("<br/>" + "startTime: " + time2String(getStartTimeInMillis()) + "");
             output.println("<br/>" + "endTime:   " + time2String(getEndTimeInMillis()) + "");
             output.println("<br/>" + "totalElapsedTime: " + elapsedTimeFormat.format(getElapsedTimeInMillis()) + "");
-            output.println("<br/>");
+            output.println("<br/>"); //NOSONAR
+
             //            MethodStatistics methodStatistics = getMaxElapsedTimeInMillisMethod();
             //
             //            if (methodStatistics != null) {

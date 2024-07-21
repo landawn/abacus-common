@@ -194,7 +194,7 @@ public final class Multiset<E> implements Collection<E> {
         final Multiset<T> multiset = new Multiset<>(N.<T, MutableInt> newHashMap(a.length));
 
         for (T e : a) {
-            multiset.add(e);
+            multiset.add(e); // NOSONAR
         }
 
         return multiset;
@@ -1172,7 +1172,7 @@ public final class Multiset<E> implements Collection<E> {
         return ImmutableSet.wrap(backingMap.keySet());
     }
 
-    private transient Set<Entry<E>> entrySet;
+    private transient Set<Entry<E>> entrySet; // NOSONAR
 
     /**
      * Returns a unmodifiable view of the contents of this multiset, grouped into {@code Multiset.Entry} instances,
@@ -1188,16 +1188,10 @@ public final class Multiset<E> implements Collection<E> {
         Set<Multiset.Entry<E>> result = entrySet;
 
         if (result == null) {
-            entrySet = result = createEntrySet();
+            entrySet = result = ImmutableSet.wrap(new EntrySet());
         }
 
         return result;
-    }
-
-    Set<Multiset.Entry<E>> createEntrySet() {
-        final Set<Multiset.Entry<E>> entrySet = new EntrySet();
-
-        return ImmutableSet.wrap(entrySet);
     }
 
     class EntrySet extends AbstractSet<Multiset.Entry<E>> {
@@ -1354,8 +1348,10 @@ public final class Multiset<E> implements Collection<E> {
      */
     @Override
     public <T> T[] toArray(T[] a) {
+        N.checkArgNotNull(a, "The specified array can't be null");
+
         final int size = size();
-        final T[] ret = a == null || a.length < size ? N.newArray(a.getClass().getComponentType(), size) : a;
+        final T[] ret = a.length < size ? N.newArray(a.getClass().getComponentType(), size) : a;
 
         int idx = 0;
         int occurrences = 0;
@@ -1548,8 +1544,11 @@ public final class Multiset<E> implements Collection<E> {
     //    }
 
     /**
+     * Returns an immutable {@code Stream} with elements from the {@code Multiset}.
+     * Elements that occur multiple times in the multiset will appear multiple times in this {@code Stream}, though not necessarily sequentially
      *
      * @return
+     * @see #iterator()
      */
     public Stream<E> elements() {
         return Stream.of(iterator());
@@ -1716,12 +1715,14 @@ public final class Multiset<E> implements Collection<E> {
          * for this entry is one, this is simply the string representation of the corresponding element.
          * Otherwise, it is the string representation of the element, followed by the three characters
          * {@code " x "} (space, letter x, space), followed by the count.
+         *
+         * @return
          */
         @Override
         String toString();
     }
 
-    static final class ImmutableEntry<E> implements Entry<E> {
+    static final class ImmutableEntry<E> implements Entry<E> { // NOSONAR
         private final E element;
         private final int count;
 

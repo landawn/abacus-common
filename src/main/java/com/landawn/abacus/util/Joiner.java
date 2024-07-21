@@ -20,6 +20,9 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BiPredicate;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import com.landawn.abacus.parser.ParserUtil;
@@ -144,9 +147,9 @@ public final class Joiner implements Closeable {
     /**
      * Sets the empty value.
      *
-     * @param emptyValue 
-     * @return 
-     * @throws IllegalArgumentException 
+     * @param emptyValue
+     * @return
+     * @throws IllegalArgumentException
      */
     public Joiner setEmptyValue(CharSequence emptyValue) throws IllegalArgumentException {
         this.emptyValue = N.checkArgNotNull(emptyValue, "The empty value must not be null").toString();
@@ -483,13 +486,13 @@ public final class Joiner implements Closeable {
     }
 
     /**
-     * 
      *
-     * @param a 
-     * @param fromIndex 
-     * @param toIndex 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     *
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return
+     * @throws IndexOutOfBoundsException
      */
     public Joiner appendAll(final boolean[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
@@ -529,13 +532,13 @@ public final class Joiner implements Closeable {
     }
 
     /**
-     * 
      *
-     * @param a 
-     * @param fromIndex 
-     * @param toIndex 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     *
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return
+     * @throws IndexOutOfBoundsException
      */
     public Joiner appendAll(final char[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
@@ -575,13 +578,13 @@ public final class Joiner implements Closeable {
     }
 
     /**
-     * 
      *
-     * @param a 
-     * @param fromIndex 
-     * @param toIndex 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     *
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return
+     * @throws IndexOutOfBoundsException
      */
     public Joiner appendAll(final byte[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
@@ -621,13 +624,13 @@ public final class Joiner implements Closeable {
     }
 
     /**
-     * 
      *
-     * @param a 
-     * @param fromIndex 
-     * @param toIndex 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     *
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return
+     * @throws IndexOutOfBoundsException
      */
     public Joiner appendAll(final short[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
@@ -667,13 +670,13 @@ public final class Joiner implements Closeable {
     }
 
     /**
-     * 
      *
-     * @param a 
-     * @param fromIndex 
-     * @param toIndex 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     *
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return
+     * @throws IndexOutOfBoundsException
      */
     public Joiner appendAll(final int[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
@@ -713,13 +716,13 @@ public final class Joiner implements Closeable {
     }
 
     /**
-     * 
      *
-     * @param a 
-     * @param fromIndex 
-     * @param toIndex 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     *
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return
+     * @throws IndexOutOfBoundsException
      */
     public Joiner appendAll(final long[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
@@ -759,13 +762,13 @@ public final class Joiner implements Closeable {
     }
 
     /**
-     * 
      *
-     * @param a 
-     * @param fromIndex 
-     * @param toIndex 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     *
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return
+     * @throws IndexOutOfBoundsException
      */
     public Joiner appendAll(final float[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
@@ -805,13 +808,13 @@ public final class Joiner implements Closeable {
     }
 
     /**
-     * 
      *
-     * @param a 
-     * @param fromIndex 
-     * @param toIndex 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     *
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return
+     * @throws IndexOutOfBoundsException
      */
     public Joiner appendAll(final double[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
@@ -851,13 +854,13 @@ public final class Joiner implements Closeable {
     }
 
     /**
-     * 
      *
-     * @param a 
-     * @param fromIndex 
-     * @param toIndex 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     *
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return
+     * @throws IndexOutOfBoundsException
      */
     public Joiner appendAll(final Object[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
@@ -899,13 +902,13 @@ public final class Joiner implements Closeable {
     }
 
     /**
-     * 
      *
-     * @param c 
-     * @param fromIndex 
-     * @param toIndex 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     *
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @return
+     * @throws IndexOutOfBoundsException
      */
     public Joiner appendAll(final BooleanList c, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, c == null ? 0 : c.size());
@@ -931,13 +934,13 @@ public final class Joiner implements Closeable {
     }
 
     /**
-     * 
      *
-     * @param c 
-     * @param fromIndex 
-     * @param toIndex 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     *
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @return
+     * @throws IndexOutOfBoundsException
      */
     public Joiner appendAll(final CharList c, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, c == null ? 0 : c.size());
@@ -963,13 +966,13 @@ public final class Joiner implements Closeable {
     }
 
     /**
-     * 
      *
-     * @param c 
-     * @param fromIndex 
-     * @param toIndex 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     *
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @return
+     * @throws IndexOutOfBoundsException
      */
     public Joiner appendAll(final ByteList c, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, c == null ? 0 : c.size());
@@ -995,13 +998,13 @@ public final class Joiner implements Closeable {
     }
 
     /**
-     * 
      *
-     * @param c 
-     * @param fromIndex 
-     * @param toIndex 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     *
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @return
+     * @throws IndexOutOfBoundsException
      */
     public Joiner appendAll(final ShortList c, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, c == null ? 0 : c.size());
@@ -1027,13 +1030,13 @@ public final class Joiner implements Closeable {
     }
 
     /**
-     * 
      *
-     * @param c 
-     * @param fromIndex 
-     * @param toIndex 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     *
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @return
+     * @throws IndexOutOfBoundsException
      */
     public Joiner appendAll(final IntList c, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, c == null ? 0 : c.size());
@@ -1059,13 +1062,13 @@ public final class Joiner implements Closeable {
     }
 
     /**
-     * 
      *
-     * @param c 
-     * @param fromIndex 
-     * @param toIndex 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     *
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @return
+     * @throws IndexOutOfBoundsException
      */
     public Joiner appendAll(final LongList c, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, c == null ? 0 : c.size());
@@ -1091,13 +1094,13 @@ public final class Joiner implements Closeable {
     }
 
     /**
-     * 
      *
-     * @param c 
-     * @param fromIndex 
-     * @param toIndex 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     *
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @return
+     * @throws IndexOutOfBoundsException
      */
     public Joiner appendAll(final FloatList c, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, c == null ? 0 : c.size());
@@ -1123,13 +1126,13 @@ public final class Joiner implements Closeable {
     }
 
     /**
-     * 
      *
-     * @param c 
-     * @param fromIndex 
-     * @param toIndex 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     *
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @return
+     * @throws IndexOutOfBoundsException
      */
     public Joiner appendAll(final DoubleList c, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, c == null ? 0 : c.size());
@@ -1155,13 +1158,13 @@ public final class Joiner implements Closeable {
     }
 
     /**
-     * 
      *
-     * @param c 
-     * @param fromIndex 
-     * @param toIndex 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     *
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @return
+     * @throws IndexOutOfBoundsException
      */
     public Joiner appendAll(final Collection<?> c, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, c == null ? 0 : c.size());
@@ -1227,18 +1230,15 @@ public final class Joiner implements Closeable {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <E> 
-     * @param c 
+     *
+     * @param <T>
+     * @param c
      * @param filter will be the only condition to decide if append an element from the specified {@code Iterable} or not. {@code skipNulls()} won't be used here.
-     * @return 
-     * @throws IllegalArgumentException 
-     * @throws E 
+     * @return
+     * @throws IllegalArgumentException
      */
-    public <T, E extends Exception> Joiner appendAll(final Iterable<? extends T> c, final Throwables.Predicate<? super T, E> filter)
-            throws IllegalArgumentException, E {
+    public <T> Joiner appendAll(final Iterable<? extends T> c, final Predicate<? super T> filter) throws IllegalArgumentException {
         N.checkArgNotNull(filter, "filter"); //NOSONAR
 
         if (c != null) {
@@ -1295,18 +1295,15 @@ public final class Joiner implements Closeable {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <E> 
-     * @param iter 
+     *
+     * @param <T>
+     * @param iter
      * @param filter will be the only condition to decide if append an element from the specified {@code Iterable} or not. {@code skipNulls()} won't be used here.
-     * @return 
-     * @throws IllegalArgumentException 
-     * @throws E 
+     * @return
+     * @throws IllegalArgumentException
      */
-    public <T, E extends Exception> Joiner appendAll(final Iterator<? extends T> iter, final Throwables.Predicate<? super T, E> filter)
-            throws IllegalArgumentException, E {
+    public <T> Joiner appendAll(final Iterator<? extends T> iter, final Predicate<? super T> filter) throws IllegalArgumentException {
         N.checkArgNotNull(filter, "filter");
 
         if (iter != null) {
@@ -1572,13 +1569,13 @@ public final class Joiner implements Closeable {
     }
 
     /**
-     * 
      *
-     * @param m 
-     * @param fromIndex 
-     * @param toIndex 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     *
+     * @param m
+     * @param fromIndex
+     * @param toIndex
+     * @return
+     * @throws IndexOutOfBoundsException
      */
     public Joiner appendEntries(final Map<?, ?> m, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, m == null ? 0 : m.size());
@@ -1620,19 +1617,16 @@ public final class Joiner implements Closeable {
     }
 
     /**
-     * 
      *
-     * @param <K> 
-     * @param <V> 
-     * @param <E> 
-     * @param m 
-     * @param filter 
-     * @return 
-     * @throws IllegalArgumentException 
-     * @throws E 
+     *
+     * @param <K>
+     * @param <V>
+     * @param m
+     * @param filter
+     * @return
+     * @throws IllegalArgumentException
      */
-    public <K, V, E extends Exception> Joiner appendEntries(final Map<K, V> m, final Throwables.Predicate<? super Map.Entry<K, V>, E> filter)
-            throws IllegalArgumentException, E {
+    public <K, V> Joiner appendEntries(final Map<K, V> m, final Predicate<? super Map.Entry<K, V>> filter) throws IllegalArgumentException {
         N.checkArgNotNull(filter, "filter");
 
         StringBuilder sb = null;
@@ -1663,19 +1657,16 @@ public final class Joiner implements Closeable {
     }
 
     /**
-     * 
      *
-     * @param <K> 
-     * @param <V> 
-     * @param <E> 
-     * @param m 
-     * @param filter 
-     * @return 
-     * @throws IllegalArgumentException 
-     * @throws E 
+     *
+     * @param <K>
+     * @param <V>
+     * @param m
+     * @param filter
+     * @return
+     * @throws IllegalArgumentException
      */
-    public <K, V, E extends Exception> Joiner appendEntries(final Map<K, V> m, final Throwables.BiPredicate<? super K, ? super V, E> filter)
-            throws IllegalArgumentException, E {
+    public <K, V> Joiner appendEntries(final Map<K, V> m, final BiPredicate<? super K, ? super V> filter) throws IllegalArgumentException {
         N.checkArgNotNull(filter, "filter");
 
         StringBuilder sb = null;
@@ -1706,22 +1697,18 @@ public final class Joiner implements Closeable {
     }
 
     /**
-     * 
      *
-     * @param <K> 
-     * @param <V> 
-     * @param <E> 
-     * @param <E2> 
-     * @param m 
-     * @param keyMapper 
-     * @param valueMapper 
-     * @return 
-     * @throws IllegalArgumentException 
-     * @throws E 
-     * @throws E2 
+     *
+     * @param <K>
+     * @param <V>
+     * @param m
+     * @param keyMapper
+     * @param valueMapper
+     * @return
+     * @throws IllegalArgumentException
      */
-    public <K, V, E extends Exception, E2 extends Exception> Joiner appendEntries(final Map<K, V> m, final Throwables.Function<? super K, ?, E> keyMapper,
-            final Throwables.Function<? super V, ?, E2> valueMapper) throws IllegalArgumentException, E, E2 {
+    public <K, V> Joiner appendEntries(final Map<K, V> m, final Function<? super K, ?> keyMapper, final Function<? super V, ?> valueMapper)
+            throws IllegalArgumentException {
         N.checkArgNotNull(keyMapper, "keyMapper");
         N.checkArgNotNull(valueMapper, "valueMapper");
 
@@ -1761,12 +1748,12 @@ public final class Joiner implements Closeable {
     }
 
     /**
-     * 
      *
-     * @param bean 
-     * @param selectPropNames 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param bean
+     * @param selectPropNames
+     * @return
+     * @throws IllegalArgumentException
      */
     public Joiner appendEntries(final Object bean, final Collection<String> selectPropNames) throws IllegalArgumentException {
         if (bean == null) {
@@ -1809,13 +1796,13 @@ public final class Joiner implements Closeable {
     }
 
     /**
-     * 
      *
-     * @param bean 
-     * @param ignoreNullProperty 
-     * @param ignoredPropNames 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param bean
+     * @param ignoreNullProperty
+     * @param ignoredPropNames
+     * @return
+     * @throws IllegalArgumentException
      */
     public Joiner appendEntries(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames) throws IllegalArgumentException {
         if (bean == null) {
@@ -1861,17 +1848,14 @@ public final class Joiner implements Closeable {
     }
 
     /**
-     * 
      *
-     * @param <E> 
-     * @param bean 
-     * @param filter 
-     * @return 
-     * @throws IllegalArgumentException 
-     * @throws E 
+     *
+     * @param bean
+     * @param filter
+     * @return
+     * @throws IllegalArgumentException
      */
-    public <E extends Exception> Joiner appendEntries(final Object bean, final Throwables.BiPredicate<? super String, ?, E> filter)
-            throws IllegalArgumentException, E {
+    public Joiner appendEntries(final Object bean, final BiPredicate<? super String, ?> filter) throws IllegalArgumentException {
         N.checkArgNotNull(filter, "filter");
 
         if (bean == null) {
@@ -1882,7 +1866,7 @@ public final class Joiner implements Closeable {
 
         N.checkArgument(ClassUtil.isBeanClass(cls), "'bean' must be bean class with getter/setter methods");
 
-        final Throwables.BiPredicate<? super String, Object, E> filterToUse = (Throwables.BiPredicate<? super String, Object, E>) filter;
+        final BiPredicate<? super String, Object> filterToUse = (BiPredicate<? super String, Object>) filter;
         final BeanInfo beanInfo = ParserUtil.getBeanInfo(cls);
         StringBuilder sb = null;
         Object propValue = null;
@@ -1915,12 +1899,12 @@ public final class Joiner implements Closeable {
     }
 
     /**
-     * 
      *
-     * @param str 
-     * @param n 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param str
+     * @param n
+     * @return
+     * @throws IllegalArgumentException
      */
     public Joiner repeat(final String str, final int n) throws IllegalArgumentException {
         N.checkArgNotNegative(n, "n");
@@ -1952,22 +1936,22 @@ public final class Joiner implements Closeable {
      * Adds the contents of the given {@code StringJoiner} without prefix and
      * suffix as the next element if it is non-empty. If the given {@code
      * StringJoiner} is empty, the call has no effect.
-     * 
+     *
      * <p>A {@code StringJoiner} is empty if append/appendAll
      * has never been called, and if {@code merge()} has never been called
      * with a non-empty {@code StringJoiner} argument.
-     * 
+     *
      * <p>If the other {@code StringJoiner} is using a different delimiter,
      * then elements from the other {@code StringJoiner} are concatenated with
      * that delimiter and the result is appended to this {@code StringJoiner}
      * as a single element.
-     * 
+     *
      * <p>Remember to close {@code other} Joiner if {@code reuseCachedBuffer} is set to {@code} true.
      *
      * @param other The {@code StringJoiner} whose contents should be merged
      *              into this one
      * @return This {@code StringJoiner}
-     * @throws IllegalArgumentException 
+     * @throws IllegalArgumentException
      * @throws NullPointerException if the other {@code StringJoiner} is null
      */
     public Joiner merge(Joiner other) throws IllegalArgumentException {
@@ -2091,31 +2075,27 @@ public final class Joiner implements Closeable {
      * </pre>
      *
      * @param <T>
-     * @param <E>
      * @param mapper
      * @return
-     * @throws E the e
      */
-    public <T, E extends Exception> T map(Throwables.Function<? super String, T, E> mapper) throws E {
+    public <T> T map(final Function<? super String, T> mapper) {
         return mapper.apply(toString());
     }
 
     /**
      * Call {@code mapper} only if at least one element/object/entry is appended.
-     * 
+     *
      * <pre>
      * The underline {@code StringBuilder} will be recycled after this method is called if {@code resueStringBuilder} is set to {@code true},
      * and should not continue to this instance.
      * </pre>
      *
-     * @param <T> 
-     * @param <E> 
-     * @param mapper 
-     * @return 
-     * @throws IllegalArgumentException 
-     * @throws E the e
+     * @param <T>
+     * @param mapper
+     * @return
+     * @throws IllegalArgumentException
      */
-    public <T, E extends Exception> Nullable<T> mapIfNotEmpty(Throwables.Function<? super String, T, E> mapper) throws IllegalArgumentException, E {
+    public <T> Nullable<T> mapIfNotEmpty(final Function<? super String, T> mapper) throws IllegalArgumentException {
         N.checkArgNotNull(mapper);
 
         return buffer == null ? Nullable.<T> empty() : Nullable.of(mapper.apply(toString()));
@@ -2123,20 +2103,18 @@ public final class Joiner implements Closeable {
 
     /**
      * Call {@code mapper} only if at least one element/object/entry is appended.
-     * 
+     *
      * <pre>
      * The underline {@code StringBuilder} will be recycled after this method is called if {@code resueStringBuilder} is set to {@code true},
      * and should not continue to this instance.
      * </pre>
      *
-     * @param <T> 
-     * @param <E> 
-     * @param mapper 
-     * @return 
-     * @throws IllegalArgumentException 
-     * @throws E 
+     * @param <T>
+     * @param mapper
+     * @return
+     * @throws IllegalArgumentException
      */
-    public <T, E extends Exception> u.Optional<T> mapToNonNullIfNotEmpty(Throwables.Function<? super String, T, E> mapper) throws IllegalArgumentException, E {
+    public <T> u.Optional<T> mapToNonNullIfNotEmpty(final Function<? super String, T> mapper) throws IllegalArgumentException {
         N.checkArgNotNull(mapper);
 
         return buffer == null ? u.Optional.<T> empty() : u.Optional.of(mapper.apply(toString()));

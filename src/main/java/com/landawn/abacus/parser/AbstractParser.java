@@ -137,12 +137,12 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param source 
-     * @param targetClass 
-     * @return 
+     *
+     * @param <T>
+     * @param source
+     * @param targetClass
+     * @return
      */
     @Override
     public <T> T deserialize(String source, Class<? extends T> targetClass) {
@@ -150,12 +150,12 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param source 
-     * @param targetClass 
-     * @return 
+     *
+     * @param <T>
+     * @param source
+     * @param targetClass
+     * @return
      */
     @Override
     public <T> T deserialize(File source, Class<? extends T> targetClass) {
@@ -163,12 +163,12 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param source 
-     * @param targetClass 
-     * @return 
+     *
+     * @param <T>
+     * @param source
+     * @param targetClass
+     * @return
      */
     @Override
     public <T> T deserialize(InputStream source, Class<? extends T> targetClass) {
@@ -176,12 +176,12 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param source 
-     * @param targetClass 
-     * @return 
+     *
+     * @param <T>
+     * @param source
+     * @param targetClass
+     * @return
      */
     @Override
     public <T> T deserialize(Reader source, Class<? extends T> targetClass) {
@@ -192,7 +192,7 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
 
     static {
         mapOfCreatorAndConvertorForTargetType.put(ImmutableList.class,
-                Tuple.<Function<Class<?>, Object>, Function<Object, Object>> of(t -> new ArrayList<>(), new Function<>() {
+                Tuple.<Function<Class<?>, Object>, Function<Object, Object>> of(t -> new ArrayList<>(), new Function<>() { //NOSONAR
                     @Override
                     public Object apply(Object t) {
                         return ImmutableList.wrap((List<?>) t);
@@ -200,7 +200,7 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
                 }));
 
         mapOfCreatorAndConvertorForTargetType.put(ImmutableSet.class,
-                Tuple.<Function<Class<?>, Object>, Function<Object, Object>> of(t -> new HashSet<>(), new Function<>() {
+                Tuple.<Function<Class<?>, Object>, Function<Object, Object>> of(t -> new HashSet<>(), new Function<>() { //NOSONAR
                     @Override
                     public Object apply(Object t) {
                         return ImmutableSet.wrap((Set<?>) t);
@@ -208,7 +208,7 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
                 }));
 
         mapOfCreatorAndConvertorForTargetType.put(ImmutableSortedSet.class,
-                Tuple.<Function<Class<?>, Object>, Function<Object, Object>> of(t -> new TreeSet<>(), new Function<>() {
+                Tuple.<Function<Class<?>, Object>, Function<Object, Object>> of(t -> new TreeSet<>(), new Function<>() { //NOSONAR
                     @Override
                     public Object apply(Object t) {
                         return ImmutableSortedSet.wrap((SortedSet<?>) t);
@@ -216,7 +216,7 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
                 }));
 
         mapOfCreatorAndConvertorForTargetType.put(ImmutableNavigableSet.class,
-                Tuple.<Function<Class<?>, Object>, Function<Object, Object>> of(t -> new TreeSet<>(), new Function<>() {
+                Tuple.<Function<Class<?>, Object>, Function<Object, Object>> of(t -> new TreeSet<>(), new Function<>() { //NOSONAR
                     @Override
                     public Object apply(Object t) {
                         return ImmutableNavigableSet.wrap((NavigableSet<?>) t);
@@ -226,7 +226,7 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
         mapOfCreatorAndConvertorForTargetType.put(ImmutableCollection.class, mapOfCreatorAndConvertorForTargetType.get(ImmutableList.class));
 
         mapOfCreatorAndConvertorForTargetType.put(ImmutableMap.class,
-                Tuple.<Function<Class<?>, Object>, Function<Object, Object>> of(t -> new HashMap<>(), new Function<>() {
+                Tuple.<Function<Class<?>, Object>, Function<Object, Object>> of(t -> new HashMap<>(), new Function<>() { //NOSONAR
                     @Override
                     public Object apply(Object t) {
                         return ImmutableMap.wrap((Map<?, ?>) t);
@@ -234,7 +234,7 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
                 }));
 
         mapOfCreatorAndConvertorForTargetType.put(ImmutableBiMap.class,
-                Tuple.<Function<Class<?>, Object>, Function<Object, Object>> of(t -> new BiMap<>(), new Function<>() {
+                Tuple.<Function<Class<?>, Object>, Function<Object, Object>> of(t -> new BiMap<>(), new Function<>() { //NOSONAR
                     @Override
                     public Object apply(Object t) {
                         return ImmutableBiMap.wrap((BiMap<?, ?>) t);
@@ -242,7 +242,7 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
                 }));
 
         mapOfCreatorAndConvertorForTargetType.put(ImmutableSortedMap.class,
-                Tuple.<Function<Class<?>, Object>, Function<Object, Object>> of(t -> new TreeMap<>(), new Function<>() {
+                Tuple.<Function<Class<?>, Object>, Function<Object, Object>> of(t -> new TreeMap<>(), new Function<>() { //NOSONAR
                     @Override
                     public Object apply(Object t) {
                         return ImmutableSortedMap.wrap((SortedMap<?, ?>) t);
@@ -250,7 +250,7 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
                 }));
 
         mapOfCreatorAndConvertorForTargetType.put(ImmutableNavigableMap.class,
-                Tuple.<Function<Class<?>, Object>, Function<Object, Object>> of(t -> new TreeMap<>(), new Function<>() {
+                Tuple.<Function<Class<?>, Object>, Function<Object, Object>> of(t -> new TreeMap<>(), new Function<>() { //NOSONAR
                     @Override
                     public Object apply(Object t) {
                         return ImmutableNavigableMap.wrap((NavigableMap<?, ?>) t);

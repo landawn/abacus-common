@@ -271,7 +271,7 @@ public final class WebUtil {
      * @return
      * @see https://github.com/mrmike/Ok2Curl
      */
-    public static OkHttpRequest createOkHttpRequestForCurl(final String url, Consumer<String> logHandler) {
+    public static OkHttpRequest createOkHttpRequestForCurl(final String url, Consumer<? super String> logHandler) {
         return createOkHttpRequestForCurl(url, CurlInterceptor.DEFAULT_QUOTE_CHAR, logHandler);
     }
 
@@ -283,7 +283,7 @@ public final class WebUtil {
      * @param logHandler
      * @return
      */
-    public static OkHttpRequest createOkHttpRequestForCurl(final String url, final char quoteChar, Consumer<String> logHandler) {
+    public static OkHttpRequest createOkHttpRequestForCurl(final String url, final char quoteChar, Consumer<? super String> logHandler) {
         final okhttp3.OkHttpClient client = new okhttp3.OkHttpClient().newBuilder().addInterceptor(new CurlInterceptor(quoteChar, logHandler)).build();
 
         return OkHttpRequest.create(url, client);

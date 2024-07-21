@@ -27,8 +27,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
+import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.function.ToIntFunction;
 
@@ -37,6 +40,7 @@ import com.landawn.abacus.util.NoCachingNoUpdating.DisposableObjArray;
 import com.landawn.abacus.util.Tuple.Tuple2;
 import com.landawn.abacus.util.Tuple.Tuple3;
 import com.landawn.abacus.util.u.Optional;
+import com.landawn.abacus.util.function.TriFunction;
 import com.landawn.abacus.util.stream.Stream;
 
 /**
@@ -303,55 +307,51 @@ public class Builder<T> {
     }
 
     /**
+     * 
      *
-     * @param <R>
-     * @param <E>
-     * @param mapper
-     * @return
-     * @throws E the e
-     * @deprecated
+     * @param <R> 
+     * @param mapper 
+     * @return 
+     * @deprecated 
      */
     @Deprecated
-    public <R, E extends Exception> Builder<R> map(final Throwables.Function<? super T, ? extends R, E> mapper) throws E {
+    public <R> Builder<R> map(final Function<? super T, ? extends R> mapper) {
         return of(mapper.apply(val));
     }
 
     /**
+     * 
      *
-     * @param <E>
-     * @param predicate
+     * @param predicate 
      * @return <code>Optional</code> with the value if <code>predicate</code> returns true,
      * otherwise, return an empty <code>Optional</code>
-     * @throws E the e
-     * @deprecated
+     * @deprecated 
      */
     @Deprecated
-    public <E extends Exception> Optional<T> filter(final Throwables.Predicate<? super T, E> predicate) throws E {
+    public Optional<T> filter(final Predicate<? super T> predicate) {
         return predicate.test(val) ? Optional.of(val) : Optional.<T> empty();
     }
 
     /**
+     * 
      *
-     * @param <E>
-     * @param consumer
-     * @return
-     * @throws E the e
+     * @param consumer 
+     * @return 
      */
-    public <E extends Exception> Builder<T> accept(final Throwables.Consumer<? super T, E> consumer) throws E {
+    public Builder<T> accept(final Consumer<? super T> consumer) {
         consumer.accept(val);
 
         return this;
     }
 
     /**
+     * 
      *
-     * @param <R>
-     * @param <E>
-     * @param func
-     * @return
-     * @throws E the e
+     * @param <R> 
+     * @param func 
+     * @return 
      */
-    public <R, E extends Exception> R apply(final Throwables.Function<? super T, ? extends R, E> func) throws E {
+    public <R> R apply(final Function<? super T, ? extends R> func) {
         return func.apply(val);
     }
 
@@ -1852,29 +1852,25 @@ public class Builder<T> {
             return this;
         }
 
-        /**
-         *
-         * @param <E>
-         * @param columnName
-         * @param func
-         * @return
-         * @throws E the e
-         */
-        public <E extends Exception> DataSetBuilder renameColumn(String columnName, Throwables.Function<String, String, E> func) throws E {
-            val.renameColumn(columnName, func);
-
-            return this;
-        }
+        //        /**
+        //         *
+        //         * @param columnName
+        //         * @param func
+        //         * @return
+        //         */
+        //        public DataSetBuilder renameColumn(String columnName, Function<? super String, String> func) {
+        //            val.renameColumn(columnName, func);
+        //
+        //            return this;
+        //        }
 
         /**
          *
-         * @param <E>
          * @param columnNames
          * @param func
          * @return
-         * @throws E the e
          */
-        public <E extends Exception> DataSetBuilder renameColumns(Collection<String> columnNames, Throwables.Function<String, String, E> func) throws E {
+        public DataSetBuilder renameColumns(Collection<String> columnNames, Function<? super String, String> func) {
             val.renameColumns(columnNames, func);
 
             return this;
@@ -1882,12 +1878,10 @@ public class Builder<T> {
 
         /**
          *
-         * @param <E>
          * @param func
          * @return
-         * @throws E the e
          */
-        public <E extends Exception> DataSetBuilder renameColumns(Throwables.Function<String, String, E> func) throws E {
+        public DataSetBuilder renameColumns(Function<? super String, String> func) {
             val.renameColumns(func);
 
             return this;
@@ -1923,15 +1917,12 @@ public class Builder<T> {
         /**
          * Adds the column.
          *
-         * @param <T>
-         * @param <E>
-         * @param newColumnName
-         * @param fromColumnName
-         * @param func
-         * @return
-         * @throws E the e
+         * @param newColumnName 
+         * @param fromColumnName 
+         * @param func 
+         * @return 
          */
-        public <T, E extends Exception> DataSetBuilder addColumn(String newColumnName, String fromColumnName, Throwables.Function<T, ?, E> func) throws E {
+        public DataSetBuilder addColumn(String newColumnName, String fromColumnName, Function<?, ?> func) {
             val.addColumn(newColumnName, fromColumnName, func);
 
             return this;
@@ -1940,17 +1931,13 @@ public class Builder<T> {
         /**
          * Adds the column.
          *
-         * @param <T>
-         * @param <E>
-         * @param columnIndex
-         * @param newColumnName
-         * @param fromColumnName
-         * @param func
-         * @return
-         * @throws E the e
+         * @param columnIndex 
+         * @param newColumnName 
+         * @param fromColumnName 
+         * @param func 
+         * @return 
          */
-        public <T, E extends Exception> DataSetBuilder addColumn(int columnIndex, String newColumnName, String fromColumnName,
-                Throwables.Function<T, ?, E> func) throws E {
+        public DataSetBuilder addColumn(int columnIndex, String newColumnName, String fromColumnName, Function<?, ?> func) {
             val.addColumn(columnIndex, newColumnName, fromColumnName, func);
 
             return this;
@@ -1959,15 +1946,12 @@ public class Builder<T> {
         /**
          * Adds the column.
          *
-         * @param <E>
-         * @param newColumnName
-         * @param fromColumnNames
-         * @param func
-         * @return
-         * @throws E the e
+         * @param newColumnName 
+         * @param fromColumnNames 
+         * @param func 
+         * @return 
          */
-        public <E extends Exception> DataSetBuilder addColumn(String newColumnName, Collection<String> fromColumnNames,
-                Throwables.Function<? super DisposableObjArray, ?, E> func) throws E {
+        public DataSetBuilder addColumn(String newColumnName, Collection<String> fromColumnNames, Function<? super DisposableObjArray, ?> func) {
             val.addColumn(newColumnName, fromColumnNames, func);
 
             return this;
@@ -1976,16 +1960,14 @@ public class Builder<T> {
         /**
          * Adds the column.
          *
-         * @param <E>
-         * @param columnIndex
-         * @param newColumnName
-         * @param fromColumnNames
-         * @param func
-         * @return
-         * @throws E the e
+         * @param columnIndex 
+         * @param newColumnName 
+         * @param fromColumnNames 
+         * @param func 
+         * @return 
          */
-        public <E extends Exception> DataSetBuilder addColumn(int columnIndex, String newColumnName, Collection<String> fromColumnNames,
-                Throwables.Function<? super DisposableObjArray, ?, E> func) throws E {
+        public DataSetBuilder addColumn(int columnIndex, String newColumnName, Collection<String> fromColumnNames,
+                Function<? super DisposableObjArray, ?> func) {
             val.addColumn(columnIndex, newColumnName, fromColumnNames, func);
 
             return this;
@@ -1994,15 +1976,12 @@ public class Builder<T> {
         /**
          * Adds the column.
          *
-         * @param <E>
-         * @param newColumnName
-         * @param fromColumnNames
-         * @param func
-         * @return
-         * @throws E the e
+         * @param newColumnName 
+         * @param fromColumnNames 
+         * @param func 
+         * @return 
          */
-        public <E extends Exception> DataSetBuilder addColumn(String newColumnName, Tuple2<String, String> fromColumnNames,
-                Throwables.BiFunction<?, ?, ?, E> func) throws E {
+        public DataSetBuilder addColumn(String newColumnName, Tuple2<String, String> fromColumnNames, BiFunction<?, ?, ?> func) {
             val.addColumn(newColumnName, fromColumnNames, func);
 
             return this;
@@ -2011,16 +1990,13 @@ public class Builder<T> {
         /**
          * Adds the column.
          *
-         * @param <E>
-         * @param columnIndex
-         * @param newColumnName
-         * @param fromColumnNames
-         * @param func
-         * @return
-         * @throws E the e
+         * @param columnIndex 
+         * @param newColumnName 
+         * @param fromColumnNames 
+         * @param func 
+         * @return 
          */
-        public <E extends Exception> DataSetBuilder addColumn(int columnIndex, String newColumnName, Tuple2<String, String> fromColumnNames,
-                Throwables.BiFunction<?, ?, ?, E> func) throws E {
+        public DataSetBuilder addColumn(int columnIndex, String newColumnName, Tuple2<String, String> fromColumnNames, BiFunction<?, ?, ?> func) {
             val.addColumn(columnIndex, newColumnName, fromColumnNames, func);
 
             return this;
@@ -2029,15 +2005,12 @@ public class Builder<T> {
         /**
          * Adds the column.
          *
-         * @param <E>
-         * @param newColumnName
-         * @param fromColumnNames
-         * @param func
-         * @return
-         * @throws E the e
+         * @param newColumnName 
+         * @param fromColumnNames 
+         * @param func 
+         * @return 
          */
-        public <E extends Exception> DataSetBuilder addColumn(String newColumnName, Tuple3<String, String, String> fromColumnNames,
-                Throwables.TriFunction<?, ?, ?, ?, E> func) throws E {
+        public DataSetBuilder addColumn(String newColumnName, Tuple3<String, String, String> fromColumnNames, TriFunction<?, ?, ?, ?> func) {
             val.addColumn(newColumnName, fromColumnNames, func);
 
             return this;
@@ -2046,16 +2019,13 @@ public class Builder<T> {
         /**
          * Adds the column.
          *
-         * @param <E>
-         * @param columnIndex
-         * @param newColumnName
-         * @param fromColumnNames
-         * @param func
-         * @return
-         * @throws E the e
+         * @param columnIndex 
+         * @param newColumnName 
+         * @param fromColumnNames 
+         * @param func 
+         * @return 
          */
-        public <E extends Exception> DataSetBuilder addColumn(int columnIndex, String newColumnName, Tuple3<String, String, String> fromColumnNames,
-                Throwables.TriFunction<?, ?, ?, ?, E> func) throws E {
+        public DataSetBuilder addColumn(int columnIndex, String newColumnName, Tuple3<String, String, String> fromColumnNames, TriFunction<?, ?, ?, ?> func) {
             val.addColumn(columnIndex, newColumnName, fromColumnNames, func);
 
             return this;
@@ -2088,58 +2058,49 @@ public class Builder<T> {
         /**
          * Removes the columns.
          *
-         * @param <E>
          * @param filter
          * @return
-         * @throws E the e
          */
-        public <E extends Exception> DataSetBuilder removeColumns(Throwables.Predicate<String, E> filter) throws E {
+        public DataSetBuilder removeColumns(Predicate<? super String> filter) {
             val.removeColumns(filter);
 
             return this;
         }
 
         //        /**
-        //         * Removes the columns if.
         //         *
-        //         * @param <E>
         //         * @param filter
         //         * @return
-        //         * @throws E the e
         //         * @deprecated replaced by {@code removeColumns}.
         //         */
         //        @Deprecated
-        //        public <E extends Exception> DataSetBuilder removeColumnsIf(Predicate<String, E> filter) throws E {
+        //        public DataSetBuilder removeColumnsIf(Predicate<? super String> filter) {
         //            val.removeColumnsIf(filter);
         //
         //            return this;
         //        }
 
         /**
+         * 
          *
-         * @param <T>
-         * @param <E>
-         * @param columnName
-         * @param func
-         * @return
-         * @throws E the e
+         * @param columnName 
+         * @param func 
+         * @return 
          */
-        public <T, E extends Exception> DataSetBuilder updateColumn(String columnName, Throwables.Function<T, ?, E> func) throws E {
+        public DataSetBuilder updateColumn(String columnName, Function<?, ?> func) {
             val.updateColumn(columnName, func);
 
             return this;
         }
 
         /**
+         * 
          *
-         *
-         * @param <E>
-         * @param columnNames
-         * @param func
-         * @return
-         * @throws E the e
+         * @param columnNames 
+         * @param func 
+         * @return 
          */
-        public <E extends Exception> DataSetBuilder updateColumns(Collection<String> columnNames, Throwables.Function<?, ?, E> func) throws E {
+        public DataSetBuilder updateColumns(Collection<String> columnNames, Function<?, ?> func) {
             val.updateColumns(columnNames, func);
 
             return this;
@@ -2182,16 +2143,42 @@ public class Builder<T> {
         }
 
         /**
+         * 
          *
-         * @param <E>
-         * @param columnNames
-         * @param newColumnName
-         * @param combineFunc
-         * @return
-         * @throws E the e
+         * @param columnNames 
+         * @param newColumnName 
+         * @param combineFunc 
+         * @return 
          */
-        public <E extends Exception> DataSetBuilder combineColumns(Collection<String> columnNames, String newColumnName,
-                Throwables.Function<? super DisposableObjArray, ?, E> combineFunc) throws E {
+        public DataSetBuilder combineColumns(Collection<String> columnNames, String newColumnName, Function<? super DisposableObjArray, ?> combineFunc) {
+            val.combineColumns(columnNames, newColumnName, combineFunc);
+
+            return this;
+        }
+
+        /**
+         * 
+         *
+         * @param columnNames 
+         * @param newColumnName 
+         * @param combineFunc 
+         * @return 
+         */
+        public DataSetBuilder combineColumns(Tuple2<String, String> columnNames, String newColumnName, BiFunction<?, ?, ?> combineFunc) {
+            val.combineColumns(columnNames, newColumnName, combineFunc);
+
+            return this;
+        }
+
+        /**
+         * 
+         *
+         * @param columnNames 
+         * @param newColumnName 
+         * @param combineFunc 
+         * @return 
+         */
+        public DataSetBuilder combineColumns(Tuple3<String, String, String> columnNames, String newColumnName, TriFunction<?, ?, ?, ?> combineFunc) {
             val.combineColumns(columnNames, newColumnName, combineFunc);
 
             return this;
@@ -2199,160 +2186,109 @@ public class Builder<T> {
 
         /**
          *
-         * @param <E>
-         * @param columnNames
-         * @param newColumnName
-         * @param combineFunc
-         * @return
-         * @throws E the e
-         */
-        public <E extends Exception> DataSetBuilder combineColumns(Tuple2<String, String> columnNames, String newColumnName,
-                Throwables.BiFunction<?, ?, ?, E> combineFunc) throws E {
-            val.combineColumns(columnNames, newColumnName, combineFunc);
-
-            return this;
-        }
-
-        /**
-         *
-         * @param <E>
-         * @param columnNames
-         * @param newColumnName
-         * @param combineFunc
-         * @return
-         * @throws E the e
-         */
-        public <E extends Exception> DataSetBuilder combineColumns(Tuple3<String, String, String> columnNames, String newColumnName,
-                Throwables.TriFunction<?, ?, ?, ?, E> combineFunc) throws E {
-            val.combineColumns(columnNames, newColumnName, combineFunc);
-
-            return this;
-        }
-
-        /**
-         *
-         * @param <E>
          * @param columnNameFilter
          * @param newColumnName
          * @param newColumnClass
          * @return
-         * @throws E the e
          */
-        public <E extends Exception> DataSetBuilder combineColumns(Throwables.Predicate<String, E> columnNameFilter, String newColumnName,
-                Class<?> newColumnClass) throws E {
+        public DataSetBuilder combineColumns(final Predicate<? super String> columnNameFilter, final String newColumnName, Class<?> newColumnClass) {
             val.combineColumns(columnNameFilter, newColumnName, newColumnClass);
 
             return this;
         }
 
         /**
+         * 
          *
-         * @param <E>
-         * @param <E2>
-         * @param columnNameFilter
-         * @param newColumnName
-         * @param combineFunc
-         * @return
-         * @throws E the e
-         * @throws E2 the e2
+         * @param columnNameFilter 
+         * @param newColumnName 
+         * @param combineFunc 
+         * @return 
          */
-        public <E extends Exception, E2 extends Exception> DataSetBuilder combineColumns(Throwables.Predicate<String, E> columnNameFilter, String newColumnName,
-                Throwables.Function<? super DisposableObjArray, ?, E2> combineFunc) throws E, E2 {
+        public DataSetBuilder combineColumns(Predicate<? super String> columnNameFilter, String newColumnName,
+                Function<? super DisposableObjArray, ?> combineFunc) {
             val.combineColumns(columnNameFilter, newColumnName, combineFunc);
 
             return this;
         }
 
         /**
+         * 
          *
-         * @param <T>
-         * @param <E>
-         * @param columnName
-         * @param newColumnNames
-         * @param divideFunc
-         * @return
-         * @throws E the e
+         * @param columnName 
+         * @param newColumnNames 
+         * @param divideFunc 
+         * @return 
          */
-        public <T, E extends Exception> DataSetBuilder divideColumn(String columnName, Collection<String> newColumnNames,
-                Throwables.Function<T, ? extends List<?>, E> divideFunc) throws E {
+        public DataSetBuilder divideColumn(String columnName, Collection<String> newColumnNames, Function<?, ? extends List<?>> divideFunc) {
             val.divideColumn(columnName, newColumnNames, divideFunc);
 
             return this;
         }
 
         /**
+         * 
          *
-         * @param <T>
-         * @param <E>
-         * @param columnName
-         * @param newColumnNames
-         * @param output
-         * @return
-         * @throws E the e
+         * @param columnName 
+         * @param newColumnNames 
+         * @param output 
+         * @return 
          */
-        public <T, E extends Exception> DataSetBuilder divideColumn(String columnName, Collection<String> newColumnNames,
-                Throwables.BiConsumer<T, Object[], E> output) throws E {
+        public DataSetBuilder divideColumn(String columnName, Collection<String> newColumnNames, BiConsumer<?, Object[]> output) {
             val.divideColumn(columnName, newColumnNames, output);
 
             return this;
         }
 
         /**
+         * 
          *
-         * @param <T>
-         * @param <E>
-         * @param columnName
-         * @param newColumnNames
-         * @param output
-         * @return
-         * @throws E the e
+         * @param columnName 
+         * @param newColumnNames 
+         * @param output 
+         * @return 
          */
-        public <T, E extends Exception> DataSetBuilder divideColumn(String columnName, Tuple2<String, String> newColumnNames,
-                Throwables.BiConsumer<T, Pair<Object, Object>, E> output) throws E {
+        public DataSetBuilder divideColumn(String columnName, Tuple2<String, String> newColumnNames, BiConsumer<?, Pair<Object, Object>> output) {
             val.divideColumn(columnName, newColumnNames, output);
 
             return this;
         }
 
         /**
+         * 
          *
-         * @param <T>
-         * @param <E>
-         * @param columnName
-         * @param newColumnNames
-         * @param output
-         * @return
-         * @throws E the e
+         * @param columnName 
+         * @param newColumnNames 
+         * @param output 
+         * @return 
          */
-        public <T, E extends Exception> DataSetBuilder divideColumn(String columnName, Tuple3<String, String, String> newColumnNames,
-                Throwables.BiConsumer<T, Triple<Object, Object, Object>, E> output) throws E {
+        public DataSetBuilder divideColumn(String columnName, Tuple3<String, String, String> newColumnNames,
+                BiConsumer<?, Triple<Object, Object, Object>> output) {
             val.divideColumn(columnName, newColumnNames, output);
 
             return this;
         }
 
         /**
+         * 
          *
-         * @param <E>
-         * @param func
-         * @return
-         * @throws E the e
+         * @param func 
+         * @return 
          */
-        public <E extends Exception> DataSetBuilder updateAll(Throwables.Function<?, ?, E> func) throws E {
+        public DataSetBuilder updateAll(Function<?, ?> func) {
             val.updateAll(func);
 
             return this;
         }
 
         /**
+         * 
          *
-         * @param <E>
-         * @param predicate
-         * @param newValue
-         * @return
-         * @throws E the e
+         * @param predicate 
+         * @param newValue 
+         * @return 
          */
-        public <E extends Exception> DataSetBuilder replaceIf(Throwables.Predicate<?, E> predicate, Object newValue) throws E {
+        public DataSetBuilder replaceIf(Predicate<?> predicate, Object newValue) {
             val.replaceIf(predicate, newValue);
 
             return this;

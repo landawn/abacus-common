@@ -21,6 +21,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.RandomAccess;
+import java.util.function.Predicate;
 
 import com.landawn.abacus.util.u.OptionalInt;
 
@@ -377,13 +378,13 @@ public final class Index {
     /**
      * Of sub array.
      *
-     * @param sourceArray 
-     * @param startIndex 
-     * @param subArrayToFind 
-     * @param beginIndexOfTargetSubArray 
-     * @param size 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     * @param sourceArray
+     * @param startIndex
+     * @param subArrayToFind
+     * @param beginIndexOfTargetSubArray
+     * @param size
+     * @return
+     * @throws IndexOutOfBoundsException
      */
     public static OptionalInt ofSubArray(final boolean[] sourceArray, final int startIndex, final boolean[] subArrayToFind,
             final int beginIndexOfTargetSubArray, final int size) throws IndexOutOfBoundsException {
@@ -436,13 +437,13 @@ public final class Index {
     /**
      * Of sub array.
      *
-     * @param sourceArray 
-     * @param startIndex 
-     * @param subArrayToFind 
-     * @param beginIndexOfTargetSubArray 
-     * @param size 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     * @param sourceArray
+     * @param startIndex
+     * @param subArrayToFind
+     * @param beginIndexOfTargetSubArray
+     * @param size
+     * @return
+     * @throws IndexOutOfBoundsException
      */
     public static OptionalInt ofSubArray(final char[] sourceArray, final int startIndex, final char[] subArrayToFind, final int beginIndexOfTargetSubArray,
             final int size) throws IndexOutOfBoundsException {
@@ -495,13 +496,13 @@ public final class Index {
     /**
      * Of sub array.
      *
-     * @param sourceArray 
-     * @param startIndex 
-     * @param subArrayToFind 
-     * @param beginIndexOfTargetSubArray 
-     * @param size 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     * @param sourceArray
+     * @param startIndex
+     * @param subArrayToFind
+     * @param beginIndexOfTargetSubArray
+     * @param size
+     * @return
+     * @throws IndexOutOfBoundsException
      */
     public static OptionalInt ofSubArray(final byte[] sourceArray, final int startIndex, final byte[] subArrayToFind, final int beginIndexOfTargetSubArray,
             final int size) throws IndexOutOfBoundsException {
@@ -554,13 +555,13 @@ public final class Index {
     /**
      * Of sub array.
      *
-     * @param sourceArray 
-     * @param startIndex 
-     * @param subArrayToFind 
-     * @param beginIndexOfTargetSubArray 
-     * @param size 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     * @param sourceArray
+     * @param startIndex
+     * @param subArrayToFind
+     * @param beginIndexOfTargetSubArray
+     * @param size
+     * @return
+     * @throws IndexOutOfBoundsException
      */
     public static OptionalInt ofSubArray(final short[] sourceArray, final int startIndex, final short[] subArrayToFind, final int beginIndexOfTargetSubArray,
             final int size) throws IndexOutOfBoundsException {
@@ -613,13 +614,13 @@ public final class Index {
     /**
      * Of sub array.
      *
-     * @param sourceArray 
-     * @param startIndex 
-     * @param subArrayToFind 
-     * @param beginIndexOfTargetSubArray 
-     * @param size 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     * @param sourceArray
+     * @param startIndex
+     * @param subArrayToFind
+     * @param beginIndexOfTargetSubArray
+     * @param size
+     * @return
+     * @throws IndexOutOfBoundsException
      */
     public static OptionalInt ofSubArray(final int[] sourceArray, final int startIndex, final int[] subArrayToFind, final int beginIndexOfTargetSubArray,
             final int size) throws IndexOutOfBoundsException {
@@ -672,13 +673,13 @@ public final class Index {
     /**
      * Of sub array.
      *
-     * @param sourceArray 
-     * @param startIndex 
-     * @param subArrayToFind 
-     * @param beginIndexOfTargetSubArray 
-     * @param size 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     * @param sourceArray
+     * @param startIndex
+     * @param subArrayToFind
+     * @param beginIndexOfTargetSubArray
+     * @param size
+     * @return
+     * @throws IndexOutOfBoundsException
      */
     public static OptionalInt ofSubArray(final long[] sourceArray, final int startIndex, final long[] subArrayToFind, final int beginIndexOfTargetSubArray,
             final int size) throws IndexOutOfBoundsException {
@@ -731,13 +732,13 @@ public final class Index {
     /**
      * Of sub array.
      *
-     * @param sourceArray 
-     * @param startIndex 
-     * @param subArrayToFind 
-     * @param beginIndexOfTargetSubArray 
-     * @param size 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     * @param sourceArray
+     * @param startIndex
+     * @param subArrayToFind
+     * @param beginIndexOfTargetSubArray
+     * @param size
+     * @return
+     * @throws IndexOutOfBoundsException
      */
     public static OptionalInt ofSubArray(final float[] sourceArray, final int startIndex, final float[] subArrayToFind, final int beginIndexOfTargetSubArray,
             final int size) throws IndexOutOfBoundsException {
@@ -790,13 +791,13 @@ public final class Index {
     /**
      * Of sub array.
      *
-     * @param sourceArray 
-     * @param startIndex 
-     * @param subArrayToFind 
-     * @param beginIndexOfTargetSubArray 
-     * @param size 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     * @param sourceArray
+     * @param startIndex
+     * @param subArrayToFind
+     * @param beginIndexOfTargetSubArray
+     * @param size
+     * @return
+     * @throws IndexOutOfBoundsException
      */
     public static OptionalInt ofSubArray(final double[] sourceArray, final int startIndex, final double[] subArrayToFind, final int beginIndexOfTargetSubArray,
             final int size) throws IndexOutOfBoundsException {
@@ -849,13 +850,13 @@ public final class Index {
     /**
      * Of sub array.
      *
-     * @param sourceArray 
-     * @param startIndex 
-     * @param subArrayToFind 
-     * @param beginIndexOfTargetSubArray 
-     * @param size 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     * @param sourceArray
+     * @param startIndex
+     * @param subArrayToFind
+     * @param beginIndexOfTargetSubArray
+     * @param size
+     * @return
+     * @throws IndexOutOfBoundsException
      */
     public static OptionalInt ofSubArray(final Object[] sourceArray, final int startIndex, final Object[] subArrayToFind, final int beginIndexOfTargetSubArray,
             final int size) throws IndexOutOfBoundsException {
@@ -908,13 +909,13 @@ public final class Index {
     /**
      * Of sub list.
      *
-     * @param sourceList 
-     * @param startIndex 
-     * @param subListToFind 
-     * @param beginIndexOfTargetSubList 
-     * @param size 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     * @param sourceList
+     * @param startIndex
+     * @param subListToFind
+     * @param beginIndexOfTargetSubList
+     * @param size
+     * @return
+     * @throws IndexOutOfBoundsException
      */
     public static OptionalInt ofSubList(final List<?> sourceList, final int startIndex, final List<?> subListToFind, final int beginIndexOfTargetSubList,
             final int size) throws IndexOutOfBoundsException {
@@ -1270,13 +1271,13 @@ public final class Index {
     /**
      * Last of sub array.
      *
-     * @param sourceArray 
-     * @param startIndexFromBack 
-     * @param subArrayToFind 
-     * @param beginIndexOfTargetSubArray 
-     * @param size 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     * @param sourceArray
+     * @param startIndexFromBack
+     * @param subArrayToFind
+     * @param beginIndexOfTargetSubArray
+     * @param size
+     * @return
+     * @throws IndexOutOfBoundsException
      */
     public static OptionalInt lastOfSubArray(final boolean[] sourceArray, final int startIndexFromBack, final boolean[] subArrayToFind,
             final int beginIndexOfTargetSubArray, final int size) throws IndexOutOfBoundsException {
@@ -1329,13 +1330,13 @@ public final class Index {
     /**
      * Last of sub array.
      *
-     * @param sourceArray 
-     * @param startIndexFromBack 
-     * @param subArrayToFind 
-     * @param beginIndexOfTargetSubArray 
-     * @param size 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     * @param sourceArray
+     * @param startIndexFromBack
+     * @param subArrayToFind
+     * @param beginIndexOfTargetSubArray
+     * @param size
+     * @return
+     * @throws IndexOutOfBoundsException
      */
     public static OptionalInt lastOfSubArray(final char[] sourceArray, final int startIndexFromBack, final char[] subArrayToFind,
             final int beginIndexOfTargetSubArray, final int size) throws IndexOutOfBoundsException {
@@ -1388,13 +1389,13 @@ public final class Index {
     /**
      * Last of sub array.
      *
-     * @param sourceArray 
-     * @param startIndexFromBack 
-     * @param subArrayToFind 
-     * @param beginIndexOfTargetSubArray 
-     * @param size 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     * @param sourceArray
+     * @param startIndexFromBack
+     * @param subArrayToFind
+     * @param beginIndexOfTargetSubArray
+     * @param size
+     * @return
+     * @throws IndexOutOfBoundsException
      */
     public static OptionalInt lastOfSubArray(final byte[] sourceArray, final int startIndexFromBack, final byte[] subArrayToFind,
             final int beginIndexOfTargetSubArray, final int size) throws IndexOutOfBoundsException {
@@ -1447,13 +1448,13 @@ public final class Index {
     /**
      * Last of sub array.
      *
-     * @param sourceArray 
-     * @param startIndexFromBack 
-     * @param subArrayToFind 
-     * @param beginIndexOfTargetSubArray 
-     * @param size 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     * @param sourceArray
+     * @param startIndexFromBack
+     * @param subArrayToFind
+     * @param beginIndexOfTargetSubArray
+     * @param size
+     * @return
+     * @throws IndexOutOfBoundsException
      */
     public static OptionalInt lastOfSubArray(final short[] sourceArray, final int startIndexFromBack, final short[] subArrayToFind,
             final int beginIndexOfTargetSubArray, final int size) throws IndexOutOfBoundsException {
@@ -1506,13 +1507,13 @@ public final class Index {
     /**
      * Last of sub array.
      *
-     * @param sourceArray 
-     * @param startIndexFromBack 
-     * @param subArrayToFind 
-     * @param beginIndexOfTargetSubArray 
-     * @param size 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     * @param sourceArray
+     * @param startIndexFromBack
+     * @param subArrayToFind
+     * @param beginIndexOfTargetSubArray
+     * @param size
+     * @return
+     * @throws IndexOutOfBoundsException
      */
     public static OptionalInt lastOfSubArray(final int[] sourceArray, final int startIndexFromBack, final int[] subArrayToFind,
             final int beginIndexOfTargetSubArray, final int size) throws IndexOutOfBoundsException {
@@ -1565,13 +1566,13 @@ public final class Index {
     /**
      * Last of sub array.
      *
-     * @param sourceArray 
-     * @param startIndexFromBack 
-     * @param subArrayToFind 
-     * @param beginIndexOfTargetSubArray 
-     * @param size 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     * @param sourceArray
+     * @param startIndexFromBack
+     * @param subArrayToFind
+     * @param beginIndexOfTargetSubArray
+     * @param size
+     * @return
+     * @throws IndexOutOfBoundsException
      */
     public static OptionalInt lastOfSubArray(final long[] sourceArray, final int startIndexFromBack, final long[] subArrayToFind,
             final int beginIndexOfTargetSubArray, final int size) throws IndexOutOfBoundsException {
@@ -1624,13 +1625,13 @@ public final class Index {
     /**
      * Last of sub array.
      *
-     * @param sourceArray 
-     * @param startIndexFromBack 
-     * @param subArrayToFind 
-     * @param beginIndexOfTargetSubArray 
-     * @param size 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     * @param sourceArray
+     * @param startIndexFromBack
+     * @param subArrayToFind
+     * @param beginIndexOfTargetSubArray
+     * @param size
+     * @return
+     * @throws IndexOutOfBoundsException
      */
     public static OptionalInt lastOfSubArray(final float[] sourceArray, final int startIndexFromBack, final float[] subArrayToFind,
             final int beginIndexOfTargetSubArray, final int size) throws IndexOutOfBoundsException {
@@ -1683,13 +1684,13 @@ public final class Index {
     /**
      * Last of sub array.
      *
-     * @param sourceArray 
-     * @param startIndexFromBack 
-     * @param subArrayToFind 
-     * @param beginIndexOfTargetSubArray 
-     * @param size 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     * @param sourceArray
+     * @param startIndexFromBack
+     * @param subArrayToFind
+     * @param beginIndexOfTargetSubArray
+     * @param size
+     * @return
+     * @throws IndexOutOfBoundsException
      */
     public static OptionalInt lastOfSubArray(final double[] sourceArray, final int startIndexFromBack, final double[] subArrayToFind,
             final int beginIndexOfTargetSubArray, final int size) throws IndexOutOfBoundsException {
@@ -1742,13 +1743,13 @@ public final class Index {
     /**
      * Last of sub array.
      *
-     * @param sourceArray 
-     * @param startIndexFromBack 
-     * @param subArrayToFind 
-     * @param beginIndexOfTargetSubArray 
-     * @param size 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     * @param sourceArray
+     * @param startIndexFromBack
+     * @param subArrayToFind
+     * @param beginIndexOfTargetSubArray
+     * @param size
+     * @return
+     * @throws IndexOutOfBoundsException
      */
     public static OptionalInt lastOfSubArray(final Object[] sourceArray, final int startIndexFromBack, final Object[] subArrayToFind,
             final int beginIndexOfTargetSubArray, final int size) throws IndexOutOfBoundsException {
@@ -1801,13 +1802,13 @@ public final class Index {
     /**
      * Last of sub list.
      *
-     * @param sourceList 
-     * @param startIndexFromBack 
-     * @param subArrayToFind 
-     * @param beginIndexOfTargetSubList 
-     * @param size 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     * @param sourceList
+     * @param startIndexFromBack
+     * @param subArrayToFind
+     * @param beginIndexOfTargetSubList
+     * @param size
+     * @return
+     * @throws IndexOutOfBoundsException
      */
     public static OptionalInt lastOfSubList(final List<?> sourceList, final int startIndexFromBack, final List<?> subArrayToFind,
             final int beginIndexOfTargetSubList, final int size) throws IndexOutOfBoundsException {
@@ -2395,27 +2396,23 @@ public final class Index {
     /**
      *
      * @param <T>
-     * @param <E>
      * @param a
      * @param predicate
      * @return the indices of all found target value/element in the specified {@code Collection/Array}.
-     * @throws E
      */
-    public static <T, E extends Exception> BitSet allOf(final T[] a, final Throwables.Predicate<? super T, E> predicate) throws E {
+    public static <T> BitSet allOf(final T[] a, final Predicate<? super T> predicate) {
         return allOf(a, 0, predicate);
     }
 
     /**
      *
      * @param <T>
-     * @param <E>
      * @param a
      * @param startIndex
      * @param predicate
      * @return the indices of all found target value/element in the specified {@code Collection/Array}.
-     * @throws E
      */
-    public static <T, E extends Exception> BitSet allOf(final T[] a, int startIndex, final Throwables.Predicate<? super T, E> predicate) throws E {
+    public static <T> BitSet allOf(final T[] a, int startIndex, final Predicate<? super T> predicate) {
         final BitSet bitSet = new BitSet();
         final int len = N.len(a);
 
@@ -2435,28 +2432,23 @@ public final class Index {
     /**
      *
      * @param <T>
-     * @param <E>
      * @param c
      * @param predicate
      * @return the indices of all found target value/element in the specified {@code Collection/Array}.
-     * @throws E
      */
-    public static <T, E extends Exception> BitSet allOf(final Collection<? extends T> c, final Throwables.Predicate<? super T, E> predicate) throws E {
+    public static <T> BitSet allOf(final Collection<? extends T> c, final Predicate<? super T> predicate) {
         return allOf(c, 0, predicate);
     }
 
     /**
      *
      * @param <T>
-     * @param <E>
      * @param c
      * @param startIndex
      * @param predicate
      * @return the indices of all found target value/element in the specified {@code Collection/Array}.
-     * @throws E
      */
-    public static <T, E extends Exception> BitSet allOf(final Collection<? extends T> c, int startIndex, final Throwables.Predicate<? super T, E> predicate)
-            throws E {
+    public static <T> BitSet allOf(final Collection<? extends T> c, int startIndex, final Predicate<? super T> predicate) {
         final BitSet bitSet = new BitSet();
         final int size = N.size(c);
 

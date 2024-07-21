@@ -202,14 +202,14 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
     }
 
     /**
-     * 
      *
-     * @param <A> 
-     * @param <B> 
-     * @param hasNext 
-     * @param output 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <A>
+     * @param <B>
+     * @param hasNext
+     * @param output
+     * @return
+     * @throws IllegalArgumentException
      */
     public static <A, B> BiIterator<A, B> generate(final BooleanSupplier hasNext, final Consumer<Pair<A, B>> output) throws IllegalArgumentException {
         N.checkArgNotNull(hasNext);
@@ -295,16 +295,16 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
     }
 
     /**
-     * 
      *
-     * @param <A> 
-     * @param <B> 
-     * @param fromIndex 
-     * @param toIndex 
-     * @param output 
-     * @return 
-     * @throws IllegalArgumentException 
-     * @throws IndexOutOfBoundsException 
+     *
+     * @param <A>
+     * @param <B>
+     * @param fromIndex
+     * @param toIndex
+     * @param output
+     * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
      */
     public static <A, B> BiIterator<A, B> generate(final int fromIndex, final int toIndex, final IntObjConsumer<Pair<A, B>> output)
             throws IllegalArgumentException, IndexOutOfBoundsException {
@@ -673,14 +673,14 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
      * @param action
      * @throws E the e
      */
-    public abstract <E extends Exception> void foreachRemaining(final Throwables.BiConsumer<? super A, ? super B, E> action) throws E;
+    public abstract <E extends Exception> void foreachRemaining(final Throwables.BiConsumer<? super A, ? super B, E> action) throws E; // NOSONAR
 
     /**
-     * 
      *
-     * @param n 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param n
+     * @return
+     * @throws IllegalArgumentException
      */
     public BiIterator<A, B> skip(final long n) throws IllegalArgumentException {
         N.checkArgNotNegative(n, "n");
@@ -763,11 +763,11 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
     }
 
     /**
-     * 
      *
-     * @param count 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param count
+     * @return
+     * @throws IllegalArgumentException
      */
     public BiIterator<A, B> limit(final long count) throws IllegalArgumentException {
         N.checkArgNotNegative(count, "count");
@@ -836,11 +836,11 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
     }
 
     /**
-     * 
      *
-     * @param predicate 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param predicate
+     * @return
+     * @throws IllegalArgumentException
      */
     public BiIterator<A, B> filter(final BiPredicate<? super A, ? super B> predicate) throws IllegalArgumentException {
         N.checkArgNotNull(predicate, "predicate");
@@ -991,12 +991,12 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
     }
 
     /**
-     * 
      *
-     * @param <R> 
-     * @param mapper 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <R>
+     * @param mapper
+     * @return
+     * @throws IllegalArgumentException
      */
     public <R> Stream<R> stream(final BiFunction<? super A, ? super B, ? extends R> mapper) throws IllegalArgumentException {
         N.checkArgNotNull(mapper);
@@ -1035,10 +1035,10 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
     }
 
     /**
-     * 
      *
-     * @param supplier 
-     * @return 
+     *
+     * @param supplier
+     * @return
      */
     public Pair<List<A>, List<B>> toMultiList(@SuppressWarnings("rawtypes") final Supplier<? extends List> supplier) {
         final List<A> listA = supplier.get();
@@ -1053,10 +1053,10 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
     }
 
     /**
-     * 
      *
-     * @param supplier 
-     * @return 
+     *
+     * @param supplier
+     * @return
      */
     public Pair<Set<A>, Set<B>> toMultiSet(@SuppressWarnings("rawtypes") final Supplier<? extends Set> supplier) {
         final Set<A> listA = supplier.get();

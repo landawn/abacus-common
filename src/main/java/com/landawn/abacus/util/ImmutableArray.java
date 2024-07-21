@@ -286,6 +286,11 @@ public final class ImmutableArray<T> implements Iterable<T>, Immutable {
         return ImmutableList.wrap(N.asList(elements));
     }
 
+    /**
+     *
+     *
+     * @return
+     */
     @Override
     public ObjIterator<T> iterator() {
         return ObjIterator.of(elements);
@@ -307,7 +312,7 @@ public final class ImmutableArray<T> implements Iterable<T>, Immutable {
      */
     @Override
     public void forEach(final Consumer<? super T> consumer) throws IllegalArgumentException {
-        N.checkArgNotNull(consumer, "consumer");
+        N.checkArgNotNull(consumer, "consumer"); // NOSONAR
 
         for (int i = 0; i < length; i++) {
             consumer.accept(elements[i]);
@@ -323,8 +328,8 @@ public final class ImmutableArray<T> implements Iterable<T>, Immutable {
      * @throws E
      */
     @Beta
-    public <E extends Exception> void foreach(final Throwables.Consumer<? super T, E> consumer) throws IllegalArgumentException, E {
-        N.checkArgNotNull(consumer, "consumer");
+    public <E extends Exception> void foreach(final Throwables.Consumer<? super T, E> consumer) throws IllegalArgumentException, E { // NOSONAR
+        N.checkArgNotNull(consumer, "consumer"); // NOSONAR
 
         for (int i = 0; i < length; i++) {
             consumer.accept(elements[i]);
@@ -340,8 +345,8 @@ public final class ImmutableArray<T> implements Iterable<T>, Immutable {
      * @throws E
      */
     @Beta
-    public <E extends Exception> void foreachIndexed(final Throwables.IntObjConsumer<? super T, E> consumer) throws IllegalArgumentException, E {
-        N.checkArgNotNull(consumer, "consumer");
+    public <E extends Exception> void foreachIndexed(final Throwables.IntObjConsumer<? super T, E> consumer) throws IllegalArgumentException, E { // NOSONAR
+        N.checkArgNotNull(consumer, "consumer"); // NOSONAR
 
         for (int i = 0; i < length; i++) {
             consumer.accept(i, elements[i]);

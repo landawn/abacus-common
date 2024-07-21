@@ -22,6 +22,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.io.Writer;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -29,6 +31,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -36,15 +39,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
-import java.util.NavigableMap;
-import java.util.NavigableSet;
 import java.util.NoSuchElementException;
 import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.RandomAccess;
 import java.util.Set;
-import java.util.SortedMap;
-import java.util.SortedSet;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
@@ -56,11 +55,28 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
+import java.util.function.DoublePredicate;
+import java.util.function.DoubleToIntFunction;
+import java.util.function.DoubleToLongFunction;
+import java.util.function.DoubleUnaryOperator;
 import java.util.function.Function;
 import java.util.function.IntFunction;
+import java.util.function.IntPredicate;
+import java.util.function.IntToDoubleFunction;
+import java.util.function.IntToLongFunction;
+import java.util.function.IntUnaryOperator;
+import java.util.function.LongPredicate;
+import java.util.function.LongToDoubleFunction;
+import java.util.function.LongToIntFunction;
+import java.util.function.LongUnaryOperator;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+import java.util.function.ToDoubleFunction;
+import java.util.function.ToIntFunction;
+import java.util.function.ToLongFunction;
+import java.util.function.UnaryOperator;
 import java.util.stream.Collector;
 
 import com.landawn.abacus.annotation.Beta;
@@ -83,7 +99,23 @@ import com.landawn.abacus.util.Tuple.Tuple3;
 import com.landawn.abacus.util.Tuple.Tuple4;
 import com.landawn.abacus.util.Tuple.Tuple5;
 import com.landawn.abacus.util.u.Nullable;
+import com.landawn.abacus.util.function.BooleanPredicate;
+import com.landawn.abacus.util.function.BooleanUnaryOperator;
+import com.landawn.abacus.util.function.BytePredicate;
+import com.landawn.abacus.util.function.ByteUnaryOperator;
+import com.landawn.abacus.util.function.CharPredicate;
+import com.landawn.abacus.util.function.CharUnaryOperator;
+import com.landawn.abacus.util.function.FloatPredicate;
+import com.landawn.abacus.util.function.FloatUnaryOperator;
 import com.landawn.abacus.util.function.IntBiFunction;
+import com.landawn.abacus.util.function.ShortPredicate;
+import com.landawn.abacus.util.function.ShortUnaryOperator;
+import com.landawn.abacus.util.function.ToBooleanFunction;
+import com.landawn.abacus.util.function.ToByteFunction;
+import com.landawn.abacus.util.function.ToCharFunction;
+import com.landawn.abacus.util.function.ToFloatFunction;
+import com.landawn.abacus.util.function.ToShortFunction;
+import com.landawn.abacus.util.function.TriFunction;
 import com.landawn.abacus.util.stream.ObjIteratorEx;
 import com.landawn.abacus.util.stream.Stream;
 
@@ -883,7 +915,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IndexOutOfBoundsException
      */
     public static <T> ImmutableList<T> slice(final T[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a)) {
             return ImmutableList.empty();
@@ -996,7 +1028,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static List<boolean[]> split(final boolean[] a, final int fromIndex, final int toIndex, final int chunkSize)
             throws IllegalArgumentException, IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
         checkArgPositive(chunkSize, "chunkSize");
 
         if (isEmpty(a) || fromIndex == toIndex) {
@@ -1053,7 +1085,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static List<char[]> split(final char[] a, final int fromIndex, final int toIndex, final int chunkSize)
             throws IllegalArgumentException, IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
         checkArgPositive(chunkSize, "chunkSize");
 
         if (isEmpty(a) || fromIndex == toIndex) {
@@ -1110,7 +1142,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static List<byte[]> split(final byte[] a, final int fromIndex, final int toIndex, final int chunkSize)
             throws IllegalArgumentException, IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
         checkArgPositive(chunkSize, "chunkSize");
 
         if (isEmpty(a) || fromIndex == toIndex) {
@@ -1167,7 +1199,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static List<short[]> split(final short[] a, final int fromIndex, final int toIndex, final int chunkSize)
             throws IllegalArgumentException, IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
         checkArgPositive(chunkSize, "chunkSize");
 
         if (isEmpty(a) || fromIndex == toIndex) {
@@ -1224,7 +1256,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static List<int[]> split(final int[] a, final int fromIndex, final int toIndex, final int chunkSize)
             throws IllegalArgumentException, IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
         checkArgPositive(chunkSize, "chunkSize");
 
         if (isEmpty(a) || fromIndex == toIndex) {
@@ -1281,7 +1313,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static List<long[]> split(final long[] a, final int fromIndex, final int toIndex, final int chunkSize)
             throws IllegalArgumentException, IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
         checkArgPositive(chunkSize, "chunkSize");
 
         if (isEmpty(a) || fromIndex == toIndex) {
@@ -1338,7 +1370,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static List<float[]> split(final float[] a, final int fromIndex, final int toIndex, final int chunkSize)
             throws IllegalArgumentException, IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
         checkArgPositive(chunkSize, "chunkSize");
 
         if (isEmpty(a) || fromIndex == toIndex) {
@@ -1395,7 +1427,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static List<double[]> split(final double[] a, final int fromIndex, final int toIndex, final int chunkSize)
             throws IllegalArgumentException, IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
         checkArgPositive(chunkSize, "chunkSize");
 
         if (isEmpty(a) || fromIndex == toIndex) {
@@ -1454,7 +1486,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static <T> List<T[]> split(final T[] a, final int fromIndex, final int toIndex, final int chunkSize)
             throws IllegalArgumentException, IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
         checkArgPositive(chunkSize, "chunkSize");
 
         if (isEmpty(a) || fromIndex == toIndex) {
@@ -4258,12 +4290,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      *
      *
-     * @param <E>
      * @param a
      * @param operator
-     * @throws E
      */
-    public static <E extends Exception> void replaceAll(final boolean[] a, final Throwables.BooleanUnaryOperator<E> operator) throws E {
+    public static void replaceAll(final boolean[] a, final BooleanUnaryOperator operator) {
         if (isEmpty(a)) {
             return;
         }
@@ -4276,12 +4306,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      *
      *
-     * @param <E>
      * @param a
      * @param operator
-     * @throws E
      */
-    public static <E extends Exception> void replaceAll(final char[] a, final Throwables.CharUnaryOperator<E> operator) throws E {
+    public static void replaceAll(final char[] a, final CharUnaryOperator operator) {
         if (isEmpty(a)) {
             return;
         }
@@ -4294,12 +4322,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      *
      *
-     * @param <E>
      * @param a
      * @param operator
-     * @throws E
      */
-    public static <E extends Exception> void replaceAll(final byte[] a, final Throwables.ByteUnaryOperator<E> operator) throws E {
+    public static void replaceAll(final byte[] a, final ByteUnaryOperator operator) {
         if (isEmpty(a)) {
             return;
         }
@@ -4312,12 +4338,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      *
      *
-     * @param <E>
      * @param a
      * @param operator
-     * @throws E
      */
-    public static <E extends Exception> void replaceAll(final short[] a, final Throwables.ShortUnaryOperator<E> operator) throws E {
+    public static void replaceAll(final short[] a, final ShortUnaryOperator operator) {
         if (isEmpty(a)) {
             return;
         }
@@ -4330,12 +4354,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      *
      *
-     * @param <E>
      * @param a
      * @param operator
-     * @throws E
      */
-    public static <E extends Exception> void replaceAll(final int[] a, final Throwables.IntUnaryOperator<E> operator) throws E {
+    public static void replaceAll(final int[] a, final IntUnaryOperator operator) {
         if (isEmpty(a)) {
             return;
         }
@@ -4348,12 +4370,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      *
      *
-     * @param <E>
      * @param a
      * @param operator
-     * @throws E
      */
-    public static <E extends Exception> void replaceAll(final long[] a, final Throwables.LongUnaryOperator<E> operator) throws E {
+    public static void replaceAll(final long[] a, final LongUnaryOperator operator) {
         if (isEmpty(a)) {
             return;
         }
@@ -4366,12 +4386,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      *
      *
-     * @param <E>
      * @param a
      * @param operator
-     * @throws E
      */
-    public static <E extends Exception> void replaceAll(final float[] a, final Throwables.FloatUnaryOperator<E> operator) throws E {
+    public static void replaceAll(final float[] a, final FloatUnaryOperator operator) {
         if (isEmpty(a)) {
             return;
         }
@@ -4384,12 +4402,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      *
      *
-     * @param <E>
      * @param a
      * @param operator
-     * @throws E
      */
-    public static <E extends Exception> void replaceAll(final double[] a, final Throwables.DoubleUnaryOperator<E> operator) throws E {
+    public static void replaceAll(final double[] a, final DoubleUnaryOperator operator) {
         if (isEmpty(a)) {
             return;
         }
@@ -4403,12 +4419,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      *
      * @param <T>
-     * @param <E>
      * @param a
      * @param operator
-     * @throws E
      */
-    public static <T, E extends Exception> void replaceAll(final T[] a, final Throwables.UnaryOperator<T, E> operator) throws E {
+    public static <T> void replaceAll(final T[] a, final UnaryOperator<T> operator) {
         if (isEmpty(a)) {
             return;
         }
@@ -4422,12 +4436,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      *
      * @param <T>
-     * @param <E>
      * @param list
      * @param operator
-     * @throws E
      */
-    public static <T, E extends Exception> void replaceAll(final List<T> list, final Throwables.UnaryOperator<T, E> operator) throws E {
+    public static <T> void replaceAll(final List<T> list, final UnaryOperator<T> operator) {
         if (isEmpty(list)) {
             return;
         }
@@ -4450,14 +4462,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      *
      *
-     * @param <E>
      * @param a
      * @param predicate
      * @param newValue
      * @return
-     * @throws E
      */
-    public static <E extends Exception> int replaceIf(final boolean[] a, final Throwables.BooleanPredicate<E> predicate, final boolean newValue) throws E {
+    public static int replaceIf(final boolean[] a, final BooleanPredicate predicate, final boolean newValue) {
         if (isEmpty(a)) {
             return 0;
         }
@@ -4477,14 +4487,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      *
      *
-     * @param <E>
      * @param a
      * @param predicate
      * @param newValue
      * @return
-     * @throws E
      */
-    public static <E extends Exception> int replaceIf(final char[] a, final Throwables.CharPredicate<E> predicate, final char newValue) throws E {
+    public static int replaceIf(final char[] a, final CharPredicate predicate, final char newValue) {
         if (isEmpty(a)) {
             return 0;
         }
@@ -4504,14 +4512,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      *
      *
-     * @param <E>
      * @param a
      * @param predicate
      * @param newValue
      * @return
-     * @throws E
      */
-    public static <E extends Exception> int replaceIf(final byte[] a, final Throwables.BytePredicate<E> predicate, final byte newValue) throws E {
+    public static int replaceIf(final byte[] a, final BytePredicate predicate, final byte newValue) {
         if (isEmpty(a)) {
             return 0;
         }
@@ -4531,14 +4537,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      *
      *
-     * @param <E>
      * @param a
      * @param predicate
      * @param newValue
      * @return
-     * @throws E
      */
-    public static <E extends Exception> int replaceIf(final short[] a, final Throwables.ShortPredicate<E> predicate, final short newValue) throws E {
+    public static int replaceIf(final short[] a, final ShortPredicate predicate, final short newValue) {
         if (isEmpty(a)) {
             return 0;
         }
@@ -4558,14 +4562,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      *
      *
-     * @param <E>
      * @param a
      * @param predicate
      * @param newValue
      * @return
-     * @throws E
      */
-    public static <E extends Exception> int replaceIf(final int[] a, final Throwables.IntPredicate<E> predicate, final int newValue) throws E {
+    public static int replaceIf(final int[] a, final IntPredicate predicate, final int newValue) {
         if (isEmpty(a)) {
             return 0;
         }
@@ -4585,14 +4587,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      *
      *
-     * @param <E>
      * @param a
      * @param predicate
      * @param newValue
      * @return
-     * @throws E
      */
-    public static <E extends Exception> int replaceIf(final long[] a, final Throwables.LongPredicate<E> predicate, final long newValue) throws E {
+    public static int replaceIf(final long[] a, final LongPredicate predicate, final long newValue) {
         if (isEmpty(a)) {
             return 0;
         }
@@ -4612,14 +4612,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      *
      *
-     * @param <E>
      * @param a
      * @param predicate
      * @param newValue
      * @return
-     * @throws E
      */
-    public static <E extends Exception> int replaceIf(final float[] a, final Throwables.FloatPredicate<E> predicate, final float newValue) throws E {
+    public static int replaceIf(final float[] a, final FloatPredicate predicate, final float newValue) {
         if (isEmpty(a)) {
             return 0;
         }
@@ -4639,42 +4637,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      *
      *
-     * @param <E>
      * @param a
      * @param predicate
      * @param newValue
      * @return
-     * @throws E
      */
-    public static <E extends Exception> int replaceIf(final double[] a, final Throwables.DoublePredicate<E> predicate, final double newValue) throws E {
-        if (isEmpty(a)) {
-            return 0;
-        }
-
-        int result = 0;
-
-        for (int i = 0, n = a.length; i < n; i++) {
-            if (predicate.test(a[i])) {
-                a[i] = newValue;
-                result++;
-            }
-        }
-
-        return result;
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param <E>
-     * @param a
-     * @param predicate
-     * @param newValue
-     * @return
-     * @throws E
-     */
-    public static <T, E extends Exception> int replaceIf(final T[] a, final Throwables.Predicate<? super T, E> predicate, final T newValue) throws E {
+    public static int replaceIf(final double[] a, final DoublePredicate predicate, final double newValue) {
         if (isEmpty(a)) {
             return 0;
         }
@@ -4695,14 +4663,38 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      *
      * @param <T>
-     * @param <E>
+     * @param a
+     * @param predicate
+     * @param newValue
+     * @return
+     */
+    public static <T> int replaceIf(final T[] a, final Predicate<? super T> predicate, final T newValue) {
+        if (isEmpty(a)) {
+            return 0;
+        }
+
+        int result = 0;
+
+        for (int i = 0, n = a.length; i < n; i++) {
+            if (predicate.test(a[i])) {
+                a[i] = newValue;
+                result++;
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     *
+     *
+     * @param <T>
      * @param c
      * @param predicate
      * @param newValue
      * @return
-     * @throws E
      */
-    public static <T, E extends Exception> int replaceIf(final List<T> c, final Throwables.Predicate<? super T, E> predicate, final T newValue) throws E {
+    public static <T> int replaceIf(final List<T> c, final Predicate<? super T> predicate, final T newValue) {
         if (isEmpty(c)) {
             return 0;
         }
@@ -4723,7 +4715,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * A fake method defined to remind user to use {@code replaceAll} when {@code update/updateAll/updateIf} is searched.
      *
      * @throws UnsupportedOperationException
-     * @see #replaceAll(Object[], com.landawn.abacus.util.Throwables.UnaryOperator)
+     * @see #replaceAll(Object[], com.landawn.abacus.util.UnaryOperator)
      * @see #replaceAll(Object[], Object, Object)
      * @deprecated use {@code replaceAll}
      */
@@ -4736,7 +4728,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * A fake method defined to remind user to use {@code replaceIf} when {@code update/updateAll/updateIf} is searched.
      *
      * @throws UnsupportedOperationException
-     * @see #replaceIf(Object[], com.landawn.abacus.util.Throwables.Predicate, Object)
+     * @see #replaceIf(Object[], com.landawn.abacus.util.Predicate, Object)
      * @deprecated use {@code replaceIf}
      */
     @Deprecated
@@ -8097,7 +8089,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IndexOutOfBoundsException
      */
     public static boolean[] removeDuplicates(final boolean[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) && fromIndex == 0 && toIndex == 0) {
             return EMPTY_BOOLEAN_ARRAY;
@@ -8159,7 +8151,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IndexOutOfBoundsException
      */
     public static char[] removeDuplicates(final char[] a, final int fromIndex, final int toIndex, final boolean isSorted) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) && fromIndex == 0 && toIndex == 0) {
             return EMPTY_CHAR_ARRAY;
@@ -8242,7 +8234,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IndexOutOfBoundsException
      */
     public static byte[] removeDuplicates(final byte[] a, final int fromIndex, final int toIndex, final boolean isSorted) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) && fromIndex == 0 && toIndex == 0) {
             return EMPTY_BYTE_ARRAY;
@@ -8325,7 +8317,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IndexOutOfBoundsException
      */
     public static short[] removeDuplicates(final short[] a, final int fromIndex, final int toIndex, final boolean isSorted) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) && fromIndex == 0 && toIndex == 0) {
             return EMPTY_SHORT_ARRAY;
@@ -8408,7 +8400,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IndexOutOfBoundsException
      */
     public static int[] removeDuplicates(final int[] a, final int fromIndex, final int toIndex, final boolean isSorted) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) && fromIndex == 0 && toIndex == 0) {
             return EMPTY_INT_ARRAY;
@@ -8491,7 +8483,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IndexOutOfBoundsException
      */
     public static long[] removeDuplicates(final long[] a, final int fromIndex, final int toIndex, final boolean isSorted) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) && fromIndex == 0 && toIndex == 0) {
             return EMPTY_LONG_ARRAY;
@@ -8574,7 +8566,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IndexOutOfBoundsException
      */
     public static float[] removeDuplicates(final float[] a, final int fromIndex, final int toIndex, final boolean isSorted) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) && fromIndex == 0 && toIndex == 0) {
             return EMPTY_FLOAT_ARRAY;
@@ -8658,7 +8650,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IndexOutOfBoundsException
      */
     public static double[] removeDuplicates(final double[] a, final int fromIndex, final int toIndex, final boolean isSorted) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) && fromIndex == 0 && toIndex == 0) {
             return EMPTY_DOUBLE_ARRAY;
@@ -8741,7 +8733,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IndexOutOfBoundsException
      */
     public static String[] removeDuplicates(final String[] a, final int fromIndex, final int toIndex, final boolean isSorted) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) && fromIndex == 0 && toIndex == 0) {
             return EMPTY_STRING_ARRAY;
@@ -8834,7 +8826,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IndexOutOfBoundsException
      */
     public static <T> T[] removeDuplicates(final T[] a, final int fromIndex, final int toIndex, final boolean isSorted) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) && fromIndex == 0 && toIndex == 0) {
             return a;
@@ -8934,7 +8926,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IndexOutOfBoundsException
      */
     public static boolean[] deleteRange(final boolean[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (fromIndex == toIndex) {
             return a == null ? EMPTY_BOOLEAN_ARRAY : a.clone();
@@ -8964,7 +8956,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IndexOutOfBoundsException
      */
     public static char[] deleteRange(final char[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (fromIndex == toIndex) {
             return a == null ? EMPTY_CHAR_ARRAY : a.clone();
@@ -8994,7 +8986,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IndexOutOfBoundsException
      */
     public static byte[] deleteRange(final byte[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (fromIndex == toIndex) {
             return a == null ? EMPTY_BYTE_ARRAY : a.clone();
@@ -9024,7 +9016,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IndexOutOfBoundsException
      */
     public static short[] deleteRange(final short[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (fromIndex == toIndex) {
             return a == null ? EMPTY_SHORT_ARRAY : a.clone();
@@ -9054,7 +9046,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IndexOutOfBoundsException
      */
     public static int[] deleteRange(final int[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (fromIndex == toIndex) {
             return a == null ? EMPTY_INT_ARRAY : a.clone();
@@ -9084,7 +9076,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IndexOutOfBoundsException
      */
     public static long[] deleteRange(final long[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (fromIndex == toIndex) {
             return a == null ? EMPTY_LONG_ARRAY : a.clone();
@@ -9114,7 +9106,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IndexOutOfBoundsException
      */
     public static float[] deleteRange(final float[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (fromIndex == toIndex) {
             return a == null ? EMPTY_FLOAT_ARRAY : a.clone();
@@ -9144,7 +9136,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IndexOutOfBoundsException
      */
     public static double[] deleteRange(final double[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (fromIndex == toIndex) {
             return a == null ? EMPTY_DOUBLE_ARRAY : a.clone();
@@ -9175,7 +9167,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException
      */
     public static String[] deleteRange(final String[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException, IllegalArgumentException {
-        checkFromToIndex(fromIndex, toIndex, len(a));
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (fromIndex == toIndex) {
             return a == null ? EMPTY_STRING_ARRAY : a.clone();
@@ -9209,7 +9201,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static <T> T[] deleteRange(final T[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException, IllegalArgumentException {
         checkArgNotNull(a, "a");
 
-        checkFromToIndex(fromIndex, toIndex, len(a));
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (fromIndex == toIndex) {
             return a.clone();
@@ -10042,7 +10034,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //     * @return a new array.
     //     */
     //    public static boolean[] copyThenMoveRange(final boolean[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
-    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a));
+    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a)); // NOSONAR
     //
     //        final boolean[] copy = isEmpty(a) ? a : a.clone();
     //
@@ -10061,7 +10053,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //     * @return a new array.
     //     */
     //    public static char[] copyThenMoveRange(final char[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
-    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a));
+    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a)); // NOSONAR
     //
     //        final char[] copy = isEmpty(a) ? a : a.clone();
     //
@@ -10080,7 +10072,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //     * @return a new array.
     //     */
     //    public static byte[] copyThenMoveRange(final byte[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
-    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a));
+    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a)); // NOSONAR
     //
     //        final byte[] copy = isEmpty(a) ? a : a.clone();
     //
@@ -10099,7 +10091,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //     * @return a new array.
     //     */
     //    public static short[] copyThenMoveRange(final short[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
-    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a));
+    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a)); // NOSONAR
     //
     //        final short[] copy = isEmpty(a) ? a : a.clone();
     //
@@ -10118,7 +10110,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //     * @return a new array.
     //     */
     //    public static int[] copyThenMoveRange(final int[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
-    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a));
+    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a)); // NOSONAR
     //
     //        final int[] copy = isEmpty(a) ? a : a.clone();
     //
@@ -10137,7 +10129,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //     * @return a new array.
     //     */
     //    public static long[] copyThenMoveRange(final long[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
-    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a));
+    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a)); // NOSONAR
     //
     //        final long[] copy = isEmpty(a) ? a : a.clone();
     //
@@ -10156,7 +10148,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //     * @return a new array.
     //     */
     //    public static double[] copyThenMoveRange(final double[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
-    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a));
+    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a)); // NOSONAR
     //
     //        final double[] copy = isEmpty(a) ? a : a.clone();
     //
@@ -10175,7 +10167,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //     * @return a new array.
     //     */
     //    public static <T> T[] copyThenMoveRange(final T[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
-    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a));
+    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a)); // NOSONAR
     //
     //        final T[] copy = isEmpty(a) ? a : a.clone();
     //
@@ -10194,7 +10186,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //     * @return a new array.
     //     */
     //    public static boolean[] copyThenMoveRange(final boolean[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
-    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a));
+    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a)); // NOSONAR
     //
     //        final boolean[] copy = isEmpty(a) ? a : a.clone();
     //
@@ -10213,7 +10205,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //     * @return a new array.
     //     */
     //    public static char[] copyThenMoveRange(final char[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
-    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a));
+    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a)); // NOSONAR
     //
     //        final char[] copy = isEmpty(a) ? a : a.clone();
     //
@@ -10232,7 +10224,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //     * @return a new array.
     //     */
     //    public static byte[] copyThenMoveRange(final byte[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
-    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a));
+    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a)); // NOSONAR
     //
     //        final byte[] copy = isEmpty(a) ? a : a.clone();
     //
@@ -10251,7 +10243,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //     * @return a new array.
     //     */
     //    public static short[] copyThenMoveRange(final short[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
-    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a));
+    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a)); // NOSONAR
     //
     //        final short[] copy = isEmpty(a) ? a : a.clone();
     //
@@ -10270,7 +10262,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //     * @return a new array.
     //     */
     //    public static int[] copyThenMoveRange(final int[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
-    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a));
+    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a)); // NOSONAR
     //
     //        final int[] copy = isEmpty(a) ? a : a.clone();
     //
@@ -10289,7 +10281,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //     * @return a new array.
     //     */
     //    public static long[] copyThenMoveRange(final long[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
-    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a));
+    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a)); // NOSONAR
     //
     //        final long[] copy = isEmpty(a) ? a : a.clone();
     //
@@ -10308,7 +10300,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //     * @return a new array.
     //     */
     //    public static double[] copyThenMoveRange(final double[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
-    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a));
+    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a)); // NOSONAR
     //
     //        final double[] copy = isEmpty(a) ? a : a.clone();
     //
@@ -10327,7 +10319,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //     * @return a new array.
     //     */
     //    public static <T> T[] copyThenMoveRange(final T[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
-    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a));
+    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a)); // NOSONAR
     //
     //        final T[] copy = isEmpty(a) ? a : a.clone();
     //
@@ -10346,7 +10338,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //     * @return a new array.
     //     */
     //    public static boolean[] copyThenMoveRange(final boolean[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
-    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a));
+    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a)); // NOSONAR
     //
     //        final boolean[] copy = isEmpty(a) ? a : a.clone();
     //
@@ -10365,7 +10357,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //     * @return a new array.
     //     */
     //    public static char[] copyThenMoveRange(final char[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
-    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a));
+    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a)); // NOSONAR
     //
     //        final char[] copy = isEmpty(a) ? a : a.clone();
     //
@@ -10384,7 +10376,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //     * @return a new array.
     //     */
     //    public static byte[] copyThenMoveRange(final byte[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
-    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a));
+    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a)); // NOSONAR
     //
     //        final byte[] copy = isEmpty(a) ? a : a.clone();
     //
@@ -10403,7 +10395,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //     * @return a new array.
     //     */
     //    public static short[] copyThenMoveRange(final short[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
-    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a));
+    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a)); // NOSONAR
     //
     //        final short[] copy = isEmpty(a) ? a : a.clone();
     //
@@ -10422,7 +10414,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //     * @return a new array.
     //     */
     //    public static int[] copyThenMoveRange(final int[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
-    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a));
+    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a)); // NOSONAR
     //
     //        final int[] copy = isEmpty(a) ? a : a.clone();
     //
@@ -10441,7 +10433,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //     * @return a new array.
     //     */
     //    public static long[] copyThenMoveRange(final long[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
-    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a));
+    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a)); // NOSONAR
     //
     //        final long[] copy = isEmpty(a) ? a : a.clone();
     //
@@ -10460,7 +10452,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //     * @return a new array.
     //     */
     //    public static double[] copyThenMoveRange(final double[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
-    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a));
+    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a)); // NOSONAR
     //
     //        final double[] copy = isEmpty(a) ? a : a.clone();
     //
@@ -10479,7 +10471,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //     * @return a new array.
     //     */
     //    public static <T> T[] copyThenMoveRange(final T[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
-    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a));
+    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a)); // NOSONAR
     //
     //        final T[] copy = isEmpty(a) ? a : a.clone();
     //
@@ -10626,7 +10618,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      */
     static boolean hasDuplicates(final char[] a, final int fromIndex, final int toIndex, final boolean isSorted) {
-        checkFromToIndex(fromIndex, toIndex, len(a));
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) || toIndex - fromIndex < 2) {
             return false;
@@ -10692,7 +10684,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      */
     static boolean hasDuplicates(final byte[] a, final int fromIndex, final int toIndex, final boolean isSorted) {
-        checkFromToIndex(fromIndex, toIndex, len(a));
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) || toIndex - fromIndex < 2) {
             return false;
@@ -10758,7 +10750,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      */
     static boolean hasDuplicates(final short[] a, final int fromIndex, final int toIndex, final boolean isSorted) {
-        checkFromToIndex(fromIndex, toIndex, len(a));
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) || toIndex - fromIndex < 2) {
             return false;
@@ -10824,7 +10816,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      */
     static boolean hasDuplicates(final int[] a, final int fromIndex, final int toIndex, final boolean isSorted) {
-        checkFromToIndex(fromIndex, toIndex, len(a));
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) || toIndex - fromIndex < 2) {
             return false;
@@ -10890,7 +10882,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      */
     static boolean hasDuplicates(final long[] a, final int fromIndex, final int toIndex, final boolean isSorted) {
-        checkFromToIndex(fromIndex, toIndex, len(a));
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) || toIndex - fromIndex < 2) {
             return false;
@@ -10956,7 +10948,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      */
     static boolean hasDuplicates(final float[] a, final int fromIndex, final int toIndex, final boolean isSorted) {
-        checkFromToIndex(fromIndex, toIndex, len(a));
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) || toIndex - fromIndex < 2) {
             return false;
@@ -11022,7 +11014,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      */
     static boolean hasDuplicates(final double[] a, final int fromIndex, final int toIndex, final boolean isSorted) {
-        checkFromToIndex(fromIndex, toIndex, len(a));
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) || toIndex - fromIndex < 2) {
             return false;
@@ -11091,7 +11083,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      */
     static <T> boolean hasDuplicates(final T[] a, final int fromIndex, final int toIndex, final boolean isSorted) {
-        checkFromToIndex(fromIndex, toIndex, len(a));
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) || toIndex - fromIndex < 2) {
             return false;
@@ -11228,7 +11220,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IndexOutOfBoundsException
      */
     public static int sum(final char[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) || fromIndex == toIndex) {
             return 0;
@@ -11267,7 +11259,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IndexOutOfBoundsException
      */
     public static int sum(final byte[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) || fromIndex == toIndex) {
             return 0;
@@ -11306,7 +11298,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IndexOutOfBoundsException
      */
     public static int sum(final short[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) || fromIndex == toIndex) {
             return 0;
@@ -11370,7 +11362,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IndexOutOfBoundsException
      */
     public static long sumToLong(final int[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) || fromIndex == toIndex) {
             return 0;
@@ -11409,7 +11401,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IndexOutOfBoundsException
      */
     public static long sum(final long[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) || fromIndex == toIndex) {
             return 0;
@@ -11448,7 +11440,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IndexOutOfBoundsException
      */
     public static float sum(final float[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) || fromIndex == toIndex) {
             return 0f;
@@ -11487,7 +11479,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IndexOutOfBoundsException
      */
     public static double sumToDouble(final float[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) || fromIndex == toIndex) {
             return 0f;
@@ -11526,7 +11518,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IndexOutOfBoundsException
      */
     public static double sum(final double[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) || fromIndex == toIndex) {
             return 0d;
@@ -11566,7 +11558,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IndexOutOfBoundsException
      */
     public static double average(final char[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) || fromIndex == toIndex) {
             return 0d;
@@ -11600,7 +11592,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IndexOutOfBoundsException
      */
     public static double average(final byte[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) || fromIndex == toIndex) {
             return 0d;
@@ -11634,7 +11626,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IndexOutOfBoundsException
      */
     public static double average(final short[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) || fromIndex == toIndex) {
             return 0d;
@@ -11668,7 +11660,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IndexOutOfBoundsException
      */
     public static double average(final int[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) || fromIndex == toIndex) {
             return 0d;
@@ -11708,7 +11700,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IndexOutOfBoundsException
      */
     public static double average(final long[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) || fromIndex == toIndex) {
             return 0d;
@@ -11742,7 +11734,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IndexOutOfBoundsException
      */
     public static double average(final float[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) || fromIndex == toIndex) {
             return 0d;
@@ -11782,7 +11774,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IndexOutOfBoundsException
      */
     public static double average(final double[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) || fromIndex == toIndex) {
             return 0d;
@@ -11823,14 +11815,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      *
      * @param <T>
-     * @param <E>
      * @param a
      * @param func
      * @return
      * @throws IndexOutOfBoundsException
-     * @throws E the e
      */
-    public static <T, E extends Exception> int sumInt(final T[] a, final Throwables.ToIntFunction<? super T, E> func) throws IndexOutOfBoundsException, E {
+    public static <T> int sumInt(final T[] a, final ToIntFunction<? super T> func) throws IndexOutOfBoundsException {
         if (isEmpty(a)) {
             return 0;
         }
@@ -11840,18 +11830,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <T>
-     * @param <E>
      * @param a
      * @param fromIndex
      * @param toIndex
      * @param func
      * @return
-     * @throws E the e
      */
-    public static <T, E extends Exception> int sumInt(final T[] a, final int fromIndex, final int toIndex, final Throwables.ToIntFunction<? super T, E> func)
-            throws E {
-        checkFromToIndex(fromIndex, toIndex, len(a));
+    public static <T> int sumInt(final T[] a, final int fromIndex, final int toIndex, final ToIntFunction<? super T> func) {
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (fromIndex == toIndex) {
             return 0;
@@ -11882,17 +11870,15 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      *
      * @param <T>
-     * @param <E>
      * @param c
      * @param fromIndex
      * @param toIndex
      * @param func
      * @return
      * @throws IndexOutOfBoundsException
-     * @throws E the e
      */
-    public static <T, E extends Exception> int sumInt(final Collection<? extends T> c, final int fromIndex, final int toIndex,
-            final Throwables.ToIntFunction<? super T, E> func) throws IndexOutOfBoundsException, E {
+    public static <T> int sumInt(final Collection<? extends T> c, final int fromIndex, final int toIndex, final ToIntFunction<? super T> func)
+            throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, size(c));
 
         if (fromIndex == toIndex) {
@@ -11938,14 +11924,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <T>
-     * @param <E>
      * @param c
      * @param func
      * @return
-     * @throws E the e
      */
-    public static <T, E extends Exception> int sumInt(final Iterable<? extends T> c, final Throwables.ToIntFunction<? super T, E> func) throws E {
+    public static <T> int sumInt(final Iterable<? extends T> c, final ToIntFunction<? super T> func) {
         return Numbers.toIntExact(sumIntToLong(c, func));
     }
 
@@ -11961,14 +11946,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <T>
-     * @param <E>
      * @param c
      * @param func
      * @return
-     * @throws E the e
      */
-    public static <T, E extends Exception> long sumIntToLong(final Iterable<? extends T> c, final Throwables.ToIntFunction<? super T, E> func) throws E {
+    public static <T> long sumIntToLong(final Iterable<? extends T> c, final ToIntFunction<? super T> func) {
         if (c == null) {
             return 0;
         }
@@ -12008,14 +11992,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      *
      * @param <T>
-     * @param <E>
      * @param a
      * @param func
      * @return
      * @throws IndexOutOfBoundsException
-     * @throws E the e
      */
-    public static <T, E extends Exception> long sumLong(final T[] a, final Throwables.ToLongFunction<? super T, E> func) throws IndexOutOfBoundsException, E {
+    public static <T> long sumLong(final T[] a, final ToLongFunction<? super T> func) throws IndexOutOfBoundsException {
         if (isEmpty(a)) {
             return 0L;
         }
@@ -12025,18 +12007,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <T>
-     * @param <E>
      * @param a
      * @param fromIndex
      * @param toIndex
      * @param func
      * @return
-     * @throws E the e
      */
-    public static <T, E extends Exception> long sumLong(final T[] a, final int fromIndex, final int toIndex, final Throwables.ToLongFunction<? super T, E> func)
-            throws E {
-        checkFromToIndex(fromIndex, toIndex, len(a));
+    public static <T> long sumLong(final T[] a, final int fromIndex, final int toIndex, final ToLongFunction<? super T> func) {
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (fromIndex == toIndex) {
             return 0L;
@@ -12067,17 +12047,15 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      *
      * @param <T>
-     * @param <E>
      * @param c
      * @param fromIndex
      * @param toIndex
      * @param func
      * @return
      * @throws IndexOutOfBoundsException
-     * @throws E the e
      */
-    public static <T, E extends Exception> long sumLong(final Collection<? extends T> c, final int fromIndex, final int toIndex,
-            final Throwables.ToLongFunction<? super T, E> func) throws IndexOutOfBoundsException, E {
+    public static <T> long sumLong(final Collection<? extends T> c, final int fromIndex, final int toIndex, final ToLongFunction<? super T> func)
+            throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, size(c));
 
         if (fromIndex == toIndex) {
@@ -12123,14 +12101,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <T>
-     * @param <E>
      * @param c
      * @param func
      * @return
-     * @throws E the e
      */
-    public static <T, E extends Exception> long sumLong(final Iterable<? extends T> c, final Throwables.ToLongFunction<? super T, E> func) throws E {
+    public static <T> long sumLong(final Iterable<? extends T> c, final ToLongFunction<? super T> func) {
         if (c == null) {
             return 0L;
         }
@@ -12168,14 +12145,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <T>
-     * @param <E>
      * @param a
      * @param func
      * @return
-     * @throws E the e
      */
-    public static <T, E extends Exception> double sumDouble(final T[] a, final Throwables.ToDoubleFunction<? super T, E> func) throws E {
+    public static <T> double sumDouble(final T[] a, final ToDoubleFunction<? super T> func) {
         if (isEmpty(a)) {
             return 0D;
         }
@@ -12187,18 +12163,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      *
      * @param <T>
-     * @param <E>
      * @param a
      * @param fromIndex
      * @param toIndex
      * @param func
      * @return
      * @throws IndexOutOfBoundsException
-     * @throws E the e
      */
-    public static <T, E extends Exception> double sumDouble(final T[] a, final int fromIndex, final int toIndex,
-            final Throwables.ToDoubleFunction<? super T, E> func) throws IndexOutOfBoundsException, E {
-        checkFromToIndex(fromIndex, toIndex, len(a));
+    public static <T> double sumDouble(final T[] a, final int fromIndex, final int toIndex, final ToDoubleFunction<? super T> func)
+            throws IndexOutOfBoundsException {
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (fromIndex == toIndex) {
             return 0D;
@@ -12229,17 +12203,15 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      *
      * @param <T>
-     * @param <E>
      * @param c
      * @param fromIndex
      * @param toIndex
      * @param func
      * @return
      * @throws IndexOutOfBoundsException
-     * @throws E the e
      */
-    public static <T, E extends Exception> double sumDouble(final Collection<? extends T> c, final int fromIndex, final int toIndex,
-            final Throwables.ToDoubleFunction<? super T, E> func) throws IndexOutOfBoundsException, E {
+    public static <T> double sumDouble(final Collection<? extends T> c, final int fromIndex, final int toIndex, final ToDoubleFunction<? super T> func)
+            throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, size(c));
 
         if (fromIndex == toIndex) {
@@ -12285,14 +12257,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <T>
-     * @param <E>
      * @param c
      * @param func
      * @return
-     * @throws E the e
      */
-    public static <T, E extends Exception> double sumDouble(final Iterable<? extends T> c, final Throwables.ToDoubleFunction<? super T, E> func) throws E {
+    public static <T> double sumDouble(final Iterable<? extends T> c, final ToDoubleFunction<? super T> func) {
         if (c == null) {
             return 0D;
         }
@@ -12318,15 +12289,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <T>
-     * @param <E>
      * @param c
      * @param func
      * @return
-     * @throws E the e
      */
-    public static <T, E extends Exception> BigInteger sumBigInteger(final Iterable<? extends T> c, final Throwables.Function<? super T, BigInteger, E> func)
-            throws E {
+    public static <T> BigInteger sumBigInteger(final Iterable<? extends T> c, final Function<? super T, BigInteger> func) {
         if (c == null) {
             return BigInteger.ZERO;
         }
@@ -12357,15 +12326,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <T>
-     * @param <E>
      * @param c
      * @param func
      * @return
-     * @throws E the e
      */
-    public static <T, E extends Exception> BigDecimal sumBigDecimal(final Iterable<? extends T> c, final Throwables.Function<? super T, BigDecimal, E> func)
-            throws E {
+    public static <T> BigDecimal sumBigDecimal(final Iterable<? extends T> c, final Function<? super T, BigDecimal> func) {
         if (c == null) {
             return BigDecimal.ZERO;
         }
@@ -12413,13 +12380,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Returns {@code 0} if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
      *
      * @param <T>
-     * @param <E>
      * @param a
      * @param func
      * @return
-     * @throws E the e
      */
-    public static <T, E extends Exception> double averageInt(final T[] a, final Throwables.ToIntFunction<? super T, E> func) throws E {
+    public static <T> double averageInt(final T[] a, final ToIntFunction<? super T> func) {
         if (isEmpty(a)) {
             return 0d;
         }
@@ -12431,18 +12396,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Returns {@code 0} if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
      *
      * @param <T>
-     * @param <E>
      * @param a
      * @param fromIndex
      * @param toIndex
      * @param func
      * @return
      * @throws IndexOutOfBoundsException
-     * @throws E the e
      */
-    public static <T, E extends Exception> double averageInt(final T[] a, final int fromIndex, final int toIndex,
-            final Throwables.ToIntFunction<? super T, E> func) throws IndexOutOfBoundsException, E {
-        checkFromToIndex(fromIndex, toIndex, len(a));
+    public static <T> double averageInt(final T[] a, final int fromIndex, final int toIndex, final ToIntFunction<? super T> func)
+            throws IndexOutOfBoundsException {
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (fromIndex == toIndex) {
             return 0d;
@@ -12474,17 +12437,15 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Returns {@code 0} if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
      *
      * @param <T>
-     * @param <E>
      * @param c
      * @param fromIndex
      * @param toIndex
      * @param func
      * @return
      * @throws IndexOutOfBoundsException
-     * @throws E the e
      */
-    public static <T, E extends Exception> double averageInt(final Collection<? extends T> c, final int fromIndex, final int toIndex,
-            final Throwables.ToIntFunction<? super T, E> func) throws IndexOutOfBoundsException, E {
+    public static <T> double averageInt(final Collection<? extends T> c, final int fromIndex, final int toIndex, final ToIntFunction<? super T> func)
+            throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, size(c));
 
         if (fromIndex == toIndex) {
@@ -12533,13 +12494,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Returns {@code 0} if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
      *
      * @param <T>
-     * @param <E>
      * @param c
      * @param func
      * @return
-     * @throws E the e
      */
-    public static <T, E extends Exception> double averageInt(final Iterable<? extends T> c, final Throwables.ToIntFunction<? super T, E> func) throws E {
+    public static <T> double averageInt(final Iterable<? extends T> c, final ToIntFunction<? super T> func) {
         if (c == null) {
             return 0D;
         }
@@ -12583,13 +12542,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Returns {@code 0} if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
      *
      * @param <T>
-     * @param <E>
      * @param a
      * @param func
      * @return
-     * @throws E the e
      */
-    public static <T, E extends Exception> double averageLong(final T[] a, final Throwables.ToLongFunction<? super T, E> func) throws E {
+    public static <T> double averageLong(final T[] a, final ToLongFunction<? super T> func) {
         if (isEmpty(a)) {
             return 0d;
         }
@@ -12601,18 +12558,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Returns {@code 0} if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
      *
      * @param <T>
-     * @param <E>
      * @param a
      * @param fromIndex
      * @param toIndex
      * @param func
      * @return
      * @throws IndexOutOfBoundsException
-     * @throws E the e
      */
-    public static <T, E extends Exception> double averageLong(final T[] a, final int fromIndex, final int toIndex,
-            final Throwables.ToLongFunction<? super T, E> func) throws IndexOutOfBoundsException, E {
-        checkFromToIndex(fromIndex, toIndex, len(a));
+    public static <T> double averageLong(final T[] a, final int fromIndex, final int toIndex, final ToLongFunction<? super T> func)
+            throws IndexOutOfBoundsException {
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (fromIndex == toIndex) {
             return 0d;
@@ -12638,17 +12593,15 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Returns {@code 0} if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
      *
      * @param <T>
-     * @param <E>
      * @param c
      * @param fromIndex
      * @param toIndex
      * @param func
      * @return
      * @throws IndexOutOfBoundsException
-     * @throws E the e
      */
-    public static <T, E extends Exception> double averageLong(final Collection<? extends T> c, final int fromIndex, final int toIndex,
-            final Throwables.ToLongFunction<? super T, E> func) throws IndexOutOfBoundsException, E {
+    public static <T> double averageLong(final Collection<? extends T> c, final int fromIndex, final int toIndex, final ToLongFunction<? super T> func)
+            throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, size(c));
 
         if (fromIndex == toIndex) {
@@ -12673,13 +12626,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Returns {@code 0} if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
      *
      * @param <T>
-     * @param <E>
      * @param c
      * @param func
      * @return
-     * @throws E the e
      */
-    public static <T, E extends Exception> double averageLong(final Iterable<? extends T> c, final Throwables.ToLongFunction<? super T, E> func) throws E {
+    public static <T> double averageLong(final Iterable<? extends T> c, final ToLongFunction<? super T> func) {
         if (c == null) {
             return 0D;
         }
@@ -12724,14 +12675,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Returns {@code 0} if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
      *
      * @param <T>
-     * @param <E>
      * @param a
      * @param func
      * @return
-     * @throws E the e
-     * @see Iterables#averageDouble(Object[], Throwables.ToDoubleFunction)
+     * @see Iterables#averageDouble(Object[], ToDoubleFunction)
      */
-    public static <T, E extends Exception> double averageDouble(final T[] a, final Throwables.ToDoubleFunction<? super T, E> func) throws E {
+    public static <T> double averageDouble(final T[] a, final ToDoubleFunction<? super T> func) {
         if (isEmpty(a)) {
             return 0d;
         }
@@ -12743,19 +12692,17 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Returns {@code 0} if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
      *
      * @param <T>
-     * @param <E>
      * @param a
      * @param fromIndex
      * @param toIndex
      * @param func
      * @return
      * @throws IndexOutOfBoundsException
-     * @throws E the e
-     * @see Iterables#averageDouble(Object[], int, int, Throwables.ToDoubleFunction)
+     * @see Iterables#averageDouble(Object[], int, int, ToDoubleFunction)
      */
-    public static <T, E extends Exception> double averageDouble(final T[] a, final int fromIndex, final int toIndex,
-            final Throwables.ToDoubleFunction<? super T, E> func) throws IndexOutOfBoundsException, E {
-        checkFromToIndex(fromIndex, toIndex, len(a));
+    public static <T> double averageDouble(final T[] a, final int fromIndex, final int toIndex, final ToDoubleFunction<? super T> func)
+            throws IndexOutOfBoundsException {
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (fromIndex == toIndex) {
             return 0d;
@@ -12781,18 +12728,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Returns {@code 0} if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
      *
      * @param <T>
-     * @param <E>
      * @param c
      * @param fromIndex
      * @param toIndex
      * @param func
      * @return
      * @throws IndexOutOfBoundsException
-     * @throws E the e
-     * @see Iterables#averageDouble(Collection, int, int, Throwables.ToDoubleFunction)
+     * @see Iterables#averageDouble(Collection, int, int, ToDoubleFunction)
      */
-    public static <T, E extends Exception> double averageDouble(final Collection<? extends T> c, final int fromIndex, final int toIndex,
-            final Throwables.ToDoubleFunction<? super T, E> func) throws IndexOutOfBoundsException, E {
+    public static <T> double averageDouble(final Collection<? extends T> c, final int fromIndex, final int toIndex, final ToDoubleFunction<? super T> func)
+            throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, size(c));
 
         if (fromIndex == toIndex) {
@@ -12818,14 +12763,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Returns {@code 0} if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
      *
      * @param <T>
-     * @param <E>
      * @param c
      * @param func
      * @return
-     * @throws E the e
-     * @see Iterables#averageDouble(Iterable, Throwables.ToDoubleFunction)
+     * @see Iterables#averageDouble(Iterable, ToDoubleFunction)
      */
-    public static <T, E extends Exception> double averageDouble(final Iterable<? extends T> c, final Throwables.ToDoubleFunction<? super T, E> func) throws E {
+    public static <T> double averageDouble(final Iterable<? extends T> c, final ToDoubleFunction<? super T> func) {
         if (c == null) {
             return 0d;
         }
@@ -12844,15 +12787,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <T>
-     * @param <E>
      * @param c
      * @param func
      * @return
-     * @throws E the e
      */
-    public static <T, E extends Exception> BigDecimal averageBigInteger(final Iterable<? extends T> c, final Throwables.Function<? super T, BigInteger, E> func)
-            throws E {
+    public static <T> BigDecimal averageBigInteger(final Iterable<? extends T> c, final Function<? super T, BigInteger> func) {
         if (c == null) {
             return BigDecimal.ZERO;
         }
@@ -12885,15 +12826,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
      * @param <T>
-     * @param <E>
      * @param c
      * @param func
      * @return
-     * @throws E the e
      */
-    public static <T, E extends Exception> BigDecimal averageBigDecimal(final Iterable<? extends T> c, final Throwables.Function<? super T, BigDecimal, E> func)
-            throws E {
+    public static <T> BigDecimal averageBigDecimal(final Iterable<? extends T> c, final Function<? super T, BigDecimal> func) {
         if (c == null) {
             return BigDecimal.ZERO;
         }
@@ -13805,16 +13744,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param <T>
      * @param <R>
-     * @param <E>
      * @param a
      * @param valueExtractor
      * @param defaultValue
      * @return
-     * @throws E
      */
     @Beta
-    public static <T, R extends Comparable<? super R>, E extends Exception> R minOrDefaultIfEmpty(final T[] a,
-            final Throwables.Function<? super T, ? extends R, E> valueExtractor, final R defaultValue) throws E {
+    public static <T, R extends Comparable<? super R>> R minOrDefaultIfEmpty(final T[] a, final Function<? super T, ? extends R> valueExtractor,
+            final R defaultValue) {
         if (isEmpty(a)) {
             return defaultValue;
         }
@@ -13838,15 +13775,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param <T>
      * @param <R>
-     * @param <E>
      * @param c
      * @param valueExtractor
      * @param defaultValue
      * @return
-     * @throws E
      */
-    public static <T, R extends Comparable<? super R>, E extends Exception> R minOrDefaultIfEmpty(final Iterable<? extends T> c,
-            final Throwables.Function<? super T, ? extends R, E> valueExtractor, final R defaultValue) throws E {
+    public static <T, R extends Comparable<? super R>> R minOrDefaultIfEmpty(final Iterable<? extends T> c,
+            final Function<? super T, ? extends R> valueExtractor, final R defaultValue) {
         if (c == null) {
             return defaultValue;
         }
@@ -13859,15 +13794,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param <T>
      * @param <R>
-     * @param <E>
      * @param iter
      * @param valueExtractor
      * @param defaultValue
      * @return
-     * @throws E
      */
-    public static <T, R extends Comparable<? super R>, E extends Exception> R minOrDefaultIfEmpty(final Iterator<? extends T> iter,
-            final Throwables.Function<? super T, ? extends R, E> valueExtractor, final R defaultValue) throws E {
+    public static <T, R extends Comparable<? super R>> R minOrDefaultIfEmpty(final Iterator<? extends T> iter,
+            final Function<? super T, ? extends R> valueExtractor, final R defaultValue) {
         if (iter == null || iter.hasNext() == false) {
             return defaultValue;
         }
@@ -13890,16 +13823,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Returns the minimum {@code int} value extracted from the specified array {@code a} by {@code valueExtractor}, or {@code defaultValue} if {@code a} is null or empty.
      *
      * @param <T>
-     * @param <E>
      * @param a
      * @param valueExtractor
      * @param defaultValue
      * @return
-     * @throws E
      */
     @Beta
-    public static <T, E extends Exception> int minIntOrDefaultIfEmpty(final T[] a, final Throwables.ToIntFunction<? super T, E> valueExtractor,
-            final int defaultValue) throws E {
+    public static <T> int minIntOrDefaultIfEmpty(final T[] a, final ToIntFunction<? super T> valueExtractor, final int defaultValue) {
         if (isEmpty(a)) {
             return defaultValue;
         }
@@ -13922,16 +13852,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Returns the minimum {@code int} value extracted from the specified iterable {@code c} by {@code valueExtractor}, or {@code defaultValue} if {@code a} is null or empty.
      *
      * @param <T>
-     * @param <E>
      * @param c
      * @param valueExtractor
      * @param defaultValue
      * @return
-     * @throws E
      */
     @Beta
-    public static <T, E extends Exception> int minIntOrDefaultIfEmpty(final Iterable<? extends T> c,
-            final Throwables.ToIntFunction<? super T, E> valueExtractor, final int defaultValue) throws E {
+    public static <T> int minIntOrDefaultIfEmpty(final Iterable<? extends T> c, final ToIntFunction<? super T> valueExtractor, final int defaultValue) {
         if (c == null) {
             return defaultValue;
         }
@@ -13943,16 +13870,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Returns the minimum {@code int} value extracted from the specified iterator {@code iter} by {@code valueExtractor}, or {@code defaultValue} if {@code a} is null or empty.
      *
      * @param <T>
-     * @param <E>
      * @param iter
      * @param valueExtractor
      * @param defaultValue
      * @return
-     * @throws E
      */
     @Beta
-    public static <T, E extends Exception> int minIntOrDefaultIfEmpty(final Iterator<? extends T> iter,
-            final Throwables.ToIntFunction<? super T, E> valueExtractor, final int defaultValue) throws E {
+    public static <T> int minIntOrDefaultIfEmpty(final Iterator<? extends T> iter, final ToIntFunction<? super T> valueExtractor, final int defaultValue) {
         if (iter == null || iter.hasNext() == false) {
             return defaultValue;
         }
@@ -13975,16 +13899,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Returns the minimum {@code long} value extracted from the specified array {@code a} by {@code valueExtractor}, or {@code defaultValue} if {@code a} is null or empty.
      *
      * @param <T>
-     * @param <E>
      * @param a
      * @param valueExtractor
      * @param defaultValue
      * @return
-     * @throws E
      */
     @Beta
-    public static <T, E extends Exception> long minLongOrDefaultIfEmpty(final T[] a, final Throwables.ToLongFunction<? super T, E> valueExtractor,
-            final long defaultValue) throws E {
+    public static <T> long minLongOrDefaultIfEmpty(final T[] a, final ToLongFunction<? super T> valueExtractor, final long defaultValue) {
         if (isEmpty(a)) {
             return defaultValue;
         }
@@ -14007,16 +13928,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Returns the minimum {@code long} value extracted from the specified iterable {@code c} by {@code valueExtractor}, or {@code defaultValue} if {@code a} is null or empty.
      *
      * @param <T>
-     * @param <E>
      * @param c
      * @param valueExtractor
      * @param defaultValue
      * @return
-     * @throws E
      */
     @Beta
-    public static <T, E extends Exception> long minLongOrDefaultIfEmpty(final Iterable<? extends T> c,
-            final Throwables.ToLongFunction<? super T, E> valueExtractor, final long defaultValue) throws E {
+    public static <T> long minLongOrDefaultIfEmpty(final Iterable<? extends T> c, final ToLongFunction<? super T> valueExtractor, final long defaultValue) {
         if (c == null) {
             return defaultValue;
         }
@@ -14028,16 +13946,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Returns the minimum {@code long} value extracted from the specified iterator {@code iter} by {@code valueExtractor}, or {@code defaultValue} if {@code a} is null or empty.
      *
      * @param <T>
-     * @param <E>
      * @param iter
      * @param valueExtractor
      * @param defaultValue
      * @return
-     * @throws E
      */
     @Beta
-    public static <T, E extends Exception> long minLongOrDefaultIfEmpty(final Iterator<? extends T> iter,
-            final Throwables.ToLongFunction<? super T, E> valueExtractor, final long defaultValue) throws E {
+    public static <T> long minLongOrDefaultIfEmpty(final Iterator<? extends T> iter, final ToLongFunction<? super T> valueExtractor, final long defaultValue) {
         if (iter == null || iter.hasNext() == false) {
             return defaultValue;
         }
@@ -14060,16 +13975,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Returns the minimum {@code double} value extracted from the specified array {@code a} by {@code valueExtractor}, or {@code defaultValue} if {@code a} is null or empty.
      *
      * @param <T>
-     * @param <E>
      * @param a
      * @param valueExtractor
      * @param defaultValue
      * @return
-     * @throws E
      */
     @Beta
-    public static <T, E extends Exception> double minDoubleOrDefaultIfEmpty(final T[] a, final Throwables.ToDoubleFunction<? super T, E> valueExtractor,
-            final double defaultValue) throws E {
+    public static <T> double minDoubleOrDefaultIfEmpty(final T[] a, final ToDoubleFunction<? super T> valueExtractor, final double defaultValue) {
         if (isEmpty(a)) {
             return defaultValue;
         }
@@ -14092,16 +14004,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Returns the minimum {@code double} value extracted from the specified iterable {@code c} by {@code valueExtractor}, or {@code defaultValue} if {@code a} is null or empty.
      *
      * @param <T>
-     * @param <E>
      * @param c
      * @param valueExtractor
      * @param defaultValue
      * @return
-     * @throws E
      */
     @Beta
-    public static <T, E extends Exception> double minDoubleOrDefaultIfEmpty(final Iterable<? extends T> c,
-            final Throwables.ToDoubleFunction<? super T, E> valueExtractor, final double defaultValue) throws E {
+    public static <T> double minDoubleOrDefaultIfEmpty(final Iterable<? extends T> c, final ToDoubleFunction<? super T> valueExtractor,
+            final double defaultValue) {
         if (c == null) {
             return defaultValue;
         }
@@ -14113,16 +14023,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Returns the minimum {@code double} value extracted from the specified iterator {@code iter} by {@code valueExtractor}, or {@code defaultValue} if {@code a} is null or empty.
      *
      * @param <T>
-     * @param <E>
      * @param iter
      * @param valueExtractor
      * @param defaultValue
      * @return
-     * @throws E
      */
     @Beta
-    public static <T, E extends Exception> double minDoubleOrDefaultIfEmpty(final Iterator<? extends T> iter,
-            final Throwables.ToDoubleFunction<? super T, E> valueExtractor, final double defaultValue) throws E {
+    public static <T> double minDoubleOrDefaultIfEmpty(final Iterator<? extends T> iter, final ToDoubleFunction<? super T> valueExtractor,
+            final double defaultValue) {
         if (iter == null || iter.hasNext() == false) {
             return defaultValue;
         }
@@ -15131,16 +15039,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param <T>
      * @param <R>
-     * @param <E>
      * @param a
      * @param valueExtractor
      * @param defaultValue
      * @return
-     * @throws E
      */
     @Beta
-    public static <T, R extends Comparable<? super R>, E extends Exception> R maxOrDefaultIfEmpty(final T[] a,
-            final Throwables.Function<? super T, ? extends R, E> valueExtractor, final R defaultValue) throws E {
+    public static <T, R extends Comparable<? super R>> R maxOrDefaultIfEmpty(final T[] a, final Function<? super T, ? extends R> valueExtractor,
+            final R defaultValue) {
         if (isEmpty(a)) {
             return defaultValue;
         }
@@ -15164,15 +15070,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param <T>
      * @param <R>
-     * @param <E>
      * @param c
      * @param valueExtractor
      * @param defaultValue
      * @return
-     * @throws E
      */
-    public static <T, R extends Comparable<? super R>, E extends Exception> R maxOrDefaultIfEmpty(final Iterable<? extends T> c,
-            final Throwables.Function<? super T, ? extends R, E> valueExtractor, final R defaultValue) throws E {
+    public static <T, R extends Comparable<? super R>> R maxOrDefaultIfEmpty(final Iterable<? extends T> c,
+            final Function<? super T, ? extends R> valueExtractor, final R defaultValue) {
         if (c == null) {
             return defaultValue;
         }
@@ -15185,15 +15089,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param <T>
      * @param <R>
-     * @param <E>
      * @param iter
      * @param valueExtractor
      * @param defaultValue
      * @return
-     * @throws E
      */
-    public static <T, R extends Comparable<? super R>, E extends Exception> R maxOrDefaultIfEmpty(final Iterator<? extends T> iter,
-            final Throwables.Function<? super T, ? extends R, E> valueExtractor, final R defaultValue) throws E {
+    public static <T, R extends Comparable<? super R>> R maxOrDefaultIfEmpty(final Iterator<? extends T> iter,
+            final Function<? super T, ? extends R> valueExtractor, final R defaultValue) {
         if (iter == null || iter.hasNext() == false) {
             return defaultValue;
         }
@@ -15216,16 +15118,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Returns the maximum {@code int} value extracted from the specified array {@code a} by {@code valueExtractor}, or {@code defaultValue} if {@code a} is null or empty.
      *
      * @param <T>
-     * @param <E>
      * @param a
      * @param valueExtractor
      * @param defaultValue
      * @return
-     * @throws E
      */
     @Beta
-    public static <T, E extends Exception> int maxIntOrDefaultIfEmpty(final T[] a, final Throwables.ToIntFunction<? super T, E> valueExtractor,
-            final int defaultValue) throws E {
+    public static <T> int maxIntOrDefaultIfEmpty(final T[] a, final ToIntFunction<? super T> valueExtractor, final int defaultValue) {
         if (isEmpty(a)) {
             return defaultValue;
         }
@@ -15248,16 +15147,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Returns the maximum {@code int} value extracted from the specified iterable {@code c} by {@code valueExtractor}, or {@code defaultValue} if {@code a} is null or empty.
      *
      * @param <T>
-     * @param <E>
      * @param c
      * @param valueExtractor
      * @param defaultValue
      * @return
-     * @throws E
      */
     @Beta
-    public static <T, E extends Exception> int maxIntOrDefaultIfEmpty(final Iterable<? extends T> c,
-            final Throwables.ToIntFunction<? super T, E> valueExtractor, final int defaultValue) throws E {
+    public static <T> int maxIntOrDefaultIfEmpty(final Iterable<? extends T> c, final ToIntFunction<? super T> valueExtractor, final int defaultValue) {
         if (c == null) {
             return defaultValue;
         }
@@ -15269,16 +15165,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Returns the maximum {@code int} value extracted from the specified iterator {@code iter} by {@code valueExtractor}, or {@code defaultValue} if {@code a} is null or empty.
      *
      * @param <T>
-     * @param <E>
      * @param iter
      * @param valueExtractor
      * @param defaultValue
      * @return
-     * @throws E
      */
     @Beta
-    public static <T, E extends Exception> int maxIntOrDefaultIfEmpty(final Iterator<? extends T> iter,
-            final Throwables.ToIntFunction<? super T, E> valueExtractor, final int defaultValue) throws E {
+    public static <T> int maxIntOrDefaultIfEmpty(final Iterator<? extends T> iter, final ToIntFunction<? super T> valueExtractor, final int defaultValue) {
         if (iter == null || iter.hasNext() == false) {
             return defaultValue;
         }
@@ -15301,16 +15194,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Returns the maximum {@code long} value extracted from the specified array {@code a} by {@code valueExtractor}, or {@code defaultValue} if {@code a} is null or empty.
      *
      * @param <T>
-     * @param <E>
      * @param a
      * @param valueExtractor
      * @param defaultValue
      * @return
-     * @throws E
      */
     @Beta
-    public static <T, E extends Exception> long maxLongOrDefaultIfEmpty(final T[] a, final Throwables.ToLongFunction<? super T, E> valueExtractor,
-            final long defaultValue) throws E {
+    public static <T> long maxLongOrDefaultIfEmpty(final T[] a, final ToLongFunction<? super T> valueExtractor, final long defaultValue) {
         if (isEmpty(a)) {
             return defaultValue;
         }
@@ -15333,16 +15223,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Returns the maximum {@code long} value extracted from the specified iterable {@code c} by {@code valueExtractor}, or {@code defaultValue} if {@code a} is null or empty.
      *
      * @param <T>
-     * @param <E>
      * @param c
      * @param valueExtractor
      * @param defaultValue
      * @return
-     * @throws E
      */
     @Beta
-    public static <T, E extends Exception> long maxLongOrDefaultIfEmpty(final Iterable<? extends T> c,
-            final Throwables.ToLongFunction<? super T, E> valueExtractor, final long defaultValue) throws E {
+    public static <T> long maxLongOrDefaultIfEmpty(final Iterable<? extends T> c, final ToLongFunction<? super T> valueExtractor, final long defaultValue) {
         if (c == null) {
             return defaultValue;
         }
@@ -15354,16 +15241,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Returns the maximum {@code long} value extracted from the specified iterator {@code iter} by {@code valueExtractor}, or {@code defaultValue} if {@code a} is null or empty.
      *
      * @param <T>
-     * @param <E>
      * @param iter
      * @param valueExtractor
      * @param defaultValue
      * @return
-     * @throws E
      */
     @Beta
-    public static <T, E extends Exception> long maxLongOrDefaultIfEmpty(final Iterator<? extends T> iter,
-            final Throwables.ToLongFunction<? super T, E> valueExtractor, final long defaultValue) throws E {
+    public static <T> long maxLongOrDefaultIfEmpty(final Iterator<? extends T> iter, final ToLongFunction<? super T> valueExtractor, final long defaultValue) {
         if (iter == null || iter.hasNext() == false) {
             return defaultValue;
         }
@@ -15386,16 +15270,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Returns the maximum {@code double} value extracted from the specified array {@code a} by {@code valueExtractor}, or {@code defaultValue} if {@code a} is null or empty.
      *
      * @param <T>
-     * @param <E>
      * @param a
      * @param valueExtractor
      * @param defaultValue
      * @return
-     * @throws E
      */
     @Beta
-    public static <T, E extends Exception> double maxDoubleOrDefaultIfEmpty(final T[] a, final Throwables.ToDoubleFunction<? super T, E> valueExtractor,
-            final double defaultValue) throws E {
+    public static <T> double maxDoubleOrDefaultIfEmpty(final T[] a, final ToDoubleFunction<? super T> valueExtractor, final double defaultValue) {
         if (isEmpty(a)) {
             return defaultValue;
         }
@@ -15418,16 +15299,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Returns the maximum {@code double} value extracted from the specified iterable {@code c} by {@code valueExtractor}, or {@code defaultValue} if {@code a} is null or empty.
      *
      * @param <T>
-     * @param <E>
      * @param c
      * @param valueExtractor
      * @param defaultValue
      * @return
-     * @throws E
      */
     @Beta
-    public static <T, E extends Exception> double maxDoubleOrDefaultIfEmpty(final Iterable<? extends T> c,
-            final Throwables.ToDoubleFunction<? super T, E> valueExtractor, final double defaultValue) throws E {
+    public static <T> double maxDoubleOrDefaultIfEmpty(final Iterable<? extends T> c, final ToDoubleFunction<? super T> valueExtractor,
+            final double defaultValue) {
         if (c == null) {
             return defaultValue;
         }
@@ -15439,16 +15318,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Returns the maximum {@code double} value extracted from the specified iterator {@code iter} by {@code valueExtractor}, or {@code defaultValue} if {@code a} is null or empty.
      *
      * @param <T>
-     * @param <E>
      * @param iter
      * @param valueExtractor
      * @param defaultValue
      * @return
-     * @throws E
      */
     @Beta
-    public static <T, E extends Exception> double maxDoubleOrDefaultIfEmpty(final Iterator<? extends T> iter,
-            final Throwables.ToDoubleFunction<? super T, E> valueExtractor, final double defaultValue) throws E {
+    public static <T> double maxDoubleOrDefaultIfEmpty(final Iterator<? extends T> iter, final ToDoubleFunction<? super T> valueExtractor,
+            final double defaultValue) {
         if (iter == null || iter.hasNext() == false) {
             return defaultValue;
         }
@@ -17925,6 +17802,7986 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
+     *
+     * @param a
+     * @param filter
+     * @return
+     * @throws IllegalArgumentException
+     */
+    public static boolean[] filter(final boolean[] a, final BooleanPredicate filter) throws IllegalArgumentException {
+        checkArgNotNull(filter, "filter"); //NOSONAR
+
+        if (isEmpty(a)) {
+            return EMPTY_BOOLEAN_ARRAY;
+        }
+
+        return filter(a, 0, a.length, filter);
+    }
+
+    /**
+     *
+     *
+     * @param a
+     * @param max
+     * @param filter
+     * @return
+     * @throws IllegalArgumentException
+     */
+    public static boolean[] filter(final boolean[] a, final int max, final BooleanPredicate filter) throws IllegalArgumentException {
+        checkArgNotNull(filter, "filter");
+
+        if (isEmpty(a)) {
+            return EMPTY_BOOLEAN_ARRAY;
+        }
+
+        return filter(a, 0, a.length, filter, max);
+    }
+
+    /**
+     *
+     *
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param filter
+     * @return
+     */
+    public static boolean[] filter(final boolean[] a, final int fromIndex, final int toIndex, final BooleanPredicate filter) {
+        return filter(a, fromIndex, toIndex, filter, Integer.MAX_VALUE);
+    }
+
+    /**
+     * Mostly it's designed for one-step operation to complete the operation in one step.
+     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
+     *
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param filter
+     * @param max maximum return result.
+     * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
+     */
+    public static boolean[] filter(final boolean[] a, final int fromIndex, final int toIndex, final BooleanPredicate filter, final int max)
+            throws IllegalArgumentException, IndexOutOfBoundsException {
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
+        checkArgNotNull(filter, "filter");
+
+        if (isEmpty(a) || fromIndex == toIndex) {
+            return EMPTY_BOOLEAN_ARRAY;
+        }
+
+        boolean[] result = new boolean[(toIndex - fromIndex) / 2];
+        int len = result.length;
+        int count = 0;
+
+        for (int i = fromIndex, cnt = 0; i < toIndex && cnt < max; i++) {
+            if (filter.test(a[i])) {
+                if (count == len) {
+                    result = copyOf(result, toIndex - fromIndex);
+                    len = result.length;
+                }
+
+                result[count++] = a[i];
+            }
+        }
+
+        return result.length == count ? result : copyOfRange(result, 0, count);
+    }
+
+    /**
+     *
+     *
+     * @param a
+     * @param filter
+     * @return
+     * @throws IllegalArgumentException
+     */
+    public static char[] filter(final char[] a, final CharPredicate filter) throws IllegalArgumentException {
+        checkArgNotNull(filter, "filter");
+
+        if (isEmpty(a)) {
+            return EMPTY_CHAR_ARRAY;
+        }
+
+        return filter(a, 0, a.length, filter);
+    }
+
+    /**
+     *
+     *
+     * @param a
+     * @param filter
+     * @param max
+     * @return
+     * @throws IllegalArgumentException
+     */
+    public static char[] filter(final char[] a, final CharPredicate filter, final int max) throws IllegalArgumentException {
+        checkArgNotNull(filter, "filter");
+
+        if (isEmpty(a)) {
+            return EMPTY_CHAR_ARRAY;
+        }
+
+        return filter(a, 0, a.length, filter, max);
+    }
+
+    /**
+     *
+     *
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param filter
+     * @return
+     */
+    public static char[] filter(final char[] a, final int fromIndex, final int toIndex, final CharPredicate filter) {
+        return filter(a, fromIndex, toIndex, filter, Integer.MAX_VALUE);
+    }
+
+    /**
+     * Mostly it's designed for one-step operation to complete the operation in one step.
+     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
+     *
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param filter
+     * @param max maximum return result.
+     * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
+     */
+    public static char[] filter(final char[] a, final int fromIndex, final int toIndex, final CharPredicate filter, final int max)
+            throws IllegalArgumentException, IndexOutOfBoundsException {
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
+        checkArgNotNull(filter, "filter");
+
+        if (isEmpty(a) || fromIndex == toIndex) {
+            return EMPTY_CHAR_ARRAY;
+        }
+
+        char[] result = new char[(toIndex - fromIndex) / 2];
+        int len = result.length;
+        int count = 0;
+
+        for (int i = fromIndex, cnt = 0; i < toIndex && cnt < max; i++) {
+            if (filter.test(a[i])) {
+                if (count == len) {
+                    result = copyOf(result, toIndex - fromIndex);
+                    len = result.length;
+                }
+
+                result[count++] = a[i];
+            }
+        }
+
+        return result.length == count ? result : copyOfRange(result, 0, count);
+    }
+
+    /**
+     *
+     *
+     * @param a
+     * @param filter
+     * @return
+     * @throws IllegalArgumentException
+     */
+    public static byte[] filter(final byte[] a, final BytePredicate filter) throws IllegalArgumentException {
+        checkArgNotNull(filter, "filter");
+
+        if (isEmpty(a)) {
+            return EMPTY_BYTE_ARRAY;
+        }
+
+        return filter(a, 0, a.length, filter);
+    }
+
+    /**
+     *
+     *
+     * @param a
+     * @param filter
+     * @param max
+     * @return
+     * @throws IllegalArgumentException
+     */
+    public static byte[] filter(final byte[] a, final BytePredicate filter, final int max) throws IllegalArgumentException {
+        checkArgNotNull(filter, "filter");
+
+        if (isEmpty(a)) {
+            return EMPTY_BYTE_ARRAY;
+        }
+
+        return filter(a, 0, a.length, filter, max);
+    }
+
+    /**
+     *
+     *
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param filter
+     * @return
+     */
+    public static byte[] filter(final byte[] a, final int fromIndex, final int toIndex, final BytePredicate filter) {
+        return filter(a, fromIndex, toIndex, filter, Integer.MAX_VALUE);
+    }
+
+    /**
+     * Mostly it's designed for one-step operation to complete the operation in one step.
+     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
+     *
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param filter
+     * @param max maximum return result.
+     * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
+     */
+    public static byte[] filter(final byte[] a, final int fromIndex, final int toIndex, final BytePredicate filter, final int max)
+            throws IllegalArgumentException, IndexOutOfBoundsException {
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
+        checkArgNotNull(filter, "filter");
+
+        if (isEmpty(a) || fromIndex == toIndex) {
+            return EMPTY_BYTE_ARRAY;
+        }
+
+        byte[] result = new byte[(toIndex - fromIndex) / 2];
+        int len = result.length;
+        int count = 0;
+
+        for (int i = fromIndex, cnt = 0; i < toIndex && cnt < max; i++) {
+            if (filter.test(a[i])) {
+                if (count == len) {
+                    result = copyOf(result, toIndex - fromIndex);
+                    len = result.length;
+                }
+
+                result[count++] = a[i];
+            }
+        }
+
+        return result.length == count ? result : copyOfRange(result, 0, count);
+    }
+
+    /**
+     *
+     *
+     * @param a
+     * @param filter
+     * @return
+     * @throws IllegalArgumentException
+     */
+    public static short[] filter(final short[] a, final ShortPredicate filter) throws IllegalArgumentException {
+        checkArgNotNull(filter, "filter");
+
+        if (isEmpty(a)) {
+            return EMPTY_SHORT_ARRAY;
+        }
+
+        return filter(a, 0, a.length, filter);
+    }
+
+    /**
+     *
+     *
+     * @param a
+     * @param filter
+     * @param max
+     * @return
+     * @throws IllegalArgumentException
+     */
+    public static short[] filter(final short[] a, final ShortPredicate filter, final int max) throws IllegalArgumentException {
+        checkArgNotNull(filter, "filter");
+
+        if (isEmpty(a)) {
+            return EMPTY_SHORT_ARRAY;
+        }
+
+        return filter(a, 0, a.length, filter, max);
+    }
+
+    /**
+     *
+     *
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param filter
+     * @return
+     */
+    public static short[] filter(final short[] a, final int fromIndex, final int toIndex, final ShortPredicate filter) {
+        return filter(a, fromIndex, toIndex, filter, Integer.MAX_VALUE);
+    }
+
+    /**
+     * Mostly it's designed for one-step operation to complete the operation in one step.
+     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
+     *
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param filter
+     * @param max maximum return result.
+     * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
+     */
+    public static short[] filter(final short[] a, final int fromIndex, final int toIndex, final ShortPredicate filter, final int max)
+            throws IllegalArgumentException, IndexOutOfBoundsException {
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
+        checkArgNotNull(filter, "filter");
+
+        if (isEmpty(a) || fromIndex == toIndex) {
+            return EMPTY_SHORT_ARRAY;
+        }
+
+        short[] result = new short[(toIndex - fromIndex) / 2];
+        int len = result.length;
+        int count = 0;
+
+        for (int i = fromIndex, cnt = 0; i < toIndex && cnt < max; i++) {
+            if (filter.test(a[i])) {
+                if (count == len) {
+                    result = copyOf(result, toIndex - fromIndex);
+                    len = result.length;
+                }
+
+                result[count++] = a[i];
+            }
+        }
+
+        return result.length == count ? result : copyOfRange(result, 0, count);
+    }
+
+    /**
+     *
+     *
+     * @param a
+     * @param filter
+     * @return
+     * @throws IllegalArgumentException
+     */
+    public static int[] filter(final int[] a, final IntPredicate filter) throws IllegalArgumentException {
+        checkArgNotNull(filter, "filter");
+
+        if (isEmpty(a)) {
+            return EMPTY_INT_ARRAY;
+        }
+
+        return filter(a, 0, a.length, filter);
+    }
+
+    /**
+     *
+     *
+     * @param a
+     * @param filter
+     * @param max
+     * @return
+     * @throws IllegalArgumentException
+     */
+    public static int[] filter(final int[] a, final IntPredicate filter, final int max) throws IllegalArgumentException {
+        checkArgNotNull(filter, "filter");
+
+        if (isEmpty(a)) {
+            return EMPTY_INT_ARRAY;
+        }
+
+        return filter(a, 0, a.length, filter, max);
+    }
+
+    /**
+     *
+     *
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param filter
+     * @return
+     */
+    public static int[] filter(final int[] a, final int fromIndex, final int toIndex, final IntPredicate filter) {
+        return filter(a, fromIndex, toIndex, filter, Integer.MAX_VALUE);
+    }
+
+    /**
+     * Mostly it's designed for one-step operation to complete the operation in one step.
+     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
+     *
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param filter
+     * @param max maximum return result.
+     * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
+     */
+    public static int[] filter(final int[] a, final int fromIndex, final int toIndex, final IntPredicate filter, final int max)
+            throws IllegalArgumentException, IndexOutOfBoundsException {
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
+        checkArgNotNull(filter, "filter");
+
+        if (isEmpty(a) || fromIndex == toIndex) {
+            return EMPTY_INT_ARRAY;
+        }
+
+        int[] result = new int[(toIndex - fromIndex) / 2];
+        int len = result.length;
+        int count = 0;
+
+        for (int i = fromIndex, cnt = 0; i < toIndex && cnt < max; i++) {
+            if (filter.test(a[i])) {
+                if (count == len) {
+                    result = copyOf(result, toIndex - fromIndex);
+                    len = result.length;
+                }
+
+                result[count++] = a[i];
+            }
+        }
+
+        return result.length == count ? result : copyOfRange(result, 0, count);
+    }
+
+    /**
+     *
+     *
+     * @param a
+     * @param filter
+     * @return
+     * @throws IllegalArgumentException
+     */
+    public static long[] filter(final long[] a, final LongPredicate filter) throws IllegalArgumentException {
+        checkArgNotNull(filter, "filter");
+
+        if (isEmpty(a)) {
+            return EMPTY_LONG_ARRAY;
+        }
+
+        return filter(a, 0, a.length, filter);
+    }
+
+    /**
+     *
+     *
+     * @param a
+     * @param filter
+     * @param max
+     * @return
+     * @throws IllegalArgumentException
+     */
+    public static long[] filter(final long[] a, final LongPredicate filter, final int max) throws IllegalArgumentException {
+        checkArgNotNull(filter, "filter");
+
+        if (isEmpty(a)) {
+            return EMPTY_LONG_ARRAY;
+        }
+
+        return filter(a, 0, a.length, filter, max);
+    }
+
+    /**
+     *
+     *
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param filter
+     * @return
+     */
+    public static long[] filter(final long[] a, final int fromIndex, final int toIndex, final LongPredicate filter) {
+        return filter(a, fromIndex, toIndex, filter, Integer.MAX_VALUE);
+    }
+
+    /**
+     * Mostly it's designed for one-step operation to complete the operation in one step.
+     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
+     *
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param filter
+     * @param max maximum return result.
+     * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
+     */
+    public static long[] filter(final long[] a, final int fromIndex, final int toIndex, final LongPredicate filter, final int max)
+            throws IllegalArgumentException, IndexOutOfBoundsException {
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
+        checkArgNotNull(filter, "filter");
+
+        if (isEmpty(a) || fromIndex == toIndex) {
+            return EMPTY_LONG_ARRAY;
+        }
+
+        long[] result = new long[(toIndex - fromIndex) / 2];
+        int len = result.length;
+        int count = 0;
+
+        for (int i = fromIndex, cnt = 0; i < toIndex && cnt < max; i++) {
+            if (filter.test(a[i])) {
+                if (count == len) {
+                    result = copyOf(result, toIndex - fromIndex);
+                    len = result.length;
+                }
+
+                result[count++] = a[i];
+            }
+        }
+
+        return result.length == count ? result : copyOfRange(result, 0, count);
+    }
+
+    /**
+     *
+     *
+     * @param a
+     * @param filter
+     * @return
+     * @throws IllegalArgumentException
+     */
+    public static float[] filter(final float[] a, final FloatPredicate filter) throws IllegalArgumentException {
+        checkArgNotNull(filter, "filter");
+
+        if (isEmpty(a)) {
+            return EMPTY_FLOAT_ARRAY;
+        }
+
+        return filter(a, 0, a.length, filter);
+    }
+
+    /**
+     *
+     *
+     * @param a
+     * @param filter
+     * @param max
+     * @return
+     * @throws IllegalArgumentException
+     */
+    public static float[] filter(final float[] a, final FloatPredicate filter, final int max) throws IllegalArgumentException {
+        checkArgNotNull(filter, "filter");
+
+        if (isEmpty(a)) {
+            return EMPTY_FLOAT_ARRAY;
+        }
+
+        return filter(a, 0, a.length, filter, max);
+    }
+
+    /**
+     *
+     *
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param filter
+     * @return
+     */
+    public static float[] filter(final float[] a, final int fromIndex, final int toIndex, final FloatPredicate filter) {
+        return filter(a, fromIndex, toIndex, filter, Integer.MAX_VALUE);
+    }
+
+    /**
+     * Mostly it's designed for one-step operation to complete the operation in one step.
+     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
+     *
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param filter
+     * @param max maximum return result.
+     * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
+     */
+    public static float[] filter(final float[] a, final int fromIndex, final int toIndex, final FloatPredicate filter, final int max)
+            throws IllegalArgumentException, IndexOutOfBoundsException {
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
+        checkArgNotNull(filter, "filter");
+
+        if (isEmpty(a) || fromIndex == toIndex) {
+            return EMPTY_FLOAT_ARRAY;
+        }
+
+        float[] result = new float[(toIndex - fromIndex) / 2];
+        int len = result.length;
+        int count = 0;
+
+        for (int i = fromIndex, cnt = 0; i < toIndex && cnt < max; i++) {
+            if (filter.test(a[i])) {
+                if (count == len) {
+                    result = copyOf(result, toIndex - fromIndex);
+                    len = result.length;
+                }
+
+                result[count++] = a[i];
+            }
+        }
+
+        return result.length == count ? result : copyOfRange(result, 0, count);
+    }
+
+    /**
+     *
+     *
+     * @param a
+     * @param filter
+     * @return
+     * @throws IllegalArgumentException
+     */
+    public static double[] filter(final double[] a, final DoublePredicate filter) throws IllegalArgumentException {
+        checkArgNotNull(filter, "filter");
+
+        if (isEmpty(a)) {
+            return EMPTY_DOUBLE_ARRAY;
+        }
+
+        return filter(a, 0, a.length, filter);
+    }
+
+    /**
+     *
+     *
+     * @param a
+     * @param filter
+     * @param max
+     * @return
+     * @throws IllegalArgumentException
+     */
+    public static double[] filter(final double[] a, final DoublePredicate filter, final int max) throws IllegalArgumentException {
+        checkArgNotNull(filter, "filter");
+
+        if (isEmpty(a)) {
+            return EMPTY_DOUBLE_ARRAY;
+        }
+
+        return filter(a, 0, a.length, filter, max);
+    }
+
+    /**
+     *
+     *
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param filter
+     * @return
+     */
+    public static double[] filter(final double[] a, final int fromIndex, final int toIndex, final DoublePredicate filter) {
+        return filter(a, fromIndex, toIndex, filter, Integer.MAX_VALUE);
+    }
+
+    /**
+     * Mostly it's designed for one-step operation to complete the operation in one step.
+     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
+     *
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param filter
+     * @param max maximum return result.
+     * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
+     */
+    public static double[] filter(final double[] a, final int fromIndex, final int toIndex, final DoublePredicate filter, final int max)
+            throws IllegalArgumentException, IndexOutOfBoundsException {
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
+        checkArgNotNull(filter, "filter");
+
+        if (isEmpty(a) || fromIndex == toIndex) {
+            return EMPTY_DOUBLE_ARRAY;
+        }
+
+        double[] result = new double[(toIndex - fromIndex) / 2];
+        int len = result.length;
+        int count = 0;
+
+        for (int i = fromIndex, cnt = 0; i < toIndex && cnt < max; i++) {
+            if (filter.test(a[i])) {
+                if (count == len) {
+                    result = copyOf(result, toIndex - fromIndex);
+                    len = result.length;
+                }
+
+                result[count++] = a[i];
+            }
+        }
+
+        return result.length == count ? result : copyOfRange(result, 0, count);
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param a
+     * @param filter
+     * @return
+     * @throws IllegalArgumentException
+     */
+    public static <T> List<T> filter(final T[] a, final Predicate<? super T> filter) throws IllegalArgumentException {
+        checkArgNotNull(filter, "filter");
+
+        if (isEmpty(a)) {
+            return new ArrayList<>();
+        }
+
+        return filter(a, filter, Integer.MAX_VALUE);
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param <R>
+     * @param a
+     * @param filter
+     * @param supplier
+     * @return
+     * @throws IllegalArgumentException
+     */
+    public static <T, R extends Collection<T>> R filter(final T[] a, final Predicate<? super T> filter, final IntFunction<R> supplier)
+            throws IllegalArgumentException {
+        checkArgNotNull(filter, "filter");
+
+        if (isEmpty(a)) {
+            return supplier.apply(0);
+        }
+
+        return filter(a, filter, Integer.MAX_VALUE, supplier);
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param a
+     * @param filter
+     * @param max
+     * @return
+     * @throws IllegalArgumentException
+     */
+    public static <T> List<T> filter(final T[] a, final Predicate<? super T> filter, final int max) throws IllegalArgumentException {
+        checkArgNotNull(filter, "filter");
+
+        if (isEmpty(a)) {
+            return new ArrayList<>();
+        }
+
+        return filter(a, 0, a.length, filter, max);
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param <R>
+     * @param a
+     * @param filter
+     * @param max
+     * @param supplier
+     * @return
+     * @throws IllegalArgumentException
+     */
+    public static <T, R extends Collection<T>> R filter(final T[] a, final Predicate<? super T> filter, final int max, final IntFunction<R> supplier)
+            throws IllegalArgumentException {
+        checkArgNotNull(filter, "filter");
+
+        if (isEmpty(a)) {
+            return supplier.apply(0);
+        }
+
+        return filter(a, 0, a.length, filter, max, supplier);
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param filter
+     * @return
+     */
+    public static <T> List<T> filter(final T[] a, final int fromIndex, final int toIndex, final Predicate<? super T> filter) {
+        return filter(a, fromIndex, toIndex, filter, Integer.MAX_VALUE);
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param <R>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param filter
+     * @param supplier
+     * @return
+     */
+    public static <T, R extends Collection<T>> R filter(final T[] a, final int fromIndex, final int toIndex, final Predicate<? super T> filter,
+            final IntFunction<R> supplier) {
+        return filter(a, fromIndex, toIndex, filter, Integer.MAX_VALUE, supplier);
+    }
+
+    /**
+     * Mostly it's designed for one-step operation to complete the operation in one step.
+     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
+     *
+     * @param <T>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param filter
+     * @param max
+     * @return
+     */
+    public static <T> List<T> filter(final T[] a, final int fromIndex, final int toIndex, final Predicate<? super T> filter, final int max) {
+        return filter(a, fromIndex, toIndex, filter, max, Factory.ofList());
+    }
+
+    /**
+     * Mostly it's designed for one-step operation to complete the operation in one step.
+     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
+     *
+     * @param <T>
+     * @param <R>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param filter
+     * @param max
+     * @param supplier
+     * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
+     */
+    public static <T, R extends Collection<T>> R filter(final T[] a, final int fromIndex, final int toIndex, final Predicate<? super T> filter, final int max,
+            final IntFunction<R> supplier) throws IllegalArgumentException, IndexOutOfBoundsException {
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
+        checkArgNotNull(filter, "filter");
+
+        if (isEmpty(a) || fromIndex == toIndex) {
+            return supplier.apply(0);
+        }
+
+        final R result = supplier.apply(min(9, max, (toIndex - fromIndex)));
+
+        for (int i = fromIndex, cnt = 0; i < toIndex && cnt < max; i++) {
+            if (filter.test(a[i])) {
+                result.add(a[i]);
+                cnt++;
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param c
+     * @param filter
+     * @return
+     */
+    public static <T> List<T> filter(final Iterable<? extends T> c, final Predicate<? super T> filter) {
+        return filter(c, filter, Integer.MAX_VALUE);
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param <R>
+     * @param c
+     * @param filter
+     * @param supplier
+     * @return
+     */
+    public static <T, R extends Collection<T>> R filter(final Iterable<? extends T> c, final Predicate<? super T> filter, final IntFunction<R> supplier) {
+        return filter(c, filter, Integer.MAX_VALUE, supplier);
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param c
+     * @param filter
+     * @param max
+     * @return
+     */
+    public static <T> List<T> filter(final Iterable<? extends T> c, final Predicate<? super T> filter, final int max) {
+        return filter(c, filter, max, Factory.ofList());
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param <R>
+     * @param c
+     * @param filter
+     * @param max
+     * @param supplier
+     * @return
+     * @throws IllegalArgumentException
+     */
+    public static <T, R extends Collection<T>> R filter(final Iterable<? extends T> c, final Predicate<? super T> filter, final int max,
+            final IntFunction<R> supplier) throws IllegalArgumentException {
+        checkArgNotNull(filter, "filter");
+
+        if (c == null) {
+            return supplier.apply(0);
+        }
+
+        final R result = supplier.apply(getMinSize(c));
+        int count = 0;
+
+        for (T e : c) {
+            if (filter.test(e)) {
+                result.add(e);
+
+                if (++count == max) {
+                    break;
+                }
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @param filter
+     * @return
+     */
+    public static <T> List<T> filter(final Collection<? extends T> c, final int fromIndex, final int toIndex, final Predicate<? super T> filter) {
+        return filter(c, fromIndex, toIndex, filter, Integer.MAX_VALUE);
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param <R>
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @param filter
+     * @param supplier
+     * @return
+     */
+    public static <T, R extends Collection<T>> R filter(final Collection<? extends T> c, final int fromIndex, final int toIndex,
+            final Predicate<? super T> filter, final IntFunction<R> supplier) {
+        return filter(c, fromIndex, toIndex, filter, Integer.MAX_VALUE, supplier);
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @param filter
+     * @param max
+     * @return
+     */
+    public static <T> List<T> filter(final Collection<? extends T> c, final int fromIndex, final int toIndex, final Predicate<? super T> filter,
+            final int max) {
+        return filter(c, fromIndex, toIndex, filter, max, Factory.ofList());
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param <R>
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @param filter
+     * @param max
+     * @param supplier
+     * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
+     */
+    public static <T, R extends Collection<T>> R filter(final Collection<? extends T> c, final int fromIndex, final int toIndex,
+            final Predicate<? super T> filter, final int max, final IntFunction<R> supplier) throws IllegalArgumentException, IndexOutOfBoundsException {
+        checkFromToIndex(fromIndex, toIndex, size(c));
+        checkArgNotNull(filter, "filter");
+
+        if ((isEmpty(c) && fromIndex == 0 && toIndex == 0) || fromIndex == toIndex) {
+            return supplier.apply(0);
+        }
+
+        final R result = supplier.apply(min(9, max, (toIndex - fromIndex)));
+
+        if ((isEmpty(c) && fromIndex == 0 && toIndex == 0) || (fromIndex == toIndex && fromIndex < c.size())) {
+            return result;
+        }
+
+        if (c instanceof List && c instanceof RandomAccess) {
+            final List<T> list = (List<T>) c;
+            T e = null;
+
+            for (int i = fromIndex, cnt = 0; i < toIndex && cnt < max; i++) {
+                e = list.get(i);
+
+                if (filter.test(e)) {
+                    result.add(e);
+                    cnt++;
+                }
+            }
+        } else {
+            int idx = 0;
+            int cnt = 0;
+
+            for (T e : c) {
+                if (idx++ < fromIndex) {
+                    continue;
+                }
+
+                if (filter.test(e)) {
+                    result.add(e);
+
+                    if (++cnt >= max) {
+                        break;
+                    }
+                }
+
+                if (idx >= toIndex) {
+                    break;
+                }
+            }
+        }
+
+        return result;
+    }
+
+    //    /**
+    //     *
+    //     * @param <T>
+    //     * @param iter
+    //     * @param filter
+    //     * @return
+    //     * @see {@code Iterators.filter(Iterator, Predicate)}
+    //     */
+    //    public static <T> List<T> filter(final Iterator<? extends T> iter, final Predicate<? super T> filter) {
+    //        return filter(iter, 0, Integer.MAX_VALUE, filter);
+    //    }
+    //
+    //    public static <T> List<T> filter(final Iterator<? extends T> iter, final Predicate<? super T> filter, final int max)
+    //            {
+    //        return filter(iter, 0, Integer.MAX_VALUE, filter, max);
+    //    }
+    //
+    //    public static <T> List<T> filter(final Iterator<? extends T> iter, final int fromIndex, final int toIndex,
+    //            final Predicate<? super T> filter) {
+    //        checkFromToIndex(fromIndex, toIndex, Integer.MAX_VALUE);
+    //        checkArgNotNull(filter, "filter");
+    //
+    //        if (iter == null || fromIndex == toIndex) {
+    //            return new ArrayList<>(0);
+    //        }
+    //
+    //        final List<T> result = new ArrayList<>(min(9, toIndex - fromIndex));
+    //        int idx = 0;
+    //        T e = null;
+    //
+    //        while (iter.hasNext()) {
+    //            e = iter.next();
+    //
+    //            if (idx++ < fromIndex) {
+    //                continue;
+    //            }
+    //
+    //            if (filter.test(e)) {
+    //                result.add(e);
+    //            }
+    //
+    //            if (idx >= toIndex) {
+    //                break;
+    //            }
+    //        }
+    //
+    //        return result;
+    //    }
+    //
+    //    public static <T> List<T> filter(final Iterator<? extends T> iter, final int fromIndex, final int toIndex,
+    //            final Predicate<? super T> filter, final int max) {
+    //        checkFromToIndex(fromIndex, toIndex, Integer.MAX_VALUE);
+    //        checkArgNotNull(filter, "filter");
+    //
+    //        if (iter == null || fromIndex == toIndex) {
+    //            return new ArrayList<>(0);
+    //        }
+    //
+    //        final List<T> result = new ArrayList<>(min(9, max, (toIndex - fromIndex)));
+    //        int idx = 0;
+    //        int cnt = 0;
+    //        T e = null;
+    //
+    //        while (iter.hasNext()) {
+    //            e = iter.next();
+    //
+    //            if (idx++ < fromIndex) {
+    //                continue;
+    //            }
+    //
+    //            if (filter.test(e)) {
+    //                result.add(e);
+    //
+    //                if (++cnt >= max) {
+    //                    break;
+    //                }
+    //            }
+    //
+    //            if (idx >= toIndex) {
+    //                break;
+    //            }
+    //        }
+    //
+    //        return result;
+    //    }
+
+    /**
+     * Map to boolean.
+     *
+     * @param <T>
+     * @param a
+     * @param mapper
+     * @return
+     * @throws IllegalArgumentException
+     */
+    public static <T> boolean[] mapToBoolean(final T[] a, final ToBooleanFunction<? super T> mapper) throws IllegalArgumentException {
+        checkArgNotNull(mapper);
+
+        if (isEmpty(a)) {
+            return EMPTY_BOOLEAN_ARRAY;
+        }
+
+        return mapToBoolean(a, 0, a.length, mapper);
+    }
+
+    /**
+     * Mostly it's designed for one-step operation to complete the operation in one step.
+     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
+     *
+     * @param <T>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param mapper
+     * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
+     */
+    public static <T> boolean[] mapToBoolean(final T[] a, final int fromIndex, final int toIndex, final ToBooleanFunction<? super T> mapper)
+            throws IllegalArgumentException, IndexOutOfBoundsException {
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
+        checkArgNotNull(mapper);
+
+        if (isEmpty(a) || fromIndex == toIndex) {
+            return EMPTY_BOOLEAN_ARRAY;
+        }
+
+        final boolean[] result = new boolean[toIndex - fromIndex];
+
+        for (int i = fromIndex; i < toIndex; i++) {
+            result[i - fromIndex] = mapper.applyAsBoolean(a[i]);
+        }
+
+        return result;
+    }
+
+    /**
+     * Map to boolean.
+     *
+     * @param <T>
+     * @param c
+     * @param mapper
+     * @return
+     */
+    public static <T> boolean[] mapToBoolean(final Collection<? extends T> c, final ToBooleanFunction<? super T> mapper) {
+        checkArgNotNull(mapper);
+
+        if (isEmpty(c)) {
+            return EMPTY_BOOLEAN_ARRAY;
+        }
+
+        return mapToBoolean(c, 0, c.size(), mapper);
+    }
+
+    /**
+     * Mostly it's designed for one-step operation to complete the operation in one step.
+     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
+     *
+     * @param <T>
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @param mapper
+     * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
+     */
+    public static <T> boolean[] mapToBoolean(final Collection<? extends T> c, final int fromIndex, final int toIndex, final ToBooleanFunction<? super T> mapper)
+            throws IllegalArgumentException, IndexOutOfBoundsException {
+        checkFromToIndex(fromIndex, toIndex, size(c));
+        checkArgNotNull(mapper);
+
+        if ((isEmpty(c) && fromIndex == 0 && toIndex == 0) || fromIndex == toIndex) {
+            return EMPTY_BOOLEAN_ARRAY;
+        }
+
+        final boolean[] result = new boolean[toIndex - fromIndex];
+
+        if (c instanceof List && c instanceof RandomAccess) {
+            final List<T> list = (List<T>) c;
+
+            for (int i = fromIndex; i < toIndex; i++) {
+                result[i - fromIndex] = mapper.applyAsBoolean(list.get(i));
+            }
+        } else {
+            int idx = 0;
+
+            for (T e : c) {
+                if (idx++ < fromIndex) {
+                    continue;
+                }
+
+                result[idx - fromIndex] = mapper.applyAsBoolean(e);
+
+                if (idx >= toIndex) {
+                    break;
+                }
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Map to char.
+     *
+     * @param <T>
+     * @param a
+     * @param mapper
+     * @return
+     * @throws IllegalArgumentException
+     */
+    public static <T> char[] mapToChar(final T[] a, final ToCharFunction<? super T> mapper) throws IllegalArgumentException {
+        checkArgNotNull(mapper);
+
+        if (isEmpty(a)) {
+            return EMPTY_CHAR_ARRAY;
+        }
+
+        return mapToChar(a, 0, a.length, mapper);
+    }
+
+    /**
+     * Mostly it's designed for one-step operation to complete the operation in one step.
+     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
+     *
+     * @param <T>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param mapper
+     * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
+     */
+    public static <T> char[] mapToChar(final T[] a, final int fromIndex, final int toIndex, final ToCharFunction<? super T> mapper)
+            throws IllegalArgumentException, IndexOutOfBoundsException {
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
+        checkArgNotNull(mapper);
+
+        if (isEmpty(a) || fromIndex == toIndex) {
+            return EMPTY_CHAR_ARRAY;
+        }
+
+        final char[] result = new char[toIndex - fromIndex];
+
+        for (int i = fromIndex; i < toIndex; i++) {
+            result[i - fromIndex] = mapper.applyAsChar(a[i]);
+        }
+
+        return result;
+    }
+
+    /**
+     * Map to char.
+     *
+     * @param <T>
+     * @param c
+     * @param mapper
+     * @return
+     * @throws IllegalArgumentException
+     */
+    public static <T> char[] mapToChar(final Collection<? extends T> c, final ToCharFunction<? super T> mapper) throws IllegalArgumentException {
+        checkArgNotNull(mapper);
+
+        if (isEmpty(c)) {
+            return EMPTY_CHAR_ARRAY;
+        }
+
+        return mapToChar(c, 0, c.size(), mapper);
+    }
+
+    /**
+     * Mostly it's designed for one-step operation to complete the operation in one step.
+     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
+     *
+     * @param <T>
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @param mapper
+     * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
+     */
+    public static <T> char[] mapToChar(final Collection<? extends T> c, final int fromIndex, final int toIndex, final ToCharFunction<? super T> mapper)
+            throws IllegalArgumentException, IndexOutOfBoundsException {
+        checkFromToIndex(fromIndex, toIndex, size(c));
+        checkArgNotNull(mapper);
+
+        if ((isEmpty(c) && fromIndex == 0 && toIndex == 0) || fromIndex == toIndex) {
+            return EMPTY_CHAR_ARRAY;
+        }
+
+        final char[] result = new char[toIndex - fromIndex];
+
+        if (c instanceof List && c instanceof RandomAccess) {
+            final List<T> list = (List<T>) c;
+
+            for (int i = fromIndex; i < toIndex; i++) {
+                result[i - fromIndex] = mapper.applyAsChar(list.get(i));
+            }
+        } else {
+            int idx = 0;
+
+            for (T e : c) {
+                if (idx++ < fromIndex) {
+                    continue;
+                }
+
+                result[idx - fromIndex] = mapper.applyAsChar(e);
+
+                if (idx >= toIndex) {
+                    break;
+                }
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Map to byte.
+     *
+     * @param <T>
+     * @param a
+     * @param mapper
+     * @return
+     * @throws IllegalArgumentException
+     */
+    public static <T> byte[] mapToByte(final T[] a, final ToByteFunction<? super T> mapper) throws IllegalArgumentException {
+        checkArgNotNull(mapper);
+
+        if (isEmpty(a)) {
+            return EMPTY_BYTE_ARRAY;
+        }
+
+        return mapToByte(a, 0, a.length, mapper);
+    }
+
+    /**
+     * Mostly it's designed for one-step operation to complete the operation in one step.
+     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
+     *
+     * @param <T>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param mapper
+     * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
+     */
+    public static <T> byte[] mapToByte(final T[] a, final int fromIndex, final int toIndex, final ToByteFunction<? super T> mapper)
+            throws IllegalArgumentException, IndexOutOfBoundsException {
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
+        checkArgNotNull(mapper);
+
+        if (isEmpty(a) || fromIndex == toIndex) {
+            return EMPTY_BYTE_ARRAY;
+        }
+
+        final byte[] result = new byte[toIndex - fromIndex];
+
+        for (int i = fromIndex; i < toIndex; i++) {
+            result[i - fromIndex] = mapper.applyAsByte(a[i]);
+        }
+
+        return result;
+    }
+
+    /**
+     * Map to byte.
+     *
+     * @param <T>
+     * @param c
+     * @param mapper
+     * @return
+     * @throws IllegalArgumentException
+     */
+    public static <T> byte[] mapToByte(final Collection<? extends T> c, final ToByteFunction<? super T> mapper) throws IllegalArgumentException {
+        checkArgNotNull(mapper);
+
+        if (isEmpty(c)) {
+            return EMPTY_BYTE_ARRAY;
+        }
+
+        return mapToByte(c, 0, c.size(), mapper);
+    }
+
+    /**
+     * Mostly it's designed for one-step operation to complete the operation in one step.
+     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
+     *
+     * @param <T>
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @param mapper
+     * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
+     */
+    public static <T> byte[] mapToByte(final Collection<? extends T> c, final int fromIndex, final int toIndex, final ToByteFunction<? super T> mapper)
+            throws IllegalArgumentException, IndexOutOfBoundsException {
+        checkFromToIndex(fromIndex, toIndex, size(c));
+        checkArgNotNull(mapper);
+
+        if ((isEmpty(c) && fromIndex == 0 && toIndex == 0) || fromIndex == toIndex) {
+            return EMPTY_BYTE_ARRAY;
+        }
+
+        final byte[] result = new byte[toIndex - fromIndex];
+
+        if (c instanceof List && c instanceof RandomAccess) {
+            final List<T> list = (List<T>) c;
+
+            for (int i = fromIndex; i < toIndex; i++) {
+                result[i - fromIndex] = mapper.applyAsByte(list.get(i));
+            }
+        } else {
+            int idx = 0;
+
+            for (T e : c) {
+                if (idx++ < fromIndex) {
+                    continue;
+                }
+
+                result[idx - fromIndex] = mapper.applyAsByte(e);
+
+                if (idx >= toIndex) {
+                    break;
+                }
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Map to short.
+     *
+     * @param <T>
+     * @param a
+     * @param mapper
+     * @return
+     * @throws IllegalArgumentException
+     */
+    public static <T> short[] mapToShort(final T[] a, final ToShortFunction<? super T> mapper) throws IllegalArgumentException {
+        checkArgNotNull(mapper);
+
+        if (isEmpty(a)) {
+            return EMPTY_SHORT_ARRAY;
+        }
+
+        return mapToShort(a, 0, a.length, mapper);
+    }
+
+    /**
+     * Mostly it's designed for one-step operation to complete the operation in one step.
+     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
+     *
+     * @param <T>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param mapper
+     * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
+     */
+    public static <T> short[] mapToShort(final T[] a, final int fromIndex, final int toIndex, final ToShortFunction<? super T> mapper)
+            throws IllegalArgumentException, IndexOutOfBoundsException {
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
+        checkArgNotNull(mapper);
+
+        if (isEmpty(a) || fromIndex == toIndex) {
+            return EMPTY_SHORT_ARRAY;
+        }
+
+        final short[] result = new short[toIndex - fromIndex];
+
+        for (int i = fromIndex; i < toIndex; i++) {
+            result[i - fromIndex] = mapper.applyAsShort(a[i]);
+        }
+
+        return result;
+    }
+
+    /**
+     * Map to short.
+     *
+     * @param <T>
+     * @param c
+     * @param mapper
+     * @return
+     * @throws IllegalArgumentException
+     */
+    public static <T> short[] mapToShort(final Collection<? extends T> c, final ToShortFunction<? super T> mapper) throws IllegalArgumentException {
+        checkArgNotNull(mapper);
+
+        if (isEmpty(c)) {
+            return EMPTY_SHORT_ARRAY;
+        }
+
+        return mapToShort(c, 0, c.size(), mapper);
+    }
+
+    /**
+     * Mostly it's designed for one-step operation to complete the operation in one step.
+     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
+     *
+     * @param <T>
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @param mapper
+     * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
+     */
+    public static <T> short[] mapToShort(final Collection<? extends T> c, final int fromIndex, final int toIndex, final ToShortFunction<? super T> mapper)
+            throws IllegalArgumentException, IndexOutOfBoundsException {
+        checkFromToIndex(fromIndex, toIndex, size(c));
+        checkArgNotNull(mapper);
+
+        if ((isEmpty(c) && fromIndex == 0 && toIndex == 0) || fromIndex == toIndex) {
+            return EMPTY_SHORT_ARRAY;
+        }
+
+        final short[] result = new short[toIndex - fromIndex];
+
+        if (c instanceof List && c instanceof RandomAccess) {
+            final List<T> list = (List<T>) c;
+
+            for (int i = fromIndex; i < toIndex; i++) {
+                result[i - fromIndex] = mapper.applyAsShort(list.get(i));
+            }
+        } else {
+            int idx = 0;
+
+            for (T e : c) {
+                if (idx++ < fromIndex) {
+                    continue;
+                }
+
+                result[idx - fromIndex] = mapper.applyAsShort(e);
+
+                if (idx >= toIndex) {
+                    break;
+                }
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Map to int.
+     *
+     * @param <T>
+     * @param a
+     * @param mapper
+     * @return
+     * @throws IllegalArgumentException
+     */
+    public static <T> int[] mapToInt(final T[] a, final ToIntFunction<? super T> mapper) throws IllegalArgumentException {
+        checkArgNotNull(mapper);
+
+        if (isEmpty(a)) {
+            return EMPTY_INT_ARRAY;
+        }
+
+        return mapToInt(a, 0, a.length, mapper);
+    }
+
+    /**
+     * Mostly it's designed for one-step operation to complete the operation in one step.
+     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
+     *
+     * @param <T>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param mapper
+     * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
+     */
+    public static <T> int[] mapToInt(final T[] a, final int fromIndex, final int toIndex, final ToIntFunction<? super T> mapper)
+            throws IllegalArgumentException, IndexOutOfBoundsException {
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
+        checkArgNotNull(mapper);
+
+        if (isEmpty(a) || fromIndex == toIndex) {
+            return EMPTY_INT_ARRAY;
+        }
+
+        final int[] result = new int[toIndex - fromIndex];
+
+        for (int i = fromIndex; i < toIndex; i++) {
+            result[i - fromIndex] = mapper.applyAsInt(a[i]);
+        }
+
+        return result;
+    }
+
+    /**
+     * Map to int.
+     *
+     * @param <T>
+     * @param c
+     * @param mapper
+     * @return
+     * @throws IllegalArgumentException
+     */
+    public static <T> int[] mapToInt(final Collection<? extends T> c, final ToIntFunction<? super T> mapper) throws IllegalArgumentException {
+        checkArgNotNull(mapper);
+
+        if (isEmpty(c)) {
+            return EMPTY_INT_ARRAY;
+        }
+
+        return mapToInt(c, 0, c.size(), mapper);
+    }
+
+    /**
+     * Mostly it's designed for one-step operation to complete the operation in one step.
+     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
+     *
+     * @param <T>
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @param mapper
+     * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
+     */
+    public static <T> int[] mapToInt(final Collection<? extends T> c, final int fromIndex, final int toIndex, final ToIntFunction<? super T> mapper)
+            throws IllegalArgumentException, IndexOutOfBoundsException {
+        checkFromToIndex(fromIndex, toIndex, size(c));
+        checkArgNotNull(mapper);
+
+        if ((isEmpty(c) && fromIndex == 0 && toIndex == 0) || fromIndex == toIndex) {
+            return EMPTY_INT_ARRAY;
+        }
+
+        final int[] result = new int[toIndex - fromIndex];
+
+        if (c instanceof List && c instanceof RandomAccess) {
+            final List<T> list = (List<T>) c;
+
+            for (int i = fromIndex; i < toIndex; i++) {
+                result[i - fromIndex] = mapper.applyAsInt(list.get(i));
+            }
+        } else {
+            int idx = 0;
+
+            for (T e : c) {
+                if (idx++ < fromIndex) {
+                    continue;
+                }
+
+                result[idx - fromIndex] = mapper.applyAsInt(e);
+
+                if (idx >= toIndex) {
+                    break;
+                }
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     *
+     *
+     * @param a
+     * @param mapper
+     * @return
+     */
+    @Beta
+    public static int[] mapToInt(final long[] a, final LongToIntFunction mapper) {
+        if (a == null) {
+            return EMPTY_INT_ARRAY;
+        }
+
+        final int len = len(a);
+        final int[] result = new int[len];
+
+        for (int i = 0; i < len; i++) {
+            result[i] = mapper.applyAsInt(a[i]);
+        }
+
+        return result;
+    }
+
+    /**
+     *
+     *
+     * @param a
+     * @param mapper
+     * @return
+     */
+    @Beta
+    public static int[] mapToInt(final double[] a, final DoubleToIntFunction mapper) {
+        if (a == null) {
+            return EMPTY_INT_ARRAY;
+        }
+
+        final int len = len(a);
+        final int[] result = new int[len];
+
+        for (int i = 0; i < len; i++) {
+            result[i] = mapper.applyAsInt(a[i]);
+        }
+
+        return result;
+    }
+
+    /**
+     * Map to long.
+     *
+     * @param <T>
+     * @param a
+     * @param mapper
+     * @return
+     * @throws IllegalArgumentException
+     */
+    public static <T> long[] mapToLong(final T[] a, final ToLongFunction<? super T> mapper) throws IllegalArgumentException {
+        checkArgNotNull(mapper);
+
+        if (isEmpty(a)) {
+            return EMPTY_LONG_ARRAY;
+        }
+
+        return mapToLong(a, 0, a.length, mapper);
+    }
+
+    /**
+     * Mostly it's designed for one-step operation to complete the operation in one step.
+     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
+     *
+     * @param <T>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param mapper
+     * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
+     */
+    public static <T> long[] mapToLong(final T[] a, final int fromIndex, final int toIndex, final ToLongFunction<? super T> mapper)
+            throws IllegalArgumentException, IndexOutOfBoundsException {
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
+        checkArgNotNull(mapper);
+
+        if (isEmpty(a) || fromIndex == toIndex) {
+            return EMPTY_LONG_ARRAY;
+        }
+
+        final long[] result = new long[toIndex - fromIndex];
+
+        for (int i = fromIndex; i < toIndex; i++) {
+            result[i - fromIndex] = mapper.applyAsLong(a[i]);
+        }
+
+        return result;
+    }
+
+    /**
+     * Map to long.
+     *
+     * @param <T>
+     * @param c
+     * @param mapper
+     * @return
+     * @throws IllegalArgumentException
+     */
+    public static <T> long[] mapToLong(final Collection<? extends T> c, final ToLongFunction<? super T> mapper) throws IllegalArgumentException {
+        checkArgNotNull(mapper);
+
+        if (isEmpty(c)) {
+            return EMPTY_LONG_ARRAY;
+        }
+
+        return mapToLong(c, 0, c.size(), mapper);
+    }
+
+    /**
+     * Mostly it's designed for one-step operation to complete the operation in one step.
+     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
+     *
+     * @param <T>
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @param mapper
+     * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
+     */
+    public static <T> long[] mapToLong(final Collection<? extends T> c, final int fromIndex, final int toIndex, final ToLongFunction<? super T> mapper)
+            throws IllegalArgumentException, IndexOutOfBoundsException {
+        checkFromToIndex(fromIndex, toIndex, size(c));
+        checkArgNotNull(mapper);
+
+        if ((isEmpty(c) && fromIndex == 0 && toIndex == 0) || fromIndex == toIndex) {
+            return EMPTY_LONG_ARRAY;
+        }
+
+        final long[] result = new long[toIndex - fromIndex];
+
+        if (c instanceof List && c instanceof RandomAccess) {
+            final List<T> list = (List<T>) c;
+
+            for (int i = fromIndex; i < toIndex; i++) {
+                result[i - fromIndex] = mapper.applyAsLong(list.get(i));
+            }
+        } else {
+            int idx = 0;
+
+            for (T e : c) {
+                if (idx++ < fromIndex) {
+                    continue;
+                }
+
+                result[idx - fromIndex] = mapper.applyAsLong(e);
+
+                if (idx >= toIndex) {
+                    break;
+                }
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     *
+     *
+     * @param a
+     * @param mapper
+     * @return
+     */
+    @Beta
+    public static long[] mapToLong(final int[] a, final IntToLongFunction mapper) {
+        if (a == null) {
+            return EMPTY_LONG_ARRAY;
+        }
+
+        final int len = len(a);
+        final long[] result = new long[len];
+
+        for (int i = 0; i < len; i++) {
+            result[i] = mapper.applyAsLong(a[i]);
+        }
+
+        return result;
+    }
+
+    /**
+     *
+     *
+     * @param a
+     * @param mapper
+     * @return
+     */
+    @Beta
+    public static long[] mapToLong(final double[] a, final DoubleToLongFunction mapper) {
+        if (a == null) {
+            return EMPTY_LONG_ARRAY;
+        }
+
+        final int len = len(a);
+        final long[] result = new long[len];
+
+        for (int i = 0; i < len; i++) {
+            result[i] = mapper.applyAsLong(a[i]);
+        }
+
+        return result;
+    }
+
+    /**
+     * Map to float.
+     *
+     * @param <T>
+     * @param a
+     * @param mapper
+     * @return
+     * @throws IllegalArgumentException
+     */
+    public static <T> float[] mapToFloat(final T[] a, final ToFloatFunction<? super T> mapper) throws IllegalArgumentException {
+        checkArgNotNull(mapper);
+
+        if (isEmpty(a)) {
+            return EMPTY_FLOAT_ARRAY;
+        }
+
+        return mapToFloat(a, 0, a.length, mapper);
+    }
+
+    /**
+     * Mostly it's designed for one-step operation to complete the operation in one step.
+     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
+     *
+     * @param <T>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param mapper
+     * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
+     */
+    public static <T> float[] mapToFloat(final T[] a, final int fromIndex, final int toIndex, final ToFloatFunction<? super T> mapper)
+            throws IllegalArgumentException, IndexOutOfBoundsException {
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
+        checkArgNotNull(mapper);
+
+        if (isEmpty(a) || fromIndex == toIndex) {
+            return EMPTY_FLOAT_ARRAY;
+        }
+
+        final float[] result = new float[toIndex - fromIndex];
+
+        for (int i = fromIndex; i < toIndex; i++) {
+            result[i - fromIndex] = mapper.applyAsFloat(a[i]);
+        }
+
+        return result;
+    }
+
+    /**
+     * Map to float.
+     *
+     * @param <T>
+     * @param c
+     * @param mapper
+     * @return
+     * @throws IllegalArgumentException
+     */
+    public static <T> float[] mapToFloat(final Collection<? extends T> c, final ToFloatFunction<? super T> mapper) throws IllegalArgumentException {
+        checkArgNotNull(mapper);
+
+        if (isEmpty(c)) {
+            return EMPTY_FLOAT_ARRAY;
+        }
+
+        return mapToFloat(c, 0, c.size(), mapper);
+    }
+
+    /**
+     * Mostly it's designed for one-step operation to complete the operation in one step.
+     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
+     *
+     * @param <T>
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @param mapper
+     * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
+     */
+    public static <T> float[] mapToFloat(final Collection<? extends T> c, final int fromIndex, final int toIndex, final ToFloatFunction<? super T> mapper)
+            throws IllegalArgumentException, IndexOutOfBoundsException {
+        checkFromToIndex(fromIndex, toIndex, size(c));
+        checkArgNotNull(mapper);
+
+        if ((isEmpty(c) && fromIndex == 0 && toIndex == 0) || fromIndex == toIndex) {
+            return EMPTY_FLOAT_ARRAY;
+        }
+
+        final float[] result = new float[toIndex - fromIndex];
+
+        if (c instanceof List && c instanceof RandomAccess) {
+            final List<T> list = (List<T>) c;
+
+            for (int i = fromIndex; i < toIndex; i++) {
+                result[i - fromIndex] = mapper.applyAsFloat(list.get(i));
+            }
+        } else {
+            int idx = 0;
+
+            for (T e : c) {
+                if (idx++ < fromIndex) {
+                    continue;
+                }
+
+                result[idx - fromIndex] = mapper.applyAsFloat(e);
+
+                if (idx >= toIndex) {
+                    break;
+                }
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Map to double.
+     *
+     * @param <T>
+     * @param a
+     * @param mapper
+     * @return
+     * @throws IllegalArgumentException
+     */
+    public static <T> double[] mapToDouble(final T[] a, final ToDoubleFunction<? super T> mapper) throws IllegalArgumentException {
+        checkArgNotNull(mapper);
+
+        if (isEmpty(a)) {
+            return EMPTY_DOUBLE_ARRAY;
+        }
+
+        return mapToDouble(a, 0, a.length, mapper);
+    }
+
+    /**
+     * Mostly it's designed for one-step operation to complete the operation in one step.
+     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
+     *
+     * @param <T>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param mapper
+     * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
+     */
+    public static <T> double[] mapToDouble(final T[] a, final int fromIndex, final int toIndex, final ToDoubleFunction<? super T> mapper)
+            throws IllegalArgumentException, IndexOutOfBoundsException {
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
+        checkArgNotNull(mapper);
+
+        if (isEmpty(a) || fromIndex == toIndex) {
+            return EMPTY_DOUBLE_ARRAY;
+        }
+
+        final double[] result = new double[toIndex - fromIndex];
+
+        for (int i = fromIndex; i < toIndex; i++) {
+            result[i - fromIndex] = mapper.applyAsDouble(a[i]);
+        }
+
+        return result;
+    }
+
+    /**
+     * Map to double.
+     *
+     * @param <T>
+     * @param c
+     * @param mapper
+     * @return
+     */
+    public static <T> double[] mapToDouble(final Collection<? extends T> c, final ToDoubleFunction<? super T> mapper) {
+        checkArgNotNull(mapper);
+
+        if (isEmpty(c)) {
+            return EMPTY_DOUBLE_ARRAY;
+        }
+
+        return mapToDouble(c, 0, c.size(), mapper);
+    }
+
+    /**
+     * Mostly it's designed for one-step operation to complete the operation in one step.
+     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
+     *
+     * @param <T>
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @param mapper
+     * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
+     */
+    public static <T> double[] mapToDouble(final Collection<? extends T> c, final int fromIndex, final int toIndex, final ToDoubleFunction<? super T> mapper)
+            throws IllegalArgumentException, IndexOutOfBoundsException {
+        checkFromToIndex(fromIndex, toIndex, size(c));
+        checkArgNotNull(mapper);
+
+        if ((isEmpty(c) && fromIndex == 0 && toIndex == 0) || fromIndex == toIndex) {
+            return EMPTY_DOUBLE_ARRAY;
+        }
+
+        final double[] result = new double[toIndex - fromIndex];
+
+        if (c instanceof List && c instanceof RandomAccess) {
+            final List<T> list = (List<T>) c;
+
+            for (int i = fromIndex; i < toIndex; i++) {
+                result[i - fromIndex] = mapper.applyAsDouble(list.get(i));
+            }
+        } else {
+            int idx = 0;
+
+            for (T e : c) {
+                if (idx++ < fromIndex) {
+                    continue;
+                }
+
+                result[idx - fromIndex] = mapper.applyAsDouble(e);
+
+                if (idx >= toIndex) {
+                    break;
+                }
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     *
+     *
+     * @param a
+     * @param mapper
+     * @return
+     */
+    @Beta
+    public static double[] mapToDouble(final int[] a, final IntToDoubleFunction mapper) {
+        if (a == null) {
+            return EMPTY_DOUBLE_ARRAY;
+        }
+
+        final int len = len(a);
+        final double[] result = new double[len];
+
+        for (int i = 0; i < len; i++) {
+            result[i] = mapper.applyAsDouble(a[i]);
+        }
+
+        return result;
+    }
+
+    /**
+     *
+     *
+     * @param a
+     * @param mapper
+     * @return
+     */
+    @Beta
+    public static double[] mapToDouble(final long[] a, final LongToDoubleFunction mapper) {
+        if (a == null) {
+            return EMPTY_DOUBLE_ARRAY;
+        }
+
+        final int len = len(a);
+        final double[] result = new double[len];
+
+        for (int i = 0; i < len; i++) {
+            result[i] = mapper.applyAsDouble(a[i]);
+        }
+
+        return result;
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param <R>
+     * @param a
+     * @param mapper
+     * @return
+     * @throws IllegalArgumentException
+     */
+    public static <T, R> List<R> map(final T[] a, final Function<? super T, ? extends R> mapper) throws IllegalArgumentException {
+        checkArgNotNull(mapper);
+
+        if (isEmpty(a)) {
+            return new ArrayList<>();
+        }
+
+        return map(a, 0, a.length, mapper);
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param <R>
+     * @param <C>
+     * @param a
+     * @param mapper
+     * @param supplier
+     * @return
+     * @throws IllegalArgumentException
+     */
+    public static <T, R, C extends Collection<R>> C map(final T[] a, final Function<? super T, ? extends R> mapper, final IntFunction<? extends C> supplier)
+            throws IllegalArgumentException {
+        checkArgNotNull(mapper);
+
+        if (isEmpty(a)) {
+            return supplier.apply(0);
+        }
+
+        return map(a, 0, a.length, mapper, supplier);
+    }
+
+    /**
+     * Mostly it's designed for one-step operation to complete the operation in one step.
+     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
+     *
+     * @param <T>
+     * @param <R>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param mapper
+     * @return
+     */
+    public static <T, R> List<R> map(final T[] a, final int fromIndex, final int toIndex, final Function<? super T, ? extends R> mapper) {
+        return map(a, fromIndex, toIndex, mapper, Factory.ofList());
+    }
+
+    /**
+     * Mostly it's designed for one-step operation to complete the operation in one step.
+     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
+     *
+     * @param <T>
+     * @param <R>
+     * @param <C>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param mapper
+     * @param supplier
+     * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
+     */
+    public static <T, R, C extends Collection<R>> C map(final T[] a, final int fromIndex, final int toIndex, final Function<? super T, ? extends R> mapper,
+            final IntFunction<? extends C> supplier) throws IllegalArgumentException, IndexOutOfBoundsException {
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
+        checkArgNotNull(mapper);
+
+        if (isEmpty(a) || fromIndex == toIndex) {
+            return supplier.apply(0);
+        }
+
+        final C result = supplier.apply(toIndex - fromIndex);
+
+        for (int i = fromIndex; i < toIndex; i++) {
+            result.add(mapper.apply(a[i]));
+        }
+
+        return result;
+    }
+
+    /**
+     * Mostly it's designed for one-step operation to complete the operation in one step.
+     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
+     *
+     * @param <T>
+     * @param <R>
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @param mapper
+     * @return
+     */
+    public static <T, R> List<R> map(final Collection<? extends T> c, final int fromIndex, final int toIndex, final Function<? super T, ? extends R> mapper) {
+        return map(c, fromIndex, toIndex, mapper, Factory.ofList());
+    }
+
+    /**
+     * Mostly it's designed for one-step operation to complete the operation in one step.
+     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
+     *
+     * @param <T>
+     * @param <R>
+     * @param <C>
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @param mapper
+     * @param supplier
+     * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
+     */
+    public static <T, R, C extends Collection<R>> C map(final Collection<? extends T> c, final int fromIndex, final int toIndex,
+            final Function<? super T, ? extends R> mapper, final IntFunction<? extends C> supplier) throws IllegalArgumentException, IndexOutOfBoundsException {
+        checkFromToIndex(fromIndex, toIndex, size(c));
+        checkArgNotNull(mapper);
+
+        if ((isEmpty(c) && fromIndex == 0 && toIndex == 0) || fromIndex == toIndex) {
+            return supplier.apply(0);
+        }
+
+        final C result = supplier.apply(toIndex - fromIndex);
+
+        if (c instanceof List && c instanceof RandomAccess) {
+            final List<T> list = (List<T>) c;
+
+            for (int i = fromIndex; i < toIndex; i++) {
+                result.add(mapper.apply(list.get(i)));
+            }
+        } else {
+            int idx = 0;
+
+            for (T e : c) {
+                if (idx++ < fromIndex) {
+                    continue;
+                }
+
+                result.add(mapper.apply(e));
+
+                if (idx >= toIndex) {
+                    break;
+                }
+            }
+        }
+
+        return result;
+    }
+
+    //    /**
+    //     *
+    //     * @param <T>
+    //     * @param <U>
+    //     * @param iter
+    //     * @param mapper
+    //     * @return
+    //     * @see {@code Iterators.map(Iterator, Function)}
+    //     */
+    //    public static <T, R> List<R> map(final Iterator<? extends T> iter, final Function<? super T, ? extends R> mapper)
+    //            {
+    //        return map(iter, 0, Integer.MAX_VALUE, mapper);
+    //    }
+    //
+    //    public static <T, R> List<R> map(final Iterator<? extends T> iter, final int fromIndex, final int toIndex,
+    //            final Function<? super T, ? extends R> mapper) {
+    //        checkFromToIndex(fromIndex, toIndex, Integer.MAX_VALUE);
+    //        checkArgNotNull(mapper);
+    //
+    //        if (iter == null || fromIndex == toIndex) {
+    //            return new ArrayList<>();
+    //        }
+    //
+    //        final List<R> result = new ArrayList<>(min(9, toIndex - fromIndex));
+    //
+    //        int idx = 0;
+    //        T e = null;
+    //
+    //        while (iter.hasNext()) {
+    //            e = iter.next();
+    //
+    //            if (idx++ < fromIndex) {
+    //                continue;
+    //            }
+    //
+    //            result.add(mapper.apply(e));
+    //
+    //            if (idx >= toIndex) {
+    //                break;
+    //            }
+    //        }
+    //
+    //        return result;
+    //    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param <R>
+     * @param c
+     * @param mapper
+     * @return
+     */
+    public static <T, R> List<R> map(final Iterable<? extends T> c, final Function<? super T, ? extends R> mapper) {
+        return map(c, mapper, Factory.ofList());
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param <R>
+     * @param <C>
+     * @param c
+     * @param mapper
+     * @param supplier
+     * @return
+     * @throws IllegalArgumentException
+     */
+    public static <T, R, C extends Collection<R>> C map(final Iterable<? extends T> c, final Function<? super T, ? extends R> mapper,
+            final IntFunction<? extends C> supplier) throws IllegalArgumentException {
+        checkArgNotNull(mapper);
+
+        if (c == null) {
+            return supplier.apply(0);
+        }
+
+        final C result = supplier.apply(getSizeOrDefault(c, 0));
+
+        for (T e : c) {
+            result.add(mapper.apply(e));
+        }
+
+        return result;
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param <R>
+     * @param a
+     * @param mapper
+     * @return
+     */
+    public static <T, R> List<R> flatMap(final T[] a, final Function<? super T, ? extends Collection<? extends R>> mapper) {
+        checkArgNotNull(mapper);
+
+        if (isEmpty(a)) {
+            return new ArrayList<>();
+        }
+
+        return flatMap(a, 0, a.length, mapper);
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param <R>
+     * @param <C>
+     * @param a
+     * @param mapper
+     * @param supplier
+     * @return
+     * @throws IllegalArgumentException
+     */
+    public static <T, R, C extends Collection<R>> C flatMap(final T[] a, final Function<? super T, ? extends Collection<? extends R>> mapper,
+            final IntFunction<? extends C> supplier) throws IllegalArgumentException {
+        checkArgNotNull(mapper);
+
+        if (isEmpty(a)) {
+            return supplier.apply(0);
+        }
+
+        return flatMap(a, 0, a.length, mapper, supplier);
+    }
+
+    /**
+     * Mostly it's designed for one-step operation to complete the operation in one step.
+     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
+     *
+     * @param <T>
+     * @param <R>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param mapper
+     * @return
+     */
+    public static <T, R> List<R> flatMap(final T[] a, final int fromIndex, final int toIndex,
+            final Function<? super T, ? extends Collection<? extends R>> mapper) {
+        return flatMap(a, fromIndex, toIndex, mapper, Factory.ofList());
+    }
+
+    /**
+     * Mostly it's designed for one-step operation to complete the operation in one step.
+     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
+     *
+     * @param <T>
+     * @param <R>
+     * @param <C>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param mapper
+     * @param supplier
+     * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
+     */
+    public static <T, R, C extends Collection<R>> C flatMap(final T[] a, final int fromIndex, final int toIndex,
+            final Function<? super T, ? extends Collection<? extends R>> mapper, final IntFunction<? extends C> supplier)
+            throws IllegalArgumentException, IndexOutOfBoundsException {
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
+        checkArgNotNull(mapper);
+
+        if (isEmpty(a) || fromIndex == toIndex) {
+            return supplier.apply(0);
+        }
+
+        final int len = initSizeForFlatMap(toIndex - fromIndex);
+        final C result = supplier.apply(len);
+        Collection<? extends R> mr = null;
+
+        for (int i = fromIndex; i < toIndex; i++) {
+            if (notEmpty(mr = mapper.apply(a[i]))) {
+                result.addAll(mr);
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Mostly it's designed for one-step operation to complete the operation in one step.
+     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
+     *
+     * @param <T>
+     * @param <R>
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @param mapper
+     * @return
+     */
+    public static <T, R> List<R> flatMap(final Collection<? extends T> c, final int fromIndex, final int toIndex,
+            final Function<? super T, ? extends Collection<? extends R>> mapper) {
+        return flatMap(c, fromIndex, toIndex, mapper, Factory.<R> ofList());
+    }
+
+    /**
+     * Mostly it's designed for one-step operation to complete the operation in one step.
+     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
+     *
+     * @param <T>
+     * @param <R>
+     * @param <C>
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @param mapper
+     * @param supplier
+     * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
+     */
+    public static <T, R, C extends Collection<R>> C flatMap(final Collection<? extends T> c, final int fromIndex, final int toIndex,
+            final Function<? super T, ? extends Collection<? extends R>> mapper, final IntFunction<? extends C> supplier)
+            throws IllegalArgumentException, IndexOutOfBoundsException {
+        checkFromToIndex(fromIndex, toIndex, size(c));
+        checkArgNotNull(mapper);
+
+        if ((isEmpty(c) && fromIndex == 0 && toIndex == 0) || fromIndex == toIndex) {
+            return supplier.apply(0);
+        }
+
+        final int len = initSizeForFlatMap(toIndex - fromIndex);
+        final C result = supplier.apply(len);
+        Collection<? extends R> mr = null;
+
+        if (c instanceof List && c instanceof RandomAccess) {
+            final List<T> list = (List<T>) c;
+
+            for (int i = fromIndex; i < toIndex; i++) {
+                if (notEmpty(mr = mapper.apply(list.get(i)))) {
+                    result.addAll(mr);
+                }
+            }
+        } else {
+            int idx = 0;
+
+            for (T e : c) {
+                if (idx++ < fromIndex) {
+                    continue;
+                }
+
+                if (notEmpty(mr = mapper.apply(e))) {
+                    result.addAll(mr);
+                }
+
+                if (idx >= toIndex) {
+                    break;
+                }
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param <R>
+     * @param c
+     * @param mapper
+     * @return
+     */
+    public static <T, R> List<R> flatMap(final Iterable<? extends T> c, final Function<? super T, ? extends Collection<? extends R>> mapper) {
+        return flatMap(c, mapper, Factory.<R> ofList());
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param <R>
+     * @param <C>
+     * @param c
+     * @param mapper
+     * @param supplier
+     * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
+     */
+    public static <T, R, C extends Collection<R>> C flatMap(final Iterable<? extends T> c, final Function<? super T, ? extends Collection<? extends R>> mapper,
+            final IntFunction<? extends C> supplier) throws IllegalArgumentException, IndexOutOfBoundsException {
+        checkArgNotNull(mapper);
+
+        if (c == null) {
+            return supplier.apply(0);
+        }
+
+        final C result = supplier.apply(initSizeForFlatMap(c));
+        Collection<? extends R> mr = null;
+
+        for (T e : c) {
+            if (notEmpty(mr = mapper.apply(e))) {
+                result.addAll(mr);
+            }
+        }
+
+        return result;
+    }
+
+    //    /**
+    //     *
+    //     * @param <T>
+    //     * @param <U>
+    //     * @param iter
+    //     * @param mapper
+    //     * @return
+    //     * @see {@code Iterators.flatMap(Iterator, Function)}
+    //     */
+    //    public static <T, R> List<R> flatMap(final Iterator<? extends T> iter,
+    //            final Function<? super T, ? extends Collection<? extends R>> mapper) {
+    //        return flatMap(iter, 0, Integer.MAX_VALUE, mapper);
+    //    }
+    //
+    //    public static <T, R> List<R> flatMap(final Iterator<? extends T> iter, final int fromIndex, final int toIndex,
+    //            final Function<? super T, ? extends Collection<? extends R>> mapper) {
+    //        checkFromToIndex(fromIndex, toIndex, Integer.MAX_VALUE);
+    //        checkArgNotNull(mapper);
+    //
+    //        if (iter == null || fromIndex == toIndex) {
+    //            return new ArrayList<>();
+    //        }
+    //
+    //        final List<R> result = new ArrayList<>(min(9, toIndex - fromIndex));
+    //        Collection<? extends R> mr = null;
+    //
+    //        int idx = 0;
+    //        T e = null;
+    //
+    //        while (iter.hasNext()) {
+    //            e = iter.next();
+    //
+    //            if (idx++ < fromIndex) {
+    //                continue;
+    //            }
+    //
+    //            if (notEmpty(mr = mapper.apply(e))) {
+    //                result.addAll(mr);
+    //            }
+    //
+    //            if (idx >= toIndex) {
+    //                break;
+    //            }
+    //        }
+    //
+    //        return result;
+    //    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param <U>
+     * @param <R>
+     * @param a
+     * @param mapper
+     * @param mapper2
+     * @return
+     */
+    public static <T, U, R> List<R> flatMap(final T[] a, final Function<? super T, ? extends Collection<? extends U>> mapper,
+            final Function<? super U, ? extends Collection<? extends R>> mapper2) {
+
+        return flatMap(a, mapper, mapper2, Factory.<R> ofList());
+    }
+
+    /**
+     * Mostly it's designed for one-step operation to complete the operation in one step.
+     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
+     *
+     * @param <T>
+     * @param <U>
+     * @param <R>
+     * @param <C>
+     * @param a
+     * @param mapper
+     * @param mapper2
+     * @param supplier
+     * @return
+     * @throws IllegalArgumentException
+     */
+    public static <T, U, R, C extends Collection<R>> C flatMap(final T[] a, final Function<? super T, ? extends Collection<? extends U>> mapper,
+            final Function<? super U, ? extends Collection<? extends R>> mapper2, final IntFunction<? extends C> supplier) throws IllegalArgumentException {
+        checkArgNotNull(mapper);
+        checkArgNotNull(mapper2);
+
+        if (isEmpty(a)) {
+            return supplier.apply(0);
+        }
+
+        final int len = a.length > MAX_ARRAY_SIZE / LOAD_FACTOR_FOR_TWO_FLAT_MAP ? MAX_ARRAY_SIZE : a.length * LOAD_FACTOR_FOR_TWO_FLAT_MAP;
+        final C result = supplier.apply(len);
+
+        for (T e : a) {
+            final Collection<? extends U> c1 = mapper.apply(e);
+
+            if (notEmpty(c1)) {
+                for (U e2 : c1) {
+                    final Collection<? extends R> c2 = mapper2.apply(e2);
+
+                    if (notEmpty(c2)) {
+                        result.addAll(c2);
+                    }
+                }
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param <U>
+     * @param <R>
+     * @param c
+     * @param mapper
+     * @param mapper2
+     * @return
+     */
+    public static <T, U, R> List<R> flatMap(final Iterable<? extends T> c, final Function<? super T, ? extends Collection<? extends U>> mapper,
+            final Function<? super U, ? extends Collection<? extends R>> mapper2) {
+
+        return flatMap(c, mapper, mapper2, Factory.<R> ofList());
+    }
+
+    /**
+     * Mostly it's designed for one-step operation to complete the operation in one step.
+     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
+     *
+     * @param <T>
+     * @param <U>
+     * @param <R>
+     * @param <C>
+     * @param c
+     * @param mapper
+     * @param mapper2
+     * @param supplier
+     * @return
+     * @throws IllegalArgumentException
+     */
+    public static <T, U, R, C extends Collection<R>> C flatMap(final Iterable<? extends T> c,
+            final Function<? super T, ? extends Collection<? extends U>> mapper, final Function<? super U, ? extends Collection<? extends R>> mapper2,
+            final IntFunction<? extends C> supplier) throws IllegalArgumentException {
+        checkArgNotNull(mapper);
+        checkArgNotNull(mapper2);
+
+        if (c == null) {
+            return supplier.apply(0);
+        }
+
+        final C result = supplier.apply(initSizeForFlatMap(c));
+
+        for (T e : c) {
+            final Collection<? extends U> c1 = mapper.apply(e);
+
+            if (notEmpty(c1)) {
+                for (U e2 : c1) {
+                    final Collection<? extends R> c2 = mapper2.apply(e2);
+
+                    if (notEmpty(c2)) {
+                        result.addAll(c2);
+                    }
+                }
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param <R>
+     * @param a
+     * @param mapper
+     * @return
+     */
+    public static <T, R> List<R> flatmap(final T[] a, final Function<? super T, ? extends R[]> mapper) { //NOSONAR
+        checkArgNotNull(mapper);
+
+        if (isEmpty(a)) {
+            return new ArrayList<>();
+        }
+
+        return flatmap(a, 0, a.length, mapper);
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param <R>
+     * @param <C>
+     * @param a
+     * @param mapper
+     * @param supplier
+     * @return
+     * @throws IllegalArgumentException
+     */
+    public static <T, R, C extends Collection<R>> C flatmap(final T[] a, final Function<? super T, ? extends R[]> mapper, //NOSONAR
+            final IntFunction<? extends C> supplier) throws IllegalArgumentException {
+        checkArgNotNull(mapper);
+
+        if (isEmpty(a)) {
+            return supplier.apply(0);
+        }
+
+        return flatmap(a, 0, a.length, mapper, supplier);
+    }
+
+    /**
+     * Mostly it's designed for one-step operation to complete the operation in one step.
+     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
+     *
+     * @param <T>
+     * @param <R>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param mapper
+     * @return
+     */
+    public static <T, R> List<R> flatmap(final T[] a, final int fromIndex, final int toIndex, //NOSONAR
+            final Function<? super T, ? extends R[]> mapper) {
+        return flatmap(a, fromIndex, toIndex, mapper, Factory.ofList());
+    }
+
+    /**
+     * Mostly it's designed for one-step operation to complete the operation in one step.
+     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
+     *
+     * @param <T>
+     * @param <R>
+     * @param <C>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param mapper
+     * @param supplier
+     * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
+     */
+    public static <T, R, C extends Collection<R>> C flatmap(final T[] a, final int fromIndex, final int toIndex, //NOSONAR
+            final Function<? super T, ? extends R[]> mapper, final IntFunction<? extends C> supplier)
+            throws IllegalArgumentException, IndexOutOfBoundsException {
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
+        checkArgNotNull(mapper);
+
+        if (isEmpty(a) || fromIndex == toIndex) {
+            return supplier.apply(0);
+        }
+
+        final int len = initSizeForFlatMap(toIndex - fromIndex);
+        final C result = supplier.apply(len);
+        R[] mr = null;
+
+        for (int i = fromIndex; i < toIndex; i++) {
+            if (notEmpty(mr = mapper.apply(a[i]))) {
+                result.addAll(Arrays.asList(mr));
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Mostly it's designed for one-step operation to complete the operation in one step.
+     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
+     *
+     * @param <T>
+     * @param <R>
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @param mapper
+     * @return
+     */
+    public static <T, R> List<R> flatmap(final Collection<? extends T> c, final int fromIndex, final int toIndex, //NOSONAR
+            final Function<? super T, ? extends R[]> mapper) {
+        return flatmap(c, fromIndex, toIndex, mapper, Factory.ofList());
+    }
+
+    /**
+     * Mostly it's designed for one-step operation to complete the operation in one step.
+     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
+     *
+     * @param <T>
+     * @param <R>
+     * @param <C>
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @param mapper
+     * @param supplier
+     * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
+     */
+    public static <T, R, C extends Collection<R>> C flatmap(final Collection<? extends T> c, final int fromIndex, final int toIndex, //NOSONAR
+            final Function<? super T, ? extends R[]> mapper, final IntFunction<? extends C> supplier)
+            throws IllegalArgumentException, IndexOutOfBoundsException {
+        checkFromToIndex(fromIndex, toIndex, size(c));
+        checkArgNotNull(mapper);
+
+        if ((isEmpty(c) && fromIndex == 0 && toIndex == 0) || fromIndex == toIndex) {
+            return supplier.apply(0);
+        }
+
+        final int len = initSizeForFlatMap(toIndex - fromIndex);
+        final C result = supplier.apply(len);
+        R[] mr = null;
+
+        if (c instanceof List && c instanceof RandomAccess) {
+            final List<T> list = (List<T>) c;
+
+            for (int i = fromIndex; i < toIndex; i++) {
+                if (notEmpty(mr = mapper.apply(list.get(i)))) {
+                    result.addAll(Arrays.asList(mr));
+                }
+            }
+        } else {
+            int idx = 0;
+
+            for (T e : c) {
+                if (idx++ < fromIndex) {
+                    continue;
+                }
+
+                if (notEmpty(mr = mapper.apply(e))) {
+                    result.addAll(Arrays.asList(mr));
+                }
+
+                if (idx >= toIndex) {
+                    break;
+                }
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param <R>
+     * @param c
+     * @param mapper
+     * @return
+     */
+    public static <T, R> List<R> flatmap(final Iterable<? extends T> c, final Function<? super T, ? extends R[]> mapper) //NOSONAR
+    {
+        return flatmap(c, mapper, Factory.<R> ofList());
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param <R>
+     * @param <C>
+     * @param c
+     * @param mapper
+     * @param supplier
+     * @return
+     * @throws IllegalArgumentException
+     */
+    public static <T, R, C extends Collection<R>> C flatmap(final Iterable<? extends T> c, //NOSONAR
+            final Function<? super T, ? extends R[]> mapper, final IntFunction<? extends C> supplier) throws IllegalArgumentException {
+        checkArgNotNull(mapper);
+
+        if (c == null) {
+            return supplier.apply(0);
+        }
+
+        final C result = supplier.apply(initSizeForFlatMap(c));
+        R[] mr = null;
+
+        for (T e : c) {
+            if (notEmpty(mr = mapper.apply(e))) {
+                result.addAll(Arrays.asList(mr));
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param a
+     * @param filter
+     * @return the list
+     * @throws IllegalArgumentException
+     */
+    public static <T> List<T> takeWhile(final T[] a, final Predicate<? super T> filter) throws IllegalArgumentException {
+        checkArgNotNull(filter, "filter");
+
+        final List<T> result = new ArrayList<>(min(9, len(a)));
+
+        if (isEmpty(a)) {
+            return result;
+        }
+
+        for (T e : a) {
+            if (filter.test(e)) {
+                result.add(e);
+            } else {
+                break;
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param c
+     * @param filter
+     * @return the list
+     * @throws IllegalArgumentException
+     */
+    public static <T> List<T> takeWhile(final Iterable<? extends T> c, final Predicate<? super T> filter) throws IllegalArgumentException {
+        checkArgNotNull(filter, "filter");
+
+        final List<T> result = new ArrayList<>(min(9, getSizeOrDefault(c, 0)));
+
+        if (c == null) {
+            return result;
+        }
+
+        for (T e : c) {
+            if (filter.test(e)) {
+                result.add(e);
+            } else {
+                break;
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Take while inclusive.
+     *
+     * @param <T>
+     * @param a
+     * @param filter
+     * @return the list
+     * @throws IllegalArgumentException
+     */
+    public static <T> List<T> takeWhileInclusive(final T[] a, final Predicate<? super T> filter) throws IllegalArgumentException {
+        checkArgNotNull(filter, "filter");
+
+        final List<T> result = new ArrayList<>(min(9, len(a)));
+
+        if (isEmpty(a)) {
+            return result;
+        }
+
+        for (T e : a) {
+            result.add(e);
+
+            if (!filter.test(e)) {
+                break;
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Take while inclusive.
+     *
+     * @param <T>
+     * @param c
+     * @param filter
+     * @return the list
+     * @throws IllegalArgumentException
+     */
+    public static <T> List<T> takeWhileInclusive(final Iterable<? extends T> c, final Predicate<? super T> filter) throws IllegalArgumentException {
+        checkArgNotNull(filter, "filter");
+
+        final List<T> result = new ArrayList<>(min(9, getSizeOrDefault(c, 0)));
+
+        if (c == null) {
+            return result;
+        }
+
+        for (T e : c) {
+            result.add(e);
+
+            if (!filter.test(e)) {
+                break;
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param a
+     * @param filter
+     * @return the list
+     * @throws IllegalArgumentException
+     */
+    public static <T> List<T> dropWhile(final T[] a, final Predicate<? super T> filter) throws IllegalArgumentException {
+        checkArgNotNull(filter, "filter");
+
+        final List<T> result = new ArrayList<>(min(9, len(a)));
+
+        if (isEmpty(a)) {
+            return result;
+        }
+
+        final int len = a.length;
+        int idx = 0;
+
+        while (idx < len && filter.test(a[idx])) {
+            idx++;
+        }
+
+        while (idx < len) {
+            result.add(a[idx++]);
+        }
+
+        return result;
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param c
+     * @param filter
+     * @return the list
+     * @throws IllegalArgumentException
+     */
+    public static <T> List<T> dropWhile(final Iterable<? extends T> c, final Predicate<? super T> filter) throws IllegalArgumentException {
+        checkArgNotNull(filter, "filter");
+
+        final List<T> result = new ArrayList<>(min(9, getSizeOrDefault(c, 0)));
+
+        if (c == null) {
+            return result;
+        }
+
+        final Iterator<? extends T> iter = c.iterator();
+        T e = null;
+
+        while (iter.hasNext()) {
+            e = iter.next();
+
+            if (!filter.test(e)) {
+                result.add(e);
+                break;
+            }
+        }
+
+        while (iter.hasNext()) {
+            result.add(iter.next());
+        }
+
+        return result;
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param a
+     * @param filter
+     * @return the list
+     * @throws IllegalArgumentException
+     */
+    public static <T> List<T> skipUntil(final T[] a, final Predicate<? super T> filter) throws IllegalArgumentException {
+        checkArgNotNull(filter, "filter");
+
+        final List<T> result = new ArrayList<>(min(9, len(a)));
+
+        if (isEmpty(a)) {
+            return result;
+        }
+
+        final int len = a.length;
+        int idx = 0;
+
+        while (idx < len && !filter.test(a[idx])) {
+            idx++;
+        }
+
+        while (idx < len) {
+            result.add(a[idx++]);
+        }
+
+        return result;
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param c
+     * @param filter
+     * @return the list
+     * @throws IllegalArgumentException
+     */
+    public static <T> List<T> skipUntil(final Iterable<? extends T> c, final Predicate<? super T> filter) throws IllegalArgumentException {
+        checkArgNotNull(filter, "filter");
+
+        final List<T> result = new ArrayList<>(getMinSize(c));
+
+        if (c == null) {
+            return result;
+        }
+
+        final Iterator<? extends T> iter = c.iterator();
+        T e = null;
+
+        while (iter.hasNext()) {
+            e = iter.next();
+
+            if (filter.test(e)) {
+                result.add(e);
+                break;
+            }
+        }
+
+        while (iter.hasNext()) {
+            result.add(iter.next());
+        }
+
+        return result;
+    }
+
+    private static int getSizeOrDefault(final Iterable<?> c, final int defaultSize) {
+        return c instanceof Collection ? ((Collection<?>) c).size() : defaultSize;
+    }
+
+    private static int getMinSize(final Iterable<?> c) {
+        return min(9, getSizeOrDefault(c, 0));
+    }
+
+    private static int initSizeForFlatMap(final Iterable<?> c) {
+        return c instanceof Collection ? initSizeForFlatMap(((Collection<?>) c).size()) : 0;
+    }
+
+    private static int initSizeForFlatMap(final int size) {
+        return size > MAX_ARRAY_SIZE / LOAD_FACTOR_FOR_FLAT_MAP ? MAX_ARRAY_SIZE : (int) (size * LOAD_FACTOR_FOR_FLAT_MAP); // NOSONAR
+    }
+
+    /**
+     * Mostly it's designed for one-step operation to complete the operation in one step.
+     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
+     *
+     * @param a
+     * @return
+     */
+    public static boolean[] distinct(final boolean[] a) {
+        return distinct(a, 0, len(a)); // NOSONAR
+    }
+
+    /**
+     * Mostly it's designed for one-step operation to complete the operation in one step.
+     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
+     *
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return
+     */
+    public static boolean[] distinct(final boolean[] a, final int fromIndex, final int toIndex) {
+        return removeDuplicates(a, fromIndex, toIndex);
+    }
+
+    /**
+     * Mostly it's designed for one-step operation to complete the operation in one step.
+     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
+     *
+     * @param a
+     * @return
+     */
+    public static char[] distinct(final char[] a) {
+        return distinct(a, 0, len(a)); // NOSONAR
+    }
+
+    /**
+     * Mostly it's designed for one-step operation to complete the operation in one step.
+     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
+     *
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return
+     */
+    public static char[] distinct(final char[] a, final int fromIndex, final int toIndex) {
+        return removeDuplicates(a, fromIndex, toIndex, false);
+    }
+
+    /**
+     * Mostly it's designed for one-step operation to complete the operation in one step.
+     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
+     *
+     * @param a
+     * @return
+     */
+    public static byte[] distinct(final byte[] a) {
+        return distinct(a, 0, len(a)); // NOSONAR
+    }
+
+    /**
+     * Mostly it's designed for one-step operation to complete the operation in one step.
+     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
+     *
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return
+     */
+    public static byte[] distinct(final byte[] a, final int fromIndex, final int toIndex) {
+        return removeDuplicates(a, fromIndex, toIndex, false);
+    }
+
+    /**
+     * Mostly it's designed for one-step operation to complete the operation in one step.
+     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
+     *
+     * @param a
+     * @return
+     */
+    public static short[] distinct(final short[] a) {
+        return distinct(a, 0, len(a)); // NOSONAR
+    }
+
+    /**
+     * Mostly it's designed for one-step operation to complete the operation in one step.
+     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
+     *
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return
+     */
+    public static short[] distinct(final short[] a, final int fromIndex, final int toIndex) {
+        return removeDuplicates(a, fromIndex, toIndex, false);
+    }
+
+    /**
+     * Mostly it's designed for one-step operation to complete the operation in one step.
+     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
+     *
+     * @param a
+     * @return
+     */
+    public static int[] distinct(final int[] a) {
+        return distinct(a, 0, len(a)); // NOSONAR
+    }
+
+    /**
+     * Mostly it's designed for one-step operation to complete the operation in one step.
+     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
+     *
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return
+     */
+    public static int[] distinct(final int[] a, final int fromIndex, final int toIndex) {
+        return removeDuplicates(a, fromIndex, toIndex, false);
+    }
+
+    /**
+     * Mostly it's designed for one-step operation to complete the operation in one step.
+     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
+     *
+     * @param a
+     * @return
+     */
+    public static long[] distinct(final long[] a) {
+        return distinct(a, 0, len(a)); // NOSONAR
+    }
+
+    /**
+     * Mostly it's designed for one-step operation to complete the operation in one step.
+     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
+     *
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return
+     */
+    public static long[] distinct(final long[] a, final int fromIndex, final int toIndex) {
+        return removeDuplicates(a, fromIndex, toIndex, false);
+    }
+
+    /**
+     * Mostly it's designed for one-step operation to complete the operation in one step.
+     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
+     *
+     * @param a
+     * @return
+     */
+    public static float[] distinct(final float[] a) {
+        return distinct(a, 0, len(a)); // NOSONAR
+    }
+
+    /**
+     * Mostly it's designed for one-step operation to complete the operation in one step.
+     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
+     *
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return
+     */
+    public static float[] distinct(final float[] a, final int fromIndex, final int toIndex) {
+        return removeDuplicates(a, fromIndex, toIndex, false);
+    }
+
+    /**
+     * Mostly it's designed for one-step operation to complete the operation in one step.
+     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
+     *
+     * @param a
+     * @return
+     */
+    public static double[] distinct(final double[] a) {
+        return distinct(a, 0, len(a)); // NOSONAR
+    }
+
+    /**
+     * Mostly it's designed for one-step operation to complete the operation in one step.
+     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
+     *
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return
+     */
+    public static double[] distinct(final double[] a, final int fromIndex, final int toIndex) {
+        return removeDuplicates(a, fromIndex, toIndex, false);
+    }
+
+    /**
+     * Mostly it's designed for one-step operation to complete the operation in one step.
+     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
+     *
+     * @param <T>
+     * @param a
+     * @return
+     */
+    public static <T> List<T> distinct(final T[] a) {
+        if (isEmpty(a)) {
+            return new ArrayList<>();
+        }
+
+        return distinct(a, 0, a.length);
+    }
+
+    /**
+     * Mostly it's designed for one-step operation to complete the operation in one step.
+     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
+     *
+     * @param <T>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return
+     * @throws IndexOutOfBoundsException
+     */
+    public static <T> List<T> distinct(final T[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
+
+        if (isEmpty(a) || fromIndex == toIndex) {
+            return new ArrayList<>();
+        }
+
+        final int initCapacity = (toIndex - fromIndex) / 2 + 1;
+        final List<T> result = new ArrayList<>(initCapacity);
+        final Set<Object> set = newHashSet(initCapacity);
+
+        for (int i = fromIndex; i < toIndex; i++) {
+            if (set.add(hashKey(a[i]))) {
+                result.add(a[i]);
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Mostly it's designed for one-step operation to complete the operation in one step.
+     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
+     *
+     * @param <T>
+     * @param c
+     * @return
+     */
+    public static <T> List<T> distinct(final Iterable<? extends T> c) {
+        if (c == null) {
+            return new ArrayList<>();
+        } else if (c instanceof Collection) {
+            final Collection<T> coll = (Collection<T>) c;
+            return distinct(coll, 0, coll.size());
+        } else {
+            final List<T> result = new ArrayList<>();
+            final Set<Object> set = new HashSet<>();
+
+            for (T e : c) {
+                if (set.add(hashKey(e))) {
+                    result.add(e);
+                }
+            }
+
+            return result;
+        }
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param iter
+     * @return
+     * @see Iterators#distinct(Iterator)
+     * @see Iterators#distinct(Iterable)
+     * @see Iterators#distinctBy(Iterator, Function)
+     * @see Iterators#distinctBy(Iterable, Function)
+     */
+    public static <T> List<T> distinct(final Iterator<? extends T> iter) {
+        return distinctBy(iter, Fn.identity());
+    }
+
+    /**
+     * Mostly it's designed for one-step operation to complete the operation in one step.
+     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
+     *
+     * @param <T>
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @return
+     * @throws IndexOutOfBoundsException
+     */
+    public static <T> List<T> distinct(final Collection<? extends T> c, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
+        checkFromToIndex(fromIndex, toIndex, size(c));
+
+        if ((isEmpty(c) && fromIndex == 0 && toIndex == 0) || fromIndex == toIndex) {
+            return new ArrayList<>();
+        }
+
+        final int initCapacity = (toIndex - fromIndex) / 2 + 1;
+        final List<T> result = new ArrayList<>(initCapacity);
+        final Set<Object> set = newHashSet(initCapacity);
+        T e = null;
+
+        if (c instanceof List && c instanceof RandomAccess) {
+            final List<T> list = (List<T>) c;
+
+            for (int i = fromIndex; i < toIndex; i++) {
+                e = list.get(i);
+
+                if (set.add(hashKey(e))) {
+                    result.add(e);
+                }
+            }
+        } else {
+            final Iterator<? extends T> it = c.iterator();
+
+            for (int i = 0; i < toIndex && it.hasNext(); i++) {
+                e = it.next();
+
+                if (i < fromIndex) {
+                    continue;
+                }
+
+                if (set.add(hashKey(e))) {
+                    result.add(e);
+                }
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Distinct by the value mapped from <code>keyMapper</code>.
+     *
+     * Mostly it's designed for one-step operation to complete the operation in one step.
+     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
+     *
+     * @param <T>
+     * @param a
+     * @param keyMapper don't change value of the input parameter.
+     * @return
+     */
+    public static <T> List<T> distinctBy(final T[] a, final Function<? super T, ?> keyMapper) {
+        if (isEmpty(a)) {
+            return new ArrayList<>();
+        }
+
+        return distinctBy(a, 0, a.length, keyMapper);
+    }
+
+    /**
+     * Distinct by the value mapped from <code>keyMapper</code>.
+     *
+     * Mostly it's designed for one-step operation to complete the operation in one step.
+     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
+     *
+     * @param <T>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param keyMapper don't change value of the input parameter.
+     * @return
+     * @throws IndexOutOfBoundsException
+     */
+    public static <T> List<T> distinctBy(final T[] a, final int fromIndex, final int toIndex, final Function<? super T, ?> keyMapper)
+            throws IndexOutOfBoundsException {
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
+
+        if (isEmpty(a) || fromIndex == toIndex) {
+            return new ArrayList<>();
+        }
+
+        final int initCapacity = (toIndex - fromIndex) / 2 + 1;
+        final List<T> result = new ArrayList<>(initCapacity);
+        final Set<Object> set = newHashSet(initCapacity);
+
+        for (int i = fromIndex; i < toIndex; i++) {
+            if (set.add(hashKey(keyMapper.apply(a[i])))) {
+                result.add(a[i]);
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Distinct by the value mapped from <code>keyMapper</code>.
+     *
+     * Mostly it's designed for one-step operation to complete the operation in one step.
+     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
+     *
+     * @param <T>
+     * @param <C>
+     * @param a
+     * @param keyMapper don't change value of the input parameter.
+     * @param supplier
+     * @return
+     */
+    public static <T, C extends Collection<T>> C distinctBy(final T[] a, final Function<? super T, ?> keyMapper, final Supplier<C> supplier) {
+        if (isEmpty(a)) {
+            return supplier.get();
+        }
+
+        final C result = supplier.get();
+        final Set<Object> set = newHashSet(len(a) / 2 + 1);
+
+        for (T e : a) {
+            if (set.add(hashKey(keyMapper.apply(e)))) {
+                result.add(e);
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Distinct by the value mapped from <code>keyMapper</code>.
+     *
+     * Mostly it's designed for one-step operation to complete the operation in one step.
+     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
+     *
+     * @param <T>
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @param keyMapper don't change value of the input parameter.
+     * @return
+     * @throws IndexOutOfBoundsException
+     */
+    public static <T> List<T> distinctBy(final Collection<? extends T> c, final int fromIndex, final int toIndex, final Function<? super T, ?> keyMapper)
+            throws IndexOutOfBoundsException {
+        checkFromToIndex(fromIndex, toIndex, size(c));
+
+        if ((isEmpty(c) && fromIndex == 0 && toIndex == 0) || fromIndex == toIndex) {
+            return new ArrayList<>();
+        }
+
+        final int initCapacity = (toIndex - fromIndex) / 2 + 1;
+        final List<T> result = new ArrayList<>(initCapacity);
+        final Set<Object> set = newHashSet(initCapacity);
+        T e = null;
+
+        if (c instanceof List && c instanceof RandomAccess) {
+            final List<T> list = (List<T>) c;
+
+            for (int i = fromIndex; i < toIndex; i++) {
+                e = list.get(i);
+
+                if (set.add(hashKey(keyMapper.apply(e)))) {
+                    result.add(e);
+                }
+            }
+        } else {
+            final Iterator<? extends T> it = c.iterator();
+
+            for (int i = 0; i < toIndex && it.hasNext(); i++) {
+                e = it.next();
+
+                if (i < fromIndex) {
+                    continue;
+                }
+
+                if (set.add(hashKey(keyMapper.apply(e)))) {
+                    result.add(e);
+                }
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Distinct by the value mapped from <code>keyMapper</code>.
+     *
+     * Mostly it's designed for one-step operation to complete the operation in one step.
+     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
+     *
+     * @param <T>
+     * @param c
+     * @param keyMapper don't change value of the input parameter.
+     * @return
+     */
+    public static <T> List<T> distinctBy(final Iterable<? extends T> c, final Function<? super T, ?> keyMapper) {
+        return distinctBy(c, keyMapper, Suppliers.ofList());
+    }
+
+    /**
+     * Distinct by the value mapped from <code>keyMapper</code>.
+     *
+     * Mostly it's designed for one-step operation to complete the operation in one step.
+     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
+     *
+     * @param <T>
+     * @param <C>
+     * @param c
+     * @param keyMapper don't change value of the input parameter.
+     * @param supplier
+     * @return
+     */
+    public static <T, C extends Collection<T>> C distinctBy(final Iterable<? extends T> c, final Function<? super T, ?> keyMapper, final Supplier<C> supplier) {
+        if (c == null) {
+            return supplier.get();
+        }
+
+        final C result = supplier.get();
+        final Set<Object> set = newHashSet(c instanceof Collection ? ((Collection<T>) c).size() / 2 + 1 : 0);
+
+        for (T e : c) {
+            if (set.add(hashKey(keyMapper.apply(e)))) {
+                result.add(e);
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Distinct by the value mapped from <code>keyMapper</code>.
+     *
+     * Mostly it's designed for one-step operation to complete the operation in one step.
+     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
+     *
+     * @param <T>
+     * @param iter
+     * @param keyMapper don't change value of the input parameter.
+     * @return
+     * @see Iterators#distinct(Iterator)
+     * @see Iterators#distinct(Iterable)
+     * @see Iterators#distinctBy(Iterator, Function)
+     * @see Iterators#distinctBy(Iterable, Function)
+     */
+    public static <T> List<T> distinctBy(final Iterator<? extends T> iter, final Function<? super T, ?> keyMapper) {
+        return distinctBy(iter, keyMapper, Suppliers.ofList());
+    }
+
+    /**
+     * Distinct by the value mapped from <code>keyMapper</code>.
+     *
+     * Mostly it's designed for one-step operation to complete the operation in one step.
+     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
+     *
+     * @param <T>
+     * @param <C>
+     * @param iter
+     * @param keyMapper don't change value of the input parameter.
+     * @param supplier
+     * @return
+     * @see Iterators#distinct(Iterator)
+     * @see Iterators#distinct(Iterable)
+     * @see Iterators#distinctBy(Iterator, Function)
+     * @see Iterators#distinctBy(Iterable, Function)
+     */
+    public static <T, C extends Collection<T>> C distinctBy(final Iterator<? extends T> iter, final Function<? super T, ?> keyMapper,
+            final Supplier<C> supplier) {
+        if (iter == null) {
+            return supplier.get();
+        }
+
+        final C result = supplier.get();
+        final Set<Object> set = new HashSet<>();
+
+        T next = null;
+
+        while (iter.hasNext()) {
+            next = iter.next();
+
+            if (set.add(hashKey(keyMapper.apply(next)))) {
+                result.add(next);
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param a
+     * @param filter
+     * @return
+     * @throws IllegalArgumentException
+     */
+    public static <T> boolean allMatch(final T[] a, final Predicate<? super T> filter) throws IllegalArgumentException {
+        checkArgNotNull(filter, "filter");
+
+        if (isEmpty(a)) {
+            return true;
+        }
+
+        for (T e : a) {
+            if (!filter.test(e)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param c
+     * @param filter
+     * @return
+     * @throws IllegalArgumentException
+     */
+    public static <T> boolean allMatch(final Iterable<? extends T> c, final Predicate<? super T> filter) throws IllegalArgumentException {
+        checkArgNotNull(filter, "filter");
+
+        if (c == null) {
+            return true;
+        }
+
+        for (T e : c) {
+            if (!filter.test(e)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param iter
+     * @param filter
+     * @return
+     * @throws IllegalArgumentException
+     */
+    public static <T> boolean allMatch(final Iterator<? extends T> iter, final Predicate<? super T> filter) throws IllegalArgumentException {
+        checkArgNotNull(filter, "filter");
+
+        if (iter == null) {
+            return true;
+        }
+
+        while (iter.hasNext()) {
+            if (!filter.test(iter.next())) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param a
+     * @param filter
+     * @return
+     * @throws IllegalArgumentException
+     */
+    public static <T> boolean anyMatch(final T[] a, final Predicate<? super T> filter) throws IllegalArgumentException {
+        checkArgNotNull(filter, "filter");
+
+        if (isEmpty(a)) {
+            return false;
+        }
+
+        for (T e : a) {
+            if (filter.test(e)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param c
+     * @param filter
+     * @return
+     * @throws IllegalArgumentException
+     */
+    public static <T> boolean anyMatch(final Iterable<? extends T> c, final Predicate<? super T> filter) throws IllegalArgumentException {
+        checkArgNotNull(filter, "filter");
+
+        if (c == null) {
+            return false;
+        }
+
+        for (T e : c) {
+            if (filter.test(e)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param iter
+     * @param filter
+     * @return
+     * @throws IllegalArgumentException
+     */
+    public static <T> boolean anyMatch(final Iterator<? extends T> iter, final Predicate<? super T> filter) throws IllegalArgumentException {
+        checkArgNotNull(filter, "filter");
+
+        if (iter == null) {
+            return false;
+        }
+
+        while (iter.hasNext()) {
+            if (filter.test(iter.next())) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param a
+     * @param filter
+     * @return
+     * @throws IllegalArgumentException
+     */
+    public static <T> boolean noneMatch(final T[] a, final Predicate<? super T> filter) throws IllegalArgumentException {
+        checkArgNotNull(filter, "filter");
+
+        if (isEmpty(a)) {
+            return true;
+        }
+
+        for (T e : a) {
+            if (filter.test(e)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param c
+     * @param filter
+     * @return
+     * @throws IllegalArgumentException
+     */
+    public static <T> boolean noneMatch(final Iterable<? extends T> c, final Predicate<? super T> filter) throws IllegalArgumentException {
+        checkArgNotNull(filter, "filter");
+
+        if (c == null) {
+            return true;
+        }
+
+        for (T e : c) {
+            if (filter.test(e)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param iter
+     * @param filter
+     * @return
+     * @throws IllegalArgumentException
+     */
+    public static <T> boolean noneMatch(final Iterator<? extends T> iter, final Predicate<? super T> filter) throws IllegalArgumentException {
+        checkArgNotNull(filter, "filter");
+
+        if (iter == null) {
+            return true;
+        }
+
+        while (iter.hasNext()) {
+            if (filter.test(iter.next())) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param a
+     * @param atLeast
+     * @param atMost
+     * @param filter
+     * @return
+     */
+    public static <T> boolean nMatch(final T[] a, final int atLeast, final int atMost, final Predicate<? super T> filter) {
+        checkArgNotNegative(atLeast, "atLeast"); //NOSONAR
+        checkArgNotNegative(atMost, "atMost"); //NOSONAR
+        checkArgument(atLeast <= atMost, "'atLeast' must be <= 'atMost'"); //NOSONAR
+        checkArgNotNull(filter, "filter");
+
+        if (isEmpty(a)) {
+            return atLeast == 0;
+        }
+
+        final int len = len(a);
+
+        if (len < atLeast) {
+            return false;
+        }
+
+        long cnt = 0;
+
+        for (int i = 0; i < len; i++) {
+            if (filter.test(a[i]) && (++cnt > atMost)) {
+                return false;
+            }
+        }
+
+        return cnt >= atLeast && cnt <= atMost;
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param c
+     * @param atLeast
+     * @param atMost
+     * @param filter
+     * @return
+     * @throws IllegalArgumentException
+     */
+    public static <T> boolean nMatch(final Iterable<? extends T> c, final int atLeast, final int atMost, final Predicate<? super T> filter)
+            throws IllegalArgumentException {
+        checkArgNotNegative(atLeast, "atLeast");
+        checkArgNotNegative(atMost, "atMost");
+        checkArgument(atLeast <= atMost, "'atLeast' must be <= 'atMost'");
+        checkArgNotNull(filter, "filter");
+
+        if (c == null) {
+            return atLeast == 0;
+        }
+
+        return nMatch(c.iterator(), atLeast, atMost, filter);
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param iter
+     * @param atLeast
+     * @param atMost
+     * @param filter
+     * @return
+     * @throws IllegalArgumentException
+     */
+    public static <T> boolean nMatch(final Iterator<? extends T> iter, final int atLeast, final int atMost, final Predicate<? super T> filter)
+            throws IllegalArgumentException {
+        checkArgNotNegative(atLeast, "atLeast");
+        checkArgNotNegative(atMost, "atMost");
+        checkArgument(atLeast <= atMost, "'atLeast' must be <= 'atMost'");
+        checkArgNotNull(filter, "filter");
+
+        if (iter == null) {
+            return atLeast == 0;
+        }
+
+        long cnt = 0;
+
+        while (iter.hasNext()) {
+            if (filter.test(iter.next()) && (++cnt > atMost)) {
+                return false;
+            }
+        }
+
+        return cnt >= atLeast && cnt <= atMost;
+    }
+
+    /**
+     *
+     *
+     * @param a
+     * @return
+     */
+    public static boolean allTrue(final boolean[] a) {
+        if (isEmpty(a)) {
+            return true;
+        }
+
+        for (boolean b : a) {
+            if (!b) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     *
+     *
+     * @param a
+     * @return
+     */
+    public static boolean allFalse(final boolean[] a) {
+        if (isEmpty(a)) {
+            return true;
+        }
+
+        for (boolean b : a) {
+            if (b) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     *
+     *
+     * @param a
+     * @return
+     */
+    public static boolean anyTrue(final boolean[] a) {
+        if (isEmpty(a)) {
+            return false;
+        }
+
+        for (boolean b : a) {
+            if (b) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     *
+     *
+     * @param a
+     * @return
+     */
+    public static boolean anyFalse(final boolean[] a) {
+        if (isEmpty(a)) {
+            return false;
+        }
+
+        for (boolean b : a) {
+            if (!b) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Mostly it's designed for one-step operation to complete the operation in one step.
+     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
+     *
+     * @param a
+     * @param filter
+     * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
+     */
+    public static int count(final boolean[] a, final BooleanPredicate filter) throws IllegalArgumentException, IndexOutOfBoundsException {
+        checkArgNotNull(filter, "filter");
+
+        if (isEmpty(a)) {
+            return 0;
+        }
+
+        return count(a, 0, a.length, filter);
+    }
+
+    /**
+     * Mostly it's designed for one-step operation to complete the operation in one step.
+     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
+     *
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param filter
+     * @return
+     */
+    public static int count(final boolean[] a, final int fromIndex, final int toIndex, final BooleanPredicate filter) {
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
+        checkArgNotNull(filter, "filter");
+
+        if (isEmpty(a) || fromIndex == toIndex) {
+            return 0;
+        }
+
+        int count = 0;
+
+        for (int i = fromIndex; i < toIndex; i++) {
+            if (filter.test(a[i])) {
+                count++;
+            }
+        }
+
+        return count;
+    }
+
+    /**
+     * Mostly it's designed for one-step operation to complete the operation in one step.
+     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
+     *
+     * @param a
+     * @param filter
+     * @return
+     * @throws IllegalArgumentException
+     */
+    public static int count(final char[] a, final CharPredicate filter) throws IllegalArgumentException {
+        checkArgNotNull(filter, "filter");
+
+        if (isEmpty(a)) {
+            return 0;
+        }
+
+        return count(a, 0, a.length, filter);
+    }
+
+    /**
+     * Mostly it's designed for one-step operation to complete the operation in one step.
+     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
+     *
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param filter
+     * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
+     */
+    public static int count(final char[] a, final int fromIndex, final int toIndex, final CharPredicate filter)
+            throws IllegalArgumentException, IndexOutOfBoundsException {
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
+        checkArgNotNull(filter, "filter");
+
+        if (isEmpty(a) || fromIndex == toIndex) {
+            return 0;
+        }
+
+        int count = 0;
+
+        for (int i = fromIndex; i < toIndex; i++) {
+            if (filter.test(a[i])) {
+                count++;
+            }
+        }
+
+        return count;
+    }
+
+    /**
+     * Mostly it's designed for one-step operation to complete the operation in one step.
+     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
+     *
+     * @param a
+     * @param filter
+     * @return
+     * @throws IllegalArgumentException
+     */
+    public static int count(final byte[] a, final BytePredicate filter) throws IllegalArgumentException {
+        checkArgNotNull(filter, "filter");
+
+        if (isEmpty(a)) {
+            return 0;
+        }
+
+        return count(a, 0, a.length, filter);
+    }
+
+    /**
+     * Mostly it's designed for one-step operation to complete the operation in one step.
+     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
+     *
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param filter
+     * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
+     */
+    public static int count(final byte[] a, final int fromIndex, final int toIndex, final BytePredicate filter)
+            throws IllegalArgumentException, IndexOutOfBoundsException {
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
+        checkArgNotNull(filter, "filter");
+
+        if (isEmpty(a) || fromIndex == toIndex) {
+            return 0;
+        }
+
+        int count = 0;
+
+        for (int i = fromIndex; i < toIndex; i++) {
+            if (filter.test(a[i])) {
+                count++;
+            }
+        }
+
+        return count;
+    }
+
+    /**
+     * Mostly it's designed for one-step operation to complete the operation in one step.
+     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
+     *
+     * @param a
+     * @param filter
+     * @return
+     * @throws IllegalArgumentException
+     */
+    public static int count(final short[] a, final ShortPredicate filter) throws IllegalArgumentException {
+        checkArgNotNull(filter, "filter");
+
+        if (isEmpty(a)) {
+            return 0;
+        }
+
+        return count(a, 0, a.length, filter);
+    }
+
+    /**
+     * Mostly it's designed for one-step operation to complete the operation in one step.
+     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
+     *
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param filter
+     * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
+     */
+    public static int count(final short[] a, final int fromIndex, final int toIndex, final ShortPredicate filter)
+            throws IllegalArgumentException, IndexOutOfBoundsException {
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
+        checkArgNotNull(filter, "filter");
+
+        if (isEmpty(a) || fromIndex == toIndex) {
+            return 0;
+        }
+
+        int count = 0;
+
+        for (int i = fromIndex; i < toIndex; i++) {
+            if (filter.test(a[i])) {
+                count++;
+            }
+        }
+
+        return count;
+    }
+
+    /**
+     * Mostly it's designed for one-step operation to complete the operation in one step.
+     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
+     *
+     * @param a
+     * @param filter
+     * @return
+     * @throws IllegalArgumentException
+     */
+    public static int count(final int[] a, final IntPredicate filter) throws IllegalArgumentException {
+        checkArgNotNull(filter, "filter");
+
+        if (isEmpty(a)) {
+            return 0;
+        }
+
+        return count(a, 0, a.length, filter);
+    }
+
+    /**
+     * Mostly it's designed for one-step operation to complete the operation in one step.
+     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
+     *
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param filter
+     * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
+     */
+    public static int count(final int[] a, final int fromIndex, final int toIndex, final IntPredicate filter)
+            throws IllegalArgumentException, IndexOutOfBoundsException {
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
+        checkArgNotNull(filter, "filter");
+
+        if (isEmpty(a) || fromIndex == toIndex) {
+            return 0;
+        }
+
+        int count = 0;
+
+        for (int i = fromIndex; i < toIndex; i++) {
+            if (filter.test(a[i])) {
+                count++;
+            }
+        }
+
+        return count;
+    }
+
+    /**
+     * Mostly it's designed for one-step operation to complete the operation in one step.
+     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
+     *
+     * @param a
+     * @param filter
+     * @return
+     * @throws IllegalArgumentException
+     */
+    public static int count(final long[] a, final LongPredicate filter) throws IllegalArgumentException {
+        checkArgNotNull(filter, "filter");
+
+        if (isEmpty(a)) {
+            return 0;
+        }
+
+        return count(a, 0, a.length, filter);
+    }
+
+    /**
+     * Mostly it's designed for one-step operation to complete the operation in one step.
+     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
+     *
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param filter
+     * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
+     */
+    public static int count(final long[] a, final int fromIndex, final int toIndex, final LongPredicate filter)
+            throws IllegalArgumentException, IndexOutOfBoundsException {
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
+        checkArgNotNull(filter, "filter");
+
+        if (isEmpty(a) || fromIndex == toIndex) {
+            return 0;
+        }
+
+        int count = 0;
+
+        for (int i = fromIndex; i < toIndex; i++) {
+            if (filter.test(a[i])) {
+                count++;
+            }
+        }
+
+        return count;
+    }
+
+    /**
+     * Mostly it's designed for one-step operation to complete the operation in one step.
+     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
+     *
+     * @param a
+     * @param filter
+     * @return
+     * @throws IllegalArgumentException
+     */
+    public static int count(final float[] a, final FloatPredicate filter) throws IllegalArgumentException {
+        checkArgNotNull(filter, "filter");
+
+        if (isEmpty(a)) {
+            return 0;
+        }
+
+        return count(a, 0, a.length, filter);
+    }
+
+    /**
+     * Mostly it's designed for one-step operation to complete the operation in one step.
+     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
+     *
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param filter
+     * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
+     */
+    public static int count(final float[] a, final int fromIndex, final int toIndex, final FloatPredicate filter)
+            throws IllegalArgumentException, IndexOutOfBoundsException {
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
+        checkArgNotNull(filter, "filter");
+
+        if (isEmpty(a) || fromIndex == toIndex) {
+            return 0;
+        }
+
+        int count = 0;
+
+        for (int i = fromIndex; i < toIndex; i++) {
+            if (filter.test(a[i])) {
+                count++;
+            }
+        }
+
+        return count;
+    }
+
+    /**
+     * Mostly it's designed for one-step operation to complete the operation in one step.
+     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
+     *
+     * @param a
+     * @param filter
+     * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
+     */
+    public static int count(final double[] a, final DoublePredicate filter) throws IllegalArgumentException, IndexOutOfBoundsException {
+        checkArgNotNull(filter, "filter");
+
+        if (isEmpty(a)) {
+            return 0;
+        }
+
+        return count(a, 0, a.length, filter);
+    }
+
+    /**
+     * Mostly it's designed for one-step operation to complete the operation in one step.
+     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
+     *
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param filter
+     * @return
+     */
+    public static int count(final double[] a, final int fromIndex, final int toIndex, final DoublePredicate filter) {
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
+        checkArgNotNull(filter, "filter");
+
+        if (isEmpty(a) || fromIndex == toIndex) {
+            return 0;
+        }
+
+        int count = 0;
+
+        for (int i = fromIndex; i < toIndex; i++) {
+            if (filter.test(a[i])) {
+                count++;
+            }
+        }
+
+        return count;
+    }
+
+    /**
+     * Mostly it's designed for one-step operation to complete the operation in one step.
+     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
+     *
+     * @param <T>
+     * @param a
+     * @param filter
+     * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
+     */
+    public static <T> int count(final T[] a, final Predicate<? super T> filter) throws IllegalArgumentException, IndexOutOfBoundsException {
+        checkArgNotNull(filter, "filter");
+
+        if (isEmpty(a)) {
+            return 0;
+        }
+
+        return count(a, 0, a.length, filter);
+    }
+
+    /**
+     * Mostly it's designed for one-step operation to complete the operation in one step.
+     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
+     *
+     * @param <T>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param filter
+     * @return
+     */
+    public static <T> int count(final T[] a, final int fromIndex, final int toIndex, final Predicate<? super T> filter) {
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
+        checkArgNotNull(filter, "filter");
+
+        if (isEmpty(a) || fromIndex == toIndex) {
+            return 0;
+        }
+
+        int count = 0;
+
+        for (int i = fromIndex; i < toIndex; i++) {
+            if (filter.test(a[i])) {
+                count++;
+            }
+        }
+
+        return count;
+    }
+
+    /**
+     * Mostly it's designed for one-step operation to complete the operation in one step.
+     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
+     *
+     * @param <T>
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @param filter
+     * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
+     */
+    public static <T> int count(final Collection<? extends T> c, final int fromIndex, final int toIndex, final Predicate<? super T> filter)
+            throws IllegalArgumentException, IndexOutOfBoundsException {
+        checkFromToIndex(fromIndex, toIndex, size(c));
+        checkArgNotNull(filter, "filter");
+
+        if ((isEmpty(c) && fromIndex == 0 && toIndex == 0) || (fromIndex == toIndex && fromIndex < c.size())) {
+            return 0;
+        }
+
+        int count = 0;
+
+        if (c instanceof List && c instanceof RandomAccess) {
+            final List<T> list = (List<T>) c;
+
+            for (int i = fromIndex; i < toIndex; i++) {
+                if (filter.test(list.get(i))) {
+                    count++;
+                }
+            }
+        } else {
+            int idx = 0;
+
+            for (T e : c) {
+                if (idx++ < fromIndex) {
+                    continue;
+                }
+
+                if (filter.test(e)) {
+                    count++;
+                }
+
+                if (idx >= toIndex) {
+                    break;
+                }
+            }
+        }
+
+        return count;
+    }
+
+    /**
+     * Mostly it's designed for one-step operation to complete the operation in one step.
+     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
+     *
+     * @param <T>
+     * @param c
+     * @param filter
+     * @return
+     * @throws IllegalArgumentException
+     */
+    public static <T> int count(final Iterable<? extends T> c, final Predicate<? super T> filter) throws IllegalArgumentException {
+        checkArgNotNull(filter, "filter");
+
+        if (c == null) {
+            return 0;
+        }
+
+        int count = 0;
+
+        for (T e : c) {
+            if (filter.test(e)) {
+                count++;
+            }
+        }
+
+        return count;
+    }
+
+    /**
+     *
+     *
+     * @param iter
+     * @return
+     * @throws IllegalArgumentException
+     * @throws ArithmeticException if the total {@code count} overflows an {@code int}.
+     */
+    public static int count(final Iterator<?> iter) throws IllegalArgumentException, ArithmeticException {
+        if (iter == null) {
+            return 0;
+        }
+
+        long res = 0;
+
+        while (iter.hasNext()) {
+            iter.next();
+            res++;
+        }
+
+        return Numbers.toIntExact(res);
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param iter
+     * @param filter
+     * @return
+     * @throws ArithmeticException if the total matched {@code count} overflows an {@code int}.
+     */
+    public static <T> int count(final Iterator<? extends T> iter, final Predicate<? super T> filter) throws ArithmeticException {
+        checkArgNotNull(filter, "filter");
+
+        if (iter == null) {
+            return 0;
+        }
+
+        long res = 0;
+
+        while (iter.hasNext()) {
+            if (filter.test(iter.next())) {
+                res++;
+            }
+        }
+
+        return Numbers.toIntExact(res);
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param a
+     * @param b
+     * @param nextSelector
+     * @return
+     */
+    public static <T> List<T> merge(final T[] a, final T[] b, final BiFunction<? super T, ? super T, MergeResult> nextSelector) {
+        if (isEmpty(a)) {
+            return isEmpty(b) ? new ArrayList<>() : asList(b);
+        } else if (isEmpty(b)) {
+            return asList(a);
+        }
+
+        final List<T> result = new ArrayList<>(a.length + b.length);
+        final int lenA = a.length;
+        final int lenB = b.length;
+        int cursorA = 0;
+        int cursorB = 0;
+
+        while (cursorA < lenA || cursorB < lenB) {
+            if (cursorA < lenA) {
+                if (cursorB < lenB) {
+                    if (nextSelector.apply(a[cursorA], b[cursorB]) == MergeResult.TAKE_FIRST) {
+                        result.add(a[cursorA++]);
+                    } else {
+                        result.add(b[cursorB++]);
+                    }
+                } else {
+                    result.add(a[cursorA++]);
+                }
+            } else {
+                result.add(b[cursorB++]);
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param a
+     * @param b
+     * @param nextSelector
+     * @return
+     */
+    public static <T> List<T> merge(final Iterable<? extends T> a, final Iterable<? extends T> b,
+            final BiFunction<? super T, ? super T, MergeResult> nextSelector) {
+        return merge(N.asList(a, b), nextSelector, Factory.ofList());
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param c
+     * @param nextSelector
+     * @return
+     */
+    public static <T> List<T> merge(final Collection<? extends Iterable<? extends T>> c, final BiFunction<? super T, ? super T, MergeResult> nextSelector) {
+        return merge(c, nextSelector, Factory.ofList());
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param <C>
+     * @param c
+     * @param nextSelector
+     * @param supplier
+     * @return
+     * @
+     */
+    public static <T, C extends Collection<T>> C merge(final Collection<? extends Iterable<? extends T>> c,
+            final BiFunction<? super T, ? super T, MergeResult> nextSelector, final IntFunction<? extends C> supplier) {
+        if (N.isEmpty(c)) {
+            return supplier.apply(0);
+        } else if (c.size() == 1) {
+            final Iterable<? extends T> a = N.firstOrNullIfEmpty(c);
+            return a == null ? supplier.apply(0) : N.toCollection(a, supplier);
+        } else if (c.size() == 2) {
+            final Iterator<? extends Iterable<? extends T>> iter = c.iterator();
+            final Iterable<? extends T> a = iter.next();
+            final Iterable<? extends T> b = iter.next();
+
+            if (a == null) {
+                return b == null ? supplier.apply(0) : N.toCollection(b, supplier);
+            } else if (b == null) {
+                return N.toCollection(a, supplier);
+            }
+
+            final C ret = supplier.apply(getSizeOrDefault(a, 0) + getSizeOrDefault(b, 0));
+            final Iterator<? extends T> iterA = a.iterator();
+            final Iterator<? extends T> iterB = b.iterator();
+
+            T nextA = null;
+            T nextB = null;
+            boolean hasNextA = false;
+            boolean hasNextB = false;
+
+            while (hasNextA || hasNextB || iterA.hasNext() || iterB.hasNext()) {
+                if (hasNextA) {
+                    if (iterB.hasNext()) {
+                        if (nextSelector.apply(nextA, (nextB = iterB.next())) == MergeResult.TAKE_FIRST) {
+                            hasNextA = false;
+                            hasNextB = true;
+                            ret.add(nextA);
+                        } else {
+                            ret.add(nextB);
+                        }
+                    } else {
+                        hasNextA = false;
+                        ret.add(nextA);
+                    }
+                } else if (hasNextB) {
+                    if (iterA.hasNext()) {
+                        if (nextSelector.apply((nextA = iterA.next()), nextB) == MergeResult.TAKE_FIRST) {
+                            ret.add(nextA);
+                        } else {
+                            hasNextA = true;
+                            hasNextB = false;
+                            ret.add(nextB);
+                        }
+                    } else {
+                        hasNextB = false;
+                        ret.add(nextB);
+                    }
+                } else if (iterA.hasNext()) {
+                    if (iterB.hasNext()) {
+                        if (nextSelector.apply((nextA = iterA.next()), (nextB = iterB.next())) == MergeResult.TAKE_FIRST) {
+                            hasNextB = true;
+                            ret.add(nextA);
+                        } else {
+                            hasNextA = true;
+                            ret.add(nextB);
+                        }
+                    } else {
+                        ret.add(iterA.next());
+                    }
+                } else {
+                    ret.add(iterB.next());
+                }
+            }
+
+            return ret;
+        } else {
+            int totalSize = 0;
+            Iterator<T> mergedIter = ObjIterator.empty();
+            Iterator<? extends T> iter = null;
+
+            for (Iterable<? extends T> e : c) {
+                iter = e == null ? null : e.iterator();
+
+                if (iter == null || iter.hasNext() == false) {
+                    continue;
+                }
+
+                totalSize += getSizeOrDefault(e, 0);
+
+                final Iterator<T> iterA = mergedIter;
+                final Iterator<? extends T> iterB = iter;
+
+                mergedIter = new Iterator<>() {
+                    private T nextA = null;
+                    private T nextB = null;
+                    private boolean hasNextA = false;
+                    private boolean hasNextB = false;
+
+                    @Override
+                    public boolean hasNext() {
+                        return hasNextA || hasNextB || iterA.hasNext() || iterB.hasNext();
+                    }
+
+                    @Override
+                    public T next() {
+                        if (hasNextA) {
+                            if (iterB.hasNext()) {
+                                if (nextSelector.apply(nextA, (nextB = iterB.next())) == MergeResult.TAKE_FIRST) {
+                                    hasNextA = false;
+                                    hasNextB = true;
+                                    return nextA;
+                                } else {
+                                    return nextB;
+                                }
+                            } else {
+                                hasNextA = false;
+                                return nextA;
+                            }
+                        } else if (hasNextB) {
+                            if (iterA.hasNext()) {
+                                if (nextSelector.apply((nextA = iterA.next()), nextB) == MergeResult.TAKE_FIRST) {
+                                    return nextA;
+                                } else {
+                                    hasNextA = true;
+                                    hasNextB = false;
+                                    return nextB;
+                                }
+                            } else {
+                                hasNextB = false;
+                                return nextB;
+                            }
+                        } else if (iterA.hasNext()) {
+                            if (iterB.hasNext()) {
+                                if (nextSelector.apply((nextA = iterA.next()), (nextB = iterB.next())) == MergeResult.TAKE_FIRST) {
+                                    hasNextB = true;
+                                    return nextA;
+                                } else {
+                                    hasNextA = true;
+                                    return nextB;
+                                }
+                            } else {
+                                return iterA.next();
+                            }
+                        } else {
+                            return iterB.next();
+                        }
+                    }
+                };
+            }
+
+            final C ret = supplier.apply(totalSize);
+
+            while (mergedIter.hasNext()) {
+                ret.add(mergedIter.next());
+            }
+
+            return ret;
+        }
+    }
+
+    //    /**
+    //     *
+    //     * @param <T>
+    //     * @param a
+    //     * @param b
+    //     * @param nextSelector
+    //     * @return
+    //     * @see {@code Iterators.merge(Iterator, Iterator, BiFunction)}
+    //     */
+    //    public static <T, E extends Exception> List<T> merge(final Iterator<? extends T> a, final Iterator<? extends T> b,
+    //            final Throwables.BiFunction<? super T, ? super T, MergeResult, E> nextSelector) throws E {
+    //        if (a == null) {
+    //            return b == null ? new ArrayList<>() : toList(b);
+    //        } else if (b == null) {
+    //            return toList(a);
+    //        }
+    //
+    //        final List<T> result = new ArrayList<>(9);
+    //        final Iterator<? extends T> iterA = a;
+    //        final Iterator<? extends T> iterB = b;
+    //
+    //        T nextA = null;
+    //        T nextB = null;
+    //        boolean hasNextA = false;
+    //        boolean hasNextB = false;
+    //
+    //        while (hasNextA || hasNextB || iterA.hasNext() || iterB.hasNext()) {
+    //            if (hasNextA) {
+    //                if (iterB.hasNext()) {
+    //                    if (nextSelector.apply(nextA, (nextB = iterB.next())) == MergeResult.TAKE_FIRST) {
+    //                        hasNextA = false;
+    //                        hasNextB = true;
+    //                        result.add(nextA);
+    //                    } else {
+    //                        result.add(nextB);
+    //                    }
+    //                } else {
+    //                    hasNextA = false;
+    //                    result.add(nextA);
+    //                }
+    //            } else if (hasNextB) {
+    //                if (iterA.hasNext()) {
+    //                    if (nextSelector.apply((nextA = iterA.next()), nextB) == MergeResult.TAKE_FIRST) {
+    //                        result.add(nextA);
+    //                    } else {
+    //                        hasNextA = true;
+    //                        hasNextB = false;
+    //                        result.add(nextB);
+    //                    }
+    //                } else {
+    //                    hasNextB = false;
+    //                    result.add(nextB);
+    //                }
+    //            } else if (iterA.hasNext()) {
+    //                if (iterB.hasNext()) {
+    //                    if (nextSelector.apply((nextA = iterA.next()), (nextB = iterB.next())) == MergeResult.TAKE_FIRST) {
+    //                        hasNextB = true;
+    //                        result.add(nextA);
+    //                    } else {
+    //                        hasNextA = true;
+    //                        result.add(nextB);
+    //                    }
+    //                } else {
+    //                    result.add(iterA.next());
+    //                }
+    //            } else {
+    //                result.add(iterB.next());
+    //            }
+    //        }
+    //
+    //        return result;
+    //    }
+
+    //    /**
+    //     *
+    //     * @param <A>
+    //     * @param <B>
+    //     * @param <R>
+    //     * @param a
+    //     * @param b
+    //     * @param zipFunction
+    //     * @return
+    //     * @see {@code Iterators.zip(Iterator, Iterator, BiFunction)}
+    //     */
+    //    public static <A, B, R, E extends Exception> List<R> zip(final Iterator<A> a, final Iterator<B> b,
+    //            final Throwables.BiFunction<? super A, ? super B, ? extends R, E> zipFunction) throws E {
+    //        checkArgNotNull(zipFunction);
+    //
+    //        if (a == null || b == null) {
+    //            return new ArrayList<>();
+    //        }
+    //
+    //        final Iterator<A> iterA = a;
+    //        final Iterator<B> iterB = b;
+    //        final List<R> result = new ArrayList<>(9);
+    //
+    //        while (iterA.hasNext() && iterB.hasNext()) {
+    //            result.add(zipFunction.apply(iterA.next(), iterB.next()));
+    //        }
+    //
+    //        return result;
+    //    }
+    //
+    //    /**
+    //     *
+    //     * @param <A>
+    //     * @param <B>
+    //     * @param <C>
+    //     * @param <R>
+    //     * @param a
+    //     * @param b
+    //     * @param c
+    //     * @param zipFunction
+    //     * @return
+    //     * @see {@code Iterators.zip(Iterator, Iterator, Iterator, TriFunction)}
+    //     */
+    //    public static <A, B, C, R, E extends Exception> List<R> zip(final Iterator<A> a, final Iterator<B> b, final Iterator<C> c,
+    //            final Throwables.TriFunction<? super A, ? super B, ? super C, ? extends R, E> zipFunction) throws E {
+    //        checkArgNotNull(zipFunction);
+    //
+    //        if (a == null || b == null || c == null) {
+    //            return new ArrayList<>();
+    //        }
+    //
+    //        final Iterator<A> iterA = a;
+    //        final Iterator<B> iterB = b;
+    //        final Iterator<C> iterC = c;
+    //        final List<R> result = new ArrayList<>(9);
+    //
+    //        while (iterA.hasNext() && iterB.hasNext() && iterC.hasNext()) {
+    //            result.add(zipFunction.apply(iterA.next(), iterB.next(), iterC.next()));
+    //        }
+    //
+    //        return result;
+    //    }
+    //
+    //    /**
+    //     *
+    //     * @param <A>
+    //     * @param <B>
+    //     * @param <R>
+    //     * @param a
+    //     * @param b
+    //     * @param valueForNoneA
+    //     * @param valueForNoneB
+    //     * @param zipFunction
+    //     * @return
+    //     * @see {@code Iterators.zip(Iterator, Iterator, Object, Object, BiFunction)}
+    //     */
+    //    public static <A, B, R, E extends Exception> List<R> zip(final Iterator<A> a, final Iterator<B> b, final A valueForNoneA, final B valueForNoneB,
+    //            final Throwables.BiFunction<? super A, ? super B, ? extends R, E> zipFunction) throws E {
+    //        checkArgNotNull(zipFunction);
+    //
+    //        final Iterator<A> iterA = a == null ? ObjIterator.<A> empty() : a;
+    //        final Iterator<B> iterB = b == null ? ObjIterator.<B> empty() : b;
+    //
+    //        final List<R> result = new ArrayList<>(9);
+    //        boolean hasA = true;
+    //
+    //        do {
+    //            if (hasA && (hasA = iterA.hasNext())) {
+    //                result.add(zipFunction.apply(iterA.next(), iterB.hasNext() ? iterB.next() : valueForNoneB));
+    //            } else if (iterB.hasNext()) {
+    //                result.add(zipFunction.apply(valueForNoneA, iterB.next()));
+    //            } else {
+    //                break;
+    //            }
+    //        } while (true);
+    //
+    //        return result;
+    //    }
+    //
+    //    /**
+    //     *
+    //     * @param <A>
+    //     * @param <B>
+    //     * @param <C>
+    //     * @param <R>
+    //     * @param a
+    //     * @param b
+    //     * @param c
+    //     * @param valueForNoneA
+    //     * @param valueForNoneB
+    //     * @param valueForNoneC
+    //     * @param zipFunction
+    //     * @return
+    //     * @see {@code Iterators.zip(Iterator, Iterator, Iterator, Object, Object, Object, TriFunction)}
+    //     */
+    //    public static <A, B, C, R, E extends Exception> List<R> zip(final Iterator<A> a, final Iterator<B> b, final Iterator<C> c, final A valueForNoneA,
+    //            final B valueForNoneB, final C valueForNoneC, final Throwables.TriFunction<? super A, ? super B, ? super C, ? extends R, E> zipFunction) throws E {
+    //        checkArgNotNull(zipFunction);
+    //
+    //        final Iterator<A> iterA = a == null ? ObjIterator.<A> empty() : a;
+    //        final Iterator<B> iterB = b == null ? ObjIterator.<B> empty() : b;
+    //        final Iterator<C> iterC = c == null ? ObjIterator.<C> empty() : c;
+    //
+    //        final List<R> result = new ArrayList<>(9);
+    //        boolean hasA = true;
+    //        boolean hasB = true;
+    //
+    //        do {
+    //            if (hasA && (hasA = iterA.hasNext())) {
+    //                result.add(zipFunction.apply(iterA.next(), iterB.hasNext() ? iterB.next() : valueForNoneB, iterC.hasNext() ? iterC.next() : valueForNoneC));
+    //            } else if (hasB && (hasB = iterB.hasNext())) {
+    //                result.add(zipFunction.apply(valueForNoneA, iterB.next(), iterC.hasNext() ? iterC.next() : valueForNoneC));
+    //            } else if (iterC.hasNext()) {
+    //                result.add(zipFunction.apply(valueForNoneA, valueForNoneB, iterC.hasNext() ? iterC.next() : valueForNoneC));
+    //            } else {
+    //                break;
+    //            }
+    //        } while (true);
+    //
+    //        return result;
+    //    }
+
+    //    /**
+    //     *
+    //     * @param <T>
+    //     * @param <L>
+    //     * @param <R>
+    //     * @param iter
+    //     * @param unzip the second parameter is an output parameter.
+    //     * @return
+    //     * @see {@code Iterators.unzip(Iterator, BiConsumer)}
+    //     */
+    //    public static <T, L, R, E extends Exception> Pair<List<L>, List<R>> unzip(final Iterator<? extends T> iter,
+    //            final Throwables.BiConsumer<? super T, Pair<L, R>, E> unzip) throws E {
+    //        checkArgNotNull(unzip);
+    //
+    //        final int len = 9;
+    //
+    //        final List<L> l = new ArrayList<>(len);
+    //        final List<R> r = new ArrayList<>(len);
+    //        final Pair<L, R> p = new Pair<>();
+    //
+    //        if (iter != null) {
+    //            T e = null;
+    //
+    //            while (iter.hasNext()) {
+    //                e = iter.next();
+    //
+    //                unzip.accept(e, p);
+    //
+    //                l.add(p.left);
+    //                r.add(p.right);
+    //            }
+    //        }
+    //
+    //        return Pair.of(l, r);
+    //    }
+    /**
+     *
+     *
+     * @param <A>
+     * @param <B>
+     * @param <R>
+     * @param a
+     * @param b
+     * @param zipFunction
+     * @return
+     * @throws IllegalArgumentException
+     */
+    public static <A, B, R> List<R> zip(final A[] a, final B[] b, final BiFunction<? super A, ? super B, ? extends R> zipFunction)
+            throws IllegalArgumentException {
+        checkArgNotNull(zipFunction);
+
+        if (isEmpty(a) || isEmpty(b)) {
+            return new ArrayList<>();
+        }
+
+        final int minLen = min(a.length, b.length);
+        final List<R> result = new ArrayList<>(minLen);
+
+        for (int i = 0; i < minLen; i++) {
+            result.add(zipFunction.apply(a[i], b[i]));
+        }
+
+        return result;
+    }
+
+    /**
+     *
+     *
+     * @param <A>
+     * @param <B>
+     * @param <R>
+     * @param a
+     * @param b
+     * @param zipFunction
+     * @return
+     * @throws IllegalArgumentException
+     */
+    public static <A, B, R> List<R> zip(final Iterable<A> a, final Iterable<B> b, final BiFunction<? super A, ? super B, ? extends R> zipFunction)
+            throws IllegalArgumentException {
+        checkArgNotNull(zipFunction);
+
+        if (a == null || b == null) {
+            return new ArrayList<>();
+        }
+
+        final Iterator<A> iterA = a.iterator();
+        final Iterator<B> iterB = b.iterator();
+        final int minLen = min(getSizeOrDefault(a, 0), getSizeOrDefault(b, 0));
+        final List<R> result = new ArrayList<>(minLen);
+
+        while (iterA.hasNext() && iterB.hasNext()) {
+            result.add(zipFunction.apply(iterA.next(), iterB.next()));
+        }
+
+        return result;
+    }
+
+    /**
+     *
+     *
+     * @param <A>
+     * @param <B>
+     * @param <C>
+     * @param <R>
+     * @param a
+     * @param b
+     * @param c
+     * @param zipFunction
+     * @return
+     * @throws IllegalArgumentException
+     */
+    public static <A, B, C, R> List<R> zip(final A[] a, final B[] b, final C[] c, final TriFunction<? super A, ? super B, ? super C, ? extends R> zipFunction)
+            throws IllegalArgumentException {
+        checkArgNotNull(zipFunction);
+
+        if (isEmpty(a) || isEmpty(b) || isEmpty(c)) {
+            return new ArrayList<>();
+        }
+
+        final int minLen = min(a.length, b.length, c.length);
+        final List<R> result = new ArrayList<>(minLen);
+
+        for (int i = 0; i < minLen; i++) {
+            result.add(zipFunction.apply(a[i], b[i], c[i]));
+        }
+
+        return result;
+    }
+
+    /**
+     *
+     *
+     * @param <A>
+     * @param <B>
+     * @param <C>
+     * @param <R>
+     * @param a
+     * @param b
+     * @param c
+     * @param zipFunction
+     * @return
+     * @throws IllegalArgumentException
+     */
+    public static <A, B, C, R> List<R> zip(final Iterable<A> a, final Iterable<B> b, final Iterable<C> c,
+            final TriFunction<? super A, ? super B, ? super C, ? extends R> zipFunction) throws IllegalArgumentException {
+        checkArgNotNull(zipFunction);
+
+        if (a == null || b == null || c == null) {
+            return new ArrayList<>();
+        }
+
+        final Iterator<A> iterA = a.iterator();
+        final Iterator<B> iterB = b.iterator();
+        final Iterator<C> iterC = c.iterator();
+        final int minLen = min(getSizeOrDefault(a, 0), getSizeOrDefault(b, 0), getSizeOrDefault(c, 0));
+        final List<R> result = new ArrayList<>(minLen);
+
+        while (iterA.hasNext() && iterB.hasNext() && iterC.hasNext()) {
+            result.add(zipFunction.apply(iterA.next(), iterB.next(), iterC.next()));
+        }
+
+        return result;
+    }
+
+    /**
+     *
+     *
+     * @param <A>
+     * @param <B>
+     * @param <R>
+     * @param a
+     * @param b
+     * @param valueForNoneA
+     * @param valueForNoneB
+     * @param zipFunction
+     * @return
+     * @throws IllegalArgumentException
+     */
+    public static <A, B, R> List<R> zip(final A[] a, final B[] b, final A valueForNoneA, final B valueForNoneB,
+            final BiFunction<? super A, ? super B, ? extends R> zipFunction) throws IllegalArgumentException {
+        checkArgNotNull(zipFunction);
+
+        final int lenA = len(a);
+        final int lenB = len(b);
+        final int maxLen = max(lenA, lenB);
+        final List<R> result = new ArrayList<>(maxLen);
+
+        for (int i = 0; i < maxLen; i++) {
+            result.add(zipFunction.apply(i < lenA ? a[i] : valueForNoneA, i < lenB ? b[i] : valueForNoneB));
+        }
+
+        return result;
+    }
+
+    /**
+     *
+     *
+     * @param <A>
+     * @param <B>
+     * @param <R>
+     * @param a
+     * @param b
+     * @param valueForNoneA
+     * @param valueForNoneB
+     * @param zipFunction
+     * @return
+     * @throws IllegalArgumentException
+     */
+    public static <A, B, R> List<R> zip(final Iterable<A> a, final Iterable<B> b, final A valueForNoneA, final B valueForNoneB,
+            final BiFunction<? super A, ? super B, ? extends R> zipFunction) throws IllegalArgumentException {
+        checkArgNotNull(zipFunction);
+
+        final Iterator<A> iterA = a == null ? ObjIterator.<A> empty() : a.iterator();
+        final Iterator<B> iterB = b == null ? ObjIterator.<B> empty() : b.iterator();
+        final int lenA = getSizeOrDefault(a, 0);
+        final int lenB = getSizeOrDefault(b, 0);
+        final int maxLen = max(lenA, lenB);
+        final List<R> result = new ArrayList<>(maxLen);
+
+        if (a == null || a instanceof Collection) {
+            if (b == null || b instanceof Collection) {
+                for (int i = 0; i < maxLen; i++) {
+                    result.add(zipFunction.apply(i < lenA ? iterA.next() : valueForNoneA, i < lenB ? iterB.next() : valueForNoneB));
+                }
+            } else {
+                for (int i = 0; i < lenA || iterB.hasNext(); i++) {
+                    result.add(zipFunction.apply(i < lenA ? iterA.next() : valueForNoneA, iterB.hasNext() ? iterB.next() : valueForNoneB));
+                }
+            }
+        } else if (b == null || b instanceof Collection) {
+            for (int i = 0; i < lenB || iterA.hasNext(); i++) {
+                result.add(zipFunction.apply(iterA.hasNext() ? iterA.next() : valueForNoneA, i < lenB ? iterB.next() : valueForNoneB));
+            }
+        } else {
+            while (iterA.hasNext() || iterB.hasNext()) {
+                result.add(zipFunction.apply(iterA.hasNext() ? iterA.next() : valueForNoneA, iterB.hasNext() ? iterB.next() : valueForNoneB));
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     *
+     *
+     * @param <A>
+     * @param <B>
+     * @param <C>
+     * @param <R>
+     * @param a
+     * @param b
+     * @param c
+     * @param valueForNoneA
+     * @param valueForNoneB
+     * @param valueForNoneC
+     * @param zipFunction
+     * @return
+     * @throws IllegalArgumentException
+     */
+    public static <A, B, C, R> List<R> zip(final A[] a, final B[] b, final C[] c, final A valueForNoneA, final B valueForNoneB, final C valueForNoneC,
+            final TriFunction<? super A, ? super B, ? super C, ? extends R> zipFunction) throws IllegalArgumentException {
+        checkArgNotNull(zipFunction);
+
+        final int lenA = len(a);
+        final int lenB = len(b);
+        final int lenC = len(c);
+        final int maxLen = max(lenA, lenB, lenC);
+        final List<R> result = new ArrayList<>(maxLen);
+
+        for (int i = 0; i < maxLen; i++) {
+            result.add(zipFunction.apply(i < lenA ? a[i] : valueForNoneA, i < lenB ? b[i] : valueForNoneB, i < lenC ? c[i] : valueForNoneC));
+        }
+
+        return result;
+    }
+
+    /**
+     *
+     *
+     * @param <A>
+     * @param <B>
+     * @param <C>
+     * @param <R>
+     * @param a
+     * @param b
+     * @param c
+     * @param valueForNoneA
+     * @param valueForNoneB
+     * @param valueForNoneC
+     * @param zipFunction
+     * @return
+     * @throws IllegalArgumentException
+     */
+    public static <A, B, C, R> List<R> zip(final Iterable<A> a, final Iterable<B> b, final Iterable<C> c, final A valueForNoneA, final B valueForNoneB,
+            final C valueForNoneC, final TriFunction<? super A, ? super B, ? super C, ? extends R> zipFunction) throws IllegalArgumentException {
+        checkArgNotNull(zipFunction);
+
+        final Iterator<A> iterA = a == null ? ObjIterator.<A> empty() : a.iterator();
+        final Iterator<B> iterB = b == null ? ObjIterator.<B> empty() : b.iterator();
+        final Iterator<C> iterC = c == null ? ObjIterator.<C> empty() : c.iterator();
+        final int lenA = getSizeOrDefault(a, 0);
+        final int lenB = getSizeOrDefault(b, 0);
+        final int lenC = getSizeOrDefault(c, 0);
+        final int maxLen = max(lenA, lenB, lenC);
+        final List<R> result = new ArrayList<>(maxLen);
+
+        if (a == null || a instanceof Collection) {
+            if (b == null || b instanceof Collection) {
+                if (c == null || c instanceof Collection) {
+                    for (int i = 0; i < maxLen; i++) {
+                        result.add(zipFunction.apply(i < lenA ? iterA.next() : valueForNoneA, i < lenB ? iterB.next() : valueForNoneB,
+                                i < lenC ? iterC.next() : valueForNoneC));
+                    }
+                } else {
+                    for (int i = 0; i < lenA || i < lenB || iterC.hasNext(); i++) {
+                        result.add(zipFunction.apply(i < lenA ? iterA.next() : valueForNoneA, i < lenB ? iterB.next() : valueForNoneB,
+                                iterC.hasNext() ? iterC.next() : valueForNoneC));
+                    }
+                }
+            } else {
+                if (c == null || c instanceof Collection) {
+                    for (int i = 0; i < lenA || i < lenC || iterB.hasNext(); i++) {
+                        result.add(zipFunction.apply(i < lenA ? iterA.next() : valueForNoneA, iterB.hasNext() ? iterB.next() : valueForNoneB,
+                                i < lenC ? iterC.next() : valueForNoneC));
+                    }
+                } else {
+                    for (int i = 0; i < lenA || iterB.hasNext() || iterC.hasNext(); i++) {
+                        result.add(zipFunction.apply(i < lenA ? iterA.next() : valueForNoneA, iterB.hasNext() ? iterB.next() : valueForNoneB,
+                                iterC.hasNext() ? iterC.next() : valueForNoneC));
+                    }
+                }
+            }
+        } else if (b == null || b instanceof Collection) {
+            if (c == null || c instanceof Collection) {
+                for (int i = 0; i < lenB || i < lenC || iterA.hasNext(); i++) {
+                    result.add(zipFunction.apply(iterA.hasNext() ? iterA.next() : valueForNoneA, i < lenB ? iterB.next() : valueForNoneB,
+                            i < lenC ? iterC.next() : valueForNoneC));
+                }
+            } else {
+                for (int i = 0; i < lenB || iterA.hasNext() || iterC.hasNext(); i++) {
+                    result.add(zipFunction.apply(iterA.hasNext() ? iterA.next() : valueForNoneA, i < lenB ? iterB.next() : valueForNoneB,
+                            iterC.hasNext() ? iterC.next() : valueForNoneC));
+                }
+            }
+        } else {
+            if (c == null || c instanceof Collection) {
+                for (int i = 0; i < lenC || iterA.hasNext() || iterB.hasNext(); i++) {
+                    result.add(zipFunction.apply(iterA.hasNext() ? iterA.next() : valueForNoneA, iterB.hasNext() ? iterB.next() : valueForNoneB,
+                            i < lenC ? iterC.next() : valueForNoneC));
+                }
+            } else {
+                while (iterA.hasNext() || iterB.hasNext() || iterC.hasNext()) {
+                    result.add(zipFunction.apply(iterA.hasNext() ? iterA.next() : valueForNoneA, iterB.hasNext() ? iterB.next() : valueForNoneB,
+                            iterC.hasNext() ? iterC.next() : valueForNoneC));
+                }
+            }
+        }
+
+        return result;
+    }
+
+    //    /**
+    //     *
+    //     * @param <A>
+    //     * @param <B>
+    //     * @param <R>
+    //     * @param a
+    //     * @param b
+    //     * @param zipFunction
+    //     * @return
+    //     * @see {@code Iterators.zip(Iterator, Iterator, BiFunction)}
+    //     */
+    //    public static <A, B, R> List<R> zip(final Iterator<A> a, final Iterator<B> b,
+    //            final BiFunction<? super A, ? super B, ? extends R> zipFunction) {
+    //        checkArgNotNull(zipFunction);
+    //
+    //        if (a == null || b == null) {
+    //            return new ArrayList<>();
+    //        }
+    //
+    //        final Iterator<A> iterA = a;
+    //        final Iterator<B> iterB = b;
+    //        final List<R> result = new ArrayList<>(9);
+    //
+    //        while (iterA.hasNext() && iterB.hasNext()) {
+    //            result.add(zipFunction.apply(iterA.next(), iterB.next()));
+    //        }
+    //
+    //        return result;
+    //    }
+    //
+    //    /**
+    //     *
+    //     * @param <A>
+    //     * @param <B>
+    //     * @param <C>
+    //     * @param <R>
+    //     * @param a
+    //     * @param b
+    //     * @param c
+    //     * @param zipFunction
+    //     * @return
+    //     * @see {@code Iterators.zip(Iterator, Iterator, Iterator, TriFunction)}
+    //     */
+    //    public static <A, B, C, R> List<R> zip(final Iterator<A> a, final Iterator<B> b, final Iterator<C> c,
+    //            final TriFunction<? super A, ? super B, ? super C, ? extends R> zipFunction) {
+    //        checkArgNotNull(zipFunction);
+    //
+    //        if (a == null || b == null || c == null) {
+    //            return new ArrayList<>();
+    //        }
+    //
+    //        final Iterator<A> iterA = a;
+    //        final Iterator<B> iterB = b;
+    //        final Iterator<C> iterC = c;
+    //        final List<R> result = new ArrayList<>(9);
+    //
+    //        while (iterA.hasNext() && iterB.hasNext() && iterC.hasNext()) {
+    //            result.add(zipFunction.apply(iterA.next(), iterB.next(), iterC.next()));
+    //        }
+    //
+    //        return result;
+    //    }
+    //
+    //    /**
+    //     *
+    //     * @param <A>
+    //     * @param <B>
+    //     * @param <R>
+    //     * @param a
+    //     * @param b
+    //     * @param valueForNoneA
+    //     * @param valueForNoneB
+    //     * @param zipFunction
+    //     * @return
+    //     * @see {@code Iterators.zip(Iterator, Iterator, Object, Object, BiFunction)}
+    //     */
+    //    public static <A, B, R> List<R> zip(final Iterator<A> a, final Iterator<B> b, final A valueForNoneA, final B valueForNoneB,
+    //            final BiFunction<? super A, ? super B, ? extends R> zipFunction) {
+    //        checkArgNotNull(zipFunction);
+    //
+    //        final Iterator<A> iterA = a == null ? ObjIterator.<A> empty() : a;
+    //        final Iterator<B> iterB = b == null ? ObjIterator.<B> empty() : b;
+    //
+    //        final List<R> result = new ArrayList<>(9);
+    //        boolean hasA = true;
+    //
+    //        do {
+    //            if (hasA && (hasA = iterA.hasNext())) {
+    //                result.add(zipFunction.apply(iterA.next(), iterB.hasNext() ? iterB.next() : valueForNoneB));
+    //            } else if (iterB.hasNext()) {
+    //                result.add(zipFunction.apply(valueForNoneA, iterB.next()));
+    //            } else {
+    //                break;
+    //            }
+    //        } while (true);
+    //
+    //        return result;
+    //    }
+    //
+    //    /**
+    //     *
+    //     * @param <A>
+    //     * @param <B>
+    //     * @param <C>
+    //     * @param <R>
+    //     * @param a
+    //     * @param b
+    //     * @param c
+    //     * @param valueForNoneA
+    //     * @param valueForNoneB
+    //     * @param valueForNoneC
+    //     * @param zipFunction
+    //     * @return
+    //     * @see {@code Iterators.zip(Iterator, Iterator, Iterator, Object, Object, Object, TriFunction)}
+    //     */
+    //    public static <A, B, C, R> List<R> zip(final Iterator<A> a, final Iterator<B> b, final Iterator<C> c, final A valueForNoneA,
+    //            final B valueForNoneB, final C valueForNoneC, final TriFunction<? super A, ? super B, ? super C, ? extends R> zipFunction) {
+    //        checkArgNotNull(zipFunction);
+    //
+    //        final Iterator<A> iterA = a == null ? ObjIterator.<A> empty() : a;
+    //        final Iterator<B> iterB = b == null ? ObjIterator.<B> empty() : b;
+    //        final Iterator<C> iterC = c == null ? ObjIterator.<C> empty() : c;
+    //
+    //        final List<R> result = new ArrayList<>(9);
+    //        boolean hasA = true;
+    //        boolean hasB = true;
+    //
+    //        do {
+    //            if (hasA && (hasA = iterA.hasNext())) {
+    //                result.add(zipFunction.apply(iterA.next(), iterB.hasNext() ? iterB.next() : valueForNoneB, iterC.hasNext() ? iterC.next() : valueForNoneC));
+    //            } else if (hasB && (hasB = iterB.hasNext())) {
+    //                result.add(zipFunction.apply(valueForNoneA, iterB.next(), iterC.hasNext() ? iterC.next() : valueForNoneC));
+    //            } else if (iterC.hasNext()) {
+    //                result.add(zipFunction.apply(valueForNoneA, valueForNoneB, iterC.hasNext() ? iterC.next() : valueForNoneC));
+    //            } else {
+    //                break;
+    //            }
+    //        } while (true);
+    //
+    //        return result;
+    //    }
+
+    /**
+     *
+     *
+     * @param <A>
+     * @param <B>
+     * @param <R>
+     * @param a
+     * @param b
+     * @param zipFunction
+     * @param targetElementType
+     * @return
+     * @throws IllegalArgumentException
+     */
+    public static <A, B, R> R[] zip(final A[] a, final B[] b, final BiFunction<? super A, ? super B, ? extends R> zipFunction, final Class<R> targetElementType)
+            throws IllegalArgumentException {
+        checkArgNotNull(zipFunction);
+
+        final int lenA = len(a);
+        final int lenB = len(b);
+        final int minLen = min(lenA, lenB);
+
+        final R[] result = newArray(targetElementType, minLen);
+
+        for (int i = 0; i < minLen; i++) {
+            result[i] = zipFunction.apply(a[i], b[i]);
+        }
+
+        return result;
+    }
+
+    /**
+     *
+     *
+     * @param <A>
+     * @param <B>
+     * @param <R>
+     * @param a
+     * @param b
+     * @param valueForNoneA
+     * @param valueForNoneB
+     * @param zipFunction
+     * @param targetElementType
+     * @return
+     * @throws IllegalArgumentException
+     */
+    public static <A, B, R> R[] zip(final A[] a, final B[] b, final A valueForNoneA, final B valueForNoneB,
+            final BiFunction<? super A, ? super B, ? extends R> zipFunction, final Class<R> targetElementType) throws IllegalArgumentException {
+        checkArgNotNull(zipFunction);
+
+        final int lenA = len(a);
+        final int lenB = len(b);
+        final int minLen = min(lenA, lenB);
+        final int maxLen = max(lenA, lenB);
+
+        final R[] result = newArray(targetElementType, maxLen);
+
+        for (int i = 0; i < minLen; i++) {
+            result[i] = zipFunction.apply(a[i], b[i]);
+        }
+
+        if (lenA < maxLen) {
+            for (int i = lenA; i < maxLen; i++) {
+                result[i] = zipFunction.apply(valueForNoneA, b[i]);
+            }
+        } else if (lenB < maxLen) {
+            for (int i = lenB; i < maxLen; i++) {
+                result[i] = zipFunction.apply(a[i], valueForNoneB);
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     *
+     *
+     * @param <A>
+     * @param <B>
+     * @param <C>
+     * @param <R>
+     * @param a
+     * @param b
+     * @param c
+     * @param zipFunction
+     * @param targetElementType
+     * @return
+     * @throws IllegalArgumentException
+     */
+    public static <A, B, C, R> R[] zip(final A[] a, final B[] b, final C[] c, final TriFunction<? super A, ? super B, ? super C, ? extends R> zipFunction,
+            final Class<R> targetElementType) throws IllegalArgumentException {
+        checkArgNotNull(zipFunction);
+
+        final int lenA = len(a);
+        final int lenB = len(b);
+        final int lenC = len(c);
+        final int minLen = min(lenA, lenB, lenC);
+
+        final R[] result = newArray(targetElementType, minLen);
+
+        for (int i = 0; i < minLen; i++) {
+            result[i] = zipFunction.apply(a[i], b[i], c[i]);
+        }
+
+        return result;
+    }
+
+    /**
+     *
+     *
+     * @param <A>
+     * @param <B>
+     * @param <C>
+     * @param <R>
+     * @param a
+     * @param b
+     * @param c
+     * @param valueForNoneA
+     * @param valueForNoneB
+     * @param valueForNoneC
+     * @param zipFunction
+     * @param targetElementType
+     * @return
+     */
+    public static <A, B, C, R> R[] zip(final A[] a, final B[] b, final C[] c, final A valueForNoneA, final B valueForNoneB, final C valueForNoneC,
+            final TriFunction<? super A, ? super B, ? super C, ? extends R> zipFunction, final Class<R> targetElementType) {
+        checkArgNotNull(zipFunction);
+
+        final int lenA = len(a);
+        final int lenB = len(b);
+        final int lenC = len(c);
+        final int minLen = min(lenA, lenB, lenC);
+        final int maxLen = max(lenA, lenB, lenC);
+
+        final R[] result = newArray(targetElementType, maxLen);
+
+        for (int i = 0; i < minLen; i++) {
+            result[i] = zipFunction.apply(a[i], b[i], c[i]);
+        }
+
+        if (minLen < maxLen) {
+            for (int i = minLen; i < maxLen; i++) {
+                result[i] = zipFunction.apply(i < lenA ? a[i] : valueForNoneA, i < lenB ? b[i] : valueForNoneB, i < lenC ? c[i] : valueForNoneC);
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param <A>
+     * @param <B>
+     * @param c
+     * @param unzip the second parameter is an output parameter.
+     * @return
+     */
+    public static <T, A, B> Pair<List<A>, List<B>> unzip(final Iterable<? extends T> c, final BiConsumer<? super T, Pair<A, B>> unzip) {
+        return unzip(c, unzip, Factory.ofList());
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param <A>
+     * @param <B>
+     * @param <LC>
+     * @param <RC>
+     * @param c
+     * @param unzip the second parameter is an output parameter.
+     * @param supplier
+     * @return
+     * @throws IllegalArgumentException
+     */
+    public static <T, A, B, LC extends Collection<A>, RC extends Collection<B>> Pair<LC, RC> unzip(final Iterable<? extends T> c,
+            final BiConsumer<? super T, Pair<A, B>> unzip, final IntFunction<? extends Collection<?>> supplier) throws IllegalArgumentException {
+        checkArgNotNull(unzip);
+
+        final int len = getSizeOrDefault(c, 0);
+
+        final LC l = (LC) supplier.apply(len);
+        final RC r = (RC) supplier.apply(len);
+        final Pair<A, B> p = new Pair<>();
+
+        if (c != null) {
+            for (T e : c) {
+                unzip.accept(e, p);
+
+                l.add(p.left);
+                r.add(p.right);
+            }
+        }
+
+        return Pair.of(l, r);
+    }
+
+    //    /**
+    //     *
+    //     * @param <T>
+    //     * @param <L>
+    //     * @param <R>
+    //     * @param iter
+    //     * @param unzip the second parameter is an output parameter.
+    //     * @return
+    //     * @see {@code Iterators.unzip(Iterator, BiConsumer)}
+    //     */
+    //    public static <T, L, R> Pair<List<L>, List<R>> unzip(final Iterator<? extends T> iter,
+    //            final BiConsumer<? super T, Pair<L, R>> unzip) {
+    //        checkArgNotNull(unzip);
+    //
+    //        final int len = 9;
+    //
+    //        final List<L> l = new ArrayList<>(len);
+    //        final List<R> r = new ArrayList<>(len);
+    //        final Pair<L, R> p = new Pair<>();
+    //
+    //        if (iter != null) {
+    //            T e = null;
+    //
+    //            while (iter.hasNext()) {
+    //                e = iter.next();
+    //
+    //                unzip.accept(e, p);
+    //
+    //                l.add(p.left);
+    //                r.add(p.right);
+    //            }
+    //        }
+    //
+    //        return Pair.of(l, r);
+    //    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param <A>
+     * @param <B>
+     * @param <C>
+     * @param c
+     * @param unzip the second parameter is an output parameter.
+     * @return
+     * @see TriIterator#unzip(Iterable, BiConsumer)
+     * @see TriIterator#toMultiList(Supplier)
+     * @see TriIterator#toMultiSet(Supplier)
+     * @deprecated replaced by {@link TriIterator#unzip(Iterable, BiConsumer)}
+     */
+    @Deprecated
+    public static <T, A, B, C> Triple<List<A>, List<B>, List<C>> unzipp(final Iterable<? extends T> c, final BiConsumer<? super T, Triple<A, B, C>> unzip) {
+        return unzipp(c, unzip, Factory.ofList());
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param <A>
+     * @param <B>
+     * @param <C>
+     * @param <LC>
+     * @param <MC>
+     * @param <RC>
+     * @param c
+     * @param unzip the second parameter is an output parameter.
+     * @param supplier
+     * @return
+     * @throws IllegalArgumentException
+     * @see TriIterator#unzip(Iterable, BiConsumer)
+     * @see TriIterator#toMultiList(Supplier)
+     * @see TriIterator#toMultiSet(Supplier)
+     * @deprecated replaced by {@link TriIterator#unzip(Iterable, BiConsumer)}
+     */
+    @Deprecated
+    public static <T, A, B, C, LC extends Collection<A>, MC extends Collection<B>, RC extends Collection<C>> Triple<LC, MC, RC> unzipp(
+            final Iterable<? extends T> c, final BiConsumer<? super T, Triple<A, B, C>> unzip, final IntFunction<? extends Collection<?>> supplier)
+            throws IllegalArgumentException {
+        checkArgNotNull(unzip);
+
+        final int len = getSizeOrDefault(c, 0);
+
+        final LC l = (LC) supplier.apply(len);
+        final MC m = (MC) supplier.apply(len);
+        final RC r = (RC) supplier.apply(len);
+        final Triple<A, B, C> t = new Triple<>();
+
+        if (c != null) {
+            for (T e : c) {
+                unzip.accept(e, t);
+
+                l.add(t.left);
+                m.add(t.middle);
+                r.add(t.right);
+            }
+        }
+
+        return Triple.of(l, m, r);
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param <K>
+     * @param a
+     * @param keyExtractor
+     * @return
+     */
+    @Beta
+    public static <T, K> Map<K, List<T>> groupBy(final T[] a, final Function<? super T, ? extends K> keyExtractor) {
+        return groupBy(a, keyExtractor, Suppliers.ofMap());
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param <K>
+     * @param <M>
+     * @param a
+     * @param keyExtractor
+     * @param mapSupplier
+     * @return
+     */
+    @Beta
+    public static <T, K, M extends Map<K, List<T>>> M groupBy(final T[] a, final Function<? super T, ? extends K> keyExtractor, final Supplier<M> mapSupplier) {
+        return groupBy(a, 0, len(a), keyExtractor, mapSupplier);
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param <K>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param keyExtractor
+     * @return
+     */
+    @Beta
+    public static <T, K> Map<K, List<T>> groupBy(final T[] a, final int fromIndex, final int toIndex, final Function<? super T, ? extends K> keyExtractor) {
+        return groupBy(a, fromIndex, toIndex, keyExtractor, Suppliers.ofMap());
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param <K>
+     * @param <M>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param keyExtractor
+     * @param mapSupplier
+     * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
+     */
+    @Beta
+    public static <T, K, M extends Map<K, List<T>>> M groupBy(final T[] a, final int fromIndex, final int toIndex,
+            final Function<? super T, ? extends K> keyExtractor, final Supplier<M> mapSupplier) throws IllegalArgumentException, IndexOutOfBoundsException {
+        final int length = len(a);
+
+        checkFromToIndex(fromIndex, toIndex, length);
+        checkArgNotNull(keyExtractor, "keyExtractor"); //NOSONAR
+        checkArgNotNull(mapSupplier, "mapSupplier"); //NOSONAR
+
+        final M ret = mapSupplier.get();
+        K key = null;
+        List<T> val = null;
+
+        for (int i = fromIndex; i < toIndex; i++) {
+            key = keyExtractor.apply(a[i]);
+            val = ret.get(key);
+
+            if (val == null) {
+                val = new ArrayList<>();
+
+                ret.put(key, val);
+            }
+
+            val.add(a[i]);
+        }
+
+        return ret;
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param <K>
+     * @param c
+     * @param keyExtractor
+     * @return
+     */
+    @Beta
+    public static <T, K> Map<K, List<T>> groupBy(final Iterable<? extends T> c, final Function<? super T, ? extends K> keyExtractor) {
+        return groupBy(c, keyExtractor, Suppliers.ofMap());
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param <K>
+     * @param <M>
+     * @param c
+     * @param keyExtractor
+     * @param mapSupplier
+     * @return
+     * @throws IllegalArgumentException
+     */
+    @Beta
+    public static <T, K, M extends Map<K, List<T>>> M groupBy(final Iterable<? extends T> c, final Function<? super T, ? extends K> keyExtractor,
+            final Supplier<M> mapSupplier) throws IllegalArgumentException {
+        checkArgNotNull(keyExtractor, "keyExtractor");
+        checkArgNotNull(mapSupplier, "mapSupplier");
+
+        final M ret = mapSupplier.get();
+
+        if (c == null) {
+            return ret;
+        }
+
+        K key = null;
+        List<T> val = null;
+
+        for (T e : c) {
+            key = keyExtractor.apply(e);
+            val = ret.get(key);
+
+            if (val == null) {
+                val = new ArrayList<>();
+
+                ret.put(key, val);
+            }
+
+            val.add(e);
+        }
+
+        return ret;
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param <K>
+     * @param iter
+     * @param keyExtractor
+     * @return
+     */
+    @Beta
+    public static <T, K> Map<K, List<T>> groupBy(final Iterator<? extends T> iter, final Function<? super T, ? extends K> keyExtractor) {
+        return groupBy(iter, keyExtractor, Suppliers.ofMap());
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param <K>
+     * @param <M>
+     * @param iter
+     * @param keyExtractor
+     * @param mapSupplier
+     * @return
+     * @throws IllegalArgumentException
+     */
+    @Beta
+    public static <T, K, M extends Map<K, List<T>>> M groupBy(final Iterator<? extends T> iter, final Function<? super T, ? extends K> keyExtractor,
+            final Supplier<M> mapSupplier) throws IllegalArgumentException {
+        checkArgNotNull(keyExtractor, "keyExtractor");
+        checkArgNotNull(mapSupplier, "mapSupplier");
+
+        final M ret = mapSupplier.get();
+
+        if (iter == null) {
+            return ret;
+        }
+
+        K key = null;
+        List<T> val = null;
+        T e = null;
+
+        while (iter.hasNext()) {
+            e = iter.next();
+
+            key = keyExtractor.apply(e);
+            val = ret.get(key);
+
+            if (val == null) {
+                val = new ArrayList<>();
+
+                ret.put(key, val);
+            }
+
+            val.add(e);
+        }
+
+        return ret;
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param <K>
+     * @param <V>
+     * @param c
+     * @param keyExtractor
+     * @param valueExtractor
+     * @return
+     */
+    @Beta
+    public static <T, K, V> Map<K, List<V>> groupBy(final Iterable<? extends T> c, final Function<? super T, ? extends K> keyExtractor,
+            final Function<? super T, ? extends V> valueExtractor) {
+        return groupBy(c, keyExtractor, valueExtractor, Suppliers.ofMap());
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param <K>
+     * @param <V>
+     * @param <M>
+     * @param c
+     * @param keyExtractor
+     * @param valueExtractor
+     * @param mapSupplier
+     * @return
+     * @throws IllegalArgumentException
+     */
+    @Beta
+    public static <T, K, V, M extends Map<K, List<V>>> M groupBy(final Iterable<? extends T> c, final Function<? super T, ? extends K> keyExtractor,
+            final Function<? super T, ? extends V> valueExtractor, final Supplier<M> mapSupplier) throws IllegalArgumentException {
+        checkArgNotNull(keyExtractor, "keyExtractor");
+        checkArgNotNull(valueExtractor, "valueExtractor");
+        checkArgNotNull(mapSupplier, "mapSupplier");
+
+        final M ret = mapSupplier.get();
+
+        if (c == null) {
+            return ret;
+        }
+
+        K key = null;
+        List<V> val = null;
+
+        for (T e : c) {
+            key = keyExtractor.apply(e);
+            val = ret.get(key);
+
+            if (val == null) {
+                val = new ArrayList<>();
+
+                ret.put(key, val);
+            }
+
+            val.add(valueExtractor.apply(e));
+        }
+
+        return ret;
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param <K>
+     * @param <V>
+     * @param iter
+     * @param keyExtractor
+     * @param valueExtractor
+     * @return
+     */
+    @Beta
+    public static <T, K, V> Map<K, List<V>> groupBy(final Iterator<? extends T> iter, final Function<? super T, ? extends K> keyExtractor,
+            final Function<? super T, ? extends V> valueExtractor) {
+        return groupBy(iter, keyExtractor, valueExtractor, Suppliers.ofMap());
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param <K>
+     * @param <V>
+     * @param <M>
+     * @param iter
+     * @param keyExtractor
+     * @param valueExtractor
+     * @param mapSupplier
+     * @return
+     * @throws IllegalArgumentException
+     */
+    @Beta
+    public static <T, K, V, M extends Map<K, List<V>>> M groupBy(final Iterator<? extends T> iter, final Function<? super T, ? extends K> keyExtractor,
+            final Function<? super T, ? extends V> valueExtractor, final Supplier<M> mapSupplier) throws IllegalArgumentException {
+        checkArgNotNull(keyExtractor, "keyExtractor");
+        checkArgNotNull(valueExtractor, "valueExtractor");
+        checkArgNotNull(mapSupplier, "mapSupplier");
+
+        final M ret = mapSupplier.get();
+
+        if (iter == null) {
+            return ret;
+        }
+
+        K key = null;
+        List<V> val = null;
+        T e = null;
+
+        while (iter.hasNext()) {
+            e = iter.next();
+
+            key = keyExtractor.apply(e);
+            val = ret.get(key);
+
+            if (val == null) {
+                val = new ArrayList<>();
+
+                ret.put(key, val);
+            }
+
+            val.add(valueExtractor.apply(e));
+        }
+
+        return ret;
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param <K>
+     * @param <R>
+     * @param c
+     * @param keyExtractor
+     * @param collector
+     * @return
+     * @throws IllegalArgumentException
+     */
+    @Beta
+    public static <T, K, R> Map<K, R> groupBy(final Iterable<? extends T> c, final Function<? super T, ? extends K> keyExtractor,
+            final Collector<? super T, ?, R> collector) throws IllegalArgumentException {
+        return groupBy(c, keyExtractor, collector, Suppliers.ofMap());
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param <K>
+     * @param <R>
+     * @param <M>
+     * @param c
+     * @param keyExtractor
+     * @param collector
+     * @param mapSupplier
+     * @return
+     */
+    @Beta
+    public static <T, K, R, M extends Map<K, R>> M groupBy(final Iterable<? extends T> c, final Function<? super T, ? extends K> keyExtractor,
+            final Collector<? super T, ?, R> collector, final Supplier<M> mapSupplier) {
+        checkArgNotNull(keyExtractor, "keyExtractor");
+        checkArgNotNull(collector, "collector");
+        checkArgNotNull(mapSupplier, "mapSupplier");
+
+        final M ret = mapSupplier.get();
+
+        final Supplier<Object> downstreamSupplier = (Supplier<Object>) collector.supplier();
+        final BiConsumer<Object, ? super T> downstreamAccumulator = (BiConsumer<Object, ? super T>) collector.accumulator();
+        final Function<Object, R> downstreamFinisher = (Function<Object, R>) collector.finisher();
+
+        final Map<K, Object> intermediate = (Map<K, Object>) ret;
+
+        if (c == null) {
+            return ret;
+        }
+
+        K key = null;
+        Object val = null;
+
+        for (T e : c) {
+            key = keyExtractor.apply(e);
+
+            if (((val = intermediate.get(key)) == null) && ((val = downstreamSupplier.get()) != null)) {
+                intermediate.put(key, val);
+            }
+
+            downstreamAccumulator.accept(val, e);
+        }
+
+        updateIntermediateValue(intermediate, downstreamFinisher);
+
+        return ret;
+    }
+
+    /**
+     *
+     *
+     * @param <K>
+     * @param <T>
+     * @param <R>
+     * @param iter
+     * @param keyExtractor
+     * @param collector
+     * @return
+     * @throws IllegalArgumentException
+     */
+    @Beta
+    public static <K, T, R> Map<K, R> groupBy(final Iterator<? extends T> iter, final Function<? super T, ? extends K> keyExtractor,
+            final Collector<? super T, ?, R> collector) throws IllegalArgumentException {
+        return groupBy(iter, keyExtractor, collector, Suppliers.ofMap());
+    }
+
+    /**
+     *
+     *
+     * @param <K>
+     * @param <T>
+     * @param <R>
+     * @param <M>
+     * @param iter
+     * @param keyExtractor
+     * @param collector
+     * @param mapSupplier
+     * @return
+     */
+    @Beta
+    public static <K, T, R, M extends Map<K, R>> M groupBy(final Iterator<? extends T> iter, final Function<? super T, ? extends K> keyExtractor,
+            final Collector<? super T, ?, R> collector, final Supplier<M> mapSupplier) {
+        checkArgNotNull(keyExtractor, "keyExtractor");
+        checkArgNotNull(collector, "collector");
+        checkArgNotNull(mapSupplier, "mapSupplier");
+
+        final M ret = mapSupplier.get();
+
+        final Supplier<Object> downstreamSupplier = (Supplier<Object>) collector.supplier();
+        final BiConsumer<Object, ? super T> downstreamAccumulator = (BiConsumer<Object, ? super T>) collector.accumulator();
+        final Function<Object, R> downstreamFinisher = (Function<Object, R>) collector.finisher();
+
+        final Map<K, Object> intermediate = (Map<K, Object>) ret;
+
+        if (iter == null) {
+            return ret;
+        }
+
+        T e = null;
+        K key = null;
+        Object val = null;
+
+        while (iter.hasNext()) {
+            e = iter.next();
+
+            key = keyExtractor.apply(e);
+
+            if (((val = intermediate.get(key)) == null) && ((val = downstreamSupplier.get()) != null)) {
+                intermediate.put(key, val);
+            }
+
+            downstreamAccumulator.accept(val, e);
+        }
+
+        updateIntermediateValue(intermediate, downstreamFinisher);
+
+        return ret;
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param <K>
+     * @param c
+     * @param keyExtractor
+     * @return
+     */
+    @Beta
+    public static <T, K> Map<K, Integer> countBy(final Iterable<? extends T> c, final Function<? super T, ? extends K> keyExtractor) {
+        return countBy(c, keyExtractor, Suppliers.ofMap());
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param <K>
+     * @param <M>
+     * @param c
+     * @param keyExtractor
+     * @param mapSupplier
+     * @return
+     * @throws IllegalArgumentException
+     */
+    @Beta
+    public static <T, K, M extends Map<K, Integer>> M countBy(final Iterable<? extends T> c, final Function<? super T, ? extends K> keyExtractor,
+            final Supplier<M> mapSupplier) throws IllegalArgumentException {
+        checkArgNotNull(keyExtractor, "keyExtractor");
+        checkArgNotNull(mapSupplier, "mapSupplier");
+
+        final M ret = mapSupplier.get();
+
+        if (c == null) {
+            return ret;
+        }
+
+        @SuppressWarnings("rawtypes")
+        final Map<K, MutableInt> intermediateMap = (Map) ret;
+
+        K key = null;
+        MutableInt val = null;
+
+        for (T e : c) {
+            key = keyExtractor.apply(e);
+            val = intermediateMap.get(key);
+
+            if (val == null) {
+                intermediateMap.put(key, MutableInt.of(1));
+            } else {
+                val.increment();
+            }
+        }
+
+        updateIntermediateValue(intermediateMap, MutableInt::value);
+
+        return ret;
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param <K>
+     * @param iter
+     * @param keyExtractor
+     * @return
+     */
+    @Beta
+    public static <T, K> Map<K, Integer> countBy(final Iterator<? extends T> iter, final Function<? super T, ? extends K> keyExtractor) {
+        return countBy(iter, keyExtractor, Suppliers.ofMap());
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param <K>
+     * @param <M>
+     * @param iter
+     * @param keyExtractor
+     * @param mapSupplier
+     * @return
+     * @throws IllegalArgumentException
+     */
+    @Beta
+    public static <T, K, M extends Map<K, Integer>> M countBy(final Iterator<? extends T> iter, final Function<? super T, ? extends K> keyExtractor,
+            final Supplier<M> mapSupplier) throws IllegalArgumentException {
+        checkArgNotNull(keyExtractor, "keyExtractor");
+        checkArgNotNull(mapSupplier, "mapSupplier");
+
+        final M ret = mapSupplier.get();
+
+        if (iter == null) {
+            return ret;
+        }
+
+        @SuppressWarnings("rawtypes")
+        final Map<K, MutableInt> intermediateMap = (Map) ret;
+
+        K key = null;
+        MutableInt val = null;
+
+        while (iter.hasNext()) {
+            key = keyExtractor.apply(iter.next());
+            val = intermediateMap.get(key);
+
+            if (val == null) {
+                intermediateMap.put(key, MutableInt.of(1));
+            } else {
+                val.increment();
+            }
+        }
+
+        updateIntermediateValue(intermediateMap, MutableInt::value);
+
+        return ret;
+    }
+
+    static <V> void updateIntermediateValue(final Map<?, V> intermediate, final Function<? super V, ?> downstreamFinisher) {
+        for (Map.Entry<?, V> entry : intermediate.entrySet()) {
+            entry.setValue((V) downstreamFinisher.apply(entry.getValue()));
+        }
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param a
+     * @return
+     * @see ObjIterator#of(Object...)
+     */
+    @Beta
+    public static <T> ObjIterator<T> iterate(final T[] a) {
+        return ObjIterator.of(a);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return
+     * @see ObjIterator#of(Object[], int, int)
+     */
+    @Beta
+    public static <T> ObjIterator<T> iterate(final T[] a, final int fromIndex, final int toIndex) {
+        return ObjIterator.of(a, fromIndex, toIndex);
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param iterable
+     * @return
+     */
+    @Beta
+    public static <T> Iterator<T> iterate(final Iterable<? extends T> iterable) {
+        return iterable == null ? ObjIterator.<T> empty() : (Iterator<T>) iterable.iterator();
+    }
+
+    /**
+     *
+     * @param a
+     * @param b
+     * @return
+     */
+    public static boolean disjoint(final Object[] a, final Object[] b) {
+        if (isEmpty(a) || isEmpty(b)) {
+            return true;
+        }
+
+        return a.length >= b.length ? disjoint(Arrays.asList(a), asSet(b)) : disjoint(asSet(a), Arrays.asList(b));
+    }
+
+    /**
+     * Returns {@code true} if the two specified arrays have no elements in common.
+     *
+     * @param c1
+     * @param c2
+     * @return {@code true} if the two specified arrays have no elements in common.
+     * @see Collections#disjoint(Collection, Collection)
+     */
+    public static boolean disjoint(final Collection<?> c1, final Collection<?> c2) {
+        if (isEmpty(c1) || isEmpty(c2)) {
+            return true;
+        }
+
+        if (c1 instanceof Set || (!(c2 instanceof Set) && c1.size() > c2.size())) {
+            for (Object e : c2) {
+                if (c1.contains(e)) {
+                    return false;
+                }
+            }
+        } else {
+            for (Object e : c1) {
+                if (c2.contains(e)) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     *
+     * @param obj
+     * @return
+     */
+    public static String toJson(final Object obj) {
+        return Utils.jsonParser.serialize(obj, Utils.jsc);
+    }
+
+    /**
+     *
+     * @param obj
+     * @param prettyFormat
+     * @return
+     */
+    public static String toJson(final Object obj, final boolean prettyFormat) {
+        return Utils.jsonParser.serialize(obj, prettyFormat ? Utils.jscPrettyFormat : Utils.jsc);
+    }
+
+    /**
+     *
+     * @param obj
+     * @param config
+     * @return
+     */
+    public static String toJson(final Object obj, final JSONSerializationConfig config) {
+        return Utils.jsonParser.serialize(obj, config);
+    }
+
+    /**
+     *
+     * @param obj
+     * @param output
+     */
+    public static void toJson(final Object obj, final File output) {
+        Utils.jsonParser.serialize(obj, output);
+    }
+
+    /**
+     *
+     * @param obj
+     * @param config
+     * @param output
+     */
+    public static void toJson(final Object obj, final JSONSerializationConfig config, final File output) {
+        Utils.jsonParser.serialize(obj, config, output);
+    }
+
+    /**
+     *
+     * @param obj
+     * @param output
+     */
+    public static void toJson(final Object obj, final OutputStream output) {
+        Utils.jsonParser.serialize(obj, output);
+    }
+
+    /**
+     *
+     * @param obj
+     * @param config
+     * @param output
+     */
+    public static void toJson(final Object obj, final JSONSerializationConfig config, final OutputStream output) {
+        Utils.jsonParser.serialize(obj, config, output);
+    }
+
+    /**
+     *
+     * @param obj
+     * @param output
+     */
+    public static void toJson(final Object obj, final Writer output) {
+        Utils.jsonParser.serialize(obj, output);
+    }
+
+    /**
+     *
+     * @param obj
+     * @param config
+     * @param output
+     */
+    public static void toJson(final Object obj, final JSONSerializationConfig config, final Writer output) {
+        Utils.jsonParser.serialize(obj, config, output);
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param json
+     * @param targetType
+     * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
+     */
+    public static <T> T fromJson(final String json, final Class<? extends T> targetType) {
+        return Utils.jsonParser.deserialize(json, targetType);
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param json
+     * @param defaultIfNull
+     * @param targetType
+     * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
+     */
+    public static <T> T fromJson(final String json, final T defaultIfNull, final Class<? extends T> targetType) {
+        final T ret = fromJson(json, targetType);
+
+        return ret == null ? defaultIfNull : ret;
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param json
+     * @param config
+     * @param targetType
+     * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
+     */
+    public static <T> T fromJson(final String json, final JSONDeserializationConfig config, final Class<? extends T> targetType) {
+        return Utils.jsonParser.deserialize(json, config, targetType);
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param json
+     * @param targetType
+     * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
+     */
+    public static <T> T fromJson(final File json, final Class<? extends T> targetType) {
+        return Utils.jsonParser.deserialize(json, targetType);
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param json
+     * @param config
+     * @param targetType
+     * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
+     */
+    public static <T> T fromJson(final File json, final JSONDeserializationConfig config, final Class<? extends T> targetType) {
+        return Utils.jsonParser.deserialize(json, config, targetType);
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param json
+     * @param targetType
+     * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
+     */
+    public static <T> T fromJson(final InputStream json, final Class<? extends T> targetType) {
+        return Utils.jsonParser.deserialize(json, targetType);
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param json
+     * @param config
+     * @param targetType
+     * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
+     */
+    public static <T> T fromJson(final InputStream json, final JSONDeserializationConfig config, final Class<? extends T> targetType) {
+        return Utils.jsonParser.deserialize(json, config, targetType);
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param json
+     * @param targetType
+     * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
+     */
+    public static <T> T fromJson(final Reader json, final Class<? extends T> targetType) {
+        return Utils.jsonParser.deserialize(json, targetType);
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param json
+     * @param config
+     * @param targetType
+     * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
+     */
+    public static <T> T fromJson(final Reader json, final JSONDeserializationConfig config, final Class<? extends T> targetType) {
+        return Utils.jsonParser.deserialize(json, config, targetType);
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param json
+     * @param fromIndex
+     * @param toIndex
+     * @param targetType
+     * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
+     */
+    public static <T> T fromJson(final String json, final int fromIndex, final int toIndex, final Class<? extends T> targetType) {
+        return Utils.jsonParser.deserialize(json, fromIndex, toIndex, targetType);
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param json
+     * @param fromIndex
+     * @param toIndex
+     * @param config
+     * @param targetType
+     * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
+     */
+    public static <T> T fromJson(final String json, final int fromIndex, final int toIndex, final JSONDeserializationConfig config,
+            final Class<? extends T> targetType) {
+        return Utils.jsonParser.deserialize(json, fromIndex, toIndex, config, targetType);
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param json
+     * @param targetType can be the {@code Type} of {@code Bean/Array/Collection/Map}.
+     * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
+     */
+    public static <T> T fromJson(final String json, final Type<? extends T> targetType) {
+        return fromJson(json, null, targetType);
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param json
+     * @param defaultIfNull
+     * @param targetType
+     * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
+     */
+    public static <T> T fromJson(final String json, final T defaultIfNull, final Type<? extends T> targetType) {
+        final T ret = fromJson(json, targetType);
+
+        return ret == null ? defaultIfNull : ret;
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param json
+     * @param config
+     * @param targetType can be the {@code Type} of {@code Bean/Array/Collection/Map}.
+     * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
+     */
+    public static <T> T fromJson(final String json, final JSONDeserializationConfig config, final Type<? extends T> targetType) {
+        return Utils.jsonParser.deserialize(json, setConfig(targetType, config, true), targetType.clazz());
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param json
+     * @param targetType can be the {@code Type} of {@code Bean/Array/Collection/Map}.
+     * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
+     */
+    public static <T> T fromJson(final File json, final Type<? extends T> targetType) {
+        return fromJson(json, null, targetType);
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param json
+     * @param config
+     * @param targetType can be the {@code Type} of {@code Bean/Array/Collection/Map}.
+     * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
+     */
+    public static <T> T fromJson(final File json, final JSONDeserializationConfig config, final Type<? extends T> targetType) {
+        return Utils.jsonParser.deserialize(json, setConfig(targetType, config, true), targetType.clazz());
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param json
+     * @param targetType can be the {@code Type} of {@code Bean/Array/Collection/Map}.
+     * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
+     */
+    public static <T> T fromJson(final InputStream json, final Type<? extends T> targetType) {
+        return fromJson(json, null, targetType);
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param json
+     * @param config
+     * @param targetType can be the {@code Type} of {@code Bean/Array/Collection/Map}.
+     * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
+     */
+    public static <T> T fromJson(final InputStream json, final JSONDeserializationConfig config, final Type<? extends T> targetType) {
+        return Utils.jsonParser.deserialize(json, setConfig(targetType, config, true), targetType.clazz());
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param json
+     * @param targetType can be the {@code Type} of {@code Bean/Array/Collection/Map}.
+     * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
+     */
+    public static <T> T fromJson(final Reader json, final Type<? extends T> targetType) {
+        return fromJson(json, null, targetType);
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param json
+     * @param config
+     * @param targetType can be the {@code Type} of {@code Bean/Array/Collection/Map}.
+     * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
+     */
+    public static <T> T fromJson(final Reader json, final JSONDeserializationConfig config, final Type<? extends T> targetType) {
+        return Utils.jsonParser.deserialize(json, setConfig(targetType, config, true), targetType.clazz());
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param json
+     * @param fromIndex
+     * @param toIndex
+     * @param targetType can be the {@code Type} of {@code Bean/Array/Collection/Map}.
+     * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
+     */
+    public static <T> T fromJson(final String json, final int fromIndex, final int toIndex, final Type<? extends T> targetType) {
+        return fromJson(json, fromIndex, toIndex, null, targetType);
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param json
+     * @param fromIndex
+     * @param toIndex
+     * @param config
+     * @param targetType can be the {@code Type} of {@code Bean/Array/Collection/Map}.
+     * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
+     */
+    public static <T> T fromJson(final String json, final int fromIndex, final int toIndex, final JSONDeserializationConfig config,
+            final Type<? extends T> targetType) {
+        return Utils.jsonParser.deserialize(json, fromIndex, toIndex, setConfig(targetType, config, true), targetType.clazz());
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param jsonArray must be a json array/list.
+     * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
+     * @return
+     */
+    public static <T> CheckedStream<T, IOException> streamJson(String jsonArray, Class<? extends T> elementClass) {
+        return Utils.jsonParser.stream(jsonArray, elementClass);
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param jsonArray must be a json array/list.
+     * @param config
+     * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
+     * @return
+     */
+    public static <T> CheckedStream<T, IOException> streamJson(String jsonArray, JSONDeserializationConfig config, Class<? extends T> elementClass) {
+        return Utils.jsonParser.stream(jsonArray, config, elementClass);
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param jsonArray must be a json array/list.
+     * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
+     * @return
+     */
+    public static <T> CheckedStream<T, IOException> streamJson(File jsonArray, Class<? extends T> elementClass) {
+        return Utils.jsonParser.stream(jsonArray, elementClass);
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param jsonArray must be a json array/list.
+     * @param config
+     * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
+     * @return
+     */
+    public static <T> CheckedStream<T, IOException> streamJson(File jsonArray, JSONDeserializationConfig config, Class<? extends T> elementClass) {
+        return Utils.jsonParser.stream(jsonArray, config, elementClass);
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param jsonArray must be a json array/list.
+     * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
+     * @return
+     */
+    public static <T> CheckedStream<T, IOException> streamJson(InputStream jsonArray, Class<? extends T> elementClass) {
+        return streamJson(jsonArray, false, elementClass);
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param jsonArray must be a json array/list.
+     * @param closeInputStreamWhenStreamIsClosed
+     * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
+     * @return
+     */
+    public static <T> CheckedStream<T, IOException> streamJson(InputStream jsonArray, boolean closeInputStreamWhenStreamIsClosed,
+            Class<? extends T> elementClass) {
+        return Utils.jsonParser.stream(jsonArray, closeInputStreamWhenStreamIsClosed, elementClass);
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param jsonArray must be a json array/list.
+     * @param config
+     * @param closeInputStreamWhenStreamIsClosed
+     * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
+     * @return
+     */
+    public static <T> CheckedStream<T, IOException> streamJson(InputStream jsonArray, JSONDeserializationConfig config,
+            boolean closeInputStreamWhenStreamIsClosed, Class<? extends T> elementClass) {
+        return Utils.jsonParser.stream(jsonArray, config, closeInputStreamWhenStreamIsClosed, elementClass);
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param jsonArray must be a json array/list.
+     * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
+     * @return
+     */
+    public static <T> CheckedStream<T, IOException> streamJson(Reader jsonArray, Class<? extends T> elementClass) {
+        return streamJson(jsonArray, false, elementClass);
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param jsonArray must be a json array/list.
+     * @param closeReaderWhenStreamIsClosed
+     * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
+     * @return
+     */
+    public static <T> CheckedStream<T, IOException> streamJson(Reader jsonArray, boolean closeReaderWhenStreamIsClosed, Class<? extends T> elementClass) {
+        return Utils.jsonParser.stream(jsonArray, closeReaderWhenStreamIsClosed, elementClass);
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param jsonArray must be a json array/list.
+     * @param config
+     * @param closeReaderWhenStreamIsClosed
+     * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
+     * @return
+     */
+    public static <T> CheckedStream<T, IOException> streamJson(Reader jsonArray, JSONDeserializationConfig config, boolean closeReaderWhenStreamIsClosed,
+            Class<? extends T> elementClass) {
+        return Utils.jsonParser.stream(jsonArray, config, closeReaderWhenStreamIsClosed, elementClass);
+    }
+
+    /**
+     *
+     * @param json
+     * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
+     */
+    public static String formatJson(final String json) {
+        return formatJson(json, Utils.jscPrettyFormat, Object.class);
+    }
+
+    /**
+     *
+     * @param json
+     * @param config
+     * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
+     */
+    public static String formatJson(final String json, final JSONSerializationConfig config) {
+        return formatJson(json, config, Object.class);
+    }
+
+    /**
+     *
+     * @param json
+     * @param transferType
+     * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
+     */
+    public static String formatJson(final String json, final Class<?> transferType) {
+        return toJson(fromJson(json, transferType), Utils.jscPrettyFormat);
+    }
+
+    /**
+     *
+     * @param json
+     * @param config
+     * @param transferType
+     * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
+     */
+    public static String formatJson(final String json, final JSONSerializationConfig config, final Class<?> transferType) {
+        final JSONSerializationConfig configToUse = config == null ? Utils.jscPrettyFormat
+                : (config.prettyFormat() == false ? config.copy().prettyFormat(true) : config);
+
+        return toJson(fromJson(json, transferType), configToUse);
+    }
+
+    /**
+     *
+     * @param json
+     * @param transferType
+     * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
+     */
+    public static String formatJson(final String json, final Type<?> transferType) {
+        return toJson(fromJson(json, transferType), Utils.jscPrettyFormat);
+    }
+
+    /**
+     *
+     * @param json
+     * @param config
+     * @param transferType
+     * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
+     */
+    public static String formatJson(final String json, final JSONSerializationConfig config, final Type<?> transferType) {
+        final JSONSerializationConfig configToUse = config == null ? Utils.jscPrettyFormat
+                : (config.prettyFormat() == false ? config.copy().prettyFormat(true) : config);
+
+        return toJson(fromJson(json, transferType), configToUse);
+    }
+
+    /**
+     *
+     * @param obj
+     * @return
+     */
+    public static String toXml(final Object obj) {
+        return Utils.xmlParser.serialize(obj);
+    }
+
+    /**
+     *
+     * @param obj
+     * @param prettyFormat
+     * @return
+     */
+    public static String toXml(final Object obj, final boolean prettyFormat) {
+        return Utils.xmlParser.serialize(obj, prettyFormat ? Utils.xscPrettyFormat : Utils.xsc);
+    }
+
+    /**
+     *
+     * @param obj
+     * @param config
+     * @return
+     */
+    public static String toXml(final Object obj, final XMLSerializationConfig config) {
+        return Utils.xmlParser.serialize(obj, config);
+    }
+
+    /**
+     *
+     * @param obj
+     * @param output
+     */
+    public static void toXml(final Object obj, final File output) {
+        Utils.xmlParser.serialize(obj, output);
+    }
+
+    /**
+     *
+     * @param obj
+     * @param config
+     * @param output
+     */
+    public static void toXml(final Object obj, final XMLSerializationConfig config, final File output) {
+        Utils.xmlParser.serialize(obj, config, output);
+    }
+
+    /**
+     *
+     * @param obj
+     * @param output
+     */
+    public static void toXml(final Object obj, final OutputStream output) {
+        Utils.xmlParser.serialize(obj, output);
+    }
+
+    /**
+     *
+     * @param obj
+     * @param config
+     * @param output
+     */
+    public static void toXml(final Object obj, final XMLSerializationConfig config, final OutputStream output) {
+        Utils.xmlParser.serialize(obj, config, output);
+    }
+
+    /**
+     *
+     * @param obj
+     * @param output
+     */
+    public static void toXml(final Object obj, final Writer output) {
+        Utils.xmlParser.serialize(obj, output);
+    }
+
+    /**
+     *
+     * @param obj
+     * @param config
+     * @param output
+     */
+    public static void toXml(final Object obj, final XMLSerializationConfig config, final Writer output) {
+        Utils.xmlParser.serialize(obj, config, output);
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param xml
+     * @param targetType
+     * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
+     */
+    public static <T> T fromXml(final String xml, final Class<? extends T> targetType) {
+        return Utils.xmlParser.deserialize(xml, targetType);
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param xml
+     * @param config
+     * @param targetType
+     * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
+     */
+    public static <T> T fromXml(final String xml, final XMLDeserializationConfig config, final Class<? extends T> targetType) {
+        return Utils.xmlParser.deserialize(xml, config, targetType);
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param xml
+     * @param targetType
+     * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
+     */
+    public static <T> T fromXml(final File xml, final Class<? extends T> targetType) {
+        return Utils.xmlParser.deserialize(xml, targetType);
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param xml
+     * @param config
+     * @param targetType
+     * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
+     */
+    public static <T> T fromXml(final File xml, final XMLDeserializationConfig config, final Class<? extends T> targetType) {
+        return Utils.xmlParser.deserialize(xml, config, targetType);
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param xml
+     * @param targetType
+     * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
+     */
+    public static <T> T fromXml(final InputStream xml, final Class<? extends T> targetType) {
+        return Utils.xmlParser.deserialize(xml, targetType);
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param xml
+     * @param config
+     * @param targetType
+     * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
+     */
+    public static <T> T fromXml(final InputStream xml, final XMLDeserializationConfig config, final Class<? extends T> targetType) {
+        return Utils.xmlParser.deserialize(xml, config, targetType);
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param xml
+     * @param targetType
+     * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
+     */
+    public static <T> T fromXml(final Reader xml, final Class<? extends T> targetType) {
+        return Utils.xmlParser.deserialize(xml, targetType);
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param xml
+     * @param config
+     * @param targetType
+     * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
+     */
+    public static <T> T fromXml(final Reader xml, final XMLDeserializationConfig config, final Class<? extends T> targetType) {
+        return Utils.xmlParser.deserialize(xml, config, targetType);
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param xml
+     * @param targetType can be the {@code Type} of {@code Bean/Array/Collection/Map}.
+     * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
+     */
+    public static <T> T fromXml(final String xml, final Type<? extends T> targetType) {
+        return fromJson(xml, null, targetType);
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param xml
+     * @param config
+     * @param targetType can be the {@code Type} of {@code Bean/Array/Collection/Map}.
+     * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
+     */
+    public static <T> T fromXml(final String xml, final XMLDeserializationConfig config, final Type<? extends T> targetType) {
+        return Utils.xmlParser.deserialize(xml, setConfig(targetType, config, false), targetType.clazz());
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param xml
+     * @param targetType can be the {@code Type} of {@code Bean/Array/Collection/Map}.
+     * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
+     */
+    public static <T> T fromXml(final File xml, final Type<? extends T> targetType) {
+        return fromJson(xml, null, targetType);
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param xml
+     * @param config
+     * @param targetType can be the {@code Type} of {@code Bean/Array/Collection/Map}.
+     * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
+     */
+    public static <T> T fromXml(final File xml, final XMLDeserializationConfig config, final Type<? extends T> targetType) {
+        return Utils.xmlParser.deserialize(xml, setConfig(targetType, config, false), targetType.clazz());
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param xml
+     * @param targetType can be the {@code Type} of {@code Bean/Array/Collection/Map}.
+     * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
+     */
+    public static <T> T fromXml(final InputStream xml, final Type<? extends T> targetType) {
+        return fromJson(xml, null, targetType);
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param xml
+     * @param config
+     * @param targetType can be the {@code Type} of {@code Bean/Array/Collection/Map}.
+     * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
+     */
+    public static <T> T fromXml(final InputStream xml, final XMLDeserializationConfig config, final Type<? extends T> targetType) {
+        return Utils.xmlParser.deserialize(xml, setConfig(targetType, config, false), targetType.clazz());
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param xml
+     * @param targetType can be the {@code Type} of {@code Bean/Array/Collection/Map}.
+     * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
+     */
+    public static <T> T fromXml(final Reader xml, final Type<? extends T> targetType) {
+        return fromJson(xml, null, targetType);
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param xml
+     * @param config
+     * @param targetType can be the {@code Type} of {@code Bean/Array/Collection/Map}.
+     * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
+     */
+    public static <T> T fromXml(final Reader xml, final XMLDeserializationConfig config, final Type<? extends T> targetType) {
+        return Utils.xmlParser.deserialize(xml, setConfig(targetType, config, false), targetType.clazz());
+    }
+
+    /**
+     * Sets the config.
+     *
+     * @param <C>
+     * @param targetType
+     * @param config
+     * @param isJSON
+     * @return
+     */
+    private static <C extends DeserializationConfig<C>> C setConfig(final Type<?> targetType, final C config, boolean isJSON) {
+        C configToReturn = config;
+
+        if (targetType.isCollection() || targetType.isArray()) {
+            if (config == null || config.getElementType() == null) {
+                configToReturn = config == null ? (C) (isJSON ? JDC.create() : XDC.create()) : (C) config.copy();
+
+                configToReturn.setElementType(targetType.getParameterTypes()[0]);
+            }
+        } else if (targetType.isMap() && (config == null || config.getMapKeyType() == null || config.getMapValueType() == null)) {
+            configToReturn = config == null ? (C) (isJSON ? JDC.create() : XDC.create()) : (C) config.copy();
+
+            if (configToReturn.getMapKeyType() == null) {
+                configToReturn.setMapKeyType(targetType.getParameterTypes()[0]);
+            }
+
+            if (configToReturn.getMapValueType() == null) {
+                configToReturn.setMapValueType(targetType.getParameterTypes()[1]);
+            }
+        }
+
+        return configToReturn;
+    }
+
+    /**
+     *
+     * @param xml
+     * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
+     */
+    public static String formatXml(final String xml) {
+        return formatXml(xml, MapEntity.class);
+    }
+
+    /**
+     *
+     * @param xml
+     * @param config
+     * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
+     */
+    public static String formatXml(final String xml, final XMLSerializationConfig config) {
+        return formatXml(xml, config, MapEntity.class);
+    }
+
+    /**
+     *
+     * @param xml
+     * @param transferType
+     * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
+     */
+    public static String formatXml(final String xml, final Class<?> transferType) {
+        return toXml(fromXml(xml, transferType), Utils.xscPrettyFormat);
+    }
+
+    /**
+     *
+     * @param xml
+     * @param config
+     * @param transferType
+     * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
+     */
+    public static String formatXml(final String xml, final XMLSerializationConfig config, final Class<?> transferType) {
+        final XMLSerializationConfig configToUse = config == null ? Utils.xscPrettyFormat
+                : (config.prettyFormat() == false ? config.copy().prettyFormat(true) : config);
+
+        return toXml(fromXml(xml, transferType), configToUse);
+    }
+
+    /**
+     *
+     * @param xml
+     * @param transferType
+     * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
+     */
+    public static String formatXml(final String xml, final Type<?> transferType) {
+        return toXml(fromXml(xml, transferType), Utils.xscPrettyFormat);
+    }
+
+    /**
+     *
+     * @param xml
+     * @param config
+     * @param transferType
+     * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
+     */
+    public static String formatXml(final String xml, final XMLSerializationConfig config, final Type<?> transferType) {
+        final XMLSerializationConfig configToUse = config == null ? Utils.xscPrettyFormat
+                : (config.prettyFormat() == false ? config.copy().prettyFormat(true) : config);
+
+        return toXml(fromXml(xml, transferType), configToUse);
+    }
+
+    /**
+     * Xml 2 JSO.
+     *
+     * @param xml
+     * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
+     */
+    public static String xml2Json(final String xml) {
+        return xml2Json(xml, Map.class);
+    }
+
+    /**
+     * Xml 2 JSO.
+     * @param xml
+     * @param transferType
+     *
+     * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
+     */
+    public static String xml2Json(final String xml, final Class<?> transferType) {
+        return Utils.jsonParser.serialize(Utils.xmlParser.deserialize(xml, transferType), Utils.jsc);
+    }
+
+    /**
+     * Json 2 XML.
+     *
+     * @param json
+     * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
+     */
+    public static String json2Xml(final String json) {
+        return json2Xml(json, Map.class);
+    }
+
+    /**
+     * Json 2 XML.
+     * @param json
+     * @param transferType
+     *
+     * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
+     */
+    public static String json2Xml(final String json, final Class<?> transferType) {
+        return Utils.xmlParser.serialize(Utils.jsonParser.deserialize(json, transferType));
+    }
+
+    /**
+     *
      * @param <E>
      * @param startInclusive
      * @param endExclusive
@@ -18083,7 +25940,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static <T, E extends Exception> void forEach(final T[] a, final int fromIndex, final int toIndex, final Throwables.Consumer<? super T, E> action)
             throws E {
-        checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), fromIndex < toIndex ? toIndex : fromIndex, len(a));
+        checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), fromIndex < toIndex ? toIndex : fromIndex, len(a)); // NOSONAR
         checkArgNotNull(action);
 
         if (isEmpty(a) || fromIndex == toIndex) {
@@ -19486,7 +27343,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static <T, E extends Exception> void forEachIndexed(final T[] a, final int fromIndex, final int toIndex,
             final Throwables.IntObjConsumer<? super T, E> action) throws IllegalArgumentException, IndexOutOfBoundsException, E {
-        checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), fromIndex < toIndex ? toIndex : fromIndex, len(a));
+        checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), fromIndex < toIndex ? toIndex : fromIndex, len(a)); // NOSONAR
         checkArgNotNull(action);
 
         if (isEmpty(a) || fromIndex == toIndex) {
@@ -20231,8221 +28088,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
-     *
-     * @param <E>
-     * @param a
-     * @param filter
-     * @return
-     * @throws IllegalArgumentException
-     * @throws E the e
-     */
-    public static <E extends Exception> boolean[] filter(final boolean[] a, final Throwables.BooleanPredicate<E> filter) throws IllegalArgumentException, E {
-        checkArgNotNull(filter, "filter"); //NOSONAR
-
-        if (isEmpty(a)) {
-            return EMPTY_BOOLEAN_ARRAY;
-        }
-
-        return filter(a, 0, a.length, filter);
-    }
-
-    /**
-     *
-     *
-     * @param <E>
-     * @param a
-     * @param max
-     * @param filter
-     * @return
-     * @throws IllegalArgumentException
-     * @throws E the e
-     */
-    public static <E extends Exception> boolean[] filter(final boolean[] a, final int max, final Throwables.BooleanPredicate<E> filter)
-            throws IllegalArgumentException, E {
-        checkArgNotNull(filter, "filter");
-
-        if (isEmpty(a)) {
-            return EMPTY_BOOLEAN_ARRAY;
-        }
-
-        return filter(a, 0, a.length, filter, max);
-    }
-
-    /**
-     *
-     * @param <E>
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param filter
-     * @return
-     * @throws E the e
-     */
-    public static <E extends Exception> boolean[] filter(final boolean[] a, final int fromIndex, final int toIndex, final Throwables.BooleanPredicate<E> filter)
-            throws E {
-        return filter(a, fromIndex, toIndex, filter, Integer.MAX_VALUE);
-    }
-
-    /**
-     * Mostly it's designed for one-step operation to complete the operation in one step.
-     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
-     *
-     * @param <E>
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param filter
-     * @param max maximum return result.
-     * @return
-     * @throws IllegalArgumentException
-     * @throws IndexOutOfBoundsException
-     * @throws E the e
-     */
-    public static <E extends Exception> boolean[] filter(final boolean[] a, final int fromIndex, final int toIndex, final Throwables.BooleanPredicate<E> filter,
-            final int max) throws IllegalArgumentException, IndexOutOfBoundsException, E {
-        checkFromToIndex(fromIndex, toIndex, len(a));
-        checkArgNotNull(filter, "filter");
-
-        if (isEmpty(a) || fromIndex == toIndex) {
-            return EMPTY_BOOLEAN_ARRAY;
-        }
-
-        boolean[] result = new boolean[(toIndex - fromIndex) / 2];
-        int len = result.length;
-        int count = 0;
-
-        for (int i = fromIndex, cnt = 0; i < toIndex && cnt < max; i++) {
-            if (filter.test(a[i])) {
-                if (count == len) {
-                    result = copyOf(result, toIndex - fromIndex);
-                    len = result.length;
-                }
-
-                result[count++] = a[i];
-            }
-        }
-
-        return result.length == count ? result : copyOfRange(result, 0, count);
-    }
-
-    /**
-     *
-     *
-     * @param <E>
-     * @param a
-     * @param filter
-     * @return
-     * @throws IllegalArgumentException
-     * @throws E the e
-     */
-    public static <E extends Exception> char[] filter(final char[] a, final Throwables.CharPredicate<E> filter) throws IllegalArgumentException, E {
-        checkArgNotNull(filter, "filter");
-
-        if (isEmpty(a)) {
-            return EMPTY_CHAR_ARRAY;
-        }
-
-        return filter(a, 0, a.length, filter);
-    }
-
-    /**
-     *
-     *
-     * @param <E>
-     * @param a
-     * @param filter
-     * @param max
-     * @return
-     * @throws IllegalArgumentException
-     * @throws E the e
-     */
-    public static <E extends Exception> char[] filter(final char[] a, final Throwables.CharPredicate<E> filter, final int max)
-            throws IllegalArgumentException, E {
-        checkArgNotNull(filter, "filter");
-
-        if (isEmpty(a)) {
-            return EMPTY_CHAR_ARRAY;
-        }
-
-        return filter(a, 0, a.length, filter, max);
-    }
-
-    /**
-     *
-     * @param <E>
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param filter
-     * @return
-     * @throws E the e
-     */
-    public static <E extends Exception> char[] filter(final char[] a, final int fromIndex, final int toIndex, final Throwables.CharPredicate<E> filter)
-            throws E {
-        return filter(a, fromIndex, toIndex, filter, Integer.MAX_VALUE);
-    }
-
-    /**
-     * Mostly it's designed for one-step operation to complete the operation in one step.
-     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
-     *
-     * @param <E>
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param filter
-     * @param max maximum return result.
-     * @return
-     * @throws IllegalArgumentException
-     * @throws IndexOutOfBoundsException
-     * @throws E the e
-     */
-    public static <E extends Exception> char[] filter(final char[] a, final int fromIndex, final int toIndex, final Throwables.CharPredicate<E> filter,
-            final int max) throws IllegalArgumentException, IndexOutOfBoundsException, E {
-        checkFromToIndex(fromIndex, toIndex, len(a));
-        checkArgNotNull(filter, "filter");
-
-        if (isEmpty(a) || fromIndex == toIndex) {
-            return EMPTY_CHAR_ARRAY;
-        }
-
-        char[] result = new char[(toIndex - fromIndex) / 2];
-        int len = result.length;
-        int count = 0;
-
-        for (int i = fromIndex, cnt = 0; i < toIndex && cnt < max; i++) {
-            if (filter.test(a[i])) {
-                if (count == len) {
-                    result = copyOf(result, toIndex - fromIndex);
-                    len = result.length;
-                }
-
-                result[count++] = a[i];
-            }
-        }
-
-        return result.length == count ? result : copyOfRange(result, 0, count);
-    }
-
-    /**
-     *
-     *
-     * @param <E>
-     * @param a
-     * @param filter
-     * @return
-     * @throws IllegalArgumentException
-     * @throws E the e
-     */
-    public static <E extends Exception> byte[] filter(final byte[] a, final Throwables.BytePredicate<E> filter) throws IllegalArgumentException, E {
-        checkArgNotNull(filter, "filter");
-
-        if (isEmpty(a)) {
-            return EMPTY_BYTE_ARRAY;
-        }
-
-        return filter(a, 0, a.length, filter);
-    }
-
-    /**
-     *
-     *
-     * @param <E>
-     * @param a
-     * @param filter
-     * @param max
-     * @return
-     * @throws IllegalArgumentException
-     * @throws E the e
-     */
-    public static <E extends Exception> byte[] filter(final byte[] a, final Throwables.BytePredicate<E> filter, final int max)
-            throws IllegalArgumentException, E {
-        checkArgNotNull(filter, "filter");
-
-        if (isEmpty(a)) {
-            return EMPTY_BYTE_ARRAY;
-        }
-
-        return filter(a, 0, a.length, filter, max);
-    }
-
-    /**
-     *
-     * @param <E>
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param filter
-     * @return
-     * @throws E the e
-     */
-    public static <E extends Exception> byte[] filter(final byte[] a, final int fromIndex, final int toIndex, final Throwables.BytePredicate<E> filter)
-            throws E {
-        return filter(a, fromIndex, toIndex, filter, Integer.MAX_VALUE);
-    }
-
-    /**
-     * Mostly it's designed for one-step operation to complete the operation in one step.
-     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
-     *
-     * @param <E>
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param filter
-     * @param max maximum return result.
-     * @return
-     * @throws IllegalArgumentException
-     * @throws IndexOutOfBoundsException
-     * @throws E the e
-     */
-    public static <E extends Exception> byte[] filter(final byte[] a, final int fromIndex, final int toIndex, final Throwables.BytePredicate<E> filter,
-            final int max) throws IllegalArgumentException, IndexOutOfBoundsException, E {
-        checkFromToIndex(fromIndex, toIndex, len(a));
-        checkArgNotNull(filter, "filter");
-
-        if (isEmpty(a) || fromIndex == toIndex) {
-            return EMPTY_BYTE_ARRAY;
-        }
-
-        byte[] result = new byte[(toIndex - fromIndex) / 2];
-        int len = result.length;
-        int count = 0;
-
-        for (int i = fromIndex, cnt = 0; i < toIndex && cnt < max; i++) {
-            if (filter.test(a[i])) {
-                if (count == len) {
-                    result = copyOf(result, toIndex - fromIndex);
-                    len = result.length;
-                }
-
-                result[count++] = a[i];
-            }
-        }
-
-        return result.length == count ? result : copyOfRange(result, 0, count);
-    }
-
-    /**
-     *
-     *
-     * @param <E>
-     * @param a
-     * @param filter
-     * @return
-     * @throws IllegalArgumentException
-     * @throws E the e
-     */
-    public static <E extends Exception> short[] filter(final short[] a, final Throwables.ShortPredicate<E> filter) throws IllegalArgumentException, E {
-        checkArgNotNull(filter, "filter");
-
-        if (isEmpty(a)) {
-            return EMPTY_SHORT_ARRAY;
-        }
-
-        return filter(a, 0, a.length, filter);
-    }
-
-    /**
-     *
-     *
-     * @param <E>
-     * @param a
-     * @param filter
-     * @param max
-     * @return
-     * @throws IllegalArgumentException
-     * @throws E the e
-     */
-    public static <E extends Exception> short[] filter(final short[] a, final Throwables.ShortPredicate<E> filter, final int max)
-            throws IllegalArgumentException, E {
-        checkArgNotNull(filter, "filter");
-
-        if (isEmpty(a)) {
-            return EMPTY_SHORT_ARRAY;
-        }
-
-        return filter(a, 0, a.length, filter, max);
-    }
-
-    /**
-     *
-     * @param <E>
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param filter
-     * @return
-     * @throws E the e
-     */
-    public static <E extends Exception> short[] filter(final short[] a, final int fromIndex, final int toIndex, final Throwables.ShortPredicate<E> filter)
-            throws E {
-        return filter(a, fromIndex, toIndex, filter, Integer.MAX_VALUE);
-    }
-
-    /**
-     * Mostly it's designed for one-step operation to complete the operation in one step.
-     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
-     *
-     * @param <E>
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param filter
-     * @param max maximum return result.
-     * @return
-     * @throws IllegalArgumentException
-     * @throws IndexOutOfBoundsException
-     * @throws E the e
-     */
-    public static <E extends Exception> short[] filter(final short[] a, final int fromIndex, final int toIndex, final Throwables.ShortPredicate<E> filter,
-            final int max) throws IllegalArgumentException, IndexOutOfBoundsException, E {
-        checkFromToIndex(fromIndex, toIndex, len(a));
-        checkArgNotNull(filter, "filter");
-
-        if (isEmpty(a) || fromIndex == toIndex) {
-            return EMPTY_SHORT_ARRAY;
-        }
-
-        short[] result = new short[(toIndex - fromIndex) / 2];
-        int len = result.length;
-        int count = 0;
-
-        for (int i = fromIndex, cnt = 0; i < toIndex && cnt < max; i++) {
-            if (filter.test(a[i])) {
-                if (count == len) {
-                    result = copyOf(result, toIndex - fromIndex);
-                    len = result.length;
-                }
-
-                result[count++] = a[i];
-            }
-        }
-
-        return result.length == count ? result : copyOfRange(result, 0, count);
-    }
-
-    /**
-     *
-     *
-     * @param <E>
-     * @param a
-     * @param filter
-     * @return
-     * @throws IllegalArgumentException
-     * @throws E the e
-     */
-    public static <E extends Exception> int[] filter(final int[] a, final Throwables.IntPredicate<E> filter) throws IllegalArgumentException, E {
-        checkArgNotNull(filter, "filter");
-
-        if (isEmpty(a)) {
-            return EMPTY_INT_ARRAY;
-        }
-
-        return filter(a, 0, a.length, filter);
-    }
-
-    /**
-     *
-     *
-     * @param <E>
-     * @param a
-     * @param filter
-     * @param max
-     * @return
-     * @throws IllegalArgumentException
-     * @throws E the e
-     */
-    public static <E extends Exception> int[] filter(final int[] a, final Throwables.IntPredicate<E> filter, final int max) throws IllegalArgumentException, E {
-        checkArgNotNull(filter, "filter");
-
-        if (isEmpty(a)) {
-            return EMPTY_INT_ARRAY;
-        }
-
-        return filter(a, 0, a.length, filter, max);
-    }
-
-    /**
-     *
-     * @param <E>
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param filter
-     * @return
-     * @throws E the e
-     */
-    public static <E extends Exception> int[] filter(final int[] a, final int fromIndex, final int toIndex, final Throwables.IntPredicate<E> filter) throws E {
-        return filter(a, fromIndex, toIndex, filter, Integer.MAX_VALUE);
-    }
-
-    /**
-     * Mostly it's designed for one-step operation to complete the operation in one step.
-     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
-     *
-     * @param <E>
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param filter
-     * @param max maximum return result.
-     * @return
-     * @throws IllegalArgumentException
-     * @throws IndexOutOfBoundsException
-     * @throws E the e
-     */
-    public static <E extends Exception> int[] filter(final int[] a, final int fromIndex, final int toIndex, final Throwables.IntPredicate<E> filter,
-            final int max) throws IllegalArgumentException, IndexOutOfBoundsException, E {
-        checkFromToIndex(fromIndex, toIndex, len(a));
-        checkArgNotNull(filter, "filter");
-
-        if (isEmpty(a) || fromIndex == toIndex) {
-            return EMPTY_INT_ARRAY;
-        }
-
-        int[] result = new int[(toIndex - fromIndex) / 2];
-        int len = result.length;
-        int count = 0;
-
-        for (int i = fromIndex, cnt = 0; i < toIndex && cnt < max; i++) {
-            if (filter.test(a[i])) {
-                if (count == len) {
-                    result = copyOf(result, toIndex - fromIndex);
-                    len = result.length;
-                }
-
-                result[count++] = a[i];
-            }
-        }
-
-        return result.length == count ? result : copyOfRange(result, 0, count);
-    }
-
-    /**
-     *
-     *
-     * @param <E>
-     * @param a
-     * @param filter
-     * @return
-     * @throws IllegalArgumentException
-     * @throws E the e
-     */
-    public static <E extends Exception> long[] filter(final long[] a, final Throwables.LongPredicate<E> filter) throws IllegalArgumentException, E {
-        checkArgNotNull(filter, "filter");
-
-        if (isEmpty(a)) {
-            return EMPTY_LONG_ARRAY;
-        }
-
-        return filter(a, 0, a.length, filter);
-    }
-
-    /**
-     *
-     *
-     * @param <E>
-     * @param a
-     * @param filter
-     * @param max
-     * @return
-     * @throws IllegalArgumentException
-     * @throws E the e
-     */
-    public static <E extends Exception> long[] filter(final long[] a, final Throwables.LongPredicate<E> filter, final int max)
-            throws IllegalArgumentException, E {
-        checkArgNotNull(filter, "filter");
-
-        if (isEmpty(a)) {
-            return EMPTY_LONG_ARRAY;
-        }
-
-        return filter(a, 0, a.length, filter, max);
-    }
-
-    /**
-     *
-     * @param <E>
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param filter
-     * @return
-     * @throws E the e
-     */
-    public static <E extends Exception> long[] filter(final long[] a, final int fromIndex, final int toIndex, final Throwables.LongPredicate<E> filter)
-            throws E {
-        return filter(a, fromIndex, toIndex, filter, Integer.MAX_VALUE);
-    }
-
-    /**
-     * Mostly it's designed for one-step operation to complete the operation in one step.
-     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
-     *
-     * @param <E>
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param filter
-     * @param max maximum return result.
-     * @return
-     * @throws IllegalArgumentException
-     * @throws IndexOutOfBoundsException
-     * @throws E the e
-     */
-    public static <E extends Exception> long[] filter(final long[] a, final int fromIndex, final int toIndex, final Throwables.LongPredicate<E> filter,
-            final int max) throws IllegalArgumentException, IndexOutOfBoundsException, E {
-        checkFromToIndex(fromIndex, toIndex, len(a));
-        checkArgNotNull(filter, "filter");
-
-        if (isEmpty(a) || fromIndex == toIndex) {
-            return EMPTY_LONG_ARRAY;
-        }
-
-        long[] result = new long[(toIndex - fromIndex) / 2];
-        int len = result.length;
-        int count = 0;
-
-        for (int i = fromIndex, cnt = 0; i < toIndex && cnt < max; i++) {
-            if (filter.test(a[i])) {
-                if (count == len) {
-                    result = copyOf(result, toIndex - fromIndex);
-                    len = result.length;
-                }
-
-                result[count++] = a[i];
-            }
-        }
-
-        return result.length == count ? result : copyOfRange(result, 0, count);
-    }
-
-    /**
-     *
-     *
-     * @param <E>
-     * @param a
-     * @param filter
-     * @return
-     * @throws IllegalArgumentException
-     * @throws E the e
-     */
-    public static <E extends Exception> float[] filter(final float[] a, final Throwables.FloatPredicate<E> filter) throws IllegalArgumentException, E {
-        checkArgNotNull(filter, "filter");
-
-        if (isEmpty(a)) {
-            return EMPTY_FLOAT_ARRAY;
-        }
-
-        return filter(a, 0, a.length, filter);
-    }
-
-    /**
-     *
-     *
-     * @param <E>
-     * @param a
-     * @param filter
-     * @param max
-     * @return
-     * @throws IllegalArgumentException
-     * @throws E the e
-     */
-    public static <E extends Exception> float[] filter(final float[] a, final Throwables.FloatPredicate<E> filter, final int max)
-            throws IllegalArgumentException, E {
-        checkArgNotNull(filter, "filter");
-
-        if (isEmpty(a)) {
-            return EMPTY_FLOAT_ARRAY;
-        }
-
-        return filter(a, 0, a.length, filter, max);
-    }
-
-    /**
-     *
-     * @param <E>
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param filter
-     * @return
-     * @throws E the e
-     */
-    public static <E extends Exception> float[] filter(final float[] a, final int fromIndex, final int toIndex, final Throwables.FloatPredicate<E> filter)
-            throws E {
-        return filter(a, fromIndex, toIndex, filter, Integer.MAX_VALUE);
-    }
-
-    /**
-     * Mostly it's designed for one-step operation to complete the operation in one step.
-     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
-     *
-     * @param <E>
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param filter
-     * @param max maximum return result.
-     * @return
-     * @throws IllegalArgumentException
-     * @throws IndexOutOfBoundsException
-     * @throws E the e
-     */
-    public static <E extends Exception> float[] filter(final float[] a, final int fromIndex, final int toIndex, final Throwables.FloatPredicate<E> filter,
-            final int max) throws IllegalArgumentException, IndexOutOfBoundsException, E {
-        checkFromToIndex(fromIndex, toIndex, len(a));
-        checkArgNotNull(filter, "filter");
-
-        if (isEmpty(a) || fromIndex == toIndex) {
-            return EMPTY_FLOAT_ARRAY;
-        }
-
-        float[] result = new float[(toIndex - fromIndex) / 2];
-        int len = result.length;
-        int count = 0;
-
-        for (int i = fromIndex, cnt = 0; i < toIndex && cnt < max; i++) {
-            if (filter.test(a[i])) {
-                if (count == len) {
-                    result = copyOf(result, toIndex - fromIndex);
-                    len = result.length;
-                }
-
-                result[count++] = a[i];
-            }
-        }
-
-        return result.length == count ? result : copyOfRange(result, 0, count);
-    }
-
-    /**
-     *
-     *
-     * @param <E>
-     * @param a
-     * @param filter
-     * @return
-     * @throws IllegalArgumentException
-     * @throws E the e
-     */
-    public static <E extends Exception> double[] filter(final double[] a, final Throwables.DoublePredicate<E> filter) throws IllegalArgumentException, E {
-        checkArgNotNull(filter, "filter");
-
-        if (isEmpty(a)) {
-            return EMPTY_DOUBLE_ARRAY;
-        }
-
-        return filter(a, 0, a.length, filter);
-    }
-
-    /**
-     *
-     *
-     * @param <E>
-     * @param a
-     * @param filter
-     * @param max
-     * @return
-     * @throws IllegalArgumentException
-     * @throws E the e
-     */
-    public static <E extends Exception> double[] filter(final double[] a, final Throwables.DoublePredicate<E> filter, final int max)
-            throws IllegalArgumentException, E {
-        checkArgNotNull(filter, "filter");
-
-        if (isEmpty(a)) {
-            return EMPTY_DOUBLE_ARRAY;
-        }
-
-        return filter(a, 0, a.length, filter, max);
-    }
-
-    /**
-     *
-     * @param <E>
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param filter
-     * @return
-     * @throws E the e
-     */
-    public static <E extends Exception> double[] filter(final double[] a, final int fromIndex, final int toIndex, final Throwables.DoublePredicate<E> filter)
-            throws E {
-        return filter(a, fromIndex, toIndex, filter, Integer.MAX_VALUE);
-    }
-
-    /**
-     * Mostly it's designed for one-step operation to complete the operation in one step.
-     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
-     *
-     * @param <E>
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param filter
-     * @param max maximum return result.
-     * @return
-     * @throws IllegalArgumentException
-     * @throws IndexOutOfBoundsException
-     * @throws E the e
-     */
-    public static <E extends Exception> double[] filter(final double[] a, final int fromIndex, final int toIndex, final Throwables.DoublePredicate<E> filter,
-            final int max) throws IllegalArgumentException, IndexOutOfBoundsException, E {
-        checkFromToIndex(fromIndex, toIndex, len(a));
-        checkArgNotNull(filter, "filter");
-
-        if (isEmpty(a) || fromIndex == toIndex) {
-            return EMPTY_DOUBLE_ARRAY;
-        }
-
-        double[] result = new double[(toIndex - fromIndex) / 2];
-        int len = result.length;
-        int count = 0;
-
-        for (int i = fromIndex, cnt = 0; i < toIndex && cnt < max; i++) {
-            if (filter.test(a[i])) {
-                if (count == len) {
-                    result = copyOf(result, toIndex - fromIndex);
-                    len = result.length;
-                }
-
-                result[count++] = a[i];
-            }
-        }
-
-        return result.length == count ? result : copyOfRange(result, 0, count);
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param <E>
-     * @param a
-     * @param filter
-     * @return
-     * @throws IllegalArgumentException
-     * @throws E the e
-     */
-    public static <T, E extends Exception> List<T> filter(final T[] a, final Throwables.Predicate<? super T, E> filter) throws IllegalArgumentException, E {
-        checkArgNotNull(filter, "filter");
-
-        if (isEmpty(a)) {
-            return new ArrayList<>();
-        }
-
-        return filter(a, filter, Integer.MAX_VALUE);
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param <R>
-     * @param <E>
-     * @param a
-     * @param filter
-     * @param supplier
-     * @return
-     * @throws IllegalArgumentException
-     * @throws E the e
-     */
-    public static <T, R extends Collection<T>, E extends Exception> R filter(final T[] a, final Throwables.Predicate<? super T, E> filter,
-            final IntFunction<R> supplier) throws IllegalArgumentException, E {
-        checkArgNotNull(filter, "filter");
-
-        if (isEmpty(a)) {
-            return supplier.apply(0);
-        }
-
-        return filter(a, filter, Integer.MAX_VALUE, supplier);
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param <E>
-     * @param a
-     * @param filter
-     * @param max
-     * @return
-     * @throws IllegalArgumentException
-     * @throws E the e
-     */
-    public static <T, E extends Exception> List<T> filter(final T[] a, final Throwables.Predicate<? super T, E> filter, final int max)
-            throws IllegalArgumentException, E {
-        checkArgNotNull(filter, "filter");
-
-        if (isEmpty(a)) {
-            return new ArrayList<>();
-        }
-
-        return filter(a, 0, a.length, filter, max);
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param <R>
-     * @param <E>
-     * @param a
-     * @param filter
-     * @param max
-     * @param supplier
-     * @return
-     * @throws IllegalArgumentException
-     * @throws E the e
-     */
-    public static <T, R extends Collection<T>, E extends Exception> R filter(final T[] a, final Throwables.Predicate<? super T, E> filter, final int max,
-            final IntFunction<R> supplier) throws IllegalArgumentException, E {
-        checkArgNotNull(filter, "filter");
-
-        if (isEmpty(a)) {
-            return supplier.apply(0);
-        }
-
-        return filter(a, 0, a.length, filter, max, supplier);
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param <E>
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param filter
-     * @return
-     * @throws E the e
-     */
-    public static <T, E extends Exception> List<T> filter(final T[] a, final int fromIndex, final int toIndex, final Throwables.Predicate<? super T, E> filter)
-            throws E {
-        return filter(a, fromIndex, toIndex, filter, Integer.MAX_VALUE);
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param <R>
-     * @param <E>
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param filter
-     * @param supplier
-     * @return
-     * @throws E the e
-     */
-    public static <T, R extends Collection<T>, E extends Exception> R filter(final T[] a, final int fromIndex, final int toIndex,
-            final Throwables.Predicate<? super T, E> filter, final IntFunction<R> supplier) throws E {
-        return filter(a, fromIndex, toIndex, filter, Integer.MAX_VALUE, supplier);
-    }
-
-    /**
-     * Mostly it's designed for one-step operation to complete the operation in one step.
-     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
-     *
-     * @param <T>
-     * @param <E>
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param filter
-     * @param max
-     * @return
-     * @throws E the e
-     */
-    public static <T, E extends Exception> List<T> filter(final T[] a, final int fromIndex, final int toIndex, final Throwables.Predicate<? super T, E> filter,
-            final int max) throws E {
-        return filter(a, fromIndex, toIndex, filter, max, Factory.ofList());
-    }
-
-    /**
-     * Mostly it's designed for one-step operation to complete the operation in one step.
-     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
-     *
-     * @param <T>
-     * @param <R>
-     * @param <E>
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param filter
-     * @param max
-     * @param supplier
-     * @return
-     * @throws IllegalArgumentException
-     * @throws IndexOutOfBoundsException
-     * @throws E the e
-     */
-    public static <T, R extends Collection<T>, E extends Exception> R filter(final T[] a, final int fromIndex, final int toIndex,
-            final Throwables.Predicate<? super T, E> filter, final int max, final IntFunction<R> supplier)
-            throws IllegalArgumentException, IndexOutOfBoundsException, E {
-        checkFromToIndex(fromIndex, toIndex, len(a));
-        checkArgNotNull(filter, "filter");
-
-        if (isEmpty(a) || fromIndex == toIndex) {
-            return supplier.apply(0);
-        }
-
-        final R result = supplier.apply(min(9, max, (toIndex - fromIndex)));
-
-        for (int i = fromIndex, cnt = 0; i < toIndex && cnt < max; i++) {
-            if (filter.test(a[i])) {
-                result.add(a[i]);
-                cnt++;
-            }
-        }
-
-        return result;
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param <E>
-     * @param c
-     * @param filter
-     * @return
-     * @throws E the e
-     */
-    public static <T, E extends Exception> List<T> filter(final Iterable<? extends T> c, final Throwables.Predicate<? super T, E> filter) throws E {
-        return filter(c, filter, Integer.MAX_VALUE);
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param <R>
-     * @param <E>
-     * @param c
-     * @param filter
-     * @param supplier
-     * @return
-     * @throws E the e
-     */
-    public static <T, R extends Collection<T>, E extends Exception> R filter(final Iterable<? extends T> c, final Throwables.Predicate<? super T, E> filter,
-            final IntFunction<R> supplier) throws E {
-        return filter(c, filter, Integer.MAX_VALUE, supplier);
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param <E>
-     * @param c
-     * @param filter
-     * @param max
-     * @return
-     * @throws E the e
-     */
-    public static <T, E extends Exception> List<T> filter(final Iterable<? extends T> c, final Throwables.Predicate<? super T, E> filter, final int max)
-            throws E {
-        return filter(c, filter, max, Factory.ofList());
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param <R>
-     * @param <E>
-     * @param c
-     * @param filter
-     * @param max
-     * @param supplier
-     * @return
-     * @throws IllegalArgumentException
-     * @throws E the e
-     */
-    public static <T, R extends Collection<T>, E extends Exception> R filter(final Iterable<? extends T> c, final Throwables.Predicate<? super T, E> filter,
-            final int max, final IntFunction<R> supplier) throws IllegalArgumentException, E {
-        checkArgNotNull(filter, "filter");
-
-        if (c == null) {
-            return supplier.apply(0);
-        }
-
-        final R result = supplier.apply(getMinSize(c));
-        int count = 0;
-
-        for (T e : c) {
-            if (filter.test(e)) {
-                result.add(e);
-
-                if (++count == max) {
-                    break;
-                }
-            }
-        }
-
-        return result;
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param <E>
-     * @param c
-     * @param fromIndex
-     * @param toIndex
-     * @param filter
-     * @return
-     * @throws E the e
-     */
-    public static <T, E extends Exception> List<T> filter(final Collection<? extends T> c, final int fromIndex, final int toIndex,
-            final Throwables.Predicate<? super T, E> filter) throws E {
-        return filter(c, fromIndex, toIndex, filter, Integer.MAX_VALUE);
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param <R>
-     * @param <E>
-     * @param c
-     * @param fromIndex
-     * @param toIndex
-     * @param filter
-     * @param supplier
-     * @return
-     * @throws E the e
-     */
-    public static <T, R extends Collection<T>, E extends Exception> R filter(final Collection<? extends T> c, final int fromIndex, final int toIndex,
-            final Throwables.Predicate<? super T, E> filter, final IntFunction<R> supplier) throws E {
-        return filter(c, fromIndex, toIndex, filter, Integer.MAX_VALUE, supplier);
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param <E>
-     * @param c
-     * @param fromIndex
-     * @param toIndex
-     * @param filter
-     * @param max
-     * @return
-     * @throws E the e
-     */
-    public static <T, E extends Exception> List<T> filter(final Collection<? extends T> c, final int fromIndex, final int toIndex,
-            final Throwables.Predicate<? super T, E> filter, final int max) throws E {
-        return filter(c, fromIndex, toIndex, filter, max, Factory.ofList());
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param <R>
-     * @param <E>
-     * @param c
-     * @param fromIndex
-     * @param toIndex
-     * @param filter
-     * @param max
-     * @param supplier
-     * @return
-     * @throws IllegalArgumentException
-     * @throws IndexOutOfBoundsException
-     * @throws E the e
-     */
-    public static <T, R extends Collection<T>, E extends Exception> R filter(final Collection<? extends T> c, final int fromIndex, final int toIndex,
-            final Throwables.Predicate<? super T, E> filter, final int max, final IntFunction<R> supplier)
-            throws IllegalArgumentException, IndexOutOfBoundsException, E {
-        checkFromToIndex(fromIndex, toIndex, size(c));
-        checkArgNotNull(filter, "filter");
-
-        if ((isEmpty(c) && fromIndex == 0 && toIndex == 0) || fromIndex == toIndex) {
-            return supplier.apply(0);
-        }
-
-        final R result = supplier.apply(min(9, max, (toIndex - fromIndex)));
-
-        if ((isEmpty(c) && fromIndex == 0 && toIndex == 0) || (fromIndex == toIndex && fromIndex < c.size())) {
-            return result;
-        }
-
-        if (c instanceof List && c instanceof RandomAccess) {
-            final List<T> list = (List<T>) c;
-            T e = null;
-
-            for (int i = fromIndex, cnt = 0; i < toIndex && cnt < max; i++) {
-                e = list.get(i);
-
-                if (filter.test(e)) {
-                    result.add(e);
-                    cnt++;
-                }
-            }
-        } else {
-            int idx = 0;
-            int cnt = 0;
-
-            for (T e : c) {
-                if (idx++ < fromIndex) {
-                    continue;
-                }
-
-                if (filter.test(e)) {
-                    result.add(e);
-
-                    if (++cnt >= max) {
-                        break;
-                    }
-                }
-
-                if (idx >= toIndex) {
-                    break;
-                }
-            }
-        }
-
-        return result;
-    }
-
-    //    /**
-    //     *
-    //     * @param <T>
-    //     * @param iter
-    //     * @param filter
-    //     * @return
-    //     * @see {@code Iterators.filter(Iterator, Predicate)}
-    //     */
-    //    public static <T, E extends Exception> List<T> filter(final Iterator<? extends T> iter, final Throwables.Predicate<? super T, E> filter) throws E {
-    //        return filter(iter, 0, Integer.MAX_VALUE, filter);
-    //    }
-    //
-    //    public static <T, E extends Exception> List<T> filter(final Iterator<? extends T> iter, final Throwables.Predicate<? super T, E> filter, final int max)
-    //            throws E {
-    //        return filter(iter, 0, Integer.MAX_VALUE, filter, max);
-    //    }
-    //
-    //    public static <T, E extends Exception> List<T> filter(final Iterator<? extends T> iter, final int fromIndex, final int toIndex,
-    //            final Throwables.Predicate<? super T, E> filter) throws E {
-    //        checkFromToIndex(fromIndex, toIndex, Integer.MAX_VALUE);
-    //        checkArgNotNull(filter, "filter");
-    //
-    //        if (iter == null || fromIndex == toIndex) {
-    //            return new ArrayList<>(0);
-    //        }
-    //
-    //        final List<T> result = new ArrayList<>(min(9, toIndex - fromIndex));
-    //        int idx = 0;
-    //        T e = null;
-    //
-    //        while (iter.hasNext()) {
-    //            e = iter.next();
-    //
-    //            if (idx++ < fromIndex) {
-    //                continue;
-    //            }
-    //
-    //            if (filter.test(e)) {
-    //                result.add(e);
-    //            }
-    //
-    //            if (idx >= toIndex) {
-    //                break;
-    //            }
-    //        }
-    //
-    //        return result;
-    //    }
-    //
-    //    public static <T, E extends Exception> List<T> filter(final Iterator<? extends T> iter, final int fromIndex, final int toIndex,
-    //            final Throwables.Predicate<? super T, E> filter, final int max) throws E {
-    //        checkFromToIndex(fromIndex, toIndex, Integer.MAX_VALUE);
-    //        checkArgNotNull(filter, "filter");
-    //
-    //        if (iter == null || fromIndex == toIndex) {
-    //            return new ArrayList<>(0);
-    //        }
-    //
-    //        final List<T> result = new ArrayList<>(min(9, max, (toIndex - fromIndex)));
-    //        int idx = 0;
-    //        int cnt = 0;
-    //        T e = null;
-    //
-    //        while (iter.hasNext()) {
-    //            e = iter.next();
-    //
-    //            if (idx++ < fromIndex) {
-    //                continue;
-    //            }
-    //
-    //            if (filter.test(e)) {
-    //                result.add(e);
-    //
-    //                if (++cnt >= max) {
-    //                    break;
-    //                }
-    //            }
-    //
-    //            if (idx >= toIndex) {
-    //                break;
-    //            }
-    //        }
-    //
-    //        return result;
-    //    }
-
-    /**
-     * Map to boolean.
-     *
-     * @param <T>
-     * @param <E>
-     * @param a
-     * @param mapper
-     * @return
-     * @throws IllegalArgumentException
-     * @throws E the e
-     */
-    public static <T, E extends Exception> boolean[] mapToBoolean(final T[] a, final Throwables.ToBooleanFunction<? super T, E> mapper)
-            throws IllegalArgumentException, E {
-        checkArgNotNull(mapper);
-
-        if (isEmpty(a)) {
-            return EMPTY_BOOLEAN_ARRAY;
-        }
-
-        return mapToBoolean(a, 0, a.length, mapper);
-    }
-
-    /**
-     * Mostly it's designed for one-step operation to complete the operation in one step.
-     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
-     *
-     * @param <T>
-     * @param <E>
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param mapper
-     * @return
-     * @throws IllegalArgumentException
-     * @throws IndexOutOfBoundsException
-     * @throws E the e
-     */
-    public static <T, E extends Exception> boolean[] mapToBoolean(final T[] a, final int fromIndex, final int toIndex,
-            final Throwables.ToBooleanFunction<? super T, E> mapper) throws IllegalArgumentException, IndexOutOfBoundsException, E {
-        checkFromToIndex(fromIndex, toIndex, len(a));
-        checkArgNotNull(mapper);
-
-        if (isEmpty(a) || fromIndex == toIndex) {
-            return EMPTY_BOOLEAN_ARRAY;
-        }
-
-        final boolean[] result = new boolean[toIndex - fromIndex];
-
-        for (int i = fromIndex; i < toIndex; i++) {
-            result[i - fromIndex] = mapper.applyAsBoolean(a[i]);
-        }
-
-        return result;
-    }
-
-    /**
-     * Map to boolean.
-     *
-     * @param <T>
-     * @param <E>
-     * @param c
-     * @param mapper
-     * @return
-     * @throws E the e
-     */
-    public static <T, E extends Exception> boolean[] mapToBoolean(final Collection<? extends T> c, final Throwables.ToBooleanFunction<? super T, E> mapper)
-            throws E {
-        checkArgNotNull(mapper);
-
-        if (isEmpty(c)) {
-            return EMPTY_BOOLEAN_ARRAY;
-        }
-
-        return mapToBoolean(c, 0, c.size(), mapper);
-    }
-
-    /**
-     * Mostly it's designed for one-step operation to complete the operation in one step.
-     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
-     *
-     * @param <T>
-     * @param <E>
-     * @param c
-     * @param fromIndex
-     * @param toIndex
-     * @param mapper
-     * @return
-     * @throws IllegalArgumentException
-     * @throws IndexOutOfBoundsException
-     * @throws E the e
-     */
-    public static <T, E extends Exception> boolean[] mapToBoolean(final Collection<? extends T> c, final int fromIndex, final int toIndex,
-            final Throwables.ToBooleanFunction<? super T, E> mapper) throws IllegalArgumentException, IndexOutOfBoundsException, E {
-        checkFromToIndex(fromIndex, toIndex, size(c));
-        checkArgNotNull(mapper);
-
-        if ((isEmpty(c) && fromIndex == 0 && toIndex == 0) || fromIndex == toIndex) {
-            return EMPTY_BOOLEAN_ARRAY;
-        }
-
-        final boolean[] result = new boolean[toIndex - fromIndex];
-
-        if (c instanceof List && c instanceof RandomAccess) {
-            final List<T> list = (List<T>) c;
-
-            for (int i = fromIndex; i < toIndex; i++) {
-                result[i - fromIndex] = mapper.applyAsBoolean(list.get(i));
-            }
-        } else {
-            int idx = 0;
-
-            for (T e : c) {
-                if (idx++ < fromIndex) {
-                    continue;
-                }
-
-                result[idx - fromIndex] = mapper.applyAsBoolean(e);
-
-                if (idx >= toIndex) {
-                    break;
-                }
-            }
-        }
-
-        return result;
-    }
-
-    /**
-     * Map to char.
-     *
-     * @param <T>
-     * @param <E>
-     * @param a
-     * @param mapper
-     * @return
-     * @throws IllegalArgumentException
-     * @throws E the e
-     */
-    public static <T, E extends Exception> char[] mapToChar(final T[] a, final Throwables.ToCharFunction<? super T, E> mapper)
-            throws IllegalArgumentException, E {
-        checkArgNotNull(mapper);
-
-        if (isEmpty(a)) {
-            return EMPTY_CHAR_ARRAY;
-        }
-
-        return mapToChar(a, 0, a.length, mapper);
-    }
-
-    /**
-     * Mostly it's designed for one-step operation to complete the operation in one step.
-     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
-     *
-     * @param <T>
-     * @param <E>
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param mapper
-     * @return
-     * @throws IllegalArgumentException
-     * @throws IndexOutOfBoundsException
-     * @throws E the e
-     */
-    public static <T, E extends Exception> char[] mapToChar(final T[] a, final int fromIndex, final int toIndex,
-            final Throwables.ToCharFunction<? super T, E> mapper) throws IllegalArgumentException, IndexOutOfBoundsException, E {
-        checkFromToIndex(fromIndex, toIndex, len(a));
-        checkArgNotNull(mapper);
-
-        if (isEmpty(a) || fromIndex == toIndex) {
-            return EMPTY_CHAR_ARRAY;
-        }
-
-        final char[] result = new char[toIndex - fromIndex];
-
-        for (int i = fromIndex; i < toIndex; i++) {
-            result[i - fromIndex] = mapper.applyAsChar(a[i]);
-        }
-
-        return result;
-    }
-
-    /**
-     * Map to char.
-     *
-     * @param <T>
-     * @param <E>
-     * @param c
-     * @param mapper
-     * @return
-     * @throws IllegalArgumentException
-     * @throws E the e
-     */
-    public static <T, E extends Exception> char[] mapToChar(final Collection<? extends T> c, final Throwables.ToCharFunction<? super T, E> mapper)
-            throws IllegalArgumentException, E {
-        checkArgNotNull(mapper);
-
-        if (isEmpty(c)) {
-            return EMPTY_CHAR_ARRAY;
-        }
-
-        return mapToChar(c, 0, c.size(), mapper);
-    }
-
-    /**
-     * Mostly it's designed for one-step operation to complete the operation in one step.
-     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
-     *
-     * @param <T>
-     * @param <E>
-     * @param c
-     * @param fromIndex
-     * @param toIndex
-     * @param mapper
-     * @return
-     * @throws IllegalArgumentException
-     * @throws IndexOutOfBoundsException
-     * @throws E the e
-     */
-    public static <T, E extends Exception> char[] mapToChar(final Collection<? extends T> c, final int fromIndex, final int toIndex,
-            final Throwables.ToCharFunction<? super T, E> mapper) throws IllegalArgumentException, IndexOutOfBoundsException, E {
-        checkFromToIndex(fromIndex, toIndex, size(c));
-        checkArgNotNull(mapper);
-
-        if ((isEmpty(c) && fromIndex == 0 && toIndex == 0) || fromIndex == toIndex) {
-            return EMPTY_CHAR_ARRAY;
-        }
-
-        final char[] result = new char[toIndex - fromIndex];
-
-        if (c instanceof List && c instanceof RandomAccess) {
-            final List<T> list = (List<T>) c;
-
-            for (int i = fromIndex; i < toIndex; i++) {
-                result[i - fromIndex] = mapper.applyAsChar(list.get(i));
-            }
-        } else {
-            int idx = 0;
-
-            for (T e : c) {
-                if (idx++ < fromIndex) {
-                    continue;
-                }
-
-                result[idx - fromIndex] = mapper.applyAsChar(e);
-
-                if (idx >= toIndex) {
-                    break;
-                }
-            }
-        }
-
-        return result;
-    }
-
-    /**
-     * Map to byte.
-     *
-     * @param <T>
-     * @param <E>
-     * @param a
-     * @param mapper
-     * @return
-     * @throws IllegalArgumentException
-     * @throws E the e
-     */
-    public static <T, E extends Exception> byte[] mapToByte(final T[] a, final Throwables.ToByteFunction<? super T, E> mapper)
-            throws IllegalArgumentException, E {
-        checkArgNotNull(mapper);
-
-        if (isEmpty(a)) {
-            return EMPTY_BYTE_ARRAY;
-        }
-
-        return mapToByte(a, 0, a.length, mapper);
-    }
-
-    /**
-     * Mostly it's designed for one-step operation to complete the operation in one step.
-     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
-     *
-     * @param <T>
-     * @param <E>
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param mapper
-     * @return
-     * @throws IllegalArgumentException
-     * @throws IndexOutOfBoundsException
-     * @throws E the e
-     */
-    public static <T, E extends Exception> byte[] mapToByte(final T[] a, final int fromIndex, final int toIndex,
-            final Throwables.ToByteFunction<? super T, E> mapper) throws IllegalArgumentException, IndexOutOfBoundsException, E {
-        checkFromToIndex(fromIndex, toIndex, len(a));
-        checkArgNotNull(mapper);
-
-        if (isEmpty(a) || fromIndex == toIndex) {
-            return EMPTY_BYTE_ARRAY;
-        }
-
-        final byte[] result = new byte[toIndex - fromIndex];
-
-        for (int i = fromIndex; i < toIndex; i++) {
-            result[i - fromIndex] = mapper.applyAsByte(a[i]);
-        }
-
-        return result;
-    }
-
-    /**
-     * Map to byte.
-     *
-     * @param <T>
-     * @param <E>
-     * @param c
-     * @param mapper
-     * @return
-     * @throws IllegalArgumentException
-     * @throws E the e
-     */
-    public static <T, E extends Exception> byte[] mapToByte(final Collection<? extends T> c, final Throwables.ToByteFunction<? super T, E> mapper)
-            throws IllegalArgumentException, E {
-        checkArgNotNull(mapper);
-
-        if (isEmpty(c)) {
-            return EMPTY_BYTE_ARRAY;
-        }
-
-        return mapToByte(c, 0, c.size(), mapper);
-    }
-
-    /**
-     * Mostly it's designed for one-step operation to complete the operation in one step.
-     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
-     *
-     * @param <T>
-     * @param <E>
-     * @param c
-     * @param fromIndex
-     * @param toIndex
-     * @param mapper
-     * @return
-     * @throws IllegalArgumentException
-     * @throws IndexOutOfBoundsException
-     * @throws E the e
-     */
-    public static <T, E extends Exception> byte[] mapToByte(final Collection<? extends T> c, final int fromIndex, final int toIndex,
-            final Throwables.ToByteFunction<? super T, E> mapper) throws IllegalArgumentException, IndexOutOfBoundsException, E {
-        checkFromToIndex(fromIndex, toIndex, size(c));
-        checkArgNotNull(mapper);
-
-        if ((isEmpty(c) && fromIndex == 0 && toIndex == 0) || fromIndex == toIndex) {
-            return EMPTY_BYTE_ARRAY;
-        }
-
-        final byte[] result = new byte[toIndex - fromIndex];
-
-        if (c instanceof List && c instanceof RandomAccess) {
-            final List<T> list = (List<T>) c;
-
-            for (int i = fromIndex; i < toIndex; i++) {
-                result[i - fromIndex] = mapper.applyAsByte(list.get(i));
-            }
-        } else {
-            int idx = 0;
-
-            for (T e : c) {
-                if (idx++ < fromIndex) {
-                    continue;
-                }
-
-                result[idx - fromIndex] = mapper.applyAsByte(e);
-
-                if (idx >= toIndex) {
-                    break;
-                }
-            }
-        }
-
-        return result;
-    }
-
-    /**
-     * Map to short.
-     *
-     * @param <T>
-     * @param <E>
-     * @param a
-     * @param mapper
-     * @return
-     * @throws IllegalArgumentException
-     * @throws E the e
-     */
-    public static <T, E extends Exception> short[] mapToShort(final T[] a, final Throwables.ToShortFunction<? super T, E> mapper)
-            throws IllegalArgumentException, E {
-        checkArgNotNull(mapper);
-
-        if (isEmpty(a)) {
-            return EMPTY_SHORT_ARRAY;
-        }
-
-        return mapToShort(a, 0, a.length, mapper);
-    }
-
-    /**
-     * Mostly it's designed for one-step operation to complete the operation in one step.
-     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
-     *
-     * @param <T>
-     * @param <E>
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param mapper
-     * @return
-     * @throws IllegalArgumentException
-     * @throws IndexOutOfBoundsException
-     * @throws E the e
-     */
-    public static <T, E extends Exception> short[] mapToShort(final T[] a, final int fromIndex, final int toIndex,
-            final Throwables.ToShortFunction<? super T, E> mapper) throws IllegalArgumentException, IndexOutOfBoundsException, E {
-        checkFromToIndex(fromIndex, toIndex, len(a));
-        checkArgNotNull(mapper);
-
-        if (isEmpty(a) || fromIndex == toIndex) {
-            return EMPTY_SHORT_ARRAY;
-        }
-
-        final short[] result = new short[toIndex - fromIndex];
-
-        for (int i = fromIndex; i < toIndex; i++) {
-            result[i - fromIndex] = mapper.applyAsShort(a[i]);
-        }
-
-        return result;
-    }
-
-    /**
-     * Map to short.
-     *
-     * @param <T>
-     * @param <E>
-     * @param c
-     * @param mapper
-     * @return
-     * @throws IllegalArgumentException
-     * @throws E the e
-     */
-    public static <T, E extends Exception> short[] mapToShort(final Collection<? extends T> c, final Throwables.ToShortFunction<? super T, E> mapper)
-            throws IllegalArgumentException, E {
-        checkArgNotNull(mapper);
-
-        if (isEmpty(c)) {
-            return EMPTY_SHORT_ARRAY;
-        }
-
-        return mapToShort(c, 0, c.size(), mapper);
-    }
-
-    /**
-     * Mostly it's designed for one-step operation to complete the operation in one step.
-     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
-     *
-     * @param <T>
-     * @param <E>
-     * @param c
-     * @param fromIndex
-     * @param toIndex
-     * @param mapper
-     * @return
-     * @throws IllegalArgumentException
-     * @throws IndexOutOfBoundsException
-     * @throws E the e
-     */
-    public static <T, E extends Exception> short[] mapToShort(final Collection<? extends T> c, final int fromIndex, final int toIndex,
-            final Throwables.ToShortFunction<? super T, E> mapper) throws IllegalArgumentException, IndexOutOfBoundsException, E {
-        checkFromToIndex(fromIndex, toIndex, size(c));
-        checkArgNotNull(mapper);
-
-        if ((isEmpty(c) && fromIndex == 0 && toIndex == 0) || fromIndex == toIndex) {
-            return EMPTY_SHORT_ARRAY;
-        }
-
-        final short[] result = new short[toIndex - fromIndex];
-
-        if (c instanceof List && c instanceof RandomAccess) {
-            final List<T> list = (List<T>) c;
-
-            for (int i = fromIndex; i < toIndex; i++) {
-                result[i - fromIndex] = mapper.applyAsShort(list.get(i));
-            }
-        } else {
-            int idx = 0;
-
-            for (T e : c) {
-                if (idx++ < fromIndex) {
-                    continue;
-                }
-
-                result[idx - fromIndex] = mapper.applyAsShort(e);
-
-                if (idx >= toIndex) {
-                    break;
-                }
-            }
-        }
-
-        return result;
-    }
-
-    /**
-     * Map to int.
-     *
-     * @param <T>
-     * @param <E>
-     * @param a
-     * @param mapper
-     * @return
-     * @throws IllegalArgumentException
-     * @throws E the e
-     */
-    public static <T, E extends Exception> int[] mapToInt(final T[] a, final Throwables.ToIntFunction<? super T, E> mapper) throws IllegalArgumentException, E {
-        checkArgNotNull(mapper);
-
-        if (isEmpty(a)) {
-            return EMPTY_INT_ARRAY;
-        }
-
-        return mapToInt(a, 0, a.length, mapper);
-    }
-
-    /**
-     * Mostly it's designed for one-step operation to complete the operation in one step.
-     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
-     *
-     * @param <T>
-     * @param <E>
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param mapper
-     * @return
-     * @throws IllegalArgumentException
-     * @throws IndexOutOfBoundsException
-     * @throws E the e
-     */
-    public static <T, E extends Exception> int[] mapToInt(final T[] a, final int fromIndex, final int toIndex,
-            final Throwables.ToIntFunction<? super T, E> mapper) throws IllegalArgumentException, IndexOutOfBoundsException, E {
-        checkFromToIndex(fromIndex, toIndex, len(a));
-        checkArgNotNull(mapper);
-
-        if (isEmpty(a) || fromIndex == toIndex) {
-            return EMPTY_INT_ARRAY;
-        }
-
-        final int[] result = new int[toIndex - fromIndex];
-
-        for (int i = fromIndex; i < toIndex; i++) {
-            result[i - fromIndex] = mapper.applyAsInt(a[i]);
-        }
-
-        return result;
-    }
-
-    /**
-     * Map to int.
-     *
-     * @param <T>
-     * @param <E>
-     * @param c
-     * @param mapper
-     * @return
-     * @throws IllegalArgumentException
-     * @throws E the e
-     */
-    public static <T, E extends Exception> int[] mapToInt(final Collection<? extends T> c, final Throwables.ToIntFunction<? super T, E> mapper)
-            throws IllegalArgumentException, E {
-        checkArgNotNull(mapper);
-
-        if (isEmpty(c)) {
-            return EMPTY_INT_ARRAY;
-        }
-
-        return mapToInt(c, 0, c.size(), mapper);
-    }
-
-    /**
-     * Mostly it's designed for one-step operation to complete the operation in one step.
-     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
-     *
-     * @param <T>
-     * @param <E>
-     * @param c
-     * @param fromIndex
-     * @param toIndex
-     * @param mapper
-     * @return
-     * @throws IllegalArgumentException
-     * @throws IndexOutOfBoundsException
-     * @throws E the e
-     */
-    public static <T, E extends Exception> int[] mapToInt(final Collection<? extends T> c, final int fromIndex, final int toIndex,
-            final Throwables.ToIntFunction<? super T, E> mapper) throws IllegalArgumentException, IndexOutOfBoundsException, E {
-        checkFromToIndex(fromIndex, toIndex, size(c));
-        checkArgNotNull(mapper);
-
-        if ((isEmpty(c) && fromIndex == 0 && toIndex == 0) || fromIndex == toIndex) {
-            return EMPTY_INT_ARRAY;
-        }
-
-        final int[] result = new int[toIndex - fromIndex];
-
-        if (c instanceof List && c instanceof RandomAccess) {
-            final List<T> list = (List<T>) c;
-
-            for (int i = fromIndex; i < toIndex; i++) {
-                result[i - fromIndex] = mapper.applyAsInt(list.get(i));
-            }
-        } else {
-            int idx = 0;
-
-            for (T e : c) {
-                if (idx++ < fromIndex) {
-                    continue;
-                }
-
-                result[idx - fromIndex] = mapper.applyAsInt(e);
-
-                if (idx >= toIndex) {
-                    break;
-                }
-            }
-        }
-
-        return result;
-    }
-
-    /**
-     *
-     * @param <E>
-     * @param a
-     * @param mapper
-     * @return
-     * @throws E the e
-     */
-    @Beta
-    public static <E extends Exception> int[] mapToInt(final long[] a, final Throwables.LongToIntFunction<E> mapper) throws E {
-        if (a == null) {
-            return EMPTY_INT_ARRAY;
-        }
-
-        final int len = len(a);
-        final int[] result = new int[len];
-
-        for (int i = 0; i < len; i++) {
-            result[i] = mapper.applyAsInt(a[i]);
-        }
-
-        return result;
-    }
-
-    /**
-     *
-     * @param <E>
-     * @param a
-     * @param mapper
-     * @return
-     * @throws E the e
-     */
-    @Beta
-    public static <E extends Exception> int[] mapToInt(final double[] a, final Throwables.DoubleToIntFunction<E> mapper) throws E {
-        if (a == null) {
-            return EMPTY_INT_ARRAY;
-        }
-
-        final int len = len(a);
-        final int[] result = new int[len];
-
-        for (int i = 0; i < len; i++) {
-            result[i] = mapper.applyAsInt(a[i]);
-        }
-
-        return result;
-    }
-
-    /**
-     * Map to long.
-     *
-     * @param <T>
-     * @param <E>
-     * @param a
-     * @param mapper
-     * @return
-     * @throws IllegalArgumentException
-     * @throws E the e
-     */
-    public static <T, E extends Exception> long[] mapToLong(final T[] a, final Throwables.ToLongFunction<? super T, E> mapper)
-            throws IllegalArgumentException, E {
-        checkArgNotNull(mapper);
-
-        if (isEmpty(a)) {
-            return EMPTY_LONG_ARRAY;
-        }
-
-        return mapToLong(a, 0, a.length, mapper);
-    }
-
-    /**
-     * Mostly it's designed for one-step operation to complete the operation in one step.
-     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
-     *
-     * @param <T>
-     * @param <E>
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param mapper
-     * @return
-     * @throws IllegalArgumentException
-     * @throws IndexOutOfBoundsException
-     * @throws E the e
-     */
-    public static <T, E extends Exception> long[] mapToLong(final T[] a, final int fromIndex, final int toIndex,
-            final Throwables.ToLongFunction<? super T, E> mapper) throws IllegalArgumentException, IndexOutOfBoundsException, E {
-        checkFromToIndex(fromIndex, toIndex, len(a));
-        checkArgNotNull(mapper);
-
-        if (isEmpty(a) || fromIndex == toIndex) {
-            return EMPTY_LONG_ARRAY;
-        }
-
-        final long[] result = new long[toIndex - fromIndex];
-
-        for (int i = fromIndex; i < toIndex; i++) {
-            result[i - fromIndex] = mapper.applyAsLong(a[i]);
-        }
-
-        return result;
-    }
-
-    /**
-     * Map to long.
-     *
-     * @param <T>
-     * @param <E>
-     * @param c
-     * @param mapper
-     * @return
-     * @throws IllegalArgumentException
-     * @throws E the e
-     */
-    public static <T, E extends Exception> long[] mapToLong(final Collection<? extends T> c, final Throwables.ToLongFunction<? super T, E> mapper)
-            throws IllegalArgumentException, E {
-        checkArgNotNull(mapper);
-
-        if (isEmpty(c)) {
-            return EMPTY_LONG_ARRAY;
-        }
-
-        return mapToLong(c, 0, c.size(), mapper);
-    }
-
-    /**
-     * Mostly it's designed for one-step operation to complete the operation in one step.
-     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
-     *
-     * @param <T>
-     * @param <E>
-     * @param c
-     * @param fromIndex
-     * @param toIndex
-     * @param mapper
-     * @return
-     * @throws IllegalArgumentException
-     * @throws IndexOutOfBoundsException
-     * @throws E the e
-     */
-    public static <T, E extends Exception> long[] mapToLong(final Collection<? extends T> c, final int fromIndex, final int toIndex,
-            final Throwables.ToLongFunction<? super T, E> mapper) throws IllegalArgumentException, IndexOutOfBoundsException, E {
-        checkFromToIndex(fromIndex, toIndex, size(c));
-        checkArgNotNull(mapper);
-
-        if ((isEmpty(c) && fromIndex == 0 && toIndex == 0) || fromIndex == toIndex) {
-            return EMPTY_LONG_ARRAY;
-        }
-
-        final long[] result = new long[toIndex - fromIndex];
-
-        if (c instanceof List && c instanceof RandomAccess) {
-            final List<T> list = (List<T>) c;
-
-            for (int i = fromIndex; i < toIndex; i++) {
-                result[i - fromIndex] = mapper.applyAsLong(list.get(i));
-            }
-        } else {
-            int idx = 0;
-
-            for (T e : c) {
-                if (idx++ < fromIndex) {
-                    continue;
-                }
-
-                result[idx - fromIndex] = mapper.applyAsLong(e);
-
-                if (idx >= toIndex) {
-                    break;
-                }
-            }
-        }
-
-        return result;
-    }
-
-    /**
-     *
-     * @param <E>
-     * @param a
-     * @param mapper
-     * @return
-     * @throws E the e
-     */
-    @Beta
-    public static <E extends Exception> long[] mapToLong(final int[] a, final Throwables.IntToLongFunction<E> mapper) throws E {
-        if (a == null) {
-            return EMPTY_LONG_ARRAY;
-        }
-
-        final int len = len(a);
-        final long[] result = new long[len];
-
-        for (int i = 0; i < len; i++) {
-            result[i] = mapper.applyAsLong(a[i]);
-        }
-
-        return result;
-    }
-
-    /**
-     *
-     * @param <E>
-     * @param a
-     * @param mapper
-     * @return
-     * @throws E the e
-     */
-    @Beta
-    public static <E extends Exception> long[] mapToLong(final double[] a, final Throwables.DoubleToLongFunction<E> mapper) throws E {
-        if (a == null) {
-            return EMPTY_LONG_ARRAY;
-        }
-
-        final int len = len(a);
-        final long[] result = new long[len];
-
-        for (int i = 0; i < len; i++) {
-            result[i] = mapper.applyAsLong(a[i]);
-        }
-
-        return result;
-    }
-
-    /**
-     * Map to float.
-     *
-     * @param <T>
-     * @param <E>
-     * @param a
-     * @param mapper
-     * @return
-     * @throws IllegalArgumentException
-     * @throws E the e
-     */
-    public static <T, E extends Exception> float[] mapToFloat(final T[] a, final Throwables.ToFloatFunction<? super T, E> mapper)
-            throws IllegalArgumentException, E {
-        checkArgNotNull(mapper);
-
-        if (isEmpty(a)) {
-            return EMPTY_FLOAT_ARRAY;
-        }
-
-        return mapToFloat(a, 0, a.length, mapper);
-    }
-
-    /**
-     * Mostly it's designed for one-step operation to complete the operation in one step.
-     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
-     *
-     * @param <T>
-     * @param <E>
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param mapper
-     * @return
-     * @throws IllegalArgumentException
-     * @throws IndexOutOfBoundsException
-     * @throws E the e
-     */
-    public static <T, E extends Exception> float[] mapToFloat(final T[] a, final int fromIndex, final int toIndex,
-            final Throwables.ToFloatFunction<? super T, E> mapper) throws IllegalArgumentException, IndexOutOfBoundsException, E {
-        checkFromToIndex(fromIndex, toIndex, len(a));
-        checkArgNotNull(mapper);
-
-        if (isEmpty(a) || fromIndex == toIndex) {
-            return EMPTY_FLOAT_ARRAY;
-        }
-
-        final float[] result = new float[toIndex - fromIndex];
-
-        for (int i = fromIndex; i < toIndex; i++) {
-            result[i - fromIndex] = mapper.applyAsFloat(a[i]);
-        }
-
-        return result;
-    }
-
-    /**
-     * Map to float.
-     *
-     * @param <T>
-     * @param <E>
-     * @param c
-     * @param mapper
-     * @return
-     * @throws IllegalArgumentException
-     * @throws E the e
-     */
-    public static <T, E extends Exception> float[] mapToFloat(final Collection<? extends T> c, final Throwables.ToFloatFunction<? super T, E> mapper)
-            throws IllegalArgumentException, E {
-        checkArgNotNull(mapper);
-
-        if (isEmpty(c)) {
-            return EMPTY_FLOAT_ARRAY;
-        }
-
-        return mapToFloat(c, 0, c.size(), mapper);
-    }
-
-    /**
-     * Mostly it's designed for one-step operation to complete the operation in one step.
-     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
-     *
-     * @param <T>
-     * @param <E>
-     * @param c
-     * @param fromIndex
-     * @param toIndex
-     * @param mapper
-     * @return
-     * @throws IllegalArgumentException
-     * @throws IndexOutOfBoundsException
-     * @throws E the e
-     */
-    public static <T, E extends Exception> float[] mapToFloat(final Collection<? extends T> c, final int fromIndex, final int toIndex,
-            final Throwables.ToFloatFunction<? super T, E> mapper) throws IllegalArgumentException, IndexOutOfBoundsException, E {
-        checkFromToIndex(fromIndex, toIndex, size(c));
-        checkArgNotNull(mapper);
-
-        if ((isEmpty(c) && fromIndex == 0 && toIndex == 0) || fromIndex == toIndex) {
-            return EMPTY_FLOAT_ARRAY;
-        }
-
-        final float[] result = new float[toIndex - fromIndex];
-
-        if (c instanceof List && c instanceof RandomAccess) {
-            final List<T> list = (List<T>) c;
-
-            for (int i = fromIndex; i < toIndex; i++) {
-                result[i - fromIndex] = mapper.applyAsFloat(list.get(i));
-            }
-        } else {
-            int idx = 0;
-
-            for (T e : c) {
-                if (idx++ < fromIndex) {
-                    continue;
-                }
-
-                result[idx - fromIndex] = mapper.applyAsFloat(e);
-
-                if (idx >= toIndex) {
-                    break;
-                }
-            }
-        }
-
-        return result;
-    }
-
-    /**
-     * Map to double.
-     *
-     * @param <T>
-     * @param <E>
-     * @param a
-     * @param mapper
-     * @return
-     * @throws IllegalArgumentException
-     * @throws E the e
-     */
-    public static <T, E extends Exception> double[] mapToDouble(final T[] a, final Throwables.ToDoubleFunction<? super T, E> mapper)
-            throws IllegalArgumentException, E {
-        checkArgNotNull(mapper);
-
-        if (isEmpty(a)) {
-            return EMPTY_DOUBLE_ARRAY;
-        }
-
-        return mapToDouble(a, 0, a.length, mapper);
-    }
-
-    /**
-     * Mostly it's designed for one-step operation to complete the operation in one step.
-     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
-     *
-     * @param <T>
-     * @param <E>
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param mapper
-     * @return
-     * @throws IllegalArgumentException
-     * @throws IndexOutOfBoundsException
-     * @throws E the e
-     */
-    public static <T, E extends Exception> double[] mapToDouble(final T[] a, final int fromIndex, final int toIndex,
-            final Throwables.ToDoubleFunction<? super T, E> mapper) throws IllegalArgumentException, IndexOutOfBoundsException, E {
-        checkFromToIndex(fromIndex, toIndex, len(a));
-        checkArgNotNull(mapper);
-
-        if (isEmpty(a) || fromIndex == toIndex) {
-            return EMPTY_DOUBLE_ARRAY;
-        }
-
-        final double[] result = new double[toIndex - fromIndex];
-
-        for (int i = fromIndex; i < toIndex; i++) {
-            result[i - fromIndex] = mapper.applyAsDouble(a[i]);
-        }
-
-        return result;
-    }
-
-    /**
-     * Map to double.
-     *
-     * @param <T>
-     * @param <E>
-     * @param c
-     * @param mapper
-     * @return
-     * @throws E the e
-     */
-    public static <T, E extends Exception> double[] mapToDouble(final Collection<? extends T> c, final Throwables.ToDoubleFunction<? super T, E> mapper)
-            throws E {
-        checkArgNotNull(mapper);
-
-        if (isEmpty(c)) {
-            return EMPTY_DOUBLE_ARRAY;
-        }
-
-        return mapToDouble(c, 0, c.size(), mapper);
-    }
-
-    /**
-     * Mostly it's designed for one-step operation to complete the operation in one step.
-     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
-     *
-     * @param <T>
-     * @param <E>
-     * @param c
-     * @param fromIndex
-     * @param toIndex
-     * @param mapper
-     * @return
-     * @throws IllegalArgumentException
-     * @throws IndexOutOfBoundsException
-     * @throws E the e
-     */
-    public static <T, E extends Exception> double[] mapToDouble(final Collection<? extends T> c, final int fromIndex, final int toIndex,
-            final Throwables.ToDoubleFunction<? super T, E> mapper) throws IllegalArgumentException, IndexOutOfBoundsException, E {
-        checkFromToIndex(fromIndex, toIndex, size(c));
-        checkArgNotNull(mapper);
-
-        if ((isEmpty(c) && fromIndex == 0 && toIndex == 0) || fromIndex == toIndex) {
-            return EMPTY_DOUBLE_ARRAY;
-        }
-
-        final double[] result = new double[toIndex - fromIndex];
-
-        if (c instanceof List && c instanceof RandomAccess) {
-            final List<T> list = (List<T>) c;
-
-            for (int i = fromIndex; i < toIndex; i++) {
-                result[i - fromIndex] = mapper.applyAsDouble(list.get(i));
-            }
-        } else {
-            int idx = 0;
-
-            for (T e : c) {
-                if (idx++ < fromIndex) {
-                    continue;
-                }
-
-                result[idx - fromIndex] = mapper.applyAsDouble(e);
-
-                if (idx >= toIndex) {
-                    break;
-                }
-            }
-        }
-
-        return result;
-    }
-
-    /**
-    *
-    * @param <E>
-    * @param a
-    * @param mapper
-    * @return
-    * @throws E the e
-    */
-    @Beta
-    public static <E extends Exception> double[] mapToDouble(final int[] a, final Throwables.IntToDoubleFunction<E> mapper) throws E {
-        if (a == null) {
-            return EMPTY_DOUBLE_ARRAY;
-        }
-
-        final int len = len(a);
-        final double[] result = new double[len];
-
-        for (int i = 0; i < len; i++) {
-            result[i] = mapper.applyAsDouble(a[i]);
-        }
-
-        return result;
-    }
-
-    /**
-     *
-     * @param <E>
-     * @param a
-     * @param mapper
-     * @return
-     * @throws E the e
-     */
-    @Beta
-    public static <E extends Exception> double[] mapToDouble(final long[] a, final Throwables.LongToDoubleFunction<E> mapper) throws E {
-        if (a == null) {
-            return EMPTY_DOUBLE_ARRAY;
-        }
-
-        final int len = len(a);
-        final double[] result = new double[len];
-
-        for (int i = 0; i < len; i++) {
-            result[i] = mapper.applyAsDouble(a[i]);
-        }
-
-        return result;
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param <R>
-     * @param <E>
-     * @param a
-     * @param mapper
-     * @return
-     * @throws IllegalArgumentException
-     * @throws E the e
-     */
-    public static <T, R, E extends Exception> List<R> map(final T[] a, final Throwables.Function<? super T, ? extends R, E> mapper)
-            throws IllegalArgumentException, E {
-        checkArgNotNull(mapper);
-
-        if (isEmpty(a)) {
-            return new ArrayList<>();
-        }
-
-        return map(a, 0, a.length, mapper);
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param <R>
-     * @param <C>
-     * @param <E>
-     * @param a
-     * @param mapper
-     * @param supplier
-     * @return
-     * @throws IllegalArgumentException
-     * @throws E the e
-     */
-    public static <T, R, C extends Collection<R>, E extends Exception> C map(final T[] a, final Throwables.Function<? super T, ? extends R, E> mapper,
-            final IntFunction<? extends C> supplier) throws IllegalArgumentException, E {
-        checkArgNotNull(mapper);
-
-        if (isEmpty(a)) {
-            return supplier.apply(0);
-        }
-
-        return map(a, 0, a.length, mapper, supplier);
-    }
-
-    /**
-     * Mostly it's designed for one-step operation to complete the operation in one step.
-     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
-     *
-     * @param <T>
-     * @param <R>
-     * @param <E>
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param mapper
-     * @return
-     * @throws E the e
-     */
-    public static <T, R, E extends Exception> List<R> map(final T[] a, final int fromIndex, final int toIndex,
-            final Throwables.Function<? super T, ? extends R, E> mapper) throws E {
-        return map(a, fromIndex, toIndex, mapper, Factory.ofList());
-    }
-
-    /**
-     * Mostly it's designed for one-step operation to complete the operation in one step.
-     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
-     *
-     * @param <T>
-     * @param <R>
-     * @param <C>
-     * @param <E>
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param mapper
-     * @param supplier
-     * @return
-     * @throws IllegalArgumentException
-     * @throws IndexOutOfBoundsException
-     * @throws E the e
-     */
-    public static <T, R, C extends Collection<R>, E extends Exception> C map(final T[] a, final int fromIndex, final int toIndex,
-            final Throwables.Function<? super T, ? extends R, E> mapper, final IntFunction<? extends C> supplier)
-            throws IllegalArgumentException, IndexOutOfBoundsException, E {
-        checkFromToIndex(fromIndex, toIndex, len(a));
-        checkArgNotNull(mapper);
-
-        if (isEmpty(a) || fromIndex == toIndex) {
-            return supplier.apply(0);
-        }
-
-        final C result = supplier.apply(toIndex - fromIndex);
-
-        for (int i = fromIndex; i < toIndex; i++) {
-            result.add(mapper.apply(a[i]));
-        }
-
-        return result;
-    }
-
-    /**
-     * Mostly it's designed for one-step operation to complete the operation in one step.
-     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
-     *
-     * @param <T>
-     * @param <R>
-     * @param <E>
-     * @param c
-     * @param fromIndex
-     * @param toIndex
-     * @param mapper
-     * @return
-     * @throws E the e
-     */
-    public static <T, R, E extends Exception> List<R> map(final Collection<? extends T> c, final int fromIndex, final int toIndex,
-            final Throwables.Function<? super T, ? extends R, E> mapper) throws E {
-        return map(c, fromIndex, toIndex, mapper, Factory.ofList());
-    }
-
-    /**
-     * Mostly it's designed for one-step operation to complete the operation in one step.
-     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
-     *
-     * @param <T>
-     * @param <R>
-     * @param <C>
-     * @param <E>
-     * @param c
-     * @param fromIndex
-     * @param toIndex
-     * @param mapper
-     * @param supplier
-     * @return
-     * @throws IllegalArgumentException
-     * @throws IndexOutOfBoundsException
-     * @throws E the e
-     */
-    public static <T, R, C extends Collection<R>, E extends Exception> C map(final Collection<? extends T> c, final int fromIndex, final int toIndex,
-            final Throwables.Function<? super T, ? extends R, E> mapper, final IntFunction<? extends C> supplier)
-            throws IllegalArgumentException, IndexOutOfBoundsException, E {
-        checkFromToIndex(fromIndex, toIndex, size(c));
-        checkArgNotNull(mapper);
-
-        if ((isEmpty(c) && fromIndex == 0 && toIndex == 0) || fromIndex == toIndex) {
-            return supplier.apply(0);
-        }
-
-        final C result = supplier.apply(toIndex - fromIndex);
-
-        if (c instanceof List && c instanceof RandomAccess) {
-            final List<T> list = (List<T>) c;
-
-            for (int i = fromIndex; i < toIndex; i++) {
-                result.add(mapper.apply(list.get(i)));
-            }
-        } else {
-            int idx = 0;
-
-            for (T e : c) {
-                if (idx++ < fromIndex) {
-                    continue;
-                }
-
-                result.add(mapper.apply(e));
-
-                if (idx >= toIndex) {
-                    break;
-                }
-            }
-        }
-
-        return result;
-    }
-
-    //    /**
-    //     *
-    //     * @param <T>
-    //     * @param <U>
-    //     * @param iter
-    //     * @param mapper
-    //     * @return
-    //     * @see {@code Iterators.map(Iterator, Function)}
-    //     */
-    //    public static <T, R, E extends Exception> List<R> map(final Iterator<? extends T> iter, final Throwables.Function<? super T, ? extends R, E> mapper)
-    //            throws E {
-    //        return map(iter, 0, Integer.MAX_VALUE, mapper);
-    //    }
-    //
-    //    public static <T, R, E extends Exception> List<R> map(final Iterator<? extends T> iter, final int fromIndex, final int toIndex,
-    //            final Throwables.Function<? super T, ? extends R, E> mapper) throws E {
-    //        checkFromToIndex(fromIndex, toIndex, Integer.MAX_VALUE);
-    //        checkArgNotNull(mapper);
-    //
-    //        if (iter == null || fromIndex == toIndex) {
-    //            return new ArrayList<>();
-    //        }
-    //
-    //        final List<R> result = new ArrayList<>(min(9, toIndex - fromIndex));
-    //
-    //        int idx = 0;
-    //        T e = null;
-    //
-    //        while (iter.hasNext()) {
-    //            e = iter.next();
-    //
-    //            if (idx++ < fromIndex) {
-    //                continue;
-    //            }
-    //
-    //            result.add(mapper.apply(e));
-    //
-    //            if (idx >= toIndex) {
-    //                break;
-    //            }
-    //        }
-    //
-    //        return result;
-    //    }
-
-    /**
-     *
-     * @param <T>
-     * @param <R>
-     * @param <E>
-     * @param c
-     * @param mapper
-     * @return
-     * @throws E the e
-     */
-    public static <T, R, E extends Exception> List<R> map(final Iterable<? extends T> c, final Throwables.Function<? super T, ? extends R, E> mapper) throws E {
-        return map(c, mapper, Factory.ofList());
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param <R>
-     * @param <C>
-     * @param <E>
-     * @param c
-     * @param mapper
-     * @param supplier
-     * @return
-     * @throws IllegalArgumentException
-     * @throws E the e
-     */
-    public static <T, R, C extends Collection<R>, E extends Exception> C map(final Iterable<? extends T> c,
-            final Throwables.Function<? super T, ? extends R, E> mapper, final IntFunction<? extends C> supplier) throws IllegalArgumentException, E {
-        checkArgNotNull(mapper);
-
-        if (c == null) {
-            return supplier.apply(0);
-        }
-
-        final C result = supplier.apply(getSizeOrDefault(c, 0));
-
-        for (T e : c) {
-            result.add(mapper.apply(e));
-        }
-
-        return result;
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param <R>
-     * @param <E>
-     * @param a
-     * @param mapper
-     * @return
-     * @throws E the e
-     */
-    public static <T, R, E extends Exception> List<R> flatMap(final T[] a, final Throwables.Function<? super T, ? extends Collection<? extends R>, E> mapper)
-            throws E {
-        checkArgNotNull(mapper);
-
-        if (isEmpty(a)) {
-            return new ArrayList<>();
-        }
-
-        return flatMap(a, 0, a.length, mapper);
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param <R>
-     * @param <C>
-     * @param <E>
-     * @param a
-     * @param mapper
-     * @param supplier
-     * @return
-     * @throws IllegalArgumentException
-     * @throws E the e
-     */
-    public static <T, R, C extends Collection<R>, E extends Exception> C flatMap(final T[] a,
-            final Throwables.Function<? super T, ? extends Collection<? extends R>, E> mapper, final IntFunction<? extends C> supplier)
-            throws IllegalArgumentException, E {
-        checkArgNotNull(mapper);
-
-        if (isEmpty(a)) {
-            return supplier.apply(0);
-        }
-
-        return flatMap(a, 0, a.length, mapper, supplier);
-    }
-
-    /**
-     * Mostly it's designed for one-step operation to complete the operation in one step.
-     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
-     *
-     * @param <T>
-     * @param <R>
-     * @param <E>
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param mapper
-     * @return
-     * @throws E the e
-     */
-    public static <T, R, E extends Exception> List<R> flatMap(final T[] a, final int fromIndex, final int toIndex,
-            final Throwables.Function<? super T, ? extends Collection<? extends R>, E> mapper) throws E {
-        return flatMap(a, fromIndex, toIndex, mapper, Factory.ofList());
-    }
-
-    /**
-     * Mostly it's designed for one-step operation to complete the operation in one step.
-     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
-     *
-     * @param <T>
-     * @param <R>
-     * @param <C>
-     * @param <E>
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param mapper
-     * @param supplier
-     * @return
-     * @throws IllegalArgumentException
-     * @throws IndexOutOfBoundsException
-     * @throws E the e
-     */
-    public static <T, R, C extends Collection<R>, E extends Exception> C flatMap(final T[] a, final int fromIndex, final int toIndex,
-            final Throwables.Function<? super T, ? extends Collection<? extends R>, E> mapper, final IntFunction<? extends C> supplier)
-            throws IllegalArgumentException, IndexOutOfBoundsException, E {
-        checkFromToIndex(fromIndex, toIndex, len(a));
-        checkArgNotNull(mapper);
-
-        if (isEmpty(a) || fromIndex == toIndex) {
-            return supplier.apply(0);
-        }
-
-        final int len = initSizeForFlatMap(toIndex - fromIndex);
-        final C result = supplier.apply(len);
-        Collection<? extends R> mr = null;
-
-        for (int i = fromIndex; i < toIndex; i++) {
-            if (notEmpty(mr = mapper.apply(a[i]))) {
-                result.addAll(mr);
-            }
-        }
-
-        return result;
-    }
-
-    /**
-     * Mostly it's designed for one-step operation to complete the operation in one step.
-     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
-     *
-     * @param <T>
-     * @param <R>
-     * @param <E>
-     * @param c
-     * @param fromIndex
-     * @param toIndex
-     * @param mapper
-     * @return
-     * @throws E the e
-     */
-    public static <T, R, E extends Exception> List<R> flatMap(final Collection<? extends T> c, final int fromIndex, final int toIndex,
-            final Throwables.Function<? super T, ? extends Collection<? extends R>, E> mapper) throws E {
-        return flatMap(c, fromIndex, toIndex, mapper, Factory.<R> ofList());
-    }
-
-    /**
-     * Mostly it's designed for one-step operation to complete the operation in one step.
-     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
-     *
-     * @param <T>
-     * @param <R>
-     * @param <C>
-     * @param <E>
-     * @param c
-     * @param fromIndex
-     * @param toIndex
-     * @param mapper
-     * @param supplier
-     * @return
-     * @throws IllegalArgumentException
-     * @throws IndexOutOfBoundsException
-     * @throws E the e
-     */
-    public static <T, R, C extends Collection<R>, E extends Exception> C flatMap(final Collection<? extends T> c, final int fromIndex, final int toIndex,
-            final Throwables.Function<? super T, ? extends Collection<? extends R>, E> mapper, final IntFunction<? extends C> supplier)
-            throws IllegalArgumentException, IndexOutOfBoundsException, E {
-        checkFromToIndex(fromIndex, toIndex, size(c));
-        checkArgNotNull(mapper);
-
-        if ((isEmpty(c) && fromIndex == 0 && toIndex == 0) || fromIndex == toIndex) {
-            return supplier.apply(0);
-        }
-
-        final int len = initSizeForFlatMap(toIndex - fromIndex);
-        final C result = supplier.apply(len);
-        Collection<? extends R> mr = null;
-
-        if (c instanceof List && c instanceof RandomAccess) {
-            final List<T> list = (List<T>) c;
-
-            for (int i = fromIndex; i < toIndex; i++) {
-                if (notEmpty(mr = mapper.apply(list.get(i)))) {
-                    result.addAll(mr);
-                }
-            }
-        } else {
-            int idx = 0;
-
-            for (T e : c) {
-                if (idx++ < fromIndex) {
-                    continue;
-                }
-
-                if (notEmpty(mr = mapper.apply(e))) {
-                    result.addAll(mr);
-                }
-
-                if (idx >= toIndex) {
-                    break;
-                }
-            }
-        }
-
-        return result;
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param <R>
-     * @param <E>
-     * @param c
-     * @param mapper
-     * @return
-     * @throws E the e
-     */
-    public static <T, R, E extends Exception> List<R> flatMap(final Iterable<? extends T> c,
-            final Throwables.Function<? super T, ? extends Collection<? extends R>, E> mapper) throws E {
-        return flatMap(c, mapper, Factory.<R> ofList());
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param <R>
-     * @param <C>
-     * @param <E>
-     * @param c
-     * @param mapper
-     * @param supplier
-     * @return
-     * @throws IllegalArgumentException
-     * @throws IndexOutOfBoundsException
-     * @throws E the e
-     */
-    public static <T, R, C extends Collection<R>, E extends Exception> C flatMap(final Iterable<? extends T> c,
-            final Throwables.Function<? super T, ? extends Collection<? extends R>, E> mapper, final IntFunction<? extends C> supplier)
-            throws IllegalArgumentException, IndexOutOfBoundsException, E {
-        checkArgNotNull(mapper);
-
-        if (c == null) {
-            return supplier.apply(0);
-        }
-
-        final C result = supplier.apply(initSizeForFlatMap(c));
-        Collection<? extends R> mr = null;
-
-        for (T e : c) {
-            if (notEmpty(mr = mapper.apply(e))) {
-                result.addAll(mr);
-            }
-        }
-
-        return result;
-    }
-
-    //    /**
-    //     *
-    //     * @param <T>
-    //     * @param <U>
-    //     * @param iter
-    //     * @param mapper
-    //     * @return
-    //     * @see {@code Iterators.flatMap(Iterator, Function)}
-    //     */
-    //    public static <T, R, E extends Exception> List<R> flatMap(final Iterator<? extends T> iter,
-    //            final Throwables.Function<? super T, ? extends Collection<? extends R>, E> mapper) throws E {
-    //        return flatMap(iter, 0, Integer.MAX_VALUE, mapper);
-    //    }
-    //
-    //    public static <T, R, E extends Exception> List<R> flatMap(final Iterator<? extends T> iter, final int fromIndex, final int toIndex,
-    //            final Throwables.Function<? super T, ? extends Collection<? extends R>, E> mapper) throws E {
-    //        checkFromToIndex(fromIndex, toIndex, Integer.MAX_VALUE);
-    //        checkArgNotNull(mapper);
-    //
-    //        if (iter == null || fromIndex == toIndex) {
-    //            return new ArrayList<>();
-    //        }
-    //
-    //        final List<R> result = new ArrayList<>(min(9, toIndex - fromIndex));
-    //        Collection<? extends R> mr = null;
-    //
-    //        int idx = 0;
-    //        T e = null;
-    //
-    //        while (iter.hasNext()) {
-    //            e = iter.next();
-    //
-    //            if (idx++ < fromIndex) {
-    //                continue;
-    //            }
-    //
-    //            if (notEmpty(mr = mapper.apply(e))) {
-    //                result.addAll(mr);
-    //            }
-    //
-    //            if (idx >= toIndex) {
-    //                break;
-    //            }
-    //        }
-    //
-    //        return result;
-    //    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param <U>
-     * @param <R>
-     * @param <E>
-     * @param <E2>
-     * @param a
-     * @param mapper
-     * @param mapper2
-     * @return
-     * @throws E the e
-     * @throws E2 the e2
-     */
-    public static <T, U, R, E extends Exception, E2 extends Exception> List<R> flatMap(final T[] a,
-            final Throwables.Function<? super T, ? extends Collection<? extends U>, E> mapper,
-            final Throwables.Function<? super U, ? extends Collection<? extends R>, E2> mapper2) throws E, E2 {
-
-        return flatMap(a, mapper, mapper2, Factory.<R> ofList());
-    }
-
-    /**
-     * Mostly it's designed for one-step operation to complete the operation in one step.
-     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
-     *
-     * @param <T>
-     * @param <U>
-     * @param <R>
-     * @param <C>
-     * @param <E>
-     * @param <E2>
-     * @param a
-     * @param mapper
-     * @param mapper2
-     * @param supplier
-     * @return
-     * @throws IllegalArgumentException
-     * @throws E the e
-     * @throws E2 the e2
-     */
-    public static <T, U, R, C extends Collection<R>, E extends Exception, E2 extends Exception> C flatMap(final T[] a,
-            final Throwables.Function<? super T, ? extends Collection<? extends U>, E> mapper,
-            final Throwables.Function<? super U, ? extends Collection<? extends R>, E2> mapper2, final IntFunction<? extends C> supplier)
-            throws IllegalArgumentException, E, E2 {
-        checkArgNotNull(mapper);
-        checkArgNotNull(mapper2);
-
-        if (isEmpty(a)) {
-            return supplier.apply(0);
-        }
-
-        final int len = a.length > MAX_ARRAY_SIZE / LOAD_FACTOR_FOR_TWO_FLAT_MAP ? MAX_ARRAY_SIZE : a.length * LOAD_FACTOR_FOR_TWO_FLAT_MAP;
-        final C result = supplier.apply(len);
-
-        for (T e : a) {
-            final Collection<? extends U> c1 = mapper.apply(e);
-
-            if (notEmpty(c1)) {
-                for (U e2 : c1) {
-                    final Collection<? extends R> c2 = mapper2.apply(e2);
-
-                    if (notEmpty(c2)) {
-                        result.addAll(c2);
-                    }
-                }
-            }
-        }
-
-        return result;
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param <U>
-     * @param <R>
-     * @param <E>
-     * @param <E2>
-     * @param c
-     * @param mapper
-     * @param mapper2
-     * @return
-     * @throws E the e
-     * @throws E2 the e2
-     */
-    public static <T, U, R, E extends Exception, E2 extends Exception> List<R> flatMap(final Iterable<? extends T> c,
-            final Throwables.Function<? super T, ? extends Collection<? extends U>, E> mapper,
-            final Throwables.Function<? super U, ? extends Collection<? extends R>, E2> mapper2) throws E, E2 {
-
-        return flatMap(c, mapper, mapper2, Factory.<R> ofList());
-    }
-
-    /**
-     * Mostly it's designed for one-step operation to complete the operation in one step.
-     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
-     *
-     * @param <T>
-     * @param <U>
-     * @param <R>
-     * @param <C>
-     * @param <E>
-     * @param <E2>
-     * @param c
-     * @param mapper
-     * @param mapper2
-     * @param supplier
-     * @return
-     * @throws IllegalArgumentException
-     * @throws E the e
-     * @throws E2 the e2
-     */
-    public static <T, U, R, C extends Collection<R>, E extends Exception, E2 extends Exception> C flatMap(final Iterable<? extends T> c,
-            final Throwables.Function<? super T, ? extends Collection<? extends U>, E> mapper,
-            final Throwables.Function<? super U, ? extends Collection<? extends R>, E2> mapper2, final IntFunction<? extends C> supplier)
-            throws IllegalArgumentException, E, E2 {
-        checkArgNotNull(mapper);
-        checkArgNotNull(mapper2);
-
-        if (c == null) {
-            return supplier.apply(0);
-        }
-
-        final C result = supplier.apply(initSizeForFlatMap(c));
-
-        for (T e : c) {
-            final Collection<? extends U> c1 = mapper.apply(e);
-
-            if (notEmpty(c1)) {
-                for (U e2 : c1) {
-                    final Collection<? extends R> c2 = mapper2.apply(e2);
-
-                    if (notEmpty(c2)) {
-                        result.addAll(c2);
-                    }
-                }
-            }
-        }
-
-        return result;
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param <R>
-     * @param <E>
-     * @param a
-     * @param mapper
-     * @return
-     * @throws E the e
-     */
-    public static <T, R, E extends Exception> List<R> flatmap(final T[] a, final Throwables.Function<? super T, ? extends R[], E> mapper) throws E { //NOSONAR
-        checkArgNotNull(mapper);
-
-        if (isEmpty(a)) {
-            return new ArrayList<>();
-        }
-
-        return flatmap(a, 0, a.length, mapper);
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param <R>
-     * @param <C>
-     * @param <E>
-     * @param a
-     * @param mapper
-     * @param supplier
-     * @return
-     * @throws IllegalArgumentException
-     * @throws E the e
-     */
-    public static <T, R, C extends Collection<R>, E extends Exception> C flatmap(final T[] a, final Throwables.Function<? super T, ? extends R[], E> mapper, //NOSONAR
-            final IntFunction<? extends C> supplier) throws IllegalArgumentException, E {
-        checkArgNotNull(mapper);
-
-        if (isEmpty(a)) {
-            return supplier.apply(0);
-        }
-
-        return flatmap(a, 0, a.length, mapper, supplier);
-    }
-
-    /**
-     * Mostly it's designed for one-step operation to complete the operation in one step.
-     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
-     *
-     * @param <T>
-     * @param <R>
-     * @param <E>
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param mapper
-     * @return
-     * @throws E the e
-     */
-    public static <T, R, E extends Exception> List<R> flatmap(final T[] a, final int fromIndex, final int toIndex, //NOSONAR
-            final Throwables.Function<? super T, ? extends R[], E> mapper) throws E {
-        return flatmap(a, fromIndex, toIndex, mapper, Factory.ofList());
-    }
-
-    /**
-     * Mostly it's designed for one-step operation to complete the operation in one step.
-     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
-     *
-     * @param <T>
-     * @param <R>
-     * @param <C>
-     * @param <E>
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param mapper
-     * @param supplier
-     * @return
-     * @throws IllegalArgumentException
-     * @throws IndexOutOfBoundsException
-     * @throws E the e
-     */
-    public static <T, R, C extends Collection<R>, E extends Exception> C flatmap(final T[] a, final int fromIndex, final int toIndex, //NOSONAR
-            final Throwables.Function<? super T, ? extends R[], E> mapper, final IntFunction<? extends C> supplier)
-            throws IllegalArgumentException, IndexOutOfBoundsException, E {
-        checkFromToIndex(fromIndex, toIndex, len(a));
-        checkArgNotNull(mapper);
-
-        if (isEmpty(a) || fromIndex == toIndex) {
-            return supplier.apply(0);
-        }
-
-        final int len = initSizeForFlatMap(toIndex - fromIndex);
-        final C result = supplier.apply(len);
-        R[] mr = null;
-
-        for (int i = fromIndex; i < toIndex; i++) {
-            if (notEmpty(mr = mapper.apply(a[i]))) {
-                result.addAll(Arrays.asList(mr));
-            }
-        }
-
-        return result;
-    }
-
-    /**
-     * Mostly it's designed for one-step operation to complete the operation in one step.
-     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
-     *
-     * @param <T>
-     * @param <R>
-     * @param <E>
-     * @param c
-     * @param fromIndex
-     * @param toIndex
-     * @param mapper
-     * @return
-     * @throws E the e
-     */
-    public static <T, R, E extends Exception> List<R> flatmap(final Collection<? extends T> c, final int fromIndex, final int toIndex, //NOSONAR
-            final Throwables.Function<? super T, ? extends R[], E> mapper) throws E {
-        return flatmap(c, fromIndex, toIndex, mapper, Factory.ofList());
-    }
-
-    /**
-     * Mostly it's designed for one-step operation to complete the operation in one step.
-     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
-     *
-     * @param <T>
-     * @param <R>
-     * @param <C>
-     * @param <E>
-     * @param c
-     * @param fromIndex
-     * @param toIndex
-     * @param mapper
-     * @param supplier
-     * @return
-     * @throws IllegalArgumentException
-     * @throws IndexOutOfBoundsException
-     * @throws E the e
-     */
-    public static <T, R, C extends Collection<R>, E extends Exception> C flatmap(final Collection<? extends T> c, final int fromIndex, final int toIndex, //NOSONAR
-            final Throwables.Function<? super T, ? extends R[], E> mapper, final IntFunction<? extends C> supplier)
-            throws IllegalArgumentException, IndexOutOfBoundsException, E {
-        checkFromToIndex(fromIndex, toIndex, size(c));
-        checkArgNotNull(mapper);
-
-        if ((isEmpty(c) && fromIndex == 0 && toIndex == 0) || fromIndex == toIndex) {
-            return supplier.apply(0);
-        }
-
-        final int len = initSizeForFlatMap(toIndex - fromIndex);
-        final C result = supplier.apply(len);
-        R[] mr = null;
-
-        if (c instanceof List && c instanceof RandomAccess) {
-            final List<T> list = (List<T>) c;
-
-            for (int i = fromIndex; i < toIndex; i++) {
-                if (notEmpty(mr = mapper.apply(list.get(i)))) {
-                    result.addAll(Arrays.asList(mr));
-                }
-            }
-        } else {
-            int idx = 0;
-
-            for (T e : c) {
-                if (idx++ < fromIndex) {
-                    continue;
-                }
-
-                if (notEmpty(mr = mapper.apply(e))) {
-                    result.addAll(Arrays.asList(mr));
-                }
-
-                if (idx >= toIndex) {
-                    break;
-                }
-            }
-        }
-
-        return result;
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param <R>
-     * @param <E>
-     * @param c
-     * @param mapper
-     * @return
-     * @throws E the e
-     */
-    public static <T, R, E extends Exception> List<R> flatmap(final Iterable<? extends T> c, final Throwables.Function<? super T, ? extends R[], E> mapper) //NOSONAR
-            throws E {
-        return flatmap(c, mapper, Factory.<R> ofList());
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param <R>
-     * @param <C>
-     * @param <E>
-     * @param c
-     * @param mapper
-     * @param supplier
-     * @return
-     * @throws IllegalArgumentException
-     * @throws E the e
-     */
-    public static <T, R, C extends Collection<R>, E extends Exception> C flatmap(final Iterable<? extends T> c, //NOSONAR
-            final Throwables.Function<? super T, ? extends R[], E> mapper, final IntFunction<? extends C> supplier) throws IllegalArgumentException, E {
-        checkArgNotNull(mapper);
-
-        if (c == null) {
-            return supplier.apply(0);
-        }
-
-        final C result = supplier.apply(initSizeForFlatMap(c));
-        R[] mr = null;
-
-        for (T e : c) {
-            if (notEmpty(mr = mapper.apply(e))) {
-                result.addAll(Arrays.asList(mr));
-            }
-        }
-
-        return result;
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param <E>
-     * @param a
-     * @param filter
-     * @return the list
-     * @throws IllegalArgumentException
-     * @throws E the e
-     */
-    public static <T, E extends Exception> List<T> takeWhile(final T[] a, final Throwables.Predicate<? super T, E> filter) throws IllegalArgumentException, E {
-        checkArgNotNull(filter, "filter");
-
-        final List<T> result = new ArrayList<>(min(9, len(a)));
-
-        if (isEmpty(a)) {
-            return result;
-        }
-
-        for (T e : a) {
-            if (filter.test(e)) {
-                result.add(e);
-            } else {
-                break;
-            }
-        }
-
-        return result;
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param <E>
-     * @param c
-     * @param filter
-     * @return the list
-     * @throws IllegalArgumentException
-     * @throws E the e
-     */
-    public static <T, E extends Exception> List<T> takeWhile(final Iterable<? extends T> c, final Throwables.Predicate<? super T, E> filter)
-            throws IllegalArgumentException, E {
-        checkArgNotNull(filter, "filter");
-
-        final List<T> result = new ArrayList<>(min(9, getSizeOrDefault(c, 0)));
-
-        if (c == null) {
-            return result;
-        }
-
-        for (T e : c) {
-            if (filter.test(e)) {
-                result.add(e);
-            } else {
-                break;
-            }
-        }
-
-        return result;
-    }
-
-    /**
-     * Take while inclusive.
-     *
-     * @param <T>
-     * @param <E>
-     * @param a
-     * @param filter
-     * @return the list
-     * @throws IllegalArgumentException
-     * @throws E the e
-     */
-    public static <T, E extends Exception> List<T> takeWhileInclusive(final T[] a, final Throwables.Predicate<? super T, E> filter)
-            throws IllegalArgumentException, E {
-        checkArgNotNull(filter, "filter");
-
-        final List<T> result = new ArrayList<>(min(9, len(a)));
-
-        if (isEmpty(a)) {
-            return result;
-        }
-
-        for (T e : a) {
-            result.add(e);
-
-            if (!filter.test(e)) {
-                break;
-            }
-        }
-
-        return result;
-    }
-
-    /**
-     * Take while inclusive.
-     *
-     * @param <T>
-     * @param <E>
-     * @param c
-     * @param filter
-     * @return the list
-     * @throws IllegalArgumentException
-     * @throws E the e
-     */
-    public static <T, E extends Exception> List<T> takeWhileInclusive(final Iterable<? extends T> c, final Throwables.Predicate<? super T, E> filter)
-            throws IllegalArgumentException, E {
-        checkArgNotNull(filter, "filter");
-
-        final List<T> result = new ArrayList<>(min(9, getSizeOrDefault(c, 0)));
-
-        if (c == null) {
-            return result;
-        }
-
-        for (T e : c) {
-            result.add(e);
-
-            if (!filter.test(e)) {
-                break;
-            }
-        }
-
-        return result;
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param <E>
-     * @param a
-     * @param filter
-     * @return the list
-     * @throws IllegalArgumentException
-     * @throws E the e
-     */
-    public static <T, E extends Exception> List<T> dropWhile(final T[] a, final Throwables.Predicate<? super T, E> filter) throws IllegalArgumentException, E {
-        checkArgNotNull(filter, "filter");
-
-        final List<T> result = new ArrayList<>(min(9, len(a)));
-
-        if (isEmpty(a)) {
-            return result;
-        }
-
-        final int len = a.length;
-        int idx = 0;
-
-        while (idx < len && filter.test(a[idx])) {
-            idx++;
-        }
-
-        while (idx < len) {
-            result.add(a[idx++]);
-        }
-
-        return result;
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param <E>
-     * @param c
-     * @param filter
-     * @return the list
-     * @throws IllegalArgumentException
-     * @throws E the e
-     */
-    public static <T, E extends Exception> List<T> dropWhile(final Iterable<? extends T> c, final Throwables.Predicate<? super T, E> filter)
-            throws IllegalArgumentException, E {
-        checkArgNotNull(filter, "filter");
-
-        final List<T> result = new ArrayList<>(min(9, getSizeOrDefault(c, 0)));
-
-        if (c == null) {
-            return result;
-        }
-
-        final Iterator<? extends T> iter = c.iterator();
-        T e = null;
-
-        while (iter.hasNext()) {
-            e = iter.next();
-
-            if (!filter.test(e)) {
-                result.add(e);
-                break;
-            }
-        }
-
-        while (iter.hasNext()) {
-            result.add(iter.next());
-        }
-
-        return result;
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param <E>
-     * @param a
-     * @param filter
-     * @return the list
-     * @throws IllegalArgumentException
-     * @throws E the e
-     */
-    public static <T, E extends Exception> List<T> skipUntil(final T[] a, final Throwables.Predicate<? super T, E> filter) throws IllegalArgumentException, E {
-        checkArgNotNull(filter, "filter");
-
-        final List<T> result = new ArrayList<>(min(9, len(a)));
-
-        if (isEmpty(a)) {
-            return result;
-        }
-
-        final int len = a.length;
-        int idx = 0;
-
-        while (idx < len && !filter.test(a[idx])) {
-            idx++;
-        }
-
-        while (idx < len) {
-            result.add(a[idx++]);
-        }
-
-        return result;
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param <E>
-     * @param c
-     * @param filter
-     * @return the list
-     * @throws IllegalArgumentException
-     * @throws E the e
-     */
-    public static <T, E extends Exception> List<T> skipUntil(final Iterable<? extends T> c, final Throwables.Predicate<? super T, E> filter)
-            throws IllegalArgumentException, E {
-        checkArgNotNull(filter, "filter");
-
-        final List<T> result = new ArrayList<>(getMinSize(c));
-
-        if (c == null) {
-            return result;
-        }
-
-        final Iterator<? extends T> iter = c.iterator();
-        T e = null;
-
-        while (iter.hasNext()) {
-            e = iter.next();
-
-            if (filter.test(e)) {
-                result.add(e);
-                break;
-            }
-        }
-
-        while (iter.hasNext()) {
-            result.add(iter.next());
-        }
-
-        return result;
-    }
-
-    private static int getSizeOrDefault(final Iterable<?> c, final int defaultSize) {
-        return c instanceof Collection ? ((Collection<?>) c).size() : defaultSize;
-    }
-
-    private static int getMinSize(final Iterable<?> c) {
-        return min(9, getSizeOrDefault(c, 0));
-    }
-
-    private static int initSizeForFlatMap(final Iterable<?> c) {
-        return c instanceof Collection ? initSizeForFlatMap(((Collection<?>) c).size()) : 0;
-    }
-
-    private static int initSizeForFlatMap(final int size) {
-        return size > MAX_ARRAY_SIZE / LOAD_FACTOR_FOR_FLAT_MAP ? MAX_ARRAY_SIZE : (int) (size * LOAD_FACTOR_FOR_FLAT_MAP); // NOSONAR
-    }
-
-    /**
-     * Mostly it's designed for one-step operation to complete the operation in one step.
-     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
-     *
-     * @param a
-     * @return
-     */
-    public static boolean[] distinct(final boolean[] a) {
-        return distinct(a, 0, len(a));
-    }
-
-    /**
-     * Mostly it's designed for one-step operation to complete the operation in one step.
-     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
-     *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return
-     */
-    public static boolean[] distinct(final boolean[] a, final int fromIndex, final int toIndex) {
-        return removeDuplicates(a, fromIndex, toIndex);
-    }
-
-    /**
-     * Mostly it's designed for one-step operation to complete the operation in one step.
-     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
-     *
-     * @param a
-     * @return
-     */
-    public static char[] distinct(final char[] a) {
-        return distinct(a, 0, len(a));
-    }
-
-    /**
-     * Mostly it's designed for one-step operation to complete the operation in one step.
-     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
-     *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return
-     */
-    public static char[] distinct(final char[] a, final int fromIndex, final int toIndex) {
-        return removeDuplicates(a, fromIndex, toIndex, false);
-    }
-
-    /**
-     * Mostly it's designed for one-step operation to complete the operation in one step.
-     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
-     *
-     * @param a
-     * @return
-     */
-    public static byte[] distinct(final byte[] a) {
-        return distinct(a, 0, len(a));
-    }
-
-    /**
-     * Mostly it's designed for one-step operation to complete the operation in one step.
-     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
-     *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return
-     */
-    public static byte[] distinct(final byte[] a, final int fromIndex, final int toIndex) {
-        return removeDuplicates(a, fromIndex, toIndex, false);
-    }
-
-    /**
-     * Mostly it's designed for one-step operation to complete the operation in one step.
-     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
-     *
-     * @param a
-     * @return
-     */
-    public static short[] distinct(final short[] a) {
-        return distinct(a, 0, len(a));
-    }
-
-    /**
-     * Mostly it's designed for one-step operation to complete the operation in one step.
-     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
-     *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return
-     */
-    public static short[] distinct(final short[] a, final int fromIndex, final int toIndex) {
-        return removeDuplicates(a, fromIndex, toIndex, false);
-    }
-
-    /**
-     * Mostly it's designed for one-step operation to complete the operation in one step.
-     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
-     *
-     * @param a
-     * @return
-     */
-    public static int[] distinct(final int[] a) {
-        return distinct(a, 0, len(a));
-    }
-
-    /**
-     * Mostly it's designed for one-step operation to complete the operation in one step.
-     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
-     *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return
-     */
-    public static int[] distinct(final int[] a, final int fromIndex, final int toIndex) {
-        return removeDuplicates(a, fromIndex, toIndex, false);
-    }
-
-    /**
-     * Mostly it's designed for one-step operation to complete the operation in one step.
-     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
-     *
-     * @param a
-     * @return
-     */
-    public static long[] distinct(final long[] a) {
-        return distinct(a, 0, len(a));
-    }
-
-    /**
-     * Mostly it's designed for one-step operation to complete the operation in one step.
-     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
-     *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return
-     */
-    public static long[] distinct(final long[] a, final int fromIndex, final int toIndex) {
-        return removeDuplicates(a, fromIndex, toIndex, false);
-    }
-
-    /**
-     * Mostly it's designed for one-step operation to complete the operation in one step.
-     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
-     *
-     * @param a
-     * @return
-     */
-    public static float[] distinct(final float[] a) {
-        return distinct(a, 0, len(a));
-    }
-
-    /**
-     * Mostly it's designed for one-step operation to complete the operation in one step.
-     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
-     *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return
-     */
-    public static float[] distinct(final float[] a, final int fromIndex, final int toIndex) {
-        return removeDuplicates(a, fromIndex, toIndex, false);
-    }
-
-    /**
-     * Mostly it's designed for one-step operation to complete the operation in one step.
-     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
-     *
-     * @param a
-     * @return
-     */
-    public static double[] distinct(final double[] a) {
-        return distinct(a, 0, len(a));
-    }
-
-    /**
-     * Mostly it's designed for one-step operation to complete the operation in one step.
-     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
-     *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return
-     */
-    public static double[] distinct(final double[] a, final int fromIndex, final int toIndex) {
-        return removeDuplicates(a, fromIndex, toIndex, false);
-    }
-
-    /**
-     * Mostly it's designed for one-step operation to complete the operation in one step.
-     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
-     *
-     * @param <T>
-     * @param a
-     * @return
-     */
-    public static <T> List<T> distinct(final T[] a) {
-        if (isEmpty(a)) {
-            return new ArrayList<>();
-        }
-
-        return distinct(a, 0, a.length);
-    }
-
-    /**
-     * Mostly it's designed for one-step operation to complete the operation in one step.
-     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
-     *
-     * @param <T>
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return
-     * @throws IndexOutOfBoundsException
-     */
-    public static <T> List<T> distinct(final T[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));
-
-        if (isEmpty(a) || fromIndex == toIndex) {
-            return new ArrayList<>();
-        }
-
-        final int initCapacity = (toIndex - fromIndex) / 2 + 1;
-        final List<T> result = new ArrayList<>(initCapacity);
-        final Set<Object> set = newHashSet(initCapacity);
-
-        for (int i = fromIndex; i < toIndex; i++) {
-            if (set.add(hashKey(a[i]))) {
-                result.add(a[i]);
-            }
-        }
-
-        return result;
-    }
-
-    /**
-     * Mostly it's designed for one-step operation to complete the operation in one step.
-     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
-     *
-     * @param <T>
-     * @param c
-     * @return
-     */
-    public static <T> List<T> distinct(final Iterable<? extends T> c) {
-        if (c == null) {
-            return new ArrayList<>();
-        } else if (c instanceof Collection) {
-            final Collection<T> coll = (Collection<T>) c;
-            return distinct(coll, 0, coll.size());
-        } else {
-            final List<T> result = new ArrayList<>();
-            final Set<Object> set = new HashSet<>();
-
-            for (T e : c) {
-                if (set.add(hashKey(e))) {
-                    result.add(e);
-                }
-            }
-
-            return result;
-        }
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param iter
-     * @return
-     * @see Iterators#distinct(Iterator)
-     * @see Iterators#distinct(Iterable)
-     * @see Iterators#distinctBy(Iterator, Function)
-     * @see Iterators#distinctBy(Iterable, Function)
-     */
-    public static <T> List<T> distinct(final Iterator<? extends T> iter) {
-        return distinctBy(iter, Fn.identity());
-    }
-
-    /**
-     * Mostly it's designed for one-step operation to complete the operation in one step.
-     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
-     *
-     * @param <T>
-     * @param c
-     * @param fromIndex
-     * @param toIndex
-     * @return
-     * @throws IndexOutOfBoundsException
-     */
-    public static <T> List<T> distinct(final Collection<? extends T> c, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, size(c));
-
-        if ((isEmpty(c) && fromIndex == 0 && toIndex == 0) || fromIndex == toIndex) {
-            return new ArrayList<>();
-        }
-
-        final int initCapacity = (toIndex - fromIndex) / 2 + 1;
-        final List<T> result = new ArrayList<>(initCapacity);
-        final Set<Object> set = newHashSet(initCapacity);
-        T e = null;
-
-        if (c instanceof List && c instanceof RandomAccess) {
-            final List<T> list = (List<T>) c;
-
-            for (int i = fromIndex; i < toIndex; i++) {
-                e = list.get(i);
-
-                if (set.add(hashKey(e))) {
-                    result.add(e);
-                }
-            }
-        } else {
-            final Iterator<? extends T> it = c.iterator();
-
-            for (int i = 0; i < toIndex && it.hasNext(); i++) {
-                e = it.next();
-
-                if (i < fromIndex) {
-                    continue;
-                }
-
-                if (set.add(hashKey(e))) {
-                    result.add(e);
-                }
-            }
-        }
-
-        return result;
-    }
-
-    /**
-     * Distinct by the value mapped from <code>keyMapper</code>.
-     *
-     * Mostly it's designed for one-step operation to complete the operation in one step.
-     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
-     *
-     * @param <T>
-     * @param <E>
-     * @param a
-     * @param keyMapper don't change value of the input parameter.
-     * @return
-     * @throws E the e
-     */
-    public static <T, E extends Exception> List<T> distinctBy(final T[] a, final Throwables.Function<? super T, ?, E> keyMapper) throws E {
-        if (isEmpty(a)) {
-            return new ArrayList<>();
-        }
-
-        return distinctBy(a, 0, a.length, keyMapper);
-    }
-
-    /**
-     * Distinct by the value mapped from <code>keyMapper</code>.
-     *
-     * Mostly it's designed for one-step operation to complete the operation in one step.
-     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
-     *
-     * @param <T>
-     * @param <E>
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param keyMapper don't change value of the input parameter.
-     * @return
-     * @throws IndexOutOfBoundsException
-     * @throws E the e
-     */
-    public static <T, E extends Exception> List<T> distinctBy(final T[] a, final int fromIndex, final int toIndex,
-            final Throwables.Function<? super T, ?, E> keyMapper) throws IndexOutOfBoundsException, E {
-        checkFromToIndex(fromIndex, toIndex, len(a));
-
-        if (isEmpty(a) || fromIndex == toIndex) {
-            return new ArrayList<>();
-        }
-
-        final int initCapacity = (toIndex - fromIndex) / 2 + 1;
-        final List<T> result = new ArrayList<>(initCapacity);
-        final Set<Object> set = newHashSet(initCapacity);
-
-        for (int i = fromIndex; i < toIndex; i++) {
-            if (set.add(hashKey(keyMapper.apply(a[i])))) {
-                result.add(a[i]);
-            }
-        }
-
-        return result;
-    }
-
-    /**
-     * Distinct by the value mapped from <code>keyMapper</code>.
-     *
-     * Mostly it's designed for one-step operation to complete the operation in one step.
-     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
-     *
-     * @param <T>
-     * @param <C>
-     * @param <E>
-     * @param a
-     * @param keyMapper don't change value of the input parameter.
-     * @param supplier
-     * @return
-     * @throws E the e
-     */
-    public static <T, C extends Collection<T>, E extends Exception> C distinctBy(final T[] a, final Throwables.Function<? super T, ?, E> keyMapper,
-            final Supplier<C> supplier) throws E {
-        if (isEmpty(a)) {
-            return supplier.get();
-        }
-
-        final C result = supplier.get();
-        final Set<Object> set = newHashSet(len(a) / 2 + 1);
-
-        for (T e : a) {
-            if (set.add(hashKey(keyMapper.apply(e)))) {
-                result.add(e);
-            }
-        }
-
-        return result;
-    }
-
-    /**
-     * Distinct by the value mapped from <code>keyMapper</code>.
-     *
-     * Mostly it's designed for one-step operation to complete the operation in one step.
-     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
-     *
-     * @param <T>
-     * @param <E>
-     * @param c
-     * @param fromIndex
-     * @param toIndex
-     * @param keyMapper don't change value of the input parameter.
-     * @return
-     * @throws IndexOutOfBoundsException
-     * @throws E the e
-     */
-    public static <T, E extends Exception> List<T> distinctBy(final Collection<? extends T> c, final int fromIndex, final int toIndex,
-            final Throwables.Function<? super T, ?, E> keyMapper) throws IndexOutOfBoundsException, E {
-        checkFromToIndex(fromIndex, toIndex, size(c));
-
-        if ((isEmpty(c) && fromIndex == 0 && toIndex == 0) || fromIndex == toIndex) {
-            return new ArrayList<>();
-        }
-
-        final int initCapacity = (toIndex - fromIndex) / 2 + 1;
-        final List<T> result = new ArrayList<>(initCapacity);
-        final Set<Object> set = newHashSet(initCapacity);
-        T e = null;
-
-        if (c instanceof List && c instanceof RandomAccess) {
-            final List<T> list = (List<T>) c;
-
-            for (int i = fromIndex; i < toIndex; i++) {
-                e = list.get(i);
-
-                if (set.add(hashKey(keyMapper.apply(e)))) {
-                    result.add(e);
-                }
-            }
-        } else {
-            final Iterator<? extends T> it = c.iterator();
-
-            for (int i = 0; i < toIndex && it.hasNext(); i++) {
-                e = it.next();
-
-                if (i < fromIndex) {
-                    continue;
-                }
-
-                if (set.add(hashKey(keyMapper.apply(e)))) {
-                    result.add(e);
-                }
-            }
-        }
-
-        return result;
-    }
-
-    /**
-     * Distinct by the value mapped from <code>keyMapper</code>.
-     *
-     * Mostly it's designed for one-step operation to complete the operation in one step.
-     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
-     *
-     * @param <T>
-     * @param <E>
-     * @param c
-     * @param keyMapper don't change value of the input parameter.
-     * @return
-     * @throws E the e
-     */
-    public static <T, E extends Exception> List<T> distinctBy(final Iterable<? extends T> c, final Throwables.Function<? super T, ?, E> keyMapper) throws E {
-        return distinctBy(c, keyMapper, Suppliers.ofList());
-    }
-
-    /**
-     * Distinct by the value mapped from <code>keyMapper</code>.
-     *
-     * Mostly it's designed for one-step operation to complete the operation in one step.
-     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
-     *
-     * @param <T>
-     * @param <C>
-     * @param <E>
-     * @param c
-     * @param keyMapper don't change value of the input parameter.
-     * @param supplier
-     * @return
-     * @throws E the e
-     */
-    public static <T, C extends Collection<T>, E extends Exception> C distinctBy(final Iterable<? extends T> c,
-            final Throwables.Function<? super T, ?, E> keyMapper, final Supplier<C> supplier) throws E {
-        if (c == null) {
-            return supplier.get();
-        }
-
-        final C result = supplier.get();
-        final Set<Object> set = newHashSet(c instanceof Collection ? ((Collection<T>) c).size() / 2 + 1 : 0);
-
-        for (T e : c) {
-            if (set.add(hashKey(keyMapper.apply(e)))) {
-                result.add(e);
-            }
-        }
-
-        return result;
-    }
-
-    /**
-     * Distinct by the value mapped from <code>keyMapper</code>.
-     *
-     * Mostly it's designed for one-step operation to complete the operation in one step.
-     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
-     *
-     * @param <T>
-     * @param <E>
-     * @param iter
-     * @param keyMapper don't change value of the input parameter.
-     * @return
-     * @throws E the e
-     * @see Iterators#distinct(Iterator)
-     * @see Iterators#distinct(Iterable)
-     * @see Iterators#distinctBy(Iterator, Function)
-     * @see Iterators#distinctBy(Iterable, Function)
-     */
-    public static <T, E extends Exception> List<T> distinctBy(final Iterator<? extends T> iter, final Throwables.Function<? super T, ?, E> keyMapper) throws E {
-        return distinctBy(iter, keyMapper, Suppliers.ofList());
-    }
-
-    /**
-     * Distinct by the value mapped from <code>keyMapper</code>.
-     *
-     * Mostly it's designed for one-step operation to complete the operation in one step.
-     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
-     *
-     * @param <T>
-     * @param <C>
-     * @param <E>
-     * @param iter
-     * @param keyMapper don't change value of the input parameter.
-     * @param supplier
-     * @return
-     * @throws E the e
-     * @see Iterators#distinct(Iterator)
-     * @see Iterators#distinct(Iterable)
-     * @see Iterators#distinctBy(Iterator, Function)
-     * @see Iterators#distinctBy(Iterable, Function)
-     */
-    public static <T, C extends Collection<T>, E extends Exception> C distinctBy(final Iterator<? extends T> iter,
-            final Throwables.Function<? super T, ?, E> keyMapper, final Supplier<C> supplier) throws E {
-        if (iter == null) {
-            return supplier.get();
-        }
-
-        final C result = supplier.get();
-        final Set<Object> set = new HashSet<>();
-
-        T next = null;
-
-        while (iter.hasNext()) {
-            next = iter.next();
-
-            if (set.add(hashKey(keyMapper.apply(next)))) {
-                result.add(next);
-            }
-        }
-
-        return result;
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param <E>
-     * @param a
-     * @param filter
-     * @return
-     * @throws IllegalArgumentException
-     * @throws E the e
-     */
-    public static <T, E extends Exception> boolean allMatch(final T[] a, final Throwables.Predicate<? super T, E> filter) throws IllegalArgumentException, E {
-        checkArgNotNull(filter, "filter");
-
-        if (isEmpty(a)) {
-            return true;
-        }
-
-        for (T e : a) {
-            if (!filter.test(e)) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param <E>
-     * @param c
-     * @param filter
-     * @return
-     * @throws IllegalArgumentException
-     * @throws E the e
-     */
-    public static <T, E extends Exception> boolean allMatch(final Iterable<? extends T> c, final Throwables.Predicate<? super T, E> filter)
-            throws IllegalArgumentException, E {
-        checkArgNotNull(filter, "filter");
-
-        if (c == null) {
-            return true;
-        }
-
-        for (T e : c) {
-            if (!filter.test(e)) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param <E>
-     * @param iter
-     * @param filter
-     * @return
-     * @throws IllegalArgumentException
-     * @throws E the e
-     */
-    public static <T, E extends Exception> boolean allMatch(final Iterator<? extends T> iter, final Throwables.Predicate<? super T, E> filter)
-            throws IllegalArgumentException, E {
-        checkArgNotNull(filter, "filter");
-
-        if (iter == null) {
-            return true;
-        }
-
-        while (iter.hasNext()) {
-            if (!filter.test(iter.next())) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param <E>
-     * @param a
-     * @param filter
-     * @return
-     * @throws IllegalArgumentException
-     * @throws E the e
-     */
-    public static <T, E extends Exception> boolean anyMatch(final T[] a, final Throwables.Predicate<? super T, E> filter) throws IllegalArgumentException, E {
-        checkArgNotNull(filter, "filter");
-
-        if (isEmpty(a)) {
-            return false;
-        }
-
-        for (T e : a) {
-            if (filter.test(e)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param <E>
-     * @param c
-     * @param filter
-     * @return
-     * @throws IllegalArgumentException
-     * @throws E the e
-     */
-    public static <T, E extends Exception> boolean anyMatch(final Iterable<? extends T> c, final Throwables.Predicate<? super T, E> filter)
-            throws IllegalArgumentException, E {
-        checkArgNotNull(filter, "filter");
-
-        if (c == null) {
-            return false;
-        }
-
-        for (T e : c) {
-            if (filter.test(e)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param <E>
-     * @param iter
-     * @param filter
-     * @return
-     * @throws IllegalArgumentException
-     * @throws E the e
-     */
-    public static <T, E extends Exception> boolean anyMatch(final Iterator<? extends T> iter, final Throwables.Predicate<? super T, E> filter)
-            throws IllegalArgumentException, E {
-        checkArgNotNull(filter, "filter");
-
-        if (iter == null) {
-            return false;
-        }
-
-        while (iter.hasNext()) {
-            if (filter.test(iter.next())) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param <E>
-     * @param a
-     * @param filter
-     * @return
-     * @throws IllegalArgumentException
-     * @throws E the e
-     */
-    public static <T, E extends Exception> boolean noneMatch(final T[] a, final Throwables.Predicate<? super T, E> filter) throws IllegalArgumentException, E {
-        checkArgNotNull(filter, "filter");
-
-        if (isEmpty(a)) {
-            return true;
-        }
-
-        for (T e : a) {
-            if (filter.test(e)) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param <E>
-     * @param c
-     * @param filter
-     * @return
-     * @throws IllegalArgumentException
-     * @throws E the e
-     */
-    public static <T, E extends Exception> boolean noneMatch(final Iterable<? extends T> c, final Throwables.Predicate<? super T, E> filter)
-            throws IllegalArgumentException, E {
-        checkArgNotNull(filter, "filter");
-
-        if (c == null) {
-            return true;
-        }
-
-        for (T e : c) {
-            if (filter.test(e)) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param <E>
-     * @param iter
-     * @param filter
-     * @return
-     * @throws IllegalArgumentException
-     * @throws E the e
-     */
-    public static <T, E extends Exception> boolean noneMatch(final Iterator<? extends T> iter, final Throwables.Predicate<? super T, E> filter)
-            throws IllegalArgumentException, E {
-        checkArgNotNull(filter, "filter");
-
-        if (iter == null) {
-            return true;
-        }
-
-        while (iter.hasNext()) {
-            if (filter.test(iter.next())) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param <E>
-     * @param a
-     * @param atLeast
-     * @param atMost
-     * @param filter
-     * @return
-     * @throws E the e
-     */
-    public static <T, E extends Exception> boolean nMatch(final T[] a, final int atLeast, final int atMost, final Throwables.Predicate<? super T, E> filter)
-            throws E {
-        checkArgNotNegative(atLeast, "atLeast"); //NOSONAR
-        checkArgNotNegative(atMost, "atMost"); //NOSONAR
-        checkArgument(atLeast <= atMost, "'atLeast' must be <= 'atMost'"); //NOSONAR
-        checkArgNotNull(filter, "filter");
-
-        if (isEmpty(a)) {
-            return atLeast == 0;
-        }
-
-        final int len = len(a);
-
-        if (len < atLeast) {
-            return false;
-        }
-
-        long cnt = 0;
-
-        for (int i = 0; i < len; i++) {
-            if (filter.test(a[i]) && (++cnt > atMost)) {
-                return false;
-            }
-        }
-
-        return cnt >= atLeast && cnt <= atMost;
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param <E>
-     * @param c
-     * @param atLeast
-     * @param atMost
-     * @param filter
-     * @return
-     * @throws IllegalArgumentException
-     * @throws E the e
-     */
-    public static <T, E extends Exception> boolean nMatch(final Iterable<? extends T> c, final int atLeast, final int atMost,
-            final Throwables.Predicate<? super T, E> filter) throws IllegalArgumentException, E {
-        checkArgNotNegative(atLeast, "atLeast");
-        checkArgNotNegative(atMost, "atMost");
-        checkArgument(atLeast <= atMost, "'atLeast' must be <= 'atMost'");
-        checkArgNotNull(filter, "filter");
-
-        if (c == null) {
-            return atLeast == 0;
-        }
-
-        return nMatch(c.iterator(), atLeast, atMost, filter);
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param <E>
-     * @param iter
-     * @param atLeast
-     * @param atMost
-     * @param filter
-     * @return
-     * @throws IllegalArgumentException
-     * @throws E the e
-     */
-    public static <T, E extends Exception> boolean nMatch(final Iterator<? extends T> iter, final int atLeast, final int atMost,
-            final Throwables.Predicate<? super T, E> filter) throws IllegalArgumentException, E {
-        checkArgNotNegative(atLeast, "atLeast");
-        checkArgNotNegative(atMost, "atMost");
-        checkArgument(atLeast <= atMost, "'atLeast' must be <= 'atMost'");
-        checkArgNotNull(filter, "filter");
-
-        if (iter == null) {
-            return atLeast == 0;
-        }
-
-        long cnt = 0;
-
-        while (iter.hasNext()) {
-            if (filter.test(iter.next()) && (++cnt > atMost)) {
-                return false;
-            }
-        }
-
-        return cnt >= atLeast && cnt <= atMost;
-    }
-
-    /**
-     *
-     *
-     * @param a
-     * @return
-     */
-    public static boolean allTrue(final boolean[] a) {
-        if (isEmpty(a)) {
-            return true;
-        }
-
-        for (boolean b : a) {
-            if (!b) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    /**
-     *
-     *
-     * @param a
-     * @return
-     */
-    public static boolean allFalse(final boolean[] a) {
-        if (isEmpty(a)) {
-            return true;
-        }
-
-        for (boolean b : a) {
-            if (b) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    /**
-     *
-     *
-     * @param a
-     * @return
-     */
-    public static boolean anyTrue(final boolean[] a) {
-        if (isEmpty(a)) {
-            return false;
-        }
-
-        for (boolean b : a) {
-            if (b) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     *
-     *
-     * @param a
-     * @return
-     */
-    public static boolean anyFalse(final boolean[] a) {
-        if (isEmpty(a)) {
-            return false;
-        }
-
-        for (boolean b : a) {
-            if (!b) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     * Mostly it's designed for one-step operation to complete the operation in one step.
-     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
-     *
-     * @param <E>
-     * @param a
-     * @param filter
-     * @return
-     * @throws IllegalArgumentException
-     * @throws IndexOutOfBoundsException
-     * @throws E the e
-     */
-    public static <E extends Exception> int count(final boolean[] a, final Throwables.BooleanPredicate<E> filter)
-            throws IllegalArgumentException, IndexOutOfBoundsException, E {
-        checkArgNotNull(filter, "filter");
-
-        if (isEmpty(a)) {
-            return 0;
-        }
-
-        return count(a, 0, a.length, filter);
-    }
-
-    /**
-     * Mostly it's designed for one-step operation to complete the operation in one step.
-     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
-     *
-     * @param <E>
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param filter
-     * @return
-     * @throws E the e
-     */
-    public static <E extends Exception> int count(final boolean[] a, final int fromIndex, final int toIndex, final Throwables.BooleanPredicate<E> filter)
-            throws E {
-        checkFromToIndex(fromIndex, toIndex, len(a));
-        checkArgNotNull(filter, "filter");
-
-        if (isEmpty(a) || fromIndex == toIndex) {
-            return 0;
-        }
-
-        int count = 0;
-
-        for (int i = fromIndex; i < toIndex; i++) {
-            if (filter.test(a[i])) {
-                count++;
-            }
-        }
-
-        return count;
-    }
-
-    /**
-     * Mostly it's designed for one-step operation to complete the operation in one step.
-     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
-     *
-     * @param <E>
-     * @param a
-     * @param filter
-     * @return
-     * @throws IllegalArgumentException
-     * @throws E the e
-     */
-    public static <E extends Exception> int count(final char[] a, final Throwables.CharPredicate<E> filter) throws IllegalArgumentException, E {
-        checkArgNotNull(filter, "filter");
-
-        if (isEmpty(a)) {
-            return 0;
-        }
-
-        return count(a, 0, a.length, filter);
-    }
-
-    /**
-     * Mostly it's designed for one-step operation to complete the operation in one step.
-     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
-     *
-     * @param <E>
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param filter
-     * @return
-     * @throws IllegalArgumentException
-     * @throws IndexOutOfBoundsException
-     * @throws E the e
-     */
-    public static <E extends Exception> int count(final char[] a, final int fromIndex, final int toIndex, final Throwables.CharPredicate<E> filter)
-            throws IllegalArgumentException, IndexOutOfBoundsException, E {
-        checkFromToIndex(fromIndex, toIndex, len(a));
-        checkArgNotNull(filter, "filter");
-
-        if (isEmpty(a) || fromIndex == toIndex) {
-            return 0;
-        }
-
-        int count = 0;
-
-        for (int i = fromIndex; i < toIndex; i++) {
-            if (filter.test(a[i])) {
-                count++;
-            }
-        }
-
-        return count;
-    }
-
-    /**
-     * Mostly it's designed for one-step operation to complete the operation in one step.
-     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
-     *
-     * @param <E>
-     * @param a
-     * @param filter
-     * @return
-     * @throws IllegalArgumentException
-     * @throws E the e
-     */
-    public static <E extends Exception> int count(final byte[] a, final Throwables.BytePredicate<E> filter) throws IllegalArgumentException, E {
-        checkArgNotNull(filter, "filter");
-
-        if (isEmpty(a)) {
-            return 0;
-        }
-
-        return count(a, 0, a.length, filter);
-    }
-
-    /**
-     * Mostly it's designed for one-step operation to complete the operation in one step.
-     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
-     *
-     * @param <E>
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param filter
-     * @return
-     * @throws IllegalArgumentException
-     * @throws IndexOutOfBoundsException
-     * @throws E the e
-     */
-    public static <E extends Exception> int count(final byte[] a, final int fromIndex, final int toIndex, final Throwables.BytePredicate<E> filter)
-            throws IllegalArgumentException, IndexOutOfBoundsException, E {
-        checkFromToIndex(fromIndex, toIndex, len(a));
-        checkArgNotNull(filter, "filter");
-
-        if (isEmpty(a) || fromIndex == toIndex) {
-            return 0;
-        }
-
-        int count = 0;
-
-        for (int i = fromIndex; i < toIndex; i++) {
-            if (filter.test(a[i])) {
-                count++;
-            }
-        }
-
-        return count;
-    }
-
-    /**
-     * Mostly it's designed for one-step operation to complete the operation in one step.
-     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
-     *
-     * @param <E>
-     * @param a
-     * @param filter
-     * @return
-     * @throws IllegalArgumentException
-     * @throws E the e
-     */
-    public static <E extends Exception> int count(final short[] a, final Throwables.ShortPredicate<E> filter) throws IllegalArgumentException, E {
-        checkArgNotNull(filter, "filter");
-
-        if (isEmpty(a)) {
-            return 0;
-        }
-
-        return count(a, 0, a.length, filter);
-    }
-
-    /**
-     * Mostly it's designed for one-step operation to complete the operation in one step.
-     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
-     *
-     * @param <E>
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param filter
-     * @return
-     * @throws IllegalArgumentException
-     * @throws IndexOutOfBoundsException
-     * @throws E the e
-     */
-    public static <E extends Exception> int count(final short[] a, final int fromIndex, final int toIndex, final Throwables.ShortPredicate<E> filter)
-            throws IllegalArgumentException, IndexOutOfBoundsException, E {
-        checkFromToIndex(fromIndex, toIndex, len(a));
-        checkArgNotNull(filter, "filter");
-
-        if (isEmpty(a) || fromIndex == toIndex) {
-            return 0;
-        }
-
-        int count = 0;
-
-        for (int i = fromIndex; i < toIndex; i++) {
-            if (filter.test(a[i])) {
-                count++;
-            }
-        }
-
-        return count;
-    }
-
-    /**
-     * Mostly it's designed for one-step operation to complete the operation in one step.
-     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
-     *
-     * @param <E>
-     * @param a
-     * @param filter
-     * @return
-     * @throws IllegalArgumentException
-     * @throws E the e
-     */
-    public static <E extends Exception> int count(final int[] a, final Throwables.IntPredicate<E> filter) throws IllegalArgumentException, E {
-        checkArgNotNull(filter, "filter");
-
-        if (isEmpty(a)) {
-            return 0;
-        }
-
-        return count(a, 0, a.length, filter);
-    }
-
-    /**
-     * Mostly it's designed for one-step operation to complete the operation in one step.
-     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
-     *
-     * @param <E>
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param filter
-     * @return
-     * @throws IllegalArgumentException
-     * @throws IndexOutOfBoundsException
-     * @throws E the e
-     */
-    public static <E extends Exception> int count(final int[] a, final int fromIndex, final int toIndex, final Throwables.IntPredicate<E> filter)
-            throws IllegalArgumentException, IndexOutOfBoundsException, E {
-        checkFromToIndex(fromIndex, toIndex, len(a));
-        checkArgNotNull(filter, "filter");
-
-        if (isEmpty(a) || fromIndex == toIndex) {
-            return 0;
-        }
-
-        int count = 0;
-
-        for (int i = fromIndex; i < toIndex; i++) {
-            if (filter.test(a[i])) {
-                count++;
-            }
-        }
-
-        return count;
-    }
-
-    /**
-     * Mostly it's designed for one-step operation to complete the operation in one step.
-     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
-     *
-     * @param <E>
-     * @param a
-     * @param filter
-     * @return
-     * @throws IllegalArgumentException
-     * @throws E the e
-     */
-    public static <E extends Exception> int count(final long[] a, final Throwables.LongPredicate<E> filter) throws IllegalArgumentException, E {
-        checkArgNotNull(filter, "filter");
-
-        if (isEmpty(a)) {
-            return 0;
-        }
-
-        return count(a, 0, a.length, filter);
-    }
-
-    /**
-     * Mostly it's designed for one-step operation to complete the operation in one step.
-     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
-     *
-     * @param <E>
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param filter
-     * @return
-     * @throws IllegalArgumentException
-     * @throws IndexOutOfBoundsException
-     * @throws E the e
-     */
-    public static <E extends Exception> int count(final long[] a, final int fromIndex, final int toIndex, final Throwables.LongPredicate<E> filter)
-            throws IllegalArgumentException, IndexOutOfBoundsException, E {
-        checkFromToIndex(fromIndex, toIndex, len(a));
-        checkArgNotNull(filter, "filter");
-
-        if (isEmpty(a) || fromIndex == toIndex) {
-            return 0;
-        }
-
-        int count = 0;
-
-        for (int i = fromIndex; i < toIndex; i++) {
-            if (filter.test(a[i])) {
-                count++;
-            }
-        }
-
-        return count;
-    }
-
-    /**
-     * Mostly it's designed for one-step operation to complete the operation in one step.
-     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
-     *
-     * @param <E>
-     * @param a
-     * @param filter
-     * @return
-     * @throws IllegalArgumentException
-     * @throws E the e
-     */
-    public static <E extends Exception> int count(final float[] a, final Throwables.FloatPredicate<E> filter) throws IllegalArgumentException, E {
-        checkArgNotNull(filter, "filter");
-
-        if (isEmpty(a)) {
-            return 0;
-        }
-
-        return count(a, 0, a.length, filter);
-    }
-
-    /**
-     * Mostly it's designed for one-step operation to complete the operation in one step.
-     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
-     *
-     * @param <E>
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param filter
-     * @return
-     * @throws IllegalArgumentException
-     * @throws IndexOutOfBoundsException
-     * @throws E the e
-     */
-    public static <E extends Exception> int count(final float[] a, final int fromIndex, final int toIndex, final Throwables.FloatPredicate<E> filter)
-            throws IllegalArgumentException, IndexOutOfBoundsException, E {
-        checkFromToIndex(fromIndex, toIndex, len(a));
-        checkArgNotNull(filter, "filter");
-
-        if (isEmpty(a) || fromIndex == toIndex) {
-            return 0;
-        }
-
-        int count = 0;
-
-        for (int i = fromIndex; i < toIndex; i++) {
-            if (filter.test(a[i])) {
-                count++;
-            }
-        }
-
-        return count;
-    }
-
-    /**
-     * Mostly it's designed for one-step operation to complete the operation in one step.
-     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
-     *
-     * @param <E>
-     * @param a
-     * @param filter
-     * @return
-     * @throws IllegalArgumentException
-     * @throws IndexOutOfBoundsException
-     * @throws E the e
-     */
-    public static <E extends Exception> int count(final double[] a, final Throwables.DoublePredicate<E> filter)
-            throws IllegalArgumentException, IndexOutOfBoundsException, E {
-        checkArgNotNull(filter, "filter");
-
-        if (isEmpty(a)) {
-            return 0;
-        }
-
-        return count(a, 0, a.length, filter);
-    }
-
-    /**
-     * Mostly it's designed for one-step operation to complete the operation in one step.
-     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
-     *
-     * @param <E>
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param filter
-     * @return
-     * @throws E the e
-     */
-    public static <E extends Exception> int count(final double[] a, final int fromIndex, final int toIndex, final Throwables.DoublePredicate<E> filter)
-            throws E {
-        checkFromToIndex(fromIndex, toIndex, len(a));
-        checkArgNotNull(filter, "filter");
-
-        if (isEmpty(a) || fromIndex == toIndex) {
-            return 0;
-        }
-
-        int count = 0;
-
-        for (int i = fromIndex; i < toIndex; i++) {
-            if (filter.test(a[i])) {
-                count++;
-            }
-        }
-
-        return count;
-    }
-
-    /**
-     * Mostly it's designed for one-step operation to complete the operation in one step.
-     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
-     *
-     * @param <T>
-     * @param <E>
-     * @param a
-     * @param filter
-     * @return
-     * @throws IllegalArgumentException
-     * @throws IndexOutOfBoundsException
-     * @throws E the e
-     */
-    public static <T, E extends Exception> int count(final T[] a, final Throwables.Predicate<? super T, E> filter)
-            throws IllegalArgumentException, IndexOutOfBoundsException, E {
-        checkArgNotNull(filter, "filter");
-
-        if (isEmpty(a)) {
-            return 0;
-        }
-
-        return count(a, 0, a.length, filter);
-    }
-
-    /**
-     * Mostly it's designed for one-step operation to complete the operation in one step.
-     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
-     *
-     * @param <T>
-     * @param <E>
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param filter
-     * @return
-     * @throws E the e
-     */
-    public static <T, E extends Exception> int count(final T[] a, final int fromIndex, final int toIndex, final Throwables.Predicate<? super T, E> filter)
-            throws E {
-        checkFromToIndex(fromIndex, toIndex, len(a));
-        checkArgNotNull(filter, "filter");
-
-        if (isEmpty(a) || fromIndex == toIndex) {
-            return 0;
-        }
-
-        int count = 0;
-
-        for (int i = fromIndex; i < toIndex; i++) {
-            if (filter.test(a[i])) {
-                count++;
-            }
-        }
-
-        return count;
-    }
-
-    /**
-     * Mostly it's designed for one-step operation to complete the operation in one step.
-     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
-     *
-     * @param <T>
-     * @param <E>
-     * @param c
-     * @param fromIndex
-     * @param toIndex
-     * @param filter
-     * @return
-     * @throws IllegalArgumentException
-     * @throws IndexOutOfBoundsException
-     * @throws E the e
-     */
-    public static <T, E extends Exception> int count(final Collection<? extends T> c, final int fromIndex, final int toIndex,
-            final Throwables.Predicate<? super T, E> filter) throws IllegalArgumentException, IndexOutOfBoundsException, E {
-        checkFromToIndex(fromIndex, toIndex, size(c));
-        checkArgNotNull(filter, "filter");
-
-        if ((isEmpty(c) && fromIndex == 0 && toIndex == 0) || (fromIndex == toIndex && fromIndex < c.size())) {
-            return 0;
-        }
-
-        int count = 0;
-
-        if (c instanceof List && c instanceof RandomAccess) {
-            final List<T> list = (List<T>) c;
-
-            for (int i = fromIndex; i < toIndex; i++) {
-                if (filter.test(list.get(i))) {
-                    count++;
-                }
-            }
-        } else {
-            int idx = 0;
-
-            for (T e : c) {
-                if (idx++ < fromIndex) {
-                    continue;
-                }
-
-                if (filter.test(e)) {
-                    count++;
-                }
-
-                if (idx >= toIndex) {
-                    break;
-                }
-            }
-        }
-
-        return count;
-    }
-
-    /**
-     * Mostly it's designed for one-step operation to complete the operation in one step.
-     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
-     *
-     * @param <T>
-     * @param <E>
-     * @param c
-     * @param filter
-     * @return
-     * @throws IllegalArgumentException
-     * @throws E the e
-     */
-    public static <T, E extends Exception> int count(final Iterable<? extends T> c, final Throwables.Predicate<? super T, E> filter)
-            throws IllegalArgumentException, E {
-        checkArgNotNull(filter, "filter");
-
-        if (c == null) {
-            return 0;
-        }
-
-        int count = 0;
-
-        for (T e : c) {
-            if (filter.test(e)) {
-                count++;
-            }
-        }
-
-        return count;
-    }
-
-    /**
-     *
-     *
-     * @param iter
-     * @return
-     * @throws IllegalArgumentException
-     * @throws ArithmeticException if the total {@code count} overflows an {@code int}.
-     */
-    public static int count(final Iterator<?> iter) throws IllegalArgumentException, ArithmeticException {
-        if (iter == null) {
-            return 0;
-        }
-
-        long res = 0;
-
-        while (iter.hasNext()) {
-            iter.next();
-            res++;
-        }
-
-        return Numbers.toIntExact(res);
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param <E>
-     * @param iter
-     * @param filter
-     * @return
-     * @throws ArithmeticException if the total matched {@code count} overflows an {@code int}.
-     * @throws E
-     */
-    public static <T, E extends Exception> int count(final Iterator<? extends T> iter, final Throwables.Predicate<? super T, E> filter)
-            throws ArithmeticException, E {
-        checkArgNotNull(filter, "filter");
-
-        if (iter == null) {
-            return 0;
-        }
-
-        long res = 0;
-
-        while (iter.hasNext()) {
-            if (filter.test(iter.next())) {
-                res++;
-            }
-        }
-
-        return Numbers.toIntExact(res);
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param <E>
-     * @param a
-     * @param b
-     * @param nextSelector
-     * @return
-     * @throws E the e
-     */
-    public static <T, E extends Exception> List<T> merge(final T[] a, final T[] b,
-            final Throwables.BiFunction<? super T, ? super T, MergeResult, E> nextSelector) throws E {
-        if (isEmpty(a)) {
-            return isEmpty(b) ? new ArrayList<>() : asList(b);
-        } else if (isEmpty(b)) {
-            return asList(a);
-        }
-
-        final List<T> result = new ArrayList<>(a.length + b.length);
-        final int lenA = a.length;
-        final int lenB = b.length;
-        int cursorA = 0;
-        int cursorB = 0;
-
-        while (cursorA < lenA || cursorB < lenB) {
-            if (cursorA < lenA) {
-                if (cursorB < lenB) {
-                    if (nextSelector.apply(a[cursorA], b[cursorB]) == MergeResult.TAKE_FIRST) {
-                        result.add(a[cursorA++]);
-                    } else {
-                        result.add(b[cursorB++]);
-                    }
-                } else {
-                    result.add(a[cursorA++]);
-                }
-            } else {
-                result.add(b[cursorB++]);
-            }
-        }
-
-        return result;
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param <E>
-     * @param a
-     * @param b
-     * @param nextSelector
-     * @return
-     * @throws E the e
-     */
-    public static <T, E extends Exception> List<T> merge(final Iterable<? extends T> a, final Iterable<? extends T> b,
-            final Throwables.BiFunction<? super T, ? super T, MergeResult, E> nextSelector) throws E {
-        return merge(N.asList(a, b), nextSelector, Factory.ofList());
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param <E>
-     * @param c
-     * @param nextSelector
-     * @return
-     * @throws E the e
-     */
-    public static <T, E extends Exception> List<T> merge(final Collection<? extends Iterable<? extends T>> c,
-            final Throwables.BiFunction<? super T, ? super T, MergeResult, E> nextSelector) throws E {
-        return merge(c, nextSelector, Factory.ofList());
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param <C>
-     * @param <E>
-     * @param c
-     * @param nextSelector
-     * @param supplier
-     * @return
-     * @throws E the e
-     * @
-     */
-    public static <T, C extends Collection<T>, E extends Exception> C merge(final Collection<? extends Iterable<? extends T>> c,
-            final Throwables.BiFunction<? super T, ? super T, MergeResult, E> nextSelector, final IntFunction<? extends C> supplier) throws E {
-        if (N.isEmpty(c)) {
-            return supplier.apply(0);
-        } else if (c.size() == 1) {
-            final Iterable<? extends T> a = N.firstOrNullIfEmpty(c);
-            return a == null ? supplier.apply(0) : N.toCollection(a, supplier);
-        } else if (c.size() == 2) {
-            final Iterator<? extends Iterable<? extends T>> iter = c.iterator();
-            final Iterable<? extends T> a = iter.next();
-            final Iterable<? extends T> b = iter.next();
-
-            if (a == null) {
-                return b == null ? supplier.apply(0) : N.toCollection(b, supplier);
-            } else if (b == null) {
-                return N.toCollection(a, supplier);
-            }
-
-            final C ret = supplier.apply(getSizeOrDefault(a, 0) + getSizeOrDefault(b, 0));
-            final Iterator<? extends T> iterA = a.iterator();
-            final Iterator<? extends T> iterB = b.iterator();
-
-            T nextA = null;
-            T nextB = null;
-            boolean hasNextA = false;
-            boolean hasNextB = false;
-
-            while (hasNextA || hasNextB || iterA.hasNext() || iterB.hasNext()) {
-                if (hasNextA) {
-                    if (iterB.hasNext()) {
-                        if (nextSelector.apply(nextA, (nextB = iterB.next())) == MergeResult.TAKE_FIRST) {
-                            hasNextA = false;
-                            hasNextB = true;
-                            ret.add(nextA);
-                        } else {
-                            ret.add(nextB);
-                        }
-                    } else {
-                        hasNextA = false;
-                        ret.add(nextA);
-                    }
-                } else if (hasNextB) {
-                    if (iterA.hasNext()) {
-                        if (nextSelector.apply((nextA = iterA.next()), nextB) == MergeResult.TAKE_FIRST) {
-                            ret.add(nextA);
-                        } else {
-                            hasNextA = true;
-                            hasNextB = false;
-                            ret.add(nextB);
-                        }
-                    } else {
-                        hasNextB = false;
-                        ret.add(nextB);
-                    }
-                } else if (iterA.hasNext()) {
-                    if (iterB.hasNext()) {
-                        if (nextSelector.apply((nextA = iterA.next()), (nextB = iterB.next())) == MergeResult.TAKE_FIRST) {
-                            hasNextB = true;
-                            ret.add(nextA);
-                        } else {
-                            hasNextA = true;
-                            ret.add(nextB);
-                        }
-                    } else {
-                        ret.add(iterA.next());
-                    }
-                } else {
-                    ret.add(iterB.next());
-                }
-            }
-
-            return ret;
-        } else {
-            int totalSize = 0;
-            Throwables.Iterator<T, E> mergedIter = Throwables.Iterator.empty();
-            Iterator<? extends T> iter = null;
-
-            for (Iterable<? extends T> e : c) {
-                iter = e == null ? null : e.iterator();
-
-                if (iter == null || iter.hasNext() == false) {
-                    continue;
-                }
-
-                totalSize += getSizeOrDefault(e, 0);
-
-                final Throwables.Iterator<T, E> iterA = mergedIter;
-                final Iterator<? extends T> iterB = iter;
-
-                mergedIter = new Throwables.Iterator<>() {
-                    private T nextA = null;
-                    private T nextB = null;
-                    private boolean hasNextA = false;
-                    private boolean hasNextB = false;
-
-                    @Override
-                    public boolean hasNext() throws E {
-                        return hasNextA || hasNextB || iterA.hasNext() || iterB.hasNext();
-                    }
-
-                    @Override
-                    public T next() throws E {
-                        if (hasNextA) {
-                            if (iterB.hasNext()) {
-                                if (nextSelector.apply(nextA, (nextB = iterB.next())) == MergeResult.TAKE_FIRST) {
-                                    hasNextA = false;
-                                    hasNextB = true;
-                                    return nextA;
-                                } else {
-                                    return nextB;
-                                }
-                            } else {
-                                hasNextA = false;
-                                return nextA;
-                            }
-                        } else if (hasNextB) {
-                            if (iterA.hasNext()) {
-                                if (nextSelector.apply((nextA = iterA.next()), nextB) == MergeResult.TAKE_FIRST) {
-                                    return nextA;
-                                } else {
-                                    hasNextA = true;
-                                    hasNextB = false;
-                                    return nextB;
-                                }
-                            } else {
-                                hasNextB = false;
-                                return nextB;
-                            }
-                        } else if (iterA.hasNext()) {
-                            if (iterB.hasNext()) {
-                                if (nextSelector.apply((nextA = iterA.next()), (nextB = iterB.next())) == MergeResult.TAKE_FIRST) {
-                                    hasNextB = true;
-                                    return nextA;
-                                } else {
-                                    hasNextA = true;
-                                    return nextB;
-                                }
-                            } else {
-                                return iterA.next();
-                            }
-                        } else {
-                            return iterB.next();
-                        }
-                    }
-                };
-            }
-
-            final C ret = supplier.apply(totalSize);
-
-            while (mergedIter.hasNext()) {
-                ret.add(mergedIter.next());
-            }
-
-            return ret;
-        }
-    }
-
-    /**
-     *
-     *
-     * @param <A>
-     * @param <B>
-     * @param <R>
-     * @param <E>
-     * @param a
-     * @param b
-     * @param zipFunction
-     * @return
-     * @throws IllegalArgumentException
-     * @throws E the e
-     */
-    public static <A, B, R, E extends Exception> List<R> zip(final A[] a, final B[] b,
-            final Throwables.BiFunction<? super A, ? super B, ? extends R, E> zipFunction) throws IllegalArgumentException, E {
-        checkArgNotNull(zipFunction);
-
-        if (isEmpty(a) || isEmpty(b)) {
-            return new ArrayList<>();
-        }
-
-        final int minLen = min(a.length, b.length);
-        final List<R> result = new ArrayList<>(minLen);
-
-        for (int i = 0; i < minLen; i++) {
-            result.add(zipFunction.apply(a[i], b[i]));
-        }
-
-        return result;
-    }
-
-    /**
-     *
-     *
-     * @param <A>
-     * @param <B>
-     * @param <R>
-     * @param <E>
-     * @param a
-     * @param b
-     * @param zipFunction
-     * @return
-     * @throws IllegalArgumentException
-     * @throws E the e
-     */
-    public static <A, B, R, E extends Exception> List<R> zip(final Iterable<A> a, final Iterable<B> b,
-            final Throwables.BiFunction<? super A, ? super B, ? extends R, E> zipFunction) throws IllegalArgumentException, E {
-        checkArgNotNull(zipFunction);
-
-        if (a == null || b == null) {
-            return new ArrayList<>();
-        }
-
-        final Iterator<A> iterA = a.iterator();
-        final Iterator<B> iterB = b.iterator();
-        final int minLen = min(getSizeOrDefault(a, 0), getSizeOrDefault(b, 0));
-        final List<R> result = new ArrayList<>(minLen);
-
-        while (iterA.hasNext() && iterB.hasNext()) {
-            result.add(zipFunction.apply(iterA.next(), iterB.next()));
-        }
-
-        return result;
-    }
-
-    /**
-     *
-     *
-     * @param <A>
-     * @param <B>
-     * @param <C>
-     * @param <R>
-     * @param <E>
-     * @param a
-     * @param b
-     * @param c
-     * @param zipFunction
-     * @return
-     * @throws IllegalArgumentException
-     * @throws E the e
-     */
-    public static <A, B, C, R, E extends Exception> List<R> zip(final A[] a, final B[] b, final C[] c,
-            final Throwables.TriFunction<? super A, ? super B, ? super C, ? extends R, E> zipFunction) throws IllegalArgumentException, E {
-        checkArgNotNull(zipFunction);
-
-        if (isEmpty(a) || isEmpty(b) || isEmpty(c)) {
-            return new ArrayList<>();
-        }
-
-        final int minLen = min(a.length, b.length, c.length);
-        final List<R> result = new ArrayList<>(minLen);
-
-        for (int i = 0; i < minLen; i++) {
-            result.add(zipFunction.apply(a[i], b[i], c[i]));
-        }
-
-        return result;
-    }
-
-    /**
-     *
-     *
-     * @param <A>
-     * @param <B>
-     * @param <C>
-     * @param <R>
-     * @param <E>
-     * @param a
-     * @param b
-     * @param c
-     * @param zipFunction
-     * @return
-     * @throws IllegalArgumentException
-     * @throws E the e
-     */
-    public static <A, B, C, R, E extends Exception> List<R> zip(final Iterable<A> a, final Iterable<B> b, final Iterable<C> c,
-            final Throwables.TriFunction<? super A, ? super B, ? super C, ? extends R, E> zipFunction) throws IllegalArgumentException, E {
-        checkArgNotNull(zipFunction);
-
-        if (a == null || b == null || c == null) {
-            return new ArrayList<>();
-        }
-
-        final Iterator<A> iterA = a.iterator();
-        final Iterator<B> iterB = b.iterator();
-        final Iterator<C> iterC = c.iterator();
-        final int minLen = min(getSizeOrDefault(a, 0), getSizeOrDefault(b, 0), getSizeOrDefault(c, 0));
-        final List<R> result = new ArrayList<>(minLen);
-
-        while (iterA.hasNext() && iterB.hasNext() && iterC.hasNext()) {
-            result.add(zipFunction.apply(iterA.next(), iterB.next(), iterC.next()));
-        }
-
-        return result;
-    }
-
-    /**
-     *
-     *
-     * @param <A>
-     * @param <B>
-     * @param <R>
-     * @param <E>
-     * @param a
-     * @param b
-     * @param valueForNoneA
-     * @param valueForNoneB
-     * @param zipFunction
-     * @return
-     * @throws IllegalArgumentException
-     * @throws E the e
-     */
-    public static <A, B, R, E extends Exception> List<R> zip(final A[] a, final B[] b, final A valueForNoneA, final B valueForNoneB,
-            final Throwables.BiFunction<? super A, ? super B, ? extends R, E> zipFunction) throws IllegalArgumentException, E {
-        checkArgNotNull(zipFunction);
-
-        final int lenA = len(a);
-        final int lenB = len(b);
-        final int maxLen = max(lenA, lenB);
-        final List<R> result = new ArrayList<>(maxLen);
-
-        for (int i = 0; i < maxLen; i++) {
-            result.add(zipFunction.apply(i < lenA ? a[i] : valueForNoneA, i < lenB ? b[i] : valueForNoneB));
-        }
-
-        return result;
-    }
-
-    /**
-     *
-     *
-     * @param <A>
-     * @param <B>
-     * @param <R>
-     * @param <E>
-     * @param a
-     * @param b
-     * @param valueForNoneA
-     * @param valueForNoneB
-     * @param zipFunction
-     * @return
-     * @throws IllegalArgumentException
-     * @throws E the e
-     */
-    public static <A, B, R, E extends Exception> List<R> zip(final Iterable<A> a, final Iterable<B> b, final A valueForNoneA, final B valueForNoneB,
-            final Throwables.BiFunction<? super A, ? super B, ? extends R, E> zipFunction) throws IllegalArgumentException, E {
-        checkArgNotNull(zipFunction);
-
-        final Iterator<A> iterA = a == null ? ObjIterator.<A> empty() : a.iterator();
-        final Iterator<B> iterB = b == null ? ObjIterator.<B> empty() : b.iterator();
-        final int lenA = getSizeOrDefault(a, 0);
-        final int lenB = getSizeOrDefault(b, 0);
-        final int maxLen = max(lenA, lenB);
-        final List<R> result = new ArrayList<>(maxLen);
-
-        if (a == null || a instanceof Collection) {
-            if (b == null || b instanceof Collection) {
-                for (int i = 0; i < maxLen; i++) {
-                    result.add(zipFunction.apply(i < lenA ? iterA.next() : valueForNoneA, i < lenB ? iterB.next() : valueForNoneB));
-                }
-            } else {
-                for (int i = 0; i < lenA || iterB.hasNext(); i++) {
-                    result.add(zipFunction.apply(i < lenA ? iterA.next() : valueForNoneA, iterB.hasNext() ? iterB.next() : valueForNoneB));
-                }
-            }
-        } else if (b == null || b instanceof Collection) {
-            for (int i = 0; i < lenB || iterA.hasNext(); i++) {
-                result.add(zipFunction.apply(iterA.hasNext() ? iterA.next() : valueForNoneA, i < lenB ? iterB.next() : valueForNoneB));
-            }
-        } else {
-            while (iterA.hasNext() || iterB.hasNext()) {
-                result.add(zipFunction.apply(iterA.hasNext() ? iterA.next() : valueForNoneA, iterB.hasNext() ? iterB.next() : valueForNoneB));
-            }
-        }
-
-        return result;
-    }
-
-    /**
-     *
-     *
-     * @param <A>
-     * @param <B>
-     * @param <C>
-     * @param <R>
-     * @param <E>
-     * @param a
-     * @param b
-     * @param c
-     * @param valueForNoneA
-     * @param valueForNoneB
-     * @param valueForNoneC
-     * @param zipFunction
-     * @return
-     * @throws IllegalArgumentException
-     * @throws E the e
-     */
-    public static <A, B, C, R, E extends Exception> List<R> zip(final A[] a, final B[] b, final C[] c, final A valueForNoneA, final B valueForNoneB,
-            final C valueForNoneC, final Throwables.TriFunction<? super A, ? super B, ? super C, ? extends R, E> zipFunction)
-            throws IllegalArgumentException, E {
-        checkArgNotNull(zipFunction);
-
-        final int lenA = len(a);
-        final int lenB = len(b);
-        final int lenC = len(c);
-        final int maxLen = max(lenA, lenB, lenC);
-        final List<R> result = new ArrayList<>(maxLen);
-
-        for (int i = 0; i < maxLen; i++) {
-            result.add(zipFunction.apply(i < lenA ? a[i] : valueForNoneA, i < lenB ? b[i] : valueForNoneB, i < lenC ? c[i] : valueForNoneC));
-        }
-
-        return result;
-    }
-
-    /**
-     *
-     *
-     * @param <A>
-     * @param <B>
-     * @param <C>
-     * @param <R>
-     * @param <E>
-     * @param a
-     * @param b
-     * @param c
-     * @param valueForNoneA
-     * @param valueForNoneB
-     * @param valueForNoneC
-     * @param zipFunction
-     * @return
-     * @throws IllegalArgumentException
-     * @throws E the e
-     */
-    public static <A, B, C, R, E extends Exception> List<R> zip(final Iterable<A> a, final Iterable<B> b, final Iterable<C> c, final A valueForNoneA,
-            final B valueForNoneB, final C valueForNoneC, final Throwables.TriFunction<? super A, ? super B, ? super C, ? extends R, E> zipFunction)
-            throws IllegalArgumentException, E {
-        checkArgNotNull(zipFunction);
-
-        final Iterator<A> iterA = a == null ? ObjIterator.<A> empty() : a.iterator();
-        final Iterator<B> iterB = b == null ? ObjIterator.<B> empty() : b.iterator();
-        final Iterator<C> iterC = c == null ? ObjIterator.<C> empty() : c.iterator();
-        final int lenA = getSizeOrDefault(a, 0);
-        final int lenB = getSizeOrDefault(b, 0);
-        final int lenC = getSizeOrDefault(c, 0);
-        final int maxLen = max(lenA, lenB, lenC);
-        final List<R> result = new ArrayList<>(maxLen);
-
-        if (a == null || a instanceof Collection) {
-            if (b == null || b instanceof Collection) {
-                if (c == null || c instanceof Collection) {
-                    for (int i = 0; i < maxLen; i++) {
-                        result.add(zipFunction.apply(i < lenA ? iterA.next() : valueForNoneA, i < lenB ? iterB.next() : valueForNoneB,
-                                i < lenC ? iterC.next() : valueForNoneC));
-                    }
-                } else {
-                    for (int i = 0; i < lenA || i < lenB || iterC.hasNext(); i++) {
-                        result.add(zipFunction.apply(i < lenA ? iterA.next() : valueForNoneA, i < lenB ? iterB.next() : valueForNoneB,
-                                iterC.hasNext() ? iterC.next() : valueForNoneC));
-                    }
-                }
-            } else {
-                if (c == null || c instanceof Collection) {
-                    for (int i = 0; i < lenA || i < lenC || iterB.hasNext(); i++) {
-                        result.add(zipFunction.apply(i < lenA ? iterA.next() : valueForNoneA, iterB.hasNext() ? iterB.next() : valueForNoneB,
-                                i < lenC ? iterC.next() : valueForNoneC));
-                    }
-                } else {
-                    for (int i = 0; i < lenA || iterB.hasNext() || iterC.hasNext(); i++) {
-                        result.add(zipFunction.apply(i < lenA ? iterA.next() : valueForNoneA, iterB.hasNext() ? iterB.next() : valueForNoneB,
-                                iterC.hasNext() ? iterC.next() : valueForNoneC));
-                    }
-                }
-            }
-        } else if (b == null || b instanceof Collection) {
-            if (c == null || c instanceof Collection) {
-                for (int i = 0; i < lenB || i < lenC || iterA.hasNext(); i++) {
-                    result.add(zipFunction.apply(iterA.hasNext() ? iterA.next() : valueForNoneA, i < lenB ? iterB.next() : valueForNoneB,
-                            i < lenC ? iterC.next() : valueForNoneC));
-                }
-            } else {
-                for (int i = 0; i < lenB || iterA.hasNext() || iterC.hasNext(); i++) {
-                    result.add(zipFunction.apply(iterA.hasNext() ? iterA.next() : valueForNoneA, i < lenB ? iterB.next() : valueForNoneB,
-                            iterC.hasNext() ? iterC.next() : valueForNoneC));
-                }
-            }
-        } else {
-            if (c == null || c instanceof Collection) {
-                for (int i = 0; i < lenC || iterA.hasNext() || iterB.hasNext(); i++) {
-                    result.add(zipFunction.apply(iterA.hasNext() ? iterA.next() : valueForNoneA, iterB.hasNext() ? iterB.next() : valueForNoneB,
-                            i < lenC ? iterC.next() : valueForNoneC));
-                }
-            } else {
-                while (iterA.hasNext() || iterB.hasNext() || iterC.hasNext()) {
-                    result.add(zipFunction.apply(iterA.hasNext() ? iterA.next() : valueForNoneA, iterB.hasNext() ? iterB.next() : valueForNoneB,
-                            iterC.hasNext() ? iterC.next() : valueForNoneC));
-                }
-            }
-        }
-
-        return result;
-    }
-
-    //    /**
-    //     *
-    //     * @param <A>
-    //     * @param <B>
-    //     * @param <R>
-    //     * @param a
-    //     * @param b
-    //     * @param zipFunction
-    //     * @return
-    //     * @see {@code Iterators.zip(Iterator, Iterator, BiFunction)}
-    //     */
-    //    public static <A, B, R, E extends Exception> List<R> zip(final Iterator<A> a, final Iterator<B> b,
-    //            final Throwables.BiFunction<? super A, ? super B, ? extends R, E> zipFunction) throws E {
-    //        checkArgNotNull(zipFunction);
-    //
-    //        if (a == null || b == null) {
-    //            return new ArrayList<>();
-    //        }
-    //
-    //        final Iterator<A> iterA = a;
-    //        final Iterator<B> iterB = b;
-    //        final List<R> result = new ArrayList<>(9);
-    //
-    //        while (iterA.hasNext() && iterB.hasNext()) {
-    //            result.add(zipFunction.apply(iterA.next(), iterB.next()));
-    //        }
-    //
-    //        return result;
-    //    }
-    //
-    //    /**
-    //     *
-    //     * @param <A>
-    //     * @param <B>
-    //     * @param <C>
-    //     * @param <R>
-    //     * @param a
-    //     * @param b
-    //     * @param c
-    //     * @param zipFunction
-    //     * @return
-    //     * @see {@code Iterators.zip(Iterator, Iterator, Iterator, TriFunction)}
-    //     */
-    //    public static <A, B, C, R, E extends Exception> List<R> zip(final Iterator<A> a, final Iterator<B> b, final Iterator<C> c,
-    //            final Throwables.TriFunction<? super A, ? super B, ? super C, ? extends R, E> zipFunction) throws E {
-    //        checkArgNotNull(zipFunction);
-    //
-    //        if (a == null || b == null || c == null) {
-    //            return new ArrayList<>();
-    //        }
-    //
-    //        final Iterator<A> iterA = a;
-    //        final Iterator<B> iterB = b;
-    //        final Iterator<C> iterC = c;
-    //        final List<R> result = new ArrayList<>(9);
-    //
-    //        while (iterA.hasNext() && iterB.hasNext() && iterC.hasNext()) {
-    //            result.add(zipFunction.apply(iterA.next(), iterB.next(), iterC.next()));
-    //        }
-    //
-    //        return result;
-    //    }
-    //
-    //    /**
-    //     *
-    //     * @param <A>
-    //     * @param <B>
-    //     * @param <R>
-    //     * @param a
-    //     * @param b
-    //     * @param valueForNoneA
-    //     * @param valueForNoneB
-    //     * @param zipFunction
-    //     * @return
-    //     * @see {@code Iterators.zip(Iterator, Iterator, Object, Object, BiFunction)}
-    //     */
-    //    public static <A, B, R, E extends Exception> List<R> zip(final Iterator<A> a, final Iterator<B> b, final A valueForNoneA, final B valueForNoneB,
-    //            final Throwables.BiFunction<? super A, ? super B, ? extends R, E> zipFunction) throws E {
-    //        checkArgNotNull(zipFunction);
-    //
-    //        final Iterator<A> iterA = a == null ? ObjIterator.<A> empty() : a;
-    //        final Iterator<B> iterB = b == null ? ObjIterator.<B> empty() : b;
-    //
-    //        final List<R> result = new ArrayList<>(9);
-    //        boolean hasA = true;
-    //
-    //        do {
-    //            if (hasA && (hasA = iterA.hasNext())) {
-    //                result.add(zipFunction.apply(iterA.next(), iterB.hasNext() ? iterB.next() : valueForNoneB));
-    //            } else if (iterB.hasNext()) {
-    //                result.add(zipFunction.apply(valueForNoneA, iterB.next()));
-    //            } else {
-    //                break;
-    //            }
-    //        } while (true);
-    //
-    //        return result;
-    //    }
-    //
-    //    /**
-    //     *
-    //     * @param <A>
-    //     * @param <B>
-    //     * @param <C>
-    //     * @param <R>
-    //     * @param a
-    //     * @param b
-    //     * @param c
-    //     * @param valueForNoneA
-    //     * @param valueForNoneB
-    //     * @param valueForNoneC
-    //     * @param zipFunction
-    //     * @return
-    //     * @see {@code Iterators.zip(Iterator, Iterator, Iterator, Object, Object, Object, TriFunction)}
-    //     */
-    //    public static <A, B, C, R, E extends Exception> List<R> zip(final Iterator<A> a, final Iterator<B> b, final Iterator<C> c, final A valueForNoneA,
-    //            final B valueForNoneB, final C valueForNoneC, final Throwables.TriFunction<? super A, ? super B, ? super C, ? extends R, E> zipFunction) throws E {
-    //        checkArgNotNull(zipFunction);
-    //
-    //        final Iterator<A> iterA = a == null ? ObjIterator.<A> empty() : a;
-    //        final Iterator<B> iterB = b == null ? ObjIterator.<B> empty() : b;
-    //        final Iterator<C> iterC = c == null ? ObjIterator.<C> empty() : c;
-    //
-    //        final List<R> result = new ArrayList<>(9);
-    //        boolean hasA = true;
-    //        boolean hasB = true;
-    //
-    //        do {
-    //            if (hasA && (hasA = iterA.hasNext())) {
-    //                result.add(zipFunction.apply(iterA.next(), iterB.hasNext() ? iterB.next() : valueForNoneB, iterC.hasNext() ? iterC.next() : valueForNoneC));
-    //            } else if (hasB && (hasB = iterB.hasNext())) {
-    //                result.add(zipFunction.apply(valueForNoneA, iterB.next(), iterC.hasNext() ? iterC.next() : valueForNoneC));
-    //            } else if (iterC.hasNext()) {
-    //                result.add(zipFunction.apply(valueForNoneA, valueForNoneB, iterC.hasNext() ? iterC.next() : valueForNoneC));
-    //            } else {
-    //                break;
-    //            }
-    //        } while (true);
-    //
-    //        return result;
-    //    }
-
-    /**
-     *
-     *
-     * @param <A>
-     * @param <B>
-     * @param <R>
-     * @param <E>
-     * @param a
-     * @param b
-     * @param zipFunction
-     * @param targetElementType
-     * @return
-     * @throws IllegalArgumentException
-     * @throws E the e
-     */
-    public static <A, B, R, E extends Exception> R[] zip(final A[] a, final B[] b,
-            final Throwables.BiFunction<? super A, ? super B, ? extends R, E> zipFunction, final Class<R> targetElementType)
-            throws IllegalArgumentException, E {
-        checkArgNotNull(zipFunction);
-
-        final int lenA = len(a);
-        final int lenB = len(b);
-        final int minLen = min(lenA, lenB);
-
-        final R[] result = newArray(targetElementType, minLen);
-
-        for (int i = 0; i < minLen; i++) {
-            result[i] = zipFunction.apply(a[i], b[i]);
-        }
-
-        return result;
-    }
-
-    /**
-     *
-     *
-     * @param <A>
-     * @param <B>
-     * @param <R>
-     * @param <E>
-     * @param a
-     * @param b
-     * @param valueForNoneA
-     * @param valueForNoneB
-     * @param zipFunction
-     * @param targetElementType
-     * @return
-     * @throws IllegalArgumentException
-     * @throws E the e
-     */
-    public static <A, B, R, E extends Exception> R[] zip(final A[] a, final B[] b, final A valueForNoneA, final B valueForNoneB,
-            final Throwables.BiFunction<? super A, ? super B, ? extends R, E> zipFunction, final Class<R> targetElementType)
-            throws IllegalArgumentException, E {
-        checkArgNotNull(zipFunction);
-
-        final int lenA = len(a);
-        final int lenB = len(b);
-        final int minLen = min(lenA, lenB);
-        final int maxLen = max(lenA, lenB);
-
-        final R[] result = newArray(targetElementType, maxLen);
-
-        for (int i = 0; i < minLen; i++) {
-            result[i] = zipFunction.apply(a[i], b[i]);
-        }
-
-        if (lenA < maxLen) {
-            for (int i = lenA; i < maxLen; i++) {
-                result[i] = zipFunction.apply(valueForNoneA, b[i]);
-            }
-        } else if (lenB < maxLen) {
-            for (int i = lenB; i < maxLen; i++) {
-                result[i] = zipFunction.apply(a[i], valueForNoneB);
-            }
-        }
-
-        return result;
-    }
-
-    /**
-     *
-     *
-     * @param <A>
-     * @param <B>
-     * @param <C>
-     * @param <R>
-     * @param <E>
-     * @param a
-     * @param b
-     * @param c
-     * @param zipFunction
-     * @param targetElementType
-     * @return
-     * @throws IllegalArgumentException
-     * @throws E the e
-     */
-    public static <A, B, C, R, E extends Exception> R[] zip(final A[] a, final B[] b, final C[] c,
-            final Throwables.TriFunction<? super A, ? super B, ? super C, ? extends R, E> zipFunction, final Class<R> targetElementType)
-            throws IllegalArgumentException, E {
-        checkArgNotNull(zipFunction);
-
-        final int lenA = len(a);
-        final int lenB = len(b);
-        final int lenC = len(c);
-        final int minLen = min(lenA, lenB, lenC);
-
-        final R[] result = newArray(targetElementType, minLen);
-
-        for (int i = 0; i < minLen; i++) {
-            result[i] = zipFunction.apply(a[i], b[i], c[i]);
-        }
-
-        return result;
-    }
-
-    /**
-     *
-     *
-     * @param <A>
-     * @param <B>
-     * @param <C>
-     * @param <R>
-     * @param <E>
-     * @param a
-     * @param b
-     * @param c
-     * @param valueForNoneA
-     * @param valueForNoneB
-     * @param valueForNoneC
-     * @param zipFunction
-     * @param targetElementType
-     * @return
-     * @throws E the e
-     */
-    public static <A, B, C, R, E extends Exception> R[] zip(final A[] a, final B[] b, final C[] c, final A valueForNoneA, final B valueForNoneB,
-            final C valueForNoneC, final Throwables.TriFunction<? super A, ? super B, ? super C, ? extends R, E> zipFunction, final Class<R> targetElementType)
-            throws E {
-        checkArgNotNull(zipFunction);
-
-        final int lenA = len(a);
-        final int lenB = len(b);
-        final int lenC = len(c);
-        final int minLen = min(lenA, lenB, lenC);
-        final int maxLen = max(lenA, lenB, lenC);
-
-        final R[] result = newArray(targetElementType, maxLen);
-
-        for (int i = 0; i < minLen; i++) {
-            result[i] = zipFunction.apply(a[i], b[i], c[i]);
-        }
-
-        if (minLen < maxLen) {
-            for (int i = minLen; i < maxLen; i++) {
-                result[i] = zipFunction.apply(i < lenA ? a[i] : valueForNoneA, i < lenB ? b[i] : valueForNoneB, i < lenC ? c[i] : valueForNoneC);
-            }
-        }
-
-        return result;
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param <A>
-     * @param <B>
-     * @param <E>
-     * @param c
-     * @param unzip the second parameter is an output parameter.
-     * @return
-     * @throws E the e
-     */
-    public static <T, A, B, E extends Exception> Pair<List<A>, List<B>> unzip(final Iterable<? extends T> c,
-            final Throwables.BiConsumer<? super T, Pair<A, B>, E> unzip) throws E {
-        return unzip(c, unzip, Factory.ofList());
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param <A>
-     * @param <B>
-     * @param <LC>
-     * @param <RC>
-     * @param <E>
-     * @param c
-     * @param unzip the second parameter is an output parameter.
-     * @param supplier
-     * @return
-     * @throws IllegalArgumentException
-     * @throws E the e
-     */
-    public static <T, A, B, LC extends Collection<A>, RC extends Collection<B>, E extends Exception> Pair<LC, RC> unzip(final Iterable<? extends T> c,
-            final Throwables.BiConsumer<? super T, Pair<A, B>, E> unzip, final IntFunction<? extends Collection<?>> supplier)
-            throws IllegalArgumentException, E {
-        checkArgNotNull(unzip);
-
-        final int len = getSizeOrDefault(c, 0);
-
-        final LC l = (LC) supplier.apply(len);
-        final RC r = (RC) supplier.apply(len);
-        final Pair<A, B> p = new Pair<>();
-
-        if (c != null) {
-            for (T e : c) {
-                unzip.accept(e, p);
-
-                l.add(p.left);
-                r.add(p.right);
-            }
-        }
-
-        return Pair.of(l, r);
-    }
-
-    //    /**
-    //     *
-    //     * @param <T>
-    //     * @param <L>
-    //     * @param <R>
-    //     * @param iter
-    //     * @param unzip the second parameter is an output parameter.
-    //     * @return
-    //     * @see {@code Iterators.unzip(Iterator, BiConsumer)}
-    //     */
-    //    public static <T, L, R, E extends Exception> Pair<List<L>, List<R>> unzip(final Iterator<? extends T> iter,
-    //            final Throwables.BiConsumer<? super T, Pair<L, R>, E> unzip) throws E {
-    //        checkArgNotNull(unzip);
-    //
-    //        final int len = 9;
-    //
-    //        final List<L> l = new ArrayList<>(len);
-    //        final List<R> r = new ArrayList<>(len);
-    //        final Pair<L, R> p = new Pair<>();
-    //
-    //        if (iter != null) {
-    //            T e = null;
-    //
-    //            while (iter.hasNext()) {
-    //                e = iter.next();
-    //
-    //                unzip.accept(e, p);
-    //
-    //                l.add(p.left);
-    //                r.add(p.right);
-    //            }
-    //        }
-    //
-    //        return Pair.of(l, r);
-    //    }
-
-    /**
-     *
-     * @param <T>
-     * @param <A>
-     * @param <B>
-     * @param <C>
-     * @param <E>
-     * @param c
-     * @param unzip the second parameter is an output parameter.
-     * @return
-     * @throws E the e
-     * @see TriIterator#unzip(Iterable, BiConsumer)
-     * @see TriIterator#toMultiList(Supplier)
-     * @see TriIterator#toMultiSet(Supplier)
-     * @deprecated replaced by {@link TriIterator#unzip(Iterable, BiConsumer)}
-     */
-    @Deprecated
-    public static <T, A, B, C, E extends Exception> Triple<List<A>, List<B>, List<C>> unzipp(final Iterable<? extends T> c,
-            final Throwables.BiConsumer<? super T, Triple<A, B, C>, E> unzip) throws E {
-        return unzipp(c, unzip, Factory.ofList());
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param <A>
-     * @param <B>
-     * @param <C>
-     * @param <LC>
-     * @param <MC>
-     * @param <RC>
-     * @param <E>
-     * @param c
-     * @param unzip the second parameter is an output parameter.
-     * @param supplier
-     * @return
-     * @throws IllegalArgumentException
-     * @throws E the e
-     * @see TriIterator#unzip(Iterable, BiConsumer)
-     * @see TriIterator#toMultiList(Supplier)
-     * @see TriIterator#toMultiSet(Supplier)
-     * @deprecated replaced by {@link TriIterator#unzip(Iterable, BiConsumer)}
-     */
-    @Deprecated
-    public static <T, A, B, C, LC extends Collection<A>, MC extends Collection<B>, RC extends Collection<C>, E extends Exception> Triple<LC, MC, RC> unzipp(
-            final Iterable<? extends T> c, final Throwables.BiConsumer<? super T, Triple<A, B, C>, E> unzip,
-            final IntFunction<? extends Collection<?>> supplier) throws IllegalArgumentException, E {
-        checkArgNotNull(unzip);
-
-        final int len = getSizeOrDefault(c, 0);
-
-        final LC l = (LC) supplier.apply(len);
-        final MC m = (MC) supplier.apply(len);
-        final RC r = (RC) supplier.apply(len);
-        final Triple<A, B, C> t = new Triple<>();
-
-        if (c != null) {
-            for (T e : c) {
-                unzip.accept(e, t);
-
-                l.add(t.left);
-                m.add(t.middle);
-                r.add(t.right);
-            }
-        }
-
-        return Triple.of(l, m, r);
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param <K>
-     * @param <E>
-     * @param a
-     * @param keyExtractor
-     * @return
-     * @throws E
-     */
-    @Beta
-    public static <T, K, E extends Exception> Map<K, List<T>> groupBy(final T[] a, final Throwables.Function<? super T, ? extends K, E> keyExtractor) throws E {
-        return groupBy(a, keyExtractor, Suppliers.ofMap());
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param <K>
-     * @param <M>
-     * @param <E>
-     * @param a
-     * @param keyExtractor
-     * @param mapSupplier
-     * @return
-     * @throws E
-     */
-    @Beta
-    public static <T, K, M extends Map<K, List<T>>, E extends Exception> M groupBy(final T[] a,
-            final Throwables.Function<? super T, ? extends K, E> keyExtractor, final Supplier<M> mapSupplier) throws E {
-        return groupBy(a, 0, len(a), keyExtractor, mapSupplier);
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param <K>
-     * @param <E>
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param keyExtractor
-     * @return
-     * @throws E
-     */
-    @Beta
-    public static <T, K, E extends Exception> Map<K, List<T>> groupBy(final T[] a, final int fromIndex, final int toIndex,
-            final Throwables.Function<? super T, ? extends K, E> keyExtractor) throws E {
-        return groupBy(a, fromIndex, toIndex, keyExtractor, Suppliers.ofMap());
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param <K>
-     * @param <M>
-     * @param <E>
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param keyExtractor
-     * @param mapSupplier
-     * @return
-     * @throws IllegalArgumentException
-     * @throws IndexOutOfBoundsException
-     * @throws E
-     */
-    @Beta
-    public static <T, K, M extends Map<K, List<T>>, E extends Exception> M groupBy(final T[] a, final int fromIndex, final int toIndex,
-            final Throwables.Function<? super T, ? extends K, E> keyExtractor, final Supplier<M> mapSupplier)
-            throws IllegalArgumentException, IndexOutOfBoundsException, E {
-        final int length = len(a);
-
-        checkFromToIndex(fromIndex, toIndex, length);
-        checkArgNotNull(keyExtractor, "keyExtractor"); //NOSONAR
-        checkArgNotNull(mapSupplier, "mapSupplier"); //NOSONAR
-
-        final M ret = mapSupplier.get();
-        K key = null;
-        List<T> val = null;
-
-        for (int i = fromIndex; i < toIndex; i++) {
-            key = keyExtractor.apply(a[i]);
-            val = ret.get(key);
-
-            if (val == null) {
-                val = new ArrayList<>();
-
-                ret.put(key, val);
-            }
-
-            val.add(a[i]);
-        }
-
-        return ret;
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param <K>
-     * @param <E>
-     * @param c
-     * @param keyExtractor
-     * @return
-     * @throws E
-     */
-    @Beta
-    public static <T, K, E extends Exception> Map<K, List<T>> groupBy(final Iterable<? extends T> c,
-            final Throwables.Function<? super T, ? extends K, E> keyExtractor) throws E {
-        return groupBy(c, keyExtractor, Suppliers.ofMap());
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param <K>
-     * @param <M>
-     * @param <E>
-     * @param c
-     * @param keyExtractor
-     * @param mapSupplier
-     * @return
-     * @throws IllegalArgumentException
-     * @throws E
-     */
-    @Beta
-    public static <T, K, M extends Map<K, List<T>>, E extends Exception> M groupBy(final Iterable<? extends T> c,
-            final Throwables.Function<? super T, ? extends K, E> keyExtractor, final Supplier<M> mapSupplier) throws IllegalArgumentException, E {
-        checkArgNotNull(keyExtractor, "keyExtractor");
-        checkArgNotNull(mapSupplier, "mapSupplier");
-
-        final M ret = mapSupplier.get();
-
-        if (c == null) {
-            return ret;
-        }
-
-        K key = null;
-        List<T> val = null;
-
-        for (T e : c) {
-            key = keyExtractor.apply(e);
-            val = ret.get(key);
-
-            if (val == null) {
-                val = new ArrayList<>();
-
-                ret.put(key, val);
-            }
-
-            val.add(e);
-        }
-
-        return ret;
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param <K>
-     * @param <E>
-     * @param iter
-     * @param keyExtractor
-     * @return
-     * @throws E
-     */
-    @Beta
-    public static <T, K, E extends Exception> Map<K, List<T>> groupBy(final Iterator<? extends T> iter,
-            final Throwables.Function<? super T, ? extends K, E> keyExtractor) throws E {
-        return groupBy(iter, keyExtractor, Suppliers.ofMap());
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param <K>
-     * @param <M>
-     * @param <E>
-     * @param iter
-     * @param keyExtractor
-     * @param mapSupplier
-     * @return
-     * @throws IllegalArgumentException
-     * @throws E
-     */
-    @Beta
-    public static <T, K, M extends Map<K, List<T>>, E extends Exception> M groupBy(final Iterator<? extends T> iter,
-            final Throwables.Function<? super T, ? extends K, E> keyExtractor, final Supplier<M> mapSupplier) throws IllegalArgumentException, E {
-        checkArgNotNull(keyExtractor, "keyExtractor");
-        checkArgNotNull(mapSupplier, "mapSupplier");
-
-        final M ret = mapSupplier.get();
-
-        if (iter == null) {
-            return ret;
-        }
-
-        K key = null;
-        List<T> val = null;
-        T e = null;
-
-        while (iter.hasNext()) {
-            e = iter.next();
-
-            key = keyExtractor.apply(e);
-            val = ret.get(key);
-
-            if (val == null) {
-                val = new ArrayList<>();
-
-                ret.put(key, val);
-            }
-
-            val.add(e);
-        }
-
-        return ret;
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param <K>
-     * @param <V>
-     * @param <E>
-     * @param <E2>
-     * @param c
-     * @param keyExtractor
-     * @param valueExtractor
-     * @return
-     * @throws E
-     * @throws E2
-     */
-    @Beta
-    public static <T, K, V, E extends Exception, E2 extends Exception> Map<K, List<V>> groupBy(final Iterable<? extends T> c,
-            final Throwables.Function<? super T, ? extends K, E> keyExtractor, final Throwables.Function<? super T, ? extends V, E2> valueExtractor)
-            throws E, E2 {
-        return groupBy(c, keyExtractor, valueExtractor, Suppliers.ofMap());
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param <K>
-     * @param <V>
-     * @param <M>
-     * @param <E>
-     * @param <E2>
-     * @param c
-     * @param keyExtractor
-     * @param valueExtractor
-     * @param mapSupplier
-     * @return
-     * @throws IllegalArgumentException
-     * @throws E
-     * @throws E2
-     */
-    @Beta
-    public static <T, K, V, M extends Map<K, List<V>>, E extends Exception, E2 extends Exception> M groupBy(final Iterable<? extends T> c,
-            final Throwables.Function<? super T, ? extends K, E> keyExtractor, final Throwables.Function<? super T, ? extends V, E2> valueExtractor,
-            final Supplier<M> mapSupplier) throws IllegalArgumentException, E, E2 {
-        checkArgNotNull(keyExtractor, "keyExtractor");
-        checkArgNotNull(valueExtractor, "valueExtractor");
-        checkArgNotNull(mapSupplier, "mapSupplier");
-
-        final M ret = mapSupplier.get();
-
-        if (c == null) {
-            return ret;
-        }
-
-        K key = null;
-        List<V> val = null;
-
-        for (T e : c) {
-            key = keyExtractor.apply(e);
-            val = ret.get(key);
-
-            if (val == null) {
-                val = new ArrayList<>();
-
-                ret.put(key, val);
-            }
-
-            val.add(valueExtractor.apply(e));
-        }
-
-        return ret;
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param <K>
-     * @param <V>
-     * @param <E>
-     * @param <E2>
-     * @param iter
-     * @param keyExtractor
-     * @param valueExtractor
-     * @return
-     * @throws E
-     * @throws E2
-     */
-    @Beta
-    public static <T, K, V, E extends Exception, E2 extends Exception> Map<K, List<V>> groupBy(final Iterator<? extends T> iter,
-            final Throwables.Function<? super T, ? extends K, E> keyExtractor, final Throwables.Function<? super T, ? extends V, E2> valueExtractor)
-            throws E, E2 {
-        return groupBy(iter, keyExtractor, valueExtractor, Suppliers.ofMap());
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param <K>
-     * @param <V>
-     * @param <M>
-     * @param <E>
-     * @param <E2>
-     * @param iter
-     * @param keyExtractor
-     * @param valueExtractor
-     * @param mapSupplier
-     * @return
-     * @throws IllegalArgumentException
-     * @throws E
-     * @throws E2
-     */
-    @Beta
-    public static <T, K, V, M extends Map<K, List<V>>, E extends Exception, E2 extends Exception> M groupBy(final Iterator<? extends T> iter,
-            final Throwables.Function<? super T, ? extends K, E> keyExtractor, final Throwables.Function<? super T, ? extends V, E2> valueExtractor,
-            final Supplier<M> mapSupplier) throws IllegalArgumentException, E, E2 {
-        checkArgNotNull(keyExtractor, "keyExtractor");
-        checkArgNotNull(valueExtractor, "valueExtractor");
-        checkArgNotNull(mapSupplier, "mapSupplier");
-
-        final M ret = mapSupplier.get();
-
-        if (iter == null) {
-            return ret;
-        }
-
-        K key = null;
-        List<V> val = null;
-        T e = null;
-
-        while (iter.hasNext()) {
-            e = iter.next();
-
-            key = keyExtractor.apply(e);
-            val = ret.get(key);
-
-            if (val == null) {
-                val = new ArrayList<>();
-
-                ret.put(key, val);
-            }
-
-            val.add(valueExtractor.apply(e));
-        }
-
-        return ret;
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param <K>
-     * @param <R>
-     * @param <E>
-     * @param c
-     * @param keyExtractor
-     * @param collector
-     * @return
-     * @throws IllegalArgumentException
-     * @throws E
-     */
-    @Beta
-    public static <T, K, R, E extends Exception> Map<K, R> groupBy(final Iterable<? extends T> c,
-            final Throwables.Function<? super T, ? extends K, E> keyExtractor, final Collector<? super T, ?, R> collector) throws IllegalArgumentException, E {
-        return groupBy(c, keyExtractor, collector, Suppliers.ofMap());
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param <K>
-     * @param <R>
-     * @param <M>
-     * @param <E>
-     * @param c
-     * @param keyExtractor
-     * @param collector
-     * @param mapSupplier
-     * @return
-     * @throws E
-     */
-    @Beta
-    public static <T, K, R, M extends Map<K, R>, E extends Exception> M groupBy(final Iterable<? extends T> c,
-            final Throwables.Function<? super T, ? extends K, E> keyExtractor, final Collector<? super T, ?, R> collector, final Supplier<M> mapSupplier)
-            throws E {
-        checkArgNotNull(keyExtractor, "keyExtractor");
-        checkArgNotNull(collector, "collector");
-        checkArgNotNull(mapSupplier, "mapSupplier");
-
-        final M ret = mapSupplier.get();
-
-        final Supplier<Object> downstreamSupplier = (Supplier<Object>) collector.supplier();
-        final BiConsumer<Object, ? super T> downstreamAccumulator = (BiConsumer<Object, ? super T>) collector.accumulator();
-        final Function<Object, R> downstreamFinisher = (Function<Object, R>) collector.finisher();
-
-        final Map<K, Object> intermediate = (Map<K, Object>) ret;
-
-        if (c == null) {
-            return ret;
-        }
-
-        K key = null;
-        Object val = null;
-
-        for (T e : c) {
-            key = keyExtractor.apply(e);
-
-            if (((val = intermediate.get(key)) == null) && ((val = downstreamSupplier.get()) != null)) {
-                intermediate.put(key, val);
-            }
-
-            downstreamAccumulator.accept(val, e);
-        }
-
-        updateIntermediateValue(intermediate, downstreamFinisher);
-
-        return ret;
-    }
-
-    /**
-     *
-     *
-     * @param <K>
-     * @param <T>
-     * @param <R>
-     * @param <E>
-     * @param iter
-     * @param keyExtractor
-     * @param collector
-     * @return
-     * @throws IllegalArgumentException
-     * @throws E
-     */
-    @Beta
-    public static <K, T, R, E extends Exception> Map<K, R> groupBy(final Iterator<? extends T> iter,
-            final Throwables.Function<? super T, ? extends K, E> keyExtractor, final Collector<? super T, ?, R> collector) throws IllegalArgumentException, E {
-        return groupBy(iter, keyExtractor, collector, Suppliers.ofMap());
-    }
-
-    /**
-     *
-     *
-     * @param <K>
-     * @param <T>
-     * @param <R>
-     * @param <M>
-     * @param <E>
-     * @param iter
-     * @param keyExtractor
-     * @param collector
-     * @param mapSupplier
-     * @return
-     * @throws E
-     */
-    @Beta
-    public static <K, T, R, M extends Map<K, R>, E extends Exception> M groupBy(final Iterator<? extends T> iter,
-            final Throwables.Function<? super T, ? extends K, E> keyExtractor, final Collector<? super T, ?, R> collector, final Supplier<M> mapSupplier)
-            throws E {
-        checkArgNotNull(keyExtractor, "keyExtractor");
-        checkArgNotNull(collector, "collector");
-        checkArgNotNull(mapSupplier, "mapSupplier");
-
-        final M ret = mapSupplier.get();
-
-        final Supplier<Object> downstreamSupplier = (Supplier<Object>) collector.supplier();
-        final BiConsumer<Object, ? super T> downstreamAccumulator = (BiConsumer<Object, ? super T>) collector.accumulator();
-        final Function<Object, R> downstreamFinisher = (Function<Object, R>) collector.finisher();
-
-        final Map<K, Object> intermediate = (Map<K, Object>) ret;
-
-        if (iter == null) {
-            return ret;
-        }
-
-        T e = null;
-        K key = null;
-        Object val = null;
-
-        while (iter.hasNext()) {
-            e = iter.next();
-
-            key = keyExtractor.apply(e);
-
-            if (((val = intermediate.get(key)) == null) && ((val = downstreamSupplier.get()) != null)) {
-                intermediate.put(key, val);
-            }
-
-            downstreamAccumulator.accept(val, e);
-        }
-
-        updateIntermediateValue(intermediate, downstreamFinisher);
-
-        return ret;
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param <K>
-     * @param <E>
-     * @param c
-     * @param keyExtractor
-     * @return
-     * @throws E
-     */
-    @Beta
-    public static <T, K, E extends Exception> Map<K, Integer> countBy(final Iterable<? extends T> c,
-            final Throwables.Function<? super T, ? extends K, E> keyExtractor) throws E {
-        return countBy(c, keyExtractor, Suppliers.ofMap());
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param <K>
-     * @param <M>
-     * @param <E>
-     * @param c
-     * @param keyExtractor
-     * @param mapSupplier
-     * @return
-     * @throws IllegalArgumentException
-     * @throws E
-     */
-    @Beta
-    public static <T, K, M extends Map<K, Integer>, E extends Exception> M countBy(final Iterable<? extends T> c,
-            final Throwables.Function<? super T, ? extends K, E> keyExtractor, final Supplier<M> mapSupplier) throws IllegalArgumentException, E {
-        checkArgNotNull(keyExtractor, "keyExtractor");
-        checkArgNotNull(mapSupplier, "mapSupplier");
-
-        final M ret = mapSupplier.get();
-
-        if (c == null) {
-            return ret;
-        }
-
-        @SuppressWarnings("rawtypes")
-        final Map<K, MutableInt> intermediateMap = (Map) ret;
-
-        K key = null;
-        MutableInt val = null;
-
-        for (T e : c) {
-            key = keyExtractor.apply(e);
-            val = intermediateMap.get(key);
-
-            if (val == null) {
-                intermediateMap.put(key, MutableInt.of(1));
-            } else {
-                val.increment();
-            }
-        }
-
-        updateIntermediateValue(intermediateMap, MutableInt::value);
-
-        return ret;
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param <K>
-     * @param <E>
-     * @param iter
-     * @param keyExtractor
-     * @return
-     * @throws E
-     */
-    @Beta
-    public static <T, K, E extends Exception> Map<K, Integer> countBy(final Iterator<? extends T> iter,
-            final Throwables.Function<? super T, ? extends K, E> keyExtractor) throws E {
-        return countBy(iter, keyExtractor, Suppliers.ofMap());
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param <K>
-     * @param <M>
-     * @param <E>
-     * @param iter
-     * @param keyExtractor
-     * @param mapSupplier
-     * @return
-     * @throws IllegalArgumentException
-     * @throws E
-     */
-    @Beta
-    public static <T, K, M extends Map<K, Integer>, E extends Exception> M countBy(final Iterator<? extends T> iter,
-            final Throwables.Function<? super T, ? extends K, E> keyExtractor, final Supplier<M> mapSupplier) throws IllegalArgumentException, E {
-        checkArgNotNull(keyExtractor, "keyExtractor");
-        checkArgNotNull(mapSupplier, "mapSupplier");
-
-        final M ret = mapSupplier.get();
-
-        if (iter == null) {
-            return ret;
-        }
-
-        @SuppressWarnings("rawtypes")
-        final Map<K, MutableInt> intermediateMap = (Map) ret;
-
-        K key = null;
-        MutableInt val = null;
-
-        while (iter.hasNext()) {
-            key = keyExtractor.apply(iter.next());
-            val = intermediateMap.get(key);
-
-            if (val == null) {
-                intermediateMap.put(key, MutableInt.of(1));
-            } else {
-                val.increment();
-            }
-        }
-
-        updateIntermediateValue(intermediateMap, MutableInt::value);
-
-        return ret;
-    }
-
-    static <V> void updateIntermediateValue(final Map<?, V> intermediate, final Function<? super V, ?> downstreamFinisher) {
-        for (Map.Entry<?, V> entry : intermediate.entrySet()) {
-            entry.setValue((V) downstreamFinisher.apply(entry.getValue()));
-        }
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param a
-     * @return
-     * @see ObjIterator#of(Object...)
-     */
-    @Beta
-    public static <T> ObjIterator<T> iterate(final T[] a) {
-        return ObjIterator.of(a);
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return
-     * @see ObjIterator#of(Object[], int, int)
-     */
-    @Beta
-    public static <T> ObjIterator<T> iterate(final T[] a, final int fromIndex, final int toIndex) {
-        return ObjIterator.of(a, fromIndex, toIndex);
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param iterable
-     * @return
-     */
-    @Beta
-    public static <T> Iterator<T> iterate(final Iterable<? extends T> iterable) {
-        return iterable == null ? ObjIterator.<T> empty() : (Iterator<T>) iterable.iterator();
-    }
-
-    /**
-     *
-     * @param a
-     * @param b
-     * @return
-     */
-    public static boolean disjoint(final Object[] a, final Object[] b) {
-        if (isEmpty(a) || isEmpty(b)) {
-            return true;
-        }
-
-        return a.length >= b.length ? disjoint(Arrays.asList(a), asSet(b)) : disjoint(asSet(a), Arrays.asList(b));
-    }
-
-    /**
-     * Returns {@code true} if the two specified arrays have no elements in common.
-     *
-     * @param c1
-     * @param c2
-     * @return {@code true} if the two specified arrays have no elements in common.
-     * @see Collections#disjoint(Collection, Collection)
-     */
-    public static boolean disjoint(final Collection<?> c1, final Collection<?> c2) {
-        if (isEmpty(c1) || isEmpty(c2)) {
-            return true;
-        }
-
-        if (c1 instanceof Set || (!(c2 instanceof Set) && c1.size() > c2.size())) {
-            for (Object e : c2) {
-                if (c1.contains(e)) {
-                    return false;
-                }
-            }
-        } else {
-            for (Object e : c1) {
-                if (c2.contains(e)) {
-                    return false;
-                }
-            }
-        }
-
-        return true;
-    }
-
-    /**
-     *
-     * @param obj
-     * @return
-     */
-    public static String toJson(final Object obj) {
-        return Utils.jsonParser.serialize(obj, Utils.jsc);
-    }
-
-    /**
-     *
-     * @param obj
-     * @param prettyFormat
-     * @return
-     */
-    public static String toJson(final Object obj, final boolean prettyFormat) {
-        return Utils.jsonParser.serialize(obj, prettyFormat ? Utils.jscPrettyFormat : Utils.jsc);
-    }
-
-    /**
-     *
-     * @param obj
-     * @param config
-     * @return
-     */
-    public static String toJson(final Object obj, final JSONSerializationConfig config) {
-        return Utils.jsonParser.serialize(obj, config);
-    }
-
-    /**
-     *
-     * @param obj
-     * @param output
-     */
-    public static void toJson(final Object obj, final File output) {
-        Utils.jsonParser.serialize(obj, output);
-    }
-
-    /**
-     *
-     * @param obj
-     * @param config
-     * @param output
-     */
-    public static void toJson(final Object obj, final JSONSerializationConfig config, final File output) {
-        Utils.jsonParser.serialize(obj, config, output);
-    }
-
-    /**
-     *
-     * @param obj
-     * @param output
-     */
-    public static void toJson(final Object obj, final OutputStream output) {
-        Utils.jsonParser.serialize(obj, output);
-    }
-
-    /**
-     *
-     * @param obj
-     * @param config
-     * @param output
-     */
-    public static void toJson(final Object obj, final JSONSerializationConfig config, final OutputStream output) {
-        Utils.jsonParser.serialize(obj, config, output);
-    }
-
-    /**
-     *
-     * @param obj
-     * @param output
-     */
-    public static void toJson(final Object obj, final Writer output) {
-        Utils.jsonParser.serialize(obj, output);
-    }
-
-    /**
-     *
-     * @param obj
-     * @param config
-     * @param output
-     */
-    public static void toJson(final Object obj, final JSONSerializationConfig config, final Writer output) {
-        Utils.jsonParser.serialize(obj, config, output);
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param json
-     * @param targetType
-     * @return
-     * @see com.landawn.abacus.util.TypeReference
-     * @see com.landawn.abacus.util.TypeReference.TypeToken
-     */
-    public static <T> T fromJson(final String json, final Class<? extends T> targetType) {
-        return Utils.jsonParser.deserialize(json, targetType);
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param json
-     * @param defaultIfNull
-     * @param targetType
-     * @return
-     * @see com.landawn.abacus.util.TypeReference
-     * @see com.landawn.abacus.util.TypeReference.TypeToken
-     */
-    public static <T> T fromJson(final String json, final T defaultIfNull, final Class<? extends T> targetType) {
-        final T ret = fromJson(json, targetType);
-
-        return ret == null ? defaultIfNull : ret;
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param json
-     * @param config
-     * @param targetType
-     * @return
-     * @see com.landawn.abacus.util.TypeReference
-     * @see com.landawn.abacus.util.TypeReference.TypeToken
-     */
-    public static <T> T fromJson(final String json, final JSONDeserializationConfig config, final Class<? extends T> targetType) {
-        return Utils.jsonParser.deserialize(json, config, targetType);
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param json
-     * @param targetType
-     * @return
-     * @see com.landawn.abacus.util.TypeReference
-     * @see com.landawn.abacus.util.TypeReference.TypeToken
-     */
-    public static <T> T fromJson(final File json, final Class<? extends T> targetType) {
-        return Utils.jsonParser.deserialize(json, targetType);
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param json
-     * @param config
-     * @param targetType
-     * @return
-     * @see com.landawn.abacus.util.TypeReference
-     * @see com.landawn.abacus.util.TypeReference.TypeToken
-     */
-    public static <T> T fromJson(final File json, final JSONDeserializationConfig config, final Class<? extends T> targetType) {
-        return Utils.jsonParser.deserialize(json, config, targetType);
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param json
-     * @param targetType
-     * @return
-     * @see com.landawn.abacus.util.TypeReference
-     * @see com.landawn.abacus.util.TypeReference.TypeToken
-     */
-    public static <T> T fromJson(final InputStream json, final Class<? extends T> targetType) {
-        return Utils.jsonParser.deserialize(json, targetType);
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param json
-     * @param config
-     * @param targetType
-     * @return
-     * @see com.landawn.abacus.util.TypeReference
-     * @see com.landawn.abacus.util.TypeReference.TypeToken
-     */
-    public static <T> T fromJson(final InputStream json, final JSONDeserializationConfig config, final Class<? extends T> targetType) {
-        return Utils.jsonParser.deserialize(json, config, targetType);
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param json
-     * @param targetType
-     * @return
-     * @see com.landawn.abacus.util.TypeReference
-     * @see com.landawn.abacus.util.TypeReference.TypeToken
-     */
-    public static <T> T fromJson(final Reader json, final Class<? extends T> targetType) {
-        return Utils.jsonParser.deserialize(json, targetType);
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param json
-     * @param config
-     * @param targetType
-     * @return
-     * @see com.landawn.abacus.util.TypeReference
-     * @see com.landawn.abacus.util.TypeReference.TypeToken
-     */
-    public static <T> T fromJson(final Reader json, final JSONDeserializationConfig config, final Class<? extends T> targetType) {
-        return Utils.jsonParser.deserialize(json, config, targetType);
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param json
-     * @param fromIndex
-     * @param toIndex
-     * @param targetType
-     * @return
-     * @see com.landawn.abacus.util.TypeReference
-     * @see com.landawn.abacus.util.TypeReference.TypeToken
-     */
-    public static <T> T fromJson(final String json, final int fromIndex, final int toIndex, final Class<? extends T> targetType) {
-        return Utils.jsonParser.deserialize(json, fromIndex, toIndex, targetType);
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param json
-     * @param fromIndex
-     * @param toIndex
-     * @param config
-     * @param targetType
-     * @return
-     * @see com.landawn.abacus.util.TypeReference
-     * @see com.landawn.abacus.util.TypeReference.TypeToken
-     */
-    public static <T> T fromJson(final String json, final int fromIndex, final int toIndex, final JSONDeserializationConfig config,
-            final Class<? extends T> targetType) {
-        return Utils.jsonParser.deserialize(json, fromIndex, toIndex, config, targetType);
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param json
-     * @param targetType can be the {@code Type} of {@code Bean/Array/Collection/Map}.
-     * @return
-     * @see com.landawn.abacus.util.TypeReference
-     * @see com.landawn.abacus.util.TypeReference.TypeToken
-     */
-    public static <T> T fromJson(final String json, final Type<? extends T> targetType) {
-        return fromJson(json, null, targetType);
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param json
-     * @param defaultIfNull
-     * @param targetType
-     * @return
-     * @see com.landawn.abacus.util.TypeReference
-     * @see com.landawn.abacus.util.TypeReference.TypeToken
-     */
-    public static <T> T fromJson(final String json, final T defaultIfNull, final Type<? extends T> targetType) {
-        final T ret = fromJson(json, targetType);
-
-        return ret == null ? defaultIfNull : ret;
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param json
-     * @param config
-     * @param targetType can be the {@code Type} of {@code Bean/Array/Collection/Map}.
-     * @return
-     * @see com.landawn.abacus.util.TypeReference
-     * @see com.landawn.abacus.util.TypeReference.TypeToken
-     */
-    public static <T> T fromJson(final String json, final JSONDeserializationConfig config, final Type<? extends T> targetType) {
-        return Utils.jsonParser.deserialize(json, setConfig(targetType, config, true), targetType.clazz());
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param json
-     * @param targetType can be the {@code Type} of {@code Bean/Array/Collection/Map}.
-     * @return
-     * @see com.landawn.abacus.util.TypeReference
-     * @see com.landawn.abacus.util.TypeReference.TypeToken
-     */
-    public static <T> T fromJson(final File json, final Type<? extends T> targetType) {
-        return fromJson(json, null, targetType);
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param json
-     * @param config
-     * @param targetType can be the {@code Type} of {@code Bean/Array/Collection/Map}.
-     * @return
-     * @see com.landawn.abacus.util.TypeReference
-     * @see com.landawn.abacus.util.TypeReference.TypeToken
-     */
-    public static <T> T fromJson(final File json, final JSONDeserializationConfig config, final Type<? extends T> targetType) {
-        return Utils.jsonParser.deserialize(json, setConfig(targetType, config, true), targetType.clazz());
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param json
-     * @param targetType can be the {@code Type} of {@code Bean/Array/Collection/Map}.
-     * @return
-     * @see com.landawn.abacus.util.TypeReference
-     * @see com.landawn.abacus.util.TypeReference.TypeToken
-     */
-    public static <T> T fromJson(final InputStream json, final Type<? extends T> targetType) {
-        return fromJson(json, null, targetType);
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param json
-     * @param config
-     * @param targetType can be the {@code Type} of {@code Bean/Array/Collection/Map}.
-     * @return
-     * @see com.landawn.abacus.util.TypeReference
-     * @see com.landawn.abacus.util.TypeReference.TypeToken
-     */
-    public static <T> T fromJson(final InputStream json, final JSONDeserializationConfig config, final Type<? extends T> targetType) {
-        return Utils.jsonParser.deserialize(json, setConfig(targetType, config, true), targetType.clazz());
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param json
-     * @param targetType can be the {@code Type} of {@code Bean/Array/Collection/Map}.
-     * @return
-     * @see com.landawn.abacus.util.TypeReference
-     * @see com.landawn.abacus.util.TypeReference.TypeToken
-     */
-    public static <T> T fromJson(final Reader json, final Type<? extends T> targetType) {
-        return fromJson(json, null, targetType);
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param json
-     * @param config
-     * @param targetType can be the {@code Type} of {@code Bean/Array/Collection/Map}.
-     * @return
-     * @see com.landawn.abacus.util.TypeReference
-     * @see com.landawn.abacus.util.TypeReference.TypeToken
-     */
-    public static <T> T fromJson(final Reader json, final JSONDeserializationConfig config, final Type<? extends T> targetType) {
-        return Utils.jsonParser.deserialize(json, setConfig(targetType, config, true), targetType.clazz());
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param json
-     * @param fromIndex
-     * @param toIndex
-     * @param targetType can be the {@code Type} of {@code Bean/Array/Collection/Map}.
-     * @return
-     * @see com.landawn.abacus.util.TypeReference
-     * @see com.landawn.abacus.util.TypeReference.TypeToken
-     */
-    public static <T> T fromJson(final String json, final int fromIndex, final int toIndex, final Type<? extends T> targetType) {
-        return fromJson(json, fromIndex, toIndex, null, targetType);
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param json
-     * @param fromIndex
-     * @param toIndex
-     * @param config
-     * @param targetType can be the {@code Type} of {@code Bean/Array/Collection/Map}.
-     * @return
-     * @see com.landawn.abacus.util.TypeReference
-     * @see com.landawn.abacus.util.TypeReference.TypeToken
-     */
-    public static <T> T fromJson(final String json, final int fromIndex, final int toIndex, final JSONDeserializationConfig config,
-            final Type<? extends T> targetType) {
-        return Utils.jsonParser.deserialize(json, fromIndex, toIndex, setConfig(targetType, config, true), targetType.clazz());
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param jsonArray must be a json array/list.
-     * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
-     * @return
-     */
-    public static <T> CheckedStream<T, IOException> streamJson(String jsonArray, Class<? extends T> elementClass) {
-        return Utils.jsonParser.stream(jsonArray, elementClass);
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param jsonArray must be a json array/list.
-     * @param config
-     * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
-     * @return
-     */
-    public static <T> CheckedStream<T, IOException> streamJson(String jsonArray, JSONDeserializationConfig config, Class<? extends T> elementClass) {
-        return Utils.jsonParser.stream(jsonArray, config, elementClass);
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param jsonArray must be a json array/list.
-     * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
-     * @return
-     */
-    public static <T> CheckedStream<T, IOException> streamJson(File jsonArray, Class<? extends T> elementClass) {
-        return Utils.jsonParser.stream(jsonArray, elementClass);
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param jsonArray must be a json array/list.
-     * @param config
-     * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
-     * @return
-     */
-    public static <T> CheckedStream<T, IOException> streamJson(File jsonArray, JSONDeserializationConfig config, Class<? extends T> elementClass) {
-        return Utils.jsonParser.stream(jsonArray, config, elementClass);
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param jsonArray must be a json array/list.
-     * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
-     * @return
-     */
-    public static <T> CheckedStream<T, IOException> streamJson(InputStream jsonArray, Class<? extends T> elementClass) {
-        return streamJson(jsonArray, false, elementClass);
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param jsonArray must be a json array/list.
-     * @param closeInputStreamWhenStreamIsClosed
-     * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
-     * @return
-     */
-    public static <T> CheckedStream<T, IOException> streamJson(InputStream jsonArray, boolean closeInputStreamWhenStreamIsClosed,
-            Class<? extends T> elementClass) {
-        return Utils.jsonParser.stream(jsonArray, closeInputStreamWhenStreamIsClosed, elementClass);
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param jsonArray must be a json array/list.
-     * @param config
-     * @param closeInputStreamWhenStreamIsClosed
-     * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
-     * @return
-     */
-    public static <T> CheckedStream<T, IOException> streamJson(InputStream jsonArray, JSONDeserializationConfig config,
-            boolean closeInputStreamWhenStreamIsClosed, Class<? extends T> elementClass) {
-        return Utils.jsonParser.stream(jsonArray, config, closeInputStreamWhenStreamIsClosed, elementClass);
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param jsonArray must be a json array/list.
-     * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
-     * @return
-     */
-    public static <T> CheckedStream<T, IOException> streamJson(Reader jsonArray, Class<? extends T> elementClass) {
-        return streamJson(jsonArray, false, elementClass);
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param jsonArray must be a json array/list.
-     * @param closeReaderWhenStreamIsClosed
-     * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
-     * @return
-     */
-    public static <T> CheckedStream<T, IOException> streamJson(Reader jsonArray, boolean closeReaderWhenStreamIsClosed, Class<? extends T> elementClass) {
-        return Utils.jsonParser.stream(jsonArray, closeReaderWhenStreamIsClosed, elementClass);
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param jsonArray must be a json array/list.
-     * @param config
-     * @param closeReaderWhenStreamIsClosed
-     * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
-     * @return
-     */
-    public static <T> CheckedStream<T, IOException> streamJson(Reader jsonArray, JSONDeserializationConfig config, boolean closeReaderWhenStreamIsClosed,
-            Class<? extends T> elementClass) {
-        return Utils.jsonParser.stream(jsonArray, config, closeReaderWhenStreamIsClosed, elementClass);
-    }
-
-    /**
-     *
-     * @param json
-     * @return
-     * @see com.landawn.abacus.util.TypeReference
-     * @see com.landawn.abacus.util.TypeReference.TypeToken
-     */
-    public static String formatJson(final String json) {
-        return formatJson(json, Utils.jscPrettyFormat, Object.class);
-    }
-
-    /**
-     *
-     * @param json
-     * @param config
-     * @return
-     * @see com.landawn.abacus.util.TypeReference
-     * @see com.landawn.abacus.util.TypeReference.TypeToken
-     */
-    public static String formatJson(final String json, final JSONSerializationConfig config) {
-        return formatJson(json, config, Object.class);
-    }
-
-    /**
-     *
-     * @param json
-     * @param transferType
-     * @return
-     * @see com.landawn.abacus.util.TypeReference
-     * @see com.landawn.abacus.util.TypeReference.TypeToken
-     */
-    public static String formatJson(final String json, final Class<?> transferType) {
-        return toJson(fromJson(json, transferType), Utils.jscPrettyFormat);
-    }
-
-    /**
-     *
-     * @param json
-     * @param config
-     * @param transferType
-     * @return
-     * @see com.landawn.abacus.util.TypeReference
-     * @see com.landawn.abacus.util.TypeReference.TypeToken
-     */
-    public static String formatJson(final String json, final JSONSerializationConfig config, final Class<?> transferType) {
-        final JSONSerializationConfig configToUse = config == null ? Utils.jscPrettyFormat
-                : (config.prettyFormat() == false ? config.copy().prettyFormat(true) : config);
-
-        return toJson(fromJson(json, transferType), configToUse);
-    }
-
-    /**
-     *
-     * @param json
-     * @param transferType
-     * @return
-     * @see com.landawn.abacus.util.TypeReference
-     * @see com.landawn.abacus.util.TypeReference.TypeToken
-     */
-    public static String formatJson(final String json, final Type<?> transferType) {
-        return toJson(fromJson(json, transferType), Utils.jscPrettyFormat);
-    }
-
-    /**
-     *
-     * @param json
-     * @param config
-     * @param transferType
-     * @return
-     * @see com.landawn.abacus.util.TypeReference
-     * @see com.landawn.abacus.util.TypeReference.TypeToken
-     */
-    public static String formatJson(final String json, final JSONSerializationConfig config, final Type<?> transferType) {
-        final JSONSerializationConfig configToUse = config == null ? Utils.jscPrettyFormat
-                : (config.prettyFormat() == false ? config.copy().prettyFormat(true) : config);
-
-        return toJson(fromJson(json, transferType), configToUse);
-    }
-
-    /**
-     *
-     * @param obj
-     * @return
-     */
-    public static String toXml(final Object obj) {
-        return Utils.xmlParser.serialize(obj);
-    }
-
-    /**
-     *
-     * @param obj
-     * @param prettyFormat
-     * @return
-     */
-    public static String toXml(final Object obj, final boolean prettyFormat) {
-        return Utils.xmlParser.serialize(obj, prettyFormat ? Utils.xscPrettyFormat : Utils.xsc);
-    }
-
-    /**
-     *
-     * @param obj
-     * @param config
-     * @return
-     */
-    public static String toXml(final Object obj, final XMLSerializationConfig config) {
-        return Utils.xmlParser.serialize(obj, config);
-    }
-
-    /**
-     *
-     * @param obj
-     * @param output
-     */
-    public static void toXml(final Object obj, final File output) {
-        Utils.xmlParser.serialize(obj, output);
-    }
-
-    /**
-     *
-     * @param obj
-     * @param config
-     * @param output
-     */
-    public static void toXml(final Object obj, final XMLSerializationConfig config, final File output) {
-        Utils.xmlParser.serialize(obj, config, output);
-    }
-
-    /**
-     *
-     * @param obj
-     * @param output
-     */
-    public static void toXml(final Object obj, final OutputStream output) {
-        Utils.xmlParser.serialize(obj, output);
-    }
-
-    /**
-     *
-     * @param obj
-     * @param config
-     * @param output
-     */
-    public static void toXml(final Object obj, final XMLSerializationConfig config, final OutputStream output) {
-        Utils.xmlParser.serialize(obj, config, output);
-    }
-
-    /**
-     *
-     * @param obj
-     * @param output
-     */
-    public static void toXml(final Object obj, final Writer output) {
-        Utils.xmlParser.serialize(obj, output);
-    }
-
-    /**
-     *
-     * @param obj
-     * @param config
-     * @param output
-     */
-    public static void toXml(final Object obj, final XMLSerializationConfig config, final Writer output) {
-        Utils.xmlParser.serialize(obj, config, output);
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param xml
-     * @param targetType
-     * @return
-     * @see com.landawn.abacus.util.TypeReference
-     * @see com.landawn.abacus.util.TypeReference.TypeToken
-     */
-    public static <T> T fromXml(final String xml, final Class<? extends T> targetType) {
-        return Utils.xmlParser.deserialize(xml, targetType);
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param xml
-     * @param config
-     * @param targetType
-     * @return
-     * @see com.landawn.abacus.util.TypeReference
-     * @see com.landawn.abacus.util.TypeReference.TypeToken
-     */
-    public static <T> T fromXml(final String xml, final XMLDeserializationConfig config, final Class<? extends T> targetType) {
-        return Utils.xmlParser.deserialize(xml, config, targetType);
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param xml
-     * @param targetType
-     * @return
-     * @see com.landawn.abacus.util.TypeReference
-     * @see com.landawn.abacus.util.TypeReference.TypeToken
-     */
-    public static <T> T fromXml(final File xml, final Class<? extends T> targetType) {
-        return Utils.xmlParser.deserialize(xml, targetType);
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param xml
-     * @param config
-     * @param targetType
-     * @return
-     * @see com.landawn.abacus.util.TypeReference
-     * @see com.landawn.abacus.util.TypeReference.TypeToken
-     */
-    public static <T> T fromXml(final File xml, final XMLDeserializationConfig config, final Class<? extends T> targetType) {
-        return Utils.xmlParser.deserialize(xml, config, targetType);
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param xml
-     * @param targetType
-     * @return
-     * @see com.landawn.abacus.util.TypeReference
-     * @see com.landawn.abacus.util.TypeReference.TypeToken
-     */
-    public static <T> T fromXml(final InputStream xml, final Class<? extends T> targetType) {
-        return Utils.xmlParser.deserialize(xml, targetType);
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param xml
-     * @param config
-     * @param targetType
-     * @return
-     * @see com.landawn.abacus.util.TypeReference
-     * @see com.landawn.abacus.util.TypeReference.TypeToken
-     */
-    public static <T> T fromXml(final InputStream xml, final XMLDeserializationConfig config, final Class<? extends T> targetType) {
-        return Utils.xmlParser.deserialize(xml, config, targetType);
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param xml
-     * @param targetType
-     * @return
-     * @see com.landawn.abacus.util.TypeReference
-     * @see com.landawn.abacus.util.TypeReference.TypeToken
-     */
-    public static <T> T fromXml(final Reader xml, final Class<? extends T> targetType) {
-        return Utils.xmlParser.deserialize(xml, targetType);
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param xml
-     * @param config
-     * @param targetType
-     * @return
-     * @see com.landawn.abacus.util.TypeReference
-     * @see com.landawn.abacus.util.TypeReference.TypeToken
-     */
-    public static <T> T fromXml(final Reader xml, final XMLDeserializationConfig config, final Class<? extends T> targetType) {
-        return Utils.xmlParser.deserialize(xml, config, targetType);
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param xml
-     * @param targetType can be the {@code Type} of {@code Bean/Array/Collection/Map}.
-     * @return
-     * @see com.landawn.abacus.util.TypeReference
-     * @see com.landawn.abacus.util.TypeReference.TypeToken
-     */
-    public static <T> T fromXml(final String xml, final Type<? extends T> targetType) {
-        return fromJson(xml, null, targetType);
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param xml
-     * @param config
-     * @param targetType can be the {@code Type} of {@code Bean/Array/Collection/Map}.
-     * @return
-     * @see com.landawn.abacus.util.TypeReference
-     * @see com.landawn.abacus.util.TypeReference.TypeToken
-     */
-    public static <T> T fromXml(final String xml, final XMLDeserializationConfig config, final Type<? extends T> targetType) {
-        return Utils.xmlParser.deserialize(xml, setConfig(targetType, config, false), targetType.clazz());
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param xml
-     * @param targetType can be the {@code Type} of {@code Bean/Array/Collection/Map}.
-     * @return
-     * @see com.landawn.abacus.util.TypeReference
-     * @see com.landawn.abacus.util.TypeReference.TypeToken
-     */
-    public static <T> T fromXml(final File xml, final Type<? extends T> targetType) {
-        return fromJson(xml, null, targetType);
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param xml
-     * @param config
-     * @param targetType can be the {@code Type} of {@code Bean/Array/Collection/Map}.
-     * @return
-     * @see com.landawn.abacus.util.TypeReference
-     * @see com.landawn.abacus.util.TypeReference.TypeToken
-     */
-    public static <T> T fromXml(final File xml, final XMLDeserializationConfig config, final Type<? extends T> targetType) {
-        return Utils.xmlParser.deserialize(xml, setConfig(targetType, config, false), targetType.clazz());
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param xml
-     * @param targetType can be the {@code Type} of {@code Bean/Array/Collection/Map}.
-     * @return
-     * @see com.landawn.abacus.util.TypeReference
-     * @see com.landawn.abacus.util.TypeReference.TypeToken
-     */
-    public static <T> T fromXml(final InputStream xml, final Type<? extends T> targetType) {
-        return fromJson(xml, null, targetType);
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param xml
-     * @param config
-     * @param targetType can be the {@code Type} of {@code Bean/Array/Collection/Map}.
-     * @return
-     * @see com.landawn.abacus.util.TypeReference
-     * @see com.landawn.abacus.util.TypeReference.TypeToken
-     */
-    public static <T> T fromXml(final InputStream xml, final XMLDeserializationConfig config, final Type<? extends T> targetType) {
-        return Utils.xmlParser.deserialize(xml, setConfig(targetType, config, false), targetType.clazz());
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param xml
-     * @param targetType can be the {@code Type} of {@code Bean/Array/Collection/Map}.
-     * @return
-     * @see com.landawn.abacus.util.TypeReference
-     * @see com.landawn.abacus.util.TypeReference.TypeToken
-     */
-    public static <T> T fromXml(final Reader xml, final Type<? extends T> targetType) {
-        return fromJson(xml, null, targetType);
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param xml
-     * @param config
-     * @param targetType can be the {@code Type} of {@code Bean/Array/Collection/Map}.
-     * @return
-     * @see com.landawn.abacus.util.TypeReference
-     * @see com.landawn.abacus.util.TypeReference.TypeToken
-     */
-    public static <T> T fromXml(final Reader xml, final XMLDeserializationConfig config, final Type<? extends T> targetType) {
-        return Utils.xmlParser.deserialize(xml, setConfig(targetType, config, false), targetType.clazz());
-    }
-
-    /**
-     * Sets the config.
-     *
-     * @param <C>
-     * @param targetType
-     * @param config
-     * @param isJSON
-     * @return
-     */
-    private static <C extends DeserializationConfig<C>> C setConfig(final Type<?> targetType, final C config, boolean isJSON) {
-        C configToReturn = config;
-
-        if (targetType.isCollection() || targetType.isArray()) {
-            if (config == null || config.getElementType() == null) {
-                configToReturn = config == null ? (C) (isJSON ? JDC.create() : XDC.create()) : (C) config.copy();
-
-                configToReturn.setElementType(targetType.getParameterTypes()[0]);
-            }
-        } else if (targetType.isMap() && (config == null || config.getMapKeyType() == null || config.getMapValueType() == null)) {
-            configToReturn = config == null ? (C) (isJSON ? JDC.create() : XDC.create()) : (C) config.copy();
-
-            if (configToReturn.getMapKeyType() == null) {
-                configToReturn.setMapKeyType(targetType.getParameterTypes()[0]);
-            }
-
-            if (configToReturn.getMapValueType() == null) {
-                configToReturn.setMapValueType(targetType.getParameterTypes()[1]);
-            }
-        }
-
-        return configToReturn;
-    }
-
-    /**
-     *
-     * @param xml
-     * @return
-     * @see com.landawn.abacus.util.TypeReference
-     * @see com.landawn.abacus.util.TypeReference.TypeToken
-     */
-    public static String formatXml(final String xml) {
-        return formatXml(xml, MapEntity.class);
-    }
-
-    /**
-     *
-     * @param xml
-     * @param config
-     * @return
-     * @see com.landawn.abacus.util.TypeReference
-     * @see com.landawn.abacus.util.TypeReference.TypeToken
-     */
-    public static String formatXml(final String xml, final XMLSerializationConfig config) {
-        return formatXml(xml, config, MapEntity.class);
-    }
-
-    /**
-     *
-     * @param xml
-     * @param transferType
-     * @return
-     * @see com.landawn.abacus.util.TypeReference
-     * @see com.landawn.abacus.util.TypeReference.TypeToken
-     */
-    public static String formatXml(final String xml, final Class<?> transferType) {
-        return toXml(fromXml(xml, transferType), Utils.xscPrettyFormat);
-    }
-
-    /**
-     *
-     * @param xml
-     * @param config
-     * @param transferType
-     * @return
-     * @see com.landawn.abacus.util.TypeReference
-     * @see com.landawn.abacus.util.TypeReference.TypeToken
-     */
-    public static String formatXml(final String xml, final XMLSerializationConfig config, final Class<?> transferType) {
-        final XMLSerializationConfig configToUse = config == null ? Utils.xscPrettyFormat
-                : (config.prettyFormat() == false ? config.copy().prettyFormat(true) : config);
-
-        return toXml(fromXml(xml, transferType), configToUse);
-    }
-
-    /**
-     *
-     * @param xml
-     * @param transferType
-     * @return
-     * @see com.landawn.abacus.util.TypeReference
-     * @see com.landawn.abacus.util.TypeReference.TypeToken
-     */
-    public static String formatXml(final String xml, final Type<?> transferType) {
-        return toXml(fromXml(xml, transferType), Utils.xscPrettyFormat);
-    }
-
-    /**
-     *
-     * @param xml
-     * @param config
-     * @param transferType
-     * @return
-     * @see com.landawn.abacus.util.TypeReference
-     * @see com.landawn.abacus.util.TypeReference.TypeToken
-     */
-    public static String formatXml(final String xml, final XMLSerializationConfig config, final Type<?> transferType) {
-        final XMLSerializationConfig configToUse = config == null ? Utils.xscPrettyFormat
-                : (config.prettyFormat() == false ? config.copy().prettyFormat(true) : config);
-
-        return toXml(fromXml(xml, transferType), configToUse);
-    }
-
-    /**
-     * Xml 2 JSO.
-     *
-     * @param xml
-     * @return
-     * @see com.landawn.abacus.util.TypeReference
-     * @see com.landawn.abacus.util.TypeReference.TypeToken
-     */
-    public static String xml2Json(final String xml) {
-        return xml2Json(xml, Map.class);
-    }
-
-    /**
-     * Xml 2 JSO.
-     * @param xml
-     * @param transferType
-     *
-     * @return
-     * @see com.landawn.abacus.util.TypeReference
-     * @see com.landawn.abacus.util.TypeReference.TypeToken
-     */
-    public static String xml2Json(final String xml, final Class<?> transferType) {
-        return Utils.jsonParser.serialize(Utils.xmlParser.deserialize(xml, transferType), Utils.jsc);
-    }
-
-    /**
-     * Json 2 XML.
-     *
-     * @param json
-     * @return
-     * @see com.landawn.abacus.util.TypeReference
-     * @see com.landawn.abacus.util.TypeReference.TypeToken
-     */
-    public static String json2Xml(final String json) {
-        return json2Xml(json, Map.class);
-    }
-
-    /**
-     * Json 2 XML.
-     * @param json
-     * @param transferType
-     *
-     * @return
-     * @see com.landawn.abacus.util.TypeReference
-     * @see com.landawn.abacus.util.TypeReference.TypeToken
-     */
-    public static String json2Xml(final String json, final Class<?> transferType) {
-        return Utils.xmlParser.serialize(Utils.jsonParser.deserialize(json, transferType));
-    }
-
-    /**
-     *
      * @param cmd
      * @param retryTimes
      * @param retryIntervallInMillis
@@ -28516,19 +28158,19 @@ public final class N extends CommonUtil { // public final class N extends π imp
         }, delayInMillis, TimeUnit.MILLISECONDS));
     }
 
-    /**
-     *
-     * @param commands
-     * @return
-     * @see Futures
-     * @see Fn#jr(Runnable)
-     * @see Fn#jc(Callable)
-     */
-    @SuppressWarnings("deprecation")
-    @SafeVarargs
-    public static List<ContinuableFuture<Void>> asyncExecute(final Throwables.Runnable<? extends Exception>... commands) {
-        return ASYNC_EXECUTOR.execute(commands);
-    }
+    //    /**
+    //     *
+    //     * @param commands
+    //     * @return
+    //     * @see Futures
+    //     * @see Fn#jr(Runnable)
+    //     * @see Fn#jc(Callable)
+    //     */
+    //    @SuppressWarnings("deprecation")
+    //    @SafeVarargs
+    //    public static List<ContinuableFuture<Void>> asyncExecute(final Throwables.Runnable<? extends Exception>... commands) {
+    //        return ASYNC_EXECUTOR.execute(commands);
+    //    }
 
     /**
      *
@@ -28592,20 +28234,20 @@ public final class N extends CommonUtil { // public final class N extends π imp
         return new ContinuableFuture<>(SCHEDULED_EXECUTOR.schedule(command, delayInMillis, TimeUnit.MILLISECONDS));
     }
 
-    /**
-     *
-     * @param <R>
-     * @param commands
-     * @return
-     * @see Futures
-     * @see Fn#jr(Runnable)
-     * @see Fn#jc(Callable)
-     */
-    @SuppressWarnings("deprecation")
-    @SafeVarargs
-    public static <R> List<ContinuableFuture<R>> asyncExecute(final Callable<R>... commands) {
-        return ASYNC_EXECUTOR.execute(commands);
-    }
+    //    /**
+    //     *
+    //     * @param <R>
+    //     * @param commands
+    //     * @return
+    //     * @see Futures
+    //     * @see Fn#jr(Runnable)
+    //     * @see Fn#jc(Callable)
+    //     */
+    //    @SuppressWarnings("deprecation")
+    //    @SafeVarargs
+    //    public static <R> List<ContinuableFuture<R>> asyncExecute(final Callable<R>... commands) {
+    //        return ASYNC_EXECUTOR.execute(commands);
+    //    }
 
     /**
      *
@@ -29946,7 +29588,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      * @throws IllegalArgumentException
      */
-    public static <T> T callUninterruptibly(final long timeoutInMillis, final Throwables.LongFunction<T, InterruptedException> cmd)
+    public static <T> T callUninterruptibly(final long timeoutInMillis, final Throwables.LongFunction<? extends T, InterruptedException> cmd)
             throws IllegalArgumentException {
         checkArgNotNull(cmd);
 
@@ -30462,578 +30104,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
         return a;
     }
 
-    //    /**
-    //     *
-    //     * @param <T>
-    //     * @param a
-    //     * @param b
-    //     * @param nextSelector
-    //     * @return
-    //     * @see {@code Iterators.merge(Iterator, Iterator, BiFunction)}
-    //     */
-    //    public static <T, E extends Exception> List<T> merge(final Iterator<? extends T> a, final Iterator<? extends T> b,
-    //            final Throwables.BiFunction<? super T, ? super T, MergeResult, E> nextSelector) throws E {
-    //        if (a == null) {
-    //            return b == null ? new ArrayList<>() : toList(b);
-    //        } else if (b == null) {
-    //            return toList(a);
-    //        }
-    //
-    //        final List<T> result = new ArrayList<>(9);
-    //        final Iterator<? extends T> iterA = a;
-    //        final Iterator<? extends T> iterB = b;
-    //
-    //        T nextA = null;
-    //        T nextB = null;
-    //        boolean hasNextA = false;
-    //        boolean hasNextB = false;
-    //
-    //        while (hasNextA || hasNextB || iterA.hasNext() || iterB.hasNext()) {
-    //            if (hasNextA) {
-    //                if (iterB.hasNext()) {
-    //                    if (nextSelector.apply(nextA, (nextB = iterB.next())) == MergeResult.TAKE_FIRST) {
-    //                        hasNextA = false;
-    //                        hasNextB = true;
-    //                        result.add(nextA);
-    //                    } else {
-    //                        result.add(nextB);
-    //                    }
-    //                } else {
-    //                    hasNextA = false;
-    //                    result.add(nextA);
-    //                }
-    //            } else if (hasNextB) {
-    //                if (iterA.hasNext()) {
-    //                    if (nextSelector.apply((nextA = iterA.next()), nextB) == MergeResult.TAKE_FIRST) {
-    //                        result.add(nextA);
-    //                    } else {
-    //                        hasNextA = true;
-    //                        hasNextB = false;
-    //                        result.add(nextB);
-    //                    }
-    //                } else {
-    //                    hasNextB = false;
-    //                    result.add(nextB);
-    //                }
-    //            } else if (iterA.hasNext()) {
-    //                if (iterB.hasNext()) {
-    //                    if (nextSelector.apply((nextA = iterA.next()), (nextB = iterB.next())) == MergeResult.TAKE_FIRST) {
-    //                        hasNextB = true;
-    //                        result.add(nextA);
-    //                    } else {
-    //                        hasNextA = true;
-    //                        result.add(nextB);
-    //                    }
-    //                } else {
-    //                    result.add(iterA.next());
-    //                }
-    //            } else {
-    //                result.add(iterB.next());
-    //            }
-    //        }
-    //
-    //        return result;
-    //    }
-
-    //    /**
-    //     *
-    //     * @param <A>
-    //     * @param <B>
-    //     * @param <R>
-    //     * @param a
-    //     * @param b
-    //     * @param zipFunction
-    //     * @return
-    //     * @see {@code Iterators.zip(Iterator, Iterator, BiFunction)}
-    //     */
-    //    public static <A, B, R, E extends Exception> List<R> zip(final Iterator<A> a, final Iterator<B> b,
-    //            final Throwables.BiFunction<? super A, ? super B, ? extends R, E> zipFunction) throws E {
-    //        checkArgNotNull(zipFunction);
-    //
-    //        if (a == null || b == null) {
-    //            return new ArrayList<>();
-    //        }
-    //
-    //        final Iterator<A> iterA = a;
-    //        final Iterator<B> iterB = b;
-    //        final List<R> result = new ArrayList<>(9);
-    //
-    //        while (iterA.hasNext() && iterB.hasNext()) {
-    //            result.add(zipFunction.apply(iterA.next(), iterB.next()));
-    //        }
-    //
-    //        return result;
-    //    }
-    //
-    //    /**
-    //     *
-    //     * @param <A>
-    //     * @param <B>
-    //     * @param <C>
-    //     * @param <R>
-    //     * @param a
-    //     * @param b
-    //     * @param c
-    //     * @param zipFunction
-    //     * @return
-    //     * @see {@code Iterators.zip(Iterator, Iterator, Iterator, TriFunction)}
-    //     */
-    //    public static <A, B, C, R, E extends Exception> List<R> zip(final Iterator<A> a, final Iterator<B> b, final Iterator<C> c,
-    //            final Throwables.TriFunction<? super A, ? super B, ? super C, ? extends R, E> zipFunction) throws E {
-    //        checkArgNotNull(zipFunction);
-    //
-    //        if (a == null || b == null || c == null) {
-    //            return new ArrayList<>();
-    //        }
-    //
-    //        final Iterator<A> iterA = a;
-    //        final Iterator<B> iterB = b;
-    //        final Iterator<C> iterC = c;
-    //        final List<R> result = new ArrayList<>(9);
-    //
-    //        while (iterA.hasNext() && iterB.hasNext() && iterC.hasNext()) {
-    //            result.add(zipFunction.apply(iterA.next(), iterB.next(), iterC.next()));
-    //        }
-    //
-    //        return result;
-    //    }
-    //
-    //    /**
-    //     *
-    //     * @param <A>
-    //     * @param <B>
-    //     * @param <R>
-    //     * @param a
-    //     * @param b
-    //     * @param valueForNoneA
-    //     * @param valueForNoneB
-    //     * @param zipFunction
-    //     * @return
-    //     * @see {@code Iterators.zip(Iterator, Iterator, Object, Object, BiFunction)}
-    //     */
-    //    public static <A, B, R, E extends Exception> List<R> zip(final Iterator<A> a, final Iterator<B> b, final A valueForNoneA, final B valueForNoneB,
-    //            final Throwables.BiFunction<? super A, ? super B, ? extends R, E> zipFunction) throws E {
-    //        checkArgNotNull(zipFunction);
-    //
-    //        final Iterator<A> iterA = a == null ? ObjIterator.<A> empty() : a;
-    //        final Iterator<B> iterB = b == null ? ObjIterator.<B> empty() : b;
-    //
-    //        final List<R> result = new ArrayList<>(9);
-    //        boolean hasA = true;
-    //
-    //        do {
-    //            if (hasA && (hasA = iterA.hasNext())) {
-    //                result.add(zipFunction.apply(iterA.next(), iterB.hasNext() ? iterB.next() : valueForNoneB));
-    //            } else if (iterB.hasNext()) {
-    //                result.add(zipFunction.apply(valueForNoneA, iterB.next()));
-    //            } else {
-    //                break;
-    //            }
-    //        } while (true);
-    //
-    //        return result;
-    //    }
-    //
-    //    /**
-    //     *
-    //     * @param <A>
-    //     * @param <B>
-    //     * @param <C>
-    //     * @param <R>
-    //     * @param a
-    //     * @param b
-    //     * @param c
-    //     * @param valueForNoneA
-    //     * @param valueForNoneB
-    //     * @param valueForNoneC
-    //     * @param zipFunction
-    //     * @return
-    //     * @see {@code Iterators.zip(Iterator, Iterator, Iterator, Object, Object, Object, TriFunction)}
-    //     */
-    //    public static <A, B, C, R, E extends Exception> List<R> zip(final Iterator<A> a, final Iterator<B> b, final Iterator<C> c, final A valueForNoneA,
-    //            final B valueForNoneB, final C valueForNoneC, final Throwables.TriFunction<? super A, ? super B, ? super C, ? extends R, E> zipFunction) throws E {
-    //        checkArgNotNull(zipFunction);
-    //
-    //        final Iterator<A> iterA = a == null ? ObjIterator.<A> empty() : a;
-    //        final Iterator<B> iterB = b == null ? ObjIterator.<B> empty() : b;
-    //        final Iterator<C> iterC = c == null ? ObjIterator.<C> empty() : c;
-    //
-    //        final List<R> result = new ArrayList<>(9);
-    //        boolean hasA = true;
-    //        boolean hasB = true;
-    //
-    //        do {
-    //            if (hasA && (hasA = iterA.hasNext())) {
-    //                result.add(zipFunction.apply(iterA.next(), iterB.hasNext() ? iterB.next() : valueForNoneB, iterC.hasNext() ? iterC.next() : valueForNoneC));
-    //            } else if (hasB && (hasB = iterB.hasNext())) {
-    //                result.add(zipFunction.apply(valueForNoneA, iterB.next(), iterC.hasNext() ? iterC.next() : valueForNoneC));
-    //            } else if (iterC.hasNext()) {
-    //                result.add(zipFunction.apply(valueForNoneA, valueForNoneB, iterC.hasNext() ? iterC.next() : valueForNoneC));
-    //            } else {
-    //                break;
-    //            }
-    //        } while (true);
-    //
-    //        return result;
-    //    }
-
-    //    /**
-    //     *
-    //     * @param <T>
-    //     * @param <L>
-    //     * @param <R>
-    //     * @param iter
-    //     * @param unzip the second parameter is an output parameter.
-    //     * @return
-    //     * @see {@code Iterators.unzip(Iterator, BiConsumer)}
-    //     */
-    //    public static <T, L, R, E extends Exception> Pair<List<L>, List<R>> unzip(final Iterator<? extends T> iter,
-    //            final Throwables.BiConsumer<? super T, Pair<L, R>, E> unzip) throws E {
-    //        checkArgNotNull(unzip);
-    //
-    //        final int len = 9;
-    //
-    //        final List<L> l = new ArrayList<>(len);
-    //        final List<R> r = new ArrayList<>(len);
-    //        final Pair<L, R> p = new Pair<>();
-    //
-    //        if (iter != null) {
-    //            T e = null;
-    //
-    //            while (iter.hasNext()) {
-    //                e = iter.next();
-    //
-    //                unzip.accept(e, p);
-    //
-    //                l.add(p.left);
-    //                r.add(p.right);
-    //            }
-    //        }
-    //
-    //        return Pair.of(l, r);
-    //    }
-
-    // Boolean utilities
-    //--------------------------------------------------------------------------
-
-    //    @Beta
-    //    public static boolean isNullOrFalse(final Boolean bool) {
-    //        if (bool == null) {
-    //            return true;
-    //        }
-    //
-    //        return Boolean.FALSE.equals(bool);
-    //    }
-    //
-    //    @Beta
-    //    public static boolean isNullOrTrue(final Boolean bool) {
-    //        if (bool == null) {
-    //            return true;
-    //        }
-    //
-    //        return Boolean.TRUE.equals(bool);
-    //    }
-
-    /**
-     * Returns {@code true} if the specified {@code boolean} is {@code Boolean.TRUE}, not {@code null} or {@code Boolean.FALSE}.
-     *
-     * @param bool
-     * @return
-     */
-    @Beta
-    public static boolean isTrue(final Boolean bool) {
-        return Boolean.TRUE.equals(bool);
-    }
-
-    /**
-     * Returns {@code true} if the specified {@code boolean} is {@code null} or {@code Boolean.FALSE}.
-     *
-     * @param bool
-     * @return
-     */
-    @Beta
-    public static boolean isNotTrue(final Boolean bool) {
-        return bool == null || Boolean.FALSE.equals(bool);
-    }
-
-    /**
-     * Returns {@code true} if the specified {@code boolean} is {@code Boolean.FALSE}, not {@code null} or {@code Boolean.TRUE}.
-     *
-     * @param bool
-     * @return
-     */
-    @Beta
-    public static boolean isFalse(final Boolean bool) {
-        return Boolean.FALSE.equals(bool);
-    }
-
-    /**
-     * Returns {@code true} if the specified {@code boolean} is {@code null} or {@code Boolean.TRUE}.
-     *
-     * @param bool
-     * @return
-     */
-    @Beta
-    public static boolean isNotFalse(final Boolean bool) {
-        return bool == null || Boolean.TRUE.equals(bool);
-    }
-
-    /**
-     * <p>Note: copied from Apache commons Lang under Apache license v2.0 </p>
-     *
-     * <p>Negates the specified boolean.</p>
-     *
-     * <p>If {@code null} is passed in, {@code null} will be returned.</p>
-     *
-     * <p>NOTE: This returns null and will throw a NullPointerException if autoboxed to a boolean. </p>
-     *
-     * <pre>
-     *   BooleanUtils.negate(Boolean.TRUE)  = Boolean.FALSE;
-     *   BooleanUtils.negate(Boolean.FALSE) = Boolean.TRUE;
-     *   BooleanUtils.negate(null)          = null;
-     * </pre>
-     *
-     * @param bool  the Boolean to negate, may be null
-     * @return the negated Boolean, or {@code null} if {@code null} input
-     */
-    @MayReturnNull
-    @Beta
-    public static Boolean negate(final Boolean bool) {
-        if (bool == null) {
-            return null; //NOSONAR
-        }
-
-        return bool.booleanValue() ? Boolean.FALSE : Boolean.TRUE;
-    }
-
-    /**
-     * <p>Negates boolean values in the specified boolean array</p>.
-     *
-     * @param a
-     */
-    @Beta
-    public static void negate(final boolean[] a) {
-        if (isEmpty(a)) {
-            return;
-        }
-
-        negate(a, 0, a.length);
-    }
-
-    /**
-     * <p>Negates boolean values {@code fromIndex} to {@code toIndex} in the specified boolean array</p>.
-     *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @throws IndexOutOfBoundsException
-     */
-    @Beta
-    public static void negate(final boolean[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));
-
-        if (fromIndex == toIndex) {
-            return;
-        }
-
-        for (int i = fromIndex; i < toIndex; i++) {
-            a[i] = !a[i];
-        }
-    }
-
-    //    /**
-    //     * Returns {@code 0} if the specified {@code bool} is {@code null} or {@code false}, otherwise {@code 1} is returned.
-    //     *
-    //     * @param bool
-    //     * @return
-    //     */
-    //    @Beta
-    //    public static int toIntOneZero(final Boolean bool) {
-    //        if (bool == null) {
-    //            return 0;
-    //        }
-    //
-    //        return bool.booleanValue() ? 1 : 0;
-    //    }
-    //
-    //    /**
-    //     * Returns {@code 'N'} if the specified {@code bool} is {@code null} or {@code false}, otherwise {@code 'Y'} is returned.
-    //     *
-    //     *
-    //     * @param bool
-    //     * @return
-    //     */
-    //    @Beta
-    //    public static char toCharYN(final Boolean bool) {
-    //        if (bool == null) {
-    //            return 'N';
-    //        }
-    //
-    //        return bool.booleanValue() ? 'Y' : 'N';
-    //    }
-    //
-    //    /**
-    //     * Returns {@code "no"} if the specified {@code bool} is {@code null} or {@code false}, otherwise {@code "yes"} is returned.
-    //     *
-    //     *
-    //     * @param bool
-    //     * @return
-    //     */
-    //    @Beta
-    //    public static String toStringYesNo(final Boolean bool) {
-    //        if (bool == null) {
-    //            return "no";
-    //        }
-    //
-    //        return bool.booleanValue() ? "yes" : "no";
-    //    }
-
-    //    /**
-    //     * Add it because {@code Comparator.reversed()} doesn't work well in some scenarios.
-    //     *
-    //     * @param <T>
-    //     * @param cmp
-    //     * @return
-    //     * @see Collections#reverseOrder(Comparator)
-    //     * @see Comparators#reverseOrder(Comparator)
-    //     * @deprecated replaced by {@code Comparators.reverseOrder(Comparator)}
-    //     */
-    //    @Deprecated
-    //    @Beta
-    //    public static <T> Comparator<T> reverseOrder(final Comparator<T> cmp) {
-    //        return Comparators.reverseOrder(cmp);
-    //    }
-
-    /**
-     * Returns an {@code unmodifiable view} of the specified {@code Collection}. Or an empty {@code Collection} if the specified {@code collection} is null.
-     *
-     * @param <T>
-     * @param c
-     * @return an empty {@code Collection} if the specified {@code c} is null.
-     */
-    public static <T> Collection<T> unmodifiableCollection(Collection<? extends T> c) {
-        if (c == null) {
-            return emptyList();
-        }
-
-        return Collections.unmodifiableCollection(c);
-    }
-
-    /**
-     * Returns an {@code unmodifiable view} of the specified {@code List}. Or an empty {@code List} if the specified {@code list} is null.
-     *
-     * @param <T>
-     * @param list
-     * @return
-     * @see Collections.unmodifiableList(List)
-     */
-    public static <T> List<T> unmodifiableList(final List<? extends T> list) {
-        if (list == null) {
-            return emptyList();
-        }
-
-        return Collections.unmodifiableList(list);
-    }
-
-    /**
-     * Returns an {@code unmodifiable view} of the specified {@code Set}. Or an empty {@code Set} if the specified {@code set} is null.
-     *
-     * @param <T>
-     * @param s
-     * @return
-     * @see Collections.unmodifiableSet(Set)
-     */
-    public static <T> Set<T> unmodifiableSet(final Set<? extends T> s) {
-        if (s == null) {
-            return emptySet();
-        }
-
-        return Collections.unmodifiableSet(s);
-    }
-
-    /**
-     * Returns an {@code unmodifiable view} of the specified {@code SortedSet}. Or an empty {@code SortedSet} if the specified {@code set} is null.
-     *
-     * @param <T>
-     * @param s
-     * @return
-     * @see Collections.unmodifiableSet(SortedSet)
-     */
-    public static <T> SortedSet<T> unmodifiableSortedSet(final SortedSet<T> s) {
-        if (s == null) {
-            return emptySortedSet();
-        }
-
-        return Collections.unmodifiableSortedSet(s);
-    }
-
-    /**
-     * Returns an {@code unmodifiable view} of the specified {@code NavigableSet}. Or an empty {@code NavigableSet} if the specified {@code set} is null.
-     *
-     * @param <T>
-     * @param s
-     * @return
-     * @see Collections.unmodifiableNavigableSet(NavigableSet)
-     */
-    public static <T> NavigableSet<T> unmodifiableNavigableSet(final NavigableSet<T> s) {
-        if (s == null) {
-            return emptyNavigableSet();
-        }
-
-        return Collections.unmodifiableNavigableSet(s);
-    }
-
-    /**
-     * Returns an {@code unmodifiable view} of the specified {@code Map}. Or an empty {@code Map} if the specified {@code map} is null.
-     *
-     * @param <K>
-     * @param <V>
-     * @param m
-     * @return
-     * @see Collections#unmodifiableMap(Map)
-     */
-    public static <K, V> Map<K, V> unmodifiableMap(Map<? extends K, ? extends V> m) {
-        if (m == null) {
-            return emptyMap();
-        }
-
-        return Collections.unmodifiableMap(m);
-    }
-
-    /**
-     * Returns an {@code unmodifiable view} of the specified {@code SortedMap}. Or an empty {@code SortedMap} if the specified {@code map} is null.
-     *
-     * @param <K>
-     * @param <V>
-     * @param m
-     * @return
-     * @see Collections#unmodifiableSortedMap(SortedMap)
-     */
-    public static <K, V> SortedMap<K, V> unmodifiableSortedMap(SortedMap<K, ? extends V> m) {
-        if (m == null) {
-            return emptySortedMap();
-        }
-
-        return Collections.unmodifiableSortedMap(m);
-    }
-
-    /**
-     * Returns an {@code unmodifiable view} of the specified {@code NavigableMap}. Or an empty {@code NavigableMap} if the specified {@code map} is null.
-     *
-     * @param <K>
-     * @param <V>
-     * @param m
-     * @return
-     * @see Collections#unmodifiableNavigableMap(NavigableMap)
-     */
-    public static <K, V> NavigableMap<K, V> unmodifiableNavigableMap(NavigableMap<K, ? extends V> m) {
-        if (m == null) {
-            return emptyNavigableMap();
-        }
-
-        return Collections.unmodifiableNavigableMap(m);
-    }
-
     /**
      *
      *
@@ -31057,6 +30127,26 @@ public final class N extends CommonUtil { // public final class N extends π imp
     @Beta
     public static <T, E extends Exception> Throwables.Supplier<T, E> lazyInitialize(final Throwables.Supplier<T, E> supplier) {
         return Throwables.LazyInitializer.of(supplier);
+    }
+
+    static <T> Iterator<T> getDescendingIteratorIfPossible(final Iterable<? extends T> c) {
+        if (c instanceof Deque) {
+            return ((Deque<T>) c).descendingIterator();
+        } else {
+            try {
+                Method m = null;
+
+                if ((m = ClassUtil.getDeclaredMethod(c.getClass(), "descendingIterator")) != null && Modifier.isPublic(m.getModifiers())
+                        && Iterator.class.isAssignableFrom(m.getReturnType())) {
+
+                    return (Iterator<T>) ClassUtil.invokeMethod(c, m);
+                }
+            } catch (Exception e) {
+                // continue
+            }
+        }
+
+        return null; // NOSONAR
     }
 
     /**
@@ -31131,11 +30221,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
     @SuppressWarnings("rawtypes")
     public static <T> T println(final T obj) {
         if (obj instanceof Collection) {
-            System.out.println(Joiner.with(Strings.ELEMENT_SEPARATOR, "[", "]").reuseCachedBuffer().appendAll((Collection) obj));
+            System.out.println(Joiner.with(Strings.ELEMENT_SEPARATOR, "[", "]").reuseCachedBuffer().appendAll((Collection) obj)); //NOSONAR
         } else if (obj instanceof Map) {
-            System.out.println(Joiner.with(Strings.ELEMENT_SEPARATOR, "=", "{", "}").reuseCachedBuffer().appendEntries((Map) obj));
+            System.out.println(Joiner.with(Strings.ELEMENT_SEPARATOR, "=", "{", "}").reuseCachedBuffer().appendEntries((Map) obj)); //NOSONAR
         } else {
-            System.out.println(toString(obj));
+            System.out.println(toString(obj)); //NOSONAR
         }
 
         return obj;
@@ -31150,8 +30240,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     @SafeVarargs
     public static <T> T[] fprintln(final String format, final T... args) {
-        System.out.printf(format, args);
-        System.out.println();
+        System.out.printf(format, args); //NOSONAR
+        System.out.println(); //NOSONAR
         return args;
     }
 }

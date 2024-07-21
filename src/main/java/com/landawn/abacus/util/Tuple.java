@@ -100,13 +100,13 @@ public abstract class Tuple<TP> implements Immutable {
 
     /**
      *
-     * @param <U>
+     * @param <R>
      * @param <E>
      * @param mapper
      * @return
      * @throws E the e
      */
-    public <U, E extends Exception> U map(final Throwables.Function<? super TP, U, E> mapper) throws E {
+    public <R, E extends Exception> R map(final Throwables.Function<? super TP, R, E> mapper) throws E {
         return mapper.apply((TP) this);
     }
 
@@ -947,13 +947,13 @@ public abstract class Tuple<TP> implements Immutable {
 
         /**
          *
-         * @param <U>
+         * @param <R>
          * @param <E>
          * @param mapper
          * @return
          * @throws E the e
          */
-        public <U, E extends Exception> U map(final Throwables.BiFunction<? super T1, ? super T2, U, E> mapper) throws E {
+        public <R, E extends Exception> R map(final Throwables.BiFunction<? super T1, ? super T2, ? extends R, E> mapper) throws E {
             return mapper.apply(_1, _2);
         }
 
@@ -1158,13 +1158,13 @@ public abstract class Tuple<TP> implements Immutable {
 
         /**
          *
-         * @param <U>
+         * @param <R>
          * @param <E>
          * @param mapper
          * @return
          * @throws E the e
          */
-        public <U, E extends Exception> U map(final Throwables.TriFunction<? super T1, ? super T2, ? super T3, U, E> mapper) throws E {
+        public <R, E extends Exception> R map(final Throwables.TriFunction<? super T1, ? super T2, ? super T3, ? extends R, E> mapper) throws E {
             return mapper.apply(_1, _2, _3);
         }
 

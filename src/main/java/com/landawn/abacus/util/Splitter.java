@@ -20,6 +20,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -411,11 +413,11 @@ public final class Splitter {
     }
 
     /**
-     * 
      *
-     * @param limit 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param limit
+     * @return
+     * @throws IllegalArgumentException
      */
     public Splitter limit(int limit) throws IllegalArgumentException {
         N.checkArgPositive(limit, "limit");
@@ -457,13 +459,11 @@ public final class Splitter {
      *
      *
      * @param <T>
-     * @param <E>
      * @param source
      * @param mapper
      * @return
-     * @throws E
      */
-    public <T, E extends Exception> List<T> split(final CharSequence source, final Throwables.Function<? super String, ? extends T, E> mapper) throws E {
+    public <T> List<T> split(final CharSequence source, final Function<? super String, ? extends T> mapper) {
         final List<String> tmp = new ArrayList<>();
         split(source, tmp);
 
@@ -478,13 +478,13 @@ public final class Splitter {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param source 
-     * @param targetType 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <T>
+     * @param source
+     * @param targetType
+     * @return
+     * @throws IllegalArgumentException
      */
     public <T> List<T> split(final CharSequence source, final Class<? extends T> targetType) throws IllegalArgumentException {
         N.checkArgNotNull(targetType, "targetType");
@@ -513,13 +513,13 @@ public final class Splitter {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param source 
-     * @param targetType 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <T>
+     * @param source
+     * @param targetType
+     * @return
+     * @throws IllegalArgumentException
      */
     public <T> List<T> split(final CharSequence source, final Type<? extends T> targetType) throws IllegalArgumentException {
         N.checkArgNotNull(targetType, "targetType");
@@ -550,12 +550,12 @@ public final class Splitter {
     }
 
     /**
-     * 
      *
-     * @param <C> 
-     * @param source 
-     * @param output 
-     * @throws IllegalArgumentException 
+     *
+     * @param <C>
+     * @param source
+     * @param output
+     * @throws IllegalArgumentException
      */
     public <C extends Collection<String>> void split(final CharSequence source, final C output) throws IllegalArgumentException {
         N.checkArgNotNull(output, "output");
@@ -568,15 +568,15 @@ public final class Splitter {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <C> 
-     * @param source 
-     * @param targetType 
-     * @param output 
+     *
+     * @param <T>
+     * @param <C>
+     * @param source
+     * @param targetType
+     * @param output
      * @return the specified output parameter: {@code output}
-     * @throws IllegalArgumentException 
+     * @throws IllegalArgumentException
      */
     public <T, C extends Collection<T>> void split(final CharSequence source, final Class<? extends T> targetType, final C output)
             throws IllegalArgumentException {
@@ -589,14 +589,14 @@ public final class Splitter {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <C> 
-     * @param source 
-     * @param targetType 
-     * @param output 
-     * @throws IllegalArgumentException 
+     *
+     * @param <T>
+     * @param <C>
+     * @param source
+     * @param targetType
+     * @param output
+     * @throws IllegalArgumentException
      */
     public <T, C extends Collection<T>> void split(final CharSequence source, final Type<? extends T> targetType, final C output)
             throws IllegalArgumentException {
@@ -647,13 +647,11 @@ public final class Splitter {
     /**
      * Split to array.
      *
-     * @param <E>
      * @param source
      * @param mapper
      * @return
-     * @throws E
      */
-    public <E extends Exception> String[] splitToArray(final CharSequence source, final Throwables.Function<? super String, String, E> mapper) throws E {
+    public String[] splitToArray(final CharSequence source, final Function<? super String, String> mapper) {
         final List<String> substrs = split(source, mapper);
 
         return substrs.toArray(new String[substrs.size()]);
@@ -662,11 +660,11 @@ public final class Splitter {
     /**
      * Split to array.
      *
-     * @param <T> 
-     * @param source 
-     * @param arrayType 
-     * @return 
-     * @throws IllegalArgumentException 
+     * @param <T>
+     * @param source
+     * @param arrayType
+     * @return
+     * @throws IllegalArgumentException
      */
     public <T> T splitToArray(final CharSequence source, final Class<T> arrayType) throws IllegalArgumentException {
         N.checkArgNotNull(arrayType, "arrayType");
@@ -700,9 +698,9 @@ public final class Splitter {
     /**
      * Split to array.
      *
-     * @param source 
-     * @param output 
-     * @throws IllegalArgumentException 
+     * @param source
+     * @param output
+     * @throws IllegalArgumentException
      */
     public void splitToArray(final CharSequence source, final String[] output) throws IllegalArgumentException {
         N.checkArgNotEmpty(output, "output");
@@ -727,25 +725,21 @@ public final class Splitter {
     /**
      *
      * @param <R>
-     * @param <E>
      * @param source
      * @param converter
      * @return
-     * @throws E the e
      */
-    public <R, E extends Exception> R splitThenApply(final CharSequence source, final Throwables.Function<? super List<String>, R, E> converter) throws E {
+    public <R> R splitThenApply(final CharSequence source, final Function<? super List<String>, R> converter) {
         return converter.apply(split(source));
     }
 
     /**
      *
      *
-     * @param <E>
      * @param source
      * @param consumer
-     * @throws E the e
      */
-    public <E extends Exception> void splitThenAccept(final CharSequence source, final Throwables.Consumer<? super List<String>, E> consumer) throws E {
+    public void splitThenAccept(final CharSequence source, final Consumer<? super List<String>> consumer) {
         consumer.accept(split(source));
     }
 
@@ -905,11 +899,11 @@ public final class Splitter {
         }
 
         /**
-         * 
          *
-         * @param limit 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param limit
+         * @return
+         * @throws IllegalArgumentException
          */
         public MapSplitter limit(int limit) throws IllegalArgumentException {
             N.checkArgPositive(limit, "limit");
@@ -948,15 +942,15 @@ public final class Splitter {
         }
 
         /**
-         * 
+         *
          *
          * @param <K> the key type
          * @param <V> the value type
-         * @param source 
-         * @param keyType 
-         * @param valueType 
-         * @return 
-         * @throws IllegalArgumentException 
+         * @param source
+         * @param keyType
+         * @param valueType
+         * @return
+         * @throws IllegalArgumentException
          */
         public <K, V> Map<K, V> split(final CharSequence source, final Class<K> keyType, final Class<V> valueType) throws IllegalArgumentException {
             N.checkArgNotNull(keyType, "keyType");
@@ -969,15 +963,15 @@ public final class Splitter {
         }
 
         /**
-         * 
+         *
          *
          * @param <K> the key type
          * @param <V> the value type
-         * @param source 
-         * @param keyType 
-         * @param valueType 
-         * @return 
-         * @throws IllegalArgumentException 
+         * @param source
+         * @param keyType
+         * @param valueType
+         * @return
+         * @throws IllegalArgumentException
          */
         public <K, V> Map<K, V> split(final CharSequence source, final Type<K> keyType, final Type<V> valueType) throws IllegalArgumentException {
             N.checkArgNotNull(keyType, "keyType");
@@ -1033,12 +1027,12 @@ public final class Splitter {
         }
 
         /**
-         * 
          *
-         * @param <M> 
-         * @param source 
-         * @param output 
-         * @throws IllegalArgumentException 
+         *
+         * @param <M>
+         * @param source
+         * @param output
+         * @throws IllegalArgumentException
          */
         public <M extends Map<String, String>> void split(final CharSequence source, final M output) throws IllegalArgumentException {
             N.checkArgNotNull(output, "output");
@@ -1075,16 +1069,16 @@ public final class Splitter {
         }
 
         /**
-         * 
+         *
          *
          * @param <K> the key type
          * @param <V> the value type
-         * @param <M> 
-         * @param source 
-         * @param keyType 
-         * @param valueType 
-         * @param output 
-         * @throws IllegalArgumentException 
+         * @param <M>
+         * @param source
+         * @param keyType
+         * @param valueType
+         * @param output
+         * @throws IllegalArgumentException
          */
         public <K, V, M extends Map<K, V>> void split(final CharSequence source, final Class<K> keyType, final Class<V> valueType, final M output)
                 throws IllegalArgumentException {
@@ -1099,16 +1093,16 @@ public final class Splitter {
         }
 
         /**
-         * 
+         *
          *
          * @param <K> the key type
          * @param <V> the value type
-         * @param <M> 
-         * @param source 
-         * @param keyType 
-         * @param valueType 
-         * @param output 
-         * @throws IllegalArgumentException 
+         * @param <M>
+         * @param source
+         * @param keyType
+         * @param valueType
+         * @param output
+         * @throws IllegalArgumentException
          */
         public <K, V, M extends Map<K, V>> void split(final CharSequence source, final Type<K> keyType, final Type<V> valueType, final M output)
                 throws IllegalArgumentException {
@@ -1243,27 +1237,21 @@ public final class Splitter {
         /**
          *
          * @param <T>
-         * @param <E>
          * @param source
          * @param converter
          * @return
-         * @throws E the e
          */
-        public <T, E extends Exception> T splitThenApply(final CharSequence source, final Throwables.Function<? super Map<String, String>, T, E> converter)
-                throws E {
+        public <T> T splitThenApply(final CharSequence source, final Function<? super Map<String, String>, T> converter) {
             return converter.apply(split(source));
         }
 
         /**
+         * 
          *
-         *
-         * @param <E>
-         * @param source
-         * @param consumer
-         * @throws E the e
+         * @param source 
+         * @param consumer 
          */
-        public <E extends Exception> void splitThenAccept(final CharSequence source, final Throwables.Consumer<? super Map<String, String>, E> consumer)
-                throws E {
+        public void splitThenAccept(final CharSequence source, final Consumer<? super Map<String, String>> consumer) {
             consumer.accept(split(source));
         }
     }

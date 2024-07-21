@@ -38,7 +38,7 @@ public final class Triple<L, M, R> implements Mutable {
     public R right; //NOSONAR
 
     /**
-     * 
+     *
      */
     public Triple() {
     }
@@ -66,12 +66,12 @@ public final class Triple<L, M, R> implements Mutable {
     private static final Triple<?, ?, ?>[] EMPTY_ARRAY = new Triple[0];
 
     /**
-     * 
      *
-     * @param <L> 
-     * @param <M> 
-     * @param <R> 
-     * @return 
+     *
+     * @param <L>
+     * @param <M>
+     * @param <R>
+     * @return
      */
     @SuppressWarnings("unchecked")
     public static <L, M, R> Triple<L, M, R>[] emptyArray() {
@@ -325,18 +325,18 @@ public final class Triple<L, M, R> implements Mutable {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public Triple<L, M, R> copy() {
         return new Triple<>(this.left, this.middle, this.right);
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public Object[] toArray() {
         return new Object[] { left, middle, right };
@@ -402,7 +402,7 @@ public final class Triple<L, M, R> implements Mutable {
      * @return
      * @throws E the e
      */
-    public <U, E extends Exception> U map(final Throwables.TriFunction<? super L, ? super M, ? super R, U, E> mapper) throws E {
+    public <U, E extends Exception> U map(final Throwables.TriFunction<? super L, ? super M, ? super R, ? extends U, E> mapper) throws E {
         return mapper.apply(left, middle, right);
     }
 
@@ -414,7 +414,7 @@ public final class Triple<L, M, R> implements Mutable {
      * @return
      * @throws E the e
      */
-    public <U, E extends Exception> U map(final Throwables.Function<? super Triple<L, M, R>, U, E> mapper) throws E {
+    public <U, E extends Exception> U map(final Throwables.Function<? super Triple<L, M, R>, ? extends U, E> mapper) throws E {
         return mapper.apply(this);
     }
 
@@ -441,49 +441,49 @@ public final class Triple<L, M, R> implements Mutable {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public Stream<Triple<L, M, R>> stream() {
         return Stream.of(this);
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <E> 
-     * @param func 
-     * @return 
-     * @throws E 
+     *
+     * @param <T>
+     * @param <E>
+     * @param func
+     * @return
+     * @throws E
      */
     public <T, E extends Exception> Stream<T> stream(final Throwables.Function<? super Triple<L, M, R>, Stream<T>, E> func) throws E {
         return func.apply(this);
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public Optional<Triple<L, M, R>> toOptional() {
         return Optional.of(this);
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public Tuple3<L, M, R> toTuple() {
         return Tuple.of(left, middle, right);
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public int hashCode() {
@@ -515,9 +515,9 @@ public final class Triple<L, M, R> implements Mutable {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public String toString() {

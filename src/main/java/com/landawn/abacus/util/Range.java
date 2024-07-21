@@ -153,7 +153,7 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      * @param mapper
      * @return
      */
-    public <U extends Comparable<? super U>> Range<U> map(final Function<T, U> mapper) {
+    public <U extends Comparable<? super U>> Range<U> map(final Function<? super T, ? extends U> mapper) {
         return new Range<>(new LowerEndpoint<>(mapper.apply(lowerEndpoint.value), lowerEndpoint.isClosed),
                 new UpperEndpoint<>(mapper.apply(upperEndpoint.value), upperEndpoint.isClosed), boundType);
     }

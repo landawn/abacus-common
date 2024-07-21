@@ -37,9 +37,9 @@ public final class HARUtil {
 
     private static final Logger logger = LoggerFactory.getLogger(HARUtil.class);
 
-    private static final BiPredicate<String, String> defaultHttpHeaderFilterForHARRequest = HttpUtil::isValidHttpHeader;
+    private static final BiPredicate<? super String, String> defaultHttpHeaderFilterForHARRequest = HttpUtil::isValidHttpHeader;
 
-    private static final ThreadLocal<BiPredicate<String, String>> httpHeaderFilterForHARRequest_TL = ThreadLocal //NOSONAR
+    private static final ThreadLocal<BiPredicate<? super String, String>> httpHeaderFilterForHARRequest_TL = ThreadLocal //NOSONAR
             .withInitial(() -> defaultHttpHeaderFilterForHARRequest);
 
     private static final Consumer<String> defaultCurlLogHandler = curl -> {
@@ -48,7 +48,7 @@ public final class HARUtil {
         }
     };
 
-    private static final ThreadLocal<Tuple3<Boolean, Character, Consumer<String>>> logRequestCurlForHARRequest_TL = ThreadLocal //NOSONAR
+    private static final ThreadLocal<Tuple3<Boolean, Character, Consumer<? super String>>> logRequestCurlForHARRequest_TL = ThreadLocal //NOSONAR
             .withInitial(() -> Tuple.of(false, '\'', defaultCurlLogHandler));
 
     /**
@@ -57,7 +57,8 @@ public final class HARUtil {
      * @param httpHeaderFilterForHARRequest
      * @throws IllegalArgumentException
      */
-    public static void setHttpHeaderFilterForHARRequest(final BiPredicate<String, String> httpHeaderFilterForHARRequest) throws IllegalArgumentException {
+    public static void setHttpHeaderFilterForHARRequest(final BiPredicate<? super String, String> httpHeaderFilterForHARRequest)
+            throws IllegalArgumentException {
         N.checkArgNotNull(httpHeaderFilterForHARRequest, "httpHeaderFilterForHARRequest");
 
         httpHeaderFilterForHARRequest_TL.set(httpHeaderFilterForHARRequest);
@@ -96,7 +97,7 @@ public final class HARUtil {
      * @param quoteChar
      * @param logHandler
      */
-    public static void logRequestCurlForHARRequest(final boolean logRequest, char quoteChar, Consumer<String> logHandler) {
+    public static void logRequestCurlForHARRequest(final boolean logRequest, char quoteChar, Consumer<? super String> logHandler) {
         logRequestCurlForHARRequest_TL.set(Tuple.of(logRequest, quoteChar, logHandler));
     }
 
@@ -122,7 +123,7 @@ public final class HARUtil {
      * @param filterForTargetUrl
      * @return
      */
-    public static String sendRequstByHAR(final File har, final Predicate<String> filterForTargetUrl) {
+    public static String sendRequstByHAR(final File har, final Predicate<? super String> filterForTargetUrl) {
         return sendRequstByHAR(IOUtil.readAllToString(har), filterForTargetUrl);
     }
 
@@ -149,7 +150,7 @@ public final class HARUtil {
      * @return
      */
     @SuppressWarnings("rawtypes")
-    public static String sendRequstByHAR(final String har, final Predicate<String> filterForTargetUrl) {
+    public static String sendRequstByHAR(final String har, final Predicate<? super String> filterForTargetUrl) {
         Map map = N.fromJson(har, Map.class);
         List<Map> entries = Maps.getByPath(map, "log.entries"); //NOSONAR
 
@@ -172,7 +173,7 @@ public final class HARUtil {
      * @param filterForTargetUrl
      * @return
      */
-    public static List<String> sendMultiRequstsByHAR(final File har, final Predicate<String> filterForTargetUrl) {
+    public static List<String> sendMultiRequstsByHAR(final File har, final Predicate<? super String> filterForTargetUrl) {
         return sendMultiRequstsByHAR(IOUtil.readAllToString(har), filterForTargetUrl);
     }
 
@@ -186,7 +187,7 @@ public final class HARUtil {
      * @return
      */
     @SuppressWarnings("rawtypes")
-    public static List<String> sendMultiRequstsByHAR(final String har, final Predicate<String> filterForTargetUrl) {
+    public static List<String> sendMultiRequstsByHAR(final String har, final Predicate<? super String> filterForTargetUrl) {
         Map map = N.fromJson(har, Map.class);
         List<Map> entries = Maps.getByPath(map, "log.entries");
 
@@ -208,7 +209,8 @@ public final class HARUtil {
      * @param filterForTargetUrl
      * @return first element in the returned {@code Tuple2} is {@code url}. The second element is HttpResponse.
      */
-    public static Stream<Tuple2<Map<String, Object>, HttpResponse>> streamMultiRequstsByHAR(final File har, final Predicate<String> filterForTargetUrl) {
+    public static Stream<Tuple2<Map<String, Object>, HttpResponse>> streamMultiRequstsByHAR(final File har,
+            final Predicate<? super String> filterForTargetUrl) {
         return streamMultiRequstsByHAR(IOUtil.readAllToString(har), filterForTargetUrl);
     }
 
@@ -222,7 +224,8 @@ public final class HARUtil {
      * @return first element in the returned {@code Tuple2} is {@code url}. The second element is HttpResponse.
      */
     @SuppressWarnings("rawtypes")
-    public static Stream<Tuple2<Map<String, Object>, HttpResponse>> streamMultiRequstsByHAR(final String har, final Predicate<String> filterForTargetUrl) {
+    public static Stream<Tuple2<Map<String, Object>, HttpResponse>> streamMultiRequstsByHAR(final String har,
+            final Predicate<? super String> filterForTargetUrl) {
         Map map = N.fromJson(har, Map.class);
         List<Map> entries = Maps.getByPath(map, "log.entries");
 
@@ -255,7 +258,7 @@ public final class HARUtil {
             WebUtil.setContentTypeByRequestBodyType(bodyType, httpHeaders);
         }
 
-        final Tuple3<Boolean, Character, Consumer<String>> tp = logRequestCurlForHARRequest_TL.get();
+        final Tuple3<Boolean, Character, Consumer<? super String>> tp = logRequestCurlForHARRequest_TL.get();
 
         if (tp._1.booleanValue() && (tp._3 != defaultCurlLogHandler || logger.isInfoEnabled())) {
             tp._3.accept(WebUtil.buildCurl(httpMethod.name(), url, httpHeaders.toMap(), requestBody, bodyType, tp._2));
@@ -271,7 +274,7 @@ public final class HARUtil {
      * @param filterForTargetUrl
      * @return
      */
-    public static Optional<Map<String, Object>> getRequestEntryByUrlFromHAR(final File har, final Predicate<String> filterForTargetUrl) {
+    public static Optional<Map<String, Object>> getRequestEntryByUrlFromHAR(final File har, final Predicate<? super String> filterForTargetUrl) {
         return getRequestEntryByUrlFromHAR(IOUtil.readAllToString(har), filterForTargetUrl);
     }
 
@@ -283,7 +286,7 @@ public final class HARUtil {
      * @return
      */
     @SuppressWarnings("rawtypes")
-    public static Optional<Map<String, Object>> getRequestEntryByUrlFromHAR(final String har, final Predicate<String> filterForTargetUrl) {
+    public static Optional<Map<String, Object>> getRequestEntryByUrlFromHAR(final String har, final Predicate<? super String> filterForTargetUrl) {
         Map map = N.fromJson(har, Map.class);
         List<Map> entries = Maps.getByPath(map, "log.entries");
 
@@ -320,7 +323,7 @@ public final class HARUtil {
      * @return
      */
     public static HttpHeaders getHeadersByRequestEntry(final Map<String, Object> requestEntry) {
-        final BiPredicate<String, String> httpHeaderValidatorForHARRequest = httpHeaderFilterForHARRequest_TL.get();
+        final BiPredicate<? super String, String> httpHeaderValidatorForHARRequest = httpHeaderFilterForHARRequest_TL.get();
         final HttpHeaders httpHeaders = HttpHeaders.create();
         final List<Map<String, String>> headers = (List<Map<String, String>>) requestEntry.get("headers");
         String headerName = null;

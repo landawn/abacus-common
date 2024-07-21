@@ -103,15 +103,15 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
     }
 
     /**
-     * 
      *
-     * @param <A> 
-     * @param <B> 
-     * @param <C> 
-     * @param hasNext 
-     * @param output 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <A>
+     * @param <B>
+     * @param <C>
+     * @param hasNext
+     * @param output
+     * @return
+     * @throws IllegalArgumentException
      */
     public static <A, B, C> TriIterator<A, B, C> generate(final BooleanSupplier hasNext, final Consumer<Triple<A, B, C>> output)
             throws IllegalArgumentException {
@@ -200,17 +200,17 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
     }
 
     /**
-     * 
      *
-     * @param <A> 
-     * @param <B> 
-     * @param <C> 
-     * @param fromIndex 
-     * @param toIndex 
-     * @param output 
-     * @return 
-     * @throws IllegalArgumentException 
-     * @throws IndexOutOfBoundsException 
+     *
+     * @param <A>
+     * @param <B>
+     * @param <C>
+     * @param fromIndex
+     * @param toIndex
+     * @param output
+     * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
      */
     public static <A, B, C> TriIterator<A, B, C> generate(final int fromIndex, final int toIndex, final IntObjConsumer<Triple<A, B, C>> output)
             throws IllegalArgumentException, IndexOutOfBoundsException {
@@ -613,7 +613,7 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      * @param action
      * @throws E the e
      */
-    public abstract <E extends Exception> void foreachRemaining(final Throwables.TriConsumer<? super A, ? super B, ? super C, E> action) throws E;
+    public abstract <E extends Exception> void foreachRemaining(final Throwables.TriConsumer<? super A, ? super B, ? super C, E> action) throws E; // NOSONAR
 
     @SuppressWarnings("rawtypes")
     private static final Throwables.TriConsumer DO_NOTHING = (a, b, c) -> {
@@ -621,11 +621,11 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
     };
 
     /**
-     * 
      *
-     * @param n 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param n
+     * @return
+     * @throws IllegalArgumentException
      */
     public TriIterator<A, B, C> skip(final long n) throws IllegalArgumentException {
         N.checkArgNotNegative(n, "n");
@@ -709,11 +709,11 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
     }
 
     /**
-     * 
      *
-     * @param count 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param count
+     * @return
+     * @throws IllegalArgumentException
      */
     public TriIterator<A, B, C> limit(final long count) throws IllegalArgumentException {
         N.checkArgNotNegative(count, "count");
@@ -781,11 +781,11 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
     }
 
     /**
-     * 
      *
-     * @param predicate 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param predicate
+     * @return
+     * @throws IllegalArgumentException
      */
     public TriIterator<A, B, C> filter(final TriPredicate<? super A, ? super B, ? super C> predicate) throws IllegalArgumentException {
         N.checkArgNotNull(predicate, "predicate");
@@ -929,12 +929,12 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
     }
 
     /**
-     * 
      *
-     * @param <R> 
-     * @param mapper 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <R>
+     * @param mapper
+     * @return
+     * @throws IllegalArgumentException
      */
     public <R> Stream<R> stream(final TriFunction<? super A, ? super B, ? super C, ? extends R> mapper) throws IllegalArgumentException {
         N.checkArgNotNull(mapper);
@@ -973,10 +973,10 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
     }
 
     /**
-     * 
      *
-     * @param supplier 
-     * @return 
+     *
+     * @param supplier
+     * @return
      */
     public Triple<List<A>, List<B>, List<C>> toMultiList(@SuppressWarnings("rawtypes") final Supplier<? extends List> supplier) {
         final List<A> listA = supplier.get();
@@ -993,10 +993,10 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
     }
 
     /**
-     * 
      *
-     * @param supplier 
-     * @return 
+     *
+     * @param supplier
+     * @return
      */
     public Triple<Set<A>, Set<B>, Set<C>> toMultiSet(@SuppressWarnings("rawtypes") final Supplier<? extends Set> supplier) {
         final Set<A> listA = supplier.get();

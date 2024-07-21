@@ -27,6 +27,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
+import java.util.function.BiFunction;
+import java.util.function.Function;
+import java.util.function.Predicate;
 
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.MayReturnNull;
@@ -35,11 +38,14 @@ import com.landawn.abacus.parser.KryoParser;
 import com.landawn.abacus.parser.ParserFactory;
 import com.landawn.abacus.util.If.OrElse;
 import com.landawn.abacus.util.u.Optional;
+import com.landawn.abacus.util.function.IntBiFunction;
+import com.landawn.abacus.util.function.IntBiPredicate;
+import com.landawn.abacus.util.function.TriFunction;
+import com.landawn.abacus.util.function.TriPredicate;
 import com.landawn.abacus.util.stream.IntStream;
 import com.landawn.abacus.util.stream.ObjIteratorEx;
 import com.landawn.abacus.util.stream.Stream;
 
-// TODO: Auto-generated Javadoc
 /**
  * <li>
  * {@code R} = Row, {@code C} = Column, {@code H} = Horizontal, {@code V} = Vertical.
@@ -79,11 +85,11 @@ public final class Sheet<R, C, V> implements Cloneable {
     }
 
     /**
-     * 
      *
-     * @param rowKeySet 
-     * @param columnKeySet 
-     * @throws IllegalArgumentException 
+     *
+     * @param rowKeySet
+     * @param columnKeySet
+     * @throws IllegalArgumentException
      */
     public Sheet(Collection<R> rowKeySet, Collection<C> columnKeySet) throws IllegalArgumentException {
         N.checkArgument(!N.anyNull(rowKeySet), "Row key can't be null");
@@ -94,12 +100,12 @@ public final class Sheet<R, C, V> implements Cloneable {
     }
 
     /**
-     * 
      *
-     * @param rowKeySet 
-     * @param columnKeySet 
-     * @param rows 
-     * @throws IllegalArgumentException 
+     *
+     * @param rowKeySet
+     * @param columnKeySet
+     * @param rows
+     * @throws IllegalArgumentException
      */
     public Sheet(Collection<R> rowKeySet, Collection<C> columnKeySet, Object[][] rows) throws IllegalArgumentException {
         this(rowKeySet, columnKeySet);
@@ -155,31 +161,31 @@ public final class Sheet<R, C, V> implements Cloneable {
      *
      * @param <R>
      * @param <C>
-     * @param <E>
+     * @param <V>
      * @param rowKeySet
      * @param columnKeySet
      * @param rows
      * @return
      */
-    public static <R, C, E> Sheet<R, C, E> rows(Collection<R> rowKeySet, Collection<C> columnKeySet, Object[][] rows) {
+    public static <R, C, V> Sheet<R, C, V> rows(Collection<R> rowKeySet, Collection<C> columnKeySet, Object[][] rows) {
         return new Sheet<>(rowKeySet, columnKeySet, rows);
     }
 
     /**
-     * 
      *
-     * @param <R> 
-     * @param <C> 
-     * @param <E> 
-     * @param rowKeySet 
-     * @param columnKeySet 
-     * @param rows 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <R>
+     * @param <C>
+     * @param <V>
+     * @param rowKeySet
+     * @param columnKeySet
+     * @param rows
+     * @return
+     * @throws IllegalArgumentException
      */
-    public static <R, C, E> Sheet<R, C, E> rows(Collection<R> rowKeySet, Collection<C> columnKeySet, Collection<? extends Collection<? extends E>> rows)
+    public static <R, C, V> Sheet<R, C, V> rows(Collection<R> rowKeySet, Collection<C> columnKeySet, Collection<? extends Collection<? extends V>> rows)
             throws IllegalArgumentException {
-        final Sheet<R, C, E> instance = new Sheet<>(rowKeySet, columnKeySet);
+        final Sheet<R, C, V> instance = new Sheet<>(rowKeySet, columnKeySet);
 
         final int rowLength = instance.rowLength();
         final int columnLength = instance.columnLength();
@@ -187,7 +193,7 @@ public final class Sheet<R, C, V> implements Cloneable {
         if (N.notEmpty(rows)) {
             N.checkArgument(rows.size() == rowLength, "The size of collection is not equal to size of row/column key set"); //NOSONAR
 
-            for (Collection<? extends E> e : rows) {
+            for (Collection<? extends V> e : rows) {
                 N.checkArgument(e.size() == columnLength, "The size of collection is not equal to size of row/column key set");
             }
 
@@ -199,8 +205,8 @@ public final class Sheet<R, C, V> implements Cloneable {
                 instance._columnList.add(new ArrayList<>(rowLength));
             }
 
-            for (Collection<? extends E> row : rows) {
-                final Iterator<? extends E> iter = row.iterator();
+            for (Collection<? extends V> row : rows) {
+                final Iterator<? extends V> iter = row.iterator();
 
                 for (int i = 0; i < columnLength; i++) {
                     instance._columnList.get(i).add(iter.next());
@@ -215,19 +221,19 @@ public final class Sheet<R, C, V> implements Cloneable {
     }
 
     /**
-     * 
      *
-     * @param <R> 
-     * @param <C> 
-     * @param <E> 
-     * @param rowKeySet 
-     * @param columnKeySet 
-     * @param columns 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <R>
+     * @param <C>
+     * @param <V>
+     * @param rowKeySet
+     * @param columnKeySet
+     * @param columns
+     * @return
+     * @throws IllegalArgumentException
      */
-    public static <R, C, E> Sheet<R, C, E> columns(Collection<R> rowKeySet, Collection<C> columnKeySet, Object[][] columns) throws IllegalArgumentException {
-        final Sheet<R, C, E> instance = new Sheet<>(rowKeySet, columnKeySet);
+    public static <R, C, V> Sheet<R, C, V> columns(Collection<R> rowKeySet, Collection<C> columnKeySet, Object[][] columns) throws IllegalArgumentException {
+        final Sheet<R, C, V> instance = new Sheet<>(rowKeySet, columnKeySet);
 
         final int rowLength = instance.rowLength();
         final int columnLength = instance.columnLength();
@@ -244,7 +250,7 @@ public final class Sheet<R, C, V> implements Cloneable {
             instance._columnList = new ArrayList<>(columnLength);
 
             for (Object[] column : columns) {
-                instance._columnList.add(new ArrayList<>((List<E>) Arrays.asList(column)));
+                instance._columnList.add(new ArrayList<>((List<V>) Arrays.asList(column)));
             }
 
             instance._initialized = true;
@@ -254,20 +260,20 @@ public final class Sheet<R, C, V> implements Cloneable {
     }
 
     /**
-     * 
      *
-     * @param <R> 
-     * @param <C> 
-     * @param <E> 
-     * @param rowKeySet 
-     * @param columnKeySet 
-     * @param columns 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <R>
+     * @param <C>
+     * @param <V>
+     * @param rowKeySet
+     * @param columnKeySet
+     * @param columns
+     * @return
+     * @throws IllegalArgumentException
      */
-    public static <R, C, E> Sheet<R, C, E> columns(Collection<R> rowKeySet, Collection<C> columnKeySet, Collection<? extends Collection<? extends E>> columns)
+    public static <R, C, V> Sheet<R, C, V> columns(Collection<R> rowKeySet, Collection<C> columnKeySet, Collection<? extends Collection<? extends V>> columns)
             throws IllegalArgumentException {
-        final Sheet<R, C, E> instance = new Sheet<>(rowKeySet, columnKeySet);
+        final Sheet<R, C, V> instance = new Sheet<>(rowKeySet, columnKeySet);
 
         final int rowLength = instance.rowLength();
         final int columnLength = instance.columnLength();
@@ -275,7 +281,7 @@ public final class Sheet<R, C, V> implements Cloneable {
         if (N.notEmpty(columns)) {
             N.checkArgument(columns.size() == columnLength, "The size of collection is not equal to size of row/column key set");
 
-            for (Collection<? extends E> e : columns) {
+            for (Collection<? extends V> e : columns) {
                 N.checkArgument(e.size() == rowLength, "The size of collection is not equal to size of row/column key set");
             }
 
@@ -283,7 +289,7 @@ public final class Sheet<R, C, V> implements Cloneable {
 
             instance._columnList = new ArrayList<>(columnLength);
 
-            for (Collection<? extends E> column : columns) {
+            for (Collection<? extends V> column : columns) {
                 instance._columnList.add(new ArrayList<>(column));
             }
 
@@ -698,13 +704,12 @@ public final class Sheet<R, C, V> implements Cloneable {
     }
 
     /**
+     * 
      *
-     * @param <X>
-     * @param rowKey
-     * @param func
-     * @throws X the x
+     * @param rowKey 
+     * @param func 
      */
-    public <X extends Exception> void updateRow(R rowKey, Throwables.Function<? super V, ? extends V, X> func) throws X {
+    public void updateRow(R rowKey, Function<? super V, ? extends V> func) {
         checkFrozen();
 
         if (columnLength() > 0) {
@@ -1026,13 +1031,12 @@ public final class Sheet<R, C, V> implements Cloneable {
     }
 
     /**
+     * 
      *
-     * @param <X>
-     * @param columnKey
-     * @param func
-     * @throws X the x
+     * @param columnKey 
+     * @param func 
      */
-    public <X extends Exception> void updateColumn(C columnKey, Throwables.Function<? super V, ? extends V, X> func) throws X {
+    public void updateColumn(C columnKey, Function<? super V, ? extends V> func) {
         checkFrozen();
 
         if (rowLength() > 0) {
@@ -1233,12 +1237,11 @@ public final class Sheet<R, C, V> implements Cloneable {
 
     // TODO should the method name be "replaceAll"? If change the method name to replaceAll, what about updateColumn/updateRow?
     /**
+     * 
      *
-     * @param <X>
-     * @param func
-     * @throws X the x
+     * @param func 
      */
-    public <X extends Exception> void updateAll(Throwables.Function<? super V, ? extends V, X> func) throws X {
+    public void updateAll(Function<? super V, ? extends V> func) {
         checkFrozen();
 
         if (rowLength() > 0 && columnLength() > 0) {
@@ -1257,11 +1260,9 @@ public final class Sheet<R, C, V> implements Cloneable {
     /**
      * Update all elements based on points.
      *
-     * @param <X>
-     * @param func
-     * @throws X the x
+     * @param func 
      */
-    public <X extends Exception> void updateAll(Throwables.IntBiFunction<? extends V, X> func) throws X {
+    public void updateAll(IntBiFunction<? extends V> func) {
         checkFrozen();
 
         if (rowLength() > 0 && columnLength() > 0) {
@@ -1283,11 +1284,9 @@ public final class Sheet<R, C, V> implements Cloneable {
     /**
      * Update all elements based on points.
      *
-     * @param <X>
-     * @param func
-     * @throws X the x
+     * @param func 
      */
-    public <X extends Exception> void updateAll(Throwables.TriFunction<? super R, ? super C, ? super V, ? extends V, X> func) throws X {
+    public void updateAll(TriFunction<? super R, ? super C, ? super V, ? extends V> func) {
         checkFrozen();
 
         if (rowLength() > 0 && columnLength() > 0) {
@@ -1310,13 +1309,12 @@ public final class Sheet<R, C, V> implements Cloneable {
     }
 
     /**
+     * 
      *
-     * @param <X>
-     * @param predicate
-     * @param newValue
-     * @throws X the x
+     * @param predicate 
+     * @param newValue 
      */
-    public <X extends Exception> void replaceIf(final Throwables.Predicate<? super V, X> predicate, final V newValue) throws X {
+    public void replaceIf(final Predicate<? super V> predicate, final V newValue) {
         checkFrozen();
 
         if (rowLength() > 0 && columnLength() > 0) {
@@ -1337,12 +1335,10 @@ public final class Sheet<R, C, V> implements Cloneable {
     /**
      * Replace elements by <code>Predicate.test(i, j)</code> based on points
      *
-     * @param <X>
-     * @param predicate
-     * @param newValue
-     * @throws X the x
+     * @param predicate 
+     * @param newValue 
      */
-    public <X extends Exception> void replaceIf(final Throwables.IntBiPredicate<X> predicate, final V newValue) throws X {
+    public void replaceIf(final IntBiPredicate predicate, final V newValue) {
         checkFrozen();
 
         if (rowLength() > 0 && columnLength() > 0) {
@@ -1366,12 +1362,10 @@ public final class Sheet<R, C, V> implements Cloneable {
     /**
      * Replace elements by <code>Predicate.test(i, j)</code> based on points
      *
-     * @param <X>
-     * @param predicate
-     * @param newValue
-     * @throws X the x
+     * @param predicate 
+     * @param newValue 
      */
-    public <X extends Exception> void replaceIf(final Throwables.TriPredicate<? super R, ? super C, ? super V, X> predicate, final V newValue) throws X {
+    public void replaceIf(final TriPredicate<? super R, ? super C, ? super V> predicate, final V newValue) {
         checkFrozen();
 
         if (rowLength() > 0 && columnLength() > 0) {
@@ -1658,18 +1652,16 @@ public final class Sheet<R, C, V> implements Cloneable {
     }
 
     /**
+     * 
      *
-     * @param <E2>
-     * @param <E3>
-     * @param <X>
-     * @param b
-     * @param mergeFunction
-     * @return
-     * @throws X the x
+     * @param <U> 
+     * @param <X> 
+     * @param b 
+     * @param mergeFunction 
+     * @return 
      */
-    public <E2, E3, X extends Exception> Sheet<R, C, E3> merge(Sheet<? extends R, ? extends C, ? extends E2> b,
-            Throwables.BiFunction<? super V, ? super E2, ? extends E3, X> mergeFunction) throws X {
-        final Sheet<R, C, E2> sheetB = (Sheet<R, C, E2>) b;
+    public <U, X> Sheet<R, C, X> merge(Sheet<? extends R, ? extends C, ? extends U> b, final BiFunction<? super V, ? super U, ? extends X> mergeFunction) {
+        final Sheet<R, C, U> sheetB = (Sheet<R, C, U>) b;
 
         final Set<R> newRowKeySet = N.newLinkedHashSet(this.rowKeySet());
         newRowKeySet.addAll(sheetB.rowKeySet());
@@ -1677,7 +1669,7 @@ public final class Sheet<R, C, V> implements Cloneable {
         final Set<C> newColumnKeySet = N.newLinkedHashSet(this.columnKeySet());
         newColumnKeySet.addAll(sheetB.columnKeySet());
 
-        final Sheet<R, C, E3> result = new Sheet<>(newRowKeySet, newColumnKeySet);
+        final Sheet<R, C, X> result = new Sheet<>(newRowKeySet, newColumnKeySet);
         final int[] rowIndexes1 = new int[newRowKeySet.size()], rowIndexes2 = new int[newRowKeySet.size()];
         final int[] columnIndexes1 = new int[newColumnKeySet.size()], columnIndexes2 = new int[newColumnKeySet.size()];
 
@@ -1695,7 +1687,7 @@ public final class Sheet<R, C, V> implements Cloneable {
         }
 
         V e1 = null;
-        E2 e2 = null;
+        U e2 = null;
 
         for (int rowIndex = 0, rowLen = newRowKeySet.size(); rowIndex < rowLen; rowIndex++) {
             for (int columnIndex = 0, columnLen = newColumnKeySet.size(); columnIndex < columnLen; columnIndex++) {
@@ -1816,11 +1808,11 @@ public final class Sheet<R, C, V> implements Cloneable {
     /**
      * For each H.
      *
-     * @param <X>
+     * @param <E>
      * @param action
-     * @throws X the x
+     * @throws E the x
      */
-    public <X extends Exception> void forEachH(Throwables.TriConsumer<? super R, ? super C, ? super V, X> action) throws X {
+    public <E extends Exception> void forEachH(Throwables.TriConsumer<? super R, ? super C, ? super V, E> action) throws E {
         if (_initialized) {
             for (R rowKey : _rowKeySet) {
                 for (C columnKey : _columnKeySet) {
@@ -1839,11 +1831,11 @@ public final class Sheet<R, C, V> implements Cloneable {
     /**
      * For each V.
      *
-     * @param <X>
+     * @param <E>
      * @param action
-     * @throws X the x
+     * @throws E the x
      */
-    public <X extends Exception> void forEachV(Throwables.TriConsumer<? super R, ? super C, ? super V, X> action) throws X {
+    public <E extends Exception> void forEachV(Throwables.TriConsumer<? super R, ? super C, ? super V, E> action) throws E {
         if (_initialized) {
             for (C columnKey : _columnKeySet) {
                 for (R rowKey : _rowKeySet) {
@@ -1862,11 +1854,11 @@ public final class Sheet<R, C, V> implements Cloneable {
     /**
      * For each H.
      *
-     * @param <X>
+     * @param <E>
      * @param action
-     * @throws X the x
+     * @throws E the x
      */
-    public <X extends Exception> void forEachNonNullH(Throwables.TriConsumer<? super R, ? super C, ? super V, X> action) throws X {
+    public <E extends Exception> void forEachNonNullH(Throwables.TriConsumer<? super R, ? super C, ? super V, E> action) throws E {
         if (_initialized) {
             V value = null;
 
@@ -1885,11 +1877,11 @@ public final class Sheet<R, C, V> implements Cloneable {
     /**
      * For each V.
      *
-     * @param <X>
+     * @param <E>
      * @param action
-     * @throws X the x
+     * @throws E the x
      */
-    public <X extends Exception> void forEachNonNullV(Throwables.TriConsumer<? super R, ? super C, ? super V, X> action) throws X {
+    public <E extends Exception> void forEachNonNullV(Throwables.TriConsumer<? super R, ? super C, ? super V, E> action) throws E {
         if (_initialized) {
             V value = null;
 
@@ -1923,12 +1915,12 @@ public final class Sheet<R, C, V> implements Cloneable {
     }
 
     /**
-     * 
      *
-     * @param fromRowIndex 
-     * @param toRowIndex 
+     *
+     * @param fromRowIndex
+     * @param toRowIndex
      * @return a stream of Cells based on the order of row.
-     * @throws IndexOutOfBoundsException 
+     * @throws IndexOutOfBoundsException
      */
     public Stream<Sheet.Cell<R, C, V>> cellsH(final int fromRowIndex, final int toRowIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromRowIndex, toRowIndex, rowLength());
@@ -1995,12 +1987,12 @@ public final class Sheet<R, C, V> implements Cloneable {
     }
 
     /**
-     * 
      *
-     * @param fromColumnIndex 
-     * @param toColumnIndex 
+     *
+     * @param fromColumnIndex
+     * @param toColumnIndex
      * @return a stream of Cells based on the order of column.
-     * @throws IndexOutOfBoundsException 
+     * @throws IndexOutOfBoundsException
      */
 
     public Stream<Sheet.Cell<R, C, V>> cellsV(final int fromColumnIndex, final int toColumnIndex) throws IndexOutOfBoundsException {
@@ -2059,12 +2051,12 @@ public final class Sheet<R, C, V> implements Cloneable {
     }
 
     /**
-     * 
      *
-     * @param fromRowIndex 
-     * @param toRowIndex 
+     *
+     * @param fromRowIndex
+     * @param toRowIndex
      * @return a stream based on the order of row.
-     * @throws IndexOutOfBoundsException 
+     * @throws IndexOutOfBoundsException
      */
     public Stream<Stream<Cell<R, C, V>>> cellsR(final int fromRowIndex, final int toRowIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromRowIndex, toRowIndex, rowLength());
@@ -2148,12 +2140,12 @@ public final class Sheet<R, C, V> implements Cloneable {
     }
 
     /**
-     * 
      *
-     * @param fromColumnIndex 
-     * @param toColumnIndex 
+     *
+     * @param fromColumnIndex
+     * @param toColumnIndex
      * @return a stream based on the order of column.
-     * @throws IndexOutOfBoundsException 
+     * @throws IndexOutOfBoundsException
      */
     public Stream<Stream<Cell<R, C, V>>> cellsC(final int fromColumnIndex, final int toColumnIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromColumnIndex, toColumnIndex, columnLength());
@@ -2225,12 +2217,12 @@ public final class Sheet<R, C, V> implements Cloneable {
     }
 
     /**
-     * 
      *
-     * @param fromRowIndex 
-     * @param toRowIndex 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     *
+     * @param fromRowIndex
+     * @param toRowIndex
+     * @return
+     * @throws IndexOutOfBoundsException
      */
     public Stream<IntPair> pointsH(int fromRowIndex, int toRowIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromRowIndex, toRowIndex, rowLength());
@@ -2260,12 +2252,12 @@ public final class Sheet<R, C, V> implements Cloneable {
     }
 
     /**
-     * 
      *
-     * @param fromColumnIndex 
-     * @param toColumnIndex 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     *
+     * @param fromColumnIndex
+     * @param toColumnIndex
+     * @return
+     * @throws IndexOutOfBoundsException
      */
     public Stream<IntPair> pointsV(int fromColumnIndex, int toColumnIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromColumnIndex, toColumnIndex, columnLength());
@@ -2286,12 +2278,12 @@ public final class Sheet<R, C, V> implements Cloneable {
     }
 
     /**
-     * 
      *
-     * @param fromRowIndex 
-     * @param toRowIndex 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     *
+     * @param fromRowIndex
+     * @param toRowIndex
+     * @return
+     * @throws IndexOutOfBoundsException
      */
     public Stream<Stream<IntPair>> pointsR(int fromRowIndex, int toRowIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromRowIndex, toRowIndex, rowLength());
@@ -2312,12 +2304,12 @@ public final class Sheet<R, C, V> implements Cloneable {
     }
 
     /**
-     * 
      *
-     * @param fromColumnIndex 
-     * @param toColumnIndex 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     *
+     * @param fromColumnIndex
+     * @param toColumnIndex
+     * @return
+     * @throws IndexOutOfBoundsException
      */
     public Stream<Stream<IntPair>> pointsC(int fromColumnIndex, int toColumnIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromColumnIndex, toColumnIndex, columnLength());
@@ -2346,12 +2338,12 @@ public final class Sheet<R, C, V> implements Cloneable {
     }
 
     /**
-     * 
      *
-     * @param fromRowIndex 
-     * @param toRowIndex 
+     *
+     * @param fromRowIndex
+     * @param toRowIndex
      * @return a stream based on the order of row.
-     * @throws IndexOutOfBoundsException 
+     * @throws IndexOutOfBoundsException
      */
     public Stream<V> streamH(final int fromRowIndex, final int toRowIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromRowIndex, toRowIndex, rowLength());
@@ -2416,12 +2408,12 @@ public final class Sheet<R, C, V> implements Cloneable {
     }
 
     /**
-     * 
      *
-     * @param fromColumnIndex 
-     * @param toColumnIndex 
+     *
+     * @param fromColumnIndex
+     * @param toColumnIndex
      * @return a stream based on the order of column.
-     * @throws IndexOutOfBoundsException 
+     * @throws IndexOutOfBoundsException
      */
     public Stream<V> streamV(final int fromColumnIndex, final int toColumnIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromColumnIndex, toColumnIndex, columnLength());
@@ -2477,12 +2469,12 @@ public final class Sheet<R, C, V> implements Cloneable {
     }
 
     /**
-     * 
      *
-     * @param fromRowIndex 
-     * @param toRowIndex 
+     *
+     * @param fromRowIndex
+     * @param toRowIndex
      * @return a stream based on the order of row.
-     * @throws IndexOutOfBoundsException 
+     * @throws IndexOutOfBoundsException
      */
     public Stream<Stream<V>> streamR(final int fromRowIndex, final int toRowIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromRowIndex, toRowIndex, rowLength());
@@ -2567,12 +2559,12 @@ public final class Sheet<R, C, V> implements Cloneable {
     }
 
     /**
-     * 
      *
-     * @param fromColumnIndex 
-     * @param toColumnIndex 
+     *
+     * @param fromColumnIndex
+     * @param toColumnIndex
      * @return a stream based on the order of column.
-     * @throws IndexOutOfBoundsException 
+     * @throws IndexOutOfBoundsException
      */
     public Stream<Stream<V>> streamC(final int fromColumnIndex, final int toColumnIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromColumnIndex, toColumnIndex, columnLength());
@@ -2627,12 +2619,12 @@ public final class Sheet<R, C, V> implements Cloneable {
     }
 
     /**
-     * 
      *
-     * @param fromRowIndex 
-     * @param toRowIndex 
+     *
+     * @param fromRowIndex
+     * @param toRowIndex
      * @return a stream based on the order of row.
-     * @throws IndexOutOfBoundsException 
+     * @throws IndexOutOfBoundsException
      */
     public Stream<Pair<R, Stream<V>>> rows(final int fromRowIndex, final int toRowIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromRowIndex, toRowIndex, rowLength());
@@ -2721,12 +2713,12 @@ public final class Sheet<R, C, V> implements Cloneable {
     }
 
     /**
-     * 
      *
-     * @param fromColumnIndex 
-     * @param toColumnIndex 
+     *
+     * @param fromColumnIndex
+     * @param toColumnIndex
      * @return a stream based on the order of column.
-     * @throws IndexOutOfBoundsException 
+     * @throws IndexOutOfBoundsException
      */
     public Stream<Pair<C, Stream<V>>> columns(final int fromColumnIndex, final int toColumnIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromColumnIndex, toColumnIndex, columnLength());
@@ -2941,24 +2933,24 @@ public final class Sheet<R, C, V> implements Cloneable {
     /**
      *
      * @param <T>
-     * @param <X>
+     * @param <E>
      * @param func
      * @return
-     * @throws X the x
+     * @throws E the x
      */
-    public <T, X extends Exception> T apply(Throwables.Function<? super Sheet<R, C, V>, T, X> func) throws X {
+    public <T, E extends Exception> T apply(Throwables.Function<? super Sheet<R, C, V>, T, E> func) throws E {
         return func.apply(this);
     }
 
     /**
      *
      * @param <T>
-     * @param <X>
+     * @param <E>
      * @param func
      * @return
-     * @throws X the x
+     * @throws E the x
      */
-    public <T, X extends Exception> Optional<T> applyIfNotEmpty(Throwables.Function<? super Sheet<R, C, V>, T, X> func) throws X {
+    public <T, E extends Exception> Optional<T> applyIfNotEmpty(Throwables.Function<? super Sheet<R, C, V>, T, E> func) throws E {
         if (!isEmpty()) {
             return Optional.ofNullable(func.apply(this));
         } else {
@@ -2968,23 +2960,23 @@ public final class Sheet<R, C, V> implements Cloneable {
 
     /**
      *
-     * @param <X>
+     * @param <E>
      * @param action
-     * @throws X the x
+     * @throws E the x
      */
-    public <X extends Exception> void accept(Throwables.Consumer<? super Sheet<R, C, V>, X> action) throws X {
+    public <E extends Exception> void accept(Throwables.Consumer<? super Sheet<R, C, V>, E> action) throws E {
         action.accept(this);
     }
 
     /**
      *
      *
-     * @param <X>
+     * @param <E>
      * @param action
      * @return
-     * @throws X the x
+     * @throws E the x
      */
-    public <X extends Exception> OrElse acceptIfNotEmpty(Throwables.Consumer<? super Sheet<R, C, V>, X> action) throws X {
+    public <E extends Exception> OrElse acceptIfNotEmpty(Throwables.Consumer<? super Sheet<R, C, V>, E> action) throws E {
         if (!isEmpty()) {
             action.accept(this);
 
@@ -3023,12 +3015,12 @@ public final class Sheet<R, C, V> implements Cloneable {
     }
 
     /**
-     * 
      *
-     * @param rowKeySet 
-     * @param columnKeySet 
-     * @param output 
-     * @throws IllegalArgumentException 
+     *
+     * @param rowKeySet
+     * @param columnKeySet
+     * @param output
+     * @throws IllegalArgumentException
      * @throws UncheckedIOException the unchecked IO exception
      */
     public void println(final Collection<R> rowKeySet, final Collection<C> columnKeySet, final Writer output)

@@ -132,7 +132,7 @@ public final class ParserUtil {
                     && !field.getAnnotation(com.alibaba.fastjson.annotation.JSONField.class).serialize()) {
                 return false;
             }
-        } catch (Throwable e) {
+        } catch (Throwable e) { // NOSONAR
             // ignore
         }
 
@@ -141,7 +141,7 @@ public final class ParserUtil {
                     && !field.getAnnotation(com.alibaba.fastjson2.annotation.JSONField.class).serialize()) {
                 return false;
             }
-        } catch (Throwable e) {
+        } catch (Throwable e) { // NOSONAR
             // ignore
         }
 
@@ -150,7 +150,7 @@ public final class ParserUtil {
                     && field.getAnnotation(com.fasterxml.jackson.annotation.JsonIgnore.class).value()) {
                 return false;
             }
-        } catch (Throwable e) {
+        } catch (Throwable e) { // NOSONAR
             // ignore
         }
 
@@ -178,7 +178,7 @@ public final class ParserUtil {
                         && Strings.isNotEmpty(field.getAnnotation(com.alibaba.fastjson.annotation.JSONField.class).format())) {
                     return field.getAnnotation(com.alibaba.fastjson.annotation.JSONField.class).format();
                 }
-            } catch (Throwable e) {
+            } catch (Throwable e) { // NOSONAR
                 // ignore
             }
 
@@ -187,7 +187,7 @@ public final class ParserUtil {
                         && Strings.isNotEmpty(field.getAnnotation(com.alibaba.fastjson2.annotation.JSONField.class).format())) {
                     return field.getAnnotation(com.alibaba.fastjson2.annotation.JSONField.class).format();
                 }
-            } catch (Throwable e) {
+            } catch (Throwable e) { // NOSONAR
                 // ignore
             }
 
@@ -196,7 +196,7 @@ public final class ParserUtil {
                         && Strings.isNotEmpty(field.getAnnotation(com.fasterxml.jackson.annotation.JsonFormat.class).pattern())) {
                     return field.getAnnotation(com.fasterxml.jackson.annotation.JsonFormat.class).pattern();
                 }
-            } catch (Throwable e) {
+            } catch (Throwable e) { // NOSONAR
                 // ignore
             }
         }
@@ -219,7 +219,7 @@ public final class ParserUtil {
                         && Strings.isNotEmpty(field.getAnnotation(com.fasterxml.jackson.annotation.JsonFormat.class).timezone())) {
                     return field.getAnnotation(com.fasterxml.jackson.annotation.JsonFormat.class).timezone();
                 }
-            } catch (Throwable e) {
+            } catch (Throwable e) { // NOSONAR
                 // ignore
             }
         }
@@ -268,7 +268,7 @@ public final class ParserUtil {
                         && field.getAnnotation(com.fasterxml.jackson.annotation.JsonRawValue.class).value()) {
                     isJsonRawValue = true;
                 }
-            } catch (Throwable e) {
+            } catch (Throwable e) { // NOSONAR
                 // ignore.
             }
         }
@@ -279,7 +279,7 @@ public final class ParserUtil {
                         && field.getAnnotation(com.alibaba.fastjson.annotation.JSONField.class).jsonDirect()) {
                     isJsonRawValue = true;
                 }
-            } catch (Throwable e) {
+            } catch (Throwable e) { // NOSONAR
                 // ignore.
             }
         }
@@ -290,7 +290,7 @@ public final class ParserUtil {
                         && field.getAnnotation(com.alibaba.fastjson2.annotation.JSONField.class).jsonDirect()) {
                     isJsonRawValue = true;
                 }
-            } catch (Throwable e) {
+            } catch (Throwable e) { // NOSONAR
                 // ignore.
             }
         }
@@ -334,7 +334,7 @@ public final class ParserUtil {
                             && Strings.isNotEmpty(field.getAnnotation(com.alibaba.fastjson.annotation.JSONField.class).name())) {
                         jsonXmlFieldName = field.getAnnotation(com.alibaba.fastjson.annotation.JSONField.class).name();
                     }
-                } catch (Throwable e) {
+                } catch (Throwable e) { // NOSONAR
                     // ignore
                 }
 
@@ -344,7 +344,7 @@ public final class ParserUtil {
                                 && Strings.isNotEmpty(field.getAnnotation(com.alibaba.fastjson2.annotation.JSONField.class).name())) {
                             jsonXmlFieldName = field.getAnnotation(com.alibaba.fastjson2.annotation.JSONField.class).name();
                         }
-                    } catch (Throwable e) {
+                    } catch (Throwable e) { // NOSONAR
                         // ignore
                     }
                 }
@@ -355,7 +355,7 @@ public final class ParserUtil {
                                 && Strings.isNotEmpty(field.getAnnotation(com.fasterxml.jackson.annotation.JsonProperty.class).value())) {
                             jsonXmlFieldName = field.getAnnotation(com.fasterxml.jackson.annotation.JsonProperty.class).value();
                         }
-                    } catch (Throwable e) {
+                    } catch (Throwable e) { // NOSONAR
                         // ignore
                     }
                 }
@@ -388,7 +388,7 @@ public final class ParserUtil {
                             && Strings.isNotEmpty(field.getAnnotation(com.alibaba.fastjson.annotation.JSONField.class).name())) {
                         jsonXmlFieldName = field.getAnnotation(com.alibaba.fastjson.annotation.JSONField.class).name();
                     }
-                } catch (Throwable e) {
+                } catch (Throwable e) { // NOSONAR
                     // ignore
                 }
 
@@ -398,7 +398,7 @@ public final class ParserUtil {
                                 && Strings.isNotEmpty(field.getAnnotation(com.alibaba.fastjson2.annotation.JSONField.class).name())) {
                             jsonXmlFieldName = field.getAnnotation(com.alibaba.fastjson2.annotation.JSONField.class).name();
                         }
-                    } catch (Throwable e) {
+                    } catch (Throwable e) { // NOSONAR
                         // ignore
                     }
                 }
@@ -409,7 +409,7 @@ public final class ParserUtil {
                                 && Strings.isNotEmpty(field.getAnnotation(com.fasterxml.jackson.annotation.JsonProperty.class).value())) {
                             jsonXmlFieldName = field.getAnnotation(com.fasterxml.jackson.annotation.JsonProperty.class).value();
                         }
-                    } catch (Throwable e) {
+                    } catch (Throwable e) { // NOSONAR
                         // ignore
                     }
                 }
@@ -442,7 +442,7 @@ public final class ParserUtil {
                             && N.notEmpty(field.getAnnotation(com.alibaba.fastjson.annotation.JSONField.class).alternateNames())) {
                         alias = field.getAnnotation(com.alibaba.fastjson.annotation.JSONField.class).alternateNames();
                     }
-                } catch (Throwable e) {
+                } catch (Throwable e) { // NOSONAR
                     // ignore
                 }
 
@@ -452,7 +452,7 @@ public final class ParserUtil {
                                 && N.notEmpty(field.getAnnotation(com.alibaba.fastjson2.annotation.JSONField.class).alternateNames())) {
                             alias = field.getAnnotation(com.alibaba.fastjson2.annotation.JSONField.class).alternateNames();
                         }
-                    } catch (Throwable e) {
+                    } catch (Throwable e) { // NOSONAR
                         // ignore
                     }
                 }
@@ -463,7 +463,7 @@ public final class ParserUtil {
                                 && N.notEmpty(field.getAnnotation(com.fasterxml.jackson.annotation.JsonAlias.class).value())) {
                             alias = field.getAnnotation(com.fasterxml.jackson.annotation.JsonAlias.class).value();
                         }
-                    } catch (Throwable e) {
+                    } catch (Throwable e) { // NOSONAR
                         // ignore
                     }
                 }
@@ -650,12 +650,12 @@ public final class ParserUtil {
                                 localIsImmutable = false;
 
                                 break;
-                            } catch (Throwable e) {
+                            } catch (Throwable e) { // NOSONAR
                                 // ignore.
                             }
                         }
                     }
-                } catch (Throwable e) {
+                } catch (Throwable e) { // NOSONAR
                     // ignore.
                 }
             }
@@ -823,7 +823,7 @@ public final class ParserUtil {
                     if (this.annotations.containsKey(javax.persistence.Table.class)) {
                         tmpTableName = ((javax.persistence.Table) this.annotations.get(javax.persistence.Table.class)).name();
                     }
-                } catch (Throwable e) {
+                } catch (Throwable e) { // NOSONAR
                     // ignore
                 }
 
@@ -832,7 +832,7 @@ public final class ParserUtil {
                         if (this.annotations.containsKey(jakarta.persistence.Table.class)) {
                             tmpTableName = ((jakarta.persistence.Table) this.annotations.get(jakarta.persistence.Table.class)).name();
                         }
-                    } catch (Throwable e) {
+                    } catch (Throwable e) { // NOSONAR
                         // ignore
                     }
                 }
@@ -868,7 +868,7 @@ public final class ParserUtil {
             if (tmpIsMarkedToBean == false) {
                 try {
                     tmpIsMarkedToBean = this.annotations.containsKey(javax.persistence.Entity.class);
-                } catch (Throwable e) {
+                } catch (Throwable e) { // NOSONAR
                     // ignore
                 }
             }
@@ -876,7 +876,7 @@ public final class ParserUtil {
             if (tmpIsMarkedToBean == false) {
                 try {
                     tmpIsMarkedToBean = this.annotations.containsKey(jakarta.persistence.Entity.class);
-                } catch (Throwable e) {
+                } catch (Throwable e) { // NOSONAR
                     // ignore
                 }
             }
@@ -1604,7 +1604,7 @@ public final class ParserUtil {
                 if (Class.forName("org.joda.time.DateTime") != null) {
                     tmpJodaDTFH = new JodaDateTimeFormatterHolder(dateFormat, timeZone);
                 }
-            } catch (Throwable e) {
+            } catch (Throwable e) { // NOSONAR
                 // ignore.
             }
 
@@ -1630,7 +1630,7 @@ public final class ParserUtil {
             if (!tmpIsMarkedToId) {
                 try {
                     tmpIsMarkedToId = this.annotations.containsKey(javax.persistence.Id.class);
-                } catch (Throwable e) {
+                } catch (Throwable e) { // NOSONAR
                     // ignore
                 }
             }
@@ -1638,7 +1638,7 @@ public final class ParserUtil {
             if (!tmpIsMarkedToId) {
                 try {
                     tmpIsMarkedToId = this.annotations.containsKey(jakarta.persistence.Id.class);
-                } catch (Throwable e) {
+                } catch (Throwable e) { // NOSONAR
                     // ignore
                 }
             }
@@ -1665,7 +1665,7 @@ public final class ParserUtil {
 
                         tmpColumnName = ((javax.persistence.Column) this.annotations.get(javax.persistence.Column.class)).name();
                     }
-                } catch (Throwable e) {
+                } catch (Throwable e) { // NOSONAR
                     // ignore
                 }
 
@@ -1676,7 +1676,7 @@ public final class ParserUtil {
 
                             tmpColumnName = ((jakarta.persistence.Column) this.annotations.get(jakarta.persistence.Column.class)).name();
                         }
-                    } catch (Throwable e) {
+                    } catch (Throwable e) { // NOSONAR
                         // ignore
                     }
                 }
@@ -1749,7 +1749,7 @@ public final class ParserUtil {
                     }
 
                     if (failureCountForSetProp > 0) {
-                        failureCountForSetProp--;
+                        failureCountForSetProp--; // NOSONAR
                     }
                 } catch (IllegalAccessException | InvocationTargetException e) {
                     throw ExceptionUtil.toRuntimeException(e);
@@ -1767,13 +1767,15 @@ public final class ParserUtil {
                     }
 
                     if (failureCountForSetProp > 0) {
-                        failureCountForSetProp--;
+                        failureCountForSetProp--; // NOSONAR
                     }
                 } catch (Exception e) {
                     // why don't check value type first before set? Because it's expected 99% chance set will success.
                     // Checking value type first may not improve performance.
 
-                    failureCountForSetProp++;
+                    if (failureCountForSetProp < 1000) {
+                        failureCountForSetProp++; // NOSONAR
+                    }
 
                     if (logger.isWarnEnabled()) {
                         logger.warn("Failed to set value for field: {} in class: {} with value type {}", field == null ? name : field.getName(),
@@ -2037,7 +2039,7 @@ public final class ParserUtil {
                         }
                     });
                 }
-            } catch (Throwable e) {
+            } catch (Throwable e) { // NOSONAR
                 // ignore.
             }
         }
@@ -2482,7 +2484,7 @@ public final class ParserUtil {
                 }
 
                 if (failureCountForSetProp > 0) {
-                    failureCountForSetProp--;
+                    failureCountForSetProp--; // NOSONAR
                 }
             } else {
                 try {
@@ -2497,13 +2499,15 @@ public final class ParserUtil {
                     }
 
                     if (failureCountForSetProp > 0) {
-                        failureCountForSetProp--;
+                        failureCountForSetProp--; // NOSONAR
                     }
                 } catch (Exception e) {
                     // why don't check value type first before set? Because it's expected 99% chance set will success.
                     // Checking value type first may not improve performance.
 
-                    failureCountForSetProp++;
+                    if (failureCountForSetProp < 1000) {
+                        failureCountForSetProp++; // NOSONAR
+                    }
 
                     if (logger.isWarnEnabled()) {
                         logger.warn("Failed to set value for field: {} in class: {} with value type {}", field == null ? name : field.getName(),

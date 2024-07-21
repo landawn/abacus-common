@@ -32,35 +32,35 @@ import okio.Buffer;
 
 class CurlInterceptor implements Interceptor {
     static final char DEFAULT_QUOTE_CHAR = '\'';
-    private final Consumer<String> logHandler;
+    private final Consumer<? super String> logHandler;
     private final char quoteChar;
 
     /**
-     * 
      *
-     * @param logHandler 
+     *
+     * @param logHandler
      */
-    public CurlInterceptor(final Consumer<String> logHandler) {
+    public CurlInterceptor(final Consumer<? super String> logHandler) {
         this(DEFAULT_QUOTE_CHAR, logHandler);
     }
 
     /**
-     * 
      *
-     * @param quoteChar 
-     * @param logHandler 
+     *
+     * @param quoteChar
+     * @param logHandler
      */
-    public CurlInterceptor(final char quoteChar, final Consumer<String> logHandler) {
+    public CurlInterceptor(final char quoteChar, final Consumer<? super String> logHandler) {
         this.logHandler = logHandler;
         this.quoteChar = quoteChar;
     }
 
     /**
-     * 
      *
-     * @param chain 
-     * @return 
-     * @throws IOException 
+     *
+     * @param chain
+     * @return
+     * @throws IOException
      */
     @Override
     public Response intercept(Chain chain) throws IOException {

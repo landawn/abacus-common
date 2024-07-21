@@ -541,12 +541,12 @@ public final class HttpHeaders {
     }
 
     /**
-     * 
      *
-     * @param name 
-     * @param value 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param name
+     * @param value
+     * @return
+     * @throws IllegalArgumentException
      */
     public static HttpHeaders of(final String name, final Object value) throws IllegalArgumentException {
         N.checkArgNotNull(name, "name");
@@ -555,14 +555,14 @@ public final class HttpHeaders {
     }
 
     /**
-     * 
      *
-     * @param name1 
-     * @param value1 
-     * @param name2 
-     * @param value2 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param name1
+     * @param value1
+     * @param name2
+     * @param value2
+     * @return
+     * @throws IllegalArgumentException
      */
     public static HttpHeaders of(final String name1, final Object value1, final String name2, final Object value2) throws IllegalArgumentException {
         N.checkArgNotNull(name1, "name1");
@@ -572,16 +572,16 @@ public final class HttpHeaders {
     }
 
     /**
-     * 
      *
-     * @param name1 
-     * @param value1 
-     * @param name2 
-     * @param value2 
-     * @param name3 
-     * @param value3 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param name1
+     * @param value1
+     * @param name2
+     * @param value2
+     * @param name3
+     * @param value3
+     * @return
+     * @throws IllegalArgumentException
      */
     public static HttpHeaders of(final String name1, final Object value1, final String name2, final Object value2, final String name3, final Object value3)
             throws IllegalArgumentException {
@@ -593,11 +593,11 @@ public final class HttpHeaders {
     }
 
     /**
-     * 
      *
-     * @param headers 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param headers
+     * @return
+     * @throws IllegalArgumentException
      */
     public static HttpHeaders of(final Map<String, ?> headers) throws IllegalArgumentException {
         N.checkArgNotNull(headers);
@@ -606,11 +606,11 @@ public final class HttpHeaders {
     }
 
     /**
-     * 
      *
-     * @param headers 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param headers
+     * @return
+     * @throws IllegalArgumentException
      */
     public static HttpHeaders copyOf(final Map<String, ?> headers) throws IllegalArgumentException {
         N.checkArgNotNull(headers);
@@ -728,11 +728,11 @@ public final class HttpHeaders {
     }
 
     /**
-     * 
      *
-     * @param username 
-     * @param password 
-     * @return 
+     *
+     * @param username
+     * @param password
+     * @return
      */
     public HttpHeaders setBasicAuthentication(String username, String password) {
         set(Names.AUTHORIZATION, "Basic " + Strings.base64Encode((username + ":" + password).getBytes(Charsets.UTF_8)));
@@ -909,7 +909,7 @@ public final class HttpHeaders {
      *
      * @param action
      */
-    public void forEach(final BiConsumer<String, Object> action) {
+    public void forEach(final BiConsumer<? super String, ? super Object> action) {
         map.forEach(action);
     }
 

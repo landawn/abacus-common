@@ -199,14 +199,14 @@ public abstract sealed class Strings permits Strings.StringUtil {
     // https://owasp.org/www-community/OWASP_Validation_Regex_Repository
     // https://stackoverflow.com/questions/201323/how-can-i-validate-an-email-address-using-a-regular-expression
     private static final Pattern EMAIL_ADDRESS_RFC_5322_PATTERN = Pattern.compile(
-            "(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|\"(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21\\x23-\\x5b\\x5d-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])*\")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\\[(?:(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9]))\\.){3}(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9])|[a-z0-9-]*[a-z0-9]:(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21-\\x5a\\x53-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])+)\\])",
+            "(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|\"(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21\\x23-\\x5b\\x5d-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])*\")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\\[(?:(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9]))\\.){3}(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9])|[a-z0-9-]*[a-z0-9]:(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21-\\x5a\\x53-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])+)\\])", //NOSONAR
             Pattern.UNICODE_CHARACTER_CLASS);
 
     // https://stackoverflow.com/questions/3809401/what-is-a-good-regular-expression-to-match-a-url
-    private static final Pattern URL_PATTERN = Pattern.compile("[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_\\+.~#?&//=]*)",
+    private static final Pattern URL_PATTERN = Pattern.compile("[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_\\+.~#?&//=]*)", //NOSONAR
             Pattern.UNICODE_CHARACTER_CLASS);
 
-    private static final Pattern HTTP_URL_PATTERN = Pattern.compile("[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_\\+.~#?&//=]*)",
+    private static final Pattern HTTP_URL_PATTERN = Pattern.compile("[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_\\+.~#?&//=]*)", //NOSONAR
             Pattern.UNICODE_CHARACTER_CLASS);
 
     private static final Encoder BASE64_ENCODER = java.util.Base64.getEncoder();
@@ -2302,7 +2302,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param converter
      * @return the specified String if it's {@code null} or empty.
      */
-    public static String convertWords(final String str, final Function<String, String> converter) {
+    public static String convertWords(final String str, final Function<? super String, String> converter) {
         return convertWords(str, " ", converter);
     }
 
@@ -2315,7 +2315,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @return the specified String if it's {@code null} or empty.
      * @throws IllegalArgumentException
      */
-    public static String convertWords(final String str, final String delimiter, final Function<String, String> converter) throws IllegalArgumentException {
+    public static String convertWords(final String str, final String delimiter, final Function<? super String, String> converter)
+            throws IllegalArgumentException {
         N.checkArgNotEmpty(delimiter, "delimiter"); // NOSONAR
 
         if (str == null || str.length() == 0) {
@@ -2342,7 +2343,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @throws IllegalArgumentException
      */
     public static String convertWords(final String str, final String delimiter, final Collection<String> excludedWords,
-            final Function<String, String> converter) throws IllegalArgumentException {
+            final Function<? super String, String> converter) throws IllegalArgumentException {
         N.checkArgNotEmpty(delimiter, "delimiter"); // NOSONAR
 
         if (str == null || str.length() == 0) {
@@ -7431,7 +7432,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     //     */
     //    @MayReturnNull
     //    @Beta
-    //    public static String substring(final String str, final int inclusiveBeginIndex, final BiFunction<String, Integer, Integer> funcOfExclusiveEndIndex) {
+    //    public static String substring(final String str, final int inclusiveBeginIndex, final BiFunction<? super String, Integer, Integer> funcOfExclusiveEndIndex) {
     //        if (str == null || inclusiveBeginIndex < 0) {
     //            return null;
     //        }
@@ -7470,7 +7471,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     //     */
     //    @MayReturnNull
     //    @Beta
-    //    public static String substring(final String str, final BiFunction<String, Integer, Integer> funcOfInclusiveBeginIndex, final int exclusiveEndIndex) {
+    //    public static String substring(final String str, final BiFunction<? super String, Integer, Integer> funcOfInclusiveBeginIndex, final int exclusiveEndIndex) {
     //        if (str == null || exclusiveEndIndex < 0) {
     //            return null;
     //        }
@@ -8327,7 +8328,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     //     */
     //    @MayReturnNull
     //    @Beta
-    //    public static String substringBetween(String str, int exclusiveBeginIndex, final BiFunction<String, Integer, Integer> funcOfExclusiveEndIndex) {
+    //    public static String substringBetween(String str, int exclusiveBeginIndex, final BiFunction<? super String, Integer, Integer> funcOfExclusiveEndIndex) {
     //        if (str == null || exclusiveBeginIndex < 0 || exclusiveBeginIndex >= str.length()) {
     //            return null;
     //        }
@@ -8362,7 +8363,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     //     */
     //    @MayReturnNull
     //    @Beta
-    //    public static String substringBetween(String str, final BiFunction<String, Integer, Integer> funcOfExclusiveBeginIndex, int exclusiveEndIndex) {
+    //    public static String substringBetween(String str, final BiFunction<? super String, Integer, Integer> funcOfExclusiveBeginIndex, int exclusiveEndIndex) {
     //        if (str == null || exclusiveEndIndex < 0) {
     //            return null;
     //        }
@@ -11017,7 +11018,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
-     * Returns <code>a + b</code>.
+     * Returns <code>nullToEmpty(a) + nullToEmpty(b)</code>.
      *
      * @param a
      * @param b
@@ -11032,6 +11033,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
+     * Returns <code>nullToEmpty(a) + nullToEmpty(b) + nullToEmpty(c)</code>.
      *
      * @param a
      * @param b
@@ -12280,7 +12282,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         //         */
         //        @Beta
         //        public static Optional<String> substring(final String str, final int inclusiveBeginIndex,
-        //                final BiFunction<String, Integer, Integer> funcOfExclusiveEndIndex) {
+        //                final BiFunction<? super String, Integer, Integer> funcOfExclusiveEndIndex) {
         //            return Optional.ofNullable(Strings.substring(str, inclusiveBeginIndex, funcOfExclusiveEndIndex));
         //        }
 
@@ -12307,7 +12309,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         //         * @see #substring(String, int, int)
         //         */
         //        @Beta
-        //        public static Optional<String> substring(final String str, final BiFunction<String, Integer, Integer> funcOfInclusiveBeginIndex,
+        //        public static Optional<String> substring(final String str, final BiFunction<? super String, Integer, Integer> funcOfInclusiveBeginIndex,
         //                final int exclusiveEndIndex) {
         //            return Optional.ofNullable(Strings.substring(str, funcOfInclusiveBeginIndex, exclusiveEndIndex));
         //        }
@@ -13349,7 +13351,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         //         */
         //        @Beta
         //        public static Optional<String> substringBetween(final String str, final int exclusiveBeginIndex,
-        //                final BiFunction<String, Integer, Integer> funcOfExclusiveEndIndex) {
+        //                final BiFunction<? super String, Integer, Integer> funcOfExclusiveEndIndex) {
         //            return Optional.ofNullable(Strings.substringBetween(str, exclusiveBeginIndex, funcOfExclusiveEndIndex));
         //        }
 
@@ -13376,7 +13378,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         //         * @see #substringBetween(String, int, int)
         //         */
         //        @Beta
-        //        public static Optional<String> substringBetween(final String str, final BiFunction<String, Integer, Integer> funcOfExclusiveBeginIndex,
+        //        public static Optional<String> substringBetween(final String str, final BiFunction<? super String, Integer, Integer> funcOfExclusiveBeginIndex,
         //                final int exclusiveEndIndex) {
         //            return Optional.ofNullable(Strings.substringBetween(str, funcOfExclusiveBeginIndex, exclusiveEndIndex));
         //        }

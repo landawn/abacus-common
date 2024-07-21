@@ -941,13 +941,13 @@ public final class Fn {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <U> 
-     * @param separator 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <T>
+     * @param <U>
+     * @param separator
+     * @return
+     * @throws IllegalArgumentException
      */
     public static <T, U> BiConsumer<T, U> println(final String separator) throws IllegalArgumentException {
         N.checkArgNotNull(separator);
@@ -1070,13 +1070,13 @@ public final class Fn {
     }
 
     /**
-     * 
+     *
      *
      * @param <K> the key type
-     * @param <T> 
-     * @param keyMapper 
-     * @return 
-     * @throws IllegalArgumentException 
+     * @param <T>
+     * @param keyMapper
+     * @return
+     * @throws IllegalArgumentException
      */
     public static <K, T> Function<T, Keyed<K, T>> keyed(final java.util.function.Function<? super T, K> keyMapper) throws IllegalArgumentException {
         N.checkArgNotNull(keyMapper);
@@ -1124,13 +1124,13 @@ public final class Fn {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param hashFunction 
-     * @param equalsFunction 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <T>
+     * @param hashFunction
+     * @param equalsFunction
+     * @return
+     * @throws IllegalArgumentException
      */
     public static <T> Function<T, Wrapper<T>> wrap(final java.util.function.ToIntFunction<? super T> hashFunction,
             final java.util.function.BiPredicate<? super T, ? super T> equalsFunction) throws IllegalArgumentException {
@@ -1259,13 +1259,13 @@ public final class Fn {
     }
 
     /**
-     * 
+     *
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param keyMapper 
-     * @return 
-     * @throws IllegalArgumentException 
+     * @param keyMapper
+     * @return
+     * @throws IllegalArgumentException
      */
     public static <K, V> Function<V, Map.Entry<K, V>> entryByKeyMapper(final java.util.function.Function<? super V, K> keyMapper)
             throws IllegalArgumentException {
@@ -1286,13 +1286,13 @@ public final class Fn {
     }
 
     /**
-     * 
+     *
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param valueMapper 
-     * @return 
-     * @throws IllegalArgumentException 
+     * @param valueMapper
+     * @return
+     * @throws IllegalArgumentException
      */
     public static <K, V> Function<K, Map.Entry<K, V>> entryByValueMapper(final java.util.function.Function<? super K, V> valueMapper)
             throws IllegalArgumentException {
@@ -1541,13 +1541,13 @@ public final class Fn {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <U> 
-     * @param clazz 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <T>
+     * @param <U>
+     * @param clazz
+     * @return
+     * @throws IllegalArgumentException
      */
     public static <T, U> Function<T, U> cast(final Class<U> clazz) throws IllegalArgumentException {
         N.checkArgNotNull(clazz);
@@ -1946,12 +1946,12 @@ public final class Fn {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param c 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <T>
+     * @param c
+     * @return
+     * @throws IllegalArgumentException
      */
     public static <T> Predicate<T> in(final Collection<?> c) throws IllegalArgumentException {
         N.checkArgNotNull(c);
@@ -1962,12 +1962,12 @@ public final class Fn {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param c 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <T>
+     * @param c
+     * @return
+     * @throws IllegalArgumentException
      */
     public static <T> Predicate<T> notIn(final Collection<?> c) throws IllegalArgumentException {
         N.checkArgNotNull(c);
@@ -1978,12 +1978,12 @@ public final class Fn {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param clazz 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <T>
+     * @param clazz
+     * @return
+     * @throws IllegalArgumentException
      */
     public static <T> Predicate<T> instanceOf(final Class<?> clazz) throws IllegalArgumentException {
         N.checkArgNotNull(clazz);
@@ -1992,11 +1992,11 @@ public final class Fn {
     }
 
     /**
-     * 
      *
-     * @param clazz 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param clazz
+     * @return
+     * @throws IllegalArgumentException
      */
     @SuppressWarnings("rawtypes")
     public static Predicate<Class> subtypeOf(final Class<?> clazz) throws IllegalArgumentException {
@@ -2006,11 +2006,11 @@ public final class Fn {
     }
 
     /**
-     * 
      *
-     * @param prefix 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param prefix
+     * @return
+     * @throws IllegalArgumentException
      */
     public static Predicate<String> startsWith(final String prefix) throws IllegalArgumentException {
         N.checkArgNotNull(prefix);
@@ -2019,11 +2019,11 @@ public final class Fn {
     }
 
     /**
-     * 
      *
-     * @param suffix 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param suffix
+     * @return
+     * @throws IllegalArgumentException
      */
     public static Predicate<String> endsWith(final String suffix) throws IllegalArgumentException {
         N.checkArgNotNull(suffix);
@@ -2032,11 +2032,11 @@ public final class Fn {
     }
 
     /**
-     * 
      *
-     * @param str 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param str
+     * @return
+     * @throws IllegalArgumentException
      */
     public static Predicate<String> contains(final String str) throws IllegalArgumentException {
         N.checkArgNotNull(str);
@@ -2047,9 +2047,9 @@ public final class Fn {
     /**
      * Not starts with.
      *
-     * @param prefix 
-     * @return 
-     * @throws IllegalArgumentException 
+     * @param prefix
+     * @return
+     * @throws IllegalArgumentException
      */
     public static Predicate<String> notStartsWith(final String prefix) throws IllegalArgumentException {
         N.checkArgNotNull(prefix);
@@ -2060,9 +2060,9 @@ public final class Fn {
     /**
      * Not ends with.
      *
-     * @param suffix 
-     * @return 
-     * @throws IllegalArgumentException 
+     * @param suffix
+     * @return
+     * @throws IllegalArgumentException
      */
     public static Predicate<String> notEndsWith(final String suffix) throws IllegalArgumentException {
         N.checkArgNotNull(suffix);
@@ -2071,11 +2071,11 @@ public final class Fn {
     }
 
     /**
-     * 
      *
-     * @param str 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param str
+     * @return
+     * @throws IllegalArgumentException
      */
     public static Predicate<String> notContains(final String str) throws IllegalArgumentException {
         N.checkArgNotNull(str);
@@ -2084,11 +2084,11 @@ public final class Fn {
     }
 
     /**
-     * 
      *
-     * @param pattern 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param pattern
+     * @return
+     * @throws IllegalArgumentException
      */
     public static Predicate<CharSequence> matches(final Pattern pattern) throws IllegalArgumentException {
         N.checkArgNotNull(pattern);
@@ -2153,12 +2153,12 @@ public final class Fn {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param predicate 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <T>
+     * @param predicate
+     * @return
+     * @throws IllegalArgumentException
      */
     public static <T> Predicate<T> not(final java.util.function.Predicate<T> predicate) throws IllegalArgumentException {
         N.checkArgNotNull(predicate);
@@ -2167,13 +2167,13 @@ public final class Fn {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <U> 
-     * @param biPredicate 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <T>
+     * @param <U>
+     * @param biPredicate
+     * @return
+     * @throws IllegalArgumentException
      */
     public static <T, U> BiPredicate<T, U> not(final java.util.function.BiPredicate<T, U> biPredicate) throws IllegalArgumentException {
         N.checkArgNotNull(biPredicate);
@@ -2182,14 +2182,14 @@ public final class Fn {
     }
 
     /**
-     * 
      *
-     * @param <A> 
-     * @param <B> 
-     * @param <C> 
-     * @param triPredicate 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <A>
+     * @param <B>
+     * @param <C>
+     * @param triPredicate
+     * @return
+     * @throws IllegalArgumentException
      */
     public static <A, B, C> TriPredicate<A, B, C> not(final TriPredicate<A, B, C> triPredicate) throws IllegalArgumentException {
         N.checkArgNotNull(triPredicate);
@@ -2198,12 +2198,12 @@ public final class Fn {
     }
 
     /**
-     * 
      *
-     * @param first 
-     * @param second 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param first
+     * @param second
+     * @return
+     * @throws IllegalArgumentException
      */
     public static BooleanSupplier and(final java.util.function.BooleanSupplier first, final java.util.function.BooleanSupplier second)
             throws IllegalArgumentException {
@@ -2214,13 +2214,13 @@ public final class Fn {
     }
 
     /**
-     * 
      *
-     * @param first 
-     * @param second 
-     * @param third 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param first
+     * @param second
+     * @param third
+     * @return
+     * @throws IllegalArgumentException
      */
     public static BooleanSupplier and(final java.util.function.BooleanSupplier first, final java.util.function.BooleanSupplier second,
             final java.util.function.BooleanSupplier third) throws IllegalArgumentException {
@@ -2232,13 +2232,13 @@ public final class Fn {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param first 
-     * @param second 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <T>
+     * @param first
+     * @param second
+     * @return
+     * @throws IllegalArgumentException
      */
     public static <T> Predicate<T> and(final java.util.function.Predicate<? super T> first, final java.util.function.Predicate<? super T> second)
             throws IllegalArgumentException {
@@ -2249,14 +2249,14 @@ public final class Fn {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param first 
-     * @param second 
-     * @param third 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <T>
+     * @param first
+     * @param second
+     * @param third
+     * @return
+     * @throws IllegalArgumentException
      */
     public static <T> Predicate<T> and(final java.util.function.Predicate<? super T> first, final java.util.function.Predicate<? super T> second,
             final java.util.function.Predicate<? super T> third) throws IllegalArgumentException {
@@ -2289,14 +2289,14 @@ public final class Fn {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <U> 
-     * @param first 
-     * @param second 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <T>
+     * @param <U>
+     * @param first
+     * @param second
+     * @return
+     * @throws IllegalArgumentException
      */
     public static <T, U> BiPredicate<T, U> and(final java.util.function.BiPredicate<? super T, ? super U> first,
             final java.util.function.BiPredicate<? super T, ? super U> second) throws IllegalArgumentException {
@@ -2307,15 +2307,15 @@ public final class Fn {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <U> 
-     * @param first 
-     * @param second 
-     * @param third 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <T>
+     * @param <U>
+     * @param first
+     * @param second
+     * @param third
+     * @return
+     * @throws IllegalArgumentException
      */
     public static <T, U> BiPredicate<T, U> and(final java.util.function.BiPredicate<? super T, ? super U> first,
             final java.util.function.BiPredicate<? super T, ? super U> second, final BiPredicate<? super T, ? super U> third) throws IllegalArgumentException {
@@ -2349,12 +2349,12 @@ public final class Fn {
     }
 
     /**
-     * 
      *
-     * @param first 
-     * @param second 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param first
+     * @param second
+     * @return
+     * @throws IllegalArgumentException
      */
     public static BooleanSupplier or(final java.util.function.BooleanSupplier first, final java.util.function.BooleanSupplier second)
             throws IllegalArgumentException {
@@ -2365,13 +2365,13 @@ public final class Fn {
     }
 
     /**
-     * 
      *
-     * @param first 
-     * @param second 
-     * @param third 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param first
+     * @param second
+     * @param third
+     * @return
+     * @throws IllegalArgumentException
      */
     public static BooleanSupplier or(final java.util.function.BooleanSupplier first, final java.util.function.BooleanSupplier second,
             final java.util.function.BooleanSupplier third) throws IllegalArgumentException {
@@ -2383,13 +2383,13 @@ public final class Fn {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param first 
-     * @param second 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <T>
+     * @param first
+     * @param second
+     * @return
+     * @throws IllegalArgumentException
      */
     public static <T> Predicate<T> or(final java.util.function.Predicate<? super T> first, final java.util.function.Predicate<? super T> second)
             throws IllegalArgumentException {
@@ -2400,14 +2400,14 @@ public final class Fn {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param first 
-     * @param second 
-     * @param third 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <T>
+     * @param first
+     * @param second
+     * @param third
+     * @return
+     * @throws IllegalArgumentException
      */
     public static <T> Predicate<T> or(final java.util.function.Predicate<? super T> first, final java.util.function.Predicate<? super T> second,
             final java.util.function.Predicate<? super T> third) throws IllegalArgumentException {
@@ -2440,14 +2440,14 @@ public final class Fn {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <U> 
-     * @param first 
-     * @param second 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <T>
+     * @param <U>
+     * @param first
+     * @param second
+     * @return
+     * @throws IllegalArgumentException
      */
     public static <T, U> BiPredicate<T, U> or(final java.util.function.BiPredicate<? super T, ? super U> first,
             final java.util.function.BiPredicate<? super T, ? super U> second) throws IllegalArgumentException {
@@ -2458,15 +2458,15 @@ public final class Fn {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <U> 
-     * @param first 
-     * @param second 
-     * @param third 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <T>
+     * @param <U>
+     * @param first
+     * @param second
+     * @param third
+     * @return
+     * @throws IllegalArgumentException
      */
     public static <T, U> BiPredicate<T, U> or(final java.util.function.BiPredicate<? super T, ? super U> first,
             final java.util.function.BiPredicate<? super T, ? super U> second, final java.util.function.BiPredicate<? super T, ? super U> third)
@@ -2505,9 +2505,9 @@ public final class Fn {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param predicate 
-     * @return 
-     * @throws IllegalArgumentException 
+     * @param predicate
+     * @return
+     * @throws IllegalArgumentException
      */
     public static <K, V> Predicate<Map.Entry<K, V>> testByKey(final java.util.function.Predicate<? super K> predicate) throws IllegalArgumentException {
         N.checkArgNotNull(predicate);
@@ -2520,9 +2520,9 @@ public final class Fn {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param predicate 
-     * @return 
-     * @throws IllegalArgumentException 
+     * @param predicate
+     * @return
+     * @throws IllegalArgumentException
      */
     public static <K, V> Predicate<Map.Entry<K, V>> testByValue(final java.util.function.Predicate<? super V> predicate) throws IllegalArgumentException {
         N.checkArgNotNull(predicate);
@@ -2535,9 +2535,9 @@ public final class Fn {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param consumer 
-     * @return 
-     * @throws IllegalArgumentException 
+     * @param consumer
+     * @return
+     * @throws IllegalArgumentException
      */
     public static <K, V> Consumer<Map.Entry<K, V>> acceptByKey(final java.util.function.Consumer<? super K> consumer) throws IllegalArgumentException {
         N.checkArgNotNull(consumer);
@@ -2550,9 +2550,9 @@ public final class Fn {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param consumer 
-     * @return 
-     * @throws IllegalArgumentException 
+     * @param consumer
+     * @return
+     * @throws IllegalArgumentException
      */
     public static <K, V> Consumer<Map.Entry<K, V>> acceptByValue(final java.util.function.Consumer<? super V> consumer) throws IllegalArgumentException {
         N.checkArgNotNull(consumer);
@@ -2565,10 +2565,10 @@ public final class Fn {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <R> 
-     * @param func 
-     * @return 
-     * @throws IllegalArgumentException 
+     * @param <R>
+     * @param func
+     * @return
+     * @throws IllegalArgumentException
      */
     public static <K, V, R> Function<Map.Entry<K, V>, R> applyByKey(final java.util.function.Function<? super K, ? extends R> func)
             throws IllegalArgumentException {
@@ -2582,10 +2582,10 @@ public final class Fn {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <R> 
-     * @param func 
-     * @return 
-     * @throws IllegalArgumentException 
+     * @param <R>
+     * @param func
+     * @return
+     * @throws IllegalArgumentException
      */
     public static <K, V, R> Function<Map.Entry<K, V>, R> applyByValue(final java.util.function.Function<? super V, ? extends R> func)
             throws IllegalArgumentException {
@@ -2595,14 +2595,14 @@ public final class Fn {
     }
 
     /**
-     * 
+     *
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <KK> 
-     * @param func 
-     * @return 
-     * @throws IllegalArgumentException 
+     * @param <KK>
+     * @param func
+     * @return
+     * @throws IllegalArgumentException
      */
     public static <K, V, KK> Function<Map.Entry<K, V>, Map.Entry<KK, V>> mapKey(final java.util.function.Function<? super K, ? extends KK> func)
             throws IllegalArgumentException {
@@ -2612,14 +2612,14 @@ public final class Fn {
     }
 
     /**
-     * 
+     *
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <VV> 
-     * @param func 
-     * @return 
-     * @throws IllegalArgumentException 
+     * @param <VV>
+     * @param func
+     * @return
+     * @throws IllegalArgumentException
      */
     public static <K, V, VV> Function<Map.Entry<K, V>, Map.Entry<K, VV>> mapValue(final java.util.function.Function<? super V, ? extends VV> func)
             throws IllegalArgumentException {
@@ -2633,9 +2633,9 @@ public final class Fn {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param predicate 
-     * @return 
-     * @throws IllegalArgumentException 
+     * @param predicate
+     * @return
+     * @throws IllegalArgumentException
      */
     public static <K, V> Predicate<Map.Entry<K, V>> testKeyVal(final java.util.function.BiPredicate<? super K, ? super V> predicate)
             throws IllegalArgumentException {
@@ -2649,9 +2649,9 @@ public final class Fn {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param consumer 
-     * @return 
-     * @throws IllegalArgumentException 
+     * @param consumer
+     * @return
+     * @throws IllegalArgumentException
      */
     public static <K, V> Consumer<Map.Entry<K, V>> acceptKeyVal(final java.util.function.BiConsumer<? super K, ? super V> consumer)
             throws IllegalArgumentException {
@@ -2665,10 +2665,10 @@ public final class Fn {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <R> 
-     * @param func 
-     * @return 
-     * @throws IllegalArgumentException 
+     * @param <R>
+     * @param func
+     * @return
+     * @throws IllegalArgumentException
      */
     public static <K, V, R> Function<Map.Entry<K, V>, R> applyKeyVal(final java.util.function.BiFunction<? super K, ? super V, ? extends R> func)
             throws IllegalArgumentException {
@@ -2678,12 +2678,12 @@ public final class Fn {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param consumer 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <T>
+     * @param consumer
+     * @return
+     * @throws IllegalArgumentException
      */
     @Beta
     public static <T> Consumer<T> acceptIfNotNull(final java.util.function.Consumer<? super T> consumer) throws IllegalArgumentException {
@@ -2697,13 +2697,13 @@ public final class Fn {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param predicate 
-     * @param consumer 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <T>
+     * @param predicate
+     * @param consumer
+     * @return
+     * @throws IllegalArgumentException
      */
     @Beta
     public static <T> Consumer<T> acceptIf(final java.util.function.Predicate<? super T> predicate, final java.util.function.Consumer<? super T> consumer)
@@ -2719,14 +2719,14 @@ public final class Fn {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param predicate 
-     * @param consumerForTrue 
-     * @param consumerForFalse 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <T>
+     * @param predicate
+     * @param consumerForTrue
+     * @param consumerForFalse
+     * @return
+     * @throws IllegalArgumentException
      */
     @Beta
     public static <T> Consumer<T> acceptIfOrElse(final java.util.function.Predicate<? super T> predicate,
@@ -2760,14 +2760,14 @@ public final class Fn {
     /**
      * Apply if not null or default.
      *
-     * @param <A> 
-     * @param <B> 
-     * @param <R> 
-     * @param mapperA 
-     * @param mapperB 
-     * @param defaultValue 
-     * @return 
-     * @throws IllegalArgumentException 
+     * @param <A>
+     * @param <B>
+     * @param <R>
+     * @param mapperA
+     * @param mapperB
+     * @param defaultValue
+     * @return
+     * @throws IllegalArgumentException
      */
     public static <A, B, R> Function<A, R> applyIfNotNullOrDefault(final java.util.function.Function<A, B> mapperA,
             final java.util.function.Function<B, ? extends R> mapperB, final R defaultValue) throws IllegalArgumentException {
@@ -2792,16 +2792,16 @@ public final class Fn {
     /**
      * Apply if not null or default.
      *
-     * @param <A> 
-     * @param <B> 
-     * @param <C> 
-     * @param <R> 
-     * @param mapperA 
-     * @param mapperB 
-     * @param mapperC 
-     * @param defaultValue 
-     * @return 
-     * @throws IllegalArgumentException 
+     * @param <A>
+     * @param <B>
+     * @param <C>
+     * @param <R>
+     * @param mapperA
+     * @param mapperB
+     * @param mapperC
+     * @param defaultValue
+     * @return
+     * @throws IllegalArgumentException
      */
     public static <A, B, C, R> Function<A, R> applyIfNotNullOrDefault(final java.util.function.Function<A, B> mapperA,
             final java.util.function.Function<B, C> mapperB, final java.util.function.Function<C, ? extends R> mapperC, final R defaultValue)
@@ -2834,18 +2834,18 @@ public final class Fn {
     /**
      * Apply if not null or default.
      *
-     * @param <A> 
-     * @param <B> 
-     * @param <C> 
-     * @param <D> 
-     * @param <R> 
-     * @param mapperA 
-     * @param mapperB 
-     * @param mapperC 
-     * @param mapperD 
-     * @param defaultValue 
-     * @return 
-     * @throws IllegalArgumentException 
+     * @param <A>
+     * @param <B>
+     * @param <C>
+     * @param <D>
+     * @param <R>
+     * @param mapperA
+     * @param mapperB
+     * @param mapperC
+     * @param mapperD
+     * @param defaultValue
+     * @return
+     * @throws IllegalArgumentException
      */
     public static <A, B, C, D, R> Function<A, R> applyIfNotNullOrDefault(final java.util.function.Function<A, B> mapperA,
             final java.util.function.Function<B, C> mapperB, final java.util.function.Function<C, D> mapperC,
@@ -2885,14 +2885,14 @@ public final class Fn {
     /**
      * Apply if not null or get.
      *
-     * @param <A> 
-     * @param <B> 
-     * @param <R> 
-     * @param mapperA 
-     * @param mapperB 
-     * @param supplier 
-     * @return 
-     * @throws IllegalArgumentException 
+     * @param <A>
+     * @param <B>
+     * @param <R>
+     * @param mapperA
+     * @param mapperB
+     * @param supplier
+     * @return
+     * @throws IllegalArgumentException
      */
     public static <A, B, R> Function<A, R> applyIfNotNullOrElseGet(final java.util.function.Function<A, B> mapperA,
             final java.util.function.Function<B, ? extends R> mapperB, final java.util.function.Supplier<R> supplier) throws IllegalArgumentException {
@@ -2917,16 +2917,16 @@ public final class Fn {
     /**
      * Apply if not null or get.
      *
-     * @param <A> 
-     * @param <B> 
-     * @param <C> 
-     * @param <R> 
-     * @param mapperA 
-     * @param mapperB 
-     * @param mapperC 
-     * @param supplier 
-     * @return 
-     * @throws IllegalArgumentException 
+     * @param <A>
+     * @param <B>
+     * @param <C>
+     * @param <R>
+     * @param mapperA
+     * @param mapperB
+     * @param mapperC
+     * @param supplier
+     * @return
+     * @throws IllegalArgumentException
      */
     public static <A, B, C, R> Function<A, R> applyIfNotNullOrElseGet(final java.util.function.Function<A, B> mapperA,
             final java.util.function.Function<B, C> mapperB, final java.util.function.Function<C, ? extends R> mapperC,
@@ -2959,18 +2959,18 @@ public final class Fn {
     /**
      * Apply if not null or get.
      *
-     * @param <A> 
-     * @param <B> 
-     * @param <C> 
-     * @param <D> 
-     * @param <R> 
-     * @param mapperA 
-     * @param mapperB 
-     * @param mapperC 
-     * @param mapperD 
-     * @param supplier 
-     * @return 
-     * @throws IllegalArgumentException 
+     * @param <A>
+     * @param <B>
+     * @param <C>
+     * @param <D>
+     * @param <R>
+     * @param mapperA
+     * @param mapperB
+     * @param mapperC
+     * @param mapperD
+     * @param supplier
+     * @return
+     * @throws IllegalArgumentException
      */
     public static <A, B, C, D, R> Function<A, R> applyIfNotNullOrElseGet(final java.util.function.Function<A, B> mapperA,
             final java.util.function.Function<B, C> mapperB, final java.util.function.Function<C, D> mapperC,
@@ -3008,15 +3008,15 @@ public final class Fn {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <R> 
-     * @param predicate 
-     * @param func 
-     * @param defaultValue 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <T>
+     * @param <R>
+     * @param predicate
+     * @param func
+     * @param defaultValue
+     * @return
+     * @throws IllegalArgumentException
      */
     @Beta
     public static <T, R> Function<T, R> applyIfOrElseDefault(final java.util.function.Predicate<? super T> predicate,
@@ -3034,15 +3034,15 @@ public final class Fn {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <R> 
-     * @param predicate 
-     * @param func 
-     * @param supplier 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <T>
+     * @param <R>
+     * @param predicate
+     * @param func
+     * @param supplier
+     * @return
+     * @throws IllegalArgumentException
      */
     @Beta
     public static <T, R> Function<T, R> applyIfOrElseGet(final java.util.function.Predicate<? super T> predicate,
@@ -3188,12 +3188,12 @@ public final class Fn {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param count 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <T>
+     * @param count
+     * @return
+     * @throws IllegalArgumentException
      */
     @Beta
     @Stateful
@@ -3217,11 +3217,11 @@ public final class Fn {
     /**
      * Returns a stateful <code>Predicate</code>. Don't save or cache for reuse or use it in parallel stream.
      *
-     * @param <T> 
-     * @param limit 
-     * @param predicate 
-     * @return 
-     * @throws IllegalArgumentException 
+     * @param <T>
+     * @param limit
+     * @param predicate
+     * @return
+     * @throws IllegalArgumentException
      */
     @Beta
     @SequentialOnly
@@ -3243,12 +3243,12 @@ public final class Fn {
     /**
      * Returns a stateful <code>Predicate</code>. Don't save or cache for reuse or use it in parallel stream.
      *
-     * @param <T> 
-     * @param <U> 
-     * @param limit 
-     * @param predicate 
-     * @return 
-     * @throws IllegalArgumentException 
+     * @param <T>
+     * @param <U>
+     * @param limit
+     * @param predicate
+     * @return
+     * @throws IllegalArgumentException
      */
     @Beta
     @SequentialOnly
@@ -3271,11 +3271,11 @@ public final class Fn {
     /**
      * Returns a stateful <code>Predicate</code>. Don't save or cache for reuse or use it in parallel stream.
      *
-     * @param <T> 
-     * @param predicate 
-     * @param limit 
-     * @return 
-     * @throws IllegalArgumentException 
+     * @param <T>
+     * @param predicate
+     * @param limit
+     * @return
+     * @throws IllegalArgumentException
      */
     @Beta
     @SequentialOnly
@@ -3297,12 +3297,12 @@ public final class Fn {
     /**
      * Returns a stateful <code>Predicate</code>. Don't save or cache for reuse or use it in parallel stream.
      *
-     * @param <T> 
-     * @param <U> 
-     * @param predicate 
-     * @param limit 
-     * @return 
-     * @throws IllegalArgumentException 
+     * @param <T>
+     * @param <U>
+     * @param predicate
+     * @param limit
+     * @return
+     * @throws IllegalArgumentException
      */
     @Beta
     @SequentialOnly
@@ -3325,10 +3325,10 @@ public final class Fn {
     /**
      * Returns a stateful <code>Predicate</code>. Don't save or cache for reuse or use it in parallel stream.
      *
-     * @param <T> 
-     * @param timeInMillis 
-     * @return 
-     * @throws IllegalArgumentException 
+     * @param <T>
+     * @param timeInMillis
+     * @return
+     * @throws IllegalArgumentException
      */
     @Beta
     @SequentialOnly
@@ -3357,10 +3357,10 @@ public final class Fn {
     /**
      * Returns a stateful <code>Predicate</code>. Don't save or cache for reuse or use it in parallel stream.
      *
-     * @param <T> 
-     * @param duration 
-     * @return 
-     * @throws IllegalArgumentException 
+     * @param <T>
+     * @param duration
+     * @return
+     * @throws IllegalArgumentException
      */
     @Beta
     @SequentialOnly
@@ -3446,12 +3446,12 @@ public final class Fn {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param comparator 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <T>
+     * @param comparator
+     * @return
+     * @throws IllegalArgumentException
      */
     public static <T> BinaryOperator<T> min(final Comparator<? super T> comparator) throws IllegalArgumentException {
         N.checkArgNotNull(comparator);
@@ -3460,12 +3460,12 @@ public final class Fn {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param keyMapper 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <T>
+     * @param keyMapper
+     * @return
+     * @throws IllegalArgumentException
      */
     @SuppressWarnings("rawtypes")
     public static <T> BinaryOperator<T> minBy(final java.util.function.Function<? super T, ? extends Comparable> keyMapper) throws IllegalArgumentException {
@@ -3536,12 +3536,12 @@ public final class Fn {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param comparator 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <T>
+     * @param comparator
+     * @return
+     * @throws IllegalArgumentException
      */
     public static <T> BinaryOperator<T> max(final Comparator<? super T> comparator) throws IllegalArgumentException {
         N.checkArgNotNull(comparator);
@@ -3550,12 +3550,12 @@ public final class Fn {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param keyMapper 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <T>
+     * @param keyMapper
+     * @return
+     * @throws IllegalArgumentException
      */
     @SuppressWarnings("rawtypes")
     public static <T> BinaryOperator<T> maxBy(final java.util.function.Function<? super T, ? extends Comparable> keyMapper) throws IllegalArgumentException {
@@ -3622,13 +3622,13 @@ public final class Fn {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param target 
-     * @param cmp 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <T>
+     * @param target
+     * @param cmp
+     * @return
+     * @throws IllegalArgumentException
      */
     public static <T> Function<T, Integer> compareTo(final T target, final Comparator<? super T> cmp) throws IllegalArgumentException {
         // N.checkArgNotNull(cmp);
@@ -3649,12 +3649,12 @@ public final class Fn {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param cmp 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <T>
+     * @param cmp
+     * @return
+     * @throws IllegalArgumentException
      */
     public static <T> BiFunction<T, T, Integer> compare(final Comparator<? super T> cmp) throws IllegalArgumentException {
         // N.checkArgNotNull(cmp);
@@ -3841,14 +3841,14 @@ public final class Fn {
     }
 
     /**
-     * 
      *
-     * @param <A> 
-     * @param <T> 
-     * @param a 
-     * @param biPredicate 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <A>
+     * @param <T>
+     * @param a
+     * @param biPredicate
+     * @return
+     * @throws IllegalArgumentException
      */
     @Beta
     public static <A, T> Predicate<T> p(final A a, final java.util.function.BiPredicate<A, T> biPredicate) throws IllegalArgumentException {
@@ -3858,16 +3858,16 @@ public final class Fn {
     }
 
     /**
-     * 
      *
-     * @param <A> 
-     * @param <B> 
-     * @param <T> 
-     * @param a 
-     * @param b 
-     * @param triPredicate 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <A>
+     * @param <B>
+     * @param <T>
+     * @param a
+     * @param b
+     * @param triPredicate
+     * @return
+     * @throws IllegalArgumentException
      */
     @Beta
     public static <A, B, T> Predicate<T> p(final A a, final B b, final TriPredicate<A, B, T> triPredicate) throws IllegalArgumentException {
@@ -3889,15 +3889,15 @@ public final class Fn {
     }
 
     /**
-     * 
      *
-     * @param <A> 
-     * @param <T> 
-     * @param <U> 
-     * @param a 
-     * @param triPredicate 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <A>
+     * @param <T>
+     * @param <U>
+     * @param a
+     * @param triPredicate
+     * @return
+     * @throws IllegalArgumentException
      */
     @Beta
     public static <A, T, U> BiPredicate<T, U> p(final A a, final TriPredicate<A, T, U> triPredicate) throws IllegalArgumentException {
@@ -3931,14 +3931,14 @@ public final class Fn {
     }
 
     /**
-     * 
      *
-     * @param <A> 
-     * @param <T> 
-     * @param a 
-     * @param biConsumer 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <A>
+     * @param <T>
+     * @param a
+     * @param biConsumer
+     * @return
+     * @throws IllegalArgumentException
      */
     @Beta
     public static <A, T> Consumer<T> c(final A a, final java.util.function.BiConsumer<A, T> biConsumer) throws IllegalArgumentException {
@@ -3948,16 +3948,16 @@ public final class Fn {
     }
 
     /**
-     * 
      *
-     * @param <A> 
-     * @param <B> 
-     * @param <T> 
-     * @param a 
-     * @param b 
-     * @param triConsumer 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <A>
+     * @param <B>
+     * @param <T>
+     * @param a
+     * @param b
+     * @param triConsumer
+     * @return
+     * @throws IllegalArgumentException
      */
     @Beta
     public static <A, B, T> Consumer<T> c(final A a, final B b, final TriConsumer<A, B, T> triConsumer) throws IllegalArgumentException {
@@ -3979,15 +3979,15 @@ public final class Fn {
     }
 
     /**
-     * 
      *
-     * @param <A> 
-     * @param <T> 
-     * @param <U> 
-     * @param a 
-     * @param triConsumer 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <A>
+     * @param <T>
+     * @param <U>
+     * @param a
+     * @param triConsumer
+     * @return
+     * @throws IllegalArgumentException
      */
     @Beta
     public static <A, T, U> BiConsumer<T, U> c(final A a, final TriConsumer<A, T, U> triConsumer) throws IllegalArgumentException {
@@ -4022,15 +4022,15 @@ public final class Fn {
     }
 
     /**
-     * 
      *
-     * @param <A> 
-     * @param <T> 
-     * @param <R> 
-     * @param a 
-     * @param biFunction 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <A>
+     * @param <T>
+     * @param <R>
+     * @param a
+     * @param biFunction
+     * @return
+     * @throws IllegalArgumentException
      */
     @Beta
     public static <A, T, R> Function<T, R> f(final A a, final java.util.function.BiFunction<A, T, R> biFunction) throws IllegalArgumentException {
@@ -4040,17 +4040,17 @@ public final class Fn {
     }
 
     /**
-     * 
      *
-     * @param <A> 
-     * @param <B> 
-     * @param <T> 
-     * @param <R> 
-     * @param a 
-     * @param b 
-     * @param triFunction 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <A>
+     * @param <B>
+     * @param <T>
+     * @param <R>
+     * @param a
+     * @param b
+     * @param triFunction
+     * @return
+     * @throws IllegalArgumentException
      */
     @Beta
     public static <A, B, T, R> Function<T, R> f(final A a, final B b, final TriFunction<A, B, T, R> triFunction) throws IllegalArgumentException {
@@ -4073,16 +4073,16 @@ public final class Fn {
     }
 
     /**
-     * 
      *
-     * @param <A> 
-     * @param <T> 
-     * @param <U> 
-     * @param <R> 
-     * @param a 
-     * @param triFunction 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <A>
+     * @param <T>
+     * @param <U>
+     * @param <R>
+     * @param a
+     * @param triFunction
+     * @return
+     * @throws IllegalArgumentException
      */
     @Beta
     public static <A, T, U, R> BiFunction<T, U, R> f(final A a, final TriFunction<A, T, U, R> triFunction) throws IllegalArgumentException {
@@ -4106,12 +4106,12 @@ public final class Fn {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param predicate 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <T>
+     * @param predicate
+     * @return
+     * @throws IllegalArgumentException
      */
     @Beta
     public static <T> Predicate<T> pp(final Throwables.Predicate<T, ? extends Exception> predicate) throws IllegalArgumentException {
@@ -4127,14 +4127,14 @@ public final class Fn {
     }
 
     /**
-     * 
      *
-     * @param <A> 
-     * @param <T> 
-     * @param a 
-     * @param biPredicate 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <A>
+     * @param <T>
+     * @param a
+     * @param biPredicate
+     * @return
+     * @throws IllegalArgumentException
      */
     @Beta
     public static <A, T> Predicate<T> pp(final A a, final Throwables.BiPredicate<A, T, ? extends Exception> biPredicate) throws IllegalArgumentException {
@@ -4150,16 +4150,16 @@ public final class Fn {
     }
 
     /**
-     * 
      *
-     * @param <A> 
-     * @param <B> 
-     * @param <T> 
-     * @param a 
-     * @param b 
-     * @param triPredicate 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <A>
+     * @param <B>
+     * @param <T>
+     * @param a
+     * @param b
+     * @param triPredicate
+     * @return
+     * @throws IllegalArgumentException
      */
     @Beta
     public static <A, B, T> Predicate<T> pp(final A a, final B b, final Throwables.TriPredicate<A, B, T, ? extends Exception> triPredicate)
@@ -4176,13 +4176,13 @@ public final class Fn {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <U> 
-     * @param biPredicate 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <T>
+     * @param <U>
+     * @param biPredicate
+     * @return
+     * @throws IllegalArgumentException
      */
     @Beta
     public static <T, U> BiPredicate<T, U> pp(final Throwables.BiPredicate<T, U, ? extends Exception> biPredicate) throws IllegalArgumentException {
@@ -4198,15 +4198,15 @@ public final class Fn {
     }
 
     /**
-     * 
      *
-     * @param <A> 
-     * @param <T> 
-     * @param <U> 
-     * @param a 
-     * @param triPredicate 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <A>
+     * @param <T>
+     * @param <U>
+     * @param a
+     * @param triPredicate
+     * @return
+     * @throws IllegalArgumentException
      */
     @Beta
     public static <A, T, U> BiPredicate<T, U> pp(final A a, final Throwables.TriPredicate<A, T, U, ? extends Exception> triPredicate)
@@ -4223,14 +4223,14 @@ public final class Fn {
     }
 
     /**
-     * 
      *
-     * @param <A> 
-     * @param <B> 
-     * @param <C> 
-     * @param triPredicate 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <A>
+     * @param <B>
+     * @param <C>
+     * @param triPredicate
+     * @return
+     * @throws IllegalArgumentException
      */
     @Beta
     public static <A, B, C> TriPredicate<A, B, C> pp(final Throwables.TriPredicate<A, B, C, ? extends Exception> triPredicate) throws IllegalArgumentException {
@@ -4246,12 +4246,12 @@ public final class Fn {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param consumer 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <T>
+     * @param consumer
+     * @return
+     * @throws IllegalArgumentException
      */
     @Beta
     public static <T> Consumer<T> cc(final Throwables.Consumer<T, ? extends Exception> consumer) throws IllegalArgumentException {
@@ -4267,14 +4267,14 @@ public final class Fn {
     }
 
     /**
-     * 
      *
-     * @param <A> 
-     * @param <T> 
-     * @param a 
-     * @param biConsumer 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <A>
+     * @param <T>
+     * @param a
+     * @param biConsumer
+     * @return
+     * @throws IllegalArgumentException
      */
     @Beta
     public static <A, T> Consumer<T> cc(final A a, final Throwables.BiConsumer<A, T, ? extends Exception> biConsumer) throws IllegalArgumentException {
@@ -4290,16 +4290,16 @@ public final class Fn {
     }
 
     /**
-     * 
      *
-     * @param <A> 
-     * @param <B> 
-     * @param <T> 
-     * @param a 
-     * @param b 
-     * @param triConsumer 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <A>
+     * @param <B>
+     * @param <T>
+     * @param a
+     * @param b
+     * @param triConsumer
+     * @return
+     * @throws IllegalArgumentException
      */
     @Beta
     public static <A, B, T> Consumer<T> cc(final A a, final B b, final Throwables.TriConsumer<A, B, T, ? extends Exception> triConsumer)
@@ -4316,13 +4316,13 @@ public final class Fn {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <U> 
-     * @param biConsumer 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <T>
+     * @param <U>
+     * @param biConsumer
+     * @return
+     * @throws IllegalArgumentException
      */
     @Beta
     public static <T, U> BiConsumer<T, U> cc(final Throwables.BiConsumer<T, U, ? extends Exception> biConsumer) throws IllegalArgumentException {
@@ -4338,15 +4338,15 @@ public final class Fn {
     }
 
     /**
-     * 
      *
-     * @param <A> 
-     * @param <T> 
-     * @param <U> 
-     * @param a 
-     * @param triConsumer 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <A>
+     * @param <T>
+     * @param <U>
+     * @param a
+     * @param triConsumer
+     * @return
+     * @throws IllegalArgumentException
      */
     @Beta
     public static <A, T, U> BiConsumer<T, U> cc(final A a, final Throwables.TriConsumer<A, T, U, ? extends Exception> triConsumer)
@@ -4363,14 +4363,14 @@ public final class Fn {
     }
 
     /**
-     * 
      *
-     * @param <A> 
-     * @param <B> 
-     * @param <C> 
-     * @param triConsumer 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <A>
+     * @param <B>
+     * @param <C>
+     * @param triConsumer
+     * @return
+     * @throws IllegalArgumentException
      */
     @Beta
     public static <A, B, C> TriConsumer<A, B, C> cc(final Throwables.TriConsumer<A, B, C, ? extends Exception> triConsumer) throws IllegalArgumentException {
@@ -4386,13 +4386,13 @@ public final class Fn {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <R> 
-     * @param function 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <T>
+     * @param <R>
+     * @param function
+     * @return
+     * @throws IllegalArgumentException
      */
     @Beta
     public static <T, R> Function<T, R> ff(final Throwables.Function<T, ? extends R, ? extends Exception> function) throws IllegalArgumentException {
@@ -4408,14 +4408,14 @@ public final class Fn {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <R> 
-     * @param function 
-     * @param defaultOnError 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <T>
+     * @param <R>
+     * @param function
+     * @param defaultOnError
+     * @return
+     * @throws IllegalArgumentException
      */
     @Beta
     public static <T, R> Function<T, R> ff(final Throwables.Function<T, ? extends R, ? extends Exception> function, final R defaultOnError)
@@ -4432,15 +4432,15 @@ public final class Fn {
     }
 
     /**
-     * 
      *
-     * @param <A> 
-     * @param <T> 
-     * @param <R> 
-     * @param a 
-     * @param biFunction 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <A>
+     * @param <T>
+     * @param <R>
+     * @param a
+     * @param biFunction
+     * @return
+     * @throws IllegalArgumentException
      */
     @Beta
     public static <A, T, R> Function<T, R> ff(final A a, final Throwables.BiFunction<A, T, R, ? extends Exception> biFunction) throws IllegalArgumentException {
@@ -4456,17 +4456,17 @@ public final class Fn {
     }
 
     /**
-     * 
      *
-     * @param <A> 
-     * @param <B> 
-     * @param <T> 
-     * @param <R> 
-     * @param a 
-     * @param b 
-     * @param triFunction 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <A>
+     * @param <B>
+     * @param <T>
+     * @param <R>
+     * @param a
+     * @param b
+     * @param triFunction
+     * @return
+     * @throws IllegalArgumentException
      */
     @Beta
     public static <A, B, T, R> Function<T, R> ff(final A a, final B b, final Throwables.TriFunction<A, B, T, R, ? extends Exception> triFunction)
@@ -4483,14 +4483,14 @@ public final class Fn {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <U> 
-     * @param <R> 
-     * @param biFunction 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <T>
+     * @param <U>
+     * @param <R>
+     * @param biFunction
+     * @return
+     * @throws IllegalArgumentException
      */
     @Beta
     public static <T, U, R> BiFunction<T, U, R> ff(final Throwables.BiFunction<T, U, R, ? extends Exception> biFunction) throws IllegalArgumentException {
@@ -4506,15 +4506,15 @@ public final class Fn {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <U> 
-     * @param <R> 
-     * @param biFunction 
-     * @param defaultOnError 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <T>
+     * @param <U>
+     * @param <R>
+     * @param biFunction
+     * @param defaultOnError
+     * @return
+     * @throws IllegalArgumentException
      */
     @Beta
     public static <T, U, R> BiFunction<T, U, R> ff(final Throwables.BiFunction<T, U, R, ? extends Exception> biFunction, final R defaultOnError)
@@ -4531,16 +4531,16 @@ public final class Fn {
     }
 
     /**
-     * 
      *
-     * @param <A> 
-     * @param <T> 
-     * @param <U> 
-     * @param <R> 
-     * @param a 
-     * @param triFunction 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <A>
+     * @param <T>
+     * @param <U>
+     * @param <R>
+     * @param a
+     * @param triFunction
+     * @return
+     * @throws IllegalArgumentException
      */
     @Beta
     public static <A, T, U, R> BiFunction<T, U, R> ff(final A a, final Throwables.TriFunction<A, T, U, R, ? extends Exception> triFunction)
@@ -4557,15 +4557,15 @@ public final class Fn {
     }
 
     /**
-     * 
      *
-     * @param <A> 
-     * @param <B> 
-     * @param <C> 
-     * @param <R> 
-     * @param triFunction 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <A>
+     * @param <B>
+     * @param <C>
+     * @param <R>
+     * @param triFunction
+     * @return
+     * @throws IllegalArgumentException
      */
     @Beta
     public static <A, B, C, R> TriFunction<A, B, C, R> ff(final Throwables.TriFunction<A, B, C, R, ? extends Exception> triFunction)
@@ -4582,16 +4582,16 @@ public final class Fn {
     }
 
     /**
-     * 
      *
-     * @param <A> 
-     * @param <B> 
-     * @param <C> 
-     * @param <R> 
-     * @param triFunction 
-     * @param defaultOnError 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <A>
+     * @param <B>
+     * @param <C>
+     * @param <R>
+     * @param triFunction
+     * @param defaultOnError
+     * @return
+     * @throws IllegalArgumentException
      */
     @Beta
     public static <A, B, C, R> TriFunction<A, B, C, R> ff(final Throwables.TriFunction<A, B, C, R, ? extends Exception> triFunction, final R defaultOnError)
@@ -4610,11 +4610,11 @@ public final class Fn {
     /**
      * Synchronized {@code Predicate}.
      *
-     * @param <T> 
+     * @param <T>
      * @param mutex to synchronized on
-     * @param predicate 
-     * @return 
-     * @throws IllegalArgumentException 
+     * @param predicate
+     * @return
+     * @throws IllegalArgumentException
      */
     @Beta
     public static <T> Predicate<T> sp(final Object mutex, final java.util.function.Predicate<T> predicate) throws IllegalArgumentException {
@@ -4631,13 +4631,13 @@ public final class Fn {
     /**
      * Synchronized {@code Predicate}.
      *
-     * @param <A> 
-     * @param <T> 
+     * @param <A>
+     * @param <T>
      * @param mutex to synchronized on
-     * @param a 
-     * @param biPredicate 
-     * @return 
-     * @throws IllegalArgumentException 
+     * @param a
+     * @param biPredicate
+     * @return
+     * @throws IllegalArgumentException
      */
     @Beta
     public static <A, T> Predicate<T> sp(final Object mutex, final A a, final java.util.function.BiPredicate<A, T> biPredicate)
@@ -4655,15 +4655,15 @@ public final class Fn {
     /**
      * Synchronized {@code Predicate}.
      *
-     * @param <A> 
-     * @param <B> 
-     * @param <T> 
+     * @param <A>
+     * @param <B>
+     * @param <T>
      * @param mutex to synchronized on
-     * @param a 
-     * @param b 
-     * @param triPredicate 
-     * @return 
-     * @throws IllegalArgumentException 
+     * @param a
+     * @param b
+     * @param triPredicate
+     * @return
+     * @throws IllegalArgumentException
      */
     @Beta
     public static <A, B, T> Predicate<T> sp(final Object mutex, final A a, final B b, final TriPredicate<A, B, T> triPredicate)
@@ -4681,12 +4681,12 @@ public final class Fn {
     /**
      * Synchronized {@code BiPredicate}.
      *
-     * @param <T> 
-     * @param <U> 
+     * @param <T>
+     * @param <U>
      * @param mutex to synchronized on
-     * @param biPredicate 
-     * @return 
-     * @throws IllegalArgumentException 
+     * @param biPredicate
+     * @return
+     * @throws IllegalArgumentException
      */
     @Beta
     public static <T, U> BiPredicate<T, U> sp(final Object mutex, final java.util.function.BiPredicate<T, U> biPredicate) throws IllegalArgumentException {
@@ -4703,11 +4703,11 @@ public final class Fn {
     /**
      * Synchronized {@code Consumer}.
      *
-     * @param <T> 
+     * @param <T>
      * @param mutex to synchronized on
-     * @param consumer 
-     * @return 
-     * @throws IllegalArgumentException 
+     * @param consumer
+     * @return
+     * @throws IllegalArgumentException
      */
     @Beta
     public static <T> Consumer<T> sc(final Object mutex, final java.util.function.Consumer<T> consumer) throws IllegalArgumentException {
@@ -4724,13 +4724,13 @@ public final class Fn {
     /**
      * Synchronized {@code Consumer}.
      *
-     * @param <A> 
-     * @param <T> 
+     * @param <A>
+     * @param <T>
      * @param mutex to synchronized on
-     * @param a 
-     * @param biConsumer 
-     * @return 
-     * @throws IllegalArgumentException 
+     * @param a
+     * @param biConsumer
+     * @return
+     * @throws IllegalArgumentException
      */
     @Beta
     public static <A, T> Consumer<T> sc(final Object mutex, final A a, final java.util.function.BiConsumer<A, T> biConsumer) throws IllegalArgumentException {
@@ -4747,12 +4747,12 @@ public final class Fn {
     /**
      * Synchronized {@code BiConsumer}.
      *
-     * @param <T> 
-     * @param <U> 
+     * @param <T>
+     * @param <U>
      * @param mutex to synchronized on
-     * @param biConsumer 
-     * @return 
-     * @throws IllegalArgumentException 
+     * @param biConsumer
+     * @return
+     * @throws IllegalArgumentException
      */
     @Beta
     public static <T, U> BiConsumer<T, U> sc(final Object mutex, final java.util.function.BiConsumer<T, U> biConsumer) throws IllegalArgumentException {
@@ -4769,12 +4769,12 @@ public final class Fn {
     /**
      * Synchronized {@code Function}.
      *
-     * @param <T> 
-     * @param <R> 
+     * @param <T>
+     * @param <R>
      * @param mutex to synchronized on
-     * @param function 
-     * @return 
-     * @throws IllegalArgumentException 
+     * @param function
+     * @return
+     * @throws IllegalArgumentException
      */
     @Beta
     public static <T, R> Function<T, R> sf(final Object mutex, final java.util.function.Function<T, ? extends R> function) throws IllegalArgumentException {
@@ -4791,14 +4791,14 @@ public final class Fn {
     /**
      * Synchronized {@code Function}.
      *
-     * @param <A> 
-     * @param <T> 
-     * @param <R> 
+     * @param <A>
+     * @param <T>
+     * @param <R>
      * @param mutex to synchronized on
-     * @param a 
-     * @param biFunction 
-     * @return 
-     * @throws IllegalArgumentException 
+     * @param a
+     * @param biFunction
+     * @return
+     * @throws IllegalArgumentException
      */
     @Beta
     public static <A, T, R> Function<T, R> sf(final Object mutex, final A a, final java.util.function.BiFunction<A, T, R> biFunction)
@@ -4816,13 +4816,13 @@ public final class Fn {
     /**
      * Synchronized {@code BiFunction}.
      *
-     * @param <T> 
-     * @param <U> 
-     * @param <R> 
+     * @param <T>
+     * @param <U>
+     * @param <R>
      * @param mutex to synchronized on
-     * @param biFunction 
-     * @return 
-     * @throws IllegalArgumentException 
+     * @param biFunction
+     * @return
+     * @throws IllegalArgumentException
      */
     @Beta
     public static <T, U, R> BiFunction<T, U, R> sf(final Object mutex, final java.util.function.BiFunction<T, U, R> biFunction)
@@ -4838,12 +4838,12 @@ public final class Fn {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param action 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <T>
+     * @param action
+     * @return
+     * @throws IllegalArgumentException
      */
     public static <T> Function<T, Void> c2f(final java.util.function.Consumer<? super T> action) throws IllegalArgumentException {
         N.checkArgNotNull(action);
@@ -4855,14 +4855,14 @@ public final class Fn {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <R> 
-     * @param action 
-     * @param valueToReturn 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <T>
+     * @param <R>
+     * @param action
+     * @param valueToReturn
+     * @return
+     * @throws IllegalArgumentException
      */
     public static <T, R> Function<T, R> c2f(final java.util.function.Consumer<? super T> action, final R valueToReturn) throws IllegalArgumentException {
         N.checkArgNotNull(action);
@@ -4874,13 +4874,13 @@ public final class Fn {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <U> 
-     * @param action 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <T>
+     * @param <U>
+     * @param action
+     * @return
+     * @throws IllegalArgumentException
      */
     public static <T, U> BiFunction<T, U, Void> c2f(final java.util.function.BiConsumer<? super T, ? super U> action) throws IllegalArgumentException {
         N.checkArgNotNull(action);
@@ -4892,15 +4892,15 @@ public final class Fn {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <U> 
-     * @param <R> 
-     * @param action 
-     * @param valueToReturn 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <T>
+     * @param <U>
+     * @param <R>
+     * @param action
+     * @param valueToReturn
+     * @return
+     * @throws IllegalArgumentException
      */
     public static <T, U, R> BiFunction<T, U, R> c2f(final java.util.function.BiConsumer<? super T, ? super U> action, final R valueToReturn)
             throws IllegalArgumentException {
@@ -4913,14 +4913,14 @@ public final class Fn {
     }
 
     /**
-     * 
      *
-     * @param <A> 
-     * @param <B> 
-     * @param <C> 
-     * @param action 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <A>
+     * @param <B>
+     * @param <C>
+     * @param action
+     * @return
+     * @throws IllegalArgumentException
      */
     public static <A, B, C> TriFunction<A, B, C, Void> c2f(final TriConsumer<? super A, ? super B, ? super C> action) throws IllegalArgumentException {
         N.checkArgNotNull(action);
@@ -4932,16 +4932,16 @@ public final class Fn {
     }
 
     /**
-     * 
      *
-     * @param <A> 
-     * @param <B> 
-     * @param <C> 
-     * @param <R> 
-     * @param action 
-     * @param valueToReturn 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <A>
+     * @param <B>
+     * @param <C>
+     * @param <R>
+     * @param action
+     * @param valueToReturn
+     * @return
+     * @throws IllegalArgumentException
      */
     public static <A, B, C, R> TriFunction<A, B, C, R> c2f(final TriConsumer<? super A, ? super B, ? super C> action, final R valueToReturn)
             throws IllegalArgumentException {
@@ -4956,10 +4956,10 @@ public final class Fn {
     /**
      * Returns a <code>Consumer</code> which calls the specified <code>func</code>.
      *
-     * @param <T> 
-     * @param func 
-     * @return 
-     * @throws IllegalArgumentException 
+     * @param <T>
+     * @param func
+     * @return
+     * @throws IllegalArgumentException
      */
     public static <T> Consumer<T> f2c(final java.util.function.Function<? super T, ?> func) throws IllegalArgumentException {
         N.checkArgNotNull(func);
@@ -4968,13 +4968,13 @@ public final class Fn {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <U> 
-     * @param func 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <T>
+     * @param <U>
+     * @param func
+     * @return
+     * @throws IllegalArgumentException
      */
     public static <T, U> BiConsumer<T, U> f2c(final java.util.function.BiFunction<? super T, ? super U, ?> func) throws IllegalArgumentException {
         N.checkArgNotNull(func);
@@ -4983,14 +4983,14 @@ public final class Fn {
     }
 
     /**
-     * 
      *
-     * @param <A> 
-     * @param <B> 
-     * @param <C> 
-     * @param func 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <A>
+     * @param <B>
+     * @param <C>
+     * @param func
+     * @return
+     * @throws IllegalArgumentException
      */
     public static <A, B, C> TriConsumer<A, B, C> f2c(final TriFunction<? super A, ? super B, ? super C, ?> func) throws IllegalArgumentException {
         N.checkArgNotNull(func);
@@ -5032,11 +5032,11 @@ public final class Fn {
     }
 
     /**
-     * 
      *
-     * @param runnable 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param runnable
+     * @return
+     * @throws IllegalArgumentException
      */
     public static Runnable r(final Runnable runnable) throws IllegalArgumentException {
         N.checkArgNotNull(runnable);
@@ -5045,12 +5045,12 @@ public final class Fn {
     }
 
     /**
-     * 
      *
-     * @param <R> 
-     * @param callable 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <R>
+     * @param callable
+     * @return
+     * @throws IllegalArgumentException
      */
     public static <R> Callable<R> c(final Callable<R> callable) throws IllegalArgumentException {
         N.checkArgNotNull(callable);
@@ -5059,11 +5059,11 @@ public final class Fn {
     }
 
     /**
-     * 
      *
-     * @param runnable 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param runnable
+     * @return
+     * @throws IllegalArgumentException
      */
     public static java.lang.Runnable jr(final java.lang.Runnable runnable) throws IllegalArgumentException {
         N.checkArgNotNull(runnable);
@@ -5072,12 +5072,12 @@ public final class Fn {
     }
 
     /**
-     * 
      *
-     * @param <R> 
-     * @param callable 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <R>
+     * @param callable
+     * @return
+     * @throws IllegalArgumentException
      */
     public static <R> java.util.concurrent.Callable<R> jc(final java.util.concurrent.Callable<R> callable) throws IllegalArgumentException {
         N.checkArgNotNull(callable);
@@ -5086,11 +5086,11 @@ public final class Fn {
     }
 
     /**
-     * 
      *
-     * @param runnable 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param runnable
+     * @return
+     * @throws IllegalArgumentException
      */
     public static Callable<Void> r2c(final java.lang.Runnable runnable) throws IllegalArgumentException {
         N.checkArgNotNull(runnable);
@@ -5102,13 +5102,13 @@ public final class Fn {
     }
 
     /**
-     * 
      *
-     * @param <R> 
-     * @param runnable 
-     * @param valueToReturn 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <R>
+     * @param runnable
+     * @param valueToReturn
+     * @return
+     * @throws IllegalArgumentException
      */
     public static <R> Callable<R> r2c(final java.lang.Runnable runnable, final R valueToReturn) throws IllegalArgumentException {
         N.checkArgNotNull(runnable);
@@ -5120,12 +5120,12 @@ public final class Fn {
     }
 
     /**
-     * 
      *
-     * @param <R> 
-     * @param callable 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <R>
+     * @param callable
+     * @return
+     * @throws IllegalArgumentException
      */
     public static <R> Runnable c2r(final Callable<R> callable) throws IllegalArgumentException {
         N.checkArgNotNull(callable);
@@ -5134,11 +5134,11 @@ public final class Fn {
     }
 
     /**
-     * 
      *
-     * @param runnable 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param runnable
+     * @return
+     * @throws IllegalArgumentException
      */
     public static Runnable jr2r(final java.lang.Runnable runnable) throws IllegalArgumentException {
         N.checkArgNotNull(runnable);
@@ -5151,12 +5151,12 @@ public final class Fn {
     }
 
     /**
-     * 
      *
-     * @param <R> 
-     * @param callable 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <R>
+     * @param callable
+     * @return
+     * @throws IllegalArgumentException
      */
     public static <R> Callable<R> jc2c(final java.util.concurrent.Callable<R> callable) throws IllegalArgumentException {
         N.checkArgNotNull(callable);
@@ -5175,11 +5175,11 @@ public final class Fn {
     }
 
     /**
-     * 
      *
-     * @param callable 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param callable
+     * @return
+     * @throws IllegalArgumentException
      */
     public static Runnable jc2r(final java.util.concurrent.Callable<?> callable) throws IllegalArgumentException {
         N.checkArgNotNull(callable);
@@ -6121,12 +6121,12 @@ public final class Fn {
         private static final Map<Class<?>, Supplier> collectionSupplierPool = new ConcurrentHashMap<>();
 
         /**
-         * 
          *
-         * @param <T> 
-         * @param targetType 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <T>
+         * @param targetType
+         * @return
+         * @throws IllegalArgumentException
          */
         @SuppressWarnings("rawtypes")
         public static <T> java.util.function.Supplier<? extends Collection<T>> ofCollection(final Class<? extends Collection> targetType)
@@ -6170,7 +6170,7 @@ public final class Fn {
                         if (N.newInstance(targetType) != null) {
                             ret = () -> N.newInstance(targetType);
                         }
-                    } catch (Throwable e) {
+                    } catch (Throwable e) { // NOSONAR
                         // ignore
                     }
 
@@ -6199,13 +6199,13 @@ public final class Fn {
         private static final Map<Class<?>, Supplier> mapSupplierPool = new ConcurrentHashMap<>();
 
         /**
-         * 
          *
-         * @param <K> 
-         * @param <V> 
-         * @param targetType 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <K>
+         * @param <V>
+         * @param targetType
+         * @return
+         * @throws IllegalArgumentException
          */
         @SuppressWarnings("rawtypes")
         public static <K, V> Supplier<? extends Map<K, V>> ofMap(final Class<? extends Map> targetType) throws IllegalArgumentException {
@@ -6236,7 +6236,7 @@ public final class Fn {
                         if (N.newInstance(targetType) != null) {
                             ret = () -> N.newInstance(targetType);
                         }
-                    } catch (Throwable e) {
+                    } catch (Throwable e) { // NOSONAR
                         // ignore
                     }
 
@@ -6260,13 +6260,13 @@ public final class Fn {
         }
 
         /**
-         * 
          *
-         * @param <T> 
-         * @param targetClass 
-         * @param supplier 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <T>
+         * @param targetClass
+         * @param supplier
+         * @return
+         * @throws IllegalArgumentException
          */
         @SuppressWarnings("rawtypes")
         public static <T extends Collection> boolean registerForCollection(final Class<T> targetClass, final java.util.function.Supplier<T> supplier)
@@ -6286,13 +6286,13 @@ public final class Fn {
         }
 
         /**
-         * 
          *
-         * @param <T> 
-         * @param targetClass 
-         * @param supplier 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <T>
+         * @param targetClass
+         * @param supplier
+         * @return
+         * @throws IllegalArgumentException
          */
         @SuppressWarnings("rawtypes")
         public static <T extends Map> boolean registerForMap(final Class<T> targetClass, final java.util.function.Supplier<T> supplier)
@@ -7076,12 +7076,12 @@ public final class Fn {
         private static final Map<Class<?>, IntFunction> collectionCreatorPool = new ConcurrentHashMap<>();
 
         /**
-         * 
          *
-         * @param <T> 
-         * @param targetType 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <T>
+         * @param targetType
+         * @return
+         * @throws IllegalArgumentException
          */
         @SuppressWarnings("rawtypes")
         public static <T> IntFunction<? extends Collection<T>> ofCollection(final Class<? extends Collection> targetType) throws IllegalArgumentException {
@@ -7127,12 +7127,12 @@ public final class Fn {
                             ret = size -> {
                                 try {
                                     return (Collection<T>) N.invoke(constructor, size);
-                                } catch (Throwable e) {
+                                } catch (Throwable e) { // NOSONAR
                                     throw new IllegalArgumentException("Not able to create instance for collection: " + targetType, e);
                                 }
                             };
                         }
-                    } catch (Throwable e) {
+                    } catch (Throwable e) { // NOSONAR
                         // ignore
                     }
 
@@ -7146,7 +7146,7 @@ public final class Fn {
                                 }
                             };
                         }
-                    } catch (Throwable e) {
+                    } catch (Throwable e) { // NOSONAR
                         // ignore
                     }
 
@@ -7175,13 +7175,13 @@ public final class Fn {
         private static final Map<Class<?>, IntFunction> mapCreatorPool = new ConcurrentHashMap<>();
 
         /**
-         * 
          *
-         * @param <K> 
-         * @param <V> 
-         * @param targetType 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <K>
+         * @param <V>
+         * @param targetType
+         * @return
+         * @throws IllegalArgumentException
          */
         @SuppressWarnings("rawtypes")
         public static <K, V> IntFunction<? extends Map<K, V>> ofMap(final Class<? extends Map> targetType) throws IllegalArgumentException {
@@ -7215,12 +7215,12 @@ public final class Fn {
                             ret = size -> {
                                 try {
                                     return (Map<K, V>) N.invoke(constructor, size);
-                                } catch (Throwable e) {
+                                } catch (Throwable e) { // NOSONAR
                                     throw new IllegalArgumentException("Not able to create instance for Map: " + targetType, e);
                                 }
                             };
                         }
-                    } catch (Throwable e) {
+                    } catch (Throwable e) { // NOSONAR
                         // ignore
                     }
 
@@ -7234,7 +7234,7 @@ public final class Fn {
                                 }
                             };
                         }
-                    } catch (Throwable e) {
+                    } catch (Throwable e) { // NOSONAR
                         // ignore
                     }
 
@@ -7258,13 +7258,13 @@ public final class Fn {
         }
 
         /**
-         * 
          *
-         * @param <T> 
-         * @param targetClass 
-         * @param creator 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <T>
+         * @param targetClass
+         * @param creator
+         * @return
+         * @throws IllegalArgumentException
          */
         @SuppressWarnings("rawtypes")
         public static <T extends Collection> boolean registerForCollection(final Class<T> targetClass, final java.util.function.IntFunction<T> creator)
@@ -7284,13 +7284,13 @@ public final class Fn {
         }
 
         /**
-         * 
          *
-         * @param <T> 
-         * @param targetClass 
-         * @param creator 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <T>
+         * @param targetClass
+         * @param creator
+         * @return
+         * @throws IllegalArgumentException
          */
         @SuppressWarnings("rawtypes")
         public static <T extends Map> boolean registerForMap(final Class<T> targetClass, final java.util.function.IntFunction<T> creator)
@@ -7391,10 +7391,10 @@ public final class Fn {
         /**
          * Returns a stateful <code>Predicate</code>. Don't save or cache for reuse or use it in parallel stream.
          *
-         * @param <T> 
-         * @param predicate 
-         * @return 
-         * @throws IllegalArgumentException 
+         * @param <T>
+         * @param predicate
+         * @return
+         * @throws IllegalArgumentException
          */
         @Beta
         @SequentialOnly
@@ -7581,11 +7581,11 @@ public final class Fn {
         /**
          * Returns a stateful <code>BiPredicate</code>. Don't save or cache for reuse or use it in parallel stream.
          *
-         * @param <T> 
-         * @param <U> 
-         * @param predicate 
-         * @return 
-         * @throws IllegalArgumentException 
+         * @param <T>
+         * @param <U>
+         * @param predicate
+         * @return
+         * @throws IllegalArgumentException
          */
         @Beta
         @SequentialOnly
@@ -7654,10 +7654,10 @@ public final class Fn {
         /**
          * Returns a stateful <code>BiPredicate</code>. Don't save or cache for reuse or use it in parallel stream.
          *
-         * @param <T> 
-         * @param action 
-         * @return 
-         * @throws IllegalArgumentException 
+         * @param <T>
+         * @param action
+         * @return
+         * @throws IllegalArgumentException
          */
         @Beta
         @SequentialOnly
@@ -7855,11 +7855,11 @@ public final class Fn {
         /**
          * Returns a stateful <code>BiPredicate</code>. Don't save or cache for reuse or use it in parallel stream.
          *
-         * @param <T> 
-         * @param <U> 
-         * @param action 
-         * @return 
-         * @throws IllegalArgumentException 
+         * @param <T>
+         * @param <U>
+         * @param action
+         * @return
+         * @throws IllegalArgumentException
          */
         @Beta
         @SequentialOnly
@@ -7897,11 +7897,11 @@ public final class Fn {
         /**
          * Returns a stateful <code>Function</code>. Don't save or cache for reuse or use it in parallel stream.
          *
-         * @param <T> 
-         * @param <R> 
-         * @param func 
-         * @return 
-         * @throws IllegalArgumentException 
+         * @param <T>
+         * @param <R>
+         * @param func
+         * @return
+         * @throws IllegalArgumentException
          */
         @Beta
         @SequentialOnly
@@ -8136,12 +8136,12 @@ public final class Fn {
         /**
          * Returns a stateful <code>BiPredicate</code>. Don't save or cache for reuse or use it in parallel stream.
          *
-         * @param <T> 
-         * @param <U> 
-         * @param <R> 
-         * @param func 
-         * @return 
-         * @throws IllegalArgumentException 
+         * @param <T>
+         * @param <U>
+         * @param <R>
+         * @param func
+         * @return
+         * @throws IllegalArgumentException
          */
         @Beta
         @SequentialOnly
@@ -8519,14 +8519,14 @@ public final class Fn {
         }
 
         /**
-         * 
+         *
          *
          * @param <K> the key type
          * @param <V> the value type
-         * @param <T> 
-         * @param f 
-         * @return 
-         * @throws IllegalArgumentException 
+         * @param <T>
+         * @param f
+         * @return
+         * @throws IllegalArgumentException
          */
         public static <K, V, T> Function<Map.Entry<K, V>, T> f(final java.util.function.BiFunction<? super K, ? super V, ? extends T> f)
                 throws IllegalArgumentException {
@@ -8536,13 +8536,13 @@ public final class Fn {
         }
 
         /**
-         * 
+         *
          *
          * @param <K> the key type
          * @param <V> the value type
-         * @param p 
-         * @return 
-         * @throws IllegalArgumentException 
+         * @param p
+         * @return
+         * @throws IllegalArgumentException
          */
         public static <K, V> Predicate<Map.Entry<K, V>> p(final java.util.function.BiPredicate<? super K, ? super V> p) throws IllegalArgumentException {
             N.checkArgNotNull(p, "BiPredicate");
@@ -8551,13 +8551,13 @@ public final class Fn {
         }
 
         /**
-         * 
+         *
          *
          * @param <K> the key type
          * @param <V> the value type
-         * @param c 
-         * @return 
-         * @throws IllegalArgumentException 
+         * @param c
+         * @return
+         * @throws IllegalArgumentException
          */
         public static <K, V> Consumer<Map.Entry<K, V>> c(final java.util.function.BiConsumer<? super K, ? super V> c) throws IllegalArgumentException {
             N.checkArgNotNull(c, "BiConsumer");
@@ -8566,15 +8566,15 @@ public final class Fn {
         }
 
         /**
-         * 
+         *
          *
          * @param <K> the key type
          * @param <V> the value type
-         * @param <T> 
-         * @param <E> 
-         * @param f 
-         * @return 
-         * @throws IllegalArgumentException 
+         * @param <T>
+         * @param <E>
+         * @param f
+         * @return
+         * @throws IllegalArgumentException
          */
         @Beta
         public static <K, V, T, E extends Exception> Throwables.Function<Map.Entry<K, V>, T, E> ef(
@@ -8585,14 +8585,14 @@ public final class Fn {
         }
 
         /**
-         * 
+         *
          *
          * @param <K> the key type
          * @param <V> the value type
-         * @param <E> 
-         * @param p 
-         * @return 
-         * @throws IllegalArgumentException 
+         * @param <E>
+         * @param p
+         * @return
+         * @throws IllegalArgumentException
          */
         @Beta
         public static <K, V, E extends Exception> Throwables.Predicate<Map.Entry<K, V>, E> ep(final Throwables.BiPredicate<? super K, ? super V, E> p)
@@ -8603,14 +8603,14 @@ public final class Fn {
         }
 
         /**
-         * 
+         *
          *
          * @param <K> the key type
          * @param <V> the value type
-         * @param <E> 
-         * @param c 
-         * @return 
-         * @throws IllegalArgumentException 
+         * @param <E>
+         * @param c
+         * @return
+         * @throws IllegalArgumentException
          */
         @Beta
         public static <K, V, E extends Exception> Throwables.Consumer<Map.Entry<K, V>, E> ec(final Throwables.BiConsumer<? super K, ? super V, E> c)
@@ -8621,14 +8621,14 @@ public final class Fn {
         }
 
         /**
-         * 
+         *
          *
          * @param <K> the key type
          * @param <V> the value type
-         * @param <T> 
-         * @param f 
-         * @return 
-         * @throws IllegalArgumentException 
+         * @param <T>
+         * @param f
+         * @return
+         * @throws IllegalArgumentException
          */
         public static <K, V, T> Function<Map.Entry<K, V>, T> ff(final Throwables.BiFunction<? super K, ? super V, ? extends T, ? extends Exception> f)
                 throws IllegalArgumentException {
@@ -8644,13 +8644,13 @@ public final class Fn {
         }
 
         /**
-         * 
+         *
          *
          * @param <K> the key type
          * @param <V> the value type
-         * @param p 
-         * @return 
-         * @throws IllegalArgumentException 
+         * @param p
+         * @return
+         * @throws IllegalArgumentException
          */
         public static <K, V> Predicate<Map.Entry<K, V>> pp(final Throwables.BiPredicate<? super K, ? super V, ? extends Exception> p)
                 throws IllegalArgumentException {
@@ -8666,13 +8666,13 @@ public final class Fn {
         }
 
         /**
-         * 
+         *
          *
          * @param <K> the key type
          * @param <V> the value type
-         * @param c 
-         * @return 
-         * @throws IllegalArgumentException 
+         * @param c
+         * @return
+         * @throws IllegalArgumentException
          */
         public static <K, V> Consumer<Map.Entry<K, V>> cc(final Throwables.BiConsumer<? super K, ? super V, ? extends Exception> c)
                 throws IllegalArgumentException {
@@ -8923,11 +8923,11 @@ public final class Fn {
         }
 
         /**
-         * 
          *
-         * @param p 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param p
+         * @return
+         * @throws IllegalArgumentException
          */
         public static CharPredicate p(final CharPredicate p) throws IllegalArgumentException {
             N.checkArgNotNull(p);
@@ -8936,12 +8936,12 @@ public final class Fn {
         }
 
         /**
-         * 
          *
-         * @param <R> 
-         * @param f 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <R>
+         * @param f
+         * @return
+         * @throws IllegalArgumentException
          */
         public static <R> CharFunction<R> f(final CharFunction<R> f) throws IllegalArgumentException {
             N.checkArgNotNull(f);
@@ -8950,11 +8950,11 @@ public final class Fn {
         }
 
         /**
-         * 
          *
-         * @param c 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param c
+         * @return
+         * @throws IllegalArgumentException
          */
         public static CharConsumer c(final CharConsumer c) throws IllegalArgumentException {
             N.checkArgNotNull(c);
@@ -9113,11 +9113,11 @@ public final class Fn {
         }
 
         /**
-         * 
          *
-         * @param p 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param p
+         * @return
+         * @throws IllegalArgumentException
          */
         public static BytePredicate p(final BytePredicate p) throws IllegalArgumentException {
             N.checkArgNotNull(p);
@@ -9126,12 +9126,12 @@ public final class Fn {
         }
 
         /**
-         * 
          *
-         * @param <R> 
-         * @param f 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <R>
+         * @param f
+         * @return
+         * @throws IllegalArgumentException
          */
         public static <R> ByteFunction<R> f(final ByteFunction<R> f) throws IllegalArgumentException {
             N.checkArgNotNull(f);
@@ -9140,11 +9140,11 @@ public final class Fn {
         }
 
         /**
-         * 
          *
-         * @param c 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param c
+         * @return
+         * @throws IllegalArgumentException
          */
         public static ByteConsumer c(final ByteConsumer c) throws IllegalArgumentException {
             N.checkArgNotNull(c);
@@ -9325,11 +9325,11 @@ public final class Fn {
         }
 
         /**
-         * 
          *
-         * @param p 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param p
+         * @return
+         * @throws IllegalArgumentException
          */
         public static ShortPredicate p(final ShortPredicate p) throws IllegalArgumentException {
             N.checkArgNotNull(p);
@@ -9338,12 +9338,12 @@ public final class Fn {
         }
 
         /**
-         * 
          *
-         * @param <R> 
-         * @param f 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <R>
+         * @param f
+         * @return
+         * @throws IllegalArgumentException
          */
         public static <R> ShortFunction<R> f(final ShortFunction<R> f) throws IllegalArgumentException {
             N.checkArgNotNull(f);
@@ -9352,11 +9352,11 @@ public final class Fn {
         }
 
         /**
-         * 
          *
-         * @param c 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param c
+         * @return
+         * @throws IllegalArgumentException
          */
         public static ShortConsumer c(final ShortConsumer c) throws IllegalArgumentException {
             N.checkArgNotNull(c);
@@ -9537,11 +9537,11 @@ public final class Fn {
         }
 
         /**
-         * 
          *
-         * @param p 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param p
+         * @return
+         * @throws IllegalArgumentException
          */
         public static IntPredicate p(final IntPredicate p) throws IllegalArgumentException {
             N.checkArgNotNull(p);
@@ -9550,12 +9550,12 @@ public final class Fn {
         }
 
         /**
-         * 
          *
-         * @param <R> 
-         * @param f 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <R>
+         * @param f
+         * @return
+         * @throws IllegalArgumentException
          */
         public static <R> IntFunction<R> f(final IntFunction<R> f) throws IllegalArgumentException {
             N.checkArgNotNull(f);
@@ -9564,11 +9564,11 @@ public final class Fn {
         }
 
         /**
-         * 
          *
-         * @param c 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param c
+         * @return
+         * @throws IllegalArgumentException
          */
         public static IntConsumer c(final IntConsumer c) throws IllegalArgumentException {
             N.checkArgNotNull(c);
@@ -9749,11 +9749,11 @@ public final class Fn {
         }
 
         /**
-         * 
          *
-         * @param p 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param p
+         * @return
+         * @throws IllegalArgumentException
          */
         public static LongPredicate p(final LongPredicate p) throws IllegalArgumentException {
             N.checkArgNotNull(p);
@@ -9762,12 +9762,12 @@ public final class Fn {
         }
 
         /**
-         * 
          *
-         * @param <R> 
-         * @param f 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <R>
+         * @param f
+         * @return
+         * @throws IllegalArgumentException
          */
         public static <R> LongFunction<R> f(final LongFunction<R> f) throws IllegalArgumentException {
             N.checkArgNotNull(f);
@@ -9776,11 +9776,11 @@ public final class Fn {
         }
 
         /**
-         * 
          *
-         * @param c 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param c
+         * @return
+         * @throws IllegalArgumentException
          */
         public static LongConsumer c(final LongConsumer c) throws IllegalArgumentException {
             N.checkArgNotNull(c);
@@ -9961,11 +9961,11 @@ public final class Fn {
         }
 
         /**
-         * 
          *
-         * @param p 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param p
+         * @return
+         * @throws IllegalArgumentException
          */
         public static FloatPredicate p(final FloatPredicate p) throws IllegalArgumentException {
             N.checkArgNotNull(p);
@@ -9974,12 +9974,12 @@ public final class Fn {
         }
 
         /**
-         * 
          *
-         * @param <R> 
-         * @param f 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <R>
+         * @param f
+         * @return
+         * @throws IllegalArgumentException
          */
         public static <R> FloatFunction<R> f(final FloatFunction<R> f) throws IllegalArgumentException {
             N.checkArgNotNull(f);
@@ -9988,11 +9988,11 @@ public final class Fn {
         }
 
         /**
-         * 
          *
-         * @param c 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param c
+         * @return
+         * @throws IllegalArgumentException
          */
         public static FloatConsumer c(final FloatConsumer c) throws IllegalArgumentException {
             N.checkArgNotNull(c);
@@ -10173,11 +10173,11 @@ public final class Fn {
         }
 
         /**
-         * 
          *
-         * @param p 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param p
+         * @return
+         * @throws IllegalArgumentException
          */
         public static DoublePredicate p(final DoublePredicate p) throws IllegalArgumentException {
             N.checkArgNotNull(p);
@@ -10186,12 +10186,12 @@ public final class Fn {
         }
 
         /**
-         * 
          *
-         * @param <R> 
-         * @param f 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <R>
+         * @param f
+         * @return
+         * @throws IllegalArgumentException
          */
         public static <R> DoubleFunction<R> f(final DoubleFunction<R> f) throws IllegalArgumentException {
             N.checkArgNotNull(f);
@@ -10200,11 +10200,11 @@ public final class Fn {
         }
 
         /**
-         * 
          *
-         * @param c 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param c
+         * @return
+         * @throws IllegalArgumentException
          */
         public static DoubleConsumer c(final DoubleConsumer c) throws IllegalArgumentException {
             N.checkArgNotNull(c);
@@ -10965,14 +10965,14 @@ public final class Fn {
         }
 
         /**
-         * 
          *
-         * @param <K> 
-         * @param <V> 
-         * @param <E> 
-         * @param predicate 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <K>
+         * @param <V>
+         * @param <E>
+         * @param predicate
+         * @return
+         * @throws IllegalArgumentException
          */
         public static <K, V, E extends Throwable> Throwables.Predicate<Map.Entry<K, V>, E> testByKey(final Throwables.Predicate<? super K, E> predicate)
                 throws IllegalArgumentException {
@@ -10982,14 +10982,14 @@ public final class Fn {
         }
 
         /**
-         * 
          *
-         * @param <K> 
-         * @param <V> 
-         * @param <E> 
-         * @param predicate 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <K>
+         * @param <V>
+         * @param <E>
+         * @param predicate
+         * @return
+         * @throws IllegalArgumentException
          */
         public static <K, V, E extends Throwable> Throwables.Predicate<Map.Entry<K, V>, E> testByValue(final Throwables.Predicate<? super V, E> predicate)
                 throws IllegalArgumentException {
@@ -10999,14 +10999,14 @@ public final class Fn {
         }
 
         /**
-         * 
          *
-         * @param <K> 
-         * @param <V> 
-         * @param <E> 
-         * @param consumer 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <K>
+         * @param <V>
+         * @param <E>
+         * @param consumer
+         * @return
+         * @throws IllegalArgumentException
          */
         public static <K, V, E extends Throwable> Throwables.Consumer<Map.Entry<K, V>, E> acceptByKey(final Throwables.Consumer<? super K, E> consumer)
                 throws IllegalArgumentException {
@@ -11016,14 +11016,14 @@ public final class Fn {
         }
 
         /**
-         * 
          *
-         * @param <K> 
-         * @param <V> 
-         * @param <E> 
-         * @param consumer 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <K>
+         * @param <V>
+         * @param <E>
+         * @param consumer
+         * @return
+         * @throws IllegalArgumentException
          */
         public static <K, V, E extends Throwable> Throwables.Consumer<Map.Entry<K, V>, E> acceptByValue(final Throwables.Consumer<? super V, E> consumer)
                 throws IllegalArgumentException {
@@ -11033,15 +11033,15 @@ public final class Fn {
         }
 
         /**
-         * 
          *
-         * @param <K> 
-         * @param <V> 
-         * @param <R> 
-         * @param <E> 
-         * @param func 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <K>
+         * @param <V>
+         * @param <R>
+         * @param <E>
+         * @param func
+         * @return
+         * @throws IllegalArgumentException
          */
         public static <K, V, R, E extends Throwable> Throwables.Function<Map.Entry<K, V>, R, E> applyByKey(
                 final Throwables.Function<? super K, ? extends R, E> func) throws IllegalArgumentException {
@@ -11051,15 +11051,15 @@ public final class Fn {
         }
 
         /**
-         * 
          *
-         * @param <K> 
-         * @param <V> 
-         * @param <R> 
-         * @param <E> 
-         * @param func 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <K>
+         * @param <V>
+         * @param <R>
+         * @param <E>
+         * @param func
+         * @return
+         * @throws IllegalArgumentException
          */
         public static <K, V, R, E extends Throwable> Throwables.Function<Map.Entry<K, V>, R, E> applyByValue(
                 final Throwables.Function<? super V, ? extends R, E> func) throws IllegalArgumentException {
@@ -11115,13 +11115,13 @@ public final class Fn {
         }
 
         /**
-         * 
          *
-         * @param <T> 
-         * @param <E> 
-         * @param comparator 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <T>
+         * @param <E>
+         * @param comparator
+         * @return
+         * @throws IllegalArgumentException
          */
         public static <T, E extends Throwable> Throwables.BinaryOperator<T, E> min(final Comparator<? super T> comparator) throws IllegalArgumentException {
             N.checkArgNotNull(comparator);
@@ -11130,13 +11130,13 @@ public final class Fn {
         }
 
         /**
-         * 
          *
-         * @param <T> 
-         * @param <E> 
-         * @param keyMapper 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <T>
+         * @param <E>
+         * @param keyMapper
+         * @return
+         * @throws IllegalArgumentException
          */
         @SuppressWarnings("rawtypes")
         public static <T, E extends Throwable> Throwables.BinaryOperator<T, E> minBy(
@@ -11199,13 +11199,13 @@ public final class Fn {
         }
 
         /**
-         * 
          *
-         * @param <T> 
-         * @param <E> 
-         * @param comparator 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <T>
+         * @param <E>
+         * @param comparator
+         * @return
+         * @throws IllegalArgumentException
          */
         public static <T, E extends Throwable> Throwables.BinaryOperator<T, E> max(final Comparator<? super T> comparator) throws IllegalArgumentException {
             N.checkArgNotNull(comparator);
@@ -11214,13 +11214,13 @@ public final class Fn {
         }
 
         /**
-         * 
          *
-         * @param <T> 
-         * @param <E> 
-         * @param keyMapper 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <T>
+         * @param <E>
+         * @param keyMapper
+         * @return
+         * @throws IllegalArgumentException
          */
         @SuppressWarnings("rawtypes")
         public static <T, E extends Throwable> Throwables.BinaryOperator<T, E> maxBy(
@@ -11267,13 +11267,13 @@ public final class Fn {
         }
 
         /**
-         * 
          *
-         * @param <T> 
-         * @param <E> 
-         * @param predicate 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <T>
+         * @param <E>
+         * @param predicate
+         * @return
+         * @throws IllegalArgumentException
          */
         public static <T, E extends Throwable> Throwables.Predicate<T, E> not(final Throwables.Predicate<T, E> predicate) throws IllegalArgumentException {
             N.checkArgNotNull(predicate);
@@ -11282,14 +11282,14 @@ public final class Fn {
         }
 
         /**
-         * 
          *
-         * @param <T> 
-         * @param <U> 
-         * @param <E> 
-         * @param biPredicate 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <T>
+         * @param <U>
+         * @param <E>
+         * @param biPredicate
+         * @return
+         * @throws IllegalArgumentException
          */
         public static <T, U, E extends Throwable> Throwables.BiPredicate<T, U, E> not(final Throwables.BiPredicate<T, U, E> biPredicate)
                 throws IllegalArgumentException {
@@ -11299,15 +11299,15 @@ public final class Fn {
         }
 
         /**
-         * 
          *
-         * @param <A> 
-         * @param <B> 
-         * @param <C> 
-         * @param <E> 
-         * @param triPredicate 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <A>
+         * @param <B>
+         * @param <C>
+         * @param <E>
+         * @param triPredicate
+         * @return
+         * @throws IllegalArgumentException
          */
         public static <A, B, C, E extends Throwable> Throwables.TriPredicate<A, B, C, E> not(final Throwables.TriPredicate<A, B, C, E> triPredicate)
                 throws IllegalArgumentException {
@@ -11317,13 +11317,13 @@ public final class Fn {
         }
 
         /**
-         * 
          *
-         * @param <T> 
-         * @param <E> 
-         * @param count 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <T>
+         * @param <E>
+         * @param count
+         * @return
+         * @throws IllegalArgumentException
          */
         @Beta
         @Stateful
@@ -11499,15 +11499,15 @@ public final class Fn {
         }
 
         /**
-         * 
          *
-         * @param <A> 
-         * @param <T> 
-         * @param <E> 
-         * @param a 
-         * @param biPredicate 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <A>
+         * @param <T>
+         * @param <E>
+         * @param a
+         * @param biPredicate
+         * @return
+         * @throws IllegalArgumentException
          */
         @Beta
         public static <A, T, E extends Throwable> Throwables.Predicate<T, E> p(final A a, final Throwables.BiPredicate<A, T, E> biPredicate)
@@ -11518,17 +11518,17 @@ public final class Fn {
         }
 
         /**
-         * 
          *
-         * @param <A> 
-         * @param <B> 
-         * @param <T> 
-         * @param <E> 
-         * @param a 
-         * @param b 
-         * @param triPredicate 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <A>
+         * @param <B>
+         * @param <T>
+         * @param <E>
+         * @param a
+         * @param b
+         * @param triPredicate
+         * @return
+         * @throws IllegalArgumentException
          */
         @Beta
         public static <A, B, T, E extends Throwable> Throwables.Predicate<T, E> p(final A a, final B b, final Throwables.TriPredicate<A, B, T, E> triPredicate)
@@ -11553,16 +11553,16 @@ public final class Fn {
         }
 
         /**
-         * 
          *
-         * @param <A> 
-         * @param <T> 
-         * @param <U> 
-         * @param <E> 
-         * @param a 
-         * @param triPredicate 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <A>
+         * @param <T>
+         * @param <U>
+         * @param <E>
+         * @param a
+         * @param triPredicate
+         * @return
+         * @throws IllegalArgumentException
          */
         @Beta
         public static <A, T, U, E extends Throwable> Throwables.BiPredicate<T, U, E> p(final A a, final Throwables.TriPredicate<A, T, U, E> triPredicate)
@@ -11601,15 +11601,15 @@ public final class Fn {
         }
 
         /**
-         * 
          *
-         * @param <A> 
-         * @param <T> 
-         * @param <E> 
-         * @param a 
-         * @param biConsumer 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <A>
+         * @param <T>
+         * @param <E>
+         * @param a
+         * @param biConsumer
+         * @return
+         * @throws IllegalArgumentException
          */
         @Beta
         public static <A, T, E extends Throwable> Throwables.Consumer<T, E> c(final A a, final Throwables.BiConsumer<A, T, E> biConsumer)
@@ -11620,17 +11620,17 @@ public final class Fn {
         }
 
         /**
-         * 
          *
-         * @param <A> 
-         * @param <B> 
-         * @param <T> 
-         * @param <E> 
-         * @param a 
-         * @param b 
-         * @param triConsumer 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <A>
+         * @param <B>
+         * @param <T>
+         * @param <E>
+         * @param a
+         * @param b
+         * @param triConsumer
+         * @return
+         * @throws IllegalArgumentException
          */
         @Beta
         public static <A, B, T, E extends Throwable> Throwables.Consumer<T, E> c(final A a, final B b, final Throwables.TriConsumer<A, B, T, E> triConsumer)
@@ -11655,16 +11655,16 @@ public final class Fn {
         }
 
         /**
-         * 
          *
-         * @param <A> 
-         * @param <T> 
-         * @param <U> 
-         * @param <E> 
-         * @param a 
-         * @param triConsumer 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <A>
+         * @param <T>
+         * @param <U>
+         * @param <E>
+         * @param a
+         * @param triConsumer
+         * @return
+         * @throws IllegalArgumentException
          */
         @Beta
         public static <A, T, U, E extends Throwable> Throwables.BiConsumer<T, U, E> c(final A a, final Throwables.TriConsumer<A, T, U, E> triConsumer)
@@ -11704,16 +11704,16 @@ public final class Fn {
         }
 
         /**
-         * 
          *
-         * @param <A> 
-         * @param <T> 
-         * @param <R> 
-         * @param <E> 
-         * @param a 
-         * @param biFunction 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <A>
+         * @param <T>
+         * @param <R>
+         * @param <E>
+         * @param a
+         * @param biFunction
+         * @return
+         * @throws IllegalArgumentException
          */
         @Beta
         public static <A, T, R, E extends Throwable> Throwables.Function<T, R, E> f(final A a, final Throwables.BiFunction<A, T, R, E> biFunction)
@@ -11724,18 +11724,18 @@ public final class Fn {
         }
 
         /**
-         * 
          *
-         * @param <A> 
-         * @param <B> 
-         * @param <T> 
-         * @param <R> 
-         * @param <E> 
-         * @param a 
-         * @param b 
-         * @param triFunction 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <A>
+         * @param <B>
+         * @param <T>
+         * @param <R>
+         * @param <E>
+         * @param a
+         * @param b
+         * @param triFunction
+         * @return
+         * @throws IllegalArgumentException
          */
         @Beta
         public static <A, B, T, R, E extends Throwable> Throwables.Function<T, R, E> f(final A a, final B b,
@@ -11761,17 +11761,17 @@ public final class Fn {
         }
 
         /**
-         * 
          *
-         * @param <A> 
-         * @param <T> 
-         * @param <U> 
-         * @param <R> 
-         * @param <E> 
-         * @param a 
-         * @param triFunction 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <A>
+         * @param <T>
+         * @param <U>
+         * @param <R>
+         * @param <E>
+         * @param a
+         * @param triFunction
+         * @return
+         * @throws IllegalArgumentException
          */
         @Beta
         public static <A, T, U, R, E extends Throwable> Throwables.BiFunction<T, U, R, E> f(final A a, final Throwables.TriFunction<A, T, U, R, E> triFunction)
@@ -11798,13 +11798,13 @@ public final class Fn {
         }
 
         /**
-         * 
          *
-         * @param <T> 
-         * @param <E> 
-         * @param predicate 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <T>
+         * @param <E>
+         * @param predicate
+         * @return
+         * @throws IllegalArgumentException
          */
         @Beta
         public static <T, E extends Throwable> Throwables.Predicate<T, E> pp(final Predicate<T> predicate) throws IllegalArgumentException {
@@ -11814,15 +11814,15 @@ public final class Fn {
         }
 
         /**
-         * 
          *
-         * @param <A> 
-         * @param <T> 
-         * @param <E> 
-         * @param a 
-         * @param biPredicate 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <A>
+         * @param <T>
+         * @param <E>
+         * @param a
+         * @param biPredicate
+         * @return
+         * @throws IllegalArgumentException
          */
         @Beta
         public static <A, T, E extends Throwable> Throwables.Predicate<T, E> pp(final A a, final java.util.function.BiPredicate<A, T> biPredicate)
@@ -11833,17 +11833,17 @@ public final class Fn {
         }
 
         /**
-         * 
          *
-         * @param <A> 
-         * @param <B> 
-         * @param <T> 
-         * @param <E> 
-         * @param a 
-         * @param b 
-         * @param triPredicate 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <A>
+         * @param <B>
+         * @param <T>
+         * @param <E>
+         * @param a
+         * @param b
+         * @param triPredicate
+         * @return
+         * @throws IllegalArgumentException
          */
         @Beta
         public static <A, B, T, E extends Throwable> Throwables.Predicate<T, E> pp(final A a, final B b, final TriPredicate<A, B, T> triPredicate)
@@ -11854,14 +11854,14 @@ public final class Fn {
         }
 
         /**
-         * 
          *
-         * @param <T> 
-         * @param <U> 
-         * @param <E> 
-         * @param biPredicate 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <T>
+         * @param <U>
+         * @param <E>
+         * @param biPredicate
+         * @return
+         * @throws IllegalArgumentException
          */
         @Beta
         public static <T, U, E extends Throwable> Throwables.BiPredicate<T, U, E> pp(final BiPredicate<T, U> biPredicate) throws IllegalArgumentException {
@@ -11871,16 +11871,16 @@ public final class Fn {
         }
 
         /**
-         * 
          *
-         * @param <A> 
-         * @param <T> 
-         * @param <U> 
-         * @param <E> 
-         * @param a 
-         * @param triPredicate 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <A>
+         * @param <T>
+         * @param <U>
+         * @param <E>
+         * @param a
+         * @param triPredicate
+         * @return
+         * @throws IllegalArgumentException
          */
         @Beta
         public static <A, T, U, E extends Throwable> Throwables.BiPredicate<T, U, E> pp(final A a, final TriPredicate<A, T, U> triPredicate)
@@ -11891,15 +11891,15 @@ public final class Fn {
         }
 
         /**
-         * 
          *
-         * @param <A> 
-         * @param <B> 
-         * @param <C> 
-         * @param <E> 
-         * @param triPredicate 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <A>
+         * @param <B>
+         * @param <C>
+         * @param <E>
+         * @param triPredicate
+         * @return
+         * @throws IllegalArgumentException
          */
         @Beta
         public static <A, B, C, E extends Throwable> Throwables.TriPredicate<A, B, C, E> pp(final TriPredicate<A, B, C> triPredicate)
@@ -11910,13 +11910,13 @@ public final class Fn {
         }
 
         /**
-         * 
          *
-         * @param <T> 
-         * @param <E> 
-         * @param consumer 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <T>
+         * @param <E>
+         * @param consumer
+         * @return
+         * @throws IllegalArgumentException
          */
         @Beta
         public static <T, E extends Throwable> Throwables.Consumer<T, E> cc(final Consumer<T> consumer) throws IllegalArgumentException {
@@ -11926,15 +11926,15 @@ public final class Fn {
         }
 
         /**
-         * 
          *
-         * @param <A> 
-         * @param <T> 
-         * @param <E> 
-         * @param a 
-         * @param biConsumer 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <A>
+         * @param <T>
+         * @param <E>
+         * @param a
+         * @param biConsumer
+         * @return
+         * @throws IllegalArgumentException
          */
         @Beta
         public static <A, T, E extends Throwable> Throwables.Consumer<T, E> cc(final A a, final java.util.function.BiConsumer<A, T> biConsumer)
@@ -11945,17 +11945,17 @@ public final class Fn {
         }
 
         /**
-         * 
          *
-         * @param <A> 
-         * @param <B> 
-         * @param <T> 
-         * @param <E> 
-         * @param a 
-         * @param b 
-         * @param triConsumer 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <A>
+         * @param <B>
+         * @param <T>
+         * @param <E>
+         * @param a
+         * @param b
+         * @param triConsumer
+         * @return
+         * @throws IllegalArgumentException
          */
         @Beta
         public static <A, B, T, E extends Throwable> Throwables.Consumer<T, E> cc(final A a, final B b, final TriConsumer<A, B, T> triConsumer)
@@ -11966,14 +11966,14 @@ public final class Fn {
         }
 
         /**
-         * 
          *
-         * @param <T> 
-         * @param <U> 
-         * @param <E> 
-         * @param biConsumer 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <T>
+         * @param <U>
+         * @param <E>
+         * @param biConsumer
+         * @return
+         * @throws IllegalArgumentException
          */
         @Beta
         public static <T, U, E extends Throwable> Throwables.BiConsumer<T, U, E> cc(final BiConsumer<T, U> biConsumer) throws IllegalArgumentException {
@@ -11983,16 +11983,16 @@ public final class Fn {
         }
 
         /**
-         * 
          *
-         * @param <A> 
-         * @param <T> 
-         * @param <U> 
-         * @param <E> 
-         * @param a 
-         * @param triConsumer 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <A>
+         * @param <T>
+         * @param <U>
+         * @param <E>
+         * @param a
+         * @param triConsumer
+         * @return
+         * @throws IllegalArgumentException
          */
         @Beta
         public static <A, T, U, E extends Throwable> Throwables.BiConsumer<T, U, E> cc(final A a, final TriConsumer<A, T, U> triConsumer)
@@ -12003,15 +12003,15 @@ public final class Fn {
         }
 
         /**
-         * 
          *
-         * @param <A> 
-         * @param <B> 
-         * @param <C> 
-         * @param <E> 
-         * @param triConsumer 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <A>
+         * @param <B>
+         * @param <C>
+         * @param <E>
+         * @param triConsumer
+         * @return
+         * @throws IllegalArgumentException
          */
         @Beta
         public static <A, B, C, E extends Throwable> Throwables.TriConsumer<A, B, C, E> cc(final TriConsumer<A, B, C> triConsumer)
@@ -12022,14 +12022,14 @@ public final class Fn {
         }
 
         /**
-         * 
          *
-         * @param <T> 
-         * @param <R> 
-         * @param <E> 
-         * @param function 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <T>
+         * @param <R>
+         * @param <E>
+         * @param function
+         * @return
+         * @throws IllegalArgumentException
          */
         @Beta
         public static <T, R, E extends Throwable> Throwables.Function<T, R, E> ff(final Function<T, ? extends R> function) throws IllegalArgumentException {
@@ -12039,16 +12039,16 @@ public final class Fn {
         }
 
         /**
-         * 
          *
-         * @param <A> 
-         * @param <T> 
-         * @param <R> 
-         * @param <E> 
-         * @param a 
-         * @param biFunction 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <A>
+         * @param <T>
+         * @param <R>
+         * @param <E>
+         * @param a
+         * @param biFunction
+         * @return
+         * @throws IllegalArgumentException
          */
         @Beta
         public static <A, T, R, E extends Throwable> Throwables.Function<T, R, E> ff(final A a, final java.util.function.BiFunction<A, T, R> biFunction)
@@ -12059,18 +12059,18 @@ public final class Fn {
         }
 
         /**
-         * 
          *
-         * @param <A> 
-         * @param <B> 
-         * @param <T> 
-         * @param <R> 
-         * @param <E> 
-         * @param a 
-         * @param b 
-         * @param triFunction 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <A>
+         * @param <B>
+         * @param <T>
+         * @param <R>
+         * @param <E>
+         * @param a
+         * @param b
+         * @param triFunction
+         * @return
+         * @throws IllegalArgumentException
          */
         @Beta
         public static <A, B, T, R, E extends Throwable> Throwables.Function<T, R, E> ff(final A a, final B b, final TriFunction<A, B, T, R> triFunction)
@@ -12081,15 +12081,15 @@ public final class Fn {
         }
 
         /**
-         * 
          *
-         * @param <T> 
-         * @param <U> 
-         * @param <R> 
-         * @param <E> 
-         * @param biFunction 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <T>
+         * @param <U>
+         * @param <R>
+         * @param <E>
+         * @param biFunction
+         * @return
+         * @throws IllegalArgumentException
          */
         @Beta
         public static <T, U, R, E extends Throwable> Throwables.BiFunction<T, U, R, E> ff(final BiFunction<T, U, R> biFunction)
@@ -12100,17 +12100,17 @@ public final class Fn {
         }
 
         /**
-         * 
          *
-         * @param <A> 
-         * @param <T> 
-         * @param <U> 
-         * @param <R> 
-         * @param <E> 
-         * @param a 
-         * @param triFunction 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <A>
+         * @param <T>
+         * @param <U>
+         * @param <R>
+         * @param <E>
+         * @param a
+         * @param triFunction
+         * @return
+         * @throws IllegalArgumentException
          */
         @Beta
         public static <A, T, U, R, E extends Throwable> Throwables.BiFunction<T, U, R, E> ff(final A a, final TriFunction<A, T, U, R> triFunction)
@@ -12121,16 +12121,16 @@ public final class Fn {
         }
 
         /**
-         * 
          *
-         * @param <A> 
-         * @param <B> 
-         * @param <C> 
-         * @param <R> 
-         * @param <E> 
-         * @param triFunction 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <A>
+         * @param <B>
+         * @param <C>
+         * @param <R>
+         * @param <E>
+         * @param triFunction
+         * @return
+         * @throws IllegalArgumentException
          */
         @Beta
         public static <A, B, C, R, E extends Throwable> Throwables.TriFunction<A, B, C, R, E> ff(final TriFunction<A, B, C, R> triFunction)
@@ -12143,12 +12143,12 @@ public final class Fn {
         /**
          * Synchronized {@code Predicate}.
          *
-         * @param <T> 
-         * @param <E> 
+         * @param <T>
+         * @param <E>
          * @param mutex to synchronized on
-         * @param predicate 
-         * @return 
-         * @throws IllegalArgumentException 
+         * @param predicate
+         * @return
+         * @throws IllegalArgumentException
          */
         @Beta
         public static <T, E extends Throwable> Throwables.Predicate<T, E> sp(final Object mutex, final Throwables.Predicate<T, E> predicate)
@@ -12166,14 +12166,14 @@ public final class Fn {
         /**
          * Synchronized {@code Predicate}.
          *
-         * @param <A> 
-         * @param <T> 
-         * @param <E> 
+         * @param <A>
+         * @param <T>
+         * @param <E>
          * @param mutex to synchronized on
-         * @param a 
-         * @param biPredicate 
-         * @return 
-         * @throws IllegalArgumentException 
+         * @param a
+         * @param biPredicate
+         * @return
+         * @throws IllegalArgumentException
          */
         @Beta
         public static <A, T, E extends Throwable> Throwables.Predicate<T, E> sp(final Object mutex, final A a,
@@ -12191,16 +12191,16 @@ public final class Fn {
         /**
          * Synchronized {@code Predicate}.
          *
-         * @param <A> 
-         * @param <B> 
-         * @param <T> 
-         * @param <E> 
+         * @param <A>
+         * @param <B>
+         * @param <T>
+         * @param <E>
          * @param mutex to synchronized on
-         * @param a 
-         * @param b 
-         * @param triPredicate 
-         * @return 
-         * @throws IllegalArgumentException 
+         * @param a
+         * @param b
+         * @param triPredicate
+         * @return
+         * @throws IllegalArgumentException
          */
         @Beta
         public static <A, B, T, E extends Throwable> Throwables.Predicate<T, E> sp(final Object mutex, final A a, final B b,
@@ -12218,13 +12218,13 @@ public final class Fn {
         /**
          * Synchronized {@code BiPredicate}.
          *
-         * @param <T> 
-         * @param <U> 
-         * @param <E> 
+         * @param <T>
+         * @param <U>
+         * @param <E>
          * @param mutex to synchronized on
-         * @param biPredicate 
-         * @return 
-         * @throws IllegalArgumentException 
+         * @param biPredicate
+         * @return
+         * @throws IllegalArgumentException
          */
         @Beta
         public static <T, U, E extends Throwable> Throwables.BiPredicate<T, U, E> sp(final Object mutex, final Throwables.BiPredicate<T, U, E> biPredicate)
@@ -12242,12 +12242,12 @@ public final class Fn {
         /**
          * Synchronized {@code Consumer}.
          *
-         * @param <T> 
-         * @param <E> 
+         * @param <T>
+         * @param <E>
          * @param mutex to synchronized on
-         * @param consumer 
-         * @return 
-         * @throws IllegalArgumentException 
+         * @param consumer
+         * @return
+         * @throws IllegalArgumentException
          */
         @Beta
         public static <T, E extends Throwable> Throwables.Consumer<T, E> sc(final Object mutex, final Throwables.Consumer<T, E> consumer)
@@ -12265,14 +12265,14 @@ public final class Fn {
         /**
          * Synchronized {@code Consumer}.
          *
-         * @param <A> 
-         * @param <T> 
-         * @param <E> 
+         * @param <A>
+         * @param <T>
+         * @param <E>
          * @param mutex to synchronized on
-         * @param a 
-         * @param biConsumer 
-         * @return 
-         * @throws IllegalArgumentException 
+         * @param a
+         * @param biConsumer
+         * @return
+         * @throws IllegalArgumentException
          */
         @Beta
         public static <A, T, E extends Throwable> Throwables.Consumer<T, E> sc(final Object mutex, final A a, final Throwables.BiConsumer<A, T, E> biConsumer)
@@ -12290,13 +12290,13 @@ public final class Fn {
         /**
          * Synchronized {@code BiConsumer}.
          *
-         * @param <T> 
-         * @param <U> 
-         * @param <E> 
+         * @param <T>
+         * @param <U>
+         * @param <E>
          * @param mutex to synchronized on
-         * @param biConsumer 
-         * @return 
-         * @throws IllegalArgumentException 
+         * @param biConsumer
+         * @return
+         * @throws IllegalArgumentException
          */
         @Beta
         public static <T, U, E extends Throwable> Throwables.BiConsumer<T, U, E> sc(final Object mutex, final Throwables.BiConsumer<T, U, E> biConsumer)
@@ -12314,13 +12314,13 @@ public final class Fn {
         /**
          * Synchronized {@code Function}.
          *
-         * @param <T> 
-         * @param <R> 
-         * @param <E> 
+         * @param <T>
+         * @param <R>
+         * @param <E>
          * @param mutex to synchronized on
-         * @param function 
-         * @return 
-         * @throws IllegalArgumentException 
+         * @param function
+         * @return
+         * @throws IllegalArgumentException
          */
         @Beta
         public static <T, R, E extends Throwable> Throwables.Function<T, R, E> sf(final Object mutex, final Throwables.Function<T, ? extends R, E> function)
@@ -12338,15 +12338,15 @@ public final class Fn {
         /**
          * Synchronized {@code Function}.
          *
-         * @param <A> 
-         * @param <T> 
-         * @param <R> 
-         * @param <E> 
+         * @param <A>
+         * @param <T>
+         * @param <R>
+         * @param <E>
          * @param mutex to synchronized on
-         * @param a 
-         * @param biFunction 
-         * @return 
-         * @throws IllegalArgumentException 
+         * @param a
+         * @param biFunction
+         * @return
+         * @throws IllegalArgumentException
          */
         @Beta
         public static <A, T, R, E extends Throwable> Throwables.Function<T, R, E> sf(final Object mutex, final A a,
@@ -12364,14 +12364,14 @@ public final class Fn {
         /**
          * Synchronized {@code BiFunction}.
          *
-         * @param <T> 
-         * @param <U> 
-         * @param <R> 
-         * @param <E> 
+         * @param <T>
+         * @param <U>
+         * @param <R>
+         * @param <E>
          * @param mutex to synchronized on
-         * @param biFunction 
-         * @return 
-         * @throws IllegalArgumentException 
+         * @param biFunction
+         * @return
+         * @throws IllegalArgumentException
          */
         @Beta
         public static <T, U, R, E extends Throwable> Throwables.BiFunction<T, U, R, E> sf(final Object mutex,
@@ -12387,13 +12387,13 @@ public final class Fn {
         }
 
         /**
-         * 
          *
-         * @param <T> 
-         * @param <E> 
-         * @param consumer 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <T>
+         * @param <E>
+         * @param consumer
+         * @return
+         * @throws IllegalArgumentException
          */
         public static <T, E extends Throwable> Throwables.Function<T, Void, E> c2f(final Throwables.Consumer<T, E> consumer) throws IllegalArgumentException {
             N.checkArgNotNull(consumer);
@@ -12406,15 +12406,15 @@ public final class Fn {
         }
 
         /**
-         * 
          *
-         * @param <T> 
-         * @param <R> 
-         * @param <E> 
-         * @param consumer 
-         * @param valueToReturn 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <T>
+         * @param <R>
+         * @param <E>
+         * @param consumer
+         * @param valueToReturn
+         * @return
+         * @throws IllegalArgumentException
          */
         public static <T, R, E extends Throwable> Throwables.Function<T, R, E> c2f(final Throwables.Consumer<T, E> consumer, final R valueToReturn)
                 throws IllegalArgumentException {
@@ -12428,14 +12428,14 @@ public final class Fn {
         }
 
         /**
-         * 
          *
-         * @param <T> 
-         * @param <U> 
-         * @param <E> 
-         * @param biConsumer 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <T>
+         * @param <U>
+         * @param <E>
+         * @param biConsumer
+         * @return
+         * @throws IllegalArgumentException
          */
         public static <T, U, E extends Throwable> Throwables.BiFunction<T, U, Void, E> c2f(final Throwables.BiConsumer<T, U, E> biConsumer)
                 throws IllegalArgumentException {
@@ -12449,16 +12449,16 @@ public final class Fn {
         }
 
         /**
-         * 
          *
-         * @param <T> 
-         * @param <U> 
-         * @param <R> 
-         * @param <E> 
-         * @param biConsumer 
-         * @param valueToReturn 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <T>
+         * @param <U>
+         * @param <R>
+         * @param <E>
+         * @param biConsumer
+         * @param valueToReturn
+         * @return
+         * @throws IllegalArgumentException
          */
         public static <T, U, R, E extends Throwable> Throwables.BiFunction<T, U, R, E> c2f(final Throwables.BiConsumer<T, U, E> biConsumer,
                 final R valueToReturn) throws IllegalArgumentException {
@@ -12472,15 +12472,15 @@ public final class Fn {
         }
 
         /**
-         * 
          *
-         * @param <A> 
-         * @param <B> 
-         * @param <C> 
-         * @param <E> 
-         * @param triConsumer 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <A>
+         * @param <B>
+         * @param <C>
+         * @param <E>
+         * @param triConsumer
+         * @return
+         * @throws IllegalArgumentException
          */
         public static <A, B, C, E extends Throwable> Throwables.TriFunction<A, B, C, Void, E> c2f(final Throwables.TriConsumer<A, B, C, E> triConsumer)
                 throws IllegalArgumentException {
@@ -12494,17 +12494,17 @@ public final class Fn {
         }
 
         /**
-         * 
          *
-         * @param <A> 
-         * @param <B> 
-         * @param <C> 
-         * @param <R> 
-         * @param <E> 
-         * @param triConsumer 
-         * @param valueToReturn 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <A>
+         * @param <B>
+         * @param <C>
+         * @param <R>
+         * @param <E>
+         * @param triConsumer
+         * @param valueToReturn
+         * @return
+         * @throws IllegalArgumentException
          */
         public static <A, B, C, R, E extends Throwable> Throwables.TriFunction<A, B, C, R, E> c2f(final Throwables.TriConsumer<A, B, C, E> triConsumer,
                 final R valueToReturn) throws IllegalArgumentException {
@@ -12518,14 +12518,14 @@ public final class Fn {
         }
 
         /**
-         * 
          *
-         * @param <T> 
-         * @param <R> 
-         * @param <E> 
-         * @param func 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <T>
+         * @param <R>
+         * @param <E>
+         * @param func
+         * @return
+         * @throws IllegalArgumentException
          */
         public static <T, R, E extends Throwable> Throwables.Consumer<T, E> f2c(final Throwables.Function<T, ? extends R, E> func)
                 throws IllegalArgumentException {
@@ -12535,15 +12535,15 @@ public final class Fn {
         }
 
         /**
-         * 
          *
-         * @param <T> 
-         * @param <U> 
-         * @param <R> 
-         * @param <E> 
-         * @param func 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <T>
+         * @param <U>
+         * @param <R>
+         * @param <E>
+         * @param func
+         * @return
+         * @throws IllegalArgumentException
          */
         public static <T, U, R, E extends Throwable> Throwables.BiConsumer<T, U, E> f2c(final Throwables.BiFunction<T, U, ? extends R, E> func)
                 throws IllegalArgumentException {
@@ -12553,16 +12553,16 @@ public final class Fn {
         }
 
         /**
-         * 
          *
-         * @param <A> 
-         * @param <B> 
-         * @param <C> 
-         * @param <R> 
-         * @param <E> 
-         * @param func 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <A>
+         * @param <B>
+         * @param <C>
+         * @param <R>
+         * @param <E>
+         * @param func
+         * @return
+         * @throws IllegalArgumentException
          */
         public static <A, B, C, R, E extends Throwable> Throwables.TriConsumer<A, B, C, E> f2c(final Throwables.TriFunction<A, B, C, ? extends R, E> func)
                 throws IllegalArgumentException {
@@ -12572,12 +12572,12 @@ public final class Fn {
         }
 
         /**
-         * 
          *
-         * @param <E> 
-         * @param runnable 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <E>
+         * @param runnable
+         * @return
+         * @throws IllegalArgumentException
          */
         public static <E extends Throwable> Throwables.Callable<Void, E> r2c(final Throwables.Runnable<E> runnable) throws IllegalArgumentException {
             N.checkArgNotNull(runnable);
@@ -12589,14 +12589,14 @@ public final class Fn {
         }
 
         /**
-         * 
          *
-         * @param <R> 
-         * @param <E> 
-         * @param runnable 
-         * @param valueToReturn 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <R>
+         * @param <E>
+         * @param runnable
+         * @param valueToReturn
+         * @return
+         * @throws IllegalArgumentException
          */
         public static <R, E extends Throwable> Throwables.Callable<R, E> r2c(final Throwables.Runnable<E> runnable, final R valueToReturn)
                 throws IllegalArgumentException {
@@ -12609,13 +12609,13 @@ public final class Fn {
         }
 
         /**
-         * 
          *
-         * @param <R> 
-         * @param <E> 
-         * @param callable 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <R>
+         * @param <E>
+         * @param callable
+         * @return
+         * @throws IllegalArgumentException
          */
         public static <R, E extends Throwable> Throwables.Runnable<E> c2r(final Throwables.Callable<R, E> callable) throws IllegalArgumentException {
             N.checkArgNotNull(callable);
@@ -12647,12 +12647,12 @@ public final class Fn {
         }
 
         /**
-         * 
          *
-         * @param <E> 
-         * @param runnable 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <E>
+         * @param runnable
+         * @return
+         * @throws IllegalArgumentException
          */
         public static <E extends Throwable> Throwables.Runnable<E> r(final Throwables.Runnable<E> runnable) throws IllegalArgumentException {
             N.checkArgNotNull(runnable);
@@ -12661,13 +12661,13 @@ public final class Fn {
         }
 
         /**
-         * 
          *
-         * @param <R> 
-         * @param <E> 
-         * @param callable 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <R>
+         * @param <E>
+         * @param callable
+         * @return
+         * @throws IllegalArgumentException
          */
         public static <R, E extends Throwable> Throwables.Callable<R, E> c(final Throwables.Callable<R, E> callable) throws IllegalArgumentException {
             N.checkArgNotNull(callable);
@@ -12676,12 +12676,12 @@ public final class Fn {
         }
 
         /**
-         * 
          *
-         * @param <E> 
-         * @param runnable 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <E>
+         * @param runnable
+         * @return
+         * @throws IllegalArgumentException
          */
         public static <E extends Throwable> Throwables.Runnable<E> jr2r(final java.lang.Runnable runnable) throws IllegalArgumentException {
             N.checkArgNotNull(runnable);
@@ -12694,12 +12694,12 @@ public final class Fn {
         }
 
         /**
-         * 
          *
-         * @param <E> 
-         * @param runnable 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <E>
+         * @param runnable
+         * @return
+         * @throws IllegalArgumentException
          */
         public static <E extends Throwable> java.lang.Runnable r2jr(final Throwables.Runnable<E> runnable) throws IllegalArgumentException {
             N.checkArgNotNull(runnable);
@@ -12711,19 +12711,19 @@ public final class Fn {
             return () -> {
                 try {
                     runnable.run();
-                } catch (Throwable e) {
+                } catch (Throwable e) { // NOSONAR
                     throw ExceptionUtil.toRuntimeException(e, true);
                 }
             };
         }
 
         /**
-         * 
          *
-         * @param <R> 
-         * @param callable 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <R>
+         * @param callable
+         * @return
+         * @throws IllegalArgumentException
          */
         public static <R> Throwables.Callable<R, Exception> jc2c(final java.util.concurrent.Callable<R> callable) throws IllegalArgumentException {
             N.checkArgNotNull(callable);
@@ -12736,12 +12736,12 @@ public final class Fn {
         }
 
         /**
-         * 
          *
-         * @param <R> 
-         * @param callable 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <R>
+         * @param callable
+         * @return
+         * @throws IllegalArgumentException
          */
         public static <R> java.util.concurrent.Callable<R> c2jc(final Throwables.Callable<R, ? extends Exception> callable) throws IllegalArgumentException {
             N.checkArgNotNull(callable);

@@ -199,12 +199,12 @@ public class u {//NOSONAR
         }
 
         /**
-         * 
          *
-         * @param <E> 
-         * @param action 
+         *
+         * @param <E>
+         * @param action
          * @return itself
-         * @throws IllegalArgumentException 
+         * @throws IllegalArgumentException
          * @throws E the e
          */
         public <E extends Exception> Optional<T> ifPresent(final Throwables.Consumer<? super T, E> action) throws IllegalArgumentException, E {
@@ -220,12 +220,12 @@ public class u {//NOSONAR
         /**
          * If present or else.
          *
-         * @param <E> 
-         * @param <E2> 
-         * @param action 
-         * @param emptyAction 
+         * @param <E>
+         * @param <E2>
+         * @param action
+         * @param emptyAction
          * @return itself
-         * @throws IllegalArgumentException 
+         * @throws IllegalArgumentException
          * @throws E the e
          * @throws E2 the e2
          */
@@ -244,12 +244,12 @@ public class u {//NOSONAR
         }
 
         /**
-         * 
          *
-         * @param <E> 
-         * @param predicate 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <E>
+         * @param predicate
+         * @return
+         * @throws IllegalArgumentException
          * @throws E the e
          */
         public <E extends Exception> Optional<T> filter(final Throwables.Predicate<? super T, E> predicate) throws IllegalArgumentException, E {
@@ -263,13 +263,13 @@ public class u {//NOSONAR
         }
 
         /**
-         * 
          *
-         * @param <U> 
-         * @param <E> 
-         * @param mapper 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <U>
+         * @param <E>
+         * @param mapper
+         * @return
+         * @throws IllegalArgumentException
          * @throws E the e
          */
         public <U, E extends Exception> Nullable<U> map(final Throwables.Function<? super T, ? extends U, E> mapper) throws IllegalArgumentException, E {
@@ -283,13 +283,13 @@ public class u {//NOSONAR
         }
 
         /**
-         * 
          *
-         * @param <U> 
-         * @param <E> 
-         * @param mapper 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <U>
+         * @param <E>
+         * @param mapper
+         * @return
+         * @throws IllegalArgumentException
          * @throws E the e
          */
         public <U, E extends Exception> Optional<U> mapToNonNull(final Throwables.Function<? super T, ? extends U, E> mapper)
@@ -306,10 +306,10 @@ public class u {//NOSONAR
         /**
          * Map to boolean.
          *
-         * @param <E> 
-         * @param mapper 
-         * @return 
-         * @throws IllegalArgumentException 
+         * @param <E>
+         * @param mapper
+         * @return
+         * @throws IllegalArgumentException
          * @throws E the e
          */
         public <E extends Exception> OptionalBoolean mapToBoolean(final Throwables.ToBooleanFunction<? super T, E> mapper) throws IllegalArgumentException, E {
@@ -325,10 +325,10 @@ public class u {//NOSONAR
         /**
          * Map to char.
          *
-         * @param <E> 
-         * @param mapper 
-         * @return 
-         * @throws IllegalArgumentException 
+         * @param <E>
+         * @param mapper
+         * @return
+         * @throws IllegalArgumentException
          * @throws E the e
          */
         public <E extends Exception> OptionalChar mapToChar(final Throwables.ToCharFunction<? super T, E> mapper) throws IllegalArgumentException, E {
@@ -344,10 +344,10 @@ public class u {//NOSONAR
         /**
          * Map to byte.
          *
-         * @param <E> 
-         * @param mapper 
-         * @return 
-         * @throws IllegalArgumentException 
+         * @param <E>
+         * @param mapper
+         * @return
+         * @throws IllegalArgumentException
          * @throws E the e
          */
         public <E extends Exception> OptionalByte mapToByte(final Throwables.ToByteFunction<? super T, E> mapper) throws IllegalArgumentException, E {
@@ -363,10 +363,10 @@ public class u {//NOSONAR
         /**
          * Map to short.
          *
-         * @param <E> 
-         * @param mapper 
-         * @return 
-         * @throws IllegalArgumentException 
+         * @param <E>
+         * @param mapper
+         * @return
+         * @throws IllegalArgumentException
          * @throws E the e
          */
         public <E extends Exception> OptionalShort mapToShort(final Throwables.ToShortFunction<? super T, E> mapper) throws IllegalArgumentException, E {
@@ -382,10 +382,10 @@ public class u {//NOSONAR
         /**
          * Map to int.
          *
-         * @param <E> 
-         * @param mapper 
-         * @return 
-         * @throws IllegalArgumentException 
+         * @param <E>
+         * @param mapper
+         * @return
+         * @throws IllegalArgumentException
          * @throws E the e
          */
         public <E extends Exception> OptionalInt mapToInt(final Throwables.ToIntFunction<? super T, E> mapper) throws IllegalArgumentException, E {
@@ -401,10 +401,10 @@ public class u {//NOSONAR
         /**
          * Map to long.
          *
-         * @param <E> 
-         * @param mapper 
-         * @return 
-         * @throws IllegalArgumentException 
+         * @param <E>
+         * @param mapper
+         * @return
+         * @throws IllegalArgumentException
          * @throws E the e
          */
         public <E extends Exception> OptionalLong mapToLong(final Throwables.ToLongFunction<? super T, E> mapper) throws IllegalArgumentException, E {
@@ -420,10 +420,10 @@ public class u {//NOSONAR
         /**
          * Map to float.
          *
-         * @param <E> 
-         * @param mapper 
-         * @return 
-         * @throws IllegalArgumentException 
+         * @param <E>
+         * @param mapper
+         * @return
+         * @throws IllegalArgumentException
          * @throws E the e
          */
         public <E extends Exception> OptionalFloat mapToFloat(final Throwables.ToFloatFunction<? super T, E> mapper) throws IllegalArgumentException, E {
@@ -439,10 +439,10 @@ public class u {//NOSONAR
         /**
          * Map to double.
          *
-         * @param <E> 
-         * @param mapper 
-         * @return 
-         * @throws IllegalArgumentException 
+         * @param <E>
+         * @param mapper
+         * @return
+         * @throws IllegalArgumentException
          * @throws E the e
          */
         public <E extends Exception> OptionalDouble mapToDouble(final Throwables.ToDoubleFunction<? super T, E> mapper) throws IllegalArgumentException, E {
@@ -456,13 +456,13 @@ public class u {//NOSONAR
         }
 
         /**
-         * 
          *
-         * @param <U> 
-         * @param <E> 
-         * @param mapper 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <U>
+         * @param <E>
+         * @param mapper
+         * @return
+         * @throws IllegalArgumentException
          * @throws E the e
          */
         public <U, E extends Exception> Optional<U> flatMap(final Throwables.Function<? super T, Optional<U>, E> mapper) throws IllegalArgumentException, E {
@@ -486,11 +486,11 @@ public class u {//NOSONAR
         }
 
         /**
-         * 
          *
-         * @param supplier 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param supplier
+         * @return
+         * @throws IllegalArgumentException
          */
         public Optional<T> or(final Supplier<Optional<T>> supplier) throws IllegalArgumentException {
             N.checkArgNotNull(supplier, "supplier");
@@ -901,12 +901,12 @@ public class u {//NOSONAR
         }
 
         /**
-         * 
          *
-         * @param <E> 
-         * @param action 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <E>
+         * @param action
+         * @return
+         * @throws IllegalArgumentException
          * @throws E the e
          */
         public <E extends Exception> OptionalBoolean ifPresent(final Throwables.BooleanConsumer<E> action) throws IllegalArgumentException, E {
@@ -922,12 +922,12 @@ public class u {//NOSONAR
         /**
          * If present or else.
          *
-         * @param <E> 
-         * @param <E2> 
-         * @param action 
-         * @param emptyAction 
-         * @return 
-         * @throws IllegalArgumentException 
+         * @param <E>
+         * @param <E2>
+         * @param action
+         * @param emptyAction
+         * @return
+         * @throws IllegalArgumentException
          * @throws E the e
          * @throws E2 the e2
          */
@@ -946,12 +946,12 @@ public class u {//NOSONAR
         }
 
         /**
-         * 
          *
-         * @param <E> 
-         * @param predicate 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <E>
+         * @param predicate
+         * @return
+         * @throws IllegalArgumentException
          * @throws E the e
          */
         public <E extends Exception> OptionalBoolean filter(final Throwables.BooleanPredicate<E> predicate) throws IllegalArgumentException, E {
@@ -965,12 +965,12 @@ public class u {//NOSONAR
         }
 
         /**
-         * 
          *
-         * @param <E> 
-         * @param mapper 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <E>
+         * @param mapper
+         * @return
+         * @throws IllegalArgumentException
          * @throws E the e
          */
         public <E extends Exception> OptionalBoolean map(final Throwables.BooleanUnaryOperator<E> mapper) throws IllegalArgumentException, E {
@@ -986,10 +986,10 @@ public class u {//NOSONAR
         /**
          * Map to char.
          *
-         * @param <E> 
-         * @param mapper 
-         * @return 
-         * @throws IllegalArgumentException 
+         * @param <E>
+         * @param mapper
+         * @return
+         * @throws IllegalArgumentException
          * @throws E the e
          */
         public <E extends Exception> OptionalChar mapToChar(final Throwables.ToCharFunction<Boolean, E> mapper) throws IllegalArgumentException, E {
@@ -1005,10 +1005,10 @@ public class u {//NOSONAR
         /**
          * Map to int.
          *
-         * @param <E> 
-         * @param mapper 
-         * @return 
-         * @throws IllegalArgumentException 
+         * @param <E>
+         * @param mapper
+         * @return
+         * @throws IllegalArgumentException
          * @throws E the e
          */
         public <E extends Exception> OptionalInt mapToInt(final Throwables.ToIntFunction<Boolean, E> mapper) throws IllegalArgumentException, E {
@@ -1024,14 +1024,14 @@ public class u {//NOSONAR
         /**
          * Map to obj.
          *
-         * @param <T> 
-         * @param <E> 
-         * @param mapper 
-         * @return 
-         * @throws IllegalArgumentException 
+         * @param <T>
+         * @param <E>
+         * @param mapper
+         * @return
+         * @throws IllegalArgumentException
          * @throws E the e
          */
-        public <T, E extends Exception> Nullable<T> mapToObj(final Throwables.BooleanFunction<T, E> mapper) throws IllegalArgumentException, E {
+        public <T, E extends Exception> Nullable<T> mapToObj(final Throwables.BooleanFunction<? extends T, E> mapper) throws IllegalArgumentException, E {
             N.checkArgNotNull(mapper, "mapper");
 
             if (isPresent) {
@@ -1042,16 +1042,16 @@ public class u {//NOSONAR
         }
 
         /**
-         * 
          *
-         * @param <T> 
-         * @param <E> 
-         * @param mapper 
-         * @return 
-         * @throws IllegalArgumentException 
-         * @throws E 
+         *
+         * @param <T>
+         * @param <E>
+         * @param mapper
+         * @return
+         * @throws IllegalArgumentException
+         * @throws E
          */
-        public <T, E extends Exception> Optional<T> mapToNonNull(final Throwables.BooleanFunction<T, E> mapper) throws IllegalArgumentException, E {
+        public <T, E extends Exception> Optional<T> mapToNonNull(final Throwables.BooleanFunction<? extends T, E> mapper) throws IllegalArgumentException, E {
             N.checkArgNotNull(mapper, "mapper");
 
             if (isPresent) {
@@ -1062,12 +1062,12 @@ public class u {//NOSONAR
         }
 
         /**
-         * 
          *
-         * @param <E> 
-         * @param mapper 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <E>
+         * @param mapper
+         * @return
+         * @throws IllegalArgumentException
          * @throws E the e
          */
         public <E extends Exception> OptionalBoolean flatMap(final Throwables.BooleanFunction<OptionalBoolean, E> mapper) throws IllegalArgumentException, E {
@@ -1081,10 +1081,10 @@ public class u {//NOSONAR
         }
 
         /**
-         * 
          *
-         * @param supplier 
-         * @return 
+         *
+         * @param supplier
+         * @return
          */
         public OptionalBoolean or(final Supplier<OptionalBoolean> supplier) {
             if (isPresent) {
@@ -1134,9 +1134,9 @@ public class u {//NOSONAR
         /**
          * Or else get.
          *
-         * @param other 
-         * @return 
-         * @throws IllegalArgumentException 
+         * @param other
+         * @return
+         * @throws IllegalArgumentException
          */
         public boolean orElseGet(final BooleanSupplier other) throws IllegalArgumentException {
             N.checkArgNotNull(other, "other");
@@ -1252,10 +1252,10 @@ public class u {//NOSONAR
         /**
          * Or else throw.
          *
-         * @param <X> 
-         * @param exceptionSupplier 
-         * @return 
-         * @throws IllegalArgumentException 
+         * @param <X>
+         * @param exceptionSupplier
+         * @return
+         * @throws IllegalArgumentException
          * @throws X the x
          */
         public <X extends Throwable> boolean orElseThrow(final Supplier<? extends X> exceptionSupplier) throws IllegalArgumentException, X {
@@ -1508,12 +1508,12 @@ public class u {//NOSONAR
         }
 
         /**
-         * 
          *
-         * @param <E> 
-         * @param action 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <E>
+         * @param action
+         * @return
+         * @throws IllegalArgumentException
          * @throws E the e
          */
         public <E extends Exception> OptionalChar ifPresent(final Throwables.CharConsumer<E> action) throws IllegalArgumentException, E {
@@ -1529,12 +1529,12 @@ public class u {//NOSONAR
         /**
          * If present or else.
          *
-         * @param <E> 
-         * @param <E2> 
-         * @param action 
-         * @param emptyAction 
-         * @return 
-         * @throws IllegalArgumentException 
+         * @param <E>
+         * @param <E2>
+         * @param action
+         * @param emptyAction
+         * @return
+         * @throws IllegalArgumentException
          * @throws E the e
          * @throws E2 the e2
          */
@@ -1553,12 +1553,12 @@ public class u {//NOSONAR
         }
 
         /**
-         * 
          *
-         * @param <E> 
-         * @param predicate 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <E>
+         * @param predicate
+         * @return
+         * @throws IllegalArgumentException
          * @throws E the e
          */
         public <E extends Exception> OptionalChar filter(final Throwables.CharPredicate<E> predicate) throws IllegalArgumentException, E {
@@ -1572,12 +1572,12 @@ public class u {//NOSONAR
         }
 
         /**
-         * 
          *
-         * @param <E> 
-         * @param mapper 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <E>
+         * @param mapper
+         * @return
+         * @throws IllegalArgumentException
          * @throws E the e
          */
         public <E extends Exception> OptionalChar map(final Throwables.CharUnaryOperator<E> mapper) throws IllegalArgumentException, E {
@@ -1593,10 +1593,10 @@ public class u {//NOSONAR
         /**
          * Map to boolean.
          *
-         * @param <E> 
-         * @param mapper 
-         * @return 
-         * @throws IllegalArgumentException 
+         * @param <E>
+         * @param mapper
+         * @return
+         * @throws IllegalArgumentException
          * @throws E the e
          */
         public <E extends Exception> OptionalBoolean mapToBolean(final Throwables.ToBooleanFunction<Character, E> mapper) throws IllegalArgumentException, E {
@@ -1612,10 +1612,10 @@ public class u {//NOSONAR
         /**
          * Map to int.
          *
-         * @param <E> 
-         * @param mapper 
-         * @return 
-         * @throws IllegalArgumentException 
+         * @param <E>
+         * @param mapper
+         * @return
+         * @throws IllegalArgumentException
          * @throws E the e
          */
         public <E extends Exception> OptionalInt mapToInt(final Throwables.ToIntFunction<Character, E> mapper) throws IllegalArgumentException, E {
@@ -1631,14 +1631,14 @@ public class u {//NOSONAR
         /**
          * Map to obj.
          *
-         * @param <T> 
-         * @param <E> 
-         * @param mapper 
-         * @return 
-         * @throws IllegalArgumentException 
+         * @param <T>
+         * @param <E>
+         * @param mapper
+         * @return
+         * @throws IllegalArgumentException
          * @throws E the e
          */
-        public <T, E extends Exception> Nullable<T> mapToObj(final Throwables.CharFunction<T, E> mapper) throws IllegalArgumentException, E {
+        public <T, E extends Exception> Nullable<T> mapToObj(final Throwables.CharFunction<? extends T, E> mapper) throws IllegalArgumentException, E {
             N.checkArgNotNull(mapper, "mapper");
 
             if (isPresent()) {
@@ -1649,16 +1649,16 @@ public class u {//NOSONAR
         }
 
         /**
-         * 
          *
-         * @param <T> 
-         * @param <E> 
-         * @param mapper 
-         * @return 
-         * @throws IllegalArgumentException 
-         * @throws E 
+         *
+         * @param <T>
+         * @param <E>
+         * @param mapper
+         * @return
+         * @throws IllegalArgumentException
+         * @throws E
          */
-        public <T, E extends Exception> Optional<T> mapToNonNull(final Throwables.CharFunction<T, E> mapper) throws IllegalArgumentException, E {
+        public <T, E extends Exception> Optional<T> mapToNonNull(final Throwables.CharFunction<? extends T, E> mapper) throws IllegalArgumentException, E {
             N.checkArgNotNull(mapper, "mapper");
 
             if (isPresent) {
@@ -1669,12 +1669,12 @@ public class u {//NOSONAR
         }
 
         /**
-         * 
          *
-         * @param <E> 
-         * @param mapper 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <E>
+         * @param mapper
+         * @return
+         * @throws IllegalArgumentException
          * @throws E the e
          */
         public <E extends Exception> OptionalChar flatMap(final Throwables.CharFunction<OptionalChar, E> mapper) throws IllegalArgumentException, E {
@@ -1731,9 +1731,9 @@ public class u {//NOSONAR
         /**
          * Or else get.
          *
-         * @param other 
-         * @return 
-         * @throws IllegalArgumentException 
+         * @param other
+         * @return
+         * @throws IllegalArgumentException
          */
         public char orElseGet(final CharSupplier other) throws IllegalArgumentException {
             N.checkArgNotNull(other, "other");
@@ -1849,10 +1849,10 @@ public class u {//NOSONAR
         /**
          * Or else throw.
          *
-         * @param <X> 
-         * @param exceptionSupplier 
-         * @return 
-         * @throws IllegalArgumentException 
+         * @param <X>
+         * @param exceptionSupplier
+         * @return
+         * @throws IllegalArgumentException
          * @throws X the x
          */
         public <X extends Throwable> char orElseThrow(final Supplier<? extends X> exceptionSupplier) throws IllegalArgumentException, X {
@@ -2105,12 +2105,12 @@ public class u {//NOSONAR
         }
 
         /**
-         * 
          *
-         * @param <E> 
-         * @param action 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <E>
+         * @param action
+         * @return
+         * @throws IllegalArgumentException
          * @throws E the e
          */
         public <E extends Exception> OptionalByte ifPresent(final Throwables.ByteConsumer<E> action) throws IllegalArgumentException, E {
@@ -2126,12 +2126,12 @@ public class u {//NOSONAR
         /**
          * If present or else.
          *
-         * @param <E> 
-         * @param <E2> 
-         * @param action 
-         * @param emptyAction 
-         * @return 
-         * @throws IllegalArgumentException 
+         * @param <E>
+         * @param <E2>
+         * @param action
+         * @param emptyAction
+         * @return
+         * @throws IllegalArgumentException
          * @throws E the e
          * @throws E2 the e2
          */
@@ -2150,12 +2150,12 @@ public class u {//NOSONAR
         }
 
         /**
-         * 
          *
-         * @param <E> 
-         * @param predicate 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <E>
+         * @param predicate
+         * @return
+         * @throws IllegalArgumentException
          * @throws E the e
          */
         public <E extends Exception> OptionalByte filter(final Throwables.BytePredicate<E> predicate) throws IllegalArgumentException, E {
@@ -2169,12 +2169,12 @@ public class u {//NOSONAR
         }
 
         /**
-         * 
          *
-         * @param <E> 
-         * @param mapper 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <E>
+         * @param mapper
+         * @return
+         * @throws IllegalArgumentException
          * @throws E the e
          */
         public <E extends Exception> OptionalByte map(final Throwables.ByteUnaryOperator<E> mapper) throws IllegalArgumentException, E {
@@ -2190,10 +2190,10 @@ public class u {//NOSONAR
         /**
          * Map to int.
          *
-         * @param <E> 
-         * @param mapper 
-         * @return 
-         * @throws IllegalArgumentException 
+         * @param <E>
+         * @param mapper
+         * @return
+         * @throws IllegalArgumentException
          * @throws E the e
          */
         public <E extends Exception> OptionalInt mapToInt(final Throwables.ToIntFunction<Byte, E> mapper) throws IllegalArgumentException, E {
@@ -2209,14 +2209,14 @@ public class u {//NOSONAR
         /**
          * Map to obj.
          *
-         * @param <T> 
-         * @param <E> 
-         * @param mapper 
-         * @return 
-         * @throws IllegalArgumentException 
+         * @param <T>
+         * @param <E>
+         * @param mapper
+         * @return
+         * @throws IllegalArgumentException
          * @throws E the e
          */
-        public <T, E extends Exception> Nullable<T> mapToObj(final Throwables.ByteFunction<T, E> mapper) throws IllegalArgumentException, E {
+        public <T, E extends Exception> Nullable<T> mapToObj(final Throwables.ByteFunction<? extends T, E> mapper) throws IllegalArgumentException, E {
             N.checkArgNotNull(mapper, "mapper");
 
             if (isPresent) {
@@ -2227,16 +2227,16 @@ public class u {//NOSONAR
         }
 
         /**
-         * 
          *
-         * @param <T> 
-         * @param <E> 
-         * @param mapper 
-         * @return 
-         * @throws IllegalArgumentException 
-         * @throws E 
+         *
+         * @param <T>
+         * @param <E>
+         * @param mapper
+         * @return
+         * @throws IllegalArgumentException
+         * @throws E
          */
-        public <T, E extends Exception> Optional<T> mapToNonNull(final Throwables.ByteFunction<T, E> mapper) throws IllegalArgumentException, E {
+        public <T, E extends Exception> Optional<T> mapToNonNull(final Throwables.ByteFunction<? extends T, E> mapper) throws IllegalArgumentException, E {
             N.checkArgNotNull(mapper, "mapper");
 
             if (isPresent) {
@@ -2247,12 +2247,12 @@ public class u {//NOSONAR
         }
 
         /**
-         * 
          *
-         * @param <E> 
-         * @param mapper 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <E>
+         * @param mapper
+         * @return
+         * @throws IllegalArgumentException
          * @throws E the e
          */
         public <E extends Exception> OptionalByte flatMap(final Throwables.ByteFunction<OptionalByte, E> mapper) throws IllegalArgumentException, E {
@@ -2309,9 +2309,9 @@ public class u {//NOSONAR
         /**
          * Or else get.
          *
-         * @param other 
-         * @return 
-         * @throws IllegalArgumentException 
+         * @param other
+         * @return
+         * @throws IllegalArgumentException
          */
         public byte orElseGet(final ByteSupplier other) throws IllegalArgumentException {
             N.checkArgNotNull(other, "other");
@@ -2427,10 +2427,10 @@ public class u {//NOSONAR
         /**
          * Or else throw.
          *
-         * @param <X> 
-         * @param exceptionSupplier 
-         * @return 
-         * @throws IllegalArgumentException 
+         * @param <X>
+         * @param exceptionSupplier
+         * @return
+         * @throws IllegalArgumentException
          * @throws X the x
          */
         public <X extends Throwable> byte orElseThrow(final Supplier<? extends X> exceptionSupplier) throws IllegalArgumentException, X {
@@ -2683,12 +2683,12 @@ public class u {//NOSONAR
         }
 
         /**
-         * 
          *
-         * @param <E> 
-         * @param action 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <E>
+         * @param action
+         * @return
+         * @throws IllegalArgumentException
          * @throws E the e
          */
         public <E extends Exception> OptionalShort ifPresent(final Throwables.ShortConsumer<E> action) throws IllegalArgumentException, E {
@@ -2704,12 +2704,12 @@ public class u {//NOSONAR
         /**
          * If present or else.
          *
-         * @param <E> 
-         * @param <E2> 
-         * @param action 
-         * @param emptyAction 
-         * @return 
-         * @throws IllegalArgumentException 
+         * @param <E>
+         * @param <E2>
+         * @param action
+         * @param emptyAction
+         * @return
+         * @throws IllegalArgumentException
          * @throws E the e
          * @throws E2 the e2
          */
@@ -2728,12 +2728,12 @@ public class u {//NOSONAR
         }
 
         /**
-         * 
          *
-         * @param <E> 
-         * @param predicate 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <E>
+         * @param predicate
+         * @return
+         * @throws IllegalArgumentException
          * @throws E the e
          */
         public <E extends Exception> OptionalShort filter(final Throwables.ShortPredicate<E> predicate) throws IllegalArgumentException, E {
@@ -2747,12 +2747,12 @@ public class u {//NOSONAR
         }
 
         /**
-         * 
          *
-         * @param <E> 
-         * @param mapper 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <E>
+         * @param mapper
+         * @return
+         * @throws IllegalArgumentException
          * @throws E the e
          */
         public <E extends Exception> OptionalShort map(final Throwables.ShortUnaryOperator<E> mapper) throws IllegalArgumentException, E {
@@ -2768,10 +2768,10 @@ public class u {//NOSONAR
         /**
          * Map to int.
          *
-         * @param <E> 
-         * @param mapper 
-         * @return 
-         * @throws IllegalArgumentException 
+         * @param <E>
+         * @param mapper
+         * @return
+         * @throws IllegalArgumentException
          * @throws E the e
          */
         public <E extends Exception> OptionalInt mapToInt(final Throwables.ToIntFunction<Short, E> mapper) throws IllegalArgumentException, E {
@@ -2787,14 +2787,14 @@ public class u {//NOSONAR
         /**
          * Map to obj.
          *
-         * @param <T> 
-         * @param <E> 
-         * @param mapper 
-         * @return 
-         * @throws IllegalArgumentException 
+         * @param <T>
+         * @param <E>
+         * @param mapper
+         * @return
+         * @throws IllegalArgumentException
          * @throws E the e
          */
-        public <T, E extends Exception> Nullable<T> mapToObj(final Throwables.ShortFunction<T, E> mapper) throws IllegalArgumentException, E {
+        public <T, E extends Exception> Nullable<T> mapToObj(final Throwables.ShortFunction<? extends T, E> mapper) throws IllegalArgumentException, E {
             N.checkArgNotNull(mapper, "mapper");
 
             if (isPresent) {
@@ -2805,16 +2805,16 @@ public class u {//NOSONAR
         }
 
         /**
-         * 
          *
-         * @param <T> 
-         * @param <E> 
-         * @param mapper 
-         * @return 
-         * @throws IllegalArgumentException 
-         * @throws E 
+         *
+         * @param <T>
+         * @param <E>
+         * @param mapper
+         * @return
+         * @throws IllegalArgumentException
+         * @throws E
          */
-        public <T, E extends Exception> Optional<T> mapToNonNull(final Throwables.ShortFunction<T, E> mapper) throws IllegalArgumentException, E {
+        public <T, E extends Exception> Optional<T> mapToNonNull(final Throwables.ShortFunction<? extends T, E> mapper) throws IllegalArgumentException, E {
             N.checkArgNotNull(mapper, "mapper");
 
             if (isPresent) {
@@ -2825,12 +2825,12 @@ public class u {//NOSONAR
         }
 
         /**
-         * 
          *
-         * @param <E> 
-         * @param mapper 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <E>
+         * @param mapper
+         * @return
+         * @throws IllegalArgumentException
          * @throws E the e
          */
         public <E extends Exception> OptionalShort flatMap(final Throwables.ShortFunction<OptionalShort, E> mapper) throws IllegalArgumentException, E {
@@ -2887,9 +2887,9 @@ public class u {//NOSONAR
         /**
          * Or else get.
          *
-         * @param other 
-         * @return 
-         * @throws IllegalArgumentException 
+         * @param other
+         * @return
+         * @throws IllegalArgumentException
          */
         public short orElseGet(final ShortSupplier other) throws IllegalArgumentException {
             N.checkArgNotNull(other, "other");
@@ -3005,10 +3005,10 @@ public class u {//NOSONAR
         /**
          * Or else throw.
          *
-         * @param <X> 
-         * @param exceptionSupplier 
-         * @return 
-         * @throws IllegalArgumentException 
+         * @param <X>
+         * @param exceptionSupplier
+         * @return
+         * @throws IllegalArgumentException
          * @throws X the x
          */
         public <X extends Throwable> short orElseThrow(final Supplier<? extends X> exceptionSupplier) throws IllegalArgumentException, X {
@@ -3274,12 +3274,12 @@ public class u {//NOSONAR
         }
 
         /**
-         * 
          *
-         * @param <E> 
-         * @param action 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <E>
+         * @param action
+         * @return
+         * @throws IllegalArgumentException
          * @throws E the e
          */
         public <E extends Exception> OptionalInt ifPresent(final Throwables.IntConsumer<E> action) throws IllegalArgumentException, E {
@@ -3295,12 +3295,12 @@ public class u {//NOSONAR
         /**
          * If present or else.
          *
-         * @param <E> 
-         * @param <E2> 
-         * @param action 
-         * @param emptyAction 
-         * @return 
-         * @throws IllegalArgumentException 
+         * @param <E>
+         * @param <E2>
+         * @param action
+         * @param emptyAction
+         * @return
+         * @throws IllegalArgumentException
          * @throws E the e
          * @throws E2 the e2
          */
@@ -3319,12 +3319,12 @@ public class u {//NOSONAR
         }
 
         /**
-         * 
          *
-         * @param <E> 
-         * @param predicate 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <E>
+         * @param predicate
+         * @return
+         * @throws IllegalArgumentException
          * @throws E the e
          */
         public <E extends Exception> OptionalInt filter(final Throwables.IntPredicate<E> predicate) throws IllegalArgumentException, E {
@@ -3338,12 +3338,12 @@ public class u {//NOSONAR
         }
 
         /**
-         * 
          *
-         * @param <E> 
-         * @param mapper 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <E>
+         * @param mapper
+         * @return
+         * @throws IllegalArgumentException
          * @throws E the e
          */
         public <E extends Exception> OptionalInt map(final Throwables.IntUnaryOperator<E> mapper) throws IllegalArgumentException, E {
@@ -3359,10 +3359,10 @@ public class u {//NOSONAR
         /**
          * Map to boolean.
          *
-         * @param <E> 
-         * @param mapper 
-         * @return 
-         * @throws IllegalArgumentException 
+         * @param <E>
+         * @param mapper
+         * @return
+         * @throws IllegalArgumentException
          * @throws E the e
          */
         public <E extends Exception> OptionalBoolean mapToBolean(final Throwables.ToBooleanFunction<Integer, E> mapper) throws IllegalArgumentException, E {
@@ -3378,10 +3378,10 @@ public class u {//NOSONAR
         /**
          * Map to char.
          *
-         * @param <E> 
-         * @param mapper 
-         * @return 
-         * @throws IllegalArgumentException 
+         * @param <E>
+         * @param mapper
+         * @return
+         * @throws IllegalArgumentException
          * @throws E the e
          */
         public <E extends Exception> OptionalChar mapToChar(final Throwables.ToCharFunction<Integer, E> mapper) throws IllegalArgumentException, E {
@@ -3397,10 +3397,10 @@ public class u {//NOSONAR
         /**
          * Map to long.
          *
-         * @param <E> 
-         * @param mapper 
-         * @return 
-         * @throws IllegalArgumentException 
+         * @param <E>
+         * @param mapper
+         * @return
+         * @throws IllegalArgumentException
          * @throws E the e
          */
         public <E extends Exception> OptionalLong mapToLong(final Throwables.ToLongFunction<Integer, E> mapper) throws IllegalArgumentException, E {
@@ -3416,10 +3416,10 @@ public class u {//NOSONAR
         /**
          * Map to float.
          *
-         * @param <E> 
-         * @param mapper 
-         * @return 
-         * @throws IllegalArgumentException 
+         * @param <E>
+         * @param mapper
+         * @return
+         * @throws IllegalArgumentException
          * @throws E the e
          */
         public <E extends Exception> OptionalFloat mapToFloat(final Throwables.ToFloatFunction<Integer, E> mapper) throws IllegalArgumentException, E {
@@ -3435,10 +3435,10 @@ public class u {//NOSONAR
         /**
          * Map to double.
          *
-         * @param <E> 
-         * @param mapper 
-         * @return 
-         * @throws IllegalArgumentException 
+         * @param <E>
+         * @param mapper
+         * @return
+         * @throws IllegalArgumentException
          * @throws E the e
          */
         public <E extends Exception> OptionalDouble mapToDouble(final Throwables.ToDoubleFunction<Integer, E> mapper) throws IllegalArgumentException, E {
@@ -3454,14 +3454,14 @@ public class u {//NOSONAR
         /**
          * Map to obj.
          *
-         * @param <T> 
-         * @param <E> 
-         * @param mapper 
-         * @return 
-         * @throws IllegalArgumentException 
+         * @param <T>
+         * @param <E>
+         * @param mapper
+         * @return
+         * @throws IllegalArgumentException
          * @throws E the e
          */
-        public <T, E extends Exception> Nullable<T> mapToObj(final Throwables.IntFunction<T, E> mapper) throws IllegalArgumentException, E {
+        public <T, E extends Exception> Nullable<T> mapToObj(final Throwables.IntFunction<? extends T, E> mapper) throws IllegalArgumentException, E {
             N.checkArgNotNull(mapper, "mapper");
 
             if (isPresent) {
@@ -3472,16 +3472,16 @@ public class u {//NOSONAR
         }
 
         /**
-         * 
          *
-         * @param <T> 
-         * @param <E> 
-         * @param mapper 
-         * @return 
-         * @throws IllegalArgumentException 
-         * @throws E 
+         *
+         * @param <T>
+         * @param <E>
+         * @param mapper
+         * @return
+         * @throws IllegalArgumentException
+         * @throws E
          */
-        public <T, E extends Exception> Optional<T> mapToNonNull(final Throwables.IntFunction<T, E> mapper) throws IllegalArgumentException, E {
+        public <T, E extends Exception> Optional<T> mapToNonNull(final Throwables.IntFunction<? extends T, E> mapper) throws IllegalArgumentException, E {
             N.checkArgNotNull(mapper, "mapper");
 
             if (isPresent) {
@@ -3492,12 +3492,12 @@ public class u {//NOSONAR
         }
 
         /**
-         * 
          *
-         * @param <E> 
-         * @param mapper 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <E>
+         * @param mapper
+         * @return
+         * @throws IllegalArgumentException
          * @throws E the e
          */
         public <E extends Exception> OptionalInt flatMap(final Throwables.IntFunction<OptionalInt, E> mapper) throws IllegalArgumentException, E {
@@ -3554,9 +3554,9 @@ public class u {//NOSONAR
         /**
          * Or else get.
          *
-         * @param other 
-         * @return 
-         * @throws IllegalArgumentException 
+         * @param other
+         * @return
+         * @throws IllegalArgumentException
          */
         public int orElseGet(final IntSupplier other) throws IllegalArgumentException {
             N.checkArgNotNull(other, "other");
@@ -3672,10 +3672,10 @@ public class u {//NOSONAR
         /**
          * Or else throw.
          *
-         * @param <X> 
-         * @param exceptionSupplier 
-         * @return 
-         * @throws IllegalArgumentException 
+         * @param <X>
+         * @param exceptionSupplier
+         * @return
+         * @throws IllegalArgumentException
          * @throws X the x
          */
         public <X extends Throwable> int orElseThrow(final Supplier<? extends X> exceptionSupplier) throws IllegalArgumentException, X {
@@ -3963,12 +3963,12 @@ public class u {//NOSONAR
         }
 
         /**
-         * 
          *
-         * @param <E> 
-         * @param action 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <E>
+         * @param action
+         * @return
+         * @throws IllegalArgumentException
          * @throws E the e
          */
         public <E extends Exception> OptionalLong ifPresent(final Throwables.LongConsumer<E> action) throws IllegalArgumentException, E {
@@ -3984,12 +3984,12 @@ public class u {//NOSONAR
         /**
          * If present or else.
          *
-         * @param <E> 
-         * @param <E2> 
-         * @param action 
-         * @param emptyAction 
-         * @return 
-         * @throws IllegalArgumentException 
+         * @param <E>
+         * @param <E2>
+         * @param action
+         * @param emptyAction
+         * @return
+         * @throws IllegalArgumentException
          * @throws E the e
          * @throws E2 the e2
          */
@@ -4008,12 +4008,12 @@ public class u {//NOSONAR
         }
 
         /**
-         * 
          *
-         * @param <E> 
-         * @param predicate 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <E>
+         * @param predicate
+         * @return
+         * @throws IllegalArgumentException
          * @throws E the e
          */
         public <E extends Exception> OptionalLong filter(final Throwables.LongPredicate<E> predicate) throws IllegalArgumentException, E {
@@ -4027,12 +4027,12 @@ public class u {//NOSONAR
         }
 
         /**
-         * 
          *
-         * @param <E> 
-         * @param mapper 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <E>
+         * @param mapper
+         * @return
+         * @throws IllegalArgumentException
          * @throws E the e
          */
         public <E extends Exception> OptionalLong map(final Throwables.LongUnaryOperator<E> mapper) throws IllegalArgumentException, E {
@@ -4048,10 +4048,10 @@ public class u {//NOSONAR
         /**
          * Map to int.
          *
-         * @param <E> 
-         * @param mapper 
-         * @return 
-         * @throws IllegalArgumentException 
+         * @param <E>
+         * @param mapper
+         * @return
+         * @throws IllegalArgumentException
          * @throws E the e
          */
         public <E extends Exception> OptionalInt mapToInt(final Throwables.ToIntFunction<Long, E> mapper) throws IllegalArgumentException, E {
@@ -4067,10 +4067,10 @@ public class u {//NOSONAR
         /**
          * Map to double.
          *
-         * @param <E> 
-         * @param mapper 
-         * @return 
-         * @throws IllegalArgumentException 
+         * @param <E>
+         * @param mapper
+         * @return
+         * @throws IllegalArgumentException
          * @throws E the e
          */
         public <E extends Exception> OptionalDouble mapToDouble(final Throwables.ToDoubleFunction<Long, E> mapper) throws IllegalArgumentException, E {
@@ -4086,14 +4086,14 @@ public class u {//NOSONAR
         /**
          * Map to obj.
          *
-         * @param <T> 
-         * @param <E> 
-         * @param mapper 
-         * @return 
-         * @throws IllegalArgumentException 
+         * @param <T>
+         * @param <E>
+         * @param mapper
+         * @return
+         * @throws IllegalArgumentException
          * @throws E the e
          */
-        public <T, E extends Exception> Nullable<T> mapToObj(final Throwables.LongFunction<T, E> mapper) throws IllegalArgumentException, E {
+        public <T, E extends Exception> Nullable<T> mapToObj(final Throwables.LongFunction<? extends T, E> mapper) throws IllegalArgumentException, E {
             N.checkArgNotNull(mapper, "mapper");
 
             if (isPresent) {
@@ -4104,16 +4104,16 @@ public class u {//NOSONAR
         }
 
         /**
-         * 
          *
-         * @param <T> 
-         * @param <E> 
-         * @param mapper 
-         * @return 
-         * @throws IllegalArgumentException 
-         * @throws E 
+         *
+         * @param <T>
+         * @param <E>
+         * @param mapper
+         * @return
+         * @throws IllegalArgumentException
+         * @throws E
          */
-        public <T, E extends Exception> Optional<T> mapToNonNull(final Throwables.LongFunction<T, E> mapper) throws IllegalArgumentException, E {
+        public <T, E extends Exception> Optional<T> mapToNonNull(final Throwables.LongFunction<? extends T, E> mapper) throws IllegalArgumentException, E {
             N.checkArgNotNull(mapper, "mapper");
 
             if (isPresent) {
@@ -4124,12 +4124,12 @@ public class u {//NOSONAR
         }
 
         /**
-         * 
          *
-         * @param <E> 
-         * @param mapper 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <E>
+         * @param mapper
+         * @return
+         * @throws IllegalArgumentException
          * @throws E the e
          */
         public <E extends Exception> OptionalLong flatMap(final Throwables.LongFunction<OptionalLong, E> mapper) throws IllegalArgumentException, E {
@@ -4186,9 +4186,9 @@ public class u {//NOSONAR
         /**
          * Or else get.
          *
-         * @param other 
-         * @return 
-         * @throws IllegalArgumentException 
+         * @param other
+         * @return
+         * @throws IllegalArgumentException
          */
         public long orElseGet(final LongSupplier other) throws IllegalArgumentException {
             N.checkArgNotNull(other, "other");
@@ -4304,10 +4304,10 @@ public class u {//NOSONAR
         /**
          * Or else throw.
          *
-         * @param <X> 
-         * @param exceptionSupplier 
-         * @return 
-         * @throws IllegalArgumentException 
+         * @param <X>
+         * @param exceptionSupplier
+         * @return
+         * @throws IllegalArgumentException
          * @throws X the x
          */
         public <X extends Throwable> long orElseThrow(final Supplier<? extends X> exceptionSupplier) throws IllegalArgumentException, X {
@@ -4567,12 +4567,12 @@ public class u {//NOSONAR
         }
 
         /**
-         * 
          *
-         * @param <E> 
-         * @param action 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <E>
+         * @param action
+         * @return
+         * @throws IllegalArgumentException
          * @throws E the e
          */
         public <E extends Exception> OptionalFloat ifPresent(final Throwables.FloatConsumer<E> action) throws IllegalArgumentException, E {
@@ -4588,12 +4588,12 @@ public class u {//NOSONAR
         /**
          * If present or else.
          *
-         * @param <E> 
-         * @param <E2> 
-         * @param action 
-         * @param emptyAction 
-         * @return 
-         * @throws IllegalArgumentException 
+         * @param <E>
+         * @param <E2>
+         * @param action
+         * @param emptyAction
+         * @return
+         * @throws IllegalArgumentException
          * @throws E the e
          * @throws E2 the e2
          */
@@ -4612,12 +4612,12 @@ public class u {//NOSONAR
         }
 
         /**
-         * 
          *
-         * @param <E> 
-         * @param predicate 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <E>
+         * @param predicate
+         * @return
+         * @throws IllegalArgumentException
          * @throws E the e
          */
         public <E extends Exception> OptionalFloat filter(final Throwables.FloatPredicate<E> predicate) throws IllegalArgumentException, E {
@@ -4631,12 +4631,12 @@ public class u {//NOSONAR
         }
 
         /**
-         * 
          *
-         * @param <E> 
-         * @param mapper 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <E>
+         * @param mapper
+         * @return
+         * @throws IllegalArgumentException
          * @throws E the e
          */
         public <E extends Exception> OptionalFloat map(final Throwables.FloatUnaryOperator<E> mapper) throws IllegalArgumentException, E {
@@ -4652,10 +4652,10 @@ public class u {//NOSONAR
         /**
          * Map to int.
          *
-         * @param <E> 
-         * @param mapper 
-         * @return 
-         * @throws IllegalArgumentException 
+         * @param <E>
+         * @param mapper
+         * @return
+         * @throws IllegalArgumentException
          * @throws E the e
          */
         public <E extends Exception> OptionalInt mapToInt(final Throwables.ToIntFunction<Float, E> mapper) throws IllegalArgumentException, E {
@@ -4671,10 +4671,10 @@ public class u {//NOSONAR
         /**
          * Map to double.
          *
-         * @param <E> 
-         * @param mapper 
-         * @return 
-         * @throws IllegalArgumentException 
+         * @param <E>
+         * @param mapper
+         * @return
+         * @throws IllegalArgumentException
          * @throws E the e
          */
         public <E extends Exception> OptionalDouble mapToDouble(final Throwables.ToDoubleFunction<Float, E> mapper) throws IllegalArgumentException, E {
@@ -4690,14 +4690,14 @@ public class u {//NOSONAR
         /**
          * Map to obj.
          *
-         * @param <T> 
-         * @param <E> 
-         * @param mapper 
-         * @return 
-         * @throws IllegalArgumentException 
+         * @param <T>
+         * @param <E>
+         * @param mapper
+         * @return
+         * @throws IllegalArgumentException
          * @throws E the e
          */
-        public <T, E extends Exception> Nullable<T> mapToObj(final Throwables.FloatFunction<T, E> mapper) throws IllegalArgumentException, E {
+        public <T, E extends Exception> Nullable<T> mapToObj(final Throwables.FloatFunction<? extends T, E> mapper) throws IllegalArgumentException, E {
             N.checkArgNotNull(mapper, "mapper");
 
             if (isPresent) {
@@ -4708,16 +4708,16 @@ public class u {//NOSONAR
         }
 
         /**
-         * 
          *
-         * @param <T> 
-         * @param <E> 
-         * @param mapper 
-         * @return 
-         * @throws IllegalArgumentException 
-         * @throws E 
+         *
+         * @param <T>
+         * @param <E>
+         * @param mapper
+         * @return
+         * @throws IllegalArgumentException
+         * @throws E
          */
-        public <T, E extends Exception> Optional<T> mapToNonNull(final Throwables.FloatFunction<T, E> mapper) throws IllegalArgumentException, E {
+        public <T, E extends Exception> Optional<T> mapToNonNull(final Throwables.FloatFunction<? extends T, E> mapper) throws IllegalArgumentException, E {
             N.checkArgNotNull(mapper, "mapper");
 
             if (isPresent) {
@@ -4728,12 +4728,12 @@ public class u {//NOSONAR
         }
 
         /**
-         * 
          *
-         * @param <E> 
-         * @param mapper 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <E>
+         * @param mapper
+         * @return
+         * @throws IllegalArgumentException
          * @throws E the e
          */
         public <E extends Exception> OptionalFloat flatMap(final Throwables.FloatFunction<OptionalFloat, E> mapper) throws IllegalArgumentException, E {
@@ -4790,9 +4790,9 @@ public class u {//NOSONAR
         /**
          * Or else get.
          *
-         * @param other 
-         * @return 
-         * @throws IllegalArgumentException 
+         * @param other
+         * @return
+         * @throws IllegalArgumentException
          */
         public float orElseGet(final FloatSupplier other) throws IllegalArgumentException {
             N.checkArgNotNull(other, "other");
@@ -4908,10 +4908,10 @@ public class u {//NOSONAR
         /**
          * Or else throw.
          *
-         * @param <X> 
-         * @param exceptionSupplier 
-         * @return 
-         * @throws IllegalArgumentException 
+         * @param <X>
+         * @param exceptionSupplier
+         * @return
+         * @throws IllegalArgumentException
          * @throws X the x
          */
         public <X extends Throwable> float orElseThrow(final Supplier<? extends X> exceptionSupplier) throws IllegalArgumentException, X {
@@ -5162,12 +5162,12 @@ public class u {//NOSONAR
         }
 
         /**
-         * 
          *
-         * @param <E> 
-         * @param action 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <E>
+         * @param action
+         * @return
+         * @throws IllegalArgumentException
          * @throws E the e
          */
         public <E extends Exception> OptionalDouble ifPresent(final Throwables.DoubleConsumer<E> action) throws IllegalArgumentException, E {
@@ -5183,12 +5183,12 @@ public class u {//NOSONAR
         /**
          * If present or else.
          *
-         * @param <E> 
-         * @param <E2> 
-         * @param action 
-         * @param emptyAction 
-         * @return 
-         * @throws IllegalArgumentException 
+         * @param <E>
+         * @param <E2>
+         * @param action
+         * @param emptyAction
+         * @return
+         * @throws IllegalArgumentException
          * @throws E the e
          * @throws E2 the e2
          */
@@ -5207,12 +5207,12 @@ public class u {//NOSONAR
         }
 
         /**
-         * 
          *
-         * @param <E> 
-         * @param predicate 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <E>
+         * @param predicate
+         * @return
+         * @throws IllegalArgumentException
          * @throws E the e
          */
         public <E extends Exception> OptionalDouble filter(final Throwables.DoublePredicate<E> predicate) throws IllegalArgumentException, E {
@@ -5226,12 +5226,12 @@ public class u {//NOSONAR
         }
 
         /**
-         * 
          *
-         * @param <E> 
-         * @param mapper 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <E>
+         * @param mapper
+         * @return
+         * @throws IllegalArgumentException
          * @throws E the e
          */
         public <E extends Exception> OptionalDouble map(final Throwables.DoubleUnaryOperator<E> mapper) throws IllegalArgumentException, E {
@@ -5247,10 +5247,10 @@ public class u {//NOSONAR
         /**
          * Map to int.
          *
-         * @param <E> 
-         * @param mapper 
-         * @return 
-         * @throws IllegalArgumentException 
+         * @param <E>
+         * @param mapper
+         * @return
+         * @throws IllegalArgumentException
          * @throws E the e
          */
         public <E extends Exception> OptionalInt mapToInt(final Throwables.ToIntFunction<Double, E> mapper) throws IllegalArgumentException, E {
@@ -5266,10 +5266,10 @@ public class u {//NOSONAR
         /**
          * Map to long.
          *
-         * @param <E> 
-         * @param mapper 
-         * @return 
-         * @throws IllegalArgumentException 
+         * @param <E>
+         * @param mapper
+         * @return
+         * @throws IllegalArgumentException
          * @throws E the e
          */
         public <E extends Exception> OptionalLong mapToLong(final Throwables.ToLongFunction<Double, E> mapper) throws IllegalArgumentException, E {
@@ -5285,14 +5285,14 @@ public class u {//NOSONAR
         /**
          * Map to obj.
          *
-         * @param <T> 
-         * @param <E> 
-         * @param mapper 
-         * @return 
-         * @throws IllegalArgumentException 
+         * @param <T>
+         * @param <E>
+         * @param mapper
+         * @return
+         * @throws IllegalArgumentException
          * @throws E the e
          */
-        public <T, E extends Exception> Nullable<T> mapToObj(final Throwables.DoubleFunction<T, E> mapper) throws IllegalArgumentException, E {
+        public <T, E extends Exception> Nullable<T> mapToObj(final Throwables.DoubleFunction<? extends T, E> mapper) throws IllegalArgumentException, E {
             N.checkArgNotNull(mapper, "mapper");
 
             if (isPresent) {
@@ -5303,16 +5303,16 @@ public class u {//NOSONAR
         }
 
         /**
-         * 
          *
-         * @param <T> 
-         * @param <E> 
-         * @param mapper 
-         * @return 
-         * @throws IllegalArgumentException 
-         * @throws E 
+         *
+         * @param <T>
+         * @param <E>
+         * @param mapper
+         * @return
+         * @throws IllegalArgumentException
+         * @throws E
          */
-        public <T, E extends Exception> Optional<T> mapToNonNull(final Throwables.DoubleFunction<T, E> mapper) throws IllegalArgumentException, E {
+        public <T, E extends Exception> Optional<T> mapToNonNull(final Throwables.DoubleFunction<? extends T, E> mapper) throws IllegalArgumentException, E {
             N.checkArgNotNull(mapper, "mapper");
 
             if (isPresent) {
@@ -5323,12 +5323,12 @@ public class u {//NOSONAR
         }
 
         /**
-         * 
          *
-         * @param <E> 
-         * @param mapper 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <E>
+         * @param mapper
+         * @return
+         * @throws IllegalArgumentException
          * @throws E the e
          */
         public <E extends Exception> OptionalDouble flatMap(final Throwables.DoubleFunction<OptionalDouble, E> mapper) throws IllegalArgumentException, E {
@@ -5385,9 +5385,9 @@ public class u {//NOSONAR
         /**
          * Or else get.
          *
-         * @param other 
-         * @return 
-         * @throws IllegalArgumentException 
+         * @param other
+         * @return
+         * @throws IllegalArgumentException
          */
         public double orElseGet(final DoubleSupplier other) throws IllegalArgumentException {
             N.checkArgNotNull(other, "other");
@@ -5503,10 +5503,10 @@ public class u {//NOSONAR
         /**
          * Or else throw.
          *
-         * @param <X> 
-         * @param exceptionSupplier 
-         * @return 
-         * @throws IllegalArgumentException 
+         * @param <X>
+         * @param exceptionSupplier
+         * @return
+         * @throws IllegalArgumentException
          * @throws X the x
          */
         public <X extends Throwable> double orElseThrow(final Supplier<? extends X> exceptionSupplier) throws IllegalArgumentException, X {
@@ -5840,12 +5840,12 @@ public class u {//NOSONAR
         }
 
         /**
-         * 
          *
-         * @param <E> 
-         * @param action 
+         *
+         * @param <E>
+         * @param action
          * @return itself
-         * @throws IllegalArgumentException 
+         * @throws IllegalArgumentException
          * @throws E the e
          */
         public <E extends Exception> Nullable<T> ifPresent(final Throwables.Consumer<? super T, E> action) throws IllegalArgumentException, E {
@@ -5861,12 +5861,12 @@ public class u {//NOSONAR
         /**
          * If present or else.
          *
-         * @param <E> 
-         * @param <E2> 
-         * @param action 
-         * @param emptyAction 
+         * @param <E>
+         * @param <E2>
+         * @param action
+         * @param emptyAction
          * @return itself
-         * @throws IllegalArgumentException 
+         * @throws IllegalArgumentException
          * @throws E the e
          * @throws E2 the e2
          */
@@ -5887,10 +5887,10 @@ public class u {//NOSONAR
         /**
          * If not null.
          *
-         * @param <E> 
-         * @param action 
+         * @param <E>
+         * @param action
          * @return itself
-         * @throws IllegalArgumentException 
+         * @throws IllegalArgumentException
          * @throws E the e
          */
         public <E extends Exception> Nullable<T> ifNotNull(final Throwables.Consumer<? super T, E> action) throws IllegalArgumentException, E {
@@ -5906,12 +5906,12 @@ public class u {//NOSONAR
         /**
          * If not null or else.
          *
-         * @param <E> 
-         * @param <E2> 
-         * @param action 
-         * @param emptyAction 
+         * @param <E>
+         * @param <E2>
+         * @param action
+         * @param emptyAction
          * @return itself
-         * @throws IllegalArgumentException 
+         * @throws IllegalArgumentException
          * @throws E the e
          * @throws E2 the e2
          */
@@ -5930,12 +5930,12 @@ public class u {//NOSONAR
         }
 
         /**
-         * 
          *
-         * @param <E> 
-         * @param predicate 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <E>
+         * @param predicate
+         * @return
+         * @throws IllegalArgumentException
          * @throws E the e
          */
         public <E extends Exception> Nullable<T> filter(final Throwables.Predicate<? super T, E> predicate) throws IllegalArgumentException, E {
@@ -5951,10 +5951,10 @@ public class u {//NOSONAR
         /**
          * Filter if not null.
          *
-         * @param <E> 
-         * @param predicate 
-         * @return 
-         * @throws IllegalArgumentException 
+         * @param <E>
+         * @param predicate
+         * @return
+         * @throws IllegalArgumentException
          * @throws E the e
          */
         public <E extends Exception> Optional<T> filterIfNotNull(final Throwables.Predicate<? super T, E> predicate) throws IllegalArgumentException, E {
@@ -5968,13 +5968,13 @@ public class u {//NOSONAR
         }
 
         /**
-         * 
          *
-         * @param <U> 
-         * @param <E> 
-         * @param mapper 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <U>
+         * @param <E>
+         * @param mapper
+         * @return
+         * @throws IllegalArgumentException
          * @throws E the e
          */
         public <U, E extends Exception> Nullable<U> map(final Throwables.Function<? super T, ? extends U, E> mapper) throws IllegalArgumentException, E {
@@ -5988,13 +5988,13 @@ public class u {//NOSONAR
         }
 
         /**
-         * 
          *
-         * @param <U> 
-         * @param <E> 
-         * @param mapper 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <U>
+         * @param <E>
+         * @param mapper
+         * @return
+         * @throws IllegalArgumentException
          * @throws E the e
          */
         public <U, E extends Exception> Optional<U> mapToNonNull(final Throwables.Function<? super T, ? extends U, E> mapper)
@@ -6011,10 +6011,10 @@ public class u {//NOSONAR
         /**
          * Map to boolean.
          *
-         * @param <E> 
-         * @param mapper 
-         * @return 
-         * @throws IllegalArgumentException 
+         * @param <E>
+         * @param mapper
+         * @return
+         * @throws IllegalArgumentException
          * @throws E the e
          */
         public <E extends Exception> OptionalBoolean mapToBoolean(final Throwables.ToBooleanFunction<? super T, E> mapper) throws IllegalArgumentException, E {
@@ -6030,10 +6030,10 @@ public class u {//NOSONAR
         /**
          * Map to char.
          *
-         * @param <E> 
-         * @param mapper 
-         * @return 
-         * @throws IllegalArgumentException 
+         * @param <E>
+         * @param mapper
+         * @return
+         * @throws IllegalArgumentException
          * @throws E the e
          */
         public <E extends Exception> OptionalChar mapToChar(final Throwables.ToCharFunction<? super T, E> mapper) throws IllegalArgumentException, E {
@@ -6049,10 +6049,10 @@ public class u {//NOSONAR
         /**
          * Map to byte.
          *
-         * @param <E> 
-         * @param mapper 
-         * @return 
-         * @throws IllegalArgumentException 
+         * @param <E>
+         * @param mapper
+         * @return
+         * @throws IllegalArgumentException
          * @throws E the e
          */
         public <E extends Exception> OptionalByte mapToByte(final Throwables.ToByteFunction<? super T, E> mapper) throws IllegalArgumentException, E {
@@ -6068,10 +6068,10 @@ public class u {//NOSONAR
         /**
          * Map to short.
          *
-         * @param <E> 
-         * @param mapper 
-         * @return 
-         * @throws IllegalArgumentException 
+         * @param <E>
+         * @param mapper
+         * @return
+         * @throws IllegalArgumentException
          * @throws E the e
          */
         public <E extends Exception> OptionalShort mapToShort(final Throwables.ToShortFunction<? super T, E> mapper) throws IllegalArgumentException, E {
@@ -6087,10 +6087,10 @@ public class u {//NOSONAR
         /**
          * Map to int.
          *
-         * @param <E> 
-         * @param mapper 
-         * @return 
-         * @throws IllegalArgumentException 
+         * @param <E>
+         * @param mapper
+         * @return
+         * @throws IllegalArgumentException
          * @throws E the e
          */
         public <E extends Exception> OptionalInt mapToInt(final Throwables.ToIntFunction<? super T, E> mapper) throws IllegalArgumentException, E {
@@ -6106,10 +6106,10 @@ public class u {//NOSONAR
         /**
          * Map to long.
          *
-         * @param <E> 
-         * @param mapper 
-         * @return 
-         * @throws IllegalArgumentException 
+         * @param <E>
+         * @param mapper
+         * @return
+         * @throws IllegalArgumentException
          * @throws E the e
          */
         public <E extends Exception> OptionalLong mapToLong(final Throwables.ToLongFunction<? super T, E> mapper) throws IllegalArgumentException, E {
@@ -6125,10 +6125,10 @@ public class u {//NOSONAR
         /**
          * Map to float.
          *
-         * @param <E> 
-         * @param mapper 
-         * @return 
-         * @throws IllegalArgumentException 
+         * @param <E>
+         * @param mapper
+         * @return
+         * @throws IllegalArgumentException
          * @throws E the e
          */
         public <E extends Exception> OptionalFloat mapToFloat(final Throwables.ToFloatFunction<? super T, E> mapper) throws IllegalArgumentException, E {
@@ -6144,10 +6144,10 @@ public class u {//NOSONAR
         /**
          * Map to double.
          *
-         * @param <E> 
-         * @param mapper 
-         * @return 
-         * @throws IllegalArgumentException 
+         * @param <E>
+         * @param mapper
+         * @return
+         * @throws IllegalArgumentException
          * @throws E the e
          */
         public <E extends Exception> OptionalDouble mapToDouble(final Throwables.ToDoubleFunction<? super T, E> mapper) throws IllegalArgumentException, E {
@@ -6163,11 +6163,11 @@ public class u {//NOSONAR
         /**
          * Map if not null.
          *
-         * @param <U> 
-         * @param <E> 
-         * @param mapper 
-         * @return 
-         * @throws IllegalArgumentException 
+         * @param <U>
+         * @param <E>
+         * @param mapper
+         * @return
+         * @throws IllegalArgumentException
          * @throws E the e
          */
         public <U, E extends Exception> Nullable<U> mapIfNotNull(final Throwables.Function<? super T, ? extends U, E> mapper)
@@ -6184,11 +6184,11 @@ public class u {//NOSONAR
         /**
          * Map if not null.
          *
-         * @param <U> 
-         * @param <E> 
-         * @param mapper 
-         * @return 
-         * @throws IllegalArgumentException 
+         * @param <U>
+         * @param <E>
+         * @param mapper
+         * @return
+         * @throws IllegalArgumentException
          * @throws E the e
          */
         public <U, E extends Exception> Optional<U> mapToNonNullIfNotNull(final Throwables.Function<? super T, ? extends U, E> mapper)
@@ -6205,10 +6205,10 @@ public class u {//NOSONAR
         /**
          * Map to boolean if not null.
          *
-         * @param <E> 
-         * @param mapper 
-         * @return 
-         * @throws IllegalArgumentException 
+         * @param <E>
+         * @param mapper
+         * @return
+         * @throws IllegalArgumentException
          * @throws E the e
          */
         public <E extends Exception> OptionalBoolean mapToBooleanIfNotNull(final Throwables.ToBooleanFunction<? super T, E> mapper)
@@ -6225,10 +6225,10 @@ public class u {//NOSONAR
         /**
          * Map to char if not null.
          *
-         * @param <E> 
-         * @param mapper 
-         * @return 
-         * @throws IllegalArgumentException 
+         * @param <E>
+         * @param mapper
+         * @return
+         * @throws IllegalArgumentException
          * @throws E the e
          */
         public <E extends Exception> OptionalChar mapToCharIfNotNull(final Throwables.ToCharFunction<? super T, E> mapper) throws IllegalArgumentException, E {
@@ -6244,10 +6244,10 @@ public class u {//NOSONAR
         /**
          * Map to byte if not null.
          *
-         * @param <E> 
-         * @param mapper 
-         * @return 
-         * @throws IllegalArgumentException 
+         * @param <E>
+         * @param mapper
+         * @return
+         * @throws IllegalArgumentException
          * @throws E the e
          */
         public <E extends Exception> OptionalByte mapToByteIfNotNull(final Throwables.ToByteFunction<? super T, E> mapper) throws IllegalArgumentException, E {
@@ -6263,10 +6263,10 @@ public class u {//NOSONAR
         /**
          * Map to short if not null.
          *
-         * @param <E> 
-         * @param mapper 
-         * @return 
-         * @throws IllegalArgumentException 
+         * @param <E>
+         * @param mapper
+         * @return
+         * @throws IllegalArgumentException
          * @throws E the e
          */
         public <E extends Exception> OptionalShort mapToShortIfNotNull(final Throwables.ToShortFunction<? super T, E> mapper)
@@ -6283,10 +6283,10 @@ public class u {//NOSONAR
         /**
          * Map to int if not null.
          *
-         * @param <E> 
-         * @param mapper 
-         * @return 
-         * @throws IllegalArgumentException 
+         * @param <E>
+         * @param mapper
+         * @return
+         * @throws IllegalArgumentException
          * @throws E the e
          */
         public <E extends Exception> OptionalInt mapToIntIfNotNull(final Throwables.ToIntFunction<? super T, E> mapper) throws IllegalArgumentException, E {
@@ -6302,10 +6302,10 @@ public class u {//NOSONAR
         /**
          * Map to long if not null.
          *
-         * @param <E> 
-         * @param mapper 
-         * @return 
-         * @throws IllegalArgumentException 
+         * @param <E>
+         * @param mapper
+         * @return
+         * @throws IllegalArgumentException
          * @throws E the e
          */
         public <E extends Exception> OptionalLong mapToLongIfNotNull(final Throwables.ToLongFunction<? super T, E> mapper) throws IllegalArgumentException, E {
@@ -6321,10 +6321,10 @@ public class u {//NOSONAR
         /**
          * Map to float if not null.
          *
-         * @param <E> 
-         * @param mapper 
-         * @return 
-         * @throws IllegalArgumentException 
+         * @param <E>
+         * @param mapper
+         * @return
+         * @throws IllegalArgumentException
          * @throws E the e
          */
         public <E extends Exception> OptionalFloat mapToFloatIfNotNull(final Throwables.ToFloatFunction<? super T, E> mapper)
@@ -6341,10 +6341,10 @@ public class u {//NOSONAR
         /**
          * Map to double if not null.
          *
-         * @param <E> 
-         * @param mapper 
-         * @return 
-         * @throws IllegalArgumentException 
+         * @param <E>
+         * @param mapper
+         * @return
+         * @throws IllegalArgumentException
          * @throws E the e
          */
         public <E extends Exception> OptionalDouble mapToDoubleIfNotNull(final Throwables.ToDoubleFunction<? super T, E> mapper)
@@ -6359,13 +6359,13 @@ public class u {//NOSONAR
         }
 
         /**
-         * 
          *
-         * @param <U> 
-         * @param <E> 
-         * @param mapper 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <U>
+         * @param <E>
+         * @param mapper
+         * @return
+         * @throws IllegalArgumentException
          * @throws E the e
          */
         public <U, E extends Exception> Nullable<U> flatMap(final Throwables.Function<? super T, Nullable<U>, E> mapper) throws IllegalArgumentException, E {
@@ -6381,11 +6381,11 @@ public class u {//NOSONAR
         /**
          * Flat map if not null.
          *
-         * @param <U> 
-         * @param <E> 
-         * @param mapper 
-         * @return 
-         * @throws IllegalArgumentException 
+         * @param <U>
+         * @param <E>
+         * @param mapper
+         * @return
+         * @throws IllegalArgumentException
          * @throws E the e
          */
         public <U, E extends Exception> Nullable<U> flatMapIfNotNull(final Throwables.Function<? super T, Nullable<U>, E> mapper)
@@ -6410,11 +6410,11 @@ public class u {//NOSONAR
         }
 
         /**
-         * 
          *
-         * @param supplier 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param supplier
+         * @return
+         * @throws IllegalArgumentException
          */
         public Nullable<T> or(final Supplier<Nullable<? extends T>> supplier) throws IllegalArgumentException {
             N.checkArgNotNull(supplier, "supplier");
@@ -6429,9 +6429,9 @@ public class u {//NOSONAR
         /**
          * Or if null.
          *
-         * @param supplier 
-         * @return 
-         * @throws IllegalArgumentException 
+         * @param supplier
+         * @return
+         * @throws IllegalArgumentException
          */
         public Nullable<T> orIfNull(final Supplier<Nullable<? extends T>> supplier) throws IllegalArgumentException {
             N.checkArgNotNull(supplier, "supplier");
@@ -6473,9 +6473,9 @@ public class u {//NOSONAR
         /**
          * Or else get.
          *
-         * @param other 
-         * @return 
-         * @throws IllegalArgumentException 
+         * @param other
+         * @return
+         * @throws IllegalArgumentException
          */
         public T orElseGet(final Supplier<? extends T> other) throws IllegalArgumentException {
             N.checkArgNotNull(other, "other");
@@ -6500,9 +6500,9 @@ public class u {//NOSONAR
         /**
          * Or else get if null.
          *
-         * @param other 
-         * @return 
-         * @throws IllegalArgumentException 
+         * @param other
+         * @return
+         * @throws IllegalArgumentException
          */
         public T orElseGetIfNull(final Supplier<? extends T> other) throws IllegalArgumentException {
             N.checkArgNotNull(other, "other");
@@ -6618,10 +6618,10 @@ public class u {//NOSONAR
         /**
          * Or else throw.
          *
-         * @param <X> 
-         * @param exceptionSupplier 
-         * @return 
-         * @throws IllegalArgumentException 
+         * @param <X>
+         * @param exceptionSupplier
+         * @return
+         * @throws IllegalArgumentException
          * @throws X the x
          */
         public <X extends Throwable> T orElseThrow(final Supplier<? extends X> exceptionSupplier) throws IllegalArgumentException, X {
@@ -6738,10 +6738,10 @@ public class u {//NOSONAR
         /**
          * Or else throw if null.
          *
-         * @param <X> 
-         * @param exceptionSupplier 
-         * @return 
-         * @throws IllegalArgumentException 
+         * @param <X>
+         * @param exceptionSupplier
+         * @return
+         * @throws IllegalArgumentException
          * @throws X the x
          */
         public <X extends Throwable> T orElseThrowIfNull(final Supplier<? extends X> exceptionSupplier) throws IllegalArgumentException, X {

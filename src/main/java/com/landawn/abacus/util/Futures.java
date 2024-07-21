@@ -90,7 +90,7 @@ public final class Futures {
      * @return
      */
     public static <T1, T2, R> ContinuableFuture<R> compose(final Future<T1> cf1, final Future<T2> cf2,
-            final Throwables.BiFunction<? super Future<T1>, ? super Future<T2>, R, Exception> zipFunctionForGet) {
+            final Throwables.BiFunction<? super Future<T1>, ? super Future<T2>, ? extends R, Exception> zipFunctionForGet) {
         return compose(cf1, cf2, zipFunctionForGet,
                 (Throwables.Function<Tuple4<Future<T1>, Future<T2>, Long, TimeUnit>, R, Exception>) t -> zipFunctionForGet.apply(t._1, t._2));
     }
@@ -107,7 +107,7 @@ public final class Futures {
      * @return
      */
     public static <T1, T2, R> ContinuableFuture<R> compose(final Future<T1> cf1, final Future<T2> cf2,
-            final Throwables.BiFunction<? super Future<T1>, ? super Future<T2>, R, Exception> zipFunctionForGet,
+            final Throwables.BiFunction<? super Future<T1>, ? super Future<T2>, ? extends R, Exception> zipFunctionForGet,
             final Throwables.Function<? super Tuple4<Future<T1>, Future<T2>, Long, TimeUnit>, R, Exception> zipFunctionTimeoutGet) {
         final List<Future<?>> cfs = Arrays.asList(cf1, cf2);
 
@@ -129,7 +129,7 @@ public final class Futures {
      * @return
      */
     public static <T1, T2, T3, R> ContinuableFuture<R> compose(final Future<T1> cf1, final Future<T2> cf2, final Future<T3> cf3,
-            final Throwables.TriFunction<? super Future<T1>, ? super Future<T2>, ? super Future<T3>, R, Exception> zipFunctionForGet) {
+            final Throwables.TriFunction<? super Future<T1>, ? super Future<T2>, ? super Future<T3>, ? extends R, Exception> zipFunctionForGet) {
         return compose(cf1, cf2, cf3, zipFunctionForGet, t -> zipFunctionForGet.apply(t._1, t._2, t._3));
     }
 
@@ -147,7 +147,7 @@ public final class Futures {
      * @return
      */
     public static <T1, T2, T3, R> ContinuableFuture<R> compose(final Future<T1> cf1, final Future<T2> cf2, final Future<T3> cf3,
-            final Throwables.TriFunction<? super Future<T1>, ? super Future<T2>, ? super Future<T3>, R, Exception> zipFunctionForGet,
+            final Throwables.TriFunction<? super Future<T1>, ? super Future<T2>, ? super Future<T3>, ? extends R, Exception> zipFunctionForGet,
             final Throwables.Function<? super Tuple5<Future<T1>, Future<T2>, Future<T3>, Long, TimeUnit>, R, Exception> zipFunctionTimeoutGet) {
         final List<Future<?>> cfs = Arrays.asList(cf1, cf2, cf3);
 
@@ -166,25 +166,25 @@ public final class Futures {
      * @return
      */
     public static <T, FC extends Collection<? extends Future<? extends T>>, R> ContinuableFuture<R> compose(final FC cfs,
-            final Throwables.Function<? super FC, R, Exception> zipFunctionForGet) {
+            final Throwables.Function<? super FC, ? extends R, Exception> zipFunctionForGet) {
         return compose(cfs, zipFunctionForGet, (Throwables.Function<Tuple3<FC, Long, TimeUnit>, R, Exception>) t -> zipFunctionForGet.apply(t._1));
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <FC> 
-     * @param <R> 
-     * @param cfs 
-     * @param zipFunctionForGet 
-     * @param zipFunctionTimeoutGet 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <T>
+     * @param <FC>
+     * @param <R>
+     * @param cfs
+     * @param zipFunctionForGet
+     * @param zipFunctionTimeoutGet
+     * @return
+     * @throws IllegalArgumentException
      */
     public static <T, FC extends Collection<? extends Future<? extends T>>, R> ContinuableFuture<R> compose(final FC cfs,
-            final Throwables.Function<? super FC, R, Exception> zipFunctionForGet,
-            final Throwables.Function<? super Tuple3<FC, Long, TimeUnit>, R, Exception> zipFunctionTimeoutGet) throws IllegalArgumentException {
+            final Throwables.Function<? super FC, ? extends R, Exception> zipFunctionForGet,
+            final Throwables.Function<? super Tuple3<FC, Long, TimeUnit>, ? extends R, Exception> zipFunctionTimeoutGet) throws IllegalArgumentException {
         N.checkArgument(N.notEmpty(cfs), "'cfs' can't be null or empty"); //NOSONAR
         N.checkArgNotNull(zipFunctionForGet);
         N.checkArgNotNull(zipFunctionTimeoutGet);
@@ -735,34 +735,34 @@ public final class Futures {
      * @return
      */
     public static <T, R> ObjIterator<R> iterate(final Collection<? extends Future<? extends T>> cfs,
-            final Function<Result<T, Exception>, ? extends R> resultHandler) {
+            final Function<? super Result<T, Exception>, ? extends R> resultHandler) {
         return iterate02(cfs, resultHandler);
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <R> 
-     * @param cfs 
-     * @param totalTimeoutForAll 
-     * @param unit 
-     * @param resultHandler 
-     * @return 
+     *
+     * @param <T>
+     * @param <R>
+     * @param cfs
+     * @param totalTimeoutForAll
+     * @param unit
+     * @param resultHandler
+     * @return
      * @see {@code ExecutorCompletionService}
      */
     public static <T, R> ObjIterator<R> iterate(final Collection<? extends Future<? extends T>> cfs, final long totalTimeoutForAll, final TimeUnit unit,
-            final Function<Result<T, Exception>, ? extends R> resultHandler) {
+            final Function<? super Result<T, Exception>, ? extends R> resultHandler) {
         return iterate02(cfs, totalTimeoutForAll, unit, resultHandler);
     }
 
     private static <T, R> ObjIterator<R> iterate02(final Collection<? extends Future<? extends T>> cfs,
-            final Function<Result<T, Exception>, ? extends R> resultHandler) {
+            final Function<? super Result<T, Exception>, ? extends R> resultHandler) {
         return iterate02(cfs, Long.MAX_VALUE, TimeUnit.MILLISECONDS, resultHandler);
     }
 
     private static <T, R> ObjIterator<R> iterate02(final Collection<? extends Future<? extends T>> cfs, final long totalTimeoutForAll, final TimeUnit unit,
-            final Function<Result<T, Exception>, ? extends R> resultHandler) {
+            final Function<? super Result<T, Exception>, ? extends R> resultHandler) {
         N.checkArgPositive(totalTimeoutForAll, "totalTimeoutForAll");
         N.checkArgNotNull(unit, "unit");
         N.checkArgNotNull(resultHandler, "resultHandler");

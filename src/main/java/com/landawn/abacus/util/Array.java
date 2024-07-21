@@ -425,6 +425,7 @@ public class Array {
      *
      * @param a
      * @return
+     * @see N#asArray(Object...)
      */
     @SafeVarargs
     public static String[] of(final String... a) {
@@ -449,6 +450,7 @@ public class Array {
      * @param <T>
      * @param a
      * @return
+     * @see N#asArray(Object...)
      */
     @SafeVarargs
     public static <T extends java.util.Date> T[] of(final T... a) {
@@ -461,6 +463,7 @@ public class Array {
      * @param <T>
      * @param a
      * @return
+     * @see N#asArray(Object...)
      */
     @SafeVarargs
     public static <T extends java.util.Calendar> T[] of(final T... a) {
@@ -473,6 +476,7 @@ public class Array {
      * @param <T>
      * @param a
      * @return
+     * @see N#asArray(Object...)
      */
     @SafeVarargs
     public static <T extends java.time.temporal.Temporal> T[] of(final T... a) {
@@ -482,9 +486,10 @@ public class Array {
     /**
      * Returns the input array.
      *
-     * @param <T>
-     * @param a
-     * @return
+     * @param <T> 
+     * @param a 
+     * @return 
+     * @see N#asArray(Object...)
      * @deprecated please use {@code N.asArray(Object...)}.
      */
     @Deprecated
@@ -4031,10 +4036,10 @@ public class Array {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param a 
+     *
+     * @param <T>
+     * @param a
      * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
      */
     @MayReturnNull

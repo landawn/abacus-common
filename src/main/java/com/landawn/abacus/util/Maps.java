@@ -37,8 +37,10 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.function.BiFunction;
+import java.util.function.BiPredicate;
 import java.util.function.BinaryOperator;
 import java.util.function.IntFunction;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import com.landawn.abacus.annotation.MayReturnNull;
@@ -494,7 +496,7 @@ public final class Maps {
     //     * @param iter
     //     * @param keyMapper
     //     * @return
-    //     * @deprecated Use {@link #create(Iterator<? extends T>,Throwables.Function<? super T, K, E>)} instead
+    //     * @deprecated Use {@link #create(Iterator<? extends T>,Function<? super T, K, E>)} instead
     //     */
     //    @Deprecated
     //    public static <T, K> Map<K, T> newMap(final Iterator<? extends T> iter, final Function<? super T, K> keyMapper) {
@@ -511,7 +513,7 @@ public final class Maps {
     //     * @param keyMapper
     //     * @param valueExtractor
     //     * @return
-    //     * @deprecated Use {@link #create(Iterator<? extends T>,Throwables.Function<? super T, K, E>,Function<? super T, ? extends V>)} instead
+    //     * @deprecated Use {@link #create(Iterator<? extends T>,Function<? super T, K, E>,Function<? super T, ? extends V>)} instead
     //     */
     //    @Deprecated
     //    public static <T, K, V> Map<K, V> newMap(final Iterator<? extends T> iter, final Function<? super T, K> keyMapper,
@@ -531,7 +533,7 @@ public final class Maps {
     //     * @param valueExtractor
     //     * @param mapSupplier
     //     * @return
-    //     * @deprecated Use {@link #create(Iterator<? extends T>,Throwables.Function<? super T, K, E>,Function<? super T, ? extends V>,Supplier<? extends M>)} instead
+    //     * @deprecated Use {@link #create(Iterator<? extends T>,Function<? super T, K, E>,Function<? super T, ? extends V>,Supplier<? extends M>)} instead
     //     */
     //    @Deprecated
     //    public static <T, K, V, M extends Map<K, V>> M newMap(final Iterator<? extends T> iter, final Function<? super T, K> keyMapper,
@@ -552,7 +554,7 @@ public final class Maps {
     //     * @param mergeFunction
     //     * @param mapSupplier
     //     * @return
-    //     * @deprecated Use {@link #create(Iterator<? extends T>,Throwables.Function<? super T, K, E>,Function<? super T, ? extends V>,BinaryOperator<V>,Supplier<? extends M>)} instead
+    //     * @deprecated Use {@link #create(Iterator<? extends T>,Function<? super T, K, E>,Function<? super T, ? extends V>,BinaryOperator<V>,Supplier<? extends M>)} instead
     //     */
     //    @Deprecated
     //    public static <T, K, V, M extends Map<K, V>> M newMap(final Iterator<? extends T> iter, final Function<? super T, K> keyMapper,
@@ -845,7 +847,7 @@ public final class Maps {
      * @throws IllegalArgumentException
      */
     public static <K, V> V getOrDefaultIfNull(final Map<K, ? extends V> map, final K key, final V defaultForNull) throws IllegalArgumentException {
-        N.checkArgNotNull(defaultForNull, "defaultForNull");
+        N.checkArgNotNull(defaultForNull, "defaultForNull"); // NOSONAR
 
         if (N.isEmpty(map)) {
             return defaultForNull;
@@ -1288,7 +1290,7 @@ public final class Maps {
      * @throws IllegalArgumentException
      */
     public static <K> String getString(final Map<? super K, ?> map, final K key, final String defaultForNull) throws IllegalArgumentException {
-        N.checkArgNotNull(defaultForNull, "defaultForNull");
+        N.checkArgNotNull(defaultForNull, "defaultForNull"); // NOSONAR
 
         if (N.isEmpty(map)) {
             return defaultForNull;
@@ -1434,7 +1436,7 @@ public final class Maps {
      * @throws IllegalArgumentException
      */
     public static <K, T> T get(final Map<? super K, ?> map, final K key, final T defaultForNull) throws IllegalArgumentException {
-        N.checkArgNotNull(defaultForNull, "defaultForNull");
+        N.checkArgNotNull(defaultForNull, "defaultForNull"); // NOSONAR
 
         if (N.isEmpty(map)) {
             return defaultForNull;
@@ -2131,13 +2133,11 @@ public final class Maps {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <E>
      * @param map
      * @param filter
      * @return {@code true} if there are one or more than one entries removed from the specified map.
-     * @throws E the e
      */
-    public static <K, V, E extends Exception> boolean removeIf(final Map<K, V> map, final Throwables.Predicate<? super Map.Entry<K, V>, E> filter) throws E {
+    public static <K, V> boolean removeIf(final Map<K, V> map, final Predicate<? super Map.Entry<K, V>> filter) {
         List<K> keysToRemove = null;
 
         for (Map.Entry<K, V> entry : map.entrySet()) {
@@ -2166,13 +2166,11 @@ public final class Maps {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <E>
      * @param map
      * @param filter
      * @return {@code true} if there are one or more than one entries removed from the specified map.
-     * @throws E the e
      */
-    public static <K, V, E extends Exception> boolean removeIf(final Map<K, V> map, final Throwables.BiPredicate<? super K, ? super V, E> filter) throws E {
+    public static <K, V> boolean removeIf(final Map<K, V> map, final BiPredicate<? super K, ? super V> filter) {
         List<K> keysToRemove = null;
 
         for (Map.Entry<K, V> entry : map.entrySet()) {
@@ -2201,13 +2199,11 @@ public final class Maps {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <E>
      * @param map
      * @param filter
      * @return {@code true} if there are one or more than one entries removed from the specified map.
-     * @throws E the e
      */
-    public static <K, V, E extends Exception> boolean removeIfKey(final Map<K, V> map, final Throwables.Predicate<? super K, E> filter) throws E {
+    public static <K, V> boolean removeIfKey(final Map<K, V> map, final Predicate<? super K> filter) {
         List<K> keysToRemove = null;
 
         for (Map.Entry<K, V> entry : map.entrySet()) {
@@ -2236,13 +2232,11 @@ public final class Maps {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <E>
      * @param map
      * @param filter
      * @return {@code true} if there are one or more than one entries removed from the specified map.
-     * @throws E the e
      */
-    public static <K, V, E extends Exception> boolean removeIfValue(final Map<K, V> map, final Throwables.Predicate<? super V, E> filter) throws E {
+    public static <K, V> boolean removeIfValue(final Map<K, V> map, final Predicate<? super V> filter) {
         List<K> keysToRemove = null;
 
         for (Map.Entry<K, V> entry : map.entrySet()) {
@@ -2321,46 +2315,29 @@ public final class Maps {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <E>
      * @param map
      * @param function
-     * @throws E the e
      */
-    public static <K, V, E extends Exception> void replaceAll(final Map<K, V> map, final Throwables.BiFunction<? super K, ? super V, ? extends V, E> function)
-            throws E {
+    public static <K, V> void replaceAll(final Map<K, V> map, final BiFunction<? super K, ? super V, ? extends V> function) {
         N.checkArgNotNull(function);
 
         if (N.isEmpty(map)) {
             return;
         }
 
-        K k = null;
-        V v = null;
-
-        for (Map.Entry<K, V> entry : map.entrySet()) {
-            try {
-                k = entry.getKey();
-                v = entry.getValue();
-            } catch (IllegalStateException ise) {
-                // this usually means the entry is no longer in the map.
-                throw new ConcurrentModificationException(ise);
+        try {
+            for (Map.Entry<K, V> entry : map.entrySet()) {
+                entry.setValue(function.apply(entry.getKey(), entry.getValue()));
             }
-
-            // ise thrown from function is not a cme.
-            v = function.apply(k, v);
-
-            try {
-                entry.setValue(v);
-            } catch (IllegalStateException ise) {
-                // this usually means the entry is no longer in the map.
-                throw new ConcurrentModificationException(ise);
-            }
+        } catch (IllegalStateException ise) {
+            // this usually means the entry is no longer in the map.
+            throw new ConcurrentModificationException(ise);
         }
     }
 
     // Replaced with N.forEach(Map....)
 
-    //    public static <K, V, E extends Exception> void forEach(final Map<K, V> map, final Throwables.Consumer<? super Map.Entry<K, V>, E> action) throws E {
+    //    public static <K, V> void forEach(final Map<K, V> map, final Consumer<? super Map.Entry<K, V>, E> action)  {
     //        N.checkArgNotNull(action);
     //
     //        if (N.isEmpty(map)) {
@@ -2376,12 +2353,10 @@ public final class Maps {
     //     *
     //     * @param <K> the key type
     //     * @param <V> the value type
-    //     * @param <E>
     //     * @param map
     //     * @param action
-    //     * @throws E the e
     //     */
-    //    public static <K, V, E extends Exception> void forEach(final Map<K, V> map, final Throwables.BiConsumer<? super K, ? super V, E> action) throws E {
+    //    public static <K, V> void forEach(final Map<K, V> map, final BiConsumer<? super K, ? super V, E> action)  {
     //        N.checkArgNotNull(action);
     //
     //        if (N.isEmpty(map)) {
@@ -2397,13 +2372,11 @@ public final class Maps {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <E>
      * @param map
      * @param predicate
      * @return
-     * @throws E the e
      */
-    public static <K, V, E extends Exception> Map<K, V> filter(final Map<K, V> map, final Throwables.Predicate<? super Map.Entry<K, V>, E> predicate) throws E {
+    public static <K, V> Map<K, V> filter(final Map<K, V> map, final Predicate<? super Map.Entry<K, V>> predicate) {
         if (map == null) {
             return new HashMap<>();
         }
@@ -2423,13 +2396,11 @@ public final class Maps {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <E>
      * @param map
      * @param predicate
      * @return
-     * @throws E the e
      */
-    public static <K, V, E extends Exception> Map<K, V> filter(final Map<K, V> map, final Throwables.BiPredicate<? super K, ? super V, E> predicate) throws E {
+    public static <K, V> Map<K, V> filter(final Map<K, V> map, final BiPredicate<? super K, ? super V> predicate) {
         if (map == null) {
             return new HashMap<>();
         }
@@ -2450,13 +2421,11 @@ public final class Maps {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <E>
      * @param map
      * @param predicate
      * @return
-     * @throws E the e
      */
-    public static <K, V, E extends Exception> Map<K, V> filterByKey(final Map<K, V> map, final Throwables.Predicate<? super K, E> predicate) throws E {
+    public static <K, V> Map<K, V> filterByKey(final Map<K, V> map, final Predicate<? super K> predicate) {
         if (map == null) {
             return new HashMap<>();
         }
@@ -2477,13 +2446,11 @@ public final class Maps {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <E>
      * @param map
      * @param predicate
      * @return
-     * @throws E the e
      */
-    public static <K, V, E extends Exception> Map<K, V> filterByValue(final Map<K, V> map, final Throwables.Predicate<? super V, E> predicate) throws E {
+    public static <K, V> Map<K, V> filterByValue(final Map<K, V> map, final Predicate<? super V> predicate) {
         if (map == null) {
             return new HashMap<>();
         }
@@ -2768,24 +2735,24 @@ public final class Maps {
     //        return Suppliers.ofMap(mapType);
     //    }
 
-    /**
-     *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param map
-     * @param function
-     */
-    static <K, V> void replaceAll(Map<K, V> map, BiFunction<? super K, ? super V, ? extends V> function) {
-        N.checkArgNotNull(function);
-
-        try {
-            for (Map.Entry<K, V> entry : map.entrySet()) {
-                entry.setValue(function.apply(entry.getKey(), entry.getValue()));
-            }
-        } catch (IllegalStateException ise) {
-            throw new ConcurrentModificationException(ise);
-        }
-    }
+    //    /**
+    //     *
+    //     * @param <K> the key type
+    //     * @param <V> the value type
+    //     * @param map
+    //     * @param function
+    //     */
+    //    static <K, V> void replaceAll(Map<K, V> map, BiFunction<? super K, ? super V, ? extends V> function) {
+    //        N.checkArgNotNull(function);
+    //
+    //        try {
+    //            for (Map.Entry<K, V> entry : map.entrySet()) {
+    //                entry.setValue(function.apply(entry.getKey(), entry.getValue()));
+    //            }
+    //        } catch (IllegalStateException ise) {
+    //            throw new ConcurrentModificationException(ise);
+    //        }
+    //    }
 
     /**
      *
@@ -4378,7 +4345,7 @@ public final class Maps {
          * @throws IllegalArgumentException
          */
         public <T> T get(final Object key, final T defaultForNull) throws IllegalArgumentException {
-            N.checkArgNotNull(defaultForNull, "defaultForNull");
+            N.checkArgNotNull(defaultForNull, "defaultForNull"); // NOSONAR
 
             final V val = map.get(key);
 

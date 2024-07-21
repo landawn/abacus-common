@@ -80,6 +80,7 @@ import java.util.function.BiPredicate;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import java.util.function.IntFunction;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.function.ToDoubleFunction;
 import java.util.function.ToIntFunction;
@@ -1533,7 +1534,7 @@ sealed class CommonUtil permits N {
      * @return {@code null} if {@code bean} is {@code null}
      */
     @MayReturnNull
-    public static <T> T copy(final T sourceBean, final BiPredicate<String, ?> propFilter) {
+    public static <T> T copy(final T sourceBean, final BiPredicate<? super String, ?> propFilter) {
         if (sourceBean == null) {
             return null; // NOSONAR
         }
@@ -1661,7 +1662,7 @@ sealed class CommonUtil permits N {
      * @return {@code targetBean}
      * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
      */
-    public static <T> T copy(final Object sourceBean, final BiPredicate<String, ?> propFilter, final Class<? extends T> targetType)
+    public static <T> T copy(final Object sourceBean, final BiPredicate<? super String, ?> propFilter, final Class<? extends T> targetType)
             throws IllegalArgumentException {
         return copy(sourceBean, propFilter, Fn.selectFirst(), targetType);
     }
@@ -1750,7 +1751,7 @@ sealed class CommonUtil permits N {
      * @return {@code targetBean}
      * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
      */
-    public static <T> T copy(final Object sourceBean, final BiPredicate<String, ?> propFilter, final BinaryOperator<?> mergeFunc,
+    public static <T> T copy(final Object sourceBean, final BiPredicate<? super String, ?> propFilter, final BinaryOperator<?> mergeFunc,
             final Class<? extends T> targetType) throws IllegalArgumentException {
         N.checkArgNotNull(targetType, "targetType");
 
@@ -1894,7 +1895,7 @@ sealed class CommonUtil permits N {
      * @return {@code targetBean}
      * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
      */
-    public static <T> T merge(final Object sourceBean, final T targetBean, final BiPredicate<String, ?> propFilter) throws IllegalArgumentException {
+    public static <T> T merge(final Object sourceBean, final T targetBean, final BiPredicate<? super String, ?> propFilter) throws IllegalArgumentException {
         return merge(sourceBean, targetBean, propFilter, Fn.selectFirst());
     }
 
@@ -2038,7 +2039,7 @@ sealed class CommonUtil permits N {
      * @return {@code targetBean}
      * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
      */
-    public static <T> T merge(final Object sourceBean, final T targetBean, final BiPredicate<String, ?> propFilter, final BinaryOperator<?> mergeFunc)
+    public static <T> T merge(final Object sourceBean, final T targetBean, final BiPredicate<? super String, ?> propFilter, final BinaryOperator<?> mergeFunc)
             throws IllegalArgumentException {
         N.checkArgNotNull(targetBean, "targetBean");
 
@@ -2048,7 +2049,7 @@ sealed class CommonUtil permits N {
 
         final BeanInfo srcBeanInfo = ParserUtil.getBeanInfo(sourceBean.getClass());
         final BeanInfo targetBeanInfo = ParserUtil.getBeanInfo(targetBean.getClass());
-        final BiPredicate<String, Object> objFilter = (BiPredicate<String, Object>) propFilter;
+        final BiPredicate<? super String, Object> objFilter = (BiPredicate<? super String, Object>) propFilter;
         final BinaryOperator<Object> objMergeFunc = (BinaryOperator<Object>) mergeFunc;
 
         Object propValue = null;
@@ -2785,15 +2786,13 @@ sealed class CommonUtil permits N {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <E>
      * @param c
      * @param keyMapper
      * @return
      * @throws IllegalArgumentException
-     * @throws E the e
      */
-    public static <K, V, E extends Exception> Map<K, V> newHashMap(final Collection<? extends V> c,
-            final Throwables.Function<? super V, ? extends K, E> keyMapper) throws IllegalArgumentException, E {
+    public static <K, V> Map<K, V> newHashMap(final Collection<? extends V> c, final Function<? super V, ? extends K> keyMapper)
+            throws IllegalArgumentException {
         checkArgNotNull(keyMapper);
 
         if (isEmpty(c)) {
@@ -2849,15 +2848,13 @@ sealed class CommonUtil permits N {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <E>
      * @param c
      * @param keyMapper
      * @return
      * @throws IllegalArgumentException
-     * @throws E the e
      */
-    public static <K, V, E extends Exception> Map<K, V> newLinkedHashMap(final Collection<? extends V> c,
-            final Throwables.Function<? super V, ? extends K, E> keyMapper) throws IllegalArgumentException, E {
+    public static <K, V> Map<K, V> newLinkedHashMap(final Collection<? extends V> c, final Function<? super V, ? extends K> keyMapper)
+            throws IllegalArgumentException {
         checkArgNotNull(keyMapper);
 
         if (isEmpty(c)) {
@@ -4832,7 +4829,7 @@ sealed class CommonUtil permits N {
      * @return
      */
     public static List<Boolean> toList(final boolean[] a) {
-        return toList(a, 0, len(a));
+        return toList(a, 0, len(a)); // NOSONAR
     }
 
     /**
@@ -4845,7 +4842,7 @@ sealed class CommonUtil permits N {
      * @throws IndexOutOfBoundsException
      */
     public static List<Boolean> toList(final boolean[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (fromIndex == toIndex) {
             return new ArrayList<>();
@@ -4866,7 +4863,7 @@ sealed class CommonUtil permits N {
      * @return
      */
     public static List<Character> toList(final char[] a) {
-        return toList(a, 0, len(a));
+        return toList(a, 0, len(a)); // NOSONAR
     }
 
     /**
@@ -4879,7 +4876,7 @@ sealed class CommonUtil permits N {
      * @throws IndexOutOfBoundsException
      */
     public static List<Character> toList(final char[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (fromIndex == toIndex) {
             return new ArrayList<>();
@@ -4900,7 +4897,7 @@ sealed class CommonUtil permits N {
      * @return
      */
     public static List<Byte> toList(final byte[] a) {
-        return toList(a, 0, len(a));
+        return toList(a, 0, len(a)); // NOSONAR
     }
 
     /**
@@ -4913,7 +4910,7 @@ sealed class CommonUtil permits N {
      * @throws IndexOutOfBoundsException
      */
     public static List<Byte> toList(final byte[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (fromIndex == toIndex) {
             return new ArrayList<>();
@@ -4934,7 +4931,7 @@ sealed class CommonUtil permits N {
      * @return
      */
     public static List<Short> toList(final short[] a) {
-        return toList(a, 0, len(a));
+        return toList(a, 0, len(a)); // NOSONAR
     }
 
     /**
@@ -4947,7 +4944,7 @@ sealed class CommonUtil permits N {
      * @throws IndexOutOfBoundsException
      */
     public static List<Short> toList(final short[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (fromIndex == toIndex) {
             return new ArrayList<>();
@@ -4968,7 +4965,7 @@ sealed class CommonUtil permits N {
      * @return
      */
     public static List<Integer> toList(final int[] a) {
-        return toList(a, 0, len(a));
+        return toList(a, 0, len(a)); // NOSONAR
     }
 
     /**
@@ -4981,7 +4978,7 @@ sealed class CommonUtil permits N {
      * @throws IndexOutOfBoundsException
      */
     public static List<Integer> toList(final int[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (fromIndex == toIndex) {
             return new ArrayList<>();
@@ -5002,7 +4999,7 @@ sealed class CommonUtil permits N {
      * @return
      */
     public static List<Long> toList(final long[] a) {
-        return toList(a, 0, len(a));
+        return toList(a, 0, len(a)); // NOSONAR
     }
 
     /**
@@ -5015,7 +5012,7 @@ sealed class CommonUtil permits N {
      * @throws IndexOutOfBoundsException
      */
     public static List<Long> toList(final long[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (fromIndex == toIndex) {
             return new ArrayList<>();
@@ -5036,7 +5033,7 @@ sealed class CommonUtil permits N {
      * @return
      */
     public static List<Float> toList(final float[] a) {
-        return toList(a, 0, len(a));
+        return toList(a, 0, len(a)); // NOSONAR
     }
 
     /**
@@ -5049,7 +5046,7 @@ sealed class CommonUtil permits N {
      * @throws IndexOutOfBoundsException
      */
     public static List<Float> toList(final float[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (fromIndex == toIndex) {
             return new ArrayList<>();
@@ -5070,7 +5067,7 @@ sealed class CommonUtil permits N {
      * @return
      */
     public static List<Double> toList(final double[] a) {
-        return toList(a, 0, len(a));
+        return toList(a, 0, len(a)); // NOSONAR
     }
 
     /**
@@ -5083,7 +5080,7 @@ sealed class CommonUtil permits N {
      * @throws IndexOutOfBoundsException
      */
     public static List<Double> toList(final double[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (fromIndex == toIndex) {
             return new ArrayList<>();
@@ -5123,7 +5120,7 @@ sealed class CommonUtil permits N {
      * @throws IndexOutOfBoundsException
      */
     public static <T> List<T> toList(final T[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (fromIndex == toIndex) {
             return new ArrayList<>();
@@ -5167,7 +5164,7 @@ sealed class CommonUtil permits N {
      * @return
      */
     public static Set<Boolean> toSet(final boolean[] a) {
-        return toSet(a, 0, len(a));
+        return toSet(a, 0, len(a)); // NOSONAR
     }
 
     /**
@@ -5180,7 +5177,7 @@ sealed class CommonUtil permits N {
      * @throws IndexOutOfBoundsException
      */
     public static Set<Boolean> toSet(final boolean[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (fromIndex == toIndex) {
             return newHashSet();
@@ -5201,7 +5198,7 @@ sealed class CommonUtil permits N {
      * @return
      */
     public static Set<Character> toSet(final char[] a) {
-        return toSet(a, 0, len(a));
+        return toSet(a, 0, len(a)); // NOSONAR
     }
 
     /**
@@ -5214,7 +5211,7 @@ sealed class CommonUtil permits N {
      * @throws IndexOutOfBoundsException
      */
     public static Set<Character> toSet(final char[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (fromIndex == toIndex) {
             return newHashSet();
@@ -5235,7 +5232,7 @@ sealed class CommonUtil permits N {
      * @return
      */
     public static Set<Byte> toSet(final byte[] a) {
-        return toSet(a, 0, len(a));
+        return toSet(a, 0, len(a)); // NOSONAR
     }
 
     /**
@@ -5248,7 +5245,7 @@ sealed class CommonUtil permits N {
      * @throws IndexOutOfBoundsException
      */
     public static Set<Byte> toSet(final byte[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (fromIndex == toIndex) {
             return newHashSet();
@@ -5269,7 +5266,7 @@ sealed class CommonUtil permits N {
      * @return
      */
     public static Set<Short> toSet(final short[] a) {
-        return toSet(a, 0, len(a));
+        return toSet(a, 0, len(a)); // NOSONAR
     }
 
     /**
@@ -5282,7 +5279,7 @@ sealed class CommonUtil permits N {
      * @throws IndexOutOfBoundsException
      */
     public static Set<Short> toSet(final short[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (fromIndex == toIndex) {
             return newHashSet();
@@ -5303,7 +5300,7 @@ sealed class CommonUtil permits N {
      * @return
      */
     public static Set<Integer> toSet(final int[] a) {
-        return toSet(a, 0, len(a));
+        return toSet(a, 0, len(a)); // NOSONAR
     }
 
     /**
@@ -5316,7 +5313,7 @@ sealed class CommonUtil permits N {
      * @throws IndexOutOfBoundsException
      */
     public static Set<Integer> toSet(final int[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (fromIndex == toIndex) {
             return newHashSet();
@@ -5337,7 +5334,7 @@ sealed class CommonUtil permits N {
      * @return
      */
     public static Set<Long> toSet(final long[] a) {
-        return toSet(a, 0, len(a));
+        return toSet(a, 0, len(a)); // NOSONAR
     }
 
     /**
@@ -5350,7 +5347,7 @@ sealed class CommonUtil permits N {
      * @throws IndexOutOfBoundsException
      */
     public static Set<Long> toSet(final long[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (fromIndex == toIndex) {
             return newHashSet();
@@ -5371,7 +5368,7 @@ sealed class CommonUtil permits N {
      * @return
      */
     public static Set<Float> toSet(final float[] a) {
-        return toSet(a, 0, len(a));
+        return toSet(a, 0, len(a)); // NOSONAR
     }
 
     /**
@@ -5384,7 +5381,7 @@ sealed class CommonUtil permits N {
      * @throws IndexOutOfBoundsException
      */
     public static Set<Float> toSet(final float[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (fromIndex == toIndex) {
             return newHashSet();
@@ -5405,7 +5402,7 @@ sealed class CommonUtil permits N {
      * @return
      */
     public static Set<Double> toSet(final double[] a) {
-        return toSet(a, 0, len(a));
+        return toSet(a, 0, len(a)); // NOSONAR
     }
 
     /**
@@ -5418,7 +5415,7 @@ sealed class CommonUtil permits N {
      * @throws IndexOutOfBoundsException
      */
     public static Set<Double> toSet(final double[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (fromIndex == toIndex) {
             return newHashSet();
@@ -5458,7 +5455,7 @@ sealed class CommonUtil permits N {
      * @throws IndexOutOfBoundsException
      */
     public static <T> Set<T> toSet(final T[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (fromIndex == toIndex) {
             return newHashSet();
@@ -5518,7 +5515,7 @@ sealed class CommonUtil permits N {
      */
     public static <C extends Collection<Boolean>> C toCollection(final boolean[] a, final int fromIndex, final int toIndex,
             final IntFunction<? extends C> supplier) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (fromIndex == toIndex) {
             return supplier.apply(0);
@@ -5557,7 +5554,7 @@ sealed class CommonUtil permits N {
      */
     public static <C extends Collection<Character>> C toCollection(final char[] a, final int fromIndex, final int toIndex,
             final IntFunction<? extends C> supplier) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (fromIndex == toIndex) {
             return supplier.apply(0);
@@ -5596,7 +5593,7 @@ sealed class CommonUtil permits N {
      */
     public static <C extends Collection<Byte>> C toCollection(final byte[] a, final int fromIndex, final int toIndex, final IntFunction<? extends C> supplier)
             throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (fromIndex == toIndex) {
             return supplier.apply(0);
@@ -5635,7 +5632,7 @@ sealed class CommonUtil permits N {
      */
     public static <C extends Collection<Short>> C toCollection(final short[] a, final int fromIndex, final int toIndex, final IntFunction<? extends C> supplier)
             throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (fromIndex == toIndex) {
             return supplier.apply(0);
@@ -5674,7 +5671,7 @@ sealed class CommonUtil permits N {
      */
     public static <C extends Collection<Integer>> C toCollection(final int[] a, final int fromIndex, final int toIndex, final IntFunction<? extends C> supplier)
             throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (fromIndex == toIndex) {
             return supplier.apply(0);
@@ -5713,7 +5710,7 @@ sealed class CommonUtil permits N {
      */
     public static <C extends Collection<Long>> C toCollection(final long[] a, final int fromIndex, final int toIndex, final IntFunction<? extends C> supplier)
             throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (fromIndex == toIndex) {
             return supplier.apply(0);
@@ -5752,7 +5749,7 @@ sealed class CommonUtil permits N {
      */
     public static <C extends Collection<Float>> C toCollection(final float[] a, final int fromIndex, final int toIndex, final IntFunction<? extends C> supplier)
             throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (fromIndex == toIndex) {
             return supplier.apply(0);
@@ -5791,7 +5788,7 @@ sealed class CommonUtil permits N {
      */
     public static <C extends Collection<Double>> C toCollection(final double[] a, final int fromIndex, final int toIndex,
             final IntFunction<? extends C> supplier) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (fromIndex == toIndex) {
             return supplier.apply(0);
@@ -5836,7 +5833,7 @@ sealed class CommonUtil permits N {
      */
     public static <T, C extends Collection<T>> C toCollection(final T[] a, final int fromIndex, final int toIndex, final IntFunction<? extends C> supplier)
             throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (fromIndex == toIndex) {
             return supplier.apply(0);
@@ -8679,13 +8676,11 @@ sealed class CommonUtil permits N {
     /**
      *
      * @param <T>
-     * @param <E>
      * @param a
      * @param predicate
      * @return the nullable
-     * @throws E the e
      */
-    public static <T, E extends Exception> Nullable<T> findFirst(final T[] a, final Throwables.Predicate<? super T, E> predicate) throws E {
+    public static <T> Nullable<T> findFirst(final T[] a, final Predicate<? super T> predicate) {
         if (N.isEmpty(a)) {
             return Nullable.empty();
         }
@@ -8702,13 +8697,11 @@ sealed class CommonUtil permits N {
     /**
      *
      * @param <T>
-     * @param <E>
      * @param c
      * @param predicate
      * @return the nullable
-     * @throws E the e
      */
-    public static <T, E extends Exception> Nullable<T> findFirst(final Iterable<? extends T> c, Throwables.Predicate<? super T, E> predicate) throws E {
+    public static <T> Nullable<T> findFirst(final Iterable<? extends T> c, Predicate<? super T> predicate) {
         if (N.isEmpty(c)) {
             return Nullable.empty();
         }
@@ -8724,14 +8717,13 @@ sealed class CommonUtil permits N {
 
     /**
      *
+     *
      * @param <T>
-     * @param <E>
      * @param iter
      * @param predicate
      * @return
-     * @throws E
      */
-    public static <T, E extends Exception> Nullable<T> findFirst(final Iterator<? extends T> iter, Throwables.Predicate<? super T, E> predicate) throws E {
+    public static <T> Nullable<T> findFirst(final Iterator<? extends T> iter, Predicate<? super T> predicate) {
         if (iter == null) {
             return Nullable.empty();
         }
@@ -8751,14 +8743,13 @@ sealed class CommonUtil permits N {
 
     /**
      *
+     *
      * @param <T>
-     * @param <E>
      * @param a
      * @param predicate
      * @return the nullable
-     * @throws E the e
      */
-    public static <T, E extends Exception> Nullable<T> findLast(final T[] a, final Throwables.Predicate<? super T, E> predicate) throws E {
+    public static <T> Nullable<T> findLast(final T[] a, final Predicate<? super T> predicate) {
         if (N.isEmpty(a)) {
             return Nullable.empty();
         }
@@ -8774,14 +8765,13 @@ sealed class CommonUtil permits N {
 
     /**
      *
+     *
      * @param <T>
-     * @param <E>
      * @param c
      * @param predicate
      * @return the nullable
-     * @throws E the e
      */
-    public static <T, E extends Exception> Nullable<T> findLast(final Iterable<? extends T> c, Throwables.Predicate<? super T, E> predicate) throws E {
+    public static <T> Nullable<T> findLast(final Iterable<? extends T> c, Predicate<? super T> predicate) {
         return (Nullable<T>) findLast(c, predicate, false);
     }
 
@@ -8796,8 +8786,7 @@ sealed class CommonUtil permits N {
      * @return the r
      * @throws E the e
      */
-    private static <T, E extends Exception> Object findLast(final Iterable<? extends T> c, Throwables.Predicate<? super T, E> predicate, boolean isForNonNull)
-            throws E {
+    private static <T> Object findLast(final Iterable<? extends T> c, Predicate<? super T> predicate, boolean isForNonNull) {
         if (c == null) {
             return isForNonNull ? Optional.empty() : Nullable.empty();
         }
@@ -8860,13 +8849,11 @@ sealed class CommonUtil permits N {
      * Find first non null.
      *
      * @param <T>
-     * @param <E>
      * @param a
      * @param predicate
      * @return the optional
-     * @throws E the e
      */
-    public static <T, E extends Exception> Optional<T> findFirstNonNull(final T[] a, final Throwables.Predicate<? super T, E> predicate) throws E {
+    public static <T> Optional<T> findFirstNonNull(final T[] a, final Predicate<? super T> predicate) {
         if (N.isEmpty(a)) {
             return Optional.empty();
         }
@@ -8884,13 +8871,11 @@ sealed class CommonUtil permits N {
      * Find first non null.
      *
      * @param <T>
-     * @param <E>
      * @param c
      * @param predicate
      * @return the optional
-     * @throws E the e
      */
-    public static <T, E extends Exception> Optional<T> findFirstNonNull(final Iterable<? extends T> c, Throwables.Predicate<? super T, E> predicate) throws E {
+    public static <T> Optional<T> findFirstNonNull(final Iterable<? extends T> c, Predicate<? super T> predicate) {
         if (N.isEmpty(c)) {
             return Optional.empty();
         }
@@ -8907,14 +8892,11 @@ sealed class CommonUtil permits N {
     /**
      *
      * @param <T>
-     * @param <E>
      * @param iter
      * @param predicate
      * @return
-     * @throws E
      */
-    public static <T, E extends Exception> Optional<T> findFirstNonNull(final Iterator<? extends T> iter, Throwables.Predicate<? super T, E> predicate)
-            throws E {
+    public static <T> Optional<T> findFirstNonNull(final Iterator<? extends T> iter, Predicate<? super T> predicate) {
         if (iter == null) {
             return Optional.empty();
         }
@@ -8936,13 +8918,11 @@ sealed class CommonUtil permits N {
      * Find last non null.
      *
      * @param <T>
-     * @param <E>
      * @param a
      * @param predicate
      * @return the optional
-     * @throws E the e
      */
-    public static <T, E extends Exception> Optional<T> findLastNonNull(final T[] a, final Throwables.Predicate<? super T, E> predicate) throws E {
+    public static <T> Optional<T> findLastNonNull(final T[] a, final Predicate<? super T> predicate) {
         if (N.isEmpty(a)) {
             return Optional.empty();
         }
@@ -8960,13 +8940,11 @@ sealed class CommonUtil permits N {
      * Find last non null.
      *
      * @param <T>
-     * @param <E>
      * @param c
      * @param predicate
      * @return the optional
-     * @throws E the e
      */
-    public static <T, E extends Exception> Optional<T> findLastNonNull(final Iterable<? extends T> c, Throwables.Predicate<? super T, E> predicate) throws E {
+    public static <T> Optional<T> findLastNonNull(final Iterable<? extends T> c, Predicate<? super T> predicate) {
         return (Optional<T>) findLast(c, predicate, true);
     }
 
@@ -12656,7 +12634,7 @@ sealed class CommonUtil permits N {
     public static int compare(final boolean[] a, final int fromIndexA, final boolean[] b, final int fromIndexB, final int len)
             throws IllegalArgumentException, IndexOutOfBoundsException {
         checkArgNotNegative(len, "len");
-        checkFromIndexSize(fromIndexA, len, len(a));
+        checkFromIndexSize(fromIndexA, len, len(a)); // NOSONAR
         checkFromIndexSize(fromIndexB, len, len(b));
 
         if ((fromIndexA == fromIndexB && a == b) || len == 0) {
@@ -12709,7 +12687,7 @@ sealed class CommonUtil permits N {
     public static int compare(final char[] a, final int fromIndexA, final char[] b, final int fromIndexB, final int len)
             throws IllegalArgumentException, IndexOutOfBoundsException {
         checkArgNotNegative(len, "len");
-        checkFromIndexSize(fromIndexA, len, len(a));
+        checkFromIndexSize(fromIndexA, len, len(a)); // NOSONAR
         checkFromIndexSize(fromIndexB, len, len(b));
 
         if ((fromIndexA == fromIndexB && a == b) || len == 0) {
@@ -12762,7 +12740,7 @@ sealed class CommonUtil permits N {
     public static int compare(final byte[] a, final int fromIndexA, final byte[] b, final int fromIndexB, final int len)
             throws IllegalArgumentException, IndexOutOfBoundsException {
         checkArgNotNegative(len, "len");
-        checkFromIndexSize(fromIndexA, len, len(a));
+        checkFromIndexSize(fromIndexA, len, len(a)); // NOSONAR
         checkFromIndexSize(fromIndexB, len, len(b));
 
         if ((fromIndexA == fromIndexB && a == b) || len == 0) {
@@ -12815,7 +12793,7 @@ sealed class CommonUtil permits N {
     public static int compare(final short[] a, final int fromIndexA, final short[] b, final int fromIndexB, final int len)
             throws IllegalArgumentException, IndexOutOfBoundsException {
         checkArgNotNegative(len, "len");
-        checkFromIndexSize(fromIndexA, len, len(a));
+        checkFromIndexSize(fromIndexA, len, len(a)); // NOSONAR
         checkFromIndexSize(fromIndexB, len, len(b));
 
         if ((fromIndexA == fromIndexB && a == b) || len == 0) {
@@ -12868,7 +12846,7 @@ sealed class CommonUtil permits N {
     public static int compare(final int[] a, final int fromIndexA, final int[] b, final int fromIndexB, final int len)
             throws IllegalArgumentException, IndexOutOfBoundsException {
         checkArgNotNegative(len, "len");
-        checkFromIndexSize(fromIndexA, len, len(a));
+        checkFromIndexSize(fromIndexA, len, len(a)); // NOSONAR
         checkFromIndexSize(fromIndexB, len, len(b));
 
         if ((fromIndexA == fromIndexB && a == b) || len == 0) {
@@ -12921,7 +12899,7 @@ sealed class CommonUtil permits N {
     public static int compare(final long[] a, final int fromIndexA, final long[] b, final int fromIndexB, final int len)
             throws IllegalArgumentException, IndexOutOfBoundsException {
         checkArgNotNegative(len, "len");
-        checkFromIndexSize(fromIndexA, len, len(a));
+        checkFromIndexSize(fromIndexA, len, len(a)); // NOSONAR
         checkFromIndexSize(fromIndexB, len, len(b));
 
         if ((fromIndexA == fromIndexB && a == b) || len == 0) {
@@ -12976,7 +12954,7 @@ sealed class CommonUtil permits N {
     public static int compare(final float[] a, final int fromIndexA, final float[] b, final int fromIndexB, final int len)
             throws IllegalArgumentException, IndexOutOfBoundsException {
         checkArgNotNegative(len, "len");
-        checkFromIndexSize(fromIndexA, len, len(a));
+        checkFromIndexSize(fromIndexA, len, len(a)); // NOSONAR
         checkFromIndexSize(fromIndexB, len, len(b));
 
         if ((fromIndexA == fromIndexB && a == b) || len == 0) {
@@ -13033,7 +13011,7 @@ sealed class CommonUtil permits N {
     public static int compare(final double[] a, final int fromIndexA, final double[] b, final int fromIndexB, final int len)
             throws IllegalArgumentException, IndexOutOfBoundsException {
         checkArgNotNegative(len, "len");
-        checkFromIndexSize(fromIndexA, len, len(a));
+        checkFromIndexSize(fromIndexA, len, len(a)); // NOSONAR
         checkFromIndexSize(fromIndexB, len, len(b));
 
         if ((fromIndexA == fromIndexB && a == b) || len == 0) {
@@ -13125,7 +13103,7 @@ sealed class CommonUtil permits N {
     public static <T> int compare(final T[] a, final int fromIndexA, final T[] b, final int fromIndexB, final int len, Comparator<? super T> cmp)
             throws IllegalArgumentException, IndexOutOfBoundsException {
         checkArgNotNegative(len, "len");
-        checkFromIndexSize(fromIndexA, len, len(a));
+        checkFromIndexSize(fromIndexA, len, len(a)); // NOSONAR
         checkFromIndexSize(fromIndexB, len, len(b));
 
         if ((fromIndexA == fromIndexB && a == b) || len == 0) {
@@ -13772,7 +13750,7 @@ sealed class CommonUtil permits N {
     public static boolean equals(final boolean[] a, final int fromIndexA, final boolean[] b, final int fromIndexB, final int len)
             throws IllegalArgumentException, IndexOutOfBoundsException {
         checkArgNotNegative(len, "len");
-        checkFromIndexSize(fromIndexA, len, len(a));
+        checkFromIndexSize(fromIndexA, len, len(a)); // NOSONAR
         checkFromIndexSize(fromIndexB, len, len(b));
 
         if ((fromIndexA == fromIndexB && a == b) || len == 0) {
@@ -13814,7 +13792,7 @@ sealed class CommonUtil permits N {
     public static boolean equals(final char[] a, final int fromIndexA, final char[] b, final int fromIndexB, final int len)
             throws IllegalArgumentException, IndexOutOfBoundsException {
         checkArgNotNegative(len, "len");
-        checkFromIndexSize(fromIndexA, len, len(a));
+        checkFromIndexSize(fromIndexA, len, len(a)); // NOSONAR
         checkFromIndexSize(fromIndexB, len, len(b));
 
         if ((fromIndexA == fromIndexB && a == b) || len == 0) {
@@ -13856,7 +13834,7 @@ sealed class CommonUtil permits N {
     public static boolean equals(final byte[] a, final int fromIndexA, final byte[] b, final int fromIndexB, final int len)
             throws IllegalArgumentException, IndexOutOfBoundsException {
         checkArgNotNegative(len, "len");
-        checkFromIndexSize(fromIndexA, len, len(a));
+        checkFromIndexSize(fromIndexA, len, len(a)); // NOSONAR
         checkFromIndexSize(fromIndexB, len, len(b));
 
         if ((fromIndexA == fromIndexB && a == b) || len == 0) {
@@ -13898,7 +13876,7 @@ sealed class CommonUtil permits N {
     public static boolean equals(final short[] a, final int fromIndexA, final short[] b, final int fromIndexB, final int len)
             throws IllegalArgumentException, IndexOutOfBoundsException {
         checkArgNotNegative(len, "len");
-        checkFromIndexSize(fromIndexA, len, len(a));
+        checkFromIndexSize(fromIndexA, len, len(a)); // NOSONAR
         checkFromIndexSize(fromIndexB, len, len(b));
 
         if ((fromIndexA == fromIndexB && a == b) || len == 0) {
@@ -13940,7 +13918,7 @@ sealed class CommonUtil permits N {
     public static boolean equals(final int[] a, final int fromIndexA, final int[] b, final int fromIndexB, final int len)
             throws IllegalArgumentException, IndexOutOfBoundsException {
         checkArgNotNegative(len, "len");
-        checkFromIndexSize(fromIndexA, len, len(a));
+        checkFromIndexSize(fromIndexA, len, len(a)); // NOSONAR
         checkFromIndexSize(fromIndexB, len, len(b));
 
         if ((fromIndexA == fromIndexB && a == b) || len == 0) {
@@ -13982,7 +13960,7 @@ sealed class CommonUtil permits N {
     public static boolean equals(final long[] a, final int fromIndexA, final long[] b, final int fromIndexB, final int len)
             throws IllegalArgumentException, IndexOutOfBoundsException {
         checkArgNotNegative(len, "len");
-        checkFromIndexSize(fromIndexA, len, len(a));
+        checkFromIndexSize(fromIndexA, len, len(a)); // NOSONAR
         checkFromIndexSize(fromIndexB, len, len(b));
 
         if ((fromIndexA == fromIndexB && a == b) || len == 0) {
@@ -14024,7 +14002,7 @@ sealed class CommonUtil permits N {
     public static boolean equals(final float[] a, final int fromIndexA, final float[] b, final int fromIndexB, final int len)
             throws IllegalArgumentException, IndexOutOfBoundsException {
         checkArgNotNegative(len, "len");
-        checkFromIndexSize(fromIndexA, len, len(a));
+        checkFromIndexSize(fromIndexA, len, len(a)); // NOSONAR
         checkFromIndexSize(fromIndexB, len, len(b));
 
         if ((fromIndexA == fromIndexB && a == b) || len == 0) {
@@ -14066,7 +14044,7 @@ sealed class CommonUtil permits N {
     public static boolean equals(final double[] a, final int fromIndexA, final double[] b, final int fromIndexB, final int len)
             throws IllegalArgumentException, IndexOutOfBoundsException {
         checkArgNotNegative(len, "len");
-        checkFromIndexSize(fromIndexA, len, len(a));
+        checkFromIndexSize(fromIndexA, len, len(a)); // NOSONAR
         checkFromIndexSize(fromIndexB, len, len(b));
 
         if ((fromIndexA == fromIndexB && a == b) || len == 0) {
@@ -14108,7 +14086,7 @@ sealed class CommonUtil permits N {
     public static boolean equals(final Object[] a, final int fromIndexA, final Object[] b, final int fromIndexB, final int len)
             throws IllegalArgumentException, IndexOutOfBoundsException {
         checkArgNotNegative(len, "len");
-        checkFromIndexSize(fromIndexA, len, len(a));
+        checkFromIndexSize(fromIndexA, len, len(a)); // NOSONAR
         checkFromIndexSize(fromIndexB, len, len(b));
 
         if ((fromIndexA == fromIndexB && a == b) || len == 0) {
@@ -14152,7 +14130,7 @@ sealed class CommonUtil permits N {
     public static boolean deepEquals(final Object[] a, final int fromIndexA, final Object[] b, final int fromIndexB, final int len)
             throws IllegalArgumentException, IndexOutOfBoundsException {
         checkArgNotNegative(len, "len");
-        checkFromIndexSize(fromIndexA, len, len(a));
+        checkFromIndexSize(fromIndexA, len, len(a)); // NOSONAR
         checkFromIndexSize(fromIndexB, len, len(b));
 
         if ((fromIndexA == fromIndexB && a == b) || len == 0) {
@@ -14196,7 +14174,7 @@ sealed class CommonUtil permits N {
     public static boolean equalsIgnoreCase(final String[] a, final int fromIndexA, final String[] b, final int fromIndexB, final int len)
             throws IllegalArgumentException, IndexOutOfBoundsException {
         checkArgNotNegative(len, "len");
-        checkFromIndexSize(fromIndexA, len, len(a));
+        checkFromIndexSize(fromIndexA, len, len(a)); // NOSONAR
         checkFromIndexSize(fromIndexB, len, len(b));
 
         if ((fromIndexA == fromIndexB && a == b) || len == 0) {
@@ -15708,7 +15686,7 @@ sealed class CommonUtil permits N {
      * @throws IndexOutOfBoundsException
      */
     public static void reverse(final boolean[] a, int fromIndex, int toIndex) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) || a.length == 1) {
             return;
@@ -15749,7 +15727,7 @@ sealed class CommonUtil permits N {
      * @throws IndexOutOfBoundsException
      */
     public static void reverse(final char[] a, int fromIndex, int toIndex) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) || a.length == 1) {
             return;
@@ -15790,7 +15768,7 @@ sealed class CommonUtil permits N {
      * @throws IndexOutOfBoundsException
      */
     public static void reverse(final byte[] a, int fromIndex, int toIndex) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) || a.length == 1) {
             return;
@@ -15831,7 +15809,7 @@ sealed class CommonUtil permits N {
      * @throws IndexOutOfBoundsException
      */
     public static void reverse(final short[] a, int fromIndex, int toIndex) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) || a.length == 1) {
             return;
@@ -15872,7 +15850,7 @@ sealed class CommonUtil permits N {
      * @throws IndexOutOfBoundsException
      */
     public static void reverse(final int[] a, int fromIndex, int toIndex) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) || a.length == 1) {
             return;
@@ -15913,7 +15891,7 @@ sealed class CommonUtil permits N {
      * @throws IndexOutOfBoundsException
      */
     public static void reverse(final long[] a, int fromIndex, int toIndex) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) || a.length == 1) {
             return;
@@ -15954,7 +15932,7 @@ sealed class CommonUtil permits N {
      * @throws IndexOutOfBoundsException
      */
     public static void reverse(final float[] a, int fromIndex, int toIndex) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) || a.length == 1) {
             return;
@@ -15995,7 +15973,7 @@ sealed class CommonUtil permits N {
      * @throws IndexOutOfBoundsException
      */
     public static void reverse(final double[] a, int fromIndex, int toIndex) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) || a.length == 1) {
             return;
@@ -16042,7 +16020,7 @@ sealed class CommonUtil permits N {
      * @throws IndexOutOfBoundsException
      */
     public static void reverse(final Object[] a, int fromIndex, int toIndex) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) || a.length == 1) {
             return;
@@ -16919,14 +16897,13 @@ sealed class CommonUtil permits N {
 
     /**
      *
+     *
      * @param <T>
-     * @param <E>
      * @param pair
      * @param predicate
      * @return
-     * @throws E the e
      */
-    public static <T, E extends Exception> boolean swapIf(final Pair<T, T> pair, Throwables.Predicate<? super Pair<T, T>, E> predicate) throws E {
+    public static <T> boolean swapIf(final Pair<T, T> pair, Predicate<? super Pair<T, T>> predicate) {
         if (predicate.test(pair)) {
             pair.set(pair.right, pair.left);
             return true;
@@ -16949,16 +16926,14 @@ sealed class CommonUtil permits N {
 
     /**
      *
+     *
      * @param <T>
      * @param <M>
-     * @param <E>
      * @param triple
      * @param predicate
      * @return
-     * @throws E the e
      */
-    public static <T, M, E extends Exception> boolean swapIf(final Triple<T, M, T> triple, Throwables.Predicate<? super Triple<T, M, T>, E> predicate)
-            throws E {
+    public static <T, M> boolean swapIf(final Triple<T, M, T> triple, Predicate<? super Triple<T, M, T>> predicate) {
         if (predicate.test(triple)) {
             final T left = triple.left;
             triple.setLeft(triple.right);
@@ -23219,13 +23194,11 @@ sealed class CommonUtil permits N {
      * Find first index.
      *
      * @param <T>
-     * @param <E>
      * @param a
      * @param predicate
      * @return an {@code OptionalInt} with the index of found target value/element, or an empty {@code OptionalInt} no target value/element found.
-     * @throws E the e
      */
-    public static <T, E extends Exception> OptionalInt findFirstIndex(final T[] a, final Throwables.Predicate<? super T, E> predicate) throws E {
+    public static <T> OptionalInt findFirstIndex(final T[] a, final Predicate<? super T> predicate) {
         if (N.isEmpty(a)) {
             return OptionalInt.empty();
         }
@@ -23244,15 +23217,12 @@ sealed class CommonUtil permits N {
      *
      * @param <T>
      * @param <U>
-     * @param <E>
      * @param a
      * @param valueToFind
      * @param predicate
      * @return an {@code OptionalInt} with the index of found target value/element, or an empty {@code OptionalInt} no target value/element found.
-     * @throws E the e
      */
-    public static <T, U, E extends Exception> OptionalInt findFirstIndex(final T[] a, final U valueToFind,
-            final Throwables.BiPredicate<? super T, ? super U, E> predicate) throws E {
+    public static <T, U> OptionalInt findFirstIndex(final T[] a, final U valueToFind, final BiPredicate<? super T, ? super U> predicate) {
         if (N.isEmpty(a)) {
             return OptionalInt.empty();
         }
@@ -23270,14 +23240,11 @@ sealed class CommonUtil permits N {
      * Find first index.
      *
      * @param <T>
-     * @param <E>
      * @param c
      * @param predicate
      * @return an {@code OptionalInt} with the index of found target value/element, or an empty {@code OptionalInt} no target value/element found.
-     * @throws E the e
      */
-    public static <T, E extends Exception> OptionalInt findFirstIndex(final Collection<? extends T> c, final Throwables.Predicate<? super T, E> predicate)
-            throws E {
+    public static <T> OptionalInt findFirstIndex(final Collection<? extends T> c, final Predicate<? super T> predicate) {
         if (N.isEmpty(c)) {
             return OptionalInt.empty();
         }
@@ -23300,15 +23267,12 @@ sealed class CommonUtil permits N {
      *
      * @param <T>
      * @param <U>
-     * @param <E>
      * @param c
      * @param valueToFind
      * @param predicate
      * @return an {@code OptionalInt} with the index of found target value/element, or an empty {@code OptionalInt} no target value/element found.
-     * @throws E the e
      */
-    public static <T, U, E extends Exception> OptionalInt findFirstIndex(final Collection<? extends T> c, final U valueToFind,
-            final Throwables.BiPredicate<? super T, ? super U, E> predicate) throws E {
+    public static <T, U> OptionalInt findFirstIndex(final Collection<? extends T> c, final U valueToFind, final BiPredicate<? super T, ? super U> predicate) {
         if (N.isEmpty(c)) {
             return OptionalInt.empty();
         }
@@ -23330,13 +23294,11 @@ sealed class CommonUtil permits N {
      * Find last index.
      *
      * @param <T>
-     * @param <E>
      * @param a
      * @param predicate
      * @return an {@code OptionalInt} with the index of found target value/element, or an empty {@code OptionalInt} no target value/element found.
-     * @throws E the e
      */
-    public static <T, E extends Exception> OptionalInt findLastIndex(final T[] a, final Throwables.Predicate<? super T, E> predicate) throws E {
+    public static <T> OptionalInt findLastIndex(final T[] a, final Predicate<? super T> predicate) {
         if (N.isEmpty(a)) {
             return OptionalInt.empty();
         }
@@ -23355,15 +23317,12 @@ sealed class CommonUtil permits N {
      *
      * @param <T>
      * @param <U>
-     * @param <E>
      * @param a
      * @param valueToFind
      * @param predicate
      * @return an {@code OptionalInt} with the index of found target value/element, or an empty {@code OptionalInt} no target value/element found.
-     * @throws E the e
      */
-    public static <T, U, E extends Exception> OptionalInt findLastIndex(final T[] a, final U valueToFind,
-            final Throwables.BiPredicate<? super T, ? super U, E> predicate) throws E {
+    public static <T, U> OptionalInt findLastIndex(final T[] a, final U valueToFind, final BiPredicate<? super T, ? super U> predicate) {
         if (N.isEmpty(a)) {
             return OptionalInt.empty();
         }
@@ -23381,14 +23340,11 @@ sealed class CommonUtil permits N {
      * Find last index.
      *
      * @param <T>
-     * @param <E>
      * @param c
      * @param predicate
      * @return an {@code OptionalInt} with the index of found target value/element, or an empty {@code OptionalInt} no target value/element found.
-     * @throws E the e
      */
-    public static <T, E extends Exception> OptionalInt findLastIndex(final Collection<? extends T> c, final Throwables.Predicate<? super T, E> predicate)
-            throws E {
+    public static <T> OptionalInt findLastIndex(final Collection<? extends T> c, final Predicate<? super T> predicate) {
         if (N.isEmpty(c)) {
             return OptionalInt.empty();
         }
@@ -23432,22 +23388,20 @@ sealed class CommonUtil permits N {
 
     /**
      *
+     *
      * @param <T>
      * @param <U>
-     * @param <E>
      * @param c
      * @param valueToFind
      * @param predicate
      * @return an {@code OptionalInt} with the index of found target value/element, or an empty {@code OptionalInt} no target value/element found.
-     * @throws E
      */
-    public static <T, U, E extends Exception> OptionalInt findLastIndex(final Collection<? extends T> c, final U valueToFind,
-            final Throwables.BiPredicate<? super T, ? super U, E> predicate) throws E {
+    public static <T, U> OptionalInt findLastIndex(final Collection<? extends T> c, final U valueToFind, final BiPredicate<? super T, ? super U> predicate) {
         if (N.isEmpty(c)) {
             return OptionalInt.empty();
         }
 
-        final Throwables.Predicate<? super T, E> predicate2 = t -> predicate.test(t, valueToFind);
+        final Predicate<? super T> predicate2 = t -> predicate.test(t, valueToFind);
 
         return findLastIndex(c, predicate2);
     }
@@ -23753,28 +23707,26 @@ sealed class CommonUtil permits N {
 
     /**
      *
+     *
      * @param <T>
-     * @param <E>
      * @param a
      * @param predicate
      * @return the indices of all found target value/element in the specified {@code Collection/Array}.
-     * @throws E
      */
-    public static <T, E extends Exception> int[] indicesOfAll(final T[] a, final Throwables.Predicate<? super T, E> predicate) throws E {
+    public static <T> int[] indicesOfAll(final T[] a, final Predicate<? super T> predicate) {
         return indicesOfAll(a, 0, predicate);
     }
 
     /**
      *
+     *
      * @param <T>
-     * @param <E>
      * @param a
      * @param startIndex
      * @param predicate
      * @return the indices of all found target value/element in the specified {@code Collection/Array}.
-     * @throws E
      */
-    public static <T, E extends Exception> int[] indicesOfAll(final T[] a, int startIndex, final Throwables.Predicate<? super T, E> predicate) throws E {
+    public static <T> int[] indicesOfAll(final T[] a, int startIndex, final Predicate<? super T> predicate) {
         final int len = N.len(a);
 
         if (len == 0 || startIndex >= len) {
@@ -23794,29 +23746,26 @@ sealed class CommonUtil permits N {
 
     /**
      *
+     *
      * @param <T>
-     * @param <E>
      * @param c
      * @param predicate
      * @return the indices of all found target value/element in the specified {@code Collection/Array}.
-     * @throws E
      */
-    public static <T, E extends Exception> int[] indicesOfAll(final Collection<? extends T> c, final Throwables.Predicate<? super T, E> predicate) throws E {
+    public static <T> int[] indicesOfAll(final Collection<? extends T> c, final Predicate<? super T> predicate) {
         return indicesOfAll(c, 0, predicate);
     }
 
     /**
      *
+     *
      * @param <T>
-     * @param <E>
      * @param c
      * @param startIndex
      * @param predicate
      * @return the indices of all found target value/element in the specified {@code Collection/Array}.
-     * @throws E
      */
-    public static <T, E extends Exception> int[] indicesOfAll(final Collection<? extends T> c, int startIndex,
-            final Throwables.Predicate<? super T, E> predicate) throws E {
+    public static <T> int[] indicesOfAll(final Collection<? extends T> c, int startIndex, final Predicate<? super T> predicate) {
         final int size = N.size(c);
 
         if (size == 0 || startIndex >= size) {
@@ -23853,6 +23802,327 @@ sealed class CommonUtil permits N {
         }
 
         return result.toArray();
+    }
+
+    // Boolean utilities
+    //--------------------------------------------------------------------------
+
+    //    @Beta
+    //    public static boolean isNullOrFalse(final Boolean bool) {
+    //        if (bool == null) {
+    //            return true;
+    //        }
+    //
+    //        return Boolean.FALSE.equals(bool);
+    //    }
+    //
+    //    @Beta
+    //    public static boolean isNullOrTrue(final Boolean bool) {
+    //        if (bool == null) {
+    //            return true;
+    //        }
+    //
+    //        return Boolean.TRUE.equals(bool);
+    //    }
+
+    /**
+     * Returns {@code true} if the specified {@code boolean} is {@code Boolean.TRUE}, not {@code null} or {@code Boolean.FALSE}.
+     *
+     * @param bool
+     * @return
+     */
+    @Beta
+    public static boolean isTrue(final Boolean bool) {
+        return Boolean.TRUE.equals(bool);
+    }
+
+    /**
+     * Returns {@code true} if the specified {@code boolean} is {@code null} or {@code Boolean.FALSE}.
+     *
+     * @param bool
+     * @return
+     */
+    @Beta
+    public static boolean isNotTrue(final Boolean bool) {
+        return bool == null || Boolean.FALSE.equals(bool);
+    }
+
+    /**
+     * Returns {@code true} if the specified {@code boolean} is {@code Boolean.FALSE}, not {@code null} or {@code Boolean.TRUE}.
+     *
+     * @param bool
+     * @return
+     */
+    @Beta
+    public static boolean isFalse(final Boolean bool) {
+        return Boolean.FALSE.equals(bool);
+    }
+
+    /**
+     * Returns {@code true} if the specified {@code boolean} is {@code null} or {@code Boolean.TRUE}.
+     *
+     * @param bool
+     * @return
+     */
+    @Beta
+    public static boolean isNotFalse(final Boolean bool) {
+        return bool == null || Boolean.TRUE.equals(bool);
+    }
+
+    /**
+     * <p>Note: copied from Apache commons Lang under Apache license v2.0 </p>
+     *
+     * <p>Negates the specified boolean.</p>
+     *
+     * <p>If {@code null} is passed in, {@code null} will be returned.</p>
+     *
+     * <p>NOTE: This returns null and will throw a NullPointerException if autoboxed to a boolean. </p>
+     *
+     * <pre>
+     *   BooleanUtils.negate(Boolean.TRUE)  = Boolean.FALSE;
+     *   BooleanUtils.negate(Boolean.FALSE) = Boolean.TRUE;
+     *   BooleanUtils.negate(null)          = null;
+     * </pre>
+     *
+     * @param bool  the Boolean to negate, may be null
+     * @return the negated Boolean, or {@code null} if {@code null} input
+     */
+    @MayReturnNull
+    @Beta
+    public static Boolean negate(final Boolean bool) {
+        if (bool == null) {
+            return null; //NOSONAR
+        }
+
+        return bool.booleanValue() ? Boolean.FALSE : Boolean.TRUE;
+    }
+
+    /**
+     * <p>Negates boolean values in the specified boolean array</p>.
+     *
+     * @param a
+     */
+    @Beta
+    public static void negate(final boolean[] a) {
+        if (isEmpty(a)) {
+            return;
+        }
+
+        negate(a, 0, a.length);
+    }
+
+    /**
+     * <p>Negates boolean values {@code fromIndex} to {@code toIndex} in the specified boolean array</p>.
+     *
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @throws IndexOutOfBoundsException
+     */
+    @Beta
+    public static void negate(final boolean[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
+
+        if (fromIndex == toIndex) {
+            return;
+        }
+
+        for (int i = fromIndex; i < toIndex; i++) {
+            a[i] = !a[i];
+        }
+    }
+
+    //    /**
+    //     * Returns {@code 0} if the specified {@code bool} is {@code null} or {@code false}, otherwise {@code 1} is returned.
+    //     *
+    //     * @param bool
+    //     * @return
+    //     */
+    //    @Beta
+    //    public static int toIntOneZero(final Boolean bool) {
+    //        if (bool == null) {
+    //            return 0;
+    //        }
+    //
+    //        return bool.booleanValue() ? 1 : 0;
+    //    }
+    //
+    //    /**
+    //     * Returns {@code 'N'} if the specified {@code bool} is {@code null} or {@code false}, otherwise {@code 'Y'} is returned.
+    //     *
+    //     *
+    //     * @param bool
+    //     * @return
+    //     */
+    //    @Beta
+    //    public static char toCharYN(final Boolean bool) {
+    //        if (bool == null) {
+    //            return 'N';
+    //        }
+    //
+    //        return bool.booleanValue() ? 'Y' : 'N';
+    //    }
+    //
+    //    /**
+    //     * Returns {@code "no"} if the specified {@code bool} is {@code null} or {@code false}, otherwise {@code "yes"} is returned.
+    //     *
+    //     *
+    //     * @param bool
+    //     * @return
+    //     */
+    //    @Beta
+    //    public static String toStringYesNo(final Boolean bool) {
+    //        if (bool == null) {
+    //            return "no";
+    //        }
+    //
+    //        return bool.booleanValue() ? "yes" : "no";
+    //    }
+
+    //    /**
+    //     * Add it because {@code Comparator.reversed()} doesn't work well in some scenarios.
+    //     *
+    //     * @param <T>
+    //     * @param cmp
+    //     * @return
+    //     * @see Collections#reverseOrder(Comparator)
+    //     * @see Comparators#reverseOrder(Comparator)
+    //     * @deprecated replaced by {@code Comparators.reverseOrder(Comparator)}
+    //     */
+    //    @Deprecated
+    //    @Beta
+    //    public static <T> Comparator<T> reverseOrder(final Comparator<T> cmp) {
+    //        return Comparators.reverseOrder(cmp);
+    //    }
+
+    /**
+     * Returns an {@code unmodifiable view} of the specified {@code Collection}. Or an empty {@code Collection} if the specified {@code collection} is null.
+     *
+     * @param <T>
+     * @param c
+     * @return an empty {@code Collection} if the specified {@code c} is null.
+     */
+    public static <T> Collection<T> unmodifiableCollection(Collection<? extends T> c) {
+        if (c == null) {
+            return emptyList();
+        }
+
+        return Collections.unmodifiableCollection(c);
+    }
+
+    /**
+     * Returns an {@code unmodifiable view} of the specified {@code List}. Or an empty {@code List} if the specified {@code list} is null.
+     *
+     * @param <T>
+     * @param list
+     * @return
+     * @see Collections.unmodifiableList(List)
+     */
+    public static <T> List<T> unmodifiableList(final List<? extends T> list) {
+        if (list == null) {
+            return emptyList();
+        }
+
+        return Collections.unmodifiableList(list);
+    }
+
+    /**
+     * Returns an {@code unmodifiable view} of the specified {@code Set}. Or an empty {@code Set} if the specified {@code set} is null.
+     *
+     * @param <T>
+     * @param s
+     * @return
+     * @see Collections.unmodifiableSet(Set)
+     */
+    public static <T> Set<T> unmodifiableSet(final Set<? extends T> s) {
+        if (s == null) {
+            return emptySet();
+        }
+
+        return Collections.unmodifiableSet(s);
+    }
+
+    /**
+     * Returns an {@code unmodifiable view} of the specified {@code SortedSet}. Or an empty {@code SortedSet} if the specified {@code set} is null.
+     *
+     * @param <T>
+     * @param s
+     * @return
+     * @see Collections.unmodifiableSet(SortedSet)
+     */
+    public static <T> SortedSet<T> unmodifiableSortedSet(final SortedSet<T> s) {
+        if (s == null) {
+            return emptySortedSet();
+        }
+
+        return Collections.unmodifiableSortedSet(s);
+    }
+
+    /**
+     * Returns an {@code unmodifiable view} of the specified {@code NavigableSet}. Or an empty {@code NavigableSet} if the specified {@code set} is null.
+     *
+     * @param <T>
+     * @param s
+     * @return
+     * @see Collections.unmodifiableNavigableSet(NavigableSet)
+     */
+    public static <T> NavigableSet<T> unmodifiableNavigableSet(final NavigableSet<T> s) {
+        if (s == null) {
+            return emptyNavigableSet();
+        }
+
+        return Collections.unmodifiableNavigableSet(s);
+    }
+
+    /**
+     * Returns an {@code unmodifiable view} of the specified {@code Map}. Or an empty {@code Map} if the specified {@code map} is null.
+     *
+     * @param <K>
+     * @param <V>
+     * @param m
+     * @return
+     * @see Collections#unmodifiableMap(Map)
+     */
+    public static <K, V> Map<K, V> unmodifiableMap(Map<? extends K, ? extends V> m) {
+        if (m == null) {
+            return emptyMap();
+        }
+
+        return Collections.unmodifiableMap(m);
+    }
+
+    /**
+     * Returns an {@code unmodifiable view} of the specified {@code SortedMap}. Or an empty {@code SortedMap} if the specified {@code map} is null.
+     *
+     * @param <K>
+     * @param <V>
+     * @param m
+     * @return
+     * @see Collections#unmodifiableSortedMap(SortedMap)
+     */
+    public static <K, V> SortedMap<K, V> unmodifiableSortedMap(SortedMap<K, ? extends V> m) {
+        if (m == null) {
+            return emptySortedMap();
+        }
+
+        return Collections.unmodifiableSortedMap(m);
+    }
+
+    /**
+     * Returns an {@code unmodifiable view} of the specified {@code NavigableMap}. Or an empty {@code NavigableMap} if the specified {@code map} is null.
+     *
+     * @param <K>
+     * @param <V>
+     * @param m
+     * @return
+     * @see Collections#unmodifiableNavigableMap(NavigableMap)
+     */
+    public static <K, V> NavigableMap<K, V> unmodifiableNavigableMap(NavigableMap<K, ? extends V> m) {
+        if (m == null) {
+            return emptyNavigableMap();
+        }
+
+        return Collections.unmodifiableNavigableMap(m);
     }
 
     static <T> Iterator<T> getDescendingIteratorIfPossible(final Iterable<? extends T> c) {
