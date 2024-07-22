@@ -509,7 +509,18 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @return
      */
     public boolean contains(R rowKey, C columnKey) {
-        return get(rowKey, columnKey) != null;
+        return _rowKeySet.contains(rowKey) && _columnKeySet.contains(columnKey);
+    }
+
+    /**
+     *
+     * @param rowKey
+     * @param columnKey
+     * @param value
+     * @return
+     */
+    public boolean contains(R rowKey, C columnKey, Object value) {
+        return N.equals(get(rowKey, columnKey), value);
     }
 
     /**
@@ -704,10 +715,10 @@ public final class Sheet<R, C, V> implements Cloneable {
     }
 
     /**
-     * 
      *
-     * @param rowKey 
-     * @param func 
+     *
+     * @param rowKey
+     * @param func
      */
     public void updateRow(R rowKey, Function<? super V, ? extends V> func) {
         checkFrozen();
@@ -1031,10 +1042,10 @@ public final class Sheet<R, C, V> implements Cloneable {
     }
 
     /**
-     * 
      *
-     * @param columnKey 
-     * @param func 
+     *
+     * @param columnKey
+     * @param func
      */
     public void updateColumn(C columnKey, Function<? super V, ? extends V> func) {
         checkFrozen();
@@ -1237,9 +1248,9 @@ public final class Sheet<R, C, V> implements Cloneable {
 
     // TODO should the method name be "replaceAll"? If change the method name to replaceAll, what about updateColumn/updateRow?
     /**
-     * 
      *
-     * @param func 
+     *
+     * @param func
      */
     public void updateAll(Function<? super V, ? extends V> func) {
         checkFrozen();
@@ -1260,7 +1271,7 @@ public final class Sheet<R, C, V> implements Cloneable {
     /**
      * Update all elements based on points.
      *
-     * @param func 
+     * @param func
      */
     public void updateAll(IntBiFunction<? extends V> func) {
         checkFrozen();
@@ -1284,7 +1295,7 @@ public final class Sheet<R, C, V> implements Cloneable {
     /**
      * Update all elements based on points.
      *
-     * @param func 
+     * @param func
      */
     public void updateAll(TriFunction<? super R, ? super C, ? super V, ? extends V> func) {
         checkFrozen();
@@ -1309,10 +1320,10 @@ public final class Sheet<R, C, V> implements Cloneable {
     }
 
     /**
-     * 
      *
-     * @param predicate 
-     * @param newValue 
+     *
+     * @param predicate
+     * @param newValue
      */
     public void replaceIf(final Predicate<? super V> predicate, final V newValue) {
         checkFrozen();
@@ -1335,8 +1346,8 @@ public final class Sheet<R, C, V> implements Cloneable {
     /**
      * Replace elements by <code>Predicate.test(i, j)</code> based on points
      *
-     * @param predicate 
-     * @param newValue 
+     * @param predicate
+     * @param newValue
      */
     public void replaceIf(final IntBiPredicate predicate, final V newValue) {
         checkFrozen();
@@ -1362,8 +1373,8 @@ public final class Sheet<R, C, V> implements Cloneable {
     /**
      * Replace elements by <code>Predicate.test(i, j)</code> based on points
      *
-     * @param predicate 
-     * @param newValue 
+     * @param predicate
+     * @param newValue
      */
     public void replaceIf(final TriPredicate<? super R, ? super C, ? super V> predicate, final V newValue) {
         checkFrozen();
@@ -1397,8 +1408,8 @@ public final class Sheet<R, C, V> implements Cloneable {
     /**
      *
      */
-    public void sortByRow() {
-        sortByRow((Comparator<R>) Comparator.naturalOrder());
+    public void sortByRowKey() {
+        sortByRowKey((Comparator<R>) Comparator.naturalOrder());
     }
 
     /**
@@ -1406,14 +1417,14 @@ public final class Sheet<R, C, V> implements Cloneable {
      *
      * @param cmp
      */
-    public void sortByRow(final Comparator<? super R> cmp) {
+    public void sortByRowKey(final Comparator<? super R> cmp) {
         checkFrozen();
 
-        final int rowCount = _rowKeySet.size();
-        final Indexed<R>[] arrayOfPair = new Indexed[rowCount];
+        final int rowLength = _rowKeySet.size();
+        final Indexed<R>[] arrayOfPair = new Indexed[rowLength];
         final Iterator<R> iter = _rowKeySet.iterator();
 
-        for (int rowIndex = 0; rowIndex < rowCount; rowIndex++) {
+        for (int rowIndex = 0; rowIndex < rowLength; rowIndex++) {
             arrayOfPair[rowIndex] = Indexed.of(iter.next(), rowIndex);
         }
 
@@ -1423,10 +1434,11 @@ public final class Sheet<R, C, V> implements Cloneable {
 
         if (this._initialized) {
             final int columnCount = _columnKeySet.size();
-            final Set<Integer> ordered = N.newHashSet(rowCount);
+            final Set<Integer> ordered = N.newHashSet(rowLength);
             final V[] tempRow = (V[]) new Object[columnCount];
+            List<V> tmpColumn = null;
 
-            for (int i = 0, index = 0; i < rowCount; i++) {
+            for (int i = 0, index = 0; i < rowLength; i++) {
                 index = arrayOfPair[i].index();
 
                 if ((index != i) && !ordered.contains(i)) {
@@ -1439,7 +1451,8 @@ public final class Sheet<R, C, V> implements Cloneable {
 
                     do {
                         for (int j = 0; j < columnCount; j++) {
-                            _columnList.get(j).set(previous, _columnList.get(j).get(next));
+                            tmpColumn = _columnList.get(j);
+                            tmpColumn.set(previous, tmpColumn.get(next));
                         }
 
                         ordered.add(next);
@@ -1460,7 +1473,7 @@ public final class Sheet<R, C, V> implements Cloneable {
         final boolean indexedMapIntialized = N.notEmpty(_rowKeyIndexMap);
         _rowKeySet.clear();
 
-        for (int i = 0; i < rowCount; i++) {
+        for (int i = 0; i < rowLength; i++) {
             _rowKeySet.add(arrayOfPair[i].value());
 
             if (indexedMapIntialized) {
@@ -1472,8 +1485,8 @@ public final class Sheet<R, C, V> implements Cloneable {
     /**
      *
      */
-    public void sortByColumn() {
-        sortByColumn((Comparator<C>) Comparator.naturalOrder());
+    public void sortByColumnKey() {
+        sortByColumnKey((Comparator<C>) Comparator.naturalOrder());
     }
 
     /**
@@ -1481,14 +1494,14 @@ public final class Sheet<R, C, V> implements Cloneable {
      *
      * @param cmp
      */
-    public void sortByColumn(final Comparator<? super C> cmp) {
+    public void sortByColumnKey(final Comparator<? super C> cmp) {
         checkFrozen();
 
-        final int columnCount = _columnKeySet.size();
-        final Indexed<C>[] arrayOfPair = new Indexed[columnCount];
+        final int columnLength = _columnKeySet.size();
+        final Indexed<C>[] arrayOfPair = new Indexed[columnLength];
         final Iterator<C> iter = _columnKeySet.iterator();
 
-        for (int columnIndex = 0; columnIndex < columnCount; columnIndex++) {
+        for (int columnIndex = 0; columnIndex < columnLength; columnIndex++) {
             arrayOfPair[columnIndex] = Indexed.of(iter.next(), columnIndex);
         }
 
@@ -1497,10 +1510,10 @@ public final class Sheet<R, C, V> implements Cloneable {
         N.sort(arrayOfPair, pairCmp);
 
         if (this._initialized) {
-            final Set<Integer> ordered = N.newHashSet(columnCount);
+            final Set<Integer> ordered = N.newHashSet(columnLength);
             List<V> tempColumn = null;
 
-            for (int i = 0, index = 0; i < columnCount; i++) {
+            for (int i = 0, index = 0; i < columnLength; i++) {
                 index = arrayOfPair[i].index();
 
                 if ((index != i) && !ordered.contains(i)) {
@@ -1528,11 +1541,147 @@ public final class Sheet<R, C, V> implements Cloneable {
         final boolean indexedMapIntialized = N.notEmpty(_columnKeyIndexMap);
         _columnKeySet.clear();
 
-        for (int i = 0; i < columnCount; i++) {
+        for (int i = 0; i < columnLength; i++) {
             _columnKeySet.add(arrayOfPair[i].value());
 
             if (indexedMapIntialized) {
                 _columnKeyIndexMap.forcePut(arrayOfPair[i].value(), i);
+            }
+        }
+    }
+
+    public void sortByRow(final R rowKey, final Comparator<? super V> cmp) {
+        checkFrozen();
+
+        if (!_initialized) {
+            return;
+        }
+
+        final int rowIndex = getRowIndex(rowKey);
+        final int columnLength = columnLength();
+        final Indexed<V>[] arrayOfPair = new Indexed[columnLength];
+
+        for (int columnIndex = 0; columnIndex < columnLength; columnIndex++) {
+            arrayOfPair[columnIndex] = Indexed.of(_columnList.get(columnIndex).get(rowIndex), columnIndex);
+        }
+
+        if (N.allMatch(arrayOfPair, it -> it.value() == null)) { // All null values in the specified row.
+            return;
+        }
+
+        final Comparator<Indexed<V>> pairCmp = createComparatorForIndexedObject(cmp);
+
+        N.sort(arrayOfPair, pairCmp);
+
+        final Set<Integer> ordered = N.newHashSet(columnLength);
+        List<V> tempColumn = null;
+
+        for (int i = 0, index = 0; i < columnLength; i++) {
+            index = arrayOfPair[i].index();
+
+            if ((index != i) && !ordered.contains(i)) {
+                tempColumn = _columnList.get(i);
+
+                int previous = i;
+                int next = index;
+
+                do {
+                    _columnList.set(previous, _columnList.get(next));
+
+                    ordered.add(next);
+
+                    previous = next;
+                    next = arrayOfPair[next].index();
+                } while (next != i);
+
+                _columnList.set(previous, tempColumn);
+
+                ordered.add(i);
+            }
+        }
+
+        final boolean indexedMapIntialized = N.notEmpty(_columnKeyIndexMap);
+        final Object[] columnKeys = _columnKeySet.toArray(new Object[columnLength]);
+        C columnKey = null;
+        _columnKeySet.clear();
+
+        for (int i = 0; i < columnLength; i++) {
+            columnKey = (C) columnKeys[arrayOfPair[i].index()];
+            _columnKeySet.add(columnKey);
+
+            if (indexedMapIntialized) {
+                _columnKeyIndexMap.forcePut(columnKey, i);
+            }
+        }
+    }
+
+    public void sortByColumn(final C columnKey, final Comparator<? super V> cmp) {
+        checkFrozen();
+
+        if (!_initialized) {
+            return;
+        }
+
+        final int columnIndex = getColumnIndex(columnKey);
+        final int rowLength = _rowKeySet.size();
+        final Indexed<V>[] arrayOfPair = new Indexed[rowLength];
+        final List<V> column = _columnList.get(columnIndex);
+
+        for (int rowIndex = 0; rowIndex < rowLength; rowIndex++) {
+            arrayOfPair[rowIndex] = Indexed.of(column.get(rowIndex), rowIndex);
+        }
+
+        final Comparator<Indexed<V>> pairCmp = createComparatorForIndexedObject(cmp);
+
+        N.sort(arrayOfPair, pairCmp);
+
+        final int columnCount = _columnKeySet.size();
+        final Set<Integer> ordered = N.newHashSet(rowLength);
+        final V[] tempRow = (V[]) new Object[columnCount];
+        List<V> tmpColumn = null;
+
+        for (int i = 0, index = 0; i < rowLength; i++) {
+            index = arrayOfPair[i].index();
+
+            if ((index != i) && !ordered.contains(i)) {
+                for (int j = 0; j < columnCount; j++) {
+                    tempRow[j] = _columnList.get(j).get(i);
+                }
+
+                int previous = i;
+                int next = index;
+
+                do {
+                    for (int j = 0; j < columnCount; j++) {
+                        tmpColumn = _columnList.get(j);
+                        tmpColumn.set(previous, tmpColumn.get(next));
+                    }
+
+                    ordered.add(next);
+
+                    previous = next;
+                    next = arrayOfPair[next].index();
+                } while (next != i);
+
+                for (int j = 0; j < columnCount; j++) {
+                    _columnList.get(j).set(previous, tempRow[j]);
+                }
+
+                ordered.add(i);
+            }
+        }
+
+        final boolean indexedMapIntialized = N.notEmpty(_rowKeyIndexMap);
+        final Object[] rowkeys = _rowKeySet.toArray(new Object[rowLength]);
+        R rowKey = null;
+        _rowKeySet.clear();
+
+        for (int i = 0; i < rowLength; i++) {
+            rowKey = (R) rowkeys[arrayOfPair[i].index()];
+            _rowKeySet.add(rowKey);
+
+            if (indexedMapIntialized) {
+                _rowKeyIndexMap.forcePut(rowKey, i);
             }
         }
     }
@@ -1652,13 +1801,13 @@ public final class Sheet<R, C, V> implements Cloneable {
     }
 
     /**
-     * 
      *
-     * @param <U> 
-     * @param <X> 
-     * @param b 
-     * @param mergeFunction 
-     * @return 
+     *
+     * @param <U>
+     * @param <X>
+     * @param b
+     * @param mergeFunction
+     * @return
      */
     public <U, X> Sheet<R, C, X> merge(Sheet<? extends R, ? extends C, ? extends U> b, final BiFunction<? super V, ? super U, ? extends X> mergeFunction) {
         final Sheet<R, C, U> sheetB = (Sheet<R, C, U>) b;
@@ -2767,7 +2916,7 @@ public final class Sheet<R, C, V> implements Cloneable {
     }
 
     /**
-     * To data set H.
+     * Returns a {@code DataSet} created by mapping column2column from this {@code Sheet}.
      *
      * @return a DataSet based on row.
      */
@@ -2798,7 +2947,7 @@ public final class Sheet<R, C, V> implements Cloneable {
     }
 
     /**
-     * To data set V.
+     * Returns a {@code DataSet} created by mapping row2column from this {@code Sheet}.
      *
      * @return a DataSet based on column.
      */
@@ -2835,7 +2984,7 @@ public final class Sheet<R, C, V> implements Cloneable {
     }
 
     /**
-     * To array H.
+     * Returns a two dimension array by mapping row to element array.
      *
      * @return a 2D array based on row.
      */
@@ -2858,7 +3007,7 @@ public final class Sheet<R, C, V> implements Cloneable {
     }
 
     /**
-     * To array H.
+     * Returns a two dimension array by mapping row to element array.
      *
      * @param <T>
      * @param cls
@@ -2887,7 +3036,7 @@ public final class Sheet<R, C, V> implements Cloneable {
     }
 
     /**
-     * To array V.
+     * Returns a two dimension array by mapping column to element array.
      *
      * @return a 2D array based on column.
      */
@@ -2906,7 +3055,7 @@ public final class Sheet<R, C, V> implements Cloneable {
     }
 
     /**
-     * To array V.
+     * Returns a two dimension array by mapping column to element array.
      *
      * @param <T>
      * @param cls

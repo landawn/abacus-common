@@ -1587,36 +1587,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * It's copied from StreamEx: https://github.com/amaembo/streamex under Apache License v2 and may be modified.
      * <br />
      *
-     * Returns a {@code Collector} which filters input elements by the supplied
-     * predicate, collecting them to the list.
-     *
-     * <p>
-     * This method behaves like
-     * {@code filtering(predicate, Collectors.toList())}.
-     *
-     * <p>
-     * There are no guarantees on the type, mutability, serializability, or
-     * thread-safety of the {@code List} returned.
-     *
-     * @param <T> the type of the input elements
-     * @param predicate a filter function to be applied to the input elements
-     * @return a collector which applies the predicate to the input elements and
-     *         collects the elements for which predicate returned true to the
-     *         {@code List}
-     * @see #filtering(Predicate, Collector)
-     * @since 0.6.0
-     */
-    @Beta
-    public static <T> Collector<T, ?, List<T>> filtering(Predicate<? super T> predicate) {
-        final Collector<? super T, ?, List<T>> downstream = Collectors.toList();
-
-        return filtering(predicate, downstream);
-    }
-
-    /**
-     * It's copied from StreamEx: https://github.com/amaembo/streamex under Apache License v2 and may be modified.
-     * <br />
-     *
      * Returns a {@code Collector} which passes only those elements to the
      * specified downstream collector which match given predicate.
      *
@@ -1661,16 +1631,33 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     }
 
     /**
+     * It's copied from StreamEx: https://github.com/amaembo/streamex under Apache License v2 and may be modified.
+     * <br />
      *
+     * Returns a {@code Collector} which filters input elements by the supplied
+     * predicate, collecting them to the list.
      *
-     * @param <T>
-     * @param <U>
-     * @param mapper
-     * @return
+     * <p>
+     * This method behaves like
+     * {@code filtering(predicate, Collectors.toList())}.
+     *
+     * <p>
+     * There are no guarantees on the type, mutability, serializability, or
+     * thread-safety of the {@code List} returned.
+     *
+     * @param <T> the type of the input elements
+     * @param predicate a filter function to be applied to the input elements
+     * @return a collector which applies the predicate to the input elements and
+     *         collects the elements for which predicate returned true to the
+     *         {@code List}
+     * @see #filtering(Predicate, Collector)
+     * @since 0.6.0
      */
     @Beta
-    public static <T, U> Collector<T, ?, List<U>> mapping(Function<? super T, ? extends U> mapper) {
-        return Collectors.mapping(mapper, Collectors.<U> toList());
+    public static <T> Collector<T, ?, List<T>> filteringToList(Predicate<? super T> predicate) {
+        final Collector<? super T, ?, List<T>> downstream = Collectors.toList();
+
+        return filtering(predicate, downstream);
     }
 
     /**
@@ -1701,8 +1688,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @return
      */
     @Beta
-    public static <T, U> Collector<T, ?, List<U>> flatMaping(final Function<? super T, ? extends java.util.stream.Stream<? extends U>> mapper) {
-        return flatMaping(mapper, Collectors.<U> toList());
+    public static <T, U> Collector<T, ?, List<U>> mappingToList(Function<? super T, ? extends U> mapper) {
+        return Collectors.mapping(mapper, Collectors.<U> toList());
     }
 
     /**
@@ -1716,48 +1703,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param downstream
      * @return
      */
-    public static <T, U, A, R> Collector<T, ?, R> flatMaping(final Function<? super T, ? extends java.util.stream.Stream<? extends U>> mapper,
-            final Collector<? super U, A, R> downstream) {
-        final BiConsumer<A, ? super U> downstreamAccumulator = downstream.accumulator();
-
-        final BiConsumer<A, T> accumulator = (a, t) -> {
-            try (java.util.stream.Stream<? extends U> stream = mapper.apply(t)) {
-                final Iterator<? extends U> iter = stream.iterator();
-
-                while (iter.hasNext()) {
-                    downstreamAccumulator.accept(a, iter.next());
-                }
-            }
-        };
-
-        return new CollectorImpl<>(downstream.supplier(), accumulator, downstream.combiner(), downstream.finisher(), downstream.characteristics());
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param <U>
-     * @param mapper
-     * @return
-     */
-    @Beta
-    public static <T, U> Collector<T, ?, List<U>> flattMaping(final Function<? super T, ? extends Stream<? extends U>> mapper) {
-        return flattMaping(mapper, Collectors.<U> toList());
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param <U>
-     * @param <A>
-     * @param <R>
-     * @param mapper
-     * @param downstream
-     * @return
-     */
-    public static <T, U, A, R> Collector<T, ?, R> flattMaping(final Function<? super T, ? extends Stream<? extends U>> mapper,
+    public static <T, U, A, R> Collector<T, ?, R> flatMapping(final Function<? super T, ? extends Stream<? extends U>> mapper,
             final Collector<? super U, A, R> downstream) {
         final BiConsumer<A, ? super U> downstreamAccumulator = downstream.accumulator();
 
@@ -1783,8 +1729,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @return
      */
     @Beta
-    public static <T, U> Collector<T, ?, List<U>> flatmapping(final Function<? super T, ? extends Collection<? extends U>> mapper) {
-        return flatmapping(mapper, Collectors.<U> toList());
+    public static <T, U> Collector<T, ?, List<U>> flatMappingToList(final Function<? super T, ? extends Stream<? extends U>> mapper) {
+        return flatMapping(mapper, Collectors.<U> toList());
     }
 
     /**
@@ -1819,16 +1765,13 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      *
      *
      * @param <T>
-     * @param <T2>
      * @param <U>
-     * @param flatMapper
      * @param mapper
      * @return
      */
     @Beta
-    public static <T, T2, U> Collector<T, ?, List<U>> flatMaping(final Function<? super T, ? extends java.util.stream.Stream<? extends T2>> flatMapper,
-            final BiFunction<? super T, ? super T2, ? extends U> mapper) {
-        return flatMaping(flatMapper, mapper, Collectors.<U> toList());
+    public static <T, U> Collector<T, ?, List<U>> flatmappingToList(final Function<? super T, ? extends Collection<? extends U>> mapper) {
+        return flatmapping(mapper, Collectors.<U> toList());
     }
 
     /**
@@ -1845,54 +1788,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @return
      */
     @Beta
-    public static <T, T2, U, A, R> Collector<T, ?, R> flatMaping(final Function<? super T, ? extends java.util.stream.Stream<? extends T2>> flatMapper,
-            final BiFunction<? super T, ? super T2, ? extends U> mapper, final Collector<? super U, A, R> downstream) {
-        final BiConsumer<A, ? super U> downstreamAccumulator = downstream.accumulator();
-
-        final BiConsumer<A, T> accumulator = (a, t) -> {
-            try (java.util.stream.Stream<? extends T2> stream = flatMapper.apply(t)) {
-                final Iterator<? extends T2> iter = stream.iterator();
-
-                while (iter.hasNext()) {
-                    downstreamAccumulator.accept(a, mapper.apply(t, iter.next()));
-                }
-            }
-        };
-
-        return new CollectorImpl<>(downstream.supplier(), accumulator, downstream.combiner(), downstream.finisher(), downstream.characteristics());
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param <T2>
-     * @param <U>
-     * @param flatMapper
-     * @param mapper
-     * @return
-     */
-    @Beta
-    public static <T, T2, U> Collector<T, ?, List<U>> flattMaping(final Function<? super T, ? extends Stream<? extends T2>> flatMapper,
-            final BiFunction<? super T, ? super T2, ? extends U> mapper) {
-        return flattMaping(flatMapper, mapper, Collectors.<U> toList());
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param <T2>
-     * @param <U>
-     * @param <A>
-     * @param <R>
-     * @param flatMapper
-     * @param mapper
-     * @param downstream
-     * @return
-     */
-    @Beta
-    public static <T, T2, U, A, R> Collector<T, ?, R> flattMaping(final Function<? super T, ? extends Stream<? extends T2>> flatMapper,
+    public static <T, T2, U, A, R> Collector<T, ?, R> flatMapping(final Function<? super T, ? extends Stream<? extends T2>> flatMapper,
             final BiFunction<? super T, ? super T2, ? extends U> mapper, final Collector<? super U, A, R> downstream) {
         final BiConsumer<A, ? super U> downstreamAccumulator = downstream.accumulator();
 
@@ -1920,9 +1816,9 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @return
      */
     @Beta
-    public static <T, T2, U> Collector<T, ?, List<U>> flatmapping(final Function<? super T, ? extends Collection<? extends T2>> flatMapper,
+    public static <T, T2, U> Collector<T, ?, List<U>> flatMappingToList(final Function<? super T, ? extends Stream<? extends T2>> flatMapper,
             final BiFunction<? super T, ? super T2, ? extends U> mapper) {
-        return flatmapping(flatMapper, mapper, Collectors.<U> toList());
+        return flatMapping(flatMapper, mapper, Collectors.<U> toList());
     }
 
     /**
@@ -1955,6 +1851,111 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
         return new CollectorImpl<>(downstream.supplier(), accumulator, downstream.combiner(), downstream.finisher(), downstream.characteristics());
     }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param <T2>
+     * @param <U>
+     * @param flatMapper
+     * @param mapper
+     * @return
+     */
+    @Beta
+    public static <T, T2, U> Collector<T, ?, List<U>> flatmappingToList(final Function<? super T, ? extends Collection<? extends T2>> flatMapper,
+            final BiFunction<? super T, ? super T2, ? extends U> mapper) {
+        return flatmapping(flatMapper, mapper, Collectors.<U> toList());
+    }
+
+    //    // Too many/much?
+    //    /**
+    //     *
+    //     *
+    //     * @param <T>
+    //     * @param <U>
+    //     * @param <A>
+    //     * @param <R>
+    //     * @param mapper
+    //     * @param downstream
+    //     * @return
+    //     */
+    //    public static <T, U, A, R> Collector<T, ?, R> flattMapping(final Function<? super T, ? extends java.util.stream.Stream<? extends U>> mapper,
+    //            final Collector<? super U, A, R> downstream) {
+    //        final BiConsumer<A, ? super U> downstreamAccumulator = downstream.accumulator();
+    //
+    //        final BiConsumer<A, T> accumulator = (a, t) -> {
+    //            try (java.util.stream.Stream<? extends U> stream = mapper.apply(t)) {
+    //                final Iterator<? extends U> iter = stream.iterator();
+    //
+    //                while (iter.hasNext()) {
+    //                    downstreamAccumulator.accept(a, iter.next());
+    //                }
+    //            }
+    //        };
+    //
+    //        return new CollectorImpl<>(downstream.supplier(), accumulator, downstream.combiner(), downstream.finisher(), downstream.characteristics());
+    //    }
+    //
+    //    /**
+    //     *
+    //     *
+    //     * @param <T>
+    //     * @param <U>
+    //     * @param mapper
+    //     * @return
+    //     */
+    //    @Beta
+    //    public static <T, U> Collector<T, ?, List<U>> flattMappingToList(final Function<? super T, ? extends java.util.stream.Stream<? extends U>> mapper) {
+    //        return flattMapping(mapper, Collectors.<U> toList());
+    //    }
+    //
+    //    /**
+    //     *
+    //     *
+    //     * @param <T>
+    //     * @param <T2>
+    //     * @param <U>
+    //     * @param <A>
+    //     * @param <R>
+    //     * @param flatMapper
+    //     * @param mapper
+    //     * @param downstream
+    //     * @return
+    //     */
+    //    @Beta
+    //    public static <T, T2, U, A, R> Collector<T, ?, R> flattMapping(final Function<? super T, ? extends java.util.stream.Stream<? extends T2>> flatMapper,
+    //            final BiFunction<? super T, ? super T2, ? extends U> mapper, final Collector<? super U, A, R> downstream) {
+    //        final BiConsumer<A, ? super U> downstreamAccumulator = downstream.accumulator();
+    //
+    //        final BiConsumer<A, T> accumulator = (a, t) -> {
+    //            try (java.util.stream.Stream<? extends T2> stream = flatMapper.apply(t)) {
+    //                final Iterator<? extends T2> iter = stream.iterator();
+    //
+    //                while (iter.hasNext()) {
+    //                    downstreamAccumulator.accept(a, mapper.apply(t, iter.next()));
+    //                }
+    //            }
+    //        };
+    //
+    //        return new CollectorImpl<>(downstream.supplier(), accumulator, downstream.combiner(), downstream.finisher(), downstream.characteristics());
+    //    }
+    //
+    //    /**
+    //     *
+    //     *
+    //     * @param <T>
+    //     * @param <T2>
+    //     * @param <U>
+    //     * @param flatMapper
+    //     * @param mapper
+    //     * @return
+    //     */
+    //    @Beta
+    //    public static <T, T2, U> Collector<T, ?, List<U>> flattMappingToList(final Function<? super T, ? extends java.util.stream.Stream<? extends T2>> flatMapper,
+    //            final BiFunction<? super T, ? super T2, ? extends U> mapper) {
+    //        return flattMapping(flatMapper, mapper, Collectors.<U> toList());
+    //    }
 
     /**
      *
@@ -2160,8 +2161,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @return a collector which collects distinct elements to the {@code List}.
      * @since 0.3.8
      */
-    public static <T> Collector<T, ?, List<T>> distinctBy(final Function<? super T, ?> keyExtractor) {
-        return distinctBy(keyExtractor, Suppliers.ofList());
+    public static <T> Collector<T, ?, List<T>> distinctByToList(final Function<? super T, ?> keyExtractor) {
+        return distinctByToCollection(keyExtractor, Suppliers.ofList());
     }
 
     /**
@@ -2173,7 +2174,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param suppplier
      * @return
      */
-    public static <T, C extends Collection<T>> Collector<T, ?, C> distinctBy(final Function<? super T, ?> keyExtractor, final Supplier<? extends C> suppplier) {
+    public static <T, C extends Collection<T>> Collector<T, ?, C> distinctByToCollection(final Function<? super T, ?> keyExtractor,
+            final Supplier<? extends C> suppplier) {
         final Supplier<Map<Object, T>> supplier = Suppliers.<Object, T> ofLinkedHashMap();
 
         final BiConsumer<Map<Object, T>, T> accumulator = (map, t) -> {
@@ -2220,7 +2222,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @return a collector which counts a number of distinct classes the mapper
      *         function returns for the stream elements.
      */
-    public static <T> Collector<T, ?, Integer> distinctCount(final Function<? super T, ?> keyExtractor) {
+    public static <T> Collector<T, ?, Integer> distinctByToCounting(final Function<? super T, ?> keyExtractor) {
         final Supplier<Set<Object>> supplier = Suppliers.<Object> ofSet();
 
         final BiConsumer<Set<Object>, T> accumulator = (c, t) -> c.add(keyExtractor.apply(t));
@@ -4832,60 +4834,9 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @return
      * @see Collectors#toMultimap(Function, Function)
      */
-    public static <T, K, V> Collector<T, ?, ListMultimap<K, V>> flatMapingValueToMultimap(final Function<? super T, K> keyMapper,
-            final Function<? super T, ? extends java.util.stream.Stream<? extends V>> flatValueMapper) {
-        return flatMapingValueToMultimap(keyMapper, flatValueMapper, Suppliers.<K, V> ofListMultimap());
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param <K>
-     * @param <V>
-     * @param <C>
-     * @param <M>
-     * @param keyMapper
-     * @param flatValueMapper
-     * @param mapFactory
-     * @return
-     * @see Collectors#toMultimap(Function, Function, Supplier)
-     */
-    public static <T, K, V, C extends Collection<V>, M extends Multimap<K, V, C>> Collector<T, ?, M> flatMapingValueToMultimap(
-            final Function<? super T, K> keyMapper, final Function<? super T, ? extends java.util.stream.Stream<? extends V>> flatValueMapper,
-            final Supplier<? extends M> mapFactory) {
-
-        final BiConsumer<M, T> accumulator = (map, element) -> {
-            final K key = keyMapper.apply(element);
-
-            try (java.util.stream.Stream<? extends V> stream = flatValueMapper.apply(element)) {
-                if (stream.isParallel()) {
-                    stream.sequential().forEach(value -> map.put(key, value));
-                } else {
-                    stream.forEach(value -> map.put(key, value));
-                }
-            }
-        };
-
-        final BinaryOperator<M> combiner = Collectors.<K, V, C, M> multimapMerger();
-
-        return new CollectorImpl<>(mapFactory, accumulator, combiner, CH_UNORDERED_ID);
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param <K>
-     * @param <V>
-     * @param keyMapper
-     * @param flatValueMapper
-     * @return
-     * @see Collectors#toMultimap(Function, Function)
-     */
-    public static <T, K, V> Collector<T, ?, ListMultimap<K, V>> flattMapingValueToMultimap(final Function<? super T, K> keyMapper,
+    public static <T, K, V> Collector<T, ?, ListMultimap<K, V>> flatMappingValueToMultimap(final Function<? super T, K> keyMapper,
             final Function<? super T, ? extends Stream<? extends V>> flatValueMapper) {
-        return flattMapingValueToMultimap(keyMapper, flatValueMapper, Suppliers.<K, V> ofListMultimap());
+        return flatMappingValueToMultimap(keyMapper, flatValueMapper, Suppliers.<K, V> ofListMultimap());
     }
 
     /**
@@ -4902,7 +4853,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @return
      * @see Collectors#toMultimap(Function, Function, Supplier)
      */
-    public static <T, K, V, C extends Collection<V>, M extends Multimap<K, V, C>> Collector<T, ?, M> flattMapingValueToMultimap(
+    public static <T, K, V, C extends Collection<V>, M extends Multimap<K, V, C>> Collector<T, ?, M> flatMappingValueToMultimap(
             final Function<? super T, K> keyMapper, final Function<? super T, ? extends Stream<? extends V>> flatValueMapper,
             final Supplier<? extends M> mapFactory) {
 
@@ -4984,60 +4935,9 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @return
      * @see Collectors#toMultimap(Function, Function)
      */
-    public static <T, K, V> Collector<T, ?, ListMultimap<K, V>> flatMapingKeyToMultimap(
-            final Function<? super T, java.util.stream.Stream<? extends K>> flatKeyMapper, final Function<? super T, V> valueMapper) {
-        return flatMapingKeyToMultimap(flatKeyMapper, valueMapper, Suppliers.<K, V> ofListMultimap());
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param <K>
-     * @param <V>
-     * @param <C>
-     * @param <M>
-     * @param flatKeyMapper
-     * @param valueMapper
-     * @param mapFactory
-     * @return
-     * @see Collectors#toMultimap(Function, Function, Supplier)
-     */
-    public static <T, K, V, C extends Collection<V>, M extends Multimap<K, V, C>> Collector<T, ?, M> flatMapingKeyToMultimap(
-            final Function<? super T, java.util.stream.Stream<? extends K>> flatKeyMapper, final Function<? super T, V> valueMapper,
-            final Supplier<? extends M> mapFactory) {
-
-        final BiConsumer<M, T> accumulator = (map, element) -> {
-            final V value = valueMapper.apply(element);
-
-            try (java.util.stream.Stream<? extends K> stream = flatKeyMapper.apply(element)) {
-                if (stream.isParallel()) {
-                    stream.sequential().forEach(key -> map.put(key, value));
-                } else {
-                    stream.forEach(key -> map.put(key, value));
-                }
-            }
-        };
-
-        final BinaryOperator<M> combiner = Collectors.<K, V, C, M> multimapMerger();
-
-        return new CollectorImpl<>(mapFactory, accumulator, combiner, CH_UNORDERED_ID);
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param <K>
-     * @param <V>
-     * @param flatKeyMapper
-     * @param valueMapper
-     * @return
-     * @see Collectors#toMultimap(Function, Function)
-     */
-    public static <T, K, V> Collector<T, ?, ListMultimap<K, V>> flattMapingKeyToMultimap(final Function<? super T, Stream<? extends K>> flatKeyMapper,
+    public static <T, K, V> Collector<T, ?, ListMultimap<K, V>> flatMappingKeyToMultimap(final Function<? super T, Stream<? extends K>> flatKeyMapper,
             final Function<? super T, V> valueMapper) {
-        return flattMapingKeyToMultimap(flatKeyMapper, valueMapper, Suppliers.<K, V> ofListMultimap());
+        return flatMappingKeyToMultimap(flatKeyMapper, valueMapper, Suppliers.<K, V> ofListMultimap());
     }
 
     /**
@@ -5054,7 +4954,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @return
      * @see Collectors#toMultimap(Function, Function, Supplier)
      */
-    public static <T, K, V, C extends Collection<V>, M extends Multimap<K, V, C>> Collector<T, ?, M> flattMapingKeyToMultimap(
+    public static <T, K, V, C extends Collection<V>, M extends Multimap<K, V, C>> Collector<T, ?, M> flatMappingKeyToMultimap(
             final Function<? super T, Stream<? extends K>> flatKeyMapper, final Function<? super T, V> valueMapper, final Supplier<? extends M> mapFactory) {
 
         final BiConsumer<M, T> accumulator = (map, element) -> {
@@ -5219,6 +5119,109 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
             map.put(key, remappingFunction.apply(oldValue, value));
         }
     }
+
+    //    // Too many/much?
+    //    /**
+    //     *
+    //     *
+    //     * @param <T>
+    //     * @param <K>
+    //     * @param <V>
+    //     * @param keyMapper
+    //     * @param flatValueMapper
+    //     * @return
+    //     * @see Collectors#toMultimap(Function, Function)
+    //     */
+    //    public static <T, K, V> Collector<T, ?, ListMultimap<K, V>> flattMappingValueToMultimap(final Function<? super T, K> keyMapper,
+    //            final Function<? super T, ? extends java.util.stream.Stream<? extends V>> flatValueMapper) {
+    //        return flattMappingValueToMultimap(keyMapper, flatValueMapper, Suppliers.<K, V> ofListMultimap());
+    //    }
+    //
+    //    /**
+    //     *
+    //     *
+    //     * @param <T>
+    //     * @param <K>
+    //     * @param <V>
+    //     * @param <C>
+    //     * @param <M>
+    //     * @param keyMapper
+    //     * @param flatValueMapper
+    //     * @param mapFactory
+    //     * @return
+    //     * @see Collectors#toMultimap(Function, Function, Supplier)
+    //     */
+    //    public static <T, K, V, C extends Collection<V>, M extends Multimap<K, V, C>> Collector<T, ?, M> flattMappingValueToMultimap(
+    //            final Function<? super T, K> keyMapper, final Function<? super T, ? extends java.util.stream.Stream<? extends V>> flatValueMapper,
+    //            final Supplier<? extends M> mapFactory) {
+    //
+    //        final BiConsumer<M, T> accumulator = (map, element) -> {
+    //            final K key = keyMapper.apply(element);
+    //
+    //            try (java.util.stream.Stream<? extends V> stream = flatValueMapper.apply(element)) {
+    //                if (stream.isParallel()) {
+    //                    stream.sequential().forEach(value -> map.put(key, value));
+    //                } else {
+    //                    stream.forEach(value -> map.put(key, value));
+    //                }
+    //            }
+    //        };
+    //
+    //        final BinaryOperator<M> combiner = Collectors.<K, V, C, M> multimapMerger();
+    //
+    //        return new CollectorImpl<>(mapFactory, accumulator, combiner, CH_UNORDERED_ID);
+    //    }
+    //
+    //    /**
+    //     *
+    //     *
+    //     * @param <T>
+    //     * @param <K>
+    //     * @param <V>
+    //     * @param flatKeyMapper
+    //     * @param valueMapper
+    //     * @return
+    //     * @see Collectors#toMultimap(Function, Function)
+    //     */
+    //    public static <T, K, V> Collector<T, ?, ListMultimap<K, V>> flattMappingKeyToMultimap(
+    //            final Function<? super T, java.util.stream.Stream<? extends K>> flatKeyMapper, final Function<? super T, V> valueMapper) {
+    //        return flattMappingKeyToMultimap(flatKeyMapper, valueMapper, Suppliers.<K, V> ofListMultimap());
+    //    }
+    //
+    //    /**
+    //     *
+    //     *
+    //     * @param <T>
+    //     * @param <K>
+    //     * @param <V>
+    //     * @param <C>
+    //     * @param <M>
+    //     * @param flatKeyMapper
+    //     * @param valueMapper
+    //     * @param mapFactory
+    //     * @return
+    //     * @see Collectors#toMultimap(Function, Function, Supplier)
+    //     */
+    //    public static <T, K, V, C extends Collection<V>, M extends Multimap<K, V, C>> Collector<T, ?, M> flattMappingKeyToMultimap(
+    //            final Function<? super T, java.util.stream.Stream<? extends K>> flatKeyMapper, final Function<? super T, V> valueMapper,
+    //            final Supplier<? extends M> mapFactory) {
+    //
+    //        final BiConsumer<M, T> accumulator = (map, element) -> {
+    //            final V value = valueMapper.apply(element);
+    //
+    //            try (java.util.stream.Stream<? extends K> stream = flatKeyMapper.apply(element)) {
+    //                if (stream.isParallel()) {
+    //                    stream.sequential().forEach(key -> map.put(key, value));
+    //                } else {
+    //                    stream.forEach(key -> map.put(key, value));
+    //                }
+    //            }
+    //        };
+    //
+    //        final BinaryOperator<M> combiner = Collectors.<K, V, C, M> multimapMerger();
+    //
+    //        return new CollectorImpl<>(mapFactory, accumulator, combiner, CH_UNORDERED_ID);
+    //    }
 
     /**
      *

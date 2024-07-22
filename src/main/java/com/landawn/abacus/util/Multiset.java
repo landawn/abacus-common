@@ -1550,6 +1550,7 @@ public final class Multiset<E> implements Collection<E> {
      * @return
      * @see #iterator()
      */
+    @Beta
     public Stream<E> elements() {
         return Stream.of(iterator());
     }
@@ -1559,6 +1560,7 @@ public final class Multiset<E> implements Collection<E> {
      *
      * @return
      */
+    @Beta
     public Stream<Multiset.Entry<E>> entries() {
         return Stream.of(entrySet());
     }

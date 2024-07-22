@@ -18,7 +18,6 @@ package com.landawn.abacus.util;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -1015,10 +1014,13 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      */
     public void replaceAll(BiFunction<? super K, ? super V, ? extends V> function) {
         List<K> keyToRemove = null;
+        V value = null;
         V newVal = null;
 
         for (Map.Entry<K, V> entry : backingMap.entrySet()) {
-            newVal = function.apply(entry.getKey(), entry.getValue());
+            value = entry.getValue();
+
+            newVal = function.apply(entry.getKey(), value);
 
             if (N.isEmpty(newVal)) {
                 if (keyToRemove == null) {
@@ -1027,11 +1029,8 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
 
                 keyToRemove.add(entry.getKey());
             } else {
-                try {
-                    entry.setValue(newVal);
-                } catch (IllegalStateException ise) {
-                    throw new ConcurrentModificationException(ise);
-                }
+                value.clear();
+                value.addAll(newVal);
             }
         }
 
@@ -1048,14 +1047,14 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * <pre>
      * final V oldValue = get(key);
      *
-     * if (N.notEmpty(oldValue)) {
+     * if (oldValue != null)) {
      *     return oldValue;
      * }
      *
      * final V newValue = mappingFunction.apply(key);
      *
      * if (N.notEmpty(newValue)) {
-     *     valueMap.put(key, newValue);
+     *      putMany(key, newValue);
      * }
      *
      * return get(key);
@@ -1063,7 +1062,7 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      *
      * @param key
      * @param mappingFunction
-     * @return
+     * @return the new value after computation. It could be {@code null}
      * @throws IllegalArgumentException
      */
     public V computeIfAbsent(K key, Function<? super K, ? extends V> mappingFunction) throws IllegalArgumentException {
@@ -1071,14 +1070,14 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
 
         final V oldValue = get(key);
 
-        if (N.notEmpty(oldValue)) {
+        if (oldValue != null) {
             return oldValue;
         }
 
         final V newValue = mappingFunction.apply(key);
 
         if (N.notEmpty(newValue)) {
-            backingMap.put(key, newValue);
+            putMany(key, newValue);
         }
 
         return get(key);
@@ -1090,16 +1089,19 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * <pre>
      * final V oldValue = get(key);
      *
-     * if (N.isEmpty(oldValue)) {
-     *     return oldValue;
+     * if (oldValue == null) {
+     *     return null;
      * }
      *
      * final V newValue = remappingFunction.apply(key, oldValue);
      *
      * if (N.notEmpty(newValue)) {
-     *     valueMap.put(key, newValue);
+     *      if (oldValue != newValue) {
+     *          oldValue.clear();
+     *          oldValue.addAll(newValue);
+     *       }
      * } else {
-     *     valueMap.remove(key);
+     *     backingMap.remove(key);
      * }
      *
      * return get(key);
@@ -1107,7 +1109,7 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      *
      * @param key
      * @param remappingFunction
-     * @return
+     * @return the new value after computation. It could be {@code null}
      * @throws IllegalArgumentException
      */
     public V computeIfPresent(K key, BiFunction<? super K, ? super V, ? extends V> remappingFunction) throws IllegalArgumentException {
@@ -1115,19 +1117,27 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
 
         final V oldValue = get(key);
 
-        if (N.isEmpty(oldValue)) {
-            return oldValue;
+        if (oldValue == null) {
+            return null;
         }
 
+        V ret = null;
         final V newValue = remappingFunction.apply(key, oldValue);
 
         if (N.notEmpty(newValue)) {
-            backingMap.put(key, newValue);
+            if (oldValue != newValue) {
+                oldValue.clear();
+                oldValue.addAll(newValue);
+            }
+
+            ret = oldValue;
         } else {
             backingMap.remove(key);
         }
 
-        return get(key);
+        // return get(key);
+
+        return ret;
     }
 
     /**
@@ -1138,11 +1148,14 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * final V newValue = remappingFunction.apply(key, oldValue);
      *
      * if (N.notEmpty(newValue)) {
-     *     valueMap.put(key, newValue);
-     * } else {
-     *     if (oldValue != null) {
-     *         valueMap.remove(key);
-     *     }
+     *      if (oldValue == null) {
+     *          putMany(key, newValue);
+     *      } else if (oldValue != newValue) {
+     *          oldValue.clear();
+     *          oldValue.addAll(newValue);
+     *      }
+     * } else if (oldValue != null) {
+     *     backingMap.remove(key);
      * }
      *
      * return get(key);
@@ -1150,22 +1163,35 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      *
      * @param key
      * @param remappingFunction
-     * @return
+     * @return the new value after computation. It could be {@code null}
      * @throws IllegalArgumentException
      */
     public V compute(K key, BiFunction<? super K, ? super V, ? extends V> remappingFunction) throws IllegalArgumentException {
         N.checkArgNotNull(remappingFunction);
 
+        V ret = null;
         final V oldValue = get(key);
         final V newValue = remappingFunction.apply(key, oldValue);
 
         if (N.notEmpty(newValue)) {
-            backingMap.put(key, newValue);
+            if (oldValue == null) {
+                putMany(key, newValue);
+                ret = get(key);
+            } else {
+                if (oldValue != newValue) {
+                    oldValue.clear();
+                    oldValue.addAll(newValue);
+                }
+
+                ret = oldValue;
+            }
         } else if (oldValue != null) {
             backingMap.remove(key);
         }
 
-        return get(key);
+        // return get(key);
+
+        return ret;
     }
 
     /**
@@ -1173,37 +1199,61 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      *
      * <pre>
      * final V oldValue = get(key);
-     * final V newValue = oldValue == null ? value : remappingFunction.apply(oldValue, value);
      *
-     * if (N.notEmpty(newValue)) {
-     *     valueMap.put(key, newValue);
-     * } else if (oldValue != null) {
-     *     valueMap.remove(key);
+     * if (oldValue == null) {
+     *     putMany(key, elements);
+     *     return get(key);
      * }
      *
-     * return newValue;
+     * final V newValue = remappingFunction.apply(oldValue, elements);
+     *
+     * if (N.notEmpty(newValue)) {
+     *      if (oldValue == null) {
+     *          putMany(key, newValue);
+     *          return get(key);
+     *      }
+     * } else if (oldValue != null) {
+     *     backingMap.remove(key);
+     * }
+     *
+     * return get(key);
      * </pre>
      *
      * @param key
-     * @param value
+     * @param elements
      * @param remappingFunction
-     * @return
+     * @return the new value after computation. It could be {@code null}
      * @throws IllegalArgumentException
      */
-    public V merge(K key, V value, BiFunction<? super V, ? super V, ? extends V> remappingFunction) throws IllegalArgumentException {
+    public <C extends Collection<? extends E>> V merge(K key, C elements, BiFunction<? super V, ? super C, ? extends V> remappingFunction)
+            throws IllegalArgumentException {
         N.checkArgNotNull(remappingFunction);
-        N.checkArgNotNull(value);
+        N.checkArgNotNull(elements);
 
         final V oldValue = get(key);
-        final V newValue = oldValue == null ? value : remappingFunction.apply(oldValue, value);
+
+        if (oldValue == null) {
+            putMany(key, elements);
+            return get(key);
+        }
+
+        V ret = null;
+        final V newValue = remappingFunction.apply(oldValue, elements);
 
         if (N.notEmpty(newValue)) {
-            backingMap.put(key, newValue);
-        } else if (oldValue != null) {
+            if (oldValue != newValue) {
+                oldValue.clear();
+                oldValue.addAll(newValue);
+            }
+
+            ret = oldValue;
+        } else {
             backingMap.remove(key);
         }
 
-        return get(key);
+        // return get(key);
+
+        return ret;
     }
 
     /**
@@ -1212,7 +1262,7 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * <pre>
      * final V oldValue = get(key);
      *
-     * if (N.isEmpty(oldValue)) {
+     * if (oldValue == null) {
      *     put(key, e);
      *     return get(key);
      * }
@@ -1220,18 +1270,21 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * final V newValue = remappingFunction.apply(oldValue, e);
      *
      * if (N.notEmpty(newValue)) {
-     *     valueMap.put(key, newValue);
+     *      if (oldValue == null) {
+     *          putMany(key, newValue);
+     *          return get(key);
+     *      }
      * } else if (oldValue != null) {
-     *     valueMap.remove(key);
+     *     backingMap.remove(key);
      * }
      *
-     * return  get(key);
+     * return get(key);
      * </pre>
      *
      * @param key
      * @param e
      * @param remappingFunction
-     * @return
+     * @return the new value after computation. It could be {@code null}
      * @throws IllegalArgumentException
      */
     public V merge(K key, E e, BiFunction<? super V, ? super E, ? extends V> remappingFunction) throws IllegalArgumentException {
@@ -1240,20 +1293,28 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
 
         final V oldValue = get(key);
 
-        if (N.isEmpty(oldValue)) {
+        if (oldValue == null) {
             put(key, e);
             return get(key);
         }
 
+        V ret = null;
         final V newValue = remappingFunction.apply(oldValue, e);
 
         if (N.notEmpty(newValue)) {
-            backingMap.put(key, newValue);
-        } else if (oldValue != null) {
+            if (oldValue != newValue) {
+                oldValue.clear();
+                oldValue.addAll(newValue);
+            }
+
+            ret = oldValue;
+        } else {
             backingMap.remove(key);
         }
 
-        return get(key);
+        // return get(key);
+
+        return ret;
     }
 
     /**
@@ -1627,9 +1688,9 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
     //    }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public Iterator<Entry<K, V>> iterator() {
