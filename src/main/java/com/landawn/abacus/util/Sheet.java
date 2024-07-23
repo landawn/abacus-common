@@ -1420,7 +1420,7 @@ public final class Sheet<R, C, V> implements Cloneable {
     public void sortByRowKey(final Comparator<? super R> cmp) {
         checkFrozen();
 
-        final int rowLength = _rowKeySet.size();
+        final int rowLength = rowLength();
         final Indexed<R>[] arrayOfPair = new Indexed[rowLength];
         final Iterator<R> iter = _rowKeySet.iterator();
 
@@ -1615,6 +1615,84 @@ public final class Sheet<R, C, V> implements Cloneable {
         }
     }
 
+    public void sortByRow(Collection<R> rowKeysToSort, Comparator<? super Object[]> cmp) {
+        checkFrozen();
+
+        if (!_initialized) {
+            return;
+        }
+
+        final int sortRowSize = rowKeysToSort.size();
+        final int[] rowIndexes = new int[sortRowSize];
+        int idx = 0;
+
+        for (R rowKey : rowKeysToSort) {
+            rowIndexes[idx++] = getRowIndex(rowKey);
+        }
+
+        final int columnLength = columnLength();
+        final Indexed<Object[]>[] arrayOfPair = new Indexed[columnLength];
+
+        for (int columnIndex = 0; columnIndex < columnLength; columnIndex++) {
+            Object[] values = new Object[sortRowSize];
+
+            for (int i = 0; i < sortRowSize; i++) {
+                values[i] = _columnList.get(columnIndex).get(rowIndexes[i]);
+            }
+
+            arrayOfPair[columnIndex] = Indexed.of(values, columnIndex);
+        }
+
+        if (N.allMatch(arrayOfPair, it -> N.allNull(it.value()))) { // All null values in the specified row.
+            return;
+        }
+
+        final Comparator<Indexed<Object[]>> pairCmp = createComparatorForIndexedObject(cmp);
+
+        N.sort(arrayOfPair, pairCmp);
+
+        final Set<Integer> ordered = N.newHashSet(columnLength);
+        List<V> tempColumn = null;
+
+        for (int i = 0, index = 0; i < columnLength; i++) {
+            index = arrayOfPair[i].index();
+
+            if ((index != i) && !ordered.contains(i)) {
+                tempColumn = _columnList.get(i);
+
+                int previous = i;
+                int next = index;
+
+                do {
+                    _columnList.set(previous, _columnList.get(next));
+
+                    ordered.add(next);
+
+                    previous = next;
+                    next = arrayOfPair[next].index();
+                } while (next != i);
+
+                _columnList.set(previous, tempColumn);
+
+                ordered.add(i);
+            }
+        }
+
+        final boolean indexedMapIntialized = N.notEmpty(_columnKeyIndexMap);
+        final Object[] columnKeys = _columnKeySet.toArray(new Object[columnLength]);
+        C columnKey = null;
+        _columnKeySet.clear();
+
+        for (int i = 0; i < columnLength; i++) {
+            columnKey = (C) columnKeys[arrayOfPair[i].index()];
+            _columnKeySet.add(columnKey);
+
+            if (indexedMapIntialized) {
+                _columnKeyIndexMap.forcePut(columnKey, i);
+            }
+        }
+    }
+
     public void sortByColumn(final C columnKey, final Comparator<? super V> cmp) {
         checkFrozen();
 
@@ -1623,7 +1701,7 @@ public final class Sheet<R, C, V> implements Cloneable {
         }
 
         final int columnIndex = getColumnIndex(columnKey);
-        final int rowLength = _rowKeySet.size();
+        final int rowLength = rowLength();
         final Indexed<V>[] arrayOfPair = new Indexed[rowLength];
         final List<V> column = _columnList.get(columnIndex);
 
@@ -1631,7 +1709,98 @@ public final class Sheet<R, C, V> implements Cloneable {
             arrayOfPair[rowIndex] = Indexed.of(column.get(rowIndex), rowIndex);
         }
 
+        if (N.allMatch(arrayOfPair, it -> it.value() == null)) { // All null values in the specified row.
+            return;
+        }
+
         final Comparator<Indexed<V>> pairCmp = createComparatorForIndexedObject(cmp);
+
+        N.sort(arrayOfPair, pairCmp);
+
+        final int columnCount = _columnKeySet.size();
+        final Set<Integer> ordered = N.newHashSet(rowLength);
+        final V[] tempRow = (V[]) new Object[columnCount];
+        List<V> tmpColumn = null;
+
+        for (int i = 0, index = 0; i < rowLength; i++) {
+            index = arrayOfPair[i].index();
+
+            if ((index != i) && !ordered.contains(i)) {
+                for (int j = 0; j < columnCount; j++) {
+                    tempRow[j] = _columnList.get(j).get(i);
+                }
+
+                int previous = i;
+                int next = index;
+
+                do {
+                    for (int j = 0; j < columnCount; j++) {
+                        tmpColumn = _columnList.get(j);
+                        tmpColumn.set(previous, tmpColumn.get(next));
+                    }
+
+                    ordered.add(next);
+
+                    previous = next;
+                    next = arrayOfPair[next].index();
+                } while (next != i);
+
+                for (int j = 0; j < columnCount; j++) {
+                    _columnList.get(j).set(previous, tempRow[j]);
+                }
+
+                ordered.add(i);
+            }
+        }
+
+        final boolean indexedMapIntialized = N.notEmpty(_rowKeyIndexMap);
+        final Object[] rowkeys = _rowKeySet.toArray(new Object[rowLength]);
+        R rowKey = null;
+        _rowKeySet.clear();
+
+        for (int i = 0; i < rowLength; i++) {
+            rowKey = (R) rowkeys[arrayOfPair[i].index()];
+            _rowKeySet.add(rowKey);
+
+            if (indexedMapIntialized) {
+                _rowKeyIndexMap.forcePut(rowKey, i);
+            }
+        }
+    }
+
+    public void sortByColumn(Collection<C> columnKeysToSort, Comparator<? super Object[]> cmp) {
+        checkFrozen();
+
+        if (!_initialized) {
+            return;
+        }
+
+        final int sortColumnSize = columnKeysToSort.size();
+        final int[] columnIndexes = new int[sortColumnSize];
+        int idx = 0;
+
+        for (C columnKey : columnKeysToSort) {
+            columnIndexes[idx++] = getColumnIndex(columnKey);
+        }
+
+        final int rowLength = rowLength();
+        final Indexed<Object[]>[] arrayOfPair = new Indexed[rowLength];
+
+        for (int rowIndex = 0; rowIndex < rowLength; rowIndex++) {
+            Object[] values = new Object[sortColumnSize];
+
+            for (int i = 0; i < sortColumnSize; i++) {
+                values[i] = _columnList.get(columnIndexes[i]).get(rowIndex);
+            }
+
+            arrayOfPair[rowIndex] = Indexed.of(values, rowIndex);
+        }
+
+        if (N.allMatch(arrayOfPair, it -> N.allNull(it.value()))) { // All null values in the specified row.
+            return;
+        }
+
+        final Comparator<Indexed<Object[]>> pairCmp = createComparatorForIndexedObject(cmp);
 
         N.sort(arrayOfPair, pairCmp);
 

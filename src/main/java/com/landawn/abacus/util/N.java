@@ -26154,45 +26154,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      *
-     *
-     * @param <A>
-     * @param <B>
-     * @param <C>
-     * @param <E>
-     * @param a
-     * @param b
-     * @param c
-     * @param valueForNoneA
-     * @param valueForNoneB
-     * @param valueForNoneC
-     * @param action
-     * @throws IllegalArgumentException
-     * @throws E the e
-     */
-    public static <A, B, C, E extends Exception> void forEach(final Iterator<A> a, final Iterator<B> b, final Iterator<C> c, final A valueForNoneA,
-            final B valueForNoneB, final C valueForNoneC, final Throwables.TriConsumer<? super A, ? super B, ? super C, E> action)
-            throws IllegalArgumentException, E {
-        checkArgNotNull(action);
-
-        final Iterator<A> iterA = a == null ? ObjIterator.<A> empty() : a;
-        final Iterator<B> iterB = b == null ? ObjIterator.<B> empty() : b;
-        final Iterator<C> iterC = b == null ? ObjIterator.<C> empty() : c;
-
-        A nextA = null;
-        B nextB = null;
-        C nextC = null;
-
-        while (iterA.hasNext() || iterB.hasNext() || iterC.hasNext()) {
-            nextA = iterA.hasNext() ? iterA.next() : valueForNoneA;
-            nextB = iterB.hasNext() ? iterB.next() : valueForNoneB;
-            nextC = iterC.hasNext() ? iterC.next() : valueForNoneC;
-
-            action.accept(nextA, nextB, nextC);
-        }
-    }
-
-    /**
-     *
      * @param <T>
      * @param <E>
      * @param c
@@ -26981,6 +26942,45 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     *
+     *
+     * @param <A>
+     * @param <B>
+     * @param <C>
+     * @param <E>
+     * @param a
+     * @param b
+     * @param c
+     * @param valueForNoneA
+     * @param valueForNoneB
+     * @param valueForNoneC
+     * @param action
+     * @throws IllegalArgumentException
+     * @throws E the e
+     */
+    public static <A, B, C, E extends Exception> void forEach(final Iterator<A> a, final Iterator<B> b, final Iterator<C> c, final A valueForNoneA,
+            final B valueForNoneB, final C valueForNoneC, final Throwables.TriConsumer<? super A, ? super B, ? super C, E> action)
+            throws IllegalArgumentException, E {
+        checkArgNotNull(action);
+
+        final Iterator<A> iterA = a == null ? ObjIterator.<A> empty() : a;
+        final Iterator<B> iterB = b == null ? ObjIterator.<B> empty() : b;
+        final Iterator<C> iterC = b == null ? ObjIterator.<C> empty() : c;
+
+        A nextA = null;
+        B nextB = null;
+        C nextC = null;
+
+        while (iterA.hasNext() || iterB.hasNext() || iterC.hasNext()) {
+            nextA = iterA.hasNext() ? iterA.next() : valueForNoneA;
+            nextB = iterB.hasNext() ? iterB.next() : valueForNoneB;
+            nextC = iterC.hasNext() ? iterC.next() : valueForNoneC;
+
+            action.accept(nextA, nextB, nextC);
+        }
+    }
+
+    /**
      * For each non null.
      *
      * @param <T>
@@ -27052,14 +27052,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return;
         }
 
-        for (T e : a) {
-            if (e != null) {
-                final Iterable<U> c2 = flatMapper.apply(e);
+        for (T t : a) {
+            if (t != null) {
+                final Iterable<U> c2 = flatMapper.apply(t);
 
                 if (c2 != null) {
                     for (U u : c2) {
                         if (u != null) {
-                            action.accept(e, u);
+                            action.accept(t, u);
                         }
                     }
                 }
@@ -27090,14 +27090,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return;
         }
 
-        for (T e : c) {
-            if (e != null) {
-                final Iterable<U> c2 = flatMapper.apply(e);
+        for (T t : c) {
+            if (t != null) {
+                final Iterable<U> c2 = flatMapper.apply(t);
 
                 if (c2 != null) {
                     for (U u : c2) {
                         if (u != null) {
-                            action.accept(e, u);
+                            action.accept(t, u);
                         }
                     }
                 }
@@ -27128,18 +27128,18 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return;
         }
 
-        T e = null;
+        T t = null;
 
         while (iter.hasNext()) {
-            e = iter.next();
+            t = iter.next();
 
-            if (e != null) {
-                final Iterable<U> c2 = flatMapper.apply(e);
+            if (t != null) {
+                final Iterable<U> c2 = flatMapper.apply(t);
 
                 if (c2 != null) {
                     for (U u : c2) {
                         if (u != null) {
-                            action.accept(e, u);
+                            action.accept(t, u);
                         }
                     }
                 }
@@ -27176,9 +27176,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return;
         }
 
-        for (T e : a) {
-            if (e != null) {
-                final Iterable<T2> c2 = flatMapper.apply(e);
+        for (T t : a) {
+            if (t != null) {
+                final Iterable<T2> c2 = flatMapper.apply(t);
 
                 if (c2 != null) {
                     for (T2 t2 : c2) {
@@ -27188,7 +27188,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
                             if (c3 != null) {
                                 for (T3 t3 : c3) {
                                     if (t3 != null) {
-                                        action.accept(e, t2, t3);
+                                        action.accept(t, t2, t3);
                                     }
                                 }
                             }
@@ -27228,9 +27228,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return;
         }
 
-        for (T e : c) {
-            if (e != null) {
-                final Iterable<T2> c2 = flatMapper.apply(e);
+        for (T t : c) {
+            if (t != null) {
+                final Iterable<T2> c2 = flatMapper.apply(t);
 
                 if (c2 != null) {
                     for (T2 t2 : c2) {
@@ -27240,7 +27240,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
                             if (c3 != null) {
                                 for (T3 t3 : c3) {
                                     if (t3 != null) {
-                                        action.accept(e, t2, t3);
+                                        action.accept(t, t2, t3);
                                     }
                                 }
                             }
@@ -27280,13 +27280,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return;
         }
 
-        T e = null;
+        T t = null;
 
         while (iter.hasNext()) {
-            e = iter.next();
+            t = iter.next();
 
-            if (e != null) {
-                final Iterable<T2> c2 = flatMapper.apply(e);
+            if (t != null) {
+                final Iterable<T2> c2 = flatMapper.apply(t);
 
                 if (c2 != null) {
                     for (T2 t2 : c2) {
@@ -27296,7 +27296,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
                             if (c3 != null) {
                                 for (T3 t3 : c3) {
                                     if (t3 != null) {
-                                        action.accept(e, t2, t3);
+                                        action.accept(t, t2, t3);
                                     }
                                 }
                             }
@@ -30229,6 +30229,38 @@ public final class N extends CommonUtil { // public final class N extends π imp
         }
 
         return obj;
+    }
+
+    public static void printlnForEach(final Object[] a) {
+        if (a == null) {
+            println("null");
+        } else if (a.length == 0) {
+            println("[]");
+        } else {
+            for (Object e : a) {
+                println(e);
+            }
+        }
+    }
+
+    public static void printlnForEach(final Iterable<?> iter) {
+        if (iter == null) {
+            println("null");
+        } else {
+            printlnForEach(iter.iterator());
+        }
+    }
+
+    public static void printlnForEach(final Iterator<?> iter) {
+        if (iter == null) {
+            println("null");
+        } else if (!iter.hasNext()) {
+            println("[]");
+        } else {
+            while (iter.hasNext()) {
+                println(iter.next());
+            }
+        }
     }
 
     /**

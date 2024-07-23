@@ -1,3 +1,7 @@
+### 5.2.2
+
+* Improvements and bug fixes.
+
 ### 5.2.1
 
 * Improvements and bug fixes.

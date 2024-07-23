@@ -14,17 +14,9 @@
 
 package com.landawn.abacus.util;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.ZonedDateTime;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collection;
 import java.util.ConcurrentModificationException;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
@@ -33,6 +25,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -789,6 +782,7 @@ public final class Maps {
     }
 
     /**
+     * Returns a {@code Nullable} with the value to which the specified key is mapped, or an empty {@code Nullable} if the specified map is empty or contains no mapping for the key.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -811,7 +805,7 @@ public final class Maps {
     }
 
     /**
-     * Returns the value to which the specified key is mapped, or {@code defaultValue} if this map contains no mapping for the key.
+     * Returns the value to which the specified key is mapped, or {@code defaultValue} if the specified map is empty or contains no mapping for the key.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -835,8 +829,8 @@ public final class Maps {
     }
 
     /**
-     * Returns the value to which the specified key is mapped if it's not {@code null},
-     * or {@code defaultForNull} if this map contains no mapping for the key or it's {@code null}.
+     * Returns the value to which the specified key is mapped if the value not {@code null},
+     * or {@code defaultForNull} if the specified map is empty or contains no value for the key or the mapping value is {@code null}.
      *
      * @param <K>
      * @param <V>
@@ -844,7 +838,7 @@ public final class Maps {
      * @param key
      * @param defaultForNull to return if the specified {@code map} doesn't contain the specified {@code key} or the mapped value is {@code null}.
      * @return
-     * @throws IllegalArgumentException
+     * @throws IllegalArgumentException if the specified {@code defaultForNull} is {@code null}
      */
     public static <K, V> V getOrDefaultIfNull(final Map<K, ? extends V> map, final K key, final V defaultForNull) throws IllegalArgumentException {
         N.checkArgNotNull(defaultForNull, "defaultForNull"); // NOSONAR
@@ -863,7 +857,85 @@ public final class Maps {
     }
 
     /**
-     * Returns an empty {@code OptionalBoolean} if the specified {@code map} is empty, or no value found by the specified {@code key}, or the value is {@code null}.
+     * Returns the value to which the specified key is mapped, or
+     * an empty immutable {@code List} if the specified map is empty or contains no value for the key or the mapping value is {@code null}.
+     *
+     * @param <K> the key type
+     * @param <E>
+     * @param <V> the value type
+     * @param map
+     * @param key
+     * @return
+     */
+    public static <K, E, V extends List<E>> List<E> getOrEmptyListIfNull(final Map<K, V> map, final K key) {
+        if (N.isEmpty(map)) {
+            return N.<E> emptyList();
+        }
+
+        final V val = map.get(key);
+
+        if (val == null) {
+            return N.emptyList();
+        }
+
+        return val;
+    }
+
+    /**
+     * Returns the value to which the specified key is mapped, or
+     * an empty immutable {@code Set} if the specified map is empty or contains no value for the key or the mapping value is {@code null}.
+     *
+     * @param <K> the key type
+     * @param <E>
+     * @param <V> the value type
+     * @param map
+     * @param key
+     * @return
+     */
+    public static <K, E, V extends Set<E>> Set<E> getOrEmptySetIfNull(final Map<K, V> map, final K key) {
+        if (N.isEmpty(map)) {
+            return N.<E> emptySet();
+        }
+
+        final V val = map.get(key);
+
+        if (val == null) {
+            return N.emptySet();
+        }
+
+        return val;
+    }
+
+    /**
+     * Returns the value to which the specified key is mapped, or
+     * an empty immutable {@code Map} if the specified map is empty or contains no value for the key or the mapping value is {@code null}.
+     *
+     * @param <K> the key type
+     * @param <KK> the key type of value map
+     * @param <VV> the value type of value map
+     * @param <V> the value type
+     * @param map
+     * @param key
+     * @return
+     */
+    public static <K, KK, VV, V extends Map<KK, VV>> Map<KK, VV> getOrEmptyMapIfNull(final Map<K, V> map, final K key) {
+        if (N.isEmpty(map)) {
+            return N.<KK, VV> emptyMap();
+        }
+
+        final V val = map.get(key);
+
+        if (val == null) {
+            return N.<KK, VV> emptyMap();
+        }
+
+        return val;
+    }
+
+    /**
+     * Returns an empty {@code OptionalBoolean} if the specified {@code map} is empty, or no value found by the specified {@code key}, or the mapping value is {@code null}.
+     * Otherwise returns an {@code OptionalBoolean} with the value mapped by the specified {@code key}.
+     * If the mapped value is not Boolean type, underline conversion will be executed.
      *
      * @param <K>
      * @param map
@@ -887,13 +959,14 @@ public final class Maps {
     }
 
     /**
-     * Returns the mapped {@code boolean} or a boolean converted from String.
-     * {@code defaultForNull} is returned if the specified {@code map} doesn't contain the specified {@code key} or the mapped value is {@code null}.
+     * Returns the specified {@code defaultForNull} if the specified {@code map} is empty, or no value found by the specified {@code key}, or the mapping value is {@code null}.
+     * Otherwise returns the value mapped by the specified {@code key}.
+     * If the mapped value is not Boolean type, underline conversion will be executed.
      *
      * @param <K>
      * @param map
      * @param key
-     * @param defaultForNull to return if the specified {@code map} doesn't contain the specified {@code key} or the mapped value is {@code null}.
+     * @param defaultForNull
      * @return
      */
     public static <K> boolean getBoolean(final Map<? super K, ?> map, final K key, final boolean defaultForNull) {
@@ -913,7 +986,9 @@ public final class Maps {
     }
 
     /**
-     * Returns an empty {@code OptionalChar} if the specified {@code map} is empty, or no value found by the specified {@code key}, or the value is {@code null}.
+     * Returns an empty {@code OptionalChar} if the specified {@code map} is empty, or no value found by the specified {@code key}, or the mapping value is {@code null}.
+     * Otherwise returns an {@code OptionalChar} with the value mapped by the specified {@code key}.
+     * If the mapped value is not Character type, underline conversion will be executed.
      *
      * @param <K>
      * @param map
@@ -937,13 +1012,14 @@ public final class Maps {
     }
 
     /**
-     * Returns the mapped {@code char} or a char converted from String.
-     * {@code defaultForNull} is returned if the specified {@code map} doesn't contain the specified {@code key} or the mapped value is {@code null}.
+     * Returns the specified {@code defaultForNull} if the specified {@code map} is empty, or no value found by the specified {@code key}, or the mapping value is {@code null}.
+     * Otherwise returns the value mapped by the specified {@code key}.
+     * If the mapped value is not Character type, underline conversion will be executed.
      *
      * @param <K>
      * @param map
      * @param key
-     * @param defaultForNull to return if the specified {@code map} doesn't contain the specified {@code key} or the mapped value is {@code null}.
+     * @param defaultForNull
      * @return
      */
     public static <K> char getChar(final Map<? super K, ?> map, final K key, final char defaultForNull) {
@@ -963,7 +1039,9 @@ public final class Maps {
     }
 
     /**
-     * Returns an empty {@code OptionalByte} if the specified {@code map} is empty, or no value found by the specified {@code key}, or the value is {@code null}.
+     * Returns an empty {@code OptionalByte} if the specified {@code map} is empty, or no value found by the specified {@code key}, or the mapping value is {@code null}.
+     * Otherwise returns an {@code OptionalByte} with the value mapped by the specified {@code key}.
+     * If the mapped value is not Byte/Number type, underline conversion will be executed.
      *
      * @param <K>
      * @param map
@@ -987,13 +1065,14 @@ public final class Maps {
     }
 
     /**
-     * Returns the mapped {@code byte} or a byte converted from String.
-     * {@code defaultForNull} is returned if the specified {@code map} doesn't contain the specified {@code key} or the mapped value is {@code null}.
+     * Returns the specified {@code defaultForNull} if the specified {@code map} is empty, or no value found by the specified {@code key}, or the mapping value is {@code null}.
+     * Otherwise returns the value mapped by the specified {@code key}.
+     * If the mapped value is not Byte/Number type, underline conversion will be executed.
      *
      * @param <K>
      * @param map
      * @param key
-     * @param defaultForNull to return if the specified {@code map} doesn't contain the specified {@code key} or the mapped value is {@code null}.
+     * @param defaultForNull
      * @return
      */
     public static <K> byte getByte(final Map<? super K, ?> map, final K key, final byte defaultForNull) {
@@ -1013,7 +1092,9 @@ public final class Maps {
     }
 
     /**
-     * Returns an empty {@code OptionalShort} if the specified {@code map} is empty, or no value found by the specified {@code key}, or the value is {@code null}.
+     * Returns an empty {@code OptionalShort} if the specified {@code map} is empty, or no value found by the specified {@code key}, or the mapping value is {@code null}.
+     * Otherwise returns an {@code OptionalShort} with the value mapped by the specified {@code key}.
+     * If the mapped value is not Short/Number type, underline conversion will be executed.
      *
      * @param <K>
      * @param map
@@ -1037,13 +1118,14 @@ public final class Maps {
     }
 
     /**
-     * Returns the mapped {@code short} or a short converted from String.
-     * {@code defaultForNull} is returned if the specified {@code map} doesn't contain the specified {@code key} or the mapped value is {@code null}.
+     * Returns the specified {@code defaultForNull} if the specified {@code map} is empty, or no value found by the specified {@code key}, or the mapping value is {@code null}.
+     * Otherwise returns the value mapped by the specified {@code key}.
+     * If the mapped value is not Short/Number type, underline conversion will be executed.
      *
      * @param <K>
      * @param map
      * @param key
-     * @param defaultForNull to return if the specified {@code map} doesn't contain the specified {@code key} or the mapped value is {@code null}.
+     * @param defaultForNull
      * @return
      */
     public static <K> short getShort(final Map<? super K, ?> map, final K key, final short defaultForNull) {
@@ -1063,7 +1145,9 @@ public final class Maps {
     }
 
     /**
-     * Returns an empty {@code OptionalInt} if the specified {@code map} is empty, or no value found by the specified {@code key}, or the value is {@code null}.
+     * Returns an empty {@code OptionalInt} if the specified {@code map} is empty, or no value found by the specified {@code key}, or the mapping value is {@code null}.
+     * Otherwise returns an {@code OptionalInt} with the value mapped by the specified {@code key}.
+     * If the mapped value is not Integer/Number type, underline conversion will be executed.
      *
      * @param <K>
      * @param map
@@ -1087,13 +1171,14 @@ public final class Maps {
     }
 
     /**
-     * Returns the mapped {@code integer} or an integer converted from String.
-     * {@code defaultForNull} is returned if the specified {@code map} doesn't contain the specified {@code key} or the mapped value is {@code null}.
+     * Returns the specified {@code defaultForNull} if the specified {@code map} is empty, or no value found by the specified {@code key}, or the mapping value is {@code null}.
+     * Otherwise returns the value mapped by the specified {@code key}.
+     * If the mapped value is not Integer/Number type, underline conversion will be executed.
      *
      * @param <K>
      * @param map
      * @param key
-     * @param defaultForNull to return if the specified {@code map} doesn't contain the specified {@code key} or the mapped value is {@code null}.
+     * @param defaultForNull
      * @return
      */
     public static <K> int getInt(final Map<? super K, ?> map, final K key, final int defaultForNull) {
@@ -1113,7 +1198,9 @@ public final class Maps {
     }
 
     /**
-     * Returns an empty {@code OptionalLong} if the specified {@code map} is empty, or no value found by the specified {@code key}, or the value is {@code null}.
+     * Returns an empty {@code OptionalLong} if the specified {@code map} is empty, or no value found by the specified {@code key}, or the mapping value is {@code null}.
+     * Otherwise returns an {@code OptionalLong} with the value mapped by the specified {@code key}.
+     * If the mapped value is not Long/Number type, underline conversion will be executed.
      *
      * @param <K>
      * @param map
@@ -1137,13 +1224,14 @@ public final class Maps {
     }
 
     /**
-     * Returns the mapped {@code long} or a long converted from String.
-     * {@code defaultForNull} is returned if the specified {@code map} doesn't contain the specified {@code key} or the mapped value is {@code null}.
+     * Returns the specified {@code defaultForNull} if the specified {@code map} is empty, or no value found by the specified {@code key}, or the mapping value is {@code null}.
+     * Otherwise returns the value mapped by the specified {@code key}.
+     * If the mapped value is not Long/Number type, underline conversion will be executed.
      *
      * @param <K>
      * @param map
      * @param key
-     * @param defaultForNull to return if the specified {@code map} doesn't contain the specified {@code key} or the mapped value is {@code null}.
+     * @param defaultForNull
      * @return
      */
     public static <K> long getLong(final Map<? super K, ?> map, final K key, final long defaultForNull) {
@@ -1163,7 +1251,9 @@ public final class Maps {
     }
 
     /**
-     * Returns an empty {@code OptionalFloat} if the specified {@code map} is empty, or no value found by the specified {@code key}, or the value is {@code null}.
+     * Returns an empty {@code OptionalFloat} if the specified {@code map} is empty, or no value found by the specified {@code key}, or the mapping value is {@code null}.
+     * Otherwise returns an {@code OptionalFloat} with the value mapped by the specified {@code key}.
+     * If the mapped value is not Float/Number type, underline conversion will be executed.
      *
      * @param <K>
      * @param map
@@ -1185,13 +1275,14 @@ public final class Maps {
     }
 
     /**
-     * Returns the mapped {@code float} or a float converted from String.
-     * {@code defaultForNull} is returned if the specified {@code map} doesn't contain the specified {@code key} or the mapped value is {@code null}.
+     * Returns the specified {@code defaultForNull} if the specified {@code map} is empty, or no value found by the specified {@code key}, or the mapping value is {@code null}.
+     * Otherwise returns the value mapped by the specified {@code key}.
+     * If the mapped value is not Float/Number type, underline conversion will be executed.
      *
      * @param <K>
      * @param map
      * @param key
-     * @param defaultForNull to return if the specified {@code map} doesn't contain the specified {@code key} or the mapped value is {@code null}.
+     * @param defaultForNull
      * @return
      */
     public static <K> float getFloat(final Map<? super K, ?> map, final K key, final float defaultForNull) {
@@ -1209,7 +1300,9 @@ public final class Maps {
     }
 
     /**
-     * Returns an empty {@code OptionalDouble} if the specified {@code map} is empty, or no value found by the specified {@code key}, or the value is {@code null}.
+     * Returns an empty {@code OptionalDouble} if the specified {@code map} is empty, or no value found by the specified {@code key}, or the mapping value is {@code null}.
+     * Otherwise returns an {@code OptionalDouble} with the value mapped by the specified {@code key}.
+     * If the mapped value is not Double/Number type, underline conversion will be executed.
      *
      * @param <K>
      * @param map
@@ -1231,13 +1324,14 @@ public final class Maps {
     }
 
     /**
-     * Returns the mapped {@code double} or a double converted from String.
-     * {@code defaultForNull} is returned if the specified {@code map} doesn't contain the specified {@code key} or the mapped value is {@code null}.
+     * Returns the specified {@code defaultForNull} if the specified {@code map} is empty, or no value found by the specified {@code key}, or the mapping value is {@code null}.
+     * Otherwise returns the value mapped by the specified {@code key}.
+     * If the mapped value is not Double/Number type, underline conversion will be executed.
      *
      * @param <K>
      * @param map
      * @param key
-     * @param defaultForNull to return if the specified {@code map} doesn't contain the specified {@code key} or the mapped value is {@code null}.
+     * @param defaultForNull
      * @return
      */
     public static <K> double getDouble(final Map<? super K, ?> map, final K key, final double defaultForNull) {
@@ -1255,7 +1349,9 @@ public final class Maps {
     }
 
     /**
-     * Returns an empty {@code Optional<String>} if the specified {@code map} is empty, or no value found by the specified {@code key}, or the value is {@code null}.
+     * Returns an empty {@code Optional<String>} if the specified {@code map} is empty, or no value found by the specified {@code key}, or the mapping value is {@code null}.
+     * Otherwise returns an {@code Optional<String>} with the value mapped by the specified {@code key}.
+     * If the mapped value is not String type, underline conversion will be executed.
      *
      * @param <K>
      * @param map
@@ -1279,15 +1375,16 @@ public final class Maps {
     }
 
     /**
-     * Returns the mapped {@code String} or a {@code String} converted from {@code N.toString(value)}.
-     * {@code defaultForNull} is returned if the specified {@code map} doesn't contain the specified {@code key} or the mapped value is {@code null}.
+     * Returns the specified {@code defaultForNull} if the specified {@code map} is empty, or no value found by the specified {@code key}, or the mapping value is {@code null}.
+     * Otherwise returns the value mapped by the specified {@code key}.
+     * If the mapped value is not String type, underline conversion will be executed by {@code N.stringOf(value).
      *
      * @param <K>
      * @param map
      * @param key
-     * @param defaultForNull to return if the specified {@code map} doesn't contain the specified {@code key} or the mapped value is {@code null}.
+     * @param defaultForNull
      * @return
-     * @throws IllegalArgumentException
+     * @throws IllegalArgumentException if the specified {@code defaultForNull} is {@code null}
      */
     public static <K> String getString(final Map<? super K, ?> map, final K key, final String defaultForNull) throws IllegalArgumentException {
         N.checkArgNotNull(defaultForNull, "defaultForNull"); // NOSONAR
@@ -1308,11 +1405,9 @@ public final class Maps {
     }
 
     /**
-     * Returns an empty {@code Optional<String>} if the specified {@code map} is empty, or no value found by the specified {@code key}, or the value is {@code null}.
-     *
-     * <br />
-     * Node: To follow one of general design rules in {@code Abacus}, if there is a conversion behind when the source value is not assignable to the target type, put the {@code targetType} to last parameter of the method.
-     * Otherwise, put the {@code targetTpye} to the first parameter of the method.
+     * Returns an empty {@code Optional<T>} if the specified {@code map} is empty, or no value found by the specified {@code key}, or the mapping value is {@code null}.
+     * Otherwise returns an {@code Optional<String>} with the value mapped by the specified {@code key}.
+     * If the mapped value is not {@code T} type, underline conversion will be executed by {@code N.convert(val, targetType)}.
      *
      * @param <K>
      * @param <T>
@@ -1320,6 +1415,8 @@ public final class Maps {
      * @param key
      * @param targetType
      * @return
+     * @see N#convert(Object, Class)
+     * @see N#convert(Object, Type)
      */
     public static <K, T> Optional<T> get(final Map<? super K, ?> map, final K key, final Class<? extends T> targetType) {
         if (N.isEmpty(map)) {
@@ -1337,40 +1434,10 @@ public final class Maps {
         }
     }
 
-    //    /**
-    //     *
-    //     * @param <K>
-    //     * @param <T>
-    //     * @param map
-    //     * @param key
-    //     * @param defaultValueForNull
-    //     * @param targetType
-    //     * @return
-    //     * @see #get(Map, Object, Object)
-    //     */
-    //    public static <K, T> T get(final Map<? super K, ?> map, final K key, final T defaultValueForNull, final Class<? extends T> targetType) {
-    //        if (N.isEmpty(map)) {
-    //            return defaultValueForNull;
-    //        }
-    //
-    //        final Object val = map.get(key);
-    //
-    //        if (val == null) {
-    //            return defaultValueForNull;
-    //        } else if (targetType.isAssignableFrom(val.getClass())) {
-    //            return (T) val;
-    //        } else {
-    //            return N.convert(val, targetType);
-    //        }
-    //
-    //    }
-
     /**
-     * Returns an empty {@code Optional<String>} if the specified {@code map} is empty, or no value found by the specified {@code key}, or the value is {@code null}.
-     *
-     * <br />
-     * Node: To follow one of general design rules in {@code Abacus}, if there is a conversion behind when the source value is not assignable to the target type, put the {@code targetType} to last parameter of the method.
-     * Otherwise, put the {@code targetTpye} to the first parameter of the method.
+     * Returns an empty {@code Optional<T>} if the specified {@code map} is empty, or no value found by the specified {@code key}, or the mapping value is {@code null}.
+     * Otherwise returns an {@code Optional<String>} with the value mapped by the specified {@code key}.
+     * If the mapped value is not {@code T} type, underline conversion will be executed by {@code N.convert(val, targetType)}.
      *
      * @param <K>
      * @param <T>
@@ -1378,6 +1445,8 @@ public final class Maps {
      * @param key
      * @param targetType
      * @return
+     * @see N#convert(Object, Class)
+     * @see N#convert(Object, Type)
      */
     public static <K, T> Optional<T> get(final Map<? super K, ?> map, final K key, final Type<? extends T> targetType) {
         if (N.isEmpty(map)) {
@@ -1395,45 +1464,19 @@ public final class Maps {
         }
     }
 
-    //    /**
-    //     *
-    //     * @param <K>
-    //     * @param <T>
-    //     * @param map
-    //     * @param key
-    //     * @param defaultValueForNull
-    //     * @param targetType
-    //     * @return
-    //     * @see #get(Map, Object, Object)
-    //     */
-    //    public static <K, T> T get(final Map<? super K, ?> map, final K key, final T defaultValueForNull, final Type<? extends T> targetType) {
-    //        if (N.isEmpty(map)) {
-    //            return defaultValueForNull;
-    //        }
-    //
-    //        final Object val = map.get(key);
-    //
-    //        if (val == null) {
-    //            return defaultValueForNull;
-    //        } else if (targetType.clazz().isAssignableFrom(val.getClass())) {
-    //            return (T) val;
-    //        } else {
-    //            return N.convert(val, targetType);
-    //        }
-    //
-    //    }
-
     /**
-     * Returns the mapped {@code T} or a {@code T} converted from {@code N.convert(val, defaultForNull.getClass())}.
-     * {@code defaultForNull} is returned if the specified {@code map} doesn't contain the specified {@code key} or the mapped value is {@code null}.
+     * Returns the specified {@code defaultForNull} if the specified {@code map} is empty, or no value found by the specified {@code key}, or the mapping value is {@code null}.
+     * Otherwise returns the value mapped by the specified {@code key}.
+     * If the mapped value is not {@code T} type, underline conversion will be executed by {@code N.convert(val, defaultForNull.getClass())}.
      *
      * @param <K>
-     * @param <T>
      * @param map
      * @param key
-     * @param defaultForNull to return if the specified {@code map} doesn't contain the specified {@code key} or the mapped value is {@code null}.
+     * @param defaultForNull
      * @return
-     * @throws IllegalArgumentException
+     * @throws IllegalArgumentException if the specified {@code defaultForNull} is {@code null}
+     * @see N#convert(Object, Class)
+     * @see N#convert(Object, Type)
      */
     public static <K, T> T get(final Map<? super K, ?> map, final K key, final T defaultForNull) throws IllegalArgumentException {
         N.checkArgNotNull(defaultForNull, "defaultForNull"); // NOSONAR
@@ -1454,65 +1497,59 @@ public final class Maps {
     }
 
     /**
-     * Returns the value to which the specified key is mapped, or
-     * an empty immutable {@code List} if this map contains no mapping for the key.
+     * Returns the value associated with the specified {@code key} if it exists in the specified {@code map}, Otherwise puts a new value got from {@code defaultValueSupplier} and returns it.
      *
      * @param <K> the key type
      * @param <E>
-     * @param <V> the value type
      * @param map
      * @param key
+     * @param defaultValueSupplier
      * @return
      */
-    public static <K, E, V extends List<E>> List<E> getOrEmptyList(final Map<K, V> map, final K key) {
-        if (N.isEmpty(map)) {
-            return N.<E> emptyList();
-        }
-
-        final V val = map.get(key);
+    public static <K, V> V getAndPutIfAbsent(final Map<K, V> map, final K key, Supplier<? extends V> defaultValueSupplier) {
+        V val = map.get(key);
 
         if (val != null || map.containsKey(key)) {
             return val;
         } else {
-            return N.emptyList();
+            val = defaultValueSupplier.get();
+            val = map.put(key, val);
         }
+
+        return val;
     }
 
     /**
-     * Returns the value to which the specified key is mapped, or
-     * an empty immutable {@code Set} if this map contains no mapping for the key.
-     *
-     * @param <K> the key type
-     * @param <E>
-     * @param <V> the value type
-     * @param map
-     * @param key
-     * @return
-     */
-    public static <K, E, V extends Set<E>> Set<E> getOrEmptySet(final Map<K, V> map, final K key) {
-        if (N.isEmpty(map)) {
-            return N.<E> emptySet();
-        }
-
-        final V val = map.get(key);
-
-        if (val != null || map.containsKey(key)) {
-            return val;
-        } else {
-            return N.emptySet();
-        }
-    }
-
-    /**
-     * Returns the value associated with the specified {@code key} if it exists in the specified {@code map} contains, or the new put {@code List} if it's absent.
+     * Returns the value associated with the specified {@code key} if it exists and not {@code null} in the specified {@code map}, Otherwise puts a new value got from {@code defaultValueSupplier} and returns it.
      *
      * @param <K> the key type
      * @param <E>
      * @param map
      * @param key
+     * @param defaultValueSupplier
      * @return
      */
-    public static <K, E> List<E> getAndPutListIfAbsent(final Map<K, List<E>> map, final K key) {
+    public static <K, V> V getAndPutIfNull(final Map<K, V> map, final K key, Supplier<? extends V> defaultValueSupplier) {
+        V val = map.get(key);
+
+        if (val == null) {
+            val = Objects.requireNonNull(defaultValueSupplier.get());
+            val = map.put(key, val);
+        }
+
+        return val;
+    }
+
+    /**
+     * Returns the value associated with the specified {@code key} if it exists and not {@code null} in the specified {@code map}, Otherwise puts a new {@code List} and returns it.
+     *
+     * @param <K> the key type
+     * @param <E>
+     * @param map
+     * @param key
+     * @return
+     */
+    public static <K, E> List<E> getAndPutListIfNull(final Map<K, List<E>> map, final K key) {
         List<E> v = map.get(key);
 
         if (v == null) {
@@ -1524,7 +1561,7 @@ public final class Maps {
     }
 
     /**
-     * Returns the value associated with the specified {@code key} if it exists in the specified {@code map} contains, or the new put {@code Set} if it's absent.
+     * Returns the value associated with the specified {@code key} if it exists and not {@code null} in the specified {@code map}, Otherwise puts a new {@code Set} and returns it.
      *
      * @param <K> the key type
      * @param <E>
@@ -1532,7 +1569,7 @@ public final class Maps {
      * @param key
      * @return
      */
-    public static <K, E> Set<E> getAndPutSetIfAbsent(final Map<K, Set<E>> map, final K key) {
+    public static <K, E> Set<E> getAndPutSetIfNull(final Map<K, Set<E>> map, final K key) {
         Set<E> v = map.get(key);
 
         if (v == null) {
@@ -1544,7 +1581,7 @@ public final class Maps {
     }
 
     /**
-     * Returns the value associated with the specified {@code key} if it exists in the specified {@code map} contains, or the new put {@code Set} if it's absent.
+     * Returns the value associated with the specified {@code key} if it exists and not {@code null} in the specified {@code map}, Otherwise puts a new {@code LinkedHashSet} and returns it.
      *
      * @param <K> the key type
      * @param <E>
@@ -1552,7 +1589,7 @@ public final class Maps {
      * @param key
      * @return
      */
-    public static <K, E> Set<E> getAndPutLinkedHashSetIfAbsent(final Map<K, Set<E>> map, final K key) {
+    public static <K, E> Set<E> getAndPutLinkedHashSetIfNull(final Map<K, Set<E>> map, final K key) {
         Set<E> v = map.get(key);
 
         if (v == null) {
@@ -1564,7 +1601,7 @@ public final class Maps {
     }
 
     /**
-     * Returns the value associated with the specified {@code key} if it exists in the specified {@code map} contains, or the new put {@code Map} if it's absent.
+     * Returns the value associated with the specified {@code key} if it exists and not {@code null} in the specified {@code map}, Otherwise puts a new {@code Map} and returns it.
      *
      * @param <K> the key type
      * @param <KK>
@@ -1573,11 +1610,32 @@ public final class Maps {
      * @param key
      * @return
      */
-    public static <K, KK, VV> Map<KK, VV> getAndPutMapIfAbsent(final Map<K, Map<KK, VV>> map, final K key) {
+    public static <K, KK, VV> Map<KK, VV> getAndPutMapIfNull(final Map<K, Map<KK, VV>> map, final K key) {
         Map<KK, VV> v = map.get(key);
 
         if (v == null) {
             v = new HashMap<>();
+            v = map.put(key, v);
+        }
+
+        return v;
+    }
+
+    /**
+     * Returns the value associated with the specified {@code key} if it exists and not {@code null} in the specified {@code map}, Otherwise puts a new {@code LinkedHashMap} and returns it.
+     *
+     * @param <K> the key type
+     * @param <KK>
+     * @param <VV>
+     * @param map
+     * @param key
+     * @return
+     */
+    public static <K, KK, VV> Map<KK, VV> getAndPutLinkedHashMapIfNull(final Map<K, Map<KK, VV>> map, final K key) {
+        Map<KK, VV> v = map.get(key);
+
+        if (v == null) {
+            v = new LinkedHashMap<>();
             v = map.put(key, v);
         }
 
@@ -1623,7 +1681,7 @@ public final class Maps {
      * @param defaultValue
      * @return
      */
-    public static <K, V> List<V> getOrDefaultForEach(final Map<K, V> map, final Collection<?> keys, final V defaultValue) {
+    public static <K, V> List<V> getOrDefaultIfAbsentForEach(final Map<K, V> map, final Collection<?> keys, final V defaultValue) {
         if (N.isEmpty(keys)) {
             return new ArrayList<>(0);
         } else if (N.isEmpty(map)) {
@@ -1653,14 +1711,16 @@ public final class Maps {
      * @param <V>
      * @param map
      * @param keys
-     * @param defaultValue
+     * @param defaultForNull
      * @return
      */
-    public static <K, V> List<V> getOrDefaultIfNullForEach(final Map<K, V> map, final Collection<?> keys, final V defaultValue) {
+    public static <K, V> List<V> getOrDefaultIfNullForEach(final Map<K, V> map, final Collection<?> keys, final V defaultForNull) {
+        N.checkArgNotNull(defaultForNull, "defaultForNull"); // NOSONAR
+
         if (N.isEmpty(keys)) {
             return new ArrayList<>(0);
         } else if (N.isEmpty(map)) {
-            return N.repeat(defaultValue, keys.size());
+            return N.repeat(defaultForNull, keys.size());
         }
 
         final List<V> result = new ArrayList<>(keys.size());
@@ -1670,7 +1730,7 @@ public final class Maps {
             val = map.get(key);
 
             if (val == null) {
-                result.add(defaultValue);
+                result.add(defaultForNull);
             } else {
                 result.add(val);
             }
@@ -2008,16 +2068,17 @@ public final class Maps {
     }
 
     /**
-     * Put if absent.
+     * Puts if the specified key is not already associated with a value (or is mapped to {@code null}).
      *
      * @param <K> the key type
      * @param <V> the value type
      * @param map
      * @param key
      * @param value
-     * @return
+     * @return the previous value associated with the specified key, or {@code null} if there was no mapping for the key
+     * @see Map#putIfAbsent(Object, Object)
      */
-    public static <K, V> V putIfAbsent(final Map<K, V> map, K key, final V value) {
+    public static <K, V> V putIfAbsentOrNull(final Map<K, V> map, K key, final V value) {
         V v = map.get(key);
 
         if (v == null) {
@@ -2028,16 +2089,17 @@ public final class Maps {
     }
 
     /**
-     * Put if absent.
+     * Puts if the specified key is not already associated with a value (or is mapped to {@code null}).
      *
      * @param <K> the key type
      * @param <V> the value type
      * @param map
      * @param key
      * @param supplier
-     * @return
+     * @return the previous value associated with the specified key, or {@code null} if there was no mapping for the key
+     * @see Map#putIfAbsent(Object, Object)
      */
-    public static <K, V> V putIfAbsent(final Map<K, V> map, K key, final Supplier<V> supplier) {
+    public static <K, V> V putIfAbsentOrNull(final Map<K, V> map, K key, final Supplier<V> supplier) {
         V v = map.get(key);
 
         if (v == null) {
@@ -2055,6 +2117,7 @@ public final class Maps {
      * @param map
      * @param entry
      * @return
+     * @see Map#remove(Object, Object)
      */
     public static <K, V> boolean remove(final Map<K, V> map, Map.Entry<?, ?> entry) {
         return remove(map, entry.getKey(), entry.getValue());
@@ -2068,6 +2131,7 @@ public final class Maps {
      * @param key
      * @param value
      * @return
+     * @see Map#remove(Object, Object)
      */
     public static <K, V> boolean remove(final Map<K, V> map, final Object key, final Object value) {
         if (N.isEmpty(map)) {
@@ -2138,6 +2202,12 @@ public final class Maps {
      * @return {@code true} if there are one or more than one entries removed from the specified map.
      */
     public static <K, V> boolean removeIf(final Map<K, V> map, final Predicate<? super Map.Entry<K, V>> filter) {
+        N.checkArgNotNull(filter, "filter");
+
+        if (N.isEmpty(map)) {
+            return false;
+        }
+
         List<K> keysToRemove = null;
 
         for (Map.Entry<K, V> entry : map.entrySet()) {
@@ -2171,6 +2241,12 @@ public final class Maps {
      * @return {@code true} if there are one or more than one entries removed from the specified map.
      */
     public static <K, V> boolean removeIf(final Map<K, V> map, final BiPredicate<? super K, ? super V> filter) {
+        N.checkArgNotNull(filter, "filter");
+
+        if (N.isEmpty(map)) {
+            return false;
+        }
+
         List<K> keysToRemove = null;
 
         for (Map.Entry<K, V> entry : map.entrySet()) {
@@ -2204,6 +2280,12 @@ public final class Maps {
      * @return {@code true} if there are one or more than one entries removed from the specified map.
      */
     public static <K, V> boolean removeIfKey(final Map<K, V> map, final Predicate<? super K> filter) {
+        N.checkArgNotNull(filter, "filter");
+
+        if (N.isEmpty(map)) {
+            return false;
+        }
+
         List<K> keysToRemove = null;
 
         for (Map.Entry<K, V> entry : map.entrySet()) {
@@ -2237,6 +2319,12 @@ public final class Maps {
      * @return {@code true} if there are one or more than one entries removed from the specified map.
      */
     public static <K, V> boolean removeIfValue(final Map<K, V> map, final Predicate<? super V> filter) {
+        N.checkArgNotNull(filter, "filter");
+
+        if (N.isEmpty(map)) {
+            return false;
+        }
+
         List<K> keysToRemove = null;
 
         for (Map.Entry<K, V> entry : map.entrySet()) {
@@ -2268,7 +2356,8 @@ public final class Maps {
      * @param key
      * @param oldValue
      * @param newValue
-     * @return
+     * @return {@code true} if the value was replaced
+     * @see Map#replace(Object, Object, Object)
      */
     public static <K, V> boolean replace(final Map<K, V> map, final K key, final V oldValue, final V newValue) {
         if (N.isEmpty(map)) {
@@ -2293,8 +2382,11 @@ public final class Maps {
      * @param map
      * @param key
      * @param newValue
-     * @return {@code null} if {@code (N.isEmpty(map))}. (auto-generated java doc for return)
+     * @return the previous value associated with the specified key, or {@code null} if there was no mapping for the key.
+     *         (A {@code null} return can also indicate that the map
+     *         previously associated {@code null} with the key
      * @throws IllegalArgumentException
+     * @see {@link Map#replace(Object, Object)}
      */
     @MayReturnNull
     public static <K, V> V replace(final Map<K, V> map, final K key, final V newValue) throws IllegalArgumentException {
@@ -2377,6 +2469,8 @@ public final class Maps {
      * @return
      */
     public static <K, V> Map<K, V> filter(final Map<K, V> map, final Predicate<? super Map.Entry<K, V>> predicate) {
+        N.checkArgNotNull(predicate, "predicate");
+
         if (map == null) {
             return new HashMap<>();
         }
@@ -2401,6 +2495,8 @@ public final class Maps {
      * @return
      */
     public static <K, V> Map<K, V> filter(final Map<K, V> map, final BiPredicate<? super K, ? super V> predicate) {
+        N.checkArgNotNull(predicate, "predicate");
+
         if (map == null) {
             return new HashMap<>();
         }
@@ -2426,6 +2522,8 @@ public final class Maps {
      * @return
      */
     public static <K, V> Map<K, V> filterByKey(final Map<K, V> map, final Predicate<? super K> predicate) {
+        N.checkArgNotNull(predicate, "predicate");
+
         if (map == null) {
             return new HashMap<>();
         }
@@ -2451,6 +2549,8 @@ public final class Maps {
      * @return
      */
     public static <K, V> Map<K, V> filterByValue(final Map<K, V> map, final Predicate<? super V> predicate) {
+        N.checkArgNotNull(predicate, "predicate");
+
         if (map == null) {
             return new HashMap<>();
         }
@@ -2764,6 +2864,8 @@ public final class Maps {
      * @param remappingFunction
      */
     public static <K, V> void merge(Map<K, V> map, K key, V value, BinaryOperator<V> remappingFunction) {
+        N.checkArgNotNull(remappingFunction, "remappingFunction");
+
         final V oldValue = map.get(key);
 
         if (oldValue == null && !map.containsKey(key)) {
@@ -3907,457 +4009,457 @@ public final class Maps {
     //        return (T) recordInfo.creator().apply(args);
     //    }
 
-    public static class MapGetter<K, V> {
-
-        private final Map<K, V> map;
-        private final boolean defaultForPrimitiveOrBoxedType;
-
-        MapGetter(final Map<K, V> map, final boolean defaultForPrimitiveOrBoxedType) {
-            this.map = map;
-            this.defaultForPrimitiveOrBoxedType = defaultForPrimitiveOrBoxedType;
-        }
-
-        /**
-         *
-         *
-         * @param <K>
-         * @param <V>
-         * @param map
-         * @return
-         */
-        public static <K, V> MapGetter<K, V> of(final Map<K, V> map) {
-            return of(map, false);
-        }
-
-        /**
-         *
-         *
-         * @param <K>
-         * @param <V>
-         * @param map
-         * @param defaultForPrimitiveOrBoxedType
-         * @return
-         */
-        public static <K, V> MapGetter<K, V> of(final Map<K, V> map, final boolean defaultForPrimitiveOrBoxedType) {
-            return new MapGetter<>(map, defaultForPrimitiveOrBoxedType);
-        }
-
-        /**
-         *
-         *
-         * @param key
-         * @return
-         */
-        public Boolean getBoolean(K key) {
-            Object value = map.get(key);
-
-            if (value == null && defaultForPrimitiveOrBoxedType) {
-                return Boolean.FALSE;
-            } else if (value instanceof Boolean) {
-                return (Boolean) value;
-            }
-
-            return Strings.parseBoolean(N.toString(value));
-        }
-
-        /**
-         *
-         *
-         * @param key
-         * @return
-         */
-        public Character getChar(K key) {
-            Object value = map.get(key);
-
-            if (value == null && defaultForPrimitiveOrBoxedType) {
-                return 0;
-            } else if (value instanceof Character) {
-                return (Character) value;
-            }
-
-            return Strings.parseChar(N.toString(value));
-        }
-
-        /**
-         *
-         *
-         * @param key
-         * @return
-         */
-        public Byte getByte(K key) {
-            Object value = map.get(key);
-
-            if (value == null && defaultForPrimitiveOrBoxedType) {
-                return 0;
-            } else if (value instanceof Byte) {
-                return (Byte) value;
-            }
-
-            return Numbers.toByte(value);
-        }
-
-        /**
-         *
-         *
-         * @param key
-         * @return
-         */
-        public Short getShort(K key) {
-            Object value = map.get(key);
-
-            if (value == null && defaultForPrimitiveOrBoxedType) {
-                return 0;
-            } else if (value instanceof Short) {
-                return (Short) value;
-            }
-
-            return Numbers.toShort(value);
-        }
-
-        /**
-         *
-         *
-         * @param key
-         * @return
-         */
-        public Integer getInt(K key) {
-            Object value = map.get(key);
-
-            if (value == null && defaultForPrimitiveOrBoxedType) {
-                return 0;
-            } else if (value instanceof Integer) {
-                return (Integer) value;
-            }
-
-            return Numbers.toInt(value);
-        }
-
-        /**
-         *
-         *
-         * @param key
-         * @return
-         */
-        public Long getLong(final K key) {
-            Object value = map.get(key);
-
-            if (value == null && defaultForPrimitiveOrBoxedType) {
-                return 0L;
-            } else if (value instanceof Long) {
-                return (Long) value;
-            }
-
-            return Numbers.toLong(value);
-        }
-
-        /**
-         *
-         *
-         * @param key
-         * @return
-         */
-        public Float getFloat(K key) {
-            Object value = map.get(key);
-
-            if (value == null && defaultForPrimitiveOrBoxedType) {
-                return 0F;
-            } else if (value instanceof Float) {
-                return (Float) value;
-            }
-
-            return Numbers.toFloat(value);
-        }
-
-        /**
-         *
-         *
-         * @param key
-         * @return
-         */
-        public Double getDouble(K key) {
-            Object value = map.get(key);
-
-            if (value == null && defaultForPrimitiveOrBoxedType) {
-                return 0d;
-            } else if (value instanceof Double) {
-                return (Double) value;
-            }
-
-            return Numbers.toDouble(value);
-        }
-
-        /**
-         *
-         *
-         * @param key
-         * @return
-         */
-        public BigInteger getBigInteger(K key) {
-            Object value = map.get(key);
-
-            if (value == null || value instanceof BigInteger) {
-                return (BigInteger) value;
-            }
-
-            return N.convert(value, BigInteger.class);
-        }
-
-        /**
-         *
-         *
-         * @param key
-         * @return
-         */
-        public BigDecimal getBigDecimal(K key) {
-            Object value = map.get(key);
-
-            if (value == null || value instanceof BigDecimal) {
-                return (BigDecimal) value;
-            }
-
-            return N.convert(value, BigDecimal.class);
-        }
-
-        /**
-         *
-         *
-         * @param key
-         * @return
-         */
-        public String getString(K key) {
-            Object value = map.get(key);
-
-            if (value == null || value instanceof String) {
-                return (String) value;
-            }
-
-            return N.stringOf(value);
-        }
-
-        /**
-         *
-         *
-         * @param key
-         * @return
-         */
-        public Calendar getCalendar(K key) {
-            Object value = map.get(key);
-
-            if (value == null || value instanceof Calendar) {
-                return (Calendar) value;
-            }
-
-            return N.convert(value, Calendar.class);
-        }
-
-        /**
-         *
-         *
-         * @param key
-         * @return
-         */
-        public Date getJUDate(K key) {
-            Object value = map.get(key);
-
-            if (value == null || value instanceof Date) {
-                return (Date) value;
-            }
-
-            return N.convert(value, Date.class);
-        }
-
-        /**
-         *
-         *
-         * @param key
-         * @return
-         */
-        public java.sql.Date getDate(K key) {
-            Object value = map.get(key);
-
-            if (value == null || value instanceof java.sql.Date) {
-                return (java.sql.Date) value;
-            }
-
-            return N.convert(value, java.sql.Date.class);
-        }
-
-        /**
-         *
-         *
-         * @param key
-         * @return
-         */
-        public java.sql.Time getTime(K key) {
-            Object value = map.get(key);
-
-            if (value == null || value instanceof java.sql.Time) {
-                return (java.sql.Time) value;
-            }
-
-            return N.convert(value, java.sql.Time.class);
-        }
-
-        /**
-         *
-         *
-         * @param key
-         * @return
-         */
-        public java.sql.Timestamp getTimestamp(K key) {
-            Object value = map.get(key);
-
-            if (value == null || value instanceof java.sql.Timestamp) {
-                return (java.sql.Timestamp) value;
-            }
-
-            return N.convert(value, java.sql.Timestamp.class);
-        }
-
-        /**
-         *
-         *
-         * @param key
-         * @return
-         */
-        public LocalDate getLocalDate(K key) {
-            Object value = map.get(key);
-
-            if (value == null || value instanceof LocalDate) {
-                return (LocalDate) value;
-            }
-
-            return N.convert(value, LocalDate.class);
-        }
-
-        /**
-         *
-         *
-         * @param key
-         * @return
-         */
-        public LocalTime getLocalTime(K key) {
-            Object value = map.get(key);
-
-            if (value == null || value instanceof LocalTime) {
-                return (LocalTime) value;
-            }
-
-            return N.convert(value, LocalTime.class);
-        }
-
-        /**
-         *
-         *
-         * @param key
-         * @return
-         */
-        public LocalDateTime getLocalDateTime(K key) {
-            Object value = map.get(key);
-
-            if (value == null || value instanceof LocalDateTime) {
-                return (LocalDateTime) value;
-            }
-
-            return N.convert(value, LocalDateTime.class);
-        }
-
-        /**
-         *
-         *
-         * @param key
-         * @return
-         */
-        public ZonedDateTime getZonedDateTime(K key) {
-            Object value = map.get(key);
-
-            if (value == null || value instanceof ZonedDateTime) {
-                return (ZonedDateTime) value;
-            }
-
-            return N.convert(value, ZonedDateTime.class);
-        }
-
-        /**
-         *
-         *
-         * @param key
-         * @return
-         */
-        public V getObject(K key) {
-            return map.get(key);
-        }
-
-        /**
-         * Returns {@code null} if no value found by the specified {@code key}, or the value is {@code null}.
-         *
-         *
-         * @param <T>
-         * @param key
-         * @param targetType
-         * @return
-         */
-        public <T> T get(final Object key, final Class<? extends T> targetType) {
-            final V val = map.get(key);
-
-            if (val == null) {
-                return (T) (defaultForPrimitiveOrBoxedType && ClassUtil.isPrimitiveWrapper(targetType) ? N.defaultValueOf(ClassUtil.unwrap(targetType))
-                        : N.defaultValueOf(targetType));
-            }
-
-            if (targetType.isAssignableFrom(val.getClass())) {
-                return (T) val;
-            }
-
-            return N.convert(val, targetType);
-        }
-
-        /**
-         * Returns {@code null} if no value found by the specified {@code key}, or the value is {@code null}.
-         *
-         *
-         * @param <T>
-         * @param key
-         * @param targetType
-         * @return
-         */
-        public <T> T get(final Object key, final Type<? extends T> targetType) {
-            final V val = map.get(key);
-
-            if (val == null) {
-                return (T) (defaultForPrimitiveOrBoxedType && targetType.isPrimitiveWrapper() ? N.defaultValueOf(ClassUtil.unwrap(targetType.clazz()))
-                        : targetType.defaultValue());
-            }
-
-            if (targetType.clazz().isAssignableFrom(val.getClass())) {
-                return (T) val;
-            }
-
-            return N.convert(val, targetType);
-        }
-
-        /**
-         *
-         * @param <T>
-         * @param key
-         * @param defaultForNull
-         * @return
-         * @throws IllegalArgumentException
-         */
-        public <T> T get(final Object key, final T defaultForNull) throws IllegalArgumentException {
-            N.checkArgNotNull(defaultForNull, "defaultForNull"); // NOSONAR
-
-            final V val = map.get(key);
-
-            if (val == null) {
-                return defaultForNull;
-            }
-
-            if (defaultForNull.getClass().isAssignableFrom(val.getClass())) {
-                return (T) val;
-            }
-
-            return (T) N.convert(val, defaultForNull.getClass());
-        }
-    }
+    //    public static class MapGetter<K, V> {
+    //
+    //        private final Map<K, V> map;
+    //        private final boolean defaultForPrimitiveOrBoxedType;
+    //
+    //        MapGetter(final Map<K, V> map, final boolean defaultForPrimitiveOrBoxedType) {
+    //            this.map = map;
+    //            this.defaultForPrimitiveOrBoxedType = defaultForPrimitiveOrBoxedType;
+    //        }
+    //
+    //        /**
+    //         *
+    //         *
+    //         * @param <K>
+    //         * @param <V>
+    //         * @param map
+    //         * @return
+    //         */
+    //        public static <K, V> MapGetter<K, V> of(final Map<K, V> map) {
+    //            return of(map, false);
+    //        }
+    //
+    //        /**
+    //         *
+    //         *
+    //         * @param <K>
+    //         * @param <V>
+    //         * @param map
+    //         * @param defaultForPrimitiveOrBoxedType
+    //         * @return
+    //         */
+    //        public static <K, V> MapGetter<K, V> of(final Map<K, V> map, final boolean defaultForPrimitiveOrBoxedType) {
+    //            return new MapGetter<>(map, defaultForPrimitiveOrBoxedType);
+    //        }
+    //
+    //        /**
+    //         *
+    //         *
+    //         * @param key
+    //         * @return
+    //         */
+    //        public Boolean getBoolean(K key) {
+    //            Object value = map.get(key);
+    //
+    //            if (value == null && defaultForPrimitiveOrBoxedType) {
+    //                return Boolean.FALSE;
+    //            } else if (value instanceof Boolean) {
+    //                return (Boolean) value;
+    //            }
+    //
+    //            return Strings.parseBoolean(N.toString(value));
+    //        }
+    //
+    //        /**
+    //         *
+    //         *
+    //         * @param key
+    //         * @return
+    //         */
+    //        public Character getChar(K key) {
+    //            Object value = map.get(key);
+    //
+    //            if (value == null && defaultForPrimitiveOrBoxedType) {
+    //                return 0;
+    //            } else if (value instanceof Character) {
+    //                return (Character) value;
+    //            }
+    //
+    //            return Strings.parseChar(N.toString(value));
+    //        }
+    //
+    //        /**
+    //         *
+    //         *
+    //         * @param key
+    //         * @return
+    //         */
+    //        public Byte getByte(K key) {
+    //            Object value = map.get(key);
+    //
+    //            if (value == null && defaultForPrimitiveOrBoxedType) {
+    //                return 0;
+    //            } else if (value instanceof Byte) {
+    //                return (Byte) value;
+    //            }
+    //
+    //            return Numbers.toByte(value);
+    //        }
+    //
+    //        /**
+    //         *
+    //         *
+    //         * @param key
+    //         * @return
+    //         */
+    //        public Short getShort(K key) {
+    //            Object value = map.get(key);
+    //
+    //            if (value == null && defaultForPrimitiveOrBoxedType) {
+    //                return 0;
+    //            } else if (value instanceof Short) {
+    //                return (Short) value;
+    //            }
+    //
+    //            return Numbers.toShort(value);
+    //        }
+    //
+    //        /**
+    //         *
+    //         *
+    //         * @param key
+    //         * @return
+    //         */
+    //        public Integer getInt(K key) {
+    //            Object value = map.get(key);
+    //
+    //            if (value == null && defaultForPrimitiveOrBoxedType) {
+    //                return 0;
+    //            } else if (value instanceof Integer) {
+    //                return (Integer) value;
+    //            }
+    //
+    //            return Numbers.toInt(value);
+    //        }
+    //
+    //        /**
+    //         *
+    //         *
+    //         * @param key
+    //         * @return
+    //         */
+    //        public Long getLong(final K key) {
+    //            Object value = map.get(key);
+    //
+    //            if (value == null && defaultForPrimitiveOrBoxedType) {
+    //                return 0L;
+    //            } else if (value instanceof Long) {
+    //                return (Long) value;
+    //            }
+    //
+    //            return Numbers.toLong(value);
+    //        }
+    //
+    //        /**
+    //         *
+    //         *
+    //         * @param key
+    //         * @return
+    //         */
+    //        public Float getFloat(K key) {
+    //            Object value = map.get(key);
+    //
+    //            if (value == null && defaultForPrimitiveOrBoxedType) {
+    //                return 0F;
+    //            } else if (value instanceof Float) {
+    //                return (Float) value;
+    //            }
+    //
+    //            return Numbers.toFloat(value);
+    //        }
+    //
+    //        /**
+    //         *
+    //         *
+    //         * @param key
+    //         * @return
+    //         */
+    //        public Double getDouble(K key) {
+    //            Object value = map.get(key);
+    //
+    //            if (value == null && defaultForPrimitiveOrBoxedType) {
+    //                return 0d;
+    //            } else if (value instanceof Double) {
+    //                return (Double) value;
+    //            }
+    //
+    //            return Numbers.toDouble(value);
+    //        }
+    //
+    //        /**
+    //         *
+    //         *
+    //         * @param key
+    //         * @return
+    //         */
+    //        public BigInteger getBigInteger(K key) {
+    //            Object value = map.get(key);
+    //
+    //            if (value == null || value instanceof BigInteger) {
+    //                return (BigInteger) value;
+    //            }
+    //
+    //            return N.convert(value, BigInteger.class);
+    //        }
+    //
+    //        /**
+    //         *
+    //         *
+    //         * @param key
+    //         * @return
+    //         */
+    //        public BigDecimal getBigDecimal(K key) {
+    //            Object value = map.get(key);
+    //
+    //            if (value == null || value instanceof BigDecimal) {
+    //                return (BigDecimal) value;
+    //            }
+    //
+    //            return N.convert(value, BigDecimal.class);
+    //        }
+    //
+    //        /**
+    //         *
+    //         *
+    //         * @param key
+    //         * @return
+    //         */
+    //        public String getString(K key) {
+    //            Object value = map.get(key);
+    //
+    //            if (value == null || value instanceof String) {
+    //                return (String) value;
+    //            }
+    //
+    //            return N.stringOf(value);
+    //        }
+    //
+    //        /**
+    //         *
+    //         *
+    //         * @param key
+    //         * @return
+    //         */
+    //        public Calendar getCalendar(K key) {
+    //            Object value = map.get(key);
+    //
+    //            if (value == null || value instanceof Calendar) {
+    //                return (Calendar) value;
+    //            }
+    //
+    //            return N.convert(value, Calendar.class);
+    //        }
+    //
+    //        /**
+    //         *
+    //         *
+    //         * @param key
+    //         * @return
+    //         */
+    //        public Date getJUDate(K key) {
+    //            Object value = map.get(key);
+    //
+    //            if (value == null || value instanceof Date) {
+    //                return (Date) value;
+    //            }
+    //
+    //            return N.convert(value, Date.class);
+    //        }
+    //
+    //        /**
+    //         *
+    //         *
+    //         * @param key
+    //         * @return
+    //         */
+    //        public java.sql.Date getDate(K key) {
+    //            Object value = map.get(key);
+    //
+    //            if (value == null || value instanceof java.sql.Date) {
+    //                return (java.sql.Date) value;
+    //            }
+    //
+    //            return N.convert(value, java.sql.Date.class);
+    //        }
+    //
+    //        /**
+    //         *
+    //         *
+    //         * @param key
+    //         * @return
+    //         */
+    //        public java.sql.Time getTime(K key) {
+    //            Object value = map.get(key);
+    //
+    //            if (value == null || value instanceof java.sql.Time) {
+    //                return (java.sql.Time) value;
+    //            }
+    //
+    //            return N.convert(value, java.sql.Time.class);
+    //        }
+    //
+    //        /**
+    //         *
+    //         *
+    //         * @param key
+    //         * @return
+    //         */
+    //        public java.sql.Timestamp getTimestamp(K key) {
+    //            Object value = map.get(key);
+    //
+    //            if (value == null || value instanceof java.sql.Timestamp) {
+    //                return (java.sql.Timestamp) value;
+    //            }
+    //
+    //            return N.convert(value, java.sql.Timestamp.class);
+    //        }
+    //
+    //        /**
+    //         *
+    //         *
+    //         * @param key
+    //         * @return
+    //         */
+    //        public LocalDate getLocalDate(K key) {
+    //            Object value = map.get(key);
+    //
+    //            if (value == null || value instanceof LocalDate) {
+    //                return (LocalDate) value;
+    //            }
+    //
+    //            return N.convert(value, LocalDate.class);
+    //        }
+    //
+    //        /**
+    //         *
+    //         *
+    //         * @param key
+    //         * @return
+    //         */
+    //        public LocalTime getLocalTime(K key) {
+    //            Object value = map.get(key);
+    //
+    //            if (value == null || value instanceof LocalTime) {
+    //                return (LocalTime) value;
+    //            }
+    //
+    //            return N.convert(value, LocalTime.class);
+    //        }
+    //
+    //        /**
+    //         *
+    //         *
+    //         * @param key
+    //         * @return
+    //         */
+    //        public LocalDateTime getLocalDateTime(K key) {
+    //            Object value = map.get(key);
+    //
+    //            if (value == null || value instanceof LocalDateTime) {
+    //                return (LocalDateTime) value;
+    //            }
+    //
+    //            return N.convert(value, LocalDateTime.class);
+    //        }
+    //
+    //        /**
+    //         *
+    //         *
+    //         * @param key
+    //         * @return
+    //         */
+    //        public ZonedDateTime getZonedDateTime(K key) {
+    //            Object value = map.get(key);
+    //
+    //            if (value == null || value instanceof ZonedDateTime) {
+    //                return (ZonedDateTime) value;
+    //            }
+    //
+    //            return N.convert(value, ZonedDateTime.class);
+    //        }
+    //
+    //        /**
+    //         *
+    //         *
+    //         * @param key
+    //         * @return
+    //         */
+    //        public V getObject(K key) {
+    //            return map.get(key);
+    //        }
+    //
+    //        /**
+    //         * Returns {@code null} if no value found by the specified {@code key}, or the value is {@code null}.
+    //         *
+    //         *
+    //         * @param <T>
+    //         * @param key
+    //         * @param targetType
+    //         * @return
+    //         */
+    //        public <T> T get(final Object key, final Class<? extends T> targetType) {
+    //            final V val = map.get(key);
+    //
+    //            if (val == null) {
+    //                return (T) (defaultForPrimitiveOrBoxedType && ClassUtil.isPrimitiveWrapper(targetType) ? N.defaultValueOf(ClassUtil.unwrap(targetType))
+    //                        : N.defaultValueOf(targetType));
+    //            }
+    //
+    //            if (targetType.isAssignableFrom(val.getClass())) {
+    //                return (T) val;
+    //            }
+    //
+    //            return N.convert(val, targetType);
+    //        }
+    //
+    //        /**
+    //         * Returns {@code null} if no value found by the specified {@code key}, or the value is {@code null}.
+    //         *
+    //         *
+    //         * @param <T>
+    //         * @param key
+    //         * @param targetType
+    //         * @return
+    //         */
+    //        public <T> T get(final Object key, final Type<? extends T> targetType) {
+    //            final V val = map.get(key);
+    //
+    //            if (val == null) {
+    //                return (T) (defaultForPrimitiveOrBoxedType && targetType.isPrimitiveWrapper() ? N.defaultValueOf(ClassUtil.unwrap(targetType.clazz()))
+    //                        : targetType.defaultValue());
+    //            }
+    //
+    //            if (targetType.clazz().isAssignableFrom(val.getClass())) {
+    //                return (T) val;
+    //            }
+    //
+    //            return N.convert(val, targetType);
+    //        }
+    //
+    //        /**
+    //         *
+    //         * @param <T>
+    //         * @param key
+    //         * @param defaultForNull
+    //         * @return
+    //         * @throws IllegalArgumentException
+    //         */
+    //        public <T> T get(final Object key, final T defaultForNull) throws IllegalArgumentException {
+    //            N.checkArgNotNull(defaultForNull, "defaultForNull"); // NOSONAR
+    //
+    //            final V val = map.get(key);
+    //
+    //            if (val == null) {
+    //                return defaultForNull;
+    //            }
+    //
+    //            if (defaultForNull.getClass().isAssignableFrom(val.getClass())) {
+    //                return (T) val;
+    //            }
+    //
+    //            return (T) N.convert(val, defaultForNull.getClass());
+    //        }
+    //    }
 }
