@@ -307,12 +307,12 @@ public class Builder<T> {
     }
 
     /**
-     * 
      *
-     * @param <R> 
-     * @param mapper 
-     * @return 
-     * @deprecated 
+     *
+     * @param <R>
+     * @param mapper
+     * @return
+     * @deprecated
      */
     @Deprecated
     public <R> Builder<R> map(final Function<? super T, ? extends R> mapper) {
@@ -320,12 +320,12 @@ public class Builder<T> {
     }
 
     /**
-     * 
      *
-     * @param predicate 
+     *
+     * @param predicate
      * @return <code>Optional</code> with the value if <code>predicate</code> returns true,
      * otherwise, return an empty <code>Optional</code>
-     * @deprecated 
+     * @deprecated
      */
     @Deprecated
     public Optional<T> filter(final Predicate<? super T> predicate) {
@@ -333,10 +333,10 @@ public class Builder<T> {
     }
 
     /**
-     * 
      *
-     * @param consumer 
-     * @return 
+     *
+     * @param consumer
+     * @return
      */
     public Builder<T> accept(final Consumer<? super T> consumer) {
         consumer.accept(val);
@@ -345,11 +345,11 @@ public class Builder<T> {
     }
 
     /**
-     * 
      *
-     * @param <R> 
-     * @param func 
-     * @return 
+     *
+     * @param <R>
+     * @param func
+     * @return
      */
     public <R> R apply(final Function<? super T, ? extends R> func) {
         return func.apply(val);
@@ -1608,16 +1608,21 @@ public class Builder<T> {
         }
 
         /**
-         * Put if absent.
+         * Put if absent or the associated value is {@code null}
+         *
+         * <br />
+         * Absent -> key is not found in the specified map or found with {@code null} value.
          *
          * @param key
          * @param value
          * @return
+         * @see Map#putIfAbsent(Object, Object)
          */
         public MapBuilder<K, V, M> putIfAbsent(K key, V value) {
             V v = val.get(key);
 
-            if (v == null && val.containsKey(key) == false) {
+            // if (v == null && val.containsKey(key) == false) {
+            if (v == null) {
                 val.put(key, value);
             }
 
@@ -1625,16 +1630,21 @@ public class Builder<T> {
         }
 
         /**
-         * Put if absent.
+         * Put if absent or the associated value is {@code null
+         *
+         * <br />
+         * Absent -> key is not found in the specified map or found with {@code null} value.
          *
          * @param key
          * @param supplier
          * @return
+         * @see Map#putIfAbsent(Object, Object)
          */
         public MapBuilder<K, V, M> putIfAbsent(K key, Supplier<V> supplier) {
             V v = val.get(key);
 
-            if (v == null && val.containsKey(key) == false) {
+            // if (v == null && val.containsKey(key) == false) {
+            if (v == null) {
                 val.put(key, supplier.get());
             }
 
@@ -1917,10 +1927,10 @@ public class Builder<T> {
         /**
          * Adds the column.
          *
-         * @param newColumnName 
-         * @param fromColumnName 
-         * @param func 
-         * @return 
+         * @param newColumnName
+         * @param fromColumnName
+         * @param func
+         * @return
          */
         public DataSetBuilder addColumn(String newColumnName, String fromColumnName, Function<?, ?> func) {
             val.addColumn(newColumnName, fromColumnName, func);
@@ -1931,11 +1941,11 @@ public class Builder<T> {
         /**
          * Adds the column.
          *
-         * @param columnIndex 
-         * @param newColumnName 
-         * @param fromColumnName 
-         * @param func 
-         * @return 
+         * @param columnIndex
+         * @param newColumnName
+         * @param fromColumnName
+         * @param func
+         * @return
          */
         public DataSetBuilder addColumn(int columnIndex, String newColumnName, String fromColumnName, Function<?, ?> func) {
             val.addColumn(columnIndex, newColumnName, fromColumnName, func);
@@ -1946,10 +1956,10 @@ public class Builder<T> {
         /**
          * Adds the column.
          *
-         * @param newColumnName 
-         * @param fromColumnNames 
-         * @param func 
-         * @return 
+         * @param newColumnName
+         * @param fromColumnNames
+         * @param func
+         * @return
          */
         public DataSetBuilder addColumn(String newColumnName, Collection<String> fromColumnNames, Function<? super DisposableObjArray, ?> func) {
             val.addColumn(newColumnName, fromColumnNames, func);
@@ -1960,11 +1970,11 @@ public class Builder<T> {
         /**
          * Adds the column.
          *
-         * @param columnIndex 
-         * @param newColumnName 
-         * @param fromColumnNames 
-         * @param func 
-         * @return 
+         * @param columnIndex
+         * @param newColumnName
+         * @param fromColumnNames
+         * @param func
+         * @return
          */
         public DataSetBuilder addColumn(int columnIndex, String newColumnName, Collection<String> fromColumnNames,
                 Function<? super DisposableObjArray, ?> func) {
@@ -1976,10 +1986,10 @@ public class Builder<T> {
         /**
          * Adds the column.
          *
-         * @param newColumnName 
-         * @param fromColumnNames 
-         * @param func 
-         * @return 
+         * @param newColumnName
+         * @param fromColumnNames
+         * @param func
+         * @return
          */
         public DataSetBuilder addColumn(String newColumnName, Tuple2<String, String> fromColumnNames, BiFunction<?, ?, ?> func) {
             val.addColumn(newColumnName, fromColumnNames, func);
@@ -1990,11 +2000,11 @@ public class Builder<T> {
         /**
          * Adds the column.
          *
-         * @param columnIndex 
-         * @param newColumnName 
-         * @param fromColumnNames 
-         * @param func 
-         * @return 
+         * @param columnIndex
+         * @param newColumnName
+         * @param fromColumnNames
+         * @param func
+         * @return
          */
         public DataSetBuilder addColumn(int columnIndex, String newColumnName, Tuple2<String, String> fromColumnNames, BiFunction<?, ?, ?> func) {
             val.addColumn(columnIndex, newColumnName, fromColumnNames, func);
@@ -2005,10 +2015,10 @@ public class Builder<T> {
         /**
          * Adds the column.
          *
-         * @param newColumnName 
-         * @param fromColumnNames 
-         * @param func 
-         * @return 
+         * @param newColumnName
+         * @param fromColumnNames
+         * @param func
+         * @return
          */
         public DataSetBuilder addColumn(String newColumnName, Tuple3<String, String, String> fromColumnNames, TriFunction<?, ?, ?, ?> func) {
             val.addColumn(newColumnName, fromColumnNames, func);
@@ -2019,11 +2029,11 @@ public class Builder<T> {
         /**
          * Adds the column.
          *
-         * @param columnIndex 
-         * @param newColumnName 
-         * @param fromColumnNames 
-         * @param func 
-         * @return 
+         * @param columnIndex
+         * @param newColumnName
+         * @param fromColumnNames
+         * @param func
+         * @return
          */
         public DataSetBuilder addColumn(int columnIndex, String newColumnName, Tuple3<String, String, String> fromColumnNames, TriFunction<?, ?, ?, ?> func) {
             val.addColumn(columnIndex, newColumnName, fromColumnNames, func);
@@ -2081,11 +2091,11 @@ public class Builder<T> {
         //        }
 
         /**
-         * 
          *
-         * @param columnName 
-         * @param func 
-         * @return 
+         *
+         * @param columnName
+         * @param func
+         * @return
          */
         public DataSetBuilder updateColumn(String columnName, Function<?, ?> func) {
             val.updateColumn(columnName, func);
@@ -2094,11 +2104,11 @@ public class Builder<T> {
         }
 
         /**
-         * 
          *
-         * @param columnNames 
-         * @param func 
-         * @return 
+         *
+         * @param columnNames
+         * @param func
+         * @return
          */
         public DataSetBuilder updateColumns(Collection<String> columnNames, Function<?, ?> func) {
             val.updateColumns(columnNames, func);
@@ -2143,12 +2153,12 @@ public class Builder<T> {
         }
 
         /**
-         * 
          *
-         * @param columnNames 
-         * @param newColumnName 
-         * @param combineFunc 
-         * @return 
+         *
+         * @param columnNames
+         * @param newColumnName
+         * @param combineFunc
+         * @return
          */
         public DataSetBuilder combineColumns(Collection<String> columnNames, String newColumnName, Function<? super DisposableObjArray, ?> combineFunc) {
             val.combineColumns(columnNames, newColumnName, combineFunc);
@@ -2157,12 +2167,12 @@ public class Builder<T> {
         }
 
         /**
-         * 
          *
-         * @param columnNames 
-         * @param newColumnName 
-         * @param combineFunc 
-         * @return 
+         *
+         * @param columnNames
+         * @param newColumnName
+         * @param combineFunc
+         * @return
          */
         public DataSetBuilder combineColumns(Tuple2<String, String> columnNames, String newColumnName, BiFunction<?, ?, ?> combineFunc) {
             val.combineColumns(columnNames, newColumnName, combineFunc);
@@ -2171,12 +2181,12 @@ public class Builder<T> {
         }
 
         /**
-         * 
          *
-         * @param columnNames 
-         * @param newColumnName 
-         * @param combineFunc 
-         * @return 
+         *
+         * @param columnNames
+         * @param newColumnName
+         * @param combineFunc
+         * @return
          */
         public DataSetBuilder combineColumns(Tuple3<String, String, String> columnNames, String newColumnName, TriFunction<?, ?, ?, ?> combineFunc) {
             val.combineColumns(columnNames, newColumnName, combineFunc);
@@ -2198,12 +2208,12 @@ public class Builder<T> {
         }
 
         /**
-         * 
          *
-         * @param columnNameFilter 
-         * @param newColumnName 
-         * @param combineFunc 
-         * @return 
+         *
+         * @param columnNameFilter
+         * @param newColumnName
+         * @param combineFunc
+         * @return
          */
         public DataSetBuilder combineColumns(Predicate<? super String> columnNameFilter, String newColumnName,
                 Function<? super DisposableObjArray, ?> combineFunc) {
@@ -2213,12 +2223,12 @@ public class Builder<T> {
         }
 
         /**
-         * 
          *
-         * @param columnName 
-         * @param newColumnNames 
-         * @param divideFunc 
-         * @return 
+         *
+         * @param columnName
+         * @param newColumnNames
+         * @param divideFunc
+         * @return
          */
         public DataSetBuilder divideColumn(String columnName, Collection<String> newColumnNames, Function<?, ? extends List<?>> divideFunc) {
             val.divideColumn(columnName, newColumnNames, divideFunc);
@@ -2227,12 +2237,12 @@ public class Builder<T> {
         }
 
         /**
-         * 
          *
-         * @param columnName 
-         * @param newColumnNames 
-         * @param output 
-         * @return 
+         *
+         * @param columnName
+         * @param newColumnNames
+         * @param output
+         * @return
          */
         public DataSetBuilder divideColumn(String columnName, Collection<String> newColumnNames, BiConsumer<?, Object[]> output) {
             val.divideColumn(columnName, newColumnNames, output);
@@ -2241,12 +2251,12 @@ public class Builder<T> {
         }
 
         /**
-         * 
          *
-         * @param columnName 
-         * @param newColumnNames 
-         * @param output 
-         * @return 
+         *
+         * @param columnName
+         * @param newColumnNames
+         * @param output
+         * @return
          */
         public DataSetBuilder divideColumn(String columnName, Tuple2<String, String> newColumnNames, BiConsumer<?, Pair<Object, Object>> output) {
             val.divideColumn(columnName, newColumnNames, output);
@@ -2255,12 +2265,12 @@ public class Builder<T> {
         }
 
         /**
-         * 
          *
-         * @param columnName 
-         * @param newColumnNames 
-         * @param output 
-         * @return 
+         *
+         * @param columnName
+         * @param newColumnNames
+         * @param output
+         * @return
          */
         public DataSetBuilder divideColumn(String columnName, Tuple3<String, String, String> newColumnNames,
                 BiConsumer<?, Triple<Object, Object, Object>> output) {
@@ -2270,10 +2280,10 @@ public class Builder<T> {
         }
 
         /**
-         * 
          *
-         * @param func 
-         * @return 
+         *
+         * @param func
+         * @return
          */
         public DataSetBuilder updateAll(Function<?, ?> func) {
             val.updateAll(func);
@@ -2282,11 +2292,11 @@ public class Builder<T> {
         }
 
         /**
-         * 
          *
-         * @param predicate 
-         * @param newValue 
-         * @return 
+         *
+         * @param predicate
+         * @param newValue
+         * @return
          */
         public DataSetBuilder replaceIf(Predicate<?> predicate, Object newValue) {
             val.replaceIf(predicate, newValue);

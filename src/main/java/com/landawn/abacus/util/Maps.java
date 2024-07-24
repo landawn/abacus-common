@@ -25,7 +25,6 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -60,6 +59,11 @@ import com.landawn.abacus.util.u.OptionalShort;
  * Note: This class includes codes copied from Apache Commons Lang, Google Guava and other open source projects under the Apache License 2.0.
  * The methods copied from other libraries/frameworks/projects may be modified in this class.
  * </p>
+ *
+ * <br />
+ * Present -> key is found in the specified map with {@code non-null} value.
+ * <br />
+ * Absent -> key is not found in the specified map or found with {@code null} value.
  *
  * @see com.landawn.abacus.util.N
  * @see com.landawn.abacus.util.Iterables
@@ -804,8 +808,59 @@ public final class Maps {
         }
     }
 
+    //    /**
+    //     * Returns the value to which the specified key is mapped if the value not {@code null},
+    //     * or {@code defaultForNull} if the specified map is empty or contains no value for the key or the mapping value is {@code null}.
+    //     *
+    //     * @param <K>
+    //     * @param <V>
+    //     * @param map
+    //     * @param key
+    //     * @param defaultForNull to return if the specified {@code map} doesn't contain the specified {@code key} or the mapped value is {@code null}.
+    //     * @return
+    //     * @throws IllegalArgumentException if the specified {@code defaultForNull} is {@code null}
+    //     * @deprecated Use {@link #getOrDefaultIfAbsent(Map, Object, Object)} instead
+    //     */
+    //    @Deprecated
+    //    public static <K, V> V getOrDefaultIfNull(final Map<K, ? extends V> map, final K key, final V defaultForNull) throws IllegalArgumentException {
+    //        return getOrDefaultIfAbsent(map, key, defaultForNull);
+    //    }
+
     /**
-     * Returns the value to which the specified key is mapped, or {@code defaultValue} if the specified map is empty or contains no mapping for the key.
+     * Returns a {@code Nullable} with the value to which the specified {@code key/k2} is mapped, or an empty {@code Nullable} if the specified map is empty or contains no mapping for the key.
+     *
+     * @param <K> the key type
+     * @param <K2> the key type
+     * @param <V2> the value type
+     * @param map
+     * @param key
+     * @param k2
+     * @return
+     */
+    public static <K, K2, V2> Nullable<V2> get(final Map<K, ? extends Map<K2, V2>> map, final K key, final K2 k2) {
+        if (N.isEmpty(map)) {
+            return Nullable.empty();
+        }
+
+        final Map<K2, V2> m2 = map.get(key);
+
+        if (N.notEmpty(m2)) {
+            V2 v2 = m2.get(k2);
+
+            if (v2 != null || m2.containsKey(k2)) {
+                return Nullable.of(v2);
+            }
+        }
+
+        return Nullable.empty();
+    }
+
+    /**
+     * Returns the value to which the specified key is mapped if the value not {@code null},
+     * or {@code defaultForNull} if the specified map is empty or contains no value for the key or the mapping value is {@code null}.
+     *
+     * <br />
+     * Absent -> key is not found in the specified map or found with {@code null} value.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -815,50 +870,97 @@ public final class Maps {
      * @return
      */
     public static <K, V> V getOrDefaultIfAbsent(final Map<K, ? extends V> map, final K key, final V defaultValue) {
+        // N.checkArgNotNull(defaultValue, "defaultValue"); // NOSONAR
+
         if (N.isEmpty(map)) {
             return defaultValue;
         }
 
         final V val = map.get(key);
 
-        if (val != null || map.containsKey(key)) {
-            return val;
-        } else {
+        // if (val != null || map.containsKey(key)) {
+        if (val == null) {
             return defaultValue;
+        } else {
+            return val;
         }
     }
+
+    //    /**
+    //     * Returns the value to which the specified key is mapped if the value not {@code null},
+    //     * or {@code defaultForNull} if the specified map is empty or contains no value for the key or the mapping value is {@code null}.
+    //     *
+    //     * @param <K>
+    //     * @param <V>
+    //     * @param map
+    //     * @param key
+    //     * @param defaultForNull to return if the specified {@code map} doesn't contain the specified {@code key} or the mapped value is {@code null}.
+    //     * @return
+    //     * @throws IllegalArgumentException if the specified {@code defaultForNull} is {@code null}
+    //     * @deprecated Use {@link #getOrDefaultIfAbsent(Map, Object, Object)} instead
+    //     */
+    //    @Deprecated
+    //    public static <K, V> V getOrDefaultIfNull(final Map<K, ? extends V> map, final K key, final V defaultForNull) throws IllegalArgumentException {
+    //        return getOrDefaultIfAbsent(map, key, defaultForNull);
+    //    }
 
     /**
-     * Returns the value to which the specified key is mapped if the value not {@code null},
-     * or {@code defaultForNull} if the specified map is empty or contains no value for the key or the mapping value is {@code null}.
+     * Returns the value to which the specified {@code key/k2} is mapped if the value not {@code null},
+     * or {@code defaultForNull} if the specified map is empty or contains no value for the {@code key/k2} or the mapping value is {@code null}.
      *
-     * @param <K>
-     * @param <V>
+     * <br />
+     * Absent -> key is not found in the specified map or found with {@code null} value.
+     *
+     * @param <K> the key type
+     * @param <K2> the key type
+     * @param <V2> the value type
      * @param map
      * @param key
-     * @param defaultForNull to return if the specified {@code map} doesn't contain the specified {@code key} or the mapped value is {@code null}.
+     * @param k2
+     * @param defaultValue
      * @return
-     * @throws IllegalArgumentException if the specified {@code defaultForNull} is {@code null}
      */
-    public static <K, V> V getOrDefaultIfNull(final Map<K, ? extends V> map, final K key, final V defaultForNull) throws IllegalArgumentException {
-        N.checkArgNotNull(defaultForNull, "defaultForNull"); // NOSONAR
-
+    public static <K, K2, V2> V2 getOrDefaultIfAbsent(final Map<K, ? extends Map<K2, V2>> map, final K key, final K2 k2, final V2 defaultValue) {
         if (N.isEmpty(map)) {
-            return defaultForNull;
+            return defaultValue;
         }
 
-        final V val = map.get(key);
+        final Map<K2, V2> m2 = map.get(key);
 
-        if (val == null) {
-            return defaultForNull;
-        } else {
-            return val;
+        if (N.notEmpty(m2)) {
+            V2 v2 = m2.get(k2);
+
+            if (v2 != null) {
+                return v2;
+            }
         }
+
+        return defaultValue;
     }
+
+    //    /**
+    //     * Returns the value to which the specified key is mapped, or
+    //     * an empty immutable {@code List} if the specified map is empty or contains no value for the key or the mapping value is {@code null}.
+    //     *
+    //     * @param <K> the key type
+    //     * @param <E>
+    //     * @param <V> the value type
+    //     * @param map
+    //     * @param key
+    //     * @return
+    //     * @deprecated Use {@link #getOrEmptyListIfAbsent(Map<K, V>,K)} instead
+    //     */
+    //    @Deprecated
+    //    public static <K, E, V extends List<E>> List<E> getOrEmptyListIfNull(final Map<K, V> map, final K key) {
+    //        return getOrEmptyListIfAbsent(map, key);
+    //    }
 
     /**
      * Returns the value to which the specified key is mapped, or
      * an empty immutable {@code List} if the specified map is empty or contains no value for the key or the mapping value is {@code null}.
+     *
+     * <br />
+     * Absent -> key is not found in the specified map or found with {@code null} value.
      *
      * @param <K> the key type
      * @param <E>
@@ -867,7 +969,7 @@ public final class Maps {
      * @param key
      * @return
      */
-    public static <K, E, V extends List<E>> List<E> getOrEmptyListIfNull(final Map<K, V> map, final K key) {
+    public static <K, E, V extends List<E>> List<E> getOrEmptyListIfAbsent(final Map<K, V> map, final K key) {
         if (N.isEmpty(map)) {
             return N.<E> emptyList();
         }
@@ -881,9 +983,29 @@ public final class Maps {
         return val;
     }
 
+    //    /**
+    //     * Returns the value to which the specified key is mapped, or
+    //     * an empty immutable {@code Set} if the specified map is empty or contains no value for the key or the mapping value is {@code null}.
+    //     *
+    //     * @param <K> the key type
+    //     * @param <E>
+    //     * @param <V> the value type
+    //     * @param map
+    //     * @param key
+    //     * @return
+    //     * @deprecated Use {@link #getOrEmptySetIfAbsent(Map<K, V>,K)} instead
+    //     */
+    //    @Deprecated
+    //    public static <K, E, V extends Set<E>> Set<E> getOrEmptySetIfNull(final Map<K, V> map, final K key) {
+    //        return getOrEmptySetIfAbsent(map, key);
+    //    }
+
     /**
      * Returns the value to which the specified key is mapped, or
      * an empty immutable {@code Set} if the specified map is empty or contains no value for the key or the mapping value is {@code null}.
+     *
+     * <br />
+     * Absent -> key is not found in the specified map or found with {@code null} value.
      *
      * @param <K> the key type
      * @param <E>
@@ -892,7 +1014,7 @@ public final class Maps {
      * @param key
      * @return
      */
-    public static <K, E, V extends Set<E>> Set<E> getOrEmptySetIfNull(final Map<K, V> map, final K key) {
+    public static <K, E, V extends Set<E>> Set<E> getOrEmptySetIfAbsent(final Map<K, V> map, final K key) {
         if (N.isEmpty(map)) {
             return N.<E> emptySet();
         }
@@ -906,9 +1028,30 @@ public final class Maps {
         return val;
     }
 
+    //    /**
+    //     * Returns the value to which the specified key is mapped, or
+    //     * an empty immutable {@code Map} if the specified map is empty or contains no value for the key or the mapping value is {@code null}.
+    //     *
+    //     * @param <K> the key type
+    //     * @param <KK> the key type of value map
+    //     * @param <VV> the value type of value map
+    //     * @param <V> the value type
+    //     * @param map
+    //     * @param key
+    //     * @return
+    //     * @deprecated Use {@link #getOrEmptyMapIfAbsent(Map<K, V>,K)} instead
+    //     */
+    //    @Deprecated
+    //    public static <K, KK, VV, V extends Map<KK, VV>> Map<KK, VV> getOrEmptyMapIfNull(final Map<K, V> map, final K key) {
+    //        return getOrEmptyMapIfAbsent(map, key);
+    //    }
+
     /**
      * Returns the value to which the specified key is mapped, or
      * an empty immutable {@code Map} if the specified map is empty or contains no value for the key or the mapping value is {@code null}.
+     *
+     * <br />
+     * Absent -> key is not found in the specified map or found with {@code null} value.
      *
      * @param <K> the key type
      * @param <KK> the key type of value map
@@ -918,7 +1061,7 @@ public final class Maps {
      * @param key
      * @return
      */
-    public static <K, KK, VV, V extends Map<KK, VV>> Map<KK, VV> getOrEmptyMapIfNull(final Map<K, V> map, final K key) {
+    public static <K, KK, VV, V extends Map<KK, VV>> Map<KK, VV> getOrEmptyMapIfAbsent(final Map<K, V> map, final K key) {
         if (N.isEmpty(map)) {
             return N.<KK, VV> emptyMap();
         }
@@ -1418,7 +1561,7 @@ public final class Maps {
      * @see N#convert(Object, Class)
      * @see N#convert(Object, Type)
      */
-    public static <K, T> Optional<T> get(final Map<? super K, ?> map, final K key, final Class<? extends T> targetType) {
+    public static <K, T> Optional<T> getNonNull(final Map<? super K, ?> map, final K key, final Class<? extends T> targetType) {
         if (N.isEmpty(map)) {
             return Optional.empty();
         }
@@ -1448,7 +1591,7 @@ public final class Maps {
      * @see N#convert(Object, Class)
      * @see N#convert(Object, Type)
      */
-    public static <K, T> Optional<T> get(final Map<? super K, ?> map, final K key, final Type<? extends T> targetType) {
+    public static <K, T> Optional<T> getNonNull(final Map<? super K, ?> map, final K key, final Type<? extends T> targetType) {
         if (N.isEmpty(map)) {
             return Optional.empty();
         }
@@ -1478,7 +1621,7 @@ public final class Maps {
      * @see N#convert(Object, Class)
      * @see N#convert(Object, Type)
      */
-    public static <K, T> T get(final Map<? super K, ?> map, final K key, final T defaultForNull) throws IllegalArgumentException {
+    public static <K, T> T getNonNull(final Map<? super K, ?> map, final K key, final T defaultForNull) throws IllegalArgumentException {
         N.checkArgNotNull(defaultForNull, "defaultForNull"); // NOSONAR
 
         if (N.isEmpty(map)) {
@@ -1496,8 +1639,64 @@ public final class Maps {
         }
     }
 
+    //    /**
+    //     * Returns an empty {@code Optional<V>} if the specified {@code map} is empty, or no value found by the specified {@code key}, or the mapping value is {@code null}.
+    //     * Otherwise returns an {@code Optional<V>} with the value mapped by the specified {@code key}.
+    //     *
+    //     * <br />
+    //     * Present -> key is found in the specified map with {@code non-null} value.
+    //     *
+    //     *
+    //     * @param <K>
+    //     * @param <V>
+    //     * @param map
+    //     * @param key
+    //     * @return
+    //     * @deprecated inconsistent with {@link #getNonNull(Map, Object, Object)
+    //     */
+    //    @Deprecated
+    //    public static <K, V> u.Optional<V> getNonNull(final Map<K, ? extends V> map, final K key) {
+    //        if (N.isEmpty(map)) {
+    //            return u.Optional.empty();
+    //        }
+    //
+    //        final V val = map.get(key);
+    //
+    //        if (val == null) {
+    //            return u.Optional.empty();
+    //        } else {
+    //            return u.Optional.of(val);
+    //        }
+    //    }
+
+    //    /**
+    //     * Returns the value associated with the specified {@code key} if it exists and not {@code null} in the specified {@code map}, Otherwise puts a new value got from {@code defaultValueSupplier} and returns it.
+    //     *
+    //     * @param <K> the key type
+    //     * @param <E>
+    //     * @param map
+    //     * @param key
+    //     * @param defaultValueSupplier
+    //     * @return
+    //     * @deprecated Use {@link #getAndPutIfAbsent(Map, Object, Supplier)} instead
+    //     */
+    //    @Deprecated
+    //    public static <K, V> V getAndPutIfNull(final Map<K, V> map, final K key, Supplier<? extends V> defaultValueSupplier) {
+    //        V val = map.get(key);
+    //
+    //        if (val == null) {
+    //            val = defaultValueSupplier.get(); // Objects.requireNonNull(defaultValueSupplier.get());
+    //            val = map.put(key, val);
+    //        }
+    //
+    //        return val;
+    //    }
+
     /**
-     * Returns the value associated with the specified {@code key} if it exists in the specified {@code map}, Otherwise puts a new value got from {@code defaultValueSupplier} and returns it.
+     * Returns the value associated with the specified {@code key} if it exists and not {@code null} in the specified {@code map}, Otherwise puts a new value got from {@code defaultValueSupplier} and returns it.
+     *
+     * <br />
+     * Absent -> key is not found in the specified map or found with {@code null} value.
      *
      * @param <K> the key type
      * @param <E>
@@ -1509,47 +1708,44 @@ public final class Maps {
     public static <K, V> V getAndPutIfAbsent(final Map<K, V> map, final K key, Supplier<? extends V> defaultValueSupplier) {
         V val = map.get(key);
 
-        if (val != null || map.containsKey(key)) {
-            return val;
-        } else {
-            val = defaultValueSupplier.get();
-            val = map.put(key, val);
-        }
-
-        return val;
-    }
-
-    /**
-     * Returns the value associated with the specified {@code key} if it exists and not {@code null} in the specified {@code map}, Otherwise puts a new value got from {@code defaultValueSupplier} and returns it.
-     *
-     * @param <K> the key type
-     * @param <E>
-     * @param map
-     * @param key
-     * @param defaultValueSupplier
-     * @return
-     */
-    public static <K, V> V getAndPutIfNull(final Map<K, V> map, final K key, Supplier<? extends V> defaultValueSupplier) {
-        V val = map.get(key);
+        // if (val != null || map.containsKey(key)) {
 
         if (val == null) {
-            val = Objects.requireNonNull(defaultValueSupplier.get());
+            val = defaultValueSupplier.get(); // Objects.requireNonNull(defaultValueSupplier.get());
             val = map.put(key, val);
         }
 
         return val;
     }
+
+    //    /**
+    //     * Returns the value associated with the specified {@code key} if it exists and not {@code null} in the specified {@code map}, Otherwise puts a new {@code List} and returns it.
+    //     *
+    //     * @param <K> the key type
+    //     * @param <E>
+    //     * @param map
+    //     * @param key
+    //     * @return
+    //     * @deprecated Use {@link #getAndPutListIfAbsent(Map<K, List<E>>,K)} instead
+    //     */
+    //    @Deprecated
+    //    public static <K, E> List<E> getAndPutListIfNull(final Map<K, List<E>> map, final K key) {
+    //        return getAndPutListIfAbsent(map, key);
+    //    }
 
     /**
      * Returns the value associated with the specified {@code key} if it exists and not {@code null} in the specified {@code map}, Otherwise puts a new {@code List} and returns it.
      *
+     * <br />
+     * Absent -> key is not found in the specified map or found with {@code null} value.
+     *
      * @param <K> the key type
      * @param <E>
      * @param map
      * @param key
      * @return
      */
-    public static <K, E> List<E> getAndPutListIfNull(final Map<K, List<E>> map, final K key) {
+    public static <K, E> List<E> getAndPutListIfAbsent(final Map<K, List<E>> map, final K key) {
         List<E> v = map.get(key);
 
         if (v == null) {
@@ -1560,8 +1756,26 @@ public final class Maps {
         return v;
     }
 
+    //    /**
+    //     * Returns the value associated with the specified {@code key} if it exists and not {@code null} in the specified {@code map}, Otherwise puts a new {@code Set} and returns it.
+    //     *
+    //     * @param <K> the key type
+    //     * @param <E>
+    //     * @param map
+    //     * @param key
+    //     * @return
+    //     * @deprecated Use {@link #getAndPutSetIfAbsent(Map<K, Set<E>>,K)} instead
+    //     */
+    //    @Deprecated
+    //    public static <K, E> Set<E> getAndPutSetIfNull(final Map<K, Set<E>> map, final K key) {
+    //        return getAndPutSetIfAbsent(map, key);
+    //    }
+
     /**
      * Returns the value associated with the specified {@code key} if it exists and not {@code null} in the specified {@code map}, Otherwise puts a new {@code Set} and returns it.
+     *
+     * <br />
+     * Absent -> key is not found in the specified map or found with {@code null} value.
      *
      * @param <K> the key type
      * @param <E>
@@ -1569,7 +1783,7 @@ public final class Maps {
      * @param key
      * @return
      */
-    public static <K, E> Set<E> getAndPutSetIfNull(final Map<K, Set<E>> map, final K key) {
+    public static <K, E> Set<E> getAndPutSetIfAbsent(final Map<K, Set<E>> map, final K key) {
         Set<E> v = map.get(key);
 
         if (v == null) {
@@ -1580,8 +1794,26 @@ public final class Maps {
         return v;
     }
 
+    //    /**
+    //     * Returns the value associated with the specified {@code key} if it exists and not {@code null} in the specified {@code map}, Otherwise puts a new {@code LinkedHashSet} and returns it.
+    //     *
+    //     * @param <K> the key type
+    //     * @param <E>
+    //     * @param map
+    //     * @param key
+    //     * @return
+    //     * @deprecated Use {@link #getAndPutLinkedHashSetIfAbsent(Map<K, Set<E>>,K)} instead
+    //     */
+    //    @Deprecated
+    //    public static <K, E> Set<E> getAndPutLinkedHashSetIfNull(final Map<K, Set<E>> map, final K key) {
+    //        return getAndPutLinkedHashSetIfAbsent(map, key);
+    //    }
+
     /**
      * Returns the value associated with the specified {@code key} if it exists and not {@code null} in the specified {@code map}, Otherwise puts a new {@code LinkedHashSet} and returns it.
+     *
+     * <br />
+     * Absent -> key is not found in the specified map or found with {@code null} value.
      *
      * @param <K> the key type
      * @param <E>
@@ -1589,7 +1821,7 @@ public final class Maps {
      * @param key
      * @return
      */
-    public static <K, E> Set<E> getAndPutLinkedHashSetIfNull(final Map<K, Set<E>> map, final K key) {
+    public static <K, E> Set<E> getAndPutLinkedHashSetIfAbsent(final Map<K, Set<E>> map, final K key) {
         Set<E> v = map.get(key);
 
         if (v == null) {
@@ -1600,8 +1832,27 @@ public final class Maps {
         return v;
     }
 
+    //    /**
+    //     * Returns the value associated with the specified {@code key} if it exists and not {@code null} in the specified {@code map}, Otherwise puts a new {@code Map} and returns it.
+    //     *
+    //     * @param <K> the key type
+    //     * @param <KK>
+    //     * @param <VV>
+    //     * @param map
+    //     * @param key
+    //     * @return
+    //     * @deprecated Use {@link #getAndPutMapIfAbsent(Map<K, Map<KK, VV>>,K)} instead
+    //     */
+    //    @Deprecated
+    //    public static <K, KK, VV> Map<KK, VV> getAndPutMapIfNull(final Map<K, Map<KK, VV>> map, final K key) {
+    //        return getAndPutMapIfAbsent(map, key);
+    //    }
+
     /**
      * Returns the value associated with the specified {@code key} if it exists and not {@code null} in the specified {@code map}, Otherwise puts a new {@code Map} and returns it.
+     *
+     * <br />
+     * Absent -> key is not found in the specified map or found with {@code null} value.
      *
      * @param <K> the key type
      * @param <KK>
@@ -1610,7 +1861,7 @@ public final class Maps {
      * @param key
      * @return
      */
-    public static <K, KK, VV> Map<KK, VV> getAndPutMapIfNull(final Map<K, Map<KK, VV>> map, final K key) {
+    public static <K, KK, VV> Map<KK, VV> getAndPutMapIfAbsent(final Map<K, Map<KK, VV>> map, final K key) {
         Map<KK, VV> v = map.get(key);
 
         if (v == null) {
@@ -1621,8 +1872,27 @@ public final class Maps {
         return v;
     }
 
+    //    /**
+    //     * Returns the value associated with the specified {@code key} if it exists and not {@code null} in the specified {@code map}, Otherwise puts a new {@code LinkedHashMap} and returns it.
+    //     *
+    //     * @param <K> the key type
+    //     * @param <KK>
+    //     * @param <VV>
+    //     * @param map
+    //     * @param key
+    //     * @return
+    //     * @deprecated Use {@link #getAndPutLinkedHashMapIfAbsent(Map<K, Map<KK, VV>>,K)} instead
+    //     */
+    //    @Deprecated
+    //    public static <K, KK, VV> Map<KK, VV> getAndPutLinkedHashMapIfNull(final Map<K, Map<KK, VV>> map, final K key) {
+    //        return getAndPutLinkedHashMapIfAbsent(map, key);
+    //    }
+
     /**
      * Returns the value associated with the specified {@code key} if it exists and not {@code null} in the specified {@code map}, Otherwise puts a new {@code LinkedHashMap} and returns it.
+     *
+     * <br />
+     * Absent -> key is not found in the specified map or found with {@code null} value.
      *
      * @param <K> the key type
      * @param <KK>
@@ -1631,7 +1901,7 @@ public final class Maps {
      * @param key
      * @return
      */
-    public static <K, KK, VV> Map<KK, VV> getAndPutLinkedHashMapIfNull(final Map<K, Map<KK, VV>> map, final K key) {
+    public static <K, KK, VV> Map<KK, VV> getAndPutLinkedHashMapIfAbsent(final Map<K, Map<KK, VV>> map, final K key) {
         Map<KK, VV> v = map.get(key);
 
         if (v == null) {
@@ -1644,7 +1914,10 @@ public final class Maps {
 
     /**
      * Returns a list of values of the keys which exist in the specified <code>Map</code>.
-     * If the key dosn't exist in the <code>Map</code>, No value will be added into the returned list.
+     * If the key dosn't exist in the <code>Map</code> or associated value is {@code null}, No value will be added into the returned list.
+     *
+     * <br />
+     * Present -> key is found in the specified map with {@code non-null} value.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -1663,7 +1936,7 @@ public final class Maps {
         for (Object key : keys) {
             val = map.get(key);
 
-            if (val != null || map.containsKey(key)) {
+            if (val != null) {
                 result.add(val);
             }
         }
@@ -1671,8 +1944,49 @@ public final class Maps {
         return result;
     }
 
+    //    /**
+    //     *
+    //     *
+    //     * @param <K>
+    //     * @param <V>
+    //     * @param map
+    //     * @param keys
+    //     * @param defaultForNull
+    //     * @return
+    //     * @throws IllegalArgumentException if the specified {@code defaultForNull} is {@code null}
+    //     * @deprecated Use {@link #getOrDefaultIfAbsentForEach(Map, Collection, Object)} instead
+    //     */
+    //    @Deprecated
+    //    public static <K, V> List<V> getOrDefaultIfNullForEach(final Map<K, V> map, final Collection<?> keys, final V defaultForNull) {
+    //        N.checkArgNotNull(defaultForNull, "defaultForNull"); // NOSONAR
+    //
+    //        if (N.isEmpty(keys)) {
+    //            return new ArrayList<>(0);
+    //        } else if (N.isEmpty(map)) {
+    //            return N.repeat(defaultForNull, keys.size());
+    //        }
+    //
+    //        final List<V> result = new ArrayList<>(keys.size());
+    //        V val = null;
+    //
+    //        for (Object key : keys) {
+    //            val = map.get(key);
+    //
+    //            if (val == null) {
+    //                result.add(defaultForNull);
+    //            } else {
+    //                result.add(val);
+    //            }
+    //        }
+    //
+    //        return result;
+    //    }
+
     /**
      * Gets the or default for each.
+     *
+     * <br />
+     * Absent -> key is not found in the specified map or found with {@code null} value.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -1682,6 +1996,8 @@ public final class Maps {
      * @return
      */
     public static <K, V> List<V> getOrDefaultIfAbsentForEach(final Map<K, V> map, final Collection<?> keys, final V defaultValue) {
+        // N.checkArgNotNull(defaultValue, "defaultValue"); // NOSONAR
+
         if (N.isEmpty(keys)) {
             return new ArrayList<>(0);
         } else if (N.isEmpty(map)) {
@@ -1694,43 +2010,8 @@ public final class Maps {
         for (Object key : keys) {
             val = map.get(key);
 
-            if (val != null || map.containsKey(key)) {
-                result.add(val);
-            } else {
-                result.add(defaultValue);
-            }
-        }
-
-        return result;
-    }
-
-    /**
-     *
-     *
-     * @param <K>
-     * @param <V>
-     * @param map
-     * @param keys
-     * @param defaultForNull
-     * @return
-     */
-    public static <K, V> List<V> getOrDefaultIfNullForEach(final Map<K, V> map, final Collection<?> keys, final V defaultForNull) {
-        N.checkArgNotNull(defaultForNull, "defaultForNull"); // NOSONAR
-
-        if (N.isEmpty(keys)) {
-            return new ArrayList<>(0);
-        } else if (N.isEmpty(map)) {
-            return N.repeat(defaultForNull, keys.size());
-        }
-
-        final List<V> result = new ArrayList<>(keys.size());
-        V val = null;
-
-        for (Object key : keys) {
-            val = map.get(key);
-
             if (val == null) {
-                result.add(defaultForNull);
+                result.add(defaultValue);
             } else {
                 result.add(val);
             }
@@ -1809,19 +2090,68 @@ public final class Maps {
     }
 
     /**
-     *
+    *
+    *
+    * @param <T>
+    * @param map
+    * @param path
+    * @param defaultValue
+    * @return {@code defaultValue} if there is no value found by the specified path.
+    * @see #getByPath(Map, String)
+    */
+    public static <T> T getByPath(final Map<?, ?> map, final String path, final T defaultValue) {
+        // N.checkArgNotNull(defaultValue, "defaultValue");
+
+        final Object val = getByPathOrDefault(map, path, defaultValue);
+
+        if (val == null || defaultValue.getClass().isAssignableFrom(val.getClass())) {
+            return (T) val;
+        } else {
+            return (T) N.convert(val, defaultValue.getClass());
+        }
+    }
+
+    /**
      *
      * @param <T>
      * @param map
      * @param path
-     * @param defaultValue
-     * @return {@code defaultValue} if there is no value found by the specified path.
-     * @throws IllegalArgumentException
-     * @see #getByPath(Map, String)
+     * @return an empty {@code Nullable} if there is no value found by the specified path.
      */
+    public static <T> Nullable<T> getByPathIfExists(final Map<?, ?> map, final String path) {
+        final Object val = getByPathOrDefault(map, path, N.NULL_MASK);
+
+        if (val == N.NULL_MASK) {
+            return Nullable.<T> empty();
+        }
+
+        return Nullable.of((T) val);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param map
+     * @param path
+     * @param targetType
+     * @return an empty {@code Nullable} if there is no value found by the specified path.
+     */
+    public static <T> Nullable<T> getByPathIfExists(final Map<?, ?> map, final String path, final Class<? extends T> targetType) {
+        final Object val = getByPathOrDefault(map, path, N.NULL_MASK);
+
+        if (val == N.NULL_MASK) {
+            return Nullable.<T> empty();
+        }
+
+        if (val == null || targetType.isAssignableFrom(val.getClass())) {
+            return Nullable.of((T) val);
+        } else {
+            return Nullable.of(N.convert(val, targetType));
+        }
+    }
+
     @SuppressWarnings("rawtypes")
-    public static <T> T getByPathOrDefault(final Map<?, ?> map, final String path, final T defaultValue) throws IllegalArgumentException {
-        N.checkArgNotNull(defaultValue, "defaultValue");
+    private static Object getByPathOrDefault(final Map<?, ?> map, final String path, final Object defaultValue) {
 
         if (N.isEmpty(map)) {
             return defaultValue;
@@ -1855,9 +2185,9 @@ public final class Maps {
                                 final Object ret = N.getElement(intermediateColl, indexes[j]);
 
                                 if (ret == null || targetType == null || targetType.isAssignableFrom(ret.getClass())) {
-                                    return (T) ret;
+                                    return ret;
                                 } else {
-                                    return (T) N.convert(ret, targetType);
+                                    return N.convert(ret, targetType);
                                 }
                             } else {
                                 intermediateMap = (Map) N.getElement(intermediateColl, indexes[j]);
@@ -1872,9 +2202,9 @@ public final class Maps {
                     final Object ret = intermediateMap.getOrDefault(key, defaultValue);
 
                     if (ret == null || targetType == null || targetType.isAssignableFrom(ret.getClass())) {
-                        return (T) ret;
+                        return ret;
                     } else {
-                        return (T) N.convert(ret, targetType);
+                        return N.convert(ret, targetType);
                     }
                 } else {
                     intermediateMap = (Map) intermediateMap.get(key);
@@ -1883,45 +2213,6 @@ public final class Maps {
         }
 
         return defaultValue;
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param map
-     * @param path
-     * @return an empty {@code Nullable} if there is no value found by the specified path.
-     */
-    public static <T> Nullable<T> getByPathIfPresent(final Map<?, ?> map, final String path) {
-        final Object val = getByPathOrDefault(map, path, N.NULL_MASK);
-
-        if (val == N.NULL_MASK) {
-            return Nullable.<T> empty();
-        }
-
-        return Nullable.of((T) val);
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param map
-     * @param path
-     * @param targetType
-     * @return an empty {@code Nullable} if there is no value found by the specified path.
-     */
-    public static <T> Nullable<T> getByPathIfPresent(final Map<?, ?> map, final String path, final Class<? extends T> targetType) {
-        final Object val = getByPathOrDefault(map, path, N.NULL_MASK);
-
-        if (val == N.NULL_MASK) {
-            return Nullable.<T> empty();
-        }
-
-        if (val == null || targetType.isAssignableFrom(val.getClass())) {
-            return Nullable.of((T) val);
-        } else {
-            return Nullable.of(N.convert(val, targetType));
-        }
     }
 
     /**
@@ -2067,8 +2358,45 @@ public final class Maps {
         return result;
     }
 
+    //    /**
+    //     * Puts if the specified key is not already associated with a value (or is mapped to {@code null}).
+    //     *
+    //     * @param <K> the key type
+    //     * @param <V> the value type
+    //     * @param map
+    //     * @param key
+    //     * @param value
+    //     * @return the previous value associated with the specified key, or {@code null} if there was no mapping for the key
+    //     * @see Map#putIfAbsent(Object, Object)
+    //     * @deprecated Use {@link #putIfAbsent(Map<K, V>,K,V)} instead
+    //     */
+    //    @Deprecated
+    //    public static <K, V> V putIfAbsentOrNull(final Map<K, V> map, K key, final V value) {
+    //        return putIfAbsent(map, key, value);
+    //    }
+    //
+    //    /**
+    //     * Puts if the specified key is not already associated with a value (or is mapped to {@code null}).
+    //     *
+    //     * @param <K> the key type
+    //     * @param <V> the value type
+    //     * @param map
+    //     * @param key
+    //     * @param supplier
+    //     * @return the previous value associated with the specified key, or {@code null} if there was no mapping for the key
+    //     * @see Map#putIfAbsent(Object, Object)
+    //     * @deprecated Use {@link #putIfAbsent(Map<K, V>,K,Supplier<V>)} instead
+    //     */
+    //    @Deprecated
+    //    public static <K, V> V putIfAbsentOrNull(final Map<K, V> map, K key, final Supplier<V> supplier) {
+    //        return putIfAbsent(map, key, supplier);
+    //    }
+
     /**
      * Puts if the specified key is not already associated with a value (or is mapped to {@code null}).
+     *
+     * <br />
+     * Absent -> key is not found in the specified map or found with {@code null} value.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -2078,7 +2406,7 @@ public final class Maps {
      * @return the previous value associated with the specified key, or {@code null} if there was no mapping for the key
      * @see Map#putIfAbsent(Object, Object)
      */
-    public static <K, V> V putIfAbsentOrNull(final Map<K, V> map, K key, final V value) {
+    public static <K, V> V putIfAbsent(final Map<K, V> map, K key, final V value) {
         V v = map.get(key);
 
         if (v == null) {
@@ -2091,6 +2419,9 @@ public final class Maps {
     /**
      * Puts if the specified key is not already associated with a value (or is mapped to {@code null}).
      *
+     * <br />
+     * Absent -> key is not found in the specified map or found with {@code null} value.
+     *
      * @param <K> the key type
      * @param <V> the value type
      * @param map
@@ -2099,7 +2430,7 @@ public final class Maps {
      * @return the previous value associated with the specified key, or {@code null} if there was no mapping for the key
      * @see Map#putIfAbsent(Object, Object)
      */
-    public static <K, V> V putIfAbsentOrNull(final Map<K, V> map, K key, final Supplier<V> supplier) {
+    public static <K, V> V putIfAbsent(final Map<K, V> map, K key, final Supplier<V> supplier) {
         V v = map.get(key);
 
         if (v == null) {

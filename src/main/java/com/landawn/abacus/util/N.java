@@ -30231,37 +30231,37 @@ public final class N extends CommonUtil { // public final class N extends π imp
         return obj;
     }
 
-    public static void printlnForEach(final Object[] a) {
-        if (a == null) {
-            println("null");
-        } else if (a.length == 0) {
-            println("[]");
-        } else {
-            for (Object e : a) {
-                println(e);
-            }
-        }
-    }
-
-    public static void printlnForEach(final Iterable<?> iter) {
-        if (iter == null) {
-            println("null");
-        } else {
-            printlnForEach(iter.iterator());
-        }
-    }
-
-    public static void printlnForEach(final Iterator<?> iter) {
-        if (iter == null) {
-            println("null");
-        } else if (!iter.hasNext()) {
-            println("[]");
-        } else {
-            while (iter.hasNext()) {
-                println(iter.next());
-            }
-        }
-    }
+    //    public static void printlnForEach(final Object[] a) {
+    //        if (a == null) {
+    //            println("null");
+    //        } else if (a.length == 0) {
+    //            println("[]");
+    //        } else {
+    //            for (Object e : a) {
+    //                println(e);
+    //            }
+    //        }
+    //    }
+    //
+    //    public static void printlnForEach(final Iterable<?> iter) {
+    //        if (iter == null) {
+    //            println("null");
+    //        } else {
+    //            printlnForEach(iter.iterator());
+    //        }
+    //    }
+    //
+    //    public static void printlnForEach(final Iterator<?> iter) {
+    //        if (iter == null) {
+    //            println("null");
+    //        } else if (!iter.hasNext()) {
+    //            println("[]");
+    //        } else {
+    //            while (iter.hasNext()) {
+    //                println(iter.next());
+    //            }
+    //        }
+    //    }
 
     /**
      *

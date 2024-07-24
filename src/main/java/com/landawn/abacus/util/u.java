@@ -1080,6 +1080,26 @@ public class u {//NOSONAR
             }
         }
 
+        //        /**
+        //         *
+        //         *
+        //         * @param element
+        //         * @return
+        //         */
+        //        public boolean contains(final boolean element) {
+        //            return isPresent() && N.equals(this.value, element);
+        //        }
+        //
+        //        /**
+        //         *
+        //         *
+        //         * @param element
+        //         * @return
+        //         */
+        //        public boolean contains(final Boolean element) {
+        //            return element != null && isPresent() && N.equals(this.value, element.booleanValue());
+        //        }
+
         /**
          *
          *
@@ -1687,6 +1707,26 @@ public class u {//NOSONAR
             }
         }
 
+        //        /**
+        //         *
+        //         *
+        //         * @param element
+        //         * @return
+        //         */
+        //        public boolean contains(final char element) {
+        //            return isPresent() && N.equals(this.value, element);
+        //        }
+        //
+        //        /**
+        //         *
+        //         *
+        //         * @param element
+        //         * @return
+        //         */
+        //        public boolean contains(final Character element) {
+        //            return element != null && isPresent() && N.equals(this.value, element.charValue());
+        //        }
+
         /**
          *
          * @param supplier
@@ -2265,6 +2305,26 @@ public class u {//NOSONAR
             }
         }
 
+        //        /**
+        //         *
+        //         *
+        //         * @param element
+        //         * @return
+        //         */
+        //        public boolean contains(final byte element) {
+        //            return isPresent() && N.equals(this.value, element);
+        //        }
+        //
+        //        /**
+        //         *
+        //         *
+        //         * @param element
+        //         * @return
+        //         */
+        //        public boolean contains(final Byte element) {
+        //            return element != null && isPresent() && N.equals(this.value, element.byteValue());
+        //        }
+
         /**
          *
          * @param supplier
@@ -2842,6 +2902,26 @@ public class u {//NOSONAR
                 return empty();
             }
         }
+
+        //        /**
+        //         *
+        //         *
+        //         * @param element
+        //         * @return
+        //         */
+        //        public boolean contains(final short element) {
+        //            return isPresent() && N.equals(this.value, element);
+        //        }
+        //
+        //        /**
+        //         *
+        //         *
+        //         * @param element
+        //         * @return
+        //         */
+        //        public boolean contains(final Short element) {
+        //            return element != null && isPresent() && N.equals(this.value, element.shortValue());
+        //        }
 
         /**
          *
@@ -3510,6 +3590,26 @@ public class u {//NOSONAR
             }
         }
 
+        //        /**
+        //         *
+        //         *
+        //         * @param element
+        //         * @return
+        //         */
+        //        public boolean contains(final int element) {
+        //            return isPresent() && N.equals(this.value, element);
+        //        }
+        //
+        //        /**
+        //         *
+        //         *
+        //         * @param element
+        //         * @return
+        //         */
+        //        public boolean contains(final Integer element) {
+        //            return element != null && isPresent() && N.equals(this.value, element.intValue());
+        //        }
+
         /**
          *
          * @param supplier
@@ -4142,6 +4242,26 @@ public class u {//NOSONAR
             }
         }
 
+        //        /**
+        //         *
+        //         *
+        //         * @param element
+        //         * @return
+        //         */
+        //        public boolean contains(final long element) {
+        //            return isPresent() && N.equals(this.value, element);
+        //        }
+        //
+        //        /**
+        //         *
+        //         *
+        //         * @param element
+        //         * @return
+        //         */
+        //        public boolean contains(final Long element) {
+        //            return element != null && isPresent() && N.equals(this.value, element.longValue());
+        //        }
+
         /**
          *
          * @param supplier
@@ -4485,6 +4605,8 @@ public class u {//NOSONAR
         /** The Constant EMPTY. */
         private static final OptionalFloat EMPTY = new OptionalFloat();
 
+        private static final OptionalFloat ZERO = new OptionalFloat(0f);
+
         /** The value. */
         private final float value;
 
@@ -4523,7 +4645,7 @@ public class u {//NOSONAR
          * @return
          */
         public static OptionalFloat of(float value) {
-            return new OptionalFloat(value);
+            return value == 0f ? ZERO : new OptionalFloat(value);
         }
 
         /**
@@ -4745,6 +4867,26 @@ public class u {//NOSONAR
                 return empty();
             }
         }
+
+        //        /**
+        //         *
+        //         *
+        //         * @param element
+        //         * @return
+        //         */
+        //        public boolean contains(final float element) {
+        //            return isPresent() && N.equals(this.value, element);
+        //        }
+        //
+        //        /**
+        //         *
+        //         *
+        //         * @param element
+        //         * @return
+        //         */
+        //        public boolean contains(final Float element) {
+        //            return element != null && isPresent() && N.equals(this.value, element.floatValue());
+        //        }
 
         /**
          *
@@ -5067,6 +5209,8 @@ public class u {//NOSONAR
         /** The Constant EMPTY. */
         private static final OptionalDouble EMPTY = new OptionalDouble();
 
+        private static final OptionalDouble ZERO = new OptionalDouble(0d);
+
         /** The value. */
         private final double value;
 
@@ -5105,7 +5249,7 @@ public class u {//NOSONAR
          * @return
          */
         public static OptionalDouble of(double value) {
-            return new OptionalDouble(value);
+            return value == 0d ? ZERO : new OptionalDouble(value);
         }
 
         /**
@@ -5340,6 +5484,26 @@ public class u {//NOSONAR
                 return empty();
             }
         }
+
+        //        /**
+        //         *
+        //         *
+        //         * @param element
+        //         * @return
+        //         */
+        //        public boolean contains(final double element) {
+        //            return isPresent() && N.equals(this.value, element);
+        //        }
+        //
+        //        /**
+        //         *
+        //         *
+        //         * @param element
+        //         * @return
+        //         */
+        //        public boolean contains(final Double element) {
+        //            return element != null && isPresent() && N.equals(this.value, element.doubleValue());
+        //        }
 
         /**
          *

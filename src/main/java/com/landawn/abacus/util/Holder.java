@@ -15,16 +15,12 @@
  */
 package com.landawn.abacus.util;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Set;
 import java.util.function.Supplier;
 
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.util.u.Nullable;
 import com.landawn.abacus.util.u.Optional;
-import com.landawn.abacus.util.stream.Stream;
 
 /**
  * The Class Holder.
@@ -200,9 +196,9 @@ public final class Holder<T> implements Mutable {
     /**
      * If not null.
      *
-     * @param <E> 
-     * @param action 
-     * @throws IllegalArgumentException 
+     * @param <E>
+     * @param action
+     * @throws IllegalArgumentException
      * @throws E the e
      */
     public <E extends Exception> void ifNotNull(final Throwables.Consumer<? super T, E> action) throws IllegalArgumentException, E {
@@ -216,11 +212,11 @@ public final class Holder<T> implements Mutable {
     /**
      * If not null or else.
      *
-     * @param <E> 
-     * @param <E2> 
-     * @param action 
-     * @param emptyAction 
-     * @throws IllegalArgumentException 
+     * @param <E>
+     * @param <E2>
+     * @param action
+     * @param emptyAction
+     * @throws IllegalArgumentException
      * @throws E the e
      * @throws E2 the e2
      */
@@ -251,9 +247,9 @@ public final class Holder<T> implements Mutable {
     /**
      * Accept if not null.
      *
-     * @param <E> 
-     * @param action 
-     * @throws IllegalArgumentException 
+     * @param <E>
+     * @param action
+     * @throws IllegalArgumentException
      * @throws E the e
      * @deprecated replaced by {@link #ifNotNull(Throwables.Consumer)}
      */
@@ -281,11 +277,11 @@ public final class Holder<T> implements Mutable {
     /**
      * Map if not null.
      *
-     * @param <U> 
-     * @param <E> 
-     * @param mapper 
-     * @return 
-     * @throws IllegalArgumentException 
+     * @param <U>
+     * @param <E>
+     * @param mapper
+     * @return
+     * @throws IllegalArgumentException
      * @throws E the e
      */
     public <U, E extends Exception> Nullable<U> mapIfNotNull(final Throwables.Function<? super T, ? extends U, E> mapper) throws IllegalArgumentException, E {
@@ -299,14 +295,14 @@ public final class Holder<T> implements Mutable {
     }
 
     /**
-     * 
      *
-     * @param <U> 
-     * @param <E> 
-     * @param mapper 
-     * @return 
-     * @throws IllegalArgumentException 
-     * @throws E 
+     *
+     * @param <U>
+     * @param <E>
+     * @param mapper
+     * @return
+     * @throws IllegalArgumentException
+     * @throws E
      */
     public <U, E extends Exception> Optional<U> mapToNonNullIfNotNull(final Throwables.Function<? super T, ? extends U, E> mapper)
             throws IllegalArgumentException, E {
@@ -337,10 +333,10 @@ public final class Holder<T> implements Mutable {
     /**
      * Filter if not null.
      *
-     * @param <E> 
-     * @param predicate 
-     * @return 
-     * @throws IllegalArgumentException 
+     * @param <E>
+     * @param predicate
+     * @return
+     * @throws IllegalArgumentException
      * @throws E the e
      */
     public <E extends Exception> Optional<T> filterIfNotNull(final Throwables.Predicate<? super T, E> predicate) throws IllegalArgumentException, E {
@@ -366,9 +362,9 @@ public final class Holder<T> implements Mutable {
     /**
      * Or else get if null.
      *
-     * @param other 
-     * @return 
-     * @throws IllegalArgumentException 
+     * @param other
+     * @return
+     * @throws IllegalArgumentException
      */
     public T orElseGetIfNull(final Supplier<? extends T> other) throws IllegalArgumentException {
         N.checkArgNotNull(other, "other");
@@ -484,10 +480,10 @@ public final class Holder<T> implements Mutable {
     /**
      * Or else throw if null.
      *
-     * @param <X> 
-     * @param exceptionSupplier 
-     * @return 
-     * @throws IllegalArgumentException 
+     * @param <X>
+     * @param exceptionSupplier
+     * @return
+     * @throws IllegalArgumentException
      * @throws X the x
      */
     public <X extends Throwable> T orElseThrowIfNull(final Supplier<? extends X> exceptionSupplier) throws IllegalArgumentException, X {
@@ -500,130 +496,131 @@ public final class Holder<T> implements Mutable {
         }
     }
 
-    /**
-     *
-     * @return
-     */
-    public Stream<T> stream() {
-        return Stream.of(value);
-    }
-
-    /**
-     * Returns a {@code Stream} with the {@code value} if {@code value} is not null, otherwise an empty {@code Stream} is returned.
-     *
-     * @return
-     */
-    public Stream<T> streamIfNotNull() {
-        if (isNotNull()) {
-            return Stream.of(value);
-        } else {
-            return Stream.<T> empty();
-        }
-    }
-
-    /**
-     *
-     * @return
-     */
-    public List<T> toList() {
-        return N.asList(value);
-    }
-
-    /**
-     * To list if not null.
-     *
-     * @return
-     */
-    public List<T> toListIfNotNull() {
-        if (isNotNull()) {
-            return N.asList(value);
-        } else {
-            return new ArrayList<>();
-        }
-    }
-
-    /**
-     *
-     * @return
-     */
-    public Set<T> toSet() {
-        return N.asSet(value);
-    }
-
-    /**
-     * To set if not null.
-     *
-     * @return
-     */
-    public Set<T> toSetIfNotNull() {
-        if (isNotNull()) {
-            return N.asSet(value);
-        } else {
-            return N.newHashSet();
-        }
-    }
-
-    /**
-     * To immutable list.
-     *
-     * @return
-     */
-    public ImmutableList<T> toImmutableList() {
-        return ImmutableList.of(value);
-    }
-
-    /**
-     * To immutable list if not null.
-     *
-     * @return
-     */
-    public ImmutableList<T> toImmutableListIfNotNull() {
-        if (isNotNull()) {
-            return ImmutableList.of(value);
-        } else {
-            return ImmutableList.empty();
-        }
-    }
-
-    /**
-     * To immutable set.
-     *
-     * @return
-     */
-    public ImmutableSet<T> toImmutableSet() {
-        return ImmutableSet.of(value);
-    }
-
-    /**
-     * To immutable set if not null.
-     *
-     * @return
-     */
-    public ImmutableSet<T> toImmutableSetIfNotNull() {
-        if (isNotNull()) {
-            return ImmutableSet.of(value);
-        } else {
-            return ImmutableSet.empty();
-        }
-    }
-
-    /**
-     * Returns a non-empty {@code Nullable} with the {@code value}.
-     *
-     * @return
-     */
-    public Nullable<T> toNullable() {
-        return Nullable.of(value);
-    }
-
-    /**
-     * Returns an {@code Optional} with the {@code value} if {@code value} is not null, otherwise an empty {@code Optional} is returned.
-     *
-     * @return
-     */
-    public Optional<T> toOptional() {
-        return Optional.ofNullable(value);
-    }
+    // Simplify the apis.
+    //    /**
+    //     *
+    //     * @return
+    //     */
+    //    public Stream<T> stream() {
+    //        return Stream.of(value);
+    //    }
+    //
+    //    /**
+    //     * Returns a {@code Stream} with the {@code value} if {@code value} is not null, otherwise an empty {@code Stream} is returned.
+    //     *
+    //     * @return
+    //     */
+    //    public Stream<T> streamIfNotNull() {
+    //        if (isNotNull()) {
+    //            return Stream.of(value);
+    //        } else {
+    //            return Stream.<T> empty();
+    //        }
+    //    }
+    //
+    //    /**
+    //     *
+    //     * @return
+    //     */
+    //    public List<T> toList() {
+    //        return N.asList(value);
+    //    }
+    //
+    //    /**
+    //     * To list if not null.
+    //     *
+    //     * @return
+    //     */
+    //    public List<T> toListIfNotNull() {
+    //        if (isNotNull()) {
+    //            return N.asList(value);
+    //        } else {
+    //            return new ArrayList<>();
+    //        }
+    //    }
+    //
+    //    /**
+    //     *
+    //     * @return
+    //     */
+    //    public Set<T> toSet() {
+    //        return N.asSet(value);
+    //    }
+    //
+    //    /**
+    //     * To set if not null.
+    //     *
+    //     * @return
+    //     */
+    //    public Set<T> toSetIfNotNull() {
+    //        if (isNotNull()) {
+    //            return N.asSet(value);
+    //        } else {
+    //            return N.newHashSet();
+    //        }
+    //    }
+    //
+    //    /**
+    //     * To immutable list.
+    //     *
+    //     * @return
+    //     */
+    //    public ImmutableList<T> toImmutableList() {
+    //        return ImmutableList.of(value);
+    //    }
+    //
+    //    /**
+    //     * To immutable list if not null.
+    //     *
+    //     * @return
+    //     */
+    //    public ImmutableList<T> toImmutableListIfNotNull() {
+    //        if (isNotNull()) {
+    //            return ImmutableList.of(value);
+    //        } else {
+    //            return ImmutableList.empty();
+    //        }
+    //    }
+    //
+    //    /**
+    //     * To immutable set.
+    //     *
+    //     * @return
+    //     */
+    //    public ImmutableSet<T> toImmutableSet() {
+    //        return ImmutableSet.of(value);
+    //    }
+    //
+    //    /**
+    //     * To immutable set if not null.
+    //     *
+    //     * @return
+    //     */
+    //    public ImmutableSet<T> toImmutableSetIfNotNull() {
+    //        if (isNotNull()) {
+    //            return ImmutableSet.of(value);
+    //        } else {
+    //            return ImmutableSet.empty();
+    //        }
+    //    }
+    //
+    //    /**
+    //     * Returns a non-empty {@code Nullable} with the {@code value}.
+    //     *
+    //     * @return
+    //     */
+    //    public Nullable<T> toNullable() {
+    //        return Nullable.of(value);
+    //    }
+    //
+    //    /**
+    //     * Returns an {@code Optional} with the {@code value} if {@code value} is not null, otherwise an empty {@code Optional} is returned.
+    //     *
+    //     * @return
+    //     */
+    //    public Optional<T> toOptional() {
+    //        return Optional.ofNullable(value);
+    //    }
 
     /**
      *
