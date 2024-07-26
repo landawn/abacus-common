@@ -115,7 +115,7 @@ A general programming library in Java. It's easy to learn and simple to use with
 [FloatStream](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/FloatStream_view.html), 
 [DoubleStream](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/DoubleStream_view.html), 
 [EntryStream](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/EntryStream_view.html), 
-[CheckedStream](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/ExceptionalStream_view.html), 
+[CheckedStream](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/CheckedStream_view.html), 
 [Fn](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/Fn_view.html), 
 more [Collectors](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/Collectors_view.html) and 
 [Throwables](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/Throwables_view.html).
