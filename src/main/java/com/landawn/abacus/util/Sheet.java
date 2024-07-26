@@ -1550,6 +1550,12 @@ public final class Sheet<R, C, V> implements Cloneable {
         }
     }
 
+    /**
+     * 
+     *
+     * @param rowKey 
+     * @param cmp 
+     */
     public void sortByRow(final R rowKey, final Comparator<? super V> cmp) {
         checkFrozen();
 
@@ -1615,6 +1621,12 @@ public final class Sheet<R, C, V> implements Cloneable {
         }
     }
 
+    /**
+     * 
+     *
+     * @param rowKeysToSort 
+     * @param cmp 
+     */
     public void sortByRow(Collection<R> rowKeysToSort, Comparator<? super Object[]> cmp) {
         checkFrozen();
 
@@ -1693,6 +1705,12 @@ public final class Sheet<R, C, V> implements Cloneable {
         }
     }
 
+    /**
+     * 
+     *
+     * @param columnKey 
+     * @param cmp 
+     */
     public void sortByColumn(final C columnKey, final Comparator<? super V> cmp) {
         checkFrozen();
 
@@ -1768,6 +1786,12 @@ public final class Sheet<R, C, V> implements Cloneable {
         }
     }
 
+    /**
+     * 
+     *
+     * @param columnKeysToSort 
+     * @param cmp 
+     */
     public void sortByColumn(Collection<C> columnKeysToSort, Comparator<? super Object[]> cmp) {
         checkFrozen();
 
@@ -2128,7 +2152,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      *
      * @param <E>
      * @param action
-     * @throws E the x
+     * @throws E
      */
     public <E extends Exception> void forEachH(Throwables.TriConsumer<? super R, ? super C, ? super V, E> action) throws E {
         if (_initialized) {
@@ -2151,7 +2175,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      *
      * @param <E>
      * @param action
-     * @throws E the x
+     * @throws E
      */
     public <E extends Exception> void forEachV(Throwables.TriConsumer<? super R, ? super C, ? super V, E> action) throws E {
         if (_initialized) {
@@ -2174,7 +2198,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      *
      * @param <E>
      * @param action
-     * @throws E the x
+     * @throws E
      */
     public <E extends Exception> void forEachNonNullH(Throwables.TriConsumer<? super R, ? super C, ? super V, E> action) throws E {
         if (_initialized) {
@@ -2197,7 +2221,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      *
      * @param <E>
      * @param action
-     * @throws E the x
+     * @throws E
      */
     public <E extends Exception> void forEachNonNullV(Throwables.TriConsumer<? super R, ? super C, ? super V, E> action) throws E {
         if (_initialized) {
@@ -3254,7 +3278,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @param <E>
      * @param func
      * @return
-     * @throws E the x
+     * @throws E
      */
     public <T, E extends Exception> T apply(Throwables.Function<? super Sheet<R, C, V>, T, E> func) throws E {
         return func.apply(this);
@@ -3266,7 +3290,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @param <E>
      * @param func
      * @return
-     * @throws E the x
+     * @throws E
      */
     public <T, E extends Exception> Optional<T> applyIfNotEmpty(Throwables.Function<? super Sheet<R, C, V>, T, E> func) throws E {
         if (!isEmpty()) {
@@ -3280,7 +3304,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      *
      * @param <E>
      * @param action
-     * @throws E the x
+     * @throws E
      */
     public <E extends Exception> void accept(Throwables.Consumer<? super Sheet<R, C, V>, E> action) throws E {
         action.accept(this);
@@ -3292,7 +3316,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @param <E>
      * @param action
      * @return
-     * @throws E the x
+     * @throws E
      */
     public <E extends Exception> OrElse acceptIfNotEmpty(Throwables.Consumer<? super Sheet<R, C, V>, E> action) throws E {
         if (!isEmpty()) {

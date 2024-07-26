@@ -516,6 +516,7 @@ public class u {//NOSONAR
          *
          * @return
          */
+        @Beta
         public T orElseNull() {
             return isPresent() ? value : null;
         }
@@ -651,12 +652,12 @@ public class u {//NOSONAR
         /**
          * Or else throw.
          *
-         * @param <X>
+         * @param <E>
          * @param exceptionSupplier
          * @return
-         * @throws X the x
+         * @throws E
          */
-        public <X extends Throwable> T orElseThrow(final Supplier<? extends X> exceptionSupplier) throws X {
+        public <E extends Throwable> T orElseThrow(final Supplier<? extends E> exceptionSupplier) throws E {
             if (isPresent()) {
                 return value;
             } else {
@@ -1272,13 +1273,13 @@ public class u {//NOSONAR
         /**
          * Or else throw.
          *
-         * @param <X>
+         * @param <E>
          * @param exceptionSupplier
          * @return
          * @throws IllegalArgumentException
-         * @throws X the x
+         * @throws E
          */
-        public <X extends Throwable> boolean orElseThrow(final Supplier<? extends X> exceptionSupplier) throws IllegalArgumentException, X {
+        public <E extends Throwable> boolean orElseThrow(final Supplier<? extends E> exceptionSupplier) throws IllegalArgumentException, E {
             N.checkArgNotNull(exceptionSupplier, "exceptionSupplier");
 
             if (isPresent) {
@@ -1889,13 +1890,13 @@ public class u {//NOSONAR
         /**
          * Or else throw.
          *
-         * @param <X>
+         * @param <E>
          * @param exceptionSupplier
          * @return
          * @throws IllegalArgumentException
-         * @throws X the x
+         * @throws E
          */
-        public <X extends Throwable> char orElseThrow(final Supplier<? extends X> exceptionSupplier) throws IllegalArgumentException, X {
+        public <E extends Throwable> char orElseThrow(final Supplier<? extends E> exceptionSupplier) throws IllegalArgumentException, E {
             N.checkArgNotNull(exceptionSupplier, "exceptionSupplier");
 
             if (isPresent()) {
@@ -2487,13 +2488,13 @@ public class u {//NOSONAR
         /**
          * Or else throw.
          *
-         * @param <X>
+         * @param <E>
          * @param exceptionSupplier
          * @return
          * @throws IllegalArgumentException
-         * @throws X the x
+         * @throws E
          */
-        public <X extends Throwable> byte orElseThrow(final Supplier<? extends X> exceptionSupplier) throws IllegalArgumentException, X {
+        public <E extends Throwable> byte orElseThrow(final Supplier<? extends E> exceptionSupplier) throws IllegalArgumentException, E {
             N.checkArgNotNull(exceptionSupplier, "exceptionSupplier");
 
             if (isPresent) {
@@ -3085,13 +3086,13 @@ public class u {//NOSONAR
         /**
          * Or else throw.
          *
-         * @param <X>
+         * @param <E>
          * @param exceptionSupplier
          * @return
          * @throws IllegalArgumentException
-         * @throws X the x
+         * @throws E
          */
-        public <X extends Throwable> short orElseThrow(final Supplier<? extends X> exceptionSupplier) throws IllegalArgumentException, X {
+        public <E extends Throwable> short orElseThrow(final Supplier<? extends E> exceptionSupplier) throws IllegalArgumentException, E {
             N.checkArgNotNull(exceptionSupplier, "exceptionSupplier");
 
             if (isPresent) {
@@ -3772,13 +3773,13 @@ public class u {//NOSONAR
         /**
          * Or else throw.
          *
-         * @param <X>
+         * @param <E>
          * @param exceptionSupplier
          * @return
          * @throws IllegalArgumentException
-         * @throws X the x
+         * @throws E
          */
-        public <X extends Throwable> int orElseThrow(final Supplier<? extends X> exceptionSupplier) throws IllegalArgumentException, X {
+        public <E extends Throwable> int orElseThrow(final Supplier<? extends E> exceptionSupplier) throws IllegalArgumentException, E {
             N.checkArgNotNull(exceptionSupplier, "exceptionSupplier");
 
             if (isPresent) {
@@ -4424,13 +4425,13 @@ public class u {//NOSONAR
         /**
          * Or else throw.
          *
-         * @param <X>
+         * @param <E>
          * @param exceptionSupplier
          * @return
          * @throws IllegalArgumentException
-         * @throws X the x
+         * @throws E
          */
-        public <X extends Throwable> long orElseThrow(final Supplier<? extends X> exceptionSupplier) throws IllegalArgumentException, X {
+        public <E extends Throwable> long orElseThrow(final Supplier<? extends E> exceptionSupplier) throws IllegalArgumentException, E {
             N.checkArgNotNull(exceptionSupplier, "exceptionSupplier");
 
             if (isPresent) {
@@ -5050,13 +5051,13 @@ public class u {//NOSONAR
         /**
          * Or else throw.
          *
-         * @param <X>
+         * @param <E>
          * @param exceptionSupplier
          * @return
          * @throws IllegalArgumentException
-         * @throws X the x
+         * @throws E
          */
-        public <X extends Throwable> float orElseThrow(final Supplier<? extends X> exceptionSupplier) throws IllegalArgumentException, X {
+        public <E extends Throwable> float orElseThrow(final Supplier<? extends E> exceptionSupplier) throws IllegalArgumentException, E {
             N.checkArgNotNull(exceptionSupplier, "exceptionSupplier");
 
             if (isPresent) {
@@ -5667,13 +5668,13 @@ public class u {//NOSONAR
         /**
          * Or else throw.
          *
-         * @param <X>
+         * @param <E>
          * @param exceptionSupplier
          * @return
          * @throws IllegalArgumentException
-         * @throws X the x
+         * @throws E
          */
-        public <X extends Throwable> double orElseThrow(final Supplier<? extends X> exceptionSupplier) throws IllegalArgumentException, X {
+        public <E extends Throwable> double orElseThrow(final Supplier<? extends E> exceptionSupplier) throws IllegalArgumentException, E {
             N.checkArgNotNull(exceptionSupplier, "exceptionSupplier");
 
             if (isPresent) {
@@ -6621,6 +6622,7 @@ public class u {//NOSONAR
          *
          * @return
          */
+        @Beta
         public T orElseNull() {
             return isPresent() ? value : null;
         }
@@ -6782,13 +6784,13 @@ public class u {//NOSONAR
         /**
          * Or else throw.
          *
-         * @param <X>
+         * @param <E>
          * @param exceptionSupplier
          * @return
          * @throws IllegalArgumentException
-         * @throws X the x
+         * @throws E
          */
-        public <X extends Throwable> T orElseThrow(final Supplier<? extends X> exceptionSupplier) throws IllegalArgumentException, X {
+        public <E extends Throwable> T orElseThrow(final Supplier<? extends E> exceptionSupplier) throws IllegalArgumentException, E {
             N.checkArgNotNull(exceptionSupplier, "exceptionSupplier");
 
             if (isPresent()) {
@@ -6902,13 +6904,13 @@ public class u {//NOSONAR
         /**
          * Or else throw if null.
          *
-         * @param <X>
+         * @param <E>
          * @param exceptionSupplier
          * @return
          * @throws IllegalArgumentException
-         * @throws X the x
+         * @throws E
          */
-        public <X extends Throwable> T orElseThrowIfNull(final Supplier<? extends X> exceptionSupplier) throws IllegalArgumentException, X {
+        public <E extends Throwable> T orElseThrowIfNull(final Supplier<? extends E> exceptionSupplier) throws IllegalArgumentException, E {
             N.checkArgNotNull(exceptionSupplier, "exceptionSupplier");
 
             if (isNotNull()) {

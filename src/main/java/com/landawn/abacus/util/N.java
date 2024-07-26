@@ -11829,16 +11829,17 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * 
      *
-     *
-     * @param <T>
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param func
-     * @return
+     * @param <T> 
+     * @param a 
+     * @param fromIndex 
+     * @param toIndex 
+     * @param func 
+     * @return 
+     * @throws IndexOutOfBoundsException 
      */
-    public static <T> int sumInt(final T[] a, final int fromIndex, final int toIndex, final ToIntFunction<? super T> func) {
+    public static <T> int sumInt(final T[] a, final int fromIndex, final int toIndex, final ToIntFunction<? super T> func) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (fromIndex == toIndex) {
@@ -12006,16 +12007,17 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * 
      *
-     *
-     * @param <T>
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param func
-     * @return
+     * @param <T> 
+     * @param a 
+     * @param fromIndex 
+     * @param toIndex 
+     * @param func 
+     * @return 
+     * @throws IndexOutOfBoundsException 
      */
-    public static <T> long sumLong(final T[] a, final int fromIndex, final int toIndex, final ToLongFunction<? super T> func) {
+    public static <T> long sumLong(final T[] a, final int fromIndex, final int toIndex, final ToLongFunction<? super T> func) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (fromIndex == toIndex) {
@@ -18543,14 +18545,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      *
      * @param <T>
-     * @param <R>
+     * @param <C>
      * @param a
      * @param filter
      * @param supplier
      * @return
      * @throws IllegalArgumentException
      */
-    public static <T, R extends Collection<T>> R filter(final T[] a, final Predicate<? super T> filter, final IntFunction<R> supplier)
+    public static <T, C extends Collection<T>> C filter(final T[] a, final Predicate<? super T> filter, final IntFunction<C> supplier)
             throws IllegalArgumentException {
         checkArgNotNull(filter, "filter");
 
@@ -18585,7 +18587,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      *
      * @param <T>
-     * @param <R>
+     * @param <C>
      * @param a
      * @param filter
      * @param max
@@ -18593,7 +18595,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      * @throws IllegalArgumentException
      */
-    public static <T, R extends Collection<T>> R filter(final T[] a, final Predicate<? super T> filter, final int max, final IntFunction<R> supplier)
+    public static <T, C extends Collection<T>> C filter(final T[] a, final Predicate<? super T> filter, final int max, final IntFunction<C> supplier)
             throws IllegalArgumentException {
         checkArgNotNull(filter, "filter");
 
@@ -18622,7 +18624,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      *
      * @param <T>
-     * @param <R>
+     * @param <C>
      * @param a
      * @param fromIndex
      * @param toIndex
@@ -18630,8 +18632,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param supplier
      * @return
      */
-    public static <T, R extends Collection<T>> R filter(final T[] a, final int fromIndex, final int toIndex, final Predicate<? super T> filter,
-            final IntFunction<R> supplier) {
+    public static <T, C extends Collection<T>> C filter(final T[] a, final int fromIndex, final int toIndex, final Predicate<? super T> filter,
+            final IntFunction<C> supplier) {
         return filter(a, fromIndex, toIndex, filter, Integer.MAX_VALUE, supplier);
     }
 
@@ -18656,7 +18658,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
      *
      * @param <T>
-     * @param <R>
+     * @param <C>
      * @param a
      * @param fromIndex
      * @param toIndex
@@ -18667,8 +18669,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException
      * @throws IndexOutOfBoundsException
      */
-    public static <T, R extends Collection<T>> R filter(final T[] a, final int fromIndex, final int toIndex, final Predicate<? super T> filter, final int max,
-            final IntFunction<R> supplier) throws IllegalArgumentException, IndexOutOfBoundsException {
+    public static <T, C extends Collection<T>> C filter(final T[] a, final int fromIndex, final int toIndex, final Predicate<? super T> filter, final int max,
+            final IntFunction<C> supplier) throws IllegalArgumentException, IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
         checkArgNotNull(filter, "filter");
 
@@ -18676,7 +18678,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return supplier.apply(0);
         }
 
-        final R result = supplier.apply(min(9, max, (toIndex - fromIndex)));
+        final C result = supplier.apply(min(9, max, (toIndex - fromIndex)));
 
         for (int i = fromIndex, cnt = 0; i < toIndex && cnt < max; i++) {
             if (filter.test(a[i])) {
@@ -18704,13 +18706,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      *
      * @param <T>
-     * @param <R>
+     * @param <C>
      * @param c
      * @param filter
      * @param supplier
      * @return
      */
-    public static <T, R extends Collection<T>> R filter(final Iterable<? extends T> c, final Predicate<? super T> filter, final IntFunction<R> supplier) {
+    public static <T, C extends Collection<T>> C filter(final Iterable<? extends T> c, final Predicate<? super T> filter, final IntFunction<C> supplier) {
         return filter(c, filter, Integer.MAX_VALUE, supplier);
     }
 
@@ -18731,7 +18733,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      *
      * @param <T>
-     * @param <R>
+     * @param <C>
      * @param c
      * @param filter
      * @param max
@@ -18739,15 +18741,15 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      * @throws IllegalArgumentException
      */
-    public static <T, R extends Collection<T>> R filter(final Iterable<? extends T> c, final Predicate<? super T> filter, final int max,
-            final IntFunction<R> supplier) throws IllegalArgumentException {
+    public static <T, C extends Collection<T>> C filter(final Iterable<? extends T> c, final Predicate<? super T> filter, final int max,
+            final IntFunction<C> supplier) throws IllegalArgumentException {
         checkArgNotNull(filter, "filter");
 
         if (c == null) {
             return supplier.apply(0);
         }
 
-        final R result = supplier.apply(getMinSize(c));
+        final C result = supplier.apply(getMinSize(c));
         int count = 0;
 
         for (T e : c) {
@@ -18781,7 +18783,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      *
      * @param <T>
-     * @param <R>
+     * @param <C>
      * @param c
      * @param fromIndex
      * @param toIndex
@@ -18789,8 +18791,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param supplier
      * @return
      */
-    public static <T, R extends Collection<T>> R filter(final Collection<? extends T> c, final int fromIndex, final int toIndex,
-            final Predicate<? super T> filter, final IntFunction<R> supplier) {
+    public static <T, C extends Collection<T>> C filter(final Collection<? extends T> c, final int fromIndex, final int toIndex,
+            final Predicate<? super T> filter, final IntFunction<C> supplier) {
         return filter(c, fromIndex, toIndex, filter, Integer.MAX_VALUE, supplier);
     }
 
@@ -18814,7 +18816,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      *
      * @param <T>
-     * @param <R>
+     * @param <C>
      * @param c
      * @param fromIndex
      * @param toIndex
@@ -18825,8 +18827,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException
      * @throws IndexOutOfBoundsException
      */
-    public static <T, R extends Collection<T>> R filter(final Collection<? extends T> c, final int fromIndex, final int toIndex,
-            final Predicate<? super T> filter, final int max, final IntFunction<R> supplier) throws IllegalArgumentException, IndexOutOfBoundsException {
+    public static <T, C extends Collection<T>> C filter(final Collection<? extends T> c, final int fromIndex, final int toIndex,
+            final Predicate<? super T> filter, final int max, final IntFunction<C> supplier) throws IllegalArgumentException, IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, size(c));
         checkArgNotNull(filter, "filter");
 
@@ -18834,7 +18836,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return supplier.apply(0);
         }
 
-        final R result = supplier.apply(min(9, max, (toIndex - fromIndex)));
+        final C result = supplier.apply(min(9, max, (toIndex - fromIndex)));
 
         if ((isEmpty(c) && fromIndex == 0 && toIndex == 0) || (fromIndex == toIndex && fromIndex < c.size())) {
             return result;
@@ -19017,12 +19019,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      * Map to boolean.
      *
-     * @param <T>
-     * @param c
-     * @param mapper
-     * @return
+     * @param <T> 
+     * @param c 
+     * @param mapper 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static <T> boolean[] mapToBoolean(final Collection<? extends T> c, final ToBooleanFunction<? super T> mapper) {
+    public static <T> boolean[] mapToBoolean(final Collection<? extends T> c, final ToBooleanFunction<? super T> mapper) throws IllegalArgumentException {
         checkArgNotNull(mapper);
 
         if (isEmpty(c)) {
@@ -19934,12 +19937,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      * Map to double.
      *
-     * @param <T>
-     * @param c
-     * @param mapper
-     * @return
+     * @param <T> 
+     * @param c 
+     * @param mapper 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static <T> double[] mapToDouble(final Collection<? extends T> c, final ToDoubleFunction<? super T> mapper) {
+    public static <T> double[] mapToDouble(final Collection<? extends T> c, final ToDoubleFunction<? super T> mapper) throws IllegalArgumentException {
         checkArgNotNull(mapper);
 
         if (isEmpty(c)) {
@@ -20293,15 +20297,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * 
      *
-     *
-     * @param <T>
-     * @param <R>
-     * @param a
-     * @param mapper
-     * @return
+     * @param <T> 
+     * @param <R> 
+     * @param a 
+     * @param mapper 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static <T, R> List<R> flatMap(final T[] a, final Function<? super T, ? extends Collection<? extends R>> mapper) {
+    public static <T, R> List<R> flatMap(final T[] a, final Function<? super T, ? extends Collection<? extends R>> mapper) throws IllegalArgumentException {
         checkArgNotNull(mapper);
 
         if (isEmpty(a)) {
@@ -21974,16 +21979,17 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * 
      *
-     *
-     * @param <T>
-     * @param a
-     * @param atLeast
-     * @param atMost
-     * @param filter
-     * @return
+     * @param <T> 
+     * @param a 
+     * @param atLeast 
+     * @param atMost 
+     * @param filter 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public static <T> boolean nMatch(final T[] a, final int atLeast, final int atMost, final Predicate<? super T> filter) {
+    public static <T> boolean nMatch(final T[] a, final int atLeast, final int atMost, final Predicate<? super T> filter) throws IllegalArgumentException {
         checkArgNotNegative(atLeast, "atLeast"); //NOSONAR
         checkArgNotNegative(atMost, "atMost"); //NOSONAR
         checkArgument(atLeast <= atMost, "'atLeast' must be <= 'atMost'"); //NOSONAR
@@ -22172,13 +22178,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Mostly it's designed for one-step operation to complete the operation in one step.
      * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
      *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param filter
-     * @return
+     * @param a 
+     * @param fromIndex 
+     * @param toIndex 
+     * @param filter 
+     * @return 
+     * @throws IllegalArgumentException 
+     * @throws IndexOutOfBoundsException 
      */
-    public static int count(final boolean[] a, final int fromIndex, final int toIndex, final BooleanPredicate filter) {
+    public static int count(final boolean[] a, final int fromIndex, final int toIndex, final BooleanPredicate filter)
+            throws IllegalArgumentException, IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
         checkArgNotNull(filter, "filter");
 
@@ -22527,13 +22536,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Mostly it's designed for one-step operation to complete the operation in one step.
      * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
      *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param filter
-     * @return
+     * @param a 
+     * @param fromIndex 
+     * @param toIndex 
+     * @param filter 
+     * @return 
+     * @throws IllegalArgumentException 
+     * @throws IndexOutOfBoundsException 
      */
-    public static int count(final double[] a, final int fromIndex, final int toIndex, final DoublePredicate filter) {
+    public static int count(final double[] a, final int fromIndex, final int toIndex, final DoublePredicate filter)
+            throws IllegalArgumentException, IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
         checkArgNotNull(filter, "filter");
 
@@ -22577,14 +22589,17 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Mostly it's designed for one-step operation to complete the operation in one step.
      * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
      *
-     * @param <T>
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param filter
-     * @return
+     * @param <T> 
+     * @param a 
+     * @param fromIndex 
+     * @param toIndex 
+     * @param filter 
+     * @return 
+     * @throws IllegalArgumentException 
+     * @throws IndexOutOfBoundsException 
      */
-    public static <T> int count(final T[] a, final int fromIndex, final int toIndex, final Predicate<? super T> filter) {
+    public static <T> int count(final T[] a, final int fromIndex, final int toIndex, final Predicate<? super T> filter)
+            throws IllegalArgumentException, IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
         checkArgNotNull(filter, "filter");
 
@@ -22708,15 +22723,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * 
      *
-     *
-     * @param <T>
-     * @param iter
-     * @param filter
-     * @return
+     * @param <T> 
+     * @param iter 
+     * @param filter 
+     * @return 
+     * @throws IllegalArgumentException 
      * @throws ArithmeticException if the total matched {@code count} overflows an {@code int}.
      */
-    public static <T> int count(final Iterator<? extends T> iter, final Predicate<? super T> filter) throws ArithmeticException {
+    public static <T> int count(final Iterator<? extends T> iter, final Predicate<? super T> filter) throws IllegalArgumentException, ArithmeticException {
         checkArgNotNull(filter, "filter");
 
         if (iter == null) {
@@ -23794,24 +23810,25 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * 
      *
-     *
-     * @param <A>
-     * @param <B>
-     * @param <C>
-     * @param <R>
-     * @param a
-     * @param b
-     * @param c
-     * @param valueForNoneA
-     * @param valueForNoneB
-     * @param valueForNoneC
-     * @param zipFunction
-     * @param targetElementType
-     * @return
+     * @param <A> 
+     * @param <B> 
+     * @param <C> 
+     * @param <R> 
+     * @param a 
+     * @param b 
+     * @param c 
+     * @param valueForNoneA 
+     * @param valueForNoneB 
+     * @param valueForNoneC 
+     * @param zipFunction 
+     * @param targetElementType 
+     * @return 
+     * @throws IllegalArgumentException 
      */
     public static <A, B, C, R> R[] zip(final A[] a, final B[] b, final C[] c, final A valueForNoneA, final B valueForNoneB, final C valueForNoneC,
-            final TriFunction<? super A, ? super B, ? super C, ? extends R> zipFunction, final Class<R> targetElementType) {
+            final TriFunction<? super A, ? super B, ? super C, ? extends R> zipFunction, final Class<R> targetElementType) throws IllegalArgumentException {
         checkArgNotNull(zipFunction);
 
         final int lenA = len(a);
@@ -24342,21 +24359,22 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * 
      *
-     *
-     * @param <T>
-     * @param <K>
-     * @param <R>
-     * @param <M>
-     * @param c
-     * @param keyExtractor
-     * @param collector
-     * @param mapSupplier
-     * @return
+     * @param <T> 
+     * @param <K> 
+     * @param <R> 
+     * @param <M> 
+     * @param c 
+     * @param keyExtractor 
+     * @param collector 
+     * @param mapSupplier 
+     * @return 
+     * @throws IllegalArgumentException 
      */
     @Beta
     public static <T, K, R, M extends Map<K, R>> M groupBy(final Iterable<? extends T> c, final Function<? super T, ? extends K> keyExtractor,
-            final Collector<? super T, ?, R> collector, final Supplier<M> mapSupplier) {
+            final Collector<? super T, ?, R> collector, final Supplier<M> mapSupplier) throws IllegalArgumentException {
         checkArgNotNull(keyExtractor, "keyExtractor");
         checkArgNotNull(collector, "collector");
         checkArgNotNull(mapSupplier, "mapSupplier");
@@ -24410,21 +24428,22 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * 
      *
-     *
-     * @param <K>
-     * @param <T>
-     * @param <R>
-     * @param <M>
-     * @param iter
-     * @param keyExtractor
-     * @param collector
-     * @param mapSupplier
-     * @return
+     * @param <K> 
+     * @param <T> 
+     * @param <R> 
+     * @param <M> 
+     * @param iter 
+     * @param keyExtractor 
+     * @param collector 
+     * @param mapSupplier 
+     * @return 
+     * @throws IllegalArgumentException 
      */
     @Beta
     public static <K, T, R, M extends Map<K, R>> M groupBy(final Iterator<? extends T> iter, final Function<? super T, ? extends K> keyExtractor,
-            final Collector<? super T, ?, R> collector, final Supplier<M> mapSupplier) {
+            final Collector<? super T, ?, R> collector, final Supplier<M> mapSupplier) throws IllegalArgumentException {
         checkArgNotNull(keyExtractor, "keyExtractor");
         checkArgNotNull(collector, "collector");
         checkArgNotNull(mapSupplier, "mapSupplier");

@@ -480,13 +480,13 @@ public final class Holder<T> implements Mutable {
     /**
      * Or else throw if null.
      *
-     * @param <X>
+     * @param <E>
      * @param exceptionSupplier
      * @return
      * @throws IllegalArgumentException
-     * @throws X the x
+     * @throws E
      */
-    public <X extends Throwable> T orElseThrowIfNull(final Supplier<? extends X> exceptionSupplier) throws IllegalArgumentException, X {
+    public <E extends Throwable> T orElseThrowIfNull(final Supplier<? extends E> exceptionSupplier) throws IllegalArgumentException, E {
         N.checkArgNotNull(exceptionSupplier, "exceptionSupplier");
 
         if (isNotNull()) {

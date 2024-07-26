@@ -1118,7 +1118,7 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
         final V oldValue = get(key);
 
         if (oldValue == null) {
-            return null;
+            return oldValue;
         }
 
         V ret = null;
@@ -1219,6 +1219,7 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * return get(key);
      * </pre>
      *
+     * @param <C>
      * @param key
      * @param elements
      * @param remappingFunction
@@ -1586,12 +1587,12 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
 
     /**
      *
-     * @param <R>
+     * @param <C>
      * @param supplier
      * @return
      */
-    public <R extends Collection<E>> R flatValues(final IntFunction<R> supplier) {
-        final R result = supplier.apply(totalCountOfValues());
+    public <C extends Collection<E>> C flatValues(final IntFunction<C> supplier) {
+        final C result = supplier.apply(totalCountOfValues());
 
         for (V v : backingMap.values()) {
             result.addAll(v);

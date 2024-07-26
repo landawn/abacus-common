@@ -2341,11 +2341,13 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
     /**
      *
+     *
      * @param predicate
      * @return
+     * @throws IllegalStateException
      */
     @IntermediateOp
-    public CheckedStream<T, E> filter(final Throwables.Predicate<? super T, ? extends E> predicate) {
+    public CheckedStream<T, E> filter(final Throwables.Predicate<? super T, ? extends E> predicate) throws IllegalStateException {
         assertNotClosed();
 
         return newStream(new Throwables.Iterator<T, E>() {
@@ -2383,13 +2385,15 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
     /**
      *
+     *
      * @param predicate
      * @param actionOnDroppedItem
      * @return
+     * @throws IllegalStateException
      */
     @IntermediateOp
     public CheckedStream<T, E> filter(final Throwables.Predicate<? super T, ? extends E> predicate,
-            final Throwables.Consumer<? super T, ? extends E> actionOnDroppedItem) {
+            final Throwables.Consumer<? super T, ? extends E> actionOnDroppedItem) throws IllegalStateException {
         assertNotClosed();
 
         return filter(value -> {
@@ -2404,11 +2408,13 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
     /**
      *
+     *
      * @param predicate
      * @return
+     * @throws IllegalStateException
      */
     @IntermediateOp
-    public CheckedStream<T, E> takeWhile(final Throwables.Predicate<? super T, ? extends E> predicate) {
+    public CheckedStream<T, E> takeWhile(final Throwables.Predicate<? super T, ? extends E> predicate) throws IllegalStateException {
         assertNotClosed();
 
         return newStream(new Throwables.Iterator<T, E>() {
@@ -2446,11 +2452,13 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
     /**
      *
+     *
      * @param predicate
      * @return
+     * @throws IllegalStateException
      */
     @IntermediateOp
-    public CheckedStream<T, E> dropWhile(final Throwables.Predicate<? super T, ? extends E> predicate) {
+    public CheckedStream<T, E> dropWhile(final Throwables.Predicate<? super T, ? extends E> predicate) throws IllegalStateException {
         assertNotClosed();
 
         return newStream(new Throwables.Iterator<T, E>() {
@@ -2497,13 +2505,15 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
     /**
      *
+     *
      * @param predicate
      * @param actionOnDroppedItem
      * @return
+     * @throws IllegalStateException
      */
     @IntermediateOp
     public CheckedStream<T, E> dropWhile(final Throwables.Predicate<? super T, ? extends E> predicate,
-            final Throwables.Consumer<? super T, ? extends E> actionOnDroppedItem) {
+            final Throwables.Consumer<? super T, ? extends E> actionOnDroppedItem) throws IllegalStateException {
         assertNotClosed();
 
         return dropWhile(value -> {
@@ -2531,9 +2541,10 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * Distinct and filter by occurrences.
      *
      * @return
+     * @throws IllegalStateException
      */
     @IntermediateOp
-    public CheckedStream<T, E> distinct() {
+    public CheckedStream<T, E> distinct() throws IllegalStateException {
         assertNotClosed();
 
         final Set<Object> set = N.newHashSet();
@@ -2559,11 +2570,12 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      *
      * @param occurrencesFilter
      * @return
+     * @throws IllegalStateException
      * @see #groupBy(Throwables.Function, Collector)
      */
     @IntermediateOp
     @TerminalOpTriggered
-    public CheckedStream<T, E> distinct(final Throwables.Predicate<? super Long, ? extends E> occurrencesFilter) {
+    public CheckedStream<T, E> distinct(final Throwables.Predicate<? super Long, ? extends E> occurrencesFilter) throws IllegalStateException {
         assertNotClosed();
 
         final Supplier<? extends Map<T, Long>> supplier = Suppliers.<T, Long> ofLinkedHashMap();
@@ -2579,9 +2591,10 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @param <K>
      * @param keyMapper don't change value of the input parameter.
      * @return
+     * @throws IllegalStateException
      */
     @IntermediateOp
-    public <K> CheckedStream<T, E> distinctBy(final Throwables.Function<? super T, K, ? extends E> keyMapper) {
+    public <K> CheckedStream<T, E> distinctBy(final Throwables.Function<? super T, K, ? extends E> keyMapper) throws IllegalStateException {
         assertNotClosed();
 
         final Set<Object> set = N.newHashSet();
@@ -2596,12 +2609,13 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @param keyMapper
      * @param mergeFunction
      * @return
+     * @throws IllegalStateException
      * @see #groupBy(Throwables.Function, Throwables.Function, Throwables.BinaryOperator)
      */
     @IntermediateOp
     @TerminalOpTriggered
     public <K> CheckedStream<T, E> distinctBy(final Throwables.Function<? super T, K, ? extends E> keyMapper,
-            final Throwables.BinaryOperator<T, ? extends E> mergeFunction) {
+            final Throwables.BinaryOperator<T, ? extends E> mergeFunction) throws IllegalStateException {
         assertNotClosed();
 
         final Supplier<? extends Map<K, T>> supplier = Suppliers.<K, T> ofLinkedHashMap();
@@ -2616,13 +2630,14 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @param keyMapper
      * @param occurrencesFilter
      * @return
+     * @throws IllegalStateException
      * @see #groupBy(Throwables.Function, Collector)
      */
     @IntermediateOp
     @TerminalOpTriggered
     @SuppressWarnings("rawtypes")
     public <K> CheckedStream<T, E> distinctBy(final Throwables.Function<? super T, K, ? extends E> keyMapper,
-            final Throwables.Predicate<? super Map.Entry<Keyed<K, T>, Long>, ? extends E> occurrencesFilter) {
+            final Throwables.Predicate<? super Map.Entry<Keyed<K, T>, Long>, ? extends E> occurrencesFilter) throws IllegalStateException {
         assertNotClosed();
 
         final Supplier<? extends Map<Keyed<K, T>, Long>> supplier = Suppliers.<Keyed<K, T>, Long> ofLinkedHashMap();
@@ -2656,12 +2671,14 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
     /**
      *
+     *
      * @param <R>
      * @param mapper
      * @return
+     * @throws IllegalStateException
      */
     @IntermediateOp
-    public <R> CheckedStream<R, E> map(final Throwables.Function<? super T, ? extends R, ? extends E> mapper) {
+    public <R> CheckedStream<R, E> map(final Throwables.Function<? super T, ? extends R, ? extends E> mapper) throws IllegalStateException {
         assertNotClosed();
 
         return newStream(new Throwables.Iterator<R, E>() {
@@ -2696,9 +2713,10 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      *
      * @param mapperForFirst
      * @return
+     * @throws IllegalStateException
      */
     @IntermediateOp
-    public CheckedStream<T, E> mapFirst(final Throwables.Function<? super T, ? extends T, ? extends E> mapperForFirst) {
+    public CheckedStream<T, E> mapFirst(final Throwables.Function<? super T, ? extends T, ? extends E> mapperForFirst) throws IllegalStateException {
         assertNotClosed();
 
         return newStream(new Throwables.Iterator<T, E>() {
@@ -2728,10 +2746,11 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @param mapperForFirst
      * @param mapperForElse
      * @return
+     * @throws IllegalStateException
      */
     @IntermediateOp
     public <R> CheckedStream<R, E> mapFirstOrElse(final Throwables.Function<? super T, ? extends R, E> mapperForFirst,
-            final Throwables.Function<? super T, ? extends R, E> mapperForElse) {
+            final Throwables.Function<? super T, ? extends R, E> mapperForElse) throws IllegalStateException {
         assertNotClosed();
 
         return newStream(new Throwables.Iterator<R, E>() {
@@ -2759,9 +2778,10 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      *
      * @param mapperForLast
      * @return
+     * @throws IllegalStateException
      */
     @IntermediateOp
-    public CheckedStream<T, E> mapLast(final Throwables.Function<? super T, ? extends T, ? extends E> mapperForLast) {
+    public CheckedStream<T, E> mapLast(final Throwables.Function<? super T, ? extends T, ? extends E> mapperForLast) throws IllegalStateException {
         assertNotClosed();
 
         return newStream(new Throwables.Iterator<T, E>() {
@@ -2793,10 +2813,11 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @param mapperForLast
      * @param mapperForElse
      * @return
+     * @throws IllegalStateException
      */
     @IntermediateOp
     public <R> CheckedStream<R, E> mapLastOrElse(final Throwables.Function<? super T, ? extends R, E> mapperForLast,
-            final Throwables.Function<? super T, ? extends R, E> mapperForElse) {
+            final Throwables.Function<? super T, ? extends R, E> mapperForElse) throws IllegalStateException {
         assertNotClosed();
 
         return newStream(new Throwables.Iterator<R, E>() {
@@ -2822,12 +2843,15 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
     /**
      *
+     *
      * @param <R>
      * @param mapper
      * @return
+     * @throws IllegalStateException
      */
     @IntermediateOp
-    public <R> CheckedStream<R, E> flatMap(final Throwables.Function<? super T, ? extends CheckedStream<? extends R, ? extends E>, ? extends E> mapper) {
+    public <R> CheckedStream<R, E> flatMap(final Throwables.Function<? super T, ? extends CheckedStream<? extends R, ? extends E>, ? extends E> mapper)
+            throws IllegalStateException {
         assertNotClosed();
 
         final Throwables.Iterator<R, E> iter = new Throwables.Iterator<>() {
@@ -2914,13 +2938,15 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
     /**
      *
+     *
      * @param <R>
      * @param mapper
      * @return
+     * @throws IllegalStateException
      */
     @IntermediateOp
     @Beta
-    public <R> CheckedStream<R, E> flattMap(final Throwables.Function<? super T, R[], ? extends E> mapper) {
+    public <R> CheckedStream<R, E> flattMap(final Throwables.Function<? super T, R[], ? extends E> mapper) throws IllegalStateException {
         assertNotClosed();
 
         return newStream(new Throwables.Iterator<R, E>() {
@@ -2945,7 +2971,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             }
 
             @Override
-            public R next() throws E {
+            public R next() throws IllegalStateException, E {
                 if (idx >= len && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -3184,10 +3210,11 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      *
      * @param mapper
      * @return
+     * @throws IllegalStateException
      */
     @Beta
     @IntermediateOp
-    public CheckedStream<Boolean, E> flatMapToBoolean(final Throwables.Function<? super T, boolean[], ? extends E> mapper) {
+    public CheckedStream<Boolean, E> flatMapToBoolean(final Throwables.Function<? super T, boolean[], ? extends E> mapper) throws IllegalStateException {
         assertNotClosed();
 
         return newStream(new Throwables.Iterator<Boolean, E>() {
@@ -3227,10 +3254,11 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      *
      * @param mapper
      * @return
+     * @throws IllegalStateException
      */
     @Beta
     @IntermediateOp
-    public CheckedStream<Character, E> flatMapToChar(final Throwables.Function<? super T, char[], ? extends E> mapper) {
+    public CheckedStream<Character, E> flatMapToChar(final Throwables.Function<? super T, char[], ? extends E> mapper) throws IllegalStateException {
         assertNotClosed();
 
         return newStream(new Throwables.Iterator<Character, E>() {
@@ -3270,10 +3298,11 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      *
      * @param mapper
      * @return
+     * @throws IllegalStateException
      */
     @Beta
     @IntermediateOp
-    public CheckedStream<Byte, E> flatMapToByte(final Throwables.Function<? super T, byte[], ? extends E> mapper) {
+    public CheckedStream<Byte, E> flatMapToByte(final Throwables.Function<? super T, byte[], ? extends E> mapper) throws IllegalStateException {
         assertNotClosed();
 
         return newStream(new Throwables.Iterator<Byte, E>() {
@@ -3313,10 +3342,11 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      *
      * @param mapper
      * @return
+     * @throws IllegalStateException
      */
     @Beta
     @IntermediateOp
-    public CheckedStream<Short, E> flatMapToShort(final Throwables.Function<? super T, short[], ? extends E> mapper) {
+    public CheckedStream<Short, E> flatMapToShort(final Throwables.Function<? super T, short[], ? extends E> mapper) throws IllegalStateException {
         assertNotClosed();
 
         return newStream(new Throwables.Iterator<Short, E>() {
@@ -3356,10 +3386,11 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      *
      * @param mapper
      * @return
+     * @throws IllegalStateException
      */
     @Beta
     @IntermediateOp
-    public CheckedStream<Integer, E> flatMapToInteger(final Throwables.Function<? super T, int[], ? extends E> mapper) {
+    public CheckedStream<Integer, E> flatMapToInteger(final Throwables.Function<? super T, int[], ? extends E> mapper) throws IllegalStateException {
         assertNotClosed();
 
         return newStream(new Throwables.Iterator<Integer, E>() {
@@ -3399,10 +3430,11 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      *
      * @param mapper
      * @return
+     * @throws IllegalStateException
      */
     @Beta
     @IntermediateOp
-    public CheckedStream<Long, E> flatMapToLong(final Throwables.Function<? super T, long[], ? extends E> mapper) {
+    public CheckedStream<Long, E> flatMapToLong(final Throwables.Function<? super T, long[], ? extends E> mapper) throws IllegalStateException {
         assertNotClosed();
 
         return newStream(new Throwables.Iterator<Long, E>() {
@@ -3442,10 +3474,11 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      *
      * @param mapper
      * @return
+     * @throws IllegalStateException
      */
     @Beta
     @IntermediateOp
-    public CheckedStream<Float, E> flatMapToFloat(final Throwables.Function<? super T, float[], ? extends E> mapper) {
+    public CheckedStream<Float, E> flatMapToFloat(final Throwables.Function<? super T, float[], ? extends E> mapper) throws IllegalStateException {
         assertNotClosed();
 
         return newStream(new Throwables.Iterator<Float, E>() {
@@ -3485,10 +3518,11 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      *
      * @param mapper
      * @return
+     * @throws IllegalStateException
      */
     @Beta
     @IntermediateOp
-    public CheckedStream<Double, E> flatMapToDouble(final Throwables.Function<? super T, double[], ? extends E> mapper) {
+    public CheckedStream<Double, E> flatMapToDouble(final Throwables.Function<? super T, double[], ? extends E> mapper) throws IllegalStateException {
         assertNotClosed();
 
         return newStream(new Throwables.Iterator<Double, E>() {
@@ -3750,11 +3784,12 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @param ignoreNotPaired
      * @param mapper
      * @return
+     * @throws IllegalStateException
      * @throws IllegalArgumentException
      */
     @IntermediateOp
     public <R> CheckedStream<R, E> slidingMap(final int increment, final boolean ignoreNotPaired,
-            final Throwables.BiFunction<? super T, ? super T, R, ? extends E> mapper) throws IllegalArgumentException {
+            final Throwables.BiFunction<? super T, ? super T, R, ? extends E> mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgPositive(increment, "increment");
@@ -3839,11 +3874,12 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @param ignoreNotPaired
      * @param mapper
      * @return
+     * @throws IllegalStateException
      * @throws IllegalArgumentException
      */
     @IntermediateOp
     public <R> CheckedStream<R, E> slidingMap(final int increment, final boolean ignoreNotPaired,
-            final Throwables.TriFunction<? super T, ? super T, ? super T, R, ? extends E> mapper) throws IllegalArgumentException {
+            final Throwables.TriFunction<? super T, ? super T, ? super T, R, ? extends E> mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgPositive(increment, "increment");
@@ -3956,18 +3992,21 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
     /**
      *
+     *
      * @param <K> the key type
      * @param <V> the value type
      * @param keyMapper
      * @param valueMapper
      * @param mapFactory
      * @return
+     * @throws IllegalStateException
      * @see Collectors#toMultimap(Function, Function, Supplier)
      */
     @IntermediateOp
     @TerminalOpTriggered
     public <K, V> CheckedStream<Map.Entry<K, List<V>>, E> groupBy(final Throwables.Function<? super T, ? extends K, ? extends E> keyMapper,
-            final Throwables.Function<? super T, ? extends V, ? extends E> valueMapper, final Supplier<? extends Map<K, List<V>>> mapFactory) {
+            final Throwables.Function<? super T, ? extends V, ? extends E> valueMapper, final Supplier<? extends Map<K, List<V>>> mapFactory)
+            throws IllegalStateException {
         assertNotClosed();
 
         return newStream(new Throwables.Iterator<Map.Entry<K, List<V>>, E>() {
@@ -4012,6 +4051,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
     /**
      *
+     *
      * @param <K> the key type
      * @param <V> the value type
      * @param keyMapper
@@ -4019,6 +4059,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @param mergeFunction
      * @param mapFactory
      * @return
+     * @throws IllegalStateException
      * @see {@link Fn.Fnn#throwingMerger()}
      * @see {@link Fn.Fnn#replacingMerger()}
      * @see {@link Fn.Fnn#ignoringMerger()}
@@ -4027,7 +4068,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     @TerminalOpTriggered
     public <K, V> CheckedStream<Map.Entry<K, V>, E> groupBy(final Throwables.Function<? super T, ? extends K, ? extends E> keyMapper,
             final Throwables.Function<? super T, ? extends V, ? extends E> valueMapper, final Throwables.BinaryOperator<V, ? extends E> mergeFunction,
-            final Supplier<? extends Map<K, V>> mapFactory) {
+            final Supplier<? extends Map<K, V>> mapFactory) throws IllegalStateException {
         assertNotClosed();
 
         return newStream(new Throwables.Iterator<Map.Entry<K, V>, E>() {
@@ -4115,12 +4156,13 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @param downstream
      * @param mapFactory
      * @return
+     * @throws IllegalStateException
      */
     @IntermediateOp
     @TerminalOpTriggered
     public <K, V, D> CheckedStream<Map.Entry<K, D>, E> groupBy(final Throwables.Function<? super T, ? extends K, ? extends E> keyMapper,
             final Throwables.Function<? super T, ? extends V, ? extends E> valueMapper, final Collector<? super V, ?, D> downstream,
-            final Supplier<? extends Map<K, D>> mapFactory) {
+            final Supplier<? extends Map<K, D>> mapFactory) throws IllegalStateException {
         assertNotClosed();
 
         return newStream(new Throwables.Iterator<Map.Entry<K, D>, E>() {
@@ -4148,13 +4190,15 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
     /**
      *
+     *
      * @param predicate
      * @return
+     * @throws IllegalStateException
      * @see Collectors#partitioningBy(Predicate)
      */
     @IntermediateOp
     @TerminalOpTriggered
-    public CheckedStream<Map.Entry<Boolean, List<T>>, E> partitionBy(final Throwables.Predicate<? super T, E> predicate) {
+    public CheckedStream<Map.Entry<Boolean, List<T>>, E> partitionBy(final Throwables.Predicate<? super T, E> predicate) throws IllegalStateException {
         assertNotClosed();
 
         return partitionBy(predicate, Collectors.<T> toList());
@@ -4167,12 +4211,13 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @param predicate
      * @param downstream
      * @return
+     * @throws IllegalStateException
      * @see Collectors#partitioningBy(Predicate, Collector)
      */
     @IntermediateOp
     @TerminalOpTriggered
     public <D> CheckedStream<Map.Entry<Boolean, D>, E> partitionBy(final Throwables.Predicate<? super T, E> predicate,
-            final Collector<? super T, ?, D> downstream) {
+            final Collector<? super T, ?, D> downstream) throws IllegalStateException {
         assertNotClosed();
 
         return newStream(new Throwables.Iterator<Entry<Boolean, D>, E>() {
@@ -4212,52 +4257,30 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
     /**
      *
+     *
      * @param collapsible test the current element with its previous element. The first parameter is the previous element of current element, the second parameter is the current element.
      * @return
+     * @throws IllegalStateException
      */
     @IntermediateOp
-    public CheckedStream<List<T>, E> collapse(final Throwables.BiPredicate<? super T, ? super T, ? extends E> collapsible) {
+    public CheckedStream<List<T>, E> collapse(final Throwables.BiPredicate<? super T, ? super T, ? extends E> collapsible) throws IllegalStateException {
         assertNotClosed();
 
-        final Throwables.Iterator<T, E> iter = elements;
-
-        return newStream(new Throwables.Iterator<List<T>, E>() {
-            private boolean hasNext = false;
-            private T next = null;
-
-            @Override
-            public boolean hasNext() throws E {
-                return hasNext || iter.hasNext();
-            }
-
-            @Override
-            public List<T> next() throws E {
-                final List<T> c = new ArrayList<>();
-                c.add(hasNext ? next : (next = iter.next()));
-
-                while ((hasNext = iter.hasNext())) {
-                    if (collapsible.test(next, (next = iter.next()))) {
-                        c.add(next);
-                    } else {
-                        break;
-                    }
-                }
-
-                return c;
-            }
-        }, closeHandlers);
+        return collapse(collapsible, Suppliers.ofList());
     }
 
     /**
+     *
      *
      * @param <C>
      * @param collapsible test the current element with its previous element. The first parameter is the previous element of current element, the second parameter is the current element.
      * @param supplier
      * @return
+     * @throws IllegalStateException
      */
     @IntermediateOp
     public <C extends Collection<T>> CheckedStream<C, E> collapse(final Throwables.BiPredicate<? super T, ? super T, ? extends E> collapsible,
-            final Supplier<? extends C> supplier) {
+            final Supplier<? extends C> supplier) throws IllegalStateException {
         assertNotClosed();
 
         final Throwables.Iterator<T, E> iter = elements;
@@ -4310,10 +4333,11 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @param collapsible test the current element with its previous element. The first parameter is the previous element of current element, the second parameter is the current element.
      * @param mergeFunction
      * @return
+     * @throws IllegalStateException
      */
     @IntermediateOp
     public CheckedStream<T, E> collapse(final Throwables.BiPredicate<? super T, ? super T, ? extends E> collapsible,
-            final Throwables.BiFunction<? super T, ? super T, T, ? extends E> mergeFunction) {
+            final Throwables.BiFunction<? super T, ? super T, T, ? extends E> mergeFunction) throws IllegalStateException {
         assertNotClosed();
 
         final Throwables.Iterator<T, E> iter = elements;
@@ -4346,15 +4370,17 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
     /**
      *
+     *
      * @param <U>
      * @param collapsible test the current element with its previous element. The first parameter is the previous element of current element, the second parameter is the current element.
      * @param init is used by {@code op} to generate the first result value in the series.
      * @param op
      * @return
+     * @throws IllegalStateException
      */
     @IntermediateOp
     public <U> CheckedStream<U, E> collapse(final Throwables.BiPredicate<? super T, ? super T, ? extends E> collapsible, final U init,
-            final Throwables.BiFunction<? super U, ? super T, U, ? extends E> op) {
+            final Throwables.BiFunction<? super U, ? super T, U, ? extends E> op) throws IllegalStateException {
         assertNotClosed();
 
         final Throwables.Iterator<T, E> iter = elements;
@@ -4385,58 +4411,64 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
         }, closeHandlers);
     }
 
+    //    /**
+    //     *
+    //     *
+    //     * @param <R>
+    //     * @param collapsible test the current element with its previous element. The first parameter is the previous element of current element, the second parameter is the current element.
+    //     * @param supplier
+    //     * @param accumulator
+    //     * @return
+    //     * @throws IllegalStateException
+    //     * @deprecated use {@linkplain #collapse(com.landawn.abacus.util.Throwables.BiPredicate, Collector)} instead. 1, parameter position is inconsistent? {@code supplier} should be last parameter, 2 Too many overload methods? 3, not frequently used?
+    //     */
+    //    @Deprecated
+    //    @IntermediateOp
+    //    public <R> CheckedStream<R, E> collapse(final Throwables.BiPredicate<? super T, ? super T, ? extends E> collapsible, final Supplier<R> supplier,
+    //            final Throwables.BiConsumer<? super R, ? super T, ? extends E> accumulator) throws IllegalStateException {
+    //        assertNotClosed();
+    //
+    //        final Throwables.Iterator<T, E> iter = elements;
+    //
+    //        return newStream(new Throwables.Iterator<R, E>() {
+    //            private boolean hasNext = false;
+    //            private T next = null;
+    //
+    //            @Override
+    //            public boolean hasNext() throws E {
+    //                return hasNext || iter.hasNext();
+    //            }
+    //
+    //            @Override
+    //            public R next() throws E {
+    //                final R container = supplier.get();
+    //                accumulator.accept(container, hasNext ? next : (next = iter.next()));
+    //
+    //                while ((hasNext = iter.hasNext())) {
+    //                    if (collapsible.test(next, (next = iter.next()))) {
+    //                        accumulator.accept(container, next);
+    //                    } else {
+    //                        break;
+    //                    }
+    //                }
+    //
+    //                return container;
+    //            }
+    //        }, closeHandlers);
+    //    }
+
     /**
      *
-     * @param <R>
-     * @param collapsible test the current element with its previous element. The first parameter is the previous element of current element, the second parameter is the current element.
-     * @param supplier
-     * @param accumulator
-     * @return
-     */
-    @IntermediateOp
-    public <R> CheckedStream<R, E> collapse(final Throwables.BiPredicate<? super T, ? super T, ? extends E> collapsible,
-            final Throwables.Supplier<R, E> supplier, final Throwables.BiConsumer<? super R, ? super T, ? extends E> accumulator) {
-        assertNotClosed();
-
-        final Throwables.Iterator<T, E> iter = elements;
-
-        return newStream(new Throwables.Iterator<R, E>() {
-            private boolean hasNext = false;
-            private T next = null;
-
-            @Override
-            public boolean hasNext() throws E {
-                return hasNext || iter.hasNext();
-            }
-
-            @Override
-            public R next() throws E {
-                final R container = supplier.get();
-                accumulator.accept(container, hasNext ? next : (next = iter.next()));
-
-                while ((hasNext = iter.hasNext())) {
-                    if (collapsible.test(next, (next = iter.next()))) {
-                        accumulator.accept(container, next);
-                    } else {
-                        break;
-                    }
-                }
-
-                return container;
-            }
-        }, closeHandlers);
-    }
-
-    /**
      *
      * @param <R>
      * @param collapsible test the current element with its previous element. The first parameter is the previous element of current element, the second parameter is the current element.
      * @param collector
      * @return
+     * @throws IllegalStateException
      */
     @IntermediateOp
     public <R> CheckedStream<R, E> collapse(final Throwables.BiPredicate<? super T, ? super T, ? extends E> collapsible,
-            final Collector<? super T, ?, R> collector) {
+            final Collector<? super T, ?, R> collector) throws IllegalStateException {
         assertNotClosed();
 
         final Supplier<Object> supplier = (Supplier<Object>) collector.supplier();
@@ -4474,11 +4506,14 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
     /**
      *
+     *
      * @param collapsible test the current element with the first element and previous element in the series. The first parameter is the first element of this series, the second parameter is the previous element and the third parameter is the current element.
      * @return
+     * @throws IllegalStateException
      */
     @IntermediateOp
-    public CheckedStream<List<T>, E> collapse(final Throwables.TriPredicate<? super T, ? super T, ? super T, ? extends E> collapsible) {
+    public CheckedStream<List<T>, E> collapse(final Throwables.TriPredicate<? super T, ? super T, ? super T, ? extends E> collapsible)
+            throws IllegalStateException {
         assertNotClosed();
 
         final Throwables.Iterator<T, E> iter = elements;
@@ -4513,14 +4548,16 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
     /**
      *
+     *
      * @param <C>
      * @param collapsible test the current element with the first element and previous element in the series. The first parameter is the first element of this series, the second parameter is the previous element and the third parameter is the current element.
      * @param supplier
      * @return
+     * @throws IllegalStateException
      */
     @IntermediateOp
     public <C extends Collection<T>> CheckedStream<C, E> collapse(final Throwables.TriPredicate<? super T, ? super T, ? super T, ? extends E> collapsible,
-            final Supplier<? extends C> supplier) {
+            final Supplier<? extends C> supplier) throws IllegalStateException {
         assertNotClosed();
 
         final Throwables.Iterator<T, E> iter = elements;
@@ -4574,10 +4611,11 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @param collapsible test the current element with the first element and previous element in the series. The first parameter is the first element of this series, the second parameter is the previous element and the third parameter is the current element.
      * @param mergeFunction
      * @return
+     * @throws IllegalStateException
      */
     @IntermediateOp
     public CheckedStream<T, E> collapse(final Throwables.TriPredicate<? super T, ? super T, ? super T, ? extends E> collapsible,
-            final Throwables.BiFunction<? super T, ? super T, T, ? extends E> mergeFunction) {
+            final Throwables.BiFunction<? super T, ? super T, T, ? extends E> mergeFunction) throws IllegalStateException {
         assertNotClosed();
 
         final Throwables.Iterator<T, E> iter = elements;
@@ -4611,15 +4649,17 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
     /**
      *
+     *
      * @param <U>
      * @param collapsible test the current element with the first element and previous element in the series. The first parameter is the first element of this series, the second parameter is the previous element and the third parameter is the current element.
      * @param init is used by {@code op} to generate the first result value in the series.
      * @param op
      * @return
+     * @throws IllegalStateException
      */
     @IntermediateOp
     public <U> CheckedStream<U, E> collapse(final Throwables.TriPredicate<? super T, ? super T, ? super T, ? extends E> collapsible, final U init,
-            final Throwables.BiFunction<? super U, ? super T, U, ? extends E> op) {
+            final Throwables.BiFunction<? super U, ? super T, U, ? extends E> op) throws IllegalStateException {
         assertNotClosed();
 
         final Throwables.Iterator<T, E> iter = elements;
@@ -4651,48 +4691,53 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
         }, closeHandlers);
     }
 
-    /**
-     *
-     * @param <R>
-     *@param collapsible test the current element with the first element and previous element in the series. The first parameter is the first element of this series, the second parameter is the previous element and the third parameter is the current element.
-     * @param supplier
-     * @param accumulator
-     * @return
-     */
-    @IntermediateOp
-    public <R> CheckedStream<R, E> collapse(final Throwables.TriPredicate<? super T, ? super T, ? super T, ? extends E> collapsible,
-            final Throwables.Supplier<R, E> supplier, final Throwables.BiConsumer<? super R, ? super T, ? extends E> accumulator) {
-        assertNotClosed();
-
-        final Throwables.Iterator<T, E> iter = elements;
-
-        return newStream(new Throwables.Iterator<R, E>() {
-            private boolean hasNext = false;
-            private T next = null;
-
-            @Override
-            public boolean hasNext() throws E {
-                return hasNext || iter.hasNext();
-            }
-
-            @Override
-            public R next() throws E {
-                final T first = hasNext ? next : (next = iter.next());
-                final R container = supplier.get();
-                accumulator.accept(container, first);
-
-                while ((hasNext = iter.hasNext())) {
-                    if (collapsible.test(first, next, (next = iter.next()))) {
-                        accumulator.accept(container, next);
-                    } else {
-                        break;
-                    }
-                }
-
-                return container;
-            }
-        }, closeHandlers);
-    }
+    //    /**
+    //     *
+    //     *
+    //     * @param <R>
+    //     * @param collapsible test the current element with the first element and previous element in the series. The first parameter is the first element of this series, the second parameter is the previous element and the third parameter is the current element.
+    //     * @param supplier
+    //     * @param accumulator
+    //     * @return
+    //     * @throws IllegalStateException
+    //     * @throws IllegalStateException
+    //     * @deprecated use {@linkplain #collapse(com.landawn.abacus.util.Throwables.TriPredicate, Collector)} instead. 1, parameter position is inconsistent? {@code supplier} should be last parameter, 2 Too many overload methods? 3, not frequently used?
+    //     */
+    //    @Deprecated
+    //    @IntermediateOp
+    //    public <R> CheckedStream<R, E> collapse(final Throwables.TriPredicate<? super T, ? super T, ? super T, ? extends E> collapsible, final Supplier<R> supplier,
+    //            final Throwables.BiConsumer<? super R, ? super T, ? extends E> accumulator) throws IllegalStateException {
+    //        assertNotClosed();
+    //
+    //        final Throwables.Iterator<T, E> iter = elements;
+    //
+    //        return newStream(new Throwables.Iterator<R, E>() {
+    //            private boolean hasNext = false;
+    //            private T next = null;
+    //
+    //            @Override
+    //            public boolean hasNext() throws E {
+    //                return hasNext || iter.hasNext();
+    //            }
+    //
+    //            @Override
+    //            public R next() throws E {
+    //                final T first = hasNext ? next : (next = iter.next());
+    //                final R container = supplier.get();
+    //                accumulator.accept(container, first);
+    //
+    //                while ((hasNext = iter.hasNext())) {
+    //                    if (collapsible.test(first, next, (next = iter.next()))) {
+    //                        accumulator.accept(container, next);
+    //                    } else {
+    //                        break;
+    //                    }
+    //                }
+    //
+    //                return container;
+    //            }
+    //        }, closeHandlers);
+    //    }
 
     /**
      * Merge series of adjacent elements which satisfy the given predicate using
@@ -4709,15 +4754,15 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * </code>
      * </pre>
      *
-     *
      * @param <R>
      * @param collapsible test the current element with the first element and previous element in the series. The first parameter is the first element of this series, the second parameter is the previous element and the third parameter is the current element.
      * @param collector
      * @return
+     * @throws IllegalStateException
      */
     @IntermediateOp
     public <R> CheckedStream<R, E> collapse(final Throwables.TriPredicate<? super T, ? super T, ? super T, ? extends E> collapsible,
-            final Collector<? super T, ?, R> collector) {
+            final Collector<? super T, ?, R> collector) throws IllegalStateException {
         assertNotClosed();
 
         final Supplier<Object> supplier = (Supplier<Object>) collector.supplier();
@@ -4755,12 +4800,30 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     }
 
     /**
+     * Returns a {@code Stream} produced by iterative application of a accumulation function
+     * to an initial element {@code init} and next element of the current stream.
+     * Produces a {@code Stream} consisting of {@code init}, {@code acc(init, value1)},
+     * {@code acc(acc(init, value1), value2)}, etc.
+     *
+     * <p>This is an intermediate operation.
+     *
+     * <p>Example:
+     * <pre>
+     * <code>
+     * Stream.of(new Integer[0]).scan((r, c) -> r + c) => []
+     * Stream.of(1).scan((r, c) -> r + c) => [1]
+     * Stream.of(1, 2).scan((r, c) -> r + c) => [1, 3]
+     * Stream.of(1, 2, 3).scan((r, c) -> r + c) => [1, 3, 6]
+     * Stream.of(1, 2, 3, 3, 2, 1).scan((r, c) -> r + c) => [1, 3, 6, 9, 11, 12]
+     * </code>
+     * </pre>
      *
      * @param accumulator
      * @return
+     * @throws IllegalStateException
      */
     @IntermediateOp
-    public CheckedStream<T, E> scan(final Throwables.BiFunction<? super T, ? super T, T, ? extends E> accumulator) {
+    public CheckedStream<T, E> scan(final Throwables.BiFunction<? super T, ? super T, T, ? extends E> accumulator) throws IllegalStateException {
         assertNotClosed();
 
         final Throwables.Iterator<T, E> iter = elements;
@@ -4787,14 +4850,35 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     }
 
     /**
+     * Returns a {@code Stream} produced by iterative application of a accumulation function
+     * to an initial element {@code init} and next element of the current stream.
+     * Produces a {@code Stream} consisting of {@code init}, {@code acc(init, value1)},
+     * {@code acc(acc(init, value1), value2)}, etc.
+     *
+     * <p>This is an intermediate operation.
+     *
+     * <p>Example:
+     * <pre>
+     * <code>
+     * Stream.of(new Integer[0]).scan(10, (r, c) -> r + c) => []
+     * Stream.of(1).scan(10, (r, c) -> r + c) => [11]
+     * Stream.of(1, 2).scan(10, (r, c) -> r + c) => [11, 13]
+     * Stream.of(1, 2, 3).scan(10, (r, c) -> r + c) => [11, 13, 16]
+     * Stream.of(1, 2, 3, 3, 2, 1).scan(10, (r, c) -> r + c) => [11, 13, 16, 19, 21, 22]
+     * </code>
+     * </pre>
      *
      * @param <U>
-     * @param init
-     * @param accumulator
+     * @param init the initial value. it's only used once by <code>accumulator</code> to calculate the fist element in the returned stream.
+     * It will be ignored if this stream is empty and won't be the first element of the returned stream.
+     * @param accumulator the accumulation function
      * @return
+     * @throws IllegalStateException
+     * @see {@link #scan(Object, boolean, com.landawn.abacus.util.Throwables.BiFunction)}
      */
     @IntermediateOp
-    public <U> CheckedStream<U, E> scan(final U init, final Throwables.BiFunction<? super U, ? super T, U, ? extends E> accumulator) {
+    public <U> CheckedStream<U, E> scan(final U init, final Throwables.BiFunction<? super U, ? super T, U, ? extends E> accumulator)
+            throws IllegalStateException {
         assertNotClosed();
 
         final Throwables.Iterator<T, E> iter = elements;
@@ -4816,15 +4900,17 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
     /**
      *
+     *
      * @param <U>
      * @param init
+     * @param initIncluded use {@code init} as the first element of the returned stream. Default value is {@code false}.
      * @param accumulator
-     * @param initIncluded
      * @return
+     * @throws IllegalStateException
      */
     @IntermediateOp
-    public <U> CheckedStream<U, E> scan(final U init, final Throwables.BiFunction<? super U, ? super T, U, ? extends E> accumulator,
-            final boolean initIncluded) {
+    public <U> CheckedStream<U, E> scan(final U init, final boolean initIncluded, final Throwables.BiFunction<? super U, ? super T, U, ? extends E> accumulator)
+            throws IllegalStateException {
         assertNotClosed();
 
         if (!initIncluded) {
@@ -4856,11 +4942,13 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
     /**
      *
+     *
      * @param c
      * @return
+     * @throws IllegalStateException
      * @see N#intersection(Collection, Collection)
      */
-    public CheckedStream<T, E> intersection(final Collection<?> c) {
+    public CheckedStream<T, E> intersection(final Collection<?> c) throws IllegalStateException {
         assertNotClosed();
 
         final Multiset<?> multiset = Multiset.create(c);
@@ -4875,9 +4963,11 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @param mapper
      * @param c
      * @return
+     * @throws IllegalStateException
      * @see N#intersection(Collection, Collection)
      */
-    public <U> CheckedStream<T, E> intersection(final Throwables.Function<? super T, ? extends U, E> mapper, final Collection<U> c) {
+    public <U> CheckedStream<T, E> intersection(final Throwables.Function<? super T, ? extends U, E> mapper, final Collection<U> c)
+            throws IllegalStateException {
         assertNotClosed();
 
         final Multiset<?> multiset = Multiset.create(c);
@@ -4887,11 +4977,13 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
     /**
      *
+     *
      * @param c
      * @return
+     * @throws IllegalStateException
      * @see N#difference(Collection, Collection)
      */
-    public CheckedStream<T, E> difference(final Collection<?> c) {
+    public CheckedStream<T, E> difference(final Collection<?> c) throws IllegalStateException {
         assertNotClosed();
 
         final Multiset<?> multiset = Multiset.create(c);
@@ -4906,9 +4998,10 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @param mapper
      * @param c
      * @return
+     * @throws IllegalStateException
      * @see N#difference(Collection, Collection)
      */
-    public <U> CheckedStream<T, E> difference(final Function<? super T, ? extends U> mapper, final Collection<U> c) {
+    public <U> CheckedStream<T, E> difference(final Function<? super T, ? extends U> mapper, final Collection<U> c) throws IllegalStateException {
         assertNotClosed();
 
         final Multiset<?> multiset = Multiset.create(c);
@@ -4918,11 +5011,13 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
     /**
      *
+     *
      * @param c
      * @return
+     * @throws IllegalStateException
      * @see N#symmetricDifference(Collection, Collection)
      */
-    public CheckedStream<T, E> symmetricDifference(final Collection<T> c) {
+    public CheckedStream<T, E> symmetricDifference(final Collection<T> c) throws IllegalStateException {
         assertNotClosed();
 
         final Multiset<?> multiset = Multiset.create(c);
@@ -4988,11 +5083,13 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
     /**
      *
+     *
      * @param s
      * @return
+     * @throws IllegalStateException
      */
     @IntermediateOp
-    public CheckedStream<T, E> prepend(final CheckedStream<T, E> s) {
+    public CheckedStream<T, E> prepend(final CheckedStream<T, E> s) throws IllegalStateException {
         assertNotClosed();
 
         return concat(s, this);
@@ -5035,11 +5132,13 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
     /**
      *
+     *
      * @param s
      * @return
+     * @throws IllegalStateException
      */
     @IntermediateOp
-    public CheckedStream<T, E> append(final CheckedStream<T, E> s) {
+    public CheckedStream<T, E> append(final CheckedStream<T, E> s) throws IllegalStateException {
         assertNotClosed();
 
         return concat(this, s);
@@ -5074,9 +5173,10 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      *
      * @param c
      * @return
+     * @throws IllegalStateException
      */
     @IntermediateOp
-    public CheckedStream<T, E> appendIfEmpty(final Collection<? extends T> c) {
+    public CheckedStream<T, E> appendIfEmpty(final Collection<? extends T> c) throws IllegalStateException {
         assertNotClosed();
 
         if (N.isEmpty(c)) {
@@ -5139,9 +5239,10 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      *
      * @param supplier
      * @return
+     * @throws IllegalStateException
      */
     @IntermediateOp
-    public CheckedStream<T, E> appendIfEmpty(final Supplier<? extends CheckedStream<T, E>> supplier) {
+    public CheckedStream<T, E> appendIfEmpty(final Supplier<? extends CheckedStream<T, E>> supplier) throws IllegalStateException {
         assertNotClosed();
 
         final Holder<CheckedStream<T, E>> holder = new Holder<>();
@@ -5545,10 +5646,11 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      *
      * @param exceptionSupplier
      * @return
+     * @throws IllegalStateException
      * @throws IllegalArgumentException
      */
     @IntermediateOp
-    public CheckedStream<T, E> throwIfEmpty(final Supplier<? extends E> exceptionSupplier) throws IllegalArgumentException {
+    public CheckedStream<T, E> throwIfEmpty(final Supplier<? extends E> exceptionSupplier) throws IllegalStateException, IllegalArgumentException {
         this.checkArgNotNull(exceptionSupplier, "exceptionSupplier");
 
         assertNotClosed();
@@ -5613,11 +5715,13 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @param <E2>
      * @param func
      * @return
+     * @throws IllegalStateException
      * @throws E
      * @throws E2
      */
     @TerminalOp
-    public <R, E2 extends Exception> u.Optional<R> applyIfNotEmpty(final Throwables.Function<? super CheckedStream<T, E>, R, E2> func) throws E, E2 {
+    public <R, E2 extends Exception> u.Optional<R> applyIfNotEmpty(final Throwables.Function<? super CheckedStream<T, E>, R, E2> func)
+            throws IllegalStateException, E, E2 {
         assertNotClosed();
 
         try {
@@ -5637,11 +5741,12 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @param <E2>
      * @param action
      * @return
+     * @throws IllegalStateException
      * @throws E
      * @throws E2
      */
     @TerminalOp
-    public <E2 extends Exception> OrElse acceptIfNotEmpty(Throwables.Consumer<? super CheckedStream<T, E>, E2> action) throws E, E2 {
+    public <E2 extends Exception> OrElse acceptIfNotEmpty(Throwables.Consumer<? super CheckedStream<T, E>, E2> action) throws IllegalStateException, E, E2 {
         assertNotClosed();
 
         try {
@@ -5659,11 +5764,13 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
     /**
      *
+     *
      * @param action
      * @return
+     * @throws IllegalStateException
      */
     @IntermediateOp
-    public CheckedStream<T, E> onEach(final Throwables.Consumer<? super T, ? extends E> action) {
+    public CheckedStream<T, E> onEach(final Throwables.Consumer<? super T, ? extends E> action) throws IllegalStateException {
         assertNotClosed();
 
         return newStream(new Throwables.Iterator<T, E>() {
@@ -5696,9 +5803,10 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      *
      * @param action
      * @return
+     * @throws IllegalStateException
      */
     @IntermediateOp
-    public CheckedStream<T, E> peekFirst(final Throwables.Consumer<? super T, ? extends E> action) {
+    public CheckedStream<T, E> peekFirst(final Throwables.Consumer<? super T, ? extends E> action) throws IllegalStateException {
         assertNotClosed();
 
         return newStream(new Throwables.Iterator<T, E>() {
@@ -5728,9 +5836,10 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      *
      * @param action
      * @return
+     * @throws IllegalStateException
      */
     @IntermediateOp
-    public CheckedStream<T, E> peekLast(final Throwables.Consumer<? super T, ? extends E> action) {
+    public CheckedStream<T, E> peekLast(final Throwables.Consumer<? super T, ? extends E> action) throws IllegalStateException {
         assertNotClosed();
 
         return newStream(new Throwables.Iterator<T, E>() {
@@ -5806,11 +5915,13 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
     /**
      *
+     *
      * @param chunkSize
      * @return
+     * @throws IllegalStateException
      */
     @IntermediateOp
-    public CheckedStream<Stream<T>, E> split(final int chunkSize) {
+    public CheckedStream<Stream<T>, E> split(final int chunkSize) throws IllegalStateException {
         assertNotClosed();
 
         return splitToList(chunkSize).map(Stream::of);
@@ -5901,10 +6012,12 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @param chunkSize the desired size of each sub sequence (the last may be smaller).
      * @param collector
      * @return
+     * @throws IllegalStateException
      * @throws IllegalArgumentException
      */
     @IntermediateOp
-    public <R> CheckedStream<R, E> split(final int chunkSize, final Collector<? super T, ?, R> collector) throws IllegalArgumentException {
+    public <R> CheckedStream<R, E> split(final int chunkSize, final Collector<? super T, ?, R> collector)
+            throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgPositive(chunkSize, "chunkSize");
@@ -5956,9 +6069,10 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      *
      * @param predicate
      * @return
+     * @throws IllegalStateException
      */
     @IntermediateOp
-    public CheckedStream<Stream<T>, E> split(final Throwables.Predicate<? super T, ? extends E> predicate) {
+    public CheckedStream<Stream<T>, E> split(final Throwables.Predicate<? super T, ? extends E> predicate) throws IllegalStateException {
         assertNotClosed();
 
         return splitToList(predicate).map(Stream::of);
@@ -5969,9 +6083,10 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      *
      * @param predicate
      * @return
+     * @throws IllegalStateException
      */
     @IntermediateOp
-    public CheckedStream<List<T>, E> splitToList(final Throwables.Predicate<? super T, ? extends E> predicate) {
+    public CheckedStream<List<T>, E> splitToList(final Throwables.Predicate<? super T, ? extends E> predicate) throws IllegalStateException {
         assertNotClosed();
 
         return split(predicate, Suppliers.<T> ofList());
@@ -5982,9 +6097,10 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      *
      * @param predicate
      * @return
+     * @throws IllegalStateException
      */
     @IntermediateOp
-    public CheckedStream<Set<T>, E> splitToSet(final Throwables.Predicate<? super T, ? extends E> predicate) {
+    public CheckedStream<Set<T>, E> splitToSet(final Throwables.Predicate<? super T, ? extends E> predicate) throws IllegalStateException {
         assertNotClosed();
 
         return split(predicate, Suppliers.<T> ofSet());
@@ -5997,11 +6113,12 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @param predicate
      * @param collectionSupplier
      * @return
+     * @throws IllegalStateException
      * @throws IllegalArgumentException
      */
     @IntermediateOp
     public <C extends Collection<T>> CheckedStream<C, E> split(final Throwables.Predicate<? super T, ? extends E> predicate,
-            final Supplier<? extends C> collectionSupplier) throws IllegalArgumentException {
+            final Supplier<? extends C> collectionSupplier) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(predicate, "predicate");
@@ -6119,10 +6236,11 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      *
      * @param where
      * @return
+     * @throws IllegalStateException
      * @throws IllegalArgumentException
      */
     @IntermediateOp
-    public CheckedStream<CheckedStream<T, E>, E> splitAt(final int where) throws IllegalArgumentException {
+    public CheckedStream<CheckedStream<T, E>, E> splitAt(final int where) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNegative(where, "where");
@@ -6194,9 +6312,10 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      *
      * @param where
      * @return
+     * @throws IllegalStateException
      */
     @IntermediateOp
-    public CheckedStream<CheckedStream<T, E>, E> splitAt(final Throwables.Predicate<? super T, ? extends E> where) {
+    public CheckedStream<CheckedStream<T, E>, E> splitAt(final Throwables.Predicate<? super T, ? extends E> where) throws IllegalStateException {
         assertNotClosed();
 
         final Throwables.Iterator<T, E> iter = elements;
@@ -6326,12 +6445,14 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
     /**
      *
+     *
      * @param windowSize
      * @param increment
      * @return
+     * @throws IllegalStateException
      */
     @IntermediateOp
-    public CheckedStream<Stream<T>, E> sliding(final int windowSize, final int increment) {
+    public CheckedStream<Stream<T>, E> sliding(final int windowSize, final int increment) throws IllegalStateException {
         assertNotClosed();
 
         return slidingToList(windowSize, increment).map(Stream::of);
@@ -6652,10 +6773,11 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      *
      * @param n
      * @return
+     * @throws IllegalStateException
      * @throws IllegalArgumentException
      */
     @IntermediateOp
-    public CheckedStream<T, E> skip(final long n) throws IllegalArgumentException {
+    public CheckedStream<T, E> skip(final long n) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
         checkArgNotNegative(n, "n");
 
@@ -6698,9 +6820,11 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @param n
      * @param action
      * @return
+     * @throws IllegalStateException
      * @throws IllegalArgumentException
      */
-    public CheckedStream<T, E> skip(final long n, final Throwables.Consumer<? super T, ? extends E> action) throws IllegalArgumentException {
+    public CheckedStream<T, E> skip(final long n, final Throwables.Consumer<? super T, ? extends E> action)
+            throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNegative(n, "n");
@@ -6748,10 +6872,11 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      *
      * @param maxSize
      * @return
+     * @throws IllegalStateException
      * @throws IllegalArgumentException
      */
     @IntermediateOp
-    public CheckedStream<T, E> limit(final long maxSize) throws IllegalArgumentException {
+    public CheckedStream<T, E> limit(final long maxSize) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNegative(maxSize, "maxSize");
@@ -6798,9 +6923,10 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      *
      * @param n
      * @return
+     * @throws IllegalStateException
      */
     @IntermediateOp
-    public CheckedStream<T, E> top(int n) {
+    public CheckedStream<T, E> top(int n) throws IllegalStateException {
         assertNotClosed();
 
         return top(n, (Comparator<T>) Comparators.nullsFirst());
@@ -6812,10 +6938,11 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @param n
      * @param comparator
      * @return
+     * @throws IllegalStateException
      * @throws IllegalArgumentException
      */
     @IntermediateOp
-    public CheckedStream<T, E> top(final int n, final Comparator<? super T> comparator) throws IllegalArgumentException {
+    public CheckedStream<T, E> top(final int n, final Comparator<? super T> comparator) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgPositive(n, "n");
@@ -6929,12 +7056,13 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      *
      * @param n
      * @return
+     * @throws IllegalStateException
      * @throws IllegalArgumentException
      * @see Stream#last(int)
      */
     @Beta
     @IntermediateOp
-    public CheckedStream<T, E> last(final int n) throws IllegalArgumentException {
+    public CheckedStream<T, E> last(final int n) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNegative(n, "n");
@@ -6994,9 +7122,10 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      *
      * @param n
      * @return
+     * @throws IllegalStateException
      */
     @IntermediateOp
-    public CheckedStream<T, E> skipLast(final int n) {
+    public CheckedStream<T, E> skipLast(final int n) throws IllegalStateException {
         assertNotClosed();
 
         if (n <= 0) {
@@ -7037,10 +7166,11 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      *
      *
      * @return
+     * @throws IllegalStateException
      */
     @IntermediateOp
     @TerminalOpTriggered
-    public CheckedStream<T, E> reversed() {
+    public CheckedStream<T, E> reversed() throws IllegalStateException {
         assertNotClosed();
 
         return newStream(new Throwables.Iterator<T, E>() {
@@ -7103,10 +7233,11 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      *
      * @param distance
      * @return
+     * @throws IllegalStateException
      */
     @IntermediateOp
     @TerminalOpTriggered
-    public CheckedStream<T, E> rotated(final int distance) {
+    public CheckedStream<T, E> rotated(final int distance) throws IllegalStateException {
         assertNotClosed();
 
         if (distance == 0) {
@@ -7192,10 +7323,11 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      *
      * @param rnd
      * @return
+     * @throws IllegalStateException
      */
     @IntermediateOp
     @TerminalOpTriggered
-    public CheckedStream<T, E> shuffled(final Random rnd) {
+    public CheckedStream<T, E> shuffled(final Random rnd) throws IllegalStateException {
         assertNotClosed();
 
         return lazyLoad(a -> {
@@ -7217,12 +7349,14 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
     /**
      *
+     *
      * @param comparator
      * @return
+     * @throws IllegalStateException
      */
     @IntermediateOp
     @TerminalOpTriggered
-    public CheckedStream<T, E> sorted(final Comparator<? super T> comparator) {
+    public CheckedStream<T, E> sorted(final Comparator<? super T> comparator) throws IllegalStateException {
         assertNotClosed();
 
         final Comparator<? super T> cmp = comparator == null ? NATURAL_COMPARATOR : comparator; //NOSONAR
@@ -7282,13 +7416,15 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
     /**
      *
+     *
      * @param keyMapper
      * @return
+     * @throws IllegalStateException
      */
     @IntermediateOp
     @TerminalOpTriggered
     @SuppressWarnings("rawtypes")
-    public CheckedStream<T, E> sortedBy(final Function<? super T, ? extends Comparable> keyMapper) {
+    public CheckedStream<T, E> sortedBy(final Function<? super T, ? extends Comparable> keyMapper) throws IllegalStateException {
         assertNotClosed();
 
         final Comparator<? super T> comparator = Comparators.comparingBy(keyMapper);
@@ -7449,9 +7585,10 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      *
      *
      * @return
+     * @throws IllegalStateException
      */
     @IntermediateOp
-    public CheckedStream<T, E> cycled() {
+    public CheckedStream<T, E> cycled() throws IllegalStateException {
         assertNotClosed();
 
         return newStream(new Throwables.Iterator<T, E>() {
@@ -7518,9 +7655,10 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      *
      * @param rounds
      * @return
+     * @throws IllegalStateException
      */
     @IntermediateOp
-    public CheckedStream<T, E> cycled(long rounds) {
+    public CheckedStream<T, E> cycled(long rounds) throws IllegalStateException {
         assertNotClosed();
 
         return newStream(new Throwables.Iterator<T, E>() {
@@ -7605,11 +7743,12 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      *
      * @param rateLimiter
      * @return
+     * @throws IllegalStateException
      * @throws IllegalArgumentException
      * @see RateLimiter#create(double)
      */
     @IntermediateOp
-    public CheckedStream<T, E> rateLimited(final RateLimiter rateLimiter) throws IllegalArgumentException {
+    public CheckedStream<T, E> rateLimited(final RateLimiter rateLimiter) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
         checkArgNotNull(rateLimiter, "rateLimiter");
 
@@ -7623,10 +7762,11 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      *
      * @param delay
      * @return
+     * @throws IllegalStateException
      * @throws IllegalArgumentException
      */
     @IntermediateOp
-    public CheckedStream<T, E> delay(final Duration delay) throws IllegalArgumentException {
+    public CheckedStream<T, E> delay(final Duration delay) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
         checkArgNotNull(delay, "delay");
 
@@ -7653,9 +7793,10 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      *
      * @param delimiter
      * @return
+     * @throws IllegalStateException
      */
     @IntermediateOp
-    public CheckedStream<T, E> intersperse(final T delimiter) {
+    public CheckedStream<T, E> intersperse(final T delimiter) throws IllegalStateException {
         assertNotClosed();
 
         return newStream(new Throwables.Iterator<T, E>() {
@@ -7690,11 +7831,12 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      *
      * @param step
      * @return
+     * @throws IllegalStateException
      * @throws IllegalArgumentException
      */
     @Beta
     @IntermediateOp
-    public CheckedStream<T, E> step(final long step) throws IllegalArgumentException {
+    public CheckedStream<T, E> step(final long step) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgPositive(step, "step");
@@ -7725,10 +7867,11 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      *
      *
      * @return
+     * @throws IllegalStateException
      */
     @Beta
     @IntermediateOp
-    public CheckedStream<Indexed<T>, E> indexed() {
+    public CheckedStream<Indexed<T>, E> indexed() throws IllegalStateException {
         assertNotClosed();
 
         return map(new Throwables.Function<T, Indexed<T>, E>() {
@@ -7748,10 +7891,11 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * Mostly it's for {@code read-write with different threads} mode.
      *
      * @return
+     * @throws IllegalStateException
      * @see #buffered()
      */
     @IntermediateOp
-    public CheckedStream<T, E> buffered() {
+    public CheckedStream<T, E> buffered() throws IllegalStateException {
         assertNotClosed();
 
         return buffered(DEFAULT_BUFFERED_SIZE_PER_ITERATOR);
@@ -7764,11 +7908,12 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      *
      * @param bufferSize
      * @return
+     * @throws IllegalStateException
      * @throws IllegalArgumentException
      * @see #buffered(int)
      */
     @IntermediateOp
-    public CheckedStream<T, E> buffered(int bufferSize) throws IllegalArgumentException {
+    public CheckedStream<T, E> buffered(int bufferSize) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgPositive(bufferSize, "bufferSize");
@@ -7789,12 +7934,15 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
     /**
      *
+     *
      * @param b
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
      * @return
+     * @throws IllegalStateException
      */
     @IntermediateOp
-    public CheckedStream<T, E> mergeWith(final Collection<? extends T> b, final Throwables.BiFunction<? super T, ? super T, MergeResult, E> nextSelector) {
+    public CheckedStream<T, E> mergeWith(final Collection<? extends T> b, final Throwables.BiFunction<? super T, ? super T, MergeResult, E> nextSelector)
+            throws IllegalStateException {
         assertNotClosed();
 
         return mergeWith(CheckedStream.of(b), nextSelector);
@@ -7802,13 +7950,15 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
     /**
      *
+     *
      * @param b
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
      * @return
+     * @throws IllegalStateException
      */
     @IntermediateOp
-    public CheckedStream<T, E> mergeWith(final CheckedStream<? extends T, E> b,
-            final Throwables.BiFunction<? super T, ? super T, MergeResult, E> nextSelector) {
+    public CheckedStream<T, E> mergeWith(final CheckedStream<? extends T, E> b, final Throwables.BiFunction<? super T, ? super T, MergeResult, E> nextSelector)
+            throws IllegalStateException {
         assertNotClosed();
 
         return CheckedStream.merge(this, b, nextSelector);
@@ -7816,21 +7966,24 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
     /**
      *
+     *
      * @param <T2>
      * @param <R>
      * @param b
      * @param zipFunction
      * @return
+     * @throws IllegalStateException
      */
     @IntermediateOp
-    public <T2, R> CheckedStream<R, E> zipWith(final Collection<T2> b,
-            final Throwables.BiFunction<? super T, ? super T2, ? extends R, ? extends E> zipFunction) {
+    public <T2, R> CheckedStream<R, E> zipWith(final Collection<T2> b, final Throwables.BiFunction<? super T, ? super T2, ? extends R, ? extends E> zipFunction)
+            throws IllegalStateException {
         assertNotClosed();
 
         return zip(this, CheckedStream.of(b), zipFunction);
     }
 
     /**
+     *
      *
      * @param <T2>
      * @param <R>
@@ -7839,16 +7992,18 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @param valueForNoneB
      * @param zipFunction
      * @return
+     * @throws IllegalStateException
      */
     @IntermediateOp
     public <T2, R> CheckedStream<R, E> zipWith(final Collection<T2> b, final T valueForNoneA, final T2 valueForNoneB,
-            final Throwables.BiFunction<? super T, ? super T2, ? extends R, ? extends E> zipFunction) {
+            final Throwables.BiFunction<? super T, ? super T2, ? extends R, ? extends E> zipFunction) throws IllegalStateException {
         assertNotClosed();
 
         return zip(this, CheckedStream.of(b), valueForNoneA, valueForNoneB, zipFunction);
     }
 
     /**
+     *
      *
      * @param <T2>
      * @param <T3>
@@ -7857,16 +8012,18 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @param c
      * @param zipFunction
      * @return
+     * @throws IllegalStateException
      */
     @IntermediateOp
     public <T2, T3, R> CheckedStream<R, E> zipWith(final Collection<T2> b, final Collection<T3> c,
-            final Throwables.TriFunction<? super T, ? super T2, ? super T3, ? extends R, ? extends E> zipFunction) {
+            final Throwables.TriFunction<? super T, ? super T2, ? super T3, ? extends R, ? extends E> zipFunction) throws IllegalStateException {
         assertNotClosed();
 
         return zip(this, CheckedStream.of(b), CheckedStream.of(c), zipFunction);
     }
 
     /**
+     *
      *
      * @param <T2>
      * @param <T3>
@@ -7878,10 +8035,12 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @param valueForNoneC
      * @param zipFunction
      * @return
+     * @throws IllegalStateException
      */
     @IntermediateOp
     public <T2, T3, R> CheckedStream<R, E> zipWith(final Collection<T2> b, final Collection<T3> c, final T valueForNoneA, final T2 valueForNoneB,
-            final T3 valueForNoneC, final Throwables.TriFunction<? super T, ? super T2, ? super T3, ? extends R, ? extends E> zipFunction) {
+            final T3 valueForNoneC, final Throwables.TriFunction<? super T, ? super T2, ? super T3, ? extends R, ? extends E> zipFunction)
+            throws IllegalStateException {
         assertNotClosed();
 
         return zip(this, CheckedStream.of(b), CheckedStream.of(c), valueForNoneA, valueForNoneB, valueForNoneC, zipFunction);
@@ -7889,21 +8048,24 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
     /**
      *
+     *
      * @param <T2>
      * @param <R>
      * @param b
      * @param zipFunction
      * @return
+     * @throws IllegalStateException
      */
     @IntermediateOp
     public <T2, R> CheckedStream<R, E> zipWith(final CheckedStream<T2, E> b,
-            final Throwables.BiFunction<? super T, ? super T2, ? extends R, ? extends E> zipFunction) {
+            final Throwables.BiFunction<? super T, ? super T2, ? extends R, ? extends E> zipFunction) throws IllegalStateException {
         assertNotClosed();
 
         return zip(this, b, zipFunction);
     }
 
     /**
+     *
      *
      * @param <T2>
      * @param <R>
@@ -7912,16 +8074,18 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @param valueForNoneB
      * @param zipFunction
      * @return
+     * @throws IllegalStateException
      */
     @IntermediateOp
     public <T2, R> CheckedStream<R, E> zipWith(final CheckedStream<T2, E> b, final T valueForNoneA, final T2 valueForNoneB,
-            final Throwables.BiFunction<? super T, ? super T2, ? extends R, ? extends E> zipFunction) {
+            final Throwables.BiFunction<? super T, ? super T2, ? extends R, ? extends E> zipFunction) throws IllegalStateException {
         assertNotClosed();
 
         return zip(this, b, valueForNoneA, valueForNoneB, zipFunction);
     }
 
     /**
+     *
      *
      * @param <T2>
      * @param <T3>
@@ -7930,10 +8094,11 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @param c
      * @param zipFunction
      * @return
+     * @throws IllegalStateException
      */
     @IntermediateOp
     public <T2, T3, R> CheckedStream<R, E> zipWith(final CheckedStream<T2, E> b, final CheckedStream<T3, E> c,
-            final Throwables.TriFunction<? super T, ? super T2, ? super T3, ? extends R, ? extends E> zipFunction) {
+            final Throwables.TriFunction<? super T, ? super T2, ? super T3, ? extends R, ? extends E> zipFunction) throws IllegalStateException {
         assertNotClosed();
 
         return zip(this, b, c, zipFunction);
@@ -8508,12 +8673,13 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      *
      * @param <E2>
      * @param action
+     * @throws IllegalStateException
      * @throws IllegalArgumentException
      * @throws E the e
      * @throws E2 the e2
      */
     @TerminalOp
-    public <E2 extends Exception> void forEach(Throwables.Consumer<? super T, E2> action) throws IllegalArgumentException, E, E2 {
+    public <E2 extends Exception> void forEach(Throwables.Consumer<? super T, E2> action) throws IllegalStateException, IllegalArgumentException, E, E2 {
         assertNotClosed();
 
         checkArgNotNull(action, "action");
@@ -8532,12 +8698,14 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      *
      * @param <E2>
      * @param action
+     * @throws IllegalStateException
      * @throws IllegalArgumentException
      * @throws E the e
      * @throws E2 the e2
      */
     @TerminalOp
-    public <E2 extends Exception> void forEachIndexed(Throwables.IntObjConsumer<? super T, E2> action) throws IllegalArgumentException, E, E2 {
+    public <E2 extends Exception> void forEachIndexed(Throwables.IntObjConsumer<? super T, E2> action)
+            throws IllegalStateException, IllegalArgumentException, E, E2 {
         assertNotClosed();
 
         checkArgNotNull(action, "action");
@@ -8561,13 +8729,14 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @param action the second parameter is a flag to break the for-each loop.
      *        Set it to {@code true} to break the loop if you don't want to continue the {@code action}.
      *        Iteration on this stream will also be stopped when this flag is set to {@code true}.
+     * @throws IllegalStateException
      * @throws E
      * @throws E2
      * @see #forEachUntil(MutableBoolean, Throwables.Consumer)
      */
     @Beta
     @TerminalOp
-    public <E2 extends Exception> void forEachUntil(final Throwables.BiConsumer<? super T, MutableBoolean, E2> action) throws E, E2 {
+    public <E2 extends Exception> void forEachUntil(final Throwables.BiConsumer<? super T, MutableBoolean, E2> action) throws IllegalStateException, E, E2 {
         assertNotClosed();
 
         final MutableBoolean flagToBreak = MutableBoolean.of(false);
@@ -8637,6 +8806,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @param <E3>
      * @param flatMapper
      * @param action
+     * @throws IllegalStateException
      * @throws IllegalArgumentException
      * @throws E the e
      * @throws E2 the e2
@@ -8644,7 +8814,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      */
     @TerminalOp
     public <U, E2 extends Exception, E3 extends Exception> void forEach(final Throwables.Function<? super T, ? extends Iterable<? extends U>, E2> flatMapper,
-            final Throwables.BiConsumer<? super T, ? super U, E3> action) throws IllegalArgumentException, E, E2, E3 {
+            final Throwables.BiConsumer<? super T, ? super U, E3> action) throws IllegalStateException, IllegalArgumentException, E, E2, E3 {
         assertNotClosed();
 
         checkArgNotNull(flatMapper, "flatMapper");
@@ -8903,12 +9073,14 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
     /**
      *
+     *
      * @param comparator
      * @return
+     * @throws IllegalStateException
      * @throws E the e
      */
     @TerminalOp
-    public Optional<T> min(Comparator<? super T> comparator) throws E {
+    public Optional<T> min(Comparator<? super T> comparator) throws IllegalStateException, E {
         assertNotClosed();
 
         try {
@@ -8940,12 +9112,13 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      *
      * @param keyMapper
      * @return
+     * @throws IllegalStateException
      * @throws IllegalArgumentException
      * @throws E the e
      */
     @TerminalOp
     @SuppressWarnings("rawtypes")
-    public Optional<T> minBy(final Function<? super T, ? extends Comparable> keyMapper) throws IllegalArgumentException, E {
+    public Optional<T> minBy(final Function<? super T, ? extends Comparable> keyMapper) throws IllegalStateException, IllegalArgumentException, E {
         assertNotClosed();
 
         checkArgNotNull(keyMapper, "keyMapper");
@@ -8961,12 +9134,14 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
     /**
      *
+     *
      * @param comparator
      * @return
+     * @throws IllegalStateException
      * @throws E the e
      */
     @TerminalOp
-    public Optional<T> max(Comparator<? super T> comparator) throws E {
+    public Optional<T> max(Comparator<? super T> comparator) throws IllegalStateException, E {
         assertNotClosed();
 
         try {
@@ -9005,12 +9180,13 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      *
      * @param keyMapper
      * @return
+     * @throws IllegalStateException
      * @throws IllegalArgumentException
      * @throws E the e
      */
     @TerminalOp
     @SuppressWarnings("rawtypes")
-    public Optional<T> maxBy(final Function<? super T, ? extends Comparable> keyMapper) throws IllegalArgumentException, E {
+    public Optional<T> maxBy(final Function<? super T, ? extends Comparable> keyMapper) throws IllegalStateException, IllegalArgumentException, E {
         assertNotClosed();
 
         checkArgNotNull(keyMapper, "keyMapper");
@@ -9026,14 +9202,16 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
     /**
      *
+     *
      * @param <E2>
      * @param predicate
      * @return
+     * @throws IllegalStateException
      * @throws E
      * @throws E2
      */
     @TerminalOp
-    public <E2 extends Exception> boolean anyMatch(final Throwables.Predicate<? super T, E2> predicate) throws E, E2 {
+    public <E2 extends Exception> boolean anyMatch(final Throwables.Predicate<? super T, E2> predicate) throws IllegalStateException, E, E2 {
         assertNotClosed();
 
         try {
@@ -9051,14 +9229,16 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
     /**
      *
+     *
      * @param <E2>
      * @param predicate
      * @return
+     * @throws IllegalStateException
      * @throws E
      * @throws E2
      */
     @TerminalOp
-    public <E2 extends Exception> boolean allMatch(final Throwables.Predicate<? super T, E2> predicate) throws E, E2 {
+    public <E2 extends Exception> boolean allMatch(final Throwables.Predicate<? super T, E2> predicate) throws IllegalStateException, E, E2 {
         assertNotClosed();
 
         try {
@@ -9076,14 +9256,16 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
     /**
      *
+     *
      * @param <E2>
      * @param predicate
      * @return
+     * @throws IllegalStateException
      * @throws E
      * @throws E2
      */
     @TerminalOp
-    public <E2 extends Exception> boolean noneMatch(final Throwables.Predicate<? super T, E2> predicate) throws E, E2 {
+    public <E2 extends Exception> boolean noneMatch(final Throwables.Predicate<? super T, E2> predicate) throws IllegalStateException, E, E2 {
         assertNotClosed();
 
         try {
@@ -9137,14 +9319,16 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
     /**
      *
+     *
      * @param <E2>
      * @param predicate
      * @return
+     * @throws IllegalStateException
      * @throws E
      * @throws E2
      */
     @TerminalOp
-    public <E2 extends Exception> Optional<T> findFirst(final Throwables.Predicate<? super T, E2> predicate) throws E, E2 {
+    public <E2 extends Exception> Optional<T> findFirst(final Throwables.Predicate<? super T, E2> predicate) throws IllegalStateException, E, E2 {
         assertNotClosed();
 
         try {
@@ -9159,37 +9343,6 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
             }
 
             return Optional.<T> empty();
-        } finally {
-            close();
-        }
-    }
-
-    /**
-     * Consider using: {@code stream.reversed().findFirst(predicate)} for better performance if possible.
-     *
-     * @param <E2>
-     * @param predicate
-     * @return
-     * @throws E
-     * @throws E2
-     */
-    @TerminalOp
-    public <E2 extends Exception> Optional<T> findLast(final Throwables.Predicate<? super T, E2> predicate) throws E, E2 {
-        assertNotClosed();
-
-        try {
-            T result = (T) NONE;
-            T next = null;
-
-            while (elements.hasNext()) {
-                next = elements.next();
-
-                if (predicate.test(next)) {
-                    result = next;
-                }
-            }
-
-            return result == NONE ? Optional.<T> empty() : Optional.of(result);
         } finally {
             close();
         }
@@ -9211,121 +9364,160 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     }
 
     /**
-     * Returns the first element matched by {@code predicateForFirst} if found or the first element if this stream is not empty
-     * Otherwise an empty {@code Optional<T>} will be returned.
+     * Consider using: {@code stream.reversed().findFirst(predicate)} for better performance if possible.
      *
      * @param <E2>
-     * @param predicateForFirst
+     * @param predicate
      * @return
+     * @throws IllegalStateException
      * @throws E
      * @throws E2
      */
+    @Beta
     @TerminalOp
-    public <E2 extends Exception> Optional<T> findFirstOrElseAny(final Throwables.Predicate<? super T, E2> predicateForFirst) throws E, E2 {
+    public <E2 extends Exception> Optional<T> findLast(final Throwables.Predicate<? super T, E2> predicate) throws IllegalStateException, E, E2 {
         assertNotClosed();
 
         try {
-            T ret = (T) NONE;
+            T result = (T) NONE;
             T next = null;
 
             while (elements.hasNext()) {
                 next = elements.next();
 
-                if (predicateForFirst.test(next)) {
-                    return Optional.of(next);
-                } else if (ret == NONE) {
-                    ret = next;
+                if (predicate.test(next)) {
+                    result = next;
                 }
             }
 
-            return ret == NONE ? Optional.<T> empty() : Optional.of(ret);
+            return result == NONE ? Optional.<T> empty() : Optional.of(result);
         } finally {
             close();
         }
     }
 
-    /**
-     * Returns the first element matched by {@code predicateForFirst} if found or the last element if this stream is not empty
-     * Otherwise an empty {@code Optional<T>} will be returned.
-     *
-     * @param <E2>
-     * @param predicateForFirst
-     * @return
-     * @throws E
-     * @throws E2
-     */
-    @TerminalOp
-    public <E2 extends Exception> Optional<T> findFirstOrElseLast(final Throwables.Predicate<? super T, E2> predicateForFirst) throws E, E2 {
-        assertNotClosed();
-
-        try {
-            T ret = (T) NONE;
-            T next = null;
-
-            while (elements.hasNext()) {
-                next = elements.next();
-
-                if (predicateForFirst.test(next)) {
-                    return Optional.of(next);
-                } else {
-                    ret = next;
-                }
-            }
-
-            return ret == NONE ? Optional.<T> empty() : Optional.of(ret);
-        } finally {
-            close();
-        }
-    }
-
-    /**
-     * Returns the first element matched by {@code predicateForFirst} if found or the first element matched by {@code predicateForAny}.
-     * Otherwise an empty {@code Optional<T>} will be returned.
-     *
-     * @param <E2>
-     * @param <E3>
-     * @param predicateForFirst
-     * @param predicateForAny
-     * @return
-     * @throws E
-     * @throws E2
-     * @throws E3
-     */
-    @TerminalOp
-    public <E2 extends Exception, E3 extends Exception> Optional<T> findFirstOrAny(final Throwables.Predicate<? super T, E2> predicateForFirst,
-            final Throwables.Predicate<? super T, E3> predicateForAny) throws E, E2, E3 {
-        assertNotClosed();
-
-        try {
-            T ret = (T) NONE;
-            T next = null;
-
-            while (elements.hasNext()) {
-                next = elements.next();
-
-                if (predicateForFirst.test(next)) {
-                    return Optional.of(next);
-                } else if (ret == NONE && predicateForAny.test(next)) {
-                    ret = next;
-                }
-            }
-
-            return ret == NONE ? Optional.<T> empty() : Optional.of(ret);
-        } finally {
-            close();
-        }
-    }
+    //    /**
+    //     * Returns the first element matched by {@code predicateForFirst} if found or the first element if this stream is not empty
+    //     * Otherwise an empty {@code Optional<T>} will be returned.
+    //     *
+    //     * @param <E2>
+    //     * @param predicateForFirst
+    //     * @return
+    //     * @throws IllegalStateException
+    //     * @throws E
+    //     * @throws E2
+    //     */
+    //    @TerminalOp
+    //    public <E2 extends Exception> Optional<T> findFirstOrElseAny(final Throwables.Predicate<? super T, E2> predicateForFirst)
+    //            throws IllegalStateException, E, E2 {
+    //        assertNotClosed();
+    //
+    //        try {
+    //            T ret = (T) NONE;
+    //            T next = null;
+    //
+    //            while (elements.hasNext()) {
+    //                next = elements.next();
+    //
+    //                if (predicateForFirst.test(next)) {
+    //                    return Optional.of(next);
+    //                } else if (ret == NONE) {
+    //                    ret = next;
+    //                }
+    //            }
+    //
+    //            return ret == NONE ? Optional.<T> empty() : Optional.of(ret);
+    //        } finally {
+    //            close();
+    //        }
+    //    }
+    //
+    //    /**
+    //     * Returns the first element matched by {@code predicateForFirst} if found or the last element if this stream is not empty
+    //     * Otherwise an empty {@code Optional<T>} will be returned.
+    //     *
+    //     * @param <E2>
+    //     * @param predicateForFirst
+    //     * @return
+    //     * @throws IllegalStateException
+    //     * @throws E
+    //     * @throws E2
+    //     */
+    //    @TerminalOp
+    //    public <E2 extends Exception> Optional<T> findFirstOrElseLast(final Throwables.Predicate<? super T, E2> predicateForFirst)
+    //            throws IllegalStateException, E, E2 {
+    //        assertNotClosed();
+    //
+    //        try {
+    //            T ret = (T) NONE;
+    //            T next = null;
+    //
+    //            while (elements.hasNext()) {
+    //                next = elements.next();
+    //
+    //                if (predicateForFirst.test(next)) {
+    //                    return Optional.of(next);
+    //                } else {
+    //                    ret = next;
+    //                }
+    //            }
+    //
+    //            return ret == NONE ? Optional.<T> empty() : Optional.of(ret);
+    //        } finally {
+    //            close();
+    //        }
+    //    }
+    //
+    //    /**
+    //     * Returns the first element matched by {@code predicateForFirst} if found or the first element matched by {@code predicateForAny}.
+    //     * Otherwise an empty {@code Optional<T>} will be returned.
+    //     *
+    //     * @param <E2>
+    //     * @param <E3>
+    //     * @param predicateForFirst
+    //     * @param predicateForAny
+    //     * @return
+    //     * @throws IllegalStateException
+    //     * @throws E
+    //     * @throws E2
+    //     * @throws E3
+    //     */
+    //    @TerminalOp
+    //    public <E2 extends Exception, E3 extends Exception> Optional<T> findFirstOrAny(final Throwables.Predicate<? super T, E2> predicateForFirst,
+    //            final Throwables.Predicate<? super T, E3> predicateForAny) throws IllegalStateException, E, E2, E3 {
+    //        assertNotClosed();
+    //
+    //        try {
+    //            T ret = (T) NONE;
+    //            T next = null;
+    //
+    //            while (elements.hasNext()) {
+    //                next = elements.next();
+    //
+    //                if (predicateForFirst.test(next)) {
+    //                    return Optional.of(next);
+    //                } else if (ret == NONE && predicateForAny.test(next)) {
+    //                    ret = next;
+    //                }
+    //            }
+    //
+    //            return ret == NONE ? Optional.<T> empty() : Optional.of(ret);
+    //        } finally {
+    //            close();
+    //        }
+    //    }
 
     /**
      *
      *
      * @param a
      * @return
+     * @throws IllegalStateException
      * @throws E
      */
     @TerminalOp
     @SafeVarargs
-    public final boolean containsAll(final T... a) throws E {
+    public final boolean containsAll(final T... a) throws IllegalStateException, E {
         assertNotClosed();
 
         try {
@@ -9356,10 +9548,11 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      *
      * @param c
      * @return
+     * @throws IllegalStateException
      * @throws E
      */
     @TerminalOp
-    public boolean containsAll(final Collection<? extends T> c) throws E {
+    public boolean containsAll(final Collection<? extends T> c) throws IllegalStateException, E {
         assertNotClosed();
 
         try {
@@ -9384,11 +9577,12 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      *
      * @param a
      * @return
+     * @throws IllegalStateException
      * @throws E
      */
     @TerminalOp
     @SafeVarargs
-    public final boolean containsAny(final T... a) throws E {
+    public final boolean containsAny(final T... a) throws IllegalStateException, E {
         assertNotClosed();
 
         try {
@@ -9421,10 +9615,11 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      *
      * @param c
      * @return
+     * @throws IllegalStateException
      * @throws E
      */
     @TerminalOp
-    public boolean containsAny(final Collection<? extends T> c) throws E {
+    public boolean containsAny(final Collection<? extends T> c) throws IllegalStateException, E {
         assertNotClosed();
 
         try {
@@ -9447,10 +9642,11 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      *
      *
      * @return
+     * @throws IllegalStateException
      * @throws E
      */
     @TerminalOp
-    public boolean hasDuplicates() throws E {
+    public boolean hasDuplicates() throws IllegalStateException, E {
         assertNotClosed();
 
         try {
@@ -9474,11 +9670,12 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @param k
      * @param comparator
      * @return
+     * @throws IllegalStateException
      * @throws IllegalArgumentException
      * @throws E
      */
     @TerminalOp
-    public Optional<T> kthLargest(int k, Comparator<? super T> comparator) throws IllegalArgumentException, E {
+    public Optional<T> kthLargest(int k, Comparator<? super T> comparator) throws IllegalStateException, IllegalArgumentException, E {
         assertNotClosed();
 
         checkArgPositive(k, "k");
@@ -9528,10 +9725,11 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      *
      * @param comparator
      * @return
+     * @throws IllegalStateException
      * @throws E
      */
     @TerminalOp
-    public Optional<Map<Percentage, T>> percentiles(Comparator<? super T> comparator) throws E {
+    public Optional<Map<Percentage, T>> percentiles(Comparator<? super T> comparator) throws IllegalStateException, E {
         assertNotClosed();
 
         try {
@@ -9549,11 +9747,13 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
     /**
      *
+     *
      * @return
+     * @throws IllegalStateException
      * @throws E the e
      */
     @TerminalOp
-    public Optional<T> first() throws E {
+    public Optional<T> first() throws IllegalStateException, E {
         assertNotClosed();
 
         try {
@@ -9569,11 +9769,13 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
     /**
      *
+     *
      * @return
+     * @throws IllegalStateException
      * @throws E the e
      */
     @TerminalOp
-    public Optional<T> last() throws E {
+    public Optional<T> last() throws IllegalStateException, E {
         assertNotClosed();
 
         try {
@@ -9598,12 +9800,13 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      *
      * @param position in current stream(not upstream or origin source). It starts from 0.
      * @return
+     * @throws IllegalStateException
      * @throws IllegalArgumentException
      * @throws E the e
      */
     @Beta
     @TerminalOp
-    public Optional<T> elementAt(final long position) throws IllegalArgumentException, E {
+    public Optional<T> elementAt(final long position) throws IllegalStateException, IllegalArgumentException, E {
         assertNotClosed();
 
         checkArgNotNegative(position, "position");
@@ -9617,12 +9820,14 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
     /**
      *
+     *
      * @return
+     * @throws IllegalStateException
      * @throws TooManyElementsException if there are more than one elements.
      * @throws E the e
      */
     @TerminalOp
-    public Optional<T> onlyOne() throws TooManyElementsException, E {
+    public Optional<T> onlyOne() throws IllegalStateException, TooManyElementsException, E {
         assertNotClosed();
 
         try {
@@ -9644,11 +9849,13 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
     /**
      *
+     *
      * @return
+     * @throws IllegalStateException
      * @throws E the e
      */
     @TerminalOp
-    public long count() throws E {
+    public long count() throws IllegalStateException, E {
         assertNotClosed();
 
         try {
@@ -9692,11 +9899,12 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @param <A>
      * @param generator
      * @return
+     * @throws IllegalStateException
      * @throws IllegalArgumentException
      * @throws E the e
      */
     @TerminalOp
-    public <A> A[] toArray(IntFunction<A[]> generator) throws IllegalArgumentException, E {
+    public <A> A[] toArray(IntFunction<A[]> generator) throws IllegalStateException, IllegalArgumentException, E {
         assertNotClosed();
 
         checkArgNotNull(generator, "generator");
@@ -9712,11 +9920,13 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
     /**
      *
+     *
      * @return
+     * @throws IllegalStateException
      * @throws E the e
      */
     @TerminalOp
-    public List<T> toList() throws E {
+    public List<T> toList() throws IllegalStateException, E {
         assertNotClosed();
 
         try {
@@ -9734,11 +9944,13 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
     /**
      *
+     *
      * @return
+     * @throws IllegalStateException
      * @throws E the e
      */
     @TerminalOp
-    public Set<T> toSet() throws E {
+    public Set<T> toSet() throws IllegalStateException, E {
         assertNotClosed();
 
         try {
@@ -9780,11 +9992,12 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @param <C>
      * @param supplier
      * @return
+     * @throws IllegalStateException
      * @throws IllegalArgumentException
      * @throws E the e
      */
     @TerminalOp
-    public <C extends Collection<T>> C toCollection(final Supplier<? extends C> supplier) throws IllegalArgumentException, E {
+    public <C extends Collection<T>> C toCollection(final Supplier<? extends C> supplier) throws IllegalStateException, IllegalArgumentException, E {
         assertNotClosed();
 
         checkArgNotNull(supplier, "supplier");
@@ -9809,11 +10022,12 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @param <E2>
      * @param func
      * @return
+     * @throws IllegalStateException
      * @throws E
      * @throws E2
      */
     @TerminalOp
-    public <R, E2 extends Exception> R toListThenApply(Throwables.Function<? super List<T>, R, E2> func) throws E, E2 {
+    public <R, E2 extends Exception> R toListThenApply(Throwables.Function<? super List<T>, R, E2> func) throws IllegalStateException, E, E2 {
         assertNotClosed();
 
         return func.apply(toList());
@@ -9824,11 +10038,12 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      *
      * @param <E2>
      * @param consumer
+     * @throws IllegalStateException
      * @throws E
      * @throws E2
      */
     @TerminalOp
-    public <E2 extends Exception> void toListThenAccept(Throwables.Consumer<? super List<T>, E2> consumer) throws E, E2 {
+    public <E2 extends Exception> void toListThenAccept(Throwables.Consumer<? super List<T>, E2> consumer) throws IllegalStateException, E, E2 {
         assertNotClosed();
 
         consumer.accept(toList());
@@ -9841,11 +10056,12 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @param <E2>
      * @param func
      * @return
+     * @throws IllegalStateException
      * @throws E
      * @throws E2
      */
     @TerminalOp
-    public <R, E2 extends Exception> R toSetThenApply(Throwables.Function<? super Set<T>, R, E2> func) throws E, E2 {
+    public <R, E2 extends Exception> R toSetThenApply(Throwables.Function<? super Set<T>, R, E2> func) throws IllegalStateException, E, E2 {
         assertNotClosed();
 
         return func.apply(toSet());
@@ -9856,11 +10072,12 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      *
      * @param <E2>
      * @param consumer
+     * @throws IllegalStateException
      * @throws E
      * @throws E2
      */
     @TerminalOp
-    public <E2 extends Exception> void toSetThenAccept(Throwables.Consumer<? super Set<T>, E2> consumer) throws E, E2 {
+    public <E2 extends Exception> void toSetThenAccept(Throwables.Consumer<? super Set<T>, E2> consumer) throws IllegalStateException, E, E2 {
         assertNotClosed();
 
         consumer.accept(toSet());
@@ -9875,12 +10092,13 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @param supplier
      * @param func
      * @return
+     * @throws IllegalStateException
      * @throws E
      * @throws E2
      */
     @TerminalOp
     public <R, C extends Collection<T>, E2 extends Exception> R toCollectionThenApply(Supplier<? extends C> supplier,
-            Throwables.Function<? super C, R, E2> func) throws E, E2 {
+            Throwables.Function<? super C, R, E2> func) throws IllegalStateException, E, E2 {
         assertNotClosed();
 
         return func.apply(toCollection(supplier));
@@ -9893,12 +10111,13 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @param <E2>
      * @param supplier
      * @param consumer
+     * @throws IllegalStateException
      * @throws E
      * @throws E2
      */
     @TerminalOp
     public <C extends Collection<T>, E2 extends Exception> void toCollectionThenAccept(Supplier<? extends C> supplier,
-            Throwables.Consumer<? super C, E2> consumer) throws E, E2 {
+            Throwables.Consumer<? super C, E2> consumer) throws IllegalStateException, E, E2 {
         assertNotClosed();
 
         consumer.accept(toCollection(supplier));
@@ -10046,6 +10265,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @param mergeFunction
      * @param mapFactory
      * @return
+     * @throws IllegalStateException
      * @throws IllegalArgumentException
      * @throws E the e
      * @throws E2
@@ -10058,7 +10278,8 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     @TerminalOp
     public <K, V, M extends Map<K, V>, E2 extends Exception, E3 extends Exception, E4 extends Exception> M toMap(
             final Throwables.Function<? super T, ? extends K, E2> keyMapper, final Throwables.Function<? super T, ? extends V, E3> valueMapper,
-            final Throwables.BinaryOperator<V, E4> mergeFunction, final Supplier<? extends M> mapFactory) throws IllegalArgumentException, E, E2, E3, E4 {
+            final Throwables.BinaryOperator<V, E4> mergeFunction, final Supplier<? extends M> mapFactory)
+            throws IllegalStateException, IllegalArgumentException, E, E2, E3, E4 {
         assertNotClosed();
 
         checkArgNotNull(keyMapper, "keyMapper");
@@ -10215,6 +10436,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @param valueMapper
      * @param mapFactory
      * @return
+     * @throws IllegalStateException
      * @throws IllegalArgumentException
      * @throws E the e
      * @throws E2
@@ -10223,7 +10445,8 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      */
     @TerminalOp
     public <K, V, M extends Map<K, List<V>>, E2 extends Exception, E3 extends Exception> M groupTo(Throwables.Function<? super T, ? extends K, E2> keyMapper,
-            Throwables.Function<? super T, ? extends V, E3> valueMapper, Supplier<? extends M> mapFactory) throws IllegalArgumentException, E, E2, E3 {
+            Throwables.Function<? super T, ? extends V, E3> valueMapper, Supplier<? extends M> mapFactory)
+            throws IllegalStateException, IllegalArgumentException, E, E2, E3 {
         assertNotClosed();
 
         checkArgNotNull(keyMapper, "keyMapper");
@@ -10326,6 +10549,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @param downstream
      * @param mapFactory
      * @return
+     * @throws IllegalStateException
      * @throws IllegalArgumentException
      * @throws E the e
      * @throws E2
@@ -10334,7 +10558,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     @TerminalOp
     public <K, V, D, M extends Map<K, D>, E2 extends Exception, E3 extends Exception> M groupTo(final Throwables.Function<? super T, ? extends K, E2> keyMapper,
             final Throwables.Function<? super T, ? extends V, E3> valueMapper, final Collector<? super V, ?, D> downstream,
-            final Supplier<? extends M> mapFactory) throws IllegalArgumentException, E, E2, E3 {
+            final Supplier<? extends M> mapFactory) throws IllegalStateException, IllegalArgumentException, E, E2, E3 {
         assertNotClosed();
 
         checkArgNotNull(keyMapper, "keyMapper");
@@ -10382,12 +10606,13 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @param <E2>
      * @param predicate
      * @return
+     * @throws IllegalStateException
      * @throws E
      * @throws E2
      * @see Collectors#partitioningBy(Predicate)
      */
     @TerminalOp
-    public <E2 extends Exception> Map<Boolean, List<T>> partitionTo(final Throwables.Predicate<? super T, E2> predicate) throws E, E2 {
+    public <E2 extends Exception> Map<Boolean, List<T>> partitionTo(final Throwables.Predicate<? super T, E2> predicate) throws IllegalStateException, E, E2 {
         assertNotClosed();
 
         return partitionTo(predicate, Collectors.<T> toList());
@@ -10401,13 +10626,14 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @param predicate
      * @param downstream
      * @return
+     * @throws IllegalStateException
      * @throws E
      * @throws E2
      * @see Collectors#partitioningBy(Predicate, Collector)
      */
     @TerminalOp
     public <D, E2 extends Exception> Map<Boolean, D> partitionTo(final Throwables.Predicate<? super T, E2> predicate,
-            final Collector<? super T, ?, D> downstream) throws E, E2 {
+            final Collector<? super T, ?, D> downstream) throws IllegalStateException, E, E2 {
         assertNotClosed();
 
         final Function<Object, D> downstreamFinisher = (Function<Object, D>) downstream.finisher();
@@ -10494,6 +10720,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @param valueMapper
      * @param mapFactory
      * @return
+     * @throws IllegalStateException
      * @throws IllegalArgumentException
      * @throws E
      * @throws E2
@@ -10502,7 +10729,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     @TerminalOp
     public <K, V, C extends Collection<V>, M extends Multimap<K, V, C>, E2 extends Exception, E3 extends Exception> M toMultimap(
             final Throwables.Function<? super T, ? extends K, E2> keyMapper, final Throwables.Function<? super T, ? extends V, E3> valueMapper,
-            Supplier<? extends M> mapFactory) throws IllegalArgumentException, E, E2, E3 {
+            Supplier<? extends M> mapFactory) throws IllegalStateException, IllegalArgumentException, E, E2, E3 {
         assertNotClosed();
 
         checkArgNotNull(keyMapper, "keyMapper");
@@ -10529,11 +10756,12 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      *
      *
      * @return
+     * @throws IllegalStateException
      * @throws IllegalArgumentException
      * @throws E
      */
     @TerminalOp
-    public Multiset<T> toMultiset() throws IllegalArgumentException, E {
+    public Multiset<T> toMultiset() throws IllegalStateException, IllegalArgumentException, E {
         return toMultiset(Suppliers.<T> ofMultiset());
     }
 
@@ -10598,11 +10826,12 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @param <E2>
      * @param func
      * @return
+     * @throws IllegalStateException
      * @throws E the e
      * @throws E2
      */
     @TerminalOp
-    public <E2 extends Exception> long sumInt(Throwables.ToIntFunction<? super T, E2> func) throws E, E2 {
+    public <E2 extends Exception> long sumInt(Throwables.ToIntFunction<? super T, E2> func) throws IllegalStateException, E, E2 {
         assertNotClosed();
 
         try {
@@ -10624,11 +10853,12 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @param <E2>
      * @param func
      * @return
+     * @throws IllegalStateException
      * @throws E the e
      * @throws E2
      */
     @TerminalOp
-    public <E2 extends Exception> long sumLong(Throwables.ToLongFunction<? super T, E2> func) throws E, E2 {
+    public <E2 extends Exception> long sumLong(Throwables.ToLongFunction<? super T, E2> func) throws IllegalStateException, E, E2 {
         assertNotClosed();
 
         try {
@@ -10650,11 +10880,12 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @param <E2>
      * @param func
      * @return
+     * @throws IllegalStateException
      * @throws E the e
      * @throws E2
      */
     @TerminalOp
-    public <E2 extends Exception> double sumDouble(Throwables.ToDoubleFunction<? super T, E2> func) throws E, E2 {
+    public <E2 extends Exception> double sumDouble(Throwables.ToDoubleFunction<? super T, E2> func) throws IllegalStateException, E, E2 {
         assertNotClosed();
 
         try {
@@ -10676,11 +10907,12 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @param <E2>
      * @param func
      * @return
+     * @throws IllegalStateException
      * @throws E the e
      * @throws E2
      */
     @TerminalOp
-    public <E2 extends Exception> OptionalDouble averageInt(Throwables.ToIntFunction<? super T, E2> func) throws E, E2 {
+    public <E2 extends Exception> OptionalDouble averageInt(Throwables.ToIntFunction<? super T, E2> func) throws IllegalStateException, E, E2 {
         assertNotClosed();
 
         try {
@@ -10708,11 +10940,12 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @param <E2>
      * @param func
      * @return
+     * @throws IllegalStateException
      * @throws E the e
      * @throws E2
      */
     @TerminalOp
-    public <E2 extends Exception> OptionalDouble averageLong(Throwables.ToLongFunction<? super T, E2> func) throws E, E2 {
+    public <E2 extends Exception> OptionalDouble averageLong(Throwables.ToLongFunction<? super T, E2> func) throws IllegalStateException, E, E2 {
         assertNotClosed();
 
         try {
@@ -10740,11 +10973,12 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @param <E2>
      * @param func
      * @return
+     * @throws IllegalStateException
      * @throws E the e
      * @throws E2
      */
     @TerminalOp
-    public <E2 extends Exception> OptionalDouble averageDouble(Throwables.ToDoubleFunction<? super T, E2> func) throws E, E2 {
+    public <E2 extends Exception> OptionalDouble averageDouble(Throwables.ToDoubleFunction<? super T, E2> func) throws IllegalStateException, E, E2 {
         assertNotClosed();
 
         try {
@@ -10770,12 +11004,14 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @param <E2>
      * @param accumulator
      * @return
+     * @throws IllegalStateException
      * @throws IllegalArgumentException
      * @throws E the e
      * @throws E2 the e2
      */
     @TerminalOp
-    public <E2 extends Exception> Optional<T> reduce(Throwables.BinaryOperator<T, E2> accumulator) throws IllegalArgumentException, E, E2 {
+    public <E2 extends Exception> Optional<T> reduce(Throwables.BinaryOperator<T, E2> accumulator)
+            throws IllegalStateException, IllegalArgumentException, E, E2 {
         assertNotClosed();
 
         checkArgNotNull(accumulator, "accumulator");
@@ -10875,6 +11111,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      *        Returns {@code true} to break the loop if you don't want to continue the {@code action}.
      *        Iteration on this stream will also be stopped when this flag is set to {@code true}.
      * @return
+     * @throws IllegalStateException
      * @throws IllegalArgumentException
      * @throws E
      * @throws E2
@@ -10882,7 +11119,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     @Beta
     @TerminalOp
     public <U, E2 extends Exception> U reduceUntil(final U identity, final Throwables.BiFunction<? super U, ? super T, U, E2> accumulator,
-            Throwables.Predicate<? super U, E2> conditionToBreak) throws IllegalArgumentException, E, E2 {
+            Throwables.Predicate<? super U, E2> conditionToBreak) throws IllegalStateException, IllegalArgumentException, E, E2 {
         assertNotClosed();
 
         checkArgNotNull(accumulator, "accumulator");
@@ -10912,6 +11149,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @param supplier
      * @param accumulator
      * @return
+     * @throws IllegalStateException
      * @throws IllegalArgumentException
      * @throws E the e
      * @throws E2 the e2
@@ -10919,7 +11157,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      */
     @TerminalOp
     public <R, E2 extends Exception, E3 extends Exception> R collect(final Throwables.Supplier<R, E2> supplier,
-            final Throwables.BiConsumer<? super R, ? super T, E3> accumulator) throws IllegalArgumentException, E, E2, E3 {
+            final Throwables.BiConsumer<? super R, ? super T, E3> accumulator) throws IllegalStateException, IllegalArgumentException, E, E2, E3 {
         assertNotClosed();
 
         checkArgNotNull(supplier, "supplier");
@@ -10983,11 +11221,12 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @param <R>
      * @param collector
      * @return
+     * @throws IllegalStateException
      * @throws IllegalArgumentException
      * @throws E the e
      */
     @TerminalOp
-    public <R> R collect(final Collector<? super T, ?, R> collector) throws IllegalArgumentException, E {
+    public <R> R collect(final Collector<? super T, ?, R> collector) throws IllegalStateException, IllegalArgumentException, E {
         assertNotClosed();
 
         checkArgNotNull(collector, "collector");
@@ -11018,13 +11257,14 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @param collector
      * @param func
      * @return
+     * @throws IllegalStateException
      * @throws IllegalArgumentException
      * @throws E the e
      * @throws E2 the e2
      */
     @TerminalOp
     public <R, RR, E2 extends Exception> RR collectThenApply(final Collector<? super T, ?, R> collector,
-            final Throwables.Function<? super R, ? extends RR, E2> func) throws IllegalArgumentException, E, E2 {
+            final Throwables.Function<? super R, ? extends RR, E2> func) throws IllegalStateException, IllegalArgumentException, E, E2 {
         assertNotClosed();
 
         checkArgNotNull(collector, "collector");
@@ -11073,10 +11313,11 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @param prefix
      * @param suffix
      * @return
+     * @throws IllegalStateException
      * @throws E
      */
     @TerminalOp
-    public String join(CharSequence delimiter, CharSequence prefix, CharSequence suffix) throws E {
+    public String join(CharSequence delimiter, CharSequence prefix, CharSequence suffix) throws IllegalStateException, E {
         assertNotClosed();
 
         try {
@@ -11097,11 +11338,12 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      *
      * @param joiner
      * @return the input {@code joiner}
+     * @throws IllegalStateException
      * @throws IllegalArgumentException
      * @throws E
      */
     @TerminalOp
-    public Joiner joinTo(final Joiner joiner) throws IllegalArgumentException, E {
+    public Joiner joinTo(final Joiner joiner) throws IllegalStateException, IllegalArgumentException, E {
         assertNotClosed();
 
         checkArgNotNull(joiner, "joiner");
@@ -11122,9 +11364,10 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      *
      *
      * @return
+     * @throws IllegalStateException
      * @throws E
      */
-    public Optional<Map<Percentage, T>> percentiles() throws E {
+    public Optional<Map<Percentage, T>> percentiles() throws IllegalStateException, E {
         assertNotClosed();
 
         try {
@@ -11155,15 +11398,17 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
     /**
      *
+     *
      * @param toLine
      * @param output
      * @return
+     * @throws IllegalStateException
      * @see #onEach(com.landawn.abacus.util.Throwables.Consumer)
      * @see #onEachE(com.landawn.abacus.util.Throwables.Consumer)
      */
     @Beta
     @IntermediateOp
-    public CheckedStream<T, E> saveEach(final Throwables.Function<? super T, String, E> toLine, final File output) {
+    public CheckedStream<T, E> saveEach(final Throwables.Function<? super T, String, E> toLine, final File output) throws IllegalStateException {
         assertNotClosed();
 
         final Throwables.Iterator<T, E> iter = new Throwables.Iterator<>() {
@@ -11217,15 +11462,17 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
     /**
      *
+     *
      * @param toLine
      * @param output
      * @return
+     * @throws IllegalStateException
      * @see #onEach(com.landawn.abacus.util.Throwables.Consumer)
      * @see #onEachE(com.landawn.abacus.util.Throwables.Consumer)
      */
     @Beta
     @IntermediateOp
-    public CheckedStream<T, E> saveEach(final Throwables.Function<? super T, String, E> toLine, final OutputStream output) {
+    public CheckedStream<T, E> saveEach(final Throwables.Function<? super T, String, E> toLine, final OutputStream output) throws IllegalStateException {
         assertNotClosed();
 
         final Throwables.Iterator<T, E> iter = new Throwables.Iterator<>() {
@@ -11271,15 +11518,17 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
     /**
      *
+     *
      * @param toLine
      * @param output
      * @return
+     * @throws IllegalStateException
      * @see #onEach(com.landawn.abacus.util.Throwables.Consumer)
      * @see #onEachE(com.landawn.abacus.util.Throwables.Consumer)
      */
     @Beta
     @IntermediateOp
-    public CheckedStream<T, E> saveEach(final Throwables.Function<? super T, String, E> toLine, Writer output) {
+    public CheckedStream<T, E> saveEach(final Throwables.Function<? super T, String, E> toLine, Writer output) throws IllegalStateException {
         assertNotClosed();
 
         final Throwables.Iterator<T, E> iter = new Throwables.Iterator<>() {
@@ -11329,15 +11578,17 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
     /**
      *
+     *
      * @param writeLine
      * @param output
      * @return
+     * @throws IllegalStateException
      * @see #onEach(com.landawn.abacus.util.Throwables.Consumer)
      * @see #onEachE(com.landawn.abacus.util.Throwables.Consumer)
      */
     @Beta
     @IntermediateOp
-    public CheckedStream<T, E> saveEach(final Throwables.BiConsumer<? super T, Writer, IOException> writeLine, final File output) {
+    public CheckedStream<T, E> saveEach(final Throwables.BiConsumer<? super T, Writer, IOException> writeLine, final File output) throws IllegalStateException {
         assertNotClosed();
 
         final Throwables.Iterator<T, E> iter = new Throwables.Iterator<>() {
@@ -11391,15 +11642,18 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
     /**
      *
+     *
      * @param writeLine
      * @param output
      * @return
+     * @throws IllegalStateException
      * @see #onEach(com.landawn.abacus.util.Throwables.Consumer)
      * @see #onEachE(com.landawn.abacus.util.Throwables.Consumer)
      */
     @Beta
     @IntermediateOp
-    public CheckedStream<T, E> saveEach(final Throwables.BiConsumer<? super T, Writer, IOException> writeLine, final Writer output) {
+    public CheckedStream<T, E> saveEach(final Throwables.BiConsumer<? super T, Writer, IOException> writeLine, final Writer output)
+            throws IllegalStateException {
         assertNotClosed();
 
         final Throwables.Iterator<T, E> iter = new Throwables.Iterator<>() {
@@ -11453,13 +11707,14 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @param stmt
      * @param stmtSetter
      * @return
+     * @throws IllegalStateException
      * @see #onEach(com.landawn.abacus.util.Throwables.Consumer)
      * @see #onEachE(com.landawn.abacus.util.Throwables.Consumer)
      */
     @Beta
     @IntermediateOp
     public CheckedStream<T, E> saveEach(final PreparedStatement stmt,
-            final Throwables.BiConsumer<? super T, ? super PreparedStatement, SQLException> stmtSetter) {
+            final Throwables.BiConsumer<? super T, ? super PreparedStatement, SQLException> stmtSetter) throws IllegalStateException {
         assertNotClosed();
 
         final Throwables.Iterator<T, E> iter = new Throwables.Iterator<>() {
@@ -11494,13 +11749,14 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @param insertSQL
      * @param stmtSetter
      * @return
+     * @throws IllegalStateException
      * @see #onEach(com.landawn.abacus.util.Throwables.Consumer)
      * @see #onEachE(com.landawn.abacus.util.Throwables.Consumer)
      */
     @Beta
     @IntermediateOp
     public CheckedStream<T, E> saveEach(final Connection conn, final String insertSQL,
-            final Throwables.BiConsumer<? super T, ? super PreparedStatement, SQLException> stmtSetter) {
+            final Throwables.BiConsumer<? super T, ? super PreparedStatement, SQLException> stmtSetter) throws IllegalStateException {
         assertNotClosed();
 
         final Throwables.Iterator<T, E> iter = new Throwables.Iterator<>() {
@@ -11557,6 +11813,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @param insertSQL
      * @param stmtSetter
      * @return
+     * @throws IllegalStateException
      * @see #onEach(com.landawn.abacus.util.Throwables.Consumer)
      * @see #onEachE(com.landawn.abacus.util.Throwables.Consumer)
      * @see #spsOnEach(com.landawn.abacus.util.Throwables.Consumer)
@@ -11565,7 +11822,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     @Beta
     @IntermediateOp
     public CheckedStream<T, E> saveEach(final javax.sql.DataSource ds, final String insertSQL,
-            final Throwables.BiConsumer<? super T, ? super PreparedStatement, SQLException> stmtSetter) {
+            final Throwables.BiConsumer<? super T, ? super PreparedStatement, SQLException> stmtSetter) throws IllegalStateException {
         assertNotClosed();
 
         final Throwables.Iterator<T, E> iter = new Throwables.Iterator<>() {
@@ -11672,16 +11929,19 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
     /**
      *
+     *
      * @param header
      * @param tail
      * @param toLine
      * @param output
      * @return
+     * @throws IllegalStateException
      * @throws E
      * @throws IOException
      */
     @TerminalOp
-    public long persist(final String header, final String tail, Throwables.Function<? super T, String, E> toLine, final File output) throws E, IOException {
+    public long persist(final String header, final String tail, Throwables.Function<? super T, String, E> toLine, final File output)
+            throws IllegalStateException, E, IOException {
         assertNotClosed();
 
         final Writer writer = IOUtil.newFileWriter(output);
@@ -11699,11 +11959,12 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @param toLine
      * @param output
      * @return
+     * @throws IllegalStateException
      * @throws E
      * @throws IOException
      */
     @TerminalOp
-    public long persist(Throwables.Function<? super T, String, E> toLine, final OutputStream output) throws E, IOException {
+    public long persist(Throwables.Function<? super T, String, E> toLine, final OutputStream output) throws IllegalStateException, E, IOException {
         assertNotClosed();
 
         final BufferedWriter bw = Objectory.createBufferedWriter(output);
@@ -11717,16 +11978,19 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
     /**
      *
+     *
      * @param header
      * @param tail
      * @param toLine
      * @param output
      * @return
+     * @throws IllegalStateException
      * @throws E
      * @throws IOException
      */
     @TerminalOp
-    public long persist(String header, String tail, Throwables.Function<? super T, String, E> toLine, OutputStream output) throws E, IOException {
+    public long persist(String header, String tail, Throwables.Function<? super T, String, E> toLine, OutputStream output)
+            throws IllegalStateException, E, IOException {
         assertNotClosed();
 
         final BufferedWriter bw = Objectory.createBufferedWriter(output);
@@ -11740,14 +12004,16 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
     /**
      *
+     *
      * @param toLine
      * @param output
      * @return
+     * @throws IllegalStateException
      * @throws E
      * @throws IOException
      */
     @TerminalOp
-    public long persist(Throwables.Function<? super T, String, E> toLine, Writer output) throws E, IOException {
+    public long persist(Throwables.Function<? super T, String, E> toLine, Writer output) throws IllegalStateException, E, IOException {
         assertNotClosed();
 
         return persist(null, null, toLine, output);
@@ -11755,16 +12021,19 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
     /**
      *
+     *
      * @param header
      * @param tail
      * @param toLine
      * @param output
      * @return
+     * @throws IllegalStateException
      * @throws E
      * @throws IOException
      */
     @TerminalOp
-    public long persist(String header, String tail, Throwables.Function<? super T, String, E> toLine, Writer output) throws E, IOException {
+    public long persist(String header, String tail, Throwables.Function<? super T, String, E> toLine, Writer output)
+            throws IllegalStateException, E, IOException {
         assertNotClosed();
 
         try {
@@ -11809,11 +12078,12 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @param writeLine
      * @param output
      * @return
+     * @throws IllegalStateException
      * @throws E
      * @throws IOException
      */
     @TerminalOp
-    public long persist(final Throwables.BiConsumer<? super T, Writer, IOException> writeLine, final File output) throws E, IOException {
+    public long persist(final Throwables.BiConsumer<? super T, Writer, IOException> writeLine, final File output) throws IllegalStateException, E, IOException {
         assertNotClosed();
 
         return persist(null, null, writeLine, output);
@@ -11850,11 +12120,13 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @param writeLine
      * @param output
      * @return
+     * @throws IllegalStateException
      * @throws E
      * @throws IOException
      */
     @TerminalOp
-    public long persist(final Throwables.BiConsumer<? super T, Writer, IOException> writeLine, final Writer output) throws E, IOException {
+    public long persist(final Throwables.BiConsumer<? super T, Writer, IOException> writeLine, final Writer output)
+            throws IllegalStateException, E, IOException {
         assertNotClosed();
 
         return persist(null, null, writeLine, output);
@@ -11920,13 +12192,15 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @param batchIntervalInMillis
      * @param stmtSetter
      * @return
+     * @throws IllegalStateException
      * @throws IllegalArgumentException
      * @throws E
      * @throws SQLException
      */
     @TerminalOp
     public long persist(final PreparedStatement stmt, final int batchSize, final long batchIntervalInMillis,
-            final Throwables.BiConsumer<? super T, ? super PreparedStatement, SQLException> stmtSetter) throws IllegalArgumentException, E, SQLException {
+            final Throwables.BiConsumer<? super T, ? super PreparedStatement, SQLException> stmtSetter)
+            throws IllegalStateException, IllegalArgumentException, E, SQLException {
         assertNotClosed();
 
         checkArgument(batchSize > 0 && batchIntervalInMillis >= 0, "'batchSize'=%s must be greater than 0 and 'batchIntervalInMillis'=%s can't be negative",
@@ -11968,12 +12242,13 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @param batchIntervalInMillis
      * @param stmtSetter
      * @return
+     * @throws IllegalStateException
      * @throws E
      * @throws SQLException
      */
     @TerminalOp
     public long persist(final Connection conn, final String insertSQL, final int batchSize, final long batchIntervalInMillis,
-            final Throwables.BiConsumer<? super T, ? super PreparedStatement, SQLException> stmtSetter) throws E, SQLException {
+            final Throwables.BiConsumer<? super T, ? super PreparedStatement, SQLException> stmtSetter) throws IllegalStateException, E, SQLException {
         assertNotClosed();
 
         PreparedStatement stmt = null;
@@ -11989,18 +12264,20 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
     /**
      *
+     *
      * @param ds
      * @param insertSQL
      * @param batchSize
      * @param batchIntervalInMillis
      * @param stmtSetter
      * @return
+     * @throws IllegalStateException
      * @throws E
      * @throws SQLException
      */
     @TerminalOp
     public long persist(final javax.sql.DataSource ds, final String insertSQL, final int batchSize, final long batchIntervalInMillis,
-            final Throwables.BiConsumer<? super T, ? super PreparedStatement, SQLException> stmtSetter) throws E, SQLException {
+            final Throwables.BiConsumer<? super T, ? super PreparedStatement, SQLException> stmtSetter) throws IllegalStateException, E, SQLException {
         assertNotClosed();
 
         Connection conn = null;
@@ -12147,12 +12424,13 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      *
      * @param output
      * @return
+     * @throws IllegalStateException
      * @throws E
      * @throws IOException
      */
     @Beta
     @TerminalOp
-    public long persistToCSV(Writer output) throws E, IOException {
+    public long persistToCSV(Writer output) throws IllegalStateException, E, IOException {
         assertNotClosed();
 
         try {
@@ -12272,12 +12550,13 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @param csvHeaders
      * @param output
      * @return
+     * @throws IllegalStateException
      * @throws IllegalArgumentException
      * @throws E
      * @throws IOException
      */
     @TerminalOp
-    public long persistToCSV(Collection<String> csvHeaders, Writer output) throws IllegalArgumentException, E, IOException {
+    public long persistToCSV(Collection<String> csvHeaders, Writer output) throws IllegalStateException, IllegalArgumentException, E, IOException {
         checkArgNotEmpty(csvHeaders, "csvHeaders");
         assertNotClosed();
 
@@ -12512,11 +12791,12 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      *
      * @param output
      * @return
+     * @throws IllegalStateException
      * @throws E
      * @throws IOException
      */
     @TerminalOp
-    public long persistToJSON(final Writer output) throws E, IOException {
+    public long persistToJSON(final Writer output) throws IllegalStateException, E, IOException {
         assertNotClosed();
 
         try {
@@ -12567,10 +12847,11 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      *
      *
      * @return
+     * @throws IllegalStateException
      */
     @Beta
     @IntermediateOp
-    public CheckedStream<T, Exception> cast() {
+    public CheckedStream<T, Exception> cast() throws IllegalStateException {
         assertNotClosed();
 
         return (CheckedStream<T, Exception>) this;
@@ -12580,9 +12861,10 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      *
      *
      * @return
+     * @throws IllegalStateException
      */
     @IntermediateOp
-    public Stream<T> unchecked() {
+    public Stream<T> unchecked() throws IllegalStateException {
         assertNotClosed();
 
         if (N.isEmpty(this.closeHandlers)) {
@@ -12596,10 +12878,11 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      *
      *
      * @return
+     * @throws IllegalStateException
      * @throws IllegalArgumentException
      */
     @IntermediateOp
-    public java.util.stream.Stream<T> toJdkStream() throws IllegalArgumentException {
+    public java.util.stream.Stream<T> toJdkStream() throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         final Spliterator<T> spliterator = Spliterators.spliteratorUnknownSize(newObjIteratorEx(elements), Spliterator.ORDERED | Spliterator.IMMUTABLE);
@@ -12638,11 +12921,13 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @param <U>
      * @param transfer
      * @return
+     * @throws IllegalStateException
      * @throws IllegalArgumentException
      */
     @Beta
     @IntermediateOp
-    public <U> CheckedStream<U, E> transformB(final Function<? super Stream<T>, ? extends Stream<? extends U>> transfer) throws IllegalArgumentException {
+    public <U> CheckedStream<U, E> transformB(final Function<? super Stream<T>, ? extends Stream<? extends U>> transfer)
+            throws IllegalStateException, IllegalArgumentException {
         // Major reason for commenting out below lines is to keep consistent with method transform.
         //        assertNotClosed();
         //        checkArgNotNull(transfer, "transfer");
@@ -12697,10 +12982,10 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * Temporarily switch the stream to parallel stream for operation {@code ops} and then switch back to sequence stream.
      * <br />
      *
-     *
      * @param <R>
      * @param ops
      * @return
+     * @throws IllegalStateException
      * @see Stream#sps(Function)
      * @see ExceptionUtil#toRuntimeException(Throwable)
      * @see ExceptionUtil#registerRuntimeExceptionMapper(Class, Function)
@@ -12709,7 +12994,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      */
     @Beta
     @IntermediateOp
-    public <R> CheckedStream<R, E> sps(final Function<? super Stream<T>, ? extends Stream<? extends R>> ops) {
+    public <R> CheckedStream<R, E> sps(final Function<? super Stream<T>, ? extends Stream<? extends R>> ops) throws IllegalStateException {
         assertNotClosed();
 
         return newStream(((Stream<R>) ops.apply(this.unchecked().parallel())), true);
@@ -12719,11 +13004,11 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * Temporarily switch the stream to parallel stream for operation {@code ops} and then switch back to sequence stream.
      * <br />
      *
-     *
      * @param <R>
      * @param maxThreadNum
      * @param ops
      * @return
+     * @throws IllegalStateException
      * @see Stream#sps(int, Function)
      * @see ExceptionUtil#toRuntimeException(Throwable)
      * @see ExceptionUtil#registerRuntimeExceptionMapper(Class, Function)
@@ -12732,7 +13017,8 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      */
     @Beta
     @IntermediateOp
-    public <R> CheckedStream<R, E> sps(final int maxThreadNum, final Function<? super Stream<T>, ? extends Stream<? extends R>> ops) {
+    public <R> CheckedStream<R, E> sps(final int maxThreadNum, final Function<? super Stream<T>, ? extends Stream<? extends R>> ops)
+            throws IllegalStateException {
         assertNotClosed();
 
         return newStream(((Stream<R>) ops.apply(this.unchecked().parallel(maxThreadNum))), true);
@@ -13192,13 +13478,15 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
     /**
      *
+     *
      * @param predicate
      * @return
+     * @throws IllegalStateException
      */
     @SuppressWarnings("rawtypes")
     @Beta
     @IntermediateOp
-    public CheckedStream<T, Exception> filterE(final Throwables.Predicate<? super T, ? extends Exception> predicate) {
+    public CheckedStream<T, Exception> filterE(final Throwables.Predicate<? super T, ? extends Exception> predicate) throws IllegalStateException {
         assertNotClosed();
 
         return newStream(new Throwables.Iterator<T, Exception>() {
@@ -13236,14 +13524,16 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
     /**
      *
+     *
      * @param <U>
      * @param mapper
      * @return
+     * @throws IllegalStateException
      */
     @SuppressWarnings("rawtypes")
     @Beta
     @IntermediateOp
-    public <U> CheckedStream<U, Exception> mapE(final Throwables.Function<? super T, ? extends U, ? extends Exception> mapper) {
+    public <U> CheckedStream<U, Exception> mapE(final Throwables.Function<? super T, ? extends U, ? extends Exception> mapper) throws IllegalStateException {
         assertNotClosed();
 
         return newStream(new Throwables.Iterator<U, Exception>() {
@@ -13261,14 +13551,17 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
     /**
      *
+     *
      * @param <R>
      * @param mapper
      * @return
+     * @throws IllegalStateException
      */
     @Beta
     @IntermediateOp
     public <R> CheckedStream<R, Exception> flatMapE(
-            final Throwables.Function<? super T, ? extends CheckedStream<? extends R, ? extends Exception>, ? extends Exception> mapper) {
+            final Throwables.Function<? super T, ? extends CheckedStream<? extends R, ? extends Exception>, ? extends Exception> mapper)
+            throws IllegalStateException {
         assertNotClosed();
 
         final Throwables.Iterator<R, Exception> iter = new Throwables.Iterator<>() {
@@ -13371,13 +13664,15 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
     /**
      *
+     *
      * @param action
      * @return
+     * @throws IllegalStateException
      */
     @SuppressWarnings("rawtypes")
     @Beta
     @IntermediateOp
-    public CheckedStream<T, Exception> onEachE(final Throwables.Consumer<? super T, ? extends Exception> action) {
+    public CheckedStream<T, Exception> onEachE(final Throwables.Consumer<? super T, ? extends Exception> action) throws IllegalStateException {
         assertNotClosed();
 
         return newStream(new Throwables.Iterator<T, Exception>() {
@@ -13418,10 +13713,11 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @param b
      * @param func
      * @return
+     * @throws IllegalStateException
      */
     @IntermediateOp
     public <U, R> CheckedStream<R, E> crossJoin(final Collection<? extends U> b,
-            final Throwables.BiFunction<? super T, ? super U, ? extends R, ? extends E> func) {
+            final Throwables.BiFunction<? super T, ? super U, ? extends R, ? extends E> func) throws IllegalStateException {
         assertNotClosed();
 
         return flatMap(t -> CheckedStream.<U, E> of(b).map(u -> func.apply(t, u)));
@@ -13435,11 +13731,12 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @param b will be loaded to memory. If {@code b} is too big to load to memory, please use {@code b.cronJoin(this, ...)}
      * @param func
      * @return
+     * @throws IllegalStateException
      * @throws IllegalArgumentException
      */
     @IntermediateOp
     public <U, R> CheckedStream<R, E> crossJoin(final CheckedStream<U, ? extends E> b,
-            final Throwables.BiFunction<? super T, ? super U, ? extends R, ? extends E> func) throws IllegalArgumentException {
+            final Throwables.BiFunction<? super T, ? super U, ? extends R, ? extends E> func) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(b, "stream 'b' can not be null");
@@ -13598,12 +13895,13 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @param predicate
      * @param func
      * @return
+     * @throws IllegalStateException
      * @deprecated The time complexity is <i>O(n * m). You should try {@code innerJoin(Collection, Function, Function, BiFunction)} first.
      */
     @Deprecated
     @IntermediateOp
     public <U, R> CheckedStream<R, E> innerJoin(final Collection<? extends U> b, final Throwables.BiPredicate<? super T, ? super U, ? extends E> predicate,
-            final Throwables.BiFunction<? super T, ? super U, ? extends R, ? extends E> func) {
+            final Throwables.BiFunction<? super T, ? super U, ? extends R, ? extends E> func) throws IllegalStateException {
         assertNotClosed();
 
         return flatMap(t -> CheckedStream.<U, E> of(b).filter(u -> predicate.test(t, u)).map(u -> func.apply(t, u)));
@@ -13637,11 +13935,12 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @param rightKeyMapper
      * @param func
      * @return
+     * @throws IllegalStateException
      */
     @IntermediateOp
     public <U, K, R> CheckedStream<R, E> fullJoin(final Collection<? extends U> b, final Throwables.Function<? super T, ? extends K, ? extends E> leftKeyMapper,
             final Throwables.Function<? super U, ? extends K, ? extends E> rightKeyMapper,
-            final Throwables.BiFunction<? super T, ? super U, ? extends R, ? extends E> func) {
+            final Throwables.BiFunction<? super T, ? super U, ? extends R, ? extends E> func) throws IllegalStateException {
         assertNotClosed();
 
         final Map<U, U> joinedRights = new IdentityHashMap<>();
@@ -13779,12 +14078,13 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @param predicate
      * @param func
      * @return
+     * @throws IllegalStateException
      * @deprecated The time complexity is <i>O(n * m). You should try {@code fullJoin(Collection, Function, Function, BiFunction)} first.
      */
     @Deprecated
     @IntermediateOp
     public <U, R> CheckedStream<R, E> fullJoin(final Collection<? extends U> b, final Throwables.BiPredicate<? super T, ? super U, ? extends E> predicate,
-            final Throwables.BiFunction<? super T, ? super U, ? extends R, ? extends E> func) {
+            final Throwables.BiFunction<? super T, ? super U, ? extends R, ? extends E> func) throws IllegalStateException {
         assertNotClosed();
 
         final Map<U, U> joinedRights = new IdentityHashMap<>();
@@ -13825,11 +14125,12 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @param rightKeyMapper
      * @param func
      * @return
+     * @throws IllegalStateException
      */
     @IntermediateOp
     public <U, K, R> CheckedStream<R, E> leftJoin(final Collection<? extends U> b, final Throwables.Function<? super T, ? extends K, ? extends E> leftKeyMapper,
             final Throwables.Function<? super U, ? extends K, ? extends E> rightKeyMapper,
-            final Throwables.BiFunction<? super T, ? super U, ? extends R, ? extends E> func) {
+            final Throwables.BiFunction<? super T, ? super U, ? extends R, ? extends E> func) throws IllegalStateException {
         assertNotClosed();
 
         return flatMap(new Throwables.Function<T, CheckedStream<R, E>, E>() {
@@ -13940,12 +14241,13 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @param predicate
      * @param func
      * @return
+     * @throws IllegalStateException
      * @deprecated The time complexity is <i>O(n * m). You should try {@code leftJoin(Collection, Function, Function, BiFunction)} first.
      */
     @Deprecated
     @IntermediateOp
     public <U, R> CheckedStream<R, E> leftJoin(final Collection<? extends U> b, final Throwables.BiPredicate<? super T, ? super U, ? extends E> predicate,
-            final Throwables.BiFunction<? super T, ? super U, ? extends R, ? extends E> func) {
+            final Throwables.BiFunction<? super T, ? super U, ? extends R, ? extends E> func) throws IllegalStateException {
         assertNotClosed();
 
         return flatMap(t -> CheckedStream.<U, E> of(b)
@@ -14113,12 +14415,13 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @param predicate
      * @param func
      * @return
+     * @throws IllegalStateException
      * @deprecated The time complexity is <i>O(n * m). You should try {@code rightJoin(Collection, Function, Function, BiFunction)} first.
      */
     @Deprecated
     @IntermediateOp
     public <U, R> CheckedStream<R, E> rightJoin(final Collection<? extends U> b, final Throwables.BiPredicate<? super T, ? super U, ? extends E> predicate,
-            final Throwables.BiFunction<? super T, ? super U, ? extends R, ? extends E> func) {
+            final Throwables.BiFunction<? super T, ? super U, ? extends R, ? extends E> func) throws IllegalStateException {
         assertNotClosed();
 
         final Map<U, U> joinedRights = new IdentityHashMap<>();
@@ -14707,13 +15010,15 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      *       <br />
      *       This input {@code Iterator} is the input {@code b}
      * @return
+     * @throws IllegalStateException
      * @throws IllegalArgumentException
      */
     @Beta
     @IntermediateOp
     public <U, D, R> CheckedStream<R, E> joinByRange(final Iterator<U> b, final Throwables.BiPredicate<? super T, ? super U, ? extends E> predicate,
             final Collector<? super U, ?, D> collector, final Throwables.BiFunction<? super T, ? super D, ? extends R, ? extends E> func,
-            final Throwables.Function<Iterator<U>, CheckedStream<R, E>, ? extends E> mapperForUnJoinedEelements) throws IllegalArgumentException {
+            final Throwables.Function<Iterator<U>, CheckedStream<R, E>, ? extends E> mapperForUnJoinedEelements)
+            throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(b, "Iterator 'b' can not be null");
@@ -14846,13 +15151,15 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      *       <br />
      *       This input {@code Iterator} comes from {@code b.iterator()}.
      * @return
+     * @throws IllegalStateException
      * @throws IllegalArgumentException
      */
     @Beta
     @IntermediateOp
     public <U, D, R> CheckedStream<R, E> joinByRange(final Stream<U> b, final Throwables.BiPredicate<? super T, ? super U, ? extends E> predicate,
             final Collector<? super U, ?, D> collector, final Throwables.BiFunction<? super T, ? super D, ? extends R, ? extends E> func,
-            final Throwables.Function<Iterator<U>, CheckedStream<R, E>, ? extends E> mapperForUnJoinedEelements) throws IllegalArgumentException {
+            final Throwables.Function<Iterator<U>, CheckedStream<R, E>, ? extends E> mapperForUnJoinedEelements)
+            throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(b, "Stream 'b' can not be null");
@@ -14871,12 +15178,13 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @param b should be ordered. It will be closed along with this {@code Seq}
      * @param predicate
      * @return
+     * @throws IllegalStateException
      * @throws IllegalArgumentException
      */
     @Beta
     @IntermediateOp
     public <U> CheckedStream<Pair<T, List<U>>, E> joinByRange(final CheckedStream<U, ? extends E> b,
-            final Throwables.BiPredicate<? super T, ? super U, ? extends E> predicate) throws IllegalArgumentException {
+            final Throwables.BiPredicate<? super T, ? super U, ? extends E> predicate) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(b, "CheckedStream 'b' can not be null");
@@ -14943,13 +15251,14 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @param collector
      * @param func
      * @return
+     * @throws IllegalStateException
      * @throws IllegalArgumentException
      */
     @Beta
     @IntermediateOp
     public <U, D, R> CheckedStream<R, E> joinByRange(final CheckedStream<U, ? extends E> b,
             final Throwables.BiPredicate<? super T, ? super U, ? extends E> predicate, final Collector<? super U, ?, D> collector,
-            final Throwables.BiFunction<? super T, ? super D, ? extends R, ? extends E> func) throws IllegalArgumentException {
+            final Throwables.BiFunction<? super T, ? super D, ? extends R, ? extends E> func) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(b, "CheckedStream 'b' can not be null");
@@ -15076,12 +15385,13 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @param b
      * @param joinFunc
      * @return
+     * @throws IllegalStateException
      * @throws IllegalArgumentException
      */
     @Beta
     @IntermediateOp
     public <B extends Collection<?>, R> CheckedStream<R, E> join(final B b,
-            final Throwables.BiFunction<? super T, ? super B, ? extends R, ? extends E> joinFunc) throws IllegalArgumentException {
+            final Throwables.BiFunction<? super T, ? super B, ? extends R, ? extends E> joinFunc) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(b, "Collection 'b' can not be null");
@@ -15150,13 +15460,15 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @param joinFunc
      * @param mapperForUnJoinedEelements In a lot of scenarios, there could be an previous element which is took out from the specified {@code Iterator b} but not joined, you may need to consider including that element in this {@code mapperForUnJoinedEelements}
      * @return
+     * @throws IllegalStateException
      * @throws IllegalArgumentException
      */
     @Beta
     @IntermediateOp
     public <U, B extends Iterator<U>, R> CheckedStream<R, E> join(final B b,
             final Throwables.BiFunction<? super T, ? super B, ? extends R, ? extends E> joinFunc,
-            final Throwables.Function<? super Iterator<U>, CheckedStream<R, E>, ? extends E> mapperForUnJoinedEelements) throws IllegalArgumentException {
+            final Throwables.Function<? super Iterator<U>, CheckedStream<R, E>, ? extends E> mapperForUnJoinedEelements)
+            throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(b, "Iterator 'b' can not be null");
@@ -15201,12 +15513,14 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @param joinFunc
      * @param mapperForUnJoinedEelements In a lot of scenarios, there could be an previous element which is took out from the specified {@code Iterator b} but not joined, you may need to consider including that element in this {@code mapperForUnJoinedEelements}
      * @return
+     * @throws IllegalStateException
      * @throws IllegalArgumentException
      */
     @Beta
     @IntermediateOp
     public <U, R> CheckedStream<R, E> join(final Stream<U> b, final Throwables.BiFunction<? super T, ? super Iterator<U>, ? extends R, ? extends E> joinFunc,
-            final Throwables.Function<? super Iterator<U>, CheckedStream<R, E>, ? extends E> mapperForUnJoinedEelements) throws IllegalArgumentException {
+            final Throwables.Function<? super Iterator<U>, CheckedStream<R, E>, ? extends E> mapperForUnJoinedEelements)
+            throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(b, "Stream 'b' can not be null");
@@ -15335,13 +15649,14 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @param maxWaitForAddingElementToQuery default value is 30000 (unit is milliseconds)
      * @param executor
      * @return
+     * @throws IllegalStateException
      * @throws IllegalArgumentException
      */
     @Beta
     @SequentialOnly
     @IntermediateOp
     public CheckedStream<T, E> addSubscriber(final Throwables.Consumer<? super CheckedStream<T, E>, ? extends Exception> consumerForNewStreamWithTerminalAction,
-            final int queueSize, final long maxWaitForAddingElementToQuery, final Executor executor) throws IllegalArgumentException {
+            final int queueSize, final long maxWaitForAddingElementToQuery, final Executor executor) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
         checkArgNotNull(consumerForNewStreamWithTerminalAction, "consumerForNewStreamWithTerminalAction");
         checkArgPositive(queueSize, "queueSize");
@@ -15539,11 +15854,12 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @param maxWaitForAddingElementToQuery default value is 30000 (unit is milliseconds)
      * @param executor
      * @return
+     * @throws IllegalStateException
      * @throws IllegalArgumentException
      */
     public CheckedStream<T, E> filterWhileAddSubscriber(final Throwables.Predicate<? super T, ? extends E> predicate,
             final Throwables.Consumer<? super CheckedStream<T, E>, ? extends Exception> consumerForNewStreamWithTerminalAction, final int queueSize,
-            final long maxWaitForAddingElementToQuery, final Executor executor) throws IllegalArgumentException {
+            final long maxWaitForAddingElementToQuery, final Executor executor) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
         checkArgNotNull(predicate, "predicate");
         checkArgNotNull(consumerForNewStreamWithTerminalAction, "consumerForNewStreamWithTerminalAction");
@@ -15974,11 +16290,12 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @param maxWaitForAddingElementToQuery default value is 30000 (unit is milliseconds)
      * @param executor
      * @return
+     * @throws IllegalStateException
      * @throws IllegalArgumentException
      */
     public CheckedStream<T, E> dropWhileAddSubscriber(final Throwables.Predicate<? super T, ? extends E> predicate,
             final Throwables.Consumer<? super CheckedStream<T, E>, ? extends Exception> consumerForNewStreamWithTerminalAction, final int queueSize,
-            final long maxWaitForAddingElementToQuery, final Executor executor) throws IllegalArgumentException {
+            final long maxWaitForAddingElementToQuery, final Executor executor) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
         checkArgNotNull(predicate, "predicate");
         checkArgNotNull(consumerForNewStreamWithTerminalAction, "consumerForNewStreamWithTerminalAction");
@@ -16248,12 +16565,13 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @param terminalAction a terminal operation should be called.
      * @param executor
      * @return
+     * @throws IllegalStateException
      * @throws IllegalArgumentException
      */
     @Beta
     @TerminalOp
     public <R> ContinuableFuture<R> asyncCall(final Throwables.Function<? super CheckedStream<T, E>, R, ? extends Exception> terminalAction,
-            final Executor executor) throws IllegalArgumentException {
+            final Executor executor) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(terminalAction, "terminalAction");
@@ -16264,11 +16582,13 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
 
     /**
      *
+     *
      * @param closeHandler
      * @return
+     * @throws IllegalStateException
      */
     @IntermediateOp
-    public CheckedStream<T, E> onClose(final Runnable closeHandler) {
+    public CheckedStream<T, E> onClose(final Runnable closeHandler) throws IllegalStateException {
         assertNotClosed();
 
         if (isEmptyCloseHandler(closeHandler)) {

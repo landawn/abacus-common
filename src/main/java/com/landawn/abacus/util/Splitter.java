@@ -26,6 +26,7 @@ import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.util.stream.EntryStream;
 import com.landawn.abacus.util.stream.ObjIteratorEx;
@@ -33,6 +34,7 @@ import com.landawn.abacus.util.stream.Stream;
 
 /**
  *
+ * @see Joiner
  * @author Haiyang Li
  * @since 0.8
  */
@@ -81,7 +83,11 @@ public final class Splitter {
      * Returns the Splitter with the default delimiter: <code>", "</code>.
      *
      * @return
+     * @see Joiner#DEFAULT_DELIMITER
+     * @see Joiner#DEFAULT_KEY_VALUE_DELIMITER
+     * @see Joiner#defauLt()
      */
+    @Beta
     public static Splitter defauLt() {
         return with(Joiner.DEFAULT_DELIMITER);
     }
@@ -777,8 +783,12 @@ public final class Splitter {
         /**
          * Returns the Map Splitter with the default entry and key/value delimiter: <code>", "</code> and <code>"="</code>.
          *
-         * @return
+         * @return 
+         * @see Joiner#DEFAULT_DELIMITER
+         * @see Joiner#DEFAULT_KEY_VALUE_DELIMITER
+         * @see Joiner#defauLt()
          */
+        @Beta
         public static MapSplitter defauLt() {
             return with(Joiner.DEFAULT_DELIMITER, Joiner.DEFAULT_KEY_VALUE_DELIMITER);
         }
@@ -1246,10 +1256,10 @@ public final class Splitter {
         }
 
         /**
-         * 
          *
-         * @param source 
-         * @param consumer 
+         *
+         * @param source
+         * @param consumer
          */
         public void splitThenAccept(final CharSequence source, final Consumer<? super Map<String, String>> consumer) {
             consumer.accept(split(source));

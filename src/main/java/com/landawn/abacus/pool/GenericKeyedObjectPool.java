@@ -114,13 +114,15 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     }
 
     /**
+     * 
      *
-     * @param key
-     * @param e
+     * @param key 
+     * @param e 
      * @return true, if successful
+     * @throws IllegalStateException 
      */
     @Override
-    public boolean put(K key, E e) {
+    public boolean put(K key, E e) throws IllegalStateException {
         assertNotClosed();
 
         if (key == null || e == null) {
@@ -193,12 +195,14 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     }
 
     /**
+     * 
      *
-     * @param key
-     * @return
+     * @param key 
+     * @return 
+     * @throws IllegalStateException 
      */
     @Override
-    public E get(K key) {
+    public E get(K key) throws IllegalStateException {
         assertNotClosed();
 
         E e = null;
@@ -225,12 +229,14 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     }
 
     /**
+     * 
      *
-     * @param key
-     * @return
+     * @param key 
+     * @return 
+     * @throws IllegalStateException 
      */
     @Override
-    public E remove(K key) {
+    public E remove(K key) throws IllegalStateException {
         assertNotClosed();
 
         E e = null;
@@ -259,12 +265,14 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     }
 
     /**
+     * 
      *
-     * @param key
-     * @return
+     * @param key 
+     * @return 
+     * @throws IllegalStateException 
      */
     @Override
-    public E peek(K key) {
+    public E peek(K key) throws IllegalStateException {
         assertNotClosed();
 
         lock.lock();
@@ -277,12 +285,14 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     }
 
     /**
+     * 
      *
-     * @param key
+     * @param key 
      * @return true, if successful
+     * @throws IllegalStateException 
      */
     @Override
-    public boolean containsKey(K key) {
+    public boolean containsKey(K key) throws IllegalStateException {
         assertNotClosed();
 
         lock.lock();
@@ -295,12 +305,14 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     }
 
     /**
+     * 
      *
-     * @param e
+     * @param e 
      * @return true, if successful
+     * @throws IllegalStateException 
      */
     @Override
-    public boolean containsValue(E e) {
+    public boolean containsValue(E e) throws IllegalStateException {
         assertNotClosed();
 
         lock.lock();
@@ -313,12 +325,13 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     }
 
     /**
+     * 
      *
-     *
-     * @return
+     * @return 
+     * @throws IllegalStateException 
      */
     @Override
-    public Set<K> keySet() {
+    public Set<K> keySet() throws IllegalStateException {
         assertNotClosed();
 
         lock.lock();
@@ -331,12 +344,13 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     }
 
     /**
+     * 
      *
-     *
-     * @return
+     * @return 
+     * @throws IllegalStateException 
      */
     @Override
-    public Collection<E> values() {
+    public Collection<E> values() throws IllegalStateException {
         assertNotClosed();
 
         lock.lock();
@@ -350,9 +364,11 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
 
     /**
      * Clear.
+     *
+     * @throws IllegalStateException 
      */
     @Override
-    public void clear() {
+    public void clear() throws IllegalStateException {
         assertNotClosed();
 
         removeAll();
@@ -380,9 +396,11 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
 
     /**
      * Vacate.
+     *
+     * @throws IllegalStateException 
      */
     @Override
-    public void vacate() {
+    public void vacate() throws IllegalStateException {
         assertNotClosed();
 
         lock.lock();
@@ -397,12 +415,13 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     }
 
     /**
+     * 
      *
-     *
-     * @return
+     * @return 
+     * @throws IllegalStateException 
      */
     @Override
-    public int size() {
+    public int size() throws IllegalStateException {
         // assertNotClosed();
 
         return pool.size();

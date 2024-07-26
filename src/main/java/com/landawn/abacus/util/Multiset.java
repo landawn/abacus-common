@@ -808,10 +808,11 @@ public final class Multiset<E> implements Collection<E> {
     /**
      * Removes the all occurrences if.
      *
-     * @param predicate
-     * @return
+     * @param predicate 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public boolean removeAllOccurrencesIf(final Predicate<? super E> predicate) {
+    public boolean removeAllOccurrencesIf(final Predicate<? super E> predicate) throws IllegalArgumentException {
         N.checkArgNotNull(predicate);
 
         Set<E> removingKeys = null;
@@ -840,10 +841,11 @@ public final class Multiset<E> implements Collection<E> {
     /**
      * Removes the all occurrences if.
      *
-     * @param predicate
-     * @return
+     * @param predicate 
+     * @return 
+     * @throws IllegalArgumentException 
      */
-    public boolean removeAllOccurrencesIf(final ObjIntPredicate<? super E> predicate) {
+    public boolean removeAllOccurrencesIf(final ObjIntPredicate<? super E> predicate) throws IllegalArgumentException {
         N.checkArgNotNull(predicate);
 
         Set<E> removingKeys = null;
@@ -872,9 +874,10 @@ public final class Multiset<E> implements Collection<E> {
     /**
      * The associated elements will be removed if zero or negative occurrences are returned by the specified <code>function</code>.
      *
-     * @param function
+     * @param function 
+     * @throws IllegalArgumentException 
      */
-    public void updateAllOccurrences(final ObjIntFunction<? super E, Integer> function) {
+    public void updateAllOccurrences(final ObjIntFunction<? super E, Integer> function) throws IllegalArgumentException {
         N.checkArgNotNull(function);
 
         List<E> keyToRemove = null;
@@ -1340,14 +1343,15 @@ public final class Multiset<E> implements Collection<E> {
     }
 
     /**
+     * 
      *
-     *
-     * @param <T>
-     * @param a
-     * @return
+     * @param <T> 
+     * @param a 
+     * @return 
+     * @throws IllegalArgumentException 
      */
     @Override
-    public <T> T[] toArray(T[] a) {
+    public <T> T[] toArray(T[] a) throws IllegalArgumentException {
         N.checkArgNotNull(a, "The specified array can't be null");
 
         final int size = size();
@@ -1484,7 +1488,7 @@ public final class Multiset<E> implements Collection<E> {
      * correspondingly many times, though not necessarily sequentially.
      */
     @Override
-    public void forEach(final Consumer<? super E> action) {
+    public void forEach(final Consumer<? super E> action) throws IllegalArgumentException {
         N.checkArgNotNull(action);
 
         final Iterator<E> iter = iterator();
@@ -1500,10 +1504,11 @@ public final class Multiset<E> implements Collection<E> {
      * efficient than iterating over the {@link #entrySet()} either explicitly or with {@code
      * entrySet().forEach(action)}.
      *
-     * @param action
+     * @param action 
+     * @throws IllegalArgumentException 
      * @since 21.0
      */
-    public void forEach(final ObjIntConsumer<? super E> action) {
+    public void forEach(final ObjIntConsumer<? super E> action) throws IllegalArgumentException {
         N.checkArgNotNull(action);
 
         for (Map.Entry<E, MutableInt> entry : backingMap.entrySet()) {

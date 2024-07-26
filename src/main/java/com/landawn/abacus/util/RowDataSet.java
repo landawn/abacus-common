@@ -5682,9 +5682,10 @@ public class RowDataSet implements DataSet, Cloneable {
      * @param keyColumnNames 
      * @param keyMapper 
      * @return 
+     * @throws IllegalArgumentException 
      */
     @Override
-    public DataSet groupBy(final Collection<String> keyColumnNames, final Function<? super DisposableObjArray, ?> keyMapper) {
+    public DataSet groupBy(final Collection<String> keyColumnNames, final Function<? super DisposableObjArray, ?> keyMapper) throws IllegalArgumentException {
         N.checkArgNotEmpty(keyColumnNames, "keyColumnNames");
 
         final boolean isNullOrIdentityKeyMapper = keyMapper == null || keyMapper == Fn.identity();
@@ -7529,9 +7530,10 @@ public class RowDataSet implements DataSet, Cloneable {
      * @param filter 
      * @param max 
      * @return 
+     * @throws IllegalArgumentException 
      */
     @Override
-    public DataSet filter(int fromRowIndex, int toRowIndex, final String columnName, Predicate<?> filter, int max) {
+    public DataSet filter(int fromRowIndex, int toRowIndex, final String columnName, Predicate<?> filter, int max) throws IllegalArgumentException {
         final int filterColumnIndex = checkColumnName(columnName);
         checkRowIndex(fromRowIndex, toRowIndex);
         N.checkArgNotNull(filter, "filter");

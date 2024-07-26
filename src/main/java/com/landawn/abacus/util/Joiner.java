@@ -25,13 +25,14 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
+import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.parser.ParserUtil;
 import com.landawn.abacus.parser.ParserUtil.BeanInfo;
 import com.landawn.abacus.util.u.Nullable;
 import com.landawn.abacus.util.stream.Stream;
 
 /**
- *
+ * @see Splitter
  * @author haiyangl
  * @since 1.3
  */
@@ -65,6 +66,10 @@ public final class Joiner implements Closeable {
 
     private String emptyValue;
 
+    private String lastestToStringValue;
+
+    private boolean isClosed;
+
     Joiner(CharSequence separator) {
         this(separator, DEFAULT_KEY_VALUE_DELIMITER);
     }
@@ -97,7 +102,10 @@ public final class Joiner implements Closeable {
      *
      *
      * @return
+     * @see Splitter#defauLt()
+     * @see Splitter.MapSplitter#defauLt()
      */
+    @Beta
     public static Joiner defauLt() {
         return with(DEFAULT_DELIMITER, DEFAULT_KEY_VALUE_DELIMITER);
     }
@@ -259,6 +267,7 @@ public final class Joiner implements Closeable {
      *
      * @return
      */
+    @Beta
     public Joiner reuseCachedBuffer() {
         if (buffer != null) {
             throw new IllegalStateException("Can't reset because the buffer has been created");
@@ -1169,7 +1178,7 @@ public final class Joiner implements Closeable {
     public Joiner appendAll(final Collection<?> c, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, c == null ? 0 : c.size());
 
-        if (N.isEmpty(c) || (fromIndex == toIndex && fromIndex < c.size())) {
+        if (N.isEmpty(c) || fromIndex == toIndex) {
             return this;
         }
 
@@ -1580,7 +1589,7 @@ public final class Joiner implements Closeable {
     public Joiner appendEntries(final Map<?, ?> m, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, m == null ? 0 : m.size());
 
-        if ((N.isEmpty(m) && fromIndex == 0 && toIndex == 0) || (fromIndex == toIndex && fromIndex < m.size())) {
+        if (N.isEmpty(m) || fromIndex == toIndex) {
             return this;
         }
 
@@ -1933,61 +1942,25 @@ public final class Joiner implements Closeable {
     }
 
     /**
-     * Adds the contents of the given {@code StringJoiner} without prefix and
-     * suffix as the next element if it is non-empty. If the given {@code
-     * StringJoiner} is empty, the call has no effect.
-     *
-     * <p>A {@code StringJoiner} is empty if append/appendAll
-     * has never been called, and if {@code merge()} has never been called
-     * with a non-empty {@code StringJoiner} argument.
-     *
-     * <p>If the other {@code StringJoiner} is using a different delimiter,
-     * then elements from the other {@code StringJoiner} are concatenated with
-     * that delimiter and the result is appended to this {@code StringJoiner}
-     * as a single element.
+     * Adds the contents from the specified Joiner {@code other} without prefix and suffix as the next element if it is non-empty.
+     * If the specified {@code Joiner} is empty, the call has no effect.
      *
      * <p>Remember to close {@code other} Joiner if {@code reuseCachedBuffer} is set to {@code} true.
      *
-     * @param other The {@code StringJoiner} whose contents should be merged
-     *              into this one
-     * @return This {@code StringJoiner}
-     * @throws IllegalArgumentException
-     * @throws NullPointerException if the other {@code StringJoiner} is null
+     * @param other
+     * @return
+     * @throws IllegalArgumentException the specified Joiner {@code other} is {@code null}.
      */
     public Joiner merge(Joiner other) throws IllegalArgumentException {
         N.checkArgNotNull(other);
 
         if (other.buffer != null) {
             final int length = other.buffer.length();
-            // lock the length so that we can seize the data to be appended
-            // before initiate copying to avoid interference, especially when
-            // merge 'this'
             StringBuilder builder = prepareBuilder();
             builder.append(other.buffer, other.prefix.length(), length);
         }
 
         return this;
-    }
-
-    private StringBuilder prepareBuilder() {
-        if (buffer != null) {
-            if (!isEmptySeparator) {
-                buffer.append(separator);
-            }
-        } else {
-            buffer = (useCachedBuffer ? Objectory.createStringBuilder() : new StringBuilder()).append(prefix);
-        }
-
-        return buffer;
-    }
-
-    /**
-     *
-     * @param obj
-     * @return
-     */
-    private String toString(Object obj) {
-        return obj == null ? nullText : (trimBeforeAppend ? N.toString(obj).trim() : N.toString(obj));
     }
 
     /**
@@ -2021,20 +1994,24 @@ public final class Joiner implements Closeable {
             return emptyValue;
         } else {
             try {
+                String result = null;
+
                 if (suffix.equals("")) {
-                    return buffer.toString();
+                    result = buffer.toString();
                 } else {
                     int initialLength = buffer.length();
-                    String result = buffer.append(suffix).toString();
+
+                    result = buffer.append(suffix).toString();
+
                     // reset value to pre-append initialLength
                     buffer.setLength(initialLength);
-                    return result;
                 }
+
+                lastestToStringValue = result;
+
+                return result;
             } finally {
-                if (useCachedBuffer) {
-                    Objectory.recycle(buffer);
-                    buffer = null;
-                }
+                recycleBuffer();
             }
         }
     }
@@ -2053,16 +2030,9 @@ public final class Joiner implements Closeable {
         }
 
         try {
-            appendable.append(buffer);
-
-            if (Strings.isNotEmpty(suffix)) {
-                appendable.append(suffix);
-            }
+            appendable.append(toString());
         } finally {
-            if (useCachedBuffer) {
-                Objectory.recycle(buffer);
-                buffer = null;
-            }
+            recycleBuffer();
         }
 
         return appendable;
@@ -2151,9 +2121,52 @@ public final class Joiner implements Closeable {
      */
     @Override
     public synchronized void close() {
-        if (buffer != null && useCachedBuffer) {
+        if (isClosed) {
+            return;
+        }
+
+        isClosed = true;
+
+        recycleBuffer();
+    }
+
+    /**
+     *
+     * @param obj
+     * @return
+     */
+    private String toString(Object obj) {
+        return obj == null ? nullText : (trimBeforeAppend ? N.toString(obj).trim() : N.toString(obj));
+    }
+
+    private StringBuilder prepareBuilder() {
+        assertNotClosed();
+
+        if (buffer != null) {
+            if (!isEmptySeparator) {
+                buffer.append(separator);
+            }
+        } else {
+            buffer = (useCachedBuffer ? Objectory.createStringBuilder() : new StringBuilder())
+                    .append(lastestToStringValue == null ? prefix : lastestToStringValue);
+        }
+
+        return buffer;
+    }
+
+    private void recycleBuffer() {
+        if (useCachedBuffer) {
             Objectory.recycle(buffer);
             buffer = null;
+
+            // reset useCachedBuffer.
+            useCachedBuffer = false;
+        }
+    }
+
+    private void assertNotClosed() {
+        if (isClosed) {
+            throw new IllegalStateException();
         }
     }
 }
