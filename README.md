@@ -24,7 +24,6 @@ A general programming library in Java. It's easy to learn and simple to use with
 [Synchronized](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/Synchronized_view.html), 
 [Retry](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/Retry_view.html), 
 [Multiset](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/Multiset_view.html), 
-[LongMultiset](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/LongMultiset_view.html), 
 [Multimap](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/Multimap_view.html), 
 [ListMultimap](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/ListMultimap_view.html), 
 [SetMultimap](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/SetMultimap_view.html), 
