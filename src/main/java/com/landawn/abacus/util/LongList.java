@@ -1869,6 +1869,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      *
      * @return
      */
+    @Override
     public List<Long> boxed() {
         return boxed(0, size);
     }
@@ -1881,6 +1882,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * @return
      * @throws IndexOutOfBoundsException
      */
+    @Override
     public List<Long> boxed(int fromIndex, int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
 

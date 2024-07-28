@@ -1864,6 +1864,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      *
      * @return
      */
+    @Override
     public List<Character> boxed() {
         return boxed(0, size);
     }
@@ -1876,6 +1877,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @return
      * @throws IndexOutOfBoundsException
      */
+    @Override
     public List<Character> boxed(int fromIndex, int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
 

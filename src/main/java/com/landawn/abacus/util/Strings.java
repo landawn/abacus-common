@@ -1769,15 +1769,17 @@ public abstract sealed class Strings permits Strings.StringUtil {
         }
 
         final String s = str.toString();
-        final int[] result = new int[s.codePointCount(0, s.length())];
-        int index = 0;
+        //    final int[] result = new int[s.codePointCount(0, s.length())];
+        //    int index = 0;
+        //
+        //    for (int i = 0; i < result.length; i++) {
+        //        result[i] = s.codePointAt(index);
+        //        index += Character.charCount(result[i]);
+        //    }
+        //
+        //    return result;
 
-        for (int i = 0; i < result.length; i++) {
-            result[i] = s.codePointAt(index);
-            index += Character.charCount(result[i]);
-        }
-
-        return result;
+        return s.codePoints().toArray();
     }
 
     /**
@@ -5546,26 +5548,27 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     @SafeVarargs
     public static int indexOfAny(final String str, final char... valuesToFind) {
-        return indexOfAny(str, valuesToFind, 0);
+        return indexOfAny(str, 0, valuesToFind);
     }
 
     /**
      *
      *
      * @param str
-     * @param valuesToFind
      * @param fromIndex
+     * @param valuesToFind
      * @return
      */
-    public static int indexOfAny(final String str, final char[] valuesToFind, final int fromIndex) {
+    @SafeVarargs
+    public static int indexOfAny(final String str, final int fromIndex, final char... valuesToFind) {
+        checkInputChars(valuesToFind, "valuesToFind", true);
+
         if (isEmpty(str) || N.isEmpty(valuesToFind)) {
             return N.INDEX_NOT_FOUND;
         }
 
         final int strLen = str.length();
-        final int strLast = strLen - 1;
         final int chsLen = valuesToFind.length;
-        final int chsLast = chsLen - 1;
         char ch = 0;
 
         for (int i = fromIndex < 0 ? 0 : fromIndex; i < strLen; i++) {
@@ -5573,14 +5576,18 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
             for (int j = 0; j < chsLen; j++) {
                 if (valuesToFind[j] == ch) {
-                    if (i < strLast && j < chsLast && Character.isHighSurrogate(ch)) {
-                        // ch is a supplementary character
-                        if (valuesToFind[j + 1] == str.charAt(i + 1)) {
-                            return i;
-                        }
-                    } else {
-                        return i;
-                    }
+                    // checked by checkInputChars
+
+                    //    if (i < strLast && j < chsLast && Character.isHighSurrogate(ch)) {
+                    //        // ch is a supplementary character
+                    //        if (valuesToFind[j + 1] == str.charAt(i + 1)) {
+                    //            return i;
+                    //        }
+                    //    } else {
+                    //        return i;
+                    //    }
+
+                    return i;
                 }
             }
         }
@@ -5597,19 +5604,20 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     @SafeVarargs
     public static int indexOfAny(final String str, final String... valuesToFind) {
-        return indexOfAny(str, valuesToFind, 0);
+        return indexOfAny(str, 0, valuesToFind);
     }
 
     /**
      *
      *
      * @param str
-     * @param valuesToFind
      * @param fromIndex
+     * @param valuesToFind
      * @return
-     * @see #smallestIndicesOfAll(String, String[], int)
+     * @see #smallestIndicesOfAll(String, int, String[])
      */
-    public static int indexOfAny(final String str, final String[] valuesToFind, final int fromIndex) {
+    @SafeVarargs
+    public static int indexOfAny(final String str, final int fromIndex, final String... valuesToFind) {
         if (str == null || N.isEmpty(valuesToFind)) {
             return N.INDEX_NOT_FOUND;
         }
@@ -5635,49 +5643,55 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * Index of any but.
      *
      * @param str
-     * @param valuesToFind
+     * @param valuesToExeclude
      * @return
      */
     @SafeVarargs
-    public static int indexOfAnyBut(final String str, final char... valuesToFind) {
-        return indexOfAnyBut(str, valuesToFind, 0);
+    public static int indexOfAnyBut(final String str, final char... valuesToExeclude) {
+        return indexOfAnyBut(str, 0, valuesToExeclude);
     }
 
     /**
      *
      *
      * @param str
-     * @param valuesToFind
      * @param fromIndex
+     * @param valuesToExeclude
      * @return
      */
-    public static int indexOfAnyBut(final String str, final char[] valuesToFind, final int fromIndex) {
+    @SafeVarargs
+    public static int indexOfAnyBut(final String str, final int fromIndex, final char... valuesToExeclude) {
+        checkInputChars(valuesToExeclude, "valuesToExeclude", true);
+
         if (str == null || str.length() == 0) {
             return N.INDEX_NOT_FOUND;
         }
 
-        if (N.isEmpty(valuesToFind)) {
+        if (N.isEmpty(valuesToExeclude)) {
             return 0;
         }
 
         final int strLen = str.length();
-        final int strLast = strLen - 1;
-        final int chsLen = valuesToFind.length;
-        final int chsLast = chsLen - 1;
+        final int chsLen = valuesToExeclude.length;
         char ch = 0;
 
         outer: for (int i = fromIndex < 0 ? 0 : fromIndex; i < strLen; i++) {//NOSONAR
             ch = str.charAt(i);
 
             for (int j = 0; j < chsLen; j++) {
-                if (valuesToFind[j] == ch) {
-                    if (i < strLast && j < chsLast && Character.isHighSurrogate(ch)) {
-                        if (valuesToFind[j + 1] == str.charAt(i + 1)) {
-                            continue outer;
-                        }
-                    } else {
-                        continue outer;
-                    }
+
+                if (valuesToExeclude[j] == ch) {
+                    // checked by checkInputChars
+
+                    //    if (i < strLast && j < chsLast && Character.isHighSurrogate(ch)) {
+                    //        if (valuesToExeclude[j + 1] == str.charAt(i + 1)) {
+                    //            continue outer;
+                    //        }
+                    //    } else {
+                    //        continue outer;
+                    //    }
+
+                    continue outer;
                 }
             }
 
@@ -6046,6 +6060,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     @SafeVarargs
     public static int lastIndexOfAny(final String str, final char... valuesToFind) {
+        checkInputChars(valuesToFind, "valuesToFind", true);
+
         if (isEmpty(str) || N.isEmpty(valuesToFind)) {
             return N.INDEX_NOT_FOUND;
         }
@@ -6069,14 +6085,18 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
             for (int j = chsLen - 1; j >= 0; j--) {
                 if (valuesToFind[j] == ch) {
-                    if (i > 0 && j > 0 && Character.isHighSurrogate(ch = str.charAt(i - 1))) {
-                        // ch is a supplementary character
-                        if (valuesToFind[j - 1] == ch) {
-                            return i - 1;
-                        }
-                    } else {
-                        return i;
-                    }
+                    // checked by checkInputChars
+
+                    //    if (i > 0 && j > 0 && Character.isHighSurrogate(ch = str.charAt(i - 1))) {
+                    //        // ch is a supplementary character
+                    //        if (valuesToFind[j - 1] == ch) {
+                    //            return i - 1;
+                    //        }
+                    //    } else {
+                    //        return i;
+                    //    }
+
+                    return i;
                 }
             }
         }
@@ -6165,7 +6185,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     @SafeVarargs
     public static int smallestIndicesOfAll(final String str, final String... valuesToFind) {
-        return smallestIndicesOfAll(str, valuesToFind, 0);
+        return smallestIndicesOfAll(str, 0, valuesToFind);
     }
 
     /**
@@ -6173,12 +6193,13 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      *
      * @param str
-     * @param valuesToFind
      * @param fromIndex
+     * @param valuesToFind
      * @return
-     * @see #indexOfAny(String, String[], int)
+     * @see #indexOfAny(String, int, String[])
      */
-    public static int smallestIndicesOfAll(final String str, final String[] valuesToFind, final int fromIndex) {
+    @SafeVarargs
+    public static int smallestIndicesOfAll(final String str, final int fromIndex, final String... valuesToFind) {
         if (str == null || N.isEmpty(valuesToFind)) {
             return N.INDEX_NOT_FOUND;
         }
@@ -6213,7 +6234,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     @SafeVarargs
     public static int largestIndicesOfAll(final String str, final String... valuesToFind) {
-        return largestIndicesOfAll(str, valuesToFind, 0);
+        return largestIndicesOfAll(str, 0, valuesToFind);
     }
 
     /**
@@ -6221,12 +6242,12 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      *
      * @param str
-     * @param valuesToFind
      * @param fromIndex
+     * @param valuesToFind
      * @return
-     * @see #indexOfAny(String, String[], int)
+     * @see #indexOfAny(String, int, String[])
      */
-    public static int largestIndicesOfAll(final String str, final String[] valuesToFind, final int fromIndex) {
+    public static int largestIndicesOfAll(final String str, final int fromIndex, final String... valuesToFind) {
         if (str == null || N.isEmpty(valuesToFind)) {
             return N.INDEX_NOT_FOUND;
         }
@@ -6260,7 +6281,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     @SafeVarargs
     public static int smallestLastindicesOfAll(final String str, final String... valuesToFind) {
-        return smallestLastindicesOfAll(str, valuesToFind, N.len(str));
+        return smallestLastindicesOfAll(str, N.len(str), valuesToFind);
     }
 
     /**
@@ -6268,12 +6289,12 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      *
      * @param str
-     * @param valuesToFind
      * @param fromIndex
+     * @param valuesToFind
      * @return
-     * @see #indexOfAny(String, String[], int)
+     * @see #indexOfAny(String, int, String[])
      */
-    public static int smallestLastindicesOfAll(final String str, final String[] valuesToFind, final int fromIndex) {
+    public static int smallestLastindicesOfAll(final String str, final int fromIndex, final String... valuesToFind) {
         if (str == null || N.isEmpty(valuesToFind)) {
             return N.INDEX_NOT_FOUND;
         }
@@ -6308,7 +6329,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     @SafeVarargs
     public static int largestLastindicesOfAll(final String str, final String... valuesToFind) {
-        return largestLastindicesOfAll(str, valuesToFind, N.len(str));
+        return largestLastindicesOfAll(str, N.len(str), valuesToFind);
     }
 
     /**
@@ -6316,12 +6337,13 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      *
      * @param str
-     * @param valuesToFind
      * @param fromIndex
+     * @param valuesToFind
      * @return
-     * @see #indexOfAny(String, String[], int)
+     * @see #indexOfAny(String, int, String[])
      */
-    public static int largestLastindicesOfAll(final String str, final String[] valuesToFind, final int fromIndex) {
+    @SafeVarargs
+    public static int largestLastindicesOfAll(final String str, final int fromIndex, final String... valuesToFind) {
         if (str == null || N.isEmpty(valuesToFind)) {
             return N.INDEX_NOT_FOUND;
         }
@@ -6570,6 +6592,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     @SafeVarargs
     public static boolean containsAll(final String str, final char... valuesToFind) {
+        checkInputChars(valuesToFind, "valuesToFind", true);
+
         if (N.isEmpty(valuesToFind)) {
             return true;
         } else if (str == null || str.length() == 0) {
@@ -6654,14 +6678,14 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     @SafeVarargs
     public static boolean containsNone(final String str, final char... valuesToFind) {
+        checkInputChars(valuesToFind, "valuesToFind", true);
+
         if (isEmpty(str) || N.isEmpty(valuesToFind)) {
             return true;
         }
 
         final int strLen = str.length();
-        final int strLast = strLen - 1;
         final int chsLen = valuesToFind.length;
-        final int chsLast = chsLen - 1;
         char ch = 0;
 
         for (int i = 0; i < strLen; i++) {
@@ -6669,14 +6693,18 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
             for (int j = 0; j < chsLen; j++) {
                 if (valuesToFind[j] == ch) {
-                    if (Character.isHighSurrogate(ch)) {
-                        if ((j == chsLast) || (i < strLast && valuesToFind[j + 1] == str.charAt(i + 1))) {
-                            return false;
-                        }
-                    } else {
-                        // ch is in the Basic Multilingual Plane
-                        return false;
-                    }
+                    // checked by checkInputChars
+
+                    //    if (Character.isHighSurrogate(ch)) {
+                    //        if ((j == chsLast) || (i < strLast && valuesToFind[j + 1] == str.charAt(i + 1))) {
+                    //            return false;
+                    //        }
+                    //    } else {
+                    //        // ch is in the Basic Multilingual Plane
+                    //        return false;
+                    //    }
+
+                    return false;
                 }
             }
         }
@@ -7103,6 +7131,60 @@ public abstract sealed class Strings permits Strings.StringUtil {
     // --------- from Google Guava
 
     /**
+     * Return the char length of common prefix the specified two Strings. {@code 0} is returned if one the specified String is empty.
+     *
+     * @param a
+     * @param b
+     * @return
+     */
+    public static int lengthOfCommonPrefix(final CharSequence a, final CharSequence b) {
+        if (isEmpty(a) || isEmpty(b)) {
+            return 0;
+        }
+
+        int maxPrefixLength = Math.min(a.length(), b.length());
+        int cnt = 0;
+
+        while (cnt < maxPrefixLength && a.charAt(cnt) == b.charAt(cnt)) {
+            cnt++;
+        }
+
+        if (validSurrogatePairAt(a, cnt - 1) || validSurrogatePairAt(b, cnt - 1)) {
+            cnt--;
+        }
+
+        return cnt;
+    }
+
+    /**
+     * Return the char length of common suffix the specified two Strings. {@code 0} is returned if one the specified String is empty.
+     *
+     * @param a
+     * @param b
+     * @return
+     */
+    public static int lengthOfCommonSuffix(final CharSequence a, final CharSequence b) {
+        if (isEmpty(a) || isEmpty(b)) {
+            return 0;
+        }
+
+        final int aLength = a.length();
+        final int bLength = b.length();
+        int maxSuffixLength = Math.min(aLength, bLength);
+        int cnt = 0;
+
+        while (cnt < maxSuffixLength && a.charAt(aLength - cnt - 1) == b.charAt(bLength - cnt - 1)) {
+            cnt++;
+        }
+
+        if (validSurrogatePairAt(a, aLength - cnt - 1) || validSurrogatePairAt(b, bLength - cnt - 1)) {
+            cnt--;
+        }
+
+        return cnt;
+    }
+
+    /**
      * Note: copy rights: Google Guava.
      *
      * Returns the longest string {@code prefix} such that
@@ -7114,28 +7196,19 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param b
      * @return
      */
-    public static String commonPrefix(final String a, final String b) {
+    public static String commonPrefix(final CharSequence a, final CharSequence b) {
         if (isEmpty(a) || isEmpty(b)) {
             return EMPTY_STRING;
         }
 
-        int maxPrefixLength = Math.min(a.length(), b.length());
-        int p = 0;
+        final int commonPrefixLen = lengthOfCommonPrefix(a, b);
 
-        while (p < maxPrefixLength && a.charAt(p) == b.charAt(p)) {
-            p++;
-        }
-
-        if (validSurrogatePairAt(a, p - 1) || validSurrogatePairAt(b, p - 1)) {
-            p--;
-        }
-
-        if (p == a.length()) {
-            return a;
-        } else if (p == b.length()) {
-            return b;
+        if (commonPrefixLen == a.length()) {
+            return a.toString();
+        } else if (commonPrefixLen == b.length()) {
+            return b.toString();
         } else {
-            return a.substring(0, p);
+            return a.subSequence(0, commonPrefixLen).toString();
         }
     }
 
@@ -7145,13 +7218,13 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @return
      */
     @SafeVarargs
-    public static String commonPrefix(final String... strs) {
+    public static String commonPrefix(final CharSequence... strs) {
         if (N.isEmpty(strs)) {
             return EMPTY_STRING;
         }
 
         if (strs.length == 1) {
-            return isEmpty(strs[0]) ? EMPTY_STRING : strs[0];
+            return isEmpty(strs[0]) ? EMPTY_STRING : strs[0].toString();
         }
 
         String commonPrefix = commonPrefix(strs[0], strs[1]);
@@ -7183,30 +7256,20 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param b
      * @return
      */
-    public static String commonSuffix(final String a, final String b) {
+    public static String commonSuffix(final CharSequence a, final CharSequence b) {
         if (isEmpty(a) || isEmpty(b)) {
             return EMPTY_STRING;
         }
 
         final int aLength = a.length();
-        final int bLength = b.length();
-        int maxSuffixLength = Math.min(aLength, bLength);
-        int s = 0;
+        final int commonSuffixLen = lengthOfCommonSuffix(a, b);
 
-        while (s < maxSuffixLength && a.charAt(aLength - s - 1) == b.charAt(bLength - s - 1)) {
-            s++;
-        }
-
-        if (validSurrogatePairAt(a, aLength - s - 1) || validSurrogatePairAt(b, bLength - s - 1)) {
-            s--;
-        }
-
-        if (s == aLength) {
-            return a;
-        } else if (s == bLength) {
-            return b;
+        if (commonSuffixLen == aLength) {
+            return a.toString();
+        } else if (commonSuffixLen == b.length()) {
+            return b.toString();
         } else {
-            return a.substring(aLength - s, aLength);
+            return a.subSequence(aLength - commonSuffixLen, aLength).toString();
         }
     }
 
@@ -7216,13 +7279,13 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @return
      */
     @SafeVarargs
-    public static String commonSuffix(final String... strs) {
+    public static String commonSuffix(final CharSequence... strs) {
         if (N.isEmpty(strs)) {
             return EMPTY_STRING;
         }
 
         if (strs.length == 1) {
-            return isEmpty(strs[0]) ? EMPTY_STRING : strs[0];
+            return isEmpty(strs[0]) ? EMPTY_STRING : strs[0].toString();
         }
 
         String commonSuffix = commonSuffix(strs[0], strs[1]);
@@ -7254,7 +7317,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param index
      * @return
      */
-    static boolean validSurrogatePairAt(final String str, final int index) {
+    static boolean validSurrogatePairAt(final CharSequence str, final int index) {
         return index >= 0 && index <= (str.length() - 2) && Character.isHighSurrogate(str.charAt(index)) && Character.isLowSurrogate(str.charAt(index + 1));
     }
 
@@ -7264,7 +7327,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param b
      * @return an empty String {@code ""} is {@code a} or {@code b} is empty or {@code null}.
      */
-    public static String longestCommonSubstring(final String a, final String b) {
+    public static String longestCommonSubstring(final CharSequence a, final CharSequence b) {
         if (isEmpty(a) || isEmpty(b)) {
             return EMPTY_STRING;
         }
@@ -7277,8 +7340,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
         int maxLen = 0;
 
         if (lenA > 16 || lenB > 16) {
-            final char[] chsA = a.toCharArray();
-            final char[] chsB = b.toCharArray();
+            final char[] chsA = a.toString().toCharArray();
+            final char[] chsB = b.toString().toCharArray();
+
+            checkInputChars(lenA < lenB ? chsA : chsB, "a or b", true);
 
             for (int i = 1; i <= lenA; i++) {
                 for (int j = lenB; j > 0; j--) {
@@ -7295,6 +7360,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
                 }
             }
         } else {
+            checkInputChars(lenA < lenB ? a.toString().toCharArray() : b.toString().toCharArray(), "a or b", true);
+
             for (int i = 1; i <= lenA; i++) {
                 for (int j = lenB; j > 0; j--) {
                     if (a.charAt(i - 1) == b.charAt(j - 1)) {
@@ -7315,7 +7382,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return EMPTY_STRING;
         }
 
-        return a.substring(endIndex - maxLen, endIndex);
+        return a.subSequence(endIndex - maxLen, endIndex).toString();
     }
 
     /**
@@ -7779,6 +7846,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     @MayReturnNull
     public static String substringAfterAny(String str, char... delimitersOfExclusiveBeginIndex) {
+        checkInputChars(delimitersOfExclusiveBeginIndex, "delimitersOfExclusiveBeginIndex", true);
+
         if (str == null || N.isEmpty(delimitersOfExclusiveBeginIndex)) {
             return null;
         }
@@ -7987,6 +8056,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     @MayReturnNull
     public static String substringBeforeAny(String str, char... delimitersOfExclusiveEndIndex) {
+        checkInputChars(delimitersOfExclusiveEndIndex, "delimitersOfExclusiveEndIndex", true);
+
         if (str == null || N.isEmpty(delimitersOfExclusiveEndIndex)) {
             return null;
         }
@@ -12208,6 +12279,19 @@ public abstract sealed class Strings permits Strings.StringUtil {
     @MayReturnNull
     public static String[] copyThenStrip(final String[] strs) {
         return copyThenApplyToEach(strs, Fn.strip());
+    }
+
+    static void checkInputChars(final char[] chs, final String parameterName, final boolean canBeNullOrEmpty) {
+        if (canBeNullOrEmpty == false && N.isEmpty(chs)) {
+            throw new IllegalArgumentException("Input char array or String parameter '" + parameterName + "' can't be null or empty");
+        }
+
+        for (char ch : chs) {
+            if (Character.isLowSurrogate(ch) || Character.isHighSurrogate(ch)) {
+                throw new IllegalArgumentException("Element char in the input char array or String parameter '" + parameterName
+                        + "' can't be low-surrogate or high-surrogate code unit. Please consider using String or String array instead if input parameter is char array");
+            }
+        }
     }
 
     /**

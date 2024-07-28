@@ -1551,10 +1551,10 @@ public final class Sheet<R, C, V> implements Cloneable {
     }
 
     /**
-     * 
      *
-     * @param rowKey 
-     * @param cmp 
+     *
+     * @param rowKey
+     * @param cmp
      */
     public void sortByRow(final R rowKey, final Comparator<? super V> cmp) {
         checkFrozen();
@@ -1621,13 +1621,24 @@ public final class Sheet<R, C, V> implements Cloneable {
         }
     }
 
+    //    /**
+    //     *
+    //     *
+    //     * @param rowKeysToSort
+    //     * @param cmp
+    //     * @deprecated Use {@link #sortByRows(Collection<R>,Comparator<? super Object[]>)} instead
+    //     */
+    //    public void sortByRow(Collection<R> rowKeysToSort, Comparator<? super Object[]> cmp) {
+    //        sortByRows(rowKeysToSort, cmp);
+    //    }
+
     /**
-     * 
      *
-     * @param rowKeysToSort 
-     * @param cmp 
+     *
+     * @param rowKeysToSort
+     * @param cmp
      */
-    public void sortByRow(Collection<R> rowKeysToSort, Comparator<? super Object[]> cmp) {
+    public void sortByRows(Collection<R> rowKeysToSort, Comparator<? super Object[]> cmp) {
         checkFrozen();
 
         if (!_initialized) {
@@ -1706,10 +1717,10 @@ public final class Sheet<R, C, V> implements Cloneable {
     }
 
     /**
-     * 
      *
-     * @param columnKey 
-     * @param cmp 
+     *
+     * @param columnKey
+     * @param cmp
      */
     public void sortByColumn(final C columnKey, final Comparator<? super V> cmp) {
         checkFrozen();
@@ -1786,13 +1797,24 @@ public final class Sheet<R, C, V> implements Cloneable {
         }
     }
 
+    //    /**
+    //     *
+    //     *
+    //     * @param columnKeysToSort
+    //     * @param cmp
+    //     * @deprecated Use {@link #sortByColumns(Collection<C>,Comparator<? super Object[]>)} instead
+    //     */
+    //    public void sortByColumn(Collection<C> columnKeysToSort, Comparator<? super Object[]> cmp) {
+    //        sortByColumns(columnKeysToSort, cmp);
+    //    }
+
     /**
-     * 
      *
-     * @param columnKeysToSort 
-     * @param cmp 
+     *
+     * @param columnKeysToSort
+     * @param cmp
      */
-    public void sortByColumn(Collection<C> columnKeysToSort, Comparator<? super Object[]> cmp) {
+    public void sortByColumns(Collection<C> columnKeysToSort, Comparator<? super Object[]> cmp) {
         checkFrozen();
 
         if (!_initialized) {

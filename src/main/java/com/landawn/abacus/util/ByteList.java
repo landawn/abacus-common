@@ -1821,6 +1821,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      *
      * @return
      */
+    @Override
     public List<Byte> boxed() {
         return boxed(0, size);
     }
@@ -1833,6 +1834,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @return
      * @throws IndexOutOfBoundsException
      */
+    @Override
     public List<Byte> boxed(int fromIndex, int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
 

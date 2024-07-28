@@ -1613,6 +1613,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      *
      * @return
      */
+    @Override
     public List<Boolean> boxed() {
         return boxed(0, size);
     }
@@ -1625,6 +1626,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * @return
      * @throws IndexOutOfBoundsException
      */
+    @Override
     public List<Boolean> boxed(int fromIndex, int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
 

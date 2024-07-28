@@ -1826,6 +1826,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      *
      * @return
      */
+    @Override
     public List<Double> boxed() {
         return boxed(0, size);
     }
@@ -1838,6 +1839,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @return
      * @throws IndexOutOfBoundsException
      */
+    @Override
     public List<Double> boxed(int fromIndex, int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
 

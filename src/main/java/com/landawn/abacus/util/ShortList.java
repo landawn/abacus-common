@@ -1870,6 +1870,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      *
      * @return
      */
+    @Override
     public List<Short> boxed() {
         return boxed(0, size);
     }
@@ -1882,6 +1883,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @return
      * @throws IndexOutOfBoundsException
      */
+    @Override
     public List<Short> boxed(int fromIndex, int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
 

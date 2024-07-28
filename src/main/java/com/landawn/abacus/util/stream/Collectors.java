@@ -89,6 +89,7 @@ import com.landawn.abacus.util.ObjIterator;
 import com.landawn.abacus.util.Pair;
 import com.landawn.abacus.util.ShortList;
 import com.landawn.abacus.util.ShortSummaryStatistics;
+import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.Tuple;
 import com.landawn.abacus.util.Tuple.Tuple2;
 import com.landawn.abacus.util.Tuple.Tuple3;
@@ -3912,40 +3913,43 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         final BiConsumer<Pair<CharSequence, Integer>, CharSequence> accumulator = (a, t) -> {
             if (a.right == -1) {
                 a.left = t;
-                a.right = t.length();
+                a.right = N.len(t);
             } else if (a.right > 0) {
-                if (t.length() < a.right) {
-                    a.right = t.length();
-                }
+                //    if (t.length() < a.right) {
+                //        a.right = t.length();
+                //    }
+                //
+                //    for (int i = 0, to = a.right; i < to; i++) {
+                //        if (a.left.charAt(i) != t.charAt(i)) {
+                //            if (i > 0 && Character.isHighSurrogate(t.charAt(i - 1))
+                //                    && (Character.isLowSurrogate(t.charAt(i)) || Character.isLowSurrogate(a.left.charAt(i)))) {
+                //                i--; // NOSONAR
+                //            }
+                //
+                //            a.right = i;
+                //
+                //            break;
+                //        }
+                //    }
 
-                for (int i = 0, to = a.right; i < to; i++) {
-                    if (a.left.charAt(i) != t.charAt(i)) {
-                        if (i > 0 && Character.isHighSurrogate(t.charAt(i - 1))
-                                && (Character.isLowSurrogate(t.charAt(i)) || Character.isLowSurrogate(a.left.charAt(i)))) {
-                            i--; // NOSONAR
-                        }
-
-                        a.right = i;
-
-                        break;
-                    }
-                }
+                a.right = Strings.lengthOfCommonPrefix(a.left, t);
+                a.left = N.len(t) < N.len(a.left) ? t : a.left;
             }
         };
 
         final BinaryOperator<Pair<CharSequence, Integer>> combiner = (a, b) -> {
             if (a.right == -1) {
                 return b;
+            } else if (b.right == -1) {
+                return a;
             }
 
-            if (b.right != -1) {
-                accumulator.accept(a, b.left.subSequence(0, b.right));
-            }
+            accumulator.accept(a, b.right == 0 ? "" : b.left.subSequence(0, b.right));
 
             return a;
         };
 
-        final Function<Pair<CharSequence, Integer>, String> finisher = a -> a.left == null ? "" : a.left.subSequence(0, a.right).toString();
+        final Function<Pair<CharSequence, Integer>, String> finisher = a -> a.left == null || a.right <= 0 ? "" : a.left.subSequence(0, a.right).toString();
 
         return new CollectorImpl<>(supplier, accumulator, combiner, finisher, CH_UNORDERED_NOID);
     }
@@ -3984,42 +3988,53 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
                 a.left = t;
                 a.right = t.length();
             } else if (a.right > 0) {
-                int alen = a.left.length();
-                int blen = t.length();
+                //    int alen = a.left.length();
+                //    int blen = t.length();
+                //
+                //    if (blen < a.right) {
+                //        a.right = blen;
+                //    }
+                //
+                //    for (int i = 0, to = a.right; i < to; i++) {
+                //        if (a.left.charAt(alen - 1 - i) != t.charAt(blen - 1 - i)) {
+                //            if (i > 0 && Character.isLowSurrogate(t.charAt(blen - i))
+                //                    && (Character.isHighSurrogate(t.charAt(blen - 1 - i)) || Character.isHighSurrogate(a.left.charAt(alen - 1 - i)))) {
+                //                i--; // NOSONAR
+                //            }
+                //
+                //            a.right = i;
+                //
+                //            break;
+                //        }
+                //    }
 
-                if (blen < a.right) {
-                    a.right = blen;
-                }
-
-                for (int i = 0, to = a.right; i < to; i++) {
-                    if (a.left.charAt(alen - 1 - i) != t.charAt(blen - 1 - i)) {
-                        if (i > 0 && Character.isLowSurrogate(t.charAt(blen - i))
-                                && (Character.isHighSurrogate(t.charAt(blen - 1 - i)) || Character.isHighSurrogate(a.left.charAt(alen - 1 - i)))) {
-                            i--; // NOSONAR
-                        }
-
-                        a.right = i;
-
-                        break;
-                    }
-                }
+                a.right = Strings.lengthOfCommonSuffix(a.left, t);
+                a.left = N.len(t) < N.len(a.left) ? t : a.left;
             }
         };
 
         final BinaryOperator<Pair<CharSequence, Integer>> combiner = (a, b) -> {
             if (a.right == -1) {
                 return b;
+            } else if (b.right == -1) {
+                return a;
             }
 
-            if (b.right != -1) {
-                accumulator.accept(a, b.left.subSequence(b.left.length() - b.right, b.left.length()));
-            }
+            final int bLen = b.left.length();
+
+            accumulator.accept(a, b.right == 0 ? "" : b.left.subSequence(bLen - b.right, bLen));
 
             return a;
         };
 
-        final Function<Pair<CharSequence, Integer>, String> finisher = a -> a.left == null ? ""
-                : a.left.subSequence(a.left.length() - a.right, a.left.length()).toString();
+        final Function<Pair<CharSequence, Integer>, String> finisher = a -> {
+            if (a.left == null || a.right <= 0) {
+                return "";
+            }
+
+            final int aLen = a.left.length();
+            return a.left.subSequence(aLen - a.right, aLen).toString();
+        };
 
         return new CollectorImpl<>(supplier, accumulator, combiner, finisher, CH_UNORDERED_NOID);
     }

@@ -1828,6 +1828,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      *
      * @return
      */
+    @Override
     public List<Float> boxed() {
         return boxed(0, size);
     }
@@ -1840,6 +1841,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * @return
      * @throws IndexOutOfBoundsException
      */
+    @Override
     public List<Float> boxed(int fromIndex, int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
 

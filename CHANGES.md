@@ -1,3 +1,7 @@
+### 5.3.1
+
+* Improvements and bug fixes.
+
 ### 5.3.0
 
 * Improvements and bug fixes.

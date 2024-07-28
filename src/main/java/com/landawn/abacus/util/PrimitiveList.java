@@ -517,8 +517,8 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      *
      * @return
      */
-    public List<B> toList() {
-        return toList(0, size());
+    public List<B> boxed() {
+        return boxed(0, size());
     }
 
     /**
@@ -527,8 +527,29 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * @param toIndex
      * @return
      */
+    public abstract List<B> boxed(final int fromIndex, final int toIndex);
+
+    /**
+     *
+     *
+     * @return
+     * @deprecated use {@link #boxed()} instead.
+     */
+    @Deprecated
+    public List<B> toList() {
+        return boxed();
+    }
+
+    /**
+     *
+     * @param fromIndex
+     * @param toIndex
+     * @return
+     * @deprecated use {@link #boxed(int, int)} instead.
+     */
+    @Deprecated
     public List<B> toList(final int fromIndex, final int toIndex) {
-        return toCollection(fromIndex, toIndex, Factory.<B> ofList());
+        return boxed(fromIndex, toIndex);
     }
 
     /**

@@ -6801,17 +6801,17 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
         return filter(Fnn.notNull());
     }
 
-    /**
-     *
-     *
-     * @return
-     * @deprecated Use {@link #skipNulls()} instead
-     */
-    @Deprecated
-    @IntermediateOp
-    public CheckedStream<T, E> skipNull() {
-        return skipNulls();
-    }
+    //    /**
+    //     *
+    //     *
+    //     * @return
+    //     * @deprecated Use {@link #skipNulls()} instead
+    //     */
+    //    @Deprecated
+    //    @IntermediateOp
+    //    public CheckedStream<T, E> skipNull() {
+    //        return skipNulls();
+    //    }
 
     /**
      *

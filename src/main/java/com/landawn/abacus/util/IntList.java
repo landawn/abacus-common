@@ -1928,6 +1928,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      *
      * @return
      */
+    @Override
     public List<Integer> boxed() {
         return boxed(0, size);
     }
@@ -1940,6 +1941,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * @return
      * @throws IndexOutOfBoundsException
      */
+    @Override
     public List<Integer> boxed(int fromIndex, int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
 

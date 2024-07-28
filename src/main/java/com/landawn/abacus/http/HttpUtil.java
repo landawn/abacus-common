@@ -945,7 +945,7 @@ public final class HttpUtil {
 
         if ((fromIndex = contentType.indexOf("charset")) >= 0) {
             fromIndex = contentType.indexOf('=', fromIndex) + 1;
-            int endIndex = Strings.indexOfAny(contentType, Array.of(';', ','), fromIndex);
+            int endIndex = Strings.indexOfAny(contentType, fromIndex, Array.of(';', ','));
 
             return Charset.forName(endIndex < 0 ? contentType.substring(fromIndex).trim() : contentType.substring(fromIndex, endIndex).trim());
         }
