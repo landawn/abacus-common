@@ -478,11 +478,11 @@ public class u {//NOSONAR
         /**
          *
          *
-         * @param element
+         * @param valueToFind
          * @return
          */
-        public boolean contains(final T element) {
-            return isPresent() && N.equals(this.value, element);
+        public boolean contains(final T valueToFind) {
+            return isPresent() && N.equals(this.value, valueToFind);
         }
 
         /**
@@ -1023,6 +1023,44 @@ public class u {//NOSONAR
         }
 
         /**
+         * Map to Long.
+         *
+         * @param <E>
+         * @param mapper
+         * @return
+         * @throws IllegalArgumentException
+         * @throws E the e
+         */
+        public <E extends Exception> OptionalLong mapToLong(final Throwables.ToLongFunction<Boolean, E> mapper) throws IllegalArgumentException, E {
+            N.checkArgNotNull(mapper, "mapper");
+
+            if (isPresent) {
+                return OptionalLong.of(mapper.applyAsLong(value));
+            } else {
+                return OptionalLong.empty();
+            }
+        }
+
+        /**
+         * Map to Double.
+         *
+         * @param <E>
+         * @param mapper
+         * @return
+         * @throws IllegalArgumentException
+         * @throws E the e
+         */
+        public <E extends Exception> OptionalDouble mapToDouble(final Throwables.ToDoubleFunction<Boolean, E> mapper) throws IllegalArgumentException, E {
+            N.checkArgNotNull(mapper, "mapper");
+
+            if (isPresent) {
+                return OptionalDouble.of(mapper.applyAsDouble(value));
+            } else {
+                return OptionalDouble.empty();
+            }
+        }
+
+        /**
          * Map to obj.
          *
          * @param <T>
@@ -1087,8 +1125,8 @@ public class u {//NOSONAR
         //         * @param element
         //         * @return
         //         */
-        //        public boolean contains(final boolean element) {
-        //            return isPresent() && N.equals(this.value, element);
+        //        public boolean contains(final boolean valueToFind) {
+        //            return isPresent() && N.equals(this.value, valueToFind);
         //        }
         //
         //        /**
@@ -1097,8 +1135,8 @@ public class u {//NOSONAR
         //         * @param element
         //         * @return
         //         */
-        //        public boolean contains(final Boolean element) {
-        //            return element != null && isPresent() && N.equals(this.value, element.booleanValue());
+        //        public boolean contains(final Boolean valueToFind) {
+        //            return valueToFind != null && isPresent() && N.equals(this.value, valueToFind.booleanValue());
         //        }
 
         /**
@@ -1714,8 +1752,8 @@ public class u {//NOSONAR
         //         * @param element
         //         * @return
         //         */
-        //        public boolean contains(final char element) {
-        //            return isPresent() && N.equals(this.value, element);
+        //        public boolean contains(final char valueToFind) {
+        //            return isPresent() && N.equals(this.value, valueToFind);
         //        }
         //
         //        /**
@@ -1724,8 +1762,8 @@ public class u {//NOSONAR
         //         * @param element
         //         * @return
         //         */
-        //        public boolean contains(final Character element) {
-        //            return element != null && isPresent() && N.equals(this.value, element.charValue());
+        //        public boolean contains(final Character valueToFind) {
+        //            return valueToFind != null && isPresent() && N.equals(this.value, valueToFind.charValue());
         //        }
 
         /**
@@ -2312,8 +2350,8 @@ public class u {//NOSONAR
         //         * @param element
         //         * @return
         //         */
-        //        public boolean contains(final byte element) {
-        //            return isPresent() && N.equals(this.value, element);
+        //        public boolean contains(final byte valueToFind) {
+        //            return isPresent() && N.equals(this.value, valueToFind);
         //        }
         //
         //        /**
@@ -2322,8 +2360,8 @@ public class u {//NOSONAR
         //         * @param element
         //         * @return
         //         */
-        //        public boolean contains(final Byte element) {
-        //            return element != null && isPresent() && N.equals(this.value, element.byteValue());
+        //        public boolean contains(final Byte valueToFind) {
+        //            return valueToFind != null && isPresent() && N.equals(this.value, valueToFind.byteValue());
         //        }
 
         /**
@@ -2910,8 +2948,8 @@ public class u {//NOSONAR
         //         * @param element
         //         * @return
         //         */
-        //        public boolean contains(final short element) {
-        //            return isPresent() && N.equals(this.value, element);
+        //        public boolean contains(final short valueToFind) {
+        //            return isPresent() && N.equals(this.value, valueToFind);
         //        }
         //
         //        /**
@@ -2920,8 +2958,8 @@ public class u {//NOSONAR
         //         * @param element
         //         * @return
         //         */
-        //        public boolean contains(final Short element) {
-        //            return element != null && isPresent() && N.equals(this.value, element.shortValue());
+        //        public boolean contains(final Short valueToFind) {
+        //            return valueToFind != null && isPresent() && N.equals(this.value, valueToFind.shortValue());
         //        }
 
         /**
@@ -3597,8 +3635,8 @@ public class u {//NOSONAR
         //         * @param element
         //         * @return
         //         */
-        //        public boolean contains(final int element) {
-        //            return isPresent() && N.equals(this.value, element);
+        //        public boolean contains(final int valueToFind) {
+        //            return isPresent() && N.equals(this.value, valueToFind);
         //        }
         //
         //        /**
@@ -3607,8 +3645,8 @@ public class u {//NOSONAR
         //         * @param element
         //         * @return
         //         */
-        //        public boolean contains(final Integer element) {
-        //            return element != null && isPresent() && N.equals(this.value, element.intValue());
+        //        public boolean contains(final Integer valueToFind) {
+        //            return valueToFind != null && isPresent() && N.equals(this.value, valueToFind.intValue());
         //        }
 
         /**
@@ -4249,8 +4287,8 @@ public class u {//NOSONAR
         //         * @param element
         //         * @return
         //         */
-        //        public boolean contains(final long element) {
-        //            return isPresent() && N.equals(this.value, element);
+        //        public boolean contains(final long valueToFind) {
+        //            return isPresent() && N.equals(this.value, valueToFind);
         //        }
         //
         //        /**
@@ -4259,8 +4297,8 @@ public class u {//NOSONAR
         //         * @param element
         //         * @return
         //         */
-        //        public boolean contains(final Long element) {
-        //            return element != null && isPresent() && N.equals(this.value, element.longValue());
+        //        public boolean contains(final Long valueToFind) {
+        //            return valueToFind != null && isPresent() && N.equals(this.value, valueToFind.longValue());
         //        }
 
         /**
@@ -4875,8 +4913,8 @@ public class u {//NOSONAR
         //         * @param element
         //         * @return
         //         */
-        //        public boolean contains(final float element) {
-        //            return isPresent() && N.equals(this.value, element);
+        //        public boolean contains(final float valueToFind) {
+        //            return isPresent() && N.equals(this.value, valueToFind);
         //        }
         //
         //        /**
@@ -4885,8 +4923,8 @@ public class u {//NOSONAR
         //         * @param element
         //         * @return
         //         */
-        //        public boolean contains(final Float element) {
-        //            return element != null && isPresent() && N.equals(this.value, element.floatValue());
+        //        public boolean contains(final Float valueToFind) {
+        //            return valueToFind != null && isPresent() && N.equals(this.value, valueToFind.floatValue());
         //        }
 
         /**
@@ -5492,8 +5530,8 @@ public class u {//NOSONAR
         //         * @param element
         //         * @return
         //         */
-        //        public boolean contains(final double element) {
-        //            return isPresent() && N.equals(this.value, element);
+        //        public boolean contains(final double valueToFind) {
+        //            return isPresent() && N.equals(this.value, valueToFind);
         //        }
         //
         //        /**
@@ -5502,8 +5540,8 @@ public class u {//NOSONAR
         //         * @param element
         //         * @return
         //         */
-        //        public boolean contains(final Double element) {
-        //            return element != null && isPresent() && N.equals(this.value, element.doubleValue());
+        //        public boolean contains(final Double valueToFind) {
+        //            return valueToFind != null && isPresent() && N.equals(this.value, valueToFind.doubleValue());
         //        }
 
         /**
@@ -6567,11 +6605,11 @@ public class u {//NOSONAR
         /**
          *
          *
-         * @param element
+         * @param valueToFind
          * @return
          */
-        public boolean contains(final T element) {
-            return isPresent() && N.equals(this.value, element);
+        public boolean contains(final T valueToFind) {
+            return isPresent() && N.equals(this.value, valueToFind);
         }
 
         /**

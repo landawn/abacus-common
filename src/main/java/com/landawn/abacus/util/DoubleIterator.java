@@ -489,7 +489,7 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
      * @throws IllegalArgumentException 
      * @throws E 
      */
-    public <E extends Exception> void foreachIndexed(Throwables.IndexedDoubleConsumer<E> action) throws IllegalArgumentException, E {
+    public <E extends Exception> void foreachIndexed(Throwables.IntDoubleConsumer<E> action) throws IllegalArgumentException, E {
         N.checkArgNotNull(action);
 
         int idx = 0;

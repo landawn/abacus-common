@@ -2034,14 +2034,14 @@ public final class Fn {
     /**
      *
      *
-     * @param str
+     * @param valueToFind
      * @return
      * @throws IllegalArgumentException
      */
-    public static Predicate<String> contains(final String str) throws IllegalArgumentException {
-        N.checkArgNotNull(str);
+    public static Predicate<String> contains(final String valueToFind) throws IllegalArgumentException {
+        N.checkArgNotNull(valueToFind);
 
-        return value -> value != null && value.contains(str);
+        return value -> value != null && value.contains(valueToFind);
     }
 
     /**
@@ -5291,7 +5291,7 @@ public final class Fn {
 
             @Override
             public MergeResult apply(T t, T u) {
-                return flag.getAndInvert() ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND;
+                return flag.getAndNegate() ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND;
             }
         };
     }
@@ -8986,7 +8986,7 @@ public final class Fn {
 
                 @Override
                 public MergeResult apply(char t, char u) {
-                    return flag.getAndInvert() ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND;
+                    return flag.getAndNegate() ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND;
                 }
             };
         }
@@ -9198,7 +9198,7 @@ public final class Fn {
 
                 @Override
                 public MergeResult apply(byte t, byte u) {
-                    return flag.getAndInvert() ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND;
+                    return flag.getAndNegate() ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND;
                 }
             };
         }
@@ -9410,7 +9410,7 @@ public final class Fn {
 
                 @Override
                 public MergeResult apply(short t, short u) {
-                    return flag.getAndInvert() ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND;
+                    return flag.getAndNegate() ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND;
                 }
             };
         }
@@ -9622,7 +9622,7 @@ public final class Fn {
 
                 @Override
                 public MergeResult apply(int t, int u) {
-                    return flag.getAndInvert() ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND;
+                    return flag.getAndNegate() ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND;
                 }
             };
         }
@@ -9834,7 +9834,7 @@ public final class Fn {
 
                 @Override
                 public MergeResult apply(long t, long u) {
-                    return flag.getAndInvert() ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND;
+                    return flag.getAndNegate() ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND;
                 }
             };
         }
@@ -10046,7 +10046,7 @@ public final class Fn {
 
                 @Override
                 public MergeResult apply(float t, float u) {
-                    return flag.getAndInvert() ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND;
+                    return flag.getAndNegate() ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND;
                 }
             };
         }
@@ -10258,7 +10258,7 @@ public final class Fn {
 
                 @Override
                 public MergeResult apply(double t, double u) {
-                    return flag.getAndInvert() ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND;
+                    return flag.getAndNegate() ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND;
                 }
             };
         }

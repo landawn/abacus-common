@@ -60,10 +60,10 @@ public abstract class Tuple<TP> implements Immutable {
 
     /**
      *
-     * @param objToFind
+     * @param valueToFind
      * @return
      */
-    public abstract boolean contains(final Object objToFind);
+    public abstract boolean contains(final Object valueToFind);
 
     /**
      *
@@ -619,7 +619,7 @@ public abstract class Tuple<TP> implements Immutable {
         }
 
         @Override
-        public boolean contains(final Object objToFind) {
+        public boolean contains(final Object valueToFind) {
             return false;
         }
 
@@ -702,12 +702,12 @@ public abstract class Tuple<TP> implements Immutable {
         /**
          *
          *
-         * @param objToFind
+         * @param valueToFind
          * @return
          */
         @Override
-        public boolean contains(final Object objToFind) {
-            return N.equals(_1, objToFind);
+        public boolean contains(final Object valueToFind) {
+            return N.equals(_1, valueToFind);
         }
 
         /**
@@ -862,12 +862,12 @@ public abstract class Tuple<TP> implements Immutable {
         /**
          *
          *
-         * @param objToFind
+         * @param valueToFind
          * @return
          */
         @Override
-        public boolean contains(final Object objToFind) {
-            return N.equals(_1, objToFind) || N.equals(_2, objToFind);
+        public boolean contains(final Object valueToFind) {
+            return N.equals(_1, valueToFind) || N.equals(_2, valueToFind);
         }
 
         /**
@@ -1079,12 +1079,12 @@ public abstract class Tuple<TP> implements Immutable {
         /**
          *
          *
-         * @param objToFind
+         * @param valueToFind
          * @return
          */
         @Override
-        public boolean contains(final Object objToFind) {
-            return N.equals(_1, objToFind) || N.equals(_2, objToFind) || N.equals(_3, objToFind);
+        public boolean contains(final Object valueToFind) {
+            return N.equals(_1, valueToFind) || N.equals(_2, valueToFind) || N.equals(_3, valueToFind);
         }
 
         /**
@@ -1298,12 +1298,12 @@ public abstract class Tuple<TP> implements Immutable {
         /**
          *
          *
-         * @param objToFind
+         * @param valueToFind
          * @return
          */
         @Override
-        public boolean contains(final Object objToFind) {
-            return N.equals(_1, objToFind) || N.equals(_2, objToFind) || N.equals(_3, objToFind) || N.equals(_4, objToFind);
+        public boolean contains(final Object valueToFind) {
+            return N.equals(_1, valueToFind) || N.equals(_2, valueToFind) || N.equals(_3, valueToFind) || N.equals(_4, valueToFind);
         }
 
         /**
@@ -1484,12 +1484,13 @@ public abstract class Tuple<TP> implements Immutable {
         /**
          *
          *
-         * @param objToFind
+         * @param valueToFind
          * @return
          */
         @Override
-        public boolean contains(final Object objToFind) {
-            return N.equals(_1, objToFind) || N.equals(_2, objToFind) || N.equals(_3, objToFind) || N.equals(_4, objToFind) || N.equals(_5, objToFind);
+        public boolean contains(final Object valueToFind) {
+            return N.equals(_1, valueToFind) || N.equals(_2, valueToFind) || N.equals(_3, valueToFind) || N.equals(_4, valueToFind)
+                    || N.equals(_5, valueToFind);
         }
 
         /**
@@ -1680,13 +1681,13 @@ public abstract class Tuple<TP> implements Immutable {
         /**
          *
          *
-         * @param objToFind
+         * @param valueToFind
          * @return
          */
         @Override
-        public boolean contains(final Object objToFind) {
-            return N.equals(_1, objToFind) || N.equals(_2, objToFind) || N.equals(_3, objToFind) || N.equals(_4, objToFind) || N.equals(_5, objToFind)
-                    || N.equals(_6, objToFind);
+        public boolean contains(final Object valueToFind) {
+            return N.equals(_1, valueToFind) || N.equals(_2, valueToFind) || N.equals(_3, valueToFind) || N.equals(_4, valueToFind) || N.equals(_5, valueToFind)
+                    || N.equals(_6, valueToFind);
         }
 
         /**
@@ -1887,13 +1888,13 @@ public abstract class Tuple<TP> implements Immutable {
         /**
          *
          *
-         * @param objToFind
+         * @param valueToFind
          * @return
          */
         @Override
-        public boolean contains(final Object objToFind) {
-            return N.equals(_1, objToFind) || N.equals(_2, objToFind) || N.equals(_3, objToFind) || N.equals(_4, objToFind) || N.equals(_5, objToFind)
-                    || N.equals(_6, objToFind) || N.equals(_7, objToFind);
+        public boolean contains(final Object valueToFind) {
+            return N.equals(_1, valueToFind) || N.equals(_2, valueToFind) || N.equals(_3, valueToFind) || N.equals(_4, valueToFind) || N.equals(_5, valueToFind)
+                    || N.equals(_6, valueToFind) || N.equals(_7, valueToFind);
         }
 
         /**
@@ -2107,13 +2108,13 @@ public abstract class Tuple<TP> implements Immutable {
         /**
          *
          *
-         * @param objToFind
+         * @param valueToFind
          * @return
          */
         @Override
-        public boolean contains(final Object objToFind) {
-            return N.equals(_1, objToFind) || N.equals(_2, objToFind) || N.equals(_3, objToFind) || N.equals(_4, objToFind) || N.equals(_5, objToFind)
-                    || N.equals(_6, objToFind) || N.equals(_7, objToFind) || N.equals(_8, objToFind);
+        public boolean contains(final Object valueToFind) {
+            return N.equals(_1, valueToFind) || N.equals(_2, valueToFind) || N.equals(_3, valueToFind) || N.equals(_4, valueToFind) || N.equals(_5, valueToFind)
+                    || N.equals(_6, valueToFind) || N.equals(_7, valueToFind) || N.equals(_8, valueToFind);
         }
 
         /**
@@ -2337,13 +2338,13 @@ public abstract class Tuple<TP> implements Immutable {
         /**
          *
          *
-         * @param objToFind
+         * @param valueToFind
          * @return
          */
         @Override
-        public boolean contains(final Object objToFind) {
-            return N.equals(_1, objToFind) || N.equals(_2, objToFind) || N.equals(_3, objToFind) || N.equals(_4, objToFind) || N.equals(_5, objToFind)
-                    || N.equals(_6, objToFind) || N.equals(_7, objToFind) || N.equals(_8, objToFind) || N.equals(_9, objToFind);
+        public boolean contains(final Object valueToFind) {
+            return N.equals(_1, valueToFind) || N.equals(_2, valueToFind) || N.equals(_3, valueToFind) || N.equals(_4, valueToFind) || N.equals(_5, valueToFind)
+                    || N.equals(_6, valueToFind) || N.equals(_7, valueToFind) || N.equals(_8, valueToFind) || N.equals(_9, valueToFind);
         }
 
         /**

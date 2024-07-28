@@ -54,6 +54,7 @@ import com.landawn.abacus.parser.ParserFactory;
 import com.landawn.abacus.parser.SerializationConfig;
 import com.landawn.abacus.parser.XMLParser;
 import com.landawn.abacus.util.AndroidUtil;
+import com.landawn.abacus.util.Array;
 import com.landawn.abacus.util.AsyncExecutor;
 import com.landawn.abacus.util.Charsets;
 import com.landawn.abacus.util.IOUtil;
@@ -944,7 +945,7 @@ public final class HttpUtil {
 
         if ((fromIndex = contentType.indexOf("charset")) >= 0) {
             fromIndex = contentType.indexOf('=', fromIndex) + 1;
-            int endIndex = Strings.indexOfAny(contentType, fromIndex, ';', ',');
+            int endIndex = Strings.indexOfAny(contentType, Array.of(';', ','), fromIndex);
 
             return Charset.forName(endIndex < 0 ? contentType.substring(fromIndex).trim() : contentType.substring(fromIndex, endIndex).trim());
         }

@@ -488,7 +488,7 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
      * @throws IllegalArgumentException 
      * @throws E the e
      */
-    public <E extends Exception> void foreachIndexed(Throwables.IndexedByteConsumer<E> action) throws IllegalArgumentException, E {
+    public <E extends Exception> void foreachIndexed(Throwables.IntByteConsumer<E> action) throws IllegalArgumentException, E {
         N.checkArgNotNull(action);
 
         int idx = 0;

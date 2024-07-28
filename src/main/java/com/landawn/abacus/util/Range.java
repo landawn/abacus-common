@@ -197,16 +197,16 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      * Checks whether the specified element occurs within this range.
      * </p>
      *
-     * @param element
+     * @param valueToFind
      *            the element to check for, null returns false
      * @return true if the specified element occurs within this range
      */
-    public boolean contains(final T element) {
-        if (element == null) {
+    public boolean contains(final T valueToFind) {
+        if (valueToFind == null) {
             return false;
         }
 
-        return lowerEndpoint.includes(element) && upperEndpoint.includes(element);
+        return lowerEndpoint.includes(valueToFind) && upperEndpoint.includes(valueToFind);
     }
 
     /**

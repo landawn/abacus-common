@@ -28,35 +28,35 @@ public final class ConcurrentHashSet<E> extends AbstractSet<E> {
     private final ConcurrentHashMap<E, Object> map;
 
     /**
-     * 
+     *
      */
     public ConcurrentHashSet() {
         map = new ConcurrentHashMap<>();
     }
 
     /**
-     * 
      *
-     * @param initialCapacity 
+     *
+     * @param initialCapacity
      */
     public ConcurrentHashSet(int initialCapacity) {
         map = new ConcurrentHashMap<>(initialCapacity);
     }
 
     /**
-     * 
      *
-     * @param initialCapacity 
-     * @param loadFactor 
+     *
+     * @param initialCapacity
+     * @param loadFactor
      */
     public ConcurrentHashSet(int initialCapacity, float loadFactor) {
         map = new ConcurrentHashMap<>(initialCapacity, loadFactor);
     }
 
     /**
-     * 
      *
-     * @param c 
+     *
+     * @param c
      */
     public ConcurrentHashSet(Collection<? extends E> c) {
         map = new ConcurrentHashMap<>(Math.max((int) (c.size() / .75f) + 1, 16));
@@ -64,9 +64,9 @@ public final class ConcurrentHashSet<E> extends AbstractSet<E> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public boolean isEmpty() {
@@ -74,10 +74,10 @@ public final class ConcurrentHashSet<E> extends AbstractSet<E> {
     }
 
     /**
-     * 
      *
-     * @param e 
-     * @return 
+     *
+     * @param e
+     * @return
      */
     @Override
     public boolean add(E e) {
@@ -85,10 +85,10 @@ public final class ConcurrentHashSet<E> extends AbstractSet<E> {
     }
 
     /**
-     * 
      *
-     * @param o 
-     * @return 
+     *
+     * @param o
+     * @return
      */
     @Override
     public boolean remove(Object o) {
@@ -96,7 +96,7 @@ public final class ConcurrentHashSet<E> extends AbstractSet<E> {
     }
 
     /**
-     * 
+     *
      */
     @Override
     public void clear() {
@@ -104,20 +104,20 @@ public final class ConcurrentHashSet<E> extends AbstractSet<E> {
     }
 
     /**
-     * 
      *
-     * @param o 
-     * @return 
+     *
+     * @param valueToFind
+     * @return
      */
     @Override
-    public boolean contains(Object o) {
-        return map.containsKey(o);
+    public boolean contains(final Object valueToFind) {
+        return map.containsKey(valueToFind);
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public Iterator<E> iterator() {
@@ -125,9 +125,9 @@ public final class ConcurrentHashSet<E> extends AbstractSet<E> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public int size() {
@@ -135,9 +135,9 @@ public final class ConcurrentHashSet<E> extends AbstractSet<E> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public int hashCode() {
@@ -145,10 +145,10 @@ public final class ConcurrentHashSet<E> extends AbstractSet<E> {
     }
 
     /**
-     * 
      *
-     * @param o 
-     * @return 
+     *
+     * @param o
+     * @return
      */
     @Override
     public boolean equals(Object o) {
@@ -160,9 +160,9 @@ public final class ConcurrentHashSet<E> extends AbstractSet<E> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public String toString() {

@@ -657,6 +657,7 @@ public final class Futures {
     }
 
     /**
+     * Returns an {@code Iterator} with elements got from the specified {@code futures}, first finished future, first out.
      *
      * @param <T>
      * @param cfs
@@ -668,6 +669,7 @@ public final class Futures {
     }
 
     /**
+     * Returns an {@code Iterator} with elements got from the specified {@code futures}, first finished future, first out.
      *
      * @param <T>
      * @param cfs
@@ -678,6 +680,7 @@ public final class Futures {
     }
 
     /**
+     * Returns an {@code Iterator} with elements got from the specified {@code futures}, first finished future, first out.
      *
      * @param <T>
      * @param cfs
@@ -691,6 +694,7 @@ public final class Futures {
     }
 
     /**
+     * Returns an {@code Iterator} with elements got from the specified {@code futures}, first finished future, first out.
      *
      * @param <T>
      * @param cfs
@@ -701,6 +705,7 @@ public final class Futures {
     }
 
     /**
+     * Returns an {@code Iterator} with elements got from the specified {@code futures}, first finished future, first out.
      *
      * @param <T>
      * @param cfs
@@ -727,6 +732,7 @@ public final class Futures {
     }
 
     /**
+     * Returns an {@code Iterator} with elements got from the specified {@code futures}, first finished future, first out.
      *
      * @param <T>
      * @param <R>
@@ -740,6 +746,7 @@ public final class Futures {
     }
 
     /**
+     * Returns an {@code Iterator} with elements got from the specified {@code futures}, first finished future, first out.
      *
      *
      * @param <T>

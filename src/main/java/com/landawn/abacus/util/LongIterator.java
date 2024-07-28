@@ -488,7 +488,7 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
      * @throws IllegalArgumentException 
      * @throws E the e
      */
-    public <E extends Exception> void foreachIndexed(Throwables.IndexedLongConsumer<E> action) throws IllegalArgumentException, E {
+    public <E extends Exception> void foreachIndexed(Throwables.IntLongConsumer<E> action) throws IllegalArgumentException, E {
         N.checkArgNotNull(action);
 
         int idx = 0;

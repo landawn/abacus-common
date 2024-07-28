@@ -79,11 +79,11 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
     }
 
     /**
-     * 
      *
-     * @param a 
-     * @param size 
-     * @throws IndexOutOfBoundsException 
+     *
+     * @param a
+     * @param size
+     * @throws IndexOutOfBoundsException
      */
     public LongList(long[] a, int size) throws IndexOutOfBoundsException {
         N.checkFromIndexSize(0, size, a.length);
@@ -103,12 +103,12 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
     }
 
     /**
-     * 
      *
-     * @param a 
-     * @param size 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     *
+     * @param a
+     * @param size
+     * @return
+     * @throws IndexOutOfBoundsException
      */
     public static LongList of(final long[] a, final int size) throws IndexOutOfBoundsException {
         N.checkFromIndexSize(0, size, N.len(a));
@@ -171,13 +171,13 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
     }
 
     /**
-     * 
      *
-     * @param c 
-     * @param fromIndex 
-     * @param toIndex 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     *
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @return
+     * @throws IndexOutOfBoundsException
      */
     public static LongList from(final Collection<Long> c, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, N.size(c));
@@ -717,11 +717,11 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
     }
 
     /**
-     * 
      *
-     * @param fromIndex 
-     * @param toIndex 
-     * @throws IndexOutOfBoundsException 
+     *
+     * @param fromIndex
+     * @param toIndex
+     * @throws IndexOutOfBoundsException
      */
     @Override
     public void deleteRange(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -756,12 +756,49 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
     }
 
     /**
-     * 
      *
-     * @param fromIndex 
-     * @param toIndex 
-     * @param replacement 
-     * @throws IndexOutOfBoundsException 
+     *
+     * @param fromIndex
+     * @param toIndex
+     * @param replacement
+     * @throws IndexOutOfBoundsException
+     */
+    @Override
+    public void replaceRange(final int fromIndex, final int toIndex, final LongList replacement) throws IndexOutOfBoundsException {
+        N.checkFromToIndex(fromIndex, toIndex, size());
+
+        if (N.isEmpty(replacement)) {
+            deleteRange(fromIndex, toIndex);
+            return;
+        }
+
+        final int size = this.size;//NOSONAR
+        final int newSize = size - (toIndex - fromIndex) + replacement.size();
+
+        if (elementData.length < newSize) {
+            elementData = N.copyOf(elementData, newSize);
+        }
+
+        if (toIndex - fromIndex != replacement.size() && toIndex != size) {
+            N.copy(elementData, toIndex, elementData, fromIndex + replacement.size(), size - toIndex);
+        }
+
+        N.copy(replacement.elementData, 0, elementData, fromIndex, replacement.size());
+
+        if (newSize < size) {
+            N.fill(elementData, newSize, size, 0L);
+        }
+
+        this.size = newSize;
+    }
+
+    /**
+     *
+     *
+     * @param fromIndex
+     * @param toIndex
+     * @param replacement
+     * @throws IndexOutOfBoundsException
      */
     @Override
     public void replaceRange(final int fromIndex, final int toIndex, final long[] replacement) throws IndexOutOfBoundsException {
@@ -786,7 +823,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
         N.copy(replacement, 0, elementData, fromIndex, replacement.length);
 
         if (newSize < size) {
-            N.fill(elementData, newSize, size, 0);
+            N.fill(elementData, newSize, size, 0L);
         }
 
         this.size = newSize;
@@ -859,12 +896,12 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
     }
 
     /**
-     * 
      *
-     * @param fromIndex 
-     * @param toIndex 
-     * @param val 
-     * @throws IndexOutOfBoundsException 
+     *
+     * @param fromIndex
+     * @param toIndex
+     * @param val
+     * @throws IndexOutOfBoundsException
      */
     public void fill(final int fromIndex, final int toIndex, final long val) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
@@ -874,11 +911,11 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
 
     /**
      *
-     * @param e
+     * @param valueToFind
      * @return
      */
-    public boolean contains(long e) {
-        return indexOf(e) >= 0;
+    public boolean contains(final long valueToFind) {
+        return indexOf(valueToFind) >= 0;
     }
 
     /**
@@ -1141,35 +1178,35 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
 
     /**
      *
-     * @param objectToFind
+     * @param valueToFind
      * @return
      */
-    public int occurrencesOf(final long objectToFind) {
-        return N.occurrencesOf(elementData, objectToFind);
+    public int occurrencesOf(final long valueToFind) {
+        return N.occurrencesOf(elementData, valueToFind);
     }
 
     /**
      *
-     * @param e
+     * @param valueToFind
      * @return
      */
-    public int indexOf(long e) {
-        return indexOf(0, e);
+    public int indexOf(final long valueToFind) {
+        return indexOf(valueToFind, 0);
     }
 
     /**
      *
+     * @param valueToFind
      * @param fromIndex
-     * @param e
      * @return
      */
-    public int indexOf(final int fromIndex, long e) {
+    public int indexOf(final long valueToFind, final int fromIndex) {
         if (fromIndex >= size) {
             return N.INDEX_NOT_FOUND;
         }
 
         for (int i = N.max(fromIndex, 0); i < size; i++) {
-            if (elementData[i] == e) {
+            if (elementData[i] == valueToFind) {
                 return i;
             }
         }
@@ -1180,27 +1217,27 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
     /**
      * Last index of.
      *
-     * @param e
+     * @param valueToFind
      * @return
      */
-    public int lastIndexOf(long e) {
-        return lastIndexOf(size, e);
+    public int lastIndexOf(final long valueToFind) {
+        return lastIndexOf(valueToFind, size);
     }
 
     /**
      * Last index of.
+     * @param valueToFind
+     * @param startIndexFromBack the start index to traverse backwards from. Inclusive.
      *
-     * @param fromIndex the start index to traverse backwards from. Inclusive.
-     * @param e
      * @return
      */
-    public int lastIndexOf(final int fromIndex, long e) {
-        if (fromIndex < 0 || size == 0) {
+    public int lastIndexOf(final long valueToFind, final int startIndexFromBack) {
+        if (startIndexFromBack < 0 || size == 0) {
             return N.INDEX_NOT_FOUND;
         }
 
-        for (int i = N.min(fromIndex, size - 1); i >= 0; i--) {
-            if (elementData[i] == e) {
+        for (int i = N.min(startIndexFromBack, size - 1); i >= 0; i--) {
+            if (elementData[i] == valueToFind) {
                 return i;
             }
         }
@@ -1218,12 +1255,12 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
     }
 
     /**
-     * 
      *
-     * @param fromIndex 
-     * @param toIndex 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     *
+     * @param fromIndex
+     * @param toIndex
+     * @return
+     * @throws IndexOutOfBoundsException
      */
     public OptionalLong min(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
@@ -1241,12 +1278,12 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
     }
 
     /**
-     * 
      *
-     * @param fromIndex 
-     * @param toIndex 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     *
+     * @param fromIndex
+     * @param toIndex
+     * @return
+     * @throws IndexOutOfBoundsException
      */
     public OptionalLong median(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
@@ -1264,12 +1301,12 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
     }
 
     /**
-     * 
      *
-     * @param fromIndex 
-     * @param toIndex 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     *
+     * @param fromIndex
+     * @param toIndex
+     * @return
+     * @throws IndexOutOfBoundsException
      */
     public OptionalLong max(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
@@ -1287,14 +1324,14 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
     }
 
     /**
-     * 
      *
-     * @param fromIndex 
-     * @param toIndex 
-     * @param k 
-     * @return 
-     * @throws IllegalArgumentException 
-     * @throws IndexOutOfBoundsException 
+     *
+     * @param fromIndex
+     * @param toIndex
+     * @param k
+     * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
      */
     public OptionalLong kthLargest(final int fromIndex, final int toIndex, final int k) throws IllegalArgumentException, IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
@@ -1313,12 +1350,12 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
     }
 
     /**
-     * 
      *
-     * @param fromIndex 
-     * @param toIndex 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     *
+     * @param fromIndex
+     * @param toIndex
+     * @return
+     * @throws IndexOutOfBoundsException
      */
     public long sum(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
@@ -1336,12 +1373,12 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
     }
 
     /**
-     * 
      *
-     * @param fromIndex 
-     * @param toIndex 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     *
+     * @param fromIndex
+     * @param toIndex
+     * @return
+     * @throws IndexOutOfBoundsException
      */
     public OptionalDouble average(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
@@ -1360,13 +1397,13 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
     }
 
     /**
-     * 
      *
-     * @param <E> 
-     * @param fromIndex 
-     * @param toIndex 
-     * @param action 
-     * @throws IndexOutOfBoundsException 
+     *
+     * @param <E>
+     * @param fromIndex
+     * @param toIndex
+     * @param action
+     * @throws IndexOutOfBoundsException
      * @throws E the e
      */
     public <E extends Exception> void forEach(final int fromIndex, final int toIndex, Throwables.LongConsumer<E> action) throws IndexOutOfBoundsException, E {
@@ -1391,21 +1428,21 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * @param action
      * @throws E the e
      */
-    public <E extends Exception> void forEachIndexed(Throwables.IndexedLongConsumer<E> action) throws E {
+    public <E extends Exception> void forEachIndexed(Throwables.IntLongConsumer<E> action) throws E {
         forEachIndexed(0, size, action);
     }
 
     /**
-     * 
      *
-     * @param <E> 
-     * @param fromIndex 
-     * @param toIndex 
-     * @param action 
-     * @throws IndexOutOfBoundsException 
+     *
+     * @param <E>
+     * @param fromIndex
+     * @param toIndex
+     * @param action
+     * @throws IndexOutOfBoundsException
      * @throws E the e
      */
-    public <E extends Exception> void forEachIndexed(final int fromIndex, final int toIndex, Throwables.IndexedLongConsumer<E> action)
+    public <E extends Exception> void forEachIndexed(final int fromIndex, final int toIndex, Throwables.IntLongConsumer<E> action)
             throws IndexOutOfBoundsException, E {
         N.checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), fromIndex < toIndex ? toIndex : fromIndex, size);
 
@@ -1441,12 +1478,12 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
     }
 
     /**
-     * 
      *
-     * @param fromIndex 
-     * @param toIndex 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     *
+     * @param fromIndex
+     * @param toIndex
+     * @return
+     * @throws IndexOutOfBoundsException
      */
     @Override
     public LongList distinct(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -1479,13 +1516,13 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
     }
 
     /**
-     * 
      *
-     * @param fromIndex 
-     * @param toIndex 
-     * @param n 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     *
+     * @param fromIndex
+     * @param toIndex
+     * @param n
+     * @return
+     * @throws IndexOutOfBoundsException
      */
     public LongList top(final int fromIndex, final int toIndex, final int n) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
@@ -1504,14 +1541,14 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
     }
 
     /**
-     * 
      *
-     * @param fromIndex 
-     * @param toIndex 
-     * @param n 
-     * @param cmp 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     *
+     * @param fromIndex
+     * @param toIndex
+     * @param n
+     * @param cmp
+     * @return
+     * @throws IndexOutOfBoundsException
      */
     public LongList top(final int fromIndex, final int toIndex, final int n, Comparator<? super Long> cmp) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
@@ -1572,11 +1609,11 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
     /**
      * This List should be sorted first.
      *
-     * @param fromIndex 
-     * @param toIndex 
-     * @param valueToFind 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     * @param fromIndex
+     * @param toIndex
+     * @param valueToFind
+     * @return
+     * @throws IndexOutOfBoundsException
      */
     public int binarySearch(final int fromIndex, final int toIndex, final long valueToFind) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
@@ -1595,11 +1632,11 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
     }
 
     /**
-     * 
      *
-     * @param fromIndex 
-     * @param toIndex 
-     * @throws IndexOutOfBoundsException 
+     *
+     * @param fromIndex
+     * @param toIndex
+     * @throws IndexOutOfBoundsException
      */
     @Override
     public void reverse(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -1666,12 +1703,12 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
     }
 
     /**
-     * 
      *
-     * @param fromIndex 
-     * @param toIndex 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     *
+     * @param fromIndex
+     * @param toIndex
+     * @return
+     * @throws IndexOutOfBoundsException
      */
     @Override
     public LongList copy(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -1681,13 +1718,13 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
     }
 
     /**
-     * 
      *
-     * @param fromIndex 
-     * @param toIndex 
-     * @param step 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     *
+     * @param fromIndex
+     * @param toIndex
+     * @param step
+     * @return
+     * @throws IndexOutOfBoundsException
      * @see N#copyOfRange(int[], int, int, int)
      */
     @Override
@@ -1700,11 +1737,11 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
     /**
      * Returns List of {@code LongList} with consecutive sub sequences of the elements, each of the same size (the final sequence may be smaller).
      *
-     * @param fromIndex 
-     * @param toIndex 
+     * @param fromIndex
+     * @param toIndex
      * @param chunkSize the desired size of each sub sequence (the last may be smaller).
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     * @return
+     * @throws IndexOutOfBoundsException
      */
     @Override
     public List<LongList> split(final int fromIndex, final int toIndex, final int chunkSize) throws IndexOutOfBoundsException {
@@ -1750,13 +1787,13 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
     //    }
 
     /**
-     * 
      *
-     * @param fromIndex 
-     * @param toIndex 
-     * @param delimiter 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     *
+     * @param fromIndex
+     * @param toIndex
+     * @param delimiter
+     * @return
+     * @throws IndexOutOfBoundsException
      */
     @Override
     public String join(int fromIndex, int toIndex, char delimiter) throws IndexOutOfBoundsException {
@@ -1766,13 +1803,13 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
     }
 
     /**
-     * 
      *
-     * @param fromIndex 
-     * @param toIndex 
-     * @param delimiter 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     *
+     * @param fromIndex
+     * @param toIndex
+     * @param delimiter
+     * @return
+     * @throws IndexOutOfBoundsException
      */
     @Override
     public String join(int fromIndex, int toIndex, String delimiter) throws IndexOutOfBoundsException {
@@ -1837,12 +1874,12 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
     }
 
     /**
-     * 
      *
-     * @param fromIndex 
-     * @param toIndex 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     *
+     * @param fromIndex
+     * @param toIndex
+     * @return
+     * @throws IndexOutOfBoundsException
      */
     public List<Long> boxed(int fromIndex, int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
@@ -1897,14 +1934,14 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
     }
 
     /**
-     * 
      *
-     * @param <C> 
-     * @param fromIndex 
-     * @param toIndex 
-     * @param supplier 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     *
+     * @param <C>
+     * @param fromIndex
+     * @param toIndex
+     * @param supplier
+     * @return
+     * @throws IndexOutOfBoundsException
      */
     @Override
     public <C extends Collection<Long>> C toCollection(final int fromIndex, final int toIndex, final IntFunction<? extends C> supplier)
@@ -1921,13 +1958,13 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
     }
 
     /**
-     * 
      *
-     * @param fromIndex 
-     * @param toIndex 
-     * @param supplier 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     *
+     * @param fromIndex
+     * @param toIndex
+     * @param supplier
+     * @return
+     * @throws IndexOutOfBoundsException
      */
     @Override
     public Multiset<Long> toMultiset(final int fromIndex, final int toIndex, final IntFunction<Multiset<Long>> supplier) throws IndexOutOfBoundsException {
@@ -1965,12 +2002,12 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
     }
 
     /**
-     * 
      *
-     * @param fromIndex 
-     * @param toIndex 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     *
+     * @param fromIndex
+     * @param toIndex
+     * @return
+     * @throws IndexOutOfBoundsException
      */
     public LongStream stream(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);

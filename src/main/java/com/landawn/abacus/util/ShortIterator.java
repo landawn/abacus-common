@@ -488,7 +488,7 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      * @throws IllegalArgumentException 
      * @throws E the e
      */
-    public <E extends Exception> void foreachIndexed(Throwables.IndexedShortConsumer<E> action) throws IllegalArgumentException, E {
+    public <E extends Exception> void foreachIndexed(Throwables.IntShortConsumer<E> action) throws IllegalArgumentException, E {
         N.checkArgNotNull(action);
 
         int idx = 0;

@@ -2650,7 +2650,7 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
     }
 
     /**
-     * Distinct and limit by {@code keyMapper}.
+     * Distinct by the key extracted by {@code keyMapper} and limit the appearance of the elements with same key to the number calculated by {@code limit}
      *
      * @param <K>
      * @param keyMapper
@@ -5706,60 +5706,6 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
                 }
             }
         }, closeHandlers).onClose(() -> close(holder));
-    }
-
-    /**
-     *
-     *
-     * @param <R>
-     * @param <E2>
-     * @param func
-     * @return
-     * @throws IllegalStateException
-     * @throws E
-     * @throws E2
-     */
-    @TerminalOp
-    public <R, E2 extends Exception> u.Optional<R> applyIfNotEmpty(final Throwables.Function<? super CheckedStream<T, E>, R, E2> func)
-            throws IllegalStateException, E, E2 {
-        assertNotClosed();
-
-        try {
-            if (elements.hasNext()) {
-                return Optional.ofNullable(func.apply(this));
-            } else {
-                return Optional.empty();
-            }
-        } finally {
-            close();
-        }
-    }
-
-    /**
-     *
-     *
-     * @param <E2>
-     * @param action
-     * @return
-     * @throws IllegalStateException
-     * @throws E
-     * @throws E2
-     */
-    @TerminalOp
-    public <E2 extends Exception> OrElse acceptIfNotEmpty(Throwables.Consumer<? super CheckedStream<T, E>, E2> action) throws IllegalStateException, E, E2 {
-        assertNotClosed();
-
-        try {
-            if (elements.hasNext()) {
-                action.accept(this);
-
-                return OrElse.TRUE;
-            }
-        } finally {
-            close();
-        }
-
-        return OrElse.FALSE;
     }
 
     /**
@@ -13483,8 +13429,8 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @return
      * @throws IllegalStateException
      */
-    @SuppressWarnings("rawtypes")
     @Beta
+    @SuppressWarnings("rawtypes")
     @IntermediateOp
     public CheckedStream<T, Exception> filterE(final Throwables.Predicate<? super T, ? extends Exception> predicate) throws IllegalStateException {
         assertNotClosed();
@@ -13530,8 +13476,8 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @return
      * @throws IllegalStateException
      */
-    @SuppressWarnings("rawtypes")
     @Beta
+    @SuppressWarnings("rawtypes")
     @IntermediateOp
     public <U> CheckedStream<U, Exception> mapE(final Throwables.Function<? super T, ? extends U, ? extends Exception> mapper) throws IllegalStateException {
         assertNotClosed();
@@ -13631,8 +13577,8 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @param mapper
      * @return
      */
-    @SuppressWarnings("rawtypes")
     @Beta
+    @SuppressWarnings("rawtypes")
     @IntermediateOp
     public <R> CheckedStream<R, Exception> flatmapE(final Throwables.Function<? super T, ? extends Collection<? extends R>, ? extends Exception> mapper) { //NOSONAR
         assertNotClosed();
@@ -13669,8 +13615,8 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @return
      * @throws IllegalStateException
      */
-    @SuppressWarnings("rawtypes")
     @Beta
+    @SuppressWarnings("rawtypes")
     @IntermediateOp
     public CheckedStream<T, Exception> onEachE(final Throwables.Consumer<? super T, ? extends Exception> action) throws IllegalStateException {
         assertNotClosed();
@@ -15653,7 +15599,6 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @throws IllegalArgumentException
      */
     @Beta
-    @SequentialOnly
     @IntermediateOp
     public CheckedStream<T, E> addSubscriber(final Throwables.Consumer<? super CheckedStream<T, E>, ? extends Exception> consumerForNewStreamWithTerminalAction,
             final int queueSize, final long maxWaitForAddingElementToQuery, final Executor executor) throws IllegalStateException, IllegalArgumentException {
@@ -15832,6 +15777,8 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @return
      * @see #filterWhileAddSubscriber(com.landawn.abacus.util.Throwables.Consumer, int, long, Executor)
      */
+    @Beta
+    @IntermediateOp
     public CheckedStream<T, E> filterWhileAddSubscriber(final Throwables.Predicate<? super T, ? extends E> predicate,
             final Throwables.Consumer<? super CheckedStream<T, E>, ? extends Exception> consumerForNewStreamWithTerminalAction) {
         return filterWhileAddSubscriber(predicate, consumerForNewStreamWithTerminalAction, DEFAULT_BUFFERED_SIZE_PER_ITERATOR,
@@ -15857,6 +15804,8 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @throws IllegalStateException
      * @throws IllegalArgumentException
      */
+    @Beta
+    @IntermediateOp
     public CheckedStream<T, E> filterWhileAddSubscriber(final Throwables.Predicate<? super T, ? extends E> predicate,
             final Throwables.Consumer<? super CheckedStream<T, E>, ? extends Exception> consumerForNewStreamWithTerminalAction, final int queueSize,
             final long maxWaitForAddingElementToQuery, final Executor executor) throws IllegalStateException, IllegalArgumentException {
@@ -16047,6 +15996,8 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @return
      * @see #takeWhileAddSubscriber(com.landawn.abacus.util.Throwables.Consumer, int, long, Executor)
      */
+    @Beta
+    @IntermediateOp
     public CheckedStream<T, E> takeWhileAddSubscriber(final Throwables.Predicate<? super T, ? extends E> predicate,
             final Throwables.Consumer<? super CheckedStream<T, E>, ? extends Exception> consumerForNewStreamWithTerminalAction) {
         return takeWhileAddSubscriber(predicate, consumerForNewStreamWithTerminalAction, Stream.executor());
@@ -16068,6 +16019,8 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @return
      * @throws IllegalArgumentException
      */
+    @Beta
+    @IntermediateOp
     public CheckedStream<T, E> takeWhileAddSubscriber(final Throwables.Predicate<? super T, ? extends E> predicate,
             final Throwables.Consumer<? super CheckedStream<T, E>, ? extends Exception> consumerForNewStreamWithTerminalAction, final Executor executor)
             throws IllegalArgumentException {
@@ -16268,6 +16221,8 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @return
      * @see #dropWhileAddSubscriber(com.landawn.abacus.util.Throwables.Consumer, int, long, Executor)
      */
+    @Beta
+    @IntermediateOp
     public CheckedStream<T, E> dropWhileAddSubscriber(final Throwables.Predicate<? super T, ? extends E> predicate,
             final Throwables.Consumer<? super CheckedStream<T, E>, ? extends Exception> consumerForNewStreamWithTerminalAction) {
         return dropWhileAddSubscriber(predicate, consumerForNewStreamWithTerminalAction, DEFAULT_BUFFERED_SIZE_PER_ITERATOR,
@@ -16293,6 +16248,8 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
      * @throws IllegalStateException
      * @throws IllegalArgumentException
      */
+    @Beta
+    @IntermediateOp
     public CheckedStream<T, E> dropWhileAddSubscriber(final Throwables.Predicate<? super T, ? extends E> predicate,
             final Throwables.Consumer<? super CheckedStream<T, E>, ? extends Exception> consumerForNewStreamWithTerminalAction, final int queueSize,
             final long maxWaitForAddingElementToQuery, final Executor executor) throws IllegalStateException, IllegalArgumentException {
@@ -16578,6 +16535,60 @@ public final class CheckedStream<T, E extends Exception> implements Closeable, I
         checkArgNotNull(executor, "executor");
 
         return ContinuableFuture.call(() -> terminalAction.apply(CheckedStream.this), executor);
+    }
+
+    /**
+     *
+     *
+     * @param <R>
+     * @param <E2>
+     * @param func
+     * @return
+     * @throws IllegalStateException
+     * @throws E
+     * @throws E2
+     */
+    @TerminalOp
+    public <R, E2 extends Exception> u.Optional<R> applyIfNotEmpty(final Throwables.Function<? super CheckedStream<T, E>, R, E2> func)
+            throws IllegalStateException, E, E2 {
+        assertNotClosed();
+
+        try {
+            if (elements.hasNext()) {
+                return Optional.ofNullable(func.apply(this));
+            } else {
+                return Optional.empty();
+            }
+        } finally {
+            close();
+        }
+    }
+
+    /**
+     *
+     *
+     * @param <E2>
+     * @param action
+     * @return
+     * @throws IllegalStateException
+     * @throws E
+     * @throws E2
+     */
+    @TerminalOp
+    public <E2 extends Exception> OrElse acceptIfNotEmpty(Throwables.Consumer<? super CheckedStream<T, E>, E2> action) throws IllegalStateException, E, E2 {
+        assertNotClosed();
+
+        try {
+            if (elements.hasNext()) {
+                action.accept(this);
+
+                return OrElse.TRUE;
+            }
+        } finally {
+            close();
+        }
+
+        return OrElse.FALSE;
     }
 
     /**

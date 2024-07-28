@@ -429,23 +429,23 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      *
      * @param str
-     * @param ch
+     * @param valueToFind
      * @return
      * @see Strings#countMatches(String, char)
      */
-    public static int occurrencesOf(final String str, final char ch) {
-        return Strings.countMatches(str, ch);
+    public static int occurrencesOf(final String str, final char valueToFind) {
+        return Strings.countMatches(str, valueToFind);
     }
 
     /**
      *
      * @param str
-     * @param substr
+     * @param valueToFind
      * @return
      * @see Strings#countMatches(String, String)
      */
-    public static int occurrencesOf(final String str, final String substr) {
-        return Strings.countMatches(str, substr);
+    public static int occurrencesOf(final String str, final String valueToFind) {
+        return Strings.countMatches(str, valueToFind);
     }
 
     /**
@@ -7123,232 +7123,232 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * <p>
-     * Removes the first occurrence of the specified elementToRemove from the specified
-     * array. All subsequent elementsToRemove are shifted to the left (subtracts one
-     * from their indices). If the array doesn't contains such an elementToRemove, no
-     * elementsToRemove are removed from the array.
+     * Removes the first occurrence of the specified valueToRemove from the specified
+     * array. All subsequent valuesToRemove are shifted to the left (subtracts one
+     * from their indices). If the array doesn't contains such an valueToRemove, no
+     * valuesToRemove are removed from the array.
      * </p>
      *
      * <p>
-     * This method returns a new array with the same elementsToRemove of the input array
-     * except the first occurrence of the specified elementToRemove. The component type
+     * This method returns a new array with the same valuesToRemove of the input array
+     * except the first occurrence of the specified valueToRemove. The component type
      * of the returned array is always the same as that of the input array.
      * </p>
      *
      * @param a
-     * @param elementToRemove the elementToRemove to be removed
-     * @return A new array containing the existing elementsToRemove except the first
-     *         occurrence of the specified elementToRemove.
+     * @param valueToRemove the valueToRemove to be removed
+     * @return A new array containing the existing valuesToRemove except the first
+     *         occurrence of the specified valueToRemove.
      */
-    public static boolean[] remove(final boolean[] a, final boolean elementToRemove) {
+    public static boolean[] remove(final boolean[] a, final boolean valueToRemove) {
         if (isEmpty(a)) {
             return EMPTY_BOOLEAN_ARRAY;
         }
 
-        int index = indexOf(a, 0, elementToRemove);
+        int index = indexOf(a, valueToRemove, 0);
 
         return index == INDEX_NOT_FOUND ? a.clone() : deleteByIndex(a, index);
     }
 
     /**
      * <p>
-     * Removes the first occurrence of the specified elementToRemove from the specified
-     * array. All subsequent elementsToRemove are shifted to the left (subtracts one
-     * from their indices). If the array doesn't contains such an elementToRemove, no
-     * elementsToRemove are removed from the array.
+     * Removes the first occurrence of the specified valueToRemove from the specified
+     * array. All subsequent valuesToRemove are shifted to the left (subtracts one
+     * from their indices). If the array doesn't contains such an valueToRemove, no
+     * valuesToRemove are removed from the array.
      * </p>
      *
      * <p>
-     * This method returns a new array with the same elementsToRemove of the input array
-     * except the first occurrence of the specified elementToRemove. The component type
+     * This method returns a new array with the same valuesToRemove of the input array
+     * except the first occurrence of the specified valueToRemove. The component type
      * of the returned array is always the same as that of the input array.
      * </p>
      *
      * @param a
-     * @param elementToRemove the elementToRemove to be removed
-     * @return A new array containing the existing elementsToRemove except the first
-     *         occurrence of the specified elementToRemove.
+     * @param valueToRemove the valueToRemove to be removed
+     * @return A new array containing the existing valuesToRemove except the first
+     *         occurrence of the specified valueToRemove.
      */
-    public static char[] remove(final char[] a, final char elementToRemove) {
+    public static char[] remove(final char[] a, final char valueToRemove) {
         if (isEmpty(a)) {
             return EMPTY_CHAR_ARRAY;
         }
 
-        int index = indexOf(a, 0, elementToRemove);
+        int index = indexOf(a, valueToRemove, 0);
 
         return index == INDEX_NOT_FOUND ? a.clone() : deleteByIndex(a, index);
     }
 
     /**
      * <p>
-     * Removes the first occurrence of the specified elementToRemove from the specified
-     * array. All subsequent elementsToRemove are shifted to the left (subtracts one
-     * from their indices). If the array doesn't contains such an elementToRemove, no
-     * elementsToRemove are removed from the array.
+     * Removes the first occurrence of the specified valueToRemove from the specified
+     * array. All subsequent valuesToRemove are shifted to the left (subtracts one
+     * from their indices). If the array doesn't contains such an valueToRemove, no
+     * valuesToRemove are removed from the array.
      * </p>
      *
      * <p>
-     * This method returns a new array with the same elementsToRemove of the input array
-     * except the first occurrence of the specified elementToRemove. The component type
+     * This method returns a new array with the same valuesToRemove of the input array
+     * except the first occurrence of the specified valueToRemove. The component type
      * of the returned array is always the same as that of the input array.
      * </p>
      *
      * @param a
-     * @param elementToRemove the elementToRemove to be removed
-     * @return A new array containing the existing elementsToRemove except the first
-     *         occurrence of the specified elementToRemove.
+     * @param valueToRemove the valueToRemove to be removed
+     * @return A new array containing the existing valuesToRemove except the first
+     *         occurrence of the specified valueToRemove.
      */
-    public static byte[] remove(final byte[] a, final byte elementToRemove) {
+    public static byte[] remove(final byte[] a, final byte valueToRemove) {
         if (isEmpty(a)) {
             return EMPTY_BYTE_ARRAY;
         }
 
-        int index = indexOf(a, 0, elementToRemove);
+        int index = indexOf(a, valueToRemove, 0);
 
         return index == INDEX_NOT_FOUND ? a.clone() : deleteByIndex(a, index);
     }
 
     /**
      * <p>
-     * Removes the first occurrence of the specified elementToRemove from the specified
-     * array. All subsequent elementsToRemove are shifted to the left (subtracts one
-     * from their indices). If the array doesn't contains such an elementToRemove, no
-     * elementsToRemove are removed from the array.
+     * Removes the first occurrence of the specified valueToRemove from the specified
+     * array. All subsequent valuesToRemove are shifted to the left (subtracts one
+     * from their indices). If the array doesn't contains such an valueToRemove, no
+     * valuesToRemove are removed from the array.
      * </p>
      *
      * <p>
-     * This method returns a new array with the same elementsToRemove of the input array
-     * except the first occurrence of the specified elementToRemove. The component type
+     * This method returns a new array with the same valuesToRemove of the input array
+     * except the first occurrence of the specified valueToRemove. The component type
      * of the returned array is always the same as that of the input array.
      * </p>
      *
      * @param a
-     * @param elementToRemove the elementToRemove to be removed
-     * @return A new array containing the existing elementsToRemove except the first
-     *         occurrence of the specified elementToRemove.
+     * @param valueToRemove the valueToRemove to be removed
+     * @return A new array containing the existing valuesToRemove except the first
+     *         occurrence of the specified valueToRemove.
      */
-    public static short[] remove(final short[] a, final short elementToRemove) {
+    public static short[] remove(final short[] a, final short valueToRemove) {
         if (isEmpty(a)) {
             return EMPTY_SHORT_ARRAY;
         }
 
-        int index = indexOf(a, 0, elementToRemove);
+        int index = indexOf(a, valueToRemove, 0);
 
         return index == INDEX_NOT_FOUND ? a.clone() : deleteByIndex(a, index);
     }
 
     /**
      * <p>
-     * Removes the first occurrence of the specified elementToRemove from the specified
-     * array. All subsequent elementsToRemove are shifted to the left (subtracts one
-     * from their indices). If the array doesn't contains such an elementToRemove, no
-     * elementsToRemove are removed from the array.
+     * Removes the first occurrence of the specified valueToRemove from the specified
+     * array. All subsequent valuesToRemove are shifted to the left (subtracts one
+     * from their indices). If the array doesn't contains such an valueToRemove, no
+     * valuesToRemove are removed from the array.
      * </p>
      *
      * <p>
-     * This method returns a new array with the same elementsToRemove of the input array
-     * except the first occurrence of the specified elementToRemove. The component type
+     * This method returns a new array with the same valuesToRemove of the input array
+     * except the first occurrence of the specified valueToRemove. The component type
      * of the returned array is always the same as that of the input array.
      * </p>
      *
      * @param a
-     * @param elementToRemove the elementToRemove to be removed
-     * @return A new array containing the existing elementsToRemove except the first
-     *         occurrence of the specified elementToRemove.
+     * @param valueToRemove the valueToRemove to be removed
+     * @return A new array containing the existing valuesToRemove except the first
+     *         occurrence of the specified valueToRemove.
      */
-    public static int[] remove(final int[] a, final int elementToRemove) {
+    public static int[] remove(final int[] a, final int valueToRemove) {
         if (isEmpty(a)) {
             return EMPTY_INT_ARRAY;
         }
 
-        int index = indexOf(a, 0, elementToRemove);
+        int index = indexOf(a, valueToRemove, 0);
 
         return index == INDEX_NOT_FOUND ? a.clone() : deleteByIndex(a, index);
     }
 
     /**
      * <p>
-     * Removes the first occurrence of the specified elementToRemove from the specified
-     * array. All subsequent elementsToRemove are shifted to the left (subtracts one
-     * from their indices). If the array doesn't contains such an elementToRemove, no
-     * elementsToRemove are removed from the array.
+     * Removes the first occurrence of the specified valueToRemove from the specified
+     * array. All subsequent valuesToRemove are shifted to the left (subtracts one
+     * from their indices). If the array doesn't contains such an valueToRemove, no
+     * valuesToRemove are removed from the array.
      * </p>
      *
      * <p>
-     * This method returns a new array with the same elementsToRemove of the input array
-     * except the first occurrence of the specified elementToRemove. The component type
+     * This method returns a new array with the same valuesToRemove of the input array
+     * except the first occurrence of the specified valueToRemove. The component type
      * of the returned array is always the same as that of the input array.
      * </p>
      *
      * @param a
-     * @param elementToRemove the elementToRemove to be removed
-     * @return A new array containing the existing elementsToRemove except the first
-     *         occurrence of the specified elementToRemove.
+     * @param valueToRemove the valueToRemove to be removed
+     * @return A new array containing the existing valuesToRemove except the first
+     *         occurrence of the specified valueToRemove.
      */
-    public static long[] remove(final long[] a, final long elementToRemove) {
+    public static long[] remove(final long[] a, final long valueToRemove) {
         if (isEmpty(a)) {
             return EMPTY_LONG_ARRAY;
         }
 
-        int index = indexOf(a, 0, elementToRemove);
+        int index = indexOf(a, valueToRemove, 0);
 
         return index == INDEX_NOT_FOUND ? a.clone() : deleteByIndex(a, index);
     }
 
     /**
      * <p>
-     * Removes the first occurrence of the specified elementToRemove from the specified
-     * array. All subsequent elementsToRemove are shifted to the left (subtracts one
-     * from their indices). If the array doesn't contains such an elementToRemove, no
-     * elementsToRemove are removed from the array.
+     * Removes the first occurrence of the specified valueToRemove from the specified
+     * array. All subsequent valuesToRemove are shifted to the left (subtracts one
+     * from their indices). If the array doesn't contains such an valueToRemove, no
+     * valuesToRemove are removed from the array.
      * </p>
      *
      * <p>
-     * This method returns a new array with the same elementsToRemove of the input array
-     * except the first occurrence of the specified elementToRemove. The component type
+     * This method returns a new array with the same valuesToRemove of the input array
+     * except the first occurrence of the specified valueToRemove. The component type
      * of the returned array is always the same as that of the input array.
      * </p>
      *
      * @param a
-     * @param elementToRemove the elementToRemove to be removed
-     * @return A new array containing the existing elementsToRemove except the first
-     *         occurrence of the specified elementToRemove.
+     * @param valueToRemove the valueToRemove to be removed
+     * @return A new array containing the existing valuesToRemove except the first
+     *         occurrence of the specified valueToRemove.
      */
-    public static float[] remove(final float[] a, final float elementToRemove) {
+    public static float[] remove(final float[] a, final float valueToRemove) {
         if (isEmpty(a)) {
             return EMPTY_FLOAT_ARRAY;
         }
 
-        int index = indexOf(a, 0, elementToRemove);
+        int index = indexOf(a, valueToRemove, 0);
 
         return index == INDEX_NOT_FOUND ? a.clone() : deleteByIndex(a, index);
     }
 
     /**
      * <p>
-     * Removes the first occurrence of the specified elementToRemove from the specified
-     * array. All subsequent elementsToRemove are shifted to the left (subtracts one
-     * from their indices). If the array doesn't contains such an elementToRemove, no
-     * elementsToRemove are removed from the array.
+     * Removes the first occurrence of the specified valueToRemove from the specified
+     * array. All subsequent valuesToRemove are shifted to the left (subtracts one
+     * from their indices). If the array doesn't contains such an valueToRemove, no
+     * valuesToRemove are removed from the array.
      * </p>
      *
      * <p>
-     * This method returns a new array with the same elementsToRemove of the input array
-     * except the first occurrence of the specified elementToRemove. The component type
+     * This method returns a new array with the same valuesToRemove of the input array
+     * except the first occurrence of the specified valueToRemove. The component type
      * of the returned array is always the same as that of the input array.
      * </p>
      *
      * @param a
-     * @param elementToRemove the elementToRemove to be removed
-     * @return A new array containing the existing elementsToRemove except the first
-     *         occurrence of the specified elementToRemove.
+     * @param valueToRemove the valueToRemove to be removed
+     * @return A new array containing the existing valuesToRemove except the first
+     *         occurrence of the specified valueToRemove.
      */
-    public static double[] remove(final double[] a, final double elementToRemove) {
+    public static double[] remove(final double[] a, final double valueToRemove) {
         if (isEmpty(a)) {
             return EMPTY_DOUBLE_ARRAY;
         }
 
-        int index = indexOf(a, 0, elementToRemove);
+        int index = indexOf(a, valueToRemove, 0);
 
         return index == INDEX_NOT_FOUND ? a.clone() : deleteByIndex(a, index);
     }
@@ -7357,282 +7357,282 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      *
      * @param a
-     * @param elementToRemove
+     * @param valueToRemove
      * @return
      */
-    public static String[] remove(final String[] a, final String elementToRemove) {
+    public static String[] remove(final String[] a, final String valueToRemove) {
         if (isEmpty(a)) {
             return EMPTY_STRING_ARRAY;
         }
 
-        int index = indexOf(a, 0, elementToRemove);
+        int index = indexOf(a, valueToRemove, 0);
 
         return index == INDEX_NOT_FOUND ? a.clone() : deleteByIndex(a, index);
     }
 
     /**
      * <p>
-     * Removes the first occurrence of the specified elementToRemove from the specified
-     * array. All subsequent elementsToRemove are shifted to the left (subtracts one
-     * from their indices). If the array doesn't contains such an elementToRemove, no
-     * elementsToRemove are removed from the array.
+     * Removes the first occurrence of the specified valueToRemove from the specified
+     * array. All subsequent valuesToRemove are shifted to the left (subtracts one
+     * from their indices). If the array doesn't contains such an valueToRemove, no
+     * valuesToRemove are removed from the array.
      * </p>
      *
      * <p>
-     * This method returns a new array with the same elementsToRemove of the input array
-     * except the first occurrence of the specified elementToRemove. The component type
+     * This method returns a new array with the same valuesToRemove of the input array
+     * except the first occurrence of the specified valueToRemove. The component type
      * of the returned array is always the same as that of the input array.
      * </p>
      *
      * @param <T>
      * @param a
-     * @param elementToRemove the elementToRemove to be removed
-     * @return A new array containing the existing elementsToRemove except the first
-     *         occurrence of the specified elementToRemove. Or the specified array if it's {@code null} or empty.
+     * @param valueToRemove the valueToRemove to be removed
+     * @return A new array containing the existing valuesToRemove except the first
+     *         occurrence of the specified valueToRemove. Or the specified array if it's {@code null} or empty.
      * @throws IllegalArgumentException if the specified {@code Array} is <code>null</code>.
      */
-    public static <T> T[] remove(final T[] a, final T elementToRemove) throws IllegalArgumentException {
+    public static <T> T[] remove(final T[] a, final T valueToRemove) throws IllegalArgumentException {
         if (isEmpty(a)) {
             return a;
         }
 
-        int index = indexOf(a, 0, elementToRemove);
+        int index = indexOf(a, valueToRemove, 0);
 
         return index == INDEX_NOT_FOUND ? a.clone() : deleteByIndex(a, index);
     }
 
     /**
      * <p>
-     * Removes the first occurrence of the specified elementToRemove from the specified
-     * collection. If the collection doesn't contains such an elementToRemove, no
-     * elementsToRemove are removed from the collection.
+     * Removes the first occurrence of the specified valueToRemove from the specified
+     * collection. If the collection doesn't contains such an valueToRemove, no
+     * valuesToRemove are removed from the collection.
      * </p>
      *
      * @param <T>
      * @param c
-     * @param elementToRemove the elementToRemove to be removed
+     * @param valueToRemove the valueToRemove to be removed
      * @return <tt>true</tt> if this collection changed as a result of the call
      */
-    public static <T> boolean remove(final Collection<T> c, final T elementToRemove) {
+    public static <T> boolean remove(final Collection<T> c, final T valueToRemove) {
         if (isEmpty(c)) {
             return false;
         }
 
-        return c.remove(elementToRemove);
+        return c.remove(valueToRemove);
     }
 
     /**
-     * Returns a new array with removes all the occurrences of specified elementsToRemove from <code>a</code>.
+     * Returns a new array with removes all the occurrences of specified valuesToRemove from <code>a</code>.
      *
      * @param a
-     * @param elementsToRemove
+     * @param valuesToRemove
      * @return
      * @see Collection#removeAll(Collection)
      * @see N#difference(boolean[], boolean[])
      */
     @SafeVarargs
-    public static boolean[] removeAll(final boolean[] a, final boolean... elementsToRemove) {
+    public static boolean[] removeAll(final boolean[] a, final boolean... valuesToRemove) {
         if (isEmpty(a)) {
             return EMPTY_BOOLEAN_ARRAY;
-        } else if (isEmpty(elementsToRemove)) {
+        } else if (isEmpty(valuesToRemove)) {
             return a.clone();
-        } else if (elementsToRemove.length == 1) {
-            return removeAllOccurrences(a, elementsToRemove[0]);
+        } else if (valuesToRemove.length == 1) {
+            return removeAllOccurrences(a, valuesToRemove[0]);
         }
 
         final BooleanList list = BooleanList.of(a.clone());
-        list.removeAll(BooleanList.of(elementsToRemove));
+        list.removeAll(BooleanList.of(valuesToRemove));
         return list.trimToSize().array();
     }
 
     /**
-     * Returns a new array with removes all the occurrences of specified elementsToRemove from <code>a</code>.
+     * Returns a new array with removes all the occurrences of specified valuesToRemove from <code>a</code>.
      *
      * @param a
-     * @param elementsToRemove
+     * @param valuesToRemove
      * @return
      * @see Collection#removeAll(Collection)
      * @see N#difference(char[], char[])
      */
     @SafeVarargs
-    public static char[] removeAll(final char[] a, final char... elementsToRemove) {
+    public static char[] removeAll(final char[] a, final char... valuesToRemove) {
         if (isEmpty(a)) {
             return EMPTY_CHAR_ARRAY;
-        } else if (isEmpty(elementsToRemove)) {
+        } else if (isEmpty(valuesToRemove)) {
             return a.clone();
-        } else if (elementsToRemove.length == 1) {
-            return removeAllOccurrences(a, elementsToRemove[0]);
+        } else if (valuesToRemove.length == 1) {
+            return removeAllOccurrences(a, valuesToRemove[0]);
         }
 
         final CharList list = CharList.of(a.clone());
-        list.removeAll(CharList.of(elementsToRemove));
+        list.removeAll(CharList.of(valuesToRemove));
         return list.trimToSize().array();
     }
 
     /**
-     * Returns a new array with removes all the occurrences of specified elementsToRemove from <code>a</code>.
+     * Returns a new array with removes all the occurrences of specified valuesToRemove from <code>a</code>.
      *
      * @param a
-     * @param elementsToRemove
+     * @param valuesToRemove
      * @return
      * @see Collection#removeAll(Collection)
      * @see N#difference(byte[], byte[])
      */
     @SafeVarargs
-    public static byte[] removeAll(final byte[] a, final byte... elementsToRemove) {
+    public static byte[] removeAll(final byte[] a, final byte... valuesToRemove) {
         if (isEmpty(a)) {
             return EMPTY_BYTE_ARRAY;
-        } else if (isEmpty(elementsToRemove)) {
+        } else if (isEmpty(valuesToRemove)) {
             return a.clone();
-        } else if (elementsToRemove.length == 1) {
-            return removeAllOccurrences(a, elementsToRemove[0]);
+        } else if (valuesToRemove.length == 1) {
+            return removeAllOccurrences(a, valuesToRemove[0]);
         }
 
         final ByteList list = ByteList.of(a.clone());
-        list.removeAll(ByteList.of(elementsToRemove));
+        list.removeAll(ByteList.of(valuesToRemove));
         return list.trimToSize().array();
     }
 
     /**
-     * Returns a new array with removes all the occurrences of specified elementsToRemove from <code>a</code>.
+     * Returns a new array with removes all the occurrences of specified valuesToRemove from <code>a</code>.
      *
      * @param a
-     * @param elementsToRemove
+     * @param valuesToRemove
      * @return
      * @see Collection#removeAll(Collection)
      * @see N#difference(short[], short[])
      */
     @SafeVarargs
-    public static short[] removeAll(final short[] a, final short... elementsToRemove) {
+    public static short[] removeAll(final short[] a, final short... valuesToRemove) {
         if (isEmpty(a)) {
             return EMPTY_SHORT_ARRAY;
-        } else if (isEmpty(elementsToRemove)) {
+        } else if (isEmpty(valuesToRemove)) {
             return a.clone();
-        } else if (elementsToRemove.length == 1) {
-            return removeAllOccurrences(a, elementsToRemove[0]);
+        } else if (valuesToRemove.length == 1) {
+            return removeAllOccurrences(a, valuesToRemove[0]);
         }
 
         final ShortList list = ShortList.of(a.clone());
-        list.removeAll(ShortList.of(elementsToRemove));
+        list.removeAll(ShortList.of(valuesToRemove));
         return list.trimToSize().array();
     }
 
     /**
-     * Returns a new array with removes all the occurrences of specified elementsToRemove from <code>a</code>.
+     * Returns a new array with removes all the occurrences of specified valuesToRemove from <code>a</code>.
      *
      * @param a
-     * @param elementsToRemove
+     * @param valuesToRemove
      * @return
      * @see Collection#removeAll(Collection)
      * @see N#difference(int[], int[])
      */
     @SafeVarargs
-    public static int[] removeAll(final int[] a, final int... elementsToRemove) {
+    public static int[] removeAll(final int[] a, final int... valuesToRemove) {
         if (isEmpty(a)) {
             return EMPTY_INT_ARRAY;
-        } else if (isEmpty(elementsToRemove)) {
+        } else if (isEmpty(valuesToRemove)) {
             return a.clone();
-        } else if (elementsToRemove.length == 1) {
-            return removeAllOccurrences(a, elementsToRemove[0]);
+        } else if (valuesToRemove.length == 1) {
+            return removeAllOccurrences(a, valuesToRemove[0]);
         }
 
         final IntList list = IntList.of(a.clone());
-        list.removeAll(IntList.of(elementsToRemove));
+        list.removeAll(IntList.of(valuesToRemove));
         return list.trimToSize().array();
     }
 
     /**
-     * Returns a new array with removes all the occurrences of specified elementsToRemove from <code>a</code>.
+     * Returns a new array with removes all the occurrences of specified valuesToRemove from <code>a</code>.
      *
      * @param a
-     * @param elementsToRemove
+     * @param valuesToRemove
      * @return
      * @see Collection#removeAll(Collection)
      * @see N#difference(long[], long[])
      */
     @SafeVarargs
-    public static long[] removeAll(final long[] a, final long... elementsToRemove) {
+    public static long[] removeAll(final long[] a, final long... valuesToRemove) {
         if (isEmpty(a)) {
             return EMPTY_LONG_ARRAY;
-        } else if (isEmpty(elementsToRemove)) {
+        } else if (isEmpty(valuesToRemove)) {
             return a.clone();
-        } else if (elementsToRemove.length == 1) {
-            return removeAllOccurrences(a, elementsToRemove[0]);
+        } else if (valuesToRemove.length == 1) {
+            return removeAllOccurrences(a, valuesToRemove[0]);
         }
 
         final LongList list = LongList.of(a.clone());
-        list.removeAll(LongList.of(elementsToRemove));
+        list.removeAll(LongList.of(valuesToRemove));
         return list.trimToSize().array();
     }
 
     /**
-     * Returns a new array with removes all the occurrences of specified elementsToRemove from <code>a</code>.
+     * Returns a new array with removes all the occurrences of specified valuesToRemove from <code>a</code>.
      *
      * @param a
-     * @param elementsToRemove
+     * @param valuesToRemove
      * @return
      * @see Collection#removeAll(Collection)
      * @see N#difference(float[], float[])
      */
     @SafeVarargs
-    public static float[] removeAll(final float[] a, final float... elementsToRemove) {
+    public static float[] removeAll(final float[] a, final float... valuesToRemove) {
         if (isEmpty(a)) {
             return EMPTY_FLOAT_ARRAY;
-        } else if (isEmpty(elementsToRemove)) {
+        } else if (isEmpty(valuesToRemove)) {
             return a.clone();
-        } else if (elementsToRemove.length == 1) {
-            return removeAllOccurrences(a, elementsToRemove[0]);
+        } else if (valuesToRemove.length == 1) {
+            return removeAllOccurrences(a, valuesToRemove[0]);
         }
 
         final FloatList list = FloatList.of(a.clone());
-        list.removeAll(FloatList.of(elementsToRemove));
+        list.removeAll(FloatList.of(valuesToRemove));
         return list.trimToSize().array();
     }
 
     /**
-     * Returns a new array with removes all the occurrences of specified elementsToRemove from <code>a</code>.
+     * Returns a new array with removes all the occurrences of specified valuesToRemove from <code>a</code>.
      *
      * @param a
-     * @param elementsToRemove
+     * @param valuesToRemove
      * @return
      * @see Collection#removeAll(Collection)
      * @see N#difference(double[], double[])
      */
     @SafeVarargs
-    public static double[] removeAll(final double[] a, final double... elementsToRemove) {
+    public static double[] removeAll(final double[] a, final double... valuesToRemove) {
         if (isEmpty(a)) {
             return EMPTY_DOUBLE_ARRAY;
-        } else if (isEmpty(elementsToRemove)) {
+        } else if (isEmpty(valuesToRemove)) {
             return a.clone();
-        } else if (elementsToRemove.length == 1) {
-            return removeAllOccurrences(a, elementsToRemove[0]);
+        } else if (valuesToRemove.length == 1) {
+            return removeAllOccurrences(a, valuesToRemove[0]);
         }
 
         final DoubleList list = DoubleList.of(a.clone());
-        list.removeAll(DoubleList.of(elementsToRemove));
+        list.removeAll(DoubleList.of(valuesToRemove));
         return list.trimToSize().array();
     }
 
     /**
-     * Returns a new array with removes all the occurrences of specified elementsToRemove from <code>a</code>.
+     * Returns a new array with removes all the occurrences of specified valuesToRemove from <code>a</code>.
      *
      * @param a
-     * @param elementsToRemove
+     * @param valuesToRemove
      * @return
      * @see Collection#removeAll(Collection)
      * @see N#difference(double[], double[])
      */
     @SafeVarargs
-    public static String[] removeAll(final String[] a, final String... elementsToRemove) {
+    public static String[] removeAll(final String[] a, final String... valuesToRemove) {
         if (isEmpty(a)) {
             return EMPTY_STRING_ARRAY;
-        } else if (isEmpty(elementsToRemove)) {
+        } else if (isEmpty(valuesToRemove)) {
             return a.clone();
-        } else if (elementsToRemove.length == 1) {
-            return removeAllOccurrences(a, elementsToRemove[0]);
+        } else if (valuesToRemove.length == 1) {
+            return removeAllOccurrences(a, valuesToRemove[0]);
         }
 
-        final Set<String> set = asSet(elementsToRemove);
+        final Set<String> set = asSet(valuesToRemove);
         final List<String> result = new ArrayList<>();
 
         for (String e : a) {
@@ -7645,26 +7645,26 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns a new array with removes all the occurrences of specified elementsToRemove from <code>a</code>.
+     * Returns a new array with removes all the occurrences of specified valuesToRemove from <code>a</code>.
      *
      * @param <T>
      * @param a
-     * @param elementsToRemove
+     * @param valuesToRemove
      * @return the specified array if it's {@code null} or empty.
      * @see Collection#removeAll(Collection)
      * @see N#difference(Object[], Object[])
      */
     @SafeVarargs
-    public static <T> T[] removeAll(final T[] a, final T... elementsToRemove) {
+    public static <T> T[] removeAll(final T[] a, final T... valuesToRemove) {
         if (isEmpty(a)) {
             return a;
-        } else if (isEmpty(elementsToRemove)) {
+        } else if (isEmpty(valuesToRemove)) {
             return a.clone();
-        } else if (elementsToRemove.length == 1) {
-            return removeAllOccurrences(a, elementsToRemove[0]);
+        } else if (valuesToRemove.length == 1) {
+            return removeAllOccurrences(a, valuesToRemove[0]);
         }
 
-        final Set<Object> set = asSet(elementsToRemove);
+        final Set<Object> set = asSet(valuesToRemove);
         final List<T> result = new ArrayList<>();
 
         for (T e : a) {
@@ -7681,16 +7681,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param <T>
      * @param c
-     * @param elementsToRemove
+     * @param valuesToRemove
      * @return
      * @see N#differentSet(Collection, Collection)
      */
     @SafeVarargs
-    public static <T> boolean removeAll(final Collection<T> c, final T... elementsToRemove) {
-        if (isEmpty(c) || isEmpty(elementsToRemove)) {
+    public static <T> boolean removeAll(final Collection<T> c, final T... valuesToRemove) {
+        if (isEmpty(c) || isEmpty(valuesToRemove)) {
             return false;
         } else {
-            return removeAll(c, asSet(elementsToRemove));
+            return removeAll(c, asSet(valuesToRemove));
         }
     }
 
@@ -7699,19 +7699,19 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param <T>
      * @param c
-     * @param elementsToRemove
+     * @param valuesToRemove
      * @return
      * @see N#differentSet(Collection, Collection)
      */
-    public static <T> boolean removeAll(final Collection<T> c, final Collection<?> elementsToRemove) {
-        if (isEmpty(c) || isEmpty(elementsToRemove)) {
+    public static <T> boolean removeAll(final Collection<T> c, final Collection<?> valuesToRemove) {
+        if (isEmpty(c) || isEmpty(valuesToRemove)) {
             return false;
         }
 
-        if (c instanceof HashSet && !(elementsToRemove instanceof Set)) {
+        if (c instanceof HashSet && !(valuesToRemove instanceof Set)) {
             boolean result = false;
 
-            for (Object e : elementsToRemove) {
+            for (Object e : valuesToRemove) {
                 result |= c.remove(e);
 
                 if (c.size() == 0) {
@@ -7721,7 +7721,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
             return result;
         } else {
-            return c.removeAll(elementsToRemove);
+            return c.removeAll(valuesToRemove);
         }
     }
 
@@ -7730,11 +7730,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param <T>
      * @param c
-     * @param elementsToRemove
+     * @param valuesToRemove
      * @return
      */
-    public static <T> boolean removeAll(final Collection<T> c, final Iterator<?> elementsToRemove) {
-        if (isEmpty(c) || elementsToRemove == null) {
+    public static <T> boolean removeAll(final Collection<T> c, final Iterator<?> valuesToRemove) {
+        if (isEmpty(c) || valuesToRemove == null) {
             return false;
         }
 
@@ -7742,28 +7742,28 @@ public final class N extends CommonUtil { // public final class N extends π imp
             final Set<T> set = (Set<T>) c;
             final int originalSize = set.size();
 
-            while (elementsToRemove.hasNext()) {
-                set.remove(elementsToRemove.next());
+            while (valuesToRemove.hasNext()) {
+                set.remove(valuesToRemove.next());
             }
 
             return set.size() != originalSize;
         } else {
-            return removeAll(c, toSet(elementsToRemove));
+            return removeAll(c, toSet(valuesToRemove));
         }
     }
 
     /**
-     * Removes all the occurrences of the specified elementToRemove from the specified
-     * array. All subsequent elementsToRemove are shifted to the left (subtracts one
-     * from their indices). If the array doesn't contains such an elementToRemove, no
-     * elementsToRemove are removed from the array.
+     * Removes all the occurrences of the specified valueToRemove from the specified
+     * array. All subsequent valuesToRemove are shifted to the left (subtracts one
+     * from their indices). If the array doesn't contains such an valueToRemove, no
+     * valuesToRemove are removed from the array.
      *
      * @param a
-     * @param elementToRemove
-     * @return A new array containing the existing elementsToRemove except the
-     *         occurrences of the specified elementToRemove.
+     * @param valueToRemove
+     * @return A new array containing the existing valuesToRemove except the
+     *         occurrences of the specified valueToRemove.
      */
-    public static boolean[] removeAllOccurrences(final boolean[] a, final boolean elementToRemove) {
+    public static boolean[] removeAllOccurrences(final boolean[] a, final boolean valueToRemove) {
         if (isEmpty(a)) {
             return EMPTY_BOOLEAN_ARRAY;
         }
@@ -7772,7 +7772,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         int idx = 0;
 
         for (boolean element : a) {
-            if (element == elementToRemove) {
+            if (element == valueToRemove) {
                 continue;
             }
 
@@ -7783,17 +7783,17 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Removes all the occurrences of the specified elementToRemove from the specified
-     * array. All subsequent elementsToRemove are shifted to the left (subtracts one
-     * from their indices). If the array doesn't contains such an elementToRemove, no
-     * elementsToRemove are removed from the array.
+     * Removes all the occurrences of the specified valueToRemove from the specified
+     * array. All subsequent valuesToRemove are shifted to the left (subtracts one
+     * from their indices). If the array doesn't contains such an valueToRemove, no
+     * valuesToRemove are removed from the array.
      *
      * @param a
-     * @param elementToRemove
-     * @return A new array containing the existing elementsToRemove except the
-     *         occurrences of the specified elementToRemove.
+     * @param valueToRemove
+     * @return A new array containing the existing valuesToRemove except the
+     *         occurrences of the specified valueToRemove.
      */
-    public static char[] removeAllOccurrences(final char[] a, final char elementToRemove) {
+    public static char[] removeAllOccurrences(final char[] a, final char valueToRemove) {
         if (isEmpty(a)) {
             return EMPTY_CHAR_ARRAY;
         }
@@ -7802,7 +7802,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         int idx = 0;
 
         for (char element : a) {
-            if (element == elementToRemove) {
+            if (element == valueToRemove) {
                 continue;
             }
 
@@ -7813,17 +7813,17 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Removes all the occurrences of the specified elementToRemove from the specified
-     * array. All subsequent elementsToRemove are shifted to the left (subtracts one
-     * from their indices). If the array doesn't contains such an elementToRemove, no
-     * elementsToRemove are removed from the array.
+     * Removes all the occurrences of the specified valueToRemove from the specified
+     * array. All subsequent valuesToRemove are shifted to the left (subtracts one
+     * from their indices). If the array doesn't contains such an valueToRemove, no
+     * valuesToRemove are removed from the array.
      *
      * @param a
-     * @param elementToRemove
-     * @return A new array containing the existing elementsToRemove except the
-     *         occurrences of the specified elementToRemove.
+     * @param valueToRemove
+     * @return A new array containing the existing valuesToRemove except the
+     *         occurrences of the specified valueToRemove.
      */
-    public static byte[] removeAllOccurrences(final byte[] a, final byte elementToRemove) {
+    public static byte[] removeAllOccurrences(final byte[] a, final byte valueToRemove) {
         if (isEmpty(a)) {
             return EMPTY_BYTE_ARRAY;
         }
@@ -7832,7 +7832,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         int idx = 0;
 
         for (byte element : a) {
-            if (element == elementToRemove) {
+            if (element == valueToRemove) {
                 continue;
             }
 
@@ -7843,17 +7843,17 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Removes all the occurrences of the specified elementToRemove from the specified
-     * array. All subsequent elementsToRemove are shifted to the left (subtracts one
-     * from their indices). If the array doesn't contains such an elementToRemove, no
-     * elementsToRemove are removed from the array.
+     * Removes all the occurrences of the specified valueToRemove from the specified
+     * array. All subsequent valuesToRemove are shifted to the left (subtracts one
+     * from their indices). If the array doesn't contains such an valueToRemove, no
+     * valuesToRemove are removed from the array.
      *
      * @param a
-     * @param elementToRemove
-     * @return A new array containing the existing elementsToRemove except the
-     *         occurrences of the specified elementToRemove.
+     * @param valueToRemove
+     * @return A new array containing the existing valuesToRemove except the
+     *         occurrences of the specified valueToRemove.
      */
-    public static short[] removeAllOccurrences(final short[] a, final short elementToRemove) {
+    public static short[] removeAllOccurrences(final short[] a, final short valueToRemove) {
         if (isEmpty(a)) {
             return EMPTY_SHORT_ARRAY;
         }
@@ -7862,7 +7862,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         int idx = 0;
 
         for (short element : a) {
-            if (element == elementToRemove) {
+            if (element == valueToRemove) {
                 continue;
             }
 
@@ -7873,17 +7873,17 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Removes all the occurrences of the specified elementToRemove from the specified
-     * array. All subsequent elementsToRemove are shifted to the left (subtracts one
-     * from their indices). If the array doesn't contains such an elementToRemove, no
-     * elementsToRemove are removed from the array.
+     * Removes all the occurrences of the specified valueToRemove from the specified
+     * array. All subsequent valuesToRemove are shifted to the left (subtracts one
+     * from their indices). If the array doesn't contains such an valueToRemove, no
+     * valuesToRemove are removed from the array.
      *
      * @param a
-     * @param elementToRemove
-     * @return A new array containing the existing elementsToRemove except the
-     *         occurrences of the specified elementToRemove.
+     * @param valueToRemove
+     * @return A new array containing the existing valuesToRemove except the
+     *         occurrences of the specified valueToRemove.
      */
-    public static int[] removeAllOccurrences(final int[] a, final int elementToRemove) {
+    public static int[] removeAllOccurrences(final int[] a, final int valueToRemove) {
         if (isEmpty(a)) {
             return EMPTY_INT_ARRAY;
         }
@@ -7892,7 +7892,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         int idx = 0;
 
         for (int element : a) {
-            if (element == elementToRemove) {
+            if (element == valueToRemove) {
                 continue;
             }
 
@@ -7903,17 +7903,17 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Removes all the occurrences of the specified elementToRemove from the specified
-     * array. All subsequent elementsToRemove are shifted to the left (subtracts one
-     * from their indices). If the array doesn't contains such an elementToRemove, no
-     * elementsToRemove are removed from the array.
+     * Removes all the occurrences of the specified valueToRemove from the specified
+     * array. All subsequent valuesToRemove are shifted to the left (subtracts one
+     * from their indices). If the array doesn't contains such an valueToRemove, no
+     * valuesToRemove are removed from the array.
      *
      * @param a
-     * @param elementToRemove
-     * @return A new array containing the existing elementsToRemove except the
-     *         occurrences of the specified elementToRemove.
+     * @param valueToRemove
+     * @return A new array containing the existing valuesToRemove except the
+     *         occurrences of the specified valueToRemove.
      */
-    public static long[] removeAllOccurrences(final long[] a, final long elementToRemove) {
+    public static long[] removeAllOccurrences(final long[] a, final long valueToRemove) {
         if (isEmpty(a)) {
             return EMPTY_LONG_ARRAY;
         }
@@ -7922,7 +7922,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         int idx = 0;
 
         for (long element : a) {
-            if (element == elementToRemove) {
+            if (element == valueToRemove) {
                 continue;
             }
 
@@ -7933,17 +7933,17 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Removes all the occurrences of the specified elementToRemove from the specified
-     * array. All subsequent elementsToRemove are shifted to the left (subtracts one
-     * from their indices). If the array doesn't contains such an elementToRemove, no
-     * elementsToRemove are removed from the array.
+     * Removes all the occurrences of the specified valueToRemove from the specified
+     * array. All subsequent valuesToRemove are shifted to the left (subtracts one
+     * from their indices). If the array doesn't contains such an valueToRemove, no
+     * valuesToRemove are removed from the array.
      *
      * @param a
-     * @param elementToRemove
-     * @return A new array containing the existing elementsToRemove except the
-     *         occurrences of the specified elementToRemove.
+     * @param valueToRemove
+     * @return A new array containing the existing valuesToRemove except the
+     *         occurrences of the specified valueToRemove.
      */
-    public static float[] removeAllOccurrences(final float[] a, final float elementToRemove) {
+    public static float[] removeAllOccurrences(final float[] a, final float valueToRemove) {
         if (isEmpty(a)) {
             return EMPTY_FLOAT_ARRAY;
         }
@@ -7952,7 +7952,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         int idx = 0;
 
         for (float element : a) {
-            if (equals(element, elementToRemove)) {
+            if (equals(element, valueToRemove)) {
                 continue;
             }
 
@@ -7963,17 +7963,17 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Removes all the occurrences of the specified elementToRemove from the specified
-     * array. All subsequent elementsToRemove are shifted to the left (subtracts one
-     * from their indices). If the array doesn't contains such an elementToRemove, no
-     * elementsToRemove are removed from the array.
+     * Removes all the occurrences of the specified valueToRemove from the specified
+     * array. All subsequent valuesToRemove are shifted to the left (subtracts one
+     * from their indices). If the array doesn't contains such an valueToRemove, no
+     * valuesToRemove are removed from the array.
      *
      * @param a
-     * @param elementToRemove
-     * @return A new array containing the existing elementsToRemove except the
-     *         occurrences of the specified elementToRemove.
+     * @param valueToRemove
+     * @return A new array containing the existing valuesToRemove except the
+     *         occurrences of the specified valueToRemove.
      */
-    public static double[] removeAllOccurrences(final double[] a, final double elementToRemove) {
+    public static double[] removeAllOccurrences(final double[] a, final double valueToRemove) {
         if (isEmpty(a)) {
             return EMPTY_DOUBLE_ARRAY;
         }
@@ -7982,7 +7982,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         int idx = 0;
 
         for (double element : a) {
-            if (equals(element, elementToRemove)) {
+            if (equals(element, valueToRemove)) {
                 continue;
             }
 
@@ -7996,10 +7996,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      *
      * @param a
-     * @param elementToRemove
+     * @param valueToRemove
      * @return
      */
-    public static String[] removeAllOccurrences(final String[] a, final String elementToRemove) {
+    public static String[] removeAllOccurrences(final String[] a, final String valueToRemove) {
         if (isEmpty(a)) {
             return EMPTY_STRING_ARRAY;
         }
@@ -8008,7 +8008,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         int idx = 0;
 
         for (String element : a) {
-            if (equals(element, elementToRemove)) {
+            if (equals(element, valueToRemove)) {
                 continue;
             }
 
@@ -8019,18 +8019,18 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Removes all the occurrences of the specified elementToRemove from the specified
-     * array. All subsequent elementsToRemove are shifted to the left (subtracts one
-     * from their indices). If the array doesn't contains such an elementToRemove, no
-     * elementsToRemove are removed from the array.
+     * Removes all the occurrences of the specified valueToRemove from the specified
+     * array. All subsequent valuesToRemove are shifted to the left (subtracts one
+     * from their indices). If the array doesn't contains such an valueToRemove, no
+     * valuesToRemove are removed from the array.
      *
      * @param <T>
      * @param a
-     * @param elementToRemove
-     * @return A new array containing the existing elementsToRemove except the
-     *         occurrences of the specified elementToRemove. Or the specified array if it's {@code null} or empty.
+     * @param valueToRemove
+     * @return A new array containing the existing valuesToRemove except the
+     *         occurrences of the specified valueToRemove. Or the specified array if it's {@code null} or empty.
      */
-    public static <T> T[] removeAllOccurrences(final T[] a, final T elementToRemove) {
+    public static <T> T[] removeAllOccurrences(final T[] a, final T valueToRemove) {
         if (isEmpty(a)) {
             return a;
         }
@@ -8039,7 +8039,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         int idx = 0;
 
         for (T element : a) {
-            if (equals(element, elementToRemove)) {
+            if (equals(element, valueToRemove)) {
                 continue;
             }
 
@@ -8054,15 +8054,15 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param <T>
      * @param c
-     * @param elementToRemove
+     * @param valueToRemove
      * @return
      */
-    public static <T> boolean removeAllOccurrences(final Collection<T> c, final T elementToRemove) {
+    public static <T> boolean removeAllOccurrences(final Collection<T> c, final T valueToRemove) {
         if (isEmpty(c)) {
             return false;
         }
 
-        return removeAll(c, asSet(elementToRemove));
+        return removeAll(c, asSet(valueToRemove));
     }
 
     /**

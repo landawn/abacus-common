@@ -259,7 +259,7 @@ public final class ImmutableArray<T> implements Iterable<T>, Immutable {
      * @param valueToFind
      * @return
      */
-    public boolean contains(T valueToFind) {
+    public boolean contains(final T valueToFind) {
         return N.contains(elements, valueToFind);
     }
 

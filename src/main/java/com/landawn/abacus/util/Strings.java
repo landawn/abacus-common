@@ -5483,89 +5483,88 @@ public abstract sealed class Strings permits Strings.StringUtil {
     /**
      *
      * @param str
-     * @param targetChar
+     * @param charValueToFind
      * @return
      */
-    public static int indexOf(final String str, final int targetChar) {
+    public static int indexOf(final String str, final int charValueToFind) {
         if (str == null || str.length() == 0) {
             return N.INDEX_NOT_FOUND;
         }
 
-        return str.indexOf(targetChar);
+        return str.indexOf(charValueToFind);
     }
 
     /**
      *
      * @param str
+     * @param charValueToFind
      * @param fromIndex
-     * @param targetChar
      * @return
      */
-    public static int indexOf(final String str, final int fromIndex, final char targetChar) {
+    public static int indexOf(final String str, final int charValueToFind, final int fromIndex) {
         if (str == null || str.length() == 0) {
             return N.INDEX_NOT_FOUND;
         }
 
-        return str.indexOf(targetChar, fromIndex);
+        return str.indexOf(charValueToFind, fromIndex);
     }
 
     /**
      *
      * @param str
-     * @param substr
+     * @param valueToFind
      * @return
      */
-    public static int indexOf(final String str, final String substr) {
-        if (str == null || substr == null || substr.length() > str.length()) {
+    public static int indexOf(final String str, final String valueToFind) {
+        if (str == null || valueToFind == null || valueToFind.length() > str.length()) {
             return N.INDEX_NOT_FOUND;
         }
 
-        return str.indexOf(substr);
+        return str.indexOf(valueToFind);
     }
 
     /**
      *
      * @param str
+     * @param valueToFind
      * @param fromIndex
-     * @param substr
      * @return
      */
-    public static int indexOf(final String str, final int fromIndex, final String substr) {
-        if (str == null || substr == null || substr.length() > str.length() - fromIndex) {
+    public static int indexOf(final String str, final String valueToFind, final int fromIndex) {
+        if (str == null || valueToFind == null || valueToFind.length() > str.length() - fromIndex) {
             return N.INDEX_NOT_FOUND;
         }
 
-        return str.indexOf(substr, fromIndex);
+        return str.indexOf(valueToFind, fromIndex);
     }
 
     /**
      *
      * @param str
-     * @param chs
+     * @param valuesToFind
      * @return
      */
     @SafeVarargs
-    public static int indexOfAny(final String str, final char... chs) {
-        return indexOfAny(str, 0, chs);
+    public static int indexOfAny(final String str, final char... valuesToFind) {
+        return indexOfAny(str, valuesToFind, 0);
     }
 
     /**
      *
      *
      * @param str
+     * @param valuesToFind
      * @param fromIndex
-     * @param chs
      * @return
      */
-    @SafeVarargs
-    public static int indexOfAny(final String str, final int fromIndex, final char... chs) {
-        if (isEmpty(str) || N.isEmpty(chs)) {
+    public static int indexOfAny(final String str, final char[] valuesToFind, final int fromIndex) {
+        if (isEmpty(str) || N.isEmpty(valuesToFind)) {
             return N.INDEX_NOT_FOUND;
         }
 
         final int strLen = str.length();
         final int strLast = strLen - 1;
-        final int chsLen = chs.length;
+        final int chsLen = valuesToFind.length;
         final int chsLast = chsLen - 1;
         char ch = 0;
 
@@ -5573,10 +5572,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
             ch = str.charAt(i);
 
             for (int j = 0; j < chsLen; j++) {
-                if (chs[j] == ch) {
+                if (valuesToFind[j] == ch) {
                     if (i < strLast && j < chsLast && Character.isHighSurrogate(ch)) {
                         // ch is a supplementary character
-                        if (chs[j + 1] == str.charAt(i + 1)) {
+                        if (valuesToFind[j + 1] == str.charAt(i + 1)) {
                             return i;
                         }
                     } else {
@@ -5592,38 +5591,37 @@ public abstract sealed class Strings permits Strings.StringUtil {
     /**
      *
      * @param str
-     * @param substrs
+     * @param valuesToFind
      * @return
      * @see #smallestIndicesOfAll(String, String...)
      */
     @SafeVarargs
-    public static int indexOfAny(final String str, final String... substrs) {
-        return indexOfAny(str, 0, substrs);
+    public static int indexOfAny(final String str, final String... valuesToFind) {
+        return indexOfAny(str, valuesToFind, 0);
     }
 
     /**
      *
      *
      * @param str
+     * @param valuesToFind
      * @param fromIndex
-     * @param substrs
      * @return
-     * @see #smallestIndicesOfAll(String, int, String...)
+     * @see #smallestIndicesOfAll(String, String[], int)
      */
-    @SafeVarargs
-    public static int indexOfAny(final String str, final int fromIndex, final String... substrs) {
-        if (str == null || N.isEmpty(substrs)) {
+    public static int indexOfAny(final String str, final String[] valuesToFind, final int fromIndex) {
+        if (str == null || N.isEmpty(valuesToFind)) {
             return N.INDEX_NOT_FOUND;
         }
 
         int idx = 0;
 
-        for (int i = 0, len = substrs.length; i < len; i++) {
-            if (isEmpty(substrs[i])) {
+        for (int i = 0, len = valuesToFind.length; i < len; i++) {
+            if (isEmpty(valuesToFind[i])) {
                 continue;
             }
 
-            idx = indexOf(str, fromIndex, substrs[i]);
+            idx = indexOf(str, valuesToFind[i], fromIndex);
 
             if (idx != N.INDEX_NOT_FOUND) {
                 return idx;
@@ -5637,35 +5635,34 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * Index of any but.
      *
      * @param str
-     * @param chs
+     * @param valuesToFind
      * @return
      */
     @SafeVarargs
-    public static int indexOfAnyBut(final String str, final char... chs) {
-        return indexOfAnyBut(str, 0, chs);
+    public static int indexOfAnyBut(final String str, final char... valuesToFind) {
+        return indexOfAnyBut(str, valuesToFind, 0);
     }
 
     /**
      *
      *
      * @param str
+     * @param valuesToFind
      * @param fromIndex
-     * @param chs
      * @return
      */
-    @SafeVarargs
-    public static int indexOfAnyBut(final String str, final int fromIndex, final char... chs) {
+    public static int indexOfAnyBut(final String str, final char[] valuesToFind, final int fromIndex) {
         if (str == null || str.length() == 0) {
             return N.INDEX_NOT_FOUND;
         }
 
-        if (N.isEmpty(chs)) {
+        if (N.isEmpty(valuesToFind)) {
             return 0;
         }
 
         final int strLen = str.length();
         final int strLast = strLen - 1;
-        final int chsLen = chs.length;
+        final int chsLen = valuesToFind.length;
         final int chsLast = chsLen - 1;
         char ch = 0;
 
@@ -5673,9 +5670,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
             ch = str.charAt(i);
 
             for (int j = 0; j < chsLen; j++) {
-                if (chs[j] == ch) {
+                if (valuesToFind[j] == ch) {
                     if (i < strLast && j < chsLast && Character.isHighSurrogate(ch)) {
-                        if (chs[j + 1] == str.charAt(i + 1)) {
+                        if (valuesToFind[j + 1] == str.charAt(i + 1)) {
                             continue outer;
                         }
                     } else {
@@ -5693,40 +5690,40 @@ public abstract sealed class Strings permits Strings.StringUtil {
     /**
      *
      * @param str
-     * @param substr
+     * @param valueToFind
      * @param delimiter
      * @return
      */
-    public static int indexOf(final String str, final String substr, final String delimiter) {
-        return indexOf(str, 0, substr, delimiter);
+    public static int indexOf(final String str, final String valueToFind, final String delimiter) {
+        return indexOf(str, valueToFind, delimiter, 0);
     }
 
     /**
      *
      * @param str
-     * @param fromIndex the index from which to start the search.
-     * @param substr
+     * @param valueToFind
      * @param delimiter
+     * @param fromIndex the index from which to start the search.
      * @return
      */
-    public static int indexOf(final String str, final int fromIndex, final String substr, final String delimiter) {
+    public static int indexOf(final String str, final String valueToFind, final String delimiter, final int fromIndex) {
         if (isEmpty(delimiter)) {
-            return indexOf(str, fromIndex, substr);
+            return indexOf(str, valueToFind, fromIndex);
         }
 
-        if (str == null || substr == null) {
+        if (str == null || valueToFind == null) {
             return N.INDEX_NOT_FOUND;
         }
 
         final int len = str.length();
 
-        final int index = str.indexOf(substr, fromIndex);
+        final int index = str.indexOf(valueToFind, fromIndex);
 
         if (index < 0) {
             return N.INDEX_NOT_FOUND;
         }
 
-        final int strLen = substr.length();
+        final int strLen = valueToFind.length();
         final int delimiterLen = delimiter.length();
 
         if ((index == fromIndex || (index - fromIndex >= delimiterLen && delimiter.equals(str.substring(index - delimiterLen, index))))
@@ -5735,12 +5732,12 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return index;
         }
 
-        int idx = str.indexOf(delimiter + substr + delimiter, index);
+        int idx = str.indexOf(delimiter + valueToFind + delimiter, index);
 
         if (idx >= 0) {
             return idx + delimiterLen;
         } else {
-            idx = str.indexOf(delimiter + substr, index);
+            idx = str.indexOf(delimiter + valueToFind, index);
 
             if (idx >= 0 && idx + delimiterLen + strLen == len) {
                 return idx + delimiterLen;
@@ -5754,28 +5751,28 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * Index of ignore case.
      *
      * @param str
-     * @param substr
+     * @param valueToFind
      * @return
      */
-    public static int indexOfIgnoreCase(final String str, final String substr) {
-        return indexOfIgnoreCase(str, 0, substr);
+    public static int indexOfIgnoreCase(final String str, final String valueToFind) {
+        return indexOfIgnoreCase(str, valueToFind, 0);
     }
 
     /**
      * Index of ignore case.
      *
      * @param str
+     * @param valueToFind
      * @param fromIndex
-     * @param substr
      * @return
      */
-    public static int indexOfIgnoreCase(final String str, final int fromIndex, final String substr) {
-        if (str == null || substr == null || substr.length() > str.length() - fromIndex) {
+    public static int indexOfIgnoreCase(final String str, final String valueToFind, final int fromIndex) {
+        if (str == null || valueToFind == null || valueToFind.length() > str.length() - fromIndex) {
             return N.INDEX_NOT_FOUND;
         }
 
-        for (int i = fromIndex, len = str.length(), substrLen = substr.length(), end = len - substrLen + 1; i < end; i++) {
-            if (str.regionMatches(true, i, substr, 0, substrLen)) {
+        for (int i = fromIndex, len = str.length(), substrLen = valueToFind.length(), end = len - substrLen + 1; i < end; i++) {
+            if (str.regionMatches(true, i, valueToFind, 0, substrLen)) {
                 return i;
             }
         }
@@ -5786,40 +5783,40 @@ public abstract sealed class Strings permits Strings.StringUtil {
     /**
      *
      * @param str
-     * @param substr
+     * @param valueToFind
      * @param delimiter
      * @return
      */
-    public static int indexOfIgnoreCase(final String str, final String substr, final String delimiter) {
-        return indexOfIgnoreCase(str, 0, substr, delimiter);
+    public static int indexOfIgnoreCase(final String str, final String valueToFind, final String delimiter) {
+        return indexOfIgnoreCase(str, valueToFind, delimiter, 0);
     }
 
     /**
      *
      * @param str
-     * @param fromIndex the index from which to start the search.
-     * @param substr
+     * @param valueToFind
      * @param delimiter
+     * @param fromIndex the index from which to start the search.
      * @return
      */
-    public static int indexOfIgnoreCase(final String str, final int fromIndex, final String substr, final String delimiter) {
+    public static int indexOfIgnoreCase(final String str, final String valueToFind, final String delimiter, final int fromIndex) {
         if (isEmpty(delimiter)) {
-            return indexOfIgnoreCase(str, fromIndex, substr);
+            return indexOfIgnoreCase(str, valueToFind, fromIndex);
         }
 
-        if (str == null || substr == null) {
+        if (str == null || valueToFind == null) {
             return N.INDEX_NOT_FOUND;
         }
 
         final int len = str.length();
 
-        final int index = indexOfIgnoreCase(str, fromIndex, substr);
+        final int index = indexOfIgnoreCase(str, valueToFind, fromIndex);
 
         if (index < 0) {
             return N.INDEX_NOT_FOUND;
         }
 
-        final int strLen = substr.length();
+        final int strLen = valueToFind.length();
         final int delimiterLen = delimiter.length();
 
         if ((index == fromIndex || (index - fromIndex >= delimiterLen && delimiter.equalsIgnoreCase(str.substring(index - delimiterLen, index))))
@@ -5828,12 +5825,12 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return index;
         }
 
-        int idx = indexOfIgnoreCase(str, index, delimiter + substr + delimiter);
+        int idx = indexOfIgnoreCase(str, delimiter + valueToFind + delimiter, index);
 
         if (idx >= 0) {
             return idx + delimiterLen;
         } else {
-            idx = indexOfIgnoreCase(str, index, delimiter + substr);
+            idx = indexOfIgnoreCase(str, delimiter + valueToFind, index);
 
             if (idx >= 0 && idx + delimiterLen + strLen == len) {
                 return idx + delimiterLen;
@@ -5847,15 +5844,15 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * Last index of.
      *
      * @param str
-     * @param targetChar
+     * @param charValueToFind
      * @return
      */
-    public static int lastIndexOf(final String str, final int targetChar) {
+    public static int lastIndexOf(final String str, final int charValueToFind) {
         if (str == null || str.length() == 0) {
             return N.INDEX_NOT_FOUND;
         }
 
-        return str.lastIndexOf(targetChar);
+        return str.lastIndexOf(charValueToFind);
     }
 
     /**
@@ -5884,39 +5881,39 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * units).
      *
      * @param str
-     * @param fromIndex the index to start the search from. There is no restriction on
+     * @param charValueToFind a character (Unicode code point).
+     * @param startIndexFromBack the index to start the search from. There is no restriction on
      *            the value of <code>fromIndex</code>. If it is greater than or
      *            equal to the length of this string, it has the same effect as
      *            if it were equal to one less than the length of this string:
      *            this entire string may be searched. If it is negative, it has
      *            the same effect as if it were -1: -1 is returned.
-     * @param targetChar a character (Unicode code point).
      * @return
      *         character sequence represented by this object that is less than
      *         or equal to <code>fromIndex</code>, or <code>-1</code> if the
      *         character does not occur before that point.
      */
-    public static int lastIndexOf(final String str, final int fromIndex, final char targetChar) {
-        if (str == null || str.length() == 0 || fromIndex < 0) {
+    public static int lastIndexOf(final String str, final int charValueToFind, final int startIndexFromBack) {
+        if (str == null || str.length() == 0 || startIndexFromBack < 0) {
             return N.INDEX_NOT_FOUND;
         }
 
-        return str.lastIndexOf(targetChar, fromIndex);
+        return str.lastIndexOf(charValueToFind, startIndexFromBack);
     }
 
     /**
      * Last index of.
      *
      * @param str
-     * @param substr
+     * @param valueToFind
      * @return
      */
-    public static int lastIndexOf(final String str, final String substr) {
-        if (str == null || substr == null || substr.length() > str.length()) {
+    public static int lastIndexOf(final String str, final String valueToFind) {
+        if (str == null || valueToFind == null || valueToFind.length() > str.length()) {
             return N.INDEX_NOT_FOUND;
         }
 
-        return str.lastIndexOf(substr);
+        return str.lastIndexOf(valueToFind);
     }
 
     /**
@@ -5935,68 +5932,68 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * returned.
      *
      * @param str
-     * @param fromIndex
-     * @param substr
+     * @param valueToFind
+     * @param startIndexFromBack
      * @return
      */
-    public static int lastIndexOf(final String str, final int fromIndex, final String substr) {
-        if (str == null || substr == null || fromIndex < 0 || substr.length() > str.length()) {
+    public static int lastIndexOf(final String str, final String valueToFind, final int startIndexFromBack) {
+        if (str == null || valueToFind == null || startIndexFromBack < 0 || valueToFind.length() > str.length()) {
             return N.INDEX_NOT_FOUND;
         }
 
-        return str.lastIndexOf(substr, fromIndex);
+        return str.lastIndexOf(valueToFind, startIndexFromBack);
     }
 
     /**
      * Last index of.
      *
      * @param str
-     * @param substr
+     * @param valueToFind
      * @param delimiter
      * @return
      */
-    public static int lastIndexOf(final String str, final String substr, final String delimiter) {
-        return lastIndexOf(str, str.length(), substr, delimiter);
+    public static int lastIndexOf(final String str, final String valueToFind, final String delimiter) {
+        return lastIndexOf(str, valueToFind, delimiter, str.length());
     }
 
     /**
      * Last index of.
      *
      * @param str
-     * @param fromIndex the start index to traverse backwards from
-     * @param substr
+     * @param valueToFind
      * @param delimiter
+     * @param startIndexFromBack the start index to traverse backwards from
      * @return
      */
-    public static int lastIndexOf(final String str, final int fromIndex, final String substr, final String delimiter) {
+    public static int lastIndexOf(final String str, final String valueToFind, final String delimiter, final int startIndexFromBack) {
         if (isEmpty(delimiter)) {
-            return lastIndexOf(str, fromIndex, substr);
-        } else if (str == null || substr == null) {
+            return lastIndexOf(str, valueToFind, startIndexFromBack);
+        } else if (str == null || valueToFind == null) {
             return N.INDEX_NOT_FOUND;
         }
 
         final int len = str.length();
 
-        int index = str.lastIndexOf(delimiter + substr, fromIndex);
+        int index = str.lastIndexOf(delimiter + valueToFind, startIndexFromBack);
 
-        if (index >= 0 && index + delimiter.length() + substr.length() == len) {
+        if (index >= 0 && index + delimiter.length() + valueToFind.length() == len) {
             return index + delimiter.length();
         }
 
-        index = str.lastIndexOf(delimiter + substr + delimiter, fromIndex);
+        index = str.lastIndexOf(delimiter + valueToFind + delimiter, startIndexFromBack);
 
         if (index >= 0) {
             return index + delimiter.length();
         }
 
-        index = str.lastIndexOf(substr, fromIndex);
+        index = str.lastIndexOf(valueToFind, startIndexFromBack);
 
         if (index < 0) {
             return N.INDEX_NOT_FOUND;
         }
 
-        if (index == 0 && (index + substr.length() == len || (len >= index + substr.length() + delimiter.length()
-                && delimiter.equals(str.substring(index + substr.length(), index + substr.length() + delimiter.length()))))) {
+        if (index == 0 && (index + valueToFind.length() == len || (len >= index + valueToFind.length() + delimiter.length()
+                && delimiter.equals(str.substring(index + valueToFind.length(), index + valueToFind.length() + delimiter.length()))))) {
             return index;
         }
 
@@ -6007,32 +6004,32 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * Last index of ignore case.
      *
      * @param str
-     * @param substr
+     * @param valueToFind
      * @return
      */
-    public static int lastIndexOfIgnoreCase(final String str, final String substr) {
-        if (str == null || substr == null || substr.length() > str.length()) {
+    public static int lastIndexOfIgnoreCase(final String str, final String valueToFind) {
+        if (str == null || valueToFind == null || valueToFind.length() > str.length()) {
             return N.INDEX_NOT_FOUND;
         }
 
-        return lastIndexOfIgnoreCase(str, str.length(), substr);
+        return lastIndexOfIgnoreCase(str, valueToFind, str.length());
     }
 
     /**
      * Last index of ignore case.
      *
      * @param str
-     * @param fromIndex
-     * @param substr
+     * @param valueToFind
+     * @param startIndexFromBack
      * @return
      */
-    public static int lastIndexOfIgnoreCase(final String str, final int fromIndex, final String substr) {
-        if (str == null || substr == null || substr.length() > str.length()) {
+    public static int lastIndexOfIgnoreCase(final String str, final String valueToFind, final int startIndexFromBack) {
+        if (str == null || valueToFind == null || valueToFind.length() > str.length()) {
             return N.INDEX_NOT_FOUND;
         }
 
-        for (int i = N.min(fromIndex, str.length() - substr.length()), substrLen = substr.length(); i >= 0; i--) {
-            if (str.regionMatches(true, i, substr, 0, substrLen)) {
+        for (int i = N.min(startIndexFromBack, str.length() - valueToFind.length()), substrLen = valueToFind.length(); i >= 0; i--) {
+            if (str.regionMatches(true, i, valueToFind, 0, substrLen)) {
                 return i;
             }
         }
@@ -6044,18 +6041,18 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * Last index of any.
      *
      * @param str
-     * @param chs
+     * @param valuesToFind
      * @return
      */
     @SafeVarargs
-    public static int lastIndexOfAny(final String str, final char... chs) {
-        if (isEmpty(str) || N.isEmpty(chs)) {
+    public static int lastIndexOfAny(final String str, final char... valuesToFind) {
+        if (isEmpty(str) || N.isEmpty(valuesToFind)) {
             return N.INDEX_NOT_FOUND;
         }
 
         int idx = 0;
 
-        for (char ch : chs) {
+        for (char ch : valuesToFind) {
             idx = str.lastIndexOf(ch);
 
             if (idx != N.INDEX_NOT_FOUND) {
@@ -6064,17 +6061,17 @@ public abstract sealed class Strings permits Strings.StringUtil {
         }
 
         final int strLen = str.length();
-        final int chsLen = chs.length;
+        final int chsLen = valuesToFind.length;
         char ch = 0;
 
         for (int i = strLen - 1; i >= 0; i--) {
             ch = str.charAt(i);
 
             for (int j = chsLen - 1; j >= 0; j--) {
-                if (chs[j] == ch) {
+                if (valuesToFind[j] == ch) {
                     if (i > 0 && j > 0 && Character.isHighSurrogate(ch = str.charAt(i - 1))) {
                         // ch is a supplementary character
-                        if (chs[j - 1] == ch) {
+                        if (valuesToFind[j - 1] == ch) {
                             return i - 1;
                         }
                     } else {
@@ -6092,19 +6089,19 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * Last index of any.
      *
      * @param str
-     * @param substrs
+     * @param valuesToFind
      * @return
      * @see #largestIndicesOfAll(String, String...)
      */
     @SafeVarargs
-    public static int lastIndexOfAny(final String str, final String... substrs) {
-        if (str == null || N.isEmpty(substrs)) {
+    public static int lastIndexOfAny(final String str, final String... valuesToFind) {
+        if (str == null || N.isEmpty(valuesToFind)) {
             return N.INDEX_NOT_FOUND;
         }
 
         int idx = 0;
 
-        for (String substr : substrs) {
+        for (String substr : valuesToFind) {
             if (substr == null) {
                 continue;
             }
@@ -6162,13 +6159,13 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>Find the smallest index of any of a set of potential substrings.</p>
      *
      * @param str
-     * @param substrs
+     * @param valuesToFind
      * @return
      * @see #indexOfAny(String, String...)
      */
     @SafeVarargs
-    public static int smallestIndicesOfAll(final String str, final String... substrs) {
-        return smallestIndicesOfAll(str, 0, substrs);
+    public static int smallestIndicesOfAll(final String str, final String... valuesToFind) {
+        return smallestIndicesOfAll(str, valuesToFind, 0);
     }
 
     /**
@@ -6176,21 +6173,20 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      *
      * @param str
+     * @param valuesToFind
      * @param fromIndex
-     * @param substrs
      * @return
-     * @see #indexOfAny(String, int, String...)
+     * @see #indexOfAny(String, String[], int)
      */
-    @SafeVarargs
-    public static int smallestIndicesOfAll(final String str, final int fromIndex, final String... substrs) {
-        if (str == null || N.isEmpty(substrs)) {
+    public static int smallestIndicesOfAll(final String str, final String[] valuesToFind, final int fromIndex) {
+        if (str == null || N.isEmpty(valuesToFind)) {
             return N.INDEX_NOT_FOUND;
         }
 
         final int len = str.length();
         int result = N.INDEX_NOT_FOUND;
 
-        for (String substr : substrs) {
+        for (String substr : valuesToFind) {
             if (substr == null || (fromIndex + substr.length() > len)) {
                 continue;
             }
@@ -6211,13 +6207,13 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>Find the largest index of any of a set of potential substrings.</p>
      *
      * @param str
-     * @param substrs
+     * @param valuesToFind
      * @return
      * @see #indexOfAny(String, String...)
      */
     @SafeVarargs
-    public static int largestIndicesOfAll(final String str, final String... substrs) {
-        return largestIndicesOfAll(str, 0, substrs);
+    public static int largestIndicesOfAll(final String str, final String... valuesToFind) {
+        return largestIndicesOfAll(str, valuesToFind, 0);
     }
 
     /**
@@ -6225,19 +6221,18 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      *
      * @param str
+     * @param valuesToFind
      * @param fromIndex
-     * @param substrs
      * @return
-     * @see #indexOfAny(String, int, String...)
+     * @see #indexOfAny(String, String[], int)
      */
-    @SafeVarargs
-    public static int largestIndicesOfAll(final String str, final int fromIndex, final String... substrs) {
-        if (str == null || N.isEmpty(substrs)) {
+    public static int largestIndicesOfAll(final String str, final String[] valuesToFind, final int fromIndex) {
+        if (str == null || N.isEmpty(valuesToFind)) {
             return N.INDEX_NOT_FOUND;
         }
 
         final int len = str.length();
-        final List<String> sortedSubstrs = Stream.of(substrs) //
+        final List<String> sortedSubstrs = Stream.of(valuesToFind) //
                 .filter(it -> !(it == null || (fromIndex + it.length() > len)))
                 .sortedByInt(N::len)
                 .toList();
@@ -6259,13 +6254,13 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>Find the smallest last index of any of a set of potential substrings from {@code fromIndex}.</p>
      *
      * @param str
-     * @param substrs
+     * @param valuesToFind
      * @return
      * @see #indexOfAny(String, String...)
      */
     @SafeVarargs
-    public static int smallestLastindicesOfAll(final String str, final String... substrs) {
-        return smallestLastindicesOfAll(str, N.len(str), substrs);
+    public static int smallestLastindicesOfAll(final String str, final String... valuesToFind) {
+        return smallestLastindicesOfAll(str, valuesToFind, N.len(str));
     }
 
     /**
@@ -6273,21 +6268,20 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      *
      * @param str
+     * @param valuesToFind
      * @param fromIndex
-     * @param substrs
      * @return
-     * @see #indexOfAny(String, int, String...)
+     * @see #indexOfAny(String, String[], int)
      */
-    @SafeVarargs
-    public static int smallestLastindicesOfAll(final String str, final int fromIndex, final String... substrs) {
-        if (str == null || N.isEmpty(substrs)) {
+    public static int smallestLastindicesOfAll(final String str, final String[] valuesToFind, final int fromIndex) {
+        if (str == null || N.isEmpty(valuesToFind)) {
             return N.INDEX_NOT_FOUND;
         }
 
         final int len = str.length();
         int result = N.INDEX_NOT_FOUND;
 
-        for (String substr : substrs) {
+        for (String substr : valuesToFind) {
             if (substr == null || substr.length() > len) {
                 continue;
             }
@@ -6308,13 +6302,13 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>Find the largest index among the first index of any of a set of potential substrings.</p>
      *
      * @param str
-     * @param substrs
+     * @param valuesToFind
      * @return
      * @see #indexOfAny(String, String...)
      */
     @SafeVarargs
-    public static int largestLastindicesOfAll(final String str, final String... substrs) {
-        return largestLastindicesOfAll(str, N.len(str), substrs);
+    public static int largestLastindicesOfAll(final String str, final String... valuesToFind) {
+        return largestLastindicesOfAll(str, valuesToFind, N.len(str));
     }
 
     /**
@@ -6322,21 +6316,20 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      *
      * @param str
+     * @param valuesToFind
      * @param fromIndex
-     * @param substrs
      * @return
-     * @see #indexOfAny(String, int, String...)
+     * @see #indexOfAny(String, String[], int)
      */
-    @SafeVarargs
-    public static int largestLastindicesOfAll(final String str, final int fromIndex, final String... substrs) {
-        if (str == null || N.isEmpty(substrs)) {
+    public static int largestLastindicesOfAll(final String str, final String[] valuesToFind, final int fromIndex) {
+        if (str == null || N.isEmpty(valuesToFind)) {
             return N.INDEX_NOT_FOUND;
         }
 
         final int len = str.length();
         int result = N.INDEX_NOT_FOUND;
 
-        for (String substr : substrs) {
+        for (String substr : valuesToFind) {
             if (substr == null || substr.length() > len) {
                 continue;
             }
@@ -6357,14 +6350,14 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * </p>
      *
      * @param str
-     * @param substr
+     * @param valueToFind
      * @param ordinal the n-th {@code searchStr} to find
      * @return
      *         {@code N.INDEX_NOT_FOUND}) if no match or {@code null} or empty
      *         string input
      */
-    public static int ordinalIndexOf(final String str, final String substr, final int ordinal) {
-        return ordinalIndexOf(str, substr, ordinal, false);
+    public static int ordinalIndexOf(final String str, final String valueToFind, final int ordinal) {
+        return ordinalIndexOf(str, valueToFind, ordinal, false);
     }
 
     /**
@@ -6373,25 +6366,25 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * </p>
      *
      * @param str
-     * @param substr
+     * @param valueToFind
      * @param ordinal the n-th last {@code searchStr} to find
      * @return
      *         {@code N.INDEX_NOT_FOUND}) if no match or {@code null} or empty
      *         string input
      */
-    public static int lastOrdinalIndexOf(final String str, final String substr, final int ordinal) {
-        return ordinalIndexOf(str, substr, ordinal, true);
+    public static int lastOrdinalIndexOf(final String str, final String valueToFind, final int ordinal) {
+        return ordinalIndexOf(str, valueToFind, ordinal, true);
     }
 
     /**
      *
      * @param str
-     * @param ch
+     * @param charValueToFind
      * @return
      * @see N#occurrencesOf(String, char)
      */
     @SuppressWarnings("deprecation")
-    public static int countMatches(final String str, final char ch) {
+    public static int countMatches(final String str, final int charValueToFind) {
         if (str == null || str.length() == 0) {
             return 0;
         }
@@ -6399,7 +6392,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         int occurrences = 0;
 
         for (char e : InternalUtil.getCharsForReadOnly(str)) {
-            if (e == ch) {
+            if (e == charValueToFind) {
                 occurrences++;
             }
         }
@@ -6410,19 +6403,19 @@ public abstract sealed class Strings permits Strings.StringUtil {
     /**
      *
      * @param str
-     * @param substr
+     * @param valueToFind
      * @return
      * @see N#occurrencesOf(String, String)
      */
-    public static int countMatches(final String str, final String substr) {
-        if (str == null || substr == null) {
+    public static int countMatches(final String str, final String valueToFind) {
+        if (str == null || valueToFind == null) {
             return 0;
         }
 
         int occurrences = 0;
 
-        for (int len = N.len(str), substrLen = N.len(substr), index = 0, fromIndex = 0, toIndex = len - substrLen; fromIndex <= toIndex;) {
-            index = str.indexOf(substr, fromIndex);
+        for (int len = N.len(str), substrLen = N.len(valueToFind), index = 0, fromIndex = 0, toIndex = len - substrLen; fromIndex <= toIndex;) {
+            index = str.indexOf(valueToFind, fromIndex);
 
             if (index < 0) {
                 break;
@@ -6438,129 +6431,129 @@ public abstract sealed class Strings permits Strings.StringUtil {
     /**
      *
      * @param str
-     * @param targetChar
+     * @param charValueToFind
      * @return
      */
-    public static boolean contains(final String str, final int targetChar) {
+    public static boolean contains(final String str, final int charValueToFind) {
         if (str == null || str.length() == 0) {
             return false;
         }
 
-        return indexOf(str, targetChar) != N.INDEX_NOT_FOUND;
+        return indexOf(str, charValueToFind) != N.INDEX_NOT_FOUND;
     }
 
     /**
      *
      * @param str
-     * @param substr
+     * @param valueToFind
      * @return
      */
-    public static boolean contains(final String str, final String substr) {
-        if (str == null || substr == null) {
+    public static boolean contains(final String str, final String valueToFind) {
+        if (str == null || valueToFind == null) {
             return false;
         }
 
-        return indexOf(str, substr) != N.INDEX_NOT_FOUND;
+        return indexOf(str, valueToFind) != N.INDEX_NOT_FOUND;
     }
 
     /**
      *
      * @param str
-     * @param substr
+     * @param valueToFind
      * @param delimiter
      * @return
      */
-    public static boolean contains(final String str, final String substr, final String delimiter) {
-        if (str == null || substr == null) {
+    public static boolean contains(final String str, final String valueToFind, final String delimiter) {
+        if (str == null || valueToFind == null) {
             return false;
         }
 
-        return indexOf(str, substr, delimiter) != N.INDEX_NOT_FOUND;
+        return indexOf(str, valueToFind, delimiter) != N.INDEX_NOT_FOUND;
     }
 
     /**
      * Contains ignore case.
      *
      * @param str
-     * @param substr
+     * @param valueToFind
      * @return
      */
-    public static boolean containsIgnoreCase(final String str, final String substr) {
-        if (str == null || substr == null) {
+    public static boolean containsIgnoreCase(final String str, final String valueToFind) {
+        if (str == null || valueToFind == null) {
             return false;
         }
 
-        return indexOfIgnoreCase(str, substr) != N.INDEX_NOT_FOUND;
+        return indexOfIgnoreCase(str, valueToFind) != N.INDEX_NOT_FOUND;
     }
 
     /**
      *
      * @param str
-     * @param substr
+     * @param valueToFind
      * @param delimiter
      * @return
      */
-    public static boolean containsIgnoreCase(final String str, final String substr, final String delimiter) {
-        if (str == null || substr == null) {
+    public static boolean containsIgnoreCase(final String str, final String valueToFind, final String delimiter) {
+        if (str == null || valueToFind == null) {
             return false;
         }
 
-        return indexOfIgnoreCase(str, substr, delimiter) != N.INDEX_NOT_FOUND;
+        return indexOfIgnoreCase(str, valueToFind, delimiter) != N.INDEX_NOT_FOUND;
     }
 
     /**
      *
      * @param str
-     * @param chs
+     * @param valuesToFind
      * @return
      */
     @SafeVarargs
-    public static boolean containsAny(final String str, final char... chs) {
-        if (isEmpty(str) || N.isEmpty(chs)) {
+    public static boolean containsAny(final String str, final char... valuesToFind) {
+        if (isEmpty(str) || N.isEmpty(valuesToFind)) {
             return false;
         }
 
-        return indexOfAny(str, chs) != N.INDEX_NOT_FOUND;
+        return indexOfAny(str, valuesToFind) != N.INDEX_NOT_FOUND;
     }
 
     /**
      *
      * @param str
-     * @param searchStrs
+     * @param valuesToFind
      * @return
      */
     @SafeVarargs
-    public static boolean containsAny(final String str, final String... searchStrs) {
-        if (isEmpty(str) || N.isEmpty(searchStrs)) {
+    public static boolean containsAny(final String str, final String... valuesToFind) {
+        if (isEmpty(str) || N.isEmpty(valuesToFind)) {
             return false;
         }
 
-        return indexOfAny(str, searchStrs) != N.INDEX_NOT_FOUND;
+        return indexOfAny(str, valuesToFind) != N.INDEX_NOT_FOUND;
     }
 
     /**
      *
      * @param str
-     * @param searchStrs
+     * @param valuesToFind
      * @return
      */
     @SafeVarargs
-    public static boolean containsAnyIgnoreCase(final String str, final String... searchStrs) {
-        if (isEmpty(str) || N.isEmpty(searchStrs)) {
+    public static boolean containsAnyIgnoreCase(final String str, final String... valuesToFind) {
+        if (isEmpty(str) || N.isEmpty(valuesToFind)) {
             return false;
-        } else if (searchStrs.length == 1) {
-            return containsIgnoreCase(str, searchStrs[0]);
-        } else if (searchStrs.length == 2) {
-            if (containsIgnoreCase(str, searchStrs[0])) {
+        } else if (valuesToFind.length == 1) {
+            return containsIgnoreCase(str, valuesToFind[0]);
+        } else if (valuesToFind.length == 2) {
+            if (containsIgnoreCase(str, valuesToFind[0])) {
                 return true;
             }
 
-            return containsIgnoreCase(str, searchStrs[1]);
+            return containsIgnoreCase(str, valuesToFind[1]);
         }
 
         final String sourceText = str.toLowerCase();
 
-        for (String searchStr : searchStrs) {
+        for (String searchStr : valuesToFind) {
             if (isNotEmpty(searchStr) && indexOf(sourceText, searchStr.toLowerCase()) != N.INDEX_NOT_FOUND) {
                 return true;
             }
@@ -6572,18 +6565,18 @@ public abstract sealed class Strings permits Strings.StringUtil {
     /**
      *
      * @param str
-     * @param chs
+     * @param valuesToFind
      * @return
      */
     @SafeVarargs
-    public static boolean containsAll(final String str, final char... chs) {
-        if (N.isEmpty(chs)) {
+    public static boolean containsAll(final String str, final char... valuesToFind) {
+        if (N.isEmpty(valuesToFind)) {
             return true;
         } else if (str == null || str.length() == 0) {
             return false;
         }
 
-        for (char ch : chs) {
+        for (char ch : valuesToFind) {
             if (str.indexOf(ch) < 0) {
                 return false;
             }
@@ -6595,18 +6588,18 @@ public abstract sealed class Strings permits Strings.StringUtil {
     /**
      *
      * @param str
-     * @param searchStrs
+     * @param valuesToFind
      * @return
      */
     @SafeVarargs
-    public static boolean containsAll(final String str, final String... searchStrs) {
-        if (N.isEmpty(searchStrs)) {
+    public static boolean containsAll(final String str, final String... valuesToFind) {
+        if (N.isEmpty(valuesToFind)) {
             return true;
         } else if (str == null || str.length() == 0) {
             return false;
         }
 
-        for (String searchStr : searchStrs) {
+        for (String searchStr : valuesToFind) {
             if (!Strings.contains(str, searchStr)) {
                 return false;
             }
@@ -6618,18 +6611,18 @@ public abstract sealed class Strings permits Strings.StringUtil {
     /**
      *
      * @param str
-     * @param searchStrs
+     * @param valuesToFind
      * @return
      */
     @SafeVarargs
-    public static boolean containsAllIgnoreCase(final String str, final String... searchStrs) {
-        if (N.isEmpty(searchStrs)) {
+    public static boolean containsAllIgnoreCase(final String str, final String... valuesToFind) {
+        if (N.isEmpty(valuesToFind)) {
             return true;
         } else if (str == null || str.length() == 0) {
             return false;
         }
 
-        for (String searchStr : searchStrs) {
+        for (String searchStr : valuesToFind) {
             if (!Strings.containsIgnoreCase(str, searchStr)) {
                 return false;
             }
@@ -6641,33 +6634,33 @@ public abstract sealed class Strings permits Strings.StringUtil {
     /**
      *
      * @param str
-     * @param chs
+     * @param valuesToFind
      * @return
      */
     @SafeVarargs
-    public static boolean containsOnly(final String str, final char... chs) {
-        if (isEmpty(str) || N.isEmpty(chs)) {
+    public static boolean containsOnly(final String str, final char... valuesToFind) {
+        if (isEmpty(str) || N.isEmpty(valuesToFind)) {
             return false;
         }
 
-        return indexOfAnyBut(str, chs) == N.INDEX_NOT_FOUND;
+        return indexOfAnyBut(str, valuesToFind) == N.INDEX_NOT_FOUND;
     }
 
     /**
      *
      * @param str
-     * @param chs
+     * @param valuesToFind
      * @return
      */
     @SafeVarargs
-    public static boolean containsNone(final String str, final char... chs) {
-        if (isEmpty(str) || N.isEmpty(chs)) {
+    public static boolean containsNone(final String str, final char... valuesToFind) {
+        if (isEmpty(str) || N.isEmpty(valuesToFind)) {
             return true;
         }
 
         final int strLen = str.length();
         final int strLast = strLen - 1;
-        final int chsLen = chs.length;
+        final int chsLen = valuesToFind.length;
         final int chsLast = chsLen - 1;
         char ch = 0;
 
@@ -6675,9 +6668,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
             ch = str.charAt(i);
 
             for (int j = 0; j < chsLen; j++) {
-                if (chs[j] == ch) {
+                if (valuesToFind[j] == ch) {
                     if (Character.isHighSurrogate(ch)) {
-                        if ((j == chsLast) || (i < strLast && chs[j + 1] == str.charAt(i + 1))) {
+                        if ((j == chsLast) || (i < strLast && valuesToFind[j + 1] == str.charAt(i + 1))) {
                             return false;
                         }
                     } else {

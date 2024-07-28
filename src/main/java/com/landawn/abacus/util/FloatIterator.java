@@ -488,7 +488,7 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
      * @throws IllegalArgumentException 
      * @throws E the e
      */
-    public <E extends Exception> void foreachIndexed(Throwables.IndexedFloatConsumer<E> action) throws IllegalArgumentException, E {
+    public <E extends Exception> void foreachIndexed(Throwables.IntFloatConsumer<E> action) throws IllegalArgumentException, E {
         N.checkArgNotNull(action);
 
         int idx = 0;

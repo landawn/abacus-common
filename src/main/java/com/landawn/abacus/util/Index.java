@@ -46,12 +46,12 @@ public final class Index {
     /**
      *
      * @param a
-     * @param startIndex
      * @param valueToFind
+     * @param fromIndex
      * @return
      */
-    public static OptionalInt of(final boolean[] a, final int startIndex, final boolean valueToFind) {
-        return toOptionalInt(N.indexOf(a, startIndex, valueToFind));
+    public static OptionalInt of(final boolean[] a, final boolean valueToFind, final int fromIndex) {
+        return toOptionalInt(N.indexOf(a, valueToFind, fromIndex));
     }
 
     /**
@@ -67,12 +67,12 @@ public final class Index {
     /**
      *
      * @param a
-     * @param startIndex
      * @param valueToFind
+     * @param fromIndex
      * @return
      */
-    public static OptionalInt of(final char[] a, final int startIndex, final char valueToFind) {
-        return toOptionalInt(N.indexOf(a, startIndex, valueToFind));
+    public static OptionalInt of(final char[] a, final char valueToFind, final int fromIndex) {
+        return toOptionalInt(N.indexOf(a, valueToFind, fromIndex));
     }
 
     /**
@@ -88,12 +88,12 @@ public final class Index {
     /**
      *
      * @param a
-     * @param startIndex
      * @param valueToFind
+     * @param fromIndex
      * @return
      */
-    public static OptionalInt of(final byte[] a, final int startIndex, final byte valueToFind) {
-        return toOptionalInt(N.indexOf(a, startIndex, valueToFind));
+    public static OptionalInt of(final byte[] a, final byte valueToFind, final int fromIndex) {
+        return toOptionalInt(N.indexOf(a, valueToFind, fromIndex));
     }
 
     /**
@@ -109,12 +109,12 @@ public final class Index {
     /**
      *
      * @param a
-     * @param startIndex
      * @param valueToFind
+     * @param fromIndex
      * @return
      */
-    public static OptionalInt of(final short[] a, final int startIndex, final short valueToFind) {
-        return toOptionalInt(N.indexOf(a, startIndex, valueToFind));
+    public static OptionalInt of(final short[] a, final short valueToFind, final int fromIndex) {
+        return toOptionalInt(N.indexOf(a, valueToFind, fromIndex));
     }
 
     /**
@@ -130,12 +130,12 @@ public final class Index {
     /**
      *
      * @param a
-     * @param startIndex
      * @param valueToFind
+     * @param fromIndex
      * @return
      */
-    public static OptionalInt of(final int[] a, final int startIndex, final int valueToFind) {
-        return toOptionalInt(N.indexOf(a, startIndex, valueToFind));
+    public static OptionalInt of(final int[] a, final int valueToFind, final int fromIndex) {
+        return toOptionalInt(N.indexOf(a, valueToFind, fromIndex));
     }
 
     /**
@@ -151,12 +151,12 @@ public final class Index {
     /**
      *
      * @param a
-     * @param startIndex
      * @param valueToFind
+     * @param fromIndex
      * @return
      */
-    public static OptionalInt of(final long[] a, final int startIndex, final long valueToFind) {
-        return toOptionalInt(N.indexOf(a, startIndex, valueToFind));
+    public static OptionalInt of(final long[] a, final long valueToFind, final int fromIndex) {
+        return toOptionalInt(N.indexOf(a, valueToFind, fromIndex));
     }
 
     /**
@@ -172,12 +172,12 @@ public final class Index {
     /**
      *
      * @param a
-     * @param startIndex
      * @param valueToFind
+     * @param fromIndex
      * @return
      */
-    public static OptionalInt of(final float[] a, final int startIndex, final float valueToFind) {
-        return toOptionalInt(N.indexOf(a, startIndex, valueToFind));
+    public static OptionalInt of(final float[] a, final float valueToFind, final int fromIndex) {
+        return toOptionalInt(N.indexOf(a, valueToFind, fromIndex));
     }
 
     /**
@@ -193,12 +193,12 @@ public final class Index {
     /**
      *
      * @param a
-     * @param startIndex
+     * @param fromIndex
      * @param valueToFind
      * @return
      */
-    public static OptionalInt of(final double[] a, final int startIndex, final double valueToFind) {
-        return toOptionalInt(N.indexOf(a, startIndex, valueToFind));
+    public static OptionalInt of(final double[] a, final int fromIndex, final double valueToFind) {
+        return toOptionalInt(N.indexOf(a, valueToFind, fromIndex));
     }
 
     /**
@@ -210,20 +210,20 @@ public final class Index {
      * @see N#indexOf(double[], double, double)
      */
     public static OptionalInt of(final double[] a, final double valueToFind, final double tolerance) {
-        return of(a, 0, valueToFind, tolerance);
+        return of(a, valueToFind, tolerance, 0);
     }
 
     /**
      *
      * @param a
-     * @param startIndex
      * @param valueToFind
      * @param tolerance
+     * @param fromIndex
      * @return
-     * @see N#indexOf(double[], int, double, double)
+     * @see N#indexOf(double[], double, double, int)
      */
-    public static OptionalInt of(final double[] a, int startIndex, final double valueToFind, final double tolerance) {
-        return toOptionalInt(N.indexOf(a, startIndex, valueToFind, tolerance));
+    public static OptionalInt of(final double[] a, final double valueToFind, final double tolerance, int fromIndex) {
+        return toOptionalInt(N.indexOf(a, valueToFind, tolerance, fromIndex));
     }
 
     /**
@@ -239,12 +239,12 @@ public final class Index {
     /**
      *
      * @param a
-     * @param startIndex
      * @param valueToFind
+     * @param fromIndex
      * @return
      */
-    public static OptionalInt of(final Object[] a, final int startIndex, final Object valueToFind) {
-        return toOptionalInt(N.indexOf(a, startIndex, valueToFind));
+    public static OptionalInt of(final Object[] a, final Object valueToFind, final int fromIndex) {
+        return toOptionalInt(N.indexOf(a, valueToFind, fromIndex));
     }
 
     /**
@@ -260,12 +260,12 @@ public final class Index {
     /**
      *
      * @param c
-     * @param startIndex
      * @param valueToFind
+     * @param fromIndex
      * @return
      */
-    public static OptionalInt of(final Collection<?> c, final int startIndex, final Object valueToFind) {
-        return toOptionalInt(N.indexOf(c, startIndex, valueToFind));
+    public static OptionalInt of(final Collection<?> c, final Object valueToFind, final int fromIndex) {
+        return toOptionalInt(N.indexOf(c, valueToFind, fromIndex));
     }
 
     /**
@@ -281,33 +281,33 @@ public final class Index {
     /**
      *
      * @param iter
-     * @param startIndex
      * @param valueToFind
+     * @param fromIndex
      * @return
      */
-    public static OptionalInt of(final Iterator<?> iter, final int startIndex, final Object valueToFind) {
-        return toOptionalInt(N.indexOf(iter, startIndex, valueToFind));
+    public static OptionalInt of(final Iterator<?> iter, final Object valueToFind, final int fromIndex) {
+        return toOptionalInt(N.indexOf(iter, valueToFind, fromIndex));
     }
 
     /**
      *
      * @param str
-     * @param valueToFind
+     * @param charValueToFind
      * @return
      */
-    public static OptionalInt of(final String str, final char valueToFind) {
-        return toOptionalInt(Strings.indexOf(str, valueToFind));
+    public static OptionalInt of(final String str, final int charValueToFind) {
+        return toOptionalInt(Strings.indexOf(str, charValueToFind));
     }
 
     /**
      *
      * @param str
-     * @param startIndex
-     * @param valueToFind
+     * @param charValueToFind
+     * @param fromIndex
      * @return
      */
-    public static OptionalInt of(final String str, final int startIndex, final char valueToFind) {
-        return toOptionalInt(Strings.indexOf(str, startIndex, valueToFind));
+    public static OptionalInt of(final String str, final int charValueToFind, final int fromIndex) {
+        return toOptionalInt(Strings.indexOf(str, charValueToFind, fromIndex));
     }
 
     /**
@@ -323,12 +323,12 @@ public final class Index {
     /**
      *
      * @param str
-     * @param startIndex
      * @param valueToFind
+     * @param fromIndex
      * @return
      */
-    public static OptionalInt of(final String str, final int startIndex, final String valueToFind) {
-        return toOptionalInt(Strings.indexOf(str, startIndex, valueToFind));
+    public static OptionalInt of(final String str, final String valueToFind, final int fromIndex) {
+        return toOptionalInt(Strings.indexOf(str, valueToFind, fromIndex));
     }
 
     /**
@@ -344,12 +344,12 @@ public final class Index {
     /**
      *
      * @param str
-     * @param startIndex
      * @param valueToFind
+     * @param fromIndex
      * @return
      */
-    public static OptionalInt ofIgnoreCase(final String str, final int startIndex, final String valueToFind) {
-        return toOptionalInt(Strings.indexOfIgnoreCase(str, startIndex, valueToFind));
+    public static OptionalInt ofIgnoreCase(final String str, final String valueToFind, final int fromIndex) {
+        return toOptionalInt(Strings.indexOfIgnoreCase(str, valueToFind, fromIndex));
     }
 
     /**
@@ -367,39 +367,39 @@ public final class Index {
      *
      *
      * @param sourceArray
-     * @param startIndex
+     * @param fromIndex
      * @param subArrayToFind
      * @return
      */
-    public static OptionalInt ofSubArray(final boolean[] sourceArray, final int startIndex, final boolean[] subArrayToFind) {
-        return ofSubArray(sourceArray, startIndex, subArrayToFind, 0, N.len(subArrayToFind));
+    public static OptionalInt ofSubArray(final boolean[] sourceArray, final int fromIndex, final boolean[] subArrayToFind) {
+        return ofSubArray(sourceArray, fromIndex, subArrayToFind, 0, N.len(subArrayToFind));
     }
 
     /**
      * Of sub array.
      *
      * @param sourceArray
-     * @param startIndex
+     * @param fromIndex
      * @param subArrayToFind
-     * @param beginIndexOfTargetSubArray
-     * @param size
+     * @param startIndexOfSubArray
+     * @param sizeToMatch
      * @return
      * @throws IndexOutOfBoundsException
      */
-    public static OptionalInt ofSubArray(final boolean[] sourceArray, final int startIndex, final boolean[] subArrayToFind,
-            final int beginIndexOfTargetSubArray, final int size) throws IndexOutOfBoundsException {
-        N.checkFromIndexSize(beginIndexOfTargetSubArray, size, N.len(subArrayToFind));
+    public static OptionalInt ofSubArray(final boolean[] sourceArray, final int fromIndex, final boolean[] subArrayToFind, final int startIndexOfSubArray,
+            final int sizeToMatch) throws IndexOutOfBoundsException {
+        N.checkFromIndexSize(startIndexOfSubArray, sizeToMatch, N.len(subArrayToFind));
 
         final int len = N.len(sourceArray);
 
-        if (len == 0 || startIndex >= len || size == 0 || len - N.max(startIndex, 0) < size) {
+        if (len == 0 || fromIndex >= len || sizeToMatch == 0 || len - N.max(fromIndex, 0) < sizeToMatch) {
             return toOptionalInt(N.INDEX_NOT_FOUND);
         }
 
-        final int endIndexOfTargetSubArray = beginIndexOfTargetSubArray + size;
+        final int endIndexOfTargetSubArray = startIndexOfSubArray + sizeToMatch;
 
-        for (int i = N.max(startIndex, 0), maxFromIndex = len - size; i <= maxFromIndex; i++) {
-            for (int k = i, j = beginIndexOfTargetSubArray; j < endIndexOfTargetSubArray; k++, j++) {
+        for (int i = N.max(fromIndex, 0), maxFromIndex = len - sizeToMatch; i <= maxFromIndex; i++) {
+            for (int k = i, j = startIndexOfSubArray; j < endIndexOfTargetSubArray; k++, j++) {
                 if (sourceArray[k] != subArrayToFind[j]) {
                     break;
                 } else if (j == endIndexOfTargetSubArray - 1) {
@@ -426,39 +426,39 @@ public final class Index {
      *
      *
      * @param sourceArray
-     * @param startIndex
+     * @param fromIndex
      * @param subArrayToFind
      * @return
      */
-    public static OptionalInt ofSubArray(final char[] sourceArray, final int startIndex, final char[] subArrayToFind) {
-        return ofSubArray(sourceArray, startIndex, subArrayToFind, 0, N.len(subArrayToFind));
+    public static OptionalInt ofSubArray(final char[] sourceArray, final int fromIndex, final char[] subArrayToFind) {
+        return ofSubArray(sourceArray, fromIndex, subArrayToFind, 0, N.len(subArrayToFind));
     }
 
     /**
      * Of sub array.
      *
      * @param sourceArray
-     * @param startIndex
+     * @param fromIndex
      * @param subArrayToFind
-     * @param beginIndexOfTargetSubArray
-     * @param size
+     * @param startIndexOfSubArray
+     * @param sizeToMatch
      * @return
      * @throws IndexOutOfBoundsException
      */
-    public static OptionalInt ofSubArray(final char[] sourceArray, final int startIndex, final char[] subArrayToFind, final int beginIndexOfTargetSubArray,
-            final int size) throws IndexOutOfBoundsException {
-        N.checkFromIndexSize(beginIndexOfTargetSubArray, size, N.len(subArrayToFind));
+    public static OptionalInt ofSubArray(final char[] sourceArray, final int fromIndex, final char[] subArrayToFind, final int startIndexOfSubArray,
+            final int sizeToMatch) throws IndexOutOfBoundsException {
+        N.checkFromIndexSize(startIndexOfSubArray, sizeToMatch, N.len(subArrayToFind));
 
         final int len = N.len(sourceArray);
 
-        if (len == 0 || startIndex >= len || size == 0 || len - N.max(startIndex, 0) < size) {
+        if (len == 0 || fromIndex >= len || sizeToMatch == 0 || len - N.max(fromIndex, 0) < sizeToMatch) {
             return toOptionalInt(N.INDEX_NOT_FOUND);
         }
 
-        final int endIndexOfTargetSubArray = beginIndexOfTargetSubArray + size;
+        final int endIndexOfTargetSubArray = startIndexOfSubArray + sizeToMatch;
 
-        for (int i = N.max(startIndex, 0), maxFromIndex = len - size; i <= maxFromIndex; i++) {
-            for (int k = i, j = beginIndexOfTargetSubArray; j < endIndexOfTargetSubArray; k++, j++) {
+        for (int i = N.max(fromIndex, 0), maxFromIndex = len - sizeToMatch; i <= maxFromIndex; i++) {
+            for (int k = i, j = startIndexOfSubArray; j < endIndexOfTargetSubArray; k++, j++) {
                 if (sourceArray[k] != subArrayToFind[j]) {
                     break;
                 } else if (j == endIndexOfTargetSubArray - 1) {
@@ -485,39 +485,39 @@ public final class Index {
      *
      *
      * @param sourceArray
-     * @param startIndex
+     * @param fromIndex
      * @param subArrayToFind
      * @return
      */
-    public static OptionalInt ofSubArray(final byte[] sourceArray, final int startIndex, final byte[] subArrayToFind) {
-        return ofSubArray(sourceArray, startIndex, subArrayToFind, 0, N.len(subArrayToFind));
+    public static OptionalInt ofSubArray(final byte[] sourceArray, final int fromIndex, final byte[] subArrayToFind) {
+        return ofSubArray(sourceArray, fromIndex, subArrayToFind, 0, N.len(subArrayToFind));
     }
 
     /**
      * Of sub array.
      *
      * @param sourceArray
-     * @param startIndex
+     * @param fromIndex
      * @param subArrayToFind
-     * @param beginIndexOfTargetSubArray
-     * @param size
+     * @param startIndexOfSubArray
+     * @param sizeToMatch
      * @return
      * @throws IndexOutOfBoundsException
      */
-    public static OptionalInt ofSubArray(final byte[] sourceArray, final int startIndex, final byte[] subArrayToFind, final int beginIndexOfTargetSubArray,
-            final int size) throws IndexOutOfBoundsException {
-        N.checkFromIndexSize(beginIndexOfTargetSubArray, size, N.len(subArrayToFind));
+    public static OptionalInt ofSubArray(final byte[] sourceArray, final int fromIndex, final byte[] subArrayToFind, final int startIndexOfSubArray,
+            final int sizeToMatch) throws IndexOutOfBoundsException {
+        N.checkFromIndexSize(startIndexOfSubArray, sizeToMatch, N.len(subArrayToFind));
 
         final int len = N.len(sourceArray);
 
-        if (len == 0 || startIndex >= len || size == 0 || len - N.max(startIndex, 0) < size) {
+        if (len == 0 || fromIndex >= len || sizeToMatch == 0 || len - N.max(fromIndex, 0) < sizeToMatch) {
             return toOptionalInt(N.INDEX_NOT_FOUND);
         }
 
-        final int endIndexOfTargetSubArray = beginIndexOfTargetSubArray + size;
+        final int endIndexOfTargetSubArray = startIndexOfSubArray + sizeToMatch;
 
-        for (int i = N.max(startIndex, 0), maxFromIndex = len - size; i <= maxFromIndex; i++) {
-            for (int k = i, j = beginIndexOfTargetSubArray; j < endIndexOfTargetSubArray; k++, j++) {
+        for (int i = N.max(fromIndex, 0), maxFromIndex = len - sizeToMatch; i <= maxFromIndex; i++) {
+            for (int k = i, j = startIndexOfSubArray; j < endIndexOfTargetSubArray; k++, j++) {
                 if (sourceArray[k] != subArrayToFind[j]) {
                     break;
                 } else if (j == endIndexOfTargetSubArray - 1) {
@@ -544,39 +544,39 @@ public final class Index {
      *
      *
      * @param sourceArray
-     * @param startIndex
+     * @param fromIndex
      * @param subArrayToFind
      * @return
      */
-    public static OptionalInt ofSubArray(final short[] sourceArray, final int startIndex, final short[] subArrayToFind) {
-        return ofSubArray(sourceArray, startIndex, subArrayToFind, 0, N.len(subArrayToFind));
+    public static OptionalInt ofSubArray(final short[] sourceArray, final int fromIndex, final short[] subArrayToFind) {
+        return ofSubArray(sourceArray, fromIndex, subArrayToFind, 0, N.len(subArrayToFind));
     }
 
     /**
      * Of sub array.
      *
      * @param sourceArray
-     * @param startIndex
+     * @param fromIndex
      * @param subArrayToFind
-     * @param beginIndexOfTargetSubArray
-     * @param size
+     * @param startIndexOfSubArray
+     * @param sizeToMatch
      * @return
      * @throws IndexOutOfBoundsException
      */
-    public static OptionalInt ofSubArray(final short[] sourceArray, final int startIndex, final short[] subArrayToFind, final int beginIndexOfTargetSubArray,
-            final int size) throws IndexOutOfBoundsException {
-        N.checkFromIndexSize(beginIndexOfTargetSubArray, size, N.len(subArrayToFind));
+    public static OptionalInt ofSubArray(final short[] sourceArray, final int fromIndex, final short[] subArrayToFind, final int startIndexOfSubArray,
+            final int sizeToMatch) throws IndexOutOfBoundsException {
+        N.checkFromIndexSize(startIndexOfSubArray, sizeToMatch, N.len(subArrayToFind));
 
         final int len = N.len(sourceArray);
 
-        if (len == 0 || startIndex >= len || size == 0 || len - N.max(startIndex, 0) < size) {
+        if (len == 0 || fromIndex >= len || sizeToMatch == 0 || len - N.max(fromIndex, 0) < sizeToMatch) {
             return toOptionalInt(N.INDEX_NOT_FOUND);
         }
 
-        final int endIndexOfTargetSubArray = beginIndexOfTargetSubArray + size;
+        final int endIndexOfTargetSubArray = startIndexOfSubArray + sizeToMatch;
 
-        for (int i = N.max(startIndex, 0), maxFromIndex = len - size; i <= maxFromIndex; i++) {
-            for (int k = i, j = beginIndexOfTargetSubArray; j < endIndexOfTargetSubArray; k++, j++) {
+        for (int i = N.max(fromIndex, 0), maxFromIndex = len - sizeToMatch; i <= maxFromIndex; i++) {
+            for (int k = i, j = startIndexOfSubArray; j < endIndexOfTargetSubArray; k++, j++) {
                 if (sourceArray[k] != subArrayToFind[j]) {
                     break;
                 } else if (j == endIndexOfTargetSubArray - 1) {
@@ -603,39 +603,39 @@ public final class Index {
      *
      *
      * @param sourceArray
-     * @param startIndex
+     * @param fromIndex
      * @param subArrayToFind
      * @return
      */
-    public static OptionalInt ofSubArray(final int[] sourceArray, final int startIndex, final int[] subArrayToFind) {
-        return ofSubArray(sourceArray, startIndex, subArrayToFind, 0, N.len(subArrayToFind));
+    public static OptionalInt ofSubArray(final int[] sourceArray, final int fromIndex, final int[] subArrayToFind) {
+        return ofSubArray(sourceArray, fromIndex, subArrayToFind, 0, N.len(subArrayToFind));
     }
 
     /**
      * Of sub array.
      *
      * @param sourceArray
-     * @param startIndex
+     * @param fromIndex
      * @param subArrayToFind
-     * @param beginIndexOfTargetSubArray
-     * @param size
+     * @param startIndexOfSubArray
+     * @param sizeToMatch
      * @return
      * @throws IndexOutOfBoundsException
      */
-    public static OptionalInt ofSubArray(final int[] sourceArray, final int startIndex, final int[] subArrayToFind, final int beginIndexOfTargetSubArray,
-            final int size) throws IndexOutOfBoundsException {
-        N.checkFromIndexSize(beginIndexOfTargetSubArray, size, N.len(subArrayToFind));
+    public static OptionalInt ofSubArray(final int[] sourceArray, final int fromIndex, final int[] subArrayToFind, final int startIndexOfSubArray,
+            final int sizeToMatch) throws IndexOutOfBoundsException {
+        N.checkFromIndexSize(startIndexOfSubArray, sizeToMatch, N.len(subArrayToFind));
 
         final int len = N.len(sourceArray);
 
-        if (len == 0 || startIndex >= len || size == 0 || len - N.max(startIndex, 0) < size) {
+        if (len == 0 || fromIndex >= len || sizeToMatch == 0 || len - N.max(fromIndex, 0) < sizeToMatch) {
             return toOptionalInt(N.INDEX_NOT_FOUND);
         }
 
-        final int endIndexOfTargetSubArray = beginIndexOfTargetSubArray + size;
+        final int endIndexOfTargetSubArray = startIndexOfSubArray + sizeToMatch;
 
-        for (int i = N.max(startIndex, 0), maxFromIndex = len - size; i <= maxFromIndex; i++) {
-            for (int k = i, j = beginIndexOfTargetSubArray; j < endIndexOfTargetSubArray; k++, j++) {
+        for (int i = N.max(fromIndex, 0), maxFromIndex = len - sizeToMatch; i <= maxFromIndex; i++) {
+            for (int k = i, j = startIndexOfSubArray; j < endIndexOfTargetSubArray; k++, j++) {
                 if (sourceArray[k] != subArrayToFind[j]) {
                     break;
                 } else if (j == endIndexOfTargetSubArray - 1) {
@@ -662,39 +662,39 @@ public final class Index {
      *
      *
      * @param sourceArray
-     * @param startIndex
+     * @param fromIndex
      * @param subArrayToFind
      * @return
      */
-    public static OptionalInt ofSubArray(final long[] sourceArray, final int startIndex, final long[] subArrayToFind) {
-        return ofSubArray(sourceArray, startIndex, subArrayToFind, 0, N.len(subArrayToFind));
+    public static OptionalInt ofSubArray(final long[] sourceArray, final int fromIndex, final long[] subArrayToFind) {
+        return ofSubArray(sourceArray, fromIndex, subArrayToFind, 0, N.len(subArrayToFind));
     }
 
     /**
      * Of sub array.
      *
      * @param sourceArray
-     * @param startIndex
+     * @param fromIndex
      * @param subArrayToFind
-     * @param beginIndexOfTargetSubArray
-     * @param size
+     * @param startIndexOfSubArray
+     * @param sizeToMatch
      * @return
      * @throws IndexOutOfBoundsException
      */
-    public static OptionalInt ofSubArray(final long[] sourceArray, final int startIndex, final long[] subArrayToFind, final int beginIndexOfTargetSubArray,
-            final int size) throws IndexOutOfBoundsException {
-        N.checkFromIndexSize(beginIndexOfTargetSubArray, size, N.len(subArrayToFind));
+    public static OptionalInt ofSubArray(final long[] sourceArray, final int fromIndex, final long[] subArrayToFind, final int startIndexOfSubArray,
+            final int sizeToMatch) throws IndexOutOfBoundsException {
+        N.checkFromIndexSize(startIndexOfSubArray, sizeToMatch, N.len(subArrayToFind));
 
         final int len = N.len(sourceArray);
 
-        if (len == 0 || startIndex >= len || size == 0 || len - N.max(startIndex, 0) < size) {
+        if (len == 0 || fromIndex >= len || sizeToMatch == 0 || len - N.max(fromIndex, 0) < sizeToMatch) {
             return toOptionalInt(N.INDEX_NOT_FOUND);
         }
 
-        final int endIndexOfTargetSubArray = beginIndexOfTargetSubArray + size;
+        final int endIndexOfTargetSubArray = startIndexOfSubArray + sizeToMatch;
 
-        for (int i = N.max(startIndex, 0), maxFromIndex = len - size; i <= maxFromIndex; i++) {
-            for (int k = i, j = beginIndexOfTargetSubArray; j < endIndexOfTargetSubArray; k++, j++) {
+        for (int i = N.max(fromIndex, 0), maxFromIndex = len - sizeToMatch; i <= maxFromIndex; i++) {
+            for (int k = i, j = startIndexOfSubArray; j < endIndexOfTargetSubArray; k++, j++) {
                 if (sourceArray[k] != subArrayToFind[j]) {
                     break;
                 } else if (j == endIndexOfTargetSubArray - 1) {
@@ -721,39 +721,39 @@ public final class Index {
      *
      *
      * @param sourceArray
-     * @param startIndex
+     * @param fromIndex
      * @param subArrayToFind
      * @return
      */
-    public static OptionalInt ofSubArray(final float[] sourceArray, final int startIndex, final float[] subArrayToFind) {
-        return ofSubArray(sourceArray, startIndex, subArrayToFind, 0, N.len(subArrayToFind));
+    public static OptionalInt ofSubArray(final float[] sourceArray, final int fromIndex, final float[] subArrayToFind) {
+        return ofSubArray(sourceArray, fromIndex, subArrayToFind, 0, N.len(subArrayToFind));
     }
 
     /**
      * Of sub array.
      *
      * @param sourceArray
-     * @param startIndex
+     * @param fromIndex
      * @param subArrayToFind
-     * @param beginIndexOfTargetSubArray
-     * @param size
+     * @param startIndexOfSubArray
+     * @param sizeToMatch
      * @return
      * @throws IndexOutOfBoundsException
      */
-    public static OptionalInt ofSubArray(final float[] sourceArray, final int startIndex, final float[] subArrayToFind, final int beginIndexOfTargetSubArray,
-            final int size) throws IndexOutOfBoundsException {
-        N.checkFromIndexSize(beginIndexOfTargetSubArray, size, N.len(subArrayToFind));
+    public static OptionalInt ofSubArray(final float[] sourceArray, final int fromIndex, final float[] subArrayToFind, final int startIndexOfSubArray,
+            final int sizeToMatch) throws IndexOutOfBoundsException {
+        N.checkFromIndexSize(startIndexOfSubArray, sizeToMatch, N.len(subArrayToFind));
 
         final int len = N.len(sourceArray);
 
-        if (len == 0 || startIndex >= len || size == 0 || len - N.max(startIndex, 0) < size) {
+        if (len == 0 || fromIndex >= len || sizeToMatch == 0 || len - N.max(fromIndex, 0) < sizeToMatch) {
             return toOptionalInt(N.INDEX_NOT_FOUND);
         }
 
-        final int endIndexOfTargetSubArray = beginIndexOfTargetSubArray + size;
+        final int endIndexOfTargetSubArray = startIndexOfSubArray + sizeToMatch;
 
-        for (int i = N.max(startIndex, 0), maxFromIndex = len - size; i <= maxFromIndex; i++) {
-            for (int k = i, j = beginIndexOfTargetSubArray; j < endIndexOfTargetSubArray; k++, j++) {
+        for (int i = N.max(fromIndex, 0), maxFromIndex = len - sizeToMatch; i <= maxFromIndex; i++) {
+            for (int k = i, j = startIndexOfSubArray; j < endIndexOfTargetSubArray; k++, j++) {
                 if (!N.equals(sourceArray[k], subArrayToFind[j])) {
                     break;
                 } else if (j == endIndexOfTargetSubArray - 1) {
@@ -780,39 +780,39 @@ public final class Index {
      *
      *
      * @param sourceArray
-     * @param startIndex
+     * @param fromIndex
      * @param subArrayToFind
      * @return
      */
-    public static OptionalInt ofSubArray(final double[] sourceArray, final int startIndex, final double[] subArrayToFind) {
-        return ofSubArray(sourceArray, startIndex, subArrayToFind, 0, N.len(subArrayToFind));
+    public static OptionalInt ofSubArray(final double[] sourceArray, final int fromIndex, final double[] subArrayToFind) {
+        return ofSubArray(sourceArray, fromIndex, subArrayToFind, 0, N.len(subArrayToFind));
     }
 
     /**
      * Of sub array.
      *
      * @param sourceArray
-     * @param startIndex
+     * @param fromIndex
      * @param subArrayToFind
-     * @param beginIndexOfTargetSubArray
-     * @param size
+     * @param startIndexOfSubArray
+     * @param sizeToMatch
      * @return
      * @throws IndexOutOfBoundsException
      */
-    public static OptionalInt ofSubArray(final double[] sourceArray, final int startIndex, final double[] subArrayToFind, final int beginIndexOfTargetSubArray,
-            final int size) throws IndexOutOfBoundsException {
-        N.checkFromIndexSize(beginIndexOfTargetSubArray, size, N.len(subArrayToFind));
+    public static OptionalInt ofSubArray(final double[] sourceArray, final int fromIndex, final double[] subArrayToFind, final int startIndexOfSubArray,
+            final int sizeToMatch) throws IndexOutOfBoundsException {
+        N.checkFromIndexSize(startIndexOfSubArray, sizeToMatch, N.len(subArrayToFind));
 
         final int len = N.len(sourceArray);
 
-        if (len == 0 || startIndex >= len || size == 0 || len - N.max(startIndex, 0) < size) {
+        if (len == 0 || fromIndex >= len || sizeToMatch == 0 || len - N.max(fromIndex, 0) < sizeToMatch) {
             return toOptionalInt(N.INDEX_NOT_FOUND);
         }
 
-        final int endIndexOfTargetSubArray = beginIndexOfTargetSubArray + size;
+        final int endIndexOfTargetSubArray = startIndexOfSubArray + sizeToMatch;
 
-        for (int i = N.max(startIndex, 0), maxFromIndex = len - size; i <= maxFromIndex; i++) {
-            for (int k = i, j = beginIndexOfTargetSubArray; j < endIndexOfTargetSubArray; k++, j++) {
+        for (int i = N.max(fromIndex, 0), maxFromIndex = len - sizeToMatch; i <= maxFromIndex; i++) {
+            for (int k = i, j = startIndexOfSubArray; j < endIndexOfTargetSubArray; k++, j++) {
                 if (!N.equals(sourceArray[k], subArrayToFind[j])) {
                     break;
                 } else if (j == endIndexOfTargetSubArray - 1) {
@@ -839,39 +839,39 @@ public final class Index {
      *
      *
      * @param sourceArray
-     * @param startIndex
+     * @param fromIndex
      * @param subArrayToFind
      * @return
      */
-    public static OptionalInt ofSubArray(final Object[] sourceArray, final int startIndex, final Object[] subArrayToFind) {
-        return ofSubArray(sourceArray, startIndex, subArrayToFind, 0, N.len(subArrayToFind));
+    public static OptionalInt ofSubArray(final Object[] sourceArray, final int fromIndex, final Object[] subArrayToFind) {
+        return ofSubArray(sourceArray, fromIndex, subArrayToFind, 0, N.len(subArrayToFind));
     }
 
     /**
      * Of sub array.
      *
      * @param sourceArray
-     * @param startIndex
+     * @param fromIndex
      * @param subArrayToFind
-     * @param beginIndexOfTargetSubArray
-     * @param size
+     * @param startIndexOfSubArray
+     * @param sizeToMatch
      * @return
      * @throws IndexOutOfBoundsException
      */
-    public static OptionalInt ofSubArray(final Object[] sourceArray, final int startIndex, final Object[] subArrayToFind, final int beginIndexOfTargetSubArray,
-            final int size) throws IndexOutOfBoundsException {
-        N.checkFromIndexSize(beginIndexOfTargetSubArray, size, N.len(subArrayToFind));
+    public static OptionalInt ofSubArray(final Object[] sourceArray, final int fromIndex, final Object[] subArrayToFind, final int startIndexOfSubArray,
+            final int sizeToMatch) throws IndexOutOfBoundsException {
+        N.checkFromIndexSize(startIndexOfSubArray, sizeToMatch, N.len(subArrayToFind));
 
         final int len = N.len(sourceArray);
 
-        if (len == 0 || startIndex >= len || size == 0 || len - N.max(startIndex, 0) < size) {
+        if (len == 0 || fromIndex >= len || sizeToMatch == 0 || len - N.max(fromIndex, 0) < sizeToMatch) {
             return toOptionalInt(N.INDEX_NOT_FOUND);
         }
 
-        final int endIndexOfTargetSubArray = beginIndexOfTargetSubArray + size;
+        final int endIndexOfTargetSubArray = startIndexOfSubArray + sizeToMatch;
 
-        for (int i = N.max(startIndex, 0), maxFromIndex = len - size; i <= maxFromIndex; i++) {
-            for (int k = i, j = beginIndexOfTargetSubArray; j < endIndexOfTargetSubArray; k++, j++) {
+        for (int i = N.max(fromIndex, 0), maxFromIndex = len - sizeToMatch; i <= maxFromIndex; i++) {
+            for (int k = i, j = startIndexOfSubArray; j < endIndexOfTargetSubArray; k++, j++) {
                 if (!N.equals(sourceArray[k], subArrayToFind[j])) {
                     break;
                 } else if (j == endIndexOfTargetSubArray - 1) {
@@ -898,40 +898,40 @@ public final class Index {
      *
      *
      * @param sourceList
-     * @param startIndex
+     * @param fromIndex
      * @param subListToFind
      * @return
      */
-    public static OptionalInt ofSubList(final List<?> sourceList, final int startIndex, final List<?> subListToFind) {
-        return ofSubList(sourceList, startIndex, subListToFind, 0, N.size(subListToFind));
+    public static OptionalInt ofSubList(final List<?> sourceList, final int fromIndex, final List<?> subListToFind) {
+        return ofSubList(sourceList, fromIndex, subListToFind, 0, N.size(subListToFind));
     }
 
     /**
      * Of sub list.
      *
      * @param sourceList
-     * @param startIndex
+     * @param fromIndex
      * @param subListToFind
-     * @param beginIndexOfTargetSubList
-     * @param size
+     * @param startIndexOfSubList
+     * @param sizeToMatch
      * @return
      * @throws IndexOutOfBoundsException
      */
-    public static OptionalInt ofSubList(final List<?> sourceList, final int startIndex, final List<?> subListToFind, final int beginIndexOfTargetSubList,
-            final int size) throws IndexOutOfBoundsException {
-        N.checkFromIndexSize(beginIndexOfTargetSubList, size, N.size(subListToFind));
+    public static OptionalInt ofSubList(final List<?> sourceList, final int fromIndex, final List<?> subListToFind, final int startIndexOfSubList,
+            final int sizeToMatch) throws IndexOutOfBoundsException {
+        N.checkFromIndexSize(startIndexOfSubList, sizeToMatch, N.size(subListToFind));
 
         final int len = N.size(sourceList);
 
-        if (len == 0 || startIndex >= len || size == 0 || len - N.max(startIndex, 0) < size) {
+        if (len == 0 || fromIndex >= len || sizeToMatch == 0 || len - N.max(fromIndex, 0) < sizeToMatch) {
             return toOptionalInt(N.INDEX_NOT_FOUND);
         }
 
         if (sourceList instanceof RandomAccess && subListToFind instanceof RandomAccess) {
-            final int endIndexOfTargetSubList = beginIndexOfTargetSubList + size;
+            final int endIndexOfTargetSubList = startIndexOfSubList + sizeToMatch;
 
-            for (int i = startIndex, maxFromIndex = len - size; i <= maxFromIndex; i++) {
-                for (int k = i, j = beginIndexOfTargetSubList; j < endIndexOfTargetSubList; k++, j++) {
+            for (int i = fromIndex, maxFromIndex = len - sizeToMatch; i <= maxFromIndex; i++) {
+                for (int k = i, j = startIndexOfSubList; j < endIndexOfTargetSubList; k++, j++) {
                     if (!N.equals(sourceList.get(k), subListToFind.get(j))) {
                         break;
                     } else if (j == endIndexOfTargetSubList - 1) {
@@ -942,8 +942,8 @@ public final class Index {
 
             return toOptionalInt(N.INDEX_NOT_FOUND);
         } else {
-            return ofSubArray(sourceList.subList(startIndex, sourceList.size()).toArray(), 0,
-                    subListToFind.subList(beginIndexOfTargetSubList, beginIndexOfTargetSubList + size).toArray(), 0, size);
+            return ofSubArray(sourceList.subList(fromIndex, sourceList.size()).toArray(), 0,
+                    subListToFind.subList(startIndexOfSubList, startIndexOfSubList + sizeToMatch).toArray(), 0, sizeToMatch);
         }
     }
 
@@ -960,12 +960,12 @@ public final class Index {
     /**
      *
      * @param a
-     * @param startIndexFromBack
      * @param valueToFind
+     * @param startIndexFromBack
      * @return
      */
-    public static OptionalInt last(final boolean[] a, final int startIndexFromBack, final boolean valueToFind) {
-        return toOptionalInt(N.lastIndexOf(a, startIndexFromBack, valueToFind));
+    public static OptionalInt last(final boolean[] a, final boolean valueToFind, final int startIndexFromBack) {
+        return toOptionalInt(N.lastIndexOf(a, valueToFind, startIndexFromBack));
     }
 
     /**
@@ -981,12 +981,12 @@ public final class Index {
     /**
      *
      * @param a
-     * @param startIndexFromBack
      * @param valueToFind
+     * @param startIndexFromBack
      * @return
      */
-    public static OptionalInt last(final char[] a, final int startIndexFromBack, final char valueToFind) {
-        return toOptionalInt(N.lastIndexOf(a, startIndexFromBack, valueToFind));
+    public static OptionalInt last(final char[] a, final char valueToFind, final int startIndexFromBack) {
+        return toOptionalInt(N.lastIndexOf(a, valueToFind, startIndexFromBack));
     }
 
     /**
@@ -1002,12 +1002,12 @@ public final class Index {
     /**
      *
      * @param a
-     * @param startIndexFromBack
      * @param valueToFind
+     * @param startIndexFromBack
      * @return
      */
-    public static OptionalInt last(final byte[] a, final int startIndexFromBack, final byte valueToFind) {
-        return toOptionalInt(N.lastIndexOf(a, startIndexFromBack, valueToFind));
+    public static OptionalInt last(final byte[] a, final byte valueToFind, final int startIndexFromBack) {
+        return toOptionalInt(N.lastIndexOf(a, valueToFind, startIndexFromBack));
     }
 
     /**
@@ -1023,12 +1023,12 @@ public final class Index {
     /**
      *
      * @param a
-     * @param startIndexFromBack
      * @param valueToFind
+     * @param startIndexFromBack
      * @return
      */
-    public static OptionalInt last(final short[] a, final int startIndexFromBack, final short valueToFind) {
-        return toOptionalInt(N.lastIndexOf(a, startIndexFromBack, valueToFind));
+    public static OptionalInt last(final short[] a, final short valueToFind, final int startIndexFromBack) {
+        return toOptionalInt(N.lastIndexOf(a, valueToFind, startIndexFromBack));
     }
 
     /**
@@ -1044,12 +1044,12 @@ public final class Index {
     /**
      *
      * @param a
-     * @param startIndexFromBack
      * @param valueToFind
+     * @param startIndexFromBack
      * @return
      */
-    public static OptionalInt last(final int[] a, final int startIndexFromBack, final int valueToFind) {
-        return toOptionalInt(N.lastIndexOf(a, startIndexFromBack, valueToFind));
+    public static OptionalInt last(final int[] a, final int valueToFind, final int startIndexFromBack) {
+        return toOptionalInt(N.lastIndexOf(a, valueToFind, startIndexFromBack));
     }
 
     /**
@@ -1065,12 +1065,12 @@ public final class Index {
     /**
      *
      * @param a
-     * @param startIndexFromBack
      * @param valueToFind
+     * @param startIndexFromBack
      * @return
      */
-    public static OptionalInt last(final long[] a, final int startIndexFromBack, final long valueToFind) {
-        return toOptionalInt(N.lastIndexOf(a, startIndexFromBack, valueToFind));
+    public static OptionalInt last(final long[] a, final long valueToFind, final int startIndexFromBack) {
+        return toOptionalInt(N.lastIndexOf(a, valueToFind, startIndexFromBack));
     }
 
     /**
@@ -1086,12 +1086,12 @@ public final class Index {
     /**
      *
      * @param a
-     * @param startIndexFromBack
      * @param valueToFind
+     * @param startIndexFromBack
      * @return
      */
-    public static OptionalInt last(final float[] a, final int startIndexFromBack, final float valueToFind) {
-        return toOptionalInt(N.lastIndexOf(a, startIndexFromBack, valueToFind));
+    public static OptionalInt last(final float[] a, final float valueToFind, final int startIndexFromBack) {
+        return toOptionalInt(N.lastIndexOf(a, valueToFind, startIndexFromBack));
     }
 
     /**
@@ -1107,12 +1107,12 @@ public final class Index {
     /**
      *
      * @param a
-     * @param startIndexFromBack
      * @param valueToFind
+     * @param startIndexFromBack
      * @return
      */
-    public static OptionalInt last(final double[] a, final int startIndexFromBack, final double valueToFind) {
-        return toOptionalInt(N.lastIndexOf(a, startIndexFromBack, valueToFind));
+    public static OptionalInt last(final double[] a, final double valueToFind, final int startIndexFromBack) {
+        return toOptionalInt(N.lastIndexOf(a, valueToFind, startIndexFromBack));
     }
 
     /**
@@ -1124,20 +1124,20 @@ public final class Index {
      * @see N#lastIndexOf(double[], double, double)
      */
     public static OptionalInt last(final double[] a, final double valueToFind, final double tolerance) {
-        return last(a, 0, valueToFind, tolerance);
+        return last(a, valueToFind, tolerance, 0);
     }
 
     /**
      *
      * @param a
-     * @param startIndexFromBack
      * @param valueToFind
      * @param tolerance
+     * @param startIndexFromBack
      * @return
-     * @see N#lastIndexOf(double[], int, double, double)
+     * @see N#lastIndexOf(double[], double, double, int)
      */
-    public static OptionalInt last(final double[] a, int startIndexFromBack, final double valueToFind, final double tolerance) {
-        return toOptionalInt(N.lastIndexOf(a, startIndexFromBack, valueToFind, tolerance));
+    public static OptionalInt last(final double[] a, final double valueToFind, final double tolerance, int startIndexFromBack) {
+        return toOptionalInt(N.lastIndexOf(a, valueToFind, tolerance, startIndexFromBack));
     }
 
     /**
@@ -1153,12 +1153,12 @@ public final class Index {
     /**
      *
      * @param a
-     * @param startIndexFromBack
      * @param valueToFind
+     * @param startIndexFromBack
      * @return
      */
-    public static OptionalInt last(final Object[] a, final int startIndexFromBack, final Object valueToFind) {
-        return toOptionalInt(N.lastIndexOf(a, startIndexFromBack, valueToFind));
+    public static OptionalInt last(final Object[] a, final Object valueToFind, final int startIndexFromBack) {
+        return toOptionalInt(N.lastIndexOf(a, valueToFind, startIndexFromBack));
     }
 
     /**
@@ -1174,33 +1174,33 @@ public final class Index {
     /**
      *
      * @param c
-     * @param startIndexFromBack
      * @param valueToFind
+     * @param startIndexFromBack
      * @return
      */
-    public static OptionalInt last(final Collection<?> c, final int startIndexFromBack, final Object valueToFind) {
-        return toOptionalInt(N.lastIndexOf(c, startIndexFromBack, valueToFind));
+    public static OptionalInt last(final Collection<?> c, final Object valueToFind, final int startIndexFromBack) {
+        return toOptionalInt(N.lastIndexOf(c, valueToFind, startIndexFromBack));
     }
 
     /**
      *
      * @param str
-     * @param valueToFind
+     * @param charValueToFind
      * @return
      */
-    public static OptionalInt last(final String str, final char valueToFind) {
-        return toOptionalInt(Strings.lastIndexOf(str, valueToFind));
+    public static OptionalInt last(final String str, final int charValueToFind) {
+        return toOptionalInt(Strings.lastIndexOf(str, charValueToFind));
     }
 
     /**
      *
      * @param str
+     * @param charValueToFind
      * @param startIndexFromBack
-     * @param valueToFind
      * @return
      */
-    public static OptionalInt last(final String str, final int startIndexFromBack, final char valueToFind) {
-        return toOptionalInt(Strings.lastIndexOf(str, startIndexFromBack, valueToFind));
+    public static OptionalInt last(final String str, final int charValueToFind, final int startIndexFromBack) {
+        return toOptionalInt(Strings.lastIndexOf(str, charValueToFind, startIndexFromBack));
     }
 
     /**
@@ -1216,12 +1216,12 @@ public final class Index {
     /**
      *
      * @param str
-     * @param startIndexFromBack
      * @param valueToFind
+     * @param startIndexFromBack
      * @return
      */
-    public static OptionalInt last(final String str, final int startIndexFromBack, final String valueToFind) {
-        return toOptionalInt(Strings.lastIndexOf(str, startIndexFromBack, valueToFind));
+    public static OptionalInt last(final String str, final String valueToFind, final int startIndexFromBack) {
+        return toOptionalInt(Strings.lastIndexOf(str, valueToFind, startIndexFromBack));
     }
 
     /**
@@ -1237,12 +1237,12 @@ public final class Index {
     /**
      *
      * @param str
-     * @param startIndexFromBack
      * @param valueToFind
+     * @param startIndexFromBack
      * @return
      */
-    public static OptionalInt lastOfIgnoreCase(final String str, final int startIndexFromBack, final String valueToFind) {
-        return toOptionalInt(Strings.lastIndexOfIgnoreCase(str, startIndexFromBack, valueToFind));
+    public static OptionalInt lastOfIgnoreCase(final String str, final String valueToFind, final int startIndexFromBack) {
+        return toOptionalInt(Strings.lastIndexOfIgnoreCase(str, valueToFind, startIndexFromBack));
     }
 
     /**
@@ -1274,28 +1274,28 @@ public final class Index {
      * @param sourceArray
      * @param startIndexFromBack
      * @param subArrayToFind
-     * @param beginIndexOfTargetSubArray
-     * @param size
+     * @param startIndexOfSubArray
+     * @param sizeToMatch
      * @return
      * @throws IndexOutOfBoundsException
      */
     public static OptionalInt lastOfSubArray(final boolean[] sourceArray, final int startIndexFromBack, final boolean[] subArrayToFind,
-            final int beginIndexOfTargetSubArray, final int size) throws IndexOutOfBoundsException {
-        N.checkFromIndexSize(beginIndexOfTargetSubArray, size, N.len(subArrayToFind));
+            final int startIndexOfSubArray, final int sizeToMatch) throws IndexOutOfBoundsException {
+        N.checkFromIndexSize(startIndexOfSubArray, sizeToMatch, N.len(subArrayToFind));
 
         final int len = N.len(sourceArray);
 
-        if (len == 0 || startIndexFromBack < 0 || size == 0 || size > startIndexFromBack) {
+        if (len == 0 || startIndexFromBack < 0 || sizeToMatch == 0 || sizeToMatch > startIndexFromBack) {
             return toOptionalInt(N.INDEX_NOT_FOUND);
         }
 
-        final int endIndexOfTargetSubArray = beginIndexOfTargetSubArray - 1 + size;
+        final int endIndexOfTargetSubArray = startIndexOfSubArray - 1 + sizeToMatch;
 
-        for (int i = N.min(startIndexFromBack, len - 1); i >= size - 1; i--) {
-            for (int k = i, j = endIndexOfTargetSubArray; j >= beginIndexOfTargetSubArray; k--, j--) {
+        for (int i = N.min(startIndexFromBack, len - 1); i >= sizeToMatch - 1; i--) {
+            for (int k = i, j = endIndexOfTargetSubArray; j >= startIndexOfSubArray; k--, j--) {
                 if (sourceArray[k] != subArrayToFind[j]) {
                     break;
-                } else if (j == beginIndexOfTargetSubArray) {
+                } else if (j == startIndexOfSubArray) {
                     return toOptionalInt(k);
                 }
             }
@@ -1333,28 +1333,28 @@ public final class Index {
      * @param sourceArray
      * @param startIndexFromBack
      * @param subArrayToFind
-     * @param beginIndexOfTargetSubArray
-     * @param size
+     * @param startIndexOfSubArray
+     * @param sizeToMatch
      * @return
      * @throws IndexOutOfBoundsException
      */
     public static OptionalInt lastOfSubArray(final char[] sourceArray, final int startIndexFromBack, final char[] subArrayToFind,
-            final int beginIndexOfTargetSubArray, final int size) throws IndexOutOfBoundsException {
-        N.checkFromIndexSize(beginIndexOfTargetSubArray, size, N.len(subArrayToFind));
+            final int startIndexOfSubArray, final int sizeToMatch) throws IndexOutOfBoundsException {
+        N.checkFromIndexSize(startIndexOfSubArray, sizeToMatch, N.len(subArrayToFind));
 
         final int len = N.len(sourceArray);
 
-        if (len == 0 || startIndexFromBack < 0 || size == 0 || size > startIndexFromBack) {
+        if (len == 0 || startIndexFromBack < 0 || sizeToMatch == 0 || sizeToMatch > startIndexFromBack) {
             return toOptionalInt(N.INDEX_NOT_FOUND);
         }
 
-        final int endIndexOfTargetSubArray = beginIndexOfTargetSubArray - 1 + size;
+        final int endIndexOfTargetSubArray = startIndexOfSubArray - 1 + sizeToMatch;
 
-        for (int i = N.min(startIndexFromBack, len - 1); i >= size - 1; i--) {
-            for (int k = i, j = endIndexOfTargetSubArray; j >= beginIndexOfTargetSubArray; k--, j--) {
+        for (int i = N.min(startIndexFromBack, len - 1); i >= sizeToMatch - 1; i--) {
+            for (int k = i, j = endIndexOfTargetSubArray; j >= startIndexOfSubArray; k--, j--) {
                 if (sourceArray[k] != subArrayToFind[j]) {
                     break;
-                } else if (j == beginIndexOfTargetSubArray) {
+                } else if (j == startIndexOfSubArray) {
                     return toOptionalInt(k);
                 }
             }
@@ -1392,28 +1392,28 @@ public final class Index {
      * @param sourceArray
      * @param startIndexFromBack
      * @param subArrayToFind
-     * @param beginIndexOfTargetSubArray
-     * @param size
+     * @param startIndexOfSubArray
+     * @param sizeToMatch
      * @return
      * @throws IndexOutOfBoundsException
      */
     public static OptionalInt lastOfSubArray(final byte[] sourceArray, final int startIndexFromBack, final byte[] subArrayToFind,
-            final int beginIndexOfTargetSubArray, final int size) throws IndexOutOfBoundsException {
-        N.checkFromIndexSize(beginIndexOfTargetSubArray, size, N.len(subArrayToFind));
+            final int startIndexOfSubArray, final int sizeToMatch) throws IndexOutOfBoundsException {
+        N.checkFromIndexSize(startIndexOfSubArray, sizeToMatch, N.len(subArrayToFind));
 
         final int len = N.len(sourceArray);
 
-        if (len == 0 || startIndexFromBack < 0 || size == 0 || size > startIndexFromBack) {
+        if (len == 0 || startIndexFromBack < 0 || sizeToMatch == 0 || sizeToMatch > startIndexFromBack) {
             return toOptionalInt(N.INDEX_NOT_FOUND);
         }
 
-        final int endIndexOfTargetSubArray = beginIndexOfTargetSubArray - 1 + size;
+        final int endIndexOfTargetSubArray = startIndexOfSubArray - 1 + sizeToMatch;
 
-        for (int i = N.min(startIndexFromBack, len - 1); i >= size - 1; i--) {
-            for (int k = i, j = endIndexOfTargetSubArray; j >= beginIndexOfTargetSubArray; k--, j--) {
+        for (int i = N.min(startIndexFromBack, len - 1); i >= sizeToMatch - 1; i--) {
+            for (int k = i, j = endIndexOfTargetSubArray; j >= startIndexOfSubArray; k--, j--) {
                 if (sourceArray[k] != subArrayToFind[j]) {
                     break;
-                } else if (j == beginIndexOfTargetSubArray) {
+                } else if (j == startIndexOfSubArray) {
                     return toOptionalInt(k);
                 }
             }
@@ -1451,28 +1451,28 @@ public final class Index {
      * @param sourceArray
      * @param startIndexFromBack
      * @param subArrayToFind
-     * @param beginIndexOfTargetSubArray
-     * @param size
+     * @param startIndexOfSubArray
+     * @param sizeToMatch
      * @return
      * @throws IndexOutOfBoundsException
      */
     public static OptionalInt lastOfSubArray(final short[] sourceArray, final int startIndexFromBack, final short[] subArrayToFind,
-            final int beginIndexOfTargetSubArray, final int size) throws IndexOutOfBoundsException {
-        N.checkFromIndexSize(beginIndexOfTargetSubArray, size, N.len(subArrayToFind));
+            final int startIndexOfSubArray, final int sizeToMatch) throws IndexOutOfBoundsException {
+        N.checkFromIndexSize(startIndexOfSubArray, sizeToMatch, N.len(subArrayToFind));
 
         final int len = N.len(sourceArray);
 
-        if (len == 0 || startIndexFromBack < 0 || size == 0 || size > startIndexFromBack) {
+        if (len == 0 || startIndexFromBack < 0 || sizeToMatch == 0 || sizeToMatch > startIndexFromBack) {
             return toOptionalInt(N.INDEX_NOT_FOUND);
         }
 
-        final int endIndexOfTargetSubArray = beginIndexOfTargetSubArray - 1 + size;
+        final int endIndexOfTargetSubArray = startIndexOfSubArray - 1 + sizeToMatch;
 
-        for (int i = N.min(startIndexFromBack, len - 1); i >= size - 1; i--) {
-            for (int k = i, j = endIndexOfTargetSubArray; j >= beginIndexOfTargetSubArray; k--, j--) {
+        for (int i = N.min(startIndexFromBack, len - 1); i >= sizeToMatch - 1; i--) {
+            for (int k = i, j = endIndexOfTargetSubArray; j >= startIndexOfSubArray; k--, j--) {
                 if (sourceArray[k] != subArrayToFind[j]) {
                     break;
-                } else if (j == beginIndexOfTargetSubArray) {
+                } else if (j == startIndexOfSubArray) {
                     return toOptionalInt(k);
                 }
             }
@@ -1510,28 +1510,28 @@ public final class Index {
      * @param sourceArray
      * @param startIndexFromBack
      * @param subArrayToFind
-     * @param beginIndexOfTargetSubArray
-     * @param size
+     * @param startIndexOfSubArray
+     * @param sizeToMatch
      * @return
      * @throws IndexOutOfBoundsException
      */
-    public static OptionalInt lastOfSubArray(final int[] sourceArray, final int startIndexFromBack, final int[] subArrayToFind,
-            final int beginIndexOfTargetSubArray, final int size) throws IndexOutOfBoundsException {
-        N.checkFromIndexSize(beginIndexOfTargetSubArray, size, N.len(subArrayToFind));
+    public static OptionalInt lastOfSubArray(final int[] sourceArray, final int startIndexFromBack, final int[] subArrayToFind, final int startIndexOfSubArray,
+            final int sizeToMatch) throws IndexOutOfBoundsException {
+        N.checkFromIndexSize(startIndexOfSubArray, sizeToMatch, N.len(subArrayToFind));
 
         final int len = N.len(sourceArray);
 
-        if (len == 0 || startIndexFromBack < 0 || size == 0 || size > startIndexFromBack) {
+        if (len == 0 || startIndexFromBack < 0 || sizeToMatch == 0 || sizeToMatch > startIndexFromBack) {
             return toOptionalInt(N.INDEX_NOT_FOUND);
         }
 
-        final int endIndexOfTargetSubArray = beginIndexOfTargetSubArray - 1 + size;
+        final int endIndexOfTargetSubArray = startIndexOfSubArray - 1 + sizeToMatch;
 
-        for (int i = N.min(startIndexFromBack, len - 1); i >= size - 1; i--) {
-            for (int k = i, j = endIndexOfTargetSubArray; j >= beginIndexOfTargetSubArray; k--, j--) {
+        for (int i = N.min(startIndexFromBack, len - 1); i >= sizeToMatch - 1; i--) {
+            for (int k = i, j = endIndexOfTargetSubArray; j >= startIndexOfSubArray; k--, j--) {
                 if (sourceArray[k] != subArrayToFind[j]) {
                     break;
-                } else if (j == beginIndexOfTargetSubArray) {
+                } else if (j == startIndexOfSubArray) {
                     return toOptionalInt(k);
                 }
             }
@@ -1569,28 +1569,28 @@ public final class Index {
      * @param sourceArray
      * @param startIndexFromBack
      * @param subArrayToFind
-     * @param beginIndexOfTargetSubArray
-     * @param size
+     * @param startIndexOfSubArray
+     * @param sizeToMatch
      * @return
      * @throws IndexOutOfBoundsException
      */
     public static OptionalInt lastOfSubArray(final long[] sourceArray, final int startIndexFromBack, final long[] subArrayToFind,
-            final int beginIndexOfTargetSubArray, final int size) throws IndexOutOfBoundsException {
-        N.checkFromIndexSize(beginIndexOfTargetSubArray, size, N.len(subArrayToFind));
+            final int startIndexOfSubArray, final int sizeToMatch) throws IndexOutOfBoundsException {
+        N.checkFromIndexSize(startIndexOfSubArray, sizeToMatch, N.len(subArrayToFind));
 
         final int len = N.len(sourceArray);
 
-        if (len == 0 || startIndexFromBack < 0 || size == 0 || size > startIndexFromBack) {
+        if (len == 0 || startIndexFromBack < 0 || sizeToMatch == 0 || sizeToMatch > startIndexFromBack) {
             return toOptionalInt(N.INDEX_NOT_FOUND);
         }
 
-        final int endIndexOfTargetSubArray = beginIndexOfTargetSubArray - 1 + size;
+        final int endIndexOfTargetSubArray = startIndexOfSubArray - 1 + sizeToMatch;
 
-        for (int i = N.min(startIndexFromBack, len - 1); i >= size - 1; i--) {
-            for (int k = i, j = endIndexOfTargetSubArray; j >= beginIndexOfTargetSubArray; k--, j--) {
+        for (int i = N.min(startIndexFromBack, len - 1); i >= sizeToMatch - 1; i--) {
+            for (int k = i, j = endIndexOfTargetSubArray; j >= startIndexOfSubArray; k--, j--) {
                 if (sourceArray[k] != subArrayToFind[j]) {
                     break;
-                } else if (j == beginIndexOfTargetSubArray) {
+                } else if (j == startIndexOfSubArray) {
                     return toOptionalInt(k);
                 }
             }
@@ -1628,28 +1628,28 @@ public final class Index {
      * @param sourceArray
      * @param startIndexFromBack
      * @param subArrayToFind
-     * @param beginIndexOfTargetSubArray
-     * @param size
+     * @param startIndexOfSubArray
+     * @param sizeToMatch
      * @return
      * @throws IndexOutOfBoundsException
      */
     public static OptionalInt lastOfSubArray(final float[] sourceArray, final int startIndexFromBack, final float[] subArrayToFind,
-            final int beginIndexOfTargetSubArray, final int size) throws IndexOutOfBoundsException {
-        N.checkFromIndexSize(beginIndexOfTargetSubArray, size, N.len(subArrayToFind));
+            final int startIndexOfSubArray, final int sizeToMatch) throws IndexOutOfBoundsException {
+        N.checkFromIndexSize(startIndexOfSubArray, sizeToMatch, N.len(subArrayToFind));
 
         final int len = N.len(sourceArray);
 
-        if (len == 0 || startIndexFromBack < 0 || size == 0 || size > startIndexFromBack) {
+        if (len == 0 || startIndexFromBack < 0 || sizeToMatch == 0 || sizeToMatch > startIndexFromBack) {
             return toOptionalInt(N.INDEX_NOT_FOUND);
         }
 
-        final int endIndexOfTargetSubArray = beginIndexOfTargetSubArray - 1 + size;
+        final int endIndexOfTargetSubArray = startIndexOfSubArray - 1 + sizeToMatch;
 
-        for (int i = N.min(startIndexFromBack, len - 1); i >= size - 1; i--) {
-            for (int k = i, j = endIndexOfTargetSubArray; j >= beginIndexOfTargetSubArray; k--, j--) {
+        for (int i = N.min(startIndexFromBack, len - 1); i >= sizeToMatch - 1; i--) {
+            for (int k = i, j = endIndexOfTargetSubArray; j >= startIndexOfSubArray; k--, j--) {
                 if (!N.equals(sourceArray[k], subArrayToFind[j])) {
                     break;
-                } else if (j == beginIndexOfTargetSubArray) {
+                } else if (j == startIndexOfSubArray) {
                     return toOptionalInt(k);
                 }
             }
@@ -1687,28 +1687,28 @@ public final class Index {
      * @param sourceArray
      * @param startIndexFromBack
      * @param subArrayToFind
-     * @param beginIndexOfTargetSubArray
-     * @param size
+     * @param startIndexOfSubArray
+     * @param sizeToMatch
      * @return
      * @throws IndexOutOfBoundsException
      */
     public static OptionalInt lastOfSubArray(final double[] sourceArray, final int startIndexFromBack, final double[] subArrayToFind,
-            final int beginIndexOfTargetSubArray, final int size) throws IndexOutOfBoundsException {
-        N.checkFromIndexSize(beginIndexOfTargetSubArray, size, N.len(subArrayToFind));
+            final int startIndexOfSubArray, final int sizeToMatch) throws IndexOutOfBoundsException {
+        N.checkFromIndexSize(startIndexOfSubArray, sizeToMatch, N.len(subArrayToFind));
 
         final int len = N.len(sourceArray);
 
-        if (len == 0 || startIndexFromBack < 0 || size == 0 || size > startIndexFromBack) {
+        if (len == 0 || startIndexFromBack < 0 || sizeToMatch == 0 || sizeToMatch > startIndexFromBack) {
             return toOptionalInt(N.INDEX_NOT_FOUND);
         }
 
-        final int endIndexOfTargetSubArray = beginIndexOfTargetSubArray - 1 + size;
+        final int endIndexOfTargetSubArray = startIndexOfSubArray - 1 + sizeToMatch;
 
-        for (int i = N.min(startIndexFromBack, len - 1); i >= size - 1; i--) {
-            for (int k = i, j = endIndexOfTargetSubArray; j >= beginIndexOfTargetSubArray; k--, j--) {
+        for (int i = N.min(startIndexFromBack, len - 1); i >= sizeToMatch - 1; i--) {
+            for (int k = i, j = endIndexOfTargetSubArray; j >= startIndexOfSubArray; k--, j--) {
                 if (!N.equals(sourceArray[k], subArrayToFind[j])) {
                     break;
-                } else if (j == beginIndexOfTargetSubArray) {
+                } else if (j == startIndexOfSubArray) {
                     return toOptionalInt(k);
                 }
             }
@@ -1746,28 +1746,28 @@ public final class Index {
      * @param sourceArray
      * @param startIndexFromBack
      * @param subArrayToFind
-     * @param beginIndexOfTargetSubArray
-     * @param size
+     * @param startIndexOfSubArray
+     * @param sizeToMatch
      * @return
      * @throws IndexOutOfBoundsException
      */
     public static OptionalInt lastOfSubArray(final Object[] sourceArray, final int startIndexFromBack, final Object[] subArrayToFind,
-            final int beginIndexOfTargetSubArray, final int size) throws IndexOutOfBoundsException {
-        N.checkFromIndexSize(beginIndexOfTargetSubArray, size, N.len(subArrayToFind));
+            final int startIndexOfSubArray, final int sizeToMatch) throws IndexOutOfBoundsException {
+        N.checkFromIndexSize(startIndexOfSubArray, sizeToMatch, N.len(subArrayToFind));
 
         final int len = N.len(sourceArray);
 
-        if (len == 0 || startIndexFromBack < 0 || size == 0 || size > startIndexFromBack) {
+        if (len == 0 || startIndexFromBack < 0 || sizeToMatch == 0 || sizeToMatch > startIndexFromBack) {
             return toOptionalInt(N.INDEX_NOT_FOUND);
         }
 
-        final int endIndexOfTargetSubArray = beginIndexOfTargetSubArray - 1 + size;
+        final int endIndexOfTargetSubArray = startIndexOfSubArray - 1 + sizeToMatch;
 
-        for (int i = N.min(startIndexFromBack, len - 1); i >= size - 1; i--) {
-            for (int k = i, j = endIndexOfTargetSubArray; j >= beginIndexOfTargetSubArray; k--, j--) {
+        for (int i = N.min(startIndexFromBack, len - 1); i >= sizeToMatch - 1; i--) {
+            for (int k = i, j = endIndexOfTargetSubArray; j >= startIndexOfSubArray; k--, j--) {
                 if (!N.equals(sourceArray[k], subArrayToFind[j])) {
                     break;
-                } else if (j == beginIndexOfTargetSubArray) {
+                } else if (j == startIndexOfSubArray) {
                     return toOptionalInt(k);
                 }
             }
@@ -1805,29 +1805,29 @@ public final class Index {
      * @param sourceList
      * @param startIndexFromBack
      * @param subArrayToFind
-     * @param beginIndexOfTargetSubList
-     * @param size
+     * @param startIndexOfSubList
+     * @param sizeToMatch
      * @return
      * @throws IndexOutOfBoundsException
      */
-    public static OptionalInt lastOfSubList(final List<?> sourceList, final int startIndexFromBack, final List<?> subArrayToFind,
-            final int beginIndexOfTargetSubList, final int size) throws IndexOutOfBoundsException {
-        N.checkFromIndexSize(beginIndexOfTargetSubList, size, N.size(subArrayToFind));
+    public static OptionalInt lastOfSubList(final List<?> sourceList, final int startIndexFromBack, final List<?> subArrayToFind, final int startIndexOfSubList,
+            final int sizeToMatch) throws IndexOutOfBoundsException {
+        N.checkFromIndexSize(startIndexOfSubList, sizeToMatch, N.size(subArrayToFind));
 
         final int len = N.size(sourceList);
 
-        if (len == 0 || startIndexFromBack < 0 || size == 0 || size > startIndexFromBack) {
+        if (len == 0 || startIndexFromBack < 0 || sizeToMatch == 0 || sizeToMatch > startIndexFromBack) {
             return toOptionalInt(N.INDEX_NOT_FOUND);
         }
 
         if (sourceList instanceof RandomAccess && subArrayToFind instanceof RandomAccess) {
-            final int endIndexOfTargetSubList = beginIndexOfTargetSubList - 1 + size;
+            final int endIndexOfTargetSubList = startIndexOfSubList - 1 + sizeToMatch;
 
-            for (int i = N.min(startIndexFromBack, len - 1); i >= size - 1; i--) {
-                for (int k = i, j = endIndexOfTargetSubList; j >= beginIndexOfTargetSubList; k--, j--) {
+            for (int i = N.min(startIndexFromBack, len - 1); i >= sizeToMatch - 1; i--) {
+                for (int k = i, j = endIndexOfTargetSubList; j >= startIndexOfSubList; k--, j--) {
                     if (!N.equals(sourceList.get(k), subArrayToFind.get(j))) {
                         break;
-                    } else if (j == beginIndexOfTargetSubList) {
+                    } else if (j == startIndexOfSubList) {
                         return toOptionalInt(i);
                     }
                 }
@@ -1836,7 +1836,7 @@ public final class Index {
             return toOptionalInt(N.INDEX_NOT_FOUND);
         } else {
             return lastOfSubArray(sourceList.subList(0, N.min(startIndexFromBack, N.size(sourceList) - 1) + 1).toArray(), startIndexFromBack,
-                    subArrayToFind.subList(beginIndexOfTargetSubList, beginIndexOfTargetSubList + size).toArray(), 0, size);
+                    subArrayToFind.subList(startIndexOfSubList, startIndexOfSubList + sizeToMatch).toArray(), 0, sizeToMatch);
         }
     }
 
@@ -1852,7 +1852,7 @@ public final class Index {
      * @since 3.10
      */
     public static BitSet allOf(final boolean[] a, final boolean valueToFind) {
-        return allOf(a, 0, valueToFind);
+        return allOf(a, valueToFind, 0);
     }
 
     /**
@@ -1860,26 +1860,26 @@ public final class Index {
      *
      * <p>This method returns an empty BitSet for a {@code null} input array.</p>
      *
-     * <p>A negative startIndex is treated as zero. A startIndex larger than the a
+     * <p>A negative fromIndex is treated as zero. A fromIndex larger than the a
      * length will return an empty BitSet ({@code -1}).</p>
      *
      * @param a the a to search through for the object, may be {@code null}
-     * @param startIndex the index to start searching at
      * @param valueToFind
+     * @param fromIndex the index to start searching at
      * @return a BitSet of all the indices of the value within the a,
      *  an empty BitSet if not found or {@code null}
      *  a input
      * @since 3.10
      */
-    public static BitSet allOf(final boolean[] a, int startIndex, final boolean valueToFind) {
+    public static BitSet allOf(final boolean[] a, final boolean valueToFind, int fromIndex) {
         final BitSet bitSet = new BitSet();
         final int len = N.len(a);
 
-        if (len == 0 || startIndex >= len) {
+        if (len == 0 || fromIndex >= len) {
             return bitSet;
         }
 
-        for (int i = N.max(startIndex, 0); i < len; i++) {
+        for (int i = N.max(fromIndex, 0); i < len; i++) {
             if (a[i] == valueToFind) {
                 bitSet.set(i);
             }
@@ -1900,7 +1900,7 @@ public final class Index {
      * @since 3.10
      */
     public static BitSet allOf(final byte[] a, final byte valueToFind) {
-        return allOf(a, 0, valueToFind);
+        return allOf(a, valueToFind, 0);
     }
 
     /**
@@ -1908,25 +1908,25 @@ public final class Index {
      *
      * <p>This method returns an empty BitSet for a {@code null} input array.</p>
      *
-     * <p>A negative startIndex is treated as zero. A startIndex larger than the a
+     * <p>A negative fromIndex is treated as zero. A fromIndex larger than the a
      * length will return an empty BitSet.</p>
      *
      * @param a the a to search through for the object, may be {@code null}
-     * @param startIndex the index to start searching at
      * @param valueToFind
+     * @param fromIndex the index to start searching at
      * @return a BitSet of all the indices of the value within the a,
      *  an empty BitSet if not found or {@code null} a input
      * @since 3.10
      */
-    public static BitSet allOf(final byte[] a, int startIndex, final byte valueToFind) {
+    public static BitSet allOf(final byte[] a, final byte valueToFind, int fromIndex) {
         final BitSet bitSet = new BitSet();
         final int len = N.len(a);
 
-        if (len == 0 || startIndex >= len) {
+        if (len == 0 || fromIndex >= len) {
             return bitSet;
         }
 
-        for (int i = N.max(startIndex, 0); i < len; i++) {
+        for (int i = N.max(fromIndex, 0); i < len; i++) {
             if (a[i] == valueToFind) {
                 bitSet.set(i);
             }
@@ -1947,7 +1947,7 @@ public final class Index {
      * @since 3.10
      */
     public static BitSet allOf(final char[] a, final char valueToFind) {
-        return allOf(a, 0, valueToFind);
+        return allOf(a, valueToFind, 0);
     }
 
     /**
@@ -1955,25 +1955,25 @@ public final class Index {
      *
      * <p>This method returns an empty BitSet for a {@code null} input array.</p>
      *
-     * <p>A negative startIndex is treated as zero. A startIndex larger than the a
+     * <p>A negative fromIndex is treated as zero. A fromIndex larger than the a
      * length will return an empty BitSet.</p>
      *
      * @param a the a to search through for the object, may be {@code null}
-     * @param startIndex the index to start searching at
      * @param valueToFind
+     * @param fromIndex the index to start searching at
      * @return a BitSet of all the indices of the value within the a,
      *  an empty BitSet if not found or {@code null} a input
      * @since 3.10
      */
-    public static BitSet allOf(final char[] a, int startIndex, final char valueToFind) {
+    public static BitSet allOf(final char[] a, final char valueToFind, int fromIndex) {
         final BitSet bitSet = new BitSet();
         final int len = N.len(a);
 
-        if (len == 0 || startIndex >= len) {
+        if (len == 0 || fromIndex >= len) {
             return bitSet;
         }
 
-        for (int i = N.max(startIndex, 0); i < len; i++) {
+        for (int i = N.max(fromIndex, 0); i < len; i++) {
             if (a[i] == valueToFind) {
                 bitSet.set(i);
             }
@@ -1994,7 +1994,7 @@ public final class Index {
      * @since 3.10
      */
     public static BitSet allOf(final short[] a, final short valueToFind) {
-        return allOf(a, 0, valueToFind);
+        return allOf(a, valueToFind, 0);
     }
 
     /**
@@ -2002,25 +2002,25 @@ public final class Index {
      *
      * <p>This method returns an empty BitSet for a {@code null} input array.</p>
      *
-     * <p>A negative startIndex is treated as zero. A startIndex larger than the a
+     * <p>A negative fromIndex is treated as zero. A fromIndex larger than the a
      * length will return an empty BitSet.</p>
      *
      * @param a the a to search through for the object, may be {@code null}
-     * @param startIndex the index to start searching at
      * @param valueToFind
+     * @param fromIndex the index to start searching at
      * @return a BitSet of all the indices of the value within the a,
      *  an empty BitSet if not found or {@code null} a input
      * @since 3.10
      */
-    public static BitSet allOf(final short[] a, int startIndex, final short valueToFind) {
+    public static BitSet allOf(final short[] a, final short valueToFind, int fromIndex) {
         final BitSet bitSet = new BitSet();
         final int len = N.len(a);
 
-        if (len == 0 || startIndex >= len) {
+        if (len == 0 || fromIndex >= len) {
             return bitSet;
         }
 
-        for (int i = N.max(startIndex, 0); i < len; i++) {
+        for (int i = N.max(fromIndex, 0); i < len; i++) {
             if (a[i] == valueToFind) {
                 bitSet.set(i);
             }
@@ -2041,7 +2041,7 @@ public final class Index {
      * @since 3.10
      */
     public static BitSet allOf(final int[] a, final int valueToFind) {
-        return allOf(a, 0, valueToFind);
+        return allOf(a, valueToFind, 0);
     }
 
     /**
@@ -2049,25 +2049,25 @@ public final class Index {
      *
      * <p>This method returns an empty BitSet for a {@code null} input array.</p>
      *
-     * <p>A negative startIndex is treated as zero. A startIndex larger than the a
+     * <p>A negative fromIndex is treated as zero. A fromIndex larger than the a
      * length will return an empty BitSet.</p>
      *
      * @param a the a to search through for the object, may be {@code null}
-     * @param startIndex the index to start searching at
      * @param valueToFind
+     * @param fromIndex the index to start searching at
      * @return a BitSet of all the indices of the value within the a,
      *  an empty BitSet if not found or {@code null} a input
      * @since 3.10
      */
-    public static BitSet allOf(final int[] a, int startIndex, final int valueToFind) {
+    public static BitSet allOf(final int[] a, final int valueToFind, int fromIndex) {
         final BitSet bitSet = new BitSet();
         final int len = N.len(a);
 
-        if (len == 0 || startIndex >= len) {
+        if (len == 0 || fromIndex >= len) {
             return bitSet;
         }
 
-        for (int i = N.max(startIndex, 0); i < len; i++) {
+        for (int i = N.max(fromIndex, 0); i < len; i++) {
             if (a[i] == valueToFind) {
                 bitSet.set(i);
             }
@@ -2088,7 +2088,7 @@ public final class Index {
      * @since 3.10
      */
     public static BitSet allOf(final long[] a, final long valueToFind) {
-        return allOf(a, 0, valueToFind);
+        return allOf(a, valueToFind, 0);
     }
 
     /**
@@ -2096,25 +2096,25 @@ public final class Index {
      *
      * <p>This method returns an empty BitSet for a {@code null} input array.</p>
      *
-     * <p>A negative startIndex is treated as zero. A startIndex larger than the a
+     * <p>A negative fromIndex is treated as zero. A fromIndex larger than the a
      * length will return an empty BitSet.</p>
      *
      * @param a the a to search through for the object, may be {@code null}
-     * @param startIndex the index to start searching at
      * @param valueToFind
+     * @param fromIndex the index to start searching at
      * @return a BitSet of all the indices of the value within the a,
      *  an empty BitSet if not found or {@code null} a input
      * @since 3.10
      */
-    public static BitSet allOf(final long[] a, int startIndex, final long valueToFind) {
+    public static BitSet allOf(final long[] a, final long valueToFind, int fromIndex) {
         final BitSet bitSet = new BitSet();
         final int len = N.len(a);
 
-        if (len == 0 || startIndex >= len) {
+        if (len == 0 || fromIndex >= len) {
             return bitSet;
         }
 
-        for (int i = N.max(startIndex, 0); i < len; i++) {
+        for (int i = N.max(fromIndex, 0); i < len; i++) {
             if (a[i] == valueToFind) {
                 bitSet.set(i);
             }
@@ -2135,7 +2135,7 @@ public final class Index {
      * @since 3.10
      */
     public static BitSet allOf(final float[] a, final float valueToFind) {
-        return allOf(a, 0, valueToFind);
+        return allOf(a, valueToFind, 0);
     }
 
     /**
@@ -2143,25 +2143,25 @@ public final class Index {
      *
      * <p>This method returns an empty BitSet for a {@code null} input array.</p>
      *
-     * <p>A negative startIndex is treated as zero. A startIndex larger than the a
+     * <p>A negative fromIndex is treated as zero. A fromIndex larger than the a
      * length will return empty BitSet.</p>
      *
      * @param a the a to search through for the object, may be {@code null}
-     * @param startIndex the index to start searching at
      * @param valueToFind
+     * @param fromIndex the index to start searching at
      * @return a BitSet of all the indices of the value within the a,
      *  an empty BitSet if not found or {@code null} a input
      * @since 3.10
      */
-    public static BitSet allOf(final float[] a, int startIndex, final float valueToFind) {
+    public static BitSet allOf(final float[] a, final float valueToFind, int fromIndex) {
         final BitSet bitSet = new BitSet();
         final int len = N.len(a);
 
-        if (len == 0 || startIndex >= len) {
+        if (len == 0 || fromIndex >= len) {
             return bitSet;
         }
 
-        for (int i = N.max(startIndex, 0); i < len; i++) {
+        for (int i = N.max(fromIndex, 0); i < len; i++) {
             if (Float.compare(a[i], valueToFind) == 0) {
                 bitSet.set(i);
             }
@@ -2182,7 +2182,7 @@ public final class Index {
      * @since 3.10
      */
     public static BitSet allOf(final double[] a, final double valueToFind) {
-        return allOf(a, 0, valueToFind);
+        return allOf(a, valueToFind, 0);
     }
 
     /**
@@ -2190,25 +2190,25 @@ public final class Index {
      *
      * <p>This method returns an empty BitSet for a {@code null} input array.</p>
      *
-     * <p>A negative startIndex is treated as zero. A startIndex larger than the a
+     * <p>A negative fromIndex is treated as zero. A fromIndex larger than the a
      * length will return an empty BitSet.</p>
      *
      * @param a the a to search through for the object, may be {@code null}
-     * @param startIndex the index to start searching at
      * @param valueToFind
+     * @param fromIndex the index to start searching at
      * @return a BitSet of the indices of the value within the a,
      *  an empty BitSet if not found or {@code null} a input
      * @since 3.10
      */
-    public static BitSet allOf(final double[] a, int startIndex, final double valueToFind) {
+    public static BitSet allOf(final double[] a, final double valueToFind, int fromIndex) {
         final BitSet bitSet = new BitSet();
         final int len = N.len(a);
 
-        if (len == 0 || startIndex >= len) {
+        if (len == 0 || fromIndex >= len) {
             return bitSet;
         }
 
-        for (int i = N.max(startIndex, 0); i < len; i++) {
+        for (int i = N.max(fromIndex, 0); i < len; i++) {
             if (Double.compare(a[i], valueToFind) == 0) {
                 bitSet.set(i);
             }
@@ -2235,7 +2235,7 @@ public final class Index {
      * @since 3.10
      */
     public static BitSet allOf(final double[] a, final double valueToFind, final double tolerance) {
-        return allOf(a, 0, valueToFind, tolerance);
+        return allOf(a, valueToFind, tolerance, 0);
     }
 
     /**
@@ -2248,29 +2248,29 @@ public final class Index {
      *
      * <p>This method returns an empty BitSet for a {@code null} input array.</p>
      *
-     * <p>A negative startIndex is treated as zero. A startIndex larger than the a
+     * <p>A negative fromIndex is treated as zero. A fromIndex larger than the a
      * length will return an empty BitSet.</p>
      *
      * @param a the a to search through for the object, may be {@code null}
-     * @param startIndex the index to start searching at
      * @param valueToFind
      * @param tolerance tolerance of the search
+     * @param fromIndex the index to start searching at
      * @return a BitSet of the indices of the value within the a,
      *  an empty BitSet if not found or {@code null} a input
      * @since 3.10
      */
-    public static BitSet allOf(final double[] a, int startIndex, final double valueToFind, final double tolerance) {
+    public static BitSet allOf(final double[] a, final double valueToFind, final double tolerance, int fromIndex) {
         final BitSet bitSet = new BitSet();
         final int len = N.len(a);
 
-        if (len == 0 || startIndex >= len) {
+        if (len == 0 || fromIndex >= len) {
             return bitSet;
         }
 
         final double min = valueToFind - tolerance;
         final double max = valueToFind + tolerance;
 
-        for (int i = N.max(startIndex, 0); i < len; i++) {
+        for (int i = N.max(fromIndex, 0); i < len; i++) {
             if (a[i] >= min && a[i] <= max) {
                 bitSet.set(i);
             }
@@ -2291,7 +2291,7 @@ public final class Index {
      * @since 3.10
      */
     public static BitSet allOf(final Object[] a, final Object valueToFind) {
-        return allOf(a, 0, valueToFind);
+        return allOf(a, valueToFind, 0);
     }
 
     /**
@@ -2299,25 +2299,25 @@ public final class Index {
      *
      * <p>This method returns an empty BitSet for a {@code null} input array.</p>
      *
-     * <p>A negative startIndex is treated as zero. A startIndex larger than the a
+     * <p>A negative fromIndex is treated as zero. A fromIndex larger than the a
      * length will return an empty BitSet.</p>
      *
      * @param a the a to search through for the object, may be {@code null}
-     * @param startIndex the index to start searching at
      * @param valueToFind the object to find, may be {@code null}
+     * @param fromIndex the index to start searching at
      * @return a BitSet of all the indices of the object within the a starting at the index,
      *  an empty BitSet if not found or {@code null} a input
      * @since 3.10
      */
-    public static BitSet allOf(final Object[] a, int startIndex, final Object valueToFind) {
+    public static BitSet allOf(final Object[] a, final Object valueToFind, int fromIndex) {
         final BitSet bitSet = new BitSet();
         final int len = N.len(a);
 
-        if (len == 0 || startIndex >= len) {
+        if (len == 0 || fromIndex >= len) {
             return bitSet;
         }
 
-        for (int i = N.max(startIndex, 0); i < len; i++) {
+        for (int i = N.max(fromIndex, 0); i < len; i++) {
             if (N.equals(a[i], valueToFind)) {
                 bitSet.set(i);
             }
@@ -2338,7 +2338,7 @@ public final class Index {
      * @since 3.10
      */
     public static BitSet allOf(final Collection<?> c, final Object valueToFind) {
-        return allOf(c, 0, valueToFind);
+        return allOf(c, valueToFind, 0);
     }
 
     /**
@@ -2346,28 +2346,28 @@ public final class Index {
      *
      * <p>This method returns an empty BitSet for a {@code null} input array.</p>
      *
-     * <p>A negative startIndex is treated as zero. A startIndex larger than the a
+     * <p>A negative fromIndex is treated as zero. A fromIndex larger than the a
      * length will return an empty BitSet.</p>
      *
      * @param c
-     * @param startIndex the index to start searching at
      * @param valueToFind the object to find, may be {@code null}
+     * @param fromIndex the index to start searching at
      * @return a BitSet of all the indices of the object within the a starting at the index,
      *  an empty BitSet if not found or {@code null} a input
      * @since 3.10
      */
-    public static BitSet allOf(final Collection<?> c, int startIndex, final Object valueToFind) {
+    public static BitSet allOf(final Collection<?> c, final Object valueToFind, int fromIndex) {
         final BitSet bitSet = new BitSet();
         final int size = N.size(c);
 
-        if (size == 0 || startIndex >= size) {
+        if (size == 0 || fromIndex >= size) {
             return bitSet;
         }
 
         if (c instanceof List && c instanceof RandomAccess) {
             final List<?> list = (List<?>) c;
 
-            for (int idx = N.max(startIndex, 0); idx < size; idx++) {
+            for (int idx = N.max(fromIndex, 0); idx < size; idx++) {
                 if (N.equals(list.get(idx), valueToFind)) {
                     bitSet.set(idx);
                 }
@@ -2376,7 +2376,7 @@ public final class Index {
             final Iterator<?> iter = c.iterator();
             int idx = 0;
 
-            while (idx < startIndex) {
+            while (idx < fromIndex) {
                 iter.next();
                 idx++;
             }
@@ -2401,26 +2401,26 @@ public final class Index {
      * @return the indices of all found target value/element in the specified {@code Collection/Array}.
      */
     public static <T> BitSet allOf(final T[] a, final Predicate<? super T> predicate) {
-        return allOf(a, 0, predicate);
+        return allOf(a, predicate, 0);
     }
 
     /**
      *
      * @param <T>
      * @param a
-     * @param startIndex
      * @param predicate
+     * @param fromIndex
      * @return the indices of all found target value/element in the specified {@code Collection/Array}.
      */
-    public static <T> BitSet allOf(final T[] a, int startIndex, final Predicate<? super T> predicate) {
+    public static <T> BitSet allOf(final T[] a, final Predicate<? super T> predicate, int fromIndex) {
         final BitSet bitSet = new BitSet();
         final int len = N.len(a);
 
-        if (len == 0 || startIndex >= len) {
+        if (len == 0 || fromIndex >= len) {
             return bitSet;
         }
 
-        for (int idx = N.max(startIndex, 0); idx < len; idx++) {
+        for (int idx = N.max(fromIndex, 0); idx < len; idx++) {
             if (predicate.test(a[idx])) {
                 bitSet.set(idx);
             }
@@ -2437,29 +2437,29 @@ public final class Index {
      * @return the indices of all found target value/element in the specified {@code Collection/Array}.
      */
     public static <T> BitSet allOf(final Collection<? extends T> c, final Predicate<? super T> predicate) {
-        return allOf(c, 0, predicate);
+        return allOf(c, predicate, 0);
     }
 
     /**
      *
      * @param <T>
      * @param c
-     * @param startIndex
      * @param predicate
+     * @param fromIndex
      * @return the indices of all found target value/element in the specified {@code Collection/Array}.
      */
-    public static <T> BitSet allOf(final Collection<? extends T> c, int startIndex, final Predicate<? super T> predicate) {
+    public static <T> BitSet allOf(final Collection<? extends T> c, final Predicate<? super T> predicate, int fromIndex) {
         final BitSet bitSet = new BitSet();
         final int size = N.size(c);
 
-        if (size == 0 || startIndex >= size) {
+        if (size == 0 || fromIndex >= size) {
             return bitSet;
         }
 
         if (c instanceof List && c instanceof RandomAccess) {
             final List<? extends T> list = (List<? extends T>) c;
 
-            for (int idx = N.max(startIndex, 0); idx < size; idx++) {
+            for (int idx = N.max(fromIndex, 0); idx < size; idx++) {
                 if (predicate.test(list.get(idx))) {
                     bitSet.set(idx);
                 }
@@ -2468,7 +2468,7 @@ public final class Index {
             final Iterator<? extends T> iter = c.iterator();
             int idx = 0;
 
-            while (idx < startIndex) {
+            while (idx < fromIndex) {
                 iter.next();
                 idx++;
             }

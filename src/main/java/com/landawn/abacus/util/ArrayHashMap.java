@@ -328,13 +328,13 @@ public sealed class ArrayHashMap<K, V> implements Map<K, V> permits LinkedArrayH
 
         /**
          *
-         * @param o
+         * @param valueToFind
          * @return
          */
         @Override
-        public boolean contains(Object o) {
-            if (o instanceof Map.Entry) {
-                final Map.Entry<K, V> entry = (Map.Entry<K, V>) o;
+        public boolean contains(final Object valueToFind) {
+            if (valueToFind instanceof Map.Entry) {
+                final Map.Entry<K, V> entry = (Map.Entry<K, V>) valueToFind;
 
                 return set.contains(N.newEntry(Wrapper.of(entry.getKey()), entry.getValue()));
             }

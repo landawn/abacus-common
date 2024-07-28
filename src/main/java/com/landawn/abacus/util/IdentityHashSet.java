@@ -165,12 +165,12 @@ public final class IdentityHashSet<T> extends AbstractSet<T> {
 
     /**
      *
-     * @param o
+     * @param valueToFind
      * @return
      */
     @Override
-    public boolean contains(Object o) {
-        return map.containsKey(o);
+    public boolean contains(final Object valueToFind) {
+        return map.containsKey(valueToFind);
     }
 
     /**

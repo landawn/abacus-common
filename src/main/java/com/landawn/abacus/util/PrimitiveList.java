@@ -162,6 +162,15 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * @param toIndex
      * @param replacement
      */
+    public abstract void replaceRange(int fromIndex, int toIndex, L replacement);
+
+    /**
+     *
+     *
+     * @param fromIndex
+     * @param toIndex
+     * @param replacement
+     */
     public abstract void replaceRange(int fromIndex, int toIndex, A replacement);
 
     /**
@@ -571,12 +580,12 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
     }
 
     /**
-     * 
      *
-     * @param fromIndex 
-     * @param toIndex 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     *
+     * @param fromIndex
+     * @param toIndex
+     * @return
+     * @throws IndexOutOfBoundsException
      */
     public Multiset<B> toMultiset(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);

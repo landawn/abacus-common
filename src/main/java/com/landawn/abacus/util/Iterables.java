@@ -1764,48 +1764,48 @@ public final class Iterables {
      *
      *
      * @param a
-     * @param objToFind
+     * @param valueToFind
      * @return
      * @see Index#of(Object[], Object)
      */
-    public static OptionalInt indexOf(final Object[] a, final Object objToFind) {
-        return Index.of(a, objToFind);
+    public static OptionalInt indexOf(final Object[] a, final Object valueToFind) {
+        return Index.of(a, valueToFind);
     }
 
     /**
      *
      *
      * @param c
-     * @param objToFind
+     * @param valueToFind
      * @return
      * @see Index#of(Collection, Object)
      */
-    public static OptionalInt indexOf(final Collection<?> c, final Object objToFind) {
-        return Index.of(c, objToFind);
+    public static OptionalInt indexOf(final Collection<?> c, final Object valueToFind) {
+        return Index.of(c, valueToFind);
     }
 
     /**
      *
      *
      * @param a
-     * @param objToFind
+     * @param valueToFind
      * @return
      * @see Index#last(Object[], Object)
      */
-    public static OptionalInt lastIndexOf(final Object[] a, final Object objToFind) {
-        return Index.last(a, objToFind);
+    public static OptionalInt lastIndexOf(final Object[] a, final Object valueToFind) {
+        return Index.last(a, valueToFind);
     }
 
     /**
      *
      *
      * @param c
-     * @param objToFind
+     * @param valueToFind
      * @return
      * @see Index#last(Collection, Object)
      */
-    public static OptionalInt lastIndexOf(final Collection<?> c, final Object objToFind) {
-        return Index.last(c, objToFind);
+    public static OptionalInt lastIndexOf(final Collection<?> c, final Object valueToFind) {
+        return Index.last(c, valueToFind);
     }
 
     /**

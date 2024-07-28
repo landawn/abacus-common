@@ -78,10 +78,10 @@ public interface ObjectPool<E extends Poolable> extends Pool {
 
     /**
      *
-     * @param e
+     * @param valueToFind
      * @return boolean
      */
-    boolean contains(E e);
+    boolean contains(E valueToFind);
 
     /**
      * The Interface MemoryMeasure.

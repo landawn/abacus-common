@@ -14,7 +14,8 @@
 package com.landawn.abacus.util;
 
 /**
- *
+ * The reason to design/create this class is just to be a bit more efficient than {@code java.time.Duration}.
+ * It seems that nanoseconds is only used in rare case.
  */
 @com.landawn.abacus.annotation.Immutable
 public final class Duration implements Comparable<Duration>, Immutable {
@@ -258,63 +259,63 @@ public final class Duration implements Comparable<Duration>, Immutable {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public Duration negated() {
         return multipliedBy(-1);
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public Duration abs() {
         return isNegative() ? negated() : this;
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public long toDays() {
         return milliseconds / MILLIS_PER_DAY;
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public long toHours() {
         return milliseconds / MILLIS_PER_HOUR;
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public long toMinutes() {
         return milliseconds / MILLIS_PER_MINUTE;
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public long toSeconds() {
         return milliseconds / MILLIS_PER_SECOND;
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public long toMillis() {
         return milliseconds;
@@ -345,9 +346,9 @@ public final class Duration implements Comparable<Duration>, Immutable {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public int hashCode() {
@@ -355,9 +356,9 @@ public final class Duration implements Comparable<Duration>, Immutable {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public String toString() {

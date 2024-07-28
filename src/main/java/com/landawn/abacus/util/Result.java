@@ -85,11 +85,11 @@ public class Result<T, E extends Throwable> implements Immutable {
     /**
      * If failure or else.
      *
-     * @param <E2> 
-     * @param <E3> 
-     * @param actionOnFailure 
-     * @param actionOnSuccess 
-     * @throws IllegalArgumentException 
+     * @param <E2>
+     * @param <E3>
+     * @param actionOnFailure
+     * @param actionOnSuccess
+     * @throws IllegalArgumentException
      * @throws E2 the e2
      * @throws E3 the e3
      */
@@ -118,11 +118,11 @@ public class Result<T, E extends Throwable> implements Immutable {
     /**
      * If success or else.
      *
-     * @param <E2> 
-     * @param <E3> 
-     * @param actionOnSuccess 
-     * @param actionOnFailure 
-     * @throws IllegalArgumentException 
+     * @param <E2>
+     * @param <E3>
+     * @param actionOnSuccess
+     * @param actionOnFailure
+     * @throws IllegalArgumentException
      * @throws E2 the e2
      * @throws E3 the e3
      */
@@ -174,11 +174,11 @@ public class Result<T, E extends Throwable> implements Immutable {
     }
 
     /**
-     * 
      *
-     * @param otherIfErrorOccurred 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param otherIfErrorOccurred
+     * @return
+     * @throws IllegalArgumentException
      */
     public T orElseGetIfFailure(final Supplier<? extends T> otherIfErrorOccurred) throws IllegalArgumentException {
         N.checkArgNotNull(otherIfErrorOccurred, "otherIfErrorOccurred");
@@ -207,10 +207,10 @@ public class Result<T, E extends Throwable> implements Immutable {
     /**
      * Or else throw.
      *
-     * @param <E2> 
-     * @param exceptionSupplierIfErrorOccurred 
-     * @return 
-     * @throws IllegalArgumentException 
+     * @param <E2>
+     * @param exceptionSupplierIfErrorOccurred
+     * @return
+     * @throws IllegalArgumentException
      * @throws E2 the e2
      */
     public <E2 extends Throwable> T orElseThrow(final Function<? super E, E2> exceptionSupplierIfErrorOccurred) throws IllegalArgumentException, E2 {
@@ -229,7 +229,9 @@ public class Result<T, E extends Throwable> implements Immutable {
      * @param exception
      * @return
      * @throws E2
+     * @deprecated replaced by {@link #orElseThrow(Supplier)}
      */
+    @Deprecated
     public <E2 extends Throwable> T orElseThrow(final E2 exception) throws E2 {
         if (exception == null) {
             return value;

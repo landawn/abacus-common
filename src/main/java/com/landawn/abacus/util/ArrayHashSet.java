@@ -165,12 +165,12 @@ public sealed class ArrayHashSet<E> implements Set<E> permits LinkedArrayHashSet
 
     /**
      *
-     * @param o
+     * @param valueToFind
      * @return
      */
     @Override
-    public boolean contains(Object o) {
-        return set.contains(Wrapper.of(o));
+    public boolean contains(final Object valueToFind) {
+        return set.contains(Wrapper.of(valueToFind));
     }
 
     /**

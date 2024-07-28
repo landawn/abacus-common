@@ -712,6 +712,43 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * @throws IndexOutOfBoundsException
      */
     @Override
+    public void replaceRange(final int fromIndex, final int toIndex, final BooleanList replacement) throws IndexOutOfBoundsException {
+        N.checkFromToIndex(fromIndex, toIndex, size());
+
+        if (N.isEmpty(replacement)) {
+            deleteRange(fromIndex, toIndex);
+            return;
+        }
+
+        final int size = this.size;//NOSONAR
+        final int newSize = size - (toIndex - fromIndex) + replacement.size();
+
+        if (elementData.length < newSize) {
+            elementData = N.copyOf(elementData, newSize);
+        }
+
+        if (toIndex - fromIndex != replacement.size() && toIndex != size) {
+            N.copy(elementData, toIndex, elementData, fromIndex + replacement.size(), size - toIndex);
+        }
+
+        N.copy(replacement.elementData, 0, elementData, fromIndex, replacement.size());
+
+        if (newSize < size) {
+            N.fill(elementData, newSize, size, false);
+        }
+
+        this.size = newSize;
+    }
+
+    /**
+     *
+     *
+     * @param fromIndex
+     * @param toIndex
+     * @param replacement
+     * @throws IndexOutOfBoundsException
+     */
+    @Override
     public void replaceRange(final int fromIndex, final int toIndex, final boolean[] replacement) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, size());
 
@@ -822,11 +859,11 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
 
     /**
      *
-     * @param e
+     * @param valueToFind
      * @return
      */
-    public boolean contains(boolean e) {
-        return indexOf(e) >= 0;
+    public boolean contains(final boolean valueToFind) {
+        return indexOf(valueToFind) >= 0;
     }
 
     /**
@@ -1089,35 +1126,35 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
 
     /**
      *
-     * @param objectToFind
+     * @param valueToFind
      * @return
      */
-    public int occurrencesOf(final boolean objectToFind) {
-        return N.occurrencesOf(elementData, objectToFind);
+    public int occurrencesOf(final boolean valueToFind) {
+        return N.occurrencesOf(elementData, valueToFind);
     }
 
     /**
      *
-     * @param e
+     * @param valueToFind
      * @return
      */
-    public int indexOf(boolean e) {
-        return indexOf(0, e);
+    public int indexOf(final boolean valueToFind) {
+        return indexOf(valueToFind, 0);
     }
 
     /**
      *
+     * @param valueToFind
      * @param fromIndex
-     * @param e
      * @return
      */
-    public int indexOf(final int fromIndex, boolean e) {
+    public int indexOf(final boolean valueToFind, final int fromIndex) {
         if (fromIndex >= size) {
             return N.INDEX_NOT_FOUND;
         }
 
         for (int i = N.max(fromIndex, 0); i < size; i++) {
-            if (elementData[i] == e) {
+            if (elementData[i] == valueToFind) {
                 return i;
             }
         }
@@ -1128,27 +1165,27 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     /**
      * Last index of.
      *
-     * @param e
+     * @param valueToFind
      * @return
      */
-    public int lastIndexOf(boolean e) {
-        return lastIndexOf(size, e);
+    public int lastIndexOf(final boolean valueToFind) {
+        return lastIndexOf(valueToFind, size);
     }
 
     /**
      * Last index of.
+     * @param valueToFind
+     * @param startIndexFromBack the start index to traverse backwards from. Inclusive.
      *
-     * @param fromIndex the start index to traverse backwards from. Inclusive.
-     * @param e
      * @return
      */
-    public int lastIndexOf(final int fromIndex, boolean e) {
-        if (fromIndex < 0 || size == 0) {
+    public int lastIndexOf(final boolean valueToFind, final int startIndexFromBack) {
+        if (startIndexFromBack < 0 || size == 0) {
             return N.INDEX_NOT_FOUND;
         }
 
-        for (int i = N.min(fromIndex, size - 1); i >= 0; i--) {
-            if (elementData[i] == e) {
+        for (int i = N.min(startIndexFromBack, size - 1); i >= 0; i--) {
+            if (elementData[i] == valueToFind) {
                 return i;
             }
         }
@@ -1199,7 +1236,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * @param action
      * @throws E the e
      */
-    public <E extends Exception> void forEachIndexed(Throwables.IndexedBooleanConsumer<E> action) throws E {
+    public <E extends Exception> void forEachIndexed(Throwables.IntBooleanConsumer<E> action) throws E {
         forEachIndexed(0, size, action);
     }
 
@@ -1213,7 +1250,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * @throws IndexOutOfBoundsException
      * @throws E the e
      */
-    public <E extends Exception> void forEachIndexed(final int fromIndex, final int toIndex, Throwables.IndexedBooleanConsumer<E> action)
+    public <E extends Exception> void forEachIndexed(final int fromIndex, final int toIndex, Throwables.IntBooleanConsumer<E> action)
             throws IndexOutOfBoundsException, E {
         N.checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), fromIndex < toIndex ? toIndex : fromIndex, size);
 

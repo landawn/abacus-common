@@ -1119,12 +1119,12 @@ public final class Multiset<E> implements Collection<E> {
      * <p>This method refines {@link Collection#contains} to further specify that it <b>may not</b>
      * throw an exception in response to {@code element} being null or of the wrong type.
      *
-     * @param element the element to check for
+     * @param valueToFind the element to check for
      * @return {@code true} if this multiset contains at least one occurrence of the element
      */
     @Override
-    public boolean contains(final Object element) {
-        return backingMap.containsKey(element);
+    public boolean contains(final Object valueToFind) {
+        return backingMap.containsKey(valueToFind);
     }
 
     /**

@@ -115,11 +115,11 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
     }
 
     /**
-     * 
      *
-     * @param e 
+     *
+     * @param e
      * @return true, if successful
-     * @throws IllegalStateException 
+     * @throws IllegalStateException
      */
     @Override
     public boolean add(E e) throws IllegalStateException {
@@ -188,13 +188,13 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
     }
 
     /**
-     * 
      *
-     * @param e 
-     * @param timeout 
-     * @param unit 
+     *
+     * @param e
+     * @param timeout
+     * @param unit
      * @return true, if successful
-     * @throws IllegalStateException 
+     * @throws IllegalStateException
      * @throws InterruptedException the interrupted exception
      */
     @Override
@@ -274,10 +274,10 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
     }
 
     /**
-     * 
      *
-     * @return 
-     * @throws IllegalStateException 
+     *
+     * @return
+     * @throws IllegalStateException
      */
     @Override
     public E take() throws IllegalStateException {
@@ -313,12 +313,12 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
     }
 
     /**
-     * 
      *
-     * @param timeout 
-     * @param unit 
-     * @return 
-     * @throws IllegalStateException 
+     *
+     * @param timeout
+     * @param unit
+     * @return
+     * @throws IllegalStateException
      * @throws InterruptedException the interrupted exception
      */
     @Override
@@ -364,20 +364,20 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
     }
 
     /**
-     * 
      *
-     * @param e 
+     *
+     * @param valueToFind
      * @return true, if successful
-     * @throws IllegalStateException 
+     * @throws IllegalStateException
      */
     @Override
-    public boolean contains(E e) throws IllegalStateException {
+    public boolean contains(final E valueToFind) throws IllegalStateException {
         assertNotClosed();
 
         lock.lock();
 
         try {
-            return pool.contains(e);
+            return pool.contains(valueToFind);
         } finally {
             lock.unlock();
         }
@@ -386,7 +386,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
     /**
      * Vacate.
      *
-     * @throws IllegalStateException 
+     * @throws IllegalStateException
      */
     @Override
     public void vacate() throws IllegalStateException {
@@ -406,7 +406,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
     /**
      * Clear.
      *
-     * @throws IllegalStateException 
+     * @throws IllegalStateException
      */
     @Override
     public void clear() throws IllegalStateException {
@@ -436,10 +436,10 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
     }
 
     /**
-     * 
      *
-     * @return 
-     * @throws IllegalStateException 
+     *
+     * @return
+     * @throws IllegalStateException
      */
     @Override
     public int size() throws IllegalStateException {

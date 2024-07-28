@@ -294,23 +294,23 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
 
     /**
      *
-     * @param o
+     * @param valueToFind
      * @return
      */
     @Override
-    public int indexOf(Object o) {
-        return list.indexOf(o);
+    public int indexOf(Object valueToFind) {
+        return list.indexOf(valueToFind);
     }
 
     /**
      * Last index of.
      *
-     * @param o
+     * @param valueToFind
      * @return
      */
     @Override
-    public int lastIndexOf(Object o) {
-        return list.lastIndexOf(o);
+    public int lastIndexOf(Object valueToFind) {
+        return list.lastIndexOf(valueToFind);
     }
 
     /**

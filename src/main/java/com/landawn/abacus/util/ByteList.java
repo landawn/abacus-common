@@ -78,11 +78,11 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * 
      *
-     * @param a 
-     * @param size 
-     * @throws IndexOutOfBoundsException 
+     *
+     * @param a
+     * @param size
+     * @throws IndexOutOfBoundsException
      */
     public ByteList(byte[] a, int size) throws IndexOutOfBoundsException {
         N.checkFromIndexSize(0, size, a.length);
@@ -102,12 +102,12 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * 
      *
-     * @param a 
-     * @param size 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     *
+     * @param a
+     * @param size
+     * @return
+     * @throws IndexOutOfBoundsException
      */
     public static ByteList of(final byte[] a, final int size) throws IndexOutOfBoundsException {
         N.checkFromIndexSize(0, size, N.len(a));
@@ -170,13 +170,13 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * 
      *
-     * @param c 
-     * @param fromIndex 
-     * @param toIndex 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     *
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @return
+     * @throws IndexOutOfBoundsException
      */
     public static ByteList from(final Collection<Byte> c, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, N.size(c));
@@ -719,11 +719,11 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * 
      *
-     * @param fromIndex 
-     * @param toIndex 
-     * @throws IndexOutOfBoundsException 
+     *
+     * @param fromIndex
+     * @param toIndex
+     * @throws IndexOutOfBoundsException
      */
     @Override
     public void deleteRange(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -758,12 +758,49 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * 
      *
-     * @param fromIndex 
-     * @param toIndex 
-     * @param replacement 
-     * @throws IndexOutOfBoundsException 
+     *
+     * @param fromIndex
+     * @param toIndex
+     * @param replacement
+     * @throws IndexOutOfBoundsException
+     */
+    @Override
+    public void replaceRange(final int fromIndex, final int toIndex, final ByteList replacement) throws IndexOutOfBoundsException {
+        N.checkFromToIndex(fromIndex, toIndex, size());
+
+        if (N.isEmpty(replacement)) {
+            deleteRange(fromIndex, toIndex);
+            return;
+        }
+
+        final int size = this.size;//NOSONAR
+        final int newSize = size - (toIndex - fromIndex) + replacement.size();
+
+        if (elementData.length < newSize) {
+            elementData = N.copyOf(elementData, newSize);
+        }
+
+        if (toIndex - fromIndex != replacement.size() && toIndex != size) {
+            N.copy(elementData, toIndex, elementData, fromIndex + replacement.size(), size - toIndex);
+        }
+
+        N.copy(replacement.elementData, 0, elementData, fromIndex, replacement.size());
+
+        if (newSize < size) {
+            N.fill(elementData, newSize, size, (byte) 0);
+        }
+
+        this.size = newSize;
+    }
+
+    /**
+     *
+     *
+     * @param fromIndex
+     * @param toIndex
+     * @param replacement
+     * @throws IndexOutOfBoundsException
      */
     @Override
     public void replaceRange(final int fromIndex, final int toIndex, final byte[] replacement) throws IndexOutOfBoundsException {
@@ -861,12 +898,12 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * 
      *
-     * @param fromIndex 
-     * @param toIndex 
-     * @param val 
-     * @throws IndexOutOfBoundsException 
+     *
+     * @param fromIndex
+     * @param toIndex
+     * @param val
+     * @throws IndexOutOfBoundsException
      */
     public void fill(final int fromIndex, final int toIndex, final byte val) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
@@ -876,11 +913,11 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
 
     /**
      *
-     * @param e
+     * @param valueToFind
      * @return
      */
-    public boolean contains(byte e) {
-        return indexOf(e) >= 0;
+    public boolean contains(final byte valueToFind) {
+        return indexOf(valueToFind) >= 0;
     }
 
     /**
@@ -1143,35 +1180,35 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
 
     /**
      *
-     * @param objectToFind
+     * @param valueToFind
      * @return
      */
-    public int occurrencesOf(final byte objectToFind) {
-        return N.occurrencesOf(elementData, objectToFind);
+    public int occurrencesOf(final byte valueToFind) {
+        return N.occurrencesOf(elementData, valueToFind);
     }
 
     /**
      *
-     * @param e
+     * @param valueToFind
      * @return
      */
-    public int indexOf(byte e) {
-        return indexOf(0, e);
+    public int indexOf(final byte valueToFind) {
+        return indexOf(valueToFind, 0);
     }
 
     /**
      *
+     * @param valueToFind
      * @param fromIndex
-     * @param e
      * @return
      */
-    public int indexOf(final int fromIndex, byte e) {
+    public int indexOf(final byte valueToFind, final int fromIndex) {
         if (fromIndex >= size) {
             return N.INDEX_NOT_FOUND;
         }
 
         for (int i = N.max(fromIndex, 0); i < size; i++) {
-            if (elementData[i] == e) {
+            if (elementData[i] == valueToFind) {
                 return i;
             }
         }
@@ -1182,27 +1219,27 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Last index of.
      *
-     * @param e
+     * @param valueToFind
      * @return
      */
-    public int lastIndexOf(byte e) {
-        return lastIndexOf(size, e);
+    public int lastIndexOf(final byte valueToFind) {
+        return lastIndexOf(valueToFind, size);
     }
 
     /**
      * Last index of.
+     * @param valueToFind
+     * @param startIndexFromBack the start index to traverse backwards from. Inclusive.
      *
-     * @param fromIndex the start index to traverse backwards from. Inclusive.
-     * @param e
      * @return
      */
-    public int lastIndexOf(final int fromIndex, byte e) {
-        if (fromIndex < 0 || size == 0) {
+    public int lastIndexOf(final byte valueToFind, final int startIndexFromBack) {
+        if (startIndexFromBack < 0 || size == 0) {
             return N.INDEX_NOT_FOUND;
         }
 
-        for (int i = N.min(fromIndex, size - 1); i >= 0; i--) {
-            if (elementData[i] == e) {
+        for (int i = N.min(startIndexFromBack, size - 1); i >= 0; i--) {
+            if (elementData[i] == valueToFind) {
                 return i;
             }
         }
@@ -1220,12 +1257,12 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * 
      *
-     * @param fromIndex 
-     * @param toIndex 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     *
+     * @param fromIndex
+     * @param toIndex
+     * @return
+     * @throws IndexOutOfBoundsException
      */
     public OptionalByte min(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
@@ -1243,12 +1280,12 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * 
      *
-     * @param fromIndex 
-     * @param toIndex 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     *
+     * @param fromIndex
+     * @param toIndex
+     * @return
+     * @throws IndexOutOfBoundsException
      */
     public OptionalByte median(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
@@ -1266,12 +1303,12 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * 
      *
-     * @param fromIndex 
-     * @param toIndex 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     *
+     * @param fromIndex
+     * @param toIndex
+     * @return
+     * @throws IndexOutOfBoundsException
      */
     public OptionalByte max(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
@@ -1289,14 +1326,14 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * 
      *
-     * @param fromIndex 
-     * @param toIndex 
-     * @param k 
-     * @return 
-     * @throws IllegalArgumentException 
-     * @throws IndexOutOfBoundsException 
+     *
+     * @param fromIndex
+     * @param toIndex
+     * @param k
+     * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
      */
     public OptionalByte kthLargest(final int fromIndex, final int toIndex, final int k) throws IllegalArgumentException, IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
@@ -1315,12 +1352,12 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * 
      *
-     * @param fromIndex 
-     * @param toIndex 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     *
+     * @param fromIndex
+     * @param toIndex
+     * @return
+     * @throws IndexOutOfBoundsException
      */
     public int sum(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
@@ -1338,12 +1375,12 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * 
      *
-     * @param fromIndex 
-     * @param toIndex 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     *
+     * @param fromIndex
+     * @param toIndex
+     * @return
+     * @throws IndexOutOfBoundsException
      */
     public OptionalDouble average(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
@@ -1362,13 +1399,13 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * 
      *
-     * @param <E> 
-     * @param fromIndex 
-     * @param toIndex 
-     * @param action 
-     * @throws IndexOutOfBoundsException 
+     *
+     * @param <E>
+     * @param fromIndex
+     * @param toIndex
+     * @param action
+     * @throws IndexOutOfBoundsException
      * @throws E the e
      */
     public <E extends Exception> void forEach(final int fromIndex, final int toIndex, Throwables.ByteConsumer<E> action) throws IndexOutOfBoundsException, E {
@@ -1393,21 +1430,21 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @param action
      * @throws E the e
      */
-    public <E extends Exception> void forEachIndexed(Throwables.IndexedByteConsumer<E> action) throws E {
+    public <E extends Exception> void forEachIndexed(Throwables.IntByteConsumer<E> action) throws E {
         forEachIndexed(0, size, action);
     }
 
     /**
-     * 
      *
-     * @param <E> 
-     * @param fromIndex 
-     * @param toIndex 
-     * @param action 
-     * @throws IndexOutOfBoundsException 
+     *
+     * @param <E>
+     * @param fromIndex
+     * @param toIndex
+     * @param action
+     * @throws IndexOutOfBoundsException
      * @throws E the e
      */
-    public <E extends Exception> void forEachIndexed(final int fromIndex, final int toIndex, Throwables.IndexedByteConsumer<E> action)
+    public <E extends Exception> void forEachIndexed(final int fromIndex, final int toIndex, Throwables.IntByteConsumer<E> action)
             throws IndexOutOfBoundsException, E {
         N.checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), fromIndex < toIndex ? toIndex : fromIndex, size);
 
@@ -1443,12 +1480,12 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * 
      *
-     * @param fromIndex 
-     * @param toIndex 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     *
+     * @param fromIndex
+     * @param toIndex
+     * @return
+     * @throws IndexOutOfBoundsException
      */
     @Override
     public ByteList distinct(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -1524,11 +1561,11 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * This List should be sorted first.
      *
-     * @param fromIndex 
-     * @param toIndex 
-     * @param valueToFind 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     * @param fromIndex
+     * @param toIndex
+     * @param valueToFind
+     * @return
+     * @throws IndexOutOfBoundsException
      */
     public int binarySearch(final int fromIndex, final int toIndex, final byte valueToFind) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
@@ -1547,11 +1584,11 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * 
      *
-     * @param fromIndex 
-     * @param toIndex 
-     * @throws IndexOutOfBoundsException 
+     *
+     * @param fromIndex
+     * @param toIndex
+     * @throws IndexOutOfBoundsException
      */
     @Override
     public void reverse(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -1618,12 +1655,12 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * 
      *
-     * @param fromIndex 
-     * @param toIndex 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     *
+     * @param fromIndex
+     * @param toIndex
+     * @return
+     * @throws IndexOutOfBoundsException
      */
     @Override
     public ByteList copy(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -1633,13 +1670,13 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * 
      *
-     * @param fromIndex 
-     * @param toIndex 
-     * @param step 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     *
+     * @param fromIndex
+     * @param toIndex
+     * @param step
+     * @return
+     * @throws IndexOutOfBoundsException
      * @see N#copyOfRange(int[], int, int, int)
      */
     @Override
@@ -1652,11 +1689,11 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Returns List of {@code ByteList} with consecutive sub sequences of the elements, each of the same size (the final sequence may be smaller).
      *
-     * @param fromIndex 
-     * @param toIndex 
+     * @param fromIndex
+     * @param toIndex
      * @param chunkSize the desired size of each sub sequence (the last may be smaller).
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     * @return
+     * @throws IndexOutOfBoundsException
      */
     @Override
     public List<ByteList> split(final int fromIndex, final int toIndex, final int chunkSize) throws IndexOutOfBoundsException {
@@ -1702,13 +1739,13 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     //    }
 
     /**
-     * 
      *
-     * @param fromIndex 
-     * @param toIndex 
-     * @param delimiter 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     *
+     * @param fromIndex
+     * @param toIndex
+     * @param delimiter
+     * @return
+     * @throws IndexOutOfBoundsException
      */
     @Override
     public String join(int fromIndex, int toIndex, char delimiter) throws IndexOutOfBoundsException {
@@ -1718,13 +1755,13 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * 
      *
-     * @param fromIndex 
-     * @param toIndex 
-     * @param delimiter 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     *
+     * @param fromIndex
+     * @param toIndex
+     * @param delimiter
+     * @return
+     * @throws IndexOutOfBoundsException
      */
     @Override
     public String join(int fromIndex, int toIndex, String delimiter) throws IndexOutOfBoundsException {
@@ -1789,12 +1826,12 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * 
      *
-     * @param fromIndex 
-     * @param toIndex 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     *
+     * @param fromIndex
+     * @param toIndex
+     * @return
+     * @throws IndexOutOfBoundsException
      */
     public List<Byte> boxed(int fromIndex, int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
@@ -1834,14 +1871,14 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * 
      *
-     * @param <C> 
-     * @param fromIndex 
-     * @param toIndex 
-     * @param supplier 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     *
+     * @param <C>
+     * @param fromIndex
+     * @param toIndex
+     * @param supplier
+     * @return
+     * @throws IndexOutOfBoundsException
      */
     @Override
     public <C extends Collection<Byte>> C toCollection(final int fromIndex, final int toIndex, final IntFunction<? extends C> supplier)
@@ -1858,13 +1895,13 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * 
      *
-     * @param fromIndex 
-     * @param toIndex 
-     * @param supplier 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     *
+     * @param fromIndex
+     * @param toIndex
+     * @param supplier
+     * @return
+     * @throws IndexOutOfBoundsException
      */
     @Override
     public Multiset<Byte> toMultiset(final int fromIndex, final int toIndex, final IntFunction<Multiset<Byte>> supplier) throws IndexOutOfBoundsException {
@@ -1902,12 +1939,12 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * 
      *
-     * @param fromIndex 
-     * @param toIndex 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     *
+     * @param fromIndex
+     * @param toIndex
+     * @return
+     * @throws IndexOutOfBoundsException
      */
     public ByteStream stream(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);

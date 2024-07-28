@@ -128,7 +128,7 @@ public final class MutableBoolean implements Mutable, Serializable, Comparable<M
      *
      * @return
      */
-    public boolean getAndInvert() { // NOSONAR
+    public boolean getAndNegate() { // NOSONAR
         final boolean result = value;
         value = !value;
         return result;
@@ -139,7 +139,7 @@ public final class MutableBoolean implements Mutable, Serializable, Comparable<M
      *
      * @return
      */
-    public boolean invertAndGet() {
+    public boolean negateAndGet() {
         value = !value;
         return this.value;
     }

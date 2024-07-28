@@ -79,11 +79,11 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * 
      *
-     * @param a 
-     * @param size 
-     * @throws IndexOutOfBoundsException 
+     *
+     * @param a
+     * @param size
+     * @throws IndexOutOfBoundsException
      */
     public IntList(int[] a, int size) throws IndexOutOfBoundsException {
         N.checkFromIndexSize(0, size, a.length);
@@ -103,12 +103,12 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * 
      *
-     * @param a 
-     * @param size 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     *
+     * @param a
+     * @param size
+     * @return
+     * @throws IndexOutOfBoundsException
      */
     public static IntList of(final int[] a, final int size) throws IndexOutOfBoundsException {
         N.checkFromIndexSize(0, size, N.len(a));
@@ -171,13 +171,13 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * 
      *
-     * @param c 
-     * @param fromIndex 
-     * @param toIndex 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     *
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @return
+     * @throws IndexOutOfBoundsException
      */
     public static IntList from(final Collection<Integer> c, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, N.size(c));
@@ -747,11 +747,11 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * 
      *
-     * @param fromIndex 
-     * @param toIndex 
-     * @throws IndexOutOfBoundsException 
+     *
+     * @param fromIndex
+     * @param toIndex
+     * @throws IndexOutOfBoundsException
      */
     @Override
     public void deleteRange(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -786,12 +786,49 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * 
      *
-     * @param fromIndex 
-     * @param toIndex 
-     * @param replacement 
-     * @throws IndexOutOfBoundsException 
+     *
+     * @param fromIndex
+     * @param toIndex
+     * @param replacement
+     * @throws IndexOutOfBoundsException
+     */
+    @Override
+    public void replaceRange(final int fromIndex, final int toIndex, final IntList replacement) throws IndexOutOfBoundsException {
+        N.checkFromToIndex(fromIndex, toIndex, size());
+
+        if (N.isEmpty(replacement)) {
+            deleteRange(fromIndex, toIndex);
+            return;
+        }
+
+        final int size = this.size;//NOSONAR
+        final int newSize = size - (toIndex - fromIndex) + replacement.size();
+
+        if (elementData.length < newSize) {
+            elementData = N.copyOf(elementData, newSize);
+        }
+
+        if (toIndex - fromIndex != replacement.size() && toIndex != size) {
+            N.copy(elementData, toIndex, elementData, fromIndex + replacement.size(), size - toIndex);
+        }
+
+        N.copy(replacement.elementData, 0, elementData, fromIndex, replacement.size());
+
+        if (newSize < size) {
+            N.fill(elementData, newSize, size, 0);
+        }
+
+        this.size = newSize;
+    }
+
+    /**
+     *
+     *
+     * @param fromIndex
+     * @param toIndex
+     * @param replacement
+     * @throws IndexOutOfBoundsException
      */
     @Override
     public void replaceRange(final int fromIndex, final int toIndex, final int[] replacement) throws IndexOutOfBoundsException {
@@ -889,12 +926,12 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * 
      *
-     * @param fromIndex 
-     * @param toIndex 
-     * @param val 
-     * @throws IndexOutOfBoundsException 
+     *
+     * @param fromIndex
+     * @param toIndex
+     * @param val
+     * @throws IndexOutOfBoundsException
      */
     public void fill(final int fromIndex, final int toIndex, final int val) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
@@ -904,11 +941,11 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
 
     /**
      *
-     * @param e
+     * @param valueToFind
      * @return
      */
-    public boolean contains(int e) {
-        return indexOf(e) >= 0;
+    public boolean contains(final int valueToFind) {
+        return indexOf(valueToFind) >= 0;
     }
 
     /**
@@ -1200,35 +1237,35 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
 
     /**
      *
-     * @param objectToFind
+     * @param valueToFind
      * @return
      */
-    public int occurrencesOf(final int objectToFind) {
-        return N.occurrencesOf(elementData, objectToFind);
+    public int occurrencesOf(final int valueToFind) {
+        return N.occurrencesOf(elementData, valueToFind);
     }
 
     /**
      *
-     * @param e
+     * @param valueToFind
      * @return
      */
-    public int indexOf(int e) {
-        return indexOf(0, e);
+    public int indexOf(final int valueToFind) {
+        return indexOf(valueToFind, 0);
     }
 
     /**
      *
+     * @param valueToFind
      * @param fromIndex
-     * @param e
      * @return
      */
-    public int indexOf(final int fromIndex, int e) {
+    public int indexOf(final int valueToFind, final int fromIndex) {
         if (fromIndex >= size) {
             return N.INDEX_NOT_FOUND;
         }
 
         for (int i = N.max(fromIndex, 0); i < size; i++) {
-            if (elementData[i] == e) {
+            if (elementData[i] == valueToFind) {
                 return i;
             }
         }
@@ -1239,27 +1276,27 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     /**
      * Last index of.
      *
-     * @param e
+     * @param valueToFind
      * @return
      */
-    public int lastIndexOf(int e) {
-        return lastIndexOf(size, e);
+    public int lastIndexOf(final int valueToFind) {
+        return lastIndexOf(valueToFind, size);
     }
 
     /**
      * Last index of.
+     * @param valueToFind
+     * @param startIndexFromBack the start index to traverse backwards from. Inclusive.
      *
-     * @param fromIndex the start index to traverse backwards from. Inclusive.
-     * @param e
      * @return
      */
-    public int lastIndexOf(final int fromIndex, int e) {
-        if (fromIndex < 0 || size == 0) {
+    public int lastIndexOf(final int valueToFind, final int startIndexFromBack) {
+        if (startIndexFromBack < 0 || size == 0) {
             return N.INDEX_NOT_FOUND;
         }
 
-        for (int i = N.min(fromIndex, size - 1); i >= 0; i--) {
-            if (elementData[i] == e) {
+        for (int i = N.min(startIndexFromBack, size - 1); i >= 0; i--) {
+            if (elementData[i] == valueToFind) {
                 return i;
             }
         }
@@ -1277,12 +1314,12 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * 
      *
-     * @param fromIndex 
-     * @param toIndex 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     *
+     * @param fromIndex
+     * @param toIndex
+     * @return
+     * @throws IndexOutOfBoundsException
      */
     public OptionalInt min(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
@@ -1300,12 +1337,12 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * 
      *
-     * @param fromIndex 
-     * @param toIndex 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     *
+     * @param fromIndex
+     * @param toIndex
+     * @return
+     * @throws IndexOutOfBoundsException
      */
     public OptionalInt median(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
@@ -1323,12 +1360,12 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * 
      *
-     * @param fromIndex 
-     * @param toIndex 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     *
+     * @param fromIndex
+     * @param toIndex
+     * @return
+     * @throws IndexOutOfBoundsException
      */
     public OptionalInt max(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
@@ -1346,14 +1383,14 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * 
      *
-     * @param fromIndex 
-     * @param toIndex 
-     * @param k 
-     * @return 
-     * @throws IllegalArgumentException 
-     * @throws IndexOutOfBoundsException 
+     *
+     * @param fromIndex
+     * @param toIndex
+     * @param k
+     * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
      */
     public OptionalInt kthLargest(final int fromIndex, final int toIndex, final int k) throws IllegalArgumentException, IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
@@ -1372,12 +1409,12 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * 
      *
-     * @param fromIndex 
-     * @param toIndex 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     *
+     * @param fromIndex
+     * @param toIndex
+     * @return
+     * @throws IndexOutOfBoundsException
      */
     public int sum(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
@@ -1395,12 +1432,12 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * 
      *
-     * @param fromIndex 
-     * @param toIndex 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     *
+     * @param fromIndex
+     * @param toIndex
+     * @return
+     * @throws IndexOutOfBoundsException
      */
     public OptionalDouble average(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
@@ -1419,13 +1456,13 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * 
      *
-     * @param <E> 
-     * @param fromIndex 
-     * @param toIndex 
-     * @param action 
-     * @throws IndexOutOfBoundsException 
+     *
+     * @param <E>
+     * @param fromIndex
+     * @param toIndex
+     * @param action
+     * @throws IndexOutOfBoundsException
      * @throws E the e
      */
     public <E extends Exception> void forEach(final int fromIndex, final int toIndex, Throwables.IntConsumer<E> action) throws IndexOutOfBoundsException, E {
@@ -1450,21 +1487,21 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * @param action
      * @throws E the e
      */
-    public <E extends Exception> void forEachIndexed(Throwables.IndexedIntConsumer<E> action) throws E {
+    public <E extends Exception> void forEachIndexed(Throwables.IntIntConsumer<E> action) throws E {
         forEachIndexed(0, size, action);
     }
 
     /**
-     * 
      *
-     * @param <E> 
-     * @param fromIndex 
-     * @param toIndex 
-     * @param action 
-     * @throws IndexOutOfBoundsException 
+     *
+     * @param <E>
+     * @param fromIndex
+     * @param toIndex
+     * @param action
+     * @throws IndexOutOfBoundsException
      * @throws E the e
      */
-    public <E extends Exception> void forEachIndexed(final int fromIndex, final int toIndex, Throwables.IndexedIntConsumer<E> action)
+    public <E extends Exception> void forEachIndexed(final int fromIndex, final int toIndex, Throwables.IntIntConsumer<E> action)
             throws IndexOutOfBoundsException, E {
         N.checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), fromIndex < toIndex ? toIndex : fromIndex, size);
 
@@ -1500,12 +1537,12 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * 
      *
-     * @param fromIndex 
-     * @param toIndex 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     *
+     * @param fromIndex
+     * @param toIndex
+     * @return
+     * @throws IndexOutOfBoundsException
      */
     @Override
     public IntList distinct(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -1538,13 +1575,13 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * 
      *
-     * @param fromIndex 
-     * @param toIndex 
-     * @param n 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     *
+     * @param fromIndex
+     * @param toIndex
+     * @param n
+     * @return
+     * @throws IndexOutOfBoundsException
      */
     public IntList top(final int fromIndex, final int toIndex, final int n) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
@@ -1563,14 +1600,14 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * 
      *
-     * @param fromIndex 
-     * @param toIndex 
-     * @param n 
-     * @param cmp 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     *
+     * @param fromIndex
+     * @param toIndex
+     * @param n
+     * @param cmp
+     * @return
+     * @throws IndexOutOfBoundsException
      */
     public IntList top(final int fromIndex, final int toIndex, final int n, Comparator<? super Integer> cmp) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
@@ -1631,11 +1668,11 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     /**
      * This List should be sorted first.
      *
-     * @param fromIndex 
-     * @param toIndex 
-     * @param valueToFind 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     * @param fromIndex
+     * @param toIndex
+     * @param valueToFind
+     * @return
+     * @throws IndexOutOfBoundsException
      */
     public int binarySearch(final int fromIndex, final int toIndex, final int valueToFind) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
@@ -1654,11 +1691,11 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * 
      *
-     * @param fromIndex 
-     * @param toIndex 
-     * @throws IndexOutOfBoundsException 
+     *
+     * @param fromIndex
+     * @param toIndex
+     * @throws IndexOutOfBoundsException
      */
     @Override
     public void reverse(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -1725,12 +1762,12 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * 
      *
-     * @param fromIndex 
-     * @param toIndex 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     *
+     * @param fromIndex
+     * @param toIndex
+     * @return
+     * @throws IndexOutOfBoundsException
      */
     @Override
     public IntList copy(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -1740,13 +1777,13 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * 
      *
-     * @param fromIndex 
-     * @param toIndex 
-     * @param step 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     *
+     * @param fromIndex
+     * @param toIndex
+     * @param step
+     * @return
+     * @throws IndexOutOfBoundsException
      * @see N#copyOfRange(int[], int, int, int)
      */
     @Override
@@ -1759,11 +1796,11 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     /**
      * Returns List of {@code IntList} with consecutive sub sequences of the elements, each of the same size (the final sequence may be smaller).
      *
-     * @param fromIndex 
-     * @param toIndex 
+     * @param fromIndex
+     * @param toIndex
      * @param chunkSize the desired size of each sub sequence (the last may be smaller).
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     * @return
+     * @throws IndexOutOfBoundsException
      */
     @Override
     public List<IntList> split(final int fromIndex, final int toIndex, final int chunkSize) throws IndexOutOfBoundsException {
@@ -1809,13 +1846,13 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     //    }
 
     /**
-     * 
      *
-     * @param fromIndex 
-     * @param toIndex 
-     * @param delimiter 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     *
+     * @param fromIndex
+     * @param toIndex
+     * @param delimiter
+     * @return
+     * @throws IndexOutOfBoundsException
      */
     @Override
     public String join(int fromIndex, int toIndex, char delimiter) throws IndexOutOfBoundsException {
@@ -1825,13 +1862,13 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * 
      *
-     * @param fromIndex 
-     * @param toIndex 
-     * @param delimiter 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     *
+     * @param fromIndex
+     * @param toIndex
+     * @param delimiter
+     * @return
+     * @throws IndexOutOfBoundsException
      */
     @Override
     public String join(int fromIndex, int toIndex, String delimiter) throws IndexOutOfBoundsException {
@@ -1896,12 +1933,12 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * 
      *
-     * @param fromIndex 
-     * @param toIndex 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     *
+     * @param fromIndex
+     * @param toIndex
+     * @return
+     * @throws IndexOutOfBoundsException
      */
     public List<Integer> boxed(int fromIndex, int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
@@ -1971,14 +2008,14 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * 
      *
-     * @param <C> 
-     * @param fromIndex 
-     * @param toIndex 
-     * @param supplier 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     *
+     * @param <C>
+     * @param fromIndex
+     * @param toIndex
+     * @param supplier
+     * @return
+     * @throws IndexOutOfBoundsException
      */
     @Override
     public <C extends Collection<Integer>> C toCollection(final int fromIndex, final int toIndex, final IntFunction<? extends C> supplier)
@@ -1995,13 +2032,13 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * 
      *
-     * @param fromIndex 
-     * @param toIndex 
-     * @param supplier 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     *
+     * @param fromIndex
+     * @param toIndex
+     * @param supplier
+     * @return
+     * @throws IndexOutOfBoundsException
      */
     @Override
     public Multiset<Integer> toMultiset(final int fromIndex, final int toIndex, final IntFunction<Multiset<Integer>> supplier)
@@ -2040,12 +2077,12 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * 
      *
-     * @param fromIndex 
-     * @param toIndex 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     *
+     * @param fromIndex
+     * @param toIndex
+     * @return
+     * @throws IndexOutOfBoundsException
      */
     public IntStream stream(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);

@@ -22128,24 +22128,24 @@ sealed class CommonUtil permits N {
      * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
      */
     public static int indexOf(final boolean[] a, final boolean valueToFind) {
-        return indexOf(a, 0, valueToFind);
+        return indexOf(a, valueToFind, 0);
     }
 
     /**
      *
      * @param a
-     * @param startIndex the index from which to start the search.
      * @param valueToFind
+     * @param fromIndex the index from which to start the search.
      * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
      */
-    public static int indexOf(final boolean[] a, final int startIndex, final boolean valueToFind) {
+    public static int indexOf(final boolean[] a, final boolean valueToFind, final int fromIndex) {
         final int len = len(a);
 
-        if (len == 0 || startIndex >= len) {
+        if (len == 0 || fromIndex >= len) {
             return INDEX_NOT_FOUND;
         }
 
-        for (int i = N.max(startIndex, 0); i < len; i++) {
+        for (int i = N.max(fromIndex, 0); i < len; i++) {
             if (a[i] == valueToFind) {
                 return i;
             }
@@ -22161,24 +22161,24 @@ sealed class CommonUtil permits N {
      * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
      */
     public static int indexOf(final char[] a, final char valueToFind) {
-        return indexOf(a, 0, valueToFind);
+        return indexOf(a, valueToFind, 0);
     }
 
     /**
      *
      * @param a
-     * @param startIndex the index from which to start the search.
      * @param valueToFind
+     * @param fromIndex the index from which to start the search.
      * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
      */
-    public static int indexOf(final char[] a, final int startIndex, final char valueToFind) {
+    public static int indexOf(final char[] a, final char valueToFind, final int fromIndex) {
         final int len = len(a);
 
-        if (len == 0 || startIndex >= len) {
+        if (len == 0 || fromIndex >= len) {
             return INDEX_NOT_FOUND;
         }
 
-        for (int i = N.max(startIndex, 0); i < len; i++) {
+        for (int i = N.max(fromIndex, 0); i < len; i++) {
             if (a[i] == valueToFind) {
                 return i;
             }
@@ -22194,25 +22194,25 @@ sealed class CommonUtil permits N {
      * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
      */
     public static int indexOf(final byte[] a, final byte valueToFind) {
-        return indexOf(a, 0, valueToFind);
+        return indexOf(a, valueToFind, 0);
 
     }
 
     /**
      *
      * @param a
-     * @param startIndex the index from which to start the search.
      * @param valueToFind
+     * @param fromIndex the index from which to start the search.
      * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
      */
-    public static int indexOf(final byte[] a, final int startIndex, final byte valueToFind) {
+    public static int indexOf(final byte[] a, final byte valueToFind, final int fromIndex) {
         final int len = len(a);
 
-        if (len == 0 || startIndex >= len) {
+        if (len == 0 || fromIndex >= len) {
             return INDEX_NOT_FOUND;
         }
 
-        for (int i = N.max(startIndex, 0); i < len; i++) {
+        for (int i = N.max(fromIndex, 0); i < len; i++) {
             if (a[i] == valueToFind) {
                 return i;
             }
@@ -22228,24 +22228,24 @@ sealed class CommonUtil permits N {
      * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
      */
     public static int indexOf(final short[] a, final short valueToFind) {
-        return indexOf(a, 0, valueToFind);
+        return indexOf(a, valueToFind, 0);
     }
 
     /**
      *
      * @param a
-     * @param startIndex the index from which to start the search.
      * @param valueToFind
+     * @param fromIndex the index from which to start the search.
      * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
      */
-    public static int indexOf(final short[] a, final int startIndex, final short valueToFind) {
+    public static int indexOf(final short[] a, final short valueToFind, final int fromIndex) {
         final int len = len(a);
 
-        if (len == 0 || startIndex >= len) {
+        if (len == 0 || fromIndex >= len) {
             return INDEX_NOT_FOUND;
         }
 
-        for (int i = N.max(startIndex, 0); i < len; i++) {
+        for (int i = N.max(fromIndex, 0); i < len; i++) {
             if (a[i] == valueToFind) {
                 return i;
             }
@@ -22261,24 +22261,24 @@ sealed class CommonUtil permits N {
      * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
      */
     public static int indexOf(final int[] a, final int valueToFind) {
-        return indexOf(a, 0, valueToFind);
+        return indexOf(a, valueToFind, 0);
     }
 
     /**
      *
      * @param a
-     * @param startIndex the index from which to start the search.
      * @param valueToFind
+     * @param fromIndex the index from which to start the search.
      * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
      */
-    public static int indexOf(final int[] a, final int startIndex, final int valueToFind) {
+    public static int indexOf(final int[] a, final int valueToFind, final int fromIndex) {
         final int len = len(a);
 
-        if (len == 0 || startIndex >= len) {
+        if (len == 0 || fromIndex >= len) {
             return INDEX_NOT_FOUND;
         }
 
-        for (int i = N.max(startIndex, 0); i < len; i++) {
+        for (int i = N.max(fromIndex, 0); i < len; i++) {
             if (a[i] == valueToFind) {
                 return i;
             }
@@ -22294,24 +22294,24 @@ sealed class CommonUtil permits N {
      * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
      */
     public static int indexOf(final long[] a, final long valueToFind) {
-        return indexOf(a, 0, valueToFind);
+        return indexOf(a, valueToFind, 0);
     }
 
     /**
      *
      * @param a
-     * @param startIndex the index from which to start the search.
      * @param valueToFind
+     * @param fromIndex the index from which to start the search.
      * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
      */
-    public static int indexOf(final long[] a, final int startIndex, final long valueToFind) {
+    public static int indexOf(final long[] a, final long valueToFind, final int fromIndex) {
         final int len = len(a);
 
-        if (len == 0 || startIndex >= len) {
+        if (len == 0 || fromIndex >= len) {
             return INDEX_NOT_FOUND;
         }
 
-        for (int i = N.max(startIndex, 0); i < len; i++) {
+        for (int i = N.max(fromIndex, 0); i < len; i++) {
             if (a[i] == valueToFind) {
                 return i;
             }
@@ -22327,24 +22327,24 @@ sealed class CommonUtil permits N {
      * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
      */
     public static int indexOf(final float[] a, final float valueToFind) {
-        return indexOf(a, 0, valueToFind);
+        return indexOf(a, valueToFind, 0);
     }
 
     /**
      *
      * @param a
-     * @param startIndex the index from which to start the search.
      * @param valueToFind
+     * @param fromIndex the index from which to start the search.
      * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
      */
-    public static int indexOf(final float[] a, final int startIndex, final float valueToFind) {
+    public static int indexOf(final float[] a, final float valueToFind, final int fromIndex) {
         final int len = len(a);
 
-        if (len == 0 || startIndex >= len) {
+        if (len == 0 || fromIndex >= len) {
             return INDEX_NOT_FOUND;
         }
 
-        for (int i = N.max(startIndex, 0); i < len; i++) {
+        for (int i = N.max(fromIndex, 0); i < len; i++) {
             if (Float.compare(a[i], valueToFind) == 0) {
                 return i;
             }
@@ -22360,24 +22360,24 @@ sealed class CommonUtil permits N {
      * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
      */
     public static int indexOf(final double[] a, final double valueToFind) {
-        return indexOf(a, 0, valueToFind);
+        return indexOf(a, valueToFind, 0);
     }
 
     /**
      *
      * @param a
-     * @param startIndex the index from which to start the search.
      * @param valueToFind
+     * @param fromIndex the index from which to start the search.
      * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
      */
-    public static int indexOf(final double[] a, final int startIndex, final double valueToFind) {
+    public static int indexOf(final double[] a, final double valueToFind, final int fromIndex) {
         final int len = len(a);
 
-        if (len == 0 || startIndex >= len) {
+        if (len == 0 || fromIndex >= len) {
             return INDEX_NOT_FOUND;
         }
 
-        for (int i = N.max(startIndex, 0); i < len; i++) {
+        for (int i = N.max(fromIndex, 0); i < len; i++) {
             if (Double.compare(a[i], valueToFind) == 0) {
                 return i;
             }
@@ -22400,7 +22400,7 @@ sealed class CommonUtil permits N {
      *  {@link #INDEX_NOT_FOUND} ({@code -1}) if not found or {@code null} array input
      */
     public static int indexOf(final double[] a, final double valueToFind, final double tolerance) {
-        return indexOf(a, 0, valueToFind, tolerance);
+        return indexOf(a, valueToFind, tolerance, 0);
     }
 
     /**
@@ -22414,23 +22414,23 @@ sealed class CommonUtil permits N {
      * length will return {@link #INDEX_NOT_FOUND} ({@code -1}).
      *
      * @param a the array to search through for the object, may be {@code null}
-     * @param startIndex the index to start searching at
      * @param valueToFind
      * @param tolerance tolerance of the search
+     * @param fromIndex the index to start searching at
      * @return the index of the value within the array,
      *  {@link #INDEX_NOT_FOUND} ({@code -1}) if not found or {@code null} array input
      */
-    public static int indexOf(final double[] a, int startIndex, final double valueToFind, final double tolerance) {
+    public static int indexOf(final double[] a, final double valueToFind, final double tolerance, int fromIndex) {
         final int len = len(a);
 
-        if (len == 0 || startIndex >= len) {
+        if (len == 0 || fromIndex >= len) {
             return INDEX_NOT_FOUND;
         }
 
         final double min = valueToFind - tolerance;
         final double max = valueToFind + tolerance;
 
-        for (int i = startIndex; i < len; i++) {
+        for (int i = fromIndex; i < len; i++) {
             if (a[i] >= min && a[i] <= max) {
                 return i;
             }
@@ -22446,24 +22446,24 @@ sealed class CommonUtil permits N {
      * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
      */
     public static int indexOf(final Object[] a, final Object valueToFind) {
-        return indexOf(a, 0, valueToFind);
+        return indexOf(a, valueToFind, 0);
     }
 
     /**
      *
      * @param a
-     * @param startIndex the index from which to start the search.
      * @param valueToFind
+     * @param fromIndex the index from which to start the search.
      * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
      */
-    public static int indexOf(final Object[] a, final int startIndex, final Object valueToFind) {
+    public static int indexOf(final Object[] a, final Object valueToFind, final int fromIndex) {
         final int len = len(a);
 
-        if (len == 0 || startIndex >= len) {
+        if (len == 0 || fromIndex >= len) {
             return INDEX_NOT_FOUND;
         }
 
-        for (int i = N.max(startIndex, 0); i < len; i++) {
+        for (int i = N.max(fromIndex, 0); i < len; i++) {
             if (equals(a[i], valueToFind)) {
                 return i;
             }
@@ -22479,28 +22479,28 @@ sealed class CommonUtil permits N {
      * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
      */
     public static int indexOf(final Collection<?> c, final Object valueToFind) {
-        return indexOf(c, 0, valueToFind);
+        return indexOf(c, valueToFind, 0);
     }
 
     /**
      *
      *
      * @param c
-     * @param startIndex the index from which to start the search.
      * @param valueToFind
+     * @param fromIndex the index from which to start the search.
      * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
      */
-    public static int indexOf(final Collection<?> c, final int startIndex, final Object valueToFind) {
+    public static int indexOf(final Collection<?> c, final Object valueToFind, final int fromIndex) {
         final int len = size(c);
 
-        if (len == 0 || startIndex >= len) {
+        if (len == 0 || fromIndex >= len) {
             return INDEX_NOT_FOUND;
         }
 
         if (c instanceof List && c instanceof RandomAccess) {
             final List<?> list = (List<?>) c;
 
-            for (int i = N.max(startIndex, 0); i < len; i++) {
+            for (int i = N.max(fromIndex, 0); i < len; i++) {
                 if (equals(list.get(i), valueToFind)) {
                     return i;
                 }
@@ -22509,8 +22509,8 @@ sealed class CommonUtil permits N {
             final Iterator<?> iter = c.iterator();
             int index = 0;
 
-            if (startIndex > 0) {
-                while (index < startIndex && iter.hasNext()) {
+            if (fromIndex > 0) {
+                while (index < fromIndex && iter.hasNext()) {
                     iter.next();
                     index++;
                 }
@@ -22544,26 +22544,26 @@ sealed class CommonUtil permits N {
      * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
      */
     public static int indexOf(final Iterator<?> iter, final Object valueToFind) {
-        return indexOf(iter, 0, valueToFind);
+        return indexOf(iter, valueToFind, 0);
     }
 
     /**
      *
      *
      * @param iter
-     * @param startIndex
      * @param valueToFind
+     * @param fromIndex
      * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
      */
-    public static int indexOf(final Iterator<?> iter, final int startIndex, final Object valueToFind) {
+    public static int indexOf(final Iterator<?> iter, final Object valueToFind, final int fromIndex) {
         if (iter == null) {
             return INDEX_NOT_FOUND;
         }
 
         long index = 0;
 
-        if (startIndex > 0) {
-            while (index < startIndex && iter.hasNext()) {
+        if (fromIndex > 0) {
+            while (index < fromIndex && iter.hasNext()) {
                 iter.next();
                 index++;
             }
@@ -22608,17 +22608,17 @@ sealed class CommonUtil permits N {
      * Index of sub list.
      *
      * @param sourceList
-     * @param startIndex
      * @param subListToFind
+     * @param fromIndex
      * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
      * @see Index#lastOfSubList(List, int, List)
      */
-    public static int indexOfSubList(final List<?> sourceList, final int startIndex, final List<?> subListToFind) {
+    public static int indexOfSubList(final List<?> sourceList, final List<?> subListToFind, final int fromIndex) {
         if (isEmpty(sourceList) || isEmpty(subListToFind)) {
             return INDEX_NOT_FOUND;
         }
 
-        return Index.ofSubList(sourceList, startIndex, subListToFind).orElse(INDEX_NOT_FOUND);
+        return Index.ofSubList(sourceList, fromIndex, subListToFind).orElse(INDEX_NOT_FOUND);
     }
 
     /**
@@ -22629,25 +22629,25 @@ sealed class CommonUtil permits N {
      * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
      */
     public static int indexOfIgnoreCase(final String[] a, final String valueToFind) {
-        return indexOfIgnoreCase(a, 0, valueToFind);
+        return indexOfIgnoreCase(a, valueToFind, 0);
     }
 
     /**
      *
      *
      * @param a
-     * @param startIndex
      * @param valueToFind
+     * @param fromIndex
      * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
      */
-    public static int indexOfIgnoreCase(final String[] a, final int startIndex, final String valueToFind) {
+    public static int indexOfIgnoreCase(final String[] a, final String valueToFind, final int fromIndex) {
         final int len = len(a);
 
-        if (len == 0 || startIndex >= len) {
+        if (len == 0 || fromIndex >= len) {
             return INDEX_NOT_FOUND;
         }
 
-        for (int i = startIndex; i < len; i++) {
+        for (int i = fromIndex; i < len; i++) {
             if (N.equalsIgnoreCase(a[i], valueToFind)) {
                 return i;
             }
@@ -22664,18 +22664,18 @@ sealed class CommonUtil permits N {
      * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
      */
     public static int lastIndexOf(final boolean[] a, final boolean valueToFind) {
-        return lastIndexOf(a, a.length - 1, valueToFind);
+        return lastIndexOf(a, valueToFind, a.length - 1);
     }
 
     /**
      * Last index of.
      *
      * @param a
-     * @param startIndexFromBack the start index to traverse backwards from
      * @param valueToFind
+     * @param startIndexFromBack the start index to traverse backwards from
      * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
      */
-    public static int lastIndexOf(final boolean[] a, final int startIndexFromBack, final boolean valueToFind) {
+    public static int lastIndexOf(final boolean[] a, final boolean valueToFind, final int startIndexFromBack) {
         final int len = len(a);
 
         if (len == 0 || startIndexFromBack < 0) {
@@ -22703,18 +22703,18 @@ sealed class CommonUtil permits N {
             return INDEX_NOT_FOUND;
         }
 
-        return lastIndexOf(a, a.length - 1, valueToFind);
+        return lastIndexOf(a, valueToFind, a.length - 1);
     }
 
     /**
      * Last index of.
      *
      * @param a
-     * @param startIndexFromBack the start index to traverse backwards from
      * @param valueToFind
+     * @param startIndexFromBack the start index to traverse backwards from
      * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
      */
-    public static int lastIndexOf(final char[] a, final int startIndexFromBack, final char valueToFind) {
+    public static int lastIndexOf(final char[] a, final char valueToFind, final int startIndexFromBack) {
         final int len = len(a);
 
         if (len == 0 || startIndexFromBack < 0) {
@@ -22742,7 +22742,7 @@ sealed class CommonUtil permits N {
             return INDEX_NOT_FOUND;
         }
 
-        return lastIndexOf(a, a.length - 1, valueToFind);
+        return lastIndexOf(a, valueToFind, a.length - 1);
 
     }
 
@@ -22750,11 +22750,11 @@ sealed class CommonUtil permits N {
      * Last index of.
      *
      * @param a
-     * @param startIndexFromBack the start index to traverse backwards from
      * @param valueToFind
+     * @param startIndexFromBack the start index to traverse backwards from
      * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
      */
-    public static int lastIndexOf(final byte[] a, final int startIndexFromBack, final byte valueToFind) {
+    public static int lastIndexOf(final byte[] a, final byte valueToFind, final int startIndexFromBack) {
         final int len = len(a);
 
         if (len == 0 || startIndexFromBack < 0) {
@@ -22782,18 +22782,18 @@ sealed class CommonUtil permits N {
             return INDEX_NOT_FOUND;
         }
 
-        return lastIndexOf(a, a.length - 1, valueToFind);
+        return lastIndexOf(a, valueToFind, a.length - 1);
     }
 
     /**
      * Last index of.
      *
      * @param a
-     * @param startIndexFromBack the start index to traverse backwards from
      * @param valueToFind
+     * @param startIndexFromBack the start index to traverse backwards from
      * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
      */
-    public static int lastIndexOf(final short[] a, final int startIndexFromBack, final short valueToFind) {
+    public static int lastIndexOf(final short[] a, final short valueToFind, final int startIndexFromBack) {
         final int len = len(a);
 
         if (len == 0 || startIndexFromBack < 0) {
@@ -22821,18 +22821,18 @@ sealed class CommonUtil permits N {
             return INDEX_NOT_FOUND;
         }
 
-        return lastIndexOf(a, a.length - 1, valueToFind);
+        return lastIndexOf(a, valueToFind, a.length - 1);
     }
 
     /**
      * Last index of.
      *
      * @param a
-     * @param startIndexFromBack the start index to traverse backwards from
      * @param valueToFind
+     * @param startIndexFromBack the start index to traverse backwards from
      * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
      */
-    public static int lastIndexOf(final int[] a, final int startIndexFromBack, final int valueToFind) {
+    public static int lastIndexOf(final int[] a, final int valueToFind, final int startIndexFromBack) {
         final int len = len(a);
 
         if (len == 0 || startIndexFromBack < 0) {
@@ -22860,18 +22860,18 @@ sealed class CommonUtil permits N {
             return INDEX_NOT_FOUND;
         }
 
-        return lastIndexOf(a, a.length - 1, valueToFind);
+        return lastIndexOf(a, valueToFind, a.length - 1);
     }
 
     /**
      * Last index of.
      *
      * @param a
-     * @param startIndexFromBack the start index to traverse backwards from
      * @param valueToFind
+     * @param startIndexFromBack the start index to traverse backwards from
      * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
      */
-    public static int lastIndexOf(final long[] a, final int startIndexFromBack, final long valueToFind) {
+    public static int lastIndexOf(final long[] a, final long valueToFind, final int startIndexFromBack) {
         final int len = len(a);
 
         if (len == 0 || startIndexFromBack < 0) {
@@ -22899,18 +22899,18 @@ sealed class CommonUtil permits N {
             return INDEX_NOT_FOUND;
         }
 
-        return lastIndexOf(a, a.length - 1, valueToFind);
+        return lastIndexOf(a, valueToFind, a.length - 1);
     }
 
     /**
      * Last index of.
      *
      * @param a
-     * @param startIndexFromBack the start index to traverse backwards from
      * @param valueToFind
+     * @param startIndexFromBack the start index to traverse backwards from
      * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
      */
-    public static int lastIndexOf(final float[] a, final int startIndexFromBack, final float valueToFind) {
+    public static int lastIndexOf(final float[] a, final float valueToFind, final int startIndexFromBack) {
         final int len = len(a);
 
         if (len == 0 || startIndexFromBack < 0) {
@@ -22938,18 +22938,18 @@ sealed class CommonUtil permits N {
             return INDEX_NOT_FOUND;
         }
 
-        return lastIndexOf(a, a.length - 1, valueToFind);
+        return lastIndexOf(a, valueToFind, a.length - 1);
     }
 
     /**
      * Last index of.
      *
      * @param a
-     * @param startIndexFromBack the start index to traverse backwards from
      * @param valueToFind
+     * @param startIndexFromBack the start index to traverse backwards from
      * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
      */
-    public static int lastIndexOf(final double[] a, final int startIndexFromBack, final double valueToFind) {
+    public static int lastIndexOf(final double[] a, final double valueToFind, final int startIndexFromBack) {
         final int len = len(a);
 
         if (len == 0 || startIndexFromBack < 0) {
@@ -22979,7 +22979,7 @@ sealed class CommonUtil permits N {
      *  {@link #INDEX_NOT_FOUND} ({@code -1}) if not found or {@code null} array input
      */
     public static int lastIndexOf(final double[] a, final double valueToFind, final double tolerance) {
-        return lastIndexOf(a, 0, valueToFind, tolerance);
+        return lastIndexOf(a, valueToFind, tolerance, 0);
     }
 
     /**
@@ -22993,13 +22993,13 @@ sealed class CommonUtil permits N {
      * array length will search from the end of the array.
      *
      * @param a the array to traverse for looking for the object, may be {@code null}
-     * @param startIndexFromBack the start index to traverse backwards from
      * @param valueToFind
      * @param tolerance search for value within plus/minus this amount
+     * @param startIndexFromBack the start index to traverse backwards from
      * @return the last index of the value within the array,
      *  {@link #INDEX_NOT_FOUND} ({@code -1}) if not found or {@code null} array input
      */
-    public static int lastIndexOf(final double[] a, int startIndexFromBack, final double valueToFind, final double tolerance) {
+    public static int lastIndexOf(final double[] a, final double valueToFind, final double tolerance, int startIndexFromBack) {
         final int len = len(a);
 
         if (len == 0 || startIndexFromBack < 0) {
@@ -23030,18 +23030,18 @@ sealed class CommonUtil permits N {
             return INDEX_NOT_FOUND;
         }
 
-        return lastIndexOf(a, a.length - 1, valueToFind);
+        return lastIndexOf(a, valueToFind, a.length - 1);
     }
 
     /**
      * Last index of.
      *
      * @param a
-     * @param startIndexFromBack the start index to traverse backwards from
      * @param valueToFind
+     * @param startIndexFromBack the start index to traverse backwards from
      * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
      */
-    public static int lastIndexOf(final Object[] a, final int startIndexFromBack, final Object valueToFind) {
+    public static int lastIndexOf(final Object[] a, final Object valueToFind, final int startIndexFromBack) {
         final int len = len(a);
 
         if (len == 0 || startIndexFromBack < 0) {
@@ -23069,18 +23069,18 @@ sealed class CommonUtil permits N {
             return INDEX_NOT_FOUND;
         }
 
-        return lastIndexOf(c, c.size() - 1, valueToFind);
+        return lastIndexOf(c, valueToFind, c.size() - 1);
     }
 
     /**
      * Last index of.
      *
      * @param c
-     * @param startIndexFromBack the start index to traverse backwards from
      * @param valueToFind
+     * @param startIndexFromBack the start index to traverse backwards from
      * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
      */
-    public static int lastIndexOf(final Collection<?> c, final int startIndexFromBack, final Object valueToFind) {
+    public static int lastIndexOf(final Collection<?> c, final Object valueToFind, final int startIndexFromBack) {
         final int size = N.size(c);
 
         if (size == 0 || startIndexFromBack < 0) {
@@ -23115,7 +23115,7 @@ sealed class CommonUtil permits N {
 
         final Object[] a = c.toArray();
 
-        return lastIndexOf(a, startIndexFromBack, valueToFind);
+        return lastIndexOf(a, valueToFind, startIndexFromBack);
     }
 
     /**
@@ -23138,12 +23138,12 @@ sealed class CommonUtil permits N {
      * Last index of sub list.
      *
      * @param sourceList
-     * @param startIndexFromBack
      * @param subListToFind
+     * @param startIndexFromBack
      * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
      * @see java.util.Collections#lastIndexOfSubList(List, List)
      */
-    public static int lastIndexOfSubList(final List<?> sourceList, final int startIndexFromBack, final List<?> subListToFind) {
+    public static int lastIndexOfSubList(final List<?> sourceList, final List<?> subListToFind, final int startIndexFromBack) {
         if (isEmpty(sourceList) || isEmpty(subListToFind)) {
             return INDEX_NOT_FOUND;
         }
@@ -23163,18 +23163,18 @@ sealed class CommonUtil permits N {
             return INDEX_NOT_FOUND;
         }
 
-        return lastIndexOfIgnoreCase(a, a.length - 1, valueToFind);
+        return lastIndexOfIgnoreCase(a, valueToFind, a.length - 1);
     }
 
     /**
      *
      *
      * @param a
-     * @param startIndexFromBack
      * @param valueToFind
+     * @param startIndexFromBack
      * @return
      */
-    public static int lastIndexOfIgnoreCase(final String[] a, final int startIndexFromBack, final String valueToFind) {
+    public static int lastIndexOfIgnoreCase(final String[] a, final String valueToFind, final int startIndexFromBack) {
         final int len = len(a);
 
         if (len == 0 || startIndexFromBack < 0) {
@@ -23218,17 +23218,17 @@ sealed class CommonUtil permits N {
      * @param <T>
      * @param <U>
      * @param a
-     * @param valueToFind
+     * @param u
      * @param predicate
      * @return an {@code OptionalInt} with the index of found target value/element, or an empty {@code OptionalInt} no target value/element found.
      */
-    public static <T, U> OptionalInt findFirstIndex(final T[] a, final U valueToFind, final BiPredicate<? super T, ? super U> predicate) {
+    public static <T, U> OptionalInt findFirstIndex(final T[] a, final U u, final BiPredicate<? super T, ? super U> predicate) {
         if (N.isEmpty(a)) {
             return OptionalInt.empty();
         }
 
         for (int len = a.length, i = 0; i < len; i++) {
-            if (predicate.test(a[i], valueToFind)) {
+            if (predicate.test(a[i], u)) {
                 return OptionalInt.of(i);
             }
         }
@@ -23268,11 +23268,11 @@ sealed class CommonUtil permits N {
      * @param <T>
      * @param <U>
      * @param c
-     * @param valueToFind
+     * @param u
      * @param predicate
      * @return an {@code OptionalInt} with the index of found target value/element, or an empty {@code OptionalInt} no target value/element found.
      */
-    public static <T, U> OptionalInt findFirstIndex(final Collection<? extends T> c, final U valueToFind, final BiPredicate<? super T, ? super U> predicate) {
+    public static <T, U> OptionalInt findFirstIndex(final Collection<? extends T> c, final U u, final BiPredicate<? super T, ? super U> predicate) {
         if (N.isEmpty(c)) {
             return OptionalInt.empty();
         }
@@ -23280,7 +23280,7 @@ sealed class CommonUtil permits N {
         int idx = 0;
 
         for (T e : c) {
-            if (predicate.test(e, valueToFind)) {
+            if (predicate.test(e, u)) {
                 return OptionalInt.of(idx);
             }
 
@@ -23318,17 +23318,17 @@ sealed class CommonUtil permits N {
      * @param <T>
      * @param <U>
      * @param a
-     * @param valueToFind
+     * @param u
      * @param predicate
      * @return an {@code OptionalInt} with the index of found target value/element, or an empty {@code OptionalInt} no target value/element found.
      */
-    public static <T, U> OptionalInt findLastIndex(final T[] a, final U valueToFind, final BiPredicate<? super T, ? super U> predicate) {
+    public static <T, U> OptionalInt findLastIndex(final T[] a, final U u, final BiPredicate<? super T, ? super U> predicate) {
         if (N.isEmpty(a)) {
             return OptionalInt.empty();
         }
 
         for (int i = a.length - 1; i >= 0; i--) {
-            if (predicate.test(a[i], valueToFind)) {
+            if (predicate.test(a[i], u)) {
                 return OptionalInt.of(i);
             }
         }
@@ -23392,16 +23392,16 @@ sealed class CommonUtil permits N {
      * @param <T>
      * @param <U>
      * @param c
-     * @param valueToFind
+     * @param u
      * @param predicate
      * @return an {@code OptionalInt} with the index of found target value/element, or an empty {@code OptionalInt} no target value/element found.
      */
-    public static <T, U> OptionalInt findLastIndex(final Collection<? extends T> c, final U valueToFind, final BiPredicate<? super T, ? super U> predicate) {
+    public static <T, U> OptionalInt findLastIndex(final Collection<? extends T> c, final U u, final BiPredicate<? super T, ? super U> predicate) {
         if (N.isEmpty(c)) {
             return OptionalInt.empty();
         }
 
-        final Predicate<? super T> predicate2 = t -> predicate.test(t, valueToFind);
+        final Predicate<? super T> predicate2 = t -> predicate.test(t, u);
 
         return findLastIndex(c, predicate2);
     }
@@ -23621,17 +23621,17 @@ sealed class CommonUtil permits N {
      * @return the indices of all found target value/element in the specified {@code Collection/Array}.
      */
     public static int[] indicesOfAll(final Object[] a, final Object valueToFind) {
-        return indicesOfAll(a, 0, valueToFind);
+        return indicesOfAll(a, valueToFind, 0);
     }
 
     /**
      *
      * @param a
-     * @param startIndex
      * @param valueToFind
+     * @param startIndex
      * @return the indices of all found target value/element in the specified {@code Collection/Array}.
      */
-    public static int[] indicesOfAll(final Object[] a, int startIndex, final Object valueToFind) {
+    public static int[] indicesOfAll(final Object[] a, final Object valueToFind, int startIndex) {
         final int len = N.len(a);
 
         if (len == 0 || startIndex >= len) {
@@ -23656,17 +23656,17 @@ sealed class CommonUtil permits N {
      * @return the indices of all found target value/element in the specified {@code Collection/Array}.
      */
     public static int[] indicesOfAll(final Collection<?> c, final Object valueToFind) {
-        return indicesOfAll(c, 0, valueToFind);
+        return indicesOfAll(c, valueToFind, 0);
     }
 
     /**
      *
      * @param c
-     * @param startIndex
      * @param valueToFind
+     * @param startIndex
      * @return the indices of all found target value/element in the specified {@code Collection/Array}.
      */
-    public static int[] indicesOfAll(final Collection<?> c, int startIndex, final Object valueToFind) {
+    public static int[] indicesOfAll(final Collection<?> c, final Object valueToFind, int startIndex) {
         final int size = N.size(c);
 
         if (size == 0 || startIndex >= size) {
@@ -23714,7 +23714,7 @@ sealed class CommonUtil permits N {
      * @return the indices of all found target value/element in the specified {@code Collection/Array}.
      */
     public static <T> int[] indicesOfAll(final T[] a, final Predicate<? super T> predicate) {
-        return indicesOfAll(a, 0, predicate);
+        return indicesOfAll(a, predicate, 0);
     }
 
     /**
@@ -23722,11 +23722,11 @@ sealed class CommonUtil permits N {
      *
      * @param <T>
      * @param a
-     * @param startIndex
      * @param predicate
+     * @param startIndex
      * @return the indices of all found target value/element in the specified {@code Collection/Array}.
      */
-    public static <T> int[] indicesOfAll(final T[] a, int startIndex, final Predicate<? super T> predicate) {
+    public static <T> int[] indicesOfAll(final T[] a, final Predicate<? super T> predicate, int startIndex) {
         final int len = N.len(a);
 
         if (len == 0 || startIndex >= len) {
@@ -23753,7 +23753,7 @@ sealed class CommonUtil permits N {
      * @return the indices of all found target value/element in the specified {@code Collection/Array}.
      */
     public static <T> int[] indicesOfAll(final Collection<? extends T> c, final Predicate<? super T> predicate) {
-        return indicesOfAll(c, 0, predicate);
+        return indicesOfAll(c, predicate, 0);
     }
 
     /**
@@ -23761,14 +23761,14 @@ sealed class CommonUtil permits N {
      *
      * @param <T>
      * @param c
-     * @param startIndex
      * @param predicate
+     * @param fromIndex
      * @return the indices of all found target value/element in the specified {@code Collection/Array}.
      */
-    public static <T> int[] indicesOfAll(final Collection<? extends T> c, int startIndex, final Predicate<? super T> predicate) {
+    public static <T> int[] indicesOfAll(final Collection<? extends T> c, final Predicate<? super T> predicate, int fromIndex) {
         final int size = N.size(c);
 
-        if (size == 0 || startIndex >= size) {
+        if (size == 0 || fromIndex >= size) {
             return EMPTY_INT_ARRAY;
         }
 
@@ -23777,7 +23777,7 @@ sealed class CommonUtil permits N {
         if (c instanceof List && c instanceof RandomAccess) {
             final List<? extends T> list = (List<? extends T>) c;
 
-            for (int i = N.max(startIndex, 0); i < size; i++) {
+            for (int i = N.max(fromIndex, 0); i < size; i++) {
                 if (predicate.test(list.get(i))) {
                     result.add(i);
                 }
@@ -23787,7 +23787,7 @@ sealed class CommonUtil permits N {
 
             int idx = 0;
 
-            while (idx < startIndex) {
+            while (idx < fromIndex) {
                 iter.next();
                 idx++;
             }
