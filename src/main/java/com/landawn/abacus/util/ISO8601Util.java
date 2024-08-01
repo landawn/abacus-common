@@ -41,7 +41,7 @@ public final class ISO8601Util {
      * Timezone we use for 'Z' in ISO-8601 date/time values: since 2.7
      * {@link #TIMEZONE_UTC}; with earlier versions up to 2.7 was {@link #TIMEZONE_GMT}.
      */
-    static final TimeZone TIMEZONE_Z = TimeZone.getTimeZone("UTC");
+    static final TimeZone TIMEZONE_Z = DateUtil.UTC_TIME_ZONE;
 
     private ISO8601Util() {
         // singleton

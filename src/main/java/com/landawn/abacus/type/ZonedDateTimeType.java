@@ -27,7 +27,6 @@ import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.DateTimeFormat;
-import com.landawn.abacus.util.DateUtil;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Numbers;
 import com.landawn.abacus.util.Strings;
@@ -89,10 +88,10 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
             }
         }
 
-        return str.length() == 20 ? ZonedDateTime.parse(str, iso8601DateTimeDTF)
-                : (str.length() == 24 ? ZonedDateTime.parse(str, iso8601TimestampDTF)
-                        : (str.endsWith("]") ? ZonedDateTime.parse(str)
-                                : ZonedDateTime.ofInstant(DateUtil.parseTimestamp(str).toInstant(), DEFAULT_TIME_ZONE_ID)));
+        final int len = str.length();
+
+        return len == 20 && str.charAt(19) == 'Z' ? ZonedDateTime.parse(str, iso8601DateTimeDTF)
+                : (len == 24 && str.charAt(23) == 'Z' ? ZonedDateTime.parse(str, iso8601TimestampDTF) : ZonedDateTime.parse(str));
     }
 
     /**

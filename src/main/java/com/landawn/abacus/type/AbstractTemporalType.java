@@ -28,7 +28,8 @@ public abstract class AbstractTemporalType<T extends Temporal> extends AbstractT
 
     protected static final ZoneId DEFAULT_TIME_ZONE_ID = ZoneId.systemDefault();
 
-    protected static final DateTimeFormatter iso8601DateTimeDTF = DateTimeFormatter.ofPattern(DateUtil.ISO_8601_DATE_TIME_FORMAT).withZone(DEFAULT_TIME_ZONE_ID);
+    protected static final DateTimeFormatter iso8601DateTimeDTF = DateTimeFormatter.ofPattern(DateUtil.ISO_8601_DATE_TIME_FORMAT)
+            .withZone(DEFAULT_TIME_ZONE_ID);
 
     protected static final DateTimeFormatter iso8601TimestampDTF = DateTimeFormatter.ofPattern(DateUtil.ISO_8601_TIMESTAMP_FORMAT)
             .withZone(DEFAULT_TIME_ZONE_ID);

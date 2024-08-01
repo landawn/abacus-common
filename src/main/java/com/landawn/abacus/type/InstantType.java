@@ -26,7 +26,6 @@ import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.DateTimeFormat;
-import com.landawn.abacus.util.DateUtil;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Numbers;
 import com.landawn.abacus.util.Strings;
@@ -88,8 +87,10 @@ public class InstantType extends AbstractTemporalType<Instant> {
             }
         }
 
-        return str.length() == 20 ? iso8601DateTimeDTF.parse(str, Instant::from)
-                : (str.length() == 24 ? iso8601TimestampDTF.parse(str, Instant::from) : DateUtil.parseTimestamp(str).toInstant());
+        final int len = str.length();
+
+        return len == 20 && str.charAt(19) == 'Z' ? iso8601DateTimeDTF.parse(str, Instant::from)
+                : (len == 24 && str.charAt(23) == 'Z' ? iso8601TimestampDTF.parse(str, Instant::from) : Instant.parse(str));
     }
 
     /**

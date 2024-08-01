@@ -71,9 +71,9 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
     // ...
     public static final TimeZone UTC_TIME_ZONE = TimeZone.getTimeZone("UTC");
 
-    static final ZoneId DEFAULT_TIME_ZONE_ID = ZoneId.systemDefault();
+    public static final ZoneId DEFAULT_ZONE_ID = ZoneId.systemDefault();
 
-    static final TimeZone DEFAULT_TIME_ZONE = TimeZone.getTimeZone(DEFAULT_TIME_ZONE_ID);
+    public static final TimeZone DEFAULT_TIME_ZONE = TimeZone.getTimeZone(DEFAULT_ZONE_ID);
 
     /**
      * Date/Time format: {@code yyyy}
@@ -117,18 +117,15 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
 
     /**
      * Date/Time format: {@code yyyy-MM-dd'T'HH:mm:ss}
+     * @see {@link DateTimeFormatter#ISO_LOCAL_DATE_TIME}
      */
     public static final String ISO_LOCAL_DATE_TIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ss";
 
     /**
      * Date/Time format: {@code yyyy-MM-dd'T'HH:mm:ssXXX}
+     * @see {@link DateTimeFormatter#ISO_OFFSET_DATE_TIME}
      */
     public static final String ISO_OFFSET_DATE_TIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ssXXX";
-
-    /**
-     * Date/Time format: {@code yyyy-MM-dd'T'HH:mm:ssXXX'['VV']'}
-     */
-    public static final String ISO_ZONED_DATE_TIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ssXXX'['VV']'";
 
     /**
      * Date/Time format: {@code yyyy-MM-dd'T'HH:mm:ss'Z'}.
@@ -603,7 +600,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
         //        return null;
         //    }
 
-        final Calendar c = Calendar.getInstance(tz);
+        final Calendar c = tz == null ? Calendar.getInstance() : Calendar.getInstance(tz);
 
         c.setTimeInMillis(timeInMillis);
 
@@ -666,7 +663,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
         //        return null;
         //    }
 
-        final GregorianCalendar c = new GregorianCalendar(tz);
+        final GregorianCalendar c = tz == null ? new GregorianCalendar() : new GregorianCalendar(tz);
 
         c.setTimeInMillis(timeInMillis);
 
@@ -708,6 +705,23 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
         //    }
 
         return dataTypeFactory.newXMLGregorianCalendar(createGregorianCalendar(timeInMillis));
+    }
+
+    /**
+     * Creates the XML gregorian calendar.
+     *
+     * @param timeInMillis
+     * @return
+     * @throws IllegalArgumentException
+     */
+    public static XMLGregorianCalendar createXMLGregorianCalendar(final long timeInMillis, final TimeZone tz) throws IllegalArgumentException {
+        //    N.checkArgPositive(timeInMillis, "timeInMillis");
+        //
+        //    if (timeInMillis == 0) {
+        //        return null;
+        //    }
+
+        return dataTypeFactory.newXMLGregorianCalendar(createGregorianCalendar(timeInMillis, tz));
     }
 
     /**
@@ -906,7 +920,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
             return null;
         }
 
-        return createCalendar(parse(calendar, format, timeZone));
+        return createCalendar(parse(calendar, format, timeZone), timeZone);
     }
 
     /**
@@ -948,7 +962,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
             return null;
         }
 
-        return createGregorianCalendar(parse(calendar, format, timeZone));
+        return createGregorianCalendar(parse(calendar, format, timeZone), timeZone);
     }
 
     /**
@@ -990,7 +1004,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
             return null;
         }
 
-        return createXMLGregorianCalendar(parse(calendar, format, timeZone));
+        return createXMLGregorianCalendar(parse(calendar, format, timeZone), timeZone);
     }
 
     static boolean isPossibleLong(final CharSequence dateTime) {
@@ -1035,7 +1049,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
             }
         }
 
-        timeZone = checkTimeZone(format, timeZone);
+        timeZone = checkTimeZone(dateTime, format, timeZone);
 
         long timeInMillis = fastDateParse(dateTime, format, timeZone);
 
@@ -1453,7 +1467,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
             format = isTimestamp ? ISO_8601_TIMESTAMP_FORMAT : ISO_8601_DATE_TIME_FORMAT;
         }
 
-        timeZone = checkTimeZone(format, timeZone);
+        timeZone = checkTimeZone(null, format, timeZone);
 
         DateFormat sdf = getSDF(format, timeZone);
 
@@ -3575,7 +3589,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
                 return LOCAL_YEAR_FORMAT;
             } else if (len == 5 || str.charAt(2) == '-') {
                 return LOCAL_MONTH_DAY_FORMAT;
-            } else if (str.charAt(4) == '-') {
+            } else if (len > 4 && str.charAt(4) == '-') {
                 switch (len) {
                     case 8:
                         return LOCAL_TIME_FORMAT;
@@ -3591,18 +3605,33 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
                         }
 
                     case 20:
-                        return ISO_8601_DATE_TIME_FORMAT;
+                        if (str.charAt(19) == 'Z') {
+                            return ISO_8601_DATE_TIME_FORMAT;
+                        }
+                        break;
 
                     case 24:
-                        return ISO_8601_TIMESTAMP_FORMAT;
+                        if (str.charAt(23) == 'Z') {
+                            return ISO_8601_TIMESTAMP_FORMAT;
+                        }
 
-                    case 29:
-                        return RFC_1123_DATE_TIME_FORMAT;
+                        break;
+
+                    case 25:
+                        final char ch = str.charAt(19);
+
+                        if (ch == '-' || ch == '+') {
+                            return ISO_OFFSET_DATE_TIME_FORMAT;
+                        }
+
+                        break;
 
                     default:
                         // throw new RuntimeException("No valid date format found for: " + str);
                         return null;
                 }
+            } else if (len == 29 || str.charAt(3) == ',') {
+                return RFC_1123_DATE_TIME_FORMAT;
             }
         }
 
@@ -3611,17 +3640,18 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
 
     /**
      * Check time zone.
-     *
+     * @param dateTime TODO
      * @param format
      * @param timeZone
+     *
      * @return
      */
-    private static TimeZone checkTimeZone(final String format, TimeZone timeZone) {
-        if (timeZone == null) {
-            timeZone = format != null && format.endsWith("'Z'") ? UTC_TIME_ZONE : DEFAULT_TIME_ZONE;
+    private static TimeZone checkTimeZone(String dateTime, final String format, TimeZone timeZone) {
+        if ((Strings.isNotEmpty(dateTime) && dateTime.endsWith("Z")) || (Strings.isNotEmpty(format) && format.endsWith("'Z'"))) {
+            return UTC_TIME_ZONE;
         }
 
-        return timeZone;
+        return timeZone == null ? DEFAULT_TIME_ZONE : timeZone;
     }
 
     /**
@@ -3877,6 +3907,12 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
      */
     public static final class DTF {
 
+        /**
+         * Date/Time format: {@code yyyy-MM-dd'T'HH:mm:ssXXX'['VV']'}
+         * @see {@link DateTimeFormatter#ISO_ZONED_DATE_TIME}
+         */
+        static final String ISO_ZONED_DATE_TIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ssXXX'['VV']'";
+
         //    /**
         //     * Date/Time format: {@code yyyy}
         //     * @see {@link #LOCAL_YEAR_FORMAT}
@@ -3923,7 +3959,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
          * Date/Time format: {@code yyyy-MM-dd'T'HH:mm:ssXXX'['VV']'}
          * @see {@link #ISO_ZONED_DATE_TIME_FORMAT}
          */
-        public static final DTF ISO_ZONED_DATE_TIME = new DTF(DateTimeUtil.ISO_ZONED_DATE_TIME_FORMAT);
+        public static final DTF ISO_ZONED_DATE_TIME = new DTF(ISO_ZONED_DATE_TIME_FORMAT);
 
         /**
          * Date/Time format: {@code yyyy-MM-dd'T'HH:mm:ss'Z'}.
@@ -3975,13 +4011,13 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
 
             if (isPossibleLong(text)) {
                 try {
-                    return LocalDate.ofInstant(Instant.ofEpochMilli(Numbers.toLong(text)), DEFAULT_TIME_ZONE_ID);
+                    return LocalDate.ofInstant(Instant.ofEpochMilli(Numbers.toLong(text)), DEFAULT_ZONE_ID);
                 } catch (NumberFormatException e2) {
                     // ignore;
                 }
             }
 
-            return LocalDate.from(dateTimeFormatter.parse(text));
+            return LocalDate.from(parse(text));
         }
 
         public LocalTime parseToLocalTime(final CharSequence text) {
@@ -3991,13 +4027,13 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
 
             if (isPossibleLong(text)) {
                 try {
-                    return LocalTime.ofInstant(Instant.ofEpochMilli(Numbers.toLong(text)), DEFAULT_TIME_ZONE_ID);
+                    return LocalTime.ofInstant(Instant.ofEpochMilli(Numbers.toLong(text)), DEFAULT_ZONE_ID);
                 } catch (NumberFormatException e2) {
                     // ignore;
                 }
             }
 
-            return LocalTime.from(dateTimeFormatter.parse(text));
+            return LocalTime.from(parse(text));
         }
 
         public LocalDateTime parseToLocalDateTime(final CharSequence text) {
@@ -4007,13 +4043,13 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
 
             if (isPossibleLong(text)) {
                 try {
-                    return LocalDateTime.ofInstant(Instant.ofEpochMilli(Numbers.toLong(text)), DEFAULT_TIME_ZONE_ID);
+                    return LocalDateTime.ofInstant(Instant.ofEpochMilli(Numbers.toLong(text)), DEFAULT_ZONE_ID);
                 } catch (NumberFormatException e2) {
                     // ignore;
                 }
             }
 
-            return LocalDateTime.from(dateTimeFormatter.parse(text));
+            return LocalDateTime.from(parse(text));
         }
 
         public OffsetDateTime parseToOffsetDateTime(final CharSequence text) {
@@ -4023,13 +4059,13 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
 
             if (isPossibleLong(text)) {
                 try {
-                    return OffsetDateTime.ofInstant(Instant.ofEpochMilli(Numbers.toLong(text)), DEFAULT_TIME_ZONE_ID);
+                    return OffsetDateTime.ofInstant(Instant.ofEpochMilli(Numbers.toLong(text)), DEFAULT_ZONE_ID);
                 } catch (NumberFormatException e2) {
                     // ignore;
                 }
             }
 
-            return OffsetDateTime.from(dateTimeFormatter.parse(text));
+            return OffsetDateTime.from(parse(text));
         }
 
         public ZonedDateTime parseToZonedDateTime(final CharSequence text) {
@@ -4039,13 +4075,13 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
 
             if (isPossibleLong(text)) {
                 try {
-                    return ZonedDateTime.ofInstant(Instant.ofEpochMilli(Numbers.toLong(text)), DEFAULT_TIME_ZONE_ID);
+                    return ZonedDateTime.ofInstant(Instant.ofEpochMilli(Numbers.toLong(text)), DEFAULT_ZONE_ID);
                 } catch (NumberFormatException e2) {
                     // ignore;
                 }
             }
 
-            return ZonedDateTime.from(dateTimeFormatter.parse(text));
+            return ZonedDateTime.from(parse(text));
         }
 
         public Instant parseToInstant(final CharSequence text) {
@@ -4061,7 +4097,26 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
                 }
             }
 
-            return Instant.from(dateTimeFormatter.parse(text));
+            return Instant.from(parse(text));
+        }
+
+        private TemporalAccessor parse(final CharSequence text) {
+            final int len = text.length();
+            char ch = 0;
+
+            if (len > 25 && text.charAt(len - 1) == ']') {
+                return ISO_ZONED_DATE_TIME.dateTimeFormatter.parse(text);
+            } else if (len >= 25 && ((ch = text.charAt(len - 5)) == '+' || ch == '-')) {
+                return ISO_OFFSET_DATE_TIME.dateTimeFormatter.parse(text);
+            } else if (len == 20 && text.charAt(19) == 'Z') {
+                return ISO_8601_DATE_TIME.dateTimeFormatter.parse(text);
+            } else if (len == 24 && text.charAt(23) == 'Z') {
+                return ISO_8601_TIMESTAMP.dateTimeFormatter.parse(text);
+            } else if (len == 29 && text.charAt(3) == ',') {
+                return RFC_1123_DATE_TIME.dateTimeFormatter.parse(text);
+            }
+
+            return dateTimeFormatter.parse(text);
         }
 
         @Override
