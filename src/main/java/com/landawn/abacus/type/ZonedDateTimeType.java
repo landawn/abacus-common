@@ -21,9 +21,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.Instant;
-import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 
 import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
@@ -39,13 +37,7 @@ import com.landawn.abacus.util.Strings;
  * @author Haiyang Li
  * @since 0.8
  */
-public class ZonedDateTimeType extends AbstractType<ZonedDateTime> {
-
-    static final ZoneId DEFAULT_TIME_ZONE = ZoneId.systemDefault();
-
-    static final DateTimeFormatter iso8601DateTimeFT = DateTimeFormatter.ofPattern(DateUtil.ISO_8601_DATETIME_FORMAT).withZone(DEFAULT_TIME_ZONE);
-
-    static final DateTimeFormatter iso8601TimestampFT = DateTimeFormatter.ofPattern(DateUtil.ISO_8601_TIMESTAMP_FORMAT).withZone(DEFAULT_TIME_ZONE);
+public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
 
     public static final String ZONED_DATE_TIME = ZonedDateTime.class.getSimpleName();
 
@@ -70,7 +62,7 @@ public class ZonedDateTimeType extends AbstractType<ZonedDateTime> {
      */
     @Override
     public String stringOf(ZonedDateTime x) {
-        return (x == null) ? null : iso8601TimestampFT.format(x);
+        return (x == null) ? null : iso8601TimestampDTF.format(x);
     }
 
     /**
@@ -89,18 +81,18 @@ public class ZonedDateTimeType extends AbstractType<ZonedDateTime> {
             return ZonedDateTime.now();
         }
 
-        if (str.charAt(4) != '-') {
+        if (isPossibleLong(str)) {
             try {
-                return ZonedDateTime.ofInstant(Instant.ofEpochMilli(Numbers.toLong(str)), DEFAULT_TIME_ZONE);
+                return ZonedDateTime.ofInstant(Instant.ofEpochMilli(Numbers.toLong(str)), DEFAULT_TIME_ZONE_ID);
             } catch (NumberFormatException e2) {
                 // ignore;
             }
         }
 
-        return str.length() == 20 ? ZonedDateTime.parse(str, iso8601DateTimeFT)
-                : (str.length() == 24 ? ZonedDateTime.parse(str, iso8601TimestampFT)
+        return str.length() == 20 ? ZonedDateTime.parse(str, iso8601DateTimeDTF)
+                : (str.length() == 24 ? ZonedDateTime.parse(str, iso8601TimestampDTF)
                         : (str.endsWith("]") ? ZonedDateTime.parse(str)
-                                : ZonedDateTime.ofInstant(DateUtil.parseTimestamp(str).toInstant(), DEFAULT_TIME_ZONE)));
+                                : ZonedDateTime.ofInstant(DateUtil.parseTimestamp(str).toInstant(), DEFAULT_TIME_ZONE_ID)));
     }
 
     /**
@@ -117,9 +109,9 @@ public class ZonedDateTimeType extends AbstractType<ZonedDateTime> {
             return null; // NOSONAR
         }
 
-        if (cbuf[offset + 4] != '-') {
+        if (isPossibleLong(cbuf, offset, len)) {
             try {
-                return ZonedDateTime.ofInstant(Instant.ofEpochMilli(parseLong(cbuf, offset, len)), DEFAULT_TIME_ZONE);
+                return ZonedDateTime.ofInstant(Instant.ofEpochMilli(parseLong(cbuf, offset, len)), DEFAULT_TIME_ZONE_ID);
             } catch (NumberFormatException e) {
                 // ignore;
             }
@@ -139,7 +131,7 @@ public class ZonedDateTimeType extends AbstractType<ZonedDateTime> {
     public ZonedDateTime get(ResultSet rs, int columnIndex) throws SQLException {
         Timestamp ts = rs.getTimestamp(columnIndex);
 
-        return ts == null ? null : ZonedDateTime.ofInstant(ts.toInstant(), DEFAULT_TIME_ZONE);
+        return ts == null ? null : ZonedDateTime.ofInstant(ts.toInstant(), DEFAULT_TIME_ZONE_ID);
     }
 
     /**
@@ -153,7 +145,7 @@ public class ZonedDateTimeType extends AbstractType<ZonedDateTime> {
     public ZonedDateTime get(ResultSet rs, String columnName) throws SQLException {
         Timestamp ts = rs.getTimestamp(columnName);
 
-        return ts == null ? null : ZonedDateTime.ofInstant(ts.toInstant(), DEFAULT_TIME_ZONE);
+        return ts == null ? null : ZonedDateTime.ofInstant(ts.toInstant(), DEFAULT_TIME_ZONE_ID);
     }
 
     /**
@@ -223,13 +215,13 @@ public class ZonedDateTimeType extends AbstractType<ZonedDateTime> {
 
                         break;
 
-                    case ISO_8601_DATETIME:
-                        writer.write(iso8601DateTimeFT.format(x));
+                    case ISO_8601_DATE_TIME:
+                        writer.write(iso8601DateTimeDTF.format(x));
 
                         break;
 
                     case ISO_8601_TIMESTAMP:
-                        writer.write(iso8601TimestampFT.format(x));
+                        writer.write(iso8601TimestampDTF.format(x));
 
                         break;
 

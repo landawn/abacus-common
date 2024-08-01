@@ -30,7 +30,7 @@ import com.landawn.abacus.util.Strings;
  * @author Haiyang Li
  * @since 0.8
  */
-public class LocalTimeType extends AbstractType<LocalTime> {
+public class LocalTimeType extends AbstractTemporalType<LocalTime> {
 
     public static final String LOCAL_TIME = LocalTime.class.getSimpleName();
 

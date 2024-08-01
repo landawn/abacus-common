@@ -23,7 +23,15 @@ import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAccessor;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.Map;
@@ -45,6 +53,7 @@ import com.landawn.abacus.exception.UncheckedIOException;
  * The methods copied from other libraries/frameworks/projects may be modified in this class.
  * </p>
  * @see DateTimeFormatter
+ * @see ISO8601Util
  * @author Haiyang Li
  * @since 1.2.6
  */
@@ -62,50 +71,88 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
     // ...
     public static final TimeZone UTC_TIME_ZONE = TimeZone.getTimeZone("UTC");
 
-    static final TimeZone DEFAULT_TIME_ZONE = Calendar.getInstance().getTimeZone();
+    static final ZoneId DEFAULT_TIME_ZONE_ID = ZoneId.systemDefault();
+
+    static final TimeZone DEFAULT_TIME_ZONE = TimeZone.getTimeZone(DEFAULT_TIME_ZONE_ID);
 
     /**
-     * Date format.
+     * Date/Time format: {@code yyyy}
      */
     public static final String LOCAL_YEAR_FORMAT = "yyyy";
 
+    /**
+     * Date/Time format: {@code MM-dd}
+     */
     public static final String LOCAL_MONTH_DAY_FORMAT = "MM-dd";
 
-    static final String LOCAL_MONTH_DAY_FORMAT_SLASH = "MM/dd";
+    // static final String LOCAL_MONTH_DAY_FORMAT_SLASH = "MM/dd";
 
+    /**
+     * Date/Time format: {@code yyyy-MM-dd}
+     */
     public static final String LOCAL_DATE_FORMAT = "yyyy-MM-dd";
 
-    static final String LOCAL_DATE_FORMAT_SLASH = "yyyy/MM/dd";
+    // static final String LOCAL_DATE_FORMAT_SLASH = "yyyy/MM/dd";
 
+    /**
+     * Date/Time format: {@code HH:mm:ss}
+     */
     public static final String LOCAL_TIME_FORMAT = "HH:mm:ss";
 
-    public static final String LOCAL_DATETIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
+    /**
+     * Date/Time format: {@code yyyy-MM-dd HH:mm:ss}
+     */
+    public static final String LOCAL_DATE_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
 
-    static final String LOCAL_DATETIME_FORMAT_SLASH = "yyyy/MM/dd HH:mm:ss";
+    // static final String LOCAL_DATE_TIME_FORMAT_SLASH = "yyyy/MM/dd HH:mm:ss";
 
-    public static final String LOCAL_TIMESTAMP_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS";
+    //    /**
+    //     * Date/Time format: {@code yyyy-MM-dd HH:mm:ss.SSS}
+    //     * @deprecated use {@link #ISO_8601_TIMESTAMP_FORMAT}
+    //     */
+    //    @Deprecated
+    //    public static final String LOCAL_TIMESTAMP_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS";
 
-    static final String LOCAL_TIMESTAMP_FORMAT_SLASH = "yyyy/MM/dd HH:mm:ss.SSS";
+    // static final String LOCAL_TIMESTAMP_FORMAT_SLASH = "yyyy/MM/dd HH:mm:ss.SSS";
 
     /**
+     * Date/Time format: {@code yyyy-MM-dd'T'HH:mm:ss}
+     */
+    public static final String ISO_LOCAL_DATE_TIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ss";
+
+    /**
+     * Date/Time format: {@code yyyy-MM-dd'T'HH:mm:ssXXX}
+     */
+    public static final String ISO_OFFSET_DATE_TIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ssXXX";
+
+    /**
+     * Date/Time format: {@code yyyy-MM-dd'T'HH:mm:ssXXX'['VV']'}
+     */
+    public static final String ISO_ZONED_DATE_TIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ssXXX'['VV']'";
+
+    /**
+     * Date/Time format: {@code yyyy-MM-dd'T'HH:mm:ss'Z'}.
      * It's default date/time format.
      */
-    public static final String ISO_8601_DATETIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ss'Z'";
+    public static final String ISO_8601_DATE_TIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ss'Z'";
 
-    static final String ISO_8601_DATETIME_FORMAT_SLASH = "yyyy/MM/dd'T'HH:mm:ss'Z'";
+    // static final String ISO_8601_DATE_TIME_FORMAT_SLASH = "yyyy/MM/dd'T'HH:mm:ss'Z'";
+
     /**
+     * Date/Time format: {@code yyyy-MM-dd'T'HH:mm:ss.SSS'Z'}.
+     *
      * It's default timestamp format.
      */
     public static final String ISO_8601_TIMESTAMP_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
 
-    static final String ISO_8601_TIMESTAMP_FORMAT_SLASH = "yyyy/MM/dd'T'HH:mm:ss.SSS'Z'";
+    // static final String ISO_8601_TIMESTAMP_FORMAT_SLASH = "yyyy/MM/dd'T'HH:mm:ss.SSS'Z'";
 
     /**
      * This constant defines the date format specified by
      * RFC 1123 / RFC 822. Used for parsing via `SimpleDateFormat` as well as
      * error messages.
      */
-    public static final String RFC1123_DATE_FORMAT = "EEE, dd MMM yyyy HH:mm:ss zzz";
+    public static final String RFC_1123_DATE_TIME_FORMAT = "EEE, dd MMM yyyy HH:mm:ss zzz";
 
     /**
      * This is half a month, so this represents whether a date is in the top
@@ -375,9 +422,9 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
     /**
      * Creates the JU date.
      *
-     * @param timeInMillis 
-     * @return 
-     * @throws IllegalArgumentException 
+     * @param timeInMillis
+     * @return
+     * @throws IllegalArgumentException
      */
     public static java.util.Date createJUDate(final long timeInMillis) throws IllegalArgumentException {
         //    N.checkArgPositive(timeInMillis, "timeInMillis");
@@ -412,9 +459,9 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
     /**
      * Creates the date.
      *
-     * @param timeInMillis 
-     * @return 
-     * @throws IllegalArgumentException 
+     * @param timeInMillis
+     * @return
+     * @throws IllegalArgumentException
      */
     public static Date createDate(final long timeInMillis) throws IllegalArgumentException {
         //    N.checkArgPositive(timeInMillis, "timeInMillis");
@@ -449,9 +496,9 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
     /**
      * Creates the time.
      *
-     * @param timeInMillis 
-     * @return 
-     * @throws IllegalArgumentException 
+     * @param timeInMillis
+     * @return
+     * @throws IllegalArgumentException
      */
     public static Time createTime(final long timeInMillis) throws IllegalArgumentException {
         //    N.checkArgPositive(timeInMillis, "timeInMillis");
@@ -486,9 +533,9 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
     /**
      * Creates the timestamp.
      *
-     * @param timeInMillis 
-     * @return 
-     * @throws IllegalArgumentException 
+     * @param timeInMillis
+     * @return
+     * @throws IllegalArgumentException
      */
     public static Timestamp createTimestamp(final long timeInMillis) throws IllegalArgumentException {
         //    N.checkArgPositive(timeInMillis, "timeInMillis");
@@ -523,9 +570,9 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
     /**
      * Creates the calendar.
      *
-     * @param timeInMillis 
-     * @return 
-     * @throws IllegalArgumentException 
+     * @param timeInMillis
+     * @return
+     * @throws IllegalArgumentException
      */
     public static Calendar createCalendar(final long timeInMillis) throws IllegalArgumentException {
         //    N.checkArgPositive(timeInMillis, "timeInMillis");
@@ -544,10 +591,10 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
     /**
      * Creates the calendar.
      *
-     * @param timeInMillis 
-     * @param tz 
-     * @return 
-     * @throws IllegalArgumentException 
+     * @param timeInMillis
+     * @param tz
+     * @return
+     * @throws IllegalArgumentException
      */
     public static Calendar createCalendar(final long timeInMillis, final TimeZone tz) throws IllegalArgumentException {
         //    N.checkArgPositive(timeInMillis, "timeInMillis");
@@ -586,9 +633,9 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
     /**
      * Creates the gregorian calendar.
      *
-     * @param timeInMillis 
-     * @return 
-     * @throws IllegalArgumentException 
+     * @param timeInMillis
+     * @return
+     * @throws IllegalArgumentException
      */
     public static GregorianCalendar createGregorianCalendar(final long timeInMillis) throws IllegalArgumentException {
         //    N.checkArgPositive(timeInMillis, "timeInMillis");
@@ -607,10 +654,10 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
     /**
      * Creates the gregorian calendar.
      *
-     * @param timeInMillis 
-     * @param tz 
-     * @return 
-     * @throws IllegalArgumentException 
+     * @param timeInMillis
+     * @param tz
+     * @return
+     * @throws IllegalArgumentException
      */
     public static GregorianCalendar createGregorianCalendar(final long timeInMillis, final TimeZone tz) throws IllegalArgumentException {
         //    N.checkArgPositive(timeInMillis, "timeInMillis");
@@ -649,9 +696,9 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
     /**
      * Creates the XML gregorian calendar.
      *
-     * @param timeInMillis 
-     * @return 
-     * @throws IllegalArgumentException 
+     * @param timeInMillis
+     * @return
+     * @throws IllegalArgumentException
      */
     public static XMLGregorianCalendar createXMLGregorianCalendar(final long timeInMillis) throws IllegalArgumentException {
         //    N.checkArgPositive(timeInMillis, "timeInMillis");
@@ -946,27 +993,43 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
         return createXMLGregorianCalendar(parse(calendar, format, timeZone));
     }
 
+    static boolean isPossibleLong(final CharSequence dateTime) {
+        if (dateTime.length() > 4) {
+            char ch = dateTime.charAt(2);
+
+            if (ch >= '0' && ch <= '9') {
+                ch = dateTime.charAt(4);
+
+                if (ch >= '0' && ch <= '9') {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
     /**
      *
-     * @param date
+     * @param dateTime
      * @param format
      * @param timeZone
      * @return
      */
-    private static long parse(final String date, String format, TimeZone timeZone) {
-        if ((format == null) && date.length() > 4 && (date.charAt(2) >= '0' && date.charAt(2) <= '9' && date.charAt(4) >= '0' && date.charAt(4) <= '9')) {
+    private static long parse(final String dateTime, String format, TimeZone timeZone) {
+        if ((format == null) && isPossibleLong(dateTime)) {
             try {
-                return Long.parseLong(date);
+                return Long.parseLong(dateTime);
             } catch (NumberFormatException e) {
                 // ignore.
             }
         }
 
-        format = checkDateFormat(date, format);
+        format = checkDateFormat(dateTime, format);
 
         if (Strings.isEmpty(format)) {
             if (timeZone == null || timeZone.equals(ISO8601Util.TIMEZONE_Z)) {
-                return ISO8601Util.parse(date).getTime();
+                return ISO8601Util.parse(dateTime).getTime();
             } else {
                 throw new RuntimeException("Unsupported date format: " + format + " with time zone: " + timeZone);
             }
@@ -974,7 +1037,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
 
         timeZone = checkTimeZone(format, timeZone);
 
-        long timeInMillis = fastDateParse(date, format, timeZone);
+        long timeInMillis = fastDateParse(dateTime, format, timeZone);
 
         if (timeInMillis != 0) {
             return timeInMillis;
@@ -983,7 +1046,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
         DateFormat sdf = getSDF(format, timeZone);
 
         try {
-            return sdf.parse(date).getTime();
+            return sdf.parse(dateTime).getTime();
         } catch (ParseException e) {
             throw new IllegalArgumentException(e);
         } finally {
@@ -1103,7 +1166,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
      */
     @Beta
     public static String formatLocalDateTime() {
-        return format(currentDate(), LOCAL_DATETIME_FORMAT);
+        return format(currentDate(), LOCAL_DATE_TIME_FORMAT);
     }
 
     /**
@@ -1113,7 +1176,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
      * @see DateTimeFormatter#format(java.time.temporal.TemporalAccessor)
      */
     public static String formatCurrentDateTime() {
-        return format(currentDate(), ISO_8601_DATETIME_FORMAT);
+        return format(currentDate(), ISO_8601_DATE_TIME_FORMAT);
     }
 
     /**
@@ -1387,7 +1450,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
         }
 
         if (format == null) {
-            format = isTimestamp ? ISO_8601_TIMESTAMP_FORMAT : ISO_8601_DATETIME_FORMAT;
+            format = isTimestamp ? ISO_8601_TIMESTAMP_FORMAT : ISO_8601_DATE_TIME_FORMAT;
         }
 
         timeZone = checkTimeZone(format, timeZone);
@@ -1811,12 +1874,12 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
      * <p>
      * <code>N.roll(date, -5, TimeUnit.DAYS)</code>.
      *
-     * @param <T> 
-     * @param date 
-     * @param amount 
-     * @param unit 
+     * @param <T>
+     * @param date
+     * @param amount
+     * @param unit
      * @return a new instance of Date with the specified amount rolled.
-     * @throws IllegalArgumentException 
+     * @throws IllegalArgumentException
      */
     @Beta
     public static <T extends java.util.Date> T roll(final T date, final long amount, final TimeUnit unit) throws IllegalArgumentException {
@@ -1832,12 +1895,12 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
      * <p>
      * <code>N.roll(date, -5, CalendarUnit.DAY)</code>.
      *
-     * @param <T> 
-     * @param date 
-     * @param amount 
-     * @param unit 
+     * @param <T>
+     * @param date
+     * @param amount
+     * @param unit
      * @return a new instance of Date with the specified amount rolled.
-     * @throws IllegalArgumentException 
+     * @throws IllegalArgumentException
      */
     @Beta
     public static <T extends java.util.Date> T roll(final T date, final int amount, final CalendarField unit) throws IllegalArgumentException {
@@ -1856,6 +1919,58 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
             return createDate(date.getTime() + toMillis(unit, amount), date.getClass());
         }
     }
+
+    /**
+     * Adds or subtracts the specified amount of time to the given time unit,
+     * based on the calendar's rules. For example, to subtract 5 days from the
+     * current time of the calendar, you can achieve it by calling:
+     * <p>
+     * <code>N.roll(c, -5, TimeUnit.DAYS)</code>.
+     *
+     * @param <T>
+     * @param calendar
+     * @param amount
+     * @param unit
+     * @return a new instance of Calendar with the specified amount rolled.
+     * @throws IllegalArgumentException
+     */
+    @Beta
+    public static <T extends Calendar> T roll(final T calendar, final long amount, final TimeUnit unit) throws IllegalArgumentException {
+        N.checkArgNotNull(calendar, CALENDAR_STR); //NOSONAR
+
+        return createCalendar(calendar, calendar.getTimeInMillis() + unit.toMillis(amount));
+    }
+
+    /**
+     * Adds or subtracts the specified amount of time to the given calendar
+     * unit, based on the calendar's rules. For example, to subtract 5 days from
+     * the current time of the calendar, you can achieve it by calling:
+     * <p>
+     * <code>N.roll(c, -5, CalendarUnit.DAY)</code>.
+     *
+     * @param <T>
+     * @param calendar
+     * @param amount
+     * @param unit
+     * @return a new instance of Calendar with the specified amount rolled.
+     * @throws IllegalArgumentException
+     */
+    @Beta
+    public static <T extends Calendar> T roll(final T calendar, final int amount, final CalendarField unit) throws IllegalArgumentException {
+        N.checkArgNotNull(calendar, CALENDAR_STR);
+
+        //    if (amount > Integer.MAX_VALUE || amount < Integer.MIN_VALUE) {
+        //        throw new IllegalArgumentException("The amount :" + amount + " is too big for unit: " + unit);
+        //    }
+
+        final T result = createCalendar(calendar, calendar.getTimeInMillis());
+
+        result.add(unit.value(), amount);
+
+        return result;
+    }
+
+    //-----------------------------------------------------------------------
 
     /**
      *
@@ -1886,58 +2001,6 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
                 throw new IllegalArgumentException("Unsupported unit: " + field);
         }
     }
-
-    /**
-     * Adds or subtracts the specified amount of time to the given time unit,
-     * based on the calendar's rules. For example, to subtract 5 days from the
-     * current time of the calendar, you can achieve it by calling:
-     * <p>
-     * <code>N.roll(c, -5, TimeUnit.DAYS)</code>.
-     *
-     * @param <T> 
-     * @param calendar 
-     * @param amount 
-     * @param unit 
-     * @return a new instance of Calendar with the specified amount rolled.
-     * @throws IllegalArgumentException 
-     */
-    @Beta
-    public static <T extends Calendar> T roll(final T calendar, final long amount, final TimeUnit unit) throws IllegalArgumentException {
-        N.checkArgNotNull(calendar, CALENDAR_STR); //NOSONAR
-
-        return createCalendar(calendar, calendar.getTimeInMillis() + unit.toMillis(amount));
-    }
-
-    /**
-     * Adds or subtracts the specified amount of time to the given calendar
-     * unit, based on the calendar's rules. For example, to subtract 5 days from
-     * the current time of the calendar, you can achieve it by calling:
-     * <p>
-     * <code>N.roll(c, -5, CalendarUnit.DAY)</code>.
-     *
-     * @param <T> 
-     * @param calendar 
-     * @param amount 
-     * @param unit 
-     * @return a new instance of Calendar with the specified amount rolled.
-     * @throws IllegalArgumentException 
-     */
-    @Beta
-    public static <T extends Calendar> T roll(final T calendar, final int amount, final CalendarField unit) throws IllegalArgumentException {
-        N.checkArgNotNull(calendar, CALENDAR_STR);
-
-        //    if (amount > Integer.MAX_VALUE || amount < Integer.MIN_VALUE) {
-        //        throw new IllegalArgumentException("The amount :" + amount + " is too big for unit: " + unit);
-        //    }
-
-        final T result = createCalendar(calendar, calendar.getTimeInMillis());
-
-        result.add(unit.value(), amount);
-
-        return result;
-    }
-
-    //-----------------------------------------------------------------------
 
     //-----------------------------------------------------------------------
     /**
@@ -2182,15 +2245,15 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
     /**
      * Copied from Apache Commons Lang under Apache License v2.
      * <br />
-     * 
+     *
      * <p>Rounds a date, leaving the field specified as the most
      * significant field.</p>
-     * 
+     *
      * <p>For example, if you had the date-time of 28 Mar 2002
      * 13:45:01.231, if this was passed with HOUR, it would return
      * 28 Mar 2002 14:00:00.000. If this was passed with MONTH, it
      * would return 1 April 2002 0:00:00.000.</p>
-     * 
+     *
      * <p>For a date in a timezone that handles the change to daylight
      * saving time, rounding to Calendar.HOUR_OF_DAY will behave as follows.
      * Suppose daylight saving time begins at 02:00 on March 30. Rounding a
@@ -2203,11 +2266,11 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
      * <li>March 30, 2003 02:40 rounds to March 30, 2003 04:00</li>
      * </ul>
      *
-     * @param <T> 
+     * @param <T>
      * @param date the date to work with, not null
      * @param field the field from {@code Calendar} or <code>SEMI_MONTH</code>
-     * @return 
-     * @throws IllegalArgumentException 
+     * @return
+     * @throws IllegalArgumentException
      * @throws ArithmeticException if the year is over 280 million
      */
     public static <T extends java.util.Date> T round(final T date, final int field) throws IllegalArgumentException {
@@ -3287,12 +3350,12 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
     }
 
     /**
-     * 
      *
-     * @param date1 
-     * @param date2 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param date1
+     * @param date2
+     * @return
+     * @throws IllegalArgumentException
      */
     public static boolean isSameMonth(final java.util.Date date1, final java.util.Date date2) throws IllegalArgumentException {
         N.checkArgNotNull(date1, DATE1_STR);
@@ -3308,12 +3371,12 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
     }
 
     /**
-     * 
      *
-     * @param cal1 
-     * @param cal2 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param cal1
+     * @param cal2
+     * @return
+     * @throws IllegalArgumentException
      */
     public static boolean isSameMonth(final Calendar cal1, final Calendar cal2) throws IllegalArgumentException {
         N.checkArgNotNull(cal1, CAL1_STR);
@@ -3324,12 +3387,12 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
     }
 
     /**
-     * 
      *
-     * @param date1 
-     * @param date2 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param date1
+     * @param date2
+     * @return
+     * @throws IllegalArgumentException
      */
     public static boolean isSameYear(final java.util.Date date1, final java.util.Date date2) throws IllegalArgumentException {
         N.checkArgNotNull(date1, DATE1_STR);
@@ -3345,12 +3408,12 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
     }
 
     /**
-     * 
      *
-     * @param cal1 
-     * @param cal2 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param cal1
+     * @param cal2
+     * @return
+     * @throws IllegalArgumentException
      */
     public static boolean isSameYear(final Calendar cal1, final Calendar cal2) throws IllegalArgumentException {
         N.checkArgNotNull(cal1, CAL1_STR);
@@ -3447,7 +3510,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
                 }
 
                 return sdf;
-            } else if ((format.length() == 24) && format.equals(ISO_8601_DATETIME_FORMAT)) {
+            } else if ((format.length() == 24) && format.equals(ISO_8601_DATE_TIME_FORMAT)) {
                 sdf = utcDateTimeDFPool.poll();
 
                 if (sdf == null) {
@@ -3487,7 +3550,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
         if (timeZone == UTC_TIME_ZONE) {
             if ((format.length() == 28) && format.equals(ISO_8601_TIMESTAMP_FORMAT)) {
                 utcTimestampDFPool.add(sdf);
-            } else if ((format.length() == 24) && format.equals(ISO_8601_DATETIME_FORMAT)) {
+            } else if ((format.length() == 24) && format.equals(ISO_8601_DATE_TIME_FORMAT)) {
                 utcDateTimeDFPool.add(sdf);
             } else {
                 dfPool.get(format).add(sdf);
@@ -3504,68 +3567,42 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
      * @param format
      * @return
      */
-    @SuppressWarnings("fallthrough")
     private static String checkDateFormat(final String str, final String format) {
         if (Strings.isEmpty(format)) {
-            int len = str.length();
+            final int len = str.length();
 
-            switch (len) {
-                case 4:
-                    return LOCAL_YEAR_FORMAT;
+            if (len == 4) {
+                return LOCAL_YEAR_FORMAT;
+            } else if (len == 5 || str.charAt(2) == '-') {
+                return LOCAL_MONTH_DAY_FORMAT;
+            } else if (str.charAt(4) == '-') {
+                switch (len) {
+                    case 8:
+                        return LOCAL_TIME_FORMAT;
 
-                case 5:
-                    if (str.charAt(2) == '/') {
-                        return LOCAL_MONTH_DAY_FORMAT_SLASH;
-                    } else {
-                        return LOCAL_MONTH_DAY_FORMAT;
-                    }
-
-                case 8:
-                    return LOCAL_TIME_FORMAT;
-
-                case 10:
-                    if (str.charAt(4) == '/') {
-                        return LOCAL_DATE_FORMAT_SLASH;
-                    } else {
+                    case 10:
                         return LOCAL_DATE_FORMAT;
-                    }
 
-                case 19:
-                    if (str.charAt(4) == '/') {
-                        return LOCAL_DATETIME_FORMAT_SLASH;
-                    } else {
-                        return LOCAL_DATETIME_FORMAT;
-                    }
+                    case 19:
+                        if (str.charAt(10) == 'T') {
+                            return ISO_LOCAL_DATE_TIME_FORMAT;
+                        } else {
+                            return LOCAL_DATE_TIME_FORMAT;
+                        }
 
-                case 23:
-                    if (str.charAt(4) == '/') {
-                        return LOCAL_TIMESTAMP_FORMAT_SLASH;
-                    } else {
-                        return LOCAL_TIMESTAMP_FORMAT;
-                    }
+                    case 20:
+                        return ISO_8601_DATE_TIME_FORMAT;
 
-                case 24:
-                    if (str.charAt(4) == '/') {
-                        return ISO_8601_DATETIME_FORMAT_SLASH;
-                    } else {
-                        return ISO_8601_DATETIME_FORMAT;
-                    }
-
-                case 28:
-                    if (str.charAt(4) == '/') {
-                        return ISO_8601_TIMESTAMP_FORMAT_SLASH;
-                    } else {
+                    case 24:
                         return ISO_8601_TIMESTAMP_FORMAT;
-                    }
 
-                case 29:
-                    if (str.charAt(3) == ',') {
-                        return RFC1123_DATE_FORMAT;
-                    }
+                    case 29:
+                        return RFC_1123_DATE_TIME_FORMAT;
 
-                default:
-                    // throw new RuntimeException("No valid date format found for: " + str);
-                    return null;
+                    default:
+                        // throw new RuntimeException("No valid date format found for: " + str);
+                        return null;
+                }
             }
         }
 
@@ -3596,8 +3633,10 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
      * @return
      */
     private static long fastDateParse(final String str, final String format, final TimeZone timeZone) {
-        if (!((str.length() == 24) || (str.length() == 20) || (str.length() == 19) || (str.length() == 23)) || !(format.equals(ISO_8601_TIMESTAMP_FORMAT)
-                || format.equals(ISO_8601_DATETIME_FORMAT) || format.equals(LOCAL_DATETIME_FORMAT) || format.equals(LOCAL_TIMESTAMP_FORMAT))) {
+        final int len = str.length();
+
+        if (!((len == 19) || (len == 20) || (len == 24)) || !(format.equals(ISO_8601_TIMESTAMP_FORMAT) || format.equals(ISO_8601_DATE_TIME_FORMAT)
+                || format.equals(ISO_LOCAL_DATE_TIME_FORMAT) || format.equals(LOCAL_DATE_TIME_FORMAT))) {
             return 0;
         }
 
@@ -3626,7 +3665,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
         int hourOfDay = parseInt(str, 11, 13);
         int minute = parseInt(str, 14, 16);
         int second = parseInt(str, 17, 19);
-        int milliSecond = ((str.length() == 24) || (str.length() == 23)) ? parseInt(str, 20, 23) : 0;
+        int milliSecond = len == 24 ? parseInt(str, 20, 23) : 0;
 
         Calendar c = null;
         Queue<Calendar> timeZoneCalendarQueue = null;
@@ -3757,11 +3796,11 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
     }
 
     /**
-     * 
      *
-     * @param date 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param date
+     * @return
+     * @throws IllegalArgumentException
      */
     public static boolean isLastDateOfMonth(final java.util.Date date) throws IllegalArgumentException {
         N.checkArgNotNull(date, DATE_STR);
@@ -3773,11 +3812,11 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
     }
 
     /**
-     * 
      *
-     * @param date 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param date
+     * @return
+     * @throws IllegalArgumentException
      */
     public static boolean isLastDateOfYear(final java.util.Date date) throws IllegalArgumentException {
         N.checkArgNotNull(date, DATE_STR);
@@ -3789,11 +3828,11 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
     }
 
     /**
-     * 
      *
-     * @param date 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param date
+     * @return
+     * @throws IllegalArgumentException
      */
     public static int getLastDateOfMonth(final java.util.Date date) throws IllegalArgumentException {
         N.checkArgNotNull(date, DATE_STR);
@@ -3805,11 +3844,11 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
     }
 
     /**
-     * 
      *
-     * @param date 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param date
+     * @return
+     * @throws IllegalArgumentException
      */
     public static int getLastDateOfYear(final java.util.Date date) throws IllegalArgumentException {
         N.checkArgNotNull(date, DATE_STR);
@@ -3818,6 +3857,217 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
         cal.setTime(date);
 
         return cal.getActualMaximum(Calendar.DAY_OF_YEAR);
+    }
+
+    //    /**
+    //     * The Class Times.
+    //     */
+    //    @Beta
+    //    public static final class Times extends DateUtil {
+    //
+    //        private Times() {
+    //            // singleton.
+    //        }
+    //    }
+
+    /**
+     * The major purpose of this class is to get rid of the milliseconds part: {@code .SSS} or nanoseconds part: {@code .SSSSSS}
+     *
+     * @see {@code DateTimeFormatter}
+     */
+    public static final class DTF {
+
+        //    /**
+        //     * Date/Time format: {@code yyyy}
+        //     * @see {@link #LOCAL_YEAR_FORMAT}
+        //     */
+        //    public static final DTF LOCAL_YEAR = new DTF(DateTimeUtil.LOCAL_YEAR_FORMAT);
+        //
+        //    /**
+        //     * Date/Time format: {@code MM-dd}
+        //     * @see {@link #LOCAL_MONTH_DAY_FORMAT}
+        //     */
+        //    public static final DTF LOCAL_MONTH_DAY = new DTF(DateTimeUtil.LOCAL_MONTH_DAY_FORMAT);
+
+        /**
+         * Date/Time format: {@code yyyy-MM-dd}
+         * @see {@link #LOCAL_DATE_FORMAT}
+         */
+        public static final DTF LOCAL_DATE = new DTF(DateTimeUtil.LOCAL_DATE_FORMAT);
+
+        /**
+         * Date/Time format: {@code HH:mm:ss}
+         * @see {@link #LOCAL_TIME_FORMAT}
+         */
+        public static final DTF LOCAL_TIME = new DTF(DateTimeUtil.LOCAL_TIME_FORMAT);
+
+        /**
+         * Date/Time format: {@code yyyy-MM-dd HH:mm:ss}
+         * @see {@link #LOCAL_DATE_TIME_FORMAT}
+         */
+        public static final DTF LOCAL_DATE_TIME = new DTF(DateTimeUtil.LOCAL_DATE_TIME_FORMAT);
+
+        /**
+         * Date/Time format: {@code yyyy-MM-dd'T'HH:mm:ss}
+         * @see {@link #ISO_LOCAL_DATE_TIME_FORMAT}
+         */
+        public static final DTF ISO_LOCAL_DATE_TIME = new DTF(DateTimeUtil.ISO_LOCAL_DATE_TIME_FORMAT);
+
+        /**
+         * Date/Time format: {@code yyyy-MM-dd'T'HH:mm:ssXXX}
+         * @see {@link #ISO_OFFSET_DATE_TIME_FORMAT}
+         */
+        public static final DTF ISO_OFFSET_DATE_TIME = new DTF(DateTimeUtil.ISO_OFFSET_DATE_TIME_FORMAT);
+
+        /**
+         * Date/Time format: {@code yyyy-MM-dd'T'HH:mm:ssXXX'['VV']'}
+         * @see {@link #ISO_ZONED_DATE_TIME_FORMAT}
+         */
+        public static final DTF ISO_ZONED_DATE_TIME = new DTF(DateTimeUtil.ISO_ZONED_DATE_TIME_FORMAT);
+
+        /**
+         * Date/Time format: {@code yyyy-MM-dd'T'HH:mm:ss'Z'}.
+         * @see {@link #ISO_8601_DATE_TIME_FORMAT}
+         */
+        public static final DTF ISO_8601_DATE_TIME = new DTF(DateTimeUtil.ISO_8601_DATE_TIME_FORMAT);
+
+        /**
+         * Date/Time format: {@code yyyy-MM-dd'T'HH:mm:ss.SSS'Z'}.
+         * @see {@link #ISO_8601_TIMESTAMP_FORMAT}
+         */
+        public static final DTF ISO_8601_TIMESTAMP = new DTF(DateTimeUtil.ISO_8601_TIMESTAMP_FORMAT);
+
+        /**
+         * Date/Time format: {@code EEE, dd MMM yyyy HH:mm:ss zzz}.
+         * @see {@link #RFC_1123_DATE_TIME_FORMAT}
+         */
+        public static final DTF RFC_1123_DATE_TIME = new DTF(DateTimeUtil.RFC_1123_DATE_TIME_FORMAT);
+
+        private final String format;
+        private final DateTimeFormatter dateTimeFormatter;
+
+        DTF(final String format) {
+            this.format = format;
+            this.dateTimeFormatter = DateTimeFormatter.ofPattern(format);
+        }
+
+        //    DTF(final DateTimeFormatter dtf) {
+        //        this.format = dtf.toString();
+        //        this.dtf = dtf;
+        //    }
+        //
+        //    public static DTF of(DateTimeFormatter dtf) {
+        //        return new DTF(dtf);
+        //    }
+
+        public String format(TemporalAccessor temporal) {
+            return dateTimeFormatter.format(temporal);
+        }
+
+        public void formatTo(TemporalAccessor temporal, Appendable appendable) {
+            dateTimeFormatter.formatTo(temporal, appendable);
+        }
+
+        public LocalDate parseToLocalDate(final CharSequence text) {
+            if (Strings.isEmpty(text)) {
+                return null;
+            }
+
+            if (isPossibleLong(text)) {
+                try {
+                    return LocalDate.ofInstant(Instant.ofEpochMilli(Numbers.toLong(text)), DEFAULT_TIME_ZONE_ID);
+                } catch (NumberFormatException e2) {
+                    // ignore;
+                }
+            }
+
+            return LocalDate.from(dateTimeFormatter.parse(text));
+        }
+
+        public LocalTime parseToLocalTime(final CharSequence text) {
+            if (Strings.isEmpty(text)) {
+                return null;
+            }
+
+            if (isPossibleLong(text)) {
+                try {
+                    return LocalTime.ofInstant(Instant.ofEpochMilli(Numbers.toLong(text)), DEFAULT_TIME_ZONE_ID);
+                } catch (NumberFormatException e2) {
+                    // ignore;
+                }
+            }
+
+            return LocalTime.from(dateTimeFormatter.parse(text));
+        }
+
+        public LocalDateTime parseToLocalDateTime(final CharSequence text) {
+            if (Strings.isEmpty(text)) {
+                return null;
+            }
+
+            if (isPossibleLong(text)) {
+                try {
+                    return LocalDateTime.ofInstant(Instant.ofEpochMilli(Numbers.toLong(text)), DEFAULT_TIME_ZONE_ID);
+                } catch (NumberFormatException e2) {
+                    // ignore;
+                }
+            }
+
+            return LocalDateTime.from(dateTimeFormatter.parse(text));
+        }
+
+        public OffsetDateTime parseToOffsetDateTime(final CharSequence text) {
+            if (Strings.isEmpty(text)) {
+                return null;
+            }
+
+            if (isPossibleLong(text)) {
+                try {
+                    return OffsetDateTime.ofInstant(Instant.ofEpochMilli(Numbers.toLong(text)), DEFAULT_TIME_ZONE_ID);
+                } catch (NumberFormatException e2) {
+                    // ignore;
+                }
+            }
+
+            return OffsetDateTime.from(dateTimeFormatter.parse(text));
+        }
+
+        public ZonedDateTime parseToZonedDateTime(final CharSequence text) {
+            if (Strings.isEmpty(text)) {
+                return null;
+            }
+
+            if (isPossibleLong(text)) {
+                try {
+                    return ZonedDateTime.ofInstant(Instant.ofEpochMilli(Numbers.toLong(text)), DEFAULT_TIME_ZONE_ID);
+                } catch (NumberFormatException e2) {
+                    // ignore;
+                }
+            }
+
+            return ZonedDateTime.from(dateTimeFormatter.parse(text));
+        }
+
+        public Instant parseToInstant(final CharSequence text) {
+            if (Strings.isEmpty(text)) {
+                return null;
+            }
+
+            if (isPossibleLong(text)) {
+                try {
+                    return Instant.ofEpochMilli(Numbers.toLong(text));
+                } catch (NumberFormatException e2) {
+                    // ignore;
+                }
+            }
+
+            return Instant.from(dateTimeFormatter.parse(text));
+        }
+
+        @Override
+        public String toString() {
+            return format;
+        }
     }
 
     /**
@@ -3852,4 +4102,5 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
     //            // singleton.
     //        }
     //    }
+
 }

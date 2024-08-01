@@ -860,17 +860,17 @@ public final class Maps {
     /**
      * Returns the value to which the specified key is mapped if the value not {@code null},
      * or {@code defaultForNull} if the specified map is empty or contains no value for the key or the mapping value is {@code null}.
-     * 
+     *
      * <br />
      * Absent -> key is not found in the specified map or found with {@code null} value.
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param map 
-     * @param key 
-     * @param defaultValue 
-     * @return 
-     * @throws IllegalArgumentException 
+     * @param map
+     * @param key
+     * @param defaultValue
+     * @return
+     * @throws IllegalArgumentException
      */
     public static <K, V> V getOrDefaultIfAbsent(final Map<K, ? extends V> map, final K key, final V defaultValue) throws IllegalArgumentException {
         // N.checkArgNotNull(defaultValue, "defaultValue"); // NOSONAR
@@ -1615,12 +1615,12 @@ public final class Maps {
      * Otherwise returns the value mapped by the specified {@code key}.
      * If the mapped value is not {@code T} type, underline conversion will be executed by {@code N.convert(val, defaultForNull.getClass())}.
      *
-     * @param <K> 
-     * @param <T> 
-     * @param map 
-     * @param key 
-     * @param defaultForNull 
-     * @return 
+     * @param <K>
+     * @param <T>
+     * @param map
+     * @param key
+     * @param defaultForNull
+     * @return
      * @throws IllegalArgumentException if the specified {@code defaultForNull} is {@code null}
      * @see N#convert(Object, Class)
      * @see N#convert(Object, Type)
@@ -1698,16 +1698,16 @@ public final class Maps {
 
     /**
      * Returns the value associated with the specified {@code key} if it exists and not {@code null} in the specified {@code map}, Otherwise puts a new value got from {@code defaultValueSupplier} and returns it.
-     * 
+     *
      * <br />
      * Absent -> key is not found in the specified map or found with {@code null} value.
      *
      * @param <K> the key type
-     * @param <V> 
-     * @param map 
-     * @param key 
-     * @param defaultValueSupplier 
-     * @return 
+     * @param <V>
+     * @param map
+     * @param key
+     * @param defaultValueSupplier
+     * @return
      */
     public static <K, V> V getAndPutIfAbsent(final Map<K, V> map, final K key, Supplier<? extends V> defaultValueSupplier) {
         V val = map.get(key);
@@ -1919,16 +1919,16 @@ public final class Maps {
     /**
      * Returns a list of values of the keys which exist in the specified <code>Map</code>.
      * If the key dosn't exist in the <code>Map</code> or associated value is {@code null}, No value will be added into the returned list.
-     * 
+     *
      * <br />
      * Present -> key is found in the specified map with {@code non-null} value.
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param map 
-     * @param keys 
-     * @return 
-     * @throws IllegalArgumentException 
+     * @param map
+     * @param keys
+     * @return
+     * @throws IllegalArgumentException
      */
     public static <K, V> List<V> getIfPresentForEach(final Map<K, ? extends V> map, final Collection<?> keys) throws IllegalArgumentException {
         if (N.isEmpty(map) || N.isEmpty(keys)) {
@@ -1989,17 +1989,17 @@ public final class Maps {
 
     /**
      * Gets the or default for each.
-     * 
+     *
      * <br />
      * Absent -> key is not found in the specified map or found with {@code null} value.
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param map 
-     * @param keys 
-     * @param defaultValue 
-     * @return 
-     * @throws IllegalArgumentException 
+     * @param map
+     * @param keys
+     * @param defaultValue
+     * @return
+     * @throws IllegalArgumentException
      */
     public static <K, V> List<V> getOrDefaultIfAbsentForEach(final Map<K, V> map, final Collection<?> keys, final V defaultValue)
             throws IllegalArgumentException {
@@ -2097,14 +2097,14 @@ public final class Maps {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param map 
-     * @param path 
-     * @param defaultValue 
+     *
+     * @param <T>
+     * @param map
+     * @param path
+     * @param defaultValue
      * @return {@code defaultValue} if there is no value found by the specified path.
-     * @throws IllegalArgumentException 
+     * @throws IllegalArgumentException
      * @see #getByPath(Map, String)
      */
     public static <T> T getByPath(final Map<?, ?> map, final String path, final T defaultValue) throws IllegalArgumentException {
@@ -2536,13 +2536,13 @@ public final class Maps {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param map 
-     * @param filter 
+     * @param map
+     * @param filter
      * @return {@code true} if there are one or more than one entries removed from the specified map.
-     * @throws IllegalArgumentException 
+     * @throws IllegalArgumentException
      */
     public static <K, V> boolean removeIf(final Map<K, V> map, final Predicate<? super Map.Entry<K, V>> filter) throws IllegalArgumentException {
-        N.checkArgNotNull(filter, "filter");
+        N.checkArgNotNull(filter, "filter"); // NOSONAR
 
         if (N.isEmpty(map)) {
             return false;
@@ -2576,13 +2576,13 @@ public final class Maps {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param map 
-     * @param filter 
+     * @param map
+     * @param filter
      * @return {@code true} if there are one or more than one entries removed from the specified map.
-     * @throws IllegalArgumentException 
+     * @throws IllegalArgumentException
      */
     public static <K, V> boolean removeIf(final Map<K, V> map, final BiPredicate<? super K, ? super V> filter) throws IllegalArgumentException {
-        N.checkArgNotNull(filter, "filter");
+        N.checkArgNotNull(filter, "filter"); // NOSONAR
 
         if (N.isEmpty(map)) {
             return false;
@@ -2616,13 +2616,13 @@ public final class Maps {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param map 
-     * @param filter 
+     * @param map
+     * @param filter
      * @return {@code true} if there are one or more than one entries removed from the specified map.
-     * @throws IllegalArgumentException 
+     * @throws IllegalArgumentException
      */
     public static <K, V> boolean removeIfKey(final Map<K, V> map, final Predicate<? super K> filter) throws IllegalArgumentException {
-        N.checkArgNotNull(filter, "filter");
+        N.checkArgNotNull(filter, "filter"); // NOSONAR
 
         if (N.isEmpty(map)) {
             return false;
@@ -2656,13 +2656,13 @@ public final class Maps {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param map 
-     * @param filter 
+     * @param map
+     * @param filter
      * @return {@code true} if there are one or more than one entries removed from the specified map.
-     * @throws IllegalArgumentException 
+     * @throws IllegalArgumentException
      */
     public static <K, V> boolean removeIfValue(final Map<K, V> map, final Predicate<? super V> filter) throws IllegalArgumentException {
-        N.checkArgNotNull(filter, "filter");
+        N.checkArgNotNull(filter, "filter"); // NOSONAR
 
         if (N.isEmpty(map)) {
             return false;
@@ -2747,13 +2747,13 @@ public final class Maps {
     }
 
     /**
-     * 
+     *
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param map 
-     * @param function 
-     * @throws IllegalArgumentException 
+     * @param map
+     * @param function
+     * @throws IllegalArgumentException
      */
     public static <K, V> void replaceAll(final Map<K, V> map, final BiFunction<? super K, ? super V, ? extends V> function) throws IllegalArgumentException {
         N.checkArgNotNull(function);
@@ -2806,17 +2806,17 @@ public final class Maps {
     //    }
 
     /**
-     * 
+     *
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param map 
-     * @param predicate 
-     * @return 
-     * @throws IllegalArgumentException 
+     * @param map
+     * @param predicate
+     * @return
+     * @throws IllegalArgumentException
      */
     public static <K, V> Map<K, V> filter(final Map<K, V> map, final Predicate<? super Map.Entry<K, V>> predicate) throws IllegalArgumentException {
-        N.checkArgNotNull(predicate, "predicate");
+        N.checkArgNotNull(predicate, "predicate"); // NOSONAR
 
         if (map == null) {
             return new HashMap<>();
@@ -2834,17 +2834,17 @@ public final class Maps {
     }
 
     /**
-     * 
+     *
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param map 
-     * @param predicate 
-     * @return 
-     * @throws IllegalArgumentException 
+     * @param map
+     * @param predicate
+     * @return
+     * @throws IllegalArgumentException
      */
     public static <K, V> Map<K, V> filter(final Map<K, V> map, final BiPredicate<? super K, ? super V> predicate) throws IllegalArgumentException {
-        N.checkArgNotNull(predicate, "predicate");
+        N.checkArgNotNull(predicate, "predicate"); // NOSONAR
 
         if (map == null) {
             return new HashMap<>();
@@ -2866,13 +2866,13 @@ public final class Maps {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param map 
-     * @param predicate 
-     * @return 
-     * @throws IllegalArgumentException 
+     * @param map
+     * @param predicate
+     * @return
+     * @throws IllegalArgumentException
      */
     public static <K, V> Map<K, V> filterByKey(final Map<K, V> map, final Predicate<? super K> predicate) throws IllegalArgumentException {
-        N.checkArgNotNull(predicate, "predicate");
+        N.checkArgNotNull(predicate, "predicate"); // NOSONAR
 
         if (map == null) {
             return new HashMap<>();
@@ -2894,13 +2894,13 @@ public final class Maps {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param map 
-     * @param predicate 
-     * @return 
-     * @throws IllegalArgumentException 
+     * @param map
+     * @param predicate
+     * @return
+     * @throws IllegalArgumentException
      */
     public static <K, V> Map<K, V> filterByValue(final Map<K, V> map, final Predicate<? super V> predicate) throws IllegalArgumentException {
-        N.checkArgNotNull(predicate, "predicate");
+        N.checkArgNotNull(predicate, "predicate"); // NOSONAR
 
         if (map == null) {
             return new HashMap<>();
@@ -3137,14 +3137,14 @@ public final class Maps {
     }
 
     /**
-     * 
      *
-     * @param <M> 
-     * @param map 
-     * @param delimiter 
-     * @param mapSupplier 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <M>
+     * @param map
+     * @param delimiter
+     * @param mapSupplier
+     * @return
+     * @throws IllegalArgumentException
      */
     public static <M extends Map<String, Object>> M unflatten(Map<String, Object> map, String delimiter, Supplier<? extends M> mapSupplier)
             throws IllegalArgumentException {
@@ -3209,15 +3209,15 @@ public final class Maps {
     //    }
 
     /**
-     * 
+     *
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param map 
-     * @param key 
-     * @param value 
-     * @param remappingFunction 
-     * @throws IllegalArgumentException 
+     * @param map
+     * @param key
+     * @param value
+     * @param remappingFunction
+     * @throws IllegalArgumentException
      */
     public static <K, V> void merge(Map<K, V> map, K key, V value, BinaryOperator<V> remappingFunction) throws IllegalArgumentException {
         N.checkArgNotNull(remappingFunction, "remappingFunction");

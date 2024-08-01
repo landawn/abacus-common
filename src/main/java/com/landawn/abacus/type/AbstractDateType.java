@@ -107,8 +107,8 @@ public abstract class AbstractDateType<T extends Date> extends AbstractType<T> {
 
                         break;
 
-                    case ISO_8601_DATETIME:
-                        DateUtil.formatTo(writer, x, DateUtil.ISO_8601_DATETIME_FORMAT, null);
+                    case ISO_8601_DATE_TIME:
+                        DateUtil.formatTo(writer, x, DateUtil.ISO_8601_DATE_TIME_FORMAT, null);
 
                         break;
 

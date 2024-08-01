@@ -20,8 +20,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-
-import org.joda.time.Instant;
+import java.time.Instant;
+import java.time.OffsetDateTime;
 
 import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
@@ -35,14 +35,13 @@ import com.landawn.abacus.util.Strings;
 /**
  *
  * @author Haiyang Li
- * @since 0.8
  */
-public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
+public class OffsetDateTimeType extends AbstractTemporalType<OffsetDateTime> {
 
-    public static final String INSTANT = "JodaInstant";
+    public static final String OFFSET_DATE_TIME = OffsetDateTime.class.getSimpleName();
 
-    JodaInstantType() {
-        super(INSTANT);
+    OffsetDateTimeType() {
+        super(OFFSET_DATE_TIME);
     }
 
     /**
@@ -51,8 +50,8 @@ public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
      * @return
      */
     @Override
-    public Class<Instant> clazz() {
-        return Instant.class;
+    public Class<OffsetDateTime> clazz() {
+        return OffsetDateTime.class;
     }
 
     /**
@@ -61,8 +60,8 @@ public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
      * @return
      */
     @Override
-    public String stringOf(Instant x) {
-        return (x == null) ? null : x.toString(jodaISO8601TimestampFT);
+    public String stringOf(OffsetDateTime x) {
+        return (x == null) ? null : iso8601TimestampDTF.format(x);
     }
 
     /**
@@ -72,25 +71,27 @@ public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
      */
     @MayReturnNull
     @Override
-    public Instant valueOf(String str) {
+    public OffsetDateTime valueOf(String str) {
         if (Strings.isEmpty(str)) {
             return null; // NOSONAR
         }
 
         if (N.equals(str, SYS_TIME)) {
-            return Instant.now();
+            return OffsetDateTime.now();
         }
 
-        if (str.charAt(4) != '-') {
+        if (isPossibleLong(str)) {
             try {
-                return Instant.ofEpochMilli(Numbers.toLong(str));
+                return OffsetDateTime.ofInstant(Instant.ofEpochMilli(Numbers.toLong(str)), DEFAULT_TIME_ZONE_ID);
             } catch (NumberFormatException e2) {
                 // ignore;
             }
         }
 
-        return str.length() == 20 ? Instant.parse(str, jodaISO8601DateTimeFT)
-                : (str.length() == 24 ? Instant.parse(str, jodaISO8601TimestampFT) : Instant.ofEpochMilli(DateUtil.parseTimestamp(str).getTime()));
+        return str.length() == 20 ? OffsetDateTime.parse(str, iso8601DateTimeDTF)
+                : (str.length() == 24 ? OffsetDateTime.parse(str, iso8601TimestampDTF)
+                        : (str.endsWith("]") ? OffsetDateTime.parse(str)
+                                : OffsetDateTime.ofInstant(DateUtil.parseTimestamp(str).toInstant(), DEFAULT_TIME_ZONE_ID)));
     }
 
     /**
@@ -102,14 +103,14 @@ public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
      */
     @MayReturnNull
     @Override
-    public Instant valueOf(char[] cbuf, int offset, int len) {
+    public OffsetDateTime valueOf(char[] cbuf, int offset, int len) {
         if ((cbuf == null) || (len == 0)) {
             return null; // NOSONAR
         }
 
-        if (cbuf[offset + 4] != '-') {
+        if (isPossibleLong(cbuf, offset, len)) {
             try {
-                return Instant.ofEpochMilli(parseLong(cbuf, offset, len));
+                return OffsetDateTime.ofInstant(Instant.ofEpochMilli(parseLong(cbuf, offset, len)), DEFAULT_TIME_ZONE_ID);
             } catch (NumberFormatException e) {
                 // ignore;
             }
@@ -126,10 +127,10 @@ public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public Instant get(ResultSet rs, int columnIndex) throws SQLException {
+    public OffsetDateTime get(ResultSet rs, int columnIndex) throws SQLException {
         Timestamp ts = rs.getTimestamp(columnIndex);
 
-        return ts == null ? null : Instant.ofEpochMilli(ts.getTime());
+        return ts == null ? null : OffsetDateTime.ofInstant(ts.toInstant(), DEFAULT_TIME_ZONE_ID);
     }
 
     /**
@@ -140,10 +141,10 @@ public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public Instant get(ResultSet rs, String columnName) throws SQLException {
+    public OffsetDateTime get(ResultSet rs, String columnName) throws SQLException {
         Timestamp ts = rs.getTimestamp(columnName);
 
-        return ts == null ? null : Instant.ofEpochMilli(ts.getTime());
+        return ts == null ? null : OffsetDateTime.ofInstant(ts.toInstant(), DEFAULT_TIME_ZONE_ID);
     }
 
     /**
@@ -154,8 +155,8 @@ public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(PreparedStatement stmt, int columnIndex, Instant x) throws SQLException {
-        stmt.setTimestamp(columnIndex, x == null ? null : new Timestamp(x.getMillis()));
+    public void set(PreparedStatement stmt, int columnIndex, OffsetDateTime x) throws SQLException {
+        stmt.setTimestamp(columnIndex, x == null ? null : Timestamp.from(x.toInstant()));
     }
 
     /**
@@ -166,8 +167,8 @@ public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(CallableStatement stmt, String columnName, Instant x) throws SQLException {
-        stmt.setTimestamp(columnName, x == null ? null : new Timestamp(x.getMillis()));
+    public void set(CallableStatement stmt, String columnName, OffsetDateTime x) throws SQLException {
+        stmt.setTimestamp(columnName, x == null ? null : Timestamp.from(x.toInstant()));
     }
 
     /**
@@ -177,7 +178,7 @@ public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void appendTo(Appendable appendable, Instant x) throws IOException {
+    public void appendTo(Appendable appendable, OffsetDateTime x) throws IOException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
@@ -194,7 +195,7 @@ public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
      */
     @SuppressWarnings("null")
     @Override
-    public void writeCharacter(CharacterWriter writer, Instant x, JSONXMLSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(CharacterWriter writer, OffsetDateTime x, JSONXMLSerializationConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
@@ -209,17 +210,17 @@ public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
             } else {
                 switch (config.getDateTimeFormat()) {
                     case LONG:
-                        writer.write(x.getMillis());
+                        writer.write(x.toInstant().toEpochMilli());
 
                         break;
 
                     case ISO_8601_DATE_TIME:
-                        writer.write(x.toString(jodaISO8601DateTimeFT));
+                        writer.write(iso8601DateTimeDTF.format(x));
 
                         break;
 
                     case ISO_8601_TIMESTAMP:
-                        writer.write(x.toString(jodaISO8601TimestampFT));
+                        writer.write(iso8601TimestampDTF.format(x));
 
                         break;
 

@@ -21,9 +21,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.Instant;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
 
 import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
@@ -39,13 +36,7 @@ import com.landawn.abacus.util.Strings;
  * @author Haiyang Li
  * @since 0.8
  */
-public class InstantType extends AbstractType<Instant> {
-
-    static final ZoneId DEFAULT_TIME_ZONE = ZoneOffset.UTC;
-
-    static final DateTimeFormatter iso8601DateTimeFT = DateTimeFormatter.ofPattern(DateUtil.ISO_8601_DATETIME_FORMAT).withZone(DEFAULT_TIME_ZONE);
-
-    static final DateTimeFormatter iso8601TimestampFT = DateTimeFormatter.ofPattern(DateUtil.ISO_8601_TIMESTAMP_FORMAT).withZone(DEFAULT_TIME_ZONE);
+public class InstantType extends AbstractTemporalType<Instant> {
 
     public static final String INSTANT = Instant.class.getSimpleName();
 
@@ -70,7 +61,7 @@ public class InstantType extends AbstractType<Instant> {
      */
     @Override
     public String stringOf(Instant x) {
-        return (x == null) ? null : iso8601TimestampFT.format(x);
+        return (x == null) ? null : iso8601TimestampDTF.format(x);
     }
 
     /**
@@ -89,7 +80,7 @@ public class InstantType extends AbstractType<Instant> {
             return Instant.now();
         }
 
-        if (str.charAt(4) != '-') {
+        if (isPossibleLong(str)) {
             try {
                 return Instant.ofEpochMilli(Numbers.toLong(str));
             } catch (NumberFormatException e2) {
@@ -97,8 +88,8 @@ public class InstantType extends AbstractType<Instant> {
             }
         }
 
-        return str.length() == 20 ? iso8601DateTimeFT.parse(str, Instant::from)
-                : (str.length() == 24 ? iso8601TimestampFT.parse(str, Instant::from) : DateUtil.parseTimestamp(str).toInstant());
+        return str.length() == 20 ? iso8601DateTimeDTF.parse(str, Instant::from)
+                : (str.length() == 24 ? iso8601TimestampDTF.parse(str, Instant::from) : DateUtil.parseTimestamp(str).toInstant());
     }
 
     /**
@@ -115,7 +106,7 @@ public class InstantType extends AbstractType<Instant> {
             return null; // NOSONAR
         }
 
-        if (cbuf[offset + 4] != '-') {
+        if (isPossibleLong(cbuf, offset, len)) {
             try {
                 return Instant.ofEpochMilli(parseLong(cbuf, offset, len));
             } catch (NumberFormatException e) {
@@ -221,13 +212,13 @@ public class InstantType extends AbstractType<Instant> {
 
                         break;
 
-                    case ISO_8601_DATETIME:
-                        writer.write(iso8601DateTimeFT.format(x));
+                    case ISO_8601_DATE_TIME:
+                        writer.write(iso8601DateTimeDTF.format(x));
 
                         break;
 
                     case ISO_8601_TIMESTAMP:
-                        writer.write(iso8601TimestampFT.format(x));
+                        writer.write(iso8601TimestampDTF.format(x));
 
                         break;
 

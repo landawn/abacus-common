@@ -30,7 +30,7 @@ import com.landawn.abacus.util.Strings;
  * @author Haiyang Li
  * @since 0.8
  */
-public class LocalDateType extends AbstractType<LocalDate> {
+public class LocalDateType extends AbstractTemporalType<LocalDate> {
 
     public static final String LOCAL_DATE = LocalDate.class.getSimpleName();
 

@@ -134,7 +134,6 @@ public final class TypeFactory {
             classes.add(com.landawn.abacus.type.ByteBufferType.class);
             classes.add(com.landawn.abacus.type.BytesType.class);
             classes.add(com.landawn.abacus.type.ByteType.class);
-            classes.add(com.landawn.abacus.type.CalendarType.class);
             classes.add(com.landawn.abacus.type.CharacterArrayType.class);
             classes.add(com.landawn.abacus.type.CharacterStreamType.class);
             classes.add(com.landawn.abacus.type.CharacterType.class);
@@ -146,7 +145,6 @@ public final class TypeFactory {
             classes.add(com.landawn.abacus.type.CurrencyType.class);
             classes.add(com.landawn.abacus.type.DataSetType.class);
             classes.add(com.landawn.abacus.type.SheetType.class);
-            classes.add(com.landawn.abacus.type.DateType.class);
             classes.add(com.landawn.abacus.type.DoubleArrayType.class);
             classes.add(com.landawn.abacus.type.DoubleType.class);
             classes.add(com.landawn.abacus.type.DurationType.class);
@@ -165,6 +163,22 @@ public final class TypeFactory {
             classes.add(com.landawn.abacus.type.IntegerType.class);
             classes.add(com.landawn.abacus.type.JSONType.class);
             classes.add(com.landawn.abacus.type.JUDateType.class);
+            classes.add(com.landawn.abacus.type.DateType.class);
+            classes.add(com.landawn.abacus.type.TimeType.class);
+            classes.add(com.landawn.abacus.type.TimestampType.class);
+            classes.add(com.landawn.abacus.type.TimedType.class);
+            classes.add(com.landawn.abacus.type.LocalDateType.class);
+            classes.add(com.landawn.abacus.type.LocalTimeType.class);
+            classes.add(com.landawn.abacus.type.LocalDateTimeType.class);
+            classes.add(com.landawn.abacus.type.OffsetDateTimeType.class);
+            classes.add(com.landawn.abacus.type.ZonedDateTimeType.class);
+            classes.add(com.landawn.abacus.type.CalendarType.class);
+            classes.add(com.landawn.abacus.type.XMLGregorianCalendarType.class);
+            classes.add(com.landawn.abacus.type.MillisCalendarType.class);
+            classes.add(com.landawn.abacus.type.MillisDateType.class);
+            classes.add(com.landawn.abacus.type.MillisTimeType.class);
+            classes.add(com.landawn.abacus.type.MillisTimestampType.class);
+            classes.add(com.landawn.abacus.type.InstantType.class);
             classes.add(com.landawn.abacus.type.LongArrayType.class);
             classes.add(com.landawn.abacus.type.LongType.class);
             classes.add(com.landawn.abacus.type.MapEntityType.class);
@@ -182,11 +196,6 @@ public final class TypeFactory {
             classes.add(com.landawn.abacus.type.Tuple8Type.class);
             classes.add(com.landawn.abacus.type.Tuple9Type.class);
             classes.add(com.landawn.abacus.type.IndexedType.class);
-            classes.add(com.landawn.abacus.type.TimedType.class);
-            classes.add(com.landawn.abacus.type.MillisCalendarType.class);
-            classes.add(com.landawn.abacus.type.MillisDateType.class);
-            classes.add(com.landawn.abacus.type.MillisTimestampType.class);
-            classes.add(com.landawn.abacus.type.MillisTimeType.class);
             classes.add(com.landawn.abacus.type.MutableBooleanType.class);
             classes.add(com.landawn.abacus.type.MutableCharType.class);
             classes.add(com.landawn.abacus.type.MutableByteType.class);
@@ -253,33 +262,18 @@ public final class TypeFactory {
             classes.add(com.landawn.abacus.type.StringType.class);
             classes.add(com.landawn.abacus.type.StringBuilderType.class);
             classes.add(com.landawn.abacus.type.StringBufferType.class);
-            classes.add(com.landawn.abacus.type.TimestampType.class);
-            classes.add(com.landawn.abacus.type.TimeType.class);
             classes.add(com.landawn.abacus.type.Type.SerializationType.class);
             classes.add(com.landawn.abacus.type.Type.class);
             classes.add(com.landawn.abacus.type.TypeType.class);
             classes.add(com.landawn.abacus.type.URIType.class);
             classes.add(com.landawn.abacus.type.URLType.class);
             classes.add(com.landawn.abacus.type.UUIDType.class);
-            classes.add(com.landawn.abacus.type.XMLGregorianCalendarType.class);
             classes.add(com.landawn.abacus.type.XMLType.class);
             classes.add(com.landawn.abacus.type.MultisetType.class);
             classes.add(com.landawn.abacus.type.SetMultimapType.class);
             classes.add(com.landawn.abacus.type.MultimapType.class);
 
             classes.add(com.landawn.abacus.type.BooleanCharType.class);
-        }
-
-        try {
-            if (Class.forName("java.time.ZonedDateTime") != null) {
-                classes.add(com.landawn.abacus.type.InstantType.class);
-                classes.add(com.landawn.abacus.type.ZonedDateTimeType.class);
-                classes.add(com.landawn.abacus.type.LocalDateType.class);
-                classes.add(com.landawn.abacus.type.LocalTimeType.class);
-                classes.add(com.landawn.abacus.type.LocalDateTimeType.class);
-            }
-        } catch (Throwable e) {
-            // ignore.
         }
 
         // initialize external types

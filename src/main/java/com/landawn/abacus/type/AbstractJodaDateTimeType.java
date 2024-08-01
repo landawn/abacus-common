@@ -32,7 +32,7 @@ import com.landawn.abacus.util.DateUtil;
  */
 public abstract class AbstractJodaDateTimeType<T extends AbstractInstant> extends AbstractType<T> {
 
-    protected static final DateTimeFormatter jodaISO8601DateTimeFT = org.joda.time.format.DateTimeFormat.forPattern(DateUtil.ISO_8601_DATETIME_FORMAT);
+    protected static final DateTimeFormatter jodaISO8601DateTimeFT = org.joda.time.format.DateTimeFormat.forPattern(DateUtil.ISO_8601_DATE_TIME_FORMAT);
 
     protected static final DateTimeFormatter jodaISO8601TimestampFT = org.joda.time.format.DateTimeFormat.forPattern(DateUtil.ISO_8601_TIMESTAMP_FORMAT);
 
@@ -113,7 +113,7 @@ public abstract class AbstractJodaDateTimeType<T extends AbstractInstant> extend
 
                         break;
 
-                    case ISO_8601_DATETIME:
+                    case ISO_8601_DATE_TIME:
                         jodaISO8601DateTimeFT.printTo(writer, x);
 
                         break;

@@ -27,7 +27,7 @@ public enum DateTimeFormat {
     LONG,
 
     /** The format is: yyyy-MM-dd'T'HH:mm:ss'Z'. */
-    ISO_8601_DATETIME,
+    ISO_8601_DATE_TIME,
     /**
      * The format is: yyyy-MM-dd'T'HH:mm:ss.SSS'Z'
      */
