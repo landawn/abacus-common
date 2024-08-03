@@ -25,10 +25,13 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.ConcurrentModificationException;
 import java.util.Deque;
+import java.util.DoubleSummaryStatistics;
 import java.util.EnumSet;
+import java.util.IntSummaryStatistics;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.LongSummaryStatistics;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Queue;
@@ -63,7 +66,6 @@ import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.Comparators;
 import com.landawn.abacus.util.DataSet;
 import com.landawn.abacus.util.DoubleList;
-import com.landawn.abacus.util.DoubleSummaryStatistics;
 import com.landawn.abacus.util.FloatList;
 import com.landawn.abacus.util.FloatSummaryStatistics;
 import com.landawn.abacus.util.Fn;
@@ -75,12 +77,10 @@ import com.landawn.abacus.util.ImmutableList;
 import com.landawn.abacus.util.ImmutableMap;
 import com.landawn.abacus.util.ImmutableSet;
 import com.landawn.abacus.util.IntList;
-import com.landawn.abacus.util.IntSummaryStatistics;
 import com.landawn.abacus.util.Joiner;
 import com.landawn.abacus.util.KahanSummation;
 import com.landawn.abacus.util.ListMultimap;
 import com.landawn.abacus.util.LongList;
-import com.landawn.abacus.util.LongSummaryStatistics;
 import com.landawn.abacus.util.Multimap;
 import com.landawn.abacus.util.Multiset;
 import com.landawn.abacus.util.MutableBoolean;
@@ -903,6 +903,16 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
     /**
      *
+     * @param <T>
+     * @return
+     * @see java.util.stream.Collectors#toUnmodifiableList
+     */
+    public static <T> Collector<T, ?, List<T>> toUnmodifiableList() {
+        return java.util.stream.Collectors.toUnmodifiableList();
+    }
+
+    /**
+     *
      *
      * @param <T>
      * @return
@@ -937,6 +947,16 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         final Function<Set<T>, ImmutableSet<T>> finisher = (Function) ImmutableSet_Finisher;
 
         return collectingAndThen(downstream, finisher);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @return
+     * @see java.util.stream.Collectors#toUnmodifiableSet
+     */
+    public static <T> Collector<T, ?, Set<T>> toUnmodifiableSet() {
+        return java.util.stream.Collectors.toUnmodifiableSet();
     }
 
     /**
@@ -4548,6 +4568,37 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         final Function<Map<K, V>, ImmutableMap<K, V>> finisher = (Function) ImmutableMap_Finisher;
 
         return collectingAndThen(downstream, finisher);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param <K>
+     * @param <U>
+     * @param keyMapper
+     * @param valueMapper
+     * @return
+     * @see java.util.stream.Collectors#toUnmodifiableMap(Function, Function)
+     */
+    public static <T, K, U> Collector<T, ?, Map<K, U>> toUnmodifiableMap(final Function<? super T, ? extends K> keyMapper,
+            final Function<? super T, ? extends U> valueMapper) {
+        return java.util.stream.Collectors.toUnmodifiableMap(keyMapper, valueMapper);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param <K>
+     * @param <U>
+     * @param keyMapper
+     * @param valueMapper
+     * @param mergeFunction
+     * @return
+     * @see java.util.stream.Collectors#toUnmodifiableMap(Function, Function, BinaryOperator)
+     */
+    public static <T, K, U> Collector<T, ?, Map<K, U>> toUnmodifiableMap(final Function<? super T, ? extends K> keyMapper,
+            final Function<? super T, ? extends U> valueMapper, final BinaryOperator<U> mergeFunction) {
+        return java.util.stream.Collectors.toUnmodifiableMap(keyMapper, valueMapper, mergeFunction);
     }
 
     /**
