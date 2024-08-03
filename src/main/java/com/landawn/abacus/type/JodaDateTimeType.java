@@ -102,7 +102,7 @@ public class JodaDateTimeType extends AbstractJodaDateTimeType<DateTime> {
             return null; // NOSONAR
         }
 
-        if (cbuf[offset + 4] != '-') {
+        if (isPossibleLong(cbuf, offset, len)) {
             try {
                 return new DateTime(parseLong(cbuf, offset, len));
             } catch (NumberFormatException e) {

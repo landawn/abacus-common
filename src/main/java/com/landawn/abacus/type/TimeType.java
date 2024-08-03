@@ -43,9 +43,9 @@ public class TimeType extends AbstractDateType<Time> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public Class<Time> clazz() {
@@ -92,7 +92,7 @@ public class TimeType extends AbstractDateType<Time> {
             return null; // NOSONAR
         }
 
-        if (cbuf[offset + 4] != '-') {
+        if (isPossibleLong(cbuf, offset, len)) {
             try {
                 return DateUtil.createTime(parseLong(cbuf, offset, len));
             } catch (NumberFormatException e) {

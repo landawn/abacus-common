@@ -107,7 +107,7 @@ public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
             return null; // NOSONAR
         }
 
-        if (cbuf[offset + 4] != '-') {
+        if (isPossibleLong(cbuf, offset, len)) {
             try {
                 return Instant.ofEpochMilli(parseLong(cbuf, offset, len));
             } catch (NumberFormatException e) {

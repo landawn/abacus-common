@@ -38,36 +38,4 @@ public abstract class AbstractTemporalType<T extends Temporal> extends AbstractT
         super(typeName);
     }
 
-    protected static boolean isPossibleLong(final CharSequence dateTime) {
-        if (dateTime.length() > 4) {
-            char ch = dateTime.charAt(2);
-
-            if (ch >= '0' && ch <= '9') {
-                ch = dateTime.charAt(4);
-
-                if (ch >= '0' && ch <= '9') {
-                    return true;
-                }
-            }
-        }
-
-        return false;
-    }
-
-    protected static boolean isPossibleLong(char[] cbuf, int offset, int len) {
-        if (len > 4) {
-            char ch = cbuf[offset + 2];
-
-            if (ch >= '0' && ch <= '9') {
-                ch = cbuf[offset + 4];
-
-                if (ch >= '0' && ch <= '9') {
-                    return true;
-                }
-            }
-        }
-
-        return false;
-    }
-
 }

@@ -73,12 +73,12 @@ abstract class AbstractXMLParser extends AbstractParser<XMLSerializationConfig, 
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param source 
-     * @param targetClass 
-     * @return 
+     *
+     * @param <T>
+     * @param source
+     * @param targetClass
+     * @return
      */
     @Override
     public <T> T deserialize(Node source, Class<? extends T> targetClass) {
@@ -167,8 +167,8 @@ abstract class AbstractXMLParser extends AbstractParser<XMLSerializationConfig, 
             try {
                 return (T) N.newInstance(propClass);
             } catch (Exception e) {
-                if (logger.isInfoEnabled()) {
-                    logger.info("Failed to new instance by class: " + propClass.getName());
+                if (logger.isWarnEnabled()) {
+                    logger.warn("Failed to new instance by class: " + propClass.getName());
                 }
             }
         }
@@ -192,8 +192,8 @@ abstract class AbstractXMLParser extends AbstractParser<XMLSerializationConfig, 
             try {
                 return (T) N.newInstance(propClass);
             } catch (Exception e) {
-                if (logger.isInfoEnabled()) {
-                    logger.info("Failed to new instance by class: " + propClass.getName());
+                if (logger.isWarnEnabled()) {
+                    logger.warn("Failed to new instance by class: " + propClass.getName());
                 }
             }
         }

@@ -93,7 +93,7 @@ public class CalendarType extends AbstractCalendarType<Calendar> {
             return null; // NOSONAR
         }
 
-        if (cbuf[offset + 4] != '-') {
+        if (isPossibleLong(cbuf, offset, len)) {
             try {
                 return DateUtil.createCalendar(parseLong(cbuf, offset, len));
             } catch (NumberFormatException e) {

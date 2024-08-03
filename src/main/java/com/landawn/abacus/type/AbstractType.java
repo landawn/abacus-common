@@ -679,12 +679,12 @@ public abstract class AbstractType<T> implements Type<T> {
     }
 
     /**
-     * 
      *
-     * @param <E> 
-     * @param array 
-     * @param collClass 
-     * @return 
+     *
+     * @param <E>
+     * @param array
+     * @param collClass
+     * @return
      */
     @Override
     public <E> Collection<E> array2Collection(T array, Class<?> collClass) {
@@ -692,11 +692,11 @@ public abstract class AbstractType<T> implements Type<T> {
     }
 
     /**
-     * 
      *
-     * @param <E> 
-     * @param array 
-     * @param output 
+     *
+     * @param <E>
+     * @param array
+     * @param output
      */
     @Override
     public <E> void array2Collection(T array, Collection<E> output) {
@@ -818,6 +818,44 @@ public abstract class AbstractType<T> implements Type<T> {
         String newValue = separatorConvertor.get(separator);
 
         return (newValue == null) ? st.split(separator) : st.split(newValue);
+    }
+
+    protected static boolean isNullDateTime(final String date) {
+        return Strings.isEmpty(date) || (date.length() == 4 && "null".equalsIgnoreCase(date));
+    }
+
+    protected static boolean isPossibleLong(final CharSequence dateTime) {
+        final int len = dateTime.length();
+
+        if (len > 4) {
+            char ch = dateTime.charAt(2);
+
+            if (ch >= '0' && ch <= '9') {
+                ch = dateTime.charAt(4);
+
+                if (ch >= '0' && ch <= '9') {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    protected static boolean isPossibleLong(char[] cbuf, int offset, int len) {
+        if (len > 4) {
+            char ch = cbuf[offset + 2];
+
+            if (ch >= '0' && ch <= '9') {
+                ch = cbuf[offset + 4];
+
+                if (ch >= '0' && ch <= '9') {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -959,7 +997,7 @@ public abstract class AbstractType<T> implements Type<T> {
      * @return
      * @throws SQLException the SQL exception
      */
-    static <T> T getColumnValue(final ResultSet rs, final int columnIndex, final Class<? extends T> targetClass) throws SQLException {
+    protected static <T> T getColumnValue(final ResultSet rs, final int columnIndex, final Class<? extends T> targetClass) throws SQLException {
         return N.<T> typeOf(targetClass).get(rs, columnIndex);
     }
 
@@ -973,7 +1011,7 @@ public abstract class AbstractType<T> implements Type<T> {
      * @return
      * @throws SQLException the SQL exception
      */
-    static <T> T getColumnValue(final ResultSet rs, final String columnLabel, final Class<? extends T> targetClass) throws SQLException {
+    protected static <T> T getColumnValue(final ResultSet rs, final String columnLabel, final Class<? extends T> targetClass) throws SQLException {
         return N.<T> typeOf(targetClass).get(rs, columnLabel);
     }
 }

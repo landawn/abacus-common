@@ -1930,6 +1930,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      *
      * @return
      */
+    @Override
     public FloatIterator iterator() {
         if (isEmpty()) {
             return FloatIterator.EMPTY;

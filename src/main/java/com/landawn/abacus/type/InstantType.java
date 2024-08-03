@@ -28,7 +28,6 @@ import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.DateTimeFormat;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Numbers;
-import com.landawn.abacus.util.Strings;
 
 /**
  *
@@ -71,7 +70,7 @@ public class InstantType extends AbstractTemporalType<Instant> {
     @MayReturnNull
     @Override
     public Instant valueOf(String str) {
-        if (Strings.isEmpty(str)) {
+        if (isNullDateTime(str)) {
             return null; // NOSONAR
         }
 

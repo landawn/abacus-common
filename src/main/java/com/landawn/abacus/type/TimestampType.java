@@ -43,9 +43,9 @@ public class TimestampType extends AbstractDateType<Timestamp> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public Class<Timestamp> clazz() {
@@ -92,7 +92,7 @@ public class TimestampType extends AbstractDateType<Timestamp> {
             return null; // NOSONAR
         }
 
-        if (cbuf[offset + 4] != '-') {
+        if (isPossibleLong(cbuf, offset, len)) {
             try {
                 return DateUtil.createTimestamp(parseLong(cbuf, offset, len));
             } catch (NumberFormatException e) {

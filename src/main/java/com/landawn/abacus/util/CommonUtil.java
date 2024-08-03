@@ -98,6 +98,8 @@ import com.landawn.abacus.parser.ParserUtil.BeanInfo;
 import com.landawn.abacus.parser.ParserUtil.PropInfo;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.type.TypeFactory;
+import com.landawn.abacus.util.Builder.ComparisonBuilder;
+import com.landawn.abacus.util.Builder.EquivalenceBuilder;
 import com.landawn.abacus.util.Fn.BiPredicates;
 import com.landawn.abacus.util.Fn.IntFunctions;
 import com.landawn.abacus.util.Fn.Suppliers;
@@ -13278,6 +13280,66 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     *
+     *
+     * @param bean1
+     * @param bean2
+     * @param propNamesToCompare
+     * @return
+     * @throws IllegalArgumentException
+     * @deprecated call {@code getPropValue} by reflection apis during comparing or sorting may have huge impact to performance. Use {@link ComparisonBuilder} instead.
+     * @see Builder#compare(Object, Object, Comparator)
+     * @see {@link ComparisonBuilder}
+     */
+    @Deprecated
+    @SuppressWarnings("rawtypes")
+    public static int compareByProps(final Object bean1, final Object bean2, final Collection<String> propNamesToCompare) {
+        N.checkArgNotNull(bean1);
+        N.checkArgNotNull(bean2);
+        N.checkArgument(ClassUtil.isBeanClass(bean1.getClass()), "{} is not a bean class", bean1.getClass());
+        N.checkArgument(ClassUtil.isBeanClass(bean2.getClass()), "{} is not a bean class", bean2.getClass());
+
+        if (N.isEmpty(propNamesToCompare)) {
+            return 0;
+        }
+
+        BeanInfo beanInfo1 = ParserUtil.getBeanInfo(bean1.getClass());
+        BeanInfo beanInfo2 = ParserUtil.getBeanInfo(bean2.getClass());
+
+        PropInfo propInfo1 = null;
+        PropInfo propInfo2 = null;
+        int ret = 0;
+
+        for (String propName : propNamesToCompare) {
+            propInfo1 = beanInfo1.getPropInfo(propName);
+
+            if (propInfo1 != null) {
+                propInfo2 = beanInfo2.getPropInfo(propInfo1);
+
+                if (propInfo2 == null) {
+                    throw new IllegalArgumentException("No field found in class: " + bean2.getClass() + " by name: " + propName);
+                }
+            } else {
+                propInfo2 = beanInfo2.getPropInfo(propName);
+
+                if (propInfo2 != null) {
+                    propInfo1 = beanInfo1.getPropInfo(propInfo2);
+                }
+
+                if (propInfo1 == null) {
+                    throw new IllegalArgumentException("No field found in class: " + bean1.getClass() + " by name: " + propName);
+                }
+            }
+
+            if ((ret = compare((Comparable) propInfo1.getPropValue(bean1), (Comparable) propInfo2.getPropValue(bean2))) != 0) {
+                return ret;
+            }
+        }
+
+        return 0;
+    }
+
+    /**
      * Returns {@code true} is {@code a < b}, otherwise {@code false} is returned.
      *
      * @param <T>
@@ -14197,35 +14259,15 @@ sealed class CommonUtil permits N {
      *
      * @param bean1
      * @param bean2
+     * @param propNamesToCompare
      * @return
      * @throws IllegalArgumentException
      * @see Difference.MapDifference#of(Object, Object)
+     * @see Builder#equals(Object, Object)
+     * @see {@link EquivalenceBuilder}
      */
-    public static boolean equalsByCommonProps(final Object bean1, final Object bean2) throws IllegalArgumentException {
-        N.checkArgNotNull(bean1);
-        N.checkArgNotNull(bean2);
-        N.checkArgument(ClassUtil.isBeanClass(bean1.getClass()), "{} is not a bean class", bean1.getClass());
-        N.checkArgument(ClassUtil.isBeanClass(bean2.getClass()), "{} is not a bean class", bean2.getClass());
-
-        BeanInfo beanInfo1 = ParserUtil.getBeanInfo(bean1.getClass());
-        BeanInfo beanInfo2 = ParserUtil.getBeanInfo(bean2.getClass());
-
-        PropInfo propInfo2 = null;
-        Object propValue1 = null;
-
-        for (PropInfo propInfo1 : beanInfo1.propInfoList) {
-            propInfo2 = beanInfo2.getPropInfo(propInfo1);
-
-            if (propInfo2 != null) {
-                propValue1 = propInfo1.getPropValue(bean1);
-
-                if (!equals(propValue1, propInfo2.getPropValue(bean2))) {
-                    return false;
-                }
-            }
-        }
-
-        return true;
+    public static boolean equalsByProps(final Object bean1, final Object bean2, final Collection<String> propNamesToCompare) throws IllegalArgumentException {
+        return compareByProps(bean1, bean2, propNamesToCompare) == 0;
     }
 
     /**
@@ -14233,58 +14275,26 @@ sealed class CommonUtil permits N {
      *
      * @param bean1
      * @param bean2
-     * @param propNamesToCompare
      * @return
      * @throws IllegalArgumentException
      * @see Difference.MapDifference#of(Object, Object)
+     * @see Builder#equals(Object, Object)
+     * @see {@link EquivalenceBuilder}
      */
-    public static boolean equalsByCommonProps(final Object bean1, final Object bean2, final Collection<String> propNamesToCompare)
-            throws IllegalArgumentException {
+    public static boolean equalsByCommonProps(final Object bean1, final Object bean2) throws IllegalArgumentException {
         N.checkArgNotNull(bean1);
         N.checkArgNotNull(bean2);
         N.checkArgument(ClassUtil.isBeanClass(bean1.getClass()), "{} is not a bean class", bean1.getClass());
         N.checkArgument(ClassUtil.isBeanClass(bean2.getClass()), "{} is not a bean class", bean2.getClass());
 
+        final List<String> propNamesToCompare = new ArrayList<>(ClassUtil.getPropNameList(bean1.getClass()));
+        propNamesToCompare.retainAll(ClassUtil.getPropNameList(bean2.getClass()));
+
         if (N.isEmpty(propNamesToCompare)) {
-            return true;
+            throw new IllegalArgumentException("No common property found in class: " + bean1.getClass() + " and class: " + bean2.getClass());
         }
 
-        BeanInfo beanInfo1 = ParserUtil.getBeanInfo(bean1.getClass());
-        BeanInfo beanInfo2 = ParserUtil.getBeanInfo(bean2.getClass());
-
-        PropInfo propInfo1 = null;
-        PropInfo propInfo2 = null;
-        Object propValue1 = null;
-
-        for (String propName : propNamesToCompare) {
-            propInfo1 = beanInfo1.getPropInfo(propName);
-
-            if (propInfo1 != null) {
-                propInfo2 = beanInfo2.getPropInfo(propInfo1);
-
-                if (propInfo2 == null) {
-                    throw new IllegalArgumentException("No field found in class: " + bean2.getClass() + " by name: " + propName);
-                }
-            } else {
-                propInfo2 = beanInfo2.getPropInfo(propName);
-
-                if (propInfo2 != null) {
-                    propInfo1 = beanInfo1.getPropInfo(propInfo2);
-                }
-
-                if (propInfo1 == null) {
-                    throw new IllegalArgumentException("No field found in class: " + bean1.getClass() + " by name: " + propName);
-                }
-            }
-
-            propValue1 = propInfo1.getPropValue(bean1);
-
-            if (!equals(propValue1, propInfo2.getPropValue(bean2))) {
-                return false;
-            }
-        }
-
-        return true;
+        return equalsByProps(bean1, bean2, propNamesToCompare);
     }
 
     /**

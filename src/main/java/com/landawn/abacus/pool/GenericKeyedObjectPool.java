@@ -114,12 +114,12 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     }
 
     /**
-     * 
      *
-     * @param key 
-     * @param e 
+     *
+     * @param key
+     * @param e
      * @return true, if successful
-     * @throws IllegalStateException 
+     * @throws IllegalStateException
      */
     @Override
     public boolean put(K key, E e) throws IllegalStateException {
@@ -195,11 +195,11 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     }
 
     /**
-     * 
      *
-     * @param key 
-     * @return 
-     * @throws IllegalStateException 
+     *
+     * @param key
+     * @return
+     * @throws IllegalStateException
      */
     @Override
     public E get(K key) throws IllegalStateException {
@@ -229,11 +229,11 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     }
 
     /**
-     * 
      *
-     * @param key 
-     * @return 
-     * @throws IllegalStateException 
+     *
+     * @param key
+     * @return
+     * @throws IllegalStateException
      */
     @Override
     public E remove(K key) throws IllegalStateException {
@@ -265,11 +265,11 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     }
 
     /**
-     * 
      *
-     * @param key 
-     * @return 
-     * @throws IllegalStateException 
+     *
+     * @param key
+     * @return
+     * @throws IllegalStateException
      */
     @Override
     public E peek(K key) throws IllegalStateException {
@@ -285,11 +285,11 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     }
 
     /**
-     * 
      *
-     * @param key 
+     *
+     * @param key
      * @return true, if successful
-     * @throws IllegalStateException 
+     * @throws IllegalStateException
      */
     @Override
     public boolean containsKey(K key) throws IllegalStateException {
@@ -305,11 +305,11 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     }
 
     /**
-     * 
      *
-     * @param e 
+     *
+     * @param e
      * @return true, if successful
-     * @throws IllegalStateException 
+     * @throws IllegalStateException
      */
     @Override
     public boolean containsValue(E e) throws IllegalStateException {
@@ -325,10 +325,10 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     }
 
     /**
-     * 
      *
-     * @return 
-     * @throws IllegalStateException 
+     *
+     * @return
+     * @throws IllegalStateException
      */
     @Override
     public Set<K> keySet() throws IllegalStateException {
@@ -344,10 +344,10 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     }
 
     /**
-     * 
      *
-     * @return 
-     * @throws IllegalStateException 
+     *
+     * @return
+     * @throws IllegalStateException
      */
     @Override
     public Collection<E> values() throws IllegalStateException {
@@ -365,7 +365,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     /**
      * Clear.
      *
-     * @throws IllegalStateException 
+     * @throws IllegalStateException
      */
     @Override
     public void clear() throws IllegalStateException {
@@ -397,7 +397,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     /**
      * Vacate.
      *
-     * @throws IllegalStateException 
+     * @throws IllegalStateException
      */
     @Override
     public void vacate() throws IllegalStateException {
@@ -415,10 +415,10 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     }
 
     /**
-     * 
      *
-     * @return 
-     * @throws IllegalStateException 
+     *
+     * @return
+     * @throws IllegalStateException
      */
     @Override
     public int size() throws IllegalStateException {
@@ -549,7 +549,6 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
             try {
                 value.destroy();
             } catch (Exception e) {
-
                 if (logger.isWarnEnabled()) {
                     logger.warn(ExceptionUtil.getErrorMessage(e, true));
                 }

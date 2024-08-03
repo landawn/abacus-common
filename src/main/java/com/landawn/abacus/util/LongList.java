@@ -1986,6 +1986,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      *
      * @return
      */
+    @Override
     public LongIterator iterator() {
         if (isEmpty()) {
             return LongIterator.EMPTY;

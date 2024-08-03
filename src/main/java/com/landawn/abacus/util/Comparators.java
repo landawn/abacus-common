@@ -27,6 +27,7 @@ import java.util.function.ToIntFunction;
 import java.util.function.ToLongFunction;
 
 import com.landawn.abacus.annotation.Beta;
+import com.landawn.abacus.util.Builder.ComparisonBuilder;
 import com.landawn.abacus.util.function.ToBooleanFunction;
 import com.landawn.abacus.util.function.ToByteFunction;
 import com.landawn.abacus.util.function.ToCharFunction;
@@ -1052,6 +1053,21 @@ public final class Comparators {
 
             return Integer.compare(sizeA, sizeB);
         };
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param propNamesToCompare
+     * @return
+     * @throws IllegalArgumentException
+     * @deprecated call {@code getPropValue} by reflection apis during comparing or sorting may have huge impact to performance. Use {@link ComparisonBuilder} instead.
+     * @see Builder#compare(Object, Object, Comparator)
+     * @see {@link ComparisonBuilder}
+     */
+    @Deprecated
+    public static <T> Comparator<T> comparingBeanByProps(final Collection<String> propNamesToCompare) throws IllegalArgumentException {
+        return (a, b) -> N.compareByProps(a, b, propNamesToCompare);
     }
 
     /**

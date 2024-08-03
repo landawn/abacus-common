@@ -17,6 +17,7 @@
 package com.landawn.abacus.util;
 
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -37,7 +38,7 @@ import com.landawn.abacus.util.u.Optional;
  * @param <L>
  * @since 0.8
  */
-public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> implements RandomAccess, java.io.Serializable {
+public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> implements RandomAccess, java.io.Serializable { // Iterable<B>, // reference to notEmpty is ambiguous both method notEmpty(java.lang.Iterable<?>)
 
     private static final long serialVersionUID = 1504784980113045443L;
 
@@ -633,6 +634,11 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * @return
      */
     public abstract Multiset<B> toMultiset(final int fromIndex, final int toIndex, final IntFunction<Multiset<B>> supplier);
+
+    /**
+     *
+     */
+    public abstract Iterator<B> iterator();
 
     /**
      *

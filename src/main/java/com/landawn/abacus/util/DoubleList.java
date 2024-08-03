@@ -1913,6 +1913,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      *
      * @return
      */
+    @Override
     public DoubleIterator iterator() {
         if (isEmpty()) {
             return DoubleIterator.EMPTY;

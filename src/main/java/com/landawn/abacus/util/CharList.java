@@ -1967,6 +1967,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      *
      * @return
      */
+    @Override
     public CharIterator iterator() {
         if (isEmpty()) {
             return CharIterator.EMPTY;

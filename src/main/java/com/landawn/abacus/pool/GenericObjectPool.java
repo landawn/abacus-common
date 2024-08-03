@@ -563,7 +563,6 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
             try {
                 value.destroy();
             } catch (Exception e) {
-
                 if (logger.isWarnEnabled()) {
                     logger.warn(ExceptionUtil.getErrorMessage(e, true));
                 }

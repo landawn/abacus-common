@@ -1701,6 +1701,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      *
      * @return
      */
+    @Override
     public BooleanIterator iterator() {
         if (isEmpty()) {
             return BooleanIterator.EMPTY;

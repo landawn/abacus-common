@@ -28,6 +28,7 @@ import java.util.function.ToIntFunction;
  * @param <T>
  * @since 0.8
  * @see Keyed
+ * @see IndexedKeyed
  */
 @com.landawn.abacus.annotation.Immutable
 public final class Wrapper<T> implements Immutable {
@@ -99,14 +100,14 @@ public final class Wrapper<T> implements Immutable {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param value 
-     * @param hashFunction 
-     * @param equalsFunction 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <T>
+     * @param value
+     * @param hashFunction
+     * @param equalsFunction
+     * @return
+     * @throws IllegalArgumentException
      */
     public static <T> Wrapper<T> of(T value, ToIntFunction<? super T> hashFunction, BiPredicate<? super T, ? super T> equalsFunction)
             throws IllegalArgumentException {
@@ -117,15 +118,15 @@ public final class Wrapper<T> implements Immutable {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param value 
-     * @param hashFunction 
-     * @param equalsFunction 
-     * @param toStringFunction 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <T>
+     * @param value
+     * @param hashFunction
+     * @param equalsFunction
+     * @param toStringFunction
+     * @return
+     * @throws IllegalArgumentException
      */
     public static <T> Wrapper<T> of(T value, ToIntFunction<? super T> hashFunction, BiPredicate<? super T, ? super T> equalsFunction,
             Function<? super T, String> toStringFunction) throws IllegalArgumentException {

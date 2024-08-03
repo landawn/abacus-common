@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 HaiYang Li
+ * Copyright (C) 2024 HaiYang Li
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -20,31 +20,30 @@ package com.landawn.abacus.util;
  * @author HaiYang Li
  * @param <K> the key type
  * @param <T>
- * @see IndexedKeyed
+ * @see Keyed
  * @see Wrapper
  */
 @com.landawn.abacus.annotation.Immutable
-public sealed class Keyed<K, T> implements Immutable permits IndexedKeyed {
+public final class IndexedKeyed<K, T> extends Keyed<K, T> {
 
-    protected final K key;
+    private final int index;
 
-    protected final T val;
-
-    Keyed(K key, T val) {
-        this.key = key;
-        this.val = val;
+    IndexedKeyed(int index, K key, T val) {
+        super(key, val);
+        this.index = index;
     }
 
     /**
      *
      * @param <K> the key type
      * @param <T>
+     * @param index
      * @param key
      * @param val
      * @return
      */
-    public static <K, T> Keyed<K, T> of(final K key, final T val) {
-        return new Keyed<>(key, val);
+    public static <K, T> IndexedKeyed<K, T> of(final int index, final K key, final T val) {
+        return new IndexedKeyed<>(index, key, val);
     }
 
     /**
@@ -52,46 +51,8 @@ public sealed class Keyed<K, T> implements Immutable permits IndexedKeyed {
      *
      * @return
      */
-    public K key() {
-        return key;
+    public int index() {
+        return index;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
-    public T val() {
-        return val;
-    }
-
-    /**
-     *
-     *
-     * @return
-     */
-    @Override
-    public int hashCode() {
-        return N.hashCode(key);
-    }
-
-    /**
-     *
-     * @param obj
-     * @return
-     */
-    @Override
-    public boolean equals(final Object obj) {
-        return (obj == this) || (obj instanceof Keyed && N.equals(((Keyed<K, T>) obj).key, key));
-    }
-
-    /**
-     *
-     *
-     * @return
-     */
-    @Override
-    public String toString() {
-        return "{key=" + N.toString(key) + ", val=" + val + "}";
-    }
 }

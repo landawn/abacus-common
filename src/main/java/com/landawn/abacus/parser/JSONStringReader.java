@@ -20,6 +20,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.landawn.abacus.exception.ParseException;
+import com.landawn.abacus.logging.Logger;
+import com.landawn.abacus.logging.LoggerFactory;
 import com.landawn.abacus.parser.ParserUtil.PropInfo;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.util.N;
@@ -43,6 +45,7 @@ import com.landawn.abacus.util.u.OptionalShort;
  * @since 0.8
  */
 class JSONStringReader extends AbstractJSONReader {
+    private static final Logger logger = LoggerFactory.getLogger(JSONStringReader.class);
 
     static final Map<Class<?>, Object> defaultOptionals = new HashMap<>(16);
 
@@ -563,6 +566,9 @@ class JSONStringReader extends AbstractJSONReader {
                     return (T) num;
                 } catch (Exception e) {
                     // ignore;
+                    if (logger.isWarnEnabled()) {
+                        logger.warn("Failed to parse: " + str + " to Number");
+                    }
                 }
 
                 return (T) str;

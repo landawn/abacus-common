@@ -33,7 +33,7 @@ import java.util.TimeZone;
  *
  * @see <a href="http://www.w3.org/TR/NOTE-datetime">this specification</a>
  */
-public final class ISO8601Util {
+final class ISO8601Util {
 
     static final int DEF_8601_LEN = "yyyy-MM-ddThh:mm:ss.SSS+00:00".length();
 

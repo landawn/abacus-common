@@ -46,6 +46,8 @@ import javax.xml.datatype.XMLGregorianCalendar;
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.exception.UncheckedIOException;
+import com.landawn.abacus.logging.Logger;
+import com.landawn.abacus.logging.LoggerFactory;
 
 /**
  * <p>
@@ -59,6 +61,7 @@ import com.landawn.abacus.exception.UncheckedIOException;
  */
 @SuppressWarnings({ "java:S1694", "java:S2143" })
 public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Dates {
+    private static final Logger logger = LoggerFactory.getLogger(DateUtil.class);
 
     private static final String DATE_STR = "date";
     private static final String DATE1_STR = "date1";
@@ -757,11 +760,51 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
      */
     @MayReturnNull
     public static java.util.Date parseJUDate(final String date, final String format, final TimeZone timeZone) {
-        if (Strings.isEmpty(date) || (date.length() == 4 && "null".equalsIgnoreCase(date))) {
+        if (isNullDateTime(date)) {
             return null;
         }
 
-        return createJUDate(parse(date, format, timeZone));
+        // return createJUDate(parse(date, format, timeZone));
+
+        if ((format == null) && isPossibleLong(date)) {
+            try {
+                return createJUDate(Long.parseLong(date));
+            } catch (NumberFormatException e) {
+                // ignore.
+                if (logger.isWarnEnabled()) {
+                    logger.warn("Failed to parse: " + date + " to Long");
+                }
+            }
+        }
+
+        final String formatToUse = checkDateFormat(date, format);
+
+        // use ISO8601Util.parse for better performance.
+        if (Strings.isEmpty(formatToUse) || ISO_8601_DATE_TIME_FORMAT.equals(formatToUse) || ISO_8601_TIMESTAMP_FORMAT.equals(formatToUse)) {
+            if (timeZone == null || timeZone.equals(ISO8601Util.TIMEZONE_Z)) {
+                return ISO8601Util.parse(date);
+            } else {
+                throw new RuntimeException("Unsupported date format: " + formatToUse + " with time zone: " + timeZone);
+            }
+        }
+
+        final TimeZone timeZoneToUse = checkTimeZone(date, formatToUse, timeZone);
+
+        long timeInMillis = fastDateParse(date, formatToUse, timeZoneToUse);
+
+        if (timeInMillis != 0) {
+            return createJUDate(timeInMillis);
+        }
+
+        DateFormat sdf = getSDF(formatToUse, timeZoneToUse);
+
+        try {
+            return sdf.parse(date);
+        } catch (ParseException e) {
+            throw new IllegalArgumentException(e);
+        } finally {
+            recycleSDF(formatToUse, timeZoneToUse, sdf);
+        }
     }
 
     /**
@@ -796,7 +839,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
      */
     @MayReturnNull
     public static Date parseDate(final String date, final String format, final TimeZone timeZone) {
-        if (Strings.isEmpty(date) || (date.length() == 4 && "null".equalsIgnoreCase(date))) {
+        if (isNullDateTime(date)) {
             return null;
         }
 
@@ -835,7 +878,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
      */
     @MayReturnNull
     public static Time parseTime(final String date, final String format, final TimeZone timeZone) {
-        if (Strings.isEmpty(date) || (date.length() == 4 && "null".equalsIgnoreCase(date))) {
+        if (isNullDateTime(date)) {
             return null;
         }
 
@@ -874,7 +917,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
      */
     @MayReturnNull
     public static Timestamp parseTimestamp(final String date, final String format, final TimeZone timeZone) {
-        if (Strings.isEmpty(date) || (date.length() == 4 && "null".equalsIgnoreCase(date))) {
+        if (isNullDateTime(date)) {
             return null;
         }
 
@@ -916,7 +959,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
     @MayReturnNull
     @Beta
     public static Calendar parseCalendar(final String calendar, final String format, final TimeZone timeZone) {
-        if (Strings.isEmpty(calendar) || (calendar.length() == 4 && "null".equalsIgnoreCase(calendar))) {
+        if (isNullDateTime(calendar)) {
             return null;
         }
 
@@ -958,7 +1001,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
     @MayReturnNull
     @Beta
     public static GregorianCalendar parseGregorianCalendar(final String calendar, final String format, final TimeZone timeZone) {
-        if (Strings.isEmpty(calendar) || (calendar.length() == 4 && "null".equalsIgnoreCase(calendar))) {
+        if (isNullDateTime(calendar)) {
             return null;
         }
 
@@ -1000,14 +1043,18 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
     @MayReturnNull
     @Beta
     public static XMLGregorianCalendar parseXMLGregorianCalendar(final String calendar, final String format, final TimeZone timeZone) {
-        if (Strings.isEmpty(calendar) || (calendar.length() == 4 && "null".equalsIgnoreCase(calendar))) {
+        if (isNullDateTime(calendar)) {
             return null;
         }
 
         return createXMLGregorianCalendar(parse(calendar, format, timeZone), timeZone);
     }
 
-    static boolean isPossibleLong(final CharSequence dateTime) {
+    private static boolean isNullDateTime(final String date) {
+        return Strings.isEmpty(date) || (date.length() == 4 && "null".equalsIgnoreCase(date));
+    }
+
+    private static boolean isPossibleLong(final CharSequence dateTime) {
         if (dateTime.length() > 4) {
             char ch = dateTime.charAt(2);
 
@@ -1026,45 +1073,49 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
     /**
      *
      * @param dateTime
-     * @param format
-     * @param timeZone
+     * @param formatToUse
+     * @param timeZoneToUse
      * @return
      */
-    private static long parse(final String dateTime, String format, TimeZone timeZone) {
+    private static long parse(final String dateTime, final String format, final TimeZone timezone) {
         if ((format == null) && isPossibleLong(dateTime)) {
             try {
                 return Long.parseLong(dateTime);
             } catch (NumberFormatException e) {
                 // ignore.
+                if (logger.isWarnEnabled()) {
+                    logger.warn("Failed to parse: " + dateTime + " to Long");
+                }
             }
         }
 
-        format = checkDateFormat(dateTime, format);
+        final String formatToUse = checkDateFormat(dateTime, format);
 
-        if (Strings.isEmpty(format)) {
-            if (timeZone == null || timeZone.equals(ISO8601Util.TIMEZONE_Z)) {
+        // use ISO8601Util.parse for better performance.
+        if (Strings.isEmpty(formatToUse) || ISO_8601_DATE_TIME_FORMAT.equals(formatToUse) || ISO_8601_TIMESTAMP_FORMAT.equals(formatToUse)) {
+            if (timezone == null || timezone.equals(ISO8601Util.TIMEZONE_Z)) {
                 return ISO8601Util.parse(dateTime).getTime();
             } else {
-                throw new RuntimeException("Unsupported date format: " + format + " with time zone: " + timeZone);
+                throw new RuntimeException("Unsupported date format: " + formatToUse + " with time zone: " + timezone);
             }
         }
 
-        timeZone = checkTimeZone(dateTime, format, timeZone);
+        final TimeZone timeZoneToUse = checkTimeZone(dateTime, formatToUse, timezone);
 
-        long timeInMillis = fastDateParse(dateTime, format, timeZone);
+        long timeInMillis = fastDateParse(dateTime, formatToUse, timeZoneToUse);
 
         if (timeInMillis != 0) {
             return timeInMillis;
         }
 
-        DateFormat sdf = getSDF(format, timeZone);
+        DateFormat sdf = getSDF(formatToUse, timeZoneToUse);
 
         try {
             return sdf.parse(dateTime).getTime();
         } catch (ParseException e) {
             throw new IllegalArgumentException(e);
         } finally {
-            recycleSDF(format, timeZone, sdf);
+            recycleSDF(formatToUse, timeZoneToUse, sdf);
         }
     }
 
@@ -4012,8 +4063,11 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
             if (isPossibleLong(text)) {
                 try {
                     return LocalDate.ofInstant(Instant.ofEpochMilli(Numbers.toLong(text)), DEFAULT_ZONE_ID);
-                } catch (NumberFormatException e2) {
+                } catch (NumberFormatException e) {
                     // ignore;
+                    if (logger.isWarnEnabled()) {
+                        logger.warn("Failed to parse: " + text + " to Long");
+                    }
                 }
             }
 
@@ -4028,8 +4082,11 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
             if (isPossibleLong(text)) {
                 try {
                     return LocalTime.ofInstant(Instant.ofEpochMilli(Numbers.toLong(text)), DEFAULT_ZONE_ID);
-                } catch (NumberFormatException e2) {
+                } catch (NumberFormatException e) {
                     // ignore;
+                    if (logger.isWarnEnabled()) {
+                        logger.warn("Failed to parse: " + text + " to Long");
+                    }
                 }
             }
 
@@ -4044,8 +4101,11 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
             if (isPossibleLong(text)) {
                 try {
                     return LocalDateTime.ofInstant(Instant.ofEpochMilli(Numbers.toLong(text)), DEFAULT_ZONE_ID);
-                } catch (NumberFormatException e2) {
+                } catch (NumberFormatException e) {
                     // ignore;
+                    if (logger.isWarnEnabled()) {
+                        logger.warn("Failed to parse: " + text + " to Long");
+                    }
                 }
             }
 
@@ -4060,8 +4120,11 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
             if (isPossibleLong(text)) {
                 try {
                     return OffsetDateTime.ofInstant(Instant.ofEpochMilli(Numbers.toLong(text)), DEFAULT_ZONE_ID);
-                } catch (NumberFormatException e2) {
+                } catch (NumberFormatException e) {
                     // ignore;
+                    if (logger.isWarnEnabled()) {
+                        logger.warn("Failed to parse: " + text + " to Long");
+                    }
                 }
             }
 
@@ -4076,8 +4139,11 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
             if (isPossibleLong(text)) {
                 try {
                     return ZonedDateTime.ofInstant(Instant.ofEpochMilli(Numbers.toLong(text)), DEFAULT_ZONE_ID);
-                } catch (NumberFormatException e2) {
+                } catch (NumberFormatException e) {
                     // ignore;
+                    if (logger.isWarnEnabled()) {
+                        logger.warn("Failed to parse: " + text + " to Long");
+                    }
                 }
             }
 
@@ -4092,8 +4158,11 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
             if (isPossibleLong(text)) {
                 try {
                     return Instant.ofEpochMilli(Numbers.toLong(text));
-                } catch (NumberFormatException e2) {
+                } catch (NumberFormatException e) {
                     // ignore;
+                    if (logger.isWarnEnabled()) {
+                        logger.warn("Failed to parse: " + text + " to Long");
+                    }
                 }
             }
 
@@ -4108,6 +4177,12 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
                 return ISO_ZONED_DATE_TIME.dateTimeFormatter.parse(text);
             } else if (len >= 25 && ((ch = text.charAt(len - 5)) == '+' || ch == '-')) {
                 return ISO_OFFSET_DATE_TIME.dateTimeFormatter.parse(text);
+            } else if (len == 19) {
+                if (text.charAt(10) == 'T') {
+                    return ISO_LOCAL_DATE_TIME.dateTimeFormatter.parse(text);
+                } else {
+                    return LOCAL_DATE_TIME.dateTimeFormatter.parse(text);
+                }
             } else if (len == 20 && text.charAt(19) == 'Z') {
                 return ISO_8601_DATE_TIME.dateTimeFormatter.parse(text);
             } else if (len == 24 && text.charAt(23) == 'Z') {

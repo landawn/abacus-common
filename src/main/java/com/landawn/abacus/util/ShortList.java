@@ -1972,6 +1972,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      *
      * @return
      */
+    @Override
     public ShortIterator iterator() {
         if (isEmpty()) {
             return ShortIterator.EMPTY;

@@ -91,7 +91,7 @@ public class GregorianCalendarType extends AbstractCalendarType<GregorianCalenda
             return null; // NOSONAR
         }
 
-        if (cbuf[offset + 4] != '-') {
+        if (isPossibleLong(cbuf, offset, len)) {
             try {
                 return DateUtil.createGregorianCalendar(parseLong(cbuf, offset, len));
             } catch (NumberFormatException e) {

@@ -106,7 +106,7 @@ public class JUDateType extends AbstractDateType<Date> {
             return null; // NOSONAR
         }
 
-        if (cbuf[offset + 4] != '-') {
+        if (isPossibleLong(cbuf, offset, len)) {
             try {
                 return DateUtil.createJUDate(parseLong(cbuf, offset, len));
             } catch (NumberFormatException e) {

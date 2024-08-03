@@ -92,7 +92,7 @@ public class DateType extends AbstractDateType<Date> {
             return null; // NOSONAR
         }
 
-        if (cbuf[offset + 4] != '-') {
+        if (isPossibleLong(cbuf, offset, len)) {
             try {
                 return DateUtil.createDate(parseLong(cbuf, offset, len));
             } catch (NumberFormatException e) {

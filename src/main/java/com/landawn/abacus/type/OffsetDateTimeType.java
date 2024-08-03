@@ -29,7 +29,6 @@ import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.DateTimeFormat;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Numbers;
-import com.landawn.abacus.util.Strings;
 
 /**
  *
@@ -71,7 +70,7 @@ public class OffsetDateTimeType extends AbstractTemporalType<OffsetDateTime> {
     @MayReturnNull
     @Override
     public OffsetDateTime valueOf(String str) {
-        if (Strings.isEmpty(str)) {
+        if (isNullDateTime(str)) {
             return null; // NOSONAR
         }
 

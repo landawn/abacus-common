@@ -80,6 +80,22 @@ public final class Iterables {
     }
 
     /**
+     * Returns {@code true} if the specified two Collections have the extra same elements(order deosn't matter), or both are empty.
+     *
+     * @param a
+     * @param b
+     * @return
+     * @see N#symmetricDifferentSet(Collection, Collection)
+     */
+    public static boolean hasSameElements(final Collection<?> a, final Collection<?> b) {
+        if (N.size(a) != N.size(b)) {
+            return false;
+        }
+
+        return N.symmetricDifferentSet(a, b).isEmpty();
+    }
+
+    /**
      * Returns {@code OptionalChar.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
      *
      * @param a
@@ -314,10 +330,10 @@ public final class Iterables {
     /**
      * Returns {@code OptionalInt.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
      *
-     * @param <T> 
-     * @param c 
-     * @param valueExtractor 
-     * @return 
+     * @param <T>
+     * @param c
+     * @param valueExtractor
+     * @return
      */
     @Beta
     public static <T> OptionalInt minInt(final Iterable<? extends T> c, final ToIntFunction<? super T> valueExtractor) {
@@ -331,10 +347,10 @@ public final class Iterables {
     /**
      * Returns {@code OptionalInt.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
      *
-     * @param <T> 
-     * @param iter 
-     * @param valueExtractor 
-     * @return 
+     * @param <T>
+     * @param iter
+     * @param valueExtractor
+     * @return
      */
     @Beta
     public static <T> OptionalInt minInt(final Iterator<? extends T> iter, final ToIntFunction<? super T> valueExtractor) {
@@ -359,10 +375,10 @@ public final class Iterables {
     /**
      * Returns {@code OptionalLong.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
      *
-     * @param <T> 
-     * @param a 
-     * @param valueExtractor 
-     * @return 
+     * @param <T>
+     * @param a
+     * @param valueExtractor
+     * @return
      */
     @Beta
     public static <T> OptionalLong minLong(final T[] a, final ToLongFunction<? super T> valueExtractor) {
@@ -387,10 +403,10 @@ public final class Iterables {
     /**
      * Returns {@code OptionalLong.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
      *
-     * @param <T> 
-     * @param c 
-     * @param valueExtractor 
-     * @return 
+     * @param <T>
+     * @param c
+     * @param valueExtractor
+     * @return
      */
     @Beta
     public static <T> OptionalLong minLong(final Iterable<? extends T> c, final ToLongFunction<? super T> valueExtractor) {
@@ -404,10 +420,10 @@ public final class Iterables {
     /**
      * Returns {@code OptionalLong.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
      *
-     * @param <T> 
-     * @param iter 
-     * @param valueExtractor 
-     * @return 
+     * @param <T>
+     * @param iter
+     * @param valueExtractor
+     * @return
      */
     @Beta
     public static <T> OptionalLong minLong(final Iterator<? extends T> iter, final ToLongFunction<? super T> valueExtractor) {
@@ -432,10 +448,10 @@ public final class Iterables {
     /**
      * Returns {@code OptionalDouble.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
      *
-     * @param <T> 
-     * @param a 
-     * @param valueExtractor 
-     * @return 
+     * @param <T>
+     * @param a
+     * @param valueExtractor
+     * @return
      */
     @Beta
     public static <T> OptionalDouble minDouble(final T[] a, final ToDoubleFunction<? super T> valueExtractor) {
@@ -460,10 +476,10 @@ public final class Iterables {
     /**
      * Returns {@code OptionalDouble.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
      *
-     * @param <T> 
-     * @param c 
-     * @param valueExtractor 
-     * @return 
+     * @param <T>
+     * @param c
+     * @param valueExtractor
+     * @return
      */
     @Beta
     public static <T> OptionalDouble minDouble(final Iterable<? extends T> c, final ToDoubleFunction<? super T> valueExtractor) {
@@ -477,10 +493,10 @@ public final class Iterables {
     /**
      * Returns {@code OptionalDouble.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
      *
-     * @param <T> 
-     * @param iter 
-     * @param valueExtractor 
-     * @return 
+     * @param <T>
+     * @param iter
+     * @param valueExtractor
+     * @return
      */
     @Beta
     public static <T> OptionalDouble minDouble(final Iterator<? extends T> iter, final ToDoubleFunction<? super T> valueExtractor) {
@@ -709,10 +725,10 @@ public final class Iterables {
     /**
      * Returns {@code OptionalInt.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
      *
-     * @param <T> 
-     * @param a 
-     * @param valueExtractor 
-     * @return 
+     * @param <T>
+     * @param a
+     * @param valueExtractor
+     * @return
      */
     @Beta
     public static <T> OptionalInt maxInt(final T[] a, final ToIntFunction<? super T> valueExtractor) {
@@ -737,10 +753,10 @@ public final class Iterables {
     /**
      * Returns {@code OptionalInt.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
      *
-     * @param <T> 
-     * @param c 
-     * @param valueExtractor 
-     * @return 
+     * @param <T>
+     * @param c
+     * @param valueExtractor
+     * @return
      */
     @Beta
     public static <T> OptionalInt maxInt(final Iterable<? extends T> c, final ToIntFunction<? super T> valueExtractor) {
@@ -754,10 +770,10 @@ public final class Iterables {
     /**
      * Returns {@code OptionalInt.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
      *
-     * @param <T> 
-     * @param iter 
-     * @param valueExtractor 
-     * @return 
+     * @param <T>
+     * @param iter
+     * @param valueExtractor
+     * @return
      */
     @Beta
     public static <T> OptionalInt maxInt(final Iterator<? extends T> iter, final ToIntFunction<? super T> valueExtractor) {
@@ -782,10 +798,10 @@ public final class Iterables {
     /**
      * Returns {@code OptionalLong.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
      *
-     * @param <T> 
-     * @param a 
-     * @param valueExtractor 
-     * @return 
+     * @param <T>
+     * @param a
+     * @param valueExtractor
+     * @return
      */
     @Beta
     public static <T> OptionalLong maxLong(final T[] a, final ToLongFunction<? super T> valueExtractor) {
@@ -810,10 +826,10 @@ public final class Iterables {
     /**
      * Returns {@code OptionalLong.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
      *
-     * @param <T> 
-     * @param c 
-     * @param valueExtractor 
-     * @return 
+     * @param <T>
+     * @param c
+     * @param valueExtractor
+     * @return
      */
     @Beta
     public static <T> OptionalLong maxLong(final Iterable<? extends T> c, final ToLongFunction<? super T> valueExtractor) {
@@ -827,10 +843,10 @@ public final class Iterables {
     /**
      * Returns {@code OptionalLong.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
      *
-     * @param <T> 
-     * @param iter 
-     * @param valueExtractor 
-     * @return 
+     * @param <T>
+     * @param iter
+     * @param valueExtractor
+     * @return
      */
     @Beta
     public static <T> OptionalLong maxLong(final Iterator<? extends T> iter, final ToLongFunction<? super T> valueExtractor) {
@@ -855,10 +871,10 @@ public final class Iterables {
     /**
      * Returns {@code OptionalDouble.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
      *
-     * @param <T> 
-     * @param a 
-     * @param valueExtractor 
-     * @return 
+     * @param <T>
+     * @param a
+     * @param valueExtractor
+     * @return
      */
     @Beta
     public static <T> OptionalDouble maxDouble(final T[] a, final ToDoubleFunction<? super T> valueExtractor) {
@@ -883,10 +899,10 @@ public final class Iterables {
     /**
      * Returns {@code OptionalDouble.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
      *
-     * @param <T> 
-     * @param c 
-     * @param valueExtractor 
-     * @return 
+     * @param <T>
+     * @param c
+     * @param valueExtractor
+     * @return
      */
     @Beta
     public static <T> OptionalDouble maxDouble(final Iterable<? extends T> c, final ToDoubleFunction<? super T> valueExtractor) {
@@ -900,10 +916,10 @@ public final class Iterables {
     /**
      * Returns {@code OptionalDouble.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
      *
-     * @param <T> 
-     * @param iter 
-     * @param valueExtractor 
-     * @return 
+     * @param <T>
+     * @param iter
+     * @param valueExtractor
+     * @return
      */
     @Beta
     public static <T> OptionalDouble maxDouble(final Iterator<? extends T> iter, final ToDoubleFunction<? super T> valueExtractor) {
@@ -1138,10 +1154,10 @@ public final class Iterables {
     /**
      * Returns {@code OptionalLong.empty()} if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
      *
-     * @param <T> 
-     * @param c 
-     * @param func 
-     * @return 
+     * @param <T>
+     * @param c
+     * @param func
+     * @return
      */
     public static <T> OptionalInt sumInt(final Iterable<? extends T> c, final ToIntFunction<? super T> func) {
         final Iterator<? extends T> iter = c == null ? ObjIterator.<T> empty() : c.iterator();
@@ -1167,10 +1183,10 @@ public final class Iterables {
     /**
      * Returns {@code OptionalLong.empty()} if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
      *
-     * @param <T> 
-     * @param c 
-     * @param func 
-     * @return 
+     * @param <T>
+     * @param c
+     * @param func
+     * @return
      */
     public static <T> OptionalLong sumIntToLong(final Iterable<? extends T> c, final ToIntFunction<? super T> func) {
         final Iterator<? extends T> iter = c == null ? ObjIterator.<T> empty() : c.iterator();
@@ -1196,10 +1212,10 @@ public final class Iterables {
     /**
      * Returns {@code OptionalLong.empty()} if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
      *
-     * @param <T> 
-     * @param c 
-     * @param func 
-     * @return 
+     * @param <T>
+     * @param c
+     * @param func
+     * @return
      */
     public static <T> OptionalLong sumLong(final Iterable<? extends T> c, final ToLongFunction<? super T> func) {
         final Iterator<? extends T> iter = c == null ? ObjIterator.<T> empty() : c.iterator();
@@ -1225,10 +1241,10 @@ public final class Iterables {
     /**
      * Returns {@code OptionalDouble.empty()} if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
      *
-     * @param <T> 
-     * @param c 
-     * @param func 
-     * @return 
+     * @param <T>
+     * @param c
+     * @param func
+     * @return
      */
     public static <T> OptionalDouble sumDouble(final Iterable<? extends T> c, final ToDoubleFunction<? super T> func) {
         final Iterator<? extends T> iter = c == null ? ObjIterator.<T> empty() : c.iterator();
@@ -1250,12 +1266,12 @@ public final class Iterables {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param c 
-     * @param func 
-     * @return 
+     *
+     * @param <T>
+     * @param c
+     * @param func
+     * @return
      */
     public static <T> Optional<BigInteger> sumBigInteger(final Iterable<? extends T> c, final Function<? super T, BigInteger> func) {
         final Iterator<? extends T> iter = c == null ? ObjIterator.<T> empty() : c.iterator();
@@ -1277,12 +1293,12 @@ public final class Iterables {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param c 
-     * @param func 
-     * @return 
+     *
+     * @param <T>
+     * @param c
+     * @param func
+     * @return
      */
     public static <T> Optional<BigDecimal> sumBigDecimal(final Iterable<? extends T> c, final Function<? super T, BigDecimal> func) {
         final Iterator<? extends T> iter = c == null ? ObjIterator.<T> empty() : c.iterator();
@@ -1321,10 +1337,10 @@ public final class Iterables {
     /**
      * Returns {@code OptionalDouble.empty()} if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
      *
-     * @param <T> 
-     * @param a 
-     * @param func 
-     * @return 
+     * @param <T>
+     * @param a
+     * @param func
+     * @return
      */
     public static <T> OptionalDouble averageInt(final T[] a, final ToIntFunction<? super T> func) {
         if (N.isEmpty(a)) {
@@ -1337,13 +1353,13 @@ public final class Iterables {
     /**
      * Returns {@code OptionalDouble.empty()} if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
      *
-     * @param <T> 
-     * @param a 
-     * @param fromIndex 
-     * @param toIndex 
-     * @param func 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     * @param <T>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param func
+     * @return
+     * @throws IndexOutOfBoundsException
      */
     public static <T> OptionalDouble averageInt(final T[] a, final int fromIndex, final int toIndex, final ToIntFunction<? super T> func)
             throws IndexOutOfBoundsException {
@@ -1372,13 +1388,13 @@ public final class Iterables {
     /**
      * Returns {@code OptionalDouble.empty()} if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
      *
-     * @param <T> 
-     * @param c 
-     * @param fromIndex 
-     * @param toIndex 
-     * @param func 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     * @param <T>
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @param func
+     * @return
+     * @throws IndexOutOfBoundsException
      */
     public static <T> OptionalDouble averageInt(final Collection<? extends T> c, final int fromIndex, final int toIndex, final ToIntFunction<? super T> func)
             throws IndexOutOfBoundsException {
@@ -1405,10 +1421,10 @@ public final class Iterables {
     /**
      * Returns {@code OptionalDouble.empty()} if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
      *
-     * @param <T> 
-     * @param c 
-     * @param func 
-     * @return 
+     * @param <T>
+     * @param c
+     * @param func
+     * @return
      */
     public static <T> OptionalDouble averageInt(final Iterable<? extends T> c, final ToIntFunction<? super T> func) {
         final Iterator<? extends T> iter = c == null ? ObjIterator.<T> empty() : c.iterator();
@@ -1447,10 +1463,10 @@ public final class Iterables {
     /**
      * Returns {@code OptionalDouble.empty()} if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
      *
-     * @param <T> 
-     * @param a 
-     * @param func 
-     * @return 
+     * @param <T>
+     * @param a
+     * @param func
+     * @return
      */
     public static <T> OptionalDouble averageLong(final T[] a, final ToLongFunction<? super T> func) {
         if (N.isEmpty(a)) {
@@ -1463,13 +1479,13 @@ public final class Iterables {
     /**
      * Returns {@code OptionalDouble.empty()} if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
      *
-     * @param <T> 
-     * @param a 
-     * @param fromIndex 
-     * @param toIndex 
-     * @param func 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     * @param <T>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param func
+     * @return
+     * @throws IndexOutOfBoundsException
      */
     public static <T> OptionalDouble averageLong(final T[] a, final int fromIndex, final int toIndex, final ToLongFunction<? super T> func)
             throws IndexOutOfBoundsException {
@@ -1498,13 +1514,13 @@ public final class Iterables {
     /**
      * Returns {@code OptionalDouble.empty()} if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
      *
-     * @param <T> 
-     * @param c 
-     * @param fromIndex 
-     * @param toIndex 
-     * @param func 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     * @param <T>
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @param func
+     * @return
+     * @throws IndexOutOfBoundsException
      */
     public static <T> OptionalDouble averageLong(final Collection<? extends T> c, final int fromIndex, final int toIndex, final ToLongFunction<? super T> func)
             throws IndexOutOfBoundsException {
@@ -1531,10 +1547,10 @@ public final class Iterables {
     /**
      * Returns {@code OptionalDouble.empty()} if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
      *
-     * @param <T> 
-     * @param c 
-     * @param func 
-     * @return 
+     * @param <T>
+     * @param c
+     * @param func
+     * @return
      */
     public static <T> OptionalDouble averageLong(final Iterable<? extends T> c, final ToLongFunction<? super T> func) {
         final Iterator<? extends T> iter = c == null ? ObjIterator.<T> empty() : c.iterator();
@@ -1573,10 +1589,10 @@ public final class Iterables {
     /**
      * Returns {@code OptionalDouble.empty()} if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
      *
-     * @param <T> 
-     * @param a 
-     * @param func 
-     * @return 
+     * @param <T>
+     * @param a
+     * @param func
+     * @return
      */
     public static <T> OptionalDouble averageDouble(final T[] a, final ToDoubleFunction<? super T> func) {
         if (N.isEmpty(a)) {
@@ -1589,13 +1605,13 @@ public final class Iterables {
     /**
      * Returns {@code OptionalDouble.empty()} if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
      *
-     * @param <T> 
-     * @param a 
-     * @param fromIndex 
-     * @param toIndex 
-     * @param func 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     * @param <T>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param func
+     * @return
+     * @throws IndexOutOfBoundsException
      */
     public static <T> OptionalDouble averageDouble(final T[] a, final int fromIndex, final int toIndex, final ToDoubleFunction<? super T> func)
             throws IndexOutOfBoundsException {
@@ -1630,13 +1646,13 @@ public final class Iterables {
     /**
      * Returns {@code OptionalDouble.empty()} if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
      *
-     * @param <T> 
-     * @param c 
-     * @param fromIndex 
-     * @param toIndex 
-     * @param func 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     * @param <T>
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @param func
+     * @return
+     * @throws IndexOutOfBoundsException
      */
     public static <T> OptionalDouble averageDouble(final Collection<? extends T> c, final int fromIndex, final int toIndex,
             final ToDoubleFunction<? super T> func) throws IndexOutOfBoundsException {
@@ -1687,10 +1703,10 @@ public final class Iterables {
     /**
      * Returns {@code OptionalDouble.empty()} if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
      *
-     * @param <T> 
-     * @param c 
-     * @param func 
-     * @return 
+     * @param <T>
+     * @param c
+     * @param func
+     * @return
      */
     public static <T> OptionalDouble averageDouble(final Iterable<? extends T> c, final ToDoubleFunction<? super T> func) {
         if (c == null) {
@@ -1716,12 +1732,12 @@ public final class Iterables {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param c 
-     * @param func 
-     * @return 
+     *
+     * @param <T>
+     * @param c
+     * @param func
+     * @return
      */
     public static <T> Optional<BigDecimal> averageBigInteger(final Iterable<? extends T> c, final Function<? super T, BigInteger> func) {
         final Iterator<? extends T> iter = c == null ? ObjIterator.<T> empty() : c.iterator();
@@ -1743,12 +1759,12 @@ public final class Iterables {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param c 
-     * @param func 
-     * @return 
+     *
+     * @param <T>
+     * @param c
+     * @param func
+     * @return
      */
     public static <T> Optional<BigDecimal> averageBigDecimal(final Iterable<? extends T> c, final Function<? super T, BigDecimal> func) {
         final Iterator<? extends T> iter = c == null ? ObjIterator.<T> empty() : c.iterator();
@@ -1811,10 +1827,10 @@ public final class Iterables {
     /**
      * Find first or last.
      *
-     * @param <T> 
-     * @param a 
-     * @param predicateForFirst 
-     * @param predicateForLast 
+     * @param <T>
+     * @param a
+     * @param predicateForFirst
+     * @param predicateForLast
      * @return the nullable
      */
     public static <T> Nullable<T> findFirstOrLast(final T[] a, final Predicate<? super T> predicateForFirst, final Predicate<? super T> predicateForLast) {
@@ -1830,10 +1846,10 @@ public final class Iterables {
     /**
      * Find first or last.
      *
-     * @param <T> 
-     * @param c 
-     * @param predicateForFirst 
-     * @param predicateForLast 
+     * @param <T>
+     * @param c
+     * @param predicateForFirst
+     * @param predicateForLast
      * @return the nullable
      */
     public static <T> Nullable<T> findFirstOrLast(final Collection<? extends T> c, final Predicate<? super T> predicateForFirst,
@@ -1850,10 +1866,10 @@ public final class Iterables {
     /**
      * Find first or last index.
      *
-     * @param <T> 
-     * @param a 
-     * @param predicateForFirst 
-     * @param predicateForLast 
+     * @param <T>
+     * @param a
+     * @param predicateForFirst
+     * @param predicateForLast
      * @return the optional int
      */
     public static <T> OptionalInt findFirstOrLastIndex(final T[] a, final Predicate<? super T> predicateForFirst, final Predicate<? super T> predicateForLast) {
@@ -1867,13 +1883,13 @@ public final class Iterables {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param c 
-     * @param predicateForFirst 
-     * @param predicateForLast 
-     * @return 
+     *
+     * @param <T>
+     * @param c
+     * @param predicateForFirst
+     * @param predicateForLast
+     * @return
      */
     public static <T> OptionalInt findFirstOrLastIndex(final Collection<? extends T> c, final Predicate<? super T> predicateForFirst,
             final Predicate<? super T> predicateForLast) {
@@ -1889,9 +1905,9 @@ public final class Iterables {
     /**
      * Find first and last.
      *
-     * @param <T> 
-     * @param a 
-     * @param predicate 
+     * @param <T>
+     * @param a
+     * @param predicate
      * @return the pair
      */
     public static <T> Pair<Nullable<T>, Nullable<T>> findFirstAndLast(final T[] a, final Predicate<? super T> predicate) {
@@ -1901,10 +1917,10 @@ public final class Iterables {
     /**
      * Find first and last.
      *
-     * @param <T> 
-     * @param a 
-     * @param predicateForFirst 
-     * @param predicateForLast 
+     * @param <T>
+     * @param a
+     * @param predicateForFirst
+     * @param predicateForLast
      * @return the pair
      */
     public static <T> Pair<Nullable<T>, Nullable<T>> findFirstAndLast(final T[] a, final Predicate<? super T> predicateForFirst,
@@ -1919,9 +1935,9 @@ public final class Iterables {
     /**
      * Find first and last.
      *
-     * @param <T> 
-     * @param c 
-     * @param predicate 
+     * @param <T>
+     * @param c
+     * @param predicate
      * @return the pair
      */
     public static <T> Pair<Nullable<T>, Nullable<T>> findFirstAndLast(final Collection<? extends T> c, final Predicate<? super T> predicate) {
@@ -1931,10 +1947,10 @@ public final class Iterables {
     /**
      * Find first and last.
      *
-     * @param <T> 
-     * @param c 
-     * @param predicateForFirst 
-     * @param predicateForLast 
+     * @param <T>
+     * @param c
+     * @param predicateForFirst
+     * @param predicateForLast
      * @return the pair
      */
     public static <T> Pair<Nullable<T>, Nullable<T>> findFirstAndLast(final Collection<? extends T> c, final Predicate<? super T> predicateForFirst,
@@ -1949,9 +1965,9 @@ public final class Iterables {
     /**
      * Find first and last index.
      *
-     * @param <T> 
-     * @param a 
-     * @param predicate 
+     * @param <T>
+     * @param a
+     * @param predicate
      * @return the pair
      */
     public static <T> Pair<OptionalInt, OptionalInt> findFirstAndLastIndex(final T[] a, final Predicate<? super T> predicate) {
@@ -1961,10 +1977,10 @@ public final class Iterables {
     /**
      * Find first and last index.
      *
-     * @param <T> 
-     * @param a 
-     * @param predicateForFirst 
-     * @param predicateForLast 
+     * @param <T>
+     * @param a
+     * @param predicateForFirst
+     * @param predicateForLast
      * @return the pair
      */
     public static <T> Pair<OptionalInt, OptionalInt> findFirstAndLastIndex(final T[] a, final Predicate<? super T> predicateForFirst,
@@ -1979,9 +1995,9 @@ public final class Iterables {
     /**
      * Find first and last index.
      *
-     * @param <T> 
-     * @param c 
-     * @param predicate 
+     * @param <T>
+     * @param c
+     * @param predicate
      * @return the pair
      */
     public static <T> Pair<OptionalInt, OptionalInt> findFirstAndLastIndex(final Collection<? extends T> c, final Predicate<? super T> predicate) {
@@ -1991,10 +2007,10 @@ public final class Iterables {
     /**
      * Find first and last index.
      *
-     * @param <T> 
-     * @param c 
-     * @param predicateForFirst 
-     * @param predicateForLast 
+     * @param <T>
+     * @param c
+     * @param predicateForFirst
+     * @param predicateForLast
      * @return the pair
      */
     public static <T> Pair<OptionalInt, OptionalInt> findFirstAndLastIndex(final Collection<? extends T> c, final Predicate<? super T> predicateForFirst,

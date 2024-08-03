@@ -295,8 +295,8 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
             try {
                 return (T) N.newInstance(attribeTypeClass);
             } catch (Exception e) {
-                if (logger.isInfoEnabled()) {
-                    logger.info("Failed to new instance by type attribute: " + attribeTypeClass.getCanonicalName());
+                if (logger.isWarnEnabled()) {
+                    logger.warn("Failed to new instance by type attribute: " + attribeTypeClass.getCanonicalName());
                 }
             }
         }

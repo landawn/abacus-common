@@ -44,9 +44,9 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public Class<XMLGregorianCalendar> clazz() {
@@ -77,7 +77,7 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
             return null; // NOSONAR
         }
 
-        if (cbuf[offset + 4] != '-') {
+        if (isPossibleLong(cbuf, offset, len)) {
             try {
                 return DateUtil.createXMLGregorianCalendar(parseLong(cbuf, offset, len));
             } catch (NumberFormatException e) {

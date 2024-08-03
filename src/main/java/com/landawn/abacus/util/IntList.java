@@ -2061,6 +2061,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      *
      * @return
      */
+    @Override
     public IntIterator iterator() {
         if (isEmpty()) {
             return IntIterator.EMPTY;

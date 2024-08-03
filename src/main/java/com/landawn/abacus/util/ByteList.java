@@ -1923,6 +1923,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      *
      * @return
      */
+    @Override
     public ByteIterator iterator() {
         if (isEmpty()) {
             return ByteIterator.EMPTY;

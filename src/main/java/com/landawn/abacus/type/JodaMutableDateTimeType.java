@@ -102,7 +102,7 @@ public class JodaMutableDateTimeType extends AbstractJodaDateTimeType<MutableDat
             return null; // NOSONAR
         }
 
-        if (cbuf[offset + 4] != '-') {
+        if (isPossibleLong(cbuf, offset, len)) {
             try {
                 return new MutableDateTime(parseLong(cbuf, offset, len));
             } catch (NumberFormatException e) {
