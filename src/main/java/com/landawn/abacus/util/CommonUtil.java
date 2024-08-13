@@ -2416,18 +2416,6 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns a set backed by the specified map.
-     *
-     * @param <E>
-     * @param map the backing map
-     * @return
-     * @see Collections#newSetFromMap(Map)
-     */
-    public static <E> Set<E> newSetFromMap(final Map<E, Boolean> map) {
-        return Collections.newSetFromMap(map);
-    }
-
-    /**
      * Inits the hash capacity.
      *
      * @param size
@@ -2614,9 +2602,10 @@ sealed class CommonUtil permits N {
      *
      * @param <T>
      * @return
+     * @see Collections#newSetFromMap(Map)
      */
-    public static <T> ConcurrentHashSet<T> newConcurrentHashSet() {
-        return new ConcurrentHashSet<>();
+    public static <T> Set<T> newConcurrentHashSet() {
+        return newSetFromMap(new ConcurrentHashMap<>());
     }
 
     /**
@@ -2625,9 +2614,10 @@ sealed class CommonUtil permits N {
      * @param <T>
      * @param initialCapacity
      * @return
+     * @see Collections#newSetFromMap(Map)
      */
-    public static <T> ConcurrentHashSet<T> newConcurrentHashSet(int initialCapacity) {
-        return new ConcurrentHashSet<>(initHashCapacity(initialCapacity));
+    public static <T> Set<T> newConcurrentHashSet(int initialCapacity) {
+        return newSetFromMap(new ConcurrentHashMap<>(initialCapacity));
     }
 
     /**
@@ -2636,9 +2626,29 @@ sealed class CommonUtil permits N {
      * @param <T>
      * @param c
      * @return
+     * @see Collections#newSetFromMap(Map)
      */
-    public static <T> ConcurrentHashSet<T> newConcurrentHashSet(Collection<? extends T> c) {
-        return isEmpty(c) ? new ConcurrentHashSet<>() : new ConcurrentHashSet<>(c);
+    public static <T> Set<T> newConcurrentHashSet(Collection<? extends T> c) {
+        final int size = N.size(c);
+        final Set<T> ret = newSetFromMap(new ConcurrentHashMap<>(size));
+
+        if (size > 0) {
+            ret.addAll(c);
+        }
+
+        return ret;
+    }
+
+    /**
+     * Returns a set backed by the specified map.
+     *
+     * @param <E>
+     * @param map the backing map
+     * @return
+     * @see Collections#newSetFromMap(Map)
+     */
+    public static <E> Set<E> newSetFromMap(final Map<E, Boolean> map) {
+        return Collections.newSetFromMap(map);
     }
 
     /**
@@ -17331,6 +17341,7 @@ sealed class CommonUtil permits N {
      * @return
      * @throws IllegalArgumentException
      * @see Iterators#repeat(Object, int)
+     * @see Collections#nCopies(int, Object)
      */
     public static <T> List<T> repeat(final T value, final int n) throws IllegalArgumentException {
         checkArgNotNegative(n, "n");

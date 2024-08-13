@@ -310,11 +310,11 @@ public abstract class Configuration {
         //        dir = dir.getParentFile();
         //    } while (i++ < 3 && (dir != null) && !dir.getName().endsWith(File.separator));
 
-        File dir = new File(IOUtil.CURRENT_PATH);
+        File dir = new File(IOUtil.CURRENT_DIR);
 
         if (logger.isInfoEnabled()) {
             logger.info("start to find simplified file: '" + simpleConfigFileName + "' from source path: '" + dir.getAbsolutePath()
-                    + "'. current folder identified by './' is: '" + IOUtil.CURRENT_PATH + "'.");
+                    + "'. current folder identified by './' is: '" + IOUtil.CURRENT_DIR + "'.");
         }
 
         configurationFile = findFileInDir(folderPrefix, simpleConfigFileName, dir, isDir, foundDir);
@@ -468,7 +468,7 @@ public abstract class Configuration {
         // if the class/library is loaded from local maven repository.
         if (path.indexOf("/.m2/repository/com/landawn/abacus-common/") > 0 || path.indexOf("/.m2/repository/com/landawn/abacus-common-se/") > 0 //NOSONAR
                 || path.indexOf("/.m2/repository/com/landawn/abacus-common-se-jdk7/") > 0) { //NOSONAR
-            return new File(IOUtil.CURRENT_PATH);
+            return new File(IOUtil.CURRENT_DIR);
         }
 
         return dir;

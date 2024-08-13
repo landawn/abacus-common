@@ -2029,11 +2029,7 @@ public final class Joiner implements Closeable {
             return appendable;
         }
 
-        try {
-            appendable.append(toString());
-        } finally {
-            recycleBuffer();
-        }
+        appendable.append(toString());
 
         return appendable;
     }

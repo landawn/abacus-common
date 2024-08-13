@@ -117,6 +117,7 @@ public abstract class Tuple<TP> implements Immutable {
      * @return
      * @throws E the e
      */
+    @Beta
     public <E extends Exception> Optional<TP> filter(final Throwables.Predicate<? super TP, E> predicate) throws E {
         return predicate.test((TP) this) ? Optional.of((TP) this) : Optional.<TP> empty();
     }
@@ -126,6 +127,7 @@ public abstract class Tuple<TP> implements Immutable {
      *
      * @return
      */
+    @Beta
     public Stream<TP> stream() {
         return Stream.of((TP) this);
     }
@@ -139,6 +141,7 @@ public abstract class Tuple<TP> implements Immutable {
      * @return
      * @throws E
      */
+    @Beta
     public <T, E extends Exception> Stream<T> stream(final Throwables.Function<? super TP, Stream<T>, E> func) throws E {
         return func.apply((TP) this);
     }
@@ -147,6 +150,7 @@ public abstract class Tuple<TP> implements Immutable {
      *
      * @return
      */
+    @Beta
     public Optional<TP> toOptional() {
         return Optional.of((TP) this);
     }

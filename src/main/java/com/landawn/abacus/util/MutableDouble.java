@@ -33,7 +33,14 @@ package com.landawn.abacus.util;
  * @see Double
  * @since 2.1
  */
-public final class MutableDouble implements Comparable<MutableDouble>, Mutable { // Should not extends Number because Number is immutable
+public final class MutableDouble extends Number implements Comparable<MutableDouble>, Mutable {
+
+    /**
+     * Required for serialization support.
+     *
+     * @see java.io.Serializable
+     */
+    private static final long serialVersionUID = 1587163916L;
 
     private double value;
 
@@ -269,6 +276,48 @@ public final class MutableDouble implements Comparable<MutableDouble>, Mutable {
      */
     public double addAndGet(final double delta) {
         return value += delta;
+    }
+
+    //-----------------------------------------------------------------------
+    // shortValue and byteValue rely on Number implementation
+    /**
+     * Returns the value of this MutableDouble as an int.
+     *
+     * @return
+     */
+    @Override
+    public int intValue() {
+        return (int) value;
+    }
+
+    /**
+     * Returns the value of this MutableDouble as a long.
+     *
+     * @return
+     */
+    @Override
+    public long longValue() {
+        return (long) value;
+    }
+
+    /**
+     * Returns the value of this MutableDouble as a float.
+     *
+     * @return
+     */
+    @Override
+    public float floatValue() {
+        return (float) value;
+    }
+
+    /**
+     * Returns the value of this MutableDouble as a double.
+     *
+     * @return
+     */
+    @Override
+    public double doubleValue() {
+        return value;
     }
 
     //-----------------------------------------------------------------------

@@ -15,6 +15,8 @@
  */
 package com.landawn.abacus.util;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -32,13 +34,17 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.io.Writer;
 import java.lang.reflect.Method;
+import java.net.HttpURLConnection;
 import java.net.InetAddress;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.ByteBuffer;
 import java.nio.MappedByteBuffer;
+import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileChannel.MapMode;
+import java.nio.channels.ReadableByteChannel;
+import java.nio.channels.WritableByteChannel;
 import java.nio.charset.Charset;
 import java.nio.file.CopyOption;
 import java.nio.file.Files;
@@ -51,6 +57,7 @@ import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.Executors;
+import java.util.function.Consumer;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 import java.util.zip.ZipEntry;
@@ -245,19 +252,38 @@ public final class IOUtil {
             : System.getProperty("user.country");
 
     /** current path retrieved by {@code new File("./").getAbsolutePath()} */
-    public static final String CURRENT_PATH;
+    public static final String CURRENT_DIR;
 
     static {
         final String path = new File("./").getAbsolutePath();
-        CURRENT_PATH = path.charAt(path.length() - 1) == '.' ? path.substring(0, path.length() - 1) : path;
+        CURRENT_DIR = path.charAt(path.length() - 1) == '.' ? path.substring(0, path.length() - 1) : path;
     }
 
-    // ...
-    public static final String PATH_SEPARATOR = System.getProperty("path.separator");
+    /**
+     * @see File#pathSeparator
+     */
+    public static final String PATH_SEPARATOR = File.pathSeparator;
 
-    public static final String FILE_SEPARATOR = System.getProperty("file.separator");
+    /**
+     * The system directory separator character.
+     * @see File#separator
+     */
+    public static final String DIR_SEPARATOR = File.separator;
 
-    public static final String LINE_SEPARATOR = System.getProperty("line.separator");
+    /**
+     * The Unix directory separator character.
+     */
+    public static final String DIR_SEPARATOR_UNIX = "/";
+
+    /**
+     * The Windows directory separator character.
+     */
+    public static final String DIR_SEPARATOR_WINDOWS = "\\";
+
+    /**
+     * @see System#lineSeparator()
+     */
+    public static final String LINE_SEPARATOR = System.lineSeparator();
 
     // ...
     public static final int EOF = -1;
@@ -2406,71 +2432,71 @@ public final class IOUtil {
 
     /**
      *
-     * @param str
+     * @param cs
      * @param output
      * @throws IOException
      */
-    public static void write(final CharSequence str, final File output) throws IOException {
-        write(str, DEFAULT_CHARSET, output);
+    public static void write(final CharSequence cs, final File output) throws IOException {
+        write(cs, DEFAULT_CHARSET, output);
     }
 
     /**
      *
-     * @param str
+     * @param cs
      * @param charset
      * @param output
      * @throws IOException
      */
-    public static void write(final CharSequence str, Charset charset, final File output) throws IOException {
+    public static void write(final CharSequence cs, Charset charset, final File output) throws IOException {
         charset = checkCharset(charset);
 
-        write(chars2Bytes(toCharArray(str), charset), output);
+        write(toByteArray(cs, charset), output);
     }
 
     /**
      *
-     * @param str
+     * @param cs
      * @param output
      * @throws IOException
      */
-    public static void write(final CharSequence str, final OutputStream output) throws IOException {
-        write(str, output, false);
+    public static void write(final CharSequence cs, final OutputStream output) throws IOException {
+        write(cs, output, false);
     }
 
     /**
      *
-     * @param str
+     * @param cs
      * @param charset
      * @param output
      * @throws IOException
      */
-    public static void write(final CharSequence str, final Charset charset, final OutputStream output) throws IOException {
-        write(str, charset, output, false);
+    public static void write(final CharSequence cs, final Charset charset, final OutputStream output) throws IOException {
+        write(cs, charset, output, false);
     }
 
     /**
      *
-     * @param str
+     * @param cs
      * @param output
      * @param flush
      * @throws IOException
      */
-    public static void write(final CharSequence str, final OutputStream output, final boolean flush) throws IOException {
-        write(str, DEFAULT_CHARSET, output, flush);
+    public static void write(final CharSequence cs, final OutputStream output, final boolean flush) throws IOException {
+        write(cs, DEFAULT_CHARSET, output, flush);
     }
 
     /**
      *
-     * @param str
+     * @param cs
      * @param charset
      * @param output
      * @param flush
      * @throws IOException
      */
-    public static void write(final CharSequence str, Charset charset, final OutputStream output, final boolean flush) throws IOException {
+    public static void write(final CharSequence cs, Charset charset, final OutputStream output, final boolean flush) throws IOException {
         charset = checkCharset(charset);
 
-        output.write(chars2Bytes(toCharArray(str), charset));
+        output.write(N.toString(cs).getBytes(charset));
 
         if (flush) {
             output.flush();
@@ -2479,23 +2505,27 @@ public final class IOUtil {
 
     /**
      *
-     * @param str
+     * @param cs
      * @param output
      * @throws IOException
      */
-    public static void write(final CharSequence str, final Writer output) throws IOException {
-        write(str, output, false);
+    public static void write(final CharSequence cs, final Writer output) throws IOException {
+        write(cs, output, false);
     }
 
     /**
      *
-     * @param str
+     * @param cs
      * @param output
      * @param flush
      * @throws IOException
      */
-    public static void write(final CharSequence str, final Writer output, final boolean flush) throws IOException {
-        write(toCharArray(str), output, flush);
+    public static void write(final CharSequence cs, final Writer output, final boolean flush) throws IOException {
+        output.append(cs);
+
+        if (flush) {
+            output.flush();
+        }
     }
 
     /**
@@ -3405,25 +3435,23 @@ public final class IOUtil {
 
     /**
      *
-     * @param str
+     * @param cs
      * @param targetFile
      * @throws IOException
      */
-    public static void append(CharSequence str, File targetFile) throws IOException {
-        append(str, DEFAULT_CHARSET, targetFile);
+    public static void append(CharSequence cs, File targetFile) throws IOException {
+        append(cs, DEFAULT_CHARSET, targetFile);
     }
 
     /**
      *
-     * @param str
+     * @param cs
      * @param charset
      * @param targetFile
      * @throws IOException
      */
-    public static void append(CharSequence str, Charset charset, File targetFile) throws IOException {
-        final char[] chs = toCharArray(str);
-
-        append(chs, 0, chs.length, charset, targetFile);
+    public static void append(CharSequence cs, Charset charset, File targetFile) throws IOException {
+        append(toByteArray(cs, charset), targetFile);
     }
 
     /**
@@ -3584,9 +3612,9 @@ public final class IOUtil {
      * @throws IOException
      */
     public static void appendLine(Object obj, Charset charset, File targetFile) throws IOException {
-        final char[] chs = toCharArray(obj + IOUtil.LINE_SEPARATOR);
+        final String str = N.toString(obj) + IOUtil.LINE_SEPARATOR;
 
-        append(chs, 0, chs.length, charset, targetFile);
+        append(toByteArray(str, charset), targetFile);
     }
 
     /**
@@ -3628,6 +3656,21 @@ public final class IOUtil {
         } finally {
             close(writer);
         }
+    }
+
+    /**
+     * Writes bytes from {@link ReadableByteChannel} to {@link WritableByteChannel}.
+     *
+     * @param src
+     * @param output
+     * @return
+     * @throws IOException
+     */
+    public static long transfer(ReadableByteChannel src, WritableByteChannel output) throws IOException {
+        N.checkArgNotNull(src, "ReadableByteChannel");
+        N.checkArgNotNull(output, "WritableByteChannel");
+
+        return write(Channels.newInputStream(src), Channels.newOutputStream(output));
     }
 
     /**
@@ -4052,8 +4095,8 @@ public final class IOUtil {
      */
     public static FileReader newFileReader(final File file) throws UncheckedIOException {
         try {
-            return new FileReader(file); // NOSONAR
-        } catch (FileNotFoundException e) {
+            return new FileReader(file, DEFAULT_CHARSET); // NOSONAR
+        } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
     }
@@ -4083,7 +4126,7 @@ public final class IOUtil {
      */
     public static FileWriter newFileWriter(final File file) throws UncheckedIOException {
         try {
-            return new FileWriter(file); // NOSONAR
+            return new FileWriter(file, DEFAULT_CHARSET); // NOSONAR
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
@@ -4112,7 +4155,7 @@ public final class IOUtil {
      * @throws UncheckedIOException
      */
     public static InputStreamReader newInputStreamReader(final InputStream is) throws UncheckedIOException {
-        return new InputStreamReader(is); // NOSONAR
+        return new InputStreamReader(is, DEFAULT_CHARSET); // NOSONAR
     }
 
     /**
@@ -4134,7 +4177,7 @@ public final class IOUtil {
      * @throws UncheckedIOException
      */
     public static OutputStreamWriter newOutputStreamWriter(final OutputStream os) throws UncheckedIOException {
-        return new OutputStreamWriter(os); // NOSONAR
+        return new OutputStreamWriter(os, DEFAULT_CHARSET); // NOSONAR
     }
 
     /**
@@ -4161,6 +4204,44 @@ public final class IOUtil {
     }
 
     /**
+     *
+     * @param file
+     * @return
+     */
+    public static BufferedInputStream newBufferedInputStream(final File file) {
+        return new BufferedInputStream(newFileInputStream(file));
+    }
+
+    /**
+     *
+     * @param file
+     * @param size
+     * @return
+     */
+    public static BufferedInputStream newBufferedInputStream(final File file, final int size) {
+        return new BufferedInputStream(newFileInputStream(file), size);
+    }
+
+    /**
+     *
+     * @param file
+     * @return
+     */
+    public static BufferedOutputStream newBufferedOutputStream(final File file) {
+        return new BufferedOutputStream(newFileOutputStream(file));
+    }
+
+    /**
+     *
+     * @param file
+     * @param size
+     * @return
+     */
+    public static BufferedOutputStream newBufferedOutputStream(final File file, final int size) {
+        return new BufferedOutputStream(newFileOutputStream(file), size);
+    }
+
+    /**
      * New buffered reader.
      *
      * @param file
@@ -4168,7 +4249,7 @@ public final class IOUtil {
      * @throws UncheckedIOException the unchecked IO exception
      */
     public static java.io.BufferedReader newBufferedReader(File file) throws UncheckedIOException {
-        return new java.io.BufferedReader(IOUtil.newFileReader(file));
+        return new java.io.BufferedReader(newFileReader(file));
     }
 
     /**
@@ -4180,7 +4261,7 @@ public final class IOUtil {
      * @throws UncheckedIOException the unchecked IO exception
      */
     public static java.io.BufferedReader newBufferedReader(File file, Charset charset) throws UncheckedIOException {
-        return new java.io.BufferedReader(IOUtil.newInputStreamReader(IOUtil.newFileInputStream(file), checkCharset(charset)));
+        return new java.io.BufferedReader(newInputStreamReader(newFileInputStream(file), checkCharset(charset)));
     }
 
     /**
@@ -4222,7 +4303,7 @@ public final class IOUtil {
      * @throws UncheckedIOException the unchecked IO exception
      */
     public static java.io.BufferedReader newBufferedReader(InputStream is) throws UncheckedIOException {
-        return new java.io.BufferedReader(IOUtil.newInputStreamReader(is)); // NOSONAR
+        return new java.io.BufferedReader(newInputStreamReader(is)); // NOSONAR
     }
 
     /**
@@ -4234,7 +4315,7 @@ public final class IOUtil {
      * @throws UncheckedIOException the unchecked IO exception
      */
     public static java.io.BufferedReader newBufferedReader(InputStream is, Charset charset) throws UncheckedIOException {
-        return new java.io.BufferedReader(IOUtil.newInputStreamReader(is, checkCharset(charset)));
+        return new java.io.BufferedReader(newInputStreamReader(is, checkCharset(charset)));
     }
 
     /**
@@ -4256,7 +4337,7 @@ public final class IOUtil {
      * @throws UncheckedIOException the unchecked IO exception
      */
     public static java.io.BufferedWriter newBufferedWriter(File file) throws UncheckedIOException {
-        return new java.io.BufferedWriter(IOUtil.newFileWriter(file));
+        return new java.io.BufferedWriter(newFileWriter(file));
     }
 
     /**
@@ -4268,7 +4349,7 @@ public final class IOUtil {
      * @throws UncheckedIOException the unchecked IO exception
      */
     public static java.io.BufferedWriter newBufferedWriter(File file, Charset charset) throws UncheckedIOException {
-        return new java.io.BufferedWriter(new OutputStreamWriter(IOUtil.newFileOutputStream(file), checkCharset(charset)));
+        return new java.io.BufferedWriter(new OutputStreamWriter(newFileOutputStream(file), checkCharset(charset)));
     }
 
     /**
@@ -4445,6 +4526,18 @@ public final class IOUtil {
     }
 
     /**
+     * Closes a URLConnection.
+     *
+     * @param conn the connection to close.
+     * @since 2.4
+     */
+    public static void close(final URLConnection conn) {
+        if (conn instanceof HttpURLConnection) {
+            ((HttpURLConnection) conn).disconnect();
+        }
+    }
+
+    /**
      *
      * @param closeable
      */
@@ -4454,6 +4547,21 @@ public final class IOUtil {
                 closeable.close();
             } catch (Exception e) {
                 throw ExceptionUtil.toRuntimeException(e);
+            }
+        }
+    }
+
+    /**
+     *
+     * @param closeable
+     * @param exceptionHandler
+     */
+    public static void close(final AutoCloseable closeable, final Consumer<Exception> exceptionHandler) {
+        if (closeable != null) {
+            try {
+                closeable.close();
+            } catch (Exception e) {
+                exceptionHandler.accept(e);
             }
         }
     }
@@ -4548,9 +4656,52 @@ public final class IOUtil {
      * @param srcFile
      * @param destDir
      * @throws UncheckedIOException the unchecked IO exception
+     * @deprecated Use {@link #copyToDirectory(File,File)} instead
      */
+    @Deprecated
     public static void copyFileToDirectory(final File srcFile, final File destDir) throws UncheckedIOException {
-        copyFileToDirectory(srcFile, destDir, true);
+        copyToDirectory(srcFile, destDir);
+    }
+
+    /**
+     *
+     * @param srcFile
+     * @param destDir
+     * @param preserveFileDate
+     * @throws UncheckedIOException the unchecked IO exception
+     * @deprecated Use {@link #copyToDirectory(File,File, boolean)} instead
+     */
+    @Deprecated
+    public static void copyFileToDirectory(final File srcFile, final File destDir, final boolean preserveFileDate) throws UncheckedIOException {
+        copyToDirectory(srcFile, destDir, preserveFileDate);
+    }
+
+    /**
+     * Copy the specified <code>scrFile</code> if it's a file or its sub files/directories if it's a directory to the target <code>destDir</code> with the specified <code>filter</code>.
+     *
+     * @param <E>
+     * @param srcFile
+     * @param destDir
+     * @param preserveFileDate
+     * @param filter
+     * @throws UncheckedIOException the unchecked IO exception
+     * @throws E the e
+     * @deprecated Use {@link #copyToDirectory(File,File,boolean,Throwables.BiPredicate<? super File, ? super File, E>)} instead
+     */
+    @Deprecated
+    public static <E extends Exception> void copyFileToDirectory(File srcFile, File destDir, final boolean preserveFileDate,
+            final Throwables.BiPredicate<? super File, ? super File, E> filter) throws UncheckedIOException, E {
+        copyToDirectory(srcFile, destDir, preserveFileDate, filter);
+    }
+
+    /**
+     *
+     * @param srcFile
+     * @param destDir
+     * @throws UncheckedIOException the unchecked IO exception
+     */
+    public static void copyToDirectory(final File srcFile, final File destDir) throws UncheckedIOException {
+        copyToDirectory(srcFile, destDir, true);
     }
 
     /**
@@ -4560,8 +4711,8 @@ public final class IOUtil {
      * @param preserveFileDate
      * @throws UncheckedIOException the unchecked IO exception
      */
-    public static void copyFileToDirectory(final File srcFile, final File destDir, final boolean preserveFileDate) throws UncheckedIOException {
-        copyFileToDirectory(srcFile, destDir, preserveFileDate, Fn.BiPredicates.alwaysTrue());
+    public static void copyToDirectory(final File srcFile, final File destDir, final boolean preserveFileDate) throws UncheckedIOException {
+        copyToDirectory(srcFile, destDir, preserveFileDate, Fn.BiPredicates.alwaysTrue());
     }
 
     /**
@@ -4575,7 +4726,7 @@ public final class IOUtil {
      * @throws UncheckedIOException the unchecked IO exception
      * @throws E the e
      */
-    public static <E extends Exception> void copyFileToDirectory(File srcFile, File destDir, final boolean preserveFileDate,
+    public static <E extends Exception> void copyToDirectory(File srcFile, File destDir, final boolean preserveFileDate,
             final Throwables.BiPredicate<? super File, ? super File, E> filter) throws UncheckedIOException, E {
         if (!srcFile.exists()) {
             throw new IllegalArgumentException("The source file doesn't exist: " + srcFile.getAbsolutePath());
@@ -4750,7 +4901,7 @@ public final class IOUtil {
      * @param options
      * @return
      * @throws UncheckedIOException the unchecked IO exception
-     * @see Files#copy(Path, Path, CopyOption...)
+     * @see {@link Files#copy(Path, Path, CopyOption...)}
      */
     @SafeVarargs
     public static Path copy(Path source, Path target, CopyOption... options) throws UncheckedIOException {
@@ -4885,13 +5036,30 @@ public final class IOUtil {
 
     /**
      *
+     * @param source
+     * @param target
+     * @param options
+     * @return
+     * @throws UncheckedIOException
+     * @see {@link Files#move(Path, Path, CopyOption...)}
+     */
+    public static Path move(final Path source, final Path target, CopyOption... options) throws UncheckedIOException {
+        try {
+            return Files.copy(source, target, options);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    /**
+     *
      * @param srcFile
      * @param newFileName
      * @return <code>true</code> if and only if the renaming succeeded;
      *          <code>false</code> otherwise
      */
     public static boolean renameTo(final File srcFile, final String newFileName) {
-        return srcFile.renameTo(new File(srcFile.getParent() + IOUtil.FILE_SEPARATOR + newFileName));
+        return srcFile.renameTo(new File(srcFile.getParent() + IOUtil.DIR_SEPARATOR + newFileName));
     }
 
     /**
@@ -5518,7 +5686,7 @@ public final class IOUtil {
             input = IOUtil.newFileInputStream(file);
 
             for (int i = 0; i < numOfParts; i++) {
-                String subFileNmae = destDir.getAbsolutePath() + IOUtil.FILE_SEPARATOR + fileName + "_" + Strings.padStart(N.stringOf(fileSerNum++), 4, '0');
+                String subFileNmae = destDir.getAbsolutePath() + IOUtil.DIR_SEPARATOR + fileName + "_" + Strings.padStart(N.stringOf(fileSerNum++), 4, '0');
                 output = IOUtil.newFileOutputStream(new File(subFileNmae));
                 long partLength = sizeOfPart;
 
@@ -5592,7 +5760,7 @@ public final class IOUtil {
 
             br = Objectory.createBufferedReader(is);
 
-            String subFileNmae = destDir.getAbsolutePath() + IOUtil.FILE_SEPARATOR + prefix + "_" + Strings.padStart(N.stringOf(fileSerNum++), suffixLen, '0')
+            String subFileNmae = destDir.getAbsolutePath() + IOUtil.DIR_SEPARATOR + prefix + "_" + Strings.padStart(N.stringOf(fileSerNum++), suffixLen, '0')
                     + postfix;
             bw = Objectory.createBufferedWriter(IOUtil.newFileWriter(new File(subFileNmae)));
 
@@ -5608,7 +5776,7 @@ public final class IOUtil {
                     Objectory.recycle(bw);
                     bw = null;
 
-                    subFileNmae = destDir.getAbsolutePath() + IOUtil.FILE_SEPARATOR + prefix + "_" + Strings.padStart(N.stringOf(fileSerNum++), suffixLen, '0')
+                    subFileNmae = destDir.getAbsolutePath() + IOUtil.DIR_SEPARATOR + prefix + "_" + Strings.padStart(N.stringOf(fileSerNum++), suffixLen, '0')
                             + postfix;
                     bw = Objectory.createBufferedWriter(IOUtil.newFileWriter(new File(subFileNmae)));
                 }
@@ -6103,6 +6271,195 @@ public final class IOUtil {
      */
     public static boolean touch(final File source) {
         return source.exists() && source.setLastModified(System.currentTimeMillis());
+    }
+
+    /**
+     * Compares the contents of two Streams to determine if they are equal or
+     * not.
+     * <p>
+     * This method buffers the input internally using
+     * {@link BufferedInputStream} if they are not already buffered.
+     * </p>
+     *
+     * @param input1 the first stream
+     * @param input2 the second stream
+     * @return true if the content of the streams are equal or they both don't
+     * exist, false otherwise
+     * @throws IOException          if an I/O error occurs
+     */
+    public static boolean contentEquals(final InputStream input1, final InputStream input2) throws IOException {
+        // Before making any changes, please test with
+        // org.apache.commons.io.jmh.IOUtilsContentEqualsInputStreamsBenchmark
+        if (input1 == input2) {
+            return true;
+        }
+
+        if (input1 == null || input2 == null) {
+            return false;
+        }
+
+        final byte[] buffer1 = Objectory.createByteArrayBuffer();
+        final byte[] buffer2 = Objectory.createByteArrayBuffer();
+        final int bufferSize = buffer1.length;
+
+        try {
+            int pos1 = 0, pos2 = 0, count1 = 0, count2 = 0;
+
+            while (true) {
+                pos1 = 0;
+                pos2 = 0;
+
+                for (int index = 0; index < bufferSize; index++) {
+                    if (pos1 == index) {
+                        do {
+                            count1 = input1.read(buffer1, pos1, bufferSize - pos1);
+                        } while (count1 == 0);
+
+                        if (count1 == EOF) {
+                            return pos2 == index && input2.read() == EOF;
+                        }
+
+                        pos1 += count1;
+                    }
+
+                    if (pos2 == index) {
+                        do {
+                            count2 = input2.read(buffer2, pos2, bufferSize - pos2);
+                        } while (count2 == 0);
+
+                        if (count2 == EOF) {
+                            return pos1 == index && input1.read() == EOF;
+                        }
+
+                        pos2 += count2;
+                    }
+
+                    if (buffer1[index] != buffer2[index]) {
+                        return false;
+                    }
+                }
+            }
+        } finally {
+            Objectory.recycle(buffer1);
+            Objectory.recycle(buffer2);
+        }
+    }
+
+    /**
+     * Compares the contents of two Readers to determine if they are equal or not.
+     * <p>
+     * This method buffers the input internally using {@link BufferedReader} if they are not already buffered.
+     * </p>
+     *
+     * @param input1 the first reader
+     * @param input2 the second reader
+     * @return true if the content of the readers are equal or they both don't exist, false otherwise
+     * @throws NullPointerException if either input is null
+     * @throws IOException if an I/O error occurs
+     * @since 1.1
+     */
+    public static boolean contentEquals(final Reader input1, final Reader input2) throws IOException {
+        if (input1 == input2) {
+            return true;
+        }
+
+        if (input1 == null || input2 == null) {
+            return false;
+        }
+
+        final char[] buffer1 = Objectory.createCharArrayBuffer();
+        final char[] buffer2 = Objectory.createCharArrayBuffer();
+        final int bufferSize = buffer1.length;
+
+        try {
+            int pos1 = 0, pos2 = 0, count1 = 0, count2 = 0;
+
+            while (true) {
+                pos1 = 0;
+                pos2 = 0;
+
+                for (int index = 0; index < bufferSize; index++) {
+                    if (pos1 == index) {
+                        do {
+                            count1 = input1.read(buffer1, pos1, bufferSize - pos1);
+                        } while (count1 == 0);
+
+                        if (count1 == EOF) {
+                            return pos2 == index && input2.read() == EOF;
+                        }
+
+                        pos1 += count1;
+                    }
+
+                    if (pos2 == index) {
+                        do {
+                            count2 = input2.read(buffer2, pos2, bufferSize - pos2);
+                        } while (count2 == 0);
+
+                        if (count2 == EOF) {
+                            return pos1 == index && input1.read() == EOF;
+                        }
+
+                        pos2 += count2;
+                    }
+
+                    if (buffer1[index] != buffer2[index]) {
+                        return false;
+                    }
+                }
+            }
+        } finally {
+            Objectory.recycle(buffer1);
+            Objectory.recycle(buffer2);
+        }
+    }
+
+    /**
+     * Compares the contents of two Readers to determine if they are equal or
+     * not, ignoring EOL characters.
+     * <p>
+     * This method buffers the input internally using
+     * {@link BufferedReader} if they are not already buffered.
+     * </p>
+     *
+     * @param input1 the first reader
+     * @param input2 the second reader
+     * @return true if the content of the readers are equal (ignoring EOL differences),  false otherwise
+     * @throws NullPointerException if either input is null
+     * @throws UncheckedIOException if an I/O error occurs
+     * @since 2.2
+     */
+    public static boolean contentEqualsIgnoreEOL(final Reader input1, final Reader input2) throws IOException {
+        if (input1 == input2) {
+            return true;
+        }
+
+        if (input1 == null || input2 == null) {
+            return false;
+        }
+
+        final BufferedReader br1 = input1 instanceof BufferedReader ? (BufferedReader) input1 : Objectory.createBufferedReader(input1); //NOSONAR
+        final BufferedReader br2 = input2 instanceof BufferedReader ? (BufferedReader) input2 : Objectory.createBufferedReader(input2); //NOSONAR
+
+        try {
+            String line1 = br1.readLine();
+            String line2 = br2.readLine();
+
+            while (line1 != null && line2 != null && line1.equals(line2)) {
+                line1 = br1.readLine();
+                line2 = br2.readLine();
+            }
+
+            return line1 == null && line2 == null;
+        } finally {
+            if (br1 != input1) {
+                Objectory.recycle(br1);
+            }
+
+            if (br2 != input2) {
+                Objectory.recycle(br2);
+            }
+        }
     }
 
     /**
@@ -6753,13 +7110,12 @@ public final class IOUtil {
     }
 
     /**
-     * To char array.
      *
-     * @param str
+     * @param cs
+     * @param charset
      * @return
      */
-    @SuppressWarnings("deprecation")
-    private static char[] toCharArray(CharSequence str) {
-        return str == null ? Strings.NULL_CHAR_ARRAY : InternalUtil.getCharsForReadOnly(str instanceof String ? (String) str : str.toString());
+    private static byte[] toByteArray(final CharSequence cs, final Charset charset) {
+        return String.valueOf(cs).getBytes(charset);
     }
 }

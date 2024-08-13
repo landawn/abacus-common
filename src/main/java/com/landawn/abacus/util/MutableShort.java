@@ -33,7 +33,14 @@ package com.landawn.abacus.util;
  * @see Short
  * @since 2.1
  */
-public final class MutableShort implements Comparable<MutableShort>, Mutable { // Should not extends Number because Number is immutable
+public final class MutableShort extends Number implements Comparable<MutableShort>, Mutable {
+
+    /**
+     * Required for serialization support.
+     *
+     * @see java.io.Serializable
+     */
+    private static final long serialVersionUID = -2135791679L;
 
     private short value;
 
@@ -250,6 +257,58 @@ public final class MutableShort implements Comparable<MutableShort>, Mutable { /
      */
     public short addAndGet(final short delta) {
         return value += delta;
+    }
+
+    //-----------------------------------------------------------------------
+    // byteValue relies on Number implementation
+    /**
+     * Returns the value of this MutableShort as a short.
+     *
+     * @return
+     */
+    @Override
+    public short shortValue() {
+        return value;
+    }
+
+    /**
+     * Returns the value of this MutableShort as an int.
+     *
+     * @return
+     */
+    @Override
+    public int intValue() {
+        return value;
+    }
+
+    /**
+     * Returns the value of this MutableShort as a long.
+     *
+     * @return
+     */
+    @Override
+    public long longValue() {
+        return value;
+    }
+
+    /**
+     * Returns the value of this MutableShort as a float.
+     *
+     * @return
+     */
+    @Override
+    public float floatValue() {
+        return value;
+    }
+
+    /**
+     * Returns the value of this MutableShort as a double.
+     *
+     * @return
+     */
+    @Override
+    public double doubleValue() {
+        return value;
     }
 
     //-----------------------------------------------------------------------

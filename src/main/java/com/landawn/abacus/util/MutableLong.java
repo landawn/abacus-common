@@ -33,7 +33,14 @@ package com.landawn.abacus.util;
  * @see Long
  * @since 2.1
  */
-public final class MutableLong implements Comparable<MutableLong>, Mutable { // Should not extends Number because Number is immutable
+public final class MutableLong extends Number implements Comparable<MutableLong>, Mutable {
+
+    /**
+     * Required for serialization support.
+     *
+     * @see java.io.Serializable
+     */
+    private static final long serialVersionUID = 62986528375L;
 
     private long value;
 
@@ -250,6 +257,48 @@ public final class MutableLong implements Comparable<MutableLong>, Mutable { // 
      */
     public long addAndGet(final long delta) {
         return value += delta;
+    }
+
+    //-----------------------------------------------------------------------
+    // shortValue and byteValue rely on Number implementation
+    /**
+     * Returns the value of this MutableLong as an int.
+     *
+     * @return
+     */
+    @Override
+    public int intValue() {
+        return (int) value;
+    }
+
+    /**
+     * Returns the value of this MutableLong as a long.
+     *
+     * @return
+     */
+    @Override
+    public long longValue() {
+        return value;
+    }
+
+    /**
+     * Returns the value of this MutableLong as a float.
+     *
+     * @return
+     */
+    @Override
+    public float floatValue() {
+        return value;
+    }
+
+    /**
+     * Returns the value of this MutableLong as a double.
+     *
+     * @return
+     */
+    @Override
+    public double doubleValue() {
+        return value;
     }
 
     //-----------------------------------------------------------------------

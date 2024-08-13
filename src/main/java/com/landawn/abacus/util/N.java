@@ -3906,10 +3906,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return false;
         }
 
+        if (subColl.size() > coll.size()) {
+            return false;
+        }
+
         final Multiset<?> multisetA = Multiset.create(subColl);
         final Multiset<?> multisetB = Multiset.create(coll);
 
-        for (final Object e : subColl) {
+        for (final Object e : multisetA.elementSet()) {
             if (multisetA.occurrencesOf(e) > multisetB.occurrencesOf(e)) {
                 return false;
             }
@@ -3982,7 +3986,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return false;
         }
 
-        for (final Object e : b) {
+        for (final Object e : multisetA.elementSet()) {
             if (multisetA.occurrencesOf(e) != multisetB.occurrencesOf(e)) {
                 return false;
             }
@@ -11829,15 +11833,15 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param a 
-     * @param fromIndex 
-     * @param toIndex 
-     * @param func 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     *
+     * @param <T>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param func
+     * @return
+     * @throws IndexOutOfBoundsException
      */
     public static <T> int sumInt(final T[] a, final int fromIndex, final int toIndex, final ToIntFunction<? super T> func) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
@@ -12007,15 +12011,15 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param a 
-     * @param fromIndex 
-     * @param toIndex 
-     * @param func 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     *
+     * @param <T>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param func
+     * @return
+     * @throws IndexOutOfBoundsException
      */
     public static <T> long sumLong(final T[] a, final int fromIndex, final int toIndex, final ToLongFunction<? super T> func) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
@@ -19019,11 +19023,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      * Map to boolean.
      *
-     * @param <T> 
-     * @param c 
-     * @param mapper 
-     * @return 
-     * @throws IllegalArgumentException 
+     * @param <T>
+     * @param c
+     * @param mapper
+     * @return
+     * @throws IllegalArgumentException
      */
     public static <T> boolean[] mapToBoolean(final Collection<? extends T> c, final ToBooleanFunction<? super T> mapper) throws IllegalArgumentException {
         checkArgNotNull(mapper);
@@ -19937,11 +19941,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      * Map to double.
      *
-     * @param <T> 
-     * @param c 
-     * @param mapper 
-     * @return 
-     * @throws IllegalArgumentException 
+     * @param <T>
+     * @param c
+     * @param mapper
+     * @return
+     * @throws IllegalArgumentException
      */
     public static <T> double[] mapToDouble(final Collection<? extends T> c, final ToDoubleFunction<? super T> mapper) throws IllegalArgumentException {
         checkArgNotNull(mapper);
@@ -20297,14 +20301,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <R> 
-     * @param a 
-     * @param mapper 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <T>
+     * @param <R>
+     * @param a
+     * @param mapper
+     * @return
+     * @throws IllegalArgumentException
      */
     public static <T, R> List<R> flatMap(final T[] a, final Function<? super T, ? extends Collection<? extends R>> mapper) throws IllegalArgumentException {
         checkArgNotNull(mapper);
@@ -21979,15 +21983,15 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param a 
-     * @param atLeast 
-     * @param atMost 
-     * @param filter 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <T>
+     * @param a
+     * @param atLeast
+     * @param atMost
+     * @param filter
+     * @return
+     * @throws IllegalArgumentException
      */
     public static <T> boolean nMatch(final T[] a, final int atLeast, final int atMost, final Predicate<? super T> filter) throws IllegalArgumentException {
         checkArgNotNegative(atLeast, "atLeast"); //NOSONAR
@@ -22178,13 +22182,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Mostly it's designed for one-step operation to complete the operation in one step.
      * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
      *
-     * @param a 
-     * @param fromIndex 
-     * @param toIndex 
-     * @param filter 
-     * @return 
-     * @throws IllegalArgumentException 
-     * @throws IndexOutOfBoundsException 
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param filter
+     * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
      */
     public static int count(final boolean[] a, final int fromIndex, final int toIndex, final BooleanPredicate filter)
             throws IllegalArgumentException, IndexOutOfBoundsException {
@@ -22536,13 +22540,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Mostly it's designed for one-step operation to complete the operation in one step.
      * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
      *
-     * @param a 
-     * @param fromIndex 
-     * @param toIndex 
-     * @param filter 
-     * @return 
-     * @throws IllegalArgumentException 
-     * @throws IndexOutOfBoundsException 
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param filter
+     * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
      */
     public static int count(final double[] a, final int fromIndex, final int toIndex, final DoublePredicate filter)
             throws IllegalArgumentException, IndexOutOfBoundsException {
@@ -22589,14 +22593,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Mostly it's designed for one-step operation to complete the operation in one step.
      * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
      *
-     * @param <T> 
-     * @param a 
-     * @param fromIndex 
-     * @param toIndex 
-     * @param filter 
-     * @return 
-     * @throws IllegalArgumentException 
-     * @throws IndexOutOfBoundsException 
+     * @param <T>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param filter
+     * @return
+     * @throws IllegalArgumentException
+     * @throws IndexOutOfBoundsException
      */
     public static <T> int count(final T[] a, final int fromIndex, final int toIndex, final Predicate<? super T> filter)
             throws IllegalArgumentException, IndexOutOfBoundsException {
@@ -22723,13 +22727,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param iter 
-     * @param filter 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <T>
+     * @param iter
+     * @param filter
+     * @return
+     * @throws IllegalArgumentException
      * @throws ArithmeticException if the total matched {@code count} overflows an {@code int}.
      */
     public static <T> int count(final Iterator<? extends T> iter, final Predicate<? super T> filter) throws IllegalArgumentException, ArithmeticException {
@@ -23810,22 +23814,22 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * 
      *
-     * @param <A> 
-     * @param <B> 
-     * @param <C> 
-     * @param <R> 
-     * @param a 
-     * @param b 
-     * @param c 
-     * @param valueForNoneA 
-     * @param valueForNoneB 
-     * @param valueForNoneC 
-     * @param zipFunction 
-     * @param targetElementType 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <A>
+     * @param <B>
+     * @param <C>
+     * @param <R>
+     * @param a
+     * @param b
+     * @param c
+     * @param valueForNoneA
+     * @param valueForNoneB
+     * @param valueForNoneC
+     * @param zipFunction
+     * @param targetElementType
+     * @return
+     * @throws IllegalArgumentException
      */
     public static <A, B, C, R> R[] zip(final A[] a, final B[] b, final C[] c, final A valueForNoneA, final B valueForNoneB, final C valueForNoneC,
             final TriFunction<? super A, ? super B, ? super C, ? extends R> zipFunction, final Class<R> targetElementType) throws IllegalArgumentException {
@@ -24359,18 +24363,18 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <K> 
-     * @param <R> 
-     * @param <M> 
-     * @param c 
-     * @param keyExtractor 
-     * @param collector 
-     * @param mapSupplier 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <T>
+     * @param <K>
+     * @param <R>
+     * @param <M>
+     * @param c
+     * @param keyExtractor
+     * @param collector
+     * @param mapSupplier
+     * @return
+     * @throws IllegalArgumentException
      */
     @Beta
     public static <T, K, R, M extends Map<K, R>> M groupBy(final Iterable<? extends T> c, final Function<? super T, ? extends K> keyExtractor,
@@ -24428,18 +24432,18 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * 
      *
-     * @param <K> 
-     * @param <T> 
-     * @param <R> 
-     * @param <M> 
-     * @param iter 
-     * @param keyExtractor 
-     * @param collector 
-     * @param mapSupplier 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <K>
+     * @param <T>
+     * @param <R>
+     * @param <M>
+     * @param iter
+     * @param keyExtractor
+     * @param collector
+     * @param mapSupplier
+     * @return
+     * @throws IllegalArgumentException
      */
     @Beta
     public static <K, T, R, M extends Map<K, R>> M groupBy(final Iterator<? extends T> iter, final Function<? super T, ? extends K> keyExtractor,

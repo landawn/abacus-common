@@ -80,22 +80,6 @@ public final class Iterables {
     }
 
     /**
-     * Returns {@code true} if the specified two Collections have the extra same elements(order deosn't matter), or both are empty.
-     *
-     * @param a
-     * @param b
-     * @return
-     * @see N#symmetricDifferentSet(Collection, Collection)
-     */
-    public static boolean hasSameElements(final Collection<?> a, final Collection<?> b) {
-        if (N.size(a) != N.size(b)) {
-            return false;
-        }
-
-        return N.symmetricDifferentSet(a, b).isEmpty();
-    }
-
-    /**
      * Returns {@code OptionalChar.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
      *
      * @param a

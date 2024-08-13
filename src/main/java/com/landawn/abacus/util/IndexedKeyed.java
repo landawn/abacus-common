@@ -55,4 +55,13 @@ public final class IndexedKeyed<K, T> extends Keyed<K, T> {
         return index;
     }
 
+    /**
+     *
+     *
+     * @return
+     */
+    @Override
+    public String toString() {
+        return "{index=" + N.toString(index) + ", key=" + key + ", val=" + val + "}";
+    }
 }

@@ -124,6 +124,11 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     public static final String CR = "\r";
 
+    /**
+     * Carriage return followed by line feed. This is the line ending used on Windows.
+     */
+    public static final String CR_LF = "\r\n";
+
     @Beta
     public static final char CHAR_ZERO = (char) 0;
     @Beta
