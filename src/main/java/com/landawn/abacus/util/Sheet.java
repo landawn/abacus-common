@@ -59,8 +59,6 @@ import com.landawn.abacus.util.stream.Stream;
  */
 public final class Sheet<R, C, V> implements Cloneable {
 
-    static final char[] ELEMENT_SEPARATOR_CHAR_ARRAY = Strings.ELEMENT_SEPARATOR_CHAR_ARRAY;
-
     static final KryoParser kryoParser = ParserFactory.isKryoAvailable() ? ParserFactory.createKryoParser() : null;
 
     private final Set<R> _rowKeySet; //NOSONAR
@@ -913,16 +911,23 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @return
      */
     public ImmutableList<V> getColumn(C columnKey) {
-        final int rowLength = rowLength();
+
         List<V> column = null;
 
-        if (_initialized) {
-            column = _columnList.get(getColumnIndex(columnKey));
-        } else {
-            checkColumnKey(columnKey);
-            column = new ArrayList<>(rowLength);
-            N.fill(column, 0, rowLength, null);
+        //    if (_initialized) {
+        //        column = _columnList.get(getColumnIndex(columnKey));
+        //    } else {
+        //        final int rowLength = rowLength();
+        //        checkColumnKey(columnKey);
+        //        column = new ArrayList<>(rowLength);
+        //        N.fill(column, 0, rowLength, null);
+        //    }
+
+        if (!_initialized) {
+            init();
         }
+
+        column = _columnList.get(getColumnIndex(columnKey));
 
         return ImmutableList.wrap(column);
     }
@@ -3616,41 +3621,31 @@ public final class Sheet<R, C, V> implements Cloneable {
     public String toString() {
         final StringBuilder sb = Objectory.createBigStringBuilder();
 
-        sb.append("{rowKeySet=");
-        sb.append(_rowKeySet);
-        sb.append(", columnKeySet=");
-        sb.append(_columnKeySet);
-        sb.append(", rowList=");
-        sb.append("[");
+        try {
+            sb.append("{rowKeySet=");
+            sb.append(_rowKeySet);
+            sb.append(", columnKeySet=");
+            sb.append(_columnKeySet);
+            sb.append(", columns={");
 
-        if (_initialized) {
-            for (int i = 0, rowLength = rowLength(), columnLength = columnLength(); i < rowLength; i++) {
-                if (i > 0) {
-                    sb.append(ELEMENT_SEPARATOR_CHAR_ARRAY);
-                }
+            if (_initialized) {
+                final Iterator<C> iter = _columnKeySet.iterator();
 
-                sb.append("[");
-
-                for (int j = 0; j < columnLength; j++) {
-                    if (j > 0) {
-                        sb.append(ELEMENT_SEPARATOR_CHAR_ARRAY);
+                for (int i = 0, columnLength = columnLength(); i < columnLength; i++) {
+                    if (i > 0) {
+                        sb.append(Strings.ELEMENT_SEPARATOR_CHAR_ARRAY);
                     }
 
-                    sb.append(N.toString(_columnList.get(j).get(i)));
+                    sb.append(iter.next()).append("=").append(N.toString(_columnList.get(i)));
                 }
-
-                sb.append("]");
             }
+
+            sb.append("}}");
+
+            return sb.toString();
+        } finally {
+            Objectory.recycle(sb);
         }
-
-        sb.append("]");
-        sb.append("}");
-
-        String str = sb.toString();
-
-        Objectory.recycle(sb);
-
-        return str;
     }
 
     /**

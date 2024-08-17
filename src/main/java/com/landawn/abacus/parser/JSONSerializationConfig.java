@@ -36,15 +36,18 @@ public class JSONSerializationConfig extends JSONXMLSerializationConfig<JSONSeri
 
     protected static final boolean defaultBracketRootValue = true;
 
-    boolean writeNullToEmpty = false;
+    private boolean writeNullToEmpty = false;
+    private boolean writeDataSetByRow = false;
+    private boolean writeRowColumnKeyType = false; // for Sheet;
+    private boolean writeColumnType = false; // for DataSet and Sheet
 
-    boolean quotePropName = defaultQuotePropName;
+    private boolean quotePropName = defaultQuotePropName;
 
-    boolean quoteMapKey = defaultQuoteMapKey;
+    private boolean quoteMapKey = defaultQuoteMapKey;
 
-    boolean wrapRootValue = defaultWrapRootValue;
+    private boolean wrapRootValue = defaultWrapRootValue;
 
-    boolean bracketRootValue = defaultBracketRootValue;
+    private boolean bracketRootValue = defaultBracketRootValue;
 
     /**
      *
@@ -67,6 +70,63 @@ public class JSONSerializationConfig extends JSONXMLSerializationConfig<JSONSeri
      */
     public JSONSerializationConfig writeNullToEmpty(boolean writeNullToEmpty) {
         this.writeNullToEmpty = writeNullToEmpty;
+
+        return this;
+    }
+
+    /**
+     *
+     * @return
+     */
+    public boolean writeDataSetByRow() {
+        return writeDataSetByRow;
+    }
+
+    /**
+     *
+     * @param writeDataSetByRow
+     * @return
+     */
+    public JSONSerializationConfig writeDataSetByRow(boolean writeDataSetByRow) {
+        this.writeDataSetByRow = writeDataSetByRow;
+
+        return this;
+    }
+
+    /**
+     *
+     * @return
+     */
+    public boolean writeRowColumnKeyType() {
+        return writeRowColumnKeyType;
+    }
+
+    /**
+     *
+     * @param writeRowColumnKeyType
+     * @return
+     */
+    public JSONSerializationConfig writeRowColumnKeyType(boolean writeRowColumnKeyType) {
+        this.writeRowColumnKeyType = writeRowColumnKeyType;
+
+        return this;
+    }
+
+    /**
+     *
+     * @return
+     */
+    public boolean writeColumnType() {
+        return writeColumnType;
+    }
+
+    /**
+     *
+     * @param writeColumnType
+     * @return
+     */
+    public JSONSerializationConfig writeColumnType(boolean writeColumnType) {
+        this.writeColumnType = writeColumnType;
 
         return this;
     }
@@ -277,6 +337,9 @@ public class JSONSerializationConfig extends JSONXMLSerializationConfig<JSONSeri
         h = 31 * h + N.hashCode(writeNullNumberAsZero);
         h = 31 * h + N.hashCode(writeNullBooleanAsFalse);
         h = 31 * h + N.hashCode(writeNullToEmpty);
+        h = 31 * h + N.hashCode(writeDataSetByRow);
+        h = 31 * h + N.hashCode(writeRowColumnKeyType);
+        h = 31 * h + N.hashCode(writeColumnType);
         h = 31 * h + N.hashCode(writeBigDecimalAsPlain());
         h = 31 * h + N.hashCode(getIndentation());
         h = 31 * h + N.hashCode(getPropNamingPolicy());
@@ -306,7 +369,9 @@ public class JSONSerializationConfig extends JSONXMLSerializationConfig<JSONSeri
                     && N.equals(writeLongAsString(), other.writeLongAsString()) && N.equals(writeNullStringAsEmpty, other.writeNullStringAsEmpty)
                     && N.equals(writeNullNumberAsZero, other.writeNullNumberAsZero) && N.equals(writeNullBooleanAsFalse, other.writeNullBooleanAsFalse)
                     && N.equals(writeBigDecimalAsPlain(), other.writeBigDecimalAsPlain()) && N.equals(getIndentation(), other.getIndentation())
-                    && N.equals(getPropNamingPolicy(), other.getPropNamingPolicy()) && N.equals(quotePropName, other.quotePropName)
+                    && N.equals(getPropNamingPolicy(), other.getPropNamingPolicy()) && N.equals(writeNullToEmpty, other.writeNullToEmpty)
+                    && N.equals(writeDataSetByRow, other.writeDataSetByRow) && N.equals(writeRowColumnKeyType, other.writeRowColumnKeyType)
+                    && N.equals(writeColumnType, other.writeColumnType) && N.equals(quotePropName, other.quotePropName)
                     && N.equals(quoteMapKey, other.quoteMapKey) && N.equals(wrapRootValue, other.wrapRootValue)
                     && N.equals(bracketRootValue, other.bracketRootValue)) {
 
@@ -329,10 +394,12 @@ public class JSONSerializationConfig extends JSONXMLSerializationConfig<JSONSeri
                 + ", skipTransientField=" + N.toString(skipTransientField()) + ", prettyFormat=" + N.toString(prettyFormat()) + ", supportCircularReference="
                 + N.toString(supportCircularReference()) + ", writeLongAsString=" + N.toString(writeLongAsString()) + ", writeNullStringAsEmpty="
                 + N.toString(writeNullStringAsEmpty) + ", writeNullNumberAsZero=" + N.toString(writeNullNumberAsZero) + ", writeNullBooleanAsFalse="
-                + N.toString(writeNullBooleanAsFalse) + ", writeNullToEmpty=" + N.toString(writeNullToEmpty) + ", writeBigDecimalAsPlain="
-                + N.toString(writeBigDecimalAsPlain()) + ", indentation=" + N.toString(getIndentation()) + ", propNamingPolicy="
-                + N.toString(getPropNamingPolicy()) + ", quotePropName=" + N.toString(quotePropName) + ", quoteMapKey=" + N.toString(quoteMapKey)
-                + ", wrapRootValue=" + N.toString(wrapRootValue) + ", bracketRootValue=" + N.toString(bracketRootValue) + "}";
+                + N.toString(writeNullBooleanAsFalse) + ", writeNullToEmpty=" + N.toString(writeNullToEmpty) + ", writeDataSetByRow="
+                + N.toString(writeDataSetByRow) + ", writeRowColumnKeyType=" + N.toString(writeRowColumnKeyType) + ", writeColumnType="
+                + N.toString(writeColumnType) + ", writeBigDecimalAsPlain=" + N.toString(writeBigDecimalAsPlain()) + ", indentation="
+                + N.toString(getIndentation()) + ", propNamingPolicy=" + N.toString(getPropNamingPolicy()) + ", quotePropName=" + N.toString(quotePropName)
+                + ", quoteMapKey=" + N.toString(quoteMapKey) + ", wrapRootValue=" + N.toString(wrapRootValue) + ", bracketRootValue="
+                + N.toString(bracketRootValue) + "}";
     }
 
     /**

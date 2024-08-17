@@ -894,6 +894,6 @@ public interface Type<T> {
     String deepToString(T x);
 
     enum SerializationType {
-        SERIALIZABLE, ENTITY, MAP, ARRAY, COLLECTION, MAP_ENTITY, ENTITY_ID, DATA_SET, UNKNOWN;
+        SERIALIZABLE, ENTITY, MAP, ARRAY, COLLECTION, MAP_ENTITY, ENTITY_ID, DATA_SET, SHEET, UNKNOWN;
     }
 }

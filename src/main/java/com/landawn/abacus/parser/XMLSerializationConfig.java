@@ -33,9 +33,9 @@ public class XMLSerializationConfig extends JSONXMLSerializationConfig<XMLSerial
 
     protected static final boolean defaultIgnoreTypeInfo = true;
 
-    boolean tagByPropertyName = defaultTagByPropertyName;
+    private boolean tagByPropertyName = defaultTagByPropertyName;
 
-    boolean ignoreTypeInfo = defaultIgnoreTypeInfo;
+    private boolean ignoreTypeInfo = defaultIgnoreTypeInfo;
 
     /**
      *

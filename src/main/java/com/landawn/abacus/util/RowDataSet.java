@@ -132,24 +132,25 @@ public class RowDataSet implements DataSet, Cloneable {
 
     private static final Type<Object> strType = N.typeOf(String.class);
 
-    List<String> _columnNameList; //NOSONAR
+    private List<String> _columnNameList; //NOSONAR
 
-    List<List<Object>> _columnList; //NOSONAR
+    private List<List<Object>> _columnList; //NOSONAR
 
-    Map<String, Integer> _columnIndexMap; //NOSONAR
+    private Map<String, Integer> _columnIndexMap; //NOSONAR
 
-    int[] _columnIndexes; //NOSONAR
+    private int[] _columnIndexes; //NOSONAR
 
-    int _currentRowNum = 0; //NOSONAR
+    private int _currentRowNum = 0; //NOSONAR
 
-    boolean _isFrozen = false; //NOSONAR
+    private boolean _isFrozen = false; //NOSONAR
 
-    Properties<String, Object> _properties; //NOSONAR
+    private final Map<String, Object> _properties; //NOSONAR
 
-    transient int modCount = 0; //NOSONAR
+    private transient int modCount = 0; //NOSONAR
 
     // For Kryo
     protected RowDataSet() {
+        _properties = N.emptyMap();
     }
 
     /**
@@ -170,7 +171,7 @@ public class RowDataSet implements DataSet, Cloneable {
      * @param properties
      * @throws IllegalArgumentException
      */
-    public RowDataSet(final List<String> columnNameList, final List<List<Object>> columnList, final Properties<String, Object> properties)
+    public RowDataSet(final List<String> columnNameList, final List<List<Object>> columnList, final Map<String, Object> properties)
             throws IllegalArgumentException {
         N.checkArgNotNull(columnNameList);
         N.checkArgNotNull(columnList);
@@ -189,7 +190,7 @@ public class RowDataSet implements DataSet, Cloneable {
 
         this._columnList = columnList;
 
-        this._properties = properties;
+        this._properties = properties == null ? N.emptyMap() : ImmutableMap.copyOf(properties);
     }
 
     //    @Override
@@ -1007,9 +1008,9 @@ public class RowDataSet implements DataSet, Cloneable {
     /**
      * Adds the column.
      *
-     * @param newColumnName 
-     * @param fromColumnName 
-     * @param func 
+     * @param newColumnName
+     * @param fromColumnName
+     * @param func
      */
     @Override
     public void addColumn(String newColumnName, String fromColumnName, Function<?, ?> func) {
@@ -1019,10 +1020,10 @@ public class RowDataSet implements DataSet, Cloneable {
     /**
      * Adds the column.
      *
-     * @param newColumnPosition 
-     * @param newColumnName 
-     * @param fromColumnName 
-     * @param func 
+     * @param newColumnPosition
+     * @param newColumnName
+     * @param fromColumnName
+     * @param func
      */
     @Override
     public void addColumn(int newColumnPosition, final String newColumnName, String fromColumnName, Function<?, ?> func) {
@@ -1055,9 +1056,9 @@ public class RowDataSet implements DataSet, Cloneable {
     /**
      * Adds the column.
      *
-     * @param newColumnName 
-     * @param fromColumnNames 
-     * @param func 
+     * @param newColumnName
+     * @param fromColumnNames
+     * @param func
      */
     @Override
     public void addColumn(String newColumnName, Collection<String> fromColumnNames, Function<? super DisposableObjArray, ?> func) {
@@ -1067,10 +1068,10 @@ public class RowDataSet implements DataSet, Cloneable {
     /**
      * Adds the column.
      *
-     * @param newColumnPosition 
-     * @param newColumnName 
-     * @param fromColumnNames 
-     * @param func 
+     * @param newColumnPosition
+     * @param newColumnName
+     * @param fromColumnNames
+     * @param func
      */
     @Override
     public void addColumn(int newColumnPosition, final String newColumnName, Collection<String> fromColumnNames, Function<? super DisposableObjArray, ?> func) {
@@ -1127,9 +1128,9 @@ public class RowDataSet implements DataSet, Cloneable {
     /**
      * Adds the column.
      *
-     * @param newColumnName 
-     * @param fromColumnNames 
-     * @param func 
+     * @param newColumnName
+     * @param fromColumnNames
+     * @param func
      */
     @Override
     public void addColumn(String newColumnName, Tuple2<String, String> fromColumnNames, BiFunction<?, ?, ?> func) {
@@ -1139,10 +1140,10 @@ public class RowDataSet implements DataSet, Cloneable {
     /**
      * Adds the column.
      *
-     * @param newColumnPosition 
-     * @param newColumnName 
-     * @param fromColumnNames 
-     * @param func 
+     * @param newColumnPosition
+     * @param newColumnName
+     * @param fromColumnNames
+     * @param func
      */
     @Override
     public void addColumn(int newColumnPosition, final String newColumnName, Tuple2<String, String> fromColumnNames, BiFunction<?, ?, ?> func) {
@@ -1174,9 +1175,9 @@ public class RowDataSet implements DataSet, Cloneable {
     /**
      * Adds the column.
      *
-     * @param newColumnName 
-     * @param fromColumnNames 
-     * @param func 
+     * @param newColumnName
+     * @param fromColumnNames
+     * @param func
      */
     @Override
     public void addColumn(String newColumnName, Tuple3<String, String, String> fromColumnNames, TriFunction<?, ?, ?, ?> func) {
@@ -1186,10 +1187,10 @@ public class RowDataSet implements DataSet, Cloneable {
     /**
      * Adds the column.
      *
-     * @param newColumnPosition 
-     * @param newColumnName 
-     * @param fromColumnNames 
-     * @param func 
+     * @param newColumnPosition
+     * @param newColumnName
+     * @param fromColumnNames
+     * @param func
      */
     @Override
     public void addColumn(int newColumnPosition, final String newColumnName, Tuple3<String, String, String> fromColumnNames, TriFunction<?, ?, ?, ?> func) {
@@ -1316,10 +1317,10 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * 
      *
-     * @param columnName 
-     * @param func 
+     *
+     * @param columnName
+     * @param func
      */
     @Override
     public void updateColumn(final String columnName, final Function<?, ?> func) {
@@ -1336,10 +1337,10 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * 
      *
-     * @param columnNames 
-     * @param func 
+     *
+     * @param columnNames
+     * @param func
      */
     @Override
     public void updateColumns(final Collection<String> columnNames, final Function<?, ?> func) {
@@ -1395,11 +1396,11 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * 
      *
-     * @param columnNames 
-     * @param newColumnName 
-     * @param combineFunc 
+     *
+     * @param columnNames
+     * @param newColumnName
+     * @param combineFunc
      */
     @Override
     public void combineColumns(Collection<String> columnNames, final String newColumnName, Function<? super DisposableObjArray, ?> combineFunc) {
@@ -1420,11 +1421,11 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * 
      *
-     * @param columnNameFilter 
-     * @param newColumnName 
-     * @param combineFunc 
+     *
+     * @param columnNameFilter
+     * @param newColumnName
+     * @param combineFunc
      */
     @Override
     public void combineColumns(Predicate<? super String> columnNameFilter, final String newColumnName, Function<? super DisposableObjArray, ?> combineFunc) {
@@ -1432,11 +1433,11 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * 
      *
-     * @param columnNames 
-     * @param newColumnName 
-     * @param combineFunc 
+     *
+     * @param columnNames
+     * @param newColumnName
+     * @param combineFunc
      */
     @Override
     public void combineColumns(Tuple2<String, String> columnNames, final String newColumnName, BiFunction<?, ?, ?> combineFunc) {
@@ -1446,11 +1447,11 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * 
      *
-     * @param columnNames 
-     * @param newColumnName 
-     * @param combineFunc 
+     *
+     * @param columnNames
+     * @param newColumnName
+     * @param combineFunc
      */
     @Override
     public void combineColumns(Tuple3<String, String, String> columnNames, final String newColumnName, TriFunction<?, ?, ?, ?> combineFunc) {
@@ -1460,11 +1461,11 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * 
      *
-     * @param columnName 
-     * @param newColumnNames 
-     * @param divideFunc 
+     *
+     * @param columnName
+     * @param newColumnNames
+     * @param divideFunc
      */
     @Override
     public void divideColumn(final String columnName, Collection<String> newColumnNames, Function<?, ? extends List<?>> divideFunc) {
@@ -1511,11 +1512,11 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * 
      *
-     * @param columnName 
-     * @param newColumnNames 
-     * @param output 
+     *
+     * @param columnName
+     * @param newColumnNames
+     * @param output
      */
     @Override
     public void divideColumn(final String columnName, Collection<String> newColumnNames, BiConsumer<?, Object[]> output) {
@@ -1563,11 +1564,11 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * 
      *
-     * @param columnName 
-     * @param newColumnNames 
-     * @param output 
+     *
+     * @param columnName
+     * @param newColumnNames
+     * @param output
      */
     @Override
     public void divideColumn(final String columnName, final Tuple2<String, String> newColumnNames, final BiConsumer<?, Pair<Object, Object>> output) {
@@ -1604,11 +1605,11 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * 
      *
-     * @param columnName 
-     * @param newColumnNames 
-     * @param output 
+     *
+     * @param columnName
+     * @param newColumnNames
+     * @param output
      */
     @Override
     public void divideColumn(final String columnName, final Tuple3<String, String, String> newColumnNames,
@@ -1825,10 +1826,10 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * 
      *
-     * @param rowIndex 
-     * @param func 
+     *
+     * @param rowIndex
+     * @param func
      */
     @Override
     public void updateRow(int rowIndex, Function<?, ?> func) {
@@ -1846,10 +1847,10 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * 
      *
-     * @param indices 
-     * @param func 
+     *
+     * @param indices
+     * @param func
      */
     @Override
     public void updateRows(int[] indices, Function<?, ?> func) {
@@ -1871,9 +1872,9 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * 
      *
-     * @param func 
+     *
+     * @param func
      */
     @Override
     public void updateAll(Function<?, ?> func) {
@@ -1892,10 +1893,10 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * 
      *
-     * @param predicate 
-     * @param newValue 
+     *
+     * @param predicate
+     * @param newValue
      */
     @Override
     public void replaceIf(Predicate<?> predicate, Object newValue) {
@@ -5193,15 +5194,15 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param keyColumnName 
-     * @param aggregateResultColumnName 
-     * @param aggregateOnColumnNames 
-     * @param rowMapper 
-     * @param collector 
-     * @return 
+     *
+     * @param <T>
+     * @param keyColumnName
+     * @param aggregateResultColumnName
+     * @param aggregateOnColumnNames
+     * @param rowMapper
+     * @param collector
+     * @return
      */
     @Override
     public <T> DataSet groupBy(final String keyColumnName, String aggregateResultColumnName, Collection<String> aggregateOnColumnNames,
@@ -5271,14 +5272,14 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * 
      *
-     * @param keyColumnName 
-     * @param keyMapper 
-     * @param aggregateResultColumnName 
-     * @param aggregateOnColumnName 
-     * @param collector 
-     * @return 
+     *
+     * @param keyColumnName
+     * @param keyMapper
+     * @param aggregateResultColumnName
+     * @param aggregateOnColumnName
+     * @param collector
+     * @return
      */
     @Override
     public DataSet groupBy(final String keyColumnName, Function<?, ?> keyMapper, String aggregateResultColumnName, String aggregateOnColumnName,
@@ -5371,14 +5372,14 @@ public class RowDataSet implements DataSet, Cloneable {
     //    }
 
     /**
-     * 
      *
-     * @param keyColumnName 
-     * @param keyMapper 
-     * @param aggregateResultColumnName 
-     * @param aggregateOnColumnNames 
-     * @param rowType 
-     * @return 
+     *
+     * @param keyColumnName
+     * @param keyMapper
+     * @param aggregateResultColumnName
+     * @param aggregateOnColumnNames
+     * @param rowType
+     * @return
      */
     @Override
     public DataSet groupBy(String keyColumnName, Function<?, ?> keyMapper, String aggregateResultColumnName, Collection<String> aggregateOnColumnNames,
@@ -5418,14 +5419,14 @@ public class RowDataSet implements DataSet, Cloneable {
     private static final Function<? super DisposableObjArray, ?> NULL_PARAM_INDICATOR_2 = null;
 
     /**
-     * 
      *
-     * @param keyColumnName 
-     * @param keyMapper 
-     * @param aggregateResultColumnName 
-     * @param aggregateOnColumnNames 
-     * @param collector 
-     * @return 
+     *
+     * @param keyColumnName
+     * @param keyMapper
+     * @param aggregateResultColumnName
+     * @param aggregateOnColumnNames
+     * @param collector
+     * @return
      */
     @Override
     public DataSet groupBy(final String keyColumnName, Function<?, ?> keyMapper, String aggregateResultColumnName, Collection<String> aggregateOnColumnNames,
@@ -5434,17 +5435,17 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param keyColumnName 
-     * @param keyMapper 
-     * @param aggregateResultColumnName 
-     * @param aggregateOnColumnNames 
-     * @param rowMapper 
-     * @param collector 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <T>
+     * @param keyColumnName
+     * @param keyMapper
+     * @param aggregateResultColumnName
+     * @param aggregateOnColumnNames
+     * @param rowMapper
+     * @param collector
+     * @return
+     * @throws IllegalArgumentException
      */
     @Override
     public <T> DataSet groupBy(final String keyColumnName, Function<?, ?> keyMapper, String aggregateResultColumnName,
@@ -5660,15 +5661,15 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param keyColumnNames 
-     * @param aggregateResultColumnName 
-     * @param aggregateOnColumnNames 
-     * @param rowMapper 
-     * @param collector 
-     * @return 
+     *
+     * @param <T>
+     * @param keyColumnNames
+     * @param aggregateResultColumnName
+     * @param aggregateOnColumnNames
+     * @param rowMapper
+     * @param collector
+     * @return
      */
     @Override
     public <T> DataSet groupBy(Collection<String> keyColumnNames, String aggregateResultColumnName, Collection<String> aggregateOnColumnNames,
@@ -5677,12 +5678,12 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * 
      *
-     * @param keyColumnNames 
-     * @param keyMapper 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param keyColumnNames
+     * @param keyMapper
+     * @return
+     * @throws IllegalArgumentException
      */
     @Override
     public DataSet groupBy(final Collection<String> keyColumnNames, final Function<? super DisposableObjArray, ?> keyMapper) throws IllegalArgumentException {
@@ -5751,15 +5752,15 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * 
      *
-     * @param keyColumnNames 
-     * @param keyMapper 
-     * @param aggregateResultColumnName 
-     * @param aggregateOnColumnName 
-     * @param collector 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param keyColumnNames
+     * @param keyMapper
+     * @param aggregateResultColumnName
+     * @param aggregateOnColumnName
+     * @param collector
+     * @return
+     * @throws IllegalArgumentException
      */
     @Override
     public DataSet groupBy(Collection<String> keyColumnNames, final Function<? super DisposableObjArray, ?> keyMapper, String aggregateResultColumnName,
@@ -5880,15 +5881,15 @@ public class RowDataSet implements DataSet, Cloneable {
     //    }
 
     /**
-     * 
      *
-     * @param keyColumnNames 
-     * @param keyMapper 
-     * @param aggregateResultColumnName 
-     * @param aggregateOnColumnNames 
-     * @param rowType 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param keyColumnNames
+     * @param keyMapper
+     * @param aggregateResultColumnName
+     * @param aggregateOnColumnNames
+     * @param rowType
+     * @return
+     * @throws IllegalArgumentException
      */
     @Override
     public DataSet groupBy(Collection<String> keyColumnNames, Function<? super DisposableObjArray, ?> keyMapper, String aggregateResultColumnName,
@@ -5965,14 +5966,14 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * 
      *
-     * @param keyColumnNames 
-     * @param keyMapper 
-     * @param aggregateResultColumnName 
-     * @param aggregateOnColumnNames 
-     * @param collector 
-     * @return 
+     *
+     * @param keyColumnNames
+     * @param keyMapper
+     * @param aggregateResultColumnName
+     * @param aggregateOnColumnNames
+     * @param collector
+     * @return
      */
     @Override
     public DataSet groupBy(Collection<String> keyColumnNames, Function<? super DisposableObjArray, ?> keyMapper, String aggregateResultColumnName,
@@ -5981,17 +5982,17 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param keyColumnNames 
-     * @param keyMapper 
-     * @param aggregateResultColumnName 
-     * @param aggregateOnColumnNames 
-     * @param rowMapper 
-     * @param collector 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <T>
+     * @param keyColumnNames
+     * @param keyMapper
+     * @param aggregateResultColumnName
+     * @param aggregateOnColumnNames
+     * @param rowMapper
+     * @param collector
+     * @return
+     * @throws IllegalArgumentException
      */
     @Override
     public <T> DataSet groupBy(Collection<String> keyColumnNames, Function<? super DisposableObjArray, ?> keyMapper, String aggregateResultColumnName,
@@ -6147,18 +6148,18 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * 
      *
-     * @param <R> 
-     * @param <C> 
-     * @param <U> 
-     * @param <T> 
-     * @param groupByColumnName 
-     * @param pivotColumnName 
-     * @param aggColumnNames 
-     * @param rowMapper 
-     * @param collector 
-     * @return 
+     *
+     * @param <R>
+     * @param <C>
+     * @param <U>
+     * @param <T>
+     * @param groupByColumnName
+     * @param pivotColumnName
+     * @param aggColumnNames
+     * @param rowMapper
+     * @param collector
+     * @return
      */
     @Override
     public <R, C, U, T> Sheet<R, C, T> pivot(String groupByColumnName, String pivotColumnName, Collection<String> aggColumnNames,
@@ -7094,9 +7095,7 @@ public class RowDataSet implements DataSet, Cloneable {
             }
         }
 
-        final Properties<String, Object> newProperties = N.isEmpty(_properties) ? null : _properties.copy();
-
-        return new RowDataSet(newColumnNameList, newColumnList, newProperties);
+        return new RowDataSet(newColumnNameList, newColumnList, _properties);
     }
 
     /**
@@ -7120,11 +7119,11 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * 
      *
-     * @param columnName 
-     * @param keyMapper 
-     * @return 
+     *
+     * @param columnName
+     * @param keyMapper
+     * @return
      */
     @Override
     public DataSet distinctBy(final String columnName, final Function<?, ?> keyMapper) {
@@ -7139,10 +7138,8 @@ public class RowDataSet implements DataSet, Cloneable {
             newColumnList.add(new ArrayList<>());
         }
 
-        final Properties<String, Object> newProperties = N.isEmpty(_properties) ? null : _properties.copy();
-
         if (size == 0) {
-            return new RowDataSet(newColumnNameList, newColumnList, newProperties);
+            return new RowDataSet(newColumnNameList, newColumnList, _properties);
         }
 
         final Function<Object, ?> keyMapperToUse = (Function<Object, ?>) keyMapper;
@@ -7161,7 +7158,7 @@ public class RowDataSet implements DataSet, Cloneable {
             }
         }
 
-        return new RowDataSet(newColumnNameList, newColumnList, newProperties);
+        return new RowDataSet(newColumnNameList, newColumnList, _properties);
     }
 
     /**
@@ -7175,11 +7172,11 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * 
      *
-     * @param columnNames 
-     * @param keyMapper 
-     * @return 
+     *
+     * @param columnNames
+     * @param keyMapper
+     * @return
      */
     @Override
     public DataSet distinctBy(final Collection<String> columnNames, final Function<? super DisposableObjArray, ?> keyMapper) {
@@ -7200,10 +7197,8 @@ public class RowDataSet implements DataSet, Cloneable {
             newColumnList.add(new ArrayList<>());
         }
 
-        final Properties<String, Object> newProperties = N.isEmpty(_properties) ? null : _properties.copy();
-
         if (size == 0) {
-            return new RowDataSet(newColumnNameList, newColumnList, newProperties);
+            return new RowDataSet(newColumnNameList, newColumnList, _properties);
         }
 
         final Set<Object> rowSet = N.newHashSet();
@@ -7244,14 +7239,14 @@ public class RowDataSet implements DataSet, Cloneable {
             }
         }
 
-        return new RowDataSet(newColumnNameList, newColumnList, newProperties);
+        return new RowDataSet(newColumnNameList, newColumnList, _properties);
     }
 
     /**
-     * 
      *
-     * @param filter 
-     * @return 
+     *
+     * @param filter
+     * @return
      */
     @Override
     public DataSet filter(final Predicate<? super DisposableObjArray> filter) {
@@ -7259,11 +7254,11 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * 
      *
-     * @param filter 
-     * @param max 
-     * @return 
+     *
+     * @param filter
+     * @param max
+     * @return
      */
     @Override
     public DataSet filter(Predicate<? super DisposableObjArray> filter, int max) {
@@ -7271,12 +7266,12 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * 
      *
-     * @param fromRowIndex 
-     * @param toRowIndex 
-     * @param filter 
-     * @return 
+     *
+     * @param fromRowIndex
+     * @param toRowIndex
+     * @param filter
+     * @return
      */
     @Override
     public DataSet filter(final int fromRowIndex, final int toRowIndex, final Predicate<? super DisposableObjArray> filter) {
@@ -7284,13 +7279,13 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * 
      *
-     * @param fromRowIndex 
-     * @param toRowIndex 
-     * @param filter 
-     * @param max 
-     * @return 
+     *
+     * @param fromRowIndex
+     * @param toRowIndex
+     * @param filter
+     * @param max
+     * @return
      */
     @Override
     public DataSet filter(int fromRowIndex, int toRowIndex, Predicate<? super DisposableObjArray> filter, int max) {
@@ -7298,11 +7293,11 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * 
      *
-     * @param columnNames 
-     * @param filter 
-     * @return 
+     *
+     * @param columnNames
+     * @param filter
+     * @return
      */
     @Override
     public DataSet filter(Tuple2<String, String> columnNames, BiPredicate<?, ?> filter) {
@@ -7310,12 +7305,12 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * 
      *
-     * @param columnNames 
-     * @param filter 
-     * @param max 
-     * @return 
+     *
+     * @param columnNames
+     * @param filter
+     * @param max
+     * @return
      */
     @Override
     public DataSet filter(Tuple2<String, String> columnNames, BiPredicate<?, ?> filter, int max) {
@@ -7323,13 +7318,13 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * 
      *
-     * @param fromRowIndex 
-     * @param toRowIndex 
-     * @param columnNames 
-     * @param filter 
-     * @return 
+     *
+     * @param fromRowIndex
+     * @param toRowIndex
+     * @param columnNames
+     * @param filter
+     * @return
      */
     @Override
     public DataSet filter(int fromRowIndex, int toRowIndex, Tuple2<String, String> columnNames, BiPredicate<?, ?> filter) {
@@ -7337,15 +7332,15 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * 
      *
-     * @param fromRowIndex 
-     * @param toRowIndex 
-     * @param columnNames 
-     * @param filter 
-     * @param max 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param fromRowIndex
+     * @param toRowIndex
+     * @param columnNames
+     * @param filter
+     * @param max
+     * @return
+     * @throws IllegalArgumentException
      */
     @Override
     public DataSet filter(int fromRowIndex, int toRowIndex, Tuple2<String, String> columnNames, BiPredicate<?, ?> filter, int max)
@@ -7365,10 +7360,8 @@ public class RowDataSet implements DataSet, Cloneable {
             newColumnList.add(new ArrayList<>(N.min(max, (size == 0) ? 0 : ((int) (size * 0.8) + 1))));
         }
 
-        final Properties<String, Object> newProperties = N.isEmpty(_properties) ? null : _properties.copy();
-
         if (size == 0 || max == 0) {
-            return new RowDataSet(newColumnNameList, newColumnList, newProperties);
+            return new RowDataSet(newColumnNameList, newColumnList, _properties);
         }
 
         int count = max;
@@ -7385,15 +7378,15 @@ public class RowDataSet implements DataSet, Cloneable {
             }
         }
 
-        return new RowDataSet(newColumnNameList, newColumnList, newProperties);
+        return new RowDataSet(newColumnNameList, newColumnList, _properties);
     }
 
     /**
-     * 
      *
-     * @param columnNames 
-     * @param filter 
-     * @return 
+     *
+     * @param columnNames
+     * @param filter
+     * @return
      */
     @Override
     public DataSet filter(Tuple3<String, String, String> columnNames, TriPredicate<?, ?, ?> filter) {
@@ -7401,12 +7394,12 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * 
      *
-     * @param columnNames 
-     * @param filter 
-     * @param max 
-     * @return 
+     *
+     * @param columnNames
+     * @param filter
+     * @param max
+     * @return
      */
     @Override
     public DataSet filter(Tuple3<String, String, String> columnNames, TriPredicate<?, ?, ?> filter, int max) {
@@ -7414,13 +7407,13 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * 
      *
-     * @param fromRowIndex 
-     * @param toRowIndex 
-     * @param columnNames 
-     * @param filter 
-     * @return 
+     *
+     * @param fromRowIndex
+     * @param toRowIndex
+     * @param columnNames
+     * @param filter
+     * @return
      */
     @Override
     public DataSet filter(int fromRowIndex, int toRowIndex, Tuple3<String, String, String> columnNames, TriPredicate<?, ?, ?> filter) {
@@ -7428,15 +7421,15 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * 
      *
-     * @param fromRowIndex 
-     * @param toRowIndex 
-     * @param columnNames 
-     * @param filter 
-     * @param max 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param fromRowIndex
+     * @param toRowIndex
+     * @param columnNames
+     * @param filter
+     * @param max
+     * @return
+     * @throws IllegalArgumentException
      */
     @Override
     public DataSet filter(final int fromRowIndex, final int toRowIndex, final Tuple3<String, String, String> columnNames, final TriPredicate<?, ?, ?> filter,
@@ -7458,10 +7451,8 @@ public class RowDataSet implements DataSet, Cloneable {
             newColumnList.add(new ArrayList<>(N.min(max, (size == 0) ? 0 : ((int) (size * 0.8) + 1))));
         }
 
-        final Properties<String, Object> newProperties = N.isEmpty(_properties) ? null : _properties.copy();
-
         if (size == 0 || max == 0) {
-            return new RowDataSet(newColumnNameList, newColumnList, newProperties);
+            return new RowDataSet(newColumnNameList, newColumnList, _properties);
         }
 
         int count = max;
@@ -7478,15 +7469,15 @@ public class RowDataSet implements DataSet, Cloneable {
             }
         }
 
-        return new RowDataSet(newColumnNameList, newColumnList, newProperties);
+        return new RowDataSet(newColumnNameList, newColumnList, _properties);
     }
 
     /**
-     * 
      *
-     * @param columnName 
-     * @param filter 
-     * @return 
+     *
+     * @param columnName
+     * @param filter
+     * @return
      */
     @Override
     public DataSet filter(final String columnName, final Predicate<?> filter) {
@@ -7494,13 +7485,13 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * 
      *
-     * @param columnName 
-     * @param filter 
-     * @param max 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param columnName
+     * @param filter
+     * @param max
+     * @return
+     * @throws IllegalArgumentException
      */
     @Override
     public DataSet filter(final String columnName, Predicate<?> filter, int max) throws IllegalArgumentException {
@@ -7508,13 +7499,13 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * 
      *
-     * @param fromRowIndex 
-     * @param toRowIndex 
-     * @param columnName 
-     * @param filter 
-     * @return 
+     *
+     * @param fromRowIndex
+     * @param toRowIndex
+     * @param columnName
+     * @param filter
+     * @return
      */
     @Override
     public DataSet filter(final int fromRowIndex, final int toRowIndex, final String columnName, final Predicate<?> filter) {
@@ -7522,15 +7513,15 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * 
      *
-     * @param fromRowIndex 
-     * @param toRowIndex 
-     * @param columnName 
-     * @param filter 
-     * @param max 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param fromRowIndex
+     * @param toRowIndex
+     * @param columnName
+     * @param filter
+     * @param max
+     * @return
+     * @throws IllegalArgumentException
      */
     @Override
     public DataSet filter(int fromRowIndex, int toRowIndex, final String columnName, Predicate<?> filter, int max) throws IllegalArgumentException {
@@ -7550,10 +7541,8 @@ public class RowDataSet implements DataSet, Cloneable {
             newColumnList.add(new ArrayList<>(N.min(max, (size == 0) ? 0 : ((int) (size * 0.8) + 1))));
         }
 
-        final Properties<String, Object> newProperties = N.isEmpty(_properties) ? null : _properties.copy();
-
         if (size == 0) {
-            return new RowDataSet(newColumnNameList, newColumnList, newProperties);
+            return new RowDataSet(newColumnNameList, newColumnList, _properties);
         }
 
         for (int rowIndex = fromRowIndex; rowIndex < toRowIndex; rowIndex++) {
@@ -7568,15 +7557,15 @@ public class RowDataSet implements DataSet, Cloneable {
             }
         }
 
-        return new RowDataSet(newColumnNameList, newColumnList, newProperties);
+        return new RowDataSet(newColumnNameList, newColumnList, _properties);
     }
 
     /**
-     * 
      *
-     * @param columnNames 
-     * @param filter 
-     * @return 
+     *
+     * @param columnNames
+     * @param filter
+     * @return
      */
     @Override
     public DataSet filter(final Collection<String> columnNames, final Predicate<? super DisposableObjArray> filter) {
@@ -7584,12 +7573,12 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * 
      *
-     * @param columnNames 
-     * @param filter 
-     * @param max 
-     * @return 
+     *
+     * @param columnNames
+     * @param filter
+     * @param max
+     * @return
      */
     @Override
     public DataSet filter(Collection<String> columnNames, Predicate<? super DisposableObjArray> filter, int max) {
@@ -7597,13 +7586,13 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * 
      *
-     * @param fromRowIndex 
-     * @param toRowIndex 
-     * @param columnNames 
-     * @param filter 
-     * @return 
+     *
+     * @param fromRowIndex
+     * @param toRowIndex
+     * @param columnNames
+     * @param filter
+     * @return
      */
     @Override
     public DataSet filter(final int fromRowIndex, final int toRowIndex, final Collection<String> columnNames,
@@ -7612,15 +7601,15 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * 
      *
-     * @param fromRowIndex 
-     * @param toRowIndex 
-     * @param columnNames 
-     * @param filter 
-     * @param max 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param fromRowIndex
+     * @param toRowIndex
+     * @param columnNames
+     * @param filter
+     * @param max
+     * @return
+     * @throws IllegalArgumentException
      */
     @Override
     public DataSet filter(int fromRowIndex, int toRowIndex, Collection<String> columnNames, Predicate<? super DisposableObjArray> filter, int max)
@@ -7639,10 +7628,8 @@ public class RowDataSet implements DataSet, Cloneable {
             newColumnList.add(new ArrayList<>(N.min(max, (size == 0) ? 0 : ((int) (size * 0.8) + 1))));
         }
 
-        final Properties<String, Object> newProperties = N.isEmpty(_properties) ? null : _properties.copy();
-
         if (size == 0) {
-            return new RowDataSet(newColumnNameList, newColumnList, newProperties);
+            return new RowDataSet(newColumnNameList, newColumnList, _properties);
         }
 
         final int filterColumnCount = filterColumnIndexes.length;
@@ -7665,17 +7652,17 @@ public class RowDataSet implements DataSet, Cloneable {
             }
         }
 
-        return new RowDataSet(newColumnNameList, newColumnList, newProperties);
+        return new RowDataSet(newColumnNameList, newColumnList, _properties);
     }
 
     /**
-     * 
      *
-     * @param fromColumnName 
-     * @param newColumnName 
-     * @param copyingColumnName 
-     * @param mapper 
-     * @return 
+     *
+     * @param fromColumnName
+     * @param newColumnName
+     * @param copyingColumnName
+     * @param mapper
+     * @return
      */
     @Override
     public DataSet map(final String fromColumnName, final String newColumnName, final String copyingColumnName, final Function<?, ?> mapper) {
@@ -7683,14 +7670,14 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * 
      *
-     * @param fromColumnName 
-     * @param newColumnName 
-     * @param copyingColumnNames 
-     * @param mapper 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param fromColumnName
+     * @param newColumnName
+     * @param copyingColumnNames
+     * @param mapper
+     * @return
+     * @throws IllegalArgumentException
      */
     @Override
     public DataSet map(final String fromColumnName, final String newColumnName, final Collection<String> copyingColumnNames, final Function<?, ?> mapper)
@@ -7727,14 +7714,14 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * 
      *
-     * @param fromColumnNames 
-     * @param newColumnName 
-     * @param copyingColumnNames 
-     * @param mapper 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param fromColumnNames
+     * @param newColumnName
+     * @param copyingColumnNames
+     * @param mapper
+     * @return
+     * @throws IllegalArgumentException
      */
     @Override
     public DataSet map(final Tuple2<String, String> fromColumnNames, final String newColumnName, final Collection<String> copyingColumnNames,
@@ -7772,14 +7759,14 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * 
      *
-     * @param fromColumnNames 
-     * @param newColumnName 
-     * @param copyingColumnNames 
-     * @param mapper 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param fromColumnNames
+     * @param newColumnName
+     * @param copyingColumnNames
+     * @param mapper
+     * @return
+     * @throws IllegalArgumentException
      */
     @Override
     public DataSet map(final Tuple3<String, String, String> fromColumnNames, final String newColumnName, final Collection<String> copyingColumnNames,
@@ -7819,14 +7806,14 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * 
      *
-     * @param fromColumnNames 
-     * @param newColumnName 
-     * @param copyingColumnNames 
-     * @param mapper 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param fromColumnNames
+     * @param newColumnName
+     * @param copyingColumnNames
+     * @param mapper
+     * @return
+     * @throws IllegalArgumentException
      */
     @Override
     public DataSet map(final Collection<String> fromColumnNames, final String newColumnName, final Collection<String> copyingColumnNames,
@@ -7870,13 +7857,13 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * 
      *
-     * @param fromColumnName 
-     * @param newColumnName 
-     * @param copyingColumnName 
-     * @param mapper 
-     * @return 
+     *
+     * @param fromColumnName
+     * @param newColumnName
+     * @param copyingColumnName
+     * @param mapper
+     * @return
      */
     @Override
     public DataSet flatMap(final String fromColumnName, final String newColumnName, final String copyingColumnName,
@@ -7885,14 +7872,14 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * 
      *
-     * @param fromColumnName 
-     * @param newColumnName 
-     * @param copyingColumnNames 
-     * @param mapper 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param fromColumnName
+     * @param newColumnName
+     * @param copyingColumnNames
+     * @param mapper
+     * @return
+     * @throws IllegalArgumentException
      */
     @Override
     public DataSet flatMap(final String fromColumnName, final String newColumnName, final Collection<String> copyingColumnNames,
@@ -7957,14 +7944,14 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * 
      *
-     * @param fromColumnNames 
-     * @param newColumnName 
-     * @param copyingColumnNames 
-     * @param mapper 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param fromColumnNames
+     * @param newColumnName
+     * @param copyingColumnNames
+     * @param mapper
+     * @return
+     * @throws IllegalArgumentException
      */
     @Override
     public DataSet flatMap(final Tuple2<String, String> fromColumnNames, final String newColumnName, final Collection<String> copyingColumnNames,
@@ -8030,14 +8017,14 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * 
      *
-     * @param fromColumnNames 
-     * @param newColumnName 
-     * @param copyingColumnNames 
-     * @param mapper 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param fromColumnNames
+     * @param newColumnName
+     * @param copyingColumnNames
+     * @param mapper
+     * @return
+     * @throws IllegalArgumentException
      */
     @Override
     public DataSet flatMap(final Tuple3<String, String, String> fromColumnNames, final String newColumnName, final Collection<String> copyingColumnNames,
@@ -8104,14 +8091,14 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * 
      *
-     * @param fromColumnNames 
-     * @param newColumnName 
-     * @param copyingColumnNames 
-     * @param mapper 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param fromColumnNames
+     * @param newColumnName
+     * @param copyingColumnNames
+     * @param mapper
+     * @return
+     * @throws IllegalArgumentException
      */
     @Override
     public DataSet flatMap(final Collection<String> fromColumnNames, final String newColumnName, final Collection<String> copyingColumnNames,
@@ -8246,9 +8233,7 @@ public class RowDataSet implements DataSet, Cloneable {
             }
         }
 
-        final Properties<String, Object> newProperties = copyProperties && N.notEmpty(_properties) ? _properties.copy() : null;
-
-        return new RowDataSet(newColumnNameList, newColumnList, newProperties);
+        return new RowDataSet(newColumnNameList, newColumnList, copyProperties ? _properties : null);
     }
 
     /**
@@ -12325,11 +12310,7 @@ public class RowDataSet implements DataSet, Cloneable {
      * @return
      */
     @Override
-    public Properties<String, Object> properties() {
-        if (_properties == null) {
-            _properties = new Properties<>();
-        }
-
+    public Map<String, Object> properties() {
         return _properties;
     }
 
@@ -12613,18 +12594,33 @@ public class RowDataSet implements DataSet, Cloneable {
      */
     @Override
     public String toString() {
-        if (columnCount() == 0) {
-            return "[[]]";
-        }
-
-        final BufferedWriter bw = Objectory.createBufferedWriter();
+        final StringBuilder sb = Objectory.createBigStringBuilder();
 
         try {
-            toCsv(true, false, bw);
+            sb.append("{columnNames=");
+            sb.append(_columnNameList);
 
-            return bw.toString();
+            sb.append(", properties=");
+            sb.append(_properties);
+
+            sb.append(", isFrozen=");
+            sb.append(_isFrozen);
+
+            sb.append(", columns={");
+
+            for (int i = 0, columnCount = _columnNameList.size(); i < columnCount; i++) {
+                if (i > 0) {
+                    sb.append(Strings.ELEMENT_SEPARATOR_CHAR_ARRAY);
+                }
+
+                sb.append(_columnNameList.get(i)).append("=").append(N.toString(_columnList.get(i)));
+            }
+
+            sb.append("}}");
+
+            return sb.toString();
         } finally {
-            Objectory.recycle(bw);
+            Objectory.recycle(sb);
         }
     }
 

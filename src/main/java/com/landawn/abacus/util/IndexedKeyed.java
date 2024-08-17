@@ -61,6 +61,37 @@ public final class IndexedKeyed<K, T> extends Keyed<K, T> {
      * @return
      */
     @Override
+    public int hashCode() {
+        return N.hashCode(index) * 31 + N.hashCode(key);
+    }
+
+    /**
+     *
+     * @param obj
+     * @return
+     */
+    @Override
+    public boolean equals(final Object obj) {
+        if ((obj == this)) {
+            return true;
+        }
+
+        if (obj instanceof IndexedKeyed) {
+            @SuppressWarnings("rawtypes")
+            final IndexedKeyed another = (IndexedKeyed) obj;
+
+            return N.equals(another.index, index) && N.equals(another.key, key);
+        }
+
+        return false;
+    }
+
+    /**
+     *
+     *
+     * @return
+     */
+    @Override
     public String toString() {
         return "{index=" + N.toString(index) + ", key=" + key + ", val=" + val + "}";
     }

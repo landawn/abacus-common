@@ -94,6 +94,85 @@ public final class Splitter {
 
     /**
      *
+     * @return
+     */
+    @Beta
+    public static Splitter forLines() {
+        final char delimiter = Strings.CHAR_LF;
+
+        return new Splitter((source, omitEmptyStrings, trim, strip, limit) -> {
+            if (source == null) {
+                return ObjIterator.empty();
+            }
+
+            return new ObjIterator<>() {
+                private final SubStringFunc subStringFunc = strip ? stripSubStringFunc : (trim ? trimSubStringFunc : defaultSubStringFunc);
+                private final int sourceLen = source.length();
+                private String next = null;
+                private int start = 0;
+                private int cursor = 0;
+                private int cnt = 0;
+
+                @Override
+                public boolean hasNext() {
+                    if (next == null && (cursor >= 0 && cursor <= sourceLen)) {
+                        if (limit - cnt == 1) {
+                            if (sourceLen > start && source.charAt(sourceLen - 1) == Strings.CHAR_CR) {
+                                next = subStringFunc.subString(source, start, sourceLen - 1);
+                            } else {
+                                next = subStringFunc.subString(source, start, sourceLen);
+                            }
+
+                            start = (cursor = sourceLen + 1);
+
+                            if (omitEmptyStrings && next.length() == 0) {
+                                next = null;
+                            }
+                        } else {
+                            while (cursor >= 0 && cursor <= sourceLen) {
+                                if (cursor == sourceLen || source.charAt(cursor) == delimiter) {
+                                    if (cursor > start && source.charAt(cursor - 1) == Strings.CHAR_CR) {
+                                        next = subStringFunc.subString(source, start, cursor - 1);
+                                    } else {
+                                        next = subStringFunc.subString(source, start, cursor);
+                                    }
+
+                                    start = ++cursor;
+
+                                    if (omitEmptyStrings && next.length() == 0) {
+                                        next = null;
+                                    }
+
+                                    if (next != null) {
+                                        break;
+                                    }
+                                } else {
+                                    cursor++;
+                                }
+                            }
+                        }
+                    }
+
+                    return next != null;
+                }
+
+                @Override
+                public String next() {
+                    if (!hasNext()) {
+                        throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+                    }
+
+                    final String result = next;
+                    next = null;
+                    cnt++;
+                    return result;
+                }
+            };
+        });
+    }
+
+    /**
+     *
      * @param delimiter
      * @return
      */
@@ -783,7 +862,7 @@ public final class Splitter {
         /**
          * Returns the Map Splitter with the default entry and key/value delimiter: <code>", "</code> and <code>"="</code>.
          *
-         * @return 
+         * @return
          * @see Joiner#DEFAULT_DELIMITER
          * @see Joiner#DEFAULT_KEY_VALUE_DELIMITER
          * @see Joiner#defauLt()

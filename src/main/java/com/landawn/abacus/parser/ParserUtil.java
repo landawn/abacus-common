@@ -2542,11 +2542,11 @@ public final class ParserUtil {
 
         public JsonNameTag(String name) {
             this.name = name.toCharArray();
-            this.nameWithColon = (name + ":").toCharArray();
-            this.nameNull = (name + ":null").toCharArray();
+            this.nameWithColon = (name + ": ").toCharArray();
+            this.nameNull = (name + ": null").toCharArray();
             this.quotedName = ("\"" + name + "\"").toCharArray();
-            this.quotedNameWithColon = ("\"" + name + "\":").toCharArray();
-            this.quotedNameNull = ("\"" + name + "\":null").toCharArray();
+            this.quotedNameWithColon = ("\"" + name + "\": ").toCharArray();
+            this.quotedNameNull = ("\"" + name + "\": null").toCharArray();
         }
 
         @Override

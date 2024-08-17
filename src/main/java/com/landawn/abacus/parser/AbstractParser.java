@@ -54,6 +54,7 @@ import com.landawn.abacus.util.ImmutableSortedSet;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Tuple;
 import com.landawn.abacus.util.Tuple.Tuple2;
+import com.landawn.abacus.util.WD;
 
 /**
  *
@@ -66,9 +67,17 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
 
     private static final Logger logger = LoggerFactory.getLogger(AbstractParser.class);
 
-    static final String ELEMENT_SEPARATOR = ", ".intern();
+    static final char _COLON = WD._COLON;
 
-    static final char[] ELEMENT_SEPARATOR_CHAR_ARRAY = ELEMENT_SEPARATOR.toCharArray();
+    static final String COLON_SPACE = WD.COLON_SPACE;
+
+    static final char[] COLON_SPACE_CHAR_ARRAY = COLON_SPACE.toCharArray();
+
+    static final char _COMMA = WD._COMMA;
+
+    static final String COMMA_SPACE = WD.COMMA_SPACE;
+
+    static final char[] COMMA_SPACE_CHAR_ARRAY = COMMA_SPACE.toCharArray();
 
     static final String NULL_STRING = "null".intern();
 

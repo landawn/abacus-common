@@ -169,6 +169,11 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     private static final Pattern WHITESPACE_PATTERN = Pattern.compile("(?: |\\u00A0|\\s|[\\s&&[^ ]])\\s*");//NOSONAR
 
+    private static final Splitter lineSplitter = Splitter.forLines();
+    private static final Splitter trimLineSplitter = Splitter.forLines().trimResults();
+    private static final Splitter omitEmptyLinesLineSplitter = Splitter.forLines().omitEmptyStrings();
+    private static final Splitter trimAndOmitEmptyLinesLineSplitter = Splitter.forLines().trimResults().omitEmptyStrings();
+
     private static final Map<Object, Splitter> splitterPool = new HashMap<>();
 
     private static final Map<Object, Splitter> trimSplitterPool = new HashMap<>();
@@ -3438,6 +3443,36 @@ public abstract sealed class Strings permits Strings.StringUtil {
     @SuppressWarnings("deprecation")
     public static String[] splitPreserveAllTokens(final String str, final String delimiter, final int max, boolean trim) {
         return Splitter.with(delimiter).trim(trim).limit(max).splitToArray(str);
+    }
+
+    /**
+     *
+     * @param str
+     * @return
+     */
+    public static String[] splitToLines(final String str) {
+        return lineSplitter.splitToArray(str);
+    }
+
+    /**
+     *
+     * @param str
+     * @param trim
+     * @param omitEmptyLines
+     * @return
+     */
+    public static String[] splitToLines(final String str, final boolean trim, final boolean omitEmptyLines) {
+        if (trim) {
+            if (omitEmptyLines) {
+                return trimAndOmitEmptyLinesLineSplitter.splitToArray(str);
+            } else {
+                return trimLineSplitter.splitToArray(str);
+            }
+        } else if (omitEmptyLines) {
+            return omitEmptyLinesLineSplitter.splitToArray(str);
+        } else {
+            return lineSplitter.splitToArray(str);
+        }
     }
 
     // -----------------------------------------------------------------------

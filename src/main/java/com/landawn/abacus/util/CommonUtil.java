@@ -3440,12 +3440,33 @@ sealed class CommonUtil permits N {
     /**
      * New empty data set.
      *
+     * @param properties
+     * @return
+     */
+    static DataSet newEmptyDataSet(final Map<String, Object> properties) {
+        return new RowDataSet(new ArrayList<>(), new ArrayList<>(), properties);
+    }
+
+    /**
+     * New empty data set.
+     *
      * @param columnNames
      * @return
      */
     public static DataSet newEmptyDataSet(final Collection<String> columnNames) {
+        return newEmptyDataSet(columnNames, null);
+    }
+
+    /**
+     * New empty data set.
+     *
+     * @param columnNames
+     * @param properties
+     * @return
+     */
+    public static DataSet newEmptyDataSet(final Collection<String> columnNames, final Map<String, Object> properties) {
         if (isEmpty(columnNames)) {
-            return newEmptyDataSet();
+            return newEmptyDataSet(properties);
         }
 
         final List<List<Object>> columnList = new ArrayList<>(columnNames.size());
@@ -3454,30 +3475,7 @@ sealed class CommonUtil permits N {
             columnList.add(new ArrayList<>(0));
         }
 
-        return new RowDataSet(new ArrayList<>(columnNames), columnList);
-    }
-
-    /**
-     * Convert the specified Map to a two columns <code>DataSet</code>: one column is for keys and one column is for values.
-     *
-     * @param keyColumnName
-     * @param valueColumnName
-     * @param m
-     * @return
-     */
-    public static DataSet newDataSet(final String keyColumnName, final String valueColumnName, final Map<?, ?> m) {
-        final List<Object> keyColumn = new ArrayList<>(m.size());
-        final List<Object> valueColumn = new ArrayList<>(m.size());
-
-        for (Map.Entry<?, ?> entry : m.entrySet()) {
-            keyColumn.add(entry.getKey());
-            valueColumn.add(entry.getValue());
-        }
-
-        final List<String> columnNameList = asList(keyColumnName, valueColumnName);
-        final List<List<Object>> columnList = asList(keyColumn, valueColumn);
-
-        return newDataSet(columnNameList, columnList);
+        return new RowDataSet(new ArrayList<>(columnNames), columnList, properties);
     }
 
     /**
@@ -3488,7 +3486,29 @@ sealed class CommonUtil permits N {
      * @return
      */
     public static DataSet newDataSet(final Collection<?> rowList) {
-        return newDataSet(null, rowList);
+        return newDataSet(rowList, null);
+    }
+
+    /**
+     * The first row will be used as column names if its type is array or list,
+     * or obtain the column names from first row if its type is bean or map.
+     *
+     * @param rowList list of row which can be: Map/Bean/Array/List
+     * @param properties
+     * @return
+     */
+    public static DataSet newDataSet(final Collection<?> rowList, final Map<String, Object> properties) {
+        return newDataSet(null, rowList, properties);
+    }
+
+    /**
+     *
+     * @param columnNames
+     * @param rowList
+     * @return
+     */
+    public static DataSet newDataSet(Collection<String> columnNames, Collection<?> rowList) {
+        return newDataSet(columnNames, rowList, null);
     }
 
     /**
@@ -3497,14 +3517,15 @@ sealed class CommonUtil permits N {
      *
      * @param columnNames
      * @param rowList
+     * @param properties
      * @return
      */
-    public static DataSet newDataSet(Collection<String> columnNames, Collection<?> rowList) {
+    public static DataSet newDataSet(Collection<String> columnNames, Collection<?> rowList, final Map<String, Object> properties) {
         if (isEmpty(columnNames) && isEmpty(rowList)) {
             // throw new IllegalArgumentException("Column name list and row list can not be both null or empty");
-            return newEmptyDataSet();
+            return newEmptyDataSet(properties);
         } else if (isEmpty(rowList)) {
-            return newEmptyDataSet(columnNames);
+            return newEmptyDataSet(columnNames, properties);
         }
 
         int startRowIndex = 0;
@@ -3513,7 +3534,7 @@ sealed class CommonUtil permits N {
             final Object firstNonNullRow = N.firstNonNull(rowList).orElse(null);
 
             if (firstNonNullRow == null) {
-                return newEmptyDataSet();
+                return newEmptyDataSet(properties);
             }
 
             final Class<?> cls = firstNonNullRow.getClass();
@@ -3621,7 +3642,7 @@ sealed class CommonUtil permits N {
             }
         }
 
-        return new RowDataSet(columnNameList, columnList);
+        return new RowDataSet(columnNameList, columnList, properties);
     }
 
     /**
@@ -3642,6 +3663,29 @@ sealed class CommonUtil permits N {
         N.checkArgument(N.size(columnNames) == N.len(rowList[0]), "length of 'columnNames' is not equals to length of 'rowList[0]'");
 
         return newDataSet(columnNames, N.asList(rowList));
+    }
+
+    /**
+     * Convert the specified Map to a two columns <code>DataSet</code>: one column is for keys and one column is for values.
+     *
+     * @param keyColumnName
+     * @param valueColumnName
+     * @param m
+     * @return
+     */
+    public static DataSet newDataSet(final String keyColumnName, final String valueColumnName, final Map<?, ?> m) {
+        final List<Object> keyColumn = new ArrayList<>(m.size());
+        final List<Object> valueColumn = new ArrayList<>(m.size());
+
+        for (Map.Entry<?, ?> entry : m.entrySet()) {
+            keyColumn.add(entry.getKey());
+            valueColumn.add(entry.getValue());
+        }
+
+        final List<String> columnNameList = asList(keyColumnName, valueColumnName);
+        final List<List<Object>> columnList = asList(keyColumn, valueColumn);
+
+        return newDataSet(columnNameList, columnList);
     }
 
     /**
@@ -3751,7 +3795,7 @@ sealed class CommonUtil permits N {
             return iter.next().merge(iter.next());
         } else {
             final Set<String> columnNameSet = N.newLinkedHashSet();
-            final Properties<String, Object> props = new Properties<>();
+            final Map<String, Object> props = new HashMap<>();
             int totalSize = 0;
 
             for (DataSet ds : dss) {

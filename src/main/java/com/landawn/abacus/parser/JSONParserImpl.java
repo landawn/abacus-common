@@ -68,9 +68,9 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.NamingPolicy;
 import com.landawn.abacus.util.Objectory;
 import com.landawn.abacus.util.Pair;
-import com.landawn.abacus.util.Properties;
 import com.landawn.abacus.util.RowDataSet;
 import com.landawn.abacus.util.Seid;
+import com.landawn.abacus.util.Sheet;
 import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.Triple;
@@ -101,19 +101,31 @@ final class JSONParserImpl extends AbstractJSONParser {
 
     private static final String COLUMN_TYPES = "columnTypes";
 
+    private static final String COLUMNS = "columns";
+
     private static final String PROPERTIES = "properties";
 
     private static final String IS_FROZEN = "isFrozen";
 
-    private static final Map<String, Integer> dataSetPropOrder = new HashMap<>();
+    private static final String ROW_KEY_SET = "rowKeySet";
+    private static final String COLUMN_KEY_SET = "columnKeySet";
+    private static final String ROW_KEY_TYPE = "rowKeyType";
+    private static final String COLUMN_KEY_TYPE = "columnKeyType";
+
+    private static final Map<String, Integer> dataSetSheetPropOrder = new HashMap<>();
 
     static {
-        dataSetPropOrder.put(ENTITY_NAME, 1);
-        dataSetPropOrder.put(ENTITY_TYPE, 2);
-        dataSetPropOrder.put(COLUMN_NAMES, 3);
-        dataSetPropOrder.put(COLUMN_TYPES, 4);
-        dataSetPropOrder.put(PROPERTIES, 5);
-        dataSetPropOrder.put(IS_FROZEN, 6);
+        dataSetSheetPropOrder.put(ENTITY_NAME, 1);
+        dataSetSheetPropOrder.put(ENTITY_TYPE, 2);
+        dataSetSheetPropOrder.put(COLUMN_NAMES, 3);
+        dataSetSheetPropOrder.put(COLUMN_TYPES, 4);
+        dataSetSheetPropOrder.put(PROPERTIES, 5);
+        dataSetSheetPropOrder.put(IS_FROZEN, 6);
+        dataSetSheetPropOrder.put(COLUMNS, 7);
+        dataSetSheetPropOrder.put(ROW_KEY_SET, 8);
+        dataSetSheetPropOrder.put(COLUMN_KEY_SET, 9);
+        dataSetSheetPropOrder.put(ROW_KEY_TYPE, 10);
+        dataSetSheetPropOrder.put(COLUMN_KEY_TYPE, 11);
     }
 
     private static final JSONDeserializationConfig jdcForStringElement = JDC.create().setElementType(String.class);
@@ -130,13 +142,13 @@ final class JSONParserImpl extends AbstractJSONParser {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param source 
-     * @param config 
-     * @param targetClass 
-     * @return 
+     *
+     * @param <T>
+     * @param source
+     * @param config
+     * @param targetClass
+     * @return
      */
     @Override
     public <T> T readString(final String source, final JSONDeserializationConfig config, final Class<? extends T> targetClass) {
@@ -225,11 +237,11 @@ final class JSONParserImpl extends AbstractJSONParser {
     }
 
     /**
-     * 
      *
-     * @param source 
-     * @param config 
-     * @param output 
+     *
+     * @param source
+     * @param config
+     * @param output
      */
     @Override
     public void readString(final String source, final JSONDeserializationConfig config, final Map<?, ?> output) {
@@ -295,6 +307,9 @@ final class JSONParserImpl extends AbstractJSONParser {
 
             case DATA_SET:
                 return readDataSet(jr, UNDEFINED, config, true, targetClass);
+
+            case SHEET:
+                return readSheet(jr, UNDEFINED, config, true, targetClass);
 
             case ENTITY_ID:
                 return readEntityId(jr, config, true, targetClass);
@@ -503,6 +518,7 @@ final class JSONParserImpl extends AbstractJSONParser {
      * @param bw
      * @throws IOException Signals that an I/O exception has occurred.
      */
+    @SuppressWarnings("rawtypes")
     protected void write(final Object obj, final JSONSerializationConfig config, final boolean isFirstCall, final String indentation,
             final IdentityHashSet<Object> serializedObjects, final BufferedJSONWriter bw) throws IOException {
         final Type<Object> type = N.typeOf(obj.getClass());
@@ -545,6 +561,11 @@ final class JSONParserImpl extends AbstractJSONParser {
 
             case DATA_SET:
                 writeDataSet((DataSet) obj, config, isFirstCall, indentation, serializedObjects, type, bw);
+
+                break;
+
+            case SHEET:
+                writeSheet((Sheet) obj, config, isFirstCall, indentation, serializedObjects, type, bw);
 
                 break;
 
@@ -677,13 +698,15 @@ final class JSONParserImpl extends AbstractJSONParser {
                 bw.write(ClassUtil.getSimpleClassName(cls));
             }
 
-            bw.write(_COLON);
+            bw.write(COLON_SPACE_CHAR_ARRAY);
             bw.write(_BRACE_L);
 
             nextIndentation += config.getIndentation();
         }
 
-        for (int k = 0, i = 0, len = propInfoList.length; i < len; i++) {
+        int cnt = 0;
+
+        for (int i = 0, len = propInfoList.length; i < len; i++) {
             propInfo = propInfoList[i];
             propName = propInfo.name;
 
@@ -699,11 +722,11 @@ final class JSONParserImpl extends AbstractJSONParser {
                 continue;
             }
 
-            if (k++ > 0) {
+            if (cnt++ > 0) {
                 if (isPrettyFormat) {
-                    bw.write(',');
+                    bw.write(_COMMA);
                 } else {
-                    bw.write(ELEMENT_SEPARATOR_CHAR_ARRAY);
+                    bw.write(COMMA_SPACE_CHAR_ARRAY);
                 }
             }
 
@@ -745,7 +768,7 @@ final class JSONParserImpl extends AbstractJSONParser {
         }
 
         if (config.wrapRootValue()) {
-            if (isPrettyFormat) {
+            if (isPrettyFormat && cnt > 0) {
                 bw.write(IOUtil.LINE_SEPARATOR);
 
                 if (indentation != null) {
@@ -759,7 +782,7 @@ final class JSONParserImpl extends AbstractJSONParser {
         }
 
         if (config.bracketRootValue() || !isFirstCall) {
-            if (isPrettyFormat) {
+            if (isPrettyFormat && (config.wrapRootValue() || cnt > 0)) {
                 bw.write(IOUtil.LINE_SEPARATOR);
 
                 if (indentation != null) {
@@ -822,9 +845,9 @@ final class JSONParserImpl extends AbstractJSONParser {
 
             if (i++ > 0) {
                 if (isPrettyFormat) {
-                    bw.write(',');
+                    bw.write(_COMMA);
                 } else {
-                    bw.write(ELEMENT_SEPARATOR_CHAR_ARRAY);
+                    bw.write(COMMA_SPACE_CHAR_ARRAY);
                 }
             }
 
@@ -851,7 +874,7 @@ final class JSONParserImpl extends AbstractJSONParser {
                 }
             }
 
-            bw.write(_COLON);
+            bw.write(COLON_SPACE_CHAR_ARRAY);
 
             if (value == null) {
                 bw.write(NULL_CHAR_ARRAY);
@@ -861,7 +884,7 @@ final class JSONParserImpl extends AbstractJSONParser {
         }
 
         if (config.bracketRootValue() || !isFirstCall) {
-            if (isPrettyFormat) {
+            if (isPrettyFormat && N.notEmpty(m)) {
                 bw.write(IOUtil.LINE_SEPARATOR);
 
                 if (indentation != null) {
@@ -909,9 +932,9 @@ final class JSONParserImpl extends AbstractJSONParser {
 
             if (i > 0) {
                 if (isPrettyFormat) {
-                    bw.write(',');
+                    bw.write(_COMMA);
                 } else {
-                    bw.write(ELEMENT_SEPARATOR_CHAR_ARRAY);
+                    bw.write(COMMA_SPACE_CHAR_ARRAY);
                 }
             }
 
@@ -928,7 +951,7 @@ final class JSONParserImpl extends AbstractJSONParser {
         }
 
         if (config.bracketRootValue() || !isFirstCall) {
-            if (isPrettyFormat) {
+            if (isPrettyFormat && len > 0) {
                 bw.write(IOUtil.LINE_SEPARATOR);
 
                 if (indentation != null) {
@@ -970,9 +993,9 @@ final class JSONParserImpl extends AbstractJSONParser {
         for (Object element : c) {
             if (i++ > 0) {
                 if (isPrettyFormat) {
-                    bw.write(',');
+                    bw.write(_COMMA);
                 } else {
-                    bw.write(ELEMENT_SEPARATOR_CHAR_ARRAY);
+                    bw.write(COMMA_SPACE_CHAR_ARRAY);
                 }
             }
 
@@ -989,7 +1012,7 @@ final class JSONParserImpl extends AbstractJSONParser {
         }
 
         if (config.bracketRootValue() || !isFirstCall) {
-            if (isPrettyFormat) {
+            if (isPrettyFormat && N.notEmpty(c)) {
                 bw.write(IOUtil.LINE_SEPARATOR);
 
                 if (indentation != null) {
@@ -1047,7 +1070,7 @@ final class JSONParserImpl extends AbstractJSONParser {
             bw.write(mapEntity.entityName());
         }
 
-        bw.write(_COLON);
+        bw.write(COLON_SPACE_CHAR_ARRAY);
 
         bw.write(_BRACE_L);
 
@@ -1060,9 +1083,9 @@ final class JSONParserImpl extends AbstractJSONParser {
             for (String propName : mapEntity.keySet()) {
                 if (i++ > 0) {
                     if (isPrettyFormat) {
-                        bw.write(',');
+                        bw.write(_COMMA);
                     } else {
-                        bw.write(ELEMENT_SEPARATOR_CHAR_ARRAY);
+                        bw.write(COMMA_SPACE_CHAR_ARRAY);
                     }
                 }
 
@@ -1079,14 +1102,14 @@ final class JSONParserImpl extends AbstractJSONParser {
                     bw.write(jsonXmlNamingPolicy == null ? propName : jsonXmlNamingPolicy.convert(propName));
                 }
 
-                bw.write(_COLON);
+                bw.write(COLON_SPACE_CHAR_ARRAY);
 
                 write(mapEntity.get(propName), config, false, nextIndentation, serializedObjects, bw);
             }
         }
 
         {
-            if (isPrettyFormat) {
+            if (isPrettyFormat && !mapEntity.isEmpty()) {
                 bw.write(IOUtil.LINE_SEPARATOR);
 
                 if (indentation != null) {
@@ -1158,7 +1181,7 @@ final class JSONParserImpl extends AbstractJSONParser {
             bw.write(entityId.entityName());
         }
 
-        bw.write(_COLON);
+        bw.write(COLON_SPACE_CHAR_ARRAY);
 
         bw.write(_BRACE_L);
 
@@ -1171,9 +1194,9 @@ final class JSONParserImpl extends AbstractJSONParser {
             for (String propName : entityId.keySet()) {
                 if (i++ > 0) {
                     if (isPrettyFormat) {
-                        bw.write(',');
+                        bw.write(_COMMA);
                     } else {
-                        bw.write(ELEMENT_SEPARATOR_CHAR_ARRAY);
+                        bw.write(COMMA_SPACE_CHAR_ARRAY);
                     }
                 }
 
@@ -1190,14 +1213,14 @@ final class JSONParserImpl extends AbstractJSONParser {
                     bw.write(jsonXmlNamingPolicy == null ? propName : jsonXmlNamingPolicy.convert(propName));
                 }
 
-                bw.write(_COLON);
+                bw.write(COLON_SPACE_CHAR_ARRAY);
 
                 write(entityId.get(propName), config, false, nextIndentation, serializedObjects, bw);
             }
         }
 
         {
-            if (isPrettyFormat) {
+            if (isPrettyFormat && entityId.size() > 0) {
                 bw.write(IOUtil.LINE_SEPARATOR);
 
                 if (indentation != null) {
@@ -1241,70 +1264,20 @@ final class JSONParserImpl extends AbstractJSONParser {
             return;
         }
 
+        if (config.writeDataSetByRow()) {
+            writeCollection(ds.toList(LinkedHashMap.class), config, isFirstCall, indentation, serializedObjects, type, bw);
+            return;
+        }
+
         final boolean quotePropName = config.quotePropName();
         final boolean isPrettyFormat = config.prettyFormat();
+        final boolean writeColumnType = config.writeColumnType();
 
         final String nextIndentation = isPrettyFormat ? ((indentation == null ? Strings.EMPTY_STRING : indentation) + config.getIndentation()) : null;
 
         if (config.bracketRootValue() || !isFirstCall) {
             bw.write(_BRACE_L);
         }
-
-        //        {
-        //            if (isPrettyFormat) {
-        //                bw.write(IOUtil.LINE_SEPARATOR);
-        //
-        //                if (indentation != null) {
-        //                    bw.write(indentation);
-        //                }
-        //
-        //                bw.write(config.getIndentation());
-        //            }
-        //        }
-        //
-        //        if (quotePropName) {
-        //            bw.write(_D_QUOTATION);
-        //            bw.write(ENTITY_NAME);
-        //            bw.write(_D_QUOTATION);
-        //        } else {
-        //            bw.write(ENTITY_NAME);
-        //        }
-        //
-        //        bw.write(_COLON);
-        //
-        //        strType.writeCharacter(bw, rs.beanName(), config);
-        //
-        //        bw.write(ELEMENT_SEPARATOR_CHAR_ARRAY);
-        //
-        //        {
-        //            if (isPrettyFormat) {
-        //                bw.write(N.LINE_SEPARATOR);
-        //
-        //                if (indentation != null) {
-        //                    bw.write(indentation);
-        //                }
-        //
-        //                bw.write(config.getIndentation());
-        //            }
-        //        }
-        //
-        //        if (quotePropName) {
-        //            bw.write(_D_QUOTATION);
-        //            bw.write(ENTITY_TYPE);
-        //            bw.write(_D_QUOTATION);
-        //        } else {
-        //            bw.write(ENTITY_TYPE);
-        //        }
-        //
-        //        bw.write(_COLON);
-        //
-        //        if (rs.beanClass() == null) {
-        //            bw.write(NULL_CHAR_ARRAY);
-        //        } else {
-        //            strType.writeCharacter(bw, N.getCanonicalClassName(rs.beanClass()), config);
-        //        }
-        //
-        //        bw.write(ELEMENT_SEPARATOR_CHAR_ARRAY);
 
         final List<String> columnNames = ds.columnNameList();
 
@@ -1328,14 +1301,121 @@ final class JSONParserImpl extends AbstractJSONParser {
             bw.write(COLUMN_NAMES);
         }
 
-        bw.write(_COLON);
+        bw.write(COLON_SPACE_CHAR_ARRAY);
 
         write(columnNames, config, false, nextIndentation, serializedObjects, bw);
 
         if (isPrettyFormat) {
-            bw.write(',');
+            bw.write(_COMMA);
         } else {
-            bw.write(ELEMENT_SEPARATOR_CHAR_ARRAY);
+            bw.write(COMMA_SPACE_CHAR_ARRAY);
+        }
+
+        if (writeColumnType) {
+            {
+                if (isPrettyFormat) {
+                    bw.write(IOUtil.LINE_SEPARATOR);
+
+                    if (indentation != null) {
+                        bw.write(indentation);
+                    }
+
+                    bw.write(config.getIndentation());
+                }
+            }
+
+            if (quotePropName) {
+                bw.write(_D_QUOTATION);
+                bw.write(COLUMN_TYPES);
+                bw.write(_D_QUOTATION);
+            } else {
+                bw.write(COLUMN_TYPES);
+            }
+
+            bw.write(COLON_SPACE_CHAR_ARRAY);
+
+            final List<String> types = Objectory.createList();
+            Class<?> eleTypeClass;
+
+            for (int i = 0, len = columnNames.size(); i < len; i++) {
+                eleTypeClass = getElementType(ds.getColumn(i));
+
+                types.add(eleTypeClass == null ? null : N.typeOf(eleTypeClass).name());
+            }
+
+            write(types, config, false, nextIndentation, serializedObjects, bw);
+
+            Objectory.recycle(types);
+
+            if (isPrettyFormat) {
+                bw.write(_COMMA);
+            } else {
+                bw.write(COMMA_SPACE_CHAR_ARRAY);
+            }
+        }
+
+        if (N.notEmpty(ds.properties())) {
+            {
+                if (isPrettyFormat) {
+                    bw.write(IOUtil.LINE_SEPARATOR);
+
+                    if (indentation != null) {
+                        bw.write(indentation);
+                    }
+
+                    bw.write(config.getIndentation());
+                }
+            }
+
+            if (quotePropName) {
+                bw.write(_D_QUOTATION);
+                bw.write(PROPERTIES);
+                bw.write(_D_QUOTATION);
+            } else {
+                bw.write(PROPERTIES);
+            }
+
+            bw.write(COLON_SPACE_CHAR_ARRAY);
+
+            write(ds.properties(), config, false, nextIndentation, serializedObjects, bw);
+
+            if (isPrettyFormat) {
+                bw.write(_COMMA);
+            } else {
+                bw.write(COMMA_SPACE_CHAR_ARRAY);
+            }
+        }
+
+        if (ds.isFrozen()) {
+            {
+                if (isPrettyFormat) {
+                    bw.write(IOUtil.LINE_SEPARATOR);
+
+                    if (indentation != null) {
+                        bw.write(indentation);
+                    }
+
+                    bw.write(config.getIndentation());
+                }
+            }
+
+            if (quotePropName) {
+                bw.write(_D_QUOTATION);
+                bw.write(IS_FROZEN);
+                bw.write(_D_QUOTATION);
+            } else {
+                bw.write(IS_FROZEN);
+            }
+
+            bw.write(COLON_SPACE_CHAR_ARRAY);
+
+            bw.write(ds.isFrozen());
+
+            if (isPrettyFormat) {
+                bw.write(_COMMA);
+            } else {
+                bw.write(COMMA_SPACE_CHAR_ARRAY);
+            }
         }
 
         {
@@ -1352,122 +1432,36 @@ final class JSONParserImpl extends AbstractJSONParser {
 
         if (quotePropName) {
             bw.write(_D_QUOTATION);
-            bw.write(COLUMN_TYPES);
+            bw.write(COLUMNS);
             bw.write(_D_QUOTATION);
         } else {
-            bw.write(COLUMN_TYPES);
+            bw.write(COLUMNS);
         }
 
-        bw.write(_COLON);
-
-        final List<String> types = Objectory.createList();
-        String typeName = null;
-        List<Object> column = null;
-        for (int i = 0, len = columnNames.size(); i < len; i++) {
-            typeName = null;
-            column = ds.getColumn(i);
-
-            for (Object value : column) {
-                if (value != null) {
-                    typeName = N.typeOf(value.getClass()).name();
-                    break;
-                }
-            }
-
-            types.add(typeName);
-        }
-
-        write(types, config, false, nextIndentation, serializedObjects, bw);
-
-        Objectory.recycle(types);
-
-        if (N.notEmpty(ds.properties())) {
-            if (isPrettyFormat) {
-                bw.write(',');
-            } else {
-                bw.write(ELEMENT_SEPARATOR_CHAR_ARRAY);
-            }
-
-            {
-                if (isPrettyFormat) {
-                    bw.write(IOUtil.LINE_SEPARATOR);
-
-                    if (indentation != null) {
-                        bw.write(indentation);
-                    }
-
-                    bw.write(config.getIndentation());
-                }
-            }
-
-            if (quotePropName) {
-                bw.write(_D_QUOTATION);
-                bw.write(PROPERTIES);
-                bw.write(_D_QUOTATION);
-            } else {
-                bw.write(PROPERTIES);
-            }
-
-            bw.write(_COLON);
-
-            write(ds.properties(), config, false, nextIndentation, serializedObjects, bw);
-        }
-
-        if (ds.isFrozen()) {
-            if (isPrettyFormat) {
-                bw.write(',');
-            } else {
-                bw.write(ELEMENT_SEPARATOR_CHAR_ARRAY);
-            }
-
-            {
-                if (isPrettyFormat) {
-                    bw.write(IOUtil.LINE_SEPARATOR);
-
-                    if (indentation != null) {
-                        bw.write(indentation);
-                    }
-
-                    bw.write(config.getIndentation());
-                }
-            }
-
-            if (quotePropName) {
-                bw.write(_D_QUOTATION);
-                bw.write(IS_FROZEN);
-                bw.write(_D_QUOTATION);
-            } else {
-                bw.write(IS_FROZEN);
-            }
-
-            bw.write(_COLON);
-
-            bw.write(ds.isFrozen());
-        }
+        bw.write(COLON_SPACE_CHAR_ARRAY);
+        bw.write(_BRACE_L);
 
         if (columnNames.size() > 0) {
-            if (isPrettyFormat) {
-                bw.write(',');
-            } else {
-                bw.write(ELEMENT_SEPARATOR_CHAR_ARRAY);
-            }
-
+            final String doubleIndentation = Strings.nullToEmpty(indentation) + Strings.nullToEmpty(config.getIndentation())
+                    + Strings.nullToEmpty(config.getIndentation());
             String columnName = null;
+            List<Object> column = null;
+
             for (int i = 0, len = columnNames.size(); i < len; i++) {
                 columnName = columnNames.get(i);
                 column = ds.getColumn(i);
 
                 if (i > 0) {
                     if (isPrettyFormat) {
-                        bw.write(',');
+                        bw.write(_COMMA);
                     } else {
-                        bw.write(ELEMENT_SEPARATOR_CHAR_ARRAY);
+                        bw.write(COMMA_SPACE_CHAR_ARRAY);
                     }
                 }
 
                 if (isPrettyFormat) {
                     bw.write(IOUtil.LINE_SEPARATOR);
-                    bw.write(nextIndentation);
+                    bw.write(doubleIndentation);
                 }
 
                 if (quotePropName) {
@@ -1478,11 +1472,325 @@ final class JSONParserImpl extends AbstractJSONParser {
                     bw.write(columnName);
                 }
 
-                bw.write(_COLON);
+                bw.write(COLON_SPACE_CHAR_ARRAY);
 
-                write(column, config, false, nextIndentation, serializedObjects, bw);
+                write(column, config, false, doubleIndentation, serializedObjects, bw);
             }
         }
+
+        {
+            if (isPrettyFormat && columnNames.size() > 0) {
+                bw.write(IOUtil.LINE_SEPARATOR);
+
+                if (indentation != null) {
+                    bw.write(indentation);
+                }
+
+                bw.write(config.getIndentation());
+            }
+        }
+
+        bw.write(_BRACE_R);
+
+        if (config.bracketRootValue() || !isFirstCall) {
+            if (isPrettyFormat) {
+                bw.write(IOUtil.LINE_SEPARATOR);
+
+                if (indentation != null) {
+                    bw.write(indentation);
+                }
+            }
+
+            bw.write(_BRACE_R);
+        }
+    }
+
+    /**
+     * Write data set.
+     * @param sheet
+     * @param config
+     * @param isFirstCall
+     * @param indentation
+     * @param serializedObjects
+     * @param type
+     * @param bw
+     * @throws IOException Signals that an I/O exception has occurred.
+     */
+    @SuppressWarnings({ "unused", "rawtypes" })
+    protected void writeSheet(final Sheet sheet, final JSONSerializationConfig config, final boolean isFirstCall, final String indentation,
+            final IdentityHashSet<Object> serializedObjects, final Type<Object> type, final BufferedJSONWriter bw) throws IOException {
+        if (hasCircularReference(sheet, serializedObjects, bw)) {
+            return;
+        }
+
+        final boolean quotePropName = config.quotePropName();
+        final boolean isPrettyFormat = config.prettyFormat();
+        final boolean writeRowColumnKeyType = config.writeRowColumnKeyType();
+        final boolean writeColumnType = config.writeColumnType();
+
+        final String nextIndentation = isPrettyFormat ? ((indentation == null ? Strings.EMPTY_STRING : indentation) + config.getIndentation()) : null;
+
+        if (config.bracketRootValue() || !isFirstCall) {
+            bw.write(_BRACE_L);
+        }
+
+        if (writeRowColumnKeyType) {
+            {
+                if (isPrettyFormat) {
+                    bw.write(IOUtil.LINE_SEPARATOR);
+
+                    if (indentation != null) {
+                        bw.write(indentation);
+                    }
+
+                    bw.write(config.getIndentation());
+                }
+            }
+
+            if (quotePropName) {
+                bw.write(_D_QUOTATION);
+                bw.write(ROW_KEY_TYPE);
+                bw.write(_D_QUOTATION);
+            } else {
+                bw.write(ROW_KEY_TYPE);
+            }
+
+            bw.write(COLON_SPACE_CHAR_ARRAY);
+
+            Class<?> eleTypeClass = getElementType(sheet.rowKeySet());
+            final String rowKeyTypeName = eleTypeClass == null ? null : N.typeOf(eleTypeClass).name();
+
+            if (rowKeyTypeName != null) {
+                bw.write(_D_QUOTATION);
+                bw.write(rowKeyTypeName);
+                bw.write(_D_QUOTATION);
+            } else {
+                bw.write(rowKeyTypeName);
+            }
+
+            if (isPrettyFormat) {
+                bw.write(_COMMA);
+            } else {
+                bw.write(COMMA_SPACE_CHAR_ARRAY);
+            }
+
+            {
+                if (isPrettyFormat) {
+                    bw.write(IOUtil.LINE_SEPARATOR);
+
+                    if (indentation != null) {
+                        bw.write(indentation);
+                    }
+
+                    bw.write(config.getIndentation());
+                }
+            }
+
+            if (quotePropName) {
+                bw.write(_D_QUOTATION);
+                bw.write(COLUMN_KEY_TYPE);
+                bw.write(_D_QUOTATION);
+            } else {
+                bw.write(COLUMN_KEY_TYPE);
+            }
+
+            bw.write(COLON_SPACE_CHAR_ARRAY);
+
+            eleTypeClass = getElementType(sheet.columnKeySet());
+            final String columnKeyTypeName = eleTypeClass == null ? null : N.typeOf(eleTypeClass).name();
+
+            if (columnKeyTypeName != null) {
+                bw.write(_D_QUOTATION);
+                bw.write(columnKeyTypeName);
+                bw.write(_D_QUOTATION);
+            } else {
+                bw.write(columnKeyTypeName);
+            }
+
+            if (isPrettyFormat) {
+                bw.write(_COMMA);
+            } else {
+                bw.write(COMMA_SPACE_CHAR_ARRAY);
+            }
+        }
+
+        {
+            if (isPrettyFormat) {
+                bw.write(IOUtil.LINE_SEPARATOR);
+
+                if (indentation != null) {
+                    bw.write(indentation);
+                }
+
+                bw.write(config.getIndentation());
+            }
+        }
+
+        if (quotePropName) {
+            bw.write(_D_QUOTATION);
+            bw.write(ROW_KEY_SET);
+            bw.write(_D_QUOTATION);
+        } else {
+            bw.write(ROW_KEY_SET);
+        }
+
+        bw.write(COLON_SPACE_CHAR_ARRAY);
+
+        write(sheet.rowKeySet(), config, false, nextIndentation, serializedObjects, bw);
+
+        if (isPrettyFormat) {
+            bw.write(_COMMA);
+        } else {
+            bw.write(COMMA_SPACE_CHAR_ARRAY);
+        }
+
+        {
+            if (isPrettyFormat) {
+                bw.write(IOUtil.LINE_SEPARATOR);
+
+                if (indentation != null) {
+                    bw.write(indentation);
+                }
+
+                bw.write(config.getIndentation());
+            }
+        }
+
+        if (quotePropName) {
+            bw.write(_D_QUOTATION);
+            bw.write(COLUMN_KEY_SET);
+            bw.write(_D_QUOTATION);
+        } else {
+            bw.write(COLUMN_KEY_SET);
+        }
+
+        bw.write(COLON_SPACE_CHAR_ARRAY);
+
+        write(sheet.columnKeySet(), config, false, nextIndentation, serializedObjects, bw);
+
+        if (isPrettyFormat) {
+            bw.write(_COMMA);
+        } else {
+            bw.write(COMMA_SPACE_CHAR_ARRAY);
+        }
+
+        if (writeColumnType) {
+            {
+                if (isPrettyFormat) {
+                    bw.write(IOUtil.LINE_SEPARATOR);
+
+                    if (indentation != null) {
+                        bw.write(indentation);
+                    }
+
+                    bw.write(config.getIndentation());
+                }
+            }
+
+            if (quotePropName) {
+                bw.write(_D_QUOTATION);
+                bw.write(COLUMN_TYPES);
+                bw.write(_D_QUOTATION);
+            } else {
+                bw.write(COLUMN_TYPES);
+            }
+
+            bw.write(COLON_SPACE_CHAR_ARRAY);
+
+            final List<String> types = Objectory.createList();
+            Class<?> eleTypeClass = null;
+
+            for (Object columnKey : sheet.columnKeySet()) {
+                eleTypeClass = getElementType(sheet.getColumn(columnKey));
+
+                types.add(eleTypeClass == null ? null : N.typeOf(eleTypeClass).name());
+            }
+
+            write(types, config, false, nextIndentation, serializedObjects, bw);
+
+            Objectory.recycle(types);
+
+            if (isPrettyFormat) {
+                bw.write(_COMMA);
+            } else {
+                bw.write(COMMA_SPACE_CHAR_ARRAY);
+            }
+        }
+
+        {
+            if (isPrettyFormat) {
+                bw.write(IOUtil.LINE_SEPARATOR);
+
+                if (indentation != null) {
+                    bw.write(indentation);
+                }
+
+                bw.write(config.getIndentation());
+            }
+        }
+
+        if (quotePropName) {
+            bw.write(_D_QUOTATION);
+            bw.write(COLUMNS);
+            bw.write(_D_QUOTATION);
+        } else {
+            bw.write(COLUMNS);
+        }
+
+        bw.write(COLON_SPACE_CHAR_ARRAY);
+        bw.write(_BRACE_L);
+
+        if (sheet.columnKeySet().size() > 0) {
+            final String doubleIndentation = Strings.nullToEmpty(indentation) + Strings.nullToEmpty(config.getIndentation())
+                    + Strings.nullToEmpty(config.getIndentation());
+            String columnName = null;
+            List column = null;
+            int i = 0;
+
+            for (Object columnKey : sheet.columnKeySet()) {
+                columnName = N.stringOf(columnKey);
+                column = sheet.getColumn(columnKey);
+
+                if (i++ > 0) {
+                    if (isPrettyFormat) {
+                        bw.write(_COMMA);
+                    } else {
+                        bw.write(COMMA_SPACE_CHAR_ARRAY);
+                    }
+                }
+
+                if (isPrettyFormat) {
+                    bw.write(IOUtil.LINE_SEPARATOR);
+                    bw.write(doubleIndentation);
+                }
+
+                if (quotePropName) {
+                    bw.write(_D_QUOTATION);
+                    bw.write(columnName);
+                    bw.write(_D_QUOTATION);
+                } else {
+                    bw.write(columnName);
+                }
+
+                bw.write(COLON_SPACE_CHAR_ARRAY);
+
+                write(column, config, false, doubleIndentation, serializedObjects, bw);
+            }
+        }
+
+        {
+            if (isPrettyFormat && sheet.columnKeySet().size() > 0) {
+                bw.write(IOUtil.LINE_SEPARATOR);
+
+                if (indentation != null) {
+                    bw.write(indentation);
+                }
+
+                bw.write(config.getIndentation());
+            }
+        }
+
+        bw.write(_BRACE_R);
 
         if (config.bracketRootValue() || !isFirstCall) {
             if (isPrettyFormat) {
@@ -1519,14 +1827,37 @@ final class JSONParserImpl extends AbstractJSONParser {
         return false;
     }
 
+    private Class<?> getElementType(Collection<?> c) {
+        Class<?> cls = null;
+        Class<?> eleClass = null;
+
+        for (Object e : c) {
+            if (e != null) {
+                eleClass = e.getClass();
+
+                if (cls == null) {
+                    cls = eleClass;
+                } else if (eleClass.isAssignableFrom(cls)) {
+                    cls = eleClass;
+                } else if (cls.isAssignableFrom(eleClass)) {
+                    // continue;
+                } else {
+                    return null; // end here because there are are two incompatible type elements.
+                }
+            }
+        }
+
+        return cls;
+    }
+
     /**
-     * 
      *
-     * @param <T> 
-     * @param source 
-     * @param config 
-     * @param targetClass 
-     * @return 
+     *
+     * @param <T>
+     * @param source
+     * @param config
+     * @param targetClass
+     * @return
      */
     @Override
     public <T> T deserialize(final String source, final JSONDeserializationConfig config, final Class<? extends T> targetClass) {
@@ -1554,16 +1885,16 @@ final class JSONParserImpl extends AbstractJSONParser {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param source 
-     * @param fromIndex 
-     * @param toIndex 
-     * @param config 
-     * @param targetClass 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     *
+     * @param <T>
+     * @param source
+     * @param fromIndex
+     * @param toIndex
+     * @param config
+     * @param targetClass
+     * @return
+     * @throws IndexOutOfBoundsException
      */
     @Override
     public <T> T deserialize(final String source, final int fromIndex, final int toIndex, final JSONDeserializationConfig config,
@@ -1592,13 +1923,13 @@ final class JSONParserImpl extends AbstractJSONParser {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param source 
-     * @param config 
-     * @param targetClass 
-     * @return 
+     *
+     * @param <T>
+     * @param source
+     * @param config
+     * @param targetClass
+     * @return
      */
     @Override
     public <T> T deserialize(final File source, final JSONDeserializationConfig config, final Class<? extends T> targetClass) {
@@ -1614,13 +1945,13 @@ final class JSONParserImpl extends AbstractJSONParser {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param source 
-     * @param config 
-     * @param targetClass 
-     * @return 
+     *
+     * @param <T>
+     * @param source
+     * @param config
+     * @param targetClass
+     * @return
      */
     @Override
     public <T> T deserialize(final InputStream source, final JSONDeserializationConfig config, final Class<? extends T> targetClass) {
@@ -1641,13 +1972,13 @@ final class JSONParserImpl extends AbstractJSONParser {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param source 
-     * @param config 
-     * @param targetClass 
-     * @return 
+     *
+     * @param <T>
+     * @param source
+     * @param config
+     * @param targetClass
+     * @return
      */
     @Override
     public <T> T deserialize(final Reader source, final JSONDeserializationConfig config, final Class<? extends T> targetClass) {
@@ -1728,6 +2059,9 @@ final class JSONParserImpl extends AbstractJSONParser {
 
             case DATA_SET:
                 return readDataSet(jr, lastToken, config, isFirstCall, targetClass);
+
+            case SHEET:
+                return readSheet(jr, lastToken, config, isFirstCall, targetClass);
 
             case ENTITY_ID:
                 return readEntityId(jr, config, isFirstCall, targetClass);
@@ -1925,7 +2259,7 @@ final class JSONParserImpl extends AbstractJSONParser {
 
                                     if (nextToken == EOF) {
                                         break;
-                                    } else if (nextToken == COMMA) {
+                                    } else if (nextToken == COMMA || nextToken == COLON) {
                                         sb.append(AbstractJSONReader.eventChars[nextToken]);
                                         sb.append(' ');
                                     } else {
@@ -1977,7 +2311,7 @@ final class JSONParserImpl extends AbstractJSONParser {
 
                                     if (nextToken == EOF) {
                                         break;
-                                    } else if (nextToken == COMMA) {
+                                    } else if (nextToken == COMMA || nextToken == COLON) {
                                         sb.append(AbstractJSONReader.eventChars[nextToken]);
                                         sb.append(' ');
                                     } else {
@@ -2918,7 +3252,7 @@ final class JSONParserImpl extends AbstractJSONParser {
             //        Class<?> beanClass = null;
             List<String> columnNameList = null;
             List<List<Object>> columnList = null;
-            Properties<String, Object> properties = null;
+            Map<String, Object> properties = null;
             boolean isFrozen = false;
 
             List<Type<?>> columnTypeList = null;
@@ -2938,7 +3272,7 @@ final class JSONParserImpl extends AbstractJSONParser {
                         if (isKey) {
                             columnName = jr.getText();
                         } else {
-                            Integer order = dataSetPropOrder.get(columnName);
+                            Integer order = dataSetSheetPropOrder.get(columnName);
 
                             if (order == null) {
                                 throw new ParseException(token, getErrorMsg(jr, token));
@@ -2988,14 +3322,13 @@ final class JSONParserImpl extends AbstractJSONParser {
                         break;
 
                     case COMMA:
-
                         if (isKey) {
                             throw new ParseException(token, getErrorMsg(jr, token));
                         } else {
                             isKey = true;
 
                             if (jr.hasText()) {
-                                Integer order = dataSetPropOrder.get(columnName);
+                                Integer order = dataSetSheetPropOrder.get(columnName);
 
                                 if (order == null) {
                                     throw new ParseException(token, getErrorMsg(jr, token));
@@ -3033,49 +3366,121 @@ final class JSONParserImpl extends AbstractJSONParser {
                         break;
 
                     case START_BRACKET:
-                        Integer order = dataSetPropOrder.get(columnName);
+                        Integer order = dataSetSheetPropOrder.get(columnName);
 
-                        if (order == null || (columnNameList != null && columnNameList.contains(columnName))) {
-                            int index = N.indexOf(columnNameList, columnName);
+                        if (order == null) {
+                            throw new ParseException(token, getErrorMsg(jr, token));
+                        }
 
-                            valueType = columnTypeList.get(index);
+                        switch (order) {
+                            case 3:
+                                columnNameList = readCollection(jr, jdcForStringElement, null, null, false, List.class, null);
+                                break;
 
-                            if (valueType == null) {
-                                valueType = defaultValueType;
-                            }
+                            case 4:
+                                columnTypeList = readCollection(jr, jdcForTypeElement, null, null, false, List.class, null);
+                                break;
 
-                            List<Object> column = readCollection(jr, JDC.create().setElementType(valueType.clazz()), null, config.getPropHandler(columnName),
-                                    false, List.class, null);
-                            if (columnList == null) {
-                                columnList = new ArrayList<>(columnNameList.size());
-                                N.fill(columnList, 0, columnNameList.size(), null);
-                            }
-
-                            columnList.set(index, column);
-
-                        } else {
-                            switch (order) {
-                                case 3:
-                                    columnNameList = readCollection(jr, jdcForStringElement, null, null, false, List.class, null);
-                                    break;
-
-                                case 4:
-                                    columnTypeList = readCollection(jr, jdcForTypeElement, null, null, false, List.class, null);
-                                    break;
-
-                                default:
-                                    throw new ParseException(token, getErrorMsg(jr, token));
-                            }
+                            default:
+                                throw new ParseException(token, getErrorMsg(jr, token));
                         }
 
                         break;
 
                     case START_BRACE:
-                        if (!PROPERTIES.equals(columnName)) {
+                        if (PROPERTIES.equals(columnName)) {
+                            properties = readMap(jr, jdcForPropertiesElement, null, false, Map.class, null);
+                        } else if (COLUMNS.equals(columnName)) {
+                            columnName = null;
+                            isKey = true;
+                            boolean readingColumns = true;
+
+                            do {
+                                token = jr.nextToken();
+
+                                switch (token) {
+                                    case START_QUOTATION_D, START_QUOTATION_S:
+
+                                        break;
+
+                                    case END_QUOTATION_D, END_QUOTATION_S:
+                                        if (isKey) {
+                                            columnName = jr.getText();
+                                        } else {
+                                            throw new ParseException(token, getErrorMsg(jr, token));
+                                        }
+
+                                        break;
+
+                                    case COLON:
+                                        if (isKey) {
+                                            isKey = false;
+
+                                            if (jr.hasText()) {
+                                                columnName = jr.getText();
+                                            }
+                                        } else {
+                                            throw new ParseException(token, getErrorMsg(jr, token));
+                                        }
+
+                                        break;
+
+                                    case COMMA:
+                                        if (isKey) {
+                                            throw new ParseException(token, getErrorMsg(jr, token));
+                                        } else {
+                                            isKey = true;
+
+                                            if (jr.hasText()) {
+                                                throw new ParseException(token, getErrorMsg(jr, token));
+                                            }
+                                        }
+
+                                        break;
+
+                                    case START_BRACKET:
+                                        int index = N.indexOf(columnNameList, columnName);
+
+                                        if (index == N.INDEX_NOT_FOUND) {
+                                            throw new ParseException("Column: " + columnName + " is not found column list: " + columnNameList);
+                                        }
+
+                                        valueType = N.isEmpty(columnTypeList) ? null : columnTypeList.get(index);
+
+                                        if (valueType == null) {
+                                            valueType = defaultValueType;
+                                        }
+
+                                        List<Object> column = readCollection(jr, JDC.create().setElementType(valueType), null,
+                                                config.getPropHandler(columnName), false, List.class, null);
+
+                                        if (columnList == null) {
+                                            columnList = new ArrayList<>(columnNameList.size());
+                                            N.fill(columnList, 0, columnNameList.size(), null);
+                                        }
+
+                                        columnList.set(index, column);
+
+                                        break;
+
+                                    case END_BRACE:
+                                        if (jr.hasText()) {
+                                            // it should not happen.
+                                            throw new ParseException(token, getErrorMsg(jr, token));
+                                        }
+
+                                        columnName = null;
+                                        isKey = true;
+                                        readingColumns = false;
+                                        break;
+
+                                    default:
+                                        throw new ParseException(token, getErrorMsg(jr, token));
+                                }
+                            } while (readingColumns);
+                        } else {
                             throw new ParseException(token, getErrorMsg(jr, token) + ". Key: " + columnName + ",  Value: " + jr.getText());
                         }
-
-                        properties = Properties.create(readMap(jr, jdcForPropertiesElement, null, false, Map.class, null));
 
                         break;
 
@@ -3089,46 +3494,10 @@ final class JSONParserImpl extends AbstractJSONParser {
                             if (jr.hasText()) {
                                 // it should not happen.
 
-                                // order = resultSetPropOrder.get(propName);
-                                // if (order == null) {
-                                // throw new ParseException("Unsupported event type: " +
-                                // token + " with " + jr.getText());
-                                // }
-                                //
-                                // switch (order) {
-                                // case 1:
-                                // beanName = jr.getText();
-                                // break;
-                                //
-                                // case 2:
-                                // String str = jr.getText();
-                                // if (N.isEmpty(str)) {
-                                // beanClass = Map.class;
-                                // } else {
-                                // try {
-                                // beanClass = N.forClass(str);
-                                // } catch (Exception e) {
-                                // beanClass = Map.class;
-                                // }
-                                // }
-                                //
-                                // break;
-                                //
-                                // case 6:
-                                // isFrozen = N.parseBoolean(jr.getText());
-                                // break;
-                                //
-                                // default:
-                                // throw new ParseException("Unsupported event type: " +
-                                // token + " with " + jr.getText());
-                                //
-                                // }
-
                                 throw new ParseException(token, getErrorMsg(jr, token));
                             }
                         }
 
-                        // rs = new RowDataSet(beanName, beanClass, columnNameList, columnList, properties);
                         if (columnNameList == null) {
                             columnNameList = new ArrayList<>();
                         }
@@ -3137,6 +3506,7 @@ final class JSONParserImpl extends AbstractJSONParser {
                             columnList = new ArrayList<>();
                         }
 
+                        // rs = new RowDataSet(beanName, beanClass, columnNameList, columnList, properties);
                         rs = new RowDataSet(columnNameList, columnList, properties);
 
                         if (isFrozen) {
@@ -3171,6 +3541,276 @@ final class JSONParserImpl extends AbstractJSONParser {
 
         values.add(value);
         //}
+    }
+
+    /**
+     * Read data set.
+     * @param jr
+     * @param lastToken TODO
+     * @param config
+     * @param isFirstCall
+     * @param targetClass
+     *
+     * @param <T>
+     * @return
+     * @throws IOException Signals that an I/O exception has occurred.
+     */
+    @SuppressWarnings({ "unused", "rawtypes" })
+    protected <T> T readSheet(final JSONReader jr, int lastToken, final JSONDeserializationConfig config, final boolean isFirstCall,
+            final Class<? extends T> targetClass) throws IOException {
+
+        int firstToken = isFirstCall ? jr.nextToken() : lastToken;
+
+        if (firstToken == EOF) {
+            if (isFirstCall && Strings.isNotEmpty(jr.getText())) {
+                throw new ParseException(firstToken, "Can't parse: " + jr.getText());
+            }
+
+            return null;
+        }
+
+        Sheet sheet = null;
+
+        List<Object> rowKeyList = null;
+        List<Object> columnKeyList = null;
+        List<List<Object>> columnList = null;
+
+        String rowkeyType = null;
+        String columnkeyType = null;
+        List<Type<?>> columnTypeList = null;
+
+        String columnName = null;
+        Type<?> valueType = defaultValueType;
+        boolean isKey = true;
+
+        for (int token = firstToken == START_BRACE ? jr.nextToken() : firstToken;; token = jr.nextToken()) {
+            switch (token) {
+                case START_QUOTATION_D, START_QUOTATION_S:
+
+                    break;
+
+                case END_QUOTATION_D, END_QUOTATION_S:
+                    if (isKey) {
+                        columnName = jr.getText();
+                    } else {
+                        Integer order = dataSetSheetPropOrder.get(columnName);
+
+                        if (order == null) {
+                            throw new ParseException(token, getErrorMsg(jr, token));
+                        }
+
+                        switch (order) { //NOSONAR
+                            case 10:
+                                rowkeyType = jr.readValue(strType);
+                                break;
+
+                            case 11:
+                                columnkeyType = jr.readValue(strType);
+                                break;
+
+                            default:
+                                throw new ParseException(token, getErrorMsg(jr, token));
+                        }
+                    }
+
+                    break;
+
+                case COLON:
+                    if (isKey) {
+                        isKey = false;
+
+                        if (jr.hasText()) {
+                            columnName = jr.getText();
+                        }
+                    } else {
+                        throw new ParseException(token, getErrorMsg(jr, token));
+                    }
+
+                    break;
+
+                case COMMA:
+                    if (isKey) {
+                        throw new ParseException(token, getErrorMsg(jr, token));
+                    } else {
+                        isKey = true;
+
+                        if (jr.hasText()) {
+                            Integer order = dataSetSheetPropOrder.get(columnName);
+
+                            if (order == null) {
+                                throw new ParseException(token, getErrorMsg(jr, token));
+                            }
+
+                            switch (order) { //NOSONAR
+                                case 10:
+                                    rowkeyType = jr.readValue(strType);
+                                    break;
+
+                                case 11:
+                                    columnkeyType = jr.readValue(strType);
+                                    break;
+
+                                default:
+                                    throw new ParseException(token, getErrorMsg(jr, token));
+                            }
+                        }
+                    }
+
+                    break;
+
+                case START_BRACKET:
+                    Integer order = dataSetSheetPropOrder.get(columnName);
+
+                    if (order == null) {
+                        throw new ParseException(token, getErrorMsg(jr, token));
+                    }
+
+                    switch (order) {
+                        case 4:
+                            columnTypeList = readCollection(jr, jdcForTypeElement, null, null, false, List.class, null);
+                            break;
+
+                        case 8:
+                            rowKeyList = readCollection(jr, JDC.create().setElementType(Strings.isEmpty(rowkeyType) ? strType : Type.of(rowkeyType)), null,
+                                    null, false, List.class, null);
+                            break;
+
+                        case 9:
+                            columnKeyList = readCollection(jr, JDC.create().setElementType(Strings.isEmpty(columnkeyType) ? strType : Type.of(columnkeyType)),
+                                    null, null, false, List.class, null);
+                            break;
+
+                        default:
+                            throw new ParseException(token, getErrorMsg(jr, token));
+                    }
+
+                    break;
+
+                case START_BRACE:
+                    if (COLUMNS.equals(columnName)) {
+                        columnName = null;
+                        isKey = true;
+                        boolean readingColumns = true;
+
+                        do {
+                            token = jr.nextToken();
+
+                            switch (token) {
+                                case START_QUOTATION_D, START_QUOTATION_S:
+
+                                    break;
+
+                                case END_QUOTATION_D, END_QUOTATION_S:
+                                    if (isKey) {
+                                        columnName = jr.getText();
+                                    } else {
+                                        throw new ParseException(token, getErrorMsg(jr, token));
+                                    }
+
+                                    break;
+
+                                case COLON:
+                                    if (isKey) {
+                                        isKey = false;
+
+                                        if (jr.hasText()) {
+                                            columnName = jr.getText();
+                                        }
+                                    } else {
+                                        throw new ParseException(token, getErrorMsg(jr, token));
+                                    }
+
+                                    break;
+
+                                case COMMA:
+                                    if (isKey) {
+                                        throw new ParseException(token, getErrorMsg(jr, token));
+                                    } else {
+                                        isKey = true;
+
+                                        if (jr.hasText()) {
+                                            throw new ParseException(token, getErrorMsg(jr, token));
+                                        }
+                                    }
+
+                                    break;
+
+                                case START_BRACKET:
+                                    int index = N.indexOf(columnKeyList, columnName);
+
+                                    if (index == N.INDEX_NOT_FOUND) {
+                                        throw new ParseException("Column: " + columnName + " is not found column list: " + columnKeyList);
+                                    }
+
+                                    valueType = N.isEmpty(columnTypeList) ? null : columnTypeList.get(index);
+
+                                    if (valueType == null) {
+                                        valueType = defaultValueType;
+                                    }
+
+                                    List<Object> column = readCollection(jr, JDC.create().setElementType(valueType), null, config.getPropHandler(columnName),
+                                            false, List.class, null);
+
+                                    if (columnList == null) {
+                                        columnList = new ArrayList<>(columnKeyList.size());
+                                        N.fill(columnList, 0, columnKeyList.size(), null);
+                                    }
+
+                                    columnList.set(index, column);
+
+                                    break;
+
+                                case END_BRACE:
+                                    if (jr.hasText()) {
+                                        // it should not happen.
+                                        throw new ParseException(token, getErrorMsg(jr, token));
+                                    }
+
+                                    columnName = null;
+                                    isKey = true;
+                                    readingColumns = false;
+                                    break;
+
+                                default:
+                                    throw new ParseException(token, getErrorMsg(jr, token));
+                            }
+                        } while (readingColumns);
+                    } else {
+                        throw new ParseException(token, getErrorMsg(jr, token) + ". Key: " + columnName + ",  Value: " + jr.getText());
+                    }
+
+                    break;
+
+                case END_BRACE, EOF:
+
+                    if ((firstToken == START_BRACE && token != END_BRACE) || (firstToken != START_BRACE && token == END_BRACE)) {
+                        throw new ParseException(token, "The JSON text should be wrapped or unwrapped with \"[]\" or \"{}\"");
+                    } else if (isKey && columnName != null) {
+                        throw new ParseException(token, getErrorMsg(jr, token));
+                    } else {
+                        if (jr.hasText()) {
+                            // it should not happen.
+
+                            throw new ParseException(token, getErrorMsg(jr, token));
+                        }
+                    }
+
+                    if (rowKeyList == null) {
+                        rowKeyList = new ArrayList<>();
+                    }
+
+                    if (columnList == null) {
+                        columnList = new ArrayList<>();
+                    }
+
+                    sheet = Sheet.columns(rowKeyList, columnKeyList, columnList);
+
+                    return (T) sheet;
+
+                default:
+                    throw new ParseException(token, getErrorMsg(jr, token));
+            }
+        }
     }
 
     //    static final int START_BRACE = 1;
@@ -3269,13 +3909,13 @@ final class JSONParserImpl extends AbstractJSONParser {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param source 
-     * @param config 
-     * @param elementClass 
-     * @return 
+     *
+     * @param <T>
+     * @param source
+     * @param config
+     * @param elementClass
+     * @return
      */
     @Override
     public <T> CheckedStream<T, IOException> stream(final String source, final JSONDeserializationConfig config, final Class<? extends T> elementClass) {
@@ -3305,13 +3945,13 @@ final class JSONParserImpl extends AbstractJSONParser {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param source 
-     * @param config 
-     * @param elementClass 
-     * @return 
+     *
+     * @param <T>
+     * @param source
+     * @param config
+     * @param elementClass
+     * @return
      */
     @Override
     public <T> CheckedStream<T, IOException> stream(final File source, final JSONDeserializationConfig config, final Class<? extends T> elementClass) {
@@ -3332,14 +3972,14 @@ final class JSONParserImpl extends AbstractJSONParser {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param source 
-     * @param config 
-     * @param closeInputStreamWhenStreamIsClosed 
-     * @param elementClass 
-     * @return 
+     *
+     * @param <T>
+     * @param source
+     * @param config
+     * @param closeInputStreamWhenStreamIsClosed
+     * @param elementClass
+     * @return
      */
     @Override
     public <T> CheckedStream<T, IOException> stream(final InputStream source, final JSONDeserializationConfig config,
@@ -3350,15 +3990,15 @@ final class JSONParserImpl extends AbstractJSONParser {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param source 
-     * @param config 
-     * @param closeReaderWhenStreamIsClosed 
-     * @param elementClass 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <T>
+     * @param source
+     * @param config
+     * @param closeReaderWhenStreamIsClosed
+     * @param elementClass
+     * @return
+     * @throws IllegalArgumentException
      */
     @Override
     public <T> CheckedStream<T, IOException> stream(final Reader source, final JSONDeserializationConfig config, final boolean closeReaderWhenStreamIsClosed,
@@ -3402,7 +4042,7 @@ final class JSONParserImpl extends AbstractJSONParser {
         final Type<T> eleType = N.typeOf(elementClass);
 
         switch (eleType.getSerializationType()) { // NOSONAR
-            case ENTITY, MAP, ARRAY, COLLECTION, MAP_ENTITY, DATA_SET, ENTITY_ID:
+            case ENTITY, MAP, ARRAY, COLLECTION, MAP_ENTITY, DATA_SET, SHEET, ENTITY_ID:
                 break;
 
             default:

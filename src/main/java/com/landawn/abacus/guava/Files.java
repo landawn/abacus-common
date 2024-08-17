@@ -42,6 +42,10 @@ import com.landawn.abacus.util.ImmutableList;
  * Copied from Google Guava under Apache License v2.
  * The purpose is to provide unified API.
  *
+ * @see java.nio.file.Files
+ * @see com.landawn.abacus.util.IOUtil
+ * @see com.landawn.abacus.util.Strings
+ *
  */
 public abstract class Files { //NOSONAR
 
@@ -443,8 +447,8 @@ public abstract class Files { //NOSONAR
      * Returns a predicate that returns the result of {@link java.nio.file.Files#isDirectory(Path,
      * LinkOption...)} on input paths with the given link options.
      *
-     * @param options 
-     * @return 
+     * @param options
+     * @return
      */
     public static Predicate<Path> isDirectory(LinkOption... options) {
         return com.google.common.io.MoreFiles.isDirectory(options);
@@ -454,8 +458,8 @@ public abstract class Files { //NOSONAR
      * Returns a predicate that returns the result of {@link java.nio.file.Files#isRegularFile(Path,
      * LinkOption...)} on input paths with the given link options.
      *
-     * @param options 
-     * @return 
+     * @param options
+     * @return
      */
     public static Predicate<Path> isRegularFile(LinkOption... options) {
         return com.google.common.io.MoreFiles.isRegularFile(options);

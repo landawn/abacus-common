@@ -77,6 +77,9 @@ import com.landawn.abacus.util.Fn.BiPredicates;
  * <br />
  * There are only {@code offset/count/len} parameters in the methods defined in class {@codeIOUtil}, no {@code fromIndex/startIndex} and {toIndex/endIndex} parameters.
  *
+ * @see java.nio.file.Files
+ * @see com.landawn.abacus.guava.Files
+ * @see com.landawn.abacus.util.Strings
  *
  * @version $Revision: 0.8 $
  */
@@ -251,14 +254,6 @@ public final class IOUtil {
     public static final String USER_COUNTRY = System.getProperty("user.country") == null ? System.getProperty("user.region")
             : System.getProperty("user.country");
 
-    /** current path retrieved by {@code new File("./").getAbsolutePath()} */
-    public static final String CURRENT_DIR;
-
-    static {
-        final String path = new File("./").getAbsolutePath();
-        CURRENT_DIR = path.charAt(path.length() - 1) == '.' ? path.substring(0, path.length() - 1) : path;
-    }
-
     /**
      * @see File#pathSeparator
      */
@@ -284,6 +279,14 @@ public final class IOUtil {
      * @see System#lineSeparator()
      */
     public static final String LINE_SEPARATOR = System.lineSeparator();
+
+    /** current path retrieved by {@code new File("./").getAbsolutePath()} */
+    public static final String CURRENT_DIR;
+
+    static {
+        final String path = new File("./").getAbsolutePath();
+        CURRENT_DIR = path.charAt(path.length() - 1) == '.' ? path.substring(0, path.length() - 1) : path;
+    }
 
     // ...
     public static final int EOF = -1;
@@ -3670,7 +3673,7 @@ public final class IOUtil {
         N.checkArgNotNull(src, "ReadableByteChannel");
         N.checkArgNotNull(output, "WritableByteChannel");
 
-        return write(Channels.newInputStream(src), Channels.newOutputStream(output));
+        return write(Channels.newInputStream(src), Channels.newOutputStream(output), true);
     }
 
     /**

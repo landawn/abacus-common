@@ -30,14 +30,14 @@ import com.landawn.abacus.util.N;
  */
 public class JSONDeserializationConfig extends DeserializationConfig<JSONDeserializationConfig> {
 
-    boolean ignoreNullOrEmpty = false;
+    private boolean ignoreNullOrEmpty = false;
 
-    boolean readNullToEmpty = false;
+    private boolean readNullToEmpty = false;
 
     @SuppressWarnings("rawtypes")
-    Class<? extends Map> mapInstanceType = HashMap.class;
+    private Class<? extends Map> mapInstanceType = HashMap.class;
 
-    Map<String, BiConsumer<? super Collection<?>, ?>> propHandlerMap = null;
+    private Map<String, BiConsumer<? super Collection<?>, ?>> propHandlerMap = null;
 
     /**
      *
@@ -115,11 +115,11 @@ public class JSONDeserializationConfig extends DeserializationConfig<JSONDeseria
     }
 
     /**
-     * 
      *
-     * @param mapInstanceType 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param mapInstanceType
+     * @return
+     * @throws IllegalArgumentException
      */
     @SuppressWarnings("rawtypes")
     public JSONDeserializationConfig setMapInstanceType(Class<? extends Map> mapInstanceType) throws IllegalArgumentException {
@@ -135,8 +135,8 @@ public class JSONDeserializationConfig extends DeserializationConfig<JSONDeseria
      *
      * @param propName TODO should it be {@code parentEntity.propNameA(subEntity).propNameB...} For examaple: {@code account.devices.model}
      * @param handler the first parameter will be Collection or Map, the second parameter will be the current element or entry
-     * @return 
-     * @throws IllegalArgumentException 
+     * @return
+     * @throws IllegalArgumentException
      */
     public JSONDeserializationConfig setPropHandler(final String propName, final BiConsumer<? super Collection<?>, ?> handler) throws IllegalArgumentException {
         N.checkArgNotEmpty(propName, "propName");

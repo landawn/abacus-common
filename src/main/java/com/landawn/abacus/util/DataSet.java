@@ -642,18 +642,18 @@ public interface DataSet {
     /**
      * Generate the new column values from the specified column by the specified {@code Function}.
      *
-     * @param newColumnPosition 
-     * @param newColumnName 
-     * @param fromColumnName 
-     * @param func 
+     * @param newColumnPosition
+     * @param newColumnName
+     * @param fromColumnName
+     * @param func
      */
     void addColumn(int newColumnPosition, String newColumnName, String fromColumnName, Function<?, ?> func);
 
     /**
      * Generate the new column values from the specified columns by the specified {@code Function}.
      *
-     * @param newColumnName 
-     * @param fromColumnNames 
+     * @param newColumnName
+     * @param fromColumnNames
      * @param func DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
      */
     void addColumn(String newColumnName, Collection<String> fromColumnNames, Function<? super DisposableObjArray, ?> func);
@@ -661,9 +661,9 @@ public interface DataSet {
     /**
      * Generate the new column values from the specified columns by the specified {@code Function}.
      *
-     * @param newColumnPosition 
-     * @param newColumnName 
-     * @param fromColumnNames 
+     * @param newColumnPosition
+     * @param newColumnName
+     * @param fromColumnNames
      * @param func DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
      */
     void addColumn(int newColumnPosition, String newColumnName, Collection<String> fromColumnNames, Function<? super DisposableObjArray, ?> func);
@@ -671,38 +671,38 @@ public interface DataSet {
     /**
      * Generate the new column values from the specified columns by the specified {@code Function}.
      *
-     * @param newColumnName 
-     * @param fromColumnNames 
-     * @param func 
+     * @param newColumnName
+     * @param fromColumnNames
+     * @param func
      */
     void addColumn(String newColumnName, Tuple2<String, String> fromColumnNames, BiFunction<?, ?, ?> func);
 
     /**
      * Generate the new column values from the specified columns by the specified {@code Function}.
      *
-     * @param newColumnPosition 
-     * @param newColumnName 
-     * @param fromColumnNames 
-     * @param func 
+     * @param newColumnPosition
+     * @param newColumnName
+     * @param fromColumnNames
+     * @param func
      */
     void addColumn(int newColumnPosition, String newColumnName, Tuple2<String, String> fromColumnNames, BiFunction<?, ?, ?> func);
 
     /**
      * Generate the new column values from the specified columns by the specified {@code Function}.
      *
-     * @param newColumnName 
-     * @param fromColumnNames 
-     * @param func 
+     * @param newColumnName
+     * @param fromColumnNames
+     * @param func
      */
     void addColumn(String newColumnName, Tuple3<String, String, String> fromColumnNames, TriFunction<?, ?, ?, ?> func);
 
     /**
      * Generate the new column values from the specified columns by the specified {@code Function}.
      *
-     * @param newColumnPosition 
-     * @param newColumnName 
-     * @param fromColumnNames 
-     * @param func 
+     * @param newColumnPosition
+     * @param newColumnName
+     * @param fromColumnNames
+     * @param func
      */
     void addColumn(int newColumnPosition, String newColumnName, Tuple3<String, String, String> fromColumnNames, TriFunction<?, ?, ?, ?> func);
 
@@ -741,16 +741,16 @@ public interface DataSet {
     /**
      * Update the values of the specified column by the specified Try.Function.
      *
-     * @param columnName 
-     * @param func 
+     * @param columnName
+     * @param func
      */
     void updateColumn(String columnName, Function<?, ?> func);
 
     /**
      * Update the values of the specified columns one by one with the specified Try.Function.
      *
-     * @param columnNames 
-     * @param func 
+     * @param columnNames
+     * @param func
      */
     void updateColumns(Collection<String> columnNames, Function<?, ?> func);
 
@@ -789,8 +789,8 @@ public interface DataSet {
     /**
      * Combines the columns specified by {@code columnNames} into a new column and then remove them from this {@code DataSet}.
      *
-     * @param columnNames 
-     * @param newColumnName 
+     * @param columnNames
+     * @param newColumnName
      * @param combineFunc DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
      */
     void combineColumns(Collection<String> columnNames, String newColumnName, Function<? super DisposableObjArray, ?> combineFunc);
@@ -798,18 +798,18 @@ public interface DataSet {
     /**
      * Combines the columns specified by {@code columnNames} into a new column and then remove them from this {@code DataSet}.
      *
-     * @param columnNames 
-     * @param newColumnName 
-     * @param combineFunc 
+     * @param columnNames
+     * @param newColumnName
+     * @param combineFunc
      */
     void combineColumns(Tuple2<String, String> columnNames, String newColumnName, BiFunction<?, ?, ?> combineFunc);
 
     /**
      * Combines the columns specified by {@code columnNames} into a new column and then remove them from this {@code DataSet}.
      *
-     * @param columnNames 
-     * @param newColumnName 
-     * @param combineFunc 
+     * @param columnNames
+     * @param newColumnName
+     * @param combineFunc
      */
     void combineColumns(Tuple3<String, String, String> columnNames, String newColumnName, TriFunction<?, ?, ?, ?> combineFunc);
 
@@ -825,8 +825,8 @@ public interface DataSet {
     /**
      * Combines the columns specified by {@code columnNames} into a new column and then remove them from this {@code DataSet}.
      *
-     * @param columnNameFilter 
-     * @param newColumnName 
+     * @param columnNameFilter
+     * @param newColumnName
      * @param combineFunc DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
      */
     void combineColumns(Predicate<? super String> columnNameFilter, String newColumnName, Function<? super DisposableObjArray, ?> combineFunc);
@@ -834,36 +834,36 @@ public interface DataSet {
     /**
      * Divide the column specified by {@code columnName} into multiple new columns and then remove it from this {@code DataSet}.
      *
-     * @param columnName 
-     * @param newColumnNames 
-     * @param divideFunc 
+     * @param columnName
+     * @param newColumnNames
+     * @param divideFunc
      */
     void divideColumn(String columnName, Collection<String> newColumnNames, Function<?, ? extends List<?>> divideFunc);
 
     /**
      * Divide the column specified by {@code columnName} into multiple new columns and then remove it from this {@code DataSet}.
      *
-     * @param columnName 
-     * @param newColumnNames 
-     * @param output 
+     * @param columnName
+     * @param newColumnNames
+     * @param output
      */
     void divideColumn(String columnName, Collection<String> newColumnNames, BiConsumer<?, Object[]> output);
 
     /**
      * Divide the column specified by {@code columnName} into multiple new columns and then remove it from this {@code DataSet}.
      *
-     * @param columnName 
-     * @param newColumnNames 
-     * @param output 
+     * @param columnName
+     * @param newColumnNames
+     * @param output
      */
     void divideColumn(String columnName, Tuple2<String, String> newColumnNames, BiConsumer<?, Pair<Object, Object>> output);
 
     /**
      * Divide the column specified by {@code columnName} into multiple new columns and then remove it from this {@code DataSet}.
      *
-     * @param columnName 
-     * @param newColumnNames 
-     * @param output 
+     * @param columnName
+     * @param newColumnNames
+     * @param output
      */
     void divideColumn(String columnName, Tuple3<String, String, String> newColumnNames, BiConsumer<?, Triple<Object, Object, Object>> output);
 
@@ -907,16 +907,16 @@ public interface DataSet {
     /**
      * Update the values in the specified row with the specified Try.Function.
      *
-     * @param rowIndex 
-     * @param func 
+     * @param rowIndex
+     * @param func
      */
     void updateRow(int rowIndex, Function<?, ?> func);
 
     /**
      * Update the values in the specified rows one by one with the specified Try.Function.
      *
-     * @param indices 
-     * @param func 
+     * @param indices
+     * @param func
      */
     void updateRows(int[] indices, Function<?, ?> func);
 
@@ -924,15 +924,15 @@ public interface DataSet {
     /**
      * Update all the values in this DataSet with the specified Try.Function.
      *
-     * @param func 
+     * @param func
      */
     void updateAll(Function<?, ?> func);
 
     /**
      * Replace all the values in this DataSet with the specified new value if it matches the specified condition.
      *
-     * @param func 
-     * @param newValue 
+     * @param func
+     * @param newValue
      */
     void replaceIf(Predicate<?> func, Object newValue);
 
@@ -2339,15 +2339,15 @@ public interface DataSet {
             Collector<? super Object[], ?, ?> collector);
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param keyColumnName 
-     * @param aggregateResultColumnName 
-     * @param aggregateOnColumnNames 
+     *
+     * @param <T>
+     * @param keyColumnName
+     * @param aggregateResultColumnName
+     * @param aggregateOnColumnNames
      * @param rowMapper DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
-     * @param collector 
-     * @return 
+     * @param collector
+     * @return
      */
     <T> DataSet groupBy(String keyColumnName, String aggregateResultColumnName, Collection<String> aggregateOnColumnNames,
             Function<? super DisposableObjArray, ? extends T> rowMapper, Collector<? super T, ?, ?> collector);
@@ -2366,14 +2366,14 @@ public interface DataSet {
     //    <K> DataSet groupBy(String columnName, Function<K, ?> keyMapper);
 
     /**
-     * 
      *
-     * @param keyColumnName 
-     * @param keyMapper 
-     * @param aggregateResultColumnName 
-     * @param aggregateOnColumnName 
-     * @param collector 
-     * @return 
+     *
+     * @param keyColumnName
+     * @param keyMapper
+     * @param aggregateResultColumnName
+     * @param aggregateOnColumnName
+     * @param collector
+     * @return
      */
     DataSet groupBy(String keyColumnName, Function<?, ?> keyMapper, String aggregateResultColumnName, String aggregateOnColumnName,
             Collector<?, ?, ?> collector);
@@ -2394,42 +2394,42 @@ public interface DataSet {
     //            String aggregateResultColumnName, String aggregateOnColumnName,Function<Stream<T>, ?> func);
 
     /**
-     * 
      *
-     * @param keyColumnName 
-     * @param keyMapper 
-     * @param aggregateResultColumnName 
-     * @param aggregateOnColumnNames 
-     * @param rowType 
-     * @return 
+     *
+     * @param keyColumnName
+     * @param keyMapper
+     * @param aggregateResultColumnName
+     * @param aggregateOnColumnNames
+     * @param rowType
+     * @return
      */
     DataSet groupBy(String keyColumnName, Function<?, ?> keyMapper, String aggregateResultColumnName, Collection<String> aggregateOnColumnNames,
             Class<?> rowType);
 
     /**
-     * 
      *
-     * @param keyColumnName 
-     * @param keyMapper 
-     * @param aggregateResultColumnName 
-     * @param aggregateOnColumnNames 
-     * @param collector 
-     * @return 
+     *
+     * @param keyColumnName
+     * @param keyMapper
+     * @param aggregateResultColumnName
+     * @param aggregateOnColumnNames
+     * @param collector
+     * @return
      */
     DataSet groupBy(String keyColumnName, Function<?, ?> keyMapper, String aggregateResultColumnName, Collection<String> aggregateOnColumnNames,
             Collector<? super Object[], ?, ?> collector);
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param keyColumnName 
+     *
+     * @param <T>
+     * @param keyColumnName
      * @param keyMapper DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
-     * @param aggregateResultColumnName 
-     * @param aggregateOnColumnNames 
+     * @param aggregateResultColumnName
+     * @param aggregateOnColumnNames
      * @param rowMapper DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
-     * @param collector 
-     * @return 
+     * @param collector
+     * @return
      */
     <T> DataSet groupBy(String keyColumnName, Function<?, ?> keyMapper, String aggregateResultColumnName, Collection<String> aggregateOnColumnNames,
             Function<? super DisposableObjArray, ? extends T> rowMapper, Collector<? super T, ?, ?> collector);
@@ -2487,37 +2487,37 @@ public interface DataSet {
             Collector<? super Object[], ?, ?> collector);
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param keyColumnNames 
-     * @param aggregateResultColumnName 
-     * @param aggregateOnColumnNames 
+     *
+     * @param <T>
+     * @param keyColumnNames
+     * @param aggregateResultColumnName
+     * @param aggregateOnColumnNames
      * @param rowMapper DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
-     * @param collector 
-     * @return 
+     * @param collector
+     * @return
      */
     <T> DataSet groupBy(Collection<String> keyColumnNames, String aggregateResultColumnName, Collection<String> aggregateOnColumnNames,
             Function<? super DisposableObjArray, ? extends T> rowMapper, Collector<? super T, ?, ?> collector);
 
     /**
-     * 
      *
-     * @param keyColumnNames 
+     *
+     * @param keyColumnNames
      * @param keyMapper DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
-     * @return 
+     * @return
      */
     DataSet groupBy(Collection<String> keyColumnNames, Function<? super DisposableObjArray, ?> keyMapper);
 
     /**
-     * 
      *
-     * @param keyColumnNames 
+     *
+     * @param keyColumnNames
      * @param keyMapper DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
-     * @param aggregateResultColumnName 
-     * @param aggregateOnColumnName 
-     * @param collector 
-     * @return 
+     * @param aggregateResultColumnName
+     * @param aggregateOnColumnName
+     * @param collector
+     * @return
      */
     DataSet groupBy(Collection<String> keyColumnNames, Function<? super DisposableObjArray, ?> keyMapper, String aggregateResultColumnName,
             String aggregateOnColumnName, Collector<?, ?, ?> collector);
@@ -2537,42 +2537,42 @@ public interface DataSet {
     //            Function<Stream<T>, ?> func);
 
     /**
-     * 
      *
-     * @param keyColumnNames 
+     *
+     * @param keyColumnNames
      * @param keyMapper DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
-     * @param aggregateResultColumnName 
-     * @param aggregateOnColumnNames 
-     * @param rowType 
-     * @return 
+     * @param aggregateResultColumnName
+     * @param aggregateOnColumnNames
+     * @param rowType
+     * @return
      */
     DataSet groupBy(Collection<String> keyColumnNames, Function<? super DisposableObjArray, ?> keyMapper, String aggregateResultColumnName,
             Collection<String> aggregateOnColumnNames, Class<?> rowType);
 
     /**
-     * 
      *
-     * @param keyColumnNames 
+     *
+     * @param keyColumnNames
      * @param keyMapper DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
-     * @param aggregateResultColumnName 
-     * @param aggregateOnColumnNames 
-     * @param collector 
-     * @return 
+     * @param aggregateResultColumnName
+     * @param aggregateOnColumnNames
+     * @param collector
+     * @return
      */
     DataSet groupBy(Collection<String> keyColumnNames, Function<? super DisposableObjArray, ?> keyMapper, String aggregateResultColumnName,
             Collection<String> aggregateOnColumnNames, Collector<? super Object[], ?, ?> collector);
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param keyColumnNames 
+     *
+     * @param <T>
+     * @param keyColumnNames
      * @param keyMapper DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
-     * @param aggregateResultColumnName 
-     * @param aggregateOnColumnNames 
+     * @param aggregateResultColumnName
+     * @param aggregateOnColumnNames
      * @param rowMapper DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
-     * @param collector 
-     * @return 
+     * @param collector
+     * @return
      */
     <T> DataSet groupBy(Collection<String> keyColumnNames, Function<? super DisposableObjArray, ?> keyMapper, String aggregateResultColumnName,
             Collection<String> aggregateOnColumnNames, Function<? super DisposableObjArray, ? extends T> rowMapper, Collector<? super T, ?, ?> collector);
@@ -2945,18 +2945,18 @@ public interface DataSet {
             Collector<? super Object[], ?, ? extends T> collector);
 
     /**
-     * 
      *
-     * @param <R> 
-     * @param <C> 
-     * @param <U> 
-     * @param <T> 
-     * @param groupByColumnName 
-     * @param pivotColumnName 
-     * @param aggColumnNames 
-     * @param rowMapper 
-     * @param collector 
-     * @return 
+     *
+     * @param <R>
+     * @param <C>
+     * @param <U>
+     * @param <T>
+     * @param groupByColumnName
+     * @param pivotColumnName
+     * @param aggColumnNames
+     * @param rowMapper
+     * @param collector
+     * @return
      */
     @Beta
     <R, C, U, T> Sheet<R, C, T> pivot(String groupByColumnName, String pivotColumnName, Collection<String> aggColumnNames,
@@ -3100,9 +3100,9 @@ public interface DataSet {
     /**
      * Returns a new {@code DataSet} with the rows de-duplicated by the value in the specified column from the specified {@code fromRowIndex} to {@code toRowIndex}.
      *
-     * @param columnName 
+     * @param columnName
      * @param keyMapper don't change value of the input parameter.
-     * @return 
+     * @return
      */
     DataSet distinctBy(String columnName, Function<?, ?> keyMapper);
 
@@ -3117,328 +3117,328 @@ public interface DataSet {
     /**
      * Returns a new {@code DataSet} with the rows de-duplicated by the values in the specified columns from the specified {@code fromRowIndex} to {@code toRowIndex}.
      *
-     * @param columnNames 
+     * @param columnNames
      * @param keyMapper DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
-     * @return 
+     * @return
      */
     DataSet distinctBy(Collection<String> columnNames, Function<? super DisposableObjArray, ?> keyMapper);
 
     /**
-     * 
+     *
      *
      * @param filter DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
-     * @return 
+     * @return
      */
     DataSet filter(Predicate<? super DisposableObjArray> filter);
 
     /**
-     * 
+     *
      *
      * @param filter DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
-     * @param max 
-     * @return 
+     * @param max
+     * @return
      */
     DataSet filter(Predicate<? super DisposableObjArray> filter, int max);
 
     /**
-     * 
      *
-     * @param fromRowIndex 
-     * @param toRowIndex 
+     *
+     * @param fromRowIndex
+     * @param toRowIndex
      * @param filter DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
-     * @return 
+     * @return
      */
     DataSet filter(int fromRowIndex, int toRowIndex, Predicate<? super DisposableObjArray> filter);
 
     /**
-     * 
      *
-     * @param fromRowIndex 
-     * @param toRowIndex 
+     *
+     * @param fromRowIndex
+     * @param toRowIndex
      * @param filter DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
-     * @param max 
-     * @return 
+     * @param max
+     * @return
      */
     DataSet filter(int fromRowIndex, int toRowIndex, Predicate<? super DisposableObjArray> filter, int max);
 
     /**
-     * 
      *
-     * @param columnNames 
-     * @param filter 
-     * @return 
+     *
+     * @param columnNames
+     * @param filter
+     * @return
      */
     DataSet filter(Tuple2<String, String> columnNames, BiPredicate<?, ?> filter);
 
     /**
-     * 
      *
-     * @param columnNames 
-     * @param filter 
-     * @param max 
-     * @return 
+     *
+     * @param columnNames
+     * @param filter
+     * @param max
+     * @return
      */
     DataSet filter(Tuple2<String, String> columnNames, BiPredicate<?, ?> filter, int max);
 
     /**
-     * 
      *
-     * @param fromRowIndex 
-     * @param toRowIndex 
-     * @param columnNames 
-     * @param filter 
-     * @return 
+     *
+     * @param fromRowIndex
+     * @param toRowIndex
+     * @param columnNames
+     * @param filter
+     * @return
      */
     DataSet filter(int fromRowIndex, int toRowIndex, Tuple2<String, String> columnNames, BiPredicate<?, ?> filter);
 
     /**
-     * 
      *
-     * @param fromRowIndex 
-     * @param toRowIndex 
-     * @param columnNames 
-     * @param filter 
-     * @param max 
-     * @return 
+     *
+     * @param fromRowIndex
+     * @param toRowIndex
+     * @param columnNames
+     * @param filter
+     * @param max
+     * @return
      */
     DataSet filter(int fromRowIndex, int toRowIndex, Tuple2<String, String> columnNames, BiPredicate<?, ?> filter, int max);
 
     /**
-     * 
      *
-     * @param columnNames 
-     * @param filter 
-     * @return 
+     *
+     * @param columnNames
+     * @param filter
+     * @return
      */
     DataSet filter(Tuple3<String, String, String> columnNames, TriPredicate<?, ?, ?> filter);
 
     /**
-     * 
      *
-     * @param columnNames 
-     * @param filter 
-     * @param max 
-     * @return 
+     *
+     * @param columnNames
+     * @param filter
+     * @param max
+     * @return
      */
     DataSet filter(Tuple3<String, String, String> columnNames, TriPredicate<?, ?, ?> filter, int max);
 
     /**
-     * 
      *
-     * @param fromRowIndex 
-     * @param toRowIndex 
-     * @param columnNames 
-     * @param filter 
-     * @return 
+     *
+     * @param fromRowIndex
+     * @param toRowIndex
+     * @param columnNames
+     * @param filter
+     * @return
      */
     DataSet filter(int fromRowIndex, int toRowIndex, Tuple3<String, String, String> columnNames, TriPredicate<?, ?, ?> filter);
 
     /**
-     * 
      *
-     * @param fromRowIndex 
-     * @param toRowIndex 
-     * @param columnNames 
-     * @param filter 
-     * @param max 
-     * @return 
+     *
+     * @param fromRowIndex
+     * @param toRowIndex
+     * @param columnNames
+     * @param filter
+     * @param max
+     * @return
      */
     DataSet filter(int fromRowIndex, int toRowIndex, Tuple3<String, String, String> columnNames, TriPredicate<?, ?, ?> filter, int max);
 
     /**
-     * 
      *
-     * @param columnName 
-     * @param filter 
-     * @return 
+     *
+     * @param columnName
+     * @param filter
+     * @return
      */
     DataSet filter(String columnName, Predicate<?> filter);
 
     /**
-     * 
      *
-     * @param columnName 
-     * @param filter 
-     * @param max 
-     * @return 
+     *
+     * @param columnName
+     * @param filter
+     * @param max
+     * @return
      */
     DataSet filter(String columnName, Predicate<?> filter, int max);
 
     /**
-     * 
      *
-     * @param fromRowIndex 
-     * @param toRowIndex 
-     * @param columnName 
-     * @param filter 
-     * @return 
+     *
+     * @param fromRowIndex
+     * @param toRowIndex
+     * @param columnName
+     * @param filter
+     * @return
      */
     DataSet filter(int fromRowIndex, int toRowIndex, String columnName, Predicate<?> filter);
 
     /**
-     * 
      *
-     * @param fromRowIndex 
-     * @param toRowIndex 
-     * @param columnName 
-     * @param filter 
-     * @param max 
-     * @return 
+     *
+     * @param fromRowIndex
+     * @param toRowIndex
+     * @param columnName
+     * @param filter
+     * @param max
+     * @return
      */
     DataSet filter(int fromRowIndex, int toRowIndex, String columnName, Predicate<?> filter, int max);
 
     /**
-     * 
      *
-     * @param columnNames 
+     *
+     * @param columnNames
      * @param filter DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
-     * @return 
+     * @return
      */
     DataSet filter(Collection<String> columnNames, Predicate<? super DisposableObjArray> filter);
 
     /**
-     * 
      *
-     * @param columnNames 
+     *
+     * @param columnNames
      * @param filter DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
-     * @param max 
-     * @return 
+     * @param max
+     * @return
      */
     DataSet filter(Collection<String> columnNames, Predicate<? super DisposableObjArray> filter, int max);
 
     /**
-     * 
      *
-     * @param fromRowIndex 
-     * @param toRowIndex 
-     * @param columnNames 
+     *
+     * @param fromRowIndex
+     * @param toRowIndex
+     * @param columnNames
      * @param filter DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
-     * @return 
+     * @return
      */
     DataSet filter(int fromRowIndex, int toRowIndex, Collection<String> columnNames, Predicate<? super DisposableObjArray> filter);
 
     /**
-     * 
      *
-     * @param fromRowIndex 
-     * @param toRowIndex 
-     * @param columnNames 
+     *
+     * @param fromRowIndex
+     * @param toRowIndex
+     * @param columnNames
      * @param filter DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
-     * @param max 
-     * @return 
+     * @param max
+     * @return
      */
     DataSet filter(int fromRowIndex, int toRowIndex, Collection<String> columnNames, Predicate<? super DisposableObjArray> filter, int max);
 
     /**
-     * 
      *
-     * @param fromColumnName 
-     * @param newColumnName 
-     * @param copyingColumnName 
-     * @param mapper 
-     * @return 
+     *
+     * @param fromColumnName
+     * @param newColumnName
+     * @param copyingColumnName
+     * @param mapper
+     * @return
      */
     DataSet map(String fromColumnName, String newColumnName, String copyingColumnName, Function<?, ?> mapper);
 
     /**
-     * 
      *
-     * @param fromColumnName 
-     * @param newColumnName 
-     * @param copyingColumnNames 
-     * @param mapper 
-     * @return 
+     *
+     * @param fromColumnName
+     * @param newColumnName
+     * @param copyingColumnNames
+     * @param mapper
+     * @return
      */
     DataSet map(String fromColumnName, String newColumnName, Collection<String> copyingColumnNames, Function<?, ?> mapper);
 
     /**
-     * 
      *
-     * @param fromColumnNames 
-     * @param newColumnName 
-     * @param copyingColumnNames 
-     * @param mapper 
-     * @return 
+     *
+     * @param fromColumnNames
+     * @param newColumnName
+     * @param copyingColumnNames
+     * @param mapper
+     * @return
      */
     DataSet map(Tuple2<String, String> fromColumnNames, String newColumnName, Collection<String> copyingColumnNames, BiFunction<?, ?, ?> mapper);
 
     /**
-     * 
      *
-     * @param fromColumnNames 
-     * @param newColumnName 
-     * @param copyingColumnNames 
-     * @param mapper 
-     * @return 
+     *
+     * @param fromColumnNames
+     * @param newColumnName
+     * @param copyingColumnNames
+     * @param mapper
+     * @return
      */
     DataSet map(Tuple3<String, String, String> fromColumnNames, String newColumnName, Collection<String> copyingColumnNames, TriFunction<?, ?, ?, ?> mapper);
 
     /**
-     * 
      *
-     * @param fromColumnNames 
-     * @param newColumnName 
-     * @param copyingColumnNames 
+     *
+     * @param fromColumnNames
+     * @param newColumnName
+     * @param copyingColumnNames
      * @param mapper DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
-     * @return 
+     * @return
      */
     DataSet map(Collection<String> fromColumnNames, String newColumnName, Collection<String> copyingColumnNames,
             Function<? super DisposableObjArray, ?> mapper);
 
     /**
-     * 
      *
-     * @param fromColumnName 
-     * @param newColumnName 
-     * @param copyingColumnName 
-     * @param mapper 
-     * @return 
+     *
+     * @param fromColumnName
+     * @param newColumnName
+     * @param copyingColumnName
+     * @param mapper
+     * @return
      */
     DataSet flatMap(String fromColumnName, String newColumnName, String copyingColumnName, Function<?, ? extends Collection<?>> mapper);
 
     /**
-     * 
      *
-     * @param fromColumnName 
-     * @param newColumnName 
-     * @param copyingColumnNames 
-     * @param mapper 
-     * @return 
+     *
+     * @param fromColumnName
+     * @param newColumnName
+     * @param copyingColumnNames
+     * @param mapper
+     * @return
      */
     DataSet flatMap(String fromColumnName, String newColumnName, Collection<String> copyingColumnNames, Function<?, ? extends Collection<?>> mapper);
 
     /**
-     * 
      *
-     * @param fromColumnNames 
-     * @param newColumnName 
-     * @param copyingColumnNames 
-     * @param mapper 
-     * @return 
+     *
+     * @param fromColumnNames
+     * @param newColumnName
+     * @param copyingColumnNames
+     * @param mapper
+     * @return
      */
     DataSet flatMap(Tuple2<String, String> fromColumnNames, String newColumnName, Collection<String> copyingColumnNames,
             BiFunction<?, ?, ? extends Collection<?>> mapper);
 
     /**
-     * 
      *
-     * @param fromColumnNames 
-     * @param newColumnName 
-     * @param copyingColumnNames 
-     * @param mapper 
-     * @return 
+     *
+     * @param fromColumnNames
+     * @param newColumnName
+     * @param copyingColumnNames
+     * @param mapper
+     * @return
      */
     DataSet flatMap(Tuple3<String, String, String> fromColumnNames, String newColumnName, Collection<String> copyingColumnNames,
             TriFunction<?, ?, ?, ? extends Collection<?>> mapper);
 
     /**
-     * 
      *
-     * @param fromColumnNames 
-     * @param newColumnName 
-     * @param copyingColumnNames 
+     *
+     * @param fromColumnNames
+     * @param newColumnName
+     * @param copyingColumnNames
      * @param mapper DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
-     * @return 
+     * @return
      */
     DataSet flatMap(Collection<String> fromColumnNames, String newColumnName, Collection<String> copyingColumnNames,
             Function<? super DisposableObjArray, ? extends Collection<?>> mapper);
@@ -4615,12 +4615,13 @@ public interface DataSet {
     int size();
 
     /**
+     * Returns an unmodifiable {@code Map}
      *
      *
      * @return
      */
     @Beta
-    Properties<String, Object> properties();
+    Map<String, Object> properties();
 
     /**
      *
