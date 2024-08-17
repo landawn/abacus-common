@@ -115,7 +115,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
         }
 
         final BufferedXMLWriter bw = Objectory.createBufferedXMLWriter();
-        final IdentityHashSet<Object> serializedObjects = config != null && config.supportCircularReference() ? new IdentityHashSet<>() : null;
+        final IdentityHashSet<Object> serializedObjects = config == null || config.supportCircularReference() == false ? null : new IdentityHashSet<>();
 
         try {
             write(obj, null, config, null, serializedObjects, bw, false);
@@ -162,7 +162,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
     @Override
     public void serialize(final Object obj, final XMLSerializationConfig config, final OutputStream output) {
         final BufferedXMLWriter bw = Objectory.createBufferedXMLWriter(output);
-        final IdentityHashSet<Object> serializedObjects = config != null && config.supportCircularReference() ? new IdentityHashSet<>() : null;
+        final IdentityHashSet<Object> serializedObjects = config == null || config.supportCircularReference() == false ? null : new IdentityHashSet<>();
 
         try {
             write(obj, null, config, null, serializedObjects, bw, true);
@@ -183,7 +183,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
     public void serialize(final Object obj, final XMLSerializationConfig config, final Writer output) {
         final boolean isBufferedWriter = output instanceof BufferedXMLWriter;
         final BufferedXMLWriter bw = isBufferedWriter ? (BufferedXMLWriter) output : Objectory.createBufferedXMLWriter(output);
-        final IdentityHashSet<Object> serializedObjects = config != null && config.supportCircularReference() ? new IdentityHashSet<>() : null;
+        final IdentityHashSet<Object> serializedObjects = config == null || config.supportCircularReference() == false ? null : new IdentityHashSet<>();
 
         try {
             write(obj, null, config, null, serializedObjects, bw, true);
@@ -843,13 +843,13 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param source 
-     * @param config 
-     * @param targetClass 
-     * @return 
+     *
+     * @param <T>
+     * @param source
+     * @param config
+     * @param targetClass
+     * @return
      */
     @Override
     public <T> T deserialize(String source, final XMLDeserializationConfig config, Class<? extends T> targetClass) {
@@ -867,13 +867,13 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param source 
-     * @param config 
-     * @param targetClass 
-     * @return 
+     *
+     * @param <T>
+     * @param source
+     * @param config
+     * @param targetClass
+     * @return
      */
     @Override
     public <T> T deserialize(File source, final XMLDeserializationConfig config, Class<? extends T> targetClass) {
@@ -889,13 +889,13 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param source 
-     * @param config 
-     * @param targetClass 
-     * @return 
+     *
+     * @param <T>
+     * @param source
+     * @param config
+     * @param targetClass
+     * @return
      */
     @Override
     public <T> T deserialize(InputStream source, final XMLDeserializationConfig config, Class<? extends T> targetClass) {
@@ -909,13 +909,13 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param source 
-     * @param config 
-     * @param targetClass 
-     * @return 
+     *
+     * @param <T>
+     * @param source
+     * @param config
+     * @param targetClass
+     * @return
      */
     @Override
     public <T> T deserialize(Reader source, final XMLDeserializationConfig config, Class<? extends T> targetClass) {
@@ -925,13 +925,13 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param source 
-     * @param config 
-     * @param targetClass 
-     * @return 
+     *
+     * @param <T>
+     * @param source
+     * @param config
+     * @param targetClass
+     * @return
      */
     @Override
     public <T> T deserialize(Node source, final XMLDeserializationConfig config, Class<? extends T> targetClass) {
@@ -939,13 +939,13 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param source 
-     * @param config 
-     * @param nodeClasses 
-     * @return 
+     *
+     * @param <T>
+     * @param source
+     * @param config
+     * @param nodeClasses
+     * @return
      */
     @Override
     public <T> T deserialize(InputStream source, final XMLDeserializationConfig config, Map<String, Class<?>> nodeClasses) {
@@ -959,13 +959,13 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param source 
-     * @param config 
-     * @param nodeClasses 
-     * @return 
+     *
+     * @param <T>
+     * @param source
+     * @param config
+     * @param nodeClasses
+     * @return
      */
     @Override
     public <T> T deserialize(Reader source, final XMLDeserializationConfig config, Map<String, Class<?>> nodeClasses) {
@@ -973,13 +973,13 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param source 
-     * @param config 
-     * @param nodeClasses 
-     * @return 
+     *
+     * @param <T>
+     * @param source
+     * @param config
+     * @param nodeClasses
+     * @return
      */
     @Override
     @SuppressWarnings("unchecked")

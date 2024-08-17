@@ -53,7 +53,16 @@ abstract class AbstractXMLParser extends AbstractParser<XMLSerializationConfig, 
     protected static final JSONSerializationConfig jsc = JSC.create().setCharQuotation(WD.CHAR_ZERO);
 
     @SuppressWarnings("deprecation")
+    protected static final JSONSerializationConfig jscWithEmptyBeanSupported = JSC.create().setCharQuotation(WD.CHAR_ZERO).failOnEmptyBean(false);
+
+    @SuppressWarnings("deprecation")
     protected static final JSONSerializationConfig jscWithCircularRefSupported = JSC.create().setCharQuotation(WD.CHAR_ZERO).supportCircularReference(true);
+
+    @SuppressWarnings("deprecation")
+    protected static final JSONSerializationConfig jscWithCircularRefAndEmptyBeanSupported = JSC.create()
+            .setCharQuotation(WD.CHAR_ZERO)
+            .failOnEmptyBean(false)
+            .supportCircularReference(true);
 
     protected static final Type<?> defaultKeyType = objType;
 
@@ -372,7 +381,21 @@ abstract class AbstractXMLParser extends AbstractParser<XMLSerializationConfig, 
      * @return
      */
     protected JSONSerializationConfig getJSC(XMLSerializationConfig config) {
-        return config == null || !config.supportCircularReference ? jsc : jscWithCircularRefSupported;
+        if (config == null) {
+            return jsc;
+        }
+
+        if (config.supportCircularReference()) {
+            if (config.failOnEmptyBean() == false) {
+                return jscWithCircularRefAndEmptyBeanSupported;
+            } else {
+                return jscWithCircularRefSupported;
+            }
+        } else if (config.failOnEmptyBean() == false) {
+            return jscWithEmptyBeanSupported;
+        }
+
+        return jsc;
     }
 
     enum NodeType {

@@ -14,7 +14,6 @@
 package com.landawn.abacus.util;
 
 import java.io.BufferedReader;
-import java.io.Closeable;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.ArrayList;
@@ -225,7 +224,7 @@ public final class Throwables {
     };
 
     @SuppressWarnings({ "java:S6548" })
-    public abstract static class Iterator<T, E extends Throwable> implements Closeable, Immutable {
+    public abstract static class Iterator<T, E extends Throwable> implements AutoCloseable, Immutable {
         /**
          *
          *

@@ -89,7 +89,7 @@ final class XMLParserImpl extends AbstractXMLParser {
         }
 
         final BufferedXMLWriter bw = Objectory.createBufferedXMLWriter();
-        final IdentityHashSet<Object> serializedObjects = config != null && config.supportCircularReference() ? new IdentityHashSet<>() : null;
+        final IdentityHashSet<Object> serializedObjects = config == null || config.supportCircularReference() == false ? null : new IdentityHashSet<>();
 
         try {
             write(obj, config, null, serializedObjects, bw, false);
@@ -136,7 +136,7 @@ final class XMLParserImpl extends AbstractXMLParser {
     @Override
     public void serialize(final Object obj, final XMLSerializationConfig config, final OutputStream output) {
         final BufferedXMLWriter bw = Objectory.createBufferedXMLWriter(output);
-        final IdentityHashSet<Object> serializedObjects = config != null && config.supportCircularReference() ? new IdentityHashSet<>() : null;
+        final IdentityHashSet<Object> serializedObjects = config == null || config.supportCircularReference() == false ? null : new IdentityHashSet<>();
 
         try {
             write(obj, config, null, serializedObjects, bw, true);
@@ -157,7 +157,7 @@ final class XMLParserImpl extends AbstractXMLParser {
     public void serialize(final Object obj, final XMLSerializationConfig config, final Writer output) {
         final boolean isBufferedWriter = output instanceof BufferedXMLWriter;
         final BufferedXMLWriter bw = isBufferedWriter ? (BufferedXMLWriter) output : Objectory.createBufferedXMLWriter(output);
-        final IdentityHashSet<Object> serializedObjects = config != null && config.supportCircularReference() ? new IdentityHashSet<>() : null;
+        final IdentityHashSet<Object> serializedObjects = config == null || config.supportCircularReference() == false ? null : new IdentityHashSet<>();
 
         try {
             write(obj, config, null, serializedObjects, bw, true);
@@ -230,8 +230,12 @@ final class XMLParserImpl extends AbstractXMLParser {
                 break;
 
             default:
-                throw new ParseException("Unsupported class: " + ClassUtil.getCanonicalClassName(cls)
-                        + ". Only Array/List/Map and Bean class with getter/setter methods are supported");
+                if (config == null || config.failOnEmptyBean()) {
+                    throw new ParseException("Unsupported class: " + ClassUtil.getCanonicalClassName(cls)
+                            + ". Only Array/List/Map and Bean class with getter/setter methods are supported");
+                } else {
+                    // ignore bw.write("");
+                }
         }
 
         if (flush) {
@@ -251,7 +255,7 @@ final class XMLParserImpl extends AbstractXMLParser {
      */
     protected void writeBean(final Object obj, final XMLSerializationConfig config, final String indentation, final IdentityHashSet<Object> serializedObjects,
             final Type<Object> type, final BufferedXMLWriter bw) throws IOException {
-        if (hasCircularReference(obj, serializedObjects, bw)) {
+        if (hasCircularReference(obj, serializedObjects, config, bw)) {
             return;
         }
 
@@ -318,7 +322,7 @@ final class XMLParserImpl extends AbstractXMLParser {
      */
     protected void writeProperties(final Object obj, final XMLSerializationConfig config, final String propIndentation,
             final IdentityHashSet<Object> serializedObjects, final Type<Object> type, final BufferedXMLWriter bw) throws IOException {
-        if (hasCircularReference(obj, serializedObjects, bw)) {
+        if (hasCircularReference(obj, serializedObjects, config, bw)) {
             return;
         }
 
@@ -420,7 +424,7 @@ final class XMLParserImpl extends AbstractXMLParser {
      */
     protected void writeMap(final Map<?, ?> m, final XMLSerializationConfig config, final String indentation, final IdentityHashSet<Object> serializedObjects,
             final Type<Object> type, final BufferedXMLWriter bw) throws IOException {
-        if (hasCircularReference(m, serializedObjects, bw)) {
+        if (hasCircularReference(m, serializedObjects, config, bw)) {
             return;
         }
 
@@ -521,7 +525,7 @@ final class XMLParserImpl extends AbstractXMLParser {
      */
     protected void writeMapEntity(final MapEntity mapEntity, final XMLSerializationConfig config, final String indentation,
             final IdentityHashSet<Object> serializedObjects, final Type<Object> type, final BufferedXMLWriter bw) throws IOException {
-        if (hasCircularReference(mapEntity, serializedObjects, bw)) {
+        if (hasCircularReference(mapEntity, serializedObjects, config, bw)) {
             return;
         }
 
@@ -626,7 +630,7 @@ final class XMLParserImpl extends AbstractXMLParser {
      */
     protected void writeArray(final Object obj, final XMLSerializationConfig config, final String indentation, final IdentityHashSet<Object> serializedObjects,
             final Type<Object> type, final BufferedXMLWriter bw) throws IOException {
-        if (hasCircularReference(obj, serializedObjects, bw)) {
+        if (hasCircularReference(obj, serializedObjects, config, bw)) {
             return;
         }
 
@@ -688,7 +692,7 @@ final class XMLParserImpl extends AbstractXMLParser {
      */
     protected void writeCollection(final Collection<?> c, final XMLSerializationConfig config, final String indentation,
             final IdentityHashSet<Object> serializedObjects, final Type<Object> type, final BufferedXMLWriter bw) throws IOException {
-        if (hasCircularReference(c, serializedObjects, bw)) {
+        if (hasCircularReference(c, serializedObjects, config, bw)) {
             return;
         }
 
@@ -863,15 +867,21 @@ final class XMLParserImpl extends AbstractXMLParser {
      * Checks for circular reference.
      * @param obj
      * @param serializedObjects
+     * @param sc TODO
      * @param bw
-     *
      * @return true, if successful
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    private boolean hasCircularReference(final Object obj, final IdentityHashSet<Object> serializedObjects, final BufferedXMLWriter bw) throws IOException {
+    private boolean hasCircularReference(final Object obj, final IdentityHashSet<Object> serializedObjects, XMLSerializationConfig sc,
+            final BufferedXMLWriter bw) throws IOException {
         if (obj != null && serializedObjects != null) {
             if (serializedObjects.contains(obj)) {
-                bw.write("null");
+                if (sc == null || sc.supportCircularReference() == false) {
+                    throw new ParseException("Self reference found in obj: " + ClassUtil.getClassName(obj.getClass()));
+                } else {
+                    bw.write("null");
+                }
+
                 return true;
             } else {
                 serializedObjects.add(obj);
@@ -917,13 +927,13 @@ final class XMLParserImpl extends AbstractXMLParser {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param source 
-     * @param config 
-     * @param targetClass 
-     * @return 
+     *
+     * @param <T>
+     * @param source
+     * @param config
+     * @param targetClass
+     * @return
      */
     @Override
     public <T> T deserialize(String source, final XMLDeserializationConfig config, Class<? extends T> targetClass) {
@@ -941,13 +951,13 @@ final class XMLParserImpl extends AbstractXMLParser {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param source 
-     * @param config 
-     * @param targetClass 
-     * @return 
+     *
+     * @param <T>
+     * @param source
+     * @param config
+     * @param targetClass
+     * @return
      */
     @Override
     public <T> T deserialize(File source, final XMLDeserializationConfig config, Class<? extends T> targetClass) {
@@ -963,13 +973,13 @@ final class XMLParserImpl extends AbstractXMLParser {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param source 
-     * @param config 
-     * @param targetClass 
-     * @return 
+     *
+     * @param <T>
+     * @param source
+     * @param config
+     * @param targetClass
+     * @return
      */
     @Override
     public <T> T deserialize(InputStream source, final XMLDeserializationConfig config, Class<? extends T> targetClass) {
@@ -983,13 +993,13 @@ final class XMLParserImpl extends AbstractXMLParser {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param source 
-     * @param config 
-     * @param targetClass 
-     * @return 
+     *
+     * @param <T>
+     * @param source
+     * @param config
+     * @param targetClass
+     * @return
      */
     @Override
     public <T> T deserialize(Reader source, final XMLDeserializationConfig config, Class<? extends T> targetClass) {
@@ -999,13 +1009,13 @@ final class XMLParserImpl extends AbstractXMLParser {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param source 
-     * @param config 
-     * @param targetClass 
-     * @return 
+     *
+     * @param <T>
+     * @param source
+     * @param config
+     * @param targetClass
+     * @return
      */
     @Override
     public <T> T deserialize(Node source, final XMLDeserializationConfig config, Class<? extends T> targetClass) {
@@ -1013,13 +1023,13 @@ final class XMLParserImpl extends AbstractXMLParser {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param source 
-     * @param config 
-     * @param nodeClasses 
-     * @return 
+     *
+     * @param <T>
+     * @param source
+     * @param config
+     * @param nodeClasses
+     * @return
      */
     @Override
     public <T> T deserialize(InputStream source, final XMLDeserializationConfig config, Map<String, Class<?>> nodeClasses) {
@@ -1033,13 +1043,13 @@ final class XMLParserImpl extends AbstractXMLParser {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param source 
-     * @param config 
-     * @param nodeClasses 
-     * @return 
+     *
+     * @param <T>
+     * @param source
+     * @param config
+     * @param nodeClasses
+     * @return
      */
     @Override
     public <T> T deserialize(Reader source, final XMLDeserializationConfig config, Map<String, Class<?>> nodeClasses) {
@@ -1047,13 +1057,13 @@ final class XMLParserImpl extends AbstractXMLParser {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param source 
-     * @param config 
-     * @param nodeClasses 
-     * @return 
+     *
+     * @param <T>
+     * @param source
+     * @param config
+     * @param nodeClasses
+     * @return
      */
     @Override
     @SuppressWarnings("unchecked")

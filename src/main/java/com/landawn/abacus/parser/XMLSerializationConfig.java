@@ -200,12 +200,13 @@ public class XMLSerializationConfig extends JSONXMLSerializationConfig<XMLSerial
         h = 31 * h + N.hashCode(getExclusion());
         h = 31 * h + N.hashCode(skipTransientField());
         h = 31 * h + N.hashCode(prettyFormat());
-        h = 31 * h + N.hashCode(supportCircularReference());
         h = 31 * h + N.hashCode(writeLongAsString());
         h = 31 * h + N.hashCode(writeNullStringAsEmpty);
         h = 31 * h + N.hashCode(writeNullNumberAsZero);
         h = 31 * h + N.hashCode(writeNullBooleanAsFalse);
         h = 31 * h + N.hashCode(writeBigDecimalAsPlain());
+        h = 31 * h + N.hashCode(failOnEmptyBean());
+        h = 31 * h + N.hashCode(supportCircularReference());
         h = 31 * h + N.hashCode(getIndentation());
         h = 31 * h + N.hashCode(getPropNamingPolicy());
         h = 31 * h + N.hashCode(tagByPropertyName);
@@ -228,12 +229,12 @@ public class XMLSerializationConfig extends JSONXMLSerializationConfig<XMLSerial
             if (N.equals(getIgnoredPropNames(), other.getIgnoredPropNames()) && N.equals(getCharQuotation(), other.getCharQuotation()) //NOSONAR
                     && N.equals(getStringQuotation(), other.getStringQuotation()) && N.equals(getDateTimeFormat(), other.getDateTimeFormat())
                     && N.equals(getExclusion(), other.getExclusion()) && N.equals(skipTransientField(), other.skipTransientField())
-                    && N.equals(prettyFormat(), other.prettyFormat()) && N.equals(supportCircularReference(), other.supportCircularReference())
-                    && N.equals(writeLongAsString(), other.writeLongAsString()) && N.equals(writeNullStringAsEmpty, other.writeNullStringAsEmpty)
-                    && N.equals(writeNullNumberAsZero, other.writeNullNumberAsZero) && N.equals(writeNullBooleanAsFalse, other.writeNullBooleanAsFalse)
-                    && N.equals(writeBigDecimalAsPlain(), other.writeBigDecimalAsPlain()) && N.equals(getIndentation(), other.getIndentation())
-                    && N.equals(getPropNamingPolicy(), other.getPropNamingPolicy()) && N.equals(tagByPropertyName, other.tagByPropertyName)
-                    && N.equals(ignoreTypeInfo, other.ignoreTypeInfo)) {
+                    && N.equals(prettyFormat(), other.prettyFormat()) && N.equals(writeLongAsString(), other.writeLongAsString())
+                    && N.equals(writeNullStringAsEmpty, other.writeNullStringAsEmpty) && N.equals(writeNullNumberAsZero, other.writeNullNumberAsZero)
+                    && N.equals(writeNullBooleanAsFalse, other.writeNullBooleanAsFalse) && N.equals(writeBigDecimalAsPlain(), other.writeBigDecimalAsPlain())
+                    && N.equals(failOnEmptyBean(), other.failOnEmptyBean()) && N.equals(supportCircularReference(), other.supportCircularReference())
+                    && N.equals(getIndentation(), other.getIndentation()) && N.equals(getPropNamingPolicy(), other.getPropNamingPolicy())
+                    && N.equals(tagByPropertyName, other.tagByPropertyName) && N.equals(ignoreTypeInfo, other.ignoreTypeInfo)) {
 
                 return true;
             }
@@ -251,12 +252,13 @@ public class XMLSerializationConfig extends JSONXMLSerializationConfig<XMLSerial
     public String toString() {
         return "{ignoredPropNames=" + N.toString(getIgnoredPropNames()) + ", charQuotation=" + N.toString(getCharQuotation()) + ", stringQuotation="
                 + N.toString(getStringQuotation()) + ", dateTimeFormat=" + N.toString(getDateTimeFormat()) + ", exclusion=" + N.toString(getExclusion())
-                + ", skipTransientField=" + N.toString(skipTransientField()) + ", prettyFormat=" + N.toString(prettyFormat()) + ", supportCircularReference="
-                + N.toString(supportCircularReference()) + ", writeLongAsString=" + N.toString(writeLongAsString()) + ", writeNullStringAsEmpty="
-                + N.toString(writeNullStringAsEmpty) + ", writeNullNumberAsZero=" + N.toString(writeNullNumberAsZero) + ", writeNullBooleanAsFalse="
-                + N.toString(writeNullBooleanAsFalse) + ", writeBigDecimalAsPlain=" + N.toString(writeBigDecimalAsPlain()) + ", indentation="
-                + N.toString(getIndentation()) + ", propNamingPolicy=" + N.toString(getPropNamingPolicy()) + ", tagByPropertyName="
-                + N.toString(tagByPropertyName) + ", ignoreTypeInfo=" + N.toString(ignoreTypeInfo) + "}";
+                + ", skipTransientField=" + N.toString(skipTransientField()) + ", prettyFormat=" + N.toString(prettyFormat()) + ", writeLongAsString="
+                + N.toString(writeLongAsString()) + ", writeNullStringAsEmpty=" + N.toString(writeNullStringAsEmpty) + ", writeNullNumberAsZero="
+                + N.toString(writeNullNumberAsZero) + ", writeNullBooleanAsFalse=" + N.toString(writeNullBooleanAsFalse) + ", writeBigDecimalAsPlain="
+                + N.toString(writeBigDecimalAsPlain()) + ", failOnEmptyBean=" + N.toString(failOnEmptyBean()) + ", supportCircularReference="
+                + N.toString(supportCircularReference()) + ", indentation=" + N.toString(getIndentation()) + ", propNamingPolicy="
+                + N.toString(getPropNamingPolicy()) + ", tagByPropertyName=" + N.toString(tagByPropertyName) + ", ignoreTypeInfo=" + N.toString(ignoreTypeInfo)
+                + "}";
     }
 
     /**

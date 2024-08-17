@@ -15,7 +15,6 @@
 package com.landawn.abacus.parser;
 
 import com.landawn.abacus.util.DateTimeFormat;
-import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.NamingPolicy;
 import com.landawn.abacus.util.WD;
 
@@ -31,8 +30,6 @@ public abstract class JSONXMLSerializationConfig<C extends JSONXMLSerializationC
 
     protected static final boolean defaultPrettyFormat = false;
 
-    protected static final boolean defaultSupportCircularReference = false;
-
     protected static final boolean defaultWriteBigDecimalAsPlain = false;
 
     protected static final String defaultIndentation = "    ";
@@ -45,14 +42,15 @@ public abstract class JSONXMLSerializationConfig<C extends JSONXMLSerializationC
 
     boolean prettyFormat = defaultPrettyFormat;
 
-    boolean supportCircularReference = defaultSupportCircularReference;
-
     boolean writeLongAsString = false;
     boolean writeNullStringAsEmpty = false;
     boolean writeNullNumberAsZero = false;
     boolean writeNullBooleanAsFalse = false;
 
     boolean writeBigDecimalAsPlain = defaultWriteBigDecimalAsPlain;
+
+    boolean failOnEmptyBean = true;
+    boolean supportCircularReference = false;
 
     String indentation = defaultIndentation;
 
@@ -220,27 +218,6 @@ public abstract class JSONXMLSerializationConfig<C extends JSONXMLSerializationC
     }
 
     /**
-     * Support circular reference.
-     *
-     * @return true, if successful
-     */
-    public boolean supportCircularReference() {
-        return supportCircularReference;
-    }
-
-    /**
-     * Support circular reference.
-     *
-     * @param supportCircularReference
-     * @return
-     */
-    public C supportCircularReference(boolean supportCircularReference) {
-        this.supportCircularReference = supportCircularReference;
-
-        return (C) this;
-    }
-
-    /**
      *
      * @return
      */
@@ -337,69 +314,39 @@ public abstract class JSONXMLSerializationConfig<C extends JSONXMLSerializationC
 
     /**
      *
-     *
      * @return
      */
-    @Override
-    public int hashCode() {
-        int h = 17;
-        h = 31 * h + N.hashCode(ignoredBeanPropNameMap);
-        h = 31 * h + N.hashCode(charQuotation);
-        h = 31 * h + N.hashCode(stringQuotation);
-        h = 31 * h + N.hashCode(dateTimeFormat);
-        h = 31 * h + N.hashCode(exclusion);
-        h = 31 * h + N.hashCode(skipTransientField);
-        h = 31 * h + N.hashCode(prettyFormat);
-        h = 31 * h + N.hashCode(supportCircularReference);
-        h = 31 * h + N.hashCode(writeLongAsString);
-        h = 31 * h + N.hashCode(writeNullNumberAsZero);
-        h = 31 * h + N.hashCode(writeNullBooleanAsFalse);
-        h = 31 * h + N.hashCode(writeBigDecimalAsPlain);
-        h = 31 * h + N.hashCode(indentation);
-        return 31 * h + N.hashCode(propNamingPolicy);
+    public boolean failOnEmptyBean() {
+        return failOnEmptyBean;
     }
 
     /**
      *
-     * @param obj
-     * @return true, if successful
+     * @param failOnEmptyBean
+     * @return
      */
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
+    public C failOnEmptyBean(boolean failOnEmptyBean) {
+        this.failOnEmptyBean = failOnEmptyBean;
 
-        if (obj instanceof JSONXMLSerializationConfig) {
-            JSONXMLSerializationConfig<C> other = (JSONXMLSerializationConfig<C>) obj;
-
-            if (N.equals(ignoredBeanPropNameMap, other.ignoredBeanPropNameMap) && N.equals(charQuotation, other.charQuotation)
-                    && N.equals(stringQuotation, other.stringQuotation) && N.equals(dateTimeFormat, other.dateTimeFormat)
-                    && N.equals(exclusion, other.exclusion) && N.equals(skipTransientField, other.skipTransientField)
-                    && N.equals(prettyFormat, other.prettyFormat) && N.equals(supportCircularReference, other.supportCircularReference)
-                    && N.equals(writeLongAsString, other.writeLongAsString) && N.equals(writeNullNumberAsZero, other.writeNullNumberAsZero)
-                    && N.equals(writeNullBooleanAsFalse, other.writeNullBooleanAsFalse) && N.equals(writeBigDecimalAsPlain, other.writeBigDecimalAsPlain)
-                    && N.equals(indentation, other.indentation) && N.equals(propNamingPolicy, other.propNamingPolicy)) {
-
-                return true;
-            }
-        }
-
-        return false;
+        return (C) this;
     }
 
     /**
      *
-     *
      * @return
      */
-    @Override
-    public String toString() {
-        return "{ignoredBeanPropNameMap=" + N.toString(ignoredBeanPropNameMap) + ", charQuotation=" + N.toString(charQuotation) + ", stringQuotation="
-                + N.toString(stringQuotation) + ", dateTimeFormat=" + N.toString(dateTimeFormat) + ", exclusion=" + N.toString(exclusion)
-                + ", skipTransientField=" + N.toString(skipTransientField) + ", prettyFormat=" + N.toString(prettyFormat) + ", supportCircularReference="
-                + N.toString(supportCircularReference) + ", writeLongAsString=" + N.toString(writeLongAsString) + ", writeNullNumberAsZero="
-                + N.toString(writeNullNumberAsZero) + ", writeNullBooleanAsFalse=" + N.toString(writeNullBooleanAsFalse) + ", writeBigDecimalAsPlain="
-                + N.toString(writeBigDecimalAsPlain) + ", indentation=" + N.toString(indentation) + ", propNamingPolicy=" + N.toString(propNamingPolicy) + "}";
+    public boolean supportCircularReference() {
+        return supportCircularReference;
+    }
+
+    /**
+     *
+     * @param supportCircularReference
+     * @return
+     */
+    public C supportCircularReference(boolean supportCircularReference) {
+        this.supportCircularReference = supportCircularReference;
+
+        return (C) this;
     }
 }

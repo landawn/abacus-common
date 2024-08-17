@@ -15,7 +15,6 @@
 package com.landawn.abacus.util;
 
 import java.io.BufferedReader;
-import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -119,7 +118,7 @@ import com.landawn.abacus.util.stream.Stream;
 @SequentialOnly
 @com.landawn.abacus.annotation.Immutable
 @SuppressWarnings({ "java:S1192", "java:S1698", "java:S4968", "java:S6539" })
-public final class CheckedStream<T, E extends Exception> implements Closeable, Immutable {
+public final class CheckedStream<T, E extends Exception> implements AutoCloseable, Immutable {
     private static final Logger logger = LoggerFactory.getLogger(CheckedStream.class);
 
     private static final Throwables.Function<OptionalInt, Integer, RuntimeException> GET_AS_INT = OptionalInt::get;

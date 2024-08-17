@@ -60,28 +60,28 @@ public class JSONDeserializationConfig extends DeserializationConfig<JSONDeseria
         return this;
     }
 
-    /**
-     *
-     *
-     * @return
-     * @deprecated Use {@link #readNullToEmpty()} instead
-     */
-    @Deprecated
-    public boolean nullToEmpty() {
-        return readNullToEmpty();
-    }
-
-    /**
-     * Deserialize the values to empty {@code CharSequence/Array/Collection/Map}, instead of null.
-     *
-     * @param nullToEmpty
-     * @return
-     * @deprecated Use {@link #readNullToEmpty(boolean)} instead
-     */
-    @Deprecated
-    public JSONDeserializationConfig nullToEmpty(boolean nullToEmpty) {
-        return readNullToEmpty(nullToEmpty);
-    }
+    //    /**
+    //     *
+    //     *
+    //     * @return
+    //     * @deprecated Use {@link #readNullToEmpty()} instead
+    //     */
+    //    @Deprecated
+    //    public boolean nullToEmpty() {
+    //        return readNullToEmpty();
+    //    }
+    //
+    //    /**
+    //     * Deserialize the values to empty {@code CharSequence/Array/Collection/Map}, instead of null.
+    //     *
+    //     * @param nullToEmpty
+    //     * @return
+    //     * @deprecated Use {@link #readNullToEmpty(boolean)} instead
+    //     */
+    //    @Deprecated
+    //    public JSONDeserializationConfig nullToEmpty(boolean nullToEmpty) {
+    //        return readNullToEmpty(nullToEmpty);
+    //    }
 
     /**
      *

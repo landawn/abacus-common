@@ -17,7 +17,6 @@
 package com.landawn.abacus.util;
 
 import java.io.BufferedReader;
-import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -51,7 +50,7 @@ import com.landawn.abacus.exception.UncheckedIOException;
  * @version $Id: LineIterator.java 1471767 2013-04-24 23:24:19Z sebb $
  * @since 1.2
  */
-public final class LineIterator extends ObjIterator<String> implements Closeable {
+public final class LineIterator extends ObjIterator<String> implements AutoCloseable {
     // N.B. This class deliberately does not implement Iterable, see https://issues.apache.org/jira/browse/IO-181
 
     private final BufferedReader br;
@@ -276,8 +275,8 @@ public final class LineIterator extends ObjIterator<String> implements Closeable
     /**
      * Returns the next line in the wrapped <code>Reader</code>.
      *
-     * @return 
-     * @throws IllegalArgumentException 
+     * @return
+     * @throws IllegalArgumentException
      * @throws NoSuchElementException if there is no line to return
      */
     @Override

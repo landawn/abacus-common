@@ -1170,6 +1170,10 @@ sealed class CommonUtil permits N {
                 final Collection result = N.newCollection((Class<Collection>) targetType.clazz(), srcArray.length);
                 result.addAll(Arrays.asList(srcArray));
                 return (T) result;
+            } else if (targetType.getElementType().clazz().isAssignableFrom(srcType.clazz())) {
+                final Collection result = N.newCollection((Class<Collection>) targetType.clazz(), 1);
+                result.add(srcObj);
+                return (T) result;
             }
         }
 
@@ -1180,21 +1184,26 @@ sealed class CommonUtil permits N {
 
                 if (op.isEmpty() || targetType.clazz().getComponentType().isAssignableFrom(op.get().getClass())) {
                     try {
-                        final Object[] a = N.newArray(targetType.clazz().getComponentType(), srcColl.size());
-                        srcColl.toArray(a);
-                        return (T) a;
+                        final Object[] result = N.newArray(targetType.clazz().getComponentType(), srcColl.size());
+                        srcColl.toArray(result);
+                        return (T) result;
                     } catch (Exception e) {
                         // ignore;
                     }
                 }
+            } else if (targetType.getElementType().clazz().isAssignableFrom(srcType.clazz())) {
+                final Object[] result = N.newArray(targetType.clazz().getComponentType(), 1);
+                result[0] = srcObj;
+                return (T) result;
             }
+
             // If it works, it has returned by: targetType.clazz().isAssignableFrom(srcClass)
             //    } else if (srcType.isObjectArray()) {
             //        try {
             //            final Object[] srcArray = (Object[]) obj;
-            //            final Object[] a = N.newArray(targetType.clazz().getComponentType(), srcArray.length);
-            //            N.copy(srcArray, 0, a, 0, srcArray.length);
-            //            return (T) a;
+            //            final Object[] result = N.newArray(targetType.clazz().getComponentType(), srcArray.length);
+            //            N.copy(srcArray, 0, result, 0, srcArray.length);
+            //            return (T) result;
             //        } catch (Exception e) {
             //            // ignore;
             //        }

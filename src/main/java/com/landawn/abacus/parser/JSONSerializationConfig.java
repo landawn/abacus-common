@@ -32,9 +32,9 @@ public class JSONSerializationConfig extends JSONXMLSerializationConfig<JSONSeri
 
     protected static final boolean defaultQuoteMapKey = true;
 
-    protected static final boolean defaultWrapRootValue = false;
-
     protected static final boolean defaultBracketRootValue = true;
+
+    protected static final boolean defaultWrapRootValue = false;
 
     private boolean writeNullToEmpty = false;
     private boolean writeDataSetByRow = false;
@@ -45,9 +45,9 @@ public class JSONSerializationConfig extends JSONXMLSerializationConfig<JSONSeri
 
     private boolean quoteMapKey = defaultQuoteMapKey;
 
-    private boolean wrapRootValue = defaultWrapRootValue;
-
     private boolean bracketRootValue = defaultBracketRootValue;
+
+    private boolean wrapRootValue = defaultWrapRootValue;
 
     /**
      *
@@ -246,27 +246,6 @@ public class JSONSerializationConfig extends JSONXMLSerializationConfig<JSONSeri
     }
 
     /**
-     * Checks if is wrap root value.
-     *
-     * @return true, if is wrap root value
-     */
-    public boolean wrapRootValue() {
-        return wrapRootValue;
-    }
-
-    /**
-     * Sets the wrap root value.
-     *
-     * @param wrapRootValue
-     * @return
-     */
-    public JSONSerializationConfig wrapRootValue(boolean wrapRootValue) {
-        this.wrapRootValue = wrapRootValue;
-
-        return this;
-    }
-
-    /**
      * The default value is true if it's not set.
      *
      * @return true, if is bracket root value
@@ -284,6 +263,27 @@ public class JSONSerializationConfig extends JSONXMLSerializationConfig<JSONSeri
      */
     public JSONSerializationConfig bracketRootValue(boolean bracketRootValue) {
         this.bracketRootValue = bracketRootValue;
+
+        return this;
+    }
+
+    /**
+     * Checks if is wrap root value.
+     *
+     * @return true, if is wrap root value
+     */
+    public boolean wrapRootValue() {
+        return wrapRootValue;
+    }
+
+    /**
+     * Sets the wrap root value.
+     *
+     * @param wrapRootValue
+     * @return
+     */
+    public JSONSerializationConfig wrapRootValue(boolean wrapRootValue) {
+        this.wrapRootValue = wrapRootValue;
 
         return this;
     }
@@ -331,7 +331,6 @@ public class JSONSerializationConfig extends JSONXMLSerializationConfig<JSONSeri
         h = 31 * h + N.hashCode(getExclusion());
         h = 31 * h + N.hashCode(skipTransientField());
         h = 31 * h + N.hashCode(prettyFormat());
-        h = 31 * h + N.hashCode(supportCircularReference());
         h = 31 * h + N.hashCode(writeLongAsString());
         h = 31 * h + N.hashCode(writeNullStringAsEmpty);
         h = 31 * h + N.hashCode(writeNullNumberAsZero);
@@ -341,12 +340,14 @@ public class JSONSerializationConfig extends JSONXMLSerializationConfig<JSONSeri
         h = 31 * h + N.hashCode(writeRowColumnKeyType);
         h = 31 * h + N.hashCode(writeColumnType);
         h = 31 * h + N.hashCode(writeBigDecimalAsPlain());
+        h = 31 * h + N.hashCode(failOnEmptyBean());
+        h = 31 * h + N.hashCode(supportCircularReference());
         h = 31 * h + N.hashCode(getIndentation());
         h = 31 * h + N.hashCode(getPropNamingPolicy());
         h = 31 * h + N.hashCode(quotePropName);
         h = 31 * h + N.hashCode(quoteMapKey);
-        h = 31 * h + N.hashCode(wrapRootValue);
-        return 31 * h + N.hashCode(bracketRootValue);
+        h = 31 * h + N.hashCode(bracketRootValue);
+        return 31 * h + N.hashCode(wrapRootValue);
     }
 
     /**
@@ -365,15 +366,15 @@ public class JSONSerializationConfig extends JSONXMLSerializationConfig<JSONSeri
             if (N.equals(getIgnoredPropNames(), other.getIgnoredPropNames()) && N.equals(getCharQuotation(), other.getCharQuotation()) //NOSONAR
                     && N.equals(getStringQuotation(), other.getStringQuotation()) && N.equals(getDateTimeFormat(), other.getDateTimeFormat())
                     && N.equals(getExclusion(), other.getExclusion()) && N.equals(skipTransientField(), other.skipTransientField())
-                    && N.equals(prettyFormat(), other.prettyFormat()) && N.equals(supportCircularReference(), other.supportCircularReference())
-                    && N.equals(writeLongAsString(), other.writeLongAsString()) && N.equals(writeNullStringAsEmpty, other.writeNullStringAsEmpty)
-                    && N.equals(writeNullNumberAsZero, other.writeNullNumberAsZero) && N.equals(writeNullBooleanAsFalse, other.writeNullBooleanAsFalse)
-                    && N.equals(writeBigDecimalAsPlain(), other.writeBigDecimalAsPlain()) && N.equals(getIndentation(), other.getIndentation())
-                    && N.equals(getPropNamingPolicy(), other.getPropNamingPolicy()) && N.equals(writeNullToEmpty, other.writeNullToEmpty)
-                    && N.equals(writeDataSetByRow, other.writeDataSetByRow) && N.equals(writeRowColumnKeyType, other.writeRowColumnKeyType)
-                    && N.equals(writeColumnType, other.writeColumnType) && N.equals(quotePropName, other.quotePropName)
-                    && N.equals(quoteMapKey, other.quoteMapKey) && N.equals(wrapRootValue, other.wrapRootValue)
-                    && N.equals(bracketRootValue, other.bracketRootValue)) {
+                    && N.equals(prettyFormat(), other.prettyFormat()) && N.equals(writeLongAsString(), other.writeLongAsString())
+                    && N.equals(writeNullStringAsEmpty, other.writeNullStringAsEmpty) && N.equals(writeNullNumberAsZero, other.writeNullNumberAsZero)
+                    && N.equals(writeNullBooleanAsFalse, other.writeNullBooleanAsFalse) && N.equals(writeBigDecimalAsPlain(), other.writeBigDecimalAsPlain())
+                    && N.equals(failOnEmptyBean(), other.failOnEmptyBean()) && N.equals(supportCircularReference(), other.supportCircularReference())
+                    && N.equals(getIndentation(), other.getIndentation()) && N.equals(getPropNamingPolicy(), other.getPropNamingPolicy())
+                    && N.equals(writeNullToEmpty, other.writeNullToEmpty) && N.equals(writeDataSetByRow, other.writeDataSetByRow)
+                    && N.equals(writeRowColumnKeyType, other.writeRowColumnKeyType) && N.equals(writeColumnType, other.writeColumnType)
+                    && N.equals(quotePropName, other.quotePropName) && N.equals(quoteMapKey, other.quoteMapKey)
+                    && N.equals(bracketRootValue, other.bracketRootValue) && N.equals(wrapRootValue, other.wrapRootValue)) {
 
                 return true;
             }
@@ -391,15 +392,15 @@ public class JSONSerializationConfig extends JSONXMLSerializationConfig<JSONSeri
     public String toString() {
         return "{ignoredPropNames=" + N.toString(getIgnoredPropNames()) + ", charQuotation=" + N.toString(getCharQuotation()) + ", stringQuotation="
                 + N.toString(getStringQuotation()) + ", dateTimeFormat=" + N.toString(getDateTimeFormat()) + ", exclusion=" + N.toString(getExclusion())
-                + ", skipTransientField=" + N.toString(skipTransientField()) + ", prettyFormat=" + N.toString(prettyFormat()) + ", supportCircularReference="
-                + N.toString(supportCircularReference()) + ", writeLongAsString=" + N.toString(writeLongAsString()) + ", writeNullStringAsEmpty="
+                + ", skipTransientField=" + N.toString(skipTransientField()) + ", prettyFormat=" + N.toString(prettyFormat()) + ", writeNullStringAsEmpty="
                 + N.toString(writeNullStringAsEmpty) + ", writeNullNumberAsZero=" + N.toString(writeNullNumberAsZero) + ", writeNullBooleanAsFalse="
                 + N.toString(writeNullBooleanAsFalse) + ", writeNullToEmpty=" + N.toString(writeNullToEmpty) + ", writeDataSetByRow="
                 + N.toString(writeDataSetByRow) + ", writeRowColumnKeyType=" + N.toString(writeRowColumnKeyType) + ", writeColumnType="
-                + N.toString(writeColumnType) + ", writeBigDecimalAsPlain=" + N.toString(writeBigDecimalAsPlain()) + ", indentation="
+                + N.toString(writeColumnType) + ", writeBigDecimalAsPlain=" + N.toString(writeBigDecimalAsPlain()) + N.toString(failOnEmptyBean())
+                + ", failOnEmptyBean=" + N.toString(failOnEmptyBean()) + ", supportCircularReference=" + N.toString(supportCircularReference()) + ", indentation="
                 + N.toString(getIndentation()) + ", propNamingPolicy=" + N.toString(getPropNamingPolicy()) + ", quotePropName=" + N.toString(quotePropName)
-                + ", quoteMapKey=" + N.toString(quoteMapKey) + ", wrapRootValue=" + N.toString(wrapRootValue) + ", bracketRootValue="
-                + N.toString(bracketRootValue) + "}";
+                + ", quoteMapKey=" + N.toString(quoteMapKey) + ", bracketRootValue=" + N.toString(bracketRootValue) + ", wrapRootValue="
+                + N.toString(wrapRootValue) + "}";
     }
 
     /**

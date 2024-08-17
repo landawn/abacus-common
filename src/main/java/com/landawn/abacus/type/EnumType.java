@@ -67,6 +67,7 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
             String jsonXmlName = getJsonXmlName(enumConstant);
             enumJsonXmlNameMap.put(enumConstant, jsonXmlName);
             jsonXmlNameEnumMap.put(jsonXmlName, enumConstant);
+            jsonXmlNameEnumMap.put(enumConstant.name(), enumConstant);
         }
 
         try {
@@ -131,7 +132,7 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
                 return null; // NOSONAR
             }
 
-            if (Strings.isAsciiDigtalInteger(str)) {
+            if (Strings.isAsciiDigtalInteger(str) && !jsonXmlNameEnumMap.containsKey(str)) {
                 return valueOf(Numbers.toInt(str));
             } else {
                 final T val = jsonXmlNameEnumMap.get(str);
