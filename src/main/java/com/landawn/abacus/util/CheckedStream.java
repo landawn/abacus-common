@@ -2648,25 +2648,26 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
                 .iteratorEx(), sorted, cmp, closeHandlers);
     }
 
-    /**
-     * Distinct by the key extracted by {@code keyMapper} and limit the appearance of the elements with same key to the number calculated by {@code limit}
-     *
-     * @param <K>
-     * @param keyMapper
-     * @param limit
-     * @return
-     * @see #groupBy(Throwables.Function, Collector)
-     */
-    @IntermediateOp
-    @TerminalOpTriggered
-    public <K> CheckedStream<T, E> distinctLimitBy(final Throwables.Function<? super T, K, ? extends E> keyMapper,
-            final Throwables.BiFunction<? super K, ? super List<T>, Integer, ? extends E> limit) {
-
-        final Supplier<Map<K, List<T>>> supplier = Suppliers.<K, List<T>> ofLinkedHashMap();
-
-        return groupBy(keyMapper, Fnn.identity(), supplier) //
-                .flatmap(it -> subList(it.getValue(), 0, limit.apply(it.getKey(), it.getValue())));
-    }
+    //    /**
+    //     * Distinct by the key extracted by {@code keyMapper} and limit the appearance of the elements with same key to the number calculated by {@code limit}
+    //     *
+    //     * @param <K>
+    //     * @param keyMapper
+    //     * @param limit
+    //     * @return
+    //     * @see #groupBy(Throwables.Function, Collector)
+    //     */
+    //    @Beta
+    //    @IntermediateOp
+    //    @TerminalOpTriggered
+    //    public <K> CheckedStream<T, E> distinctLimitBy(final Throwables.Function<? super T, K, ? extends E> keyMapper,
+    //            final Throwables.BiFunction<? super K, ? super List<T>, Integer, ? extends E> limit) {
+    //
+    //        final Supplier<Map<K, List<T>>> supplier = Suppliers.<K, List<T>> ofLinkedHashMap();
+    //
+    //        return groupBy(keyMapper, Fnn.identity(), supplier) //
+    //                .flatmap(it -> subList(it.getValue(), 0, limit.apply(it.getKey(), it.getValue())));
+    //    }
 
     /**
      *
@@ -17280,10 +17281,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     private static Object hashKey(Object obj) {
         return obj == null ? NONE : (obj.getClass().isArray() ? Wrapper.of(obj) : obj);
-    }
-
-    private static <T> List<T> subList(final List<T> list, final int fromIndex, final int toIndex) {
-        return list.subList(fromIndex, N.min(list.size(), toIndex));
     }
 
     @Internal

@@ -19,7 +19,6 @@ package com.landawn.abacus.util;
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.util.Tuple.Tuple3;
 import com.landawn.abacus.util.u.Optional;
-import com.landawn.abacus.util.stream.Stream;
 
 /**
  *
@@ -440,36 +439,44 @@ public final class Triple<L, M, R> implements Mutable {
         return predicate.test(this) ? Optional.of(this) : Optional.<Triple<L, M, R>> empty();
     }
 
-    /**
-     *
-     *
-     * @return
-     */
-    public Stream<Triple<L, M, R>> stream() {
-        return Stream.of(this);
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param <E>
-     * @param func
-     * @return
-     * @throws E
-     */
-    public <T, E extends Exception> Stream<T> stream(final Throwables.Function<? super Triple<L, M, R>, Stream<T>, E> func) throws E {
-        return func.apply(this);
-    }
-
-    /**
-     *
-     *
-     * @return
-     */
-    public Optional<Triple<L, M, R>> toOptional() {
-        return Optional.of(this);
-    }
+    //    /**
+    //     *
+    //     *
+    //     * @return
+    //     * @deprecated {@code Optional} is misused. It's marked to be removed.
+    //     */
+    //    @Deprecated
+    //    @Beta
+    //    public Stream<Triple<L, M, R>> stream() {
+    //        return Stream.of(this);
+    //    }
+    //
+    //    /**
+    //     *
+    //     *
+    //     * @param <T>
+    //     * @param <E>
+    //     * @param func
+    //     * @return
+    //     * @throws E
+    //     * @deprecated {@code Optional} is misused. It's marked to be removed.
+    //     */
+    //    @Deprecated
+    //    @Beta
+    //    public <T, E extends Exception> Stream<T> stream(final Throwables.Function<? super Triple<L, M, R>, Stream<T>, E> func) throws E {
+    //        return func.apply(this);
+    //    }
+    //
+    //    /**
+    //     *
+    //     *
+    //     * @return
+    //     * @deprecated {@code Optional} is misused. It's marked to be removed.
+    //     */
+    //    @Deprecated
+    //    public Optional<Triple<L, M, R>> toOptional() {
+    //        return Optional.of(this);
+    //    }
 
     /**
      *

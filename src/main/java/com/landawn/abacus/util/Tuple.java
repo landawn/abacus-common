@@ -23,7 +23,6 @@ import java.util.Map;
 
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.util.u.Optional;
-import com.landawn.abacus.util.stream.Stream;
 
 /**
  *
@@ -122,38 +121,43 @@ public abstract class Tuple<TP> implements Immutable {
         return predicate.test((TP) this) ? Optional.of((TP) this) : Optional.<TP> empty();
     }
 
-    /**
-     *
-     *
-     * @return
-     */
-    @Beta
-    public Stream<TP> stream() {
-        return Stream.of((TP) this);
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param <E>
-     * @param func
-     * @return
-     * @throws E
-     */
-    @Beta
-    public <T, E extends Exception> Stream<T> stream(final Throwables.Function<? super TP, Stream<T>, E> func) throws E {
-        return func.apply((TP) this);
-    }
-
-    /**
-     *
-     * @return
-     */
-    @Beta
-    public Optional<TP> toOptional() {
-        return Optional.of((TP) this);
-    }
+    //    /**
+    //     *
+    //     *
+    //     * @return
+    //     * @deprecated unlikely to be useful. It's marked to be removed.
+    //     */
+    //    @Deprecated
+    //    @Beta
+    //    public Stream<TP> stream() {
+    //        return Stream.of((TP) this);
+    //    }
+    //
+    //    /**
+    //     *
+    //     *
+    //     * @param <T>
+    //     * @param <E>
+    //     * @param func
+    //     * @return
+    //     * @throws E
+    //     * @deprecated unlikely to be useful. It's marked to be removed.
+    //     */
+    //    @Deprecated
+    //    @Beta
+    //    public <T, E extends Exception> Stream<T> stream(final Throwables.Function<? super TP, Stream<T>, E> func) throws E {
+    //        return func.apply((TP) this);
+    //    }
+    //
+    //    /**
+    //     *
+    //     * @deprecated {@code Optional} is misused. It's marked to be removed.
+    //     */
+    //    @Deprecated
+    //    @Beta
+    //    public Optional<TP> toOptional() {
+    //        return Optional.of((TP) this);
+    //    }
 
     /**
      *

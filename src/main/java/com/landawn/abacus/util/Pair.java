@@ -21,7 +21,6 @@ import java.util.Map;
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.util.Tuple.Tuple2;
 import com.landawn.abacus.util.u.Optional;
-import com.landawn.abacus.util.stream.Stream;
 
 /**
  *
@@ -419,36 +418,44 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
         return predicate.test(this) ? Optional.of(this) : Optional.<Pair<L, R>> empty();
     }
 
-    /**
-     *
-     *
-     * @return
-     */
-    public Stream<Pair<L, R>> stream() {
-        return Stream.of(this);
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param <E>
-     * @param func
-     * @return
-     * @throws E
-     */
-    public <T, E extends Exception> Stream<T> stream(final Throwables.Function<? super Pair<L, R>, Stream<T>, E> func) throws E {
-        return func.apply(this);
-    }
-
-    /**
-     *
-     *
-     * @return
-     */
-    public Optional<Pair<L, R>> toOptional() {
-        return Optional.of(this);
-    }
+    //    /**
+    //     *
+    //     *
+    //     * @return
+    //     * @deprecated unlikely to be useful. It's marked to be removed.
+    //     */
+    //    @Deprecated
+    //    @Beta
+    //    public Stream<Pair<L, R>> stream() {
+    //        return Stream.of(this);
+    //    }
+    //
+    //    /**
+    //     *
+    //     *
+    //     * @param <T>
+    //     * @param <E>
+    //     * @param func
+    //     * @return
+    //     * @throws E
+    //     * @deprecated unlikely to be useful. It's marked to be removed.
+    //     */
+    //    @Deprecated
+    //    @Beta
+    //    public <T, E extends Exception> Stream<T> stream(final Throwables.Function<? super Pair<L, R>, Stream<T>, E> func) throws E {
+    //        return func.apply(this);
+    //    }
+    //
+    //    /**
+    //     *
+    //     *
+    //     * @return
+    //     * @deprecated {@code Optional} is misused. It's marked to be removed.
+    //     */
+    //    @Deprecated
+    //    public Optional<Pair<L, R>> toOptional() {
+    //        return Optional.of(this);
+    //    }
 
     /**
      *
