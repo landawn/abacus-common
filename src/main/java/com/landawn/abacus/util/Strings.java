@@ -44,6 +44,8 @@ import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.lang.model.SourceVersion;
+
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.logging.Logger;
@@ -262,6 +264,15 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     public static String valueOf(final char[] value) {
         return value == null ? null : String.valueOf(value);
+    }
+
+    /**
+     *
+     * @param cs
+     * @return
+     */
+    public static boolean isKeyword(final CharSequence cs) {
+        return SourceVersion.isKeyword(cs);
     }
 
     /**

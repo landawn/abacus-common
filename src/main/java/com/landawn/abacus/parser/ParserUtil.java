@@ -50,6 +50,7 @@ import com.landawn.abacus.annotation.Internal;
 import com.landawn.abacus.annotation.JsonXmlConfig;
 import com.landawn.abacus.annotation.JsonXmlField;
 import com.landawn.abacus.annotation.JsonXmlField.Expose;
+import com.landawn.abacus.annotation.ReadOnly;
 import com.landawn.abacus.annotation.ReadOnlyId;
 import com.landawn.abacus.annotation.Table;
 import com.landawn.abacus.annotation.Transient;
@@ -1645,7 +1646,8 @@ public final class ParserUtil {
 
             this.isMarkedToId = tmpIsMarkedToId;
 
-            this.isMarkedToReadOnlyId = this.annotations.containsKey(ReadOnlyId.class) || readOnlyIdPropNames.contains(propName);
+            this.isMarkedToReadOnlyId = this.annotations.containsKey(ReadOnlyId.class) || (isMarkedToId && this.annotations.containsKey(ReadOnly.class))
+                    || readOnlyIdPropNames.contains(propName);
 
             String tmpColumnName = null;
             boolean tmpIsMarkedToColumn = false;

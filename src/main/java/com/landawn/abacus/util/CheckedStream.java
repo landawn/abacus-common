@@ -7704,19 +7704,19 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
+     * Delay each element in this {@code Stream} by a given {@link Duration} except first element.
      *
-     *
-     * @param delay
+     * @param duration
      * @return
      * @throws IllegalStateException
      * @throws IllegalArgumentException
      */
     @IntermediateOp
-    public CheckedStream<T, E> delay(final Duration delay) throws IllegalStateException, IllegalArgumentException {
+    public CheckedStream<T, E> delay(final Duration duration) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
-        checkArgNotNull(delay, "delay");
+        checkArgNotNull(duration, "delay");
 
-        final long millis = delay.toMillis();
+        final long millis = duration.toMillis();
         final Throwables.Consumer<T, E> action = it -> N.sleepUninterruptibly(millis);
 
         return onEach(action);
