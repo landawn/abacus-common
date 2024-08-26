@@ -120,9 +120,9 @@ public final class CodeGenerationUtil {
         final String interfaceName = "public interface " + propNameTableClassName;
 
         sb.append(LINE_SEPERATOR)
-                .append("    /*")
+                .append("    /**")
                 .append(LINE_SEPERATOR)
-                .append("     * Auto-generated class for property(field) name table by abacus-jdbc.")
+                .append("     * Auto-generated class for property(field) name table.")
                 .append(LINE_SEPERATOR)
                 .append("     */");
 
@@ -168,8 +168,8 @@ public final class CodeGenerationUtil {
             List<String> lines = IOUtil.readAllLines(file);
 
             for (int i = 0, size = lines.size(); i < size; i++) {
-                if (Strings.startsWithAny(lines.get(i).trim(), interfaceName, "* Auto-generated class for property(field) name table by abacus-jdbc")) {
-                    if (Strings.startsWith(lines.get(i).trim(), "* Auto-generated class for property(field) name table by abacus-jdbc")) {
+                if (Strings.startsWithAny(lines.get(i).trim(), interfaceName, "* Auto-generated class for property(field) name table")) {
+                    if (Strings.startsWith(lines.get(i).trim(), "* Auto-generated class for property(field) name table")) {
                         i--;
                     }
 
@@ -284,17 +284,17 @@ public final class CodeGenerationUtil {
         }
 
         if (generateClassPropNameList) {
-            sb.append(LINE_SEPERATOR).append("import com.landawn.abacus.util.ImmutableList;").append(LINE_SEPERATOR);
+            sb.append(LINE_SEPERATOR).append("import java.util.List;").append(LINE_SEPERATOR);
         }
 
         final String allClassName = StreamEx.of(entityClassesToUse).map(ClassUtil::getSimpleClassName).join(", ", "[", "]");
 
-        {
-            if (generateClassPropNameList && StreamEx.of(entityClassesToUse).map(ClassUtil::getSimpleClassName).hasDuplicates()) {
-                throw new IllegalArgumentException(
-                        "Duplicate simple class names found: " + allClassName + ". It's not supported when generateClassPropNameList is true");
-            }
+        if (generateClassPropNameList && StreamEx.of(entityClassesToUse).map(ClassUtil::getSimpleClassName).hasDuplicates()) {
+            throw new IllegalArgumentException(
+                    "Duplicate simple class names found: " + allClassName + ". It's not supported when generateClassPropNameList is true");
+        }
 
+        {
             final ListMultimap<String, String> propNameMap = N.newListMultimap();
             final ListMultimap<String, String> classPropNameListMap = N.newListMultimap();
 
@@ -322,10 +322,9 @@ public final class CodeGenerationUtil {
             }
 
             sb.append(LINE_SEPERATOR)
-                    .append("/*")
+                    .append("/**")
                     .append(LINE_SEPERATOR)
-                    .append(" * Auto-generated class for property(field) name table by abacus-jdbc for classes: ")
-                    .append(allClassName)
+                    .append(" * Auto-generated class for property(field) name table for classes: {@code " + allClassName + "}")
                     .append(LINE_SEPERATOR)
                     .append(" */");
 
@@ -359,11 +358,11 @@ public final class CodeGenerationUtil {
                     String fieldNameForPropNameList = Strings.toCamelCase(classPropNameListEntry.getKey()) + "PropNameList";
 
                     sb.append(LINE_SEPERATOR)
-                            .append("    /** Immutable property(field) name list for class: {@code \"" + classPropNameListEntry.getKey() + "\"}.")
+                            .append("    /** Unmodifiable property(field) name list for class: {@code \"" + classPropNameListEntry.getKey() + "\"}.")
                             .append(" */")
                             .append(LINE_SEPERATOR)
-                            .append("    ImmutableList<String> " + (propNameMap.containsKey(fieldNameForPropNameList) ? "_" : "") + fieldNameForPropNameList
-                                    + " = ImmutableList.of(" + StreamEx.of(classPropNameListEntry.getValue()).sorted().join(", ") + ");")
+                            .append("    List<String> " + (propNameMap.containsKey(fieldNameForPropNameList) ? "_" : "") + fieldNameForPropNameList
+                                    + " = List.of(" + StreamEx.of(classPropNameListEntry.getValue()).sorted().join(", ") + ");")
                             .append(LINE_SEPERATOR);
                 }
             }
@@ -404,11 +403,10 @@ public final class CodeGenerationUtil {
 
                 sb.append(LINE_SEPERATOR)
                         .append(INDENTATION)
-                        .append("/*")
+                        .append("/**")
                         .append(LINE_SEPERATOR)
                         .append(INDENTATION)
-                        .append(" * Auto-generated class for lower case property(field) name table by abacus-jdbc for classes: ")
-                        .append(allClassName)
+                        .append(" * Auto-generated class for lower case property(field) name table for classes: {@code " + allClassName + "}")
                         .append(LINE_SEPERATOR)
                         .append(INDENTATION)
                         .append(" */");
@@ -443,11 +441,13 @@ public final class CodeGenerationUtil {
                         String fieldNameForPropNameList = Strings.toCamelCase(classPropNameListEntry.getKey()) + "PropNameList";
 
                         sb.append(LINE_SEPERATOR)
-                                .append("    /** Immutable property(field) name list for class: {@code \"" + classPropNameListEntry.getKey() + "\"}.")
+                                .append(INDENTATION)
+                                .append("    /** Unmodifiable property(field) name list for class: {@code \"" + classPropNameListEntry.getKey() + "\"}.")
                                 .append(" */")
                                 .append(LINE_SEPERATOR)
-                                .append("    ImmutableList<String> " + (propNames.contains(fieldNameForPropNameList) ? "_" : "") + fieldNameForPropNameList
-                                        + " = ImmutableList.of(" + StreamEx.of(classPropNameListEntry.getValue()).sorted().join(", ") + ");")
+                                .append(INDENTATION)
+                                .append("    List<String> " + (propNames.contains(fieldNameForPropNameList) ? "_" : "") + fieldNameForPropNameList
+                                        + " = List.of(" + StreamEx.of(classPropNameListEntry.getValue()).sorted().join(", ") + ");")
                                 .append(LINE_SEPERATOR);
                     }
                 }
@@ -492,11 +492,10 @@ public final class CodeGenerationUtil {
 
                 sb.append(LINE_SEPERATOR)
                         .append(INDENTATION)
-                        .append("/*")
+                        .append("/**")
                         .append(LINE_SEPERATOR)
                         .append(INDENTATION)
-                        .append(" * Auto-generated class for upper case property(field) name table by abacus-jdbc for classes: ")
-                        .append(allClassName)
+                        .append(" * Auto-generated class for upper case property(field) name table for classes: {@code " + allClassName + "}")
                         .append(LINE_SEPERATOR)
                         .append(INDENTATION)
                         .append(" */");
@@ -531,11 +530,13 @@ public final class CodeGenerationUtil {
                         String fieldNameForPropNameList = Strings.toCamelCase(classPropNameListEntry.getKey()) + "PropNameList";
 
                         sb.append(LINE_SEPERATOR)
-                                .append("    /** Immutable property(field) name list for class: {@code \"" + classPropNameListEntry.getKey() + "\"}.")
+                                .append(INDENTATION)
+                                .append("    /** Unmodifiable property(field) name list for class: {@code \"" + classPropNameListEntry.getKey() + "\"}.")
                                 .append(" */")
                                 .append(LINE_SEPERATOR)
-                                .append("    ImmutableList<String> " + (propNames.contains(fieldNameForPropNameList) ? "_" : "") + fieldNameForPropNameList
-                                        + " = ImmutableList.of(" + StreamEx.of(classPropNameListEntry.getValue()).sorted().join(", ") + ");")
+                                .append(INDENTATION)
+                                .append("    List<String> " + (propNames.contains(fieldNameForPropNameList) ? "_" : "") + fieldNameForPropNameList
+                                        + " = List.of(" + StreamEx.of(classPropNameListEntry.getValue()).sorted().join(", ") + ");")
                                 .append(LINE_SEPERATOR);
                     }
                 }
@@ -583,11 +584,10 @@ public final class CodeGenerationUtil {
 
                 sb.append(LINE_SEPERATOR)
                         .append(INDENTATION)
-                        .append("/*")
+                        .append("/**")
                         .append(LINE_SEPERATOR)
                         .append(INDENTATION)
-                        .append(" * Auto-generated class for function property(field) name table by abacus-jdbc for classes: ")
-                        .append(allClassName)
+                        .append(" * Auto-generated class for function property(field) name table for classes: {@code " + allClassName + "}")
                         .append(LINE_SEPERATOR)
                         .append(INDENTATION)
                         .append(" */");

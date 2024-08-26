@@ -42,8 +42,7 @@ import com.landawn.abacus.util.stream.LongStream;
 import com.landawn.abacus.util.stream.ShortStream;
 import com.landawn.abacus.util.stream.Stream;
 
-@SuppressWarnings("java:S1192")
-public class u {//NOSONAR
+public class u { // NOSONAR
 
     private static final String NO_VALUE_PRESENT = "No value present"; // should change it to InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX
 
