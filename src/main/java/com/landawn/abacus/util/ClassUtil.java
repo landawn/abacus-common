@@ -2488,11 +2488,11 @@ public final class ClassUtil {
     private static final Map<Class<?>, Tuple3<Class<?>, com.landawn.abacus.util.function.Supplier<Object>, com.landawn.abacus.util.function.Function<Object, Object>>> builderMap = new ConcurrentHashMap<>();
 
     /**
-     * 
      *
-     * @param cls 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param cls
+     * @return
+     * @throws IllegalArgumentException
      */
     public static Tuple3<Class<?>, com.landawn.abacus.util.function.Supplier<Object>, com.landawn.abacus.util.function.Function<Object, Object>> getBuilderInfo(
             final Class<?> cls) throws IllegalArgumentException {
@@ -3267,6 +3267,7 @@ public final class ClassUtil {
      *
      * @param props
      */
+    @SuppressWarnings("deprecation")
     public static void toCamelCase(final Map<String, Object> props) {
         final Map<String, Object> tmp = Objectory.createLinkedHashMap();
 
@@ -3303,6 +3304,7 @@ public final class ClassUtil {
      *
      * @param props
      */
+    @SuppressWarnings("deprecation")
     public static void toLowerCaseKeyWithUnderscore(final Map<String, Object> props) {
         final Map<String, Object> tmp = Objectory.createLinkedHashMap();
 
@@ -3431,6 +3433,7 @@ public final class ClassUtil {
      *
      * @param props
      */
+    @SuppressWarnings("deprecation")
     public static void toUpperCaseKeyWithUnderscore(final Map<String, Object> props) {
         final Map<String, Object> tmp = Objectory.createLinkedHashMap();
 
@@ -3573,9 +3576,9 @@ public final class ClassUtil {
     /**
      * Checks if is primitive type.
      *
-     * @param cls 
+     * @param cls
      * @return true, if is primitive type
-     * @throws IllegalArgumentException 
+     * @throws IllegalArgumentException
      */
     public static boolean isPrimitiveType(final Class<?> cls) throws IllegalArgumentException {
         N.checkArgNotNull(cls, "cls");
@@ -3586,9 +3589,9 @@ public final class ClassUtil {
     /**
      * Checks if is wrapper type.
      *
-     * @param cls 
+     * @param cls
      * @return true, if is wrapper type
-     * @throws IllegalArgumentException 
+     * @throws IllegalArgumentException
      */
     public static boolean isPrimitiveWrapper(final Class<?> cls) throws IllegalArgumentException {
         N.checkArgNotNull(cls, "cls");
@@ -3599,9 +3602,9 @@ public final class ClassUtil {
     /**
      * Checks if is primitive array type.
      *
-     * @param cls 
+     * @param cls
      * @return true, if is primitive array type
-     * @throws IllegalArgumentException 
+     * @throws IllegalArgumentException
      */
     public static boolean isPrimitiveArrayType(final Class<?> cls) throws IllegalArgumentException {
         N.checkArgNotNull(cls, "cls");
@@ -3635,16 +3638,16 @@ public final class ClassUtil {
     /**
      * Returns the corresponding wrapper type of {@code type} if it is a primitive type; otherwise
      * returns {@code type} itself. Idempotent.
-     * 
+     *
      * <pre>
      *     wrap(int.class) == Integer.class
      *     wrap(Integer.class) == Integer.class
      *     wrap(String.class) == String.class
      * </pre>
      *
-     * @param cls 
-     * @return 
-     * @throws IllegalArgumentException 
+     * @param cls
+     * @return
+     * @throws IllegalArgumentException
      */
     public static Class<?> wrap(final Class<?> cls) throws IllegalArgumentException {
         N.checkArgNotNull(cls, "cls");
@@ -3657,16 +3660,16 @@ public final class ClassUtil {
     /**
      * Returns the corresponding primitive type of {@code type} if it is a wrapper type; otherwise
      * returns {@code type} itself. Idempotent.
-     * 
+     *
      * <pre>
      *     unwrap(Integer.class) == int.class
      *     unwrap(int.class) == int.class
      *     unwrap(String.class) == String.class
      * </pre>
      *
-     * @param cls 
-     * @return 
-     * @throws IllegalArgumentException 
+     * @param cls
+     * @return
+     * @throws IllegalArgumentException
      */
     public static Class<?> unwrap(final Class<?> cls) throws IllegalArgumentException {
         N.checkArgNotNull(cls, "cls");
@@ -3677,9 +3680,9 @@ public final class ClassUtil {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public static Object createNullMask() {
         return new None();

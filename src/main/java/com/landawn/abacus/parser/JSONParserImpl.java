@@ -1261,7 +1261,7 @@ final class JSONParserImpl extends AbstractJSONParser {
      * @param bw
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    @SuppressWarnings("unused")
+    @SuppressWarnings({ "unused", "deprecation" })
     protected void writeDataSet(final DataSet ds, final JSONSerializationConfig config, final boolean isFirstCall, final String indentation,
             final IdentityHashSet<Object> serializedObjects, final Type<Object> type, final BufferedJSONWriter bw) throws IOException {
         if (hasCircularReference(ds, serializedObjects, config, bw)) {
@@ -1520,7 +1520,7 @@ final class JSONParserImpl extends AbstractJSONParser {
      * @param bw
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    @SuppressWarnings({ "unused", "rawtypes" })
+    @SuppressWarnings({ "unused", "rawtypes", "deprecation" })
     protected void writeSheet(final Sheet sheet, final JSONSerializationConfig config, final boolean isFirstCall, final String indentation,
             final IdentityHashSet<Object> serializedObjects, final Type<Object> type, final BufferedJSONWriter bw) throws IOException {
         if (hasCircularReference(sheet, serializedObjects, config, bw)) {
@@ -2603,7 +2603,7 @@ final class JSONParserImpl extends AbstractJSONParser {
      * @return
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "deprecation" })
     protected <T> T readArray(final JSONReader jr, final JSONDeserializationConfig config, Type<?> propType, final boolean isFirstCall,
             final Class<? extends T> targetClass, Object[] output) throws IOException {
         Type<?> eleType = defaultValueType;

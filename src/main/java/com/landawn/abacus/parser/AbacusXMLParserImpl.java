@@ -1117,7 +1117,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
      * @return
      * @throws XMLStreamException the XML stream exception
      */
-    @SuppressWarnings({ "null", "fallthrough", "unused" })
+    @SuppressWarnings({ "null", "fallthrough", "unused", "deprecation" })
     protected <T> T readByStreamParser(XMLStreamReader xmlReader, final XMLDeserializationConfig config, Type<?> propType, PropInfo propInfo,
             boolean checkedAttr, boolean isTagByPropertyName, boolean ignoreTypeInfo, boolean isFirstCall, Class<?> inputClass, Class<?> targetClass)
             throws XMLStreamException {
@@ -1879,7 +1879,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
      * @param <T>
      * @return
      */
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "deprecation" })
     protected <T> T readByDOMParser(Node node, final XMLDeserializationConfig config, String propName, Type<?> propType, boolean checkedAttr,
             boolean isTagByPropertyName, boolean ignoreTypeInfo, boolean isFirstCall, Class<T> inputClass) {
         if (node.getNodeType() == Document.TEXT_NODE) {

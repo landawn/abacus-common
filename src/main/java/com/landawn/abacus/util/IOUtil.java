@@ -605,13 +605,22 @@ public final class IOUtil {
      *
      * @param source
      * @return
+     * @throws OutOfMemoryError if an array of the required size cannot be allocated
      * @throws UncheckedIOException the unchecked IO exception
      */
     public static byte[] readAllBytes(final File source) throws UncheckedIOException {
+        final Holder<ZipFile> outputZipFile = new Holder<>();
+        InputStream is = null;
+
         try {
-            return readBytes(source, 0, Integer.MAX_VALUE);
+            is = openFile(source, outputZipFile);
+
+            return readBytes(is, 0, Long.MAX_VALUE);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
+        } finally {
+            close(is);
+            close(outputZipFile.value());
         }
     }
 
@@ -620,11 +629,12 @@ public final class IOUtil {
      *
      * @param source
      * @return
+     * @throws OutOfMemoryError if an array of the required size cannot be allocated
      * @throws UncheckedIOException the unchecked IO exception
      */
     public static byte[] readAllBytes(final InputStream source) throws UncheckedIOException {
         try {
-            return readBytes(source, 0, Integer.MAX_VALUE);
+            return readBytes(source, 0, Long.MAX_VALUE);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
@@ -634,11 +644,22 @@ public final class IOUtil {
      *
      * @param source
      * @return
+     * @throws OutOfMemoryError if an array of the required size cannot be allocated
      * @throws IOException the unchecked IO exception
      * @see #readAllBytes(File)
      */
     public static byte[] readBytes(final File source) throws IOException {
-        return readBytes(source, 0, Integer.MAX_VALUE);
+        final Holder<ZipFile> outputZipFile = new Holder<>();
+        InputStream is = null;
+
+        try {
+            is = openFile(source, outputZipFile);
+
+            return readBytes(is, 0, Long.MAX_VALUE);
+        } finally {
+            close(is);
+            close(outputZipFile.value());
+        }
     }
 
     /**
@@ -667,11 +688,12 @@ public final class IOUtil {
      *
      * @param source
      * @return
+     * @throws OutOfMemoryError if an array of the required size cannot be allocated
      * @throws IOException
      * @see #readAllBytes(InputStream)
      */
     public static byte[] readBytes(final InputStream source) throws IOException {
-        return readBytes(source, 0, Integer.MAX_VALUE);
+        return readBytes(source, 0, Long.MAX_VALUE);
     }
 
     /**
@@ -683,35 +705,48 @@ public final class IOUtil {
      * @throws IOException
      */
     public static byte[] readBytes(final InputStream source, final long offset, final int maxLen) throws IOException {
+        return readBytes(source, offset, (long) maxLen);
+    }
+
+    private static byte[] readBytes(final InputStream source, final long offset, final long maxLen) throws IOException {
+        N.checkArgNotNegative(offset, "offset");
+        N.checkArgNotNegative(maxLen, "maxLen");
+
         if ((maxLen == 0) || ((offset > 0) && (skip(source, offset) < offset))) {
             return N.EMPTY_BYTE_ARRAY;
         }
 
-        ByteArrayOutputStream os = null;
         final byte[] buf = Objectory.createByteArrayBuffer();
-        final int bufLength = buf.length;
+        byte[] byteArray = buf;
+        int arrayLength = byteArray.length;
 
-        int totalCount = 0;
         int count = 0;
+        int cnt = 0;
 
         try {
-            while (totalCount < maxLen && EOF != (count = read(source, buf, 0, Math.min(maxLen - totalCount, bufLength)))) {
-                if ((count == bufLength && count < maxLen) && (os == null)) {
-                    os = Objectory.createByteArrayOutputStream();
-                }
+            while (count < maxLen && EOF != (cnt = read(source, byteArray, count, (int) Math.min(maxLen - count, arrayLength - count)))) {
+                count += cnt;
 
-                if (os != null) {
-                    os.write(buf, 0, count);
-                }
+                if (count < maxLen && count >= arrayLength) {
+                    int newCapacity = (int) (arrayLength * 1.75);
 
-                totalCount += count;
+                    if (newCapacity < 0 || newCapacity > maxLen || newCapacity > N.MAX_ARRAY_SIZE) {
+                        newCapacity = (int) N.min(maxLen, N.MAX_ARRAY_SIZE);
+                    }
+
+                    if (newCapacity <= arrayLength) {
+                        throw new OutOfMemoryError("Required array size too large");
+                    }
+
+                    byteArray = Arrays.copyOf(byteArray, newCapacity);
+                    arrayLength = byteArray.length;
+                }
             }
 
-            return os == null ? (totalCount <= 0 ? N.EMPTY_BYTE_ARRAY : N.copyOfRange(buf, 0, totalCount)) : os.toByteArray();
+            return (count <= 0 ? N.EMPTY_BYTE_ARRAY : N.copyOfRange(byteArray, 0, count));
 
         } finally {
             Objectory.recycle(buf);
-            Objectory.recycle(os);
         }
     }
 
@@ -720,14 +755,11 @@ public final class IOUtil {
      *
      * @param source
      * @return
+     * @throws OutOfMemoryError if an array of the required size cannot be allocated
      * @throws UncheckedIOException the unchecked IO exception
      */
     public static char[] readAllChars(final File source) throws UncheckedIOException {
-        try {
-            return readChars(source, 0, Integer.MAX_VALUE);
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
+        return readAllChars(source, DEFAULT_CHARSET);
     }
 
     /**
@@ -736,13 +768,22 @@ public final class IOUtil {
      * @param source
      * @param encoding
      * @return
+     * @throws OutOfMemoryError if an array of the required size cannot be allocated
      * @throws UncheckedIOException the unchecked IO exception
      */
     public static char[] readAllChars(final File source, final Charset encoding) throws UncheckedIOException {
+        final Holder<ZipFile> outputZipFile = new Holder<>();
+        InputStream is = null;
+
         try {
-            return readChars(source, encoding, 0, Integer.MAX_VALUE);
+            is = openFile(source, outputZipFile);
+
+            return readAllChars(is, encoding);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
+        } finally {
+            close(is);
+            close(outputZipFile.value());
         }
     }
 
@@ -751,14 +792,11 @@ public final class IOUtil {
      *
      * @param source
      * @return
+     * @throws OutOfMemoryError if an array of the required size cannot be allocated
      * @throws UncheckedIOException the unchecked IO exception
      */
     public static char[] readAllChars(final InputStream source) throws UncheckedIOException {
-        try {
-            return readChars(source, 0, Integer.MAX_VALUE);
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
+        return readAllChars(source, DEFAULT_CHARSET);
     }
 
     /**
@@ -767,11 +805,14 @@ public final class IOUtil {
      * @param source
      * @param encoding
      * @return
+     * @throws OutOfMemoryError if an array of the required size cannot be allocated
      * @throws UncheckedIOException the unchecked IO exception
      */
     public static char[] readAllChars(final InputStream source, final Charset encoding) throws UncheckedIOException {
+        final Reader reader = createReader(source, encoding);
+
         try {
-            return readChars(source, encoding, 0, Integer.MAX_VALUE);
+            return readChars(reader, 0, Long.MAX_VALUE);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
@@ -782,11 +823,12 @@ public final class IOUtil {
      *
      * @param source
      * @return
+     * @throws OutOfMemoryError if an array of the required size cannot be allocated
      * @throws UncheckedIOException the unchecked IO exception
      */
     public static char[] readAllChars(final Reader source) throws UncheckedIOException {
         try {
-            return readChars(source, 0, Integer.MAX_VALUE);
+            return readChars(source, 0, Long.MAX_VALUE);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
@@ -796,11 +838,12 @@ public final class IOUtil {
      *
      * @param source
      * @return
+     * @throws OutOfMemoryError if an array of the required size cannot be allocated
      * @throws IOException
      * @see #readAllChars(File)
      */
     public static char[] readChars(final File source) throws IOException {
-        return readChars(source, 0, Integer.MAX_VALUE);
+        return readChars(source, DEFAULT_CHARSET);
     }
 
     /**
@@ -808,11 +851,22 @@ public final class IOUtil {
      * @param source
      * @param encoding
      * @return
+     * @throws OutOfMemoryError if an array of the required size cannot be allocated
      * @throws IOException
      * @see #readAllChars(File, Charset)
      */
     public static char[] readChars(final File source, final Charset encoding) throws IOException {
-        return readChars(source, encoding, 0, Integer.MAX_VALUE);
+        final Holder<ZipFile> outputZipFile = new Holder<>();
+        InputStream is = null;
+
+        try {
+            is = openFile(source, outputZipFile);
+
+            return readChars(is, encoding);
+        } finally {
+            close(is);
+            close(outputZipFile.value());
+        }
     }
 
     /**
@@ -854,11 +908,12 @@ public final class IOUtil {
      *
      * @param source
      * @return
+     * @throws OutOfMemoryError if an array of the required size cannot be allocated
      * @throws IOException
      * @see #readAllChars(InputStream)
      */
     public static char[] readChars(final InputStream source) throws IOException {
-        return readChars(source, 0, Integer.MAX_VALUE);
+        return readChars(source, DEFAULT_CHARSET);
     }
 
     /**
@@ -866,11 +921,18 @@ public final class IOUtil {
      * @param source
      * @param encoding
      * @return
+     * @throws OutOfMemoryError if an array of the required size cannot be allocated
      * @throws IOException
      * @see #readAllChars(InputStream, encoding)
      */
     public static char[] readChars(final InputStream source, final Charset encoding) throws IOException {
-        return readChars(source, encoding, 0, Integer.MAX_VALUE);
+        final Reader reader = createReader(source, encoding);
+
+        //    try {
+        return readChars(reader, 0, Long.MAX_VALUE);
+        //    } finally {
+        //        close(reader);
+        //    }
     }
 
     /**
@@ -912,11 +974,12 @@ public final class IOUtil {
      *
      * @param source
      * @return
+     * @throws OutOfMemoryError if an array of the required size cannot be allocated
      * @throws IOException
      * @see #readAllChars(Reader)
      */
     public static char[] readChars(final Reader source) throws IOException {
-        return readChars(source, 0, Integer.MAX_VALUE);
+        return readChars(source, 0, Long.MAX_VALUE);
     }
 
     /**
@@ -928,41 +991,47 @@ public final class IOUtil {
      * @throws IOException
      */
     public static char[] readChars(final Reader source, final long offset, final int maxLen) throws IOException {
+        return readChars(source, offset, (long) maxLen);
+    }
+
+    private static char[] readChars(final Reader source, final long offset, final long maxLen) throws IOException {
+        N.checkArgNotNegative(offset, "offset");
+        N.checkArgNotNegative(maxLen, "maxLen");
+
         if ((maxLen == 0) || ((offset > 0) && (skip(source, offset) < offset))) {
             return N.EMPTY_CHAR_ARRAY;
         }
 
-        StringBuilder sb = null;
         final char[] buf = Objectory.createCharArrayBuffer();
-        final int bufLength = buf.length;
+        char[] charArray = buf;
+        int arrayLength = charArray.length;
 
-        int totalCount = 0;
         int count = 0;
+        int cnt = 0;
 
         try {
-            while (totalCount < maxLen && EOF != (count = read(source, buf, 0, Math.min(maxLen - totalCount, bufLength)))) {
-                if ((count == bufLength && count < maxLen) && (sb == null)) {
-                    sb = Objectory.createBigStringBuilder();
-                }
+            while (count < maxLen && EOF != (cnt = read(source, charArray, count, (int) Math.min(maxLen - count, arrayLength - count)))) {
+                count += cnt;
 
-                if (sb != null) {
-                    sb.append(buf, 0, count);
-                }
+                if (count < maxLen && count >= arrayLength) {
+                    int newCapacity = (int) (arrayLength * 1.75);
 
-                totalCount += count;
+                    if (newCapacity < 0 || newCapacity > maxLen || newCapacity > N.MAX_ARRAY_SIZE) {
+                        newCapacity = (int) N.min(maxLen, N.MAX_ARRAY_SIZE);
+                    }
+
+                    if (newCapacity <= arrayLength) {
+                        throw new OutOfMemoryError("Required array size too large");
+                    }
+
+                    charArray = Arrays.copyOf(charArray, newCapacity);
+                    arrayLength = charArray.length;
+                }
             }
 
-            if (sb == null) {
-                return totalCount <= 0 ? N.EMPTY_CHAR_ARRAY : N.copyOfRange(buf, 0, totalCount);
-            } else {
-                final char[] a = new char[totalCount];
-                sb.getChars(0, totalCount, a, 0);
-
-                return a;
-            }
+            return (count <= 0 ? N.EMPTY_CHAR_ARRAY : N.copyOfRange(charArray, 0, count));
         } finally {
             Objectory.recycle(buf);
-            Objectory.recycle(sb);
         }
     }
 
@@ -973,14 +1042,11 @@ public final class IOUtil {
      *
      * @param source
      * @return
+     * @throws OutOfMemoryError if an array of the required size cannot be allocated
      * @throws UncheckedIOException the unchecked IO exception
      */
     public static String readAllToString(final File source) throws UncheckedIOException {
-        try {
-            return readToString(source, 0, Integer.MAX_VALUE);
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
+        return readAllToString(source, DEFAULT_CHARSET);
     }
 
     /**
@@ -991,14 +1057,13 @@ public final class IOUtil {
      * @param source
      * @param encoding
      * @return
+     * @throws OutOfMemoryError if an array of the required size cannot be allocated
      * @throws UncheckedIOException the unchecked IO exception
      */
     public static String readAllToString(final File source, final Charset encoding) throws UncheckedIOException {
-        try {
-            return readToString(source, encoding, 0, Integer.MAX_VALUE);
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
+        final byte[] bytes = readAllBytes(source);
+
+        return new String(bytes, checkCharset(encoding));
     }
 
     /**
@@ -1008,14 +1073,11 @@ public final class IOUtil {
      *
      * @param source
      * @return
+     * @throws OutOfMemoryError if an array of the required size cannot be allocated
      * @throws UncheckedIOException the unchecked IO exception
      */
     public static String readAllToString(final InputStream source) throws UncheckedIOException {
-        try {
-            return readToString(source, 0, Integer.MAX_VALUE);
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
+        return readAllToString(source, DEFAULT_CHARSET);
     }
 
     /**
@@ -1026,14 +1088,13 @@ public final class IOUtil {
      * @param source
      * @param encoding
      * @return
+     * @throws OutOfMemoryError if an array of the required size cannot be allocated
      * @throws UncheckedIOException the unchecked IO exception
      */
     public static String readAllToString(final InputStream source, final Charset encoding) throws UncheckedIOException {
-        try {
-            return readToString(source, encoding, 0, Integer.MAX_VALUE);
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
+        final byte[] bytes = readAllBytes(source);
+
+        return new String(bytes, checkCharset(encoding));
     }
 
     /**
@@ -1043,14 +1104,13 @@ public final class IOUtil {
      *
      * @param source
      * @return
+     * @throws OutOfMemoryError if an array of the required size cannot be allocated
      * @throws UncheckedIOException the unchecked IO exception
      */
     public static String readAllToString(final Reader source) throws UncheckedIOException {
-        try {
-            return readToString(source, 0, Integer.MAX_VALUE);
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
+        final char[] chars = readAllChars(source);
+
+        return new String(chars);
     }
 
     /**
@@ -1074,11 +1134,10 @@ public final class IOUtil {
      * @return
      * @throws IOException
      */
-    @SuppressWarnings("deprecation")
     public static String readToString(final File source, final Charset encoding, final long offset, final int maxLen) throws IOException {
-        final char[] chs = readChars(source, encoding, offset, maxLen);
+        final byte[] bytes = readBytes(source, offset, maxLen);
 
-        return N.isEmpty(chs) ? Strings.EMPTY_STRING : InternalUtil.newString(chs, true);
+        return new String(bytes, checkCharset(encoding));
     }
 
     /**
@@ -1102,11 +1161,10 @@ public final class IOUtil {
      * @return
      * @throws IOException
      */
-    @SuppressWarnings("deprecation")
     public static String readToString(final InputStream source, final Charset encoding, final long offset, final int maxLen) throws IOException {
-        final char[] chs = readChars(source, encoding, offset, maxLen);
+        final byte[] bytes = readBytes(source, offset, maxLen);
 
-        return N.isEmpty(chs) ? Strings.EMPTY_STRING : InternalUtil.newString(chs, true);
+        return new String(bytes, checkCharset(encoding));
     }
 
     /**
@@ -1117,32 +1175,27 @@ public final class IOUtil {
      * @return
      * @throws IOException
      */
-    @SuppressWarnings("deprecation")
     public static String readToString(final Reader source, final long offset, final int maxLen) throws IOException {
         final char[] chs = readChars(source, offset, maxLen);
 
-        return N.isEmpty(chs) ? Strings.EMPTY_STRING : InternalUtil.newString(chs, true);
+        return new String(chs);
     }
 
     /**
      * <br />
-     * Note: It should not be used to read {@code File/InputStream/Reader} with size closed to {@code Integer.MAX_VALUE}.
+     * Note: It should not be used to read {@code File/InputStream/Reader} with line size closed to {@code Integer.MAX_VALUE}.
      *
      * @param source
      * @return
      * @throws UncheckedIOException the unchecked IO exception
      */
     public static List<String> readAllLines(final File source) throws UncheckedIOException {
-        try {
-            return readLines(source, 0, Integer.MAX_VALUE);
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
+        return readAllLines(source, DEFAULT_CHARSET);
     }
 
     /**
      * <br />
-     * Note: It should not be used to read {@code File/InputStream/Reader} with size closed to {@code Integer.MAX_VALUE}.
+     * Note: It should not be used to read {@code File/InputStream/Reader} with line size closed to {@code Integer.MAX_VALUE}.
      *
      * @param source
      * @param encoding
@@ -1150,32 +1203,36 @@ public final class IOUtil {
      * @throws UncheckedIOException the unchecked IO exception
      */
     public static List<String> readAllLines(final File source, final Charset encoding) throws UncheckedIOException {
+        final Holder<ZipFile> outputZipFile = new Holder<>();
+        InputStream is = null;
+
         try {
-            return readLines(source, encoding, 0, Integer.MAX_VALUE);
+            is = openFile(source, outputZipFile);
+
+            return readAllLines(is, encoding);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
+        } finally {
+            close(is);
+            close(outputZipFile.value());
         }
     }
 
     /**
      * <br />
-     * Note: It should not be used to read {@code File/InputStream/Reader} with size closed to {@code Integer.MAX_VALUE}.
+     * Note: It should not be used to read {@code File/InputStream/Reader} with line size closed to {@code Integer.MAX_VALUE}.
      *
      * @param source
      * @return
      * @throws UncheckedIOException the unchecked IO exception
      */
     public static List<String> readAllLines(final InputStream source) throws UncheckedIOException {
-        try {
-            return readLines(source, 0, Integer.MAX_VALUE);
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
+        return readAllLines(source, DEFAULT_CHARSET);
     }
 
     /**
      * <br />
-     * Note: It should not be used to read {@code File/InputStream/Reader} with size closed to {@code Integer.MAX_VALUE}.
+     * Note: It should not be used to read {@code File/InputStream/Reader} with line size closed to {@code Integer.MAX_VALUE}.
      *
      * @param source
      * @param encoding
@@ -1183,27 +1240,44 @@ public final class IOUtil {
      * @throws UncheckedIOException the unchecked IO exception
      */
     public static List<String> readAllLines(final InputStream source, final Charset encoding) throws UncheckedIOException {
-        try {
-            return readLines(source, encoding, 0, Integer.MAX_VALUE);
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
+        Reader reader = null;
+
+        // try {
+        reader = createReader(source, encoding);
+        // } finally {
+        // // close(reader);
+        // }
+
+        return readAllLines(reader);
     }
 
     /**
      * <br />
-     * Note: It should not be used to read {@code File/InputStream/Reader} with size closed to {@code Integer.MAX_VALUE}.
+     * Note: It should not be used to read {@code File/InputStream/Reader} with line size closed to {@code Integer.MAX_VALUE}.
      *
      * @param source
      * @return
      * @throws UncheckedIOException the unchecked IO exception
      */
     public static List<String> readAllLines(final Reader source) throws UncheckedIOException {
+        final List<String> res = new ArrayList<>();
+        final BufferedReader br = source instanceof BufferedReader ? (BufferedReader) source : Objectory.createBufferedReader(source); //NOSONAR
+
         try {
-            return readLines(source, 0, Integer.MAX_VALUE);
+            String line = null;
+
+            while ((line = br.readLine()) != null) { //NOSONAR
+                res.add(line);
+            }
         } catch (IOException e) {
             throw new UncheckedIOException(e);
+        } finally {
+            if (br != source) {
+                Objectory.recycle(br);
+            }
         }
+
+        return res;
     }
 
     /**
@@ -3680,7 +3754,7 @@ public final class IOUtil {
      * Return the count of skipped bytes.
      *
      * @param input
-     * @param toSkip
+     * @param toSkip count of bytes to skip.
      * @return
      * @throws IOException
      */
@@ -3716,7 +3790,7 @@ public final class IOUtil {
      * Return the count of skipped chars.
      *
      * @param input
-     * @param toSkip
+     * @param toSkip count of chars to skip.
      * @return
      * @throws IOException
      */
@@ -3751,15 +3825,11 @@ public final class IOUtil {
     /**
      *
      * @param input
-     * @param toSkip
+     * @param toSkip count of bytes to skip.
      * @throws IOException if the remaining length of the specified <code>input</code> is less than the specified <code>toSkip</code>
      */
     public static void skipFully(final InputStream input, final long toSkip) throws IOException {
-        if (toSkip < 0) {
-            throw new IllegalArgumentException("Bytes to skip must not be negative: " + toSkip);
-        }
-
-        long skipped = skip(input, toSkip);
+        final long skipped = skip(input, toSkip);
 
         if (skipped != toSkip) {
             throw new IOException("Bytes to skip: " + toSkip + " actual: " + skipped);
@@ -3769,11 +3839,11 @@ public final class IOUtil {
     /**
      *
      * @param input
-     * @param toSkip
+     * @param toSkip count of chars to skip.
      * @throws IOException if the remaining length of the specified <code>input</code> is less than the specified <code>toSkip</code>
      */
     public static void skipFully(final Reader input, final long toSkip) throws IOException {
-        long skipped = skip(input, toSkip);
+        final long skipped = skip(input, toSkip);
 
         if (skipped != toSkip) {
             throw new IOException("Chars to skip: " + toSkip + " actual: " + skipped);
@@ -3789,7 +3859,7 @@ public final class IOUtil {
      * @throws IOException
      */
     public static MappedByteBuffer map(File file) throws IllegalArgumentException, IOException {
-        N.checkArgNotNull(file);
+        N.checkArgNotNull(file, "file");
 
         return map(file, MapMode.READ_ONLY);
     }
@@ -3814,8 +3884,8 @@ public final class IOUtil {
      * @since 2.0
      */
     public static MappedByteBuffer map(File file, MapMode mode) throws IllegalArgumentException, IOException {
-        N.checkArgNotNull(file);
-        N.checkArgNotNull(mode);
+        N.checkArgNotNull(file, "file");
+        N.checkArgNotNull(mode, "mode");
 
         if (!file.exists()) {
             throw new IllegalArgumentException(file.toString() + " is not found");
@@ -3850,8 +3920,8 @@ public final class IOUtil {
      * @since 2.0
      */
     public static MappedByteBuffer map(File file, MapMode mode, long offset, long count) throws IllegalArgumentException, IOException {
-        N.checkArgNotNull(file);
-        N.checkArgNotNull(mode);
+        N.checkArgNotNull(file, "file");
+        N.checkArgNotNull(mode, "mode");
         N.checkArgNotNegative(offset, "offset");
         N.checkArgNotNegative(count, "count");
 
@@ -4654,48 +4724,48 @@ public final class IOUtil {
         }
     }
 
-    /**
-     *
-     * @param srcFile
-     * @param destDir
-     * @throws UncheckedIOException the unchecked IO exception
-     * @deprecated Use {@link #copyToDirectory(File,File)} instead
-     */
-    @Deprecated
-    public static void copyFileToDirectory(final File srcFile, final File destDir) throws UncheckedIOException {
-        copyToDirectory(srcFile, destDir);
-    }
-
-    /**
-     *
-     * @param srcFile
-     * @param destDir
-     * @param preserveFileDate
-     * @throws UncheckedIOException the unchecked IO exception
-     * @deprecated Use {@link #copyToDirectory(File,File, boolean)} instead
-     */
-    @Deprecated
-    public static void copyFileToDirectory(final File srcFile, final File destDir, final boolean preserveFileDate) throws UncheckedIOException {
-        copyToDirectory(srcFile, destDir, preserveFileDate);
-    }
-
-    /**
-     * Copy the specified <code>scrFile</code> if it's a file or its sub files/directories if it's a directory to the target <code>destDir</code> with the specified <code>filter</code>.
-     *
-     * @param <E>
-     * @param srcFile
-     * @param destDir
-     * @param preserveFileDate
-     * @param filter
-     * @throws UncheckedIOException the unchecked IO exception
-     * @throws E the e
-     * @deprecated Use {@link #copyToDirectory(File,File,boolean,Throwables.BiPredicate<? super File, ? super File, E>)} instead
-     */
-    @Deprecated
-    public static <E extends Exception> void copyFileToDirectory(File srcFile, File destDir, final boolean preserveFileDate,
-            final Throwables.BiPredicate<? super File, ? super File, E> filter) throws UncheckedIOException, E {
-        copyToDirectory(srcFile, destDir, preserveFileDate, filter);
-    }
+    //    /**
+    //     *
+    //     * @param srcFile
+    //     * @param destDir
+    //     * @throws UncheckedIOException the unchecked IO exception
+    //     * @deprecated Use {@link #copyToDirectory(File,File)} instead
+    //     */
+    //    @Deprecated
+    //    public static void copyFileToDirectory(final File srcFile, final File destDir) throws UncheckedIOException {
+    //        copyToDirectory(srcFile, destDir);
+    //    }
+    //
+    //    /**
+    //     *
+    //     * @param srcFile
+    //     * @param destDir
+    //     * @param preserveFileDate
+    //     * @throws UncheckedIOException the unchecked IO exception
+    //     * @deprecated Use {@link #copyToDirectory(File,File, boolean)} instead
+    //     */
+    //    @Deprecated
+    //    public static void copyFileToDirectory(final File srcFile, final File destDir, final boolean preserveFileDate) throws UncheckedIOException {
+    //        copyToDirectory(srcFile, destDir, preserveFileDate);
+    //    }
+    //
+    //    /**
+    //     * Copy the specified <code>scrFile</code> if it's a file or its sub files/directories if it's a directory to the target <code>destDir</code> with the specified <code>filter</code>.
+    //     *
+    //     * @param <E>
+    //     * @param srcFile
+    //     * @param destDir
+    //     * @param preserveFileDate
+    //     * @param filter
+    //     * @throws UncheckedIOException the unchecked IO exception
+    //     * @throws E the e
+    //     * @deprecated Use {@link #copyToDirectory(File,File,boolean,Throwables.BiPredicate<? super File, ? super File, E>)} instead
+    //     */
+    //    @Deprecated
+    //    public static <E extends Exception> void copyFileToDirectory(File srcFile, File destDir, final boolean preserveFileDate,
+    //            final Throwables.BiPredicate<? super File, ? super File, E> filter) throws UncheckedIOException, E {
+    //        copyToDirectory(srcFile, destDir, preserveFileDate, filter);
+    //    }
 
     /**
      *

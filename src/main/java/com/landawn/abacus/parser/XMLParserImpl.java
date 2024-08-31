@@ -1193,7 +1193,7 @@ final class XMLParserImpl extends AbstractXMLParser {
      * @return
      * @throws XMLStreamException the XML stream exception
      */
-    @SuppressWarnings({ "null", "fallthrough" })
+    @SuppressWarnings({ "null", "fallthrough", "deprecation" })
     protected <T> T readByStreamParser(final XMLStreamReader xmlReader, final XMLDeserializationConfig config, PropInfo propInfo, Type<?> propType,
             Class<?> targetClass) throws XMLStreamException {
 
@@ -1975,7 +1975,7 @@ final class XMLParserImpl extends AbstractXMLParser {
      * @param <T>
      * @return
      */
-    @SuppressWarnings({ "unchecked", "null" })
+    @SuppressWarnings({ "unchecked", "null", "deprecation" })
     protected <T> T readByDOMParser(final Node node, final XMLDeserializationConfig config, String propName, Type<?> propType, boolean checkedAttr,
             boolean isTagByPropertyName, boolean ignoreTypeInfo, boolean isFirstCall, Class<T> inputClass) {
         if (node.getNodeType() == Document.TEXT_NODE) {

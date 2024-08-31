@@ -15607,6 +15607,7 @@ sealed class CommonUtil permits N {
      * @param toIndex
      * @return
      */
+    @SuppressWarnings("deprecation")
     public static String deepToString(final Object[] a, final int fromIndex, final int toIndex) {
         final StringBuilder sb = Objectory.createStringBuilder();
         final Set<Object[]> set = Objectory.createSet();

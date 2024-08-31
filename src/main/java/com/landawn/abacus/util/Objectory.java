@@ -107,7 +107,9 @@ public final class Objectory {
      *
      * @param <T>
      * @return
+     * @deprecated for internal use only
      */
+    @Deprecated
     @SuppressWarnings("unchecked")
     public static <T> List<T> createList() {
         List<T> list = (List<T>) listPool.poll();
@@ -120,7 +122,9 @@ public final class Objectory {
      *
      * @param <T>
      * @return
+     * @deprecated for internal use only
      */
+    @Deprecated
     @SuppressWarnings("unchecked")
     public static <T> Set<T> createSet() {
         Set<T> set = (Set<T>) setPool.poll();
@@ -133,7 +137,9 @@ public final class Objectory {
      *
      * @param <T>
      * @return
+     * @deprecated for internal use only
      */
+    @Deprecated
     @SuppressWarnings("unchecked")
     public static <T> Set<T> createLinkedHashSet() {
         Set<T> set = (Set<T>) linkedHashSetPool.poll();
@@ -147,7 +153,9 @@ public final class Objectory {
      * @param <K> the key type
      * @param <V> the value type
      * @return
+     * @deprecated for internal use only
      */
+    @Deprecated
     @SuppressWarnings("unchecked")
     public static <K, V> Map<K, V> createMap() {
         Map<K, V> map = (Map<K, V>) mapPool.poll();
@@ -161,7 +169,9 @@ public final class Objectory {
      * @param <K> the key type
      * @param <V> the value type
      * @return
+     * @deprecated for internal use only
      */
+    @Deprecated
     @SuppressWarnings("unchecked")
     public static <K, V> Map<K, V> createLinkedHashMap() {
         Map<K, V> linkedHashMap = (Map<K, V>) linkedHashMapPool.poll();
@@ -245,9 +255,9 @@ public final class Objectory {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public static StringBuilder createBigStringBuilder() {
         StringBuilder sb = bigStringBuilderPool.poll();
@@ -611,7 +621,9 @@ public final class Objectory {
     /**
      *
      * @param list
+     * @deprecated for internal use only
      */
+    @Deprecated
     public static void recycle(List<?> list) {
         if ((list == null) || (list.size() > POOLABLE_SIZE)) {
             return;
@@ -626,7 +638,9 @@ public final class Objectory {
     /**
      *
      * @param set
+     * @deprecated for internal use only
      */
+    @Deprecated
     public static void recycle(Set<?> set) {
         if ((set == null) || (set.size() > POOLABLE_SIZE)) {
             return;
@@ -648,7 +662,9 @@ public final class Objectory {
     /**
      *
      * @param map
+     * @deprecated for internal use only
      */
+    @Deprecated
     public static void recycle(Map<?, ?> map) {
         if ((map == null) || (map.size() > POOLABLE_SIZE)) {
             return;

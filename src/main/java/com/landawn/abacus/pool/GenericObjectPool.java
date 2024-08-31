@@ -514,6 +514,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
      * or it's time out.
      *
      */
+    @SuppressWarnings("deprecation")
     protected void evict() {
         lock.lock();
 

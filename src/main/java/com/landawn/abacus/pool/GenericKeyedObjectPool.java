@@ -496,7 +496,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
      * or it's time out.
      *
      */
-    @SuppressWarnings("null")
+    @SuppressWarnings({ "null", "deprecation" })
     protected void evict() {
         lock.lock();
 
